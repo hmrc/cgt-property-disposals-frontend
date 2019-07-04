@@ -17,18 +17,14 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.config
 
 import javax.inject.{Inject, Singleton}
-
-import play.api.{Configuration, Environment}
-import play.api.Mode.Mode
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
-class AppConfig @Inject() (val runModeConfiguration: Configuration, environment: Environment) extends ServicesConfig {
-  override protected def mode: Mode = environment.mode
+class AppConfig @Inject() (servicesConfig: ServicesConfig) {
 
-  private def loadConfig(key: String): String = runModeConfiguration.getString(key).getOrElse(sys.error(s"Missing configuration key: $key"))
+  private def loadConfig(key: String): String = servicesConfig.getString(key)
 
-  private val contactHost = runModeConfiguration.getString(s"contact-frontend.host").getOrElse("")
+  private val contactHost = servicesConfig.getString(s"contact-frontend.host")
   private val contactFormServiceIdentifier = "MyService"
 
   val assetsPrefix: String = loadConfig(s"assets.url") + loadConfig(s"assets.version")
