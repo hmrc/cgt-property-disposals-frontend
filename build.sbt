@@ -15,7 +15,7 @@ lazy val wartremoverSettings =
       Wart.ImplicitParameter,
       Wart.ToString
     ),
-    wartremoverExcluded in (Compile, compile) ++=
+    wartremoverExcluded ++=
       routes.in(Compile).value ++
         (baseDirectory.value ** "*.sc").get ++
         Seq(sourceManaged.value / "main" / "sbt-buildinfo" / "BuildInfo.scala")
