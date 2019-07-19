@@ -20,7 +20,7 @@ import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
-class AppConfig @Inject() (servicesConfig: ServicesConfig) {
+class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
 
   private def loadConfig(key: String): String = servicesConfig.getString(key)
 

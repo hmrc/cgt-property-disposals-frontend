@@ -14,24 +14,22 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.config
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
-import javax.inject.{Inject, Singleton}
-
-import play.api.i18n.MessagesApi
-import play.api.mvc.Request
-import play.twirl.api.Html
-import uk.gov.hmrc.play.bootstrap.http.FrontendErrorHandler
+import com.google.inject.{Inject, Singleton}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 @Singleton
-class ErrorHandler @Inject() (
-    val messagesApi: MessagesApi,
-    error_template: views.html.error_template
-)(implicit val appConfig: ViewConfig)
-  extends FrontendErrorHandler {
+class LandingPageController @Inject() (
+    cc: MessagesControllerComponents,
+    landing_page: views.html.landing_page
+)(implicit viewConfig: ViewConfig) extends FrontendController(cc) {
 
-  override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit request: Request[_]): Html =
-    error_template(pageTitle, heading, message)
+  def landingPage(): Action[AnyContent] = Action { implicit request =>
+    Ok(landing_page())
+  }
 
 }

@@ -1,5 +1,5 @@
 # Add all the application routes to the app.routes file
-->         /cgt-property-disposals-frontend              app.Routes
+->         /cgt-property-disposals    app.Routes
 ->         /                          health.Routes
 ->     	   /template                  template.Routes
 
