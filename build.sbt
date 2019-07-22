@@ -2,6 +2,7 @@ import uk.gov.hmrc.DefaultBuildSettings.integrationTestSettings
 import uk.gov.hmrc.SbtArtifactory
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 import scalariform.formatter.preferences._
+import scoverage.ScoverageKeys
 import wartremover.wartremoverExcluded
 
 val appName = "cgt-property-disposals-frontend"
@@ -50,6 +51,14 @@ lazy val scalariformSettings =
     .setPreference(SpacesAroundMultiImports, false)
     .setPreference(SpacesWithinPatternBinders, true)
 
+lazy val scoverageSettings =
+  Seq(
+    ScoverageKeys.coverageExcludedPackages := "<empty>;.*Reverse.*;.*(config|views.*);.*(BuildInfo|Routes).*",
+    ScoverageKeys.coverageMinimum := 80.00,
+    ScoverageKeys.coverageFailOnMinimum := true,
+    ScoverageKeys.coverageHighlighting := true
+  )
+
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory)
@@ -64,5 +73,6 @@ lazy val microservice = Project(appName, file("."))
   .settings(resolvers += Resolver.jcenterRepo)
   .settings(wartremoverSettings: _*)
   .settings(scalariformSettings)
+  .settings(scoverageSettings: _*)
   .settings(PlayKeys.playDefaultPort := 7020)
 

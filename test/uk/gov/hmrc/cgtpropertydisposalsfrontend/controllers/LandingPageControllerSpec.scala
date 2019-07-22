@@ -40,17 +40,17 @@ class LandingPageControllerSpec extends WordSpec with Matchers with BeforeAndAft
 
   lazy val fakeApplication: Application = buildFakeApplication()
 
-  override def beforeAll() {
+  override def beforeAll(): Unit = {
     Play.start(fakeApplication)
     super.beforeAll()
   }
 
-  override def afterAll() {
+  override def afterAll(): Unit = {
     Play.stop(fakeApplication)
     super.afterAll()
   }
 
-  lazy val controller = new LandingPageController(
+  lazy val controller: LandingPageController = new LandingPageController(
     fakeApplication.injector.instanceOf[MessagesControllerComponents],
     fakeApplication.injector.instanceOf[views.html.landing_page]
   )(fakeApplication.injector.instanceOf[ViewConfig])
@@ -58,7 +58,7 @@ class LandingPageControllerSpec extends WordSpec with Matchers with BeforeAndAft
   "The LandingPageController" must {
 
     "display the landing page" in {
-      contentAsString(controller.landingPage()(FakeRequest())) should include("Hi")
+      contentAsString(controller.landingPage()(FakeRequest())) should include("Report and pay Capital Gains Tax on UK property")
     }
 
   }
