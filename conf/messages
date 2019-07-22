@@ -1,0 +1,16 @@
+button.startNow=Start now
+
+generic.warning=Warning
+
+landingPage.title=Report and pay Capital Gains Tax on UK property
+landingPage.p1=Use this service to:
+landingPage.list1.bullet1=report and pay Capital Gains Tax on the sale or ‘disposal’ of a residential property that's not your home
+landingPage.list1.bullet2=find out how much Capital Gains Tax you owe
+landingPage.list1.bullet3=view and amend current and previous returns
+landingPage.warning=You have 30 days after the sale completion date to report and pay your Capital Gains Tax. You risk getting a penalty if your payment is late.
+landingPage.p2=You’ll be asked to check or provide details on the:
+landingPage.list2.bullet1=property, like address and postcode
+landingPage.list2.bullet2=value of the property when you got it and when you sold or disposed of it
+landingPage.list2.bullet3=costs of buying, selling or making enhancements to the property
+landingPage.list2.bullet4=tax reliefs you are entitled to claim
+landingPage.p3=You’ll need a Government Gateway user ID and password to access the service. If you do not have a user ID, you can create one.

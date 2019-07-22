@@ -22,10 +22,37 @@
 
 @()(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
-@mainTemplate(title = "CGT Property Disposals") {
+@title = @{messages("landingPage.title")}
 
-<h1>Hi!</h1>
+@mainTemplate(title = title) {
 
-<p>You’re in CGT land now</p>
+ <h1 class="heading-xlarge">@title</h1>
 
+ <p>@messages("landingPage.p1")</p>
+
+ <ul class="list-bullet">
+  <li>@messages("landingPage.list1.bullet1")</li>
+  <li>@messages("landingPage.list1.bullet2")</li>
+  <li>@messages("landingPage.list1.bullet3")</li>
+ </ul>
+
+ <div class="notice">
+  <i class="icon icon-important">
+   <span class="visually-hidden">@messages("generic.warning")</span>
+  </i>
+  <strong class="bold-small">
+  @messages("landingPage.warning")
+  </strong>
+ </div>
+
+ <p class="body-text">@messages("landingPage.p2")</p>
+
+ <ul class="list-bullet">
+  <li>@messages("landingPage.list2.bullet1")</li>
+  <li>@messages("landingPage.list2.bullet2")</li>
+  <li>@messages("landingPage.list2.bullet3")</li>
+  <li>@messages("landingPage.list2.bullet4")</li>
+ </ul>
+
+ <p>@messages("landingPage.p3")</p>
 }
