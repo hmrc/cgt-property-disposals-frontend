@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,14 +12,15 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-import org.scalatest.{Matchers, WordSpec}
+@(warningText: String)(implicit messages: Messages)
 
-class DummySpec extends WordSpec with Matchers {
-
-  "This is a dummy test" in {
-    1 shouldEqual 1
-  }
-
-}
+<div class="notice" style="margin: 30px 0;">
+  <i class="icon icon-important">
+    <span class="visually-hidden">@messages("generic.warning")</span>
+  </i>
+  <strong class="bold-small">
+    @warningText
+  </strong>
+</div>

@@ -1,1 +1,3 @@
 # microservice specific routes
+GET /              controllers.Default.redirect(to = "/cgt-property-disposals/landing-page")
+GET /landing-page  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.LandingPageController.landingPage()

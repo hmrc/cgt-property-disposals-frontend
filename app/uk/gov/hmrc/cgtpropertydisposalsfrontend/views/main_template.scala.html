@@ -14,7 +14,7 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.AppConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 
 @this(
         uiSidebar: uk.gov.hmrc.play.views.html.layouts.Sidebar,
@@ -29,7 +29,7 @@
         contentHeader: Option[Html] = None,
         bodyClasses: Option[String] = None,
         mainClass: Option[String] = None,
-        scriptElem: Option[Html] = None)(mainContent: Html)(implicit request : Request[_], messages: Messages, appConfig: AppConfig)
+        scriptElem: Option[Html] = None)(mainContent: Html)(implicit request : Request[_], messages: Messages, appConfig: ViewConfig)
 
 @serviceInfoContent = {}
 

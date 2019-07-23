@@ -5,7 +5,6 @@ resolvers += "HMRC Releases" at "https://dl.bintray.com/hmrc/releases"
 
 resolvers += Resolver.typesafeRepo("releases")
 
-
 addSbtPlugin("uk.gov.hmrc" % "sbt-auto-build" % "1.16.0")
 
 addSbtPlugin("uk.gov.hmrc" % "sbt-git-versioning" % "1.19.0")
@@ -19,3 +18,5 @@ addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.6.23")
 addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.3.7")
 
 addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.8.3")
+
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.6.0")
