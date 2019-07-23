@@ -1,3 +1,7 @@
 # microservice specific routes
-GET /              controllers.Default.redirect(to = "/cgt-property-disposals/landing-page")
-GET /landing-page  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.LandingPageController.landingPage()
+GET /                         controllers.Default.redirect(to = "/cgt-property-disposals/landing-page")
+GET /landing-page             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.LandingPageController.landingPage()
+
+GET  /bpr-check/nino          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.BusinessPartnerRecordCheckController.getNino()
+POST /bpr-check/nino          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.BusinessPartnerRecordCheckController.getNinoSubmit()
+GET  /bpr-check/date-of-birth uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.BusinessPartnerRecordCheckController.getDateOfBirth()
