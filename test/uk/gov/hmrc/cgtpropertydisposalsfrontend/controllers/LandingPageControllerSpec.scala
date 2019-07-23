@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import com.typesafe.config.ConfigFactory
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
+import play.api.i18n.{Lang, MessagesApi}
 import play.api.{Application, Configuration, Play}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.MessagesControllerComponents
@@ -58,7 +59,8 @@ class LandingPageControllerSpec extends WordSpec with Matchers with BeforeAndAft
   "The LandingPageController" must {
 
     "display the landing page" in {
-      contentAsString(controller.landingPage()(FakeRequest())) should include("Report and pay Capital Gains Tax on UK property")
+
+      contentAsString(controller.landingPage()(FakeRequest())) should include(controller.messagesApi("landingPage.title")(Lang.defaultLang))
     }
 
   }
