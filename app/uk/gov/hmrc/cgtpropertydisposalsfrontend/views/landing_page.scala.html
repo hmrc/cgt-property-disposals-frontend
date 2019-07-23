@@ -16,6 +16,7 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 
+
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template
 )
@@ -36,14 +37,8 @@
   <li>@messages("landingPage.list1.bullet3")</li>
  </ul>
 
- <div class="notice" style="margin: 30px 0;">
-  <i class="icon icon-important">
-   <span class="visually-hidden">@messages("generic.warning")</span>
-  </i>
-  <strong class="bold-small">
-  @messages("landingPage.warning")
-  </strong>
- </div>
+ @warning(messages("landingPage.warning"))
+
 
  <p>@messages("landingPage.p2")</p>
 
