@@ -16,4 +16,23 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
+import play.api.data.Form
+import play.api.data.Forms.{mapping, text}
+
+import scala.util.matching.Regex
+
 final case class NINO(value: String) extends AnyVal
+
+object NINO {
+
+  val ninoForm: Form[NINO] = {
+    val ninoRegex: Regex = """^((?!(BG|GB|KN|NK|NT|TN|ZZ)|(D|F|I|Q|U|V)[A-Z]|[A-|Z](D|F|I|O|Q|U|V))[A-Z]{2})[0-9]{6}[A-D]$""".r
+
+    Form(
+      mapping(
+        "nino" -> text.transform[String](_.replaceAllLiterally(" ", ""), identity).verifying("invalid", ninoRegex.pattern.matcher(_).matches())
+      )(NINO.apply)(NINO.unapply)
+    )
+  }
+
+}

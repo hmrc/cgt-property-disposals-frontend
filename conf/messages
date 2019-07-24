@@ -4,6 +4,9 @@ button.startNow=Start now
 button.continue=Continue
 
 generic.warning=Warning
+generic.day=Day
+generic.month=Month
+generic.year=Year
 
 error.summary.heading=There’s a problem
 
@@ -24,3 +27,7 @@ onboarding.nino.title=Enter your National Insurance number
 onboarding.nino.helpText=It’s on your National Insurance card, benefit letter, payslip or P60.<br>For example, ‘QQ 12 34 56 C’.
 nino.invalid=Your National Insurance number must be entered as 9 alphanumeric characters. For example, ‘QQ 12 34 56 C’
 nino.generic.error=National Insurance number must be entered as 9 alphanumeric characters. For example, ‘QQ 12 34 56 C’
+
+onboarding.dob.title=What is your date of birth?
+onboarding.dob.helpText=For example, 31 3 1980
+dob.invalid=Enter a real date of birth
