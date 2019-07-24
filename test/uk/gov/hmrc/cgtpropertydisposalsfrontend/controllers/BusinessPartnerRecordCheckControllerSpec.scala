@@ -50,11 +50,13 @@ class BusinessPartnerRecordCheckControllerSpec extends ControllerSpec with AuthS
 
       "show errors when the NINO submitted is invalid" in {
           def test(nino: String)(expectedErrorMessage: String): Unit = {
-            mockSuccessfulAuth()
+            withClue(s"For NINO '$nino': ") {
+              mockSuccessfulAuth()
 
-            val result = controller.getNinoSubmit()(FakeRequest().withFormUrlEncodedBody("nino" -> nino).withCSRFToken)
-            status(result) shouldBe BAD_REQUEST
-            contentAsString(result) should include(message(expectedErrorMessage))
+              val result = controller.getNinoSubmit()(FakeRequest().withFormUrlEncodedBody("nino" -> nino).withCSRFToken)
+              status(result) shouldBe BAD_REQUEST
+              contentAsString(result) should include(message(expectedErrorMessage))
+            }
           }
 
         test("")("nino.invalid")
@@ -62,11 +64,18 @@ class BusinessPartnerRecordCheckControllerSpec extends ControllerSpec with AuthS
       }
 
       "redirect to the get DOB page if the NINO submitted is valid" in {
-        mockSuccessfulAuth()
+          def test(nino: String): Unit = {
+            withClue(s"For NINO '$nino': ") {
+              mockSuccessfulAuth()
 
-        val result = controller.getNinoSubmit()(FakeRequest().withFormUrlEncodedBody("nino" -> "AB123456C").withCSRFToken)
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.BusinessPartnerRecordCheckController.getDateOfBirth().url)
+              val result = controller.getNinoSubmit()(FakeRequest().withFormUrlEncodedBody("nino" -> nino).withCSRFToken)
+              status(result) shouldBe SEE_OTHER
+              redirectLocation(result) shouldBe Some(routes.BusinessPartnerRecordCheckController.getDateOfBirth().url)
+            }
+          }
+
+        test("AB123456C")
+        test("AB    12  345 6 C")
       }
 
     }
