@@ -61,7 +61,7 @@ object BusinessPartnerRecordCheckController {
 
     Form(
       mapping(
-        "nino" -> text.verifying("invalid", ninoRegex.pattern.matcher(_).matches())
+        "nino" -> text.transform[String](_.replaceAllLiterally(" ", ""), identity).verifying("invalid", ninoRegex.pattern.matcher(_).matches())
       )(NINO.apply)(NINO.unapply)
     )
   }
