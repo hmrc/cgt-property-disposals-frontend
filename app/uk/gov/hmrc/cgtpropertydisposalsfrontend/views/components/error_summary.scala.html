@@ -15,6 +15,7 @@
  *@
 
 @import play.api.data.Form
+@this()
 
 @(form: Form[_])(implicit messages: Messages)
 
@@ -35,7 +36,7 @@
     @form.errors.map { error =>
       <li>
         <a href="#@error.key" data-focuses="@error.key">
-        @messages(s"${error.message}")
+        @messages(s"${error.key}.${error.message}")
         </a>
       </li>
     }

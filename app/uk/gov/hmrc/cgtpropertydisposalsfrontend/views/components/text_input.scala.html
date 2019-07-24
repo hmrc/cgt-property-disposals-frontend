@@ -40,8 +40,8 @@
       @helpText.map(t => t)
     </span>
   }
-  @if(hasErrors) {
-    @errorInline(fieldId, messages(errorKey.getOrElse(s"$fieldId.generic.error")), Seq("error-message"))
+  @errorKey.map { e =>
+    @errorInline(fieldId, messages(s"$fieldId.$e"), Seq("error-message"))
   }
   <input
    class="@inputClasses"

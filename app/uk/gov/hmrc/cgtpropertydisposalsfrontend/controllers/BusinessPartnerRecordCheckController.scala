@@ -59,7 +59,7 @@ object BusinessPartnerRecordCheckController {
 
     Form(
       mapping(
-        "nino" -> text.verifying("nino.invalid", ninoRegex.pattern.matcher(_).matches())
+        "nino" -> text.verifying("invalid", ninoRegex.pattern.matcher(_).matches())
       )(NINO.apply)(NINO.unapply)
     )
   }

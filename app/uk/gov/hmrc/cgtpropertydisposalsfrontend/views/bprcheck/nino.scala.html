@@ -19,13 +19,14 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.NINO
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.{ submit_button, error_summary }
 
 @import views.html.helper.CSRF
 
 @this(
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
- textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input
+ textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
+ errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+ submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button
 )
 
 @(form: Form[NINO])(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
@@ -41,7 +42,7 @@
   @CSRF.formField(request)
 
   @if(hasErrors) {
-   @error_summary(form)
+   @errorSummary(form)
   }
 
   @textInput(
@@ -54,7 +55,7 @@
    hasErrors = hasErrors
   )
 
-  @submit_button(messages("button.continue"))
+  @submitButton(messages("button.continue"))
 
  </form>
 }
