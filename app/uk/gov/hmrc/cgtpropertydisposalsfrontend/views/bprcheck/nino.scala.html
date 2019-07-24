@@ -19,28 +19,42 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.NINO
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.{ submit_button, error_summary }
 
 @import views.html.helper.CSRF
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template
+ mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+ textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input
 )
 
 @(form: Form[NINO])(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
+@title = @{messages("onboarding.nino.title")}
+@key = @{"nino"}
+@heading = @{Html(s"""<h1 class="heading-xlarge">$title</h1>""")}
+@helpText = @{Html(messages("onboarding.nino.helpText"))}
+@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = "Hi!") {
-
- <h1 class="heading-xlarge">Give us your NINO</h1>
-
- @form.error("nino").map(e => <p>Got error message {e.message}</p>)
-
+@mainTemplate(title = title) {
  <form action="@routes.BusinessPartnerRecordCheckController.getNinoSubmit().url" method="@routes.BusinessPartnerRecordCheckController.getNinoSubmit().method">
   @CSRF.formField(request)
-  Enter your NINO:<br>
-  <input type="text" name="nino"><br>
-  <input type="submit" value="Give it to us">
+
+  @if(hasErrors) {
+   @error_summary(form)
+  }
+
+  @textInput(
+   fieldId = key,
+   label = heading,
+   value = form.data.getOrElse(key, ""),
+   helpText = Some(helpText),
+   labelAsHeading = true,
+   errorKey = form.error(key).map(e => e.message),
+   hasErrors = hasErrors
+  )
+
+  @submit_button(messages("button.continue"))
+
  </form>
-
-
 }

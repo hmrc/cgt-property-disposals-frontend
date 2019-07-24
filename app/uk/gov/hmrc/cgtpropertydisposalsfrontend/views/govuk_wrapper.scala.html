@@ -46,6 +46,7 @@
     @uiHead(
       linkElem = None,
       headScripts = None)
+    <style>label>h1.heading-xlarge { margin-bottom: 15px }</style>
     <meta name="format-detection" content="telephone=no" />
 }
 
@@ -61,12 +62,17 @@
 
 @afterHeader = {}
 
+@withCustomJS = {
+  scriptElem
+  <script>$('.error-summary').focus()</script>
+}
+
 @bodyEnd = {
     @uiFooter(
       analyticsToken = Some(appConfig.analyticsToken),
       analyticsHost = appConfig.analyticsHost,
       ssoUrl = None,
-      scriptElem = scriptElem,
+      scriptElem = Some(withCustomJS),
       gaCalls = None)
 }
 
