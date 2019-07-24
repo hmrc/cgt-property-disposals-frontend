@@ -38,14 +38,13 @@ class AuthenticatedActionSpec extends WordSpec with Matchers with MockFactory wi
 
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
 
-  val (signInUrl, selfBaseUrl) = "sign-in" -> "self-base-url"
+  val (signInUrl, origin, selfBaseUrl) = ("sign-in", "origin", "self-base-url")
 
   val config = Configuration(ConfigFactory.parseString(
     s"""
-       |urls{
-       |  gg.sign-in = "$signInUrl"
-       |  self.base  = "$selfBaseUrl"
-       |}
+       |gg.url    = "$signInUrl"
+       |gg.origin = "$origin"
+       |self.url  = "$selfBaseUrl"
     """.stripMargin
   ))
 
@@ -84,7 +83,7 @@ class AuthenticatedActionSpec extends WordSpec with Matchers with MockFactory wi
             status(result) shouldBe SEE_OTHER
 
             val redirectTo = redirectLocation(result)
-            redirectTo shouldBe Some(s"$signInUrl?continue=${urlEncode(selfBaseUrl + requestUri)}&origin=cgtpd")
+            redirectTo shouldBe Some(s"$signInUrl?continue=${urlEncode(selfBaseUrl + requestUri)}&origin=$origin")
           }
 
         }

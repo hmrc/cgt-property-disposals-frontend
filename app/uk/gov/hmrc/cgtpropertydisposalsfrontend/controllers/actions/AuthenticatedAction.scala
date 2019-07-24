@@ -38,9 +38,11 @@ class AuthenticatedAction @Inject() (
     override def authConnector: AuthConnector = self.authConnector
   }
 
-  val signInUrl: String = config.underlying.getString("urls.gg.sign-in")
+  val signInUrl: String = config.underlying.getString("gg.url")
 
-  val selfBaseUrl: String = config.underlying.getString("urls.self.base")
+  val origin: String = config.underlying.getString("gg.origin")
+
+  val selfBaseUrl: String = config.underlying.getString("self.url")
 
   def invokeBlock[A](request: Request[A], block: Request[A] => Future[Result]): Future[Result] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
@@ -48,7 +50,7 @@ class AuthenticatedAction @Inject() (
     authorisedFunctions.authorised() { block(request) }
       .recover {
         case _: NoActiveSession =>
-          Redirect(signInUrl, Map("continue" -> Seq(selfBaseUrl + request.uri), "origin" -> Seq("cgtpd")))
+          Redirect(signInUrl, Map("continue" -> Seq(selfBaseUrl + request.uri), "origin" -> Seq(origin)))
       }
   }
 
