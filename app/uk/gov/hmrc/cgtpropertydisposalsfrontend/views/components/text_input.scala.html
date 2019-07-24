@@ -30,14 +30,15 @@
 
 @classes = @{if(hasErrors) "form-group form-group-error" else "form-group" }
 @inputClasses = @{if(hasErrors) "form-control form-control-error" else "form-control" }
+@hintIdWithHintText = @{helpText.map(s"${{fieldId}}-form-hint" -> _)}
 
 <div class="@classes">
   <label class="form-label" for="@fieldId">
     @label
   </label>
-  @if(helpText.isDefined) {
-    <span id="@{fieldId}-form-hint" class="form-hint">
-      @helpText.map(t => t)
+  @hintIdWithHintText.map { case (id, text) =>
+    <span id="@id" class="form-hint">
+      @text
     </span>
   }
   @errorKey.map { e =>
@@ -49,5 +50,5 @@
    type="text"
    name="@fieldId"
    value="@value"
-   @if(helpText.isDefined) { aria-describedby="@{fieldId}-form-hint" }>
+   @hintIdWithHintText.map{ case (id,_) =>  aria-describedby="@id" }>
 </div>
