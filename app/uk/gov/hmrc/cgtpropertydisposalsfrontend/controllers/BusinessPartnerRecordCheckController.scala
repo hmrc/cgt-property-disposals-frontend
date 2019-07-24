@@ -21,6 +21,7 @@ import play.api.data._
 import play.api.data.Forms._
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.AuthenticatedAction
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.NINO
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
@@ -29,24 +30,25 @@ import scala.util.matching.Regex
 
 @Singleton
 class BusinessPartnerRecordCheckController @Inject() (
+    authenticatedAction: AuthenticatedAction,
     cc: MessagesControllerComponents,
     getNinoPage: views.html.bprcheck.nino
 )(implicit viewConfig: ViewConfig) extends FrontendController(cc) {
 
   import BusinessPartnerRecordCheckController._
 
-  def getNino(): Action[AnyContent] = Action { implicit request =>
+  def getNino(): Action[AnyContent] = authenticatedAction.andThen(Action) { implicit request =>
     Ok(getNinoPage(ninoForm))
   }
 
-  def getNinoSubmit(): Action[AnyContent] = Action { implicit request =>
+  def getNinoSubmit(): Action[AnyContent] = authenticatedAction.andThen(Action) { implicit request =>
     ninoForm.bindFromRequest().fold(
       formWithErrors => BadRequest(getNinoPage(formWithErrors)),
-      nino => SeeOther(routes.BusinessPartnerRecordCheckController.getDateOfBirth().url)
+      _ => SeeOther(routes.BusinessPartnerRecordCheckController.getDateOfBirth().url)
     )
   }
 
-  def getDateOfBirth(): Action[AnyContent] = Action { implicit request =>
+  def getDateOfBirth(): Action[AnyContent] = authenticatedAction.andThen(Action) { implicit request =>
     Ok("Give us your date of birth")
   }
 

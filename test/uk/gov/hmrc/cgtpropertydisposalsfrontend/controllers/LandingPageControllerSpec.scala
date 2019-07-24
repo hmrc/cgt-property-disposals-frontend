@@ -16,51 +16,23 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
-import com.typesafe.config.ConfigFactory
-import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
-import play.api.i18n.{Lang, MessagesApi}
-import play.api.{Application, Configuration, Play}
-import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.MessagesControllerComponents
+import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 
-class LandingPageControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll {
-
-  def buildFakeApplication(): Application =
-    new GuiceApplicationBuilder()
-      .configure(Configuration(
-        ConfigFactory.parseString(
-          """
-          | metrics.enabled       = false
-        """.stripMargin
-        )
-      )).build()
-
-  lazy val fakeApplication: Application = buildFakeApplication()
-
-  override def beforeAll(): Unit = {
-    Play.start(fakeApplication)
-    super.beforeAll()
-  }
-
-  override def afterAll(): Unit = {
-    Play.stop(fakeApplication)
-    super.afterAll()
-  }
+class LandingPageControllerSpec extends ControllerSpec {
 
   lazy val controller: LandingPageController = new LandingPageController(
-    fakeApplication.injector.instanceOf[MessagesControllerComponents],
+    messagesControllerComponents,
     fakeApplication.injector.instanceOf[views.html.landing_page]
-  )(fakeApplication.injector.instanceOf[ViewConfig])
+  )(viewConfig)
 
   "The LandingPageController" must {
 
     "display the landing page" in {
-
-      contentAsString(controller.landingPage()(FakeRequest())) should include(controller.messagesApi("landingPage.title")(Lang.defaultLang))
+      implicit val messagesApi: MessagesApi = controller.messagesApi
+      contentAsString(controller.landingPage()(FakeRequest())) should include(message("landingPage.title"))
     }
 
   }
