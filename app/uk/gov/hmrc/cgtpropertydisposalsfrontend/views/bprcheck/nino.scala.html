@@ -37,7 +37,7 @@
 @helpText = @{Html(messages("onboarding.nino.helpText"))}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title) {
+@mainTemplate(title = title, hasErrors = hasErrors) {
  <form action="@routes.BusinessPartnerRecordCheckController.getNinoSubmit().url" method="@routes.BusinessPartnerRecordCheckController.getNinoSubmit().method">
   @CSRF.formField(request)
 

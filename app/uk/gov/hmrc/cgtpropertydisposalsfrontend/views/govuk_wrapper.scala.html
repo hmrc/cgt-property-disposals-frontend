@@ -16,6 +16,8 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import play.twirl.api.HtmlFormat
+@import cats.instances.string._
+@import cats.syntax.eq._
 
 @this(
     govUkTemplate: views.html.layouts.GovUkTemplate,
@@ -32,6 +34,7 @@
 
 @(appConfig: ViewConfig,
   title: String,
+  hasErrors: Boolean = false,
   mainClass: Option[String] = None,
   mainDataAttributes: Option[Html] = None,
   bodyClasses: Option[String] = None,
@@ -103,4 +106,8 @@
       sidebar = sidebar)
 }
 
-@govUkTemplate(Some(title), bodyClasses)(head, bodyEnd, insideHeader, afterHeader, footerTop, Some(uiFooterLinks()), true)(content)
+@serviceNameAndHeading = @{if(title === messages("service.title")) title else title + " - " + messages("service.title")}
+@govTitle = @{serviceNameAndHeading + " - GOV.UK"}
+@pageTitle = @{if(hasErrors) { "Error: " + govTitle } else { govTitle }}
+
+@govUkTemplate(Some(pageTitle), bodyClasses)(head, bodyEnd, insideHeader, afterHeader, footerTop, Some(uiFooterLinks()), true)(content)
