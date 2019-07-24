@@ -3,23 +3,25 @@ import uk.gov.hmrc.SbtArtifactory
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 import scalariform.formatter.preferences._
 import scoverage.ScoverageKeys
-import wartremover.wartremoverExcluded
+import wartremover.{Wart, wartremoverErrors, wartremoverExcluded}
 
 val appName = "cgt-property-disposals-frontend"
 
 
 lazy val wartremoverSettings =
   Seq(
-    wartremoverErrors ++= Warts.allBut(
+    wartremoverErrors in (Compile,compile) ++= Warts.allBut(
       Wart.DefaultArguments,
       Wart.ImplicitConversion,
       Wart.ImplicitParameter,
+      Wart.Overloading,
       Wart.ToString
     ),
-    wartremoverExcluded ++=
+    wartremoverExcluded in (Compile, compile) ++=
       routes.in(Compile).value ++
         (baseDirectory.value ** "*.sc").get ++
-        Seq(sourceManaged.value / "main" / "sbt-buildinfo" / "BuildInfo.scala")
+        Seq(sourceManaged.value / "main" / "sbt-buildinfo" / "BuildInfo.scala"),
+    wartremoverErrors in (Test, compile) --= Seq(Wart.NonUnitStatements, Wart.Null, Wart.PublicInference)
   )
 
 lazy val scalariformSettings =

@@ -25,6 +25,7 @@
 
 
 @(title: String,
+        hasErrors: Boolean = false,
         sidebarLinks: Option[Html] = None,
         contentHeader: Option[Html] = None,
         bodyClasses: Option[String] = None,
@@ -40,6 +41,7 @@
 
 @govUkWrapper(appConfig = appConfig,
     title = title,
+  hasErrors = hasErrors,
     mainClass = mainClass,
     bodyClasses = bodyClasses,
     sidebar = sidebar,

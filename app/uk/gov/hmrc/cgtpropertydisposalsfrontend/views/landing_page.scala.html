@@ -15,7 +15,7 @@
  *@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template
@@ -52,6 +52,6 @@
  <p>@messages("landingPage.p3")</p>
 
  <p>
-  <a class="button button-start" href="#" role="button">@messages("button.startNow")</a>
+  <a class="button button-start" href="@{routes.BusinessPartnerRecordCheckController.getNino}" role="button">@messages("button.startNow")</a>
  </p>
 }
