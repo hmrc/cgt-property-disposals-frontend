@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.util
 
-import play.api.i18n.MessagesApi
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import play.api.Logger
 
-class LandingPageControllerSpec extends ControllerSpec with AuthSupport with SessionSupport {
+trait Logging {
 
-  lazy val controller: LandingPageController = instanceOf[LandingPageController]
+  val logger: Logger = Logger(this.getClass)
 
-  "The LandingPageController" must {
+}
 
-    "display the landing page" in {
-      implicit val messagesApi: MessagesApi = controller.messagesApi
-      contentAsString(controller.landingPage()(FakeRequest())) should include(message("landingPage.title"))
-    }
+object Logging {
+
+  implicit class LoggerOps(val l: Logger) extends AnyVal {
+    def warn(msg: => String, e: => Error): Unit =
+      e.value.fold(e => l.warn(s"$msg: $e"), e => l.warn(msg, e))
 
   }
 

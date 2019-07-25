@@ -14,6 +14,7 @@ lazy val wartremoverSettings =
       Wart.DefaultArguments,
       Wart.ImplicitConversion,
       Wart.ImplicitParameter,
+      Wart.Nothing,
       Wart.Overloading,
       Wart.ToString
     ),
@@ -64,6 +65,7 @@ lazy val scoverageSettings =
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory)
+  .settings(addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"))
   .settings(scalaVersion := "2.11.12")
   .settings(
     majorVersion                     := 0,

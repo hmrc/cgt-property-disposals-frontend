@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
-import play.api.i18n.MessagesApi
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.mvc.{ActionBuilder, AnyContent}
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-class LandingPageControllerSpec extends ControllerSpec with AuthSupport with SessionSupport {
+trait WithActions { this: FrontendController =>
 
-  lazy val controller: LandingPageController = instanceOf[LandingPageController]
+  val authenticatedAction: AuthenticatedAction
+  val sessionDataAction: SessionDataAction
 
-  "The LandingPageController" must {
-
-    "display the landing page" in {
-      implicit val messagesApi: MessagesApi = controller.messagesApi
-      contentAsString(controller.landingPage()(FakeRequest())) should include(message("landingPage.title"))
-    }
-
-  }
+  val authenticatedActionWithSessionData: ActionBuilder[RequestWithSessionData, AnyContent] =
+    Action.andThen(authenticatedAction).andThen(sessionDataAction)
 
 }

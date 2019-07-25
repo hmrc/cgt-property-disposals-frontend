@@ -14,23 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+package uk.gov.hmrc.cgtpropertydisposalsfrontend
 
-import play.api.i18n.MessagesApi
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import scala.concurrent.Future
 
-class LandingPageControllerSpec extends ControllerSpec with AuthSupport with SessionSupport {
+package object util {
 
-  lazy val controller: LandingPageController = instanceOf[LandingPageController]
-
-  "The LandingPageController" must {
-
-    "display the landing page" in {
-      implicit val messagesApi: MessagesApi = controller.messagesApi
-      contentAsString(controller.landingPage()(FakeRequest())) should include(message("landingPage.title"))
-    }
-
-  }
+  implicit def toFuture[A]: A => Future[A] = a => Future.successful(a)
 
 }

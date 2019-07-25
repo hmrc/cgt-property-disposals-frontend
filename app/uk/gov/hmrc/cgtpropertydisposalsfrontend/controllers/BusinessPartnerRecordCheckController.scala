@@ -17,43 +17,77 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import com.google.inject.{Inject, Singleton}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.AuthenticatedAction
+import play.api.data.Form
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithActions}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DateOfBirth.dobForm
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.NINO.ninoForm
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
+import scala.concurrent.{ExecutionContext, Future}
+
 @Singleton
 class BusinessPartnerRecordCheckController @Inject() (
-    authenticatedAction: AuthenticatedAction,
+    sessionStore: SessionStore,
+    errorHandler: ErrorHandler,
     cc: MessagesControllerComponents,
+    val authenticatedAction: AuthenticatedAction,
+    val sessionDataAction: SessionDataAction,
     getNinoPage: views.html.bprcheck.nino,
     getDobPage: views.html.bprcheck.date_of_birth
-)(implicit viewConfig: ViewConfig) extends FrontendController(cc) {
+)(implicit viewConfig: ViewConfig, ec: ExecutionContext) extends FrontendController(cc) with WithActions with Logging {
 
-  def getNino(): Action[AnyContent] = authenticatedAction.andThen(Action) { implicit request =>
-    Ok(getNinoPage(ninoForm))
+  def getNino(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
+    val sessionNino = request.sessionData.flatMap(_.nino)
+    val form = sessionNino.fold(ninoForm)(ninoForm.fill)
+    Ok(getNinoPage(form))
   }
 
-  def getNinoSubmit(): Action[AnyContent] = authenticatedAction.andThen(Action) { implicit request =>
+  def getNinoSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     ninoForm.bindFromRequest().fold(
       formWithErrors => BadRequest(getNinoPage(formWithErrors)),
-      _ => SeeOther(routes.BusinessPartnerRecordCheckController.getDateOfBirth().url)
+      nino => storeAndThen(_.copy(nino = Some(nino)))(SeeOther(routes.BusinessPartnerRecordCheckController.getDateOfBirth().url))
     )
   }
 
-  def getDateOfBirth(): Action[AnyContent] = authenticatedAction.andThen(Action) { implicit request =>
-    Ok(getDobPage(dobForm))
+  def getDateOfBirth(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
+    val form: Option[Form[DateOfBirth]] = request.sessionData.flatMap(_.nino) -> request.sessionData.flatMap(_.dob) match {
+      case (None, _)      => None
+      case (_, Some(dob)) => Some(dobForm.fill(dob))
+      case (_, None)      => Some(dobForm)
+    }
+
+    form.fold(SeeOther(routes.BusinessPartnerRecordCheckController.getNino().url)) {
+      f => Ok(getDobPage(f))
+    }
   }
 
-  def getDateOfBirthSubmit(): Action[AnyContent] = authenticatedAction.andThen(Action) { implicit request =>
-    dobForm.bindFromRequest().fold(
-      formWithErrors => BadRequest(getDobPage(formWithErrors)),
-      d => Ok(s"Got $d")
-    )
+  def getDateOfBirthSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    request.sessionData.flatMap(_.nino).fold[Future[Result]](
+      SeeOther(routes.BusinessPartnerRecordCheckController.getNino().url)
+    ) { _ =>
+        dobForm.bindFromRequest().fold(
+          formWithErrors => BadRequest(getDobPage(formWithErrors)),
+          dateOfBirth => storeAndThen(_.copy(dob = Some(dateOfBirth)))(Ok(s"Got $dateOfBirth"))
+        )
+      }
   }
+
+  def storeAndThen(updateSession: SessionData => SessionData)(f: => Result)(implicit request: RequestWithSessionData[_]): Future[Result] =
+    sessionStore.store(updateSession(request.sessionData.getOrElse(SessionData.empty))).map {
+      case Left(e) =>
+        logger.warn("Could not store data in mongo", e)
+        InternalServerError(errorHandler.internalServerErrorTemplate)
+
+      case Right(_) =>
+        f
+    }
 
 }
 
