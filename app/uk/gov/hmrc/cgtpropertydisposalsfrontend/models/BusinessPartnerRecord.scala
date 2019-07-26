@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import play.api.i18n.MessagesApi
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import java.time.LocalDate
 
-class LandingPageControllerSpec extends ControllerSpec {
+import play.api.libs.json.{Format, Json}
 
-  lazy val controller: LandingPageController = instanceOf[LandingPageController]
+final case class BusinessPartnerRecord(
+    forename: String,
+    surname: String,
+    dateOfBirth: DateOfBirth,
+    emailAddress: String,
+    address: Address
+)
 
-  "The LandingPageController" must {
+object BusinessPartnerRecord {
 
-    "display the landing page" in {
-      implicit val messagesApi: MessagesApi = controller.messagesApi
-      contentAsString(controller.landingPage()(FakeRequest())) should include(message("landingPage.title"))
-    }
-
-  }
+  implicit val format: Format[BusinessPartnerRecord] = Json.format
 
 }

@@ -18,7 +18,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import play.api.data.Form
 import play.api.data.Forms.{mapping, text}
-import play.api.libs.json.{Format, Json}
+import play.api.libs.functional.syntax._
+import play.api.libs.json.Format
 
 import scala.util.matching.Regex
 
@@ -26,7 +27,7 @@ final case class NINO(value: String) extends AnyVal
 
 object NINO {
 
-  implicit val format: Format[NINO] = Json.format
+  implicit val format: Format[NINO] = implicitly[Format[String]].inmap(NINO(_), _.value)
 
   val ninoForm: Form[NINO] = {
     val ninoRegex: Regex = """^((?!(BG|GB|KN|NK|NT|TN|ZZ)|(D|F|I|Q|U|V)[A-Z]|[A-|Z](D|F|I|O|Q|U|V))[A-Z]{2})[0-9]{6}[A-D]$""".r

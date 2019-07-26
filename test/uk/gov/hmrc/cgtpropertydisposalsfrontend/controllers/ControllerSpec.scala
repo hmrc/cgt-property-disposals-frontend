@@ -21,8 +21,8 @@ import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
 import play.api.i18n.{Lang, MessagesApi}
-import play.api.inject.bind
-import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.inject.{Binding, bind}
+import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -35,7 +35,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import scala.concurrent.Future
 import scala.reflect.ClassTag
 
-trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with MockFactory { this: AuthSupport with SessionSupport =>
+trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with MockFactory {
+
+  val overrideBindings: List[GuiceableModule] = List.empty[GuiceableModule]
 
   def buildFakeApplication(): Application =
     new GuiceApplicationBuilder()
@@ -46,12 +48,8 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
           """.stripMargin
         )
       ))
-      .overrides(
-        bind[AuthConnector].toInstance(mockAuthConnector),
-        bind[SessionStore].toInstance(mockSessionStore),
-        bind[ReactiveMongoComponent].toInstance(stub[ReactiveMongoComponent])
-
-      ).build()
+      .overrides(overrideBindings: _*)
+      .build()
 
   lazy val fakeApplication: Application = buildFakeApplication()
 

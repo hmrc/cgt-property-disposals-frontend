@@ -25,6 +25,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DateOfBirth.dobForm
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.NINO.ninoForm
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -34,13 +35,15 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class BusinessPartnerRecordCheckController @Inject() (
+    bprService: BusinessPartnerRecordService,
     sessionStore: SessionStore,
     errorHandler: ErrorHandler,
     cc: MessagesControllerComponents,
     val authenticatedAction: AuthenticatedAction,
     val sessionDataAction: SessionDataAction,
     getNinoPage: views.html.bprcheck.nino,
-    getDobPage: views.html.bprcheck.date_of_birth
+    getDobPage: views.html.bprcheck.date_of_birth,
+    displayBprPage: views.html.bprcheck.bpr
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext) extends FrontendController(cc) with WithActions with Logging {
 
   def getNino(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
@@ -52,7 +55,14 @@ class BusinessPartnerRecordCheckController @Inject() (
   def getNinoSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     ninoForm.bindFromRequest().fold(
       formWithErrors => BadRequest(getNinoPage(formWithErrors)),
-      nino => storeAndThen(_.copy(nino = Some(nino)))(SeeOther(routes.BusinessPartnerRecordCheckController.getDateOfBirth().url))
+      nino => updateSession(_.copy(nino = Some(nino))).map {
+        case Left(e) =>
+          logger.warn("Could not store NINO in mongo", e)
+          InternalServerError(errorHandler.internalServerErrorTemplate)
+
+        case Right(_) =>
+          SeeOther(routes.BusinessPartnerRecordCheckController.getDateOfBirth().url)
+      }
     )
   }
 
@@ -74,20 +84,38 @@ class BusinessPartnerRecordCheckController @Inject() (
     ) { _ =>
         dobForm.bindFromRequest().fold(
           formWithErrors => BadRequest(getDobPage(formWithErrors)),
-          dateOfBirth => storeAndThen(_.copy(dob = Some(dateOfBirth)))(Ok(s"Got $dateOfBirth"))
+          dateOfBirth =>
+            updateSession(_.copy(dob = Some(dateOfBirth))).map {
+              case Left(e) =>
+                logger.warn("Could not store DOB in mongo", e)
+                InternalServerError(errorHandler.internalServerErrorTemplate)
+
+              case Right(_) =>
+                SeeOther(routes.BusinessPartnerRecordCheckController.displayBusinessPartnerRecord().url)
+            }
         )
       }
   }
 
-  def storeAndThen(updateSession: SessionData => SessionData)(f: => Result)(implicit request: RequestWithSessionData[_]): Future[Result] =
-    sessionStore.store(updateSession(request.sessionData.getOrElse(SessionData.empty))).map {
-      case Left(e) =>
-        logger.warn("Could not store data in mongo", e)
-        InternalServerError(errorHandler.internalServerErrorTemplate)
+  def displayBusinessPartnerRecord(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    request.sessionData.flatMap(_.nino) -> request.sessionData.flatMap(_.dob) match {
+      case (None, _) => SeeOther(routes.BusinessPartnerRecordCheckController.getNino().url)
+      case (_, None) => SeeOther(routes.BusinessPartnerRecordCheckController.getDateOfBirth().url)
+      case (Some(nino), Some(dob)) =>
+        bprService.getBusinessPartnerRecord(nino, dob).map {
+          case Left(e) =>
+            logger.warn("Error while getting BPR", e)
+            InternalServerError(errorHandler.internalServerErrorTemplate)
 
-      case Right(_) =>
-        f
+          case Right(bpr) =>
+            Ok(displayBprPage(bpr))
+        }
+
     }
+  }
+
+  private def updateSession(update: SessionData => SessionData)(implicit request: RequestWithSessionData[_]): Future[Either[Error, Unit]] =
+    sessionStore.store(update(request.sessionData.getOrElse(SessionData.empty)))
 
 }
 

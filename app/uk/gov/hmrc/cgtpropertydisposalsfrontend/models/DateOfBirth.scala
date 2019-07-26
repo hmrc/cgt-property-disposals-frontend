@@ -16,13 +16,15 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import cats.syntax.either._
 import java.time.{Clock, LocalDate}
 
+import cats.Eq
+import cats.syntax.either._
 import play.api.data.Forms.{mapping, of}
 import play.api.data.format.Formatter
 import play.api.data.{Form, FormError}
-import play.api.libs.json.{Format, Json}
+import play.api.libs.functional.syntax._
+import play.api.libs.json.Format
 
 import scala.util.Try
 
@@ -30,7 +32,9 @@ final case class DateOfBirth(value: LocalDate) extends AnyVal
 
 object DateOfBirth {
 
-  implicit val format: Format[DateOfBirth] = Json.format
+  implicit val format: Format[DateOfBirth] = implicitly[Format[LocalDate]].inmap(DateOfBirth(_), _.value)
+
+  implicit val eq: Eq[DateOfBirth] = Eq.instance((d1, d2) => d1.value.isEqual(d2.value))
 
   object Ids {
     val day = "dob-day"

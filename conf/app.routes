@@ -6,3 +6,4 @@ GET  /bpr-check/nino          uk.gov.hmrc.cgtpropertydisposalsfrontend.controlle
 POST /bpr-check/nino          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.BusinessPartnerRecordCheckController.getNinoSubmit()
 GET  /bpr-check/date-of-birth uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.BusinessPartnerRecordCheckController.getDateOfBirth()
 POST /bpr-check/date-of-birth uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.BusinessPartnerRecordCheckController.getDateOfBirthSubmit()
+GET  /bpr-check/check-bpr     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.BusinessPartnerRecordCheckController.displayBusinessPartnerRecord()

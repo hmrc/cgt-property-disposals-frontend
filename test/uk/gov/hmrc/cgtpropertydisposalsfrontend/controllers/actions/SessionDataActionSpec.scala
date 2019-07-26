@@ -31,7 +31,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, Error, NINO
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class SessionDataActionSpec extends ControllerSpec with SessionSupport with AuthSupport with MockFactory {
+class SessionDataActionSpec extends ControllerSpec with SessionSupport with MockFactory {
 
   lazy val action =
     new SessionDataAction(mockSessionStore, instanceOf[PlayBodyParsers], instanceOf[ErrorHandler])

@@ -14,23 +14,24 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.util
 
-import play.api.i18n.MessagesApi
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.libs.json.JsError
 
-class LandingPageControllerSpec extends ControllerSpec {
+object JsErrorOps {
 
-  lazy val controller: LandingPageController = instanceOf[LandingPageController]
+  implicit def j(jsError: JsError): JsErrorOps = new JsErrorOps(jsError)
 
-  "The LandingPageController" must {
+}
 
-    "display the landing page" in {
-      implicit val messagesApi: MessagesApi = controller.messagesApi
-      contentAsString(controller.landingPage()(FakeRequest())) should include(message("landingPage.title"))
-    }
+class JsErrorOps(val error: JsError) extends AnyVal {
 
-  }
+  /**
+   * Create a legible string describing the error suitable for debugging purposes
+   */
+  def prettyPrint(): String = error.errors.map {
+    case (jsPath, validationErrors) ⇒
+      jsPath.toString + ": [" + validationErrors.map(_.message).mkString(",") + "]"
+  }.mkString("; ")
 
 }

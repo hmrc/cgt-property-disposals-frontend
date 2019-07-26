@@ -19,18 +19,31 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import java.time.{Clock, LocalDate}
 
 import play.api.i18n.MessagesApi
-import play.api.mvc.RequestHeader
+import play.api.inject.bind
+import play.api.inject.guice.GuiceableModule
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, Error, NINO, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DateOfBirth.Ids
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordService
 
 import scala.concurrent.Future
 
 class BusinessPartnerRecordCheckControllerSpec extends ControllerSpec with AuthSupport with SessionSupport {
+
+  val mockService = mock[BusinessPartnerRecordService]
+
+  override val overrideBindings =
+    List[GuiceableModule](
+      bind[AuthConnector].toInstance(mockAuthConnector),
+      bind[SessionStore].toInstance(mockSessionStore),
+      bind[BusinessPartnerRecordService].toInstance(mockService)
+    )
 
   lazy val controller = instanceOf[BusinessPartnerRecordCheckController]
 
@@ -143,179 +156,202 @@ class BusinessPartnerRecordCheckControllerSpec extends ControllerSpec with AuthS
 
     }
 
-  }
+    "handling requests to get the date of birth page" must {
 
-  "handling requests to get the date of birth page" must {
+      "redirect to the NINO page if there is no NINO in the session" in {
+          def test(sessionData: Option[SessionData]) = {
+            withClue(s"For session data $sessionData: ") {
+              inSequence {
+                mockSuccessfulAuth()
+                mockGetSession(Future.successful(Right(sessionData)))
+              }
 
-    "redirect to the NINO page if there is no NINO in the session" in {
-        def test(sessionData: Option[SessionData]) = {
-          withClue(s"For session data $sessionData: ") {
-            inSequence {
-              mockSuccessfulAuth()
-              mockGetSession(Future.successful(Right(sessionData)))
+              val result = controller.getDateOfBirth()(requestWithCSRFToken)
+              status(result) shouldBe SEE_OTHER
+              redirectLocation(result) shouldBe Some(routes.BusinessPartnerRecordCheckController.getNino().url)
             }
-
-            val result = controller.getDateOfBirth()(requestWithCSRFToken)
-            status(result) shouldBe SEE_OTHER
-            redirectLocation(result) shouldBe Some(routes.BusinessPartnerRecordCheckController.getNino().url)
           }
-        }
 
-      test(None)
-      test(Some(SessionData.empty))
-      test(Some(SessionData.empty.copy(dob = Some(validDOB))))
-    }
-
-    "display the get DOB page if there is a NINO in session" in {
-      inSequence {
-        mockSuccessfulAuth()
-        mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(nino = Some(validNINO))))))
+        test(None)
+        test(Some(SessionData.empty))
+        test(Some(SessionData.empty.copy(dob = Some(validDOB))))
       }
 
-      contentAsString(controller.getDateOfBirth()(requestWithCSRFToken)) should include(message("onboarding.dob.title"))
-    }
-
-    "display the get DOB page if there is a NINO in session and prepopulate the DOB with the " +
-      "one in session if one exists" in {
+      "display the get DOB page if there is a NINO in session" in {
         inSequence {
           mockSuccessfulAuth()
-          mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(nino = Some(validNINO), dob = Some(validDOB))))))
+          mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(nino = Some(validNINO))))))
         }
 
-        val content = contentAsString(controller.getDateOfBirth()(requestWithCSRFToken))
-        content should include(message("onboarding.dob.title"))
-        // probably not the best way to check below
-        content should include(s"""value="${validDOB.value.getDayOfMonth}"""")
-        content should include(s"""value="${validDOB.value.getMonthValue}"""")
-        content should include(s"""value="${validDOB.value.getYear}"""")
+        contentAsString(controller.getDateOfBirth()(requestWithCSRFToken)) should include(message("onboarding.dob.title"))
       }
 
-  }
-
-  "handling submitted dates of birth" must {
-
-      def toFieldList(d: LocalDate): List[(String, String)] =
-        List(
-          Ids.day -> d.getDayOfMonth.toString,
-          Ids.month -> d.getMonthValue.toString,
-          Ids.year -> d.getYear.toString
-        )
-
-    val today = LocalDate.now(Clock.systemUTC())
-
-    val existingSession = SessionData.empty.copy(nino = Some(validNINO))
-
-    "accept real date of births which are before 16 years in the past" in {
-        def testSuccess(d: LocalDate) = {
-          withClue(s"For date $d: ") {
-            inSequence {
-              mockSuccessfulAuth()
-              mockGetSession(Future.successful(Right(Some(existingSession))))
-              mockStoreSession(existingSession.copy(dob = Some(DateOfBirth(d))))(Future.successful(Right(())))
-            }
-
-            val result = controller.getDateOfBirthSubmit()(requestWithFormData(toFieldList(d): _*))
-            status(result) shouldBe OK
-            contentAsString(result) shouldBe s"Got ${DateOfBirth(d)}"
+      "display the get DOB page if there is a NINO in session and prepopulate the DOB with the " +
+        "one in session if one exists" in {
+          inSequence {
+            mockSuccessfulAuth()
+            mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(nino = Some(validNINO), dob = Some(validDOB))))))
           }
+
+          val content = contentAsString(controller.getDateOfBirth()(requestWithCSRFToken))
+          content should include(message("onboarding.dob.title"))
+          // probably not the best way to check below
+          content should include(s"""value="${validDOB.value.getDayOfMonth}"""")
+          content should include(s"""value="${validDOB.value.getMonthValue}"""")
+          content should include(s"""value="${validDOB.value.getYear}"""")
         }
-
-      (0 to 365).foreach(i => testSuccess(today.minusYears(16L).minusDays(i)))
-    }
-
-    "accept real date of births which are before 16 years in the past and overwrite any existing DOB " +
-      "in the session" in {
-        val existingSession = SessionData(Some(validNINO), Some(validDOB))
-        val newDOB = DateOfBirth(validDOB.value.plusDays(1L))
-
-        inSequence {
-          mockSuccessfulAuth()
-          mockGetSession(Future.successful(Right(Some(existingSession))))
-          mockStoreSession(existingSession.copy(dob = Some(newDOB)))(Future.successful(Right(())))
-        }
-
-        val result = controller.getDateOfBirthSubmit()(requestWithFormData(toFieldList(newDOB.value): _*))
-        status(result) shouldBe OK
-        contentAsString(result) shouldBe s"Got $newDOB"
-      }
-
-    "redirect to the get NINO page if there is no NINO in session" in {
-        def test(sessionData: Option[SessionData]) = {
-          withClue(s"For session data $sessionData: ") {
-            inSequence {
-              mockSuccessfulAuth()
-              mockGetSession(Future.successful(Right(sessionData)))
-            }
-
-            val result = controller.getDateOfBirthSubmit()(requestWithCSRFToken)
-            status(result) shouldBe SEE_OTHER
-            redirectLocation(result) shouldBe Some(routes.BusinessPartnerRecordCheckController.getNino().url)
-          }
-        }
-
-      test(None)
-      test(Some(SessionData.empty))
-      test(Some(SessionData.empty.copy(dob = Some(validDOB))))
-    }
-
-    "show a form error" when {
-
-        def testErrorWithRawData(formData: (String, String)*)(expectedErrorMessageKey: String) = {
-          withClue(s"For form data [$formData]: ") {
-            inSequence {
-              mockSuccessfulAuth()
-              mockGetSession(Future.successful(Right(Some(existingSession))))
-            }
-
-            val result = controller.getDateOfBirthSubmit()(requestWithFormData(formData: _*))
-            status(result) shouldBe BAD_REQUEST
-            contentAsString(result) should include(message(expectedErrorMessageKey))
-          }
-        }
-
-        def testErrorWithDate(d: LocalDate)(expectedErrorMessageKey: String) =
-          testErrorWithRawData(toFieldList(d): _*)(expectedErrorMessageKey)
-
-      "the DOB not more than 16 years in the past" in {
-        testErrorWithDate(today.minusYears(16L).plusDays(1L))("dob.invalid")
-      }
-
-      "the DOB is in the future" in {
-        testErrorWithDate(today.plusDays(1L))("dob.invalid")
-      }
-
-      "the date entered is not a real one" in {
-        // 31st June doesn't exist
-        testErrorWithRawData(Ids.day -> "31", Ids.month -> "6", Ids.year -> "2000")("dob.invalid")
-      }
-
-      "one or more of the date fields are blank" in {
-        val (validDay, validMonth, validYear) = ("1", "1", "2000")
-
-        val l = List(
-          Ids.day -> validDay,
-          Ids.month -> validMonth,
-          Ids.year -> validYear
-        )
-
-        (0 to 2).flatMap(l.combinations).foreach(testErrorWithRawData(_: _*)("dob.invalid"))
-      }
 
     }
 
-    "display an error page" when {
+    "handling submitted dates of birth" must {
 
-      "there is an error storing the DOB in store" in {
-        val error = Error("Oh no!")
+        def toFieldList(d: LocalDate): List[(String, String)] =
+          List(
+            Ids.day -> d.getDayOfMonth.toString,
+            Ids.month -> d.getMonthValue.toString,
+            Ids.year -> d.getYear.toString
+          )
 
-        inSequence {
-          mockSuccessfulAuth()
-          mockGetSession(Future.successful(Right(Some(existingSession))))
-          mockStoreSession(existingSession.copy(dob = Some(validDOB)))(Future.successful(Left(error)))
+      val today = LocalDate.now(Clock.systemUTC())
+
+      val existingSession = SessionData.empty.copy(nino = Some(validNINO))
+
+      "accept real date of births which are before 16 years in the past" in {
+          def testSuccess(d: LocalDate) = {
+            withClue(s"For date $d: ") {
+              inSequence {
+                mockSuccessfulAuth()
+                mockGetSession(Future.successful(Right(Some(existingSession))))
+                mockStoreSession(existingSession.copy(dob = Some(DateOfBirth(d))))(Future.successful(Right(())))
+              }
+
+              val result = controller.getDateOfBirthSubmit()(requestWithFormData(toFieldList(d): _*))
+              status(result) shouldBe SEE_OTHER
+              redirectLocation(result) shouldBe Some(routes.BusinessPartnerRecordCheckController.displayBusinessPartnerRecord().url)
+            }
+          }
+
+        (0 to 365).foreach(i => testSuccess(today.minusYears(16L).minusDays(i)))
+      }
+
+      "accept real date of births which are before 16 years in the past and overwrite any existing DOB " +
+        "in the session" in {
+          val existingSession = SessionData(Some(validNINO), Some(validDOB))
+          val newDOB = DateOfBirth(validDOB.value.plusDays(1L))
+
+          inSequence {
+            mockSuccessfulAuth()
+            mockGetSession(Future.successful(Right(Some(existingSession))))
+            mockStoreSession(existingSession.copy(dob = Some(newDOB)))(Future.successful(Right(())))
+          }
+
+          val result = controller.getDateOfBirthSubmit()(requestWithFormData(toFieldList(newDOB.value): _*))
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.BusinessPartnerRecordCheckController.displayBusinessPartnerRecord().url)
         }
 
-        val result = controller.getDateOfBirthSubmit()(requestWithFormData(toFieldList(validDOB.value): _*))
-        checkIsTechnicalErrorPage(result)
+      "redirect to the get NINO page if there is no NINO in session" in {
+          def test(sessionData: Option[SessionData]) = {
+            withClue(s"For session data $sessionData: ") {
+              inSequence {
+                mockSuccessfulAuth()
+                mockGetSession(Future.successful(Right(sessionData)))
+              }
+
+              val result = controller.getDateOfBirthSubmit()(requestWithCSRFToken)
+              status(result) shouldBe SEE_OTHER
+              redirectLocation(result) shouldBe Some(routes.BusinessPartnerRecordCheckController.getNino().url)
+            }
+          }
+
+        test(None)
+        test(Some(SessionData.empty))
+        test(Some(SessionData.empty.copy(dob = Some(validDOB))))
+      }
+
+      "show a form error" when {
+
+          def testErrorWithRawData(formData: (String, String)*)(expectedErrorMessageKey: String) = {
+            withClue(s"For form data [$formData]: ") {
+              inSequence {
+                mockSuccessfulAuth()
+                mockGetSession(Future.successful(Right(Some(existingSession))))
+              }
+
+              val result = controller.getDateOfBirthSubmit()(requestWithFormData(formData: _*))
+              status(result) shouldBe BAD_REQUEST
+              contentAsString(result) should include(message(expectedErrorMessageKey))
+            }
+          }
+
+          def testErrorWithDate(d: LocalDate)(expectedErrorMessageKey: String) =
+            testErrorWithRawData(toFieldList(d): _*)(expectedErrorMessageKey)
+
+        "the DOB not more than 16 years in the past" in {
+          testErrorWithDate(today.minusYears(16L).plusDays(1L))("dob.invalid")
+        }
+
+        "the DOB is in the future" in {
+          testErrorWithDate(today.plusDays(1L))("dob.invalid")
+        }
+
+        "the date entered is not a real one" in {
+          // 31st June doesn't exist
+          testErrorWithRawData(Ids.day -> "31", Ids.month -> "6", Ids.year -> "2000")("dob.invalid")
+        }
+
+        "one or more of the date fields are blank" in {
+          val (validDay, validMonth, validYear) = ("1", "1", "2000")
+
+          val l = List(
+            Ids.day -> validDay,
+            Ids.month -> validMonth,
+            Ids.year -> validYear
+          )
+
+          (0 to 2).flatMap(l.combinations).foreach(testErrorWithRawData(_: _*)("dob.invalid"))
+        }
+
+      }
+
+      "display an error page" when {
+
+        "there is an error storing the DOB in store" in {
+          val error = Error("Oh no!")
+
+          inSequence {
+            mockSuccessfulAuth()
+            mockGetSession(Future.successful(Right(Some(existingSession))))
+            mockStoreSession(existingSession.copy(dob = Some(validDOB)))(Future.successful(Left(error)))
+          }
+
+          val result = controller.getDateOfBirthSubmit()(requestWithFormData(toFieldList(validDOB.value): _*))
+          checkIsTechnicalErrorPage(result)
+        }
+
+      }
+
+    }
+
+    "handling requests to display BPR's" must {
+
+      "redirect to the NINO page if there is no NINO in session" in {
+
+      }
+
+      "redirect to the DOB page if there is no DOB in session" in {
+
+      }
+
+      "display an error page" when {
+
+        "the call to get the BPR fails" in {
+
+        }
+      }
+
+      "display the BPR if the BPR is retrieved successfully" in {
+
       }
 
     }
