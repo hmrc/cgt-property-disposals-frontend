@@ -27,10 +27,12 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, Error, NINO, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.UkAddress
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, DateOfBirth, Error, NINO, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DateOfBirth.Ids
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordService
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
@@ -51,12 +53,18 @@ class BusinessPartnerRecordCheckControllerSpec extends ControllerSpec with AuthS
 
   def mockSuccessfulAuth(): Unit = mockAuth(EmptyPredicate, EmptyRetrieval)(Future.successful(EmptyRetrieval))
 
+  def mockGetBusinessPartnerRecord(nino: NINO, dob: DateOfBirth)(result: Future[Either[Error, BusinessPartnerRecord]]) =
+    (mockService.getBusinessPartnerRecord(_: NINO, _: DateOfBirth)(_: HeaderCarrier))
+      .expects(nino, dob, *)
+      .returning(result)
+
   val requestWithCSRFToken = FakeRequest().withCSRFToken
 
   def requestWithFormData(data: (String, String)*) = FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken
 
   val validNINO = NINO("AB123456C")
   val validDOB = DateOfBirth(LocalDate.of(2000, 1, 1))
+  val validBpr = BusinessPartnerRecord("forename", "surname", validDOB, Some("email"), UkAddress("line1", None, None, None, "postcode"))
 
   "The BusinessPartnerRecordCheckController" when {
 
@@ -236,7 +244,7 @@ class BusinessPartnerRecordCheckControllerSpec extends ControllerSpec with AuthS
 
       "accept real date of births which are before 16 years in the past and overwrite any existing DOB " +
         "in the session" in {
-          val existingSession = SessionData(Some(validNINO), Some(validDOB))
+          val existingSession = SessionData(Some(validNINO), Some(validDOB), None)
           val newDOB = DateOfBirth(validDOB.value.plusDays(1L))
 
           inSequence {
@@ -335,22 +343,83 @@ class BusinessPartnerRecordCheckControllerSpec extends ControllerSpec with AuthS
 
     "handling requests to display BPR's" must {
 
-      "redirect to the NINO page if there is no NINO in session" in {
+        def performAction = controller.displayBusinessPartnerRecord()(requestWithCSRFToken)
 
+      val existingSession = SessionData.empty.copy(nino = Some(validNINO), dob = Some(validDOB))
+
+      "redirect to the NINO page if there is no NINO in session" in {
+        inSequence {
+          mockSuccessfulAuth()
+          mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+        }
+
+        val result = performAction
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.BusinessPartnerRecordCheckController.getNino().url)
       }
 
       "redirect to the DOB page if there is no DOB in session" in {
+        inSequence {
+          mockSuccessfulAuth()
+          mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+        }
 
+        val result = performAction
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.BusinessPartnerRecordCheckController.getNino().url)
       }
 
       "display an error page" when {
 
         "the call to get the BPR fails" in {
+          inSequence {
+            mockSuccessfulAuth()
+            mockGetSession(Future.successful(Right(Some(existingSession))))
+            mockGetBusinessPartnerRecord(validNINO, validDOB)(Future.successful(Left(Error("error"))))
+          }
 
+          checkIsTechnicalErrorPage(performAction)
         }
+
+        "the call to get BPR succeeds but it cannot be written to session" in {
+          val existingSession = SessionData.empty.copy(nino = Some(validNINO), dob = Some(validDOB))
+          inSequence {
+            mockSuccessfulAuth()
+            mockGetSession(Future.successful(Right(Some(existingSession))))
+            mockGetBusinessPartnerRecord(validNINO, validDOB)(Future.successful(Right(validBpr)))
+            mockStoreSession(existingSession.copy(businessPartnerRecord = Some(validBpr)))(Future.successful(Left(Error("Oh no!"))))
+          }
+
+          checkIsTechnicalErrorPage(performAction)
+        }
+
       }
 
-      "display the BPR if the BPR is retrieved successfully" in {
+      "display the BPR" when {
+
+        "one doesn't exist in session and it is successfully retrieved" in {
+          inSequence {
+            mockSuccessfulAuth()
+            mockGetSession(Future.successful(Right(Some(existingSession))))
+            mockGetBusinessPartnerRecord(validNINO, validDOB)(Future.successful(Right(validBpr)))
+            mockStoreSession(existingSession.copy(businessPartnerRecord = Some(validBpr)))(Future.successful(Right(())))
+          }
+
+          val result = performAction
+          status(result) shouldBe 200
+          contentAsString(result) should include(message("onboarding.bpr.title"))
+        }
+
+        "one exists in session" in {
+          inSequence {
+            mockSuccessfulAuth()
+            mockGetSession(Future.successful(Right(Some(existingSession.copy(businessPartnerRecord = Some(validBpr))))))
+          }
+
+          val result = performAction
+          status(result) shouldBe 200
+          contentAsString(result) should include(message("onboarding.bpr.title"))
+        }
 
       }
 

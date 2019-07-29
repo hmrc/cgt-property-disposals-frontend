@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
+import cats.data.EitherT
+import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
@@ -98,19 +100,58 @@ class BusinessPartnerRecordCheckController @Inject() (
   }
 
   def displayBusinessPartnerRecord(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    request.sessionData.flatMap(_.nino) -> request.sessionData.flatMap(_.dob) match {
-      case (None, _) => SeeOther(routes.BusinessPartnerRecordCheckController.getNino().url)
-      case (_, None) => SeeOther(routes.BusinessPartnerRecordCheckController.getDateOfBirth().url)
-      case (Some(nino), Some(dob)) =>
-        bprService.getBusinessPartnerRecord(nino, dob).map {
+    (request.sessionData.flatMap(_.nino), request.sessionData.flatMap(_.dob), request.sessionData.flatMap(_.businessPartnerRecord)) match {
+      case (None, _, _) =>
+        SeeOther(routes.BusinessPartnerRecordCheckController.getNino().url)
+
+      case (_, None, _) =>
+        SeeOther(routes.BusinessPartnerRecordCheckController.getDateOfBirth().url)
+
+      case (Some(_), Some(_), Some(bpr)) =>
+        Ok(displayBprPage(BusinessPartnerRecordConfirmed.form, bpr))
+
+      case (Some(nino), Some(dob), None) =>
+        val result = for {
+          bpr <- EitherT(bprService.getBusinessPartnerRecord(nino, dob))
+          _ <- EitherT(updateSession(_.copy(businessPartnerRecord = Some(bpr))))
+        } yield bpr
+
+        result.value.map {
           case Left(e) =>
             logger.warn("Error while getting BPR", e)
             InternalServerError(errorHandler.internalServerErrorTemplate)
 
           case Right(bpr) =>
-            Ok(displayBprPage(bpr))
+            Ok(displayBprPage(BusinessPartnerRecordConfirmed.form, bpr))
         }
+    }
+  }
 
+  def displayBusinessPartnerRecordSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    (request.sessionData.flatMap(_.nino),
+      request.sessionData.flatMap(_.dob),
+      request.sessionData.flatMap(_.businessPartnerRecord)
+    ) match {
+      case (None, _, _) =>
+        SeeOther(routes.BusinessPartnerRecordCheckController.getNino().url)
+
+      case (_, None, _) =>
+        SeeOther(routes.BusinessPartnerRecordCheckController.getDateOfBirth().url)
+
+      case (_, _, None) =>
+        SeeOther(routes.BusinessPartnerRecordCheckController.displayBusinessPartnerRecord().url)
+
+      case (_, _, Some(bpr)) =>
+        BusinessPartnerRecordConfirmed.form.bindFromRequest().fold(
+          formWithErrors => BadRequest(displayBprPage(formWithErrors, bpr)),
+          { confirmed =>
+            if(confirmed.value) {
+              Ok("confirmed!")
+            } else {
+              Ok("signing you out")
+            }
+          }
+        )
     }
   }
 

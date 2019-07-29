@@ -16,18 +16,14 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import play.api.libs.json.{Format, Json}
+import play.api.data.Form
+import play.api.data.Forms.{boolean, mapping}
 
-final case class SessionData(
-    nino: Option[NINO],
-    dob: Option[DateOfBirth],
-    businessPartnerRecord: Option[BusinessPartnerRecord]
-)
+final case class BusinessPartnerRecordConfirmed(value: Boolean) extends AnyVal
 
-object SessionData {
+object BusinessPartnerRecordConfirmed {
 
-  implicit val format: Format[SessionData] = Json.format
-
-  val empty: SessionData = SessionData(None, None, None)
-
+  val form: Form[BusinessPartnerRecordConfirmed] = Form(
+    mapping("confirmBpr" -> boolean)(BusinessPartnerRecordConfirmed.apply)(BusinessPartnerRecordConfirmed.unapply)
+  )
 }

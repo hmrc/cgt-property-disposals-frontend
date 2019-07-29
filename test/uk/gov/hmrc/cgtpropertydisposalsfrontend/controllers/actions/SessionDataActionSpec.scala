@@ -40,7 +40,7 @@ class SessionDataActionSpec extends ControllerSpec with SessionSupport with Mock
 
     lazy val messagesRequest = new MessagesRequest(FakeRequest(), instanceOf[MessagesApi])
 
-    val sessionData = SessionData(Some(NINO("AB123456C")), Some(DateOfBirth(LocalDate.ofEpochDay(0L))))
+    val sessionData = SessionData(Some(NINO("AB123456C")), Some(DateOfBirth(LocalDate.ofEpochDay(0L))), None)
 
       def performAction(): Future[Result] =
         action.invokeBlock[AnyContent](messagesRequest, { r =>

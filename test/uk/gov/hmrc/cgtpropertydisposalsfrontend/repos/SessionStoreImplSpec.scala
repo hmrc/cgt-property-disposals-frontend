@@ -48,7 +48,7 @@ class SessionStoreImplSpec extends WordSpec with Matchers with MongoSupport with
 
   "SessionStoreImpl" must {
 
-    val sessionData = SessionData(Some(NINO("AB123456C")), Some(DateOfBirth(LocalDate.ofEpochDay(0L))))
+    val sessionData = SessionData(Some(NINO("AB123456C")), Some(DateOfBirth(LocalDate.ofEpochDay(0L))), None)
 
     "be able to insert SessionData into mongo and read it back" in new TestEnvironment {
       val result = sessionStore.store(sessionData)

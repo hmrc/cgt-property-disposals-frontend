@@ -18,7 +18,7 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.BusinessPartnerRecord
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, BusinessPartnerRecordConfirmed}
 @import scala.util.Try
 @import views.html.helper.CSRF
 
@@ -30,7 +30,7 @@
  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button
 )
 
-@(bpr: BusinessPartnerRecord)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[BusinessPartnerRecordConfirmed], bpr: BusinessPartnerRecord)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
 @title = @{messages("onboarding.bpr.title")}
 @name = @{Html(s"""${bpr.forename} ${bpr.surname}""")}
