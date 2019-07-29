@@ -33,7 +33,7 @@
 
 @title = @{messages("onboarding.nino.title")}
 @key = @{"nino"}
-@heading = @{Html(s"""<h1 class="heading-xlarge">$title</h1>""")}
+@heading = @{Html(title)}
 @helpText = @{Html(messages("onboarding.nino.helpText"))}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 

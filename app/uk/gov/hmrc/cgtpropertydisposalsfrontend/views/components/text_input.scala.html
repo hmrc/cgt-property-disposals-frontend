@@ -31,11 +31,16 @@
 @classes = @{if(hasErrors) "form-group form-group-error" else "form-group" }
 @inputClasses = @{if(hasErrors) "form-control form-control-error" else "form-control" }
 @hintIdWithHintText = @{helpText.map(s"${{fieldId}}-form-hint" -> _)}
+@fieldLabel = {
+  @if(labelAsHeading) {
+    <h1><label for="@{fieldId}" class="heading-xlarge">@{label}</label></h1>
+  } else {
+    <label for="@{fieldId}">@{label}</label>
+  }
+}
 
 <div class="@classes">
-  <label class="form-label" for="@fieldId">
-    @label
-  </label>
+  @fieldLabel
   @hintIdWithHintText.map { case (id, text) =>
     <span id="@id" class="form-hint">
       @text
