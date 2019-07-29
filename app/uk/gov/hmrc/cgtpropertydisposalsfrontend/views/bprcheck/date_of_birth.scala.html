@@ -40,7 +40,12 @@
 
 
 @mainTemplate(title = title, hasErrors = hasErrors) {
- <form action="@routes.BusinessPartnerRecordCheckController.getDateOfBirthSubmit().url" method="@routes.BusinessPartnerRecordCheckController.getDateOfBirthSubmit().method">
+ <form
+  action="@{routes.BusinessPartnerRecordCheckController.getDateOfBirthSubmit().url}"
+  method="@{routes.BusinessPartnerRecordCheckController.getDateOfBirthSubmit().method}"
+  novalidate="novalidate"
+ >
+
  @CSRF.formField(request)
 
  @if(hasErrors) {

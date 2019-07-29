@@ -38,7 +38,7 @@
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @mainTemplate(title = title, hasErrors = hasErrors) {
- <form action="@routes.BusinessPartnerRecordCheckController.getNinoSubmit().url" method="@routes.BusinessPartnerRecordCheckController.getNinoSubmit().method">
+ <form action="@routes.BusinessPartnerRecordCheckController.getNinoSubmit().url" method="@routes.BusinessPartnerRecordCheckController.getNinoSubmit().method" novalidate="novalidate">
   @CSRF.formField(request)
 
   @if(hasErrors) {

@@ -31,3 +31,8 @@ nino.generic.error=National Insurance number must be entered as 9 alphanumeric c
 onboarding.dob.title=What is your date of birth?
 onboarding.dob.helpText=For example, 31 3 1980
 dob.invalid=Enter a real date of birth
+
+onboarding.bpr.title=Are these the details you want to use to Report and pay Capital Gains Tax on UK property?
+onboarding.bpr.confirmLabel=Confirm these are the details you want to use
+onboarding.bpr.confirmYes=Yes, these are the details I want to use
+onboarding.bpr.confirmNo=No, I need to change these details
