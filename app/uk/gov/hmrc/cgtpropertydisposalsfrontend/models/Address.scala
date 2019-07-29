@@ -16,20 +16,36 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import play.api.libs.json.{Format, Json}
+import julienrf.json.derived
+import play.api.libs.json.OFormat
 
-final case class Address(
-    line1: String,
-    line2: Option[String],
-    line3: Option[String],
-    line4: Option[String],
-    line5: Option[String],
-    postcode: String,
-    countryCode: String
-)
+sealed trait Address
 
 object Address {
 
-  implicit val format: Format[Address] = Json.format
+  final case class UkAddress(
+      line1: String,
+      line2: Option[String],
+      line3: Option[String],
+      line4: Option[String],
+      postcode: String
+  ) extends Address {
+    val countryCode: String = "GB"
+  }
+
+  final case class NonUkAddress(
+      line1: String,
+      line2: Option[String],
+      line3: Option[String],
+      line4: Option[String],
+      postcode: Option[String],
+      countryCode: String
+  ) extends Address
+
+  // the format instance using the play-json-derived-codecs library wraps
+  // the case class inside a JsObject with case class type name as the key
+  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
+  implicit val format: OFormat[Address] = derived.oformat
 
 }
+

@@ -16,18 +16,18 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import play.api.libs.json.{Format, Json}
+import org.scalatest.{FunSuite, Matchers, WordSpec}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.UkAddress
 
-final case class BusinessPartnerRecord(
-    forename: String,
-    surname: String,
-    dateOfBirth: DateOfBirth,
-    emailAddress: Option[String],
-    address: Address
-)
+class AddressSpec extends WordSpec with Matchers {
 
-object BusinessPartnerRecord {
+  "Address" must {
 
-  implicit val format: Format[BusinessPartnerRecord] = Json.format
+    "have a country code method on uk addresses which always returns the same value" in {
+      val ukAddress = UkAddress("line1", None, None, None, "postcode")
+      ukAddress.countryCode shouldBe "GB"
+    }
+
+  }
 
 }

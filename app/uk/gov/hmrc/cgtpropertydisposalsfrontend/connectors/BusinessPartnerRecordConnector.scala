@@ -46,8 +46,8 @@ class BusinessPartnerRecordConnectorImpl @Inject() (
   def url(nino: NINO): String = s"$baseUrl/${nino.value}/business-partner-record"
 
   def getBusinessPartnerRecord(nino: NINO)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
-    val response = BusinessPartnerRecord("Tinky", "Winky", DateOfBirth(LocalDate.of(1900, 1, 1)), "tubbies4eva@email.com",
-                                                           Address("Over the hill", Some("and faraway"), None, None, None, "PO1 L414", "GB"))
+    val response = BusinessPartnerRecord("Tinky", "Winky", DateOfBirth(LocalDate.of(1900, 1, 1)), Some("tubbies4eva@email.com"),
+                                                           Address.UkAddress("Over the hill", Some("and faraway"), None, None, "PO1 L414"))
     Future.successful(HttpResponse(200, Some(Json.toJson(response))))
     // http.get(url(nino))
   }

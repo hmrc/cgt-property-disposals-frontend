@@ -16,16 +16,13 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
-import java.time.LocalDate
-
-import cats.data.NonEmptyList
 import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
-import play.api.libs.json.{JsString, Json}
-import play.api.{Configuration, Mode}
+import play.api.libs.json.JsString
 import play.api.test.Helpers._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Address, BusinessPartnerRecord, DateOfBirth, NINO}
+import play.api.{Configuration, Mode}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.NINO
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 
