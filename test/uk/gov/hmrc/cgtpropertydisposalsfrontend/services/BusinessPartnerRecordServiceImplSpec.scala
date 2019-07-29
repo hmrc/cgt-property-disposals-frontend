@@ -18,9 +18,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.services
 
 import java.time.LocalDate
 
-import cats.data.NonEmptyList
-import cats.instances.int._
-import cats.syntax.eq._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsNumber, Json}

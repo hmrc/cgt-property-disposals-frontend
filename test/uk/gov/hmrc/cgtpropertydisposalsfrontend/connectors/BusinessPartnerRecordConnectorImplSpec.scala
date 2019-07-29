@@ -49,7 +49,7 @@ class BusinessPartnerRecordConnectorImplSpec extends WordSpec with Matchers with
 
   val connector = new BusinessPartnerRecordConnectorImpl(mockHttp, new ServicesConfig(config, new RunMode(config, Mode.Test)))
 
-  "BusinessPartnerRecordConnectorImpl" when {
+  "BusinessPartnerRecordConnectorImpl" ignore {
 
     "handling request to get the business partner record" must {
 

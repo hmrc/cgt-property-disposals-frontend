@@ -16,9 +16,12 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
+import java.time.LocalDate
+
 import com.google.inject.{ImplementedBy, Inject, Singleton}
+import play.api.libs.json.Json
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.NINO
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Address, BusinessPartnerRecord, DateOfBirth, NINO}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
@@ -42,7 +45,11 @@ class BusinessPartnerRecordConnectorImpl @Inject() (
 
   def url(nino: NINO): String = s"$baseUrl/${nino.value}/business-partner-record"
 
-  def getBusinessPartnerRecord(nino: NINO)(implicit hc: HeaderCarrier): Future[HttpResponse] =
-    http.get(url(nino))
+  def getBusinessPartnerRecord(nino: NINO)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+    val response = BusinessPartnerRecord("Tinky", "Winky", DateOfBirth(LocalDate.of(1900, 1, 1)), "tubbies4eva@email.com",
+                                                           Address("Over the hill", Some("and faraway"), None, None, None, "PO1 L414", "GB"))
+    Future.successful(HttpResponse(200, Some(Json.toJson(response))))
+    // http.get(url(nino))
+  }
 
 }
