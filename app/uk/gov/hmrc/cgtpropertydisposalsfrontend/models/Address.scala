@@ -16,28 +16,19 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import cats.data.NonEmptyList
-import play.api.libs.json.{Format, JsError, JsSuccess, Json, Reads, Writes}
+import play.api.libs.json.{Format, Json}
 
 final case class Address(
-    lines: NonEmptyList[String],
+    line1: String,
+    line2: Option[String],
+    line3: Option[String],
+    line4: Option[String],
+    line5: Option[String],
     postcode: String,
     countryCode: String
 )
 
 object Address {
-
-  implicit def nelFormat[A](implicit fa: Format[A]): Format[NonEmptyList[A]] = {
-    val f = implicitly[Format[List[A]]]
-    Format(
-      Reads(j =>
-        f.reads(j).flatMap {
-          case Nil    => JsError("list was empty")
-          case h :: t => JsSuccess(NonEmptyList.of(h, t: _*))
-        }),
-      Writes(l => f.writes(l.toList))
-    )
-  }
 
   implicit val format: Format[Address] = Json.format
 
