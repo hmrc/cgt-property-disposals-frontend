@@ -37,7 +37,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class BusinessPartnerRecordCheckControllerSpec extends ControllerSpec with AuthSupport with SessionSupport {
+class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with SessionSupport {
 
   val mockService = mock[BusinessPartnerRecordService]
 
@@ -48,7 +48,7 @@ class BusinessPartnerRecordCheckControllerSpec extends ControllerSpec with AuthS
       bind[BusinessPartnerRecordService].toInstance(mockService)
     )
 
-  lazy val controller = instanceOf[BusinessPartnerRecordCheckController]
+  lazy val controller = instanceOf[SubscriptionController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
@@ -67,7 +67,7 @@ class BusinessPartnerRecordCheckControllerSpec extends ControllerSpec with AuthS
   val validDOB = DateOfBirth(LocalDate.of(2000, 1, 1))
   val validBpr = BusinessPartnerRecord("forename", "surname", validDOB, Some("email"), UkAddress("line1", None, None, None, "postcode"))
 
-  "The BusinessPartnerRecordCheckController" when {
+  "The SubscriptionController" when {
 
     "handling requests to display the get NINO page" must {
       "be able to display the get NINO page" in {
@@ -105,7 +105,7 @@ class BusinessPartnerRecordCheckControllerSpec extends ControllerSpec with AuthS
 
               val result = controller.getNinoSubmit()(requestWithFormData("nino" -> submittedNINO))
               status(result) shouldBe SEE_OTHER
-              redirectLocation(result) shouldBe Some(routes.BusinessPartnerRecordCheckController.getDateOfBirth().url)
+              redirectLocation(result) shouldBe Some(routes.SubscriptionController.getDateOfBirth().url)
             }
           }
 
@@ -126,7 +126,7 @@ class BusinessPartnerRecordCheckControllerSpec extends ControllerSpec with AuthS
 
           val result = controller.getNinoSubmit()(requestWithFormData("nino" -> newNINO.value))
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.BusinessPartnerRecordCheckController.getDateOfBirth().url)
+          redirectLocation(result) shouldBe Some(routes.SubscriptionController.getDateOfBirth().url)
         }
 
       "show a form error when the NINO submitted is invalid" in {
@@ -177,7 +177,7 @@ class BusinessPartnerRecordCheckControllerSpec extends ControllerSpec with AuthS
 
               val result = controller.getDateOfBirth()(requestWithCSRFToken)
               status(result) shouldBe SEE_OTHER
-              redirectLocation(result) shouldBe Some(routes.BusinessPartnerRecordCheckController.getNino().url)
+              redirectLocation(result) shouldBe Some(routes.SubscriptionController.getNino().url)
             }
           }
 
@@ -192,7 +192,7 @@ class BusinessPartnerRecordCheckControllerSpec extends ControllerSpec with AuthS
           mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(nino = Some(validNINO))))))
         }
 
-        contentAsString(controller.getDateOfBirth()(requestWithCSRFToken)) should include(message("onboarding.dob.title"))
+        contentAsString(controller.getDateOfBirth()(requestWithCSRFToken)) should include(message("dob.title"))
       }
 
       "display the get DOB page if there is a NINO in session and prepopulate the DOB with the " +
@@ -203,7 +203,7 @@ class BusinessPartnerRecordCheckControllerSpec extends ControllerSpec with AuthS
           }
 
           val content = contentAsString(controller.getDateOfBirth()(requestWithCSRFToken))
-          content should include(message("onboarding.dob.title"))
+          content should include(message("dob.title"))
           // probably not the best way to check below
           content should include(s"""value="${validDOB.value.getDayOfMonth}"""")
           content should include(s"""value="${validDOB.value.getMonthValue}"""")
@@ -236,7 +236,7 @@ class BusinessPartnerRecordCheckControllerSpec extends ControllerSpec with AuthS
 
               val result = controller.getDateOfBirthSubmit()(requestWithFormData(toFieldList(d): _*))
               status(result) shouldBe SEE_OTHER
-              redirectLocation(result) shouldBe Some(routes.BusinessPartnerRecordCheckController.displayBusinessPartnerRecord().url)
+              redirectLocation(result) shouldBe Some(routes.SubscriptionController.checkYourAnswers().url)
             }
           }
 
@@ -256,7 +256,7 @@ class BusinessPartnerRecordCheckControllerSpec extends ControllerSpec with AuthS
 
           val result = controller.getDateOfBirthSubmit()(requestWithFormData(toFieldList(newDOB.value): _*))
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.BusinessPartnerRecordCheckController.displayBusinessPartnerRecord().url)
+          redirectLocation(result) shouldBe Some(routes.SubscriptionController.checkYourAnswers().url)
         }
 
       "redirect to the get NINO page if there is no NINO in session" in {
@@ -269,7 +269,7 @@ class BusinessPartnerRecordCheckControllerSpec extends ControllerSpec with AuthS
 
               val result = controller.getDateOfBirthSubmit()(requestWithCSRFToken)
               status(result) shouldBe SEE_OTHER
-              redirectLocation(result) shouldBe Some(routes.BusinessPartnerRecordCheckController.getNino().url)
+              redirectLocation(result) shouldBe Some(routes.SubscriptionController.getNino().url)
             }
           }
 
@@ -345,7 +345,7 @@ class BusinessPartnerRecordCheckControllerSpec extends ControllerSpec with AuthS
     "handling requests to display BPR's" must {
 
         def performAction: Future[Result] =
-          controller.displayBusinessPartnerRecord()(requestWithCSRFToken)
+          controller.checkYourAnswers()(requestWithCSRFToken)
 
       val existingSession = SessionData.empty.copy(nino = Some(validNINO), dob = Some(validDOB))
 
@@ -357,7 +357,7 @@ class BusinessPartnerRecordCheckControllerSpec extends ControllerSpec with AuthS
 
         val result = performAction
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.BusinessPartnerRecordCheckController.getNino().url)
+        redirectLocation(result) shouldBe Some(routes.SubscriptionController.getNino().url)
       }
 
       "redirect to the DOB page if there is no DOB in session" in {
@@ -368,7 +368,7 @@ class BusinessPartnerRecordCheckControllerSpec extends ControllerSpec with AuthS
 
         val result = performAction
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.BusinessPartnerRecordCheckController.getNino().url)
+        redirectLocation(result) shouldBe Some(routes.SubscriptionController.getNino().url)
       }
 
       "display an error page" when {
@@ -441,70 +441,43 @@ class BusinessPartnerRecordCheckControllerSpec extends ControllerSpec with AuthS
           mockGetSession(Future.successful(Right(Some(SessionData.empty))))
         }
 
-        val result = controller.displayBusinessPartnerRecordSubmit()(requestWithCSRFToken)
+        val result = controller.checkYourAnswersSubmit()(requestWithCSRFToken)
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.BusinessPartnerRecordCheckController.getNino().url)
+        redirectLocation(result) shouldBe Some(routes.SubscriptionController.getNino().url)
 
       }
 
-      "redirect the the date of birth page if there is no date of birth in the session" ignore {
+      "redirect the the date of birth page if there is no date of birth in the session" in {
         inSequence {
           mockSuccessfulAuth()
           mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(nino = Some(validNINO))))))
         }
 
-        val result = controller.displayBusinessPartnerRecordSubmit()(requestWithCSRFToken)
+        val result = controller.checkYourAnswersSubmit()(requestWithCSRFToken)
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.BusinessPartnerRecordCheckController.getDateOfBirth().url)
+        redirectLocation(result) shouldBe Some(routes.SubscriptionController.getDateOfBirth().url)
       }
 
-      "redirect to the display BPR page if there is no BPR in session" ignore {
+      "redirect to the display BPR page if there is no BPR in session" in {
         inSequence {
           mockSuccessfulAuth()
           mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(nino = Some(validNINO), dob = Some(validDOB))))))
         }
 
-        val result = controller.displayBusinessPartnerRecordSubmit()(requestWithCSRFToken)
+        val result = controller.checkYourAnswersSubmit()(requestWithCSRFToken)
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.BusinessPartnerRecordCheckController.displayBusinessPartnerRecord().url)
+        redirectLocation(result) shouldBe Some(routes.SubscriptionController.checkYourAnswers().url)
       }
 
-      "show a form with errors" when {
-
-        "an option has not been selected" ignore {
-          inSequence {
-            mockSuccessfulAuth()
-            mockGetSession(Future.successful(Right(Some(existingSession))))
-          }
-
-          val result = controller.displayBusinessPartnerRecordSubmit()(requestWithCSRFToken)
-          status(result) shouldBe BAD_REQUEST
-          // TODO: check for error message
-          contentAsString(result) should include(message("bpr.title"))
-        }
-
-      }
-
-      "handle the case when the user confirms their details" ignore {
+      "handle the case when the user confirms their details" in {
         inSequence {
           mockSuccessfulAuth()
           mockGetSession(Future.successful(Right(Some(existingSession))))
         }
 
-        val result = controller.displayBusinessPartnerRecordSubmit()(requestWithFormData("confirmBpr" -> "0"))
+        val result = controller.checkYourAnswersSubmit()(requestWithFormData("confirmBpr" -> "0"))
         status(result) shouldBe OK
-        contentAsString(result) shouldBe ("confirmed!")
-      }
-
-      "handle the case when the user rejects their details" ignore {
-        inSequence {
-          mockSuccessfulAuth()
-          mockGetSession(Future.successful(Right(Some(existingSession))))
-        }
-
-        val result = controller.displayBusinessPartnerRecordSubmit()(requestWithFormData("confirmBpr" -> "1"))
-        status(result) shouldBe OK
-        contentAsString(result) shouldBe ("signing you out")
+        contentAsString(result) shouldBe ("confirmed")
       }
 
     }

@@ -36,16 +36,16 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class BusinessPartnerRecordCheckController @Inject() (
+class SubscriptionController @Inject() (
     bprService: BusinessPartnerRecordService,
     sessionStore: SessionStore,
     errorHandler: ErrorHandler,
     cc: MessagesControllerComponents,
     val authenticatedAction: AuthenticatedAction,
     val sessionDataAction: SessionDataAction,
-    getNinoPage: views.html.bprcheck.nino,
-    getDobPage: views.html.bprcheck.date_of_birth,
-    displayBprPage: views.html.bprcheck.bpr
+    getNinoPage: views.html.subscription.nino,
+    getDobPage: views.html.subscription.date_of_birth,
+    displayBprPage: views.html.subscription.bpr
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext) extends FrontendController(cc) with WithActions with Logging {
 
   def getNino(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
@@ -63,7 +63,7 @@ class BusinessPartnerRecordCheckController @Inject() (
           InternalServerError(errorHandler.internalServerErrorTemplate)
 
         case Right(_) =>
-          SeeOther(routes.BusinessPartnerRecordCheckController.getDateOfBirth().url)
+          SeeOther(routes.SubscriptionController.getDateOfBirth().url)
       }
     )
   }
@@ -75,14 +75,14 @@ class BusinessPartnerRecordCheckController @Inject() (
       case (_, None)      => Some(dobForm)
     }
 
-    form.fold(SeeOther(routes.BusinessPartnerRecordCheckController.getNino().url)) {
+    form.fold(SeeOther(routes.SubscriptionController.getNino().url)) {
       f => Ok(getDobPage(f))
     }
   }
 
   def getDateOfBirthSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     request.sessionData.flatMap(_.nino).fold[Future[Result]](
-      SeeOther(routes.BusinessPartnerRecordCheckController.getNino().url)
+      SeeOther(routes.SubscriptionController.getNino().url)
     ) { _ =>
         dobForm.bindFromRequest().fold(
           formWithErrors => BadRequest(getDobPage(formWithErrors)),
@@ -93,22 +93,22 @@ class BusinessPartnerRecordCheckController @Inject() (
                 InternalServerError(errorHandler.internalServerErrorTemplate)
 
               case Right(_) =>
-                SeeOther(routes.BusinessPartnerRecordCheckController.displayBusinessPartnerRecord().url)
+                SeeOther(routes.SubscriptionController.checkYourAnswers().url)
             }
         )
       }
   }
 
-  def displayBusinessPartnerRecord(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+  def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     (request.sessionData.flatMap(_.nino), request.sessionData.flatMap(_.dob), request.sessionData.flatMap(_.businessPartnerRecord)) match {
       case (None, _, _) =>
-        SeeOther(routes.BusinessPartnerRecordCheckController.getNino().url)
+        SeeOther(routes.SubscriptionController.getNino().url)
 
       case (_, None, _) =>
-        SeeOther(routes.BusinessPartnerRecordCheckController.getDateOfBirth().url)
+        SeeOther(routes.SubscriptionController.getDateOfBirth().url)
 
       case (Some(_), Some(_), Some(bpr)) =>
-        Ok(displayBprPage(BusinessPartnerRecordConfirmed.form, bpr))
+        Ok(displayBprPage(bpr))
 
       case (Some(nino), Some(dob), None) =>
         val result = for {
@@ -122,38 +122,28 @@ class BusinessPartnerRecordCheckController @Inject() (
             InternalServerError(errorHandler.internalServerErrorTemplate)
 
           case Right(bpr) =>
-            Ok(displayBprPage(BusinessPartnerRecordConfirmed.form, bpr))
+            Ok(displayBprPage(bpr))
         }
     }
   }
 
-  def displayBusinessPartnerRecordSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+  def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     (
       request.sessionData.flatMap(_.nino),
       request.sessionData.flatMap(_.dob),
       request.sessionData.flatMap(_.businessPartnerRecord)
     ) match {
         case (None, _, _) =>
-          SeeOther(routes.BusinessPartnerRecordCheckController.getNino().url)
+          SeeOther(routes.SubscriptionController.getNino().url)
 
         case (_, None, _) =>
-          SeeOther(routes.BusinessPartnerRecordCheckController.getDateOfBirth().url)
+          SeeOther(routes.SubscriptionController.getDateOfBirth().url)
 
         case (_, _, None) =>
-          SeeOther(routes.BusinessPartnerRecordCheckController.displayBusinessPartnerRecord().url)
+          SeeOther(routes.SubscriptionController.checkYourAnswers().url)
 
         case (_, _, Some(bpr)) =>
-          Ok("Hi!")
-        //          BusinessPartnerRecordConfirmed.form.bindFromRequest().fold(
-        //            formWithErrors => BadRequest(displayBprPage(formWithErrors, bpr)),
-        //            { confirmed =>
-        //              if (confirmed.value) {
-        //                Ok("confirmed!")
-        //              } else {
-        //                Ok("signing you out")
-        //              }
-        //            }
-        //          )
+          Ok("confirmed")
       }
   }
 

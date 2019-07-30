@@ -39,7 +39,7 @@
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @mainTemplate(title = title, hasErrors = hasErrors) {
- @formWrapper(routes.BusinessPartnerRecordCheckController.getNinoSubmit(), 'novalidate -> "novalidate") {
+ @formWrapper(routes.SubscriptionController.getNinoSubmit(), 'novalidate -> "novalidate") {
 
   @if(hasErrors) {
    @errorSummary(form)
