@@ -16,14 +16,19 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
+import cats.instances.int._
+import cats.syntax.eq._
 import play.api.data.Form
-import play.api.data.Forms.{boolean, mapping}
+import play.api.data.Forms.{number, mapping}
 
 final case class BusinessPartnerRecordConfirmed(value: Boolean) extends AnyVal
 
 object BusinessPartnerRecordConfirmed {
 
   val form: Form[BusinessPartnerRecordConfirmed] = Form(
-    mapping("confirmBpr" -> boolean)(BusinessPartnerRecordConfirmed.apply)(BusinessPartnerRecordConfirmed.unapply)
+    mapping("confirmBpr" -> number.transform[Boolean](
+      _ === 0,
+      if (_) 0 else 1
+    ))(BusinessPartnerRecordConfirmed.apply)(BusinessPartnerRecordConfirmed.unapply)
   )
 }

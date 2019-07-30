@@ -128,31 +128,32 @@ class BusinessPartnerRecordCheckController @Inject() (
   }
 
   def displayBusinessPartnerRecordSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    (request.sessionData.flatMap(_.nino),
+    (
+      request.sessionData.flatMap(_.nino),
       request.sessionData.flatMap(_.dob),
       request.sessionData.flatMap(_.businessPartnerRecord)
     ) match {
-      case (None, _, _) =>
-        SeeOther(routes.BusinessPartnerRecordCheckController.getNino().url)
+        case (None, _, _) =>
+          SeeOther(routes.BusinessPartnerRecordCheckController.getNino().url)
 
-      case (_, None, _) =>
-        SeeOther(routes.BusinessPartnerRecordCheckController.getDateOfBirth().url)
+        case (_, None, _) =>
+          SeeOther(routes.BusinessPartnerRecordCheckController.getDateOfBirth().url)
 
-      case (_, _, None) =>
-        SeeOther(routes.BusinessPartnerRecordCheckController.displayBusinessPartnerRecord().url)
+        case (_, _, None) =>
+          SeeOther(routes.BusinessPartnerRecordCheckController.displayBusinessPartnerRecord().url)
 
-      case (_, _, Some(bpr)) =>
-        BusinessPartnerRecordConfirmed.form.bindFromRequest().fold(
-          formWithErrors => BadRequest(displayBprPage(formWithErrors, bpr)),
-          { confirmed =>
-            if(confirmed.value) {
-              Ok("confirmed!")
-            } else {
-              Ok("signing you out")
+        case (_, _, Some(bpr)) =>
+          BusinessPartnerRecordConfirmed.form.bindFromRequest().fold(
+            formWithErrors => BadRequest(displayBprPage(formWithErrors, bpr)),
+            { confirmed =>
+              if (confirmed.value) {
+                Ok("confirmed!")
+              } else {
+                Ok("signing you out")
+              }
             }
-          }
-        )
-    }
+          )
+      }
   }
 
   private def updateSession(update: SessionData => SessionData)(implicit request: RequestWithSessionData[_]): Future[Either[Error, Unit]] =
