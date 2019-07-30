@@ -31,10 +31,10 @@
 
 @(form: Form[DateOfBirth])(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
-@title = @{messages("onboarding.dob.title")}
+@title = @{messages("dob.title")}
 @key = @{"dob"}
 @heading = @{Html(s"""<h1 class="heading-xlarge">$title</h1>""")}
-@helpText = @{Html(messages("onboarding.dob.helpText"))}
+@helpText = @{Html(messages("dob.helpText"))}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @dateField(key: String) = @{form.data.get(key).flatMap(v => Try(v.toInt).toOption)}
 

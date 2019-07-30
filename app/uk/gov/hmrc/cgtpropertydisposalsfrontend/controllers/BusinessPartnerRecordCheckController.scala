@@ -143,17 +143,17 @@ class BusinessPartnerRecordCheckController @Inject() (
           SeeOther(routes.BusinessPartnerRecordCheckController.displayBusinessPartnerRecord().url)
 
         case (_, _, Some(bpr)) =>
-        Ok("Hi!")
-//          BusinessPartnerRecordConfirmed.form.bindFromRequest().fold(
-//            formWithErrors => BadRequest(displayBprPage(formWithErrors, bpr)),
-//            { confirmed =>
-//              if (confirmed.value) {
-//                Ok("confirmed!")
-//              } else {
-//                Ok("signing you out")
-//              }
-//            }
-//          )
+          Ok("Hi!")
+        //          BusinessPartnerRecordConfirmed.form.bindFromRequest().fold(
+        //            formWithErrors => BadRequest(displayBprPage(formWithErrors, bpr)),
+        //            { confirmed =>
+        //              if (confirmed.value) {
+        //                Ok("confirmed!")
+        //              } else {
+        //                Ok("signing you out")
+        //              }
+        //            }
+        //          )
       }
   }
 

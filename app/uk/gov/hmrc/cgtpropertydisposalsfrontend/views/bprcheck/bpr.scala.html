@@ -24,7 +24,10 @@
 
 @this(
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+ formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+ errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
  cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
  addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
  radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group,
  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button
@@ -32,10 +35,11 @@
 
 @(form: Form[BusinessPartnerRecordConfirmed], bpr: BusinessPartnerRecord)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
-@title = @{messages("onboarding.bpr.title")}
-@name = @{Html(s"""${bpr.forename} ${bpr.surname}""")}
-@label = @{Html(s"""<h2 class="heading-medium">${messages("onboarding.bpr.confirmLabel")}</h2>""")}
+@key = @{"confirmBpr"}
+@title = @{messages("bpr.title")}
+@label = @{Html(s"""<span class="form-label-bold">${messages("bpr.confirmLabel")}</span>""")}
 @emailAddress = @{bpr.emailAddress.map(e => e)}
+@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @mainTemplate(title = title) {
 
@@ -43,21 +47,35 @@
   @title
  </h1>
 
+ <p class="lede">
+  @messages("bpr.lede", bpr.forename, bpr.surname)
+ </p>
+
+ <div class="panel panel-border-wide">
+  <p>
+   @messages("bpr.p")
+  </p>
+ </div>
+
  <dl class="govuk-check-your-answers cya-questions-short">
-  @cyaRow("Name", name, None)
-  @cyaRow("Address", addressDisplay(bpr.address), None)
+  @cyaRow(
+   messages("bpr.cyaLabel.address"),
+   addressDisplay(bpr.address),
+   Some(cyaChange(messages("bpr.cyaChange.address"), "#"))
+  )
   @bpr.emailAddress.map { e =>
-   @cyaRow("Email address", Html(e), None)
+   @cyaRow(
+    messages("bpr.cyaLabel.email"),
+    Html(e),
+    Some(cyaChange(messages("bpr.cyaChange.email"), "#"))
+   )
   }
  </dl>
 
- <form action="?" method="POST" novalidate="novalidate">
-  @CSRF.formField(request)
-  @radioGroup(
-   fieldId="confirmBpr",
-   label=label,
-   options=List(messages("onboarding.bpr.confirmYes"), messages("onboarding.bpr.confirmNo"))
-  )
-  @submitButton("Continue")
- </form>
+ @formWrapper(routes.BusinessPartnerRecordCheckController.displayBusinessPartnerRecordSubmit(), 'novalidate -> "novalidate") {
+  <p>
+   @messages("bpr.confirm")
+  </p>
+  @submitButton(messages("button.confirmAndContinue"))
+ }
 }

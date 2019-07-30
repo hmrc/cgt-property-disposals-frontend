@@ -76,7 +76,7 @@ class BusinessPartnerRecordCheckControllerSpec extends ControllerSpec with AuthS
           mockGetSession(Future.successful(Right(None)))
         }
 
-        contentAsString(controller.getNino()(requestWithCSRFToken)) should include(message("onboarding.nino.title"))
+        contentAsString(controller.getNino()(requestWithCSRFToken)) should include(message("nino.title"))
       }
 
       "prepopulate the page with the NINO in session if one is found" in {
@@ -86,7 +86,7 @@ class BusinessPartnerRecordCheckControllerSpec extends ControllerSpec with AuthS
         }
 
         val content = contentAsString(controller.getNino()(requestWithCSRFToken))
-        content should include(message("onboarding.nino.title"))
+        content should include(message("nino.title"))
         content should include(validNINO.value)
       }
 
@@ -409,7 +409,7 @@ class BusinessPartnerRecordCheckControllerSpec extends ControllerSpec with AuthS
 
           val result = performAction
           status(result) shouldBe 200
-          contentAsString(result) should include(message("onboarding.bpr.title"))
+          contentAsString(result) should include(message("bpr.title"))
         }
 
         "one exists in session" in {
@@ -420,7 +420,7 @@ class BusinessPartnerRecordCheckControllerSpec extends ControllerSpec with AuthS
 
           val result = performAction
           status(result) shouldBe 200
-          contentAsString(result) should include(message("onboarding.bpr.title"))
+          contentAsString(result) should include(message("bpr.title"))
         }
 
       }
@@ -480,7 +480,7 @@ class BusinessPartnerRecordCheckControllerSpec extends ControllerSpec with AuthS
           val result = controller.displayBusinessPartnerRecordSubmit()(requestWithCSRFToken)
           status(result) shouldBe BAD_REQUEST
           // TODO: check for error message
-          contentAsString(result) should include(message("onboarding.bpr.title"))
+          contentAsString(result) should include(message("bpr.title"))
         }
 
       }

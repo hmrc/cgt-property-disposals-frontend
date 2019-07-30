@@ -2,6 +2,7 @@ service.title=Report and pay Capital Gains Tax on UK property
 
 button.startNow=Start now
 button.continue=Continue
+button.confirmAndContinue=Confirm and continue
 
 generic.warning=Warning
 generic.day=Day
@@ -23,16 +24,20 @@ landingPage.list2.bullet3=costs of buying, selling or making enhancements to the
 landingPage.list2.bullet4=tax reliefs you are entitled to claim
 landingPage.p3=You’ll need a Government Gateway user ID and password to access the service. If you do not have a user ID, you can create one.
 
-onboarding.nino.title=Enter your National Insurance number
-onboarding.nino.helpText=It’s on your National Insurance card, benefit letter, payslip or P60.<br>For example, ‘QQ 12 34 56 C’.
+nino.title=Enter your National Insurance number
+nino.helpText=It’s on your National Insurance card, benefit letter, payslip or P60.<br>For example, ‘QQ 12 34 56 C’.
 nino.invalid=Your National Insurance number must be entered as 9 alphanumeric characters. For example, ‘QQ 12 34 56 C’
 nino.generic.error=National Insurance number must be entered as 9 alphanumeric characters. For example, ‘QQ 12 34 56 C’
 
-onboarding.dob.title=What is your date of birth?
-onboarding.dob.helpText=For example, 31 3 1980
+dob.title=What is your date of birth?
+dob.helpText=For example, 31 3 1980
 dob.invalid=Enter a real date of birth
 
-onboarding.bpr.title=Are these the details you want to use to Report and pay Capital Gains Tax on UK property?
-onboarding.bpr.confirmLabel=Confirm these are the details you want to use
-onboarding.bpr.confirmYes=Yes, these are the details I want to use
-onboarding.bpr.confirmNo=No, I need to change these details
+bpr.title=Check your contact details
+bpr.lede={0} {1} these are the details we hold for you.
+bpr.p=We’ll only use these if we need to contact you about your Capital Gains Tax. You’ll need to change them if they are wrong.
+bpr.cyaLabel.address=Home address
+bpr.cyaChange.address=your home address
+bpr.cyaLabel.email=Email address
+bpr.cyaChange.email=your email address
+bpr.confirm=Before you continue you must confirm your details are correct.
