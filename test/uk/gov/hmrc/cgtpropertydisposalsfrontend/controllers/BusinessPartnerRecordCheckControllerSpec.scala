@@ -21,6 +21,7 @@ import java.time.{Clock, LocalDate}
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
+import play.api.mvc.{RequestHeader, Result}
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -28,8 +29,8 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.UkAddress
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, DateOfBirth, Error, NINO, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DateOfBirth.Ids
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, DateOfBirth, Error, NINO, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -343,7 +344,8 @@ class BusinessPartnerRecordCheckControllerSpec extends ControllerSpec with AuthS
 
     "handling requests to display BPR's" must {
 
-        def performAction = controller.displayBusinessPartnerRecord()(requestWithCSRFToken)
+        def performAction: Future[Result] =
+          controller.displayBusinessPartnerRecord()(requestWithCSRFToken)
 
       val existingSession = SessionData.empty.copy(nino = Some(validNINO), dob = Some(validDOB))
 
@@ -421,6 +423,88 @@ class BusinessPartnerRecordCheckControllerSpec extends ControllerSpec with AuthS
           contentAsString(result) should include(message("onboarding.bpr.title"))
         }
 
+      }
+
+    }
+
+    "handling submitted confirmation of BPR's" must {
+
+      val existingSession = SessionData.empty.copy(
+        nino                  = Some(validNINO),
+        dob                   = Some(validDOB),
+        businessPartnerRecord = Some(validBpr)
+      )
+
+      "redirect the the NINO page if there is no NINO in the session" in {
+        inSequence {
+          mockSuccessfulAuth()
+          mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+        }
+
+        val result = controller.displayBusinessPartnerRecordSubmit()(requestWithCSRFToken)
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.BusinessPartnerRecordCheckController.getNino().url)
+
+      }
+
+      "redirect the the date of birth page if there is no date of birth in the session" ignore {
+        inSequence {
+          mockSuccessfulAuth()
+          mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(nino = Some(validNINO))))))
+        }
+
+        val result = controller.displayBusinessPartnerRecordSubmit()(requestWithCSRFToken)
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.BusinessPartnerRecordCheckController.getDateOfBirth().url)
+      }
+
+      "redirect to the display BPR page if there is no BPR in session" ignore {
+        inSequence {
+          mockSuccessfulAuth()
+          mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(nino = Some(validNINO), dob = Some(validDOB))))))
+        }
+
+        val result = controller.displayBusinessPartnerRecordSubmit()(requestWithCSRFToken)
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.BusinessPartnerRecordCheckController.displayBusinessPartnerRecord().url)
+      }
+
+      "show a form with errors" when {
+
+        "an option has not been selected" in {
+          inSequence {
+            mockSuccessfulAuth()
+            mockGetSession(Future.successful(Right(Some(existingSession))))
+          }
+
+          val result = controller.displayBusinessPartnerRecordSubmit()(requestWithCSRFToken)
+          status(result) shouldBe BAD_REQUEST
+          // TODO: check for error message
+          contentAsString(result) should include(message("onboarding.bpr.title"))
+        }
+
+      }
+
+      "handle the case when the user confirms their details" in {
+        inSequence {
+          mockSuccessfulAuth()
+          mockGetSession(Future.successful(Right(Some(existingSession))))
+        }
+
+        val result = controller.displayBusinessPartnerRecordSubmit()(requestWithFormData("confirmBpr" -> "0"))
+        status(result) shouldBe OK
+        contentAsString(result) shouldBe ("confirmed!")
+      }
+
+      "handle the case when the user rejects their details" in {
+        inSequence {
+          mockSuccessfulAuth()
+          mockGetSession(Future.successful(Right(Some(existingSession))))
+        }
+
+        val result = controller.displayBusinessPartnerRecordSubmit()(requestWithFormData("confirmBpr" -> "1"))
+        status(result) shouldBe OK
+        contentAsString(result) shouldBe ("signing you out")
       }
 
     }
