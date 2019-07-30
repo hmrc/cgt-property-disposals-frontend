@@ -345,7 +345,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
     "handling requests to display BPR's" must {
 
         def performAction: Future[Result] =
-          controller.checkYourAnswers()(requestWithCSRFToken)
+          controller.checkYourDetails()(requestWithCSRFToken)
 
       val existingSession = SessionData.empty.copy(nino = Some(validNINO), dob = Some(validDOB))
 

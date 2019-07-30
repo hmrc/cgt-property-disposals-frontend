@@ -1,10 +1,10 @@
 # microservice specific routes
-GET /                         controllers.Default.redirect(to = "/cgt-property-disposals/landing-page")
-GET /landing-page             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.LandingPageController.landingPage()
+GET /                                     controllers.Default.redirect(to = "/cgt-property-disposals/landing-page")
+GET /landing-page                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.LandingPageController.landingPage()
 
-GET  /bpr-check/nino          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SubscriptionController.getNino()
-POST /bpr-check/nino          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SubscriptionController.getNinoSubmit()
-GET  /bpr-check/date-of-birth uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SubscriptionController.getDateOfBirth()
-POST /bpr-check/date-of-birth uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SubscriptionController.getDateOfBirthSubmit()
-GET  /bpr-check/check-bpr     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SubscriptionController.checkYourAnswers()
-POST /bpr-check/check-bpr     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SubscriptionController.checkYourAnswersSubmit()
+GET  /subscription/nino                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SubscriptionController.getNino()
+POST /subscription/nino                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SubscriptionController.getNinoSubmit()
+GET  /subscription/date-of-birth          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SubscriptionController.getDateOfBirth()
+POST /subscription/date-of-birth          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SubscriptionController.getDateOfBirthSubmit()
+GET  /subscription/check-your-details     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SubscriptionController.checkYourDetails()
+POST /subscription/check-your-details     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SubscriptionController.checkYourDetailsSubmit()

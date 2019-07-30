@@ -1,5 +1,7 @@
 service.title=Report and pay Capital Gains Tax on UK property
 
+label.beta=Alpha
+
 button.startNow=Start now
 button.continue=Continue
 button.confirmAndContinue=Confirm and continue
@@ -33,11 +35,12 @@ dob.title=What is your date of birth?
 dob.helpText=For example, 31 3 1980
 dob.invalid=Enter a real date of birth
 
-bpr.title=Check your contact details
-bpr.lede={0} {1} these are the details we hold for you.
-bpr.p=We’ll only use these if we need to contact you about your Capital Gains Tax. You’ll need to change them if they are wrong.
-bpr.cyaLabel.address=Home address
-bpr.cyaChange.address=your home address
-bpr.cyaLabel.email=Email address
-bpr.cyaChange.email=your email address
-bpr.confirm=Before you continue you must confirm your details are correct.
+subscription.caption=Your details
+subscription.title=Check your contact details
+subscription.lede={0} {1} these are the details we hold for you.
+subscription.p=We’ll only use these if we need to contact you about your Capital Gains Tax. You’ll need to change them if they are wrong.
+subscription.cyaLabel.address=Home address
+subscription.cyaChange.address=your home address
+subscription.cyaLabel.email=Email address
+subscription.cyaChange.email=your email address
+subscription.confirm=Before you continue you must confirm your details are correct.

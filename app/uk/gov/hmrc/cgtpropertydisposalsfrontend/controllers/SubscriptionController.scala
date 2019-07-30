@@ -45,7 +45,7 @@ class SubscriptionController @Inject() (
     val sessionDataAction: SessionDataAction,
     getNinoPage: views.html.subscription.nino,
     getDobPage: views.html.subscription.date_of_birth,
-    displayBprPage: views.html.subscription.bpr
+    checkYourDetailsPage: views.html.subscription.check_your_details
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext) extends FrontendController(cc) with WithActions with Logging {
 
   def getNino(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
@@ -93,13 +93,13 @@ class SubscriptionController @Inject() (
                 InternalServerError(errorHandler.internalServerErrorTemplate)
 
               case Right(_) =>
-                SeeOther(routes.SubscriptionController.checkYourAnswers().url)
+                SeeOther(routes.SubscriptionController.checkYourDetails().url)
             }
         )
       }
   }
 
-  def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+  def checkYourDetails(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     (request.sessionData.flatMap(_.nino), request.sessionData.flatMap(_.dob), request.sessionData.flatMap(_.businessPartnerRecord)) match {
       case (None, _, _) =>
         SeeOther(routes.SubscriptionController.getNino().url)
@@ -108,7 +108,7 @@ class SubscriptionController @Inject() (
         SeeOther(routes.SubscriptionController.getDateOfBirth().url)
 
       case (Some(_), Some(_), Some(bpr)) =>
-        Ok(displayBprPage(bpr))
+        Ok(checkYourDetailsPage(bpr))
 
       case (Some(nino), Some(dob), None) =>
         val result = for {
@@ -122,12 +122,12 @@ class SubscriptionController @Inject() (
             InternalServerError(errorHandler.internalServerErrorTemplate)
 
           case Right(bpr) =>
-            Ok(displayBprPage(bpr))
+            Ok(checkYourDetailsPage(bpr))
         }
     }
   }
 
-  def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+  def checkYourDetailsSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     (
       request.sessionData.flatMap(_.nino),
       request.sessionData.flatMap(_.dob),
@@ -140,7 +140,7 @@ class SubscriptionController @Inject() (
           SeeOther(routes.SubscriptionController.getDateOfBirth().url)
 
         case (_, _, None) =>
-          SeeOther(routes.SubscriptionController.checkYourAnswers().url)
+          SeeOther(routes.SubscriptionController.checkYourDetails().url)
 
         case (_, _, Some(bpr)) =>
           Ok("confirmed")
