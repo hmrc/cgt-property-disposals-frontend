@@ -76,11 +76,6 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
           testError(Future.successful(HttpResponse(200)))
         }
 
-        "the date of birth in the BPR doesn't match the date of birth given" in {
-          val otherDob = DateOfBirth(dob.value.plusDays(1L))
-          testError(Future.successful(HttpResponse(200, Some(Json.toJson(bpr.copy(dateOfBirth = otherDob))))))
-        }
-
       }
       "return the bpr when the http response comes back with status 200 and " +
         "the json body returns a bpr with a matching dob" in {

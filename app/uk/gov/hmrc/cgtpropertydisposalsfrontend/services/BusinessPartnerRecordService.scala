@@ -41,14 +41,7 @@ class BusinessPartnerRecordServiceImpl @Inject() (connector: CGTPropertyDisposal
     connector.getBusinessPartnerRecord(nino)
       .map { response =>
         if (response.status === 200) {
-          response.parseJSON[BusinessPartnerRecord]()
-            .flatMap(bpr =>
-              if (bpr.dateOfBirth =!= dob) {
-                Left("Date of birth given did not match date of birth in the BPR")
-              } else {
-                Right(bpr)
-              })
-            .leftMap(Error.apply)
+          response.parseJSON[BusinessPartnerRecord]().leftMap(Error.apply)
         } else {
           Left(Error(s"Call to get BPR came back with status ${response.status}"))
         }
