@@ -25,7 +25,5 @@
   <dd class="cya-answer">
    @value
   </dd>
-  <dd class="cya-change">
-   @changeButton.map(b => b)
-  </dd>
+  @changeButton.map(b => Html(s"""<dd class="cya-change">$b</dd>"""))
 </div>
