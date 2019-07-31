@@ -475,7 +475,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
           mockGetSession(Future.successful(Right(Some(existingSession))))
         }
 
-        val result = controller.checkYourDetailsSubmit()(requestWithFormData("confirmBpr" -> "0"))
+        val result = controller.checkYourDetailsSubmit()(requestWithCSRFToken)
         status(result) shouldBe OK
         contentAsString(result) shouldBe ("confirmed")
       }

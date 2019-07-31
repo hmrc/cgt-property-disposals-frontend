@@ -28,20 +28,20 @@ import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
-@ImplementedBy(classOf[BusinessPartnerRecordConnectorImpl])
-trait BusinessPartnerRecordConnector {
+@ImplementedBy(classOf[CGTPropertyDisposalsConnectorImpl])
+trait CGTPropertyDisposalsConnector {
 
   def getBusinessPartnerRecord(nino: NINO)(implicit hc: HeaderCarrier): Future[HttpResponse]
 
 }
 
 @Singleton
-class BusinessPartnerRecordConnectorImpl @Inject() (
+class CGTPropertyDisposalsConnectorImpl @Inject() (
     http: HttpClient,
     servicesConfig: ServicesConfig
-)(implicit ec: ExecutionContext) extends BusinessPartnerRecordConnector {
+)(implicit ec: ExecutionContext) extends CGTPropertyDisposalsConnector {
 
-  val baseUrl: String = servicesConfig.baseUrl("business-partner-record") + "/cgt-property-disposals"
+  val baseUrl: String = servicesConfig.baseUrl("cgt-property-disposals") + "/cgt-property-disposals"
 
   def url(nino: NINO): String = s"$baseUrl/${nino.value}/business-partner-record"
 

@@ -20,7 +20,7 @@ import cats.instances.int._
 import cats.syntax.either._
 import cats.syntax.eq._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.BusinessPartnerRecordConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, DateOfBirth, Error, NINO}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -35,7 +35,7 @@ trait BusinessPartnerRecordService {
 }
 
 @Singleton
-class BusinessPartnerRecordServiceImpl @Inject() (connector: BusinessPartnerRecordConnector)(implicit ec: ExecutionContext) extends BusinessPartnerRecordService {
+class BusinessPartnerRecordServiceImpl @Inject() (connector: CGTPropertyDisposalsConnector)(implicit ec: ExecutionContext) extends BusinessPartnerRecordService {
 
   override def getBusinessPartnerRecord(nino: NINO, dob: DateOfBirth)(implicit hc: HeaderCarrier): Future[Either[Error, BusinessPartnerRecord]] =
     connector.getBusinessPartnerRecord(nino)

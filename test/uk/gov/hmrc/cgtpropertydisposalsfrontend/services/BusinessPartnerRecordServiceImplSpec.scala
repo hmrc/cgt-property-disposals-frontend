@@ -22,7 +22,7 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsNumber, Json}
 import play.api.test.Helpers._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.BusinessPartnerRecordConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Address, BusinessPartnerRecord, DateOfBirth, NINO}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -31,7 +31,7 @@ import scala.concurrent.Future
 
 class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
-  val mockConnector = mock[BusinessPartnerRecordConnector]
+  val mockConnector = mock[CGTPropertyDisposalsConnector]
 
   val service = new BusinessPartnerRecordServiceImpl(mockConnector)
 

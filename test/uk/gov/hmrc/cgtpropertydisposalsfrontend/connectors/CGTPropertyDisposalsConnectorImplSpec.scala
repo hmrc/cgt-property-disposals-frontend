@@ -28,13 +28,13 @@ import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class BusinessPartnerRecordConnectorImplSpec extends WordSpec with Matchers with MockFactory with HttpSupport {
+class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with MockFactory with HttpSupport {
 
   val config = Configuration(ConfigFactory.parseString(
     """
       |microservice {
       |  services {
-      |      business-partner-record {
+      |    cgt-property-disposals {
       |      protocol = http
       |      host     = host
       |      port     = 123
@@ -44,9 +44,9 @@ class BusinessPartnerRecordConnectorImplSpec extends WordSpec with Matchers with
       |""".stripMargin
   ))
 
-  val connector = new BusinessPartnerRecordConnectorImpl(mockHttp, new ServicesConfig(config, new RunMode(config, Mode.Test)))
+  val connector = new CGTPropertyDisposalsConnectorImpl(mockHttp, new ServicesConfig(config, new RunMode(config, Mode.Test)))
 
-  "BusinessPartnerRecordConnectorImpl" ignore {
+  "CGTPropertyDisposalsConnectorImpl" ignore {
 
     "handling request to get the business partner record" must {
 
