@@ -236,7 +236,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
               val result = controller.getDateOfBirthSubmit()(requestWithFormData(toFieldList(d): _*))
               status(result) shouldBe SEE_OTHER
-              redirectLocation(result) shouldBe Some(routes.SubscriptionController.checkYourAnswers().url)
+              redirectLocation(result) shouldBe Some(routes.SubscriptionController.checkYourDetails().url)
             }
           }
 
@@ -256,7 +256,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
           val result = controller.getDateOfBirthSubmit()(requestWithFormData(toFieldList(newDOB.value): _*))
           status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.SubscriptionController.checkYourAnswers().url)
+          redirectLocation(result) shouldBe Some(routes.SubscriptionController.checkYourDetails().url)
         }
 
       "redirect to the get NINO page if there is no NINO in session" in {
@@ -409,7 +409,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
           val result = performAction
           status(result) shouldBe 200
-          contentAsString(result) should include(message("bpr.title"))
+          contentAsString(result) should include(message("subscription.title"))
         }
 
         "one exists in session" in {
@@ -420,7 +420,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
           val result = performAction
           status(result) shouldBe 200
-          contentAsString(result) should include(message("bpr.title"))
+          contentAsString(result) should include(message("subscription.title"))
         }
 
       }
@@ -441,7 +441,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
           mockGetSession(Future.successful(Right(Some(SessionData.empty))))
         }
 
-        val result = controller.checkYourAnswersSubmit()(requestWithCSRFToken)
+        val result = controller.checkYourDetailsSubmit()(requestWithCSRFToken)
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.SubscriptionController.getNino().url)
 
@@ -453,7 +453,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
           mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(nino = Some(validNINO))))))
         }
 
-        val result = controller.checkYourAnswersSubmit()(requestWithCSRFToken)
+        val result = controller.checkYourDetailsSubmit()(requestWithCSRFToken)
         status(result) shouldBe SEE_OTHER
         redirectLocation(result) shouldBe Some(routes.SubscriptionController.getDateOfBirth().url)
       }
@@ -464,9 +464,9 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
           mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(nino = Some(validNINO), dob = Some(validDOB))))))
         }
 
-        val result = controller.checkYourAnswersSubmit()(requestWithCSRFToken)
+        val result = controller.checkYourDetailsSubmit()(requestWithCSRFToken)
         status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.SubscriptionController.checkYourAnswers().url)
+        redirectLocation(result) shouldBe Some(routes.SubscriptionController.checkYourDetails().url)
       }
 
       "handle the case when the user confirms their details" in {
@@ -475,7 +475,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
           mockGetSession(Future.successful(Right(Some(existingSession))))
         }
 
-        val result = controller.checkYourAnswersSubmit()(requestWithFormData("confirmBpr" -> "0"))
+        val result = controller.checkYourDetailsSubmit()(requestWithFormData("confirmBpr" -> "0"))
         status(result) shouldBe OK
         contentAsString(result) shouldBe ("confirmed")
       }
