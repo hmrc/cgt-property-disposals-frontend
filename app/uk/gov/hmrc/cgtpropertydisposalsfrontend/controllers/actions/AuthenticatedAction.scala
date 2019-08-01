@@ -16,15 +16,23 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
+import java.net.URLEncoder
+
+import cats.syntax.either._
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
-import play.api.mvc.Results._
+import play.api.mvc.Results.{InternalServerError, _}
 import play.api.mvc._
+import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, NoActiveSession}
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, ConfidenceLevel, InsufficientConfidenceLevel, NoActiveSession}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.NINO
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{NINO, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.toFuture
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
@@ -37,7 +45,8 @@ class AuthenticatedAction @Inject() (
     authConnector: AuthConnector,
     config: Configuration,
     errorHandler: ErrorHandler,
-    playBodyParsers: PlayBodyParsers
+    playBodyParsers: PlayBodyParsers,
+    sessionStore: SessionStore
 )(implicit ec: ExecutionContext)
   extends ActionRefiner[MessagesRequest, AuthenticatedRequest] with Logging { self =>
 
@@ -45,29 +54,66 @@ class AuthenticatedAction @Inject() (
     override def authConnector: AuthConnector = self.authConnector
   }
 
-  val signInUrl: String = config.underlying.getString("gg.url")
+  private def getString(key: String): String = config.underlying.getString(key)
 
-  val origin: String = config.underlying.getString("gg.origin")
+  val signInUrl: String = getString("gg.url")
 
-  val selfBaseUrl: String = config.underlying.getString("self.url")
+  val origin: String = getString("gg.origin")
+
+  val selfBaseUrl: String = getString("self.url")
+
+  val ivUrl: String = getString("iv.url")
+
+  val ivOrigin: String = getString("iv.origin")
+
+  val ivSuccessUrl: String = getString("iv.success-url")
+
+  val ivFailureUrl: String = getString("iv.failure-url")
 
   @SuppressWarnings(Array("org.wartremover.warts.Product", "org.wartremover.warts.Serializable"))
   override protected def refine[A](request: MessagesRequest[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-    authorisedFunctions.authorised().retrieve(Retrievals.nino) {
+    lazy val errorResponse = InternalServerError(errorHandler.internalServerErrorTemplate(request))
+
+    authorisedFunctions.authorised(ConfidenceLevel.L200).retrieve(Retrievals.nino) {
       case None =>
         logger.warn("Could not find NINO")
-        Future.successful(Left(InternalServerError(errorHandler.internalServerErrorTemplate(request))))
+        Left(errorResponse)
+
       case Some(nino) =>
-        Future.successful(Right(AuthenticatedRequest(NINO(nino), request)))
-    }.recover {
+        Right(AuthenticatedRequest(NINO(nino), request))
+    }.recoverWith {
       case _: NoActiveSession =>
         Left(Redirect(signInUrl, Map("continue" -> Seq(selfBaseUrl + request.uri), "origin" -> Seq(origin))))
+
+      case _: InsufficientConfidenceLevel =>
+        handleInsufficientConfidenceLevel(request, errorResponse).map(Left(_))
+
     }
   }
 
   override protected def executionContext: ExecutionContext = ec
+
+  private def handleInsufficientConfidenceLevel(request: MessagesRequest[_], errorResponse: Result)(implicit hc: HeaderCarrier): Future[Result] =
+    sessionStore.store(SessionData.empty.copy(ivContinueUrl = Some(selfBaseUrl + request.uri)))
+      .map {
+        _.bimap(
+          { e =>
+            logger.warn("Could not store IV continue url", e)
+            errorResponse
+          }, _ =>
+            Redirect(
+              s"$ivUrl/mdtp/uplift",
+              Map(
+                "origin" -> Seq(ivOrigin),
+                "confidenceLevel" -> Seq("200"),
+                "completionURL" -> Seq(ivSuccessUrl),
+                "failureURL" -> Seq(ivFailureUrl)
+              )
+            )
+        ).merge
+      }
 
 }
 

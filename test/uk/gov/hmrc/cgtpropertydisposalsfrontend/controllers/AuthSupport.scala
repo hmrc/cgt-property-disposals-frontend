@@ -27,7 +27,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait AuthSupport { this: ControllerSpec =>
+trait AuthSupport { this: ControllerSpec with SessionSupport =>
 
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
 
@@ -35,7 +35,8 @@ trait AuthSupport { this: ControllerSpec =>
     mockAuthConnector,
     instanceOf[Configuration],
     instanceOf[ErrorHandler],
-    instanceOf[PlayBodyParsers]
+    instanceOf[PlayBodyParsers],
+    mockSessionStore
   )(instanceOf[ExecutionContext])
 
   def mockAuth[R](predicate: Predicate, retrieval: Retrieval[R])(result: Future[R]): Unit =

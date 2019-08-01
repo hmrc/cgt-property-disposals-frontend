@@ -16,18 +16,16 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
-import java.time.{Clock, LocalDate}
+import java.time.LocalDate
 
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
-import play.api.mvc.{RequestHeader, Result}
+import play.api.mvc.Result
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
-import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
+import uk.gov.hmrc.auth.core.{AuthConnector, ConfidenceLevel}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, DateOfBirth, Error, NINO, SessionData}
@@ -52,7 +50,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
-  def mockSuccessfulAuth(retrievedNino: Option[String]): Unit = mockAuth(EmptyPredicate, Retrievals.nino)(Future.successful(retrievedNino))
+  def mockSuccessfulAuth(retrievedNino: Option[String]): Unit = mockAuth(ConfidenceLevel.L200, Retrievals.nino)(Future.successful(retrievedNino))
 
   def mockGetBusinessPartnerRecord(nino: NINO)(result: Future[Either[Error, BusinessPartnerRecord]]) =
     (mockService.getBusinessPartnerRecord(_: NINO)(_: HeaderCarrier))
@@ -105,16 +103,21 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
       "display the subscription details" when {
 
         "one doesn't exist in session and it is successfully retrieved using the retrieved auth NINO" in {
-          inSequence {
-            mockSuccessfulAuth(Some(validNINO.value))
-            mockGetSession(Future.successful(Right(Some(existingSession))))
-            mockGetBusinessPartnerRecord(validNINO)(Future.successful(Right(validBpr)))
-            mockStoreSession(existingSession.copy(businessPartnerRecord = Some(validBpr)))(Future.successful(Right(())))
-          }
+          List(
+            Some(existingSession),
+            None
+          ).foreach { maybeSession =>
+              inSequence {
+                mockSuccessfulAuth(Some(validNINO.value))
+                mockGetSession(Future.successful(Right(maybeSession)))
+                mockGetBusinessPartnerRecord(validNINO)(Future.successful(Right(validBpr)))
+                mockStoreSession(existingSession.copy(businessPartnerRecord = Some(validBpr)))(Future.successful(Right(())))
+              }
 
-          val result = performAction
-          status(result) shouldBe 200
-          contentAsString(result) should include(message("subscription.title"))
+              val result = performAction
+              status(result) shouldBe 200
+              contentAsString(result) should include(message("subscription.title"))
+            }
         }
 
         "one exists in session" in {
@@ -132,7 +135,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
     }
 
-    "handling submitted confirmation of BPR's" must {
+    "handling submitted confirmation of subscription details" must {
 
       val existingSession = SessionData.empty.copy(businessPartnerRecord = Some(validBpr))
 
