@@ -14,24 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
+package uk.gov.hmrc.cgtpropertydisposalsfrontend
 
-import java.time.{Clock, LocalDate}
+import org.scalacheck.Gen
+import uk.gov.hmrc.smartstub.AutoGen
 
-import cats.Eq
-import cats.syntax.either._
-import play.api.data.Forms.{mapping, of}
-import play.api.data.format.Formatter
-import play.api.data.{Form, FormError}
-import play.api.libs.functional.syntax._
-import play.api.libs.json.Format
+import scala.reflect._
 
-import scala.util.Try
+package object models {
 
-final case class DateOfBirth(value: LocalDate) extends AnyVal
+  def sample[A: ClassTag](gen: Gen[A]): A = gen.sample.getOrElse(sys.error(s"Could not generate instance of ${classTag[A].runtimeClass.getSimpleName}"))
 
-object DateOfBirth {
-
-  implicit val format: Format[DateOfBirth] = implicitly[Format[LocalDate]].inmap(DateOfBirth(_), _.value)
+  val bprGen = AutoGen[BusinessPartnerRecord]
 
 }

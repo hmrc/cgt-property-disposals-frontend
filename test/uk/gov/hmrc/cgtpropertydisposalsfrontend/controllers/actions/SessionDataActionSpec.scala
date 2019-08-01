@@ -20,13 +20,13 @@ import java.time.LocalDate
 
 import org.scalamock.scalatest.MockFactory
 import play.api.i18n.MessagesApi
-import play.api.mvc.{AnyContent, MessagesRequest, PlayBodyParsers, Result}
 import play.api.mvc.Results.Ok
+import play.api.mvc.{AnyContent, MessagesRequest, PlayBodyParsers, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, Error, NINO, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, SessionSupport}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -40,7 +40,7 @@ class SessionDataActionSpec extends ControllerSpec with SessionSupport with Mock
 
     lazy val messagesRequest = new MessagesRequest(FakeRequest(), instanceOf[MessagesApi])
 
-    val sessionData = SessionData(Some(NINO("AB123456C")), Some(DateOfBirth(LocalDate.ofEpochDay(0L))), None)
+    val sessionData = SessionData(Some(sample(bprGen)))
 
       def performAction(): Future[Result] =
         action.invokeBlock[AnyContent](messagesRequest, { r =>

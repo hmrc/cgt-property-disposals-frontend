@@ -22,6 +22,7 @@ object AppDependencies {
     "com.typesafe.play"       %% "play-test"                % current                 % "test",
     "org.scalamock"           %% "scalamock"                % "4.2.0"                 % "test",
     "uk.gov.hmrc"             %% "reactivemongo-test"       % "4.15.0-play-26"        % "test",
+    "uk.gov.hmrc"             %% "stub-data-generator"      % "0.5.3"                 % "test",
     "org.pegdown"             %  "pegdown"                  % "1.6.0"                 % "test, it",
     "uk.gov.hmrc"             %% "service-integration-test" % "0.9.0-play-26"         % "test, it",
     "org.scalatestplus.play"  %% "scalatestplus-play"       % "3.1.2"                 % "test, it"

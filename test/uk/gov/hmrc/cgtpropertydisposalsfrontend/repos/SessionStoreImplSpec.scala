@@ -16,16 +16,16 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos
 
-import java.time.LocalDate
 import java.util.UUID
 
 import com.typesafe.config.ConfigFactory
-import org.scalatest.{Matchers, WordSpec}
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.{Matchers, WordSpec}
 import play.api.Configuration
 import play.api.libs.json.{JsNumber, JsObject}
 import uk.gov.hmrc.cache.model.{Cache, Id}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, NINO, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.SessionId
 import uk.gov.hmrc.mongo.DatabaseUpdate
@@ -48,7 +48,7 @@ class SessionStoreImplSpec extends WordSpec with Matchers with MongoSupport with
 
   "SessionStoreImpl" must {
 
-    val sessionData = SessionData(Some(NINO("AB123456C")), Some(DateOfBirth(LocalDate.ofEpochDay(0L))), None)
+    val sessionData = SessionData(Some(sample(bprGen)))
 
     "be able to insert SessionData into mongo and read it back" in new TestEnvironment {
       val result = sessionStore.store(sessionData)
@@ -74,7 +74,7 @@ class SessionStoreImplSpec extends WordSpec with Matchers with MongoSupport with
       }
 
       "the data in mongo cannot be parsed" in new TestEnvironment {
-        val invalidData = JsObject(Map("nino" -> JsNumber(1)))
+        val invalidData = JsObject(Map("businessPartnerRecord" -> JsNumber(1)))
         val create: Future[DatabaseUpdate[Cache]] = sessionStore.cacheRepository.createOrUpdate(Id(sessionId.value), sessionStore.sessionKey, invalidData)
         create.futureValue.writeResult.inError shouldBe false
         sessionStore.get().futureValue.isLeft shouldBe true

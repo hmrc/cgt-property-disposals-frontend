@@ -19,17 +19,14 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
-import play.api.data.Form
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithActions}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DateOfBirth.dobForm
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.NINO.ninoForm
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
@@ -43,76 +40,18 @@ class SubscriptionController @Inject() (
     cc: MessagesControllerComponents,
     val authenticatedAction: AuthenticatedAction,
     val sessionDataAction: SessionDataAction,
-    getNinoPage: views.html.subscription.nino,
-    getDobPage: views.html.subscription.date_of_birth,
     checkYourDetailsPage: views.html.subscription.check_your_details
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext) extends FrontendController(cc) with WithActions with Logging {
 
-  def getNino(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
-    val sessionNino = request.sessionData.flatMap(_.nino)
-    val form = sessionNino.fold(ninoForm)(ninoForm.fill)
-    Ok(getNinoPage(form))
-  }
-
-  def getNinoSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    ninoForm.bindFromRequest().fold(
-      formWithErrors => BadRequest(getNinoPage(formWithErrors)),
-      nino => updateSession(_.copy(nino = Some(nino))).map {
-        case Left(e) =>
-          logger.warn("Could not store NINO in mongo", e)
-          InternalServerError(errorHandler.internalServerErrorTemplate)
-
-        case Right(_) =>
-          SeeOther(routes.SubscriptionController.getDateOfBirth().url)
-      }
-    )
-  }
-
-  def getDateOfBirth(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
-    val form: Option[Form[DateOfBirth]] = request.sessionData.flatMap(_.nino) -> request.sessionData.flatMap(_.dob) match {
-      case (None, _)      => None
-      case (_, Some(dob)) => Some(dobForm.fill(dob))
-      case (_, None)      => Some(dobForm)
-    }
-
-    form.fold(SeeOther(routes.SubscriptionController.getNino().url)) {
-      f => Ok(getDobPage(f))
-    }
-  }
-
-  def getDateOfBirthSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    request.sessionData.flatMap(_.nino).fold[Future[Result]](
-      SeeOther(routes.SubscriptionController.getNino().url)
-    ) { _ =>
-        dobForm.bindFromRequest().fold(
-          formWithErrors => BadRequest(getDobPage(formWithErrors)),
-          dateOfBirth =>
-            updateSession(_.copy(dob = Some(dateOfBirth))).map {
-              case Left(e) =>
-                logger.warn("Could not store DOB in mongo", e)
-                InternalServerError(errorHandler.internalServerErrorTemplate)
-
-              case Right(_) =>
-                SeeOther(routes.SubscriptionController.checkYourDetails().url)
-            }
-        )
-      }
-  }
-
   def checkYourDetails(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    (request.sessionData.flatMap(_.nino), request.sessionData.flatMap(_.dob), request.sessionData.flatMap(_.businessPartnerRecord)) match {
-      case (None, _, _) =>
-        SeeOther(routes.SubscriptionController.getNino().url)
-
-      case (_, None, _) =>
-        SeeOther(routes.SubscriptionController.getDateOfBirth().url)
-
-      case (Some(_), Some(_), Some(bpr)) =>
+    request.sessionData.flatMap(_.businessPartnerRecord) match {
+      case Some(bpr) =>
         Ok(checkYourDetailsPage(bpr))
 
-      case (Some(nino), Some(dob), None) =>
+      case None =>
+        val nino = NINO("AB123456C")
         val result = for {
-          bpr <- EitherT(bprService.getBusinessPartnerRecord(nino, dob))
+          bpr <- EitherT(bprService.getBusinessPartnerRecord(nino))
           _ <- EitherT(updateSession(_.copy(businessPartnerRecord = Some(bpr))))
         } yield bpr
 
@@ -128,23 +67,13 @@ class SubscriptionController @Inject() (
   }
 
   def checkYourDetailsSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    (
-      request.sessionData.flatMap(_.nino),
-      request.sessionData.flatMap(_.dob),
-      request.sessionData.flatMap(_.businessPartnerRecord)
-    ) match {
-        case (None, _, _) =>
-          SeeOther(routes.SubscriptionController.getNino().url)
+    request.sessionData.flatMap(_.businessPartnerRecord) match {
+      case None =>
+        SeeOther(routes.SubscriptionController.checkYourDetails().url)
 
-        case (_, None, _) =>
-          SeeOther(routes.SubscriptionController.getDateOfBirth().url)
-
-        case (_, _, None) =>
-          SeeOther(routes.SubscriptionController.checkYourDetails().url)
-
-        case (_, _, Some(bpr)) =>
-          Ok("confirmed")
-      }
+      case Some(_) =>
+        Ok("confirmed")
+    }
   }
 
   private def updateSession(update: SessionData => SessionData)(implicit request: RequestWithSessionData[_]): Future[Either[Error, Unit]] =
