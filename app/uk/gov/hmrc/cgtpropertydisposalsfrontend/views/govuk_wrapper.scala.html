@@ -28,7 +28,8 @@
     uiMainContentHeader: uk.gov.hmrc.play.views.html.layouts.MainContentHeader,
     uiMainContent: uk.gov.hmrc.play.views.html.layouts.MainContent,
     uiFooterLinks: uk.gov.hmrc.play.views.html.layouts.FooterLinks,
-    helperReportAProblemLink: uk.gov.hmrc.play.views.html.helpers.ReportAProblemLink
+    helperReportAProblemLink: uk.gov.hmrc.play.views.html.helpers.ReportAProblemLink,
+    betaBanner: uk.gov.hmrc.play.views.html.layouts.BetaBanner
 )
 
 
@@ -50,11 +51,12 @@
       linkElem = None,
       headScripts = None)
     <style>
-      label>h1.heading-xlarge,
-      legend>h1.heading-xlarge { margin-bottom: 15px }
+      h1>label.heading-xlarge,
+      legend>h1.heading-xlarge { margin-bottom: 15px; }
       input:focus, textarea:focus, select:focus, #global-header input:focus {
         outline-offset: 0;
       }
+      .govuk-check-your-answers { margin: 30px 0 60px 0; }
     </style>
     <meta name="format-detection" content="telephone=no" />
 }
@@ -90,7 +92,7 @@
 
 @serviceInfo = {
     @uiServiceInfo(
-      betaBanner = HtmlFormat.empty,
+      betaBanner = betaBanner(false, appConfig.betaFeedbackUrlNoAuth, appConfig.betaFeedbackUrlNoAuth, true, false),
       includeGridWrapper = false,
       serviceInfoContent = Some(serviceInfoContent))
 }

@@ -16,7 +16,14 @@
 
 @this()
 
-@(label: String)(implicit messages: Messages)
-<div class="form-group">
-  <button class="button" type="submit">@label</button>
+@(label: String, value: Html, changeButton: Option[Html])
+
+<div>
+  <dt class="cya-question">
+   @label
+  </dt>
+  <dd class="cya-answer">
+   @value
+  </dd>
+  @changeButton.map(b => Html(s"""<dd class="cya-change">$b</dd>"""))
 </div>

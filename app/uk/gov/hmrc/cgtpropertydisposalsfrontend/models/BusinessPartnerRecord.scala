@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,11 +12,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@this()
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-@(label: String)(implicit messages: Messages)
-<div class="form-group">
-  <button class="button" type="submit">@label</button>
-</div>
+import play.api.libs.json.{Format, Json}
+
+final case class BusinessPartnerRecord(
+    forename: String,
+    surname: String,
+    dateOfBirth: DateOfBirth,
+    emailAddress: Option[String],
+    address: Address
+)
+
+object BusinessPartnerRecord {
+
+  implicit val format: Format[BusinessPartnerRecord] = Json.format
+
+}

@@ -16,18 +16,25 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import cats.syntax.either._
 import java.time.{Clock, LocalDate}
 
+import cats.Eq
+import cats.syntax.either._
 import play.api.data.Forms.{mapping, of}
 import play.api.data.format.Formatter
 import play.api.data.{Form, FormError}
+import play.api.libs.functional.syntax._
+import play.api.libs.json.Format
 
 import scala.util.Try
 
 final case class DateOfBirth(value: LocalDate) extends AnyVal
 
 object DateOfBirth {
+
+  implicit val format: Format[DateOfBirth] = implicitly[Format[LocalDate]].inmap(DateOfBirth(_), _.value)
+
+  implicit val eq: Eq[DateOfBirth] = Eq.instance((d1, d2) => d1.value.isEqual(d2.value))
 
   object Ids {
     val day = "dob-day"
@@ -38,7 +45,7 @@ object DateOfBirth {
 
   private val dateOfBirthFormatter: Formatter[LocalDate] = new Formatter[LocalDate] {
     def validatedFromBoolean[A](a: A)(predicate: A ⇒ Boolean, ifFalse: ⇒ String): Either[String, A] =
-      if (predicate(a)) Right[String, A](a) else Left[String, A](ifFalse)
+      if (predicate(a)) Right(a) else Left(ifFalse)
 
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], LocalDate] = {
       lazy val today = LocalDate.now(Clock.systemUTC())

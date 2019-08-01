@@ -21,26 +21,38 @@ import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
 import play.api.i18n.{Lang, MessagesApi}
-import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.MessagesControllerComponents
+import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
+import play.api.mvc.Result
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
 import play.api.{Application, Configuration, Play}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 
+import scala.concurrent.Future
 import scala.reflect.ClassTag
 
 trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with MockFactory {
+
+  val overrideBindings: List[GuiceableModule] = List.empty[GuiceableModule]
 
   def buildFakeApplication(): Application =
     new GuiceApplicationBuilder()
       .configure(Configuration(
         ConfigFactory.parseString(
           """
-            | metrics.enabled       = false
+            | metrics.enabled = false
           """.stripMargin
         )
-      )).build()
+      ))
+      .overrides(overrideBindings: _*)
+      .build()
 
   lazy val fakeApplication: Application = buildFakeApplication()
+
+  def instanceOf[A: ClassTag]: A = fakeApplication.injector.instanceOf[A]
+
+  lazy implicit val materializer: Materializer = fakeApplication.materializer
+  lazy val viewConfig = instanceOf[ViewConfig]
 
   abstract override def beforeAll(): Unit = {
     Play.start(fakeApplication)
@@ -55,10 +67,11 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
   def message(messageKey: String)(implicit messagesApi: MessagesApi): String =
     messagesApi(messageKey)(Lang.defaultLang)
 
-  def instanceOf[A: ClassTag]: A = fakeApplication.injector.instanceOf[A]
+  private lazy val technicalErrorPageContent: String = instanceOf[ErrorHandler].internalServerErrorTemplate(FakeRequest()).body
 
-  lazy implicit val materializer: Materializer = fakeApplication.materializer
-  lazy val messagesControllerComponents = instanceOf[MessagesControllerComponents]
-  lazy val viewConfig = instanceOf[ViewConfig]
+  def checkIsTechnicalErrorPage(result: Future[Result]): Unit = {
+    status(result) shouldBe INTERNAL_SERVER_ERROR
+    contentAsString(result) shouldBe technicalErrorPageContent
+  }
 
 }

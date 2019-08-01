@@ -20,10 +20,11 @@ import java.net.URLEncoder
 
 import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.{Matchers, RecoverMethods, WordSpec}
+import org.scalatest.{Matchers, WordSpec}
 import play.api.Configuration
+import play.api.i18n.MessagesApi
 import play.api.mvc.Results.Ok
-import play.api.mvc.DefaultPlayBodyParsers
+import play.api.mvc.{DefaultPlayBodyParsers, MessagesRequest}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core._
@@ -34,7 +35,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class AuthenticatedActionSpec extends WordSpec with Matchers with MockFactory with RecoverMethods {
+class AuthenticatedActionSpec extends WordSpec with Matchers with MockFactory {
 
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
 
@@ -61,10 +62,16 @@ class AuthenticatedActionSpec extends WordSpec with Matchers with MockFactory wi
 
   "AuthenticatedAction" must {
 
+      def performAction[A](r: FakeRequest[A]) = {
+        @SuppressWarnings(Array("org.wartremover.warts.Any"))
+        val request = new MessagesRequest[A](r, stub[MessagesApi])
+        authenticatedAction.invokeBlock(request, { _: MessagesRequest[A] => Future.successful(Ok) })
+      }
+
     "effect the requested action if the user is logged in" in {
       mockAuth(EmptyPredicate, EmptyRetrieval)(Future.successful(EmptyRetrieval))
 
-      status(authenticatedAction(Ok)(FakeRequest())) shouldBe OK
+      status(performAction(FakeRequest())) shouldBe OK
     }
 
     "redirect to the login page if the user is not logged in" in {
@@ -79,13 +86,12 @@ class AuthenticatedActionSpec extends WordSpec with Matchers with MockFactory wi
           withClue(s"For error $e: ") {
             mockAuth(EmptyPredicate, EmptyRetrieval)(Future.failed[Unit](e))
 
-            val result = authenticatedAction(Ok)(FakeRequest("GET", requestUri))
+            val result = performAction(FakeRequest("GET", requestUri))
             status(result) shouldBe SEE_OTHER
 
             val redirectTo = redirectLocation(result)
             redirectTo shouldBe Some(s"$signInUrl?continue=${urlEncode(selfBaseUrl + requestUri)}&origin=$origin")
           }
-
         }
     }
 
@@ -103,7 +109,7 @@ class AuthenticatedActionSpec extends WordSpec with Matchers with MockFactory wi
             val exception = intercept[AuthorisationException] {
               mockAuth(EmptyPredicate, EmptyRetrieval)(Future.failed[Unit](e))
 
-              await(authenticatedAction(Ok)(FakeRequest()))
+              await(performAction(FakeRequest()))
             }
 
             exception shouldBe e

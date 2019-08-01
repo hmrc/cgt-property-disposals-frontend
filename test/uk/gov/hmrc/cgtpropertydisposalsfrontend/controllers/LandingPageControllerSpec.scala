@@ -19,14 +19,10 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import play.api.i18n.MessagesApi
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 
 class LandingPageControllerSpec extends ControllerSpec {
 
-  lazy val controller: LandingPageController = new LandingPageController(
-    messagesControllerComponents,
-    fakeApplication.injector.instanceOf[views.html.landing_page]
-  )(viewConfig)
+  lazy val controller: LandingPageController = instanceOf[LandingPageController]
 
   "The LandingPageController" must {
 

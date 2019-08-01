@@ -18,37 +18,46 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.NINO
-
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DateOfBirth
+@import scala.util.Try
 @import views.html.helper.CSRF
 
 @this(
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
- textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
+ dateInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.date_input,
  errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button
 )
 
-@(form: Form[NINO])(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[DateOfBirth])(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
-@title = @{messages("onboarding.nino.title")}
-@key = @{"nino"}
+@title = @{messages("dob.title")}
+@key = @{"dob"}
 @heading = @{Html(s"""<h1 class="heading-xlarge">$title</h1>""")}
-@helpText = @{Html(messages("onboarding.nino.helpText"))}
+@helpText = @{Html(messages("dob.helpText"))}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@dateField(key: String) = @{form.data.get(key).flatMap(v => Try(v.toInt).toOption)}
+
 
 @mainTemplate(title = title, hasErrors = hasErrors) {
- <form action="@routes.BusinessPartnerRecordCheckController.getNinoSubmit().url" method="@routes.BusinessPartnerRecordCheckController.getNinoSubmit().method">
-  @CSRF.formField(request)
+ <form
+  action="@{routes.SubscriptionController.getDateOfBirthSubmit().url}"
+  method="@{routes.SubscriptionController.getDateOfBirthSubmit().method}"
+  novalidate="novalidate"
+ >
 
-  @if(hasErrors) {
-   @errorSummary(form)
-  }
+ @CSRF.formField(request)
 
-  @textInput(
+ @if(hasErrors) {
+  @errorSummary(form)
+ }
+
+  @dateInput(
    fieldId = key,
    label = heading,
-   value = form.data.getOrElse(key, ""),
+   dayValue = dateField(s"$key-day"),
+   monthValue = dateField(s"$key-month"),
+   yearValue = dateField(s"$key-year"),
    helpText = Some(helpText),
    labelAsHeading = true,
    errorKey = form.error(key).map(e => e.message),

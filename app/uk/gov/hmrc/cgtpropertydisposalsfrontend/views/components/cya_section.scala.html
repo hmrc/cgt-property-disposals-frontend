@@ -16,7 +16,10 @@
 
 @this()
 
-@(label: String)(implicit messages: Messages)
-<div class="form-group">
-  <button class="button" type="submit">@label</button>
-</div>
+@(heading: Option[String] = None)(rows: => Html)(implicit request: Request[_], messages: Messages)
+
+@heading.map(h => Html(s"""<h2 class="heading-medium">$h</h2>"""))
+
+<dl class="govuk-check-your-answers cya-questions-short">
+  @rows
+</dl>

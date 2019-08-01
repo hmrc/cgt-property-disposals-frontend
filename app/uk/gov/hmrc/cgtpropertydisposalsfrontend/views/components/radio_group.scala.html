@@ -21,39 +21,42 @@
 @(
   fieldId: String,
   label: Html,
-  value: String,
-  helpText: Option[Html],
-  labelAsHeading: Boolean,
-  errorKey: Option[String],
-  hasErrors: Boolean
+  options: List[String],
+  helpText: Option[Html] = None,
+  labelAsHeading: Boolean = false,
+  errorKey: Option[String] = None,
+  hasErrors: Boolean = false
 )(implicit messages: Messages)
 
 @classes = @{if(hasErrors) "form-group form-group-error" else "form-group" }
-@inputClasses = @{if(hasErrors) "form-control form-control-error" else "form-control" }
 @hintIdWithHintText = @{helpText.map(s"${{fieldId}}-form-hint" -> _)}
-@fieldLabel = {
-  @if(labelAsHeading) {
-    <h1><label for="@{fieldId}" class="heading-xlarge">@{label}</label></h1>
-  } else {
-    <label for="@{fieldId}">@{label}</label>
-  }
-}
 
 <div class="@classes">
-  @fieldLabel
-  @hintIdWithHintText.map { case (id, text) =>
-    <span id="@id" class="form-hint">
-      @text
-    </span>
-  }
-  @errorKey.map { e =>
-    @errorInline(fieldId, messages(s"$fieldId.$e"), Seq("error-message"))
-  }
-  <input
-   class="@inputClasses"
-   id="@fieldId"
-   type="text"
-   name="@fieldId"
-   value="@value"
-   @hintIdWithHintText.map{ case (id,_) =>  aria-describedby="@id" }>
+  <fieldset id="@fieldId"@hintIdWithHintText.map{ case (id,_) =>  aria-describedby="@id" }>
+    <legend>
+      @label
+    </legend>
+    @hintIdWithHintText.map { case (id, text) =>
+      <span id="@id" class="form-hint">
+        @text
+      </span>
+    }
+    @errorKey.map { e =>
+      @errorInline(fieldId, messages(s"$fieldId.$e"), Seq("error-message"))
+    }
+
+    @options.toList.zipWithIndex.map{ case (option, index) =>
+      <div class="multiple-choice">
+        <input id="@{fieldId}-@{index}"
+         name="@fieldId"
+         value="@index"
+         type="radio"
+        />
+        <label for="@{fieldId}-@{index}">
+          @option
+        </label>
+      </div>
+    }
+
+  </fieldset>
 </div>

@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,11 +12,22 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@this()
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-@(label: String)(implicit messages: Messages)
-<div class="form-group">
-  <button class="button" type="submit">@label</button>
-</div>
+import org.scalatest.{FunSuite, Matchers, WordSpec}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.UkAddress
+
+class AddressSpec extends WordSpec with Matchers {
+
+  "Address" must {
+
+    "have a country code method on uk addresses which always returns the same value" in {
+      val ukAddress = UkAddress("line1", None, None, None, "postcode")
+      ukAddress.countryCode shouldBe "GB"
+    }
+
+  }
+
+}

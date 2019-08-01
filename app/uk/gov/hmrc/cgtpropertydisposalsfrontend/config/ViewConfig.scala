@@ -25,11 +25,12 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
   private def loadConfig(key: String): String = servicesConfig.getString(key)
 
   private val contactHost = servicesConfig.getString(s"contact-frontend.host")
-  private val contactFormServiceIdentifier = "MyService"
+  private val contactFormServiceIdentifier = "CGTPD"
 
   val assetsPrefix: String = loadConfig(s"assets.url") + loadConfig(s"assets.version")
   val analyticsToken: String = loadConfig(s"google-analytics.token")
   val analyticsHost: String = loadConfig(s"google-analytics.host")
   val reportAProblemPartialUrl: String = s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
   val reportAProblemNonJSUrl: String = s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
+  val betaFeedbackUrlNoAuth: String = s"$contactHost/contact/beta-feedback-unauthenticated?service=$contactFormServiceIdentifier"
 }

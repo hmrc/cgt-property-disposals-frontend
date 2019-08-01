@@ -16,7 +16,6 @@
 
 @this()
 
-@(label: String)(implicit messages: Messages)
-<div class="form-group">
-  <button class="button" type="submit">@label</button>
-</div>
+@(hintText: String, url: String)
+
+<a href="@url">Change<span class="visuallyhidden"> @hintText</span></a>

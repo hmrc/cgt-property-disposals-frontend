@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.mvc.Results._
-import play.api.mvc.{ActionBuilder, AnyContent, BodyParser, MessagesControllerComponents, PlayBodyParsers, Request, Result}
+import play.api.mvc.{ActionRefiner, MessagesRequest, PlayBodyParsers, Result}
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, NoActiveSession}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
@@ -32,7 +32,7 @@ class AuthenticatedAction @Inject() (
     config: Configuration,
     playBodyParsers: PlayBodyParsers
 )(implicit ec: ExecutionContext)
-  extends ActionBuilder[Request, AnyContent] { self =>
+  extends ActionRefiner[MessagesRequest, MessagesRequest] { self =>
 
   val authorisedFunctions: AuthorisedFunctions = new AuthorisedFunctions {
     override def authConnector: AuthConnector = self.authConnector
@@ -44,17 +44,16 @@ class AuthenticatedAction @Inject() (
 
   val selfBaseUrl: String = config.underlying.getString("self.url")
 
-  def invokeBlock[A](request: Request[A], block: Request[A] => Future[Result]): Future[Result] = {
+  override protected def refine[A](request: MessagesRequest[A]): Future[Either[Result, MessagesRequest[A]]] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-    authorisedFunctions.authorised() { block(request) }
-      .recover {
-        case _: NoActiveSession =>
-          Redirect(signInUrl, Map("continue" -> Seq(selfBaseUrl + request.uri), "origin" -> Seq(origin)))
-      }
+    authorisedFunctions.authorised() {
+      Future.successful(Right(request))
+    }.recover {
+      case _: NoActiveSession =>
+        Left(Redirect(signInUrl, Map("continue" -> Seq(selfBaseUrl + request.uri), "origin" -> Seq(origin))))
+    }
   }
-
-  override def parser: BodyParser[AnyContent] = playBodyParsers.default
 
   override protected def executionContext: ExecutionContext = ec
 

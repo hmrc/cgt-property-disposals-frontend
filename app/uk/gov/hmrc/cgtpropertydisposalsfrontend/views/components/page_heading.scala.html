@@ -16,7 +16,9 @@
 
 @this()
 
-@(label: String)(implicit messages: Messages)
-<div class="form-group">
-  <button class="button" type="submit">@label</button>
-</div>
+@(heading: String, caption: Option[String] = None)
+
+ <h1 class="heading-xlarge">
+  @caption.map(c => Html(s"""<span class="heading-secondary">$c</span>"""))
+  @heading
+ </h1>
