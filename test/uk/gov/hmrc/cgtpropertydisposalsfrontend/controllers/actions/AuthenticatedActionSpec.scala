@@ -29,13 +29,16 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.{EmptyRetrieval, Retrieval}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.ControllerSpec
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class AuthenticatedActionSpec extends WordSpec with Matchers with MockFactory {
+class AuthenticatedActionSpec extends ControllerSpec with MockFactory {
 
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
 
@@ -49,9 +52,7 @@ class AuthenticatedActionSpec extends WordSpec with Matchers with MockFactory {
     """.stripMargin
   ))
 
-  val bodyParser = mock[DefaultPlayBodyParsers]
-
-  val authenticatedAction = new AuthenticatedAction(mockAuthConnector, config, bodyParser)
+  val authenticatedAction = new AuthenticatedAction(mockAuthConnector, config, instanceOf[ErrorHandler], instanceOf[DefaultPlayBodyParsers])
 
   def mockAuth[R](predicate: Predicate, retrieval: Retrieval[R])(result: Future[R]): Unit =
     (mockAuthConnector.authorise(_: Predicate, _: Retrieval[R])(_: HeaderCarrier, _: ExecutionContext))
@@ -65,13 +66,15 @@ class AuthenticatedActionSpec extends WordSpec with Matchers with MockFactory {
       def performAction[A](r: FakeRequest[A]) = {
         @SuppressWarnings(Array("org.wartremover.warts.Any"))
         val request = new MessagesRequest[A](r, stub[MessagesApi])
-        authenticatedAction.invokeBlock(request, { _: MessagesRequest[A] => Future.successful(Ok) })
+        authenticatedAction.invokeBlock(request, { a: AuthenticatedRequest[A] => Future.successful(Ok(a.nino.value)) })
       }
 
-    "effect the requested action if the user is logged in" in {
-      mockAuth(EmptyPredicate, EmptyRetrieval)(Future.successful(EmptyRetrieval))
+    "effect the requested action if the user is logged in and nino can be retrieved " in {
+      mockAuth(EmptyPredicate, Retrievals.nino)(Future.successful(Some("nino")))
 
-      status(performAction(FakeRequest())) shouldBe OK
+      val result = performAction(FakeRequest())
+      status(result) shouldBe OK
+      contentAsString(result) shouldBe "nino"
     }
 
     "redirect to the login page if the user is not logged in" in {
@@ -84,7 +87,7 @@ class AuthenticatedActionSpec extends WordSpec with Matchers with MockFactory {
         SessionRecordNotFound()
       ).foreach { e =>
           withClue(s"For error $e: ") {
-            mockAuth(EmptyPredicate, EmptyRetrieval)(Future.failed[Unit](e))
+            mockAuth(EmptyPredicate, Retrievals.nino)(Future.failed(e))
 
             val result = performAction(FakeRequest("GET", requestUri))
             status(result) shouldBe SEE_OTHER
@@ -107,7 +110,7 @@ class AuthenticatedActionSpec extends WordSpec with Matchers with MockFactory {
       ).foreach { e =>
           withClue(s"For error $e: ") {
             val exception = intercept[AuthorisationException] {
-              mockAuth(EmptyPredicate, EmptyRetrieval)(Future.failed[Unit](e))
+              mockAuth(EmptyPredicate, Retrievals.nino)(Future.failed(e))
 
               await(performAction(FakeRequest()))
             }
@@ -116,6 +119,13 @@ class AuthenticatedActionSpec extends WordSpec with Matchers with MockFactory {
           }
         }
 
+    }
+
+    "show an error page if a nino cannot be retrieved" in {
+      mockAuth(EmptyPredicate, Retrievals.nino)(Future.successful(None))
+
+      val result = performAction(FakeRequest())
+      checkIsTechnicalErrorPage(result)
     }
   }
 

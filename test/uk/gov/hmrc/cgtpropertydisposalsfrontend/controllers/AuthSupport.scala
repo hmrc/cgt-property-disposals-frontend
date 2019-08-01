@@ -21,6 +21,7 @@ import play.api.mvc.PlayBodyParsers
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.AuthenticatedAction
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -33,6 +34,7 @@ trait AuthSupport { this: ControllerSpec =>
   lazy val testAuthenticatedAction = new AuthenticatedAction(
     mockAuthConnector,
     instanceOf[Configuration],
+    instanceOf[ErrorHandler],
     instanceOf[PlayBodyParsers]
   )(instanceOf[ExecutionContext])
 

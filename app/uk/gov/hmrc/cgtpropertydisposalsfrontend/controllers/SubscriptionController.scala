@@ -49,9 +49,8 @@ class SubscriptionController @Inject() (
         Ok(checkYourDetailsPage(bpr))
 
       case None =>
-        val nino = NINO("AB123456C")
         val result = for {
-          bpr <- EitherT(bprService.getBusinessPartnerRecord(nino))
+          bpr <- EitherT(bprService.getBusinessPartnerRecord(request.authenticatedRequest.nino))
           _ <- EitherT(updateSession(_.copy(businessPartnerRecord = Some(bpr))))
         } yield bpr
 

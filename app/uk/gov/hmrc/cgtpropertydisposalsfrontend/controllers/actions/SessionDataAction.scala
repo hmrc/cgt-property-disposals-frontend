@@ -31,19 +31,19 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 
-final case class RequestWithSessionData[A](sessionData: Option[SessionData], request: MessagesRequest[A]) extends WrappedRequest[A](request) with PreferredMessagesProvider {
-  override def messagesApi: MessagesApi = request.messagesApi
+final case class RequestWithSessionData[A](sessionData: Option[SessionData], authenticatedRequest: AuthenticatedRequest[A]) extends WrappedRequest[A](authenticatedRequest) with PreferredMessagesProvider {
+  override def messagesApi: MessagesApi = authenticatedRequest.request.messagesApi
 }
 
 class SessionDataAction @Inject() (
     sessionStore: SessionStore,
     playBodyParsers: PlayBodyParsers,
     errorHandler: ErrorHandler
-)(implicit ec: ExecutionContext) extends ActionRefiner[MessagesRequest, RequestWithSessionData] with Logging {
+)(implicit ec: ExecutionContext) extends ActionRefiner[AuthenticatedRequest, RequestWithSessionData] with Logging {
 
   override protected def executionContext: ExecutionContext = ec
 
-  override protected def refine[A](request: MessagesRequest[A]): Future[Either[Result, RequestWithSessionData[A]]] = {
+  override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, RequestWithSessionData[A]]] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
     sessionStore.get().map(

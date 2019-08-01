@@ -39,11 +39,12 @@ class SessionDataActionSpec extends ControllerSpec with SessionSupport with Mock
   "SessionDataAction" must {
 
     lazy val messagesRequest = new MessagesRequest(FakeRequest(), instanceOf[MessagesApi])
+    lazy val authenticatedRequest = AuthenticatedRequest(NINO("nino"), messagesRequest)
 
     val sessionData = SessionData(Some(sample(bprGen)))
 
       def performAction(): Future[Result] =
-        action.invokeBlock[AnyContent](messagesRequest, { r =>
+        action.invokeBlock(authenticatedRequest, { r: RequestWithSessionData[_] =>
           r.sessionData shouldBe Some(sessionData)
           Future.successful(Ok)
         })

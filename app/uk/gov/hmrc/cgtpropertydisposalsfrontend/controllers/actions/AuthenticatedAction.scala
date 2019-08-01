@@ -19,20 +19,27 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.mvc.Results._
-import play.api.mvc.{ActionRefiner, MessagesRequest, PlayBodyParsers, Result}
+import play.api.mvc._
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, NoActiveSession}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.NINO
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 
+final case class AuthenticatedRequest[A](nino: NINO, request: MessagesRequest[A]) extends WrappedRequest[A](request)
+
 @Singleton
 class AuthenticatedAction @Inject() (
     authConnector: AuthConnector,
     config: Configuration,
+    errorHandler: ErrorHandler,
     playBodyParsers: PlayBodyParsers
 )(implicit ec: ExecutionContext)
-  extends ActionRefiner[MessagesRequest, MessagesRequest] { self =>
+  extends ActionRefiner[MessagesRequest, AuthenticatedRequest] with Logging { self =>
 
   val authorisedFunctions: AuthorisedFunctions = new AuthorisedFunctions {
     override def authConnector: AuthConnector = self.authConnector
@@ -44,11 +51,16 @@ class AuthenticatedAction @Inject() (
 
   val selfBaseUrl: String = config.underlying.getString("self.url")
 
-  override protected def refine[A](request: MessagesRequest[A]): Future[Either[Result, MessagesRequest[A]]] = {
+  @SuppressWarnings(Array("org.wartremover.warts.Product", "org.wartremover.warts.Serializable"))
+  override protected def refine[A](request: MessagesRequest[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-    authorisedFunctions.authorised() {
-      Future.successful(Right(request))
+    authorisedFunctions.authorised().retrieve(Retrievals.nino) {
+      case None =>
+        logger.warn("Could not find NINO")
+        Future.successful(Left(InternalServerError(errorHandler.internalServerErrorTemplate(request))))
+      case Some(nino) =>
+        Future.successful(Right(AuthenticatedRequest(NINO(nino), request)))
     }.recover {
       case _: NoActiveSession =>
         Left(Redirect(signInUrl, Map("continue" -> Seq(selfBaseUrl + request.uri), "origin" -> Seq(origin))))
@@ -58,3 +70,4 @@ class AuthenticatedAction @Inject() (
   override protected def executionContext: ExecutionContext = ec
 
 }
+
