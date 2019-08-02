@@ -43,7 +43,7 @@ class EmailVerificationConnectorImpl @Inject() (
     http: HttpClient,
     config: Configuration
 )(implicit ec: ExecutionContext) extends EmailVerificationConnector {
-g
+
   def getEmailVerificationConfig[A: Configs](key: String): A = config.underlying.get[A](s"microservice.services.email-verification.$key").value
 
   val url: String = {
