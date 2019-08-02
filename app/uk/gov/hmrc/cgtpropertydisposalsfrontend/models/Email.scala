@@ -18,14 +18,18 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import play.api.data.Form
 import play.api.data.Forms.{mapping, text}
+import play.api.libs.functional.syntax._
+import play.api.libs.json.Format
 
 final case class Email(value: String) extends AnyVal
 
 object Email {
 
+  implicit val format: Format[Email] = implicitly[Format[String]].inmap(Email(_), _.value)
+
   val form: Form[Email] = Form(
     mapping(
-      "email" -> text
+      "email" -> text.verifying("invalid", _.contains("@"))
     )(Email.apply)(Email.unapply)
   )
 

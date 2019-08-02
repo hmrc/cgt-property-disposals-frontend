@@ -16,18 +16,14 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
+import java.util.UUID
+
 import play.api.libs.json.{Format, Json}
 
-final case class SessionData(
-    ivContinueUrl: Option[String],
-    businessPartnerRecord: Option[BusinessPartnerRecord],
-    emailToBeVerified: Option[EmailToBeVerified]
-)
+final case class EmailToBeVerified(email: Email, id: UUID, verified: Boolean)
 
-object SessionData {
+object EmailToBeVerified {
 
-  implicit val format: Format[SessionData] = Json.format
-
-  val empty: SessionData = SessionData(None, None, None)
+  implicit val format: Format[EmailToBeVerified] = Json.format
 
 }

@@ -50,7 +50,7 @@ class SessionDataAction @Inject() (
       _.bimap(
         { e =>
           logger.warn("Could not get session data", e)
-          InternalServerError(errorHandler.internalServerErrorTemplate(request))
+          errorHandler.errorResult()(request)
         },
         d => RequestWithSessionData(d, request)
       )

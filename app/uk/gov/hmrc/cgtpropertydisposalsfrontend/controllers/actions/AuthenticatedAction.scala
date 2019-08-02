@@ -69,12 +69,10 @@ class AuthenticatedAction @Inject() (
   override protected def refine[A](request: MessagesRequest[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-    lazy val errorResponse = InternalServerError(errorHandler.internalServerErrorTemplate(request))
-
     authorisedFunctions.authorised(ConfidenceLevel.L200).retrieve(Retrievals.nino) {
       case None =>
         logger.warn("Could not find NINO")
-        Left(errorResponse)
+        Left(errorHandler.errorResult()(request))
 
       case Some(nino) =>
         Right(AuthenticatedRequest(NINO(nino), request))
@@ -83,7 +81,7 @@ class AuthenticatedAction @Inject() (
         Left(Redirect(signInUrl, Map("continue" -> Seq(selfBaseUrl + request.uri), "origin" -> Seq(origin))))
 
       case _: InsufficientConfidenceLevel =>
-        handleInsufficientConfidenceLevel(request, errorResponse).map(Left(_))
+        handleInsufficientConfidenceLevel(request, errorHandler.errorResult()(request)).map(Left(_))
 
     }
   }

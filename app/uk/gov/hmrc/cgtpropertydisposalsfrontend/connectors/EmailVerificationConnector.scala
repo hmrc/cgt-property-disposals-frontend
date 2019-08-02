@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
+import java.util.UUID
+
 import configs.syntax._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import configs.Configs
@@ -34,7 +36,7 @@ import scala.concurrent.duration.FiniteDuration
 @ImplementedBy(classOf[EmailVerificationConnectorImpl])
 trait EmailVerificationConnector {
 
-  def verifyEmail(email: Email)(implicit hc: HeaderCarrier): Future[HttpResponse]
+  def verifyEmail(email: Email, id: UUID)(implicit hc: HeaderCarrier): Future[HttpResponse]
 
 }
 
@@ -60,18 +62,19 @@ class EmailVerificationConnectorImpl @Inject() (
     java.time.Duration.ofMinutes(minutes).toString
   }
 
-  val continueUrl: String = {
-    val selfBaseUrl: String = config.underlying.get[String]("self.url").value
-    s"$selfBaseUrl${routes.EmailController.confirmEmail().url}"
+  val selfBaseUrl: String = config.underlying.get[String]("self.url").value
+
+  def continueUrl(id: UUID): String = {
+    s"$selfBaseUrl${routes.EmailController.verifyEmail(id).url}"
   }
 
-  def verifyEmail(email: Email)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  def verifyEmail(email: Email, id: UUID)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     val body =
       EmailVerificationRequest(
         email.value,
         templateId,
         linkExpiryTime,
-        continueUrl,
+        s"${continueUrl(id)}",
         Map.empty[String, String]
       )
     http.post(url, Json.toJson(body))

@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services
 
+import java.util.UUID
+
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
 import play.api.test.Helpers._
@@ -31,9 +33,9 @@ class EmailVerificationServiceImplSpec extends WordSpec with Matchers with MockF
 
   val mockConnector = mock[EmailVerificationConnector]
 
-  def mockVerifyEmail(expectedEmail: Email)(result: Future[HttpResponse]) =
-    (mockConnector.verifyEmail(_: Email)(_: HeaderCarrier))
-      .expects(expectedEmail, *)
+  def mockVerifyEmail(expectedEmail: Email, expectedId: UUID)(result: Future[HttpResponse]) =
+    (mockConnector.verifyEmail(_: Email, _: UUID)(_: HeaderCarrier))
+      .expects(expectedEmail, expectedId, *)
       .returning(result)
 
   val service = new EmailVerificationServiceImpl(mockConnector)
@@ -43,17 +45,18 @@ class EmailVerificationServiceImplSpec extends WordSpec with Matchers with MockF
 
       implicit val hc: HeaderCarrier = HeaderCarrier()
       val email = Email("email")
+      val id = UUID.randomUUID()
 
       "indicate when the email verification request has been requested" in {
-        mockVerifyEmail(email)(Future.successful(HttpResponse(CREATED)))
+        mockVerifyEmail(email, id)(Future.successful(HttpResponse(CREATED)))
 
-        await(service.verifyEmail(email)) shouldBe Right(EmailVerificationRequested)
+        await(service.verifyEmail(email, id)) shouldBe Right(EmailVerificationRequested)
       }
 
       "indicate when the email address has already been verified" in {
-        mockVerifyEmail(email)(Future.successful(HttpResponse(CONFLICT)))
+        mockVerifyEmail(email, id)(Future.successful(HttpResponse(CONFLICT)))
 
-        await(service.verifyEmail(email)) shouldBe Right(EmailAlreadyVerified)
+        await(service.verifyEmail(email, id)) shouldBe Right(EmailAlreadyVerified)
       }
 
       "indicate when there is an error verifying the email address" in {
@@ -61,9 +64,9 @@ class EmailVerificationServiceImplSpec extends WordSpec with Matchers with MockF
           Future.failed(new Exception("uh oh")),
           Future.successful(HttpResponse(INTERNAL_SERVER_ERROR))
         ).foreach { response =>
-            mockVerifyEmail(email)(response)
+            mockVerifyEmail(email, id)(response)
 
-            await(service.verifyEmail(email)).isLeft shouldBe true
+            await(service.verifyEmail(email, id)).isLeft shouldBe true
 
           }
 

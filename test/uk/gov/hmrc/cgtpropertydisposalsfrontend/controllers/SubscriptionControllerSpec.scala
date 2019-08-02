@@ -25,8 +25,7 @@ import play.api.mvc.Result
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core.{AuthConnector, ConfidenceLevel}
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, DateOfBirth, Error, NINO, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -49,8 +48,6 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
   lazy val controller = instanceOf[SubscriptionController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
-
-  def mockSuccessfulAuth(retrievedNino: Option[String]): Unit = mockAuth(ConfidenceLevel.L200, Retrievals.nino)(Future.successful(retrievedNino))
 
   def mockGetBusinessPartnerRecord(nino: NINO)(result: Future[Either[Error, BusinessPartnerRecord]]) =
     (mockService.getBusinessPartnerRecord(_: NINO)(_: HeaderCarrier))
@@ -78,7 +75,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
         "the call to get the BPR fails" in {
           inSequence {
-            mockSuccessfulAuth(Some(validNINO.value))
+            mockAuthWithCl200AndRetrievedNino(validNINO.value)
             mockGetSession(Future.successful(Right(Some(existingSession))))
             mockGetBusinessPartnerRecord(validNINO)(Future.successful(Left(Error("error"))))
           }
@@ -89,7 +86,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
         "the call to get BPR succeeds but it cannot be written to session" in {
 
           inSequence {
-            mockSuccessfulAuth(Some(validNINO.value))
+            mockAuthWithCl200AndRetrievedNino(validNINO.value)
             mockGetSession(Future.successful(Right(Some(existingSession))))
             mockGetBusinessPartnerRecord(validNINO)(Future.successful(Right(validBpr)))
             mockStoreSession(existingSession.copy(businessPartnerRecord = Some(validBpr)))(Future.successful(Left(Error("Oh no!"))))
@@ -108,7 +105,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
             None
           ).foreach { maybeSession =>
               inSequence {
-                mockSuccessfulAuth(Some(validNINO.value))
+                mockAuthWithCl200AndRetrievedNino(validNINO.value)
                 mockGetSession(Future.successful(Right(maybeSession)))
                 mockGetBusinessPartnerRecord(validNINO)(Future.successful(Right(validBpr)))
                 mockStoreSession(existingSession.copy(businessPartnerRecord = Some(validBpr)))(Future.successful(Right(())))
@@ -122,7 +119,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
         "one exists in session" in {
           inSequence {
-            mockSuccessfulAuth(Some(validNINO.value))
+            mockAuthWithCl200AndRetrievedNino(validNINO.value)
             mockGetSession(Future.successful(Right(Some(existingSession.copy(businessPartnerRecord = Some(validBpr))))))
           }
 
@@ -141,7 +138,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
       "redirect to the display BPR page if there is no BPR in session" in {
         inSequence {
-          mockSuccessfulAuth(Some(validNINO.value))
+          mockAuthWithCl200AndRetrievedNino(validNINO.value)
           mockGetSession(Future.successful(Right(Some(SessionData.empty))))
         }
 
@@ -152,7 +149,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
       "handle the case when the user confirms their details" in {
         inSequence {
-          mockSuccessfulAuth(Some(validNINO.value))
+          mockAuthWithCl200AndRetrievedNino(validNINO.value)
           mockGetSession(Future.successful(Right(Some(existingSession))))
         }
 

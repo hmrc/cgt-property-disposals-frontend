@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
+import java.util.UUID
+
 import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
@@ -62,6 +64,8 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
       "send a request to the email verification service with the correct details " +
         "and return the response" in {
           val email = Email("email@test.com")
+          val id = UUID.randomUUID()
+
           val body = Json.parse(
             s"""
             |{
@@ -69,7 +73,7 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
             |"templateId": "$templateId",
             |"templateParameters": { },
             |"linkExpiryDuration" : "PT${linkExpiryTimeMinutes}M",
-            |"continueUrl" : "$selfUrl${routes.EmailController.confirmEmail().url}"
+            |"continueUrl" : "$selfUrl${routes.EmailController.verifyEmail(id).url}"
             |}
             |""".stripMargin
 
@@ -82,7 +86,7 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
           ).foreach { response =>
               mockPost(expectedUrl, Map.empty[String, String], body)(Some(response))
 
-              await(connector.verifyEmail(email)) shouldBe response
+              await(connector.verifyEmail(email, id)) shouldBe response
             }
         }
 

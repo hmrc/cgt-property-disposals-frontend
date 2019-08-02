@@ -22,24 +22,17 @@
 @import views.html.helper.CSRF
 
 @this(
- mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-  formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-  submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button
+ mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template
  )
 
 
-@(form: Form[Email])(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@()(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
-@mainTemplate(title = "Emails!!") {
+@mainTemplate(title = "Look in your inbox"){
 
-<h1>Give us your email</h1>
+<h1>Look in your inbox</h1>
 
- @formWrapper(routes.EmailController.enterEmailSubmit()) {
- <label> Enter your email</label>
- <input id="email" name ="email" type="email" @form.data.get("email").map{ e => value="@e"} >
-
-  @submitButton("Give it to us")
- }
-
+<p>!!!NOW!!!!</p>
+<p>You've only got 10 seconds to do it</p>
 
 }

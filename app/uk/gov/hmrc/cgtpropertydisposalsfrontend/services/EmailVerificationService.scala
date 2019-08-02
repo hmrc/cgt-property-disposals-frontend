@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services
 
+import java.util.UUID
+
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.{CONFLICT, CREATED}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.EmailVerificationConnector
@@ -29,7 +31,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[EmailVerificationServiceImpl])
 trait EmailVerificationService {
 
-  def verifyEmail(email: Email)(implicit hc: HeaderCarrier): Future[Either[Error, EmailVerificationResponse]]
+  def verifyEmail(email: Email, id: UUID)(implicit hc: HeaderCarrier): Future[Either[Error, EmailVerificationResponse]]
 
 }
 
@@ -50,8 +52,8 @@ object EmailVerificationService {
 @Singleton
 class EmailVerificationServiceImpl @Inject() (connector: EmailVerificationConnector)(implicit ec: ExecutionContext) extends EmailVerificationService {
 
-  def verifyEmail(email: Email)(implicit hc: HeaderCarrier): Future[Either[Error, EmailVerificationResponse]] =
-    connector.verifyEmail(email).map[Either[Error, EmailVerificationResponse]] { response =>
+  def verifyEmail(email: Email, id: UUID)(implicit hc: HeaderCarrier): Future[Either[Error, EmailVerificationResponse]] =
+    connector.verifyEmail(email, id).map[Either[Error, EmailVerificationResponse]] { response =>
       response.status match {
         case CREATED =>
           Right(EmailVerificationRequested)
