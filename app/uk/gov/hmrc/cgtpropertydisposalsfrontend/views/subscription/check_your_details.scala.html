@@ -62,7 +62,7 @@
    @cyaRow(
     messages("subscription.cyaLabel.email"),
     Html(e),
-    Some(cyaChange(messages("subscription.cyaChange.email"), "#"))
+    Some(cyaChange(messages("subscription.cyaChange.email"), routes.EmailController.enterEmail().url))
    )
   }
  }

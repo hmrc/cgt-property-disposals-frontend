@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.Matchers
+import play.api.libs.json.Writes
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
@@ -41,5 +42,10 @@ trait HttpSupport { this: MockFactory with Matchers ⇒
         true
       })
       .returning(response.fold(Future.failed[A](new Exception("Test exception message")))(Future.successful))
+
+  def mockPost[A](url: String, headers: Map[String, String], body: A)(result: Option[HttpResponse]): Unit =
+    (mockHttp.POST(_: String, _: A, _: Seq[(String, String)])(_: Writes[A], _: HttpReads[HttpResponse], _: HeaderCarrier, _: ExecutionContext))
+      .expects(url, body, headers.toSeq, *, *, *, *)
+      .returning(result.fold[Future[HttpResponse]](Future.failed(new Exception("Test exception message")))(Future.successful))
 
 }
