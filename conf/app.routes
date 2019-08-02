@@ -1,10 +1,12 @@
-# microservice specific routes
 GET /                                     controllers.Default.redirect(to = "/cgt-property-disposals/landing-page")
 GET /landing-page                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.LandingPageController.landingPage()
 
-GET  /subscription/nino                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SubscriptionController.getNino()
-POST /subscription/nino                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SubscriptionController.getNinoSubmit()
-GET  /subscription/date-of-birth          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SubscriptionController.getDateOfBirth()
-POST /subscription/date-of-birth          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SubscriptionController.getDateOfBirthSubmit()
+
+#### IV
+GET  /iv/success                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.IvController.ivSuccess()
+GET  /iv/failure                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.IvController.ivFailure(journeyId: java.util.UUID)
+
+
+#### Subscription
 GET  /subscription/check-your-details     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SubscriptionController.checkYourDetails()
 POST /subscription/check-your-details     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SubscriptionController.checkYourDetailsSubmit()

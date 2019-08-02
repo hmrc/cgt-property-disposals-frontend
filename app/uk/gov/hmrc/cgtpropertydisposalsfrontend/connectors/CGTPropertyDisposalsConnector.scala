@@ -16,12 +16,9 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
-import java.time.LocalDate
-
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import play.api.libs.json.Json
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Address, BusinessPartnerRecord, DateOfBirth, NINO}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.NINO
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient

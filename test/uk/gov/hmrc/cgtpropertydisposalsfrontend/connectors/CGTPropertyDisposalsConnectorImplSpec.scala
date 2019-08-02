@@ -46,7 +46,7 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
 
   val connector = new CGTPropertyDisposalsConnectorImpl(mockHttp, new ServicesConfig(config, new RunMode(config, Mode.Test)))
 
-  "CGTPropertyDisposalsConnectorImpl" ignore {
+  "CGTPropertyDisposalsConnectorImpl" when {
 
     "handling request to get the business partner record" must {
 
@@ -60,7 +60,7 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
           HttpResponse(500)
         ).foreach { httpResponse =>
             withClue(s"For http response [${httpResponse.toString}]") {
-              mockGet(s"http://host:123/${nino.value}/business-partner-record")(Some(httpResponse))
+              mockGet(s"http://host:123/cgt-property-disposals/${nino.value}/business-partner-record")(Some(httpResponse))
 
               await(connector.getBusinessPartnerRecord(nino)) shouldBe httpResponse
             }

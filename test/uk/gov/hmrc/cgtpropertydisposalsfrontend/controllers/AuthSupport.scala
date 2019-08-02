@@ -21,19 +21,22 @@ import play.api.mvc.PlayBodyParsers
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.AuthenticatedAction
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait AuthSupport { this: ControllerSpec =>
+trait AuthSupport { this: ControllerSpec with SessionSupport =>
 
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
 
   lazy val testAuthenticatedAction = new AuthenticatedAction(
     mockAuthConnector,
     instanceOf[Configuration],
-    instanceOf[PlayBodyParsers]
+    instanceOf[ErrorHandler],
+    instanceOf[PlayBodyParsers],
+    mockSessionStore
   )(instanceOf[ExecutionContext])
 
   def mockAuth[R](predicate: Predicate, retrieval: Retrieval[R])(result: Future[R]): Unit =

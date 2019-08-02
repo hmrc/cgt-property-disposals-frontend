@@ -55,7 +55,7 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
           def testError(response: => Future[HttpResponse]) = {
             mockGetBPR(nino)(response)
 
-            await(service.getBusinessPartnerRecord(nino, dob)).isLeft shouldBe true
+            await(service.getBusinessPartnerRecord(nino)).isLeft shouldBe true
           }
 
         "the connector fails to make the call" in {
@@ -81,7 +81,7 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
         "the json body returns a bpr with a matching dob" in {
           mockGetBPR(nino)(Future.successful(HttpResponse(200, Some(Json.toJson(bpr)))))
 
-          await(service.getBusinessPartnerRecord(nino, dob)) shouldBe Right(bpr)
+          await(service.getBusinessPartnerRecord(nino)) shouldBe Right(bpr)
         }
 
     }

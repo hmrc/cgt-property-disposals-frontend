@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
+package uk.gov.hmrc.cgtpropertydisposalsfrontend
 
-final case class NINO(value: String) extends AnyVal
+import org.scalacheck.Gen
+import uk.gov.hmrc.smartstub.AutoGen
+
+import scala.reflect._
+
+package object models {
+
+  def sample[A: ClassTag](gen: Gen[A]): A = gen.sample.getOrElse(sys.error(s"Could not generate instance of ${classTag[A].runtimeClass.getSimpleName}"))
+
+  val bprGen = AutoGen[BusinessPartnerRecord]
+
+}

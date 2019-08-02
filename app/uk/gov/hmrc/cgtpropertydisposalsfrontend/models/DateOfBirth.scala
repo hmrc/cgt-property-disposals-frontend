@@ -34,47 +34,4 @@ object DateOfBirth {
 
   implicit val format: Format[DateOfBirth] = implicitly[Format[LocalDate]].inmap(DateOfBirth(_), _.value)
 
-  implicit val eq: Eq[DateOfBirth] = Eq.instance((d1, d2) => d1.value.isEqual(d2.value))
-
-  object Ids {
-    val day = "dob-day"
-    val month = "dob-month"
-    val year = "dob-year"
-    val dob = "dob"
-  }
-
-  private val dateOfBirthFormatter: Formatter[LocalDate] = new Formatter[LocalDate] {
-    def validatedFromBoolean[A](a: A)(predicate: A ⇒ Boolean, ifFalse: ⇒ String): Either[String, A] =
-      if (predicate(a)) Right(a) else Left(ifFalse)
-
-    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], LocalDate] = {
-      lazy val today = LocalDate.now(Clock.systemUTC())
-      lazy val todayMinus16Years = today.minusYears(16L)
-
-      val dob: Option[LocalDate] = for {
-        d <- data.get(Ids.day).map(_.trim)
-        m <- data.get(Ids.month).map(_.trim)
-        y <- data.get(Ids.year).map(_.trim)
-        dob <- Try(LocalDate.of(y.toInt, m.toInt, d.toInt)).toOption
-      } yield dob
-
-      val result = for {
-        d <- Either.fromOption(dob, "invalid")
-        _ <- validatedFromBoolean(d)(d => d.isBefore(todayMinus16Years) || d.isEqual(todayMinus16Years), "invalid")
-      } yield d
-
-      result.leftMap(e => Seq(FormError(Ids.dob, e)))
-    }
-
-    override def unbind(key: String, value: LocalDate): Map[String, String] =
-      Map(Ids.day -> value.getDayOfMonth.toString, Ids.month -> value.getMonthValue.toString, Ids.year -> value.getYear.toString)
-  }
-
-  val dobForm: Form[DateOfBirth] =
-    Form(
-      mapping(
-        Ids.dob -> of(dateOfBirthFormatter)
-      )(DateOfBirth.apply)(DateOfBirth.unapply)
-    )
-
 }

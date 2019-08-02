@@ -19,8 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import play.api.libs.json.{Format, Json}
 
 final case class SessionData(
-    nino: Option[NINO],
-    dob: Option[DateOfBirth],
+    ivContinueUrl: Option[String],
     businessPartnerRecord: Option[BusinessPartnerRecord]
 )
 
@@ -28,6 +27,6 @@ object SessionData {
 
   implicit val format: Format[SessionData] = Json.format
 
-  val empty: SessionData = SessionData(None, None, None)
+  val empty: SessionData = SessionData(None, None)
 
 }
