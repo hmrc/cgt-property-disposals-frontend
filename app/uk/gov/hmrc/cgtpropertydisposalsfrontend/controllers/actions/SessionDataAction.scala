@@ -17,10 +17,9 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
 import cats.syntax.either._
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import play.api.i18n.MessagesApi
 import play.api.mvc._
-import play.api.mvc.Results._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -35,6 +34,7 @@ final case class RequestWithSessionData[A](sessionData: Option[SessionData], aut
   override def messagesApi: MessagesApi = authenticatedRequest.request.messagesApi
 }
 
+@Singleton
 class SessionDataAction @Inject() (
     sessionStore: SessionStore,
     playBodyParsers: PlayBodyParsers,
