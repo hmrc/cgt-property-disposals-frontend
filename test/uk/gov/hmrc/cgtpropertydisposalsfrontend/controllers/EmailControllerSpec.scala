@@ -276,7 +276,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
           val result = controller.checkYourInbox()(FakeRequest())
           status(result) shouldBe OK
-          contentAsString(result) should include("Look in your inbox")
+          contentAsString(result) should include(message("confirmEmail.title"))
 
         }
 
@@ -432,7 +432,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
           val result = controller.emailVerified()(FakeRequest())
           status(result) shouldBe OK
-          contentAsString(result) should include("Email verified")
+          contentAsString(result) should include(message("confirmEmail.verified.title"))
         }
 
       }

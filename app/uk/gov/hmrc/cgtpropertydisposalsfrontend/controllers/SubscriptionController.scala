@@ -76,7 +76,4 @@ class SubscriptionController @Inject() (
     }
   }
 
-  protected def updateSession(sessionStore: SessionStore)(update: SessionData => SessionData)(implicit request: RequestWithSessionData[_], hc: HeaderCarrier): Future[Either[Error, Unit]] =
-    sessionStore.store(update(request.sessionData.getOrElse(SessionData.empty)))
-
 }

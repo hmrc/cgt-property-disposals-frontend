@@ -16,9 +16,16 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend
 
-import play.api.mvc.MessagesRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.http.HeaderCarrier
+
+import scala.concurrent.Future
 
 package object controllers {
+
+  def updateSession(sessionStore: SessionStore)(update: SessionData => SessionData)(implicit request: RequestWithSessionData[_], hc: HeaderCarrier): Future[Either[Error, Unit]] =
+    sessionStore.store(update(request.sessionData.getOrElse(SessionData.empty)))
 
 }
