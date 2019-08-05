@@ -38,14 +38,7 @@
 @extraContentIdWithContent = @{extraContent.map(extraContentKey -> _)}
 
 @describedByKeys = @{
-  if(hintIdWithHintText.nonEmpty && extraContentIdWithContent.nonEmpty) {
-    s"$extraContentKey $hintTextKey"
-  } else if (hintIdWithHintText.nonEmpty) {
-    hintTextKey
-  } else if (extraContentIdWithContent.nonEmpty) {
-    extraContentKey
-  } else { "" }
-}
+  List(hintIdWithHintText.map(_._1), extraContentIdWithContent.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
 
 @fieldLabel = {
   @if(labelAsHeading) {
