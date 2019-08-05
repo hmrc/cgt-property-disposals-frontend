@@ -16,6 +16,10 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
+import cats.Eq
+import cats.syntax.eq._
+import cats.instances.string._
+
 import play.api.data.Form
 import play.api.data.Forms.{mapping, text}
 import play.api.libs.functional.syntax._
@@ -26,6 +30,8 @@ final case class Email(value: String) extends AnyVal
 object Email {
 
   implicit val format: Format[Email] = implicitly[Format[String]].inmap(Email(_), _.value)
+
+  implicit val eq: Eq[Email] = Eq.instance(_.value === _.value)
 
   val form: Form[Email] = Form(
     mapping(

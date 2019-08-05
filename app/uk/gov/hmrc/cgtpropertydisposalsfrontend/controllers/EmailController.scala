@@ -65,15 +65,18 @@ class EmailController @Inject() (
   }
 
   def enterEmailSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    request.sessionData.flatMap(_.businessPartnerRecord) match {
-      case None =>
+    (request.sessionData.flatMap(_.businessPartnerRecord), request.sessionData.flatMap(_.emailToBeVerified)) match {
+      case (None, _) =>
         SeeOther(routes.SubscriptionController.checkYourDetails().url)
 
-      case Some(_) =>
+      case (Some(_), existingEmailToBeVerified) =>
         Email.form.bindFromRequest().fold(
           formWithErrors => BadRequest(enterEmail(formWithErrors)),
           { email =>
-            val emailToBeVerified = EmailToBeVerified(email, uuidGenerator.nextId(), verified = false)
+            val emailToBeVerified = existingEmailToBeVerified match {
+              case Some(e) if e.email === email => e
+              case _                            => EmailToBeVerified(email, uuidGenerator.nextId(), verified = false)
+            }
 
             val result = for {
               _ <- EitherT(updateSession(sessionStore)(_.copy(emailToBeVerified = Some(emailToBeVerified))))
