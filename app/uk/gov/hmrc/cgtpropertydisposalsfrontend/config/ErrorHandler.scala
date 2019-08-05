@@ -17,9 +17,9 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.config
 
 import javax.inject.{Inject, Singleton}
-
 import play.api.i18n.MessagesApi
-import play.api.mvc.Request
+import play.api.mvc.{Request, Result}
+import play.api.mvc.Results.InternalServerError
 import play.twirl.api.Html
 import uk.gov.hmrc.play.bootstrap.http.FrontendErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -33,5 +33,7 @@ class ErrorHandler @Inject() (
 
   override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit request: Request[_]): Html =
     error_template(pageTitle, heading, message)
+
+  def errorResult()(implicit request: Request[_]): Result = InternalServerError(internalServerErrorTemplate)
 
 }

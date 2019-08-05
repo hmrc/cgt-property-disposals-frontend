@@ -16,10 +16,9 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services
 
-import cats.instances.int._
 import cats.syntax.either._
-import cats.syntax.eq._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
+import play.api.http.Status.OK
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, Error, NINO}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
@@ -40,10 +39,9 @@ class BusinessPartnerRecordServiceImpl @Inject() (connector: CGTPropertyDisposal
   override def getBusinessPartnerRecord(nino: NINO)(implicit hc: HeaderCarrier): Future[Either[Error, BusinessPartnerRecord]] =
     connector.getBusinessPartnerRecord(nino)
       .map { response =>
-        if (response.status === 200) {
-          response.parseJSON[BusinessPartnerRecord]().leftMap(Error.apply)
-        } else {
-          Left(Error(s"Call to get BPR came back with status ${response.status}"))
+        response.status match {
+          case OK    => response.parseJSON[BusinessPartnerRecord]().leftMap(Error.apply)
+          case other => Left(Error(s"Call to get BPR came back with status $other"))
         }
       }
       .recover {

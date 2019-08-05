@@ -18,9 +18,10 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import play.api.Configuration
 import play.api.mvc.PlayBodyParsers
-import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.auth.core.{AuthConnector, ConfidenceLevel}
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.AuthenticatedAction
 import uk.gov.hmrc.http.HeaderCarrier
@@ -43,4 +44,8 @@ trait AuthSupport { this: ControllerSpec with SessionSupport =>
     (mockAuthConnector.authorise(_: Predicate, _: Retrieval[R])(_: HeaderCarrier, _: ExecutionContext))
       .expects(predicate, retrieval, *, *)
       .returning(result)
+
+  def mockAuthWithCl200AndRetrievedNino(retrievedNino: String): Unit =
+    mockAuth(ConfidenceLevel.L200, Retrievals.nino)(Future.successful(Some(retrievedNino)))
+
 }

@@ -16,18 +16,27 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import play.api.libs.json.{Format, Json}
+import cats.Eq
+import cats.syntax.eq._
+import cats.instances.string._
 
-final case class SessionData(
-    ivContinueUrl: Option[String],
-    businessPartnerRecord: Option[BusinessPartnerRecord],
-    emailToBeVerified: Option[EmailToBeVerified]
-)
+import play.api.data.Form
+import play.api.data.Forms.{mapping, text}
+import play.api.libs.functional.syntax._
+import play.api.libs.json.Format
 
-object SessionData {
+final case class Email(value: String) extends AnyVal
 
-  implicit val format: Format[SessionData] = Json.format
+object Email {
 
-  val empty: SessionData = SessionData(None, None, None)
+  implicit val format: Format[Email] = implicitly[Format[String]].inmap(Email(_), _.value)
+
+  implicit val eq: Eq[Email] = Eq.instance(_.value === _.value)
+
+  val form: Form[Email] = Form(
+    mapping(
+      "email" -> text.verifying("invalid", _.contains("@"))
+    )(Email.apply)(Email.unapply)
+  )
 
 }

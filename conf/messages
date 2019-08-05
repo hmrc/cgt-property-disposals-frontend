@@ -5,6 +5,7 @@ label.beta=Alpha
 button.startNow=Start now
 button.continue=Continue
 button.confirmAndContinue=Confirm and continue
+button.resendEmail=Resend email
 
 generic.warning=Warning
 generic.day=Day
@@ -44,3 +45,20 @@ subscription.cyaChange.address=your home address
 subscription.cyaLabel.email=Email address
 subscription.cyaChange.email=your email address
 subscription.confirm=Before you continue you must confirm your details are correct.
+
+email.title=Enter the new email address
+email.helpText=For example, name@example.com
+email.extraContent=The email addresses you use for other government services will not change.
+email.invalid=Please enter a valid email address
+
+confirmEmail.title=You have 30 minutes to confirm your email address
+confirmEmail.sentEmail=We’ve sent an email to you at {0}.
+confirmEmail.changeAgain=Use a different email address.
+confirmEmail.whatYouCanDo=What you need to do
+confirmEmail.gotoEmail=Go to that email account and select the link in the email we sent you.
+confirmEmail.ifNoEmail=If the email did not arrive
+confirmEmail.noEmailAction=You can tell us to resend the email to that email account.
+confirmEmail.verified.title=Email address verified
+confirmEmail.verified.intro={0} has been verified.
+confirmEmail.verified.p1=We’ll use this address to contact you about your Capital Gains Tax.
+confirmEmail.verified.p2=Your email has not been updated in other government services.

@@ -28,6 +28,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordSe
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -51,13 +52,13 @@ class SubscriptionController @Inject() (
       case None =>
         val result = for {
           bpr <- EitherT(bprService.getBusinessPartnerRecord(request.authenticatedRequest.nino))
-          _ <- EitherT(updateSession(_.copy(businessPartnerRecord = Some(bpr))))
+          _ <- EitherT(updateSession(sessionStore)(_.copy(businessPartnerRecord = Some(bpr))))
         } yield bpr
 
         result.value.map {
           case Left(e) =>
             logger.warn("Error while getting BPR", e)
-            InternalServerError(errorHandler.internalServerErrorTemplate)
+            errorHandler.errorResult()
 
           case Right(bpr) =>
             Ok(checkYourDetailsPage(bpr))
@@ -75,8 +76,4 @@ class SubscriptionController @Inject() (
     }
   }
 
-  private def updateSession(update: SessionData => SessionData)(implicit request: RequestWithSessionData[_]): Future[Either[Error, Unit]] =
-    sessionStore.store(update(request.sessionData.getOrElse(SessionData.empty)))
-
 }
-

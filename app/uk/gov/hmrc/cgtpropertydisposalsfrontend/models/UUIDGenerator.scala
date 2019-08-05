@@ -16,18 +16,20 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import play.api.libs.json.{Format, Json}
+import java.util.UUID
 
-final case class SessionData(
-    ivContinueUrl: Option[String],
-    businessPartnerRecord: Option[BusinessPartnerRecord],
-    emailToBeVerified: Option[EmailToBeVerified]
-)
+import com.google.inject.{ImplementedBy, Singleton}
 
-object SessionData {
+@ImplementedBy(classOf[UUIDGeneratorImpl])
+trait UUIDGenerator {
 
-  implicit val format: Format[SessionData] = Json.format
+  def nextId(): UUID
 
-  val empty: SessionData = SessionData(None, None, None)
+}
+
+@Singleton
+class UUIDGeneratorImpl extends UUIDGenerator {
+
+  def nextId(): UUID = UUID.randomUUID()
 
 }

@@ -16,18 +16,19 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import play.api.libs.json.{Format, Json}
+import org.scalatest.{FunSuite, Matchers, WordSpec}
 
-final case class SessionData(
-    ivContinueUrl: Option[String],
-    businessPartnerRecord: Option[BusinessPartnerRecord],
-    emailToBeVerified: Option[EmailToBeVerified]
-)
+class UUIDGeneratorImplSpec extends WordSpec with Matchers {
 
-object SessionData {
+  "UUIDIDGeneratorImpl" must {
 
-  implicit val format: Format[SessionData] = Json.format
+    "generate random UUID's" in {
+      val generator = new UUIDGeneratorImpl()
 
-  val empty: SessionData = SessionData(None, None, None)
+      val list = List.fill(100)(generator.nextId())
+      list.distinct shouldBe list
+    }
+
+  }
 
 }

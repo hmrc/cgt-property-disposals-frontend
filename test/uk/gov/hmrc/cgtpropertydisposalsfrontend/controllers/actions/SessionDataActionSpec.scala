@@ -16,12 +16,10 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
-import java.time.LocalDate
-
 import org.scalamock.scalatest.MockFactory
 import play.api.i18n.MessagesApi
 import play.api.mvc.Results.Ok
-import play.api.mvc.{AnyContent, MessagesRequest, PlayBodyParsers, Result}
+import play.api.mvc.{MessagesRequest, PlayBodyParsers, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
@@ -41,7 +39,7 @@ class SessionDataActionSpec extends ControllerSpec with SessionSupport with Mock
     lazy val messagesRequest = new MessagesRequest(FakeRequest(), instanceOf[MessagesApi])
     lazy val authenticatedRequest = AuthenticatedRequest(NINO("nino"), messagesRequest)
 
-    val sessionData = SessionData(Some("iv-continue"), Some(sample(bprGen)))
+    val sessionData = sample(sessionGen)
 
       def performAction(): Future[Result] =
         action.invokeBlock(authenticatedRequest, { r: RequestWithSessionData[_] =>

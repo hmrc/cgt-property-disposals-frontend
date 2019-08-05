@@ -25,12 +25,21 @@
   helpText: Option[Html],
   labelAsHeading: Boolean,
   errorKey: Option[String],
-  hasErrors: Boolean
+  hasErrors: Boolean,
+  extraContent: Option[Html] = None,
+  inputType: Option[String] = Some("text")
 )(implicit messages: Messages)
 
 @classes = @{if(hasErrors) "form-group form-group-error" else "form-group" }
 @inputClasses = @{if(hasErrors) "form-control form-control-error" else "form-control" }
-@hintIdWithHintText = @{helpText.map(s"${{fieldId}}-form-hint" -> _)}
+@hintTextKey = @{s"${{fieldId}}-form-hint"}
+@extraContentKey = @{s"${{fieldId}}-extra-content"}
+@hintIdWithHintText = @{helpText.map(hintTextKey -> _)}
+@extraContentIdWithContent = @{extraContent.map(extraContentKey -> _)}
+
+@describedByKeys = @{
+  List(hintIdWithHintText.map(_._1), extraContentIdWithContent.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
+
 @fieldLabel = {
   @if(labelAsHeading) {
     <h1><label for="@{fieldId}" class="heading-xlarge">@{label}</label></h1>
@@ -41,6 +50,11 @@
 
 <div class="@classes">
   @fieldLabel
+  @extraContentIdWithContent.map { case (id, text) =>
+    <div id="@id">
+      @text
+    </div>
+  }
   @hintIdWithHintText.map { case (id, text) =>
     <span id="@id" class="form-hint">
       @text
@@ -52,8 +66,8 @@
   <input
    class="@inputClasses"
    id="@fieldId"
-   type="text"
+   type="@inputType"
    name="@fieldId"
    value="@value"
-   @hintIdWithHintText.map{ case (id,_) =>  aria-describedby="@id" }>
+   @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
 </div>

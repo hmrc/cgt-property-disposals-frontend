@@ -16,23 +16,18 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
-import java.net.URLEncoder
-
 import cats.syntax.either._
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.mvc.Results.{InternalServerError, _}
 import play.api.mvc._
-import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, ConfidenceLevel, InsufficientConfidenceLevel, NoActiveSession}
+import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{NINO, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.toFuture
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
@@ -74,12 +69,10 @@ class AuthenticatedAction @Inject() (
   override protected def refine[A](request: MessagesRequest[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-    lazy val errorResponse = InternalServerError(errorHandler.internalServerErrorTemplate(request))
-
     authorisedFunctions.authorised(ConfidenceLevel.L200).retrieve(Retrievals.nino) {
       case None =>
         logger.warn("Could not find NINO")
-        Left(errorResponse)
+        Left(errorHandler.errorResult()(request))
 
       case Some(nino) =>
         Right(AuthenticatedRequest(NINO(nino), request))
@@ -88,7 +81,7 @@ class AuthenticatedAction @Inject() (
         Left(Redirect(signInUrl, Map("continue" -> Seq(selfBaseUrl + request.uri), "origin" -> Seq(origin))))
 
       case _: InsufficientConfidenceLevel =>
-        handleInsufficientConfidenceLevel(request, errorResponse).map(Left(_))
+        handleInsufficientConfidenceLevel(request, errorHandler.errorResult()(request)).map(Left(_))
 
     }
   }

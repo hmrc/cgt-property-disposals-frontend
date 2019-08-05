@@ -27,4 +27,20 @@ package object models {
 
   val bprGen = AutoGen[BusinessPartnerRecord]
 
+  // autogen for Boolean seems to be broken so we have to do it manually here
+  val sessionGen = {
+    val emailToBeVerifiedGen = for {
+      emailLocal <- Gen.alphaStr
+      emailDomain <- Gen.alphaStr
+      uuid <- Gen.uuid
+      verified <- Gen.oneOf(true, false)
+    } yield EmailToBeVerified(Email(s"$emailLocal@$emailDomain"), uuid, verified)
+
+    for {
+      url <- Gen.alphaStr
+      bpr <- bprGen
+      emailToBeVerified <- emailToBeVerifiedGen
+    } yield SessionData(Some(url), Some(bpr), Some(emailToBeVerified))
+  }
+
 }
