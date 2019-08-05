@@ -58,3 +58,7 @@ confirmEmail.whatYouCanDo=What you need to do
 confirmEmail.gotoEmail=Go to that email account and select the link in the email we sent you.
 confirmEmail.ifNoEmail=If the email did not arrive
 confirmEmail.noEmailAction=You can tell us to resend the email to that email account.
+confirmEmail.verified.title=Email address verified
+confirmEmail.verified.intro={0} has been verified.
+confirmEmail.verified.p1=We’ll use this address to contact you about your Capital Gains Tax.
+confirmEmail.verified.p2=Your email has not been updated in other government services.

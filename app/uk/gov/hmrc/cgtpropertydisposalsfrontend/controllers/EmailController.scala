@@ -148,7 +148,7 @@ class EmailController @Inject() (
 
       case (Some(_), Some(emailToBeVerified)) =>
         if (emailToBeVerified.verified) {
-          Ok(emailVerifiedPage())
+          Ok(emailVerifiedPage(emailToBeVerified.email))
         } else {
           logger.warn("Email verified endpoint called but email was not verified")
           errorHandler.errorResult()

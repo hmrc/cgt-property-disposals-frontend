@@ -22,14 +22,21 @@
 @import views.html.helper.CSRF
 
 @this(
- mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template
- )
+ mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+ pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
+)
 
+@(email: Email)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
-@()(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@title = @{messages("confirmEmail.verified.title")}
 
-@mainTemplate(title = "Email verified"){
+@mainTemplate(title = title){
 
-<h1>Email been verified</h1>
+ @pageHeading(title)
+ <p class="lede">@messages("confirmEmail.verified.intro", email.value)</p>
+ <p>@messages("confirmEmail.verified.p1")</p>
+ <p>@messages("confirmEmail.verified.p2")</p>
+
+ <a class="button" role="button" href="@{routes.SubscriptionController.checkYourDetails()}">Continue</a>
 
 }
