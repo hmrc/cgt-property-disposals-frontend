@@ -52,7 +52,7 @@
    errorKey = form.error(key).map(e => e.message),
    value = form.data.getOrElse(key, ""),
    hasErrors = hasErrors,
-   extraContent = Some(Html(messages("email.extraContent"))),
+   extraContent = Some(Html(s"""<p class="lede">${messages("email.extraContent")}</p>""")),
    inputType = Some("email")
   )
 

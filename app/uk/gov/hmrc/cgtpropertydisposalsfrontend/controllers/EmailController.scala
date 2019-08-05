@@ -101,8 +101,8 @@ class EmailController @Inject() (
       case (None, _) | (_, None) =>
         SeeOther(routes.SubscriptionController.checkYourDetails().url)
 
-      case (Some(_), Some(_)) =>
-        Ok(checkYourInboxPage())
+      case (Some(_), Some(emailToBeVerified)) =>
+        Ok(checkYourInboxPage(emailToBeVerified.email))
     }
 
   }

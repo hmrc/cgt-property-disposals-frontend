@@ -22,17 +22,49 @@
 @import views.html.helper.CSRF
 
 @this(
- mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template
- )
+ mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+ formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+ pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+ submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button
+)
 
+@(email: Email)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
-@()(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@title = @{messages("confirmEmail.title")}
 
-@mainTemplate(title = "Look in your inbox"){
+@mainTemplate(title = title) {
 
-<h1>Look in your inbox</h1>
+ @pageHeading(title, Some(messages("subscription.caption")))
 
-<p>!!!NOW!!!!</p>
-<p>You've only got 10 seconds to do it</p>
+ <p>
+  @messages("confirmEmail.sentEmail", email.value)
+ </p>
+
+ <p>
+  <a href="@{routes.EmailController.enterEmail()}">
+   @messages("confirmEmail.changeAgain")
+  </a>
+ </p>
+
+ <h2 class="heading-medium">
+  @messages("confirmEmail.whatYouCanDo")
+ </h2>
+
+ <p>
+  @messages("confirmEmail.gotoEmail")
+ </p>
+
+ <h2 class="heading-medium">
+  @messages("confirmEmail.ifNoEmail")
+ </h2>
+
+ <p>
+  @messages("confirmEmail.noEmailAction")
+ </p>
+
+ @formWrapper(routes.EmailController.enterEmailSubmit(), 'novalidate -> "novalidate") {
+  <input type="hidden" name="email" value="@{email.value}" />
+  @submitButton(messages("button.resendEmail"))
+ }
 
 }

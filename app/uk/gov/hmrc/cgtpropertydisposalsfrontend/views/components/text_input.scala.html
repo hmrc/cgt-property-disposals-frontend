@@ -58,9 +58,9 @@
 <div class="@classes">
   @fieldLabel
   @extraContentIdWithContent.map { case (id, text) =>
-    <p class="lede" id="@id">
+    <div id="@id">
       @text
-    </p>
+    </div>
   }
   @hintIdWithHintText.map { case (id, text) =>
     <span id="@id" class="form-hint">
