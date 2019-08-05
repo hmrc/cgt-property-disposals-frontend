@@ -23,23 +23,40 @@
 
 @this(
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-  formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-  submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button
- )
-
+ errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+ formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+ pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+ textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
+ submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button
+)
 
 @(form: Form[Email])(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
-@mainTemplate(title = "Emails!!") {
+@key = @{"email"}
+@title = @{messages("email.title")}
+@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@labelWithCaption = @{Html(s"""<span class="heading-secondary">${messages("subscription.caption")}</span>$title""")}
 
-<h1>Give us your email</h1>
+@mainTemplate(title = title, hasErrors = hasErrors) {
 
- @formWrapper(routes.EmailController.enterEmailSubmit()) {
- <label> Enter your email</label>
- <input id="email" name ="email" type="email" @form.data.get("email").map{ e => value="@e"} >
+ @if(hasErrors) {
+   @errorSummary(form)
+  }
 
-  @submitButton("Give it to us")
+ @formWrapper(routes.EmailController.enterEmailSubmit(), 'novalidate -> "novalidate") {
+  @textInput(
+   fieldId = key,
+   label = labelWithCaption,
+   helpText = Some(Html(messages("email.helpText"))),
+   labelAsHeading = true,
+   errorKey = form.error(key).map(e => e.message),
+   value = form.data.getOrElse(key, ""),
+   hasErrors = hasErrors,
+   extraContent = Some(Html(messages("email.extraContent"))),
+   inputType = Some("email")
+  )
+
+  @submitButton(messages("button.continue"))
  }
-
 
 }

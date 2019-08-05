@@ -44,3 +44,8 @@ subscription.cyaChange.address=your home address
 subscription.cyaLabel.email=Email address
 subscription.cyaChange.email=your email address
 subscription.confirm=Before you continue you must confirm your details are correct.
+
+email.title=Enter the new email address
+email.helpText=For example, name@example.com
+email.extraContent=The email addresses you use for other government services will not change.
+email.invalid=Please enter a valid email address
