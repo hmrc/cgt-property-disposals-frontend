@@ -30,13 +30,18 @@
 
 @title = @{messages("confirmEmail.verified.title")}
 
-@mainTemplate(title = title){
-
+@mainTemplate(title = title) {
  @pageHeading(title)
- <p class="lede">@messages("confirmEmail.verified.intro", email.value)</p>
- <p>@messages("confirmEmail.verified.p1")</p>
- <p>@messages("confirmEmail.verified.p2")</p>
-
- <a class="button" role="button" href="@{routes.SubscriptionController.checkYourDetails()}">Continue</a>
-
+ <p class="lede">
+  @messages("confirmEmail.verified.intro", email.value)
+ </p>
+ <p>
+  @messages("confirmEmail.verified.p1")
+ </p>
+ <p>
+  @messages("confirmEmail.verified.p2")
+ </p>
+ <a class="button" role="button" href="@{routes.SubscriptionController.checkYourDetails()}">
+  @messages("button.continue")
+ </a>
 }
