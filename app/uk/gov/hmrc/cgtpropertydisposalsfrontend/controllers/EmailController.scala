@@ -49,7 +49,8 @@ class EmailController @Inject() (
     errorHandler: ErrorHandler,
     cc: MessagesControllerComponents,
     enterEmail: views.html.subscription.enter_email,
-    checkYourInboxPage: views.html.subscription.check_your_inbox
+    checkYourInboxPage: views.html.subscription.check_your_inbox,
+    emailVerifiedPage: views.html.subscription.email_verified
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext) extends FrontendController(cc) with WithActions with Logging {
 
   def enterEmail(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
@@ -111,7 +112,7 @@ class EmailController @Inject() (
       case (None, _) | (_, None) =>
         SeeOther(routes.SubscriptionController.checkYourDetails().url)
 
-      case (Some(_), Some(emailToBeVerified)) =>
+      case (Some(bpr), Some(emailToBeVerified)) =>
         if (emailToBeVerified.id =!= p) {
           logger.warn(s"Received verify email request where id sent ($p) did not match the id in session (${emailToBeVerified.id})")
           errorHandler.errorResult()
@@ -119,7 +120,12 @@ class EmailController @Inject() (
           if (emailToBeVerified.verified) {
             SeeOther(routes.EmailController.emailVerified().url)
           } else {
-            updateSession(sessionStore)(_.copy(emailToBeVerified = Some(emailToBeVerified.copy(verified = true))))
+            updateSession(sessionStore)(
+              _.copy(
+                businessPartnerRecord = Some(bpr.copy(emailAddress = Some(emailToBeVerified.email.value))),
+                emailToBeVerified     = Some(emailToBeVerified.copy(verified = true))
+              )
+            )
               .map(
                 _.fold(
                   { e =>
@@ -135,8 +141,20 @@ class EmailController @Inject() (
     }
   }
 
-  def emailVerified(): Action[AnyContent] = Action { implicit request =>
-    Ok("")
+  def emailVerified(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
+    (request.sessionData.flatMap(_.businessPartnerRecord), request.sessionData.flatMap(_.emailToBeVerified)) match {
+      case (None, _) | (_, None) =>
+        SeeOther(routes.SubscriptionController.checkYourDetails().url)
+
+      case (Some(_), Some(emailToBeVerified)) =>
+        if (emailToBeVerified.verified) {
+          Ok(emailVerifiedPage())
+        } else {
+          logger.warn("Email verified endpoint called but email was not verified")
+          errorHandler.errorResult()
+        }
+
+    }
   }
 
   protected def updateSession(sessionStore: SessionStore)(update: SessionData => SessionData)(implicit request: RequestWithSessionData[_], hc: HeaderCarrier): Future[Either[Error, Unit]] =
