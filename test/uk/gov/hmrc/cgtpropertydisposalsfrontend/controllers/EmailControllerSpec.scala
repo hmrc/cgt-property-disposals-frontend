@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import java.util.UUID
 
 import org.scalamock.handlers.CallHandler0
+import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.test.CSRFTokenHelper._
@@ -48,6 +49,8 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
     )
 
   lazy val controller = instanceOf[EmailController]
+
+  implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
   val nino = NINO("AB123456C")
   val bpr = sample(bprGen)
@@ -90,7 +93,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           }
 
           val result = controller.enterEmail()(FakeRequest())
-          contentAsString(result) should include("Give us your email")
+          contentAsString(result) should include(message("email.title"))
         }
 
         "there is a BPR in session and there is an email to be verified in session" in {
@@ -103,7 +106,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           }
 
           val result = controller.enterEmail()(FakeRequest())
-          contentAsString(result) should include("Give us your email")
+          contentAsString(result) should include(message("email.title"))
           contentAsString(result) should include(s"""value="${email.value}"""")
         }
 
@@ -148,7 +151,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
           val result = controller.enterEmailSubmit()(requestWithFormData("email" -> email))
           status(result) shouldBe BAD_REQUEST
-          contentAsString(result) should include("Give us your email")
+          contentAsString(result) should include(message("email.title"))
           contentAsString(result) should include(s"""value="$email"""")
           // TODO: check error message is present
         }
@@ -213,6 +216,21 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           redirectLocation(result) shouldBe Some(routes.EmailController.checkYourInbox().url)
         }
 
+      "reuse the same id in the continue url if there is an existing email to be verified in session " +
+        "and the emails match" in {
+          inSequence {
+            mockAuthWithCl200AndRetrievedNino(nino.value)
+            mockGetSession(Future.successful(Right(Some(session.copy(emailToBeVerified = Some(emailToBeVerified))))))
+            mockStoreSession(session.copy(emailToBeVerified = Some(emailToBeVerified)))(Future.successful(Right(())))
+            mockEmailVerification(email, id)(Future.successful(Right(EmailVerificationRequested)))
+          }
+
+          val result = controller.enterEmailSubmit()(requestWithFormData("email" -> email.value))
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.EmailController.checkYourInbox().url)
+
+        }
+
     }
 
     "handling requests to display the check your inbox page" must {
@@ -258,7 +276,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
           val result = controller.checkYourInbox()(FakeRequest())
           status(result) shouldBe OK
-          contentAsString(result) should include("Look in your inbox")
+          contentAsString(result) should include(message("confirmEmail.title"))
 
         }
 
@@ -414,7 +432,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
           val result = controller.emailVerified()(FakeRequest())
           status(result) shouldBe OK
-          contentAsString(result) should include("Email verified")
+          contentAsString(result) should include(message("confirmEmail.verified.title"))
         }
 
       }

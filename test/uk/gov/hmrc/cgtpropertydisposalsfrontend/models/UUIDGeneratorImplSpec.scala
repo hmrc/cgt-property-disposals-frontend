@@ -16,27 +16,19 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import cats.Eq
-import cats.syntax.eq._
-import cats.instances.string._
+import org.scalatest.{FunSuite, Matchers, WordSpec}
 
-import play.api.data.Form
-import play.api.data.Forms.{mapping, text}
-import play.api.libs.functional.syntax._
-import play.api.libs.json.Format
+class UUIDGeneratorImplSpec extends WordSpec with Matchers {
 
-final case class Email(value: String) extends AnyVal
+  "UUIDIDGeneratorImpl" must {
 
-object Email {
+    "generate random UUID's" in {
+      val generator = new UUIDGeneratorImpl()
 
-  implicit val format: Format[Email] = implicitly[Format[String]].inmap(Email(_), _.value)
+      val list = List.fill(100)(generator.nextId())
+      list.distinct shouldBe list
+    }
 
-  implicit val eq: Eq[Email] = Eq.instance(_.value === _.value)
-
-  val form: Form[Email] = Form(
-    mapping(
-      "email" -> text.verifying("invalid", _.contains("@"))
-    )(Email.apply)(Email.unapply)
-  )
+  }
 
 }
