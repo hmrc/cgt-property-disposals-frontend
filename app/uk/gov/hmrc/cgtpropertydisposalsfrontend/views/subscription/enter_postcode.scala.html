@@ -21,7 +21,8 @@
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
  pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
  textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
- submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button
+ submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
 @()(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
@@ -29,6 +30,10 @@
 @key = @{"postcode"}
 @title = @{messages("address.postcode.title")}
 @hasErrors = @{false}
+@detailsContent = {
+  <p>@messages("address.postcode.p1")</p>
+  <p>@Html(messages("address.postcode.p2"))</p>
+ }
 
 @mainTemplate(title = title) {
 
@@ -39,11 +44,13 @@
   labelAsHeading = false,
   label = Html(messages("address.postcode.label")),
   helpText = Some(Html(messages("address.postcode.helpText"))),
-  errorKey = Some("invalid"),
+  errorKey = None,
   value = "",
   hasErrors = hasErrors
  )
 
  @submitButton(messages("button.findAddress"))
+
+ @details(messages("address.postcode.notInUk"), detailsContent)
 
 }
