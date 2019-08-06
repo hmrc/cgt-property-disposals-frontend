@@ -26,10 +26,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 class AddressController @Inject() (
-                                    cc: MessagesControllerComponents,
-                                    enterPostcodePage: views.html.subscription.enter_postcode,
-                                    selectAddressPage: views.html.subscription.select_address
-                                  )(implicit viewConfig: ViewConfig) extends FrontendController(cc) with Logging {
+    cc: MessagesControllerComponents,
+    enterPostcodePage: views.html.subscription.enter_postcode,
+    selectAddressPage: views.html.subscription.select_address
+)(implicit viewConfig: ViewConfig) extends FrontendController(cc) with Logging {
 
   def enterPostcode(): Action[AnyContent] = Action { implicit request =>
     Ok(enterPostcodePage(Postcode.form))
@@ -45,10 +45,9 @@ class AddressController @Inject() (
     )
   }
 
-
   def selectAddress(): Action[AnyContent] = Action { implicit request =>
-    def address(i: Int) =
-      UkAddress(s"$i the street", Some("The Town"), Some("The County"), None, "postcode")
+      def address(i: Int) =
+        UkAddress(s"$i the street", Some("The Town"), Some("The County"), None, "postcode")
 
     val addresses = (0 to 100).map(address).toList
     Ok(selectAddressPage(addresses))
