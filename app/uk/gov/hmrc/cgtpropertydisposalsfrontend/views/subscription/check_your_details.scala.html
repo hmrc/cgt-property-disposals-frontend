@@ -21,6 +21,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.BusinessPartnerRecord
 @import scala.util.Try
 @import views.html.helper.CSRF
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Block
 
 @this(
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -55,7 +56,7 @@
  @cyaSection() {
   @cyaRow(
    messages("subscription.cyaLabel.address"),
-   addressDisplay(bpr.address),
+   addressDisplay(bpr.address, Block),
    Some(cyaChange(messages("subscription.cyaChange.address"), routes.AddressController.enterPostcode().url))
   )
   @bpr.emailAddress.map { e =>
