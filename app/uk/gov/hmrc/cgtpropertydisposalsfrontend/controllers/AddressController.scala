@@ -19,6 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import com.google.inject.Inject
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, SessionDataAction, WithActions}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -26,12 +27,14 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 class AddressController @Inject() (
+    val authenticatedAction: AuthenticatedAction,
+    val sessionDataAction: SessionDataAction,
     cc: MessagesControllerComponents,
     enterPostcodePage: views.html.subscription.enter_postcode,
     selectAddressPage: views.html.subscription.select_address
-)(implicit viewConfig: ViewConfig) extends FrontendController(cc) with Logging {
+)(implicit viewConfig: ViewConfig) extends FrontendController(cc) with Logging with WithActions {
 
-  def enterPostcode(): Action[AnyContent] = Action { implicit request =>
+  def enterPostcode(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
     Ok(enterPostcodePage(Postcode.form))
   }
 

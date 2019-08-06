@@ -18,13 +18,16 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import cats.instances.char._
 import cats.syntax.eq._
-
 import play.api.data.Form
 import play.api.data.Forms.{mapping, text}
+import play.api.libs.functional.syntax._
+import play.api.libs.json.Format
 
 final case class Postcode(value: String) extends AnyVal
 
 object Postcode {
+
+  implicit val format: Format[Postcode] = implicitly[Format[String]].inmap(Postcode(_), _.value)
 
   val form: Form[Postcode] = Form(
     mapping(
