@@ -6,6 +6,7 @@ button.startNow=Start now
 button.continue=Continue
 button.confirmAndContinue=Confirm and continue
 button.resendEmail=Resend email
+button.findAddress=Find address
 
 generic.warning=Warning
 generic.day=Day
@@ -62,3 +63,8 @@ confirmEmail.verified.title=Email address verified
 confirmEmail.verified.intro={0} has been verified.
 confirmEmail.verified.p1=We’ll use this address to contact you about your Capital Gains Tax.
 confirmEmail.verified.p2=Your email has not been updated in other government services.
+
+address.caption=Property address
+address.postcode.title=Find the address of the UK property
+address.postcode.label=Postcode
+address.postcode.helpText=Enter the postcode of the property you have disposed of.

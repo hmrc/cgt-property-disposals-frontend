@@ -18,13 +18,32 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 
 @this(
- mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template
+ mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+ pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+ textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
+ submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button
 )
 
 @()(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
-@mainTemplate(title = "Enter your postcode"){
+@key = @{"postcode"}
+@title = @{messages("address.postcode.title")}
+@hasErrors = @{false}
 
-<h1>Hi!</h1>
+@mainTemplate(title = title) {
+
+ @pageHeading(title, Some(messages("address.caption")))
+
+ @textInput(
+  fieldId = key,
+  labelAsHeading = false,
+  label = Html(messages("address.postcode.label")),
+  helpText = Some(Html(messages("address.postcode.helpText"))),
+  errorKey = Some("invalid"),
+  value = "",
+  hasErrors = hasErrors
+ )
+
+ @submitButton(messages("button.findAddress"))
 
 }
