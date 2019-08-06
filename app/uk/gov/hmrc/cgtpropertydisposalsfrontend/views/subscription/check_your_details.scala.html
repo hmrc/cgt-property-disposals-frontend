@@ -56,7 +56,7 @@
   @cyaRow(
    messages("subscription.cyaLabel.address"),
    addressDisplay(bpr.address),
-   Some(cyaChange(messages("subscription.cyaChange.address"), "#"))
+   Some(cyaChange(messages("subscription.cyaChange.address"), routes.AddressController.enterPostcode().url))
   )
   @bpr.emailAddress.map { e =>
    @cyaRow(
