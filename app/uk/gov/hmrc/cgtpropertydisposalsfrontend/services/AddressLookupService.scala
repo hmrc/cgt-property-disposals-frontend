@@ -23,8 +23,7 @@ import cats.instances.string._
 import cats.syntax.either._
 import cats.syntax.eq._
 import cats.syntax.traverse._
-
-import com.google.inject.{Inject, Singleton}
+import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.OK
 import play.api.libs.json.{JsResult, JsValue, Json, Reads}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.AddressLookupConnector
@@ -36,6 +35,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@ImplementedBy(classOf[AddressLookupServiceImpl])
 trait AddressLookupService {
 
   def lookupAddress(postcode: Postcode)(implicit hc: HeaderCarrier): Future[Either[Error, AddressLookupResult]]
