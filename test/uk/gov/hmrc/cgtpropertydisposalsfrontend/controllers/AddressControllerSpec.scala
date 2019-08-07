@@ -19,6 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
+import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
@@ -119,16 +120,44 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
 
     "handling submitted postcodes" must {
 
+        def performAction(formData: (String, String)*) =
+          controller.enterPostcodeSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
+
       "redirect to check your details" when {
 
-        "there is no BPR in session" in {
+        "there is no session data" in {
+          inSequence {
+            mockAuthWithCl200AndRetrievedNino(nino.value)
+            mockGetSession(Future.successful(Right(None)))
+          }
 
+          val result = performAction()
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.SubscriptionController.checkYourDetails().url)
+        }
+
+        "there is no BPR in session" in {
+          inSequence {
+            mockAuthWithCl200AndRetrievedNino(nino.value)
+            mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+          }
+
+          val result = performAction()
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.SubscriptionController.checkYourDetails().url)
         }
 
       }
 
       "show form errors when the postcode isn't valid" in {
+        inSequence {
+          mockAuthWithCl200AndRetrievedNino(nino.value)
+          mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(businessPartnerRecord = Some(bpr))))))
+        }
 
+        val result = performAction("postcode" -> "invalid.postcode")
+        status(result) shouldBe BAD_REQUEST
+        contentAsString(result) should include(message("postcode.invalid"))
       }
 
       "show an error page" when {
