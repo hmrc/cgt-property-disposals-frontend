@@ -65,9 +65,9 @@ confirmEmail.verified.p1=We’ll use this address to contact you about your Capi
 confirmEmail.verified.p2=Your email has not been updated in other government services.
 
 address.caption=Property address
-address.postcode.title=Find the address of the UK property
+address.postcode.title=Find the address by postcode
 address.postcode.label=Postcode
-address.postcode.helpText=Enter the postcode of the property you have disposed of.
+address.postcode.helpText=Enter the postcode of the contact address.
 address.postcode.notInUk=The property is not in the UK
 address.postcode.p1=You cannot use this service to report and pay Capital Gains Tax if the property is not in the UK.
 address.postcode.p2=If you have to report and pay Capital Gains Tax on a property outside of the UK, you’ll need to use the 'real time' Capital Gains Tax service <a href="#">or your Self Assessment return</a>.
@@ -75,3 +75,4 @@ postcode.invalid=Please enter a valid UK postcode
 
 address.select.title=Select the address of the property
 address.select.manualOption=None of the above (Enter address manually)
+address.error.required=Select an address

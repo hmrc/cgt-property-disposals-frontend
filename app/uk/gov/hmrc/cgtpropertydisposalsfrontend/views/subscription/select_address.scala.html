@@ -34,15 +34,25 @@
 
 @key = @{"address"}
 @title = @{messages("address.select.title")}
+@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title) {
+@mainTemplate(title = title, hasErrors = hasErrors) {
 
- @radioGroup(
-  fieldId = key,
-  options = addresses.map(a => addressDisplay(a, Line)),
-  label = pageHeading(title, Some(messages("address.caption"))),
-  labelAsHeading = true
- )
+ @if(hasErrors) {
+  @errorSummary(form)
+ }
 
- @submitButton(messages("button.continue"))
+ @formWrapper(routes.AddressController.selectAddressSubmit(), 'novalidate -> "novalidate") {
+  @radioGroup(
+   fieldId = key,
+   options = addresses.map(a => addressDisplay(a, Line)),
+   selected = form.value.map(addresses.indexOf(_)),
+   label = pageHeading(title, Some(messages("subscription.caption"))),
+   labelAsHeading = true,
+   errorKey = form.error(key).map(e => e.message),
+   hasErrors = hasErrors
+  )
+  @submitButton(messages("button.continue"))
+ }
+
 }

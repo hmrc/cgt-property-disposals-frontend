@@ -44,7 +44,7 @@
   @errorSummary(form)
  }
 
- @pageHeading(title, Some(messages("address.caption")))
+ @pageHeading(title, Some(messages("subscription.caption")))
 
  @formWrapper(routes.AddressController.enterPostcodeSubmit(), 'novalidate -> "novalidate") {
    @textInput(
@@ -59,7 +59,5 @@
 
    @submitButton(messages("button.findAddress"))
  }
-
- @details(messages("address.postcode.notInUk"), detailsContent)
 
 }
