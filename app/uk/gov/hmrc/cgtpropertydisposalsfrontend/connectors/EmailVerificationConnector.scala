@@ -36,7 +36,7 @@ import scala.concurrent.duration.FiniteDuration
 @ImplementedBy(classOf[EmailVerificationConnectorImpl])
 trait EmailVerificationConnector {
 
-  def verifyEmail(email: Email, id: UUID)(implicit hc: HeaderCarrier): Future[HttpResponse]
+  def verifyEmail(email: Email, id: UUID, name: String)(implicit hc: HeaderCarrier): Future[HttpResponse]
 
 }
 
@@ -68,14 +68,14 @@ class EmailVerificationConnectorImpl @Inject() (
     s"$selfBaseUrl${routes.EmailController.verifyEmail(id).url}"
   }
 
-  def verifyEmail(email: Email, id: UUID)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  def verifyEmail(email: Email, id: UUID, name: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     val body =
       EmailVerificationRequest(
         email.value,
         templateId,
         linkExpiryTime,
         s"${continueUrl(id)}",
-        Map.empty[String, String]
+        Map("name" -> name)
       )
     http.post(url, Json.toJson(body))
   }

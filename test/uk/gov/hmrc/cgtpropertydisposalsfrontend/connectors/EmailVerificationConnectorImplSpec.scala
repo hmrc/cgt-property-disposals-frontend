@@ -65,13 +65,14 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
         "and return the response" in {
           val email = Email("email@test.com")
           val id = UUID.randomUUID()
+          val name = "Bob"
 
           val body = Json.parse(
             s"""
             |{
             |"email": "${email.value}",
             |"templateId": "$templateId",
-            |"templateParameters": { },
+            |"templateParameters": { "name" : "$name" },
             |"linkExpiryDuration" : "PT${linkExpiryTimeMinutes}M",
             |"continueUrl" : "$selfUrl${routes.EmailController.verifyEmail(id).url}"
             |}
@@ -86,7 +87,7 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
           ).foreach { response =>
               mockPost(expectedUrl, Map.empty[String, String], body)(Some(response))
 
-              await(connector.verifyEmail(email, id)) shouldBe response
+              await(connector.verifyEmail(email, id, name)) shouldBe response
             }
         }
 

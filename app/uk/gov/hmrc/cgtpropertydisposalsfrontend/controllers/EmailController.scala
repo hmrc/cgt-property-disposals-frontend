@@ -69,7 +69,7 @@ class EmailController @Inject() (
       case (None, _) =>
         SeeOther(routes.SubscriptionController.checkYourDetails().url)
 
-      case (Some(_), existingEmailToBeVerified) =>
+      case (Some(bpr), existingEmailToBeVerified) =>
         Email.form.bindFromRequest().fold(
           formWithErrors => BadRequest(enterEmail(formWithErrors)),
           { email =>
@@ -80,7 +80,7 @@ class EmailController @Inject() (
 
             val result = for {
               _ <- EitherT(updateSession(sessionStore)(_.copy(emailToBeVerified = Some(emailToBeVerified))))
-              result <- EitherT(emailVerificationService.verifyEmail(email, emailToBeVerified.id))
+              result <- EitherT(emailVerificationService.verifyEmail(email, emailToBeVerified.id, bpr.forename))
             } yield result
 
             result.value.map {
