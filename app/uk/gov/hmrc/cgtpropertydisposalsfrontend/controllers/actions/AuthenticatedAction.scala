@@ -61,9 +61,16 @@ class AuthenticatedAction @Inject() (
 
   val ivOrigin: String = getString("iv.origin")
 
-  val ivSuccessUrl: String = getString("iv.success-url")
+  val (ivSuccessUrl: String, ivFailureUrl: String) = {
+    val useRelativeUrls = config.underlying.getBoolean("iv.use-relative-urls")
+    val (successRelativeUrl, failureRelativeUrl) =
+      getString("iv.success-relative-url") -> getString("iv.failure-relative-url")
 
-  val ivFailureUrl: String = getString("iv.failure-url")
+    if (useRelativeUrls)
+      successRelativeUrl -> failureRelativeUrl
+    else
+      (selfBaseUrl + successRelativeUrl) -> (selfBaseUrl + failureRelativeUrl)
+  }
 
   @SuppressWarnings(Array("org.wartremover.warts.Product", "org.wartremover.warts.Serializable"))
   override protected def refine[A](request: MessagesRequest[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
