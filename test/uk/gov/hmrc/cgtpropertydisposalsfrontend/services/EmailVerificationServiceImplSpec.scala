@@ -33,9 +33,9 @@ class EmailVerificationServiceImplSpec extends WordSpec with Matchers with MockF
 
   val mockConnector = mock[EmailVerificationConnector]
 
-  def mockVerifyEmail(expectedEmail: Email, expectedId: UUID)(result: Future[HttpResponse]) =
-    (mockConnector.verifyEmail(_: Email, _: UUID)(_: HeaderCarrier))
-      .expects(expectedEmail, expectedId, *)
+  def mockVerifyEmail(expectedEmail: Email, expectedId: UUID, expectedName: String)(result: Future[HttpResponse]) =
+    (mockConnector.verifyEmail(_: Email, _: UUID, _: String)(_: HeaderCarrier))
+      .expects(expectedEmail, expectedId, expectedName, *)
       .returning(result)
 
   val service = new EmailVerificationServiceImpl(mockConnector)
@@ -46,17 +46,18 @@ class EmailVerificationServiceImplSpec extends WordSpec with Matchers with MockF
       implicit val hc: HeaderCarrier = HeaderCarrier()
       val email = Email("email")
       val id = UUID.randomUUID()
+      val name = "Fred"
 
       "indicate when the email verification request has been requested" in {
-        mockVerifyEmail(email, id)(Future.successful(HttpResponse(CREATED)))
+        mockVerifyEmail(email, id, name)(Future.successful(HttpResponse(CREATED)))
 
-        await(service.verifyEmail(email, id)) shouldBe Right(EmailVerificationRequested)
+        await(service.verifyEmail(email, id, name)) shouldBe Right(EmailVerificationRequested)
       }
 
       "indicate when the email address has already been verified" in {
-        mockVerifyEmail(email, id)(Future.successful(HttpResponse(CONFLICT)))
+        mockVerifyEmail(email, id, name)(Future.successful(HttpResponse(CONFLICT)))
 
-        await(service.verifyEmail(email, id)) shouldBe Right(EmailAlreadyVerified)
+        await(service.verifyEmail(email, id, name)) shouldBe Right(EmailAlreadyVerified)
       }
 
       "indicate when there is an error verifying the email address" in {
@@ -64,9 +65,9 @@ class EmailVerificationServiceImplSpec extends WordSpec with Matchers with MockF
           Future.failed(new Exception("uh oh")),
           Future.successful(HttpResponse(INTERNAL_SERVER_ERROR))
         ).foreach { response =>
-            mockVerifyEmail(email, id)(response)
+            mockVerifyEmail(email, id, name)(response)
 
-            await(service.verifyEmail(email, id)).isLeft shouldBe true
+            await(service.verifyEmail(email, id, name)).isLeft shouldBe true
 
           }
 
