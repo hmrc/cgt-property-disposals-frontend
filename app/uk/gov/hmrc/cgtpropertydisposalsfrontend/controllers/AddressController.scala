@@ -19,10 +19,12 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
+import play.api.data.Form
+import play.api.data.Forms._
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, SessionDataAction, WithActions}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Postcode
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Address, AddressLookupResult, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AddressLookupService
@@ -32,7 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class AddressController @Inject() (
@@ -70,7 +72,8 @@ class AddressController @Inject() (
                 SeeOther(routes.AddressController.selectAddress().url)
               } else {
                 val result = for {
-                  addressLookupResult <- EitherT(addressLookupService.lookupAddress(postcode))
+                  //                  addressLookupResult <- EitherT(addressLookupService.lookupAddress(postcode))
+                  addressLookupResult <- EitherT.pure(AddressLookupResult(postcode, addresses))
                   _ <- EitherT(updateSession(sessionStore)(_.copy(addressLookupResult = Some(addressLookupResult))))
                 } yield addressLookupResult
 
@@ -87,11 +90,30 @@ class AddressController @Inject() (
   }
 
   def selectAddress(): Action[AnyContent] = Action { implicit request =>
-      def address(i: Int) =
-        UkAddress(s"$i the street", Some("The Town"), Some("The County"), None, "postcode")
+    Ok(selectAddressPage(addresses, addressSelectForm(addresses)))
+  }
 
-    val addresses = (0 to 100).map(address).toList
-    Ok(selectAddressPage(addresses))
+  def selectAddressSubmit(): Action[AnyContent] = Action { implicit request =>
+    addressSelectForm(addresses).bindFromRequest().fold(
+      e => BadRequest(selectAddressPage(addresses, e)),
+      { address =>
+        Ok(s"Selected address $address")
+      }
+    )
+  }
+
+  def addressSelectForm(addresses: List[Address]): Form[Address] =
+    Form(
+      mapping(
+        "address" -> number
+          .verifying("invalid", i => i >= 0 && i < addresses.size)
+          .transform[Address](addresses.apply, addresses.indexOf(_))
+      )(identity)(Some(_))
+    )
+
+  val addresses: List[UkAddress] = {
+      def address(i: Int) = UkAddress(s"$i the Street", Some("The Town"), None, None, "ABC 123")
+    (1 to 100).map(address).toList
   }
 
 }

@@ -24,4 +24,5 @@ GET  /subscription/email-verified         uk.gov.hmrc.cgtpropertydisposalsfronte
 GET  /subscription/change-address         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.enterPostcode()
 POST /subscription/change-address         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.enterPostcodeSubmit()
 
-GET  /subscription/select-address         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.selectAddress()
+GET   /subscription/select-address         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.selectAddress()
+POST  /subscription/select-address         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.selectAddressSubmit()
