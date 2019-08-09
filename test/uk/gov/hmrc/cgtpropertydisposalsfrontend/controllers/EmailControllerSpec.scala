@@ -142,19 +142,40 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
       "show a form error" when {
 
-        "the email has no '@' character" in {
-          val email = "invalidemail"
-          inSequence {
-            mockAuthWithCl200AndRetrievedNino(nino.value)
-            mockGetSession(Future.successful(Right(Some(session))))
-          }
+          def testError(email: String): Unit =
+            withClue(s"For email '$email': ") {
+              inSequence {
+                mockAuthWithCl200AndRetrievedNino(nino.value)
+                mockGetSession(Future.successful(Right(Some(session))))
+              }
 
-          val result = controller.enterEmailSubmit()(requestWithFormData("email" -> email))
-          status(result) shouldBe BAD_REQUEST
-          contentAsString(result) should include(message("email.title"))
-          contentAsString(result) should include(s"""value="$email"""")
-          // TODO: check error message is present
+              val result = controller.enterEmailSubmit()(requestWithFormData("email" -> email))
+              val content = contentAsString(result)
+
+              status(result) shouldBe BAD_REQUEST
+
+              content should include(message("email.title"))
+              content should include(s"""value="$email"""")
+              content should include(message("email.invalid"))
+            }
+
+        "the email has no '@' character" in {
+          testError("invalidemail")
         }
+
+        "the email has no characters before the '@' character" in {
+          testError("@domain")
+        }
+
+        "the email has no characters after the '@' character" in {
+          testError("local@")
+        }
+
+        "the email has characters before and after the '@' character but " +
+          "there are more than 132 characters in it" in {
+            val longString = List.fill(100)("a").mkString("")
+            testError(s"$longString@$longString")
+          }
 
       }
 
@@ -228,8 +249,24 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           val result = controller.enterEmailSubmit()(requestWithFormData("email" -> email.value))
           status(result) shouldBe SEE_OTHER
           redirectLocation(result) shouldBe Some(routes.EmailController.checkYourInbox().url)
-
         }
+
+      "strip out spaces in emails" in {
+        val emailWithSpaces = " a @ b  "
+        val emailWithoutSpaces = "a@b"
+        val emailToBeVerified = EmailToBeVerified(Email(emailWithoutSpaces), id, false)
+
+        inSequence {
+          mockAuthWithCl200AndRetrievedNino(nino.value)
+          mockGetSession(Future.successful(Right(Some(session.copy(emailToBeVerified = Some(emailToBeVerified))))))
+          mockStoreSession(session.copy(emailToBeVerified = Some(emailToBeVerified)))(Future.successful(Right(())))
+          mockEmailVerification(Email(emailWithoutSpaces), id, bpr.forename)(Future.successful(Right(EmailVerificationRequested)))
+        }
+
+        val result = controller.enterEmailSubmit()(requestWithFormData("email" -> emailWithSpaces))
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.EmailController.checkYourInbox().url)
+      }
 
     }
 
