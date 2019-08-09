@@ -226,7 +226,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
 
     "handling requests to display the select address page" must {
 
-      def performAction(): Future[Result] = controller.selectAddress()(FakeRequest())
+        def performAction(): Future[Result] = controller.selectAddress()(FakeRequest())
 
       "redirect to the check your details page" when {
 
@@ -269,7 +269,16 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
       "display the select address page" when {
 
         "there is an address lookup result in session" in {
+          val session = SessionData.empty.copy(businessPartnerRecord = Some(bpr), addressLookupResult = Some(addressLookupResult))
 
+          inSequence {
+            mockAuthWithCl200AndRetrievedNino(nino.value)
+            mockGetSession(Future.successful(Right(Some(session))))
+          }
+
+          val result = performAction()
+          status(result) shouldBe OK
+          contentAsString(result) should include(message("address.select.title"))
         }
 
       }

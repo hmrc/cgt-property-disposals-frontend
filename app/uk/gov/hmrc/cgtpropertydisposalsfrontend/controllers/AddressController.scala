@@ -93,33 +93,33 @@ class AddressController @Inject() (
       case (None, _) | (_, None) =>
         SeeOther(routes.SubscriptionController.checkYourDetails().url)
 
-
       case (_, Some(AddressLookupResult(_, addresses))) =>
-        Ok(selectAddressPage(addresses, addressSelectForm(addresses)))
+        Ok(selectAddressPage(addresses, Address.addressSelectForm(addresses)))
     }
   }
 
-  def selectAddressSubmit(): Action[AnyContent] = Action { implicit request =>
-    addressSelectForm(addresses).bindFromRequest().fold(
-      e => BadRequest(selectAddressPage(addresses, e)),
-      { address =>
-        Ok(s"Selected address $address")
-      }
-    )
-  }
+  def selectAddressSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    (request.sessionData.flatMap(_.businessPartnerRecord), request.sessionData.flatMap(_.addressLookupResult)) match {
+      case (None, _) | (_, None) =>
+        SeeOther(routes.SubscriptionController.checkYourDetails().url)
 
-  def addressSelectForm(addresses: List[Address]): Form[Address] =
-    Form(
-      mapping(
-        "address" -> number
-          .verifying("invalid", i => i >= 0 && i < addresses.size)
-          .transform[Address](addresses.apply, addresses.indexOf(_))
-      )(identity)(Some(_))
-    )
-
-  val addresses: List[UkAddress] = {
-      def address(i: Int) = UkAddress(s"$i the Street", Some("The Town"), None, None, "ABC 123")
-    (1 to 100).map(address).toList
+      case (Some(bpr), Some(AddressLookupResult(_, addresses))) =>
+        Address.addressSelectForm(addresses).bindFromRequest().fold(
+          e => BadRequest(selectAddressPage(addresses, e)),
+          { address =>
+            updateSession(sessionStore)(_.copy(businessPartnerRecord = Some(bpr.copy(address = address))))
+              .map(
+                _.fold(
+                  { e =>
+                  logger.warn("Could not store selected address in session", e)
+                  errorHandler.errorResult()
+                },
+                  _ => SeeOther(routes.SubscriptionController.checkYourDetails().url)
+                )
+              )
+          }
+        )
+    }
   }
 
 }
