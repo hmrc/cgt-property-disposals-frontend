@@ -32,8 +32,8 @@
 
 @(addresses: List[Address], form: Form[Address])(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
-@key = @{"address"}
-@title = @{messages("address.select.title")}
+@key = @{"address-select"}
+@title = @{messages("address-select.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @mainTemplate(title = title, hasErrors = hasErrors) {

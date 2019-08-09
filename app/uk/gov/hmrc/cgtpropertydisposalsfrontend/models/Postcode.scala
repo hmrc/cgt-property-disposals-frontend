@@ -31,10 +31,9 @@ object Postcode {
 
   val form: Form[Postcode] = Form(
     mapping(
-      "postcode" -> text.verifying(
-        "invalid",
-        s => s.forall(c => c.isLetterOrDigit || c === ' ') && s.exists(_.isLetterOrDigit)
-      )
+      "postcode" -> text
+        .transform[String](_.trim, identity)
+        .verifying("invalid", s => s.forall(c => c.isLetterOrDigit || c === ' ') && s.exists(_.isLetterOrDigit))
     )(Postcode.apply)(Postcode.unapply)
   )
 

@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
+import cats.Eq
 import julienrf.json.derived
 import play.api.data.Form
 import play.api.data.Forms.{mapping, number}
@@ -49,11 +50,13 @@ object Address {
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   implicit val format: OFormat[Address] = derived.oformat
 
+  implicit val eq: Eq[Address] = Eq.fromUniversalEquals
+
   // address is selected by the index of the address in the given list
   def addressSelectForm(addresses: List[Address]): Form[Address] =
     Form(
       mapping(
-        "address" -> number
+        "address-select" -> number
           .verifying("invalid", i => i >= 0 && i < addresses.size)
           .transform[Address](addresses.apply, addresses.indexOf(_))
       )(identity)(Some(_))

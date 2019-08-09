@@ -18,23 +18,20 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
+import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
-import play.api.data.Form
-import play.api.data.Forms._
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, SessionDataAction, WithActions}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Address, AddressLookupResult, Postcode}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AddressLookupService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.toFuture
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class AddressController @Inject() (
@@ -93,8 +90,11 @@ class AddressController @Inject() (
       case (None, _) | (_, None) =>
         SeeOther(routes.SubscriptionController.checkYourDetails().url)
 
-      case (_, Some(AddressLookupResult(_, addresses))) =>
-        Ok(selectAddressPage(addresses, Address.addressSelectForm(addresses)))
+      case (Some(bpr), Some(AddressLookupResult(_, addresses))) =>
+        val form = addresses.find(_ === bpr.address)
+          .fold(Address.addressSelectForm(addresses))(Address.addressSelectForm(addresses).fill(_))
+
+        Ok(selectAddressPage(addresses, form))
     }
   }
 
@@ -111,9 +111,9 @@ class AddressController @Inject() (
               .map(
                 _.fold(
                   { e =>
-                  logger.warn("Could not store selected address in session", e)
-                  errorHandler.errorResult()
-                },
+                    logger.warn("Could not store selected address in session", e)
+                    errorHandler.errorResult()
+                  },
                   _ => SeeOther(routes.SubscriptionController.checkYourDetails().url)
                 )
               )

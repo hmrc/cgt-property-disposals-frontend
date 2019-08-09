@@ -143,8 +143,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
         }
 
         val result = controller.checkYourDetailsSubmit()(requestWithCSRFToken)
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.SubscriptionController.checkYourDetails().url)
+        checkIsRedirect(result, routes.SubscriptionController.checkYourDetails())
       }
 
       "handle the case when the user confirms their details" in {

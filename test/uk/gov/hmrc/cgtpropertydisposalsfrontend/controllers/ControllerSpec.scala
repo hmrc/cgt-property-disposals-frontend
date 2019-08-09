@@ -22,7 +22,7 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
 import play.api.i18n.{Lang, MessagesApi}
 import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
-import play.api.mvc.Result
+import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Application, Configuration, Play}
@@ -73,5 +73,13 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
     status(result) shouldBe INTERNAL_SERVER_ERROR
     contentAsString(result) shouldBe technicalErrorPageContent
   }
+
+  def checkIsRedirect(result: Future[Result], expectedRedirectUrl: String): Unit = {
+    status(result) shouldBe SEE_OTHER
+    redirectLocation(result) shouldBe Some(expectedRedirectUrl)
+  }
+
+  def checkIsRedirect(result: Future[Result], expectedRedirectCall: Call): Unit =
+    checkIsRedirect(result, expectedRedirectCall.url)
 
 }
