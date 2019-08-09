@@ -51,9 +51,7 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
         }
 
         val result = controller.ivSuccess()(FakeRequest())
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(ivContinueUrl)
-
+        checkIsRedirect(result, ivContinueUrl)
       }
 
       "show an error page if there is no IV continue URL in session" in {

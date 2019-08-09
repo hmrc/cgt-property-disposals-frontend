@@ -16,19 +16,25 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import play.api.libs.json.{Format, Json}
+import cats.instances.char._
+import cats.syntax.eq._
+import play.api.data.Form
+import play.api.data.Forms.{mapping, text}
+import play.api.libs.functional.syntax._
+import play.api.libs.json.Format
 
-final case class SessionData(
-    ivContinueUrl: Option[String],
-    businessPartnerRecord: Option[BusinessPartnerRecord],
-    emailToBeVerified: Option[EmailToBeVerified],
-    addressLookupResult: Option[AddressLookupResult]
-)
+final case class Postcode(value: String) extends AnyVal
 
-object SessionData {
+object Postcode {
 
-  implicit val format: Format[SessionData] = Json.format
+  implicit val format: Format[Postcode] = implicitly[Format[String]].inmap(Postcode(_), _.value)
 
-  val empty: SessionData = SessionData(None, None, None, None)
+  val form: Form[Postcode] = Form(
+    mapping(
+      "postcode" -> text
+        .transform[String](_.trim, identity)
+        .verifying("invalid", s => s.forall(c => c.isLetterOrDigit || c === ' ') && s.exists(_.isLetterOrDigit))
+    )(Postcode.apply)(Postcode.unapply)
+  )
 
 }

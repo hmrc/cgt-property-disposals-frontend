@@ -21,6 +21,7 @@ import org.scalamock.handlers.CallHandler0
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
+import play.api.mvc.Result
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -76,8 +77,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           }
 
           val result = controller.enterEmail()(FakeRequest())
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.SubscriptionController.checkYourDetails().url)
+          checkIsRedirect(result, routes.SubscriptionController.checkYourDetails())
         }
 
       }
@@ -132,9 +132,8 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             mockGetSession(Future.successful(Right(None)))
           }
 
-          val result = controller.enterEmailSubmit()(requestWithFormData("email" -> email.value))
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.SubscriptionController.checkYourDetails().url)
+          val result: Future[Result] = controller.enterEmailSubmit()(requestWithFormData("email" -> email.value))
+          checkIsRedirect(result, routes.SubscriptionController.checkYourDetails())
 
         }
 
@@ -217,9 +216,8 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           mockEmailVerification(email, id, bpr.forename)(Future.successful(Right(EmailAlreadyVerified)))
         }
 
-        val result = controller.enterEmailSubmit()(requestWithFormData("email" -> email.value))
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EmailController.verifyEmail(id).url)
+        val result: Future[Result] = controller.enterEmailSubmit()(requestWithFormData("email" -> email.value))
+        checkIsRedirect(result, routes.EmailController.verifyEmail(id))
       }
 
       "redirect to the check you inbox page when the email address verification request " +
@@ -232,9 +230,8 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             mockEmailVerification(email, id, bpr.forename)(Future.successful(Right(EmailVerificationRequested)))
           }
 
-          val result = controller.enterEmailSubmit()(requestWithFormData("email" -> email.value))
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.EmailController.checkYourInbox().url)
+          val result: Future[Result] = controller.enterEmailSubmit()(requestWithFormData("email" -> email.value))
+          checkIsRedirect(result, routes.EmailController.checkYourInbox())
         }
 
       "reuse the same id in the continue url if there is an existing email to be verified in session " +
@@ -246,9 +243,8 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             mockEmailVerification(email, id, bpr.forename)(Future.successful(Right(EmailVerificationRequested)))
           }
 
-          val result = controller.enterEmailSubmit()(requestWithFormData("email" -> email.value))
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.EmailController.checkYourInbox().url)
+          val result: Future[Result] = controller.enterEmailSubmit()(requestWithFormData("email" -> email.value))
+          checkIsRedirect(result, routes.EmailController.checkYourInbox())
         }
 
       "strip out spaces in emails" in {
@@ -263,9 +259,8 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           mockEmailVerification(Email(emailWithoutSpaces), id, bpr.forename)(Future.successful(Right(EmailVerificationRequested)))
         }
 
-        val result = controller.enterEmailSubmit()(requestWithFormData("email" -> emailWithSpaces))
-        status(result) shouldBe SEE_OTHER
-        redirectLocation(result) shouldBe Some(routes.EmailController.checkYourInbox().url)
+        val result: Future[Result] = controller.enterEmailSubmit()(requestWithFormData("email" -> emailWithSpaces))
+        checkIsRedirect(result, routes.EmailController.checkYourInbox())
       }
 
     }
@@ -286,8 +281,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           }
 
           val result = controller.checkYourInbox()(FakeRequest())
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.SubscriptionController.checkYourDetails().url)
+          checkIsRedirect(result, routes.SubscriptionController.checkYourDetails())
         }
 
         "there is no email to be verified in session" in {
@@ -297,8 +291,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           }
 
           val result = controller.checkYourInbox()(FakeRequest())
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.SubscriptionController.checkYourDetails().url)
+          checkIsRedirect(result, routes.SubscriptionController.checkYourDetails())
 
         }
 
@@ -335,8 +328,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           }
 
           val result = controller.verifyEmail(id)(FakeRequest())
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.SubscriptionController.checkYourDetails().url)
+          checkIsRedirect(result, routes.SubscriptionController.checkYourDetails())
         }
 
         "there is no email to be verified in session" in {
@@ -346,8 +338,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           }
 
           val result = controller.verifyEmail(id)(FakeRequest())
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.SubscriptionController.checkYourDetails().url)
+          checkIsRedirect(result, routes.SubscriptionController.checkYourDetails())
         }
       }
 
@@ -388,8 +379,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           }
 
           val result = controller.verifyEmail(id)(FakeRequest())
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.EmailController.emailVerified().url)
+          checkIsRedirect(result, routes.EmailController.emailVerified())
         }
 
         "the session is updated" in {
@@ -403,8 +393,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           }
 
           val result = controller.verifyEmail(id)(FakeRequest())
-          status(result) shouldBe SEE_OTHER
-          redirectLocation(result) shouldBe Some(routes.EmailController.emailVerified().url)
+          checkIsRedirect(result, routes.EmailController.emailVerified())
         }
 
       }
@@ -441,8 +430,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             }
 
             val result = controller.emailVerified()(FakeRequest())
-            status(result) shouldBe SEE_OTHER
-            redirectLocation(result) shouldBe Some(routes.SubscriptionController.checkYourDetails().url)
+            checkIsRedirect(result, routes.SubscriptionController.checkYourDetails())
           }
 
         "there is no BPR in session" in {

@@ -16,19 +16,9 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import play.api.libs.json.{Format, Json}
+sealed trait DisplayFormat
 
-final case class SessionData(
-    ivContinueUrl: Option[String],
-    businessPartnerRecord: Option[BusinessPartnerRecord],
-    emailToBeVerified: Option[EmailToBeVerified],
-    addressLookupResult: Option[AddressLookupResult]
-)
-
-object SessionData {
-
-  implicit val format: Format[SessionData] = Json.format
-
-  val empty: SessionData = SessionData(None, None, None, None)
-
+object DisplayFormat {
+  case object Block extends DisplayFormat
+  case object Line extends DisplayFormat
 }

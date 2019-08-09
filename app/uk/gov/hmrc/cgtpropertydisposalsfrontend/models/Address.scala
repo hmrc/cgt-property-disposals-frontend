@@ -16,7 +16,10 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
+import cats.Eq
 import julienrf.json.derived
+import play.api.data.Form
+import play.api.data.Forms.{mapping, number}
 import play.api.libs.json.OFormat
 
 sealed trait Address
@@ -46,6 +49,18 @@ object Address {
   // the case class inside a JsObject with case class type name as the key
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   implicit val format: OFormat[Address] = derived.oformat
+
+  implicit val eq: Eq[Address] = Eq.fromUniversalEquals
+
+  // address is selected by the index of the address in the given list
+  def addressSelectForm(addresses: List[Address]): Form[Address] =
+    Form(
+      mapping(
+        "address-select" -> number
+          .verifying("invalid", i => i >= 0 && i < addresses.size)
+          .transform[Address](addresses.apply, addresses.indexOf(_))
+      )(identity)(Some(_))
+    )
 
 }
 

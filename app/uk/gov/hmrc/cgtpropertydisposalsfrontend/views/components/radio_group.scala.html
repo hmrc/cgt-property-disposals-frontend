@@ -21,11 +21,12 @@
 @(
   fieldId: String,
   label: Html,
-  options: List[String],
+  options: List[Html],
   helpText: Option[Html] = None,
   labelAsHeading: Boolean = false,
   errorKey: Option[String] = None,
-  hasErrors: Boolean = false
+  hasErrors: Boolean = false,
+  selected: Option[Int] = None
 )(implicit messages: Messages)
 
 @classes = @{if(hasErrors) "form-group form-group-error" else "form-group" }
@@ -45,12 +46,13 @@
       @errorInline(fieldId, messages(s"$fieldId.$e"), Seq("error-message"))
     }
 
-    @options.toList.zipWithIndex.map{ case (option, index) =>
+    @options.zipWithIndex.map{ case (option, index) =>
       <div class="multiple-choice">
         <input id="@{fieldId}-@{index}"
          name="@fieldId"
          value="@index"
          type="radio"
+        @if(selected.contains(index)) { checked="checked" }
         />
         <label for="@{fieldId}-@{index}">
           @option

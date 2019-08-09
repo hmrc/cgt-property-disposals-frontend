@@ -16,28 +16,52 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.{ UkAddress, NonUkAddress }
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Block
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Line
 
 @this()
 
-@(address: Address)
+@(address: Address, displayFormat: DisplayFormat)
 
- @address match {
-  case UkAddress(l1,l2,l3,l4,postcode) => {
-   <div>
-    @l1<br>
-    @l2.map(l => Html(s"""$l<br>"""))
-    @l3.map(l => Html(s"""$l<br>"""))
-    @l4.map(l => Html(s"""$l<br>"""))
-    @postcode
-   </div>
+ @(address, displayFormat) match {
+   case (UkAddress(l1,l2,l3,l4,postcode), Block) => {
+    <div>
+     @l1<br />
+     @l2.map(l => Html(s"""$l<br />"""))
+     @l3.map(l => Html(s"""$l<br />"""))
+     @l4.map(l => Html(s"""$l<br />"""))
+     @postcode
+    </div>
+   }
+
+   case (UkAddress(l1,l2,l3,l4,postcode), Line) => {
+     <span>
+      @l1,
+      @l2.map(l => s"$l, ")
+      @l3.map(l => s"$l, ")
+      @l4.map(l => s"$l, ")
+      @postcode
+     </span>
+    }
+
+   case (NonUkAddress(l1,l2,l3,l4,postcode,countryCode), Block) => {
+    <div>
+     @l1<br />
+     @l2.map(l => Html(s"""$l<br />"""))
+     @l3.map(l => Html(s"""$l<br />"""))
+     @l4.map(l => Html(s"""$l<br />"""))
+     @postcode.map(p => p)
+    </div>
+   }
+   case (NonUkAddress(l1,l2,l3,l4,postcode,countryCode), Line) => {
+     <span>
+      @l1,
+      @l2.map(l => s"$l, ")
+      @l3.map(l => s"$l, ")
+      @l4.map(l => s"$l, ")
+      @postcode.map(p => p)
+     </span>
+    }
   }
-  case NonUkAddress(l1,l2,l3,l4,postcode,countryCode) => {
-   <div>
-    @l1<br>
-    @l2.map(l => Html(s"""$l<br>"""))
-    @l3.map(l => Html(s"""$l<br>"""))
-    @l4.map(l => Html(s"""$l<br>"""))
-    @postcode.map(p => p)
-   </div>
-  }
- }
+

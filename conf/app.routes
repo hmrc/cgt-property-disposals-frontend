@@ -18,3 +18,11 @@ POST /subscription/change-email           uk.gov.hmrc.cgtpropertydisposalsfronte
 GET  /subscription/check-your-inbox       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailController.checkYourInbox()
 GET  /subscription/verify-email           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailController.verifyEmail(p: java.util.UUID)
 GET  /subscription/email-verified         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailController.emailVerified()
+
+
+#### Change address
+GET  /subscription/change-address         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.enterPostcode()
+POST /subscription/change-address         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.enterPostcodeSubmit()
+
+GET   /subscription/select-address         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.selectAddress()
+POST  /subscription/select-address         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.selectAddressSubmit()
