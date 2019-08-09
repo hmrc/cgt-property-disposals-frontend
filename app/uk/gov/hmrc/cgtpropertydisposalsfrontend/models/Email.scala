@@ -33,10 +33,17 @@ object Email {
 
   implicit val eq: Eq[Email] = Eq.instance(_.value === _.value)
 
-  val form: Form[Email] = Form(
-    mapping(
-      "email" -> text.verifying("invalid", _.contains("@"))
-    )(Email.apply)(Email.unapply)
-  )
+  val form: Form[Email] = {
+    val emailRegex = "^(?=.{1,132}.$).+@.+".r.pattern.asPredicate()
+
+    Form(
+      mapping(
+        "email" ->
+          text
+          .transform[String](_.replaceAllLiterally(" ", ""), identity)
+          .verifying("invalid", emailRegex.test _)
+      )(Email.apply)(Email.unapply)
+    )
+  }
 
 }
