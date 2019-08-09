@@ -46,5 +46,5 @@ class AddressLookupConnectorImpl @Inject() (
   }
 
   override def lookupAddress(postcode: Postcode)(implicit hc: HeaderCarrier): Future[HttpResponse] =
-    http.get(url, Map("postcode" -> postcode.value), headers)
+    http.get(url, Map("postcode" -> postcode.value.replaceAllLiterally(" ", "").toUpperCase), headers)
 }

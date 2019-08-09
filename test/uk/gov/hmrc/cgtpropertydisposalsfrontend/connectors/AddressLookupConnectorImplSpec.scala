@@ -50,8 +50,9 @@ class AddressLookupConnectorImplSpec extends WordSpec with Matchers with MockFac
 
     "handling request to get the business partner record" must {
 
+      implicit val hc: HeaderCarrier = HeaderCarrier()
+
       "do a get http call and return the result" in {
-        implicit val hc: HeaderCarrier = HeaderCarrier()
         val postcode = Postcode("WC1X9BH")
 
         List(
@@ -70,6 +71,19 @@ class AddressLookupConnectorImplSpec extends WordSpec with Matchers with MockFac
             }
           }
       }
+
+      "get rid of all spaces and turn all lower case letters to upper case letters" in {
+        val response = HttpResponse(200)
+
+        mockGet(
+          s"http://host:123/v2/uk/addresses",
+          Map("postcode" -> "AB12CD"),
+          Map("User-Agent" -> "agent")
+        )(Some(response))
+
+        await(connector.lookupAddress(Postcode(" ab1 2C d "))) shouldBe response
+      }
+
     }
 
   }
