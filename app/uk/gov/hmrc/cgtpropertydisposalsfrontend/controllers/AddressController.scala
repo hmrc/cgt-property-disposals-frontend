@@ -72,14 +72,13 @@ class AddressController @Inject() (
                 SeeOther(routes.AddressController.selectAddress().url)
               } else {
                 val result = for {
-                  //                  addressLookupResult <- EitherT(addressLookupService.lookupAddress(postcode))
-                  addressLookupResult <- EitherT.pure(AddressLookupResult(postcode, addresses))
+                  addressLookupResult <- EitherT(addressLookupService.lookupAddress(postcode))
                   _ <- EitherT(updateSession(sessionStore)(_.copy(addressLookupResult = Some(addressLookupResult))))
                 } yield addressLookupResult
 
                 result.fold({
                   e =>
-                    logger.warn("Could not do address lookup", e)
+                    logger.warn(s"Could not do address lookup for postcode", e)
                     errorHandler.errorResult()
                 }, _ =>
                   SeeOther(routes.AddressController.selectAddress().url))
@@ -89,8 +88,15 @@ class AddressController @Inject() (
     }
   }
 
-  def selectAddress(): Action[AnyContent] = Action { implicit request =>
-    Ok(selectAddressPage(addresses, addressSelectForm(addresses)))
+  def selectAddress(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
+    (request.sessionData.flatMap(_.businessPartnerRecord), request.sessionData.flatMap(_.addressLookupResult)) match {
+      case (None, _) | (_, None) =>
+        SeeOther(routes.SubscriptionController.checkYourDetails().url)
+
+
+      case (_, Some(AddressLookupResult(_, addresses))) =>
+        Ok(selectAddressPage(addresses, addressSelectForm(addresses)))
+    }
   }
 
   def selectAddressSubmit(): Action[AnyContent] = Action { implicit request =>

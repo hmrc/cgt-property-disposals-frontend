@@ -19,10 +19,12 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
+import play.api.mvc.Result
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AddressLookupResult, Error, NINO, Postcode, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{bprGen, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -56,6 +58,11 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
   val postcode = Postcode("ABC 123")
 
   val bpr = sample(bprGen)
+
+  val addressLookupResult = AddressLookupResult(
+    postcode,
+    (1 to 10).map(i => UkAddress(s"$i the Street", Some("The Town"), None, None, postcode.value)).toList
+  )
 
   "AddressController" when {
 
@@ -123,6 +130,8 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
         def performAction(formData: (String, String)*) =
           controller.enterPostcodeSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
 
+      val existingSessionData = SessionData.empty.copy(businessPartnerRecord = Some(bpr))
+
       "redirect to check your details" when {
 
         "there is no session data" in {
@@ -152,7 +161,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
       "show form errors when the postcode isn't valid" in {
         inSequence {
           mockAuthWithCl200AndRetrievedNino(nino.value)
-          mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(businessPartnerRecord = Some(bpr))))))
+          mockGetSession(Future.successful(Right(Some(existingSessionData))))
         }
 
         val result = performAction("postcode" -> "invalid.postcode")
@@ -163,11 +172,24 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
       "show an error page" when {
 
         "address lookup fails" in {
+          inSequence {
+            mockAuthWithCl200AndRetrievedNino(nino.value)
+            mockGetSession(Future.successful(Right(Some(existingSessionData))))
+            mockAddressLookup(postcode)(Future.successful(Left(Error("Uh oh!"))))
+          }
 
+          checkIsTechnicalErrorPage(performAction("postcode" -> postcode.value))
         }
 
         "the address lookup result cannot be stored in session" in {
+          inSequence {
+            mockAuthWithCl200AndRetrievedNino(nino.value)
+            mockGetSession(Future.successful(Right(Some(existingSessionData))))
+            mockAddressLookup(postcode)(Future.successful(Right(addressLookupResult)))
+            mockStoreSession(existingSessionData.copy(addressLookupResult = Some(addressLookupResult)))(Future.successful(Left(Error("Uh oh!"))))
+          }
 
+          checkIsTechnicalErrorPage(performAction("postcode" -> postcode.value))
         }
 
       }
@@ -175,12 +197,80 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
       "redirect to select address without doing an address lookup" when {
 
         "there is an address lookup result already in session for the sme postcode" in {
+          inSequence {
+            mockAuthWithCl200AndRetrievedNino(nino.value)
+            mockGetSession(Future.successful(Right(Some(existingSessionData.copy(addressLookupResult = Some(addressLookupResult))))))
+          }
 
+          val result = performAction("postcode" -> postcode.value)
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.AddressController.selectAddress().url)
         }
 
       }
 
       "redirect to select address when the address lookup result has been stored in mongo" in {
+        inSequence {
+          mockAuthWithCl200AndRetrievedNino(nino.value)
+          mockGetSession(Future.successful(Right(Some(existingSessionData))))
+          mockAddressLookup(postcode)(Future.successful(Right(addressLookupResult)))
+          mockStoreSession(existingSessionData.copy(addressLookupResult = Some(addressLookupResult)))(Future.successful(Right(())))
+        }
+
+        val result = performAction("postcode" -> postcode.value)
+        status(result) shouldBe SEE_OTHER
+        redirectLocation(result) shouldBe Some(routes.AddressController.selectAddress().url)
+      }
+
+    }
+
+    "handling requests to display the select address page" must {
+
+      def performAction(): Future[Result] = controller.selectAddress()(FakeRequest())
+
+      "redirect to the check your details page" when {
+
+        "there is no data in session" in {
+          inSequence {
+            mockAuthWithCl200AndRetrievedNino(nino.value)
+            mockGetSession(Future.successful(Right(None)))
+          }
+
+          val result = performAction()
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.SubscriptionController.checkYourDetails().url)
+        }
+
+        "there is no BPR in session" in {
+          inSequence {
+            mockAuthWithCl200AndRetrievedNino(nino.value)
+            mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+          }
+
+          val result = performAction()
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.SubscriptionController.checkYourDetails().url)
+
+        }
+
+        "there is not address lookup result in session" in {
+          inSequence {
+            mockAuthWithCl200AndRetrievedNino(nino.value)
+            mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(businessPartnerRecord = Some(bpr))))))
+          }
+
+          val result = performAction()
+          status(result) shouldBe SEE_OTHER
+          redirectLocation(result) shouldBe Some(routes.SubscriptionController.checkYourDetails().url)
+        }
+
+      }
+
+      "display the select address page" when {
+
+        "there is an address lookup result in session" in {
+
+        }
 
       }
 

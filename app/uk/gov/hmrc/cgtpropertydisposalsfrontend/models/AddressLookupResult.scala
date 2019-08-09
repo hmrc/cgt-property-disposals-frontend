@@ -18,7 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import play.api.libs.json.{Format, Json}
 
-final case class AddressLookupResult(postcode: Postcode, address: List[Address])
+final case class AddressLookupResult(postcode: Postcode, addresses: List[Address])
 
 object AddressLookupResult {
 
