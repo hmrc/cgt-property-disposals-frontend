@@ -27,6 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.ExecutionContext
+import scala.util.Random
 
 @Singleton
 class SubscriptionController @Inject() (
@@ -36,7 +37,8 @@ class SubscriptionController @Inject() (
     cc: MessagesControllerComponents,
     val authenticatedAction: AuthenticatedAction,
     val subscriptionDetailsAction: SubscriptionDetailsAction,
-    checkYourDetailsPage: views.html.subscription.check_your_details
+    checkYourDetailsPage: views.html.subscription.check_your_details,
+    subscribedPage: views.html.subscription.subscribed
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext) extends FrontendController(cc) with WithSubscriptionDetailsActions with Logging {
 
   def checkYourDetails(): Action[AnyContent] = authenticatedActionWithSubscriptionDetails { implicit request =>
@@ -44,7 +46,11 @@ class SubscriptionController @Inject() (
   }
 
   def checkYourDetailsSubmit(): Action[AnyContent] = authenticatedActionWithSubscriptionDetails.async { implicit request =>
-    Ok("confirmed")
+    SeeOther(routes.SubscriptionController.subscribed().url)
+  }
+
+  def subscribed(): Action[AnyContent] = Action { implicit request =>
+    Ok(subscribedPage(Random.alphanumeric.take(20).toList.mkString("").toUpperCase))
   }
 
 }

@@ -10,6 +10,7 @@ GET  /iv/failure                          uk.gov.hmrc.cgtpropertydisposalsfronte
 #### Subscription
 GET  /subscription/check-your-details     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SubscriptionController.checkYourDetails()
 POST /subscription/check-your-details     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SubscriptionController.checkYourDetailsSubmit()
+GET  /subscription/subscribed             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SubscriptionController.subscribed()
 
 
 #### Change email
@@ -24,5 +25,9 @@ GET  /subscription/email-verified         uk.gov.hmrc.cgtpropertydisposalsfronte
 GET  /subscription/change-address         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.enterPostcode()
 POST /subscription/change-address         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.enterPostcodeSubmit()
 
-GET   /subscription/select-address         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.selectAddress()
-POST  /subscription/select-address         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.selectAddressSubmit()
+GET   /subscription/select-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.selectAddress()
+POST  /subscription/select-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.selectAddressSubmit()
+
+
+### Return journey
+GET  /return/start                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.ReturnsController.start()
