@@ -17,6 +17,6 @@ addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.6.23")
 
 addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.3.7")
 
-addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.8.3")
+// addSbtPlugin("org.scalariform" % "sbt-scalariform" % "1.8.3")
 
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.6.0")

@@ -36,7 +36,7 @@ class SubscriptionController @Inject() (
     cc: MessagesControllerComponents,
     val authenticatedAction: AuthenticatedAction,
     val subscriptionDetailsAction: SubscriptionDetailsAction,
-    checkYourDetailsPage: views.html.subscription.check_your_details,
+    checkYourDetailsPage: views.html.subscription.check_your_details
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext) extends FrontendController(cc) with WithSubscriptionDetailsActions with Logging {
 
   def checkYourDetails(): Action[AnyContent] = authenticatedActionWithSubscriptionDetails { implicit request =>
