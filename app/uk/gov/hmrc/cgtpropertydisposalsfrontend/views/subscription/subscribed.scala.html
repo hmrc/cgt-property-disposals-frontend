@@ -20,9 +20,10 @@
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template
 )
 
-@(cgtReference: String)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(cgtReference: String, continueUrl: String)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
 @mainTemplate(title = "Subscribed") {
   <h1>You've subscribed - well done :D </h1>
+  <p>Continue is @continueUrl</p>
 }
 
