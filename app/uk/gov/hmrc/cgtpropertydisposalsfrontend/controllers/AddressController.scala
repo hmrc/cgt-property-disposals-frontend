@@ -19,15 +19,15 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.eq._
-import com.google.inject.{ Inject, Singleton }
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ ErrorHandler, ViewConfig }
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{ AuthenticatedAction, SubscriptionDetailsAction, WithSubscriptionDetailsActions }
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ Address, AddressLookupResult, Postcode }
+import com.google.inject.{Inject, Singleton}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, SubscriptionDetailsAction, WithSubscriptionDetailsActions}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Address, AddressLookupResult, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AddressLookupService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{ Logging, toFuture }
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
@@ -35,14 +35,15 @@ import scala.concurrent.ExecutionContext
 
 @Singleton
 class AddressController @Inject() (
-  val authenticatedAction: AuthenticatedAction,
-  val subscriptionDetailsAction: SubscriptionDetailsAction,
-  cc: MessagesControllerComponents,
-  errorHandler: ErrorHandler,
-  addressLookupService: AddressLookupService,
-  sessionStore: SessionStore,
-  enterPostcodePage: views.html.subscription.enter_postcode,
-  selectAddressPage: views.html.subscription.select_address)(implicit viewConfig: ViewConfig, ec: ExecutionContext) extends FrontendController(cc) with Logging with WithSubscriptionDetailsActions with SessionUpdates {
+    val authenticatedAction: AuthenticatedAction,
+    val subscriptionDetailsAction: SubscriptionDetailsAction,
+    cc: MessagesControllerComponents,
+    errorHandler: ErrorHandler,
+    addressLookupService: AddressLookupService,
+    sessionStore: SessionStore,
+    enterPostcodePage: views.html.subscription.enter_postcode,
+    selectAddressPage: views.html.subscription.select_address
+)(implicit viewConfig: ViewConfig, ec: ExecutionContext) extends FrontendController(cc) with Logging with WithSubscriptionDetailsActions with SessionUpdates {
 
   def enterPostcode(): Action[AnyContent] = authenticatedActionWithSubscriptionDetails { implicit request =>
     val form = request.sessionData.addressLookupResult.fold(Postcode.form)(r => Postcode.form.fill(r.postcode))
@@ -68,7 +69,8 @@ class AddressController @Inject() (
           }, _ =>
             SeeOther(routes.AddressController.selectAddress().url))
         }
-      })
+      }
+    )
   }
   def selectAddress(): Action[AnyContent] = authenticatedActionWithSubscriptionDetails { implicit request =>
     request.sessionData.addressLookupResult match {
@@ -99,8 +101,11 @@ class AddressController @Inject() (
                     logger.warn("Could not store selected address in session", e)
                     errorHandler.errorResult()
                   },
-                  _ => SeeOther(routes.SubscriptionController.checkYourDetails().url)))
-          })
+                  _ => SeeOther(routes.SubscriptionController.checkYourDetails().url)
+                )
+              )
+          }
+        )
     }
   }
 

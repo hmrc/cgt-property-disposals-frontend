@@ -17,33 +17,35 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
 import cats.syntax.either._
-import com.google.inject.{ Inject, Singleton }
+import com.google.inject.{Inject, Singleton}
 import play.api.i18n.MessagesApi
 import play.api.mvc._
 import play.api.mvc.Results.SeeOther
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ SessionData, SubscriptionDetails }
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 final case class RequestWithSubscriptionDetails[A](
-  subscriptionDetails: SubscriptionDetails,
-  sessionData: SessionData,
-  authenticatedRequest: AuthenticatedRequest[A]) extends WrappedRequest[A](authenticatedRequest) with PreferredMessagesProvider {
+    subscriptionDetails: SubscriptionDetails,
+    sessionData: SessionData,
+    authenticatedRequest: AuthenticatedRequest[A]
+) extends WrappedRequest[A](authenticatedRequest) with PreferredMessagesProvider {
   override def messagesApi: MessagesApi = authenticatedRequest.request.messagesApi
 }
 
 @Singleton
 class SubscriptionDetailsAction @Inject() (
-  sessionStore: SessionStore,
-  playBodyParsers: PlayBodyParsers,
-  errorHandler: ErrorHandler)(implicit ec: ExecutionContext) extends ActionRefiner[AuthenticatedRequest, RequestWithSubscriptionDetails] with Logging {
+    sessionStore: SessionStore,
+    playBodyParsers: PlayBodyParsers,
+    errorHandler: ErrorHandler
+)(implicit ec: ExecutionContext) extends ActionRefiner[AuthenticatedRequest, RequestWithSubscriptionDetails] with Logging {
 
   override protected def executionContext: ExecutionContext = ec
 
@@ -64,7 +66,8 @@ class SubscriptionDetailsAction @Inject() (
               Left(SeeOther(routes.StartController.start().url))
 
           }
-        })
+        }
+    )
   }
 
 }

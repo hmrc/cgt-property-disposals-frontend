@@ -19,10 +19,10 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.Inject
-import play.api.mvc.{ Action, AnyContent, MessagesControllerComponents }
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{ AuthenticatedAction, SessionDataAction, WithActions }
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ Error, SubscriptionDetails }
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, SessionDataAction, WithActions}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -30,14 +30,15 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.toFuture
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 class StartController @Inject() (
-  bprService: BusinessPartnerRecordService,
-  sessionStore: SessionStore,
-  errorHandler: ErrorHandler, cc: MessagesControllerComponents,
-  val authenticatedAction: AuthenticatedAction,
-  val sessionDataAction: SessionDataAction)(implicit ec: ExecutionContext) extends FrontendController(cc) with WithActions with Logging with SessionUpdates {
+    bprService: BusinessPartnerRecordService,
+    sessionStore: SessionStore,
+    errorHandler: ErrorHandler, cc: MessagesControllerComponents,
+    val authenticatedAction: AuthenticatedAction,
+    val sessionDataAction: SessionDataAction
+)(implicit ec: ExecutionContext) extends FrontendController(cc) with WithActions with Logging with SessionUpdates {
 
   def start(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     (request.sessionData.flatMap(_.businessPartnerRecord), request.sessionData.flatMap(_.subscriptionDetails)) match {

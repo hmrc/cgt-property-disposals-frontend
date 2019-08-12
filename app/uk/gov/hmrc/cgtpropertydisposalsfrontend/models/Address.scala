@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import cats.Eq
 import julienrf.json.derived
 import play.api.data.Form
-import play.api.data.Forms.{ mapping, number }
+import play.api.data.Forms.{mapping, number}
 import play.api.libs.json.OFormat
 
 sealed trait Address
@@ -27,21 +27,23 @@ sealed trait Address
 object Address {
 
   final case class UkAddress(
-    line1: String,
-    line2: Option[String],
-    line3: Option[String],
-    line4: Option[String],
-    postcode: String) extends Address {
+      line1: String,
+      line2: Option[String],
+      line3: Option[String],
+      line4: Option[String],
+      postcode: String
+  ) extends Address {
     val countryCode: String = "GB"
   }
 
   final case class NonUkAddress(
-    line1: String,
-    line2: Option[String],
-    line3: Option[String],
-    line4: Option[String],
-    postcode: Option[String],
-    countryCode: String) extends Address
+      line1: String,
+      line2: Option[String],
+      line3: Option[String],
+      line4: Option[String],
+      postcode: Option[String],
+      countryCode: String
+  ) extends Address
 
   // the format instance using the play-json-derived-codecs library wraps
   // the case class inside a JsObject with case class type name as the key
@@ -56,7 +58,9 @@ object Address {
       mapping(
         "address-select" -> number
           .verifying("invalid", i => i >= 0 && i < addresses.size)
-          .transform[Address](addresses.apply, addresses.indexOf(_)))(identity)(Some(_)))
+          .transform[Address](addresses.apply, addresses.indexOf(_))
+      )(identity)(Some(_))
+    )
 
 }
 
