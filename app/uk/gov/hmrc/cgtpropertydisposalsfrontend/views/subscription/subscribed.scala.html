@@ -15,15 +15,25 @@
  *@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 
 @this(
- mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template
+ mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+ pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+ buttonLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.button_link
 )
 
 @(cgtReference: String, continueUrl: String)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
-@mainTemplate(title = "Subscribed") {
-  <h1>You've subscribed - well done :D </h1>
-  <p>Continue is @continueUrl</p>
+@title = @{messages("subscribed.title")}
+
+@mainTemplate(title = title) {
+  @pageHeading(title, Some(messages("subscription.caption")))
+  <p>@messages("subscribed.p1")</p>
+  <p>@Html(messages("subscribed.p2", cgtReference))</p>
+  @buttonLink(messages("subscribed.buttonText"), routes.ReturnsController.start().url)
+  <p>
+   <a href="#">@messages("subscribed.linkText")</a>
+  </p>
 }
 

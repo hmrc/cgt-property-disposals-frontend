@@ -37,7 +37,7 @@ dob.title=What is your date of birth?
 dob.helpText=For example, 31 3 1980
 dob.invalid=Enter a real date of birth
 
-subscription.caption=Your details
+subscription.caption=Create account
 subscription.title=Check your contact details
 subscription.lede={0} {1} these are the details we hold for you.
 subscription.p=We’ll only use these if we need to contact you about your Capital Gains Tax. You’ll need to change them if they are wrong.
@@ -78,4 +78,10 @@ address-select.manualOption=None of the above (Enter address manually)
 address-select.error.required=Select an address
 address-select.error.number=Select an address
 address-select.invalid=Select an address
+
+subscribed.title=Account created
+subscribed.p1=Your Capital Gains Tax (CGT) on UK property disposals account has been created.
+subscribed.p2=Your account number is <strong>{0}</strong>.
+subscribed.buttonText=Start a new return
+subscribed.linkText=Go to your CGT on UK property account
 
