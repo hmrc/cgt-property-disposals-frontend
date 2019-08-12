@@ -26,7 +26,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AddressLookupResult, Error, NINO, Postcode, SessionData}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{bprGen, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{subscriptionDetailsGen, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AddressLookupService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -57,7 +57,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
 
   val postcode = Postcode("ABC 123")
 
-  val bpr = sample(bprGen)
+  val subscriptionDetails = sample(subscriptionDetailsGen)
 
   val (addressHead, addresses) = {
       def address(i: Int) = UkAddress(s"$i the Street", Some("The Town"), None, None, postcode.value)
@@ -68,42 +68,46 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
 
   val addressLookupResult = AddressLookupResult(postcode, addresses)
 
+  def subscriptionDetailsBehavior(performAction: () => Future[Result]): Unit = {
+    "redirect to check your details" when {
+
+      "there is no session data" in {
+        inSequence {
+          mockAuthWithCl200AndRetrievedNino(nino.value)
+          mockGetSession(Future.successful(Right(None)))
+        }
+
+        val result = performAction()
+        checkIsRedirect(result, routes.StartController.start())
+      }
+
+      "there is no subscription details in session" in {
+        inSequence {
+          mockAuthWithCl200AndRetrievedNino(nino.value)
+          mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+        }
+
+        val result = performAction()
+        checkIsRedirect(result, routes.StartController.start())
+      }
+
+    }
+  }
+
   "AddressController" when {
 
     "handling requests to display the enter postcode page" must {
 
         def performAction() = controller.enterPostcode()(FakeRequest())
 
-      "redirect to check your details" when {
-
-        "there is no session data" in {
-          inSequence {
-            mockAuthWithCl200AndRetrievedNino(nino.value)
-            mockGetSession(Future.successful(Right(None)))
-          }
-
-          val result = performAction()
-          checkIsRedirect(result, routes.SubscriptionController.checkYourDetails())
-        }
-
-        "there is no BPR in session" in {
-          inSequence {
-            mockAuthWithCl200AndRetrievedNino(nino.value)
-            mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-          }
-
-          val result = performAction()
-          checkIsRedirect(result, routes.SubscriptionController.checkYourDetails())
-        }
-
-      }
+      behave like subscriptionDetailsBehavior(performAction)
 
       "display the enter postcode page" when {
 
         "there is no address lookup result in session" in {
           inSequence {
             mockAuthWithCl200AndRetrievedNino(nino.value)
-            mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(businessPartnerRecord = Some(bpr))))))
+            mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails))))))
           }
 
           contentAsString(performAction()) should include(message("address.postcode.title"))
@@ -111,7 +115,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
 
         "there is an address lookup result in session" in {
           val addressLookupResult = AddressLookupResult(postcode, List.empty)
-          val sessionData = SessionData.empty.copy(businessPartnerRecord = Some(bpr), addressLookupResult = Some(addressLookupResult))
+          val sessionData = SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails), addressLookupResult = Some(addressLookupResult))
 
           inSequence {
             mockAuthWithCl200AndRetrievedNino(nino.value)
@@ -132,31 +136,9 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
         def performAction(formData: (String, String)*): Future[Result] =
           controller.enterPostcodeSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
 
-      val existingSessionData = SessionData.empty.copy(businessPartnerRecord = Some(bpr))
+      val existingSessionData = SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails))
 
-      "redirect to check your details" when {
-
-        "there is no session data" in {
-          inSequence {
-            mockAuthWithCl200AndRetrievedNino(nino.value)
-            mockGetSession(Future.successful(Right(None)))
-          }
-
-          val result = performAction()
-          checkIsRedirect(result, routes.SubscriptionController.checkYourDetails())
-        }
-
-        "there is no BPR in session" in {
-          inSequence {
-            mockAuthWithCl200AndRetrievedNino(nino.value)
-            mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-          }
-
-          val result = performAction()
-          checkIsRedirect(result, routes.SubscriptionController.checkYourDetails())
-        }
-
-      }
+      behave like subscriptionDetailsBehavior(() => performAction())
 
       "show form errors when the postcode isn't valid" in {
         inSequence {
@@ -240,32 +222,14 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
 
       def performAction(): Future[Result] = controller.selectAddress()(FakeRequest())
 
+    behave like subscriptionDetailsBehavior(performAction)
+
     "redirect to the check your details page" when {
-
-      "there is no data in session" in {
-        inSequence {
-          mockAuthWithCl200AndRetrievedNino(nino.value)
-          mockGetSession(Future.successful(Right(None)))
-        }
-
-        val result = performAction()
-        checkIsRedirect(result, routes.SubscriptionController.checkYourDetails())
-      }
-
-      "there is no BPR in session" in {
-        inSequence {
-          mockAuthWithCl200AndRetrievedNino(nino.value)
-          mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-        }
-
-        val result = performAction()
-        checkIsRedirect(result, routes.SubscriptionController.checkYourDetails())
-      }
 
       "there is not address lookup result in session" in {
         inSequence {
           mockAuthWithCl200AndRetrievedNino(nino.value)
-          mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(businessPartnerRecord = Some(bpr))))))
+          mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails))))))
         }
 
         val result = performAction()
@@ -277,7 +241,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
     "display the select address page" when {
 
       "there is an address lookup result in session" in {
-        val session = SessionData.empty.copy(businessPartnerRecord = Some(bpr), addressLookupResult = Some(addressLookupResult))
+        val session = SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails), addressLookupResult = Some(addressLookupResult))
 
         inSequence {
           mockAuthWithCl200AndRetrievedNino(nino.value)
@@ -290,7 +254,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
       }
 
       "there is an address lookup result in session and an address has already been selected in session" in {
-        val session = SessionData.empty.copy(businessPartnerRecord = Some(bpr.copy(address = addressHead)), addressLookupResult = Some(addressLookupResult))
+        val session = SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails.copy(address = addressHead)), addressLookupResult = Some(addressLookupResult))
 
         inSequence {
           mockAuthWithCl200AndRetrievedNino(nino.value)
@@ -313,34 +277,16 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
       def performAction(formData: (String, String)*): Future[Result] =
         controller.selectAddressSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
 
-    val session = SessionData.empty.copy(businessPartnerRecord = Some(bpr), addressLookupResult = Some(addressLookupResult))
+    val session = SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails), addressLookupResult = Some(addressLookupResult))
+
+    behave like subscriptionDetailsBehavior(() => performAction())
 
     "redirect to the check your details page" when {
-
-      "there is no session data" in {
-        inSequence {
-          mockAuthWithCl200AndRetrievedNino(nino.value)
-          mockGetSession(Future.successful(Right(None)))
-        }
-
-        val result = performAction()
-        checkIsRedirect(result, routes.SubscriptionController.checkYourDetails())
-      }
-
-      "there is no bpr is session" in {
-        inSequence {
-          mockAuthWithCl200AndRetrievedNino(nino.value)
-          mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-        }
-
-        val result = performAction()
-        checkIsRedirect(result, routes.SubscriptionController.checkYourDetails())
-      }
 
       "there is no address lookup result in session" in {
         inSequence {
           mockAuthWithCl200AndRetrievedNino(nino.value)
-          mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(businessPartnerRecord = Some(bpr))))))
+          mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails))))))
         }
 
         val result = performAction()
@@ -375,7 +321,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
     "show an error page" when {
 
       "the selected address cannot be stored in session" in {
-        val updatedSession = session.copy(businessPartnerRecord = Some(bpr.copy(address = addressHead)))
+        val updatedSession = session.copy(subscriptionDetails = Some(subscriptionDetails.copy(address = addressHead)))
 
         inSequence {
           mockAuthWithCl200AndRetrievedNino(nino.value)
@@ -391,7 +337,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
     "redirect to the check your details page" when {
 
       "the selected address is stored in session" in {
-        val updatedSession = session.copy(businessPartnerRecord = Some(bpr.copy(address = addressHead)))
+        val updatedSession = session.copy(subscriptionDetails = Some(subscriptionDetails.copy(address = addressHead)))
 
         inSequence {
           mockAuthWithCl200AndRetrievedNino(nino.value)

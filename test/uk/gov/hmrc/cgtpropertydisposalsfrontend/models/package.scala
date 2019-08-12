@@ -29,6 +29,8 @@ package object models {
 
   val addressLookupResultGen = AutoGen[AddressLookupResult]
 
+  val subscriptionDetailsGen = AutoGen[SubscriptionDetails]
+
   // autogen for Boolean seems to be broken so we have to do it manually here
   val sessionGen = {
     val emailToBeVerifiedGen = for {
@@ -43,7 +45,8 @@ package object models {
       bpr <- bprGen
       emailToBeVerified <- emailToBeVerifiedGen
       addressLookupResult <- addressLookupResultGen
-    } yield SessionData(Some(url), Some(bpr), Some(emailToBeVerified), Some(addressLookupResult))
+      subscriptionDetails <- subscriptionDetailsGen
+    } yield SessionData(Some(url), Some(bpr), Some(emailToBeVerified), Some(addressLookupResult), Some(subscriptionDetails))
   }
 
 }

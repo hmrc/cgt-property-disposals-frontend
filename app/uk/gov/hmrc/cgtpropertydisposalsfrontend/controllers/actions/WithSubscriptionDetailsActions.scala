@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
-import play.api.libs.json.{Format, Json}
+import play.api.mvc.{ActionBuilder, AnyContent}
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-final case class BusinessPartnerRecord(
-    forename: String,
-    surname: String,
-    emailAddress: Option[String],
-    address: Address
-)
+trait WithSubscriptionDetailsActions { this: FrontendController =>
 
-object BusinessPartnerRecord {
+  val authenticatedAction: AuthenticatedAction
+  val subscriptionDetailsAction: SubscriptionDetailsAction
 
-  implicit val format: Format[BusinessPartnerRecord] = Json.format
+  val authenticatedActionWithSubscriptionDetails: ActionBuilder[RequestWithSubscriptionDetails, AnyContent] =
+    Action.andThen(authenticatedAction).andThen(subscriptionDetailsAction)
 
 }

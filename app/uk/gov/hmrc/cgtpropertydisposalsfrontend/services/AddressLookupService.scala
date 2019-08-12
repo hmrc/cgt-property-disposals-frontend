@@ -71,12 +71,13 @@ class AddressLookupServiceImpl @Inject() (connector: AddressLookupConnector)(imp
             case a1 :: a2 :: a3 :: as        => Right((a1, Some(a2), Some(a3), Some(as.mkString(", "))))
           }
 
-        lines.map { case (l1, l2, l3, l4) =>
-          if (a.country.code === "GB") {
-            UkAddress(l1, l2, l3, l4, a.postcode)
-          } else {
-            NonUkAddress(l1, l2, l3, l4, Some(a.postcode), a.country.code)
-          }
+        lines.map {
+          case (l1, l2, l3, l4) =>
+            if (a.country.code === "GB") {
+              UkAddress(l1, l2, l3, l4, a.postcode)
+            } else {
+              NonUkAddress(l1, l2, l3, l4, Some(a.postcode), a.country.code)
+            }
         }
       }
 
