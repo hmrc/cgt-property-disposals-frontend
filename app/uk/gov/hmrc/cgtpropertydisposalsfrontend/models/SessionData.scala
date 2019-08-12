@@ -22,13 +22,14 @@ final case class SessionData(
     ivContinueUrl: Option[String],
     businessPartnerRecord: Option[BusinessPartnerRecord],
     emailToBeVerified: Option[EmailToBeVerified],
-    addressLookupResult: Option[AddressLookupResult]
+    addressLookupResult: Option[AddressLookupResult],
+    subscriptionDetails: Option[SubscriptionDetails]
 )
 
 object SessionData {
 
   implicit val format: Format[SessionData] = Json.format
 
-  val empty: SessionData = SessionData(None, None, None, None)
+  val empty: SessionData = SessionData(None, None, None, None, None)
 
 }

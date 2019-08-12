@@ -26,7 +26,7 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, EmailToBeVerified, Error, NINO, SessionData, UUIDGenerator, bprGen, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, EmailToBeVerified, Error, NINO, SessionData, UUIDGenerator, sample, subscriptionDetailsGen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse
@@ -54,7 +54,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
   val nino = NINO("AB123456C")
-  val bpr = sample(bprGen)
+  val subscriptionDetails = sample(subscriptionDetailsGen)
 
   def mockUuidGenerator(uuid: UUID): CallHandler0[UUID] =
     (mockUuidGenerator.nextId: () => UUID).expects().returning(uuid)
@@ -64,48 +64,63 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
       .expects(expectedEmail, expectedId, expectedName, *)
       .returning(result)
 
+  def subscriptionDetailsBehavior(performAction: () => Future[Result]): Unit = {
+    "redirect to check your details" when {
+
+      "there is no session data" in {
+        inSequence {
+          mockAuthWithCl200AndRetrievedNino(nino.value)
+          mockGetSession(Future.successful(Right(None)))
+        }
+
+        val result = performAction()
+        checkIsRedirect(result, routes.StartController.start())
+      }
+
+      "there is no subscription details in session" in {
+        inSequence {
+          mockAuthWithCl200AndRetrievedNino(nino.value)
+          mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+        }
+
+        val result = performAction()
+        checkIsRedirect(result, routes.StartController.start())
+      }
+
+    }
+  }
+
   "EmailController" when {
 
     "handling requests to display the enter email page" must {
 
-      "redirect to the check your details page" when {
+        def performAction(): Future[Result] = controller.enterEmail()(FakeRequest())
 
-        "there is no BPR in session" in {
-          inSequence {
-            mockAuthWithCl200AndRetrievedNino(nino.value)
-            mockGetSession(Future.successful(Right(None)))
-          }
-
-          val result = controller.enterEmail()(FakeRequest())
-          checkIsRedirect(result, routes.SubscriptionController.checkYourDetails())
-        }
-
-      }
+      behave like subscriptionDetailsBehavior(performAction)
 
       "display the enter email page" when {
 
         "there is a BPR in session and there is no email to be verified in session" in {
-          val session = SessionData.empty.copy(businessPartnerRecord = Some(bpr))
+          val session = SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails))
 
           inSequence {
             mockAuthWithCl200AndRetrievedNino(nino.value)
             mockGetSession(Future.successful(Right(Some(session))))
           }
 
-          val result = controller.enterEmail()(FakeRequest())
-          contentAsString(result) should include(message("email.title"))
+          contentAsString(performAction()) should include(message("email.title"))
         }
 
         "there is a BPR in session and there is an email to be verified in session" in {
           val email = Email("email")
-          val session = SessionData.empty.copy(businessPartnerRecord = Some(bpr), emailToBeVerified = Some(EmailToBeVerified(email, UUID.randomUUID(), false)))
+          val session = SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails), emailToBeVerified = Some(EmailToBeVerified(email, UUID.randomUUID(), false)))
 
           inSequence {
             mockAuthWithCl200AndRetrievedNino(nino.value)
             mockGetSession(Future.successful(Right(Some(session))))
           }
 
-          val result = controller.enterEmail()(FakeRequest())
+          val result = performAction()
           contentAsString(result) should include(message("email.title"))
           contentAsString(result) should include(s"""value="${email.value}"""")
         }
@@ -119,25 +134,15 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
         def requestWithFormData(data: (String, String)*) =
           FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken
 
-      val session = SessionData.empty.copy(businessPartnerRecord = Some(bpr))
+      val session = SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails))
       val email = Email("test@email.com")
       val id = UUID.randomUUID()
       val emailToBeVerified = EmailToBeVerified(email, id, false)
 
-      "redirect to the check your details page" when {
+        def performAction(formData: (String, String)*): Future[Result] =
+          controller.enterEmailSubmit()(requestWithFormData(formData: _*))
 
-        "there is no BPR in session" in {
-          inSequence {
-            mockAuthWithCl200AndRetrievedNino(nino.value)
-            mockGetSession(Future.successful(Right(None)))
-          }
-
-          val result: Future[Result] = controller.enterEmailSubmit()(requestWithFormData("email" -> email.value))
-          checkIsRedirect(result, routes.SubscriptionController.checkYourDetails())
-
-        }
-
-      }
+      behave like subscriptionDetailsBehavior(() => performAction())
 
       "show a form error" when {
 
@@ -148,7 +153,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 mockGetSession(Future.successful(Right(Some(session))))
               }
 
-              val result = controller.enterEmailSubmit()(requestWithFormData("email" -> email))
+              val result = performAction("email" -> email)
               val content = contentAsString(result)
 
               status(result) shouldBe BAD_REQUEST
@@ -188,7 +193,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             mockStoreSession(session.copy(emailToBeVerified = Some(emailToBeVerified)))(Future.successful(Left(Error(""))))
           }
 
-          val result = controller.enterEmailSubmit()(requestWithFormData("email" -> email.value))
+          val result = performAction("email" -> email.value)
           checkIsTechnicalErrorPage(result)
         }
 
@@ -198,10 +203,10 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             mockGetSession(Future.successful(Right(Some(session))))
             mockUuidGenerator(id)
             mockStoreSession(session.copy(emailToBeVerified = Some(emailToBeVerified)))(Future.successful(Right(())))
-            mockEmailVerification(email, id, bpr.forename)(Future.successful(Left(Error(""))))
+            mockEmailVerification(email, id, subscriptionDetails.forename)(Future.successful(Left(Error(""))))
           }
 
-          val result = controller.enterEmailSubmit()(requestWithFormData("email" -> email.value))
+          val result = performAction("email" -> email.value)
           checkIsTechnicalErrorPage(result)
         }
 
@@ -213,10 +218,10 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           mockGetSession(Future.successful(Right(Some(session))))
           mockUuidGenerator(id)
           mockStoreSession(session.copy(emailToBeVerified = Some(emailToBeVerified)))(Future.successful(Right(())))
-          mockEmailVerification(email, id, bpr.forename)(Future.successful(Right(EmailAlreadyVerified)))
+          mockEmailVerification(email, id, subscriptionDetails.forename)(Future.successful(Right(EmailAlreadyVerified)))
         }
 
-        val result: Future[Result] = controller.enterEmailSubmit()(requestWithFormData("email" -> email.value))
+        val result: Future[Result] = performAction("email" -> email.value)
         checkIsRedirect(result, routes.EmailController.verifyEmail(id))
       }
 
@@ -227,10 +232,10 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             mockGetSession(Future.successful(Right(Some(session))))
             mockUuidGenerator(id)
             mockStoreSession(session.copy(emailToBeVerified = Some(emailToBeVerified)))(Future.successful(Right(())))
-            mockEmailVerification(email, id, bpr.forename)(Future.successful(Right(EmailVerificationRequested)))
+            mockEmailVerification(email, id, subscriptionDetails.forename)(Future.successful(Right(EmailVerificationRequested)))
           }
 
-          val result: Future[Result] = controller.enterEmailSubmit()(requestWithFormData("email" -> email.value))
+          val result: Future[Result] = performAction("email" -> email.value)
           checkIsRedirect(result, routes.EmailController.checkYourInbox())
         }
 
@@ -240,10 +245,10 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             mockAuthWithCl200AndRetrievedNino(nino.value)
             mockGetSession(Future.successful(Right(Some(session.copy(emailToBeVerified = Some(emailToBeVerified))))))
             mockStoreSession(session.copy(emailToBeVerified = Some(emailToBeVerified)))(Future.successful(Right(())))
-            mockEmailVerification(email, id, bpr.forename)(Future.successful(Right(EmailVerificationRequested)))
+            mockEmailVerification(email, id, subscriptionDetails.forename)(Future.successful(Right(EmailVerificationRequested)))
           }
 
-          val result: Future[Result] = controller.enterEmailSubmit()(requestWithFormData("email" -> email.value))
+          val result: Future[Result] = performAction("email" -> email.value)
           checkIsRedirect(result, routes.EmailController.checkYourInbox())
         }
 
@@ -256,10 +261,10 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           mockAuthWithCl200AndRetrievedNino(nino.value)
           mockGetSession(Future.successful(Right(Some(session.copy(emailToBeVerified = Some(emailToBeVerified))))))
           mockStoreSession(session.copy(emailToBeVerified = Some(emailToBeVerified)))(Future.successful(Right(())))
-          mockEmailVerification(Email(emailWithoutSpaces), id, bpr.forename)(Future.successful(Right(EmailVerificationRequested)))
+          mockEmailVerification(Email(emailWithoutSpaces), id, subscriptionDetails.forename)(Future.successful(Right(EmailVerificationRequested)))
         }
 
-        val result: Future[Result] = controller.enterEmailSubmit()(requestWithFormData("email" -> emailWithSpaces))
+        val result: Future[Result] = performAction("email" -> emailWithSpaces)
         checkIsRedirect(result, routes.EmailController.checkYourInbox())
       }
 
@@ -270,19 +275,14 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
       val email = Email("test@email.com")
       val id = UUID.randomUUID()
       val emailToBeVerified = EmailToBeVerified(email, id, false)
-      val session = SessionData.empty.copy(businessPartnerRecord = Some(bpr), emailToBeVerified = Some(emailToBeVerified))
+      val session = SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails), emailToBeVerified = Some(emailToBeVerified))
+
+        def performAction(): Future[Result] =
+          controller.checkYourInbox()(FakeRequest())
+
+      behave like subscriptionDetailsBehavior(performAction)
 
       "redirect to the check your details page" when {
-
-        "there is no BPR in session" in {
-          inSequence {
-            mockAuthWithCl200AndRetrievedNino(nino.value)
-            mockGetSession(Future.successful(Right(Some(session.copy(businessPartnerRecord = None)))))
-          }
-
-          val result = controller.checkYourInbox()(FakeRequest())
-          checkIsRedirect(result, routes.SubscriptionController.checkYourDetails())
-        }
 
         "there is no email to be verified in session" in {
           inSequence {
@@ -290,9 +290,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             mockGetSession(Future.successful(Right(Some(session.copy(emailToBeVerified = None)))))
           }
 
-          val result = controller.checkYourInbox()(FakeRequest())
-          checkIsRedirect(result, routes.SubscriptionController.checkYourDetails())
-
+          checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
         }
 
       }
@@ -304,7 +302,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             mockGetSession(Future.successful(Right(Some(session))))
           }
 
-          val result = controller.checkYourInbox()(FakeRequest())
+          val result = performAction()
           status(result) shouldBe OK
           contentAsString(result) should include(message("confirmEmail.title"))
 
@@ -317,19 +315,13 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
       val email = Email("test@email.com")
       val id = UUID.randomUUID()
       val emailToBeVerified = EmailToBeVerified(email, id, false)
-      val session = SessionData.empty.copy(businessPartnerRecord = Some(bpr), emailToBeVerified = Some(emailToBeVerified))
+      val session = SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails), emailToBeVerified = Some(emailToBeVerified))
+
+        def performAction(id: UUID) = controller.verifyEmail(id)(FakeRequest())
+
+      behave like subscriptionDetailsBehavior(() => performAction(id))
 
       "redirect to the check your details page" when {
-
-        "there is no BPR in session" in {
-          inSequence {
-            mockAuthWithCl200AndRetrievedNino(nino.value)
-            mockGetSession(Future.successful(Right(Some(session.copy(businessPartnerRecord = None)))))
-          }
-
-          val result = controller.verifyEmail(id)(FakeRequest())
-          checkIsRedirect(result, routes.SubscriptionController.checkYourDetails())
-        }
 
         "there is no email to be verified in session" in {
           inSequence {
@@ -337,7 +329,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             mockGetSession(Future.successful(Right(Some(session.copy(emailToBeVerified = None)))))
           }
 
-          val result = controller.verifyEmail(id)(FakeRequest())
+          val result = performAction(id)
           checkIsRedirect(result, routes.SubscriptionController.checkYourDetails())
         }
       }
@@ -350,8 +342,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             mockGetSession(Future.successful(Right(Some(session))))
           }
 
-          val result = controller.verifyEmail(UUID.randomUUID())(FakeRequest())
-          checkIsTechnicalErrorPage(result)
+          checkIsTechnicalErrorPage(performAction(UUID.randomUUID()))
         }
 
         "there is an error updating the session" in {
@@ -359,13 +350,12 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             mockAuthWithCl200AndRetrievedNino(nino.value)
             mockGetSession(Future.successful(Right(Some(session))))
             mockStoreSession(session.copy(
-              emailToBeVerified     = Some(emailToBeVerified.copy(verified = true)),
-              businessPartnerRecord = Some(bpr.copy(emailAddress = Some(emailToBeVerified.email.value)))
+              emailToBeVerified   = Some(emailToBeVerified.copy(verified = true)),
+              subscriptionDetails = Some(subscriptionDetails.copy(emailAddress = emailToBeVerified.email.value))
             ))(Future.successful(Left(Error(""))))
           }
 
-          val result = controller.verifyEmail(id)(FakeRequest())
-          checkIsTechnicalErrorPage(result)
+          checkIsTechnicalErrorPage(performAction(id))
         }
 
       }
@@ -378,8 +368,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             mockGetSession(Future.successful(Right(Some(session.copy(emailToBeVerified = Some(emailToBeVerified.copy(verified = true)))))))
           }
 
-          val result = controller.verifyEmail(id)(FakeRequest())
-          checkIsRedirect(result, routes.EmailController.emailVerified())
+          checkIsRedirect(performAction(id), routes.EmailController.emailVerified())
         }
 
         "the session is updated" in {
@@ -387,13 +376,12 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             mockAuthWithCl200AndRetrievedNino(nino.value)
             mockGetSession(Future.successful(Right(Some(session))))
             mockStoreSession(session.copy(
-              emailToBeVerified     = Some(emailToBeVerified.copy(verified = true)),
-              businessPartnerRecord = Some(bpr.copy(emailAddress = Some(emailToBeVerified.email.value)))
+              emailToBeVerified   = Some(emailToBeVerified.copy(verified = true)),
+              subscriptionDetails = Some(subscriptionDetails.copy(emailAddress = emailToBeVerified.email.value))
             ))(Future.successful(Right(())))
           }
 
-          val result = controller.verifyEmail(id)(FakeRequest())
-          checkIsRedirect(result, routes.EmailController.emailVerified())
+          checkIsRedirect(performAction(id), routes.EmailController.emailVerified())
         }
 
       }
@@ -404,9 +392,13 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
       val emailToBeVerified = EmailToBeVerified(Email("verified@email.com"), UUID.randomUUID(), true)
       val session = SessionData.empty.copy(
-        businessPartnerRecord = Some(bpr),
-        emailToBeVerified     = Some(emailToBeVerified)
+        subscriptionDetails = Some(subscriptionDetails),
+        emailToBeVerified   = Some(emailToBeVerified)
       )
+
+        def performAction() = controller.emailVerified()(FakeRequest())
+
+      behave like subscriptionDetailsBehavior(performAction)
 
       "show an error page" when {
 
@@ -416,33 +408,21 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             mockGetSession(Future.successful(Right(Some(session.copy(emailToBeVerified = Some(emailToBeVerified.copy(verified = false)))))))
           }
 
-          checkIsTechnicalErrorPage(controller.emailVerified()(FakeRequest()))
+          checkIsTechnicalErrorPage(performAction())
         }
 
       }
 
       "redirect to check your details " when {
 
-          def test(session: Option[SessionData]): Unit = {
-            inSequence {
-              mockAuthWithCl200AndRetrievedNino(nino.value)
-              mockGetSession(Future.successful(Right(session)))
-            }
-
-            val result = controller.emailVerified()(FakeRequest())
-            checkIsRedirect(result, routes.SubscriptionController.checkYourDetails())
+        "there is no email to be verified in session" in {
+          inSequence {
+            mockAuthWithCl200AndRetrievedNino(nino.value)
+            mockGetSession(Future.successful(Right(Some(session.copy(emailToBeVerified = None)))))
           }
 
-        "there is no BPR in session" in {
-          test(Some(session.copy(businessPartnerRecord = None)))
-        }
+          checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
 
-        "there is no email to be verified in session" in {
-          test(Some(session.copy(emailToBeVerified = None)))
-        }
-
-        "there is no session data" in {
-          test(None)
         }
 
       }
@@ -455,7 +435,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             mockGetSession(Future.successful(Right(Some(session))))
           }
 
-          val result = controller.emailVerified()(FakeRequest())
+          val result = performAction()
           status(result) shouldBe OK
           contentAsString(result) should include(message("confirmEmail.verified.title"))
         }

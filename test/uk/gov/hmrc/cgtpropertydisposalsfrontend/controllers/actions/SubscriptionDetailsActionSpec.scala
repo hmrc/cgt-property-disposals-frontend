@@ -16,34 +16,35 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
-import org.scalamock.scalatest.MockFactory
 import play.api.i18n.MessagesApi
 import play.api.mvc.Results.Ok
 import play.api.mvc.{MessagesRequest, PlayBodyParsers, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, SessionSupport, routes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, NINO, SessionData, sample, sessionGen, subscriptionDetailsGen}
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class SessionDataActionSpec extends ControllerSpec with SessionSupport {
+class SubscriptionDetailsActionSpec extends ControllerSpec with SessionSupport {
 
   lazy val action =
-    new SessionDataAction(mockSessionStore, instanceOf[PlayBodyParsers], instanceOf[ErrorHandler])
+    new SubscriptionDetailsAction(mockSessionStore, instanceOf[PlayBodyParsers], instanceOf[ErrorHandler])
 
-  "SessionDataAction" must {
+  "SubscriptionDetailsAction" must {
 
     lazy val messagesRequest = new MessagesRequest(FakeRequest(), instanceOf[MessagesApi])
     lazy val authenticatedRequest = AuthenticatedRequest(NINO("nino"), messagesRequest)
 
-    val sessionData = sample(sessionGen)
+    val subscriptionDetails = sample(subscriptionDetailsGen)
+    val sessionData = sample(sessionGen).copy(subscriptionDetails = Some(subscriptionDetails))
 
       def performAction(): Future[Result] =
-        action.invokeBlock(authenticatedRequest, { r: RequestWithSessionData[_] =>
-          r.sessionData shouldBe Some(sessionData)
+        action.invokeBlock(authenticatedRequest, { r: RequestWithSubscriptionDetails[_] =>
+          r.sessionData shouldBe sessionData
+          r.subscriptionDetails shouldBe subscriptionDetails
           Future.successful(Ok)
         })
 
@@ -53,7 +54,23 @@ class SessionDataActionSpec extends ControllerSpec with SessionSupport {
       checkIsTechnicalErrorPage(performAction())
     }
 
-    "perform the action with the session data if it can be retrieved" in {
+    "redirect to the start journey endpoint" when {
+
+      "there is no session data in store" in {
+        mockGetSession(Future.successful(Right(None)))
+
+        checkIsRedirect(performAction(), routes.StartController.start())
+      }
+
+      "there is no subscription details in the session data" in {
+        mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+
+        checkIsRedirect(performAction(), routes.StartController.start())
+      }
+
+    }
+
+    "perform the action with the subscription details if it can be retrieved" in {
       mockGetSession(Future.successful(Right(Some(sessionData))))
 
       status(performAction()) shouldBe OK

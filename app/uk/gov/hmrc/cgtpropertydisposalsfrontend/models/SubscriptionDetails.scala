@@ -16,22 +16,21 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import java.time.{Clock, LocalDate}
-
-import cats.Eq
 import cats.syntax.either._
-import play.api.data.Forms.{mapping, of}
-import play.api.data.format.Formatter
-import play.api.data.{Form, FormError}
-import play.api.libs.functional.syntax._
-import play.api.libs.json.Format
+import play.api.libs.json.{Format, Json}
 
-import scala.util.Try
+final case class SubscriptionDetails(
+    forename: String,
+    surname: String,
+    emailAddress: String,
+    address: Address
+)
 
-final case class DateOfBirth(value: LocalDate) extends AnyVal
+object SubscriptionDetails {
 
-object DateOfBirth {
+  implicit val format: Format[SubscriptionDetails] = Json.format
 
-  implicit val format: Format[DateOfBirth] = implicitly[Format[LocalDate]].inmap(DateOfBirth(_), _.value)
+  def fromBusinessPartnerRecord(bpr: BusinessPartnerRecord): Either[String, SubscriptionDetails] =
+    Either.fromOption(bpr.emailAddress.map(e => SubscriptionDetails(bpr.forename, bpr.surname, e, bpr.address)), "email address missing")
 
 }

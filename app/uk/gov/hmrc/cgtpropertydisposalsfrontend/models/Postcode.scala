@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import cats.instances.char._
 import cats.syntax.eq._
 import play.api.data.Form
-import play.api.data.Forms.{mapping, text}
+import play.api.data.Forms.{ mapping, text }
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Format
 
@@ -33,8 +33,6 @@ object Postcode {
     mapping(
       "postcode" -> text
         .transform[String](_.trim, identity)
-        .verifying("invalid", s => s.forall(c => c.isLetterOrDigit || c === ' ') && s.exists(_.isLetterOrDigit))
-    )(Postcode.apply)(Postcode.unapply)
-  )
+        .verifying("invalid", s => s.forall(c => c.isLetterOrDigit || c === ' ') && s.exists(_.isLetterOrDigit)))(Postcode.apply)(Postcode.unapply))
 
 }

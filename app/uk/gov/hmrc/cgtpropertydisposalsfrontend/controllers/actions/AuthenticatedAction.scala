@@ -17,32 +17,31 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
 import cats.syntax.either._
-import com.google.inject.{Inject, Singleton}
+import com.google.inject.{ Inject, Singleton }
 import play.api.Configuration
-import play.api.mvc.Results.{InternalServerError, _}
+import play.api.mvc.Results.{ InternalServerError, _ }
 import play.api.mvc._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{NINO, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ NINO, SessionData }
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{ Logging, toFuture }
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 final case class AuthenticatedRequest[A](nino: NINO, request: MessagesRequest[A]) extends WrappedRequest[A](request)
 
 @Singleton
 class AuthenticatedAction @Inject() (
-    authConnector: AuthConnector,
-    config: Configuration,
-    errorHandler: ErrorHandler,
-    playBodyParsers: PlayBodyParsers,
-    sessionStore: SessionStore
-)(implicit ec: ExecutionContext)
+  authConnector: AuthConnector,
+  config: Configuration,
+  errorHandler: ErrorHandler,
+  playBodyParsers: PlayBodyParsers,
+  sessionStore: SessionStore)(implicit ec: ExecutionContext)
   extends ActionRefiner[MessagesRequest, AuthenticatedRequest] with Logging { self =>
 
   val authorisedFunctions: AuthorisedFunctions = new AuthorisedFunctions {
@@ -109,10 +108,7 @@ class AuthenticatedAction @Inject() (
                 "origin" -> Seq(ivOrigin),
                 "confidenceLevel" -> Seq("200"),
                 "completionURL" -> Seq(ivSuccessUrl),
-                "failureURL" -> Seq(ivFailureUrl)
-              )
-            )
-        ).merge
+                "failureURL" -> Seq(ivFailureUrl)))).merge
       }
 
 }

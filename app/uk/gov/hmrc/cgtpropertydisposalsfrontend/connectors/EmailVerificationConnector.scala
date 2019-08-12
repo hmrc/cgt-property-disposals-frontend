@@ -19,18 +19,18 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 import java.util.UUID
 
 import configs.syntax._
-import com.google.inject.{ImplementedBy, Inject, Singleton}
+import com.google.inject.{ ImplementedBy, Inject, Singleton }
 import configs.Configs
 import play.api.Configuration
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{ Format, Json }
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.EmailVerificationConnectorImpl.EmailVerificationRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Email
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpResponse }
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.concurrent.duration.FiniteDuration
 
 @ImplementedBy(classOf[EmailVerificationConnectorImpl])
@@ -42,9 +42,8 @@ trait EmailVerificationConnector {
 
 @Singleton
 class EmailVerificationConnectorImpl @Inject() (
-    http: HttpClient,
-    config: Configuration
-)(implicit ec: ExecutionContext) extends EmailVerificationConnector {
+  http: HttpClient,
+  config: Configuration)(implicit ec: ExecutionContext) extends EmailVerificationConnector {
 
   def getEmailVerificationConfig[A: Configs](key: String): A = config.underlying.get[A](s"microservice.services.email-verification.$key").value
 
@@ -75,8 +74,7 @@ class EmailVerificationConnectorImpl @Inject() (
         templateId,
         linkExpiryTime,
         s"${continueUrl(id)}",
-        Map("name" -> name)
-      )
+        Map("name" -> name))
     http.post(url, Json.toJson(body))
   }
 
@@ -85,12 +83,11 @@ class EmailVerificationConnectorImpl @Inject() (
 object EmailVerificationConnectorImpl {
 
   final case class EmailVerificationRequest(
-      email: String,
-      templateId: String,
-      linkExpiryDuration: String,
-      continueUrl: String,
-      templateParameters: Map[String, String]
-  )
+    email: String,
+    templateId: String,
+    linkExpiryDuration: String,
+    continueUrl: String,
+    templateParameters: Map[String, String])
 
   implicit val formats: Format[EmailVerificationRequest] = Json.format[EmailVerificationRequest]
 

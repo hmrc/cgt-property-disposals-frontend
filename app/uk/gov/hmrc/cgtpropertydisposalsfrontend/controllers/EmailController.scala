@@ -23,25 +23,24 @@ import cats.instances.future._
 import cats.instances.uuid._
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithActions}
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, EmailToBeVerified, Error, SessionData, UUIDGenerator}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, SubscriptionDetailsAction, WithSubscriptionDetailsActions}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, EmailToBeVerified, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse.{EmailAlreadyVerified, EmailVerificationRequested}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.toFuture
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class EmailController @Inject() (
     val authenticatedAction: AuthenticatedAction,
-    val sessionDataAction: SessionDataAction,
+    val subscriptionDetailsAction: SubscriptionDetailsAction,
     sessionStore: SessionStore,
     emailVerificationService: EmailVerificationService,
     uuidGenerator: UUIDGenerator,
@@ -50,71 +49,54 @@ class EmailController @Inject() (
     enterEmail: views.html.subscription.enter_email,
     checkYourInboxPage: views.html.subscription.check_your_inbox,
     emailVerifiedPage: views.html.subscription.email_verified
-)(implicit viewConfig: ViewConfig, ec: ExecutionContext) extends FrontendController(cc) with WithActions with Logging {
+)(implicit viewConfig: ViewConfig, ec: ExecutionContext) extends FrontendController(cc) with WithSubscriptionDetailsActions with Logging with SessionUpdates {
 
-  def enterEmail(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
-    (request.sessionData.flatMap(_.businessPartnerRecord), request.sessionData.flatMap(_.emailToBeVerified)) match {
-      case (None, _) =>
-        SeeOther(routes.SubscriptionController.checkYourDetails().url)
-
-      case (Some(_), emailToBeVerified) =>
-        val form = emailToBeVerified.fold(Email.form)(e => Email.form.fill(e.email))
-        Ok(enterEmail(form))
-    }
+  def enterEmail(): Action[AnyContent] = authenticatedActionWithSubscriptionDetails { implicit request =>
+    val form = request.sessionData.emailToBeVerified.fold(Email.form)(e => Email.form.fill(e.email))
+    Ok(enterEmail(form))
   }
 
-  def enterEmailSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    (request.sessionData.flatMap(_.businessPartnerRecord), request.sessionData.flatMap(_.emailToBeVerified)) match {
-      case (None, _) =>
-        SeeOther(routes.SubscriptionController.checkYourDetails().url)
+  def enterEmailSubmit(): Action[AnyContent] = authenticatedActionWithSubscriptionDetails.async { implicit request =>
+    Email.form.bindFromRequest().fold(
+      formWithErrors => BadRequest(enterEmail(formWithErrors)),
+      { email =>
+        val emailToBeVerified = request.sessionData.emailToBeVerified match {
+          case Some(e) if e.email === email => e
+          case _                            => EmailToBeVerified(email, uuidGenerator.nextId(), verified = false)
+        }
 
-      case (Some(bpr), existingEmailToBeVerified) =>
-        Email.form.bindFromRequest().fold(
-          formWithErrors => BadRequest(enterEmail(formWithErrors)),
-          { email =>
-            val emailToBeVerified = existingEmailToBeVerified match {
-              case Some(e) if e.email === email => e
-              case _                            => EmailToBeVerified(email, uuidGenerator.nextId(), verified = false)
-            }
+        val result = for {
+          _ <- EitherT(updateSession(sessionStore, request)(_.copy(emailToBeVerified = Some(emailToBeVerified))))
+          result <- EitherT(emailVerificationService.verifyEmail(email, emailToBeVerified.id, request.subscriptionDetails.forename))
+        } yield result
 
-            val result = for {
-              _ <- EitherT(updateSession(sessionStore)(_.copy(emailToBeVerified = Some(emailToBeVerified))))
-              result <- EitherT(emailVerificationService.verifyEmail(email, emailToBeVerified.id, bpr.forename))
-            } yield result
+        result.value.map {
+          case Left(e) =>
+            logger.warn("Could not verify email", e)
+            errorHandler.errorResult()
 
-            result.value.map {
-              case Left(e) =>
-                logger.warn("Could not verify email", e)
-                errorHandler.errorResult()
+          case Right(EmailAlreadyVerified) =>
+            SeeOther(routes.EmailController.verifyEmail(emailToBeVerified.id).url)
 
-              case Right(EmailAlreadyVerified) =>
-                SeeOther(routes.EmailController.verifyEmail(emailToBeVerified.id).url)
-
-              case Right(EmailVerificationRequested) =>
-                SeeOther(routes.EmailController.checkYourInbox().url)
-            }
-          }
-        )
-    }
+          case Right(EmailVerificationRequested) =>
+            SeeOther(routes.EmailController.checkYourInbox().url)
+        }
+      }
+    )
   }
 
-  def checkYourInbox(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
-    (request.sessionData.flatMap(_.businessPartnerRecord), request.sessionData.flatMap(_.emailToBeVerified)) match {
-      case (None, _) | (_, None) =>
-        SeeOther(routes.SubscriptionController.checkYourDetails().url)
-
-      case (Some(_), Some(emailToBeVerified)) =>
-        Ok(checkYourInboxPage(emailToBeVerified.email))
-    }
-
+  def checkYourInbox(): Action[AnyContent] = authenticatedActionWithSubscriptionDetails { implicit request =>
+    request.sessionData.emailToBeVerified.fold(
+      SeeOther(routes.SubscriptionController.checkYourDetails().url)
+    )(
+        emailToBeVerified => Ok(checkYourInboxPage(emailToBeVerified.email))
+      )
   }
 
-  def verifyEmail(p: UUID): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    (request.sessionData.flatMap(_.businessPartnerRecord), request.sessionData.flatMap(_.emailToBeVerified)) match {
-      case (None, _) | (_, None) =>
-        SeeOther(routes.SubscriptionController.checkYourDetails().url)
-
-      case (Some(bpr), Some(emailToBeVerified)) =>
+  def verifyEmail(p: UUID): Action[AnyContent] = authenticatedActionWithSubscriptionDetails.async { implicit request =>
+    request.sessionData.emailToBeVerified.fold[Future[Result]](
+      SeeOther(routes.SubscriptionController.checkYourDetails().url)
+    ) { emailToBeVerified =>
         if (emailToBeVerified.id =!= p) {
           logger.warn(s"Received verify email request where id sent ($p) did not match the id in session (${emailToBeVerified.id})")
           errorHandler.errorResult()
@@ -122,10 +104,10 @@ class EmailController @Inject() (
           if (emailToBeVerified.verified) {
             SeeOther(routes.EmailController.emailVerified().url)
           } else {
-            updateSession(sessionStore)(
+            updateSession(sessionStore, request)(
               _.copy(
-                businessPartnerRecord = Some(bpr.copy(emailAddress = Some(emailToBeVerified.email.value))),
-                emailToBeVerified     = Some(emailToBeVerified.copy(verified = true))
+                subscriptionDetails = Some(request.subscriptionDetails.copy(emailAddress = emailToBeVerified.email.value)),
+                emailToBeVerified   = Some(emailToBeVerified.copy(verified = true))
               )
             )
               .map(
@@ -140,23 +122,20 @@ class EmailController @Inject() (
               )
           }
         }
-    }
+      }
   }
 
-  def emailVerified(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
-    (request.sessionData.flatMap(_.businessPartnerRecord), request.sessionData.flatMap(_.emailToBeVerified)) match {
-      case (None, _) | (_, None) =>
-        SeeOther(routes.SubscriptionController.checkYourDetails().url)
-
-      case (Some(_), Some(emailToBeVerified)) =>
+  def emailVerified(): Action[AnyContent] = authenticatedActionWithSubscriptionDetails { implicit request =>
+    request.sessionData.emailToBeVerified.fold(
+      SeeOther(routes.SubscriptionController.checkYourDetails().url)
+    ) { emailToBeVerified =>
         if (emailToBeVerified.verified) {
           Ok(emailVerifiedPage(emailToBeVerified.email))
         } else {
           logger.warn("Email verified endpoint called but email was not verified")
           errorHandler.errorResult()
         }
-
-    }
+      }
   }
 
 }

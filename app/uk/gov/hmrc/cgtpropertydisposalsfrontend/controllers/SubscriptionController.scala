@@ -16,22 +16,17 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
-import cats.data.EitherT
-import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithActions}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, SubscriptionDetailsAction, WithSubscriptionDetailsActions}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class SubscriptionController @Inject() (
@@ -40,40 +35,16 @@ class SubscriptionController @Inject() (
     errorHandler: ErrorHandler,
     cc: MessagesControllerComponents,
     val authenticatedAction: AuthenticatedAction,
-    val sessionDataAction: SessionDataAction,
-    checkYourDetailsPage: views.html.subscription.check_your_details
-)(implicit viewConfig: ViewConfig, ec: ExecutionContext) extends FrontendController(cc) with WithActions with Logging {
+    val subscriptionDetailsAction: SubscriptionDetailsAction,
+    checkYourDetailsPage: views.html.subscription.check_your_details,
+)(implicit viewConfig: ViewConfig, ec: ExecutionContext) extends FrontendController(cc) with WithSubscriptionDetailsActions with Logging {
 
-  def checkYourDetails(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    request.sessionData.flatMap(_.businessPartnerRecord) match {
-      case Some(bpr) =>
-        Ok(checkYourDetailsPage(bpr))
-
-      case None =>
-        val result = for {
-          bpr <- EitherT(bprService.getBusinessPartnerRecord(request.authenticatedRequest.nino))
-          _ <- EitherT(updateSession(sessionStore)(_.copy(businessPartnerRecord = Some(bpr))))
-        } yield bpr
-
-        result.value.map {
-          case Left(e) =>
-            logger.warn("Error while getting BPR", e)
-            errorHandler.errorResult()
-
-          case Right(bpr) =>
-            Ok(checkYourDetailsPage(bpr))
-        }
-    }
+  def checkYourDetails(): Action[AnyContent] = authenticatedActionWithSubscriptionDetails { implicit request =>
+    Ok(checkYourDetailsPage(request.subscriptionDetails))
   }
 
-  def checkYourDetailsSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    request.sessionData.flatMap(_.businessPartnerRecord) match {
-      case None =>
-        SeeOther(routes.SubscriptionController.checkYourDetails().url)
-
-      case Some(_) =>
-        Ok("confirmed")
-    }
+  def checkYourDetailsSubmit(): Action[AnyContent] = authenticatedActionWithSubscriptionDetails.async { implicit request =>
+    Ok("confirmed")
   }
 
 }
