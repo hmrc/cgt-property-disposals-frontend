@@ -105,8 +105,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
         }
 
         val result = controller.checkYourDetailsSubmit()(requestWithCSRFToken)
-        status(result) shouldBe OK
-        contentAsString(result) shouldBe "confirmed"
+        checkIsRedirect(result, routes.SubscriptionController.subscribed())
       }
 
     }

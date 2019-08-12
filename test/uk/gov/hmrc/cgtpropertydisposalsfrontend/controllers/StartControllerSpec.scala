@@ -49,8 +49,8 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
   val nino = NINO("AB123456C")
   val emailAddress = "email"
-  val bpr = BusinessPartnerRecord("forename", "surname", Some(emailAddress), UkAddress("line1", None, None, None, "postcode"))
-  val subscriptionDetails = SubscriptionDetails(bpr.forename, bpr.surname, emailAddress, bpr.address)
+  val bpr = BusinessPartnerRecord("forename", "surname", Some(emailAddress), UkAddress("line1", None, None, None, "postcode"), "sap")
+  val subscriptionDetails = SubscriptionDetails(bpr.forename, bpr.surname, emailAddress, bpr.address, bpr.sapNumber)
 
   "The StartController" when {
 

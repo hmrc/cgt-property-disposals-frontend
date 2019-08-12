@@ -22,7 +22,8 @@ final case class BusinessPartnerRecord(
     forename: String,
     surname: String,
     emailAddress: Option[String],
-    address: Address
+    address: Address,
+    sapNumber: String
 )
 
 object BusinessPartnerRecord {

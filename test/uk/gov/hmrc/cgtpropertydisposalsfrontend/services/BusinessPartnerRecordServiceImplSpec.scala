@@ -43,7 +43,7 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
   implicit val hc: HeaderCarrier = HeaderCarrier()
   val nino = NINO("AB123456C")
   val address = Address.UkAddress("line1", Some("line2"), None, None, "postcode")
-  val bpr = BusinessPartnerRecord("name", "surname", Some("email"), address)
+  val bpr = BusinessPartnerRecord("name", "surname", Some("email"), address, "sap")
 
   "The BusinessPartnerRecordServiceImpl" when {
 
