@@ -81,7 +81,7 @@ address-select.invalid=Select an address
 
 subscribed.title=Account created
 subscribed.p1=Your Capital Gains Tax (CGT) on UK property disposals account has been created.
-subscribed.p2=Your account number is <strong>{0}</strong>.
+subscribed.p2=Your account number is
 subscribed.buttonText=Start a new return
 subscribed.linkText=Go to your CGT on UK property account
 

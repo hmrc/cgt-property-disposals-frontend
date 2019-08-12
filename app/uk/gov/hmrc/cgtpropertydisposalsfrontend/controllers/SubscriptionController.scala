@@ -50,7 +50,7 @@ class SubscriptionController @Inject() (
   }
 
   def subscribed(): Action[AnyContent] = Action { implicit request =>
-    Ok(subscribedPage(Random.alphanumeric.take(20).toList.mkString("").toUpperCase, routes.ReturnsController.start().url))
+    Ok(subscribedPage(Random.alphanumeric.take(20).toList.mkString("").toUpperCase))
   }
 
 }
