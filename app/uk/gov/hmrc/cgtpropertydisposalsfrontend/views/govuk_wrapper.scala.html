@@ -65,7 +65,9 @@
     <meta name="format-detection" content="telephone=no" />
 }
 
-@headerNavLinks = {}
+@headerNavLinks = {
+  <li><a href="@appConfig.signOutUrl" id="signOut">@messages("service.signOut")</a></li>
+}
 
 @insideHeader = {
     @uiHeaderNav(
