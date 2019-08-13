@@ -24,7 +24,7 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{NINO, SessionData, sample, subscriptionDetailsGen}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{NINO, SessionData, SubscriptionDetails, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 
 import scala.concurrent.Future
@@ -47,7 +47,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
   val nino = NINO("AB123456C")
 
-  val subscriptionDetails = sample(subscriptionDetailsGen)
+  val subscriptionDetails = sample[SubscriptionDetails]
 
   "The SubscriptionController" when {
 

@@ -16,6 +16,9 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
+import cats.data.EitherT
+import cats.instances.future._
+
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -25,22 +28,22 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.UkAddress
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AddressLookupResult, Error, NINO, Postcode, SessionData}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{subscriptionDetailsGen, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AddressLookupResult, Error, NINO, Postcode, SessionData, SubscriptionDetails, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AddressLookupService
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class AddressControllerSpec extends ControllerSpec with AuthSupport with SessionSupport {
 
   val mockService = mock[AddressLookupService]
 
-  def mockAddressLookup(expectedPostcode: Postcode)(result: Future[Either[Error, AddressLookupResult]]) =
+  def mockAddressLookup(expectedPostcode: Postcode)(result: Either[Error, AddressLookupResult]) =
     (mockService.lookupAddress(_: Postcode)(_: HeaderCarrier))
       .expects(expectedPostcode, *)
-      .returning(result)
+      .returning(EitherT.fromEither[Future](result))
 
   override val overrideBindings: List[GuiceableModule] =
     List(
@@ -57,7 +60,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
 
   val postcode = Postcode("ABC 123")
 
-  val subscriptionDetails = sample(subscriptionDetailsGen)
+  val subscriptionDetails = sample[SubscriptionDetails]
 
   val (addressHead, addresses) = {
       def address(i: Int) = UkAddress(s"$i the Street", Some("The Town"), None, None, postcode.value)
@@ -157,7 +160,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
           inSequence {
             mockAuthWithCl200AndRetrievedNino(nino.value)
             mockGetSession(Future.successful(Right(Some(existingSessionData))))
-            mockAddressLookup(postcode)(Future.successful(Left(Error("Uh oh!"))))
+            mockAddressLookup(postcode)(Left(Error("Uh oh!")))
           }
 
           checkIsTechnicalErrorPage(performAction("postcode" -> postcode.value))
@@ -167,7 +170,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
           inSequence {
             mockAuthWithCl200AndRetrievedNino(nino.value)
             mockGetSession(Future.successful(Right(Some(existingSessionData))))
-            mockAddressLookup(postcode)(Future.successful(Right(addressLookupResult)))
+            mockAddressLookup(postcode)(Right(addressLookupResult))
             mockStoreSession(existingSessionData.copy(addressLookupResult = Some(addressLookupResult)))(Future.successful(Left(Error("Uh oh!"))))
           }
 
@@ -194,7 +197,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
         inSequence {
           mockAuthWithCl200AndRetrievedNino(nino.value)
           mockGetSession(Future.successful(Right(Some(existingSessionData))))
-          mockAddressLookup(postcode)(Future.successful(Right(addressLookupResult)))
+          mockAddressLookup(postcode)(Right(addressLookupResult))
           mockStoreSession(existingSessionData.copy(addressLookupResult = Some(addressLookupResult)))(Future.successful(Right(())))
         }
 
@@ -206,7 +209,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
         inSequence {
           mockAuthWithCl200AndRetrievedNino(nino.value)
           mockGetSession(Future.successful(Right(Some(existingSessionData))))
-          mockAddressLookup(postcode)(Future.successful(Right(addressLookupResult)))
+          mockAddressLookup(postcode)(Right(addressLookupResult))
           mockStoreSession(existingSessionData.copy(addressLookupResult = Some(addressLookupResult)))(Future.successful(Right(())))
         }
 

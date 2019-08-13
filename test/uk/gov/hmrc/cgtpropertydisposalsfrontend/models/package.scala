@@ -16,37 +16,17 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend
 
-import org.scalacheck.Gen
-import uk.gov.hmrc.smartstub.AutoGen
+import org.scalacheck.ScalacheckShapeless._
+import org.scalacheck.{Arbitrary, Gen}
 
 import scala.reflect._
 
 package object models {
 
-  def sample[A: ClassTag](gen: Gen[A]): A = gen.sample.getOrElse(sys.error(s"Could not generate instance of ${classTag[A].runtimeClass.getSimpleName}"))
+  def sample[A: ClassTag](implicit gen: Gen[A]): A = gen.sample.getOrElse(sys.error(s"Could not generate instance of ${classTag[A].runtimeClass.getSimpleName}"))
 
-  val bprGen = AutoGen[BusinessPartnerRecord]
+  implicit val subscriptionDetailsGen: Gen[SubscriptionDetails] = implicitly[Arbitrary[SubscriptionDetails]].arbitrary
 
-  val addressLookupResultGen = AutoGen[AddressLookupResult]
-
-  val subscriptionDetailsGen = AutoGen[SubscriptionDetails]
-
-  // autogen for Boolean seems to be broken so we have to do it manually here
-  val sessionGen = {
-    val emailToBeVerifiedGen = for {
-      emailLocal <- Gen.alphaStr
-      emailDomain <- Gen.alphaStr
-      uuid <- Gen.uuid
-      verified <- Gen.oneOf(true, false)
-    } yield EmailToBeVerified(Email(s"$emailLocal@$emailDomain"), uuid, verified)
-
-    for {
-      url <- Gen.alphaStr
-      bpr <- bprGen
-      emailToBeVerified <- emailToBeVerifiedGen
-      addressLookupResult <- addressLookupResultGen
-      subscriptionDetails <- subscriptionDetailsGen
-    } yield SessionData(Some(url), Some(bpr), Some(emailToBeVerified), Some(addressLookupResult), Some(subscriptionDetails))
-  }
+  implicit val sessionDataGen: Gen[SessionData] = implicitly[Arbitrary[SessionData]].arbitrary
 
 }

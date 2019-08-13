@@ -50,10 +50,10 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
 
     "handling request to get the business partner record" must {
 
-      "do a get http call and return the result" in {
-        implicit val hc: HeaderCarrier = HeaderCarrier()
-        val nino = NINO("AB123456C")
+      implicit val hc: HeaderCarrier = HeaderCarrier()
+      val nino = NINO("AB123456C")
 
+      "do a get http call and return the result" in {
         List(
           HttpResponse(200),
           HttpResponse(200, Some(JsString("hi"))),
@@ -62,10 +62,21 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
             withClue(s"For http response [${httpResponse.toString}]") {
               mockGet(s"http://host:123/cgt-property-disposals/${nino.value}/business-partner-record")(Some(httpResponse))
 
-              await(connector.getBusinessPartnerRecord(nino)) shouldBe httpResponse
+              await(connector.getBusinessPartnerRecord(nino).value) shouldBe Right(httpResponse)
             }
           }
       }
+
+      "return an error" when {
+
+        "the future fails" in {
+          mockGet(s"http://host:123/cgt-property-disposals/${nino.value}/business-partner-record")(None)
+
+          await(connector.getBusinessPartnerRecord(nino).value).isLeft shouldBe true
+        }
+
+      }
+
     }
 
   }

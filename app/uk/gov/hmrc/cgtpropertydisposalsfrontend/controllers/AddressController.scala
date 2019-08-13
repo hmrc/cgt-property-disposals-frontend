@@ -58,7 +58,7 @@ class AddressController @Inject() (
           SeeOther(routes.AddressController.selectAddress().url)
         } else {
           val result = for {
-            addressLookupResult <- EitherT(addressLookupService.lookupAddress(postcode))
+            addressLookupResult <- addressLookupService.lookupAddress(postcode)
             _ <- EitherT(updateSession(sessionStore, request)(_.copy(addressLookupResult = Some(addressLookupResult))))
           } yield addressLookupResult
 

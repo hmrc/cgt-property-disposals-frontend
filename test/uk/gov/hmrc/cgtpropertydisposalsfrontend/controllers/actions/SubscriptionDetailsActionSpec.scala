@@ -23,7 +23,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, SessionSupport, routes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, NINO, SessionData, sample, sessionGen, subscriptionDetailsGen}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, NINO, SessionData, SubscriptionDetails, sample, subscriptionDetailsGen}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -38,8 +38,8 @@ class SubscriptionDetailsActionSpec extends ControllerSpec with SessionSupport {
     lazy val messagesRequest = new MessagesRequest(FakeRequest(), instanceOf[MessagesApi])
     lazy val authenticatedRequest = AuthenticatedRequest(NINO("nino"), messagesRequest)
 
-    val subscriptionDetails = sample(subscriptionDetailsGen)
-    val sessionData = sample(sessionGen).copy(subscriptionDetails = Some(subscriptionDetails))
+    val subscriptionDetails = sample[SubscriptionDetails]
+    val sessionData = sample[SessionData].copy(subscriptionDetails = Some(subscriptionDetails))
 
       def performAction(): Future[Result] =
         action.invokeBlock(authenticatedRequest, { r: RequestWithSubscriptionDetails[_] =>

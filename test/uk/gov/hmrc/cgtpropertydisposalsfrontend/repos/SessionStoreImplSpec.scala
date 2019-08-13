@@ -48,7 +48,7 @@ class SessionStoreImplSpec extends WordSpec with Matchers with MongoSupport with
 
   "SessionStoreImpl" must {
 
-    val sessionData = sample(sessionGen)
+    val sessionData = sample[SessionData]
 
     "be able to insert SessionData into mongo and read it back" in new TestEnvironment {
       val result = sessionStore.store(sessionData)

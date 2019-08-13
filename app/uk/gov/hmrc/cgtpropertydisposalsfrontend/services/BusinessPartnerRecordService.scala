@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services
 
+import cats.data.EitherT
+import cats.instances.future._
 import cats.syntax.either._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.OK
@@ -29,23 +31,20 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[BusinessPartnerRecordServiceImpl])
 trait BusinessPartnerRecordService {
 
-  def getBusinessPartnerRecord(nino: NINO)(implicit hc: HeaderCarrier): Future[Either[Error, BusinessPartnerRecord]]
+  def getBusinessPartnerRecord(nino: NINO)(implicit hc: HeaderCarrier): EitherT[Future, Error, BusinessPartnerRecord]
 
 }
 
 @Singleton
 class BusinessPartnerRecordServiceImpl @Inject() (connector: CGTPropertyDisposalsConnector)(implicit ec: ExecutionContext) extends BusinessPartnerRecordService {
 
-  override def getBusinessPartnerRecord(nino: NINO)(implicit hc: HeaderCarrier): Future[Either[Error, BusinessPartnerRecord]] =
+  override def getBusinessPartnerRecord(nino: NINO)(implicit hc: HeaderCarrier): EitherT[Future, Error, BusinessPartnerRecord] =
     connector.getBusinessPartnerRecord(nino)
-      .map { response =>
+      .subflatMap { response =>
         response.status match {
           case OK    => response.parseJSON[BusinessPartnerRecord]().leftMap(Error.apply)
           case other => Left(Error(s"Call to get BPR came back with status $other"))
         }
-      }
-      .recover {
-        case e => Left(Error(e))
       }
 
 }
