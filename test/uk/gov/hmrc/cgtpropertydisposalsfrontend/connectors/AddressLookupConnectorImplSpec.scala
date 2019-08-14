@@ -48,7 +48,7 @@ class AddressLookupConnectorImplSpec extends WordSpec with Matchers with MockFac
   val connector = new AddressLookupConnectorImpl(mockHttp, new ServicesConfig(config, new RunMode(config, Mode.Test)))
   "AddressLookupConnectorImpl" when {
 
-    "handling request to get the business partner record" must {
+    "handling request to lookup addresses" must {
 
       implicit val hc: HeaderCarrier = HeaderCarrier()
       val postcode = Postcode("WC1X9BH")
