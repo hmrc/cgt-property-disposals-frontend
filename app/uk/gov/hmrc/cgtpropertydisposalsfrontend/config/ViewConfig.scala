@@ -25,8 +25,8 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
   private def loadConfig(key: String): String = servicesConfig.getString(key)
 
   private val contactHost = servicesConfig.getString(s"contact-frontend.host")
-  val caUrl: String = loadConfig(s"company-auth-frontend.url")
-  val signOutUri: String = loadConfig(s"sign-out.uri")
+  private val companyAuthUrl: String = loadConfig(s"company-auth-frontend.url")
+  private val signOutUri: String = loadConfig(s"sign-out.uri")
   private val contactFormServiceIdentifier = "CGTPD"
 
   val assetsPrefix: String = loadConfig(s"assets.url") + loadConfig(s"assets.version")
@@ -35,5 +35,5 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
   val reportAProblemPartialUrl: String = s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
   val reportAProblemNonJSUrl: String = s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
   val betaFeedbackUrlNoAuth: String = s"$contactHost/contact/beta-feedback-unauthenticated?service=$contactFormServiceIdentifier"
-  val signOutUrl: String = s"$caUrl$signOutUri"
+  val signOutUrl: String = s"$companyAuthUrl$signOutUri"
 }
