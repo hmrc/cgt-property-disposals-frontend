@@ -14,17 +14,28 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
-import play.api.mvc.{ActionBuilder, AnyContent}
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
 
-trait WithSubscriptionDetailsActions { this: FrontendController =>
+class ReturnsControllerSpec extends ControllerSpec {
 
-  val authenticatedAction: AuthenticatedAction
-  val subscriptionDetailsAction: SubscriptionDetailsAction
+  val controller = instanceOf[ReturnsController]
 
-  val authenticatedActionWithSubscriptionDetails: ActionBuilder[RequestWithSubscriptionData, AnyContent] =
-    Action.andThen(authenticatedAction).andThen(subscriptionDetailsAction)
+  "The ReturnsController" when {
+
+    "handling requests to display the start page" must {
+
+      "display the start page" in {
+        val result = controller.start()(FakeRequest())
+        status(result) shouldBe OK
+        contentAsString(result) should include("Start your return here")
+
+      }
+
+    }
+
+  }
 
 }

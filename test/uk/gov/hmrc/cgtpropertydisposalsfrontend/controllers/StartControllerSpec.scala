@@ -129,6 +129,20 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
               }
           }
+
+          "one doesn't exist in session and it is successfully retrieved using the retrieved auth NINO and " +
+            "there is a BPR already in session" in {
+              val session = SessionData.empty.copy(businessPartnerRecord = Some(bpr))
+
+              inSequence {
+                mockAuthWithCl200AndRetrievedNino(nino.value)
+                mockGetSession(Future.successful(Right(Some(session))))
+                mockStoreSession(session.copy(subscriptionDetails = Some(subscriptionDetails)))(Future.successful(Right(())))
+              }
+
+              checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
+            }
+
         }
 
       }

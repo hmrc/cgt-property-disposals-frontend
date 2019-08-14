@@ -40,7 +40,6 @@ class AuthenticatedAction @Inject() (
     authConnector: AuthConnector,
     config: Configuration,
     errorHandler: ErrorHandler,
-    playBodyParsers: PlayBodyParsers,
     sessionStore: SessionStore
 )(implicit ec: ExecutionContext)
   extends ActionRefiner[MessagesRequest, AuthenticatedRequest] with Logging { self =>

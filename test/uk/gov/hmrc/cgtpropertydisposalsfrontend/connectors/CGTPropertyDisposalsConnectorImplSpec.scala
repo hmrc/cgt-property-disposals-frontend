@@ -22,7 +22,8 @@ import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.JsString
 import play.api.test.Helpers._
 import play.api.{Configuration, Mode}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.NINO
+import play.api.libs.json.Json
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{NINO, SubscriptionDetails, sample}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 
@@ -77,6 +78,35 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
 
       }
 
+    }
+
+    "handling request to subscribe" must {
+      implicit val hc: HeaderCarrier = HeaderCarrier()
+      val subscriptionDetails = sample[SubscriptionDetails]
+
+      "do a get http call and return the result" in {
+        List(
+          HttpResponse(200),
+          HttpResponse(200, Some(JsString("hi"))),
+          HttpResponse(500)
+        ).foreach { httpResponse =>
+            withClue(s"For http response [${httpResponse.toString}]") {
+              mockPost(s"http://host:123/cgt-property-disposals/subscribe", Map.empty, Json.toJson(subscriptionDetails))(Some(httpResponse))
+
+              await(connector.subscribe(subscriptionDetails).value) shouldBe Right(httpResponse)
+            }
+          }
+      }
+
+      "return an error" when {
+
+        "the future fails" in {
+          mockPost(s"http://host:123/cgt-property-disposals/subscribe", Map.empty, Json.toJson(subscriptionDetails))(None)
+
+          await(connector.subscribe(subscriptionDetails).value).isLeft shouldBe true
+        }
+
+      }
     }
 
   }

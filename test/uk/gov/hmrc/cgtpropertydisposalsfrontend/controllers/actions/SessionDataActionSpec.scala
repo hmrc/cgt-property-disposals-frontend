@@ -32,7 +32,7 @@ import scala.concurrent.Future
 class SessionDataActionSpec extends ControllerSpec with SessionSupport {
 
   lazy val action =
-    new SessionDataAction(mockSessionStore, instanceOf[PlayBodyParsers], instanceOf[ErrorHandler])
+    new SessionDataAction(mockSessionStore, instanceOf[ErrorHandler])
 
   "SessionDataAction" must {
 

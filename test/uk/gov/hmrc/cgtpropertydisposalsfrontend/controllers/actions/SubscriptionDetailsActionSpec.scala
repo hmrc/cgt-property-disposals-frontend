@@ -23,7 +23,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, SessionSupport, routes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, NINO, SessionData, SubscriptionDetails, sample, subscriptionDetailsGen}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, NINO, SessionData, SubscriptionDetails, SubscriptionResponse, sample, subscriptionDetailsGen}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -31,27 +31,27 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class SubscriptionDetailsActionSpec extends ControllerSpec with SessionSupport {
 
   lazy val action =
-    new SubscriptionDetailsAction(mockSessionStore, instanceOf[PlayBodyParsers], instanceOf[ErrorHandler])
+    new SubscriptionDetailsAction(mockSessionStore, instanceOf[ErrorHandler])
 
   "SubscriptionDetailsAction" must {
 
-    lazy val messagesRequest = new MessagesRequest(FakeRequest(), instanceOf[MessagesApi])
-    lazy val authenticatedRequest = AuthenticatedRequest(NINO("nino"), messagesRequest)
-
     val subscriptionDetails = sample[SubscriptionDetails]
-    val sessionData = sample[SessionData].copy(subscriptionDetails = Some(subscriptionDetails))
 
-      def performAction(): Future[Result] =
-        action.invokeBlock(authenticatedRequest, { r: RequestWithSubscriptionDetails[_] =>
+      def performAction(sessionData: SessionData, requestUrl: String = "/"): Future[Result] = {
+        val messagesRequest = new MessagesRequest(FakeRequest("GET", requestUrl), instanceOf[MessagesApi])
+        val authenticatedRequest = AuthenticatedRequest(NINO("nino"), messagesRequest)
+
+        action.invokeBlock(authenticatedRequest, { r: RequestWithSubscriptionData[_] =>
           r.sessionData shouldBe sessionData
           r.subscriptionDetails shouldBe subscriptionDetails
           Future.successful(Ok)
         })
+      }
 
     "return an error if there is an error getting session data" in {
       mockGetSession(Future.successful(Left(Error(new Exception("Oh no!")))))
 
-      checkIsTechnicalErrorPage(performAction())
+      checkIsTechnicalErrorPage(performAction(sample[SessionData]))
     }
 
     "redirect to the start journey endpoint" when {
@@ -59,23 +59,50 @@ class SubscriptionDetailsActionSpec extends ControllerSpec with SessionSupport {
       "there is no session data in store" in {
         mockGetSession(Future.successful(Right(None)))
 
-        checkIsRedirect(performAction(), routes.StartController.start())
+        checkIsRedirect(performAction(sample[SessionData]), routes.StartController.start())
       }
 
       "there is no subscription details in the session data" in {
         mockGetSession(Future.successful(Right(Some(SessionData.empty))))
 
-        checkIsRedirect(performAction(), routes.StartController.start())
+        checkIsRedirect(performAction(sample[SessionData]), routes.StartController.start())
       }
 
     }
 
-    "perform the action with the subscription details if it can be retrieved" in {
-      mockGetSession(Future.successful(Right(Some(sessionData))))
+    "redirect to the subscribed page" when {
 
-      status(performAction()) shouldBe OK
+      "there are subscription details and a subscription response in session and the request is not " +
+        "for the subscribed page" in {
+          val sessionData = SessionData.empty.copy(subscriptionDetails  = Some(subscriptionDetails), subscriptionResponse = Some(SubscriptionResponse("number")))
+
+          mockGetSession(Future.successful(Right(Some(sessionData))))
+
+          checkIsRedirect(performAction(sessionData), routes.SubscriptionController.subscribed())
+        }
+
     }
 
+    "perform the action with the subscription details" when {
+
+      "the subscription details exist and no subscription response exists" in {
+        val sessionData = SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails))
+
+        mockGetSession(Future.successful(Right(Some(sessionData))))
+
+        status(performAction(sessionData)) shouldBe OK
+      }
+
+      "there are subscription details and a subscription response in session and the request is " +
+        "for the subscribed page" in {
+          val sessionData = SessionData.empty.copy(subscriptionDetails  = Some(subscriptionDetails), subscriptionResponse = Some(SubscriptionResponse("number")))
+
+          mockGetSession(Future.successful(Right(Some(sessionData))))
+
+          status(performAction(sessionData, routes.SubscriptionController.subscribed().url)) shouldBe OK
+        }
+
+    }
   }
 
 }

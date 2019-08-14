@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import play.api.mvc.{ActionBuilder, AnyContent}
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import play.api.libs.json.{Format, Json}
 
-trait WithSubscriptionDetailsActions { this: FrontendController =>
+final case class SubscriptionResponse(cgtReferenceNumber: String) extends AnyVal
 
-  val authenticatedAction: AuthenticatedAction
-  val subscriptionDetailsAction: SubscriptionDetailsAction
+object SubscriptionResponse {
 
-  val authenticatedActionWithSubscriptionDetails: ActionBuilder[RequestWithSubscriptionData, AnyContent] =
-    Action.andThen(authenticatedAction).andThen(subscriptionDetailsAction)
+  implicit val format: Format[SubscriptionResponse] = Json.format[SubscriptionResponse]
 
 }
