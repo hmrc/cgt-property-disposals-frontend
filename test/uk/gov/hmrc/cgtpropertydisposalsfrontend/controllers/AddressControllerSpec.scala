@@ -55,7 +55,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
 
   val nino = NINO("AB123456C")
 
-  val postcode = Postcode("ABC 123")
+  val postcode = Postcode("AB1 2CD")
 
   val subscriptionDetails = sample(subscriptionDetailsGen)
 
@@ -141,14 +141,23 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
       behave like subscriptionDetailsBehavior(() => performAction())
 
       "show form errors when the postcode isn't valid" in {
-        inSequence {
-          mockAuthWithCl200AndRetrievedNino(nino.value)
-          mockGetSession(Future.successful(Right(Some(existingSessionData))))
-        }
+        List(
+          "AAA123",
+          "BFPO123456",
+          "A11AAA"
+        ).foreach { invalidPostcode =>
+            withClue(s"For postcode '$invalidPostcode'") {
+              inSequence {
+                mockAuthWithCl200AndRetrievedNino(nino.value)
+                mockGetSession(Future.successful(Right(Some(existingSessionData))))
+              }
 
-        val result = performAction("postcode" -> "invalid.postcode")
-        status(result) shouldBe BAD_REQUEST
-        contentAsString(result) should include(message("postcode.invalid"))
+              val result = performAction("postcode" -> invalidPostcode)
+              status(result) shouldBe BAD_REQUEST
+              contentAsString(result) should include(message("postcode.invalid"))
+            }
+          }
+
       }
 
       "show an error page" when {
@@ -190,17 +199,40 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
 
       }
 
-      "redirect to select address when the address lookup result has been stored in mongo" in {
-        inSequence {
-          mockAuthWithCl200AndRetrievedNino(nino.value)
-          mockGetSession(Future.successful(Right(Some(existingSessionData))))
-          mockAddressLookup(postcode)(Future.successful(Right(addressLookupResult)))
-          mockStoreSession(existingSessionData.copy(addressLookupResult = Some(addressLookupResult)))(Future.successful(Right(())))
-        }
+      "redirect to select address when the address lookup result has been stored in mongo " +
+        "and the postcode is valid" in {
+          List(
+            "AA9A 9AA",
+            "A9A 9AA",
+            "A9 9AA",
+            "A99 9AA",
+            "AA9 9AA",
+            "AA99 9AA",
+            "  aA 99 9A a ",
+            "BFPO1",
+            "BFPO12",
+            "BF PO12 3",
+            " BfpO1234 ",
+            "BFPO  12345"
+          ).foreach { postcode =>
+              withClue(s"For postcode '$postcode': ") {
+                val formattedPostcode = Postcode(postcode.trim)
+                val addressLookupResult = AddressLookupResult(formattedPostcode, List())
 
-        val result = performAction("postcode" -> postcode.value)
-        checkIsRedirect(result, routes.AddressController.selectAddress())
-      }
+                inSequence {
+                  mockAuthWithCl200AndRetrievedNino(nino.value)
+                  mockGetSession(Future.successful(Right(Some(existingSessionData))))
+                  mockAddressLookup(formattedPostcode)(Future.successful(Right(addressLookupResult)))
+                  mockStoreSession(existingSessionData.copy(addressLookupResult = Some(addressLookupResult)))(Future.successful(Right(())))
+                }
+
+                val result = performAction("postcode" -> postcode)
+                checkIsRedirect(result, routes.AddressController.selectAddress())
+              }
+
+            }
+
+        }
 
       "trim leading and trailing spaces in postcodes" in {
         inSequence {
