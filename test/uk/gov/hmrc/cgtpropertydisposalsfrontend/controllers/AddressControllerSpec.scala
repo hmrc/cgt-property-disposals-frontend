@@ -228,7 +228,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
                 inSequence {
                   mockAuthWithCl200AndRetrievedNino(nino.value)
                   mockGetSession(Future.successful(Right(Some(existingSessionData))))
-                  mockAddressLookup(formattedPostcode)(Future.successful(Right(addressLookupResult)))
+                  mockAddressLookup(formattedPostcode)(Right(addressLookupResult))
                   mockStoreSession(existingSessionData.copy(addressLookupResult = Some(addressLookupResult)))(Future.successful(Right(())))
                 }
 
