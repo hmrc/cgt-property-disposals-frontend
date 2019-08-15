@@ -142,6 +142,9 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
 
       "show form errors when the postcode isn't valid" in {
         List(
+          "A00A",
+          "AA0A0AAA",
+          "AA0.0AA",
           "AAA123",
           "BFPO123456",
           "A11AAA"
