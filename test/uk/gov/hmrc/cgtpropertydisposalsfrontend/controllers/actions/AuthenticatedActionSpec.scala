@@ -62,7 +62,7 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
     """.stripMargin
     ))
 
-    val authenticatedAction = new AuthenticatedAction(mockAuthConnector, config, instanceOf[ErrorHandler], instanceOf[DefaultPlayBodyParsers], mockSessionStore)
+    val authenticatedAction = new AuthenticatedAction(mockAuthConnector, config, instanceOf[ErrorHandler], mockSessionStore)
 
     def mockAuth[R](predicate: Predicate, retrieval: Retrieval[R])(result: Future[R]): Unit =
       (mockAuthConnector.authorise(_: Predicate, _: Retrieval[R])(_: HeaderCarrier, _: ExecutionContext))

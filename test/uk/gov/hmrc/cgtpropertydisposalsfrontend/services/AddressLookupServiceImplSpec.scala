@@ -16,13 +16,15 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services
 
+import cats.data.EitherT
+import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsNumber, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.AddressLookupConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.{NonUkAddress, UkAddress}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Address, AddressLookupResult, Postcode}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Address, AddressLookupResult, Error, Postcode}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
@@ -32,10 +34,10 @@ class AddressLookupServiceImplSpec extends WordSpec with Matchers with MockFacto
 
   val mockConnector = mock[AddressLookupConnector]
 
-  def mockLookupAddress(expectedPostcode: Postcode)(result: Option[HttpResponse]) =
+  def mockLookupAddress(expectedPostcode: Postcode)(result: Either[Error, HttpResponse]) =
     (mockConnector.lookupAddress(_: Postcode)(_: HeaderCarrier))
       .expects(expectedPostcode, *)
-      .returning(result.fold(Future.failed[HttpResponse](new Exception))(Future.successful))
+      .returning(EitherT.fromEither[Future](result))
 
   val service = new AddressLookupServiceImpl(mockConnector)
 
@@ -49,27 +51,27 @@ class AddressLookupServiceImplSpec extends WordSpec with Matchers with MockFacto
       "return an error" when {
 
         "the http response does not come back with status 200" in {
-          mockLookupAddress(postcode)(Some(HttpResponse(500)))
+          mockLookupAddress(postcode)(Right(HttpResponse(500)))
 
-          await(service.lookupAddress(postcode)).isLeft shouldBe true
+          await(service.lookupAddress(postcode).value).isLeft shouldBe true
         }
 
         "when the call to the connector fails" in {
-          mockLookupAddress(postcode)(None)
+          mockLookupAddress(postcode)(Left(Error("uh oh!")))
 
-          await(service.lookupAddress(postcode)).isLeft shouldBe true
+          await(service.lookupAddress(postcode).value).isLeft shouldBe true
         }
 
         "there is no JSON in the body of the response" in {
-          mockLookupAddress(postcode)(Some(HttpResponse(200)))
+          mockLookupAddress(postcode)(Right(HttpResponse(200)))
 
-          await(service.lookupAddress(postcode)).isLeft shouldBe true
+          await(service.lookupAddress(postcode).value).isLeft shouldBe true
         }
 
         "the JSON in the body of the response cannot be parsed" in {
-          mockLookupAddress(postcode)(Some(HttpResponse(200, Some(JsNumber(1)))))
+          mockLookupAddress(postcode)(Right(HttpResponse(200, Some(JsNumber(1)))))
 
-          await(service.lookupAddress(postcode)).isLeft shouldBe true
+          await(service.lookupAddress(postcode).value).isLeft shouldBe true
         }
 
         "there are no lines of address found in the response" in {
@@ -91,9 +93,9 @@ class AddressLookupServiceImplSpec extends WordSpec with Matchers with MockFacto
               |""".stripMargin
           )
 
-          mockLookupAddress(postcode)(Some(HttpResponse(200, Some(json))))
+          mockLookupAddress(postcode)(Right(HttpResponse(200, Some(json))))
 
-          await(service.lookupAddress(postcode)).isLeft shouldBe true
+          await(service.lookupAddress(postcode).value).isLeft shouldBe true
         }
 
       }
@@ -147,9 +149,9 @@ class AddressLookupServiceImplSpec extends WordSpec with Matchers with MockFacto
             |""".stripMargin
         )
 
-        mockLookupAddress(postcode)(Some(HttpResponse(200, Some(json))))
+        mockLookupAddress(postcode)(Right(HttpResponse(200, Some(json))))
 
-        await(service.lookupAddress(postcode)) shouldBe Right(
+        await(service.lookupAddress(postcode).value) shouldBe Right(
           AddressLookupResult(
             postcode,
             List[Address](
@@ -181,9 +183,9 @@ class AddressLookupServiceImplSpec extends WordSpec with Matchers with MockFacto
             |""".stripMargin
         )
 
-        mockLookupAddress(postcode)(Some(HttpResponse(200, Some(json))))
+        mockLookupAddress(postcode)(Right(HttpResponse(200, Some(json))))
 
-        await(service.lookupAddress(postcode)) shouldBe Right(
+        await(service.lookupAddress(postcode).value) shouldBe Right(
           AddressLookupResult(
             postcode,
             List(
@@ -212,9 +214,9 @@ class AddressLookupServiceImplSpec extends WordSpec with Matchers with MockFacto
             |""".stripMargin
         )
 
-        mockLookupAddress(postcode)(Some(HttpResponse(200, Some(json))))
+        mockLookupAddress(postcode)(Right(HttpResponse(200, Some(json))))
 
-        await(service.lookupAddress(postcode)) shouldBe Right(
+        await(service.lookupAddress(postcode).value) shouldBe Right(
           AddressLookupResult(
             postcode,
             List(

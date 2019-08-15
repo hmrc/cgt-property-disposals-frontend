@@ -16,14 +16,17 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
+import cats.instances.string._
 import cats.syntax.either._
+import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.i18n.MessagesApi
 import play.api.mvc._
 import play.api.mvc.Results.SeeOther
+import shapeless.HList
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, SubscriptionDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, SubscriptionDetails, SubscriptionResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
@@ -40,10 +43,8 @@ final case class RequestWithSubscriptionDetails[A](
   override def messagesApi: MessagesApi = authenticatedRequest.request.messagesApi
 }
 
-@Singleton
 class SubscriptionDetailsAction @Inject() (
     sessionStore: SessionStore,
-    playBodyParsers: PlayBodyParsers,
     errorHandler: ErrorHandler
 )(implicit ec: ExecutionContext) extends ActionRefiner[AuthenticatedRequest, RequestWithSubscriptionDetails] with Logging {
 
@@ -57,9 +58,13 @@ class SubscriptionDetailsAction @Inject() (
         logger.warn("Could not get session data", e)
         errorHandler.errorResult()(request)
       }
-        .flatMap { d =>
-          (d, d.flatMap(_.subscriptionDetails)) match {
-            case (Some(sessionData), Some(subscriptionDetails)) =>
+        .flatMap { maybeSessionData =>
+          (maybeSessionData, maybeSessionData.flatMap(_.subscriptionDetails), maybeSessionData.flatMap((_.subscriptionResponse))) match {
+            case (Some(_), Some(_), Some(_)) if request.uri =!= routes.SubscriptionController.subscribed().url =>
+              // user has already subscribed in this session
+              Left(SeeOther(routes.SubscriptionController.subscribed().url))
+
+            case (Some(sessionData), Some(subscriptionDetails), _) =>
               Right(RequestWithSubscriptionDetails(subscriptionDetails, sessionData, request))
 
             case _ =>

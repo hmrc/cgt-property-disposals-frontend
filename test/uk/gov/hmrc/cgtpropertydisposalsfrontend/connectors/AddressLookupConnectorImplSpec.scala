@@ -48,13 +48,12 @@ class AddressLookupConnectorImplSpec extends WordSpec with Matchers with MockFac
   val connector = new AddressLookupConnectorImpl(mockHttp, new ServicesConfig(config, new RunMode(config, Mode.Test)))
   "AddressLookupConnectorImpl" when {
 
-    "handling request to get the business partner record" must {
+    "handling request to lookup addresses" must {
 
       implicit val hc: HeaderCarrier = HeaderCarrier()
+      val postcode = Postcode("WC1X9BH")
 
       "do a get http call and return the result" in {
-        val postcode = Postcode("WC1X9BH")
-
         List(
           HttpResponse(200),
           HttpResponse(200, Some(JsString("hi"))),
@@ -67,7 +66,7 @@ class AddressLookupConnectorImplSpec extends WordSpec with Matchers with MockFac
                 Map("User-Agent" -> "agent")
               )(Some(httpResponse))
 
-              await(connector.lookupAddress(postcode)) shouldBe httpResponse
+              await(connector.lookupAddress(postcode).value) shouldBe Right(httpResponse)
             }
           }
       }
@@ -81,7 +80,21 @@ class AddressLookupConnectorImplSpec extends WordSpec with Matchers with MockFac
           Map("User-Agent" -> "agent")
         )(Some(response))
 
-        await(connector.lookupAddress(Postcode(" ab1 2C d "))) shouldBe response
+        await(connector.lookupAddress(Postcode(" ab1 2C d ")).value) shouldBe Right(response)
+      }
+
+      "return an error" when {
+
+        "the future fails" in {
+          mockGet(
+            s"http://host:123/v2/uk/addresses",
+            Map("postcode" -> postcode.value),
+            Map("User-Agent" -> "agent")
+          )(None)
+
+          await(connector.lookupAddress(postcode).value).isLeft shouldBe true
+        }
+
       }
 
     }

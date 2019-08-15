@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
 import java.util.UUID
 
+import cats.data.EitherT
 import configs.syntax._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import configs.Configs
@@ -26,7 +27,7 @@ import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.EmailVerificationConnectorImpl.EmailVerificationRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Email
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
@@ -36,7 +37,7 @@ import scala.concurrent.duration.FiniteDuration
 @ImplementedBy(classOf[EmailVerificationConnectorImpl])
 trait EmailVerificationConnector {
 
-  def verifyEmail(email: Email, id: UUID, name: String)(implicit hc: HeaderCarrier): Future[HttpResponse]
+  def verifyEmail(email: Email, id: UUID, name: String)(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
 
 }
 
@@ -68,7 +69,7 @@ class EmailVerificationConnectorImpl @Inject() (
     s"$selfBaseUrl${routes.EmailController.verifyEmail(id).url}"
   }
 
-  def verifyEmail(email: Email, id: UUID, name: String)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  def verifyEmail(email: Email, id: UUID, name: String)(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] = {
     val body =
       EmailVerificationRequest(
         email.value,
@@ -77,7 +78,12 @@ class EmailVerificationConnectorImpl @Inject() (
         s"${continueUrl(id)}",
         Map("name" -> name)
       )
-    http.post(url, Json.toJson(body))
+
+    EitherT[Future, Error, HttpResponse](
+      http.post(url, Json.toJson(body))
+        .map(Right(_))
+        .recover { case e => Left(Error(e)) }
+    )
   }
 
 }

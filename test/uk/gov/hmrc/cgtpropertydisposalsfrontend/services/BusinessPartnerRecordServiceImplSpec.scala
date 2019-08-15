@@ -16,14 +16,14 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services
 
-import java.time.LocalDate
-
+import cats.data.EitherT
+import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsNumber, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Address, BusinessPartnerRecord, NINO}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Address, BusinessPartnerRecord, Error, NINO}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -35,15 +35,15 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
 
   val service = new BusinessPartnerRecordServiceImpl(mockConnector)
 
-  def mockGetBPR(nino: NINO)(response: Future[HttpResponse]) =
+  def mockGetBPR(nino: NINO)(response: Either[Error, HttpResponse]) =
     (mockConnector.getBusinessPartnerRecord(_: NINO)(_: HeaderCarrier))
       .expects(nino, *)
-      .returning(response)
+      .returning(EitherT.fromEither[Future](response))
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
   val nino = NINO("AB123456C")
   val address = Address.UkAddress("line1", Some("line2"), None, None, "postcode")
-  val bpr = BusinessPartnerRecord("name", "surname", Some("email"), address)
+  val bpr = BusinessPartnerRecord("name", "surname", Some("email"), address, "sap")
 
   "The BusinessPartnerRecordServiceImpl" when {
 
@@ -51,36 +51,36 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
 
       "return an error" when {
 
-          def testError(response: => Future[HttpResponse]) = {
+          def testError(response: => Either[Error, HttpResponse]) = {
             mockGetBPR(nino)(response)
 
-            await(service.getBusinessPartnerRecord(nino)).isLeft shouldBe true
+            await(service.getBusinessPartnerRecord(nino).value).isLeft shouldBe true
           }
 
         "the connector fails to make the call" in {
-          testError(Future.failed(new Exception("Uh oh")))
+          testError(Left(Error(new Exception("Uh oh"))))
         }
 
         "the HttpResponse comes back with a status other than 200" in {
           List(400, 401, 403, 404, 500, 501, 502).foreach { status =>
-            testError(Future.successful(HttpResponse(status)))
+            testError(Right(HttpResponse(status)))
           }
         }
 
         "the json body in the http response cannot be parsed" in {
-          testError(Future.successful(HttpResponse(200, Some(JsNumber(0)))))
+          testError(Right(HttpResponse(200, Some(JsNumber(0)))))
         }
 
         "there is no json body in the http response" in {
-          testError(Future.successful(HttpResponse(200)))
+          testError(Right(HttpResponse(200)))
         }
 
       }
       "return the bpr when the http response comes back with status 200 and " +
         "the json body returns a bpr with a matching dob" in {
-          mockGetBPR(nino)(Future.successful(HttpResponse(200, Some(Json.toJson(bpr)))))
+          mockGetBPR(nino)(Right(HttpResponse(200, Some(Json.toJson(bpr)))))
 
-          await(service.getBusinessPartnerRecord(nino)) shouldBe Right(bpr)
+          await(service.getBusinessPartnerRecord(nino).value) shouldBe Right(bpr)
         }
 
     }

@@ -15,8 +15,11 @@
  */
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+
 import java.util.UUID
 
+import cats.data.EitherT
+import cats.instances.future._
 import org.scalamock.handlers.CallHandler0
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
@@ -26,7 +29,7 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, EmailToBeVerified, Error, NINO, SessionData, UUIDGenerator, sample, subscriptionDetailsGen}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, EmailToBeVerified, Error, NINO, SessionData, SubscriptionDetails, UUIDGenerator, sample, subscriptionDetailsGen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse
@@ -34,6 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationServic
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSupport {
 
@@ -54,15 +58,16 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
   val nino = NINO("AB123456C")
-  val subscriptionDetails = sample(subscriptionDetailsGen)
+
+  val subscriptionDetails = sample[SubscriptionDetails]
 
   def mockUuidGenerator(uuid: UUID): CallHandler0[UUID] =
     (mockUuidGenerator.nextId: () => UUID).expects().returning(uuid)
 
-  def mockEmailVerification(expectedEmail: Email, expectedId: UUID, expectedName: String)(result: Future[Either[Error, EmailVerificationResponse]]) =
+  def mockEmailVerification(expectedEmail: Email, expectedId: UUID, expectedName: String)(result: Either[Error, EmailVerificationResponse]) =
     (mockService.verifyEmail(_: Email, _: UUID, _: String)(_: HeaderCarrier))
       .expects(expectedEmail, expectedId, expectedName, *)
-      .returning(result)
+      .returning(EitherT.fromEither[Future](result))
 
   def subscriptionDetailsBehavior(performAction: () => Future[Result]): Unit = {
     "redirect to check your details" when {
@@ -203,7 +208,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             mockGetSession(Future.successful(Right(Some(session))))
             mockUuidGenerator(id)
             mockStoreSession(session.copy(emailToBeVerified = Some(emailToBeVerified)))(Future.successful(Right(())))
-            mockEmailVerification(email, id, subscriptionDetails.forename)(Future.successful(Left(Error(""))))
+            mockEmailVerification(email, id, subscriptionDetails.forename)(Left(Error("")))
           }
 
           val result = performAction("email" -> email.value)
@@ -218,7 +223,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           mockGetSession(Future.successful(Right(Some(session))))
           mockUuidGenerator(id)
           mockStoreSession(session.copy(emailToBeVerified = Some(emailToBeVerified)))(Future.successful(Right(())))
-          mockEmailVerification(email, id, subscriptionDetails.forename)(Future.successful(Right(EmailAlreadyVerified)))
+          mockEmailVerification(email, id, subscriptionDetails.forename)(Right(EmailAlreadyVerified))
         }
 
         val result: Future[Result] = performAction("email" -> email.value)
@@ -232,7 +237,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             mockGetSession(Future.successful(Right(Some(session))))
             mockUuidGenerator(id)
             mockStoreSession(session.copy(emailToBeVerified = Some(emailToBeVerified)))(Future.successful(Right(())))
-            mockEmailVerification(email, id, subscriptionDetails.forename)(Future.successful(Right(EmailVerificationRequested)))
+            mockEmailVerification(email, id, subscriptionDetails.forename)(Right(EmailVerificationRequested))
           }
 
           val result: Future[Result] = performAction("email" -> email.value)
@@ -245,7 +250,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             mockAuthWithCl200AndRetrievedNino(nino.value)
             mockGetSession(Future.successful(Right(Some(session.copy(emailToBeVerified = Some(emailToBeVerified))))))
             mockStoreSession(session.copy(emailToBeVerified = Some(emailToBeVerified)))(Future.successful(Right(())))
-            mockEmailVerification(email, id, subscriptionDetails.forename)(Future.successful(Right(EmailVerificationRequested)))
+            mockEmailVerification(email, id, subscriptionDetails.forename)(Right(EmailVerificationRequested))
           }
 
           val result: Future[Result] = performAction("email" -> email.value)
@@ -261,7 +266,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           mockAuthWithCl200AndRetrievedNino(nino.value)
           mockGetSession(Future.successful(Right(Some(session.copy(emailToBeVerified = Some(emailToBeVerified))))))
           mockStoreSession(session.copy(emailToBeVerified = Some(emailToBeVerified)))(Future.successful(Right(())))
-          mockEmailVerification(Email(emailWithoutSpaces), id, subscriptionDetails.forename)(Future.successful(Right(EmailVerificationRequested)))
+          mockEmailVerification(Email(emailWithoutSpaces), id, subscriptionDetails.forename)(Right(EmailVerificationRequested))
         }
 
         val result: Future[Result] = performAction("email" -> emailWithSpaces)

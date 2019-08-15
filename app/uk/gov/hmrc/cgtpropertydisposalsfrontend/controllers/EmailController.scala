@@ -67,7 +67,7 @@ class EmailController @Inject() (
 
         val result = for {
           _ <- EitherT(updateSession(sessionStore, request)(_.copy(emailToBeVerified = Some(emailToBeVerified))))
-          result <- EitherT(emailVerificationService.verifyEmail(email, emailToBeVerified.id, request.subscriptionDetails.forename))
+          result <- emailVerificationService.verifyEmail(email, emailToBeVerified.id, request.subscriptionDetails.forename)
         } yield result
 
         result.value.map {

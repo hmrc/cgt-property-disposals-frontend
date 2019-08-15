@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
+import cats.data.EitherT
+import cats.instances.future._
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.Result
@@ -28,6 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordSe
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSupport {
 
@@ -42,15 +45,15 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
   lazy val controller = instanceOf[StartController]
 
-  def mockGetBusinessPartnerRecord(nino: NINO)(result: Future[Either[Error, BusinessPartnerRecord]]) =
+  def mockGetBusinessPartnerRecord(nino: NINO)(result: Either[Error, BusinessPartnerRecord]) =
     (mockService.getBusinessPartnerRecord(_: NINO)(_: HeaderCarrier))
       .expects(nino, *)
-      .returning(result)
+      .returning(EitherT.fromEither[Future](result))
 
   val nino = NINO("AB123456C")
   val emailAddress = "email"
-  val bpr = BusinessPartnerRecord("forename", "surname", Some(emailAddress), UkAddress("line1", None, None, None, "postcode"))
-  val subscriptionDetails = SubscriptionDetails(bpr.forename, bpr.surname, emailAddress, bpr.address)
+  val bpr = BusinessPartnerRecord("forename", "surname", Some(emailAddress), UkAddress("line1", None, None, None, "postcode"), "sap")
+  val subscriptionDetails = SubscriptionDetails(bpr.forename, bpr.surname, emailAddress, bpr.address, bpr.sapNumber)
 
   "The StartController" when {
 
@@ -80,7 +83,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             inSequence {
               mockAuthWithCl200AndRetrievedNino(nino.value)
               mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-              mockGetBusinessPartnerRecord(nino)(Future.successful(Left(Error("error"))))
+              mockGetBusinessPartnerRecord(nino)(Left(Error("error")))
             }
 
             checkIsTechnicalErrorPage(performAction())
@@ -90,7 +93,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             inSequence {
               mockAuthWithCl200AndRetrievedNino(nino.value)
               mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-              mockGetBusinessPartnerRecord(nino)(Future.successful(Right(bpr.copy(emailAddress = None))))
+              mockGetBusinessPartnerRecord(nino)(Right(bpr.copy(emailAddress = None)))
             }
 
             checkIsTechnicalErrorPage(performAction())
@@ -100,7 +103,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             inSequence {
               mockAuthWithCl200AndRetrievedNino(nino.value)
               mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-              mockGetBusinessPartnerRecord(nino)(Future.successful(Right(bpr)))
+              mockGetBusinessPartnerRecord(nino)(Right(bpr))
               mockStoreSession(SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails)))(Future.successful(Left(Error("Oh no!"))))
             }
 
@@ -119,13 +122,27 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 inSequence {
                   mockAuthWithCl200AndRetrievedNino(nino.value)
                   mockGetSession(Future.successful(Right(maybeSession)))
-                  mockGetBusinessPartnerRecord(nino)(Future.successful(Right(bpr)))
+                  mockGetBusinessPartnerRecord(nino)(Right(bpr))
                   mockStoreSession(SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails)))(Future.successful(Right(())))
                 }
 
                 checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
               }
           }
+
+          "one doesn't exist in session and it is successfully retrieved using the retrieved auth NINO and " +
+            "there is a BPR already in session" in {
+              val session = SessionData.empty.copy(businessPartnerRecord = Some(bpr))
+
+              inSequence {
+                mockAuthWithCl200AndRetrievedNino(nino.value)
+                mockGetSession(Future.successful(Right(Some(session))))
+                mockStoreSession(session.copy(subscriptionDetails = Some(subscriptionDetails)))(Future.successful(Right(())))
+              }
+
+              checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
+            }
+
         }
 
       }

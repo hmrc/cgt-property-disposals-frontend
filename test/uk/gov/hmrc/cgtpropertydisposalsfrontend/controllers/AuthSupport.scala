@@ -36,7 +36,6 @@ trait AuthSupport { this: ControllerSpec with SessionSupport =>
     mockAuthConnector,
     instanceOf[Configuration],
     instanceOf[ErrorHandler],
-    instanceOf[PlayBodyParsers],
     mockSessionStore
   )(instanceOf[ExecutionContext])
 

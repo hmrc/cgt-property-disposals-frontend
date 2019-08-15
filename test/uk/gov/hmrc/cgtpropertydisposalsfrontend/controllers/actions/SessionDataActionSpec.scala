@@ -32,14 +32,14 @@ import scala.concurrent.Future
 class SessionDataActionSpec extends ControllerSpec with SessionSupport {
 
   lazy val action =
-    new SessionDataAction(mockSessionStore, instanceOf[PlayBodyParsers], instanceOf[ErrorHandler])
+    new SessionDataAction(mockSessionStore, instanceOf[ErrorHandler])
 
   "SessionDataAction" must {
 
     lazy val messagesRequest = new MessagesRequest(FakeRequest(), instanceOf[MessagesApi])
     lazy val authenticatedRequest = AuthenticatedRequest(NINO("nino"), messagesRequest)
 
-    val sessionData = sample(sessionGen)
+    val sessionData = sample[SessionData]
 
       def performAction(): Future[Result] =
         action.invokeBlock(authenticatedRequest, { r: RequestWithSessionData[_] =>

@@ -47,7 +47,7 @@ class StartController @Inject() (
 
       case (maybeBpr, None) =>
         val result = for {
-          bpr <- EitherT(maybeBpr.fold(bprService.getBusinessPartnerRecord(request.authenticatedRequest.nino))(b => Future.successful(Right(b))))
+          bpr <- maybeBpr.fold(bprService.getBusinessPartnerRecord(request.authenticatedRequest.nino))(EitherT.pure(_))
           subscriptionDetails <- EitherT.fromEither[Future](SubscriptionDetails.fromBusinessPartnerRecord(bpr)).leftMap(Error(_))
           _ <- EitherT(updateSession(sessionStore, request)(_.copy(subscriptionDetails = Some(subscriptionDetails))))
         } yield subscriptionDetails

@@ -60,26 +60,24 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
 
       implicit val hc: HeaderCarrier = HeaderCarrier()
       val expectedUrl = s"$protocol://$host:$port/email-verification/verification-requests"
+      val email = Email("email@test.com")
+      val id = UUID.randomUUID()
+      val name = "Bob"
+
+      val body = Json.parse(
+        s"""
+           |{
+           |"email": "${email.value}",
+           |"templateId": "$templateId",
+           |"templateParameters": { "name" : "$name" },
+           |"linkExpiryDuration" : "PT${linkExpiryTimeMinutes}M",
+           |"continueUrl" : "$selfUrl${routes.EmailController.verifyEmail(id).url}"
+           |}
+           |""".stripMargin
+      )
 
       "send a request to the email verification service with the correct details " +
         "and return the response" in {
-          val email = Email("email@test.com")
-          val id = UUID.randomUUID()
-          val name = "Bob"
-
-          val body = Json.parse(
-            s"""
-            |{
-            |"email": "${email.value}",
-            |"templateId": "$templateId",
-            |"templateParameters": { "name" : "$name" },
-            |"linkExpiryDuration" : "PT${linkExpiryTimeMinutes}M",
-            |"continueUrl" : "$selfUrl${routes.EmailController.verifyEmail(id).url}"
-            |}
-            |""".stripMargin
-
-          )
-
           List(
             HttpResponse(200, Some(JsString("hi"))),
             HttpResponse(409),
@@ -87,9 +85,19 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
           ).foreach { response =>
               mockPost(expectedUrl, Map.empty[String, String], body)(Some(response))
 
-              await(connector.verifyEmail(email, id, name)) shouldBe response
+              await(connector.verifyEmail(email, id, name).value) shouldBe Right(response)
             }
         }
+
+      "return an error" when {
+
+        "the future fails" in {
+          mockPost(expectedUrl, Map.empty[String, String], body)(None)
+
+          await(connector.verifyEmail(email, id, name).value).isLeft shouldBe true
+        }
+
+      }
 
     }
 

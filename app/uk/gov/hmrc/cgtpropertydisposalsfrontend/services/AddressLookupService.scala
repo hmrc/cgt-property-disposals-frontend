@@ -16,7 +16,9 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services
 
+import cats.data.EitherT
 import cats.instances.either._
+import cats.instances.future._
 import cats.instances.int._
 import cats.instances.list._
 import cats.instances.string._
@@ -38,7 +40,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[AddressLookupServiceImpl])
 trait AddressLookupService {
 
-  def lookupAddress(postcode: Postcode)(implicit hc: HeaderCarrier): Future[Either[Error, AddressLookupResult]]
+  def lookupAddress(postcode: Postcode)(implicit hc: HeaderCarrier): EitherT[Future, Error, AddressLookupResult]
 
 }
 
@@ -46,17 +48,14 @@ trait AddressLookupService {
 class AddressLookupServiceImpl @Inject() (connector: AddressLookupConnector)(implicit ec: ExecutionContext)
   extends AddressLookupService {
 
-  override def lookupAddress(postcode: Postcode)(implicit hc: HeaderCarrier): Future[Either[Error, AddressLookupResult]] =
-    connector.lookupAddress(postcode).map { response =>
-      if (response.status === OK) {
+  override def lookupAddress(postcode: Postcode)(implicit hc: HeaderCarrier): EitherT[Future, Error, AddressLookupResult] =
+    connector.lookupAddress(postcode).subflatMap { response =>
+      if (response.status === OK)
         response.parseJSON[AddressLookupResponse]()
           .flatMap(toAddressLookupResult(_, postcode))
           .leftMap(Error(_))
-      } else {
+      else
         Left(Error(s"Response to address lookup came back with status ${response.status}"))
-      }
-    }.recover {
-      case e => Left(Error(e))
     }
 
   def toAddressLookupResult(r: AddressLookupResponse, postcode: Postcode): Either[String, AddressLookupResult] = {
@@ -73,11 +72,10 @@ class AddressLookupServiceImpl @Inject() (connector: AddressLookupConnector)(imp
 
         lines.map {
           case (l1, l2, l3, l4) =>
-            if (a.country.code === "GB") {
+            if (a.country.code === "GB")
               UkAddress(l1, l2, l3, l4, a.postcode)
-            } else {
+            else
               NonUkAddress(l1, l2, l3, l4, Some(a.postcode), a.country.code)
-            }
         }
       }
 

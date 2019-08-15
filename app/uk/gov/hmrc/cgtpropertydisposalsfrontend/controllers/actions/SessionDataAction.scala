@@ -37,7 +37,6 @@ final case class RequestWithSessionData[A](sessionData: Option[SessionData], aut
 @Singleton
 class SessionDataAction @Inject() (
     sessionStore: SessionStore,
-    playBodyParsers: PlayBodyParsers,
     errorHandler: ErrorHandler
 )(implicit ec: ExecutionContext) extends ActionRefiner[AuthenticatedRequest, RequestWithSessionData] with Logging {
 

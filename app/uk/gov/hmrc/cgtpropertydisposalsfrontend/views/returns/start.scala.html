@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,21 +12,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 
-import org.scalacheck.ScalacheckShapeless._
-import org.scalacheck.{Arbitrary, Gen}
+@this(
+ mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template
+)
 
-import scala.reflect._
+@()(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
-package object models {
-
-  def sample[A: ClassTag](implicit gen: Gen[A]): A = gen.sample.getOrElse(sys.error(s"Could not generate instance of ${classTag[A].runtimeClass.getSimpleName}"))
-
-  implicit val subscriptionDetailsGen: Gen[SubscriptionDetails] = implicitly[Arbitrary[SubscriptionDetails]].arbitrary
-
-  implicit val sessionDataGen: Gen[SessionData] = implicitly[Arbitrary[SessionData]].arbitrary
-
+@mainTemplate(title = "Start your return") {
+  <h1>Start your return here</h1>
 }
+

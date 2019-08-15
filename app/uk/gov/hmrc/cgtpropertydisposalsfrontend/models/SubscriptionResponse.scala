@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import org.scalacheck.ScalacheckShapeless._
-import org.scalacheck.{Arbitrary, Gen}
+import play.api.libs.json.{Format, Json}
 
-import scala.reflect._
+final case class SubscriptionResponse(cgtReferenceNumber: String) extends AnyVal
 
-package object models {
+object SubscriptionResponse {
 
-  def sample[A: ClassTag](implicit gen: Gen[A]): A = gen.sample.getOrElse(sys.error(s"Could not generate instance of ${classTag[A].runtimeClass.getSimpleName}"))
-
-  implicit val subscriptionDetailsGen: Gen[SubscriptionDetails] = implicitly[Arbitrary[SubscriptionDetails]].arbitrary
-
-  implicit val sessionDataGen: Gen[SessionData] = implicitly[Arbitrary[SessionData]].arbitrary
+  implicit val format: Format[SubscriptionResponse] = Json.format[SubscriptionResponse]
 
 }

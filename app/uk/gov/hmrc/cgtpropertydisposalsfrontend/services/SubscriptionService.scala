@@ -19,32 +19,32 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.services
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.either._
+import cats.syntax.eq._
+import cats.instances.int._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import play.api.http.Status.OK
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, Error, NINO}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SubscriptionDetails, SubscriptionResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-@ImplementedBy(classOf[BusinessPartnerRecordServiceImpl])
-trait BusinessPartnerRecordService {
+@ImplementedBy(classOf[SubscriptionServiceImpl])
+trait SubscriptionService {
 
-  def getBusinessPartnerRecord(nino: NINO)(implicit hc: HeaderCarrier): EitherT[Future, Error, BusinessPartnerRecord]
+  def subscribe(subscriptionDetails: SubscriptionDetails)(implicit hc: HeaderCarrier): EitherT[Future, Error, SubscriptionResponse]
 
 }
 
 @Singleton
-class BusinessPartnerRecordServiceImpl @Inject() (connector: CGTPropertyDisposalsConnector)(implicit ec: ExecutionContext) extends BusinessPartnerRecordService {
+class SubscriptionServiceImpl @Inject() (connector: CGTPropertyDisposalsConnector)(implicit ec: ExecutionContext) extends SubscriptionService {
 
-  override def getBusinessPartnerRecord(nino: NINO)(implicit hc: HeaderCarrier): EitherT[Future, Error, BusinessPartnerRecord] =
-    connector.getBusinessPartnerRecord(nino)
-      .subflatMap { response =>
-        response.status match {
-          case OK    => response.parseJSON[BusinessPartnerRecord]().leftMap(Error.apply)
-          case other => Left(Error(s"Call to get BPR came back with status $other"))
-        }
-      }
+  override def subscribe(subscriptionDetails: SubscriptionDetails)(implicit hc: HeaderCarrier): EitherT[Future, Error, SubscriptionResponse] =
+    connector.subscribe(subscriptionDetails).subflatMap { response =>
+      if (response.status === 200)
+        response.parseJSON[SubscriptionResponse]().leftMap(Error(_))
+      else
+        Left(Error(s"call to subscribe came back with status ${response.status}"))
+    }
 
 }

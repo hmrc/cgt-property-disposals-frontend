@@ -14,19 +14,28 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
-import org.scalacheck.ScalacheckShapeless._
-import org.scalacheck.{Arbitrary, Gen}
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
 
-import scala.reflect._
+class ReturnsControllerSpec extends ControllerSpec {
 
-package object models {
+  val controller = instanceOf[ReturnsController]
 
-  def sample[A: ClassTag](implicit gen: Gen[A]): A = gen.sample.getOrElse(sys.error(s"Could not generate instance of ${classTag[A].runtimeClass.getSimpleName}"))
+  "The ReturnsController" when {
 
-  implicit val subscriptionDetailsGen: Gen[SubscriptionDetails] = implicitly[Arbitrary[SubscriptionDetails]].arbitrary
+    "handling requests to display the start page" must {
 
-  implicit val sessionDataGen: Gen[SessionData] = implicitly[Arbitrary[SessionData]].arbitrary
+      "display the start page" in {
+        val result = controller.start()(FakeRequest())
+        status(result) shouldBe OK
+        contentAsString(result) should include("Start your return here")
+
+      }
+
+    }
+
+  }
 
 }
