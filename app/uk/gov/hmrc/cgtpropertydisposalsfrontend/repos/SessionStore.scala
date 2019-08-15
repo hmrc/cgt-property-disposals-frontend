@@ -80,11 +80,10 @@ class SessionStoreImpl @Inject() (
         cacheRepository.createOrUpdate(Id(sessionId), sessionKey, Json.toJson(sessionData))
           .map[Either[Error, Unit]] {
             dbUpdate ⇒
-              if (dbUpdate.writeResult.inError) {
+              if (dbUpdate.writeResult.inError)
                 Left(Error(dbUpdate.writeResult.errmsg.getOrElse("unknown error during inserting session data in mongo")))
-              } else {
+              else
                 Right(())
-              }
           }.recover { case e ⇒ Left(Error(e)) }
 
       case None ⇒

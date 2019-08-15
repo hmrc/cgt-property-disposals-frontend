@@ -50,13 +50,12 @@ class AddressLookupServiceImpl @Inject() (connector: AddressLookupConnector)(imp
 
   override def lookupAddress(postcode: Postcode)(implicit hc: HeaderCarrier): EitherT[Future, Error, AddressLookupResult] =
     connector.lookupAddress(postcode).subflatMap { response =>
-      if (response.status === OK) {
+      if (response.status === OK)
         response.parseJSON[AddressLookupResponse]()
           .flatMap(toAddressLookupResult(_, postcode))
           .leftMap(Error(_))
-      } else {
+      else
         Left(Error(s"Response to address lookup came back with status ${response.status}"))
-      }
     }
 
   def toAddressLookupResult(r: AddressLookupResponse, postcode: Postcode): Either[String, AddressLookupResult] = {
@@ -73,11 +72,10 @@ class AddressLookupServiceImpl @Inject() (connector: AddressLookupConnector)(imp
 
         lines.map {
           case (l1, l2, l3, l4) =>
-            if (a.country.code === "GB") {
+            if (a.country.code === "GB")
               UkAddress(l1, l2, l3, l4, a.postcode)
-            } else {
+            else
               NonUkAddress(l1, l2, l3, l4, Some(a.postcode), a.country.code)
-            }
         }
       }
 
