@@ -41,11 +41,10 @@ class SubscriptionServiceImpl @Inject() (connector: CGTPropertyDisposalsConnecto
 
   override def subscribe(subscriptionDetails: SubscriptionDetails)(implicit hc: HeaderCarrier): EitherT[Future, Error, SubscriptionResponse] =
     connector.subscribe(subscriptionDetails).subflatMap { response =>
-      if (response.status === 200) {
+      if (response.status === 200)
         response.parseJSON[SubscriptionResponse]().leftMap(Error(_))
-      } else {
+      else
         Left(Error(s"call to subscribe came back with status ${response.status}"))
-      }
     }
 
 }

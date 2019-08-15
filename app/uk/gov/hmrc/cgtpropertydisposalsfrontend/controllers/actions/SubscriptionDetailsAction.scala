@@ -35,7 +35,7 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 
-final case class RequestWithSubscriptionData[A](
+final case class RequestWithSubscriptionDetails[A](
     subscriptionDetails: SubscriptionDetails,
     sessionData: SessionData,
     authenticatedRequest: AuthenticatedRequest[A]
@@ -46,11 +46,11 @@ final case class RequestWithSubscriptionData[A](
 class SubscriptionDetailsAction @Inject() (
     sessionStore: SessionStore,
     errorHandler: ErrorHandler
-)(implicit ec: ExecutionContext) extends ActionRefiner[AuthenticatedRequest, RequestWithSubscriptionData] with Logging {
+)(implicit ec: ExecutionContext) extends ActionRefiner[AuthenticatedRequest, RequestWithSubscriptionDetails] with Logging {
 
   override protected def executionContext: ExecutionContext = ec
 
-  override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, RequestWithSubscriptionData[A]]] = {
+  override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, RequestWithSubscriptionDetails[A]]] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
     sessionStore.get().map(
@@ -61,11 +61,11 @@ class SubscriptionDetailsAction @Inject() (
         .flatMap { maybeSessionData =>
           (maybeSessionData, maybeSessionData.flatMap(_.subscriptionDetails), maybeSessionData.flatMap((_.subscriptionResponse))) match {
             case (Some(_), Some(_), Some(_)) if request.uri =!= routes.SubscriptionController.subscribed().url =>
-              // user hsa already subscribed in this session
+              // user has already subscribed in this session
               Left(SeeOther(routes.SubscriptionController.subscribed().url))
 
             case (Some(sessionData), Some(subscriptionDetails), _) =>
-              Right(RequestWithSubscriptionData(subscriptionDetails, sessionData, request))
+              Right(RequestWithSubscriptionDetails(subscriptionDetails, sessionData, request))
 
             case _ =>
               Left(SeeOther(routes.StartController.start().url))

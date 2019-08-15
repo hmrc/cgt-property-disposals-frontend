@@ -24,7 +24,7 @@ trait WithSubscriptionDetailsActions { this: FrontendController =>
   val authenticatedAction: AuthenticatedAction
   val subscriptionDetailsAction: SubscriptionDetailsAction
 
-  val authenticatedActionWithSubscriptionDetails: ActionBuilder[RequestWithSubscriptionData, AnyContent] =
+  val authenticatedActionWithSubscriptionDetails: ActionBuilder[RequestWithSubscriptionDetails, AnyContent] =
     Action.andThen(authenticatedAction).andThen(subscriptionDetailsAction)
 
 }

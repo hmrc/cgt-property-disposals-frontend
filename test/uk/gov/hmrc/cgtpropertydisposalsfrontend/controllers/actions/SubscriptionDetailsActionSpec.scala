@@ -41,7 +41,7 @@ class SubscriptionDetailsActionSpec extends ControllerSpec with SessionSupport {
         val messagesRequest = new MessagesRequest(FakeRequest("GET", requestUrl), instanceOf[MessagesApi])
         val authenticatedRequest = AuthenticatedRequest(NINO("nino"), messagesRequest)
 
-        action.invokeBlock(authenticatedRequest, { r: RequestWithSubscriptionData[_] =>
+        action.invokeBlock(authenticatedRequest, { r: RequestWithSubscriptionDetails[_] =>
           r.sessionData shouldBe sessionData
           r.subscriptionDetails shouldBe subscriptionDetails
           Future.successful(Ok)
