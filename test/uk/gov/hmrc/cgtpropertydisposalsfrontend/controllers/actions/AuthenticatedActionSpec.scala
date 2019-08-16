@@ -21,23 +21,24 @@ import java.net.URLEncoder
 import com.typesafe.config.ConfigFactory
 import org.joda.time.LocalDate
 import org.scalamock.scalatest.MockFactory
+import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.Configuration
 import play.api.i18n.MessagesApi
+import play.api.mvc.MessagesRequest
 import play.api.mvc.Results.Ok
-import play.api.mvc.{DefaultPlayBodyParsers, MessagesRequest}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
+import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.auth.core.retrieve.{EmptyRetrieval, Name, Retrieval, ~}
+import uk.gov.hmrc.auth.core.retrieve.{Name, Retrieval, ~}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Future}
 
 class AuthenticatedActionSpec extends ControllerSpec with MockFactory with SessionSupport {
 
@@ -62,7 +63,8 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
          |  use-relative-urls = $useRelativeUrls
          |}
     """.stripMargin
-      ))
+      )
+    )
 
     val authenticatedAction =
       new AuthenticatedAction(mockAuthConnector, config, instanceOf[ErrorHandler], mockSessionStore)
@@ -99,7 +101,8 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
         ).foreach { e =>
           withClue(s"For error $e: ") {
             mockAuth(ConfidenceLevel.L200, Retrievals.nino and Retrievals.name and Retrievals.dateOfBirth)(
-              Future.failed(e))
+              Future.failed(e)
+            )
 
             val result = performAction(FakeRequest("GET", requestUri))
             status(result) shouldBe SEE_OTHER
@@ -111,7 +114,7 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
       }
     }
 
-    "handling a logged in user with CL200 and a NINO can be retrieved" must {
+    "handling a logged in user with CL200 and a NINO, name, and date of birth can be retrieved" must {
       val retrievals = Retrievals.nino and Retrievals.name and Retrievals.dateOfBirth
       val retrievalsResult = Future.successful(
         new ~(new ~(Some("nino"), Some(Name(Some("forename"), Some("surname")))), Some(new LocalDate(2000, 4, 10)))
@@ -123,7 +126,55 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
         status(result)          shouldBe OK
         contentAsString(result) shouldBe "nino"
       }
+    }
 
+    val failedRetrievalCombinations =
+      Table(
+        ("nino", "name", "dateOfBirth"),
+        (Some("nino"), None, None),
+        (Some("nino"), Some(Name(None, None)), None),
+        (Some("nino"), Some(Name(Some("forename"), None)), None),
+        (Some("nino"), Some(Name(None, Some("surname"))), None),
+        (Some("nino"), Some(Name(Some("forename"), Some("surname"))), None),
+        (Some("nino"), None, Some(new LocalDate(2000, 4, 10))),
+        (Some("nino"), Some(Name(None, None)), Some(new LocalDate(2000, 4, 10))),
+        (Some("nino"), Some(Name(Some("forename"), None)), Some(new LocalDate(2000, 4, 10))),
+        (Some("nino"), Some(Name(None, Some("surname"))), Some(new LocalDate(2000, 4, 10))),
+        (None, Some(Name(None, None)), None),
+        (None, Some(Name(Some("forename"), None)), None),
+        (None, Some(Name(None, Some("surname"))), None),
+        (None, Some(Name(Some("forename"), Some("surname"))), None),
+        (None, None, Some(new LocalDate(2000, 4, 10))),
+        (None, Some(Name(None, None)), Some(new LocalDate(2000, 4, 10))),
+        (None, Some(Name(Some("forename"), None)), Some(new LocalDate(2000, 4, 10))),
+        (None, Some(Name(None, Some("surname"))), Some(new LocalDate(2000, 4, 10))),
+        (None, Some(Name(Some("forename"), Some("surname"))), Some(new LocalDate(2000, 4, 10))),
+        (Some("nino"), None, None),
+        (Some("nino"), None, None),
+        (Some("nino"), None, None),
+        (Some("nino"), None, None),
+        (Some("nino"), None, None),
+        (Some("nino"), None, Some(new LocalDate(2000, 4, 10))),
+        (Some("nino"), None, Some(new LocalDate(2000, 4, 10))),
+        (Some("nino"), None, Some(new LocalDate(2000, 4, 10))),
+        (Some("nino"), None, Some(new LocalDate(2000, 4, 10))),
+        (Some("nino"), None, Some(new LocalDate(2000, 4, 10))),
+        (None, None, None)
+      )
+
+    "handling a logged in user with CL200 and some auth records cannot be retrieved" must {
+      val retrievals = Retrievals.nino and Retrievals.name and Retrievals.dateOfBirth
+      "effect the requested action" in new TestEnvironment {
+        forAll(failedRetrievalCombinations) {
+          (nino: Option[String], name: Option[Name], dateOfBirth: Option[LocalDate]) =>
+            val retrievalsResult = Future.successful(
+              new ~(new ~(nino, name), dateOfBirth)
+            )
+            mockAuth(ConfidenceLevel.L200, retrievals)(retrievalsResult)
+            val result = performAction(FakeRequest())
+            checkIsTechnicalErrorPage(result)
+        }
+      }
     }
 
     "handling a logged in user" when {
@@ -137,9 +188,11 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
           "the IV continue url can't be stored in session" in new TestEnvironment {
             inSequence {
               mockAuth(ConfidenceLevel.L200, Retrievals.nino and Retrievals.name and Retrievals.dateOfBirth)(
-                Future.failed(InsufficientConfidenceLevel()))
+                Future.failed(InsufficientConfidenceLevel())
+              )
               mockStoreSession(SessionData.empty.copy(ivContinueUrl = Some(selfBaseUrl + requestUri)))(
-                Future.successful(Left(Error("Oh no!"))))
+                Future.successful(Left(Error("Oh no!")))
+              )
             }
 
             val result = performAction(FakeRequest("GET", requestUri))
@@ -153,9 +206,11 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
           "the IV continue URL is stored in session" in new TestEnvironment {
             inSequence {
               mockAuth(ConfidenceLevel.L200, Retrievals.nino and Retrievals.name and Retrievals.dateOfBirth)(
-                Future.failed(InsufficientConfidenceLevel()))
+                Future.failed(InsufficientConfidenceLevel())
+              )
               mockStoreSession(SessionData.empty.copy(ivContinueUrl = Some(selfBaseUrl + requestUri)))(
-                Future.successful(Right(())))
+                Future.successful(Right(()))
+              )
             }
 
             val result = performAction(FakeRequest("GET", requestUri))
@@ -170,12 +225,15 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
           }
 
           "the IV continue URL is stored in session and use absolute urls when configured to do so" in new TestEnvironment(
-            useRelativeUrls = false) {
+            useRelativeUrls = false
+          ) {
             inSequence {
               mockAuth(ConfidenceLevel.L200, Retrievals.nino and Retrievals.name and Retrievals.dateOfBirth)(
-                Future.failed(InsufficientConfidenceLevel()))
+                Future.failed(InsufficientConfidenceLevel())
+              )
               mockStoreSession(SessionData.empty.copy(ivContinueUrl = Some(selfBaseUrl + requestUri)))(
-                Future.successful(Right(())))
+                Future.successful(Right(()))
+              )
             }
 
             val result = performAction(FakeRequest("GET", requestUri))
@@ -222,7 +280,8 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
           withClue(s"For error $e: ") {
             val exception = intercept[AuthorisationException] {
               mockAuth(ConfidenceLevel.L200, Retrievals.nino and Retrievals.name and Retrievals.dateOfBirth)(
-                Future.failed(e))
+                Future.failed(e)
+              )
 
               await(performAction(FakeRequest()))
             }
