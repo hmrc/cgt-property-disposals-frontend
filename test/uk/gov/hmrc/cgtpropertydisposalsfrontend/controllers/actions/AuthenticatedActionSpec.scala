@@ -251,19 +251,6 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
 
       }
 
-      //TODO: refactor tests to handle all the cases where we don't get the various pieces of information back
-//      "the CL is 200 or more but the NINO  can't be retrieved" must {
-//
-//        "show an error page" in new TestEnvironment {
-//          mockAuth(ConfidenceLevel.L200, Retrievals.nino and Retrievals.name and Retrievals.dateOfBirth)(
-//            Future.successful(None))
-//
-//          val result = performAction(FakeRequest())
-//          checkIsTechnicalErrorPage(result)
-//        }
-//
-//      }
-
     }
 
     "handling the case when an authorisation exception is thrown" must {
