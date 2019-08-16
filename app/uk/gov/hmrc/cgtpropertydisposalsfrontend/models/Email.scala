@@ -40,10 +40,8 @@ object Email {
       mapping(
         "email" ->
           text
-          .transform[String](_.replaceAllLiterally(" ", ""), identity)
-          .verifying("invalid", emailRegex.test _)
-      )(Email.apply)(Email.unapply)
-    )
+            .transform[String](_.replaceAllLiterally(" ", ""), identity)
+            .verifying("invalid", emailRegex.test _))(Email.apply)(Email.unapply))
   }
 
 }

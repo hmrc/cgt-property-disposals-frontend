@@ -23,7 +23,8 @@ import scala.reflect._
 
 package object models {
 
-  def sample[A: ClassTag](implicit gen: Gen[A]): A = gen.sample.getOrElse(sys.error(s"Could not generate instance of ${classTag[A].runtimeClass.getSimpleName}"))
+  def sample[A: ClassTag](implicit gen: Gen[A]): A =
+    gen.sample.getOrElse(sys.error(s"Could not generate instance of ${classTag[A].runtimeClass.getSimpleName}"))
 
   implicit val subscriptionDetailsGen: Gen[SubscriptionDetails] = implicitly[Arbitrary[SubscriptionDetails]].arbitrary
 

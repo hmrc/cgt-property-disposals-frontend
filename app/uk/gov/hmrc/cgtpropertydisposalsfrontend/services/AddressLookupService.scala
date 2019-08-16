@@ -45,13 +45,15 @@ trait AddressLookupService {
 }
 
 @Singleton
-class AddressLookupServiceImpl @Inject() (connector: AddressLookupConnector)(implicit ec: ExecutionContext)
-  extends AddressLookupService {
+class AddressLookupServiceImpl @Inject()(connector: AddressLookupConnector)(implicit ec: ExecutionContext)
+    extends AddressLookupService {
 
-  override def lookupAddress(postcode: Postcode)(implicit hc: HeaderCarrier): EitherT[Future, Error, AddressLookupResult] =
+  override def lookupAddress(postcode: Postcode)(
+    implicit hc: HeaderCarrier): EitherT[Future, Error, AddressLookupResult] =
     connector.lookupAddress(postcode).subflatMap { response =>
       if (response.status === OK)
-        response.parseJSON[AddressLookupResponse]()
+        response
+          .parseJSON[AddressLookupResponse]()
           .flatMap(toAddressLookupResult(_, postcode))
           .leftMap(Error(_))
       else
@@ -59,27 +61,28 @@ class AddressLookupServiceImpl @Inject() (connector: AddressLookupConnector)(imp
     }
 
   def toAddressLookupResult(r: AddressLookupResponse, postcode: Postcode): Either[String, AddressLookupResult] = {
-      def toAddress(a: RawAddress): Either[String, Address] = {
-        val lines: Either[String, (String, Option[String], Option[String], Option[String])] =
-          (a.lines ::: List(a.town, a.county.getOrElse(""))).filter(_.nonEmpty) match {
-            case Nil                         => Left("Could not find any lines of addesss")
-            case a1 :: Nil                   => Right((a1, None, None, None))
-            case a1 :: a2 :: Nil             => Right((a1, Some(a2), None, None))
-            case a1 :: a2 :: a3 :: Nil       => Right((a1, Some(a2), Some(a3), None))
-            case a1 :: a2 :: a3 :: a4 :: Nil => Right((a1, Some(a2), Some(a3), Some(a4)))
-            case a1 :: a2 :: a3 :: as        => Right((a1, Some(a2), Some(a3), Some(as.mkString(", "))))
-          }
-
-        lines.map {
-          case (l1, l2, l3, l4) =>
-            if (a.country.code === "GB")
-              UkAddress(l1, l2, l3, l4, a.postcode)
-            else
-              NonUkAddress(l1, l2, l3, l4, Some(a.postcode), a.country.code)
+    def toAddress(a: RawAddress): Either[String, Address] = {
+      val lines: Either[String, (String, Option[String], Option[String], Option[String])] =
+        (a.lines ::: List(a.town, a.county.getOrElse(""))).filter(_.nonEmpty) match {
+          case Nil                         => Left("Could not find any lines of addesss")
+          case a1 :: Nil                   => Right((a1, None, None, None))
+          case a1 :: a2 :: Nil             => Right((a1, Some(a2), None, None))
+          case a1 :: a2 :: a3 :: Nil       => Right((a1, Some(a2), Some(a3), None))
+          case a1 :: a2 :: a3 :: a4 :: Nil => Right((a1, Some(a2), Some(a3), Some(a4)))
+          case a1 :: a2 :: a3 :: as        => Right((a1, Some(a2), Some(a3), Some(as.mkString(", "))))
         }
-      }
 
-    r.addresses.map(toAddress)
+      lines.map {
+        case (l1, l2, l3, l4) =>
+          if (a.country.code === "GB")
+            UkAddress(l1, l2, l3, l4, a.postcode)
+          else
+            NonUkAddress(l1, l2, l3, l4, Some(a.postcode), a.country.code)
+      }
+    }
+
+    r.addresses
+      .map(toAddress)
       .sequence[Either[String, ?], Address]
       .map(AddressLookupResult(postcode, _))
   }
@@ -91,12 +94,11 @@ object AddressLookupServiceImpl {
   final case class Country(code: String)
 
   final case class RawAddress(
-      lines: List[String],
-      town: String,
-      county: Option[String],
-      postcode: String,
-      country: Country
-  )
+    lines: List[String],
+    town: String,
+    county: Option[String],
+    postcode: String,
+    country: Country)
 
   final case class AddressLookupResponse(addresses: List[RawAddress])
 

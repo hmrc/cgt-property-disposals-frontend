@@ -33,36 +33,42 @@ import scala.concurrent.ExecutionContext
 import scala.util.Random
 
 @Singleton
-class SubscriptionController @Inject() (
-    subscriptionService: SubscriptionService,
-    sessionStore: SessionStore,
-    errorHandler: ErrorHandler,
-    cc: MessagesControllerComponents,
-    val authenticatedAction: AuthenticatedAction,
-    val sessionDataAction: SessionDataAction,
-    val subscriptionDetailsAction: SubscriptionDetailsAction,
-    checkYourDetailsPage: views.html.subscription.check_your_details,
-    subscribedPage: views.html.subscription.subscribed
-)(implicit viewConfig: ViewConfig, ec: ExecutionContext) extends FrontendController(cc) with WithSubscriptionDetailsActions with WithActions with Logging with SessionUpdates {
+class SubscriptionController @Inject()(
+  subscriptionService: SubscriptionService,
+  sessionStore: SessionStore,
+  errorHandler: ErrorHandler,
+  cc: MessagesControllerComponents,
+  val authenticatedAction: AuthenticatedAction,
+  val sessionDataAction: SessionDataAction,
+  val subscriptionDetailsAction: SubscriptionDetailsAction,
+  checkYourDetailsPage: views.html.subscription.check_your_details,
+  subscribedPage: views.html.subscription.subscribed)(implicit viewConfig: ViewConfig, ec: ExecutionContext)
+    extends FrontendController(cc)
+    with WithSubscriptionDetailsActions
+    with WithActions
+    with Logging
+    with SessionUpdates {
 
   def checkYourDetails(): Action[AnyContent] = authenticatedActionWithSubscriptionDetails { implicit request =>
     Ok(checkYourDetailsPage(request.subscriptionDetails))
   }
 
-  def checkYourDetailsSubmit(): Action[AnyContent] = authenticatedActionWithSubscriptionDetails.async { implicit request =>
-    val result = for {
-      subscriptionResponse <- subscriptionService.subscribe(request.subscriptionDetails)
-      _ <- EitherT(updateSession(sessionStore, request)(_.copy(subscriptionResponse = Some(subscriptionResponse))))
-    } yield subscriptionResponse
+  def checkYourDetailsSubmit(): Action[AnyContent] = authenticatedActionWithSubscriptionDetails.async {
+    implicit request =>
+      val result = for {
+        subscriptionResponse <- subscriptionService.subscribe(request.subscriptionDetails)
+        _                    <- EitherT(updateSession(sessionStore, request)(_.copy(subscriptionResponse = Some(subscriptionResponse))))
+      } yield subscriptionResponse
 
-    result.fold({
-      e =>
-        logger.warn("Could not subscribe", e)
-        errorHandler.errorResult()
-    }, { subscriptionResponse =>
-      logger.info(s"Successfully subscribed with cgt id ${subscriptionResponse.cgtReferenceNumber}")
-      SeeOther(routes.SubscriptionController.subscribed().url)
-    })
+      result.fold(
+        { e =>
+          logger.warn("Could not subscribe", e)
+          errorHandler.errorResult()
+        }, { subscriptionResponse =>
+          logger.info(s"Successfully subscribed with cgt id ${subscriptionResponse.cgtReferenceNumber}")
+          SeeOther(routes.SubscriptionController.subscribed().url)
+        }
+      )
   }
 
   def subscribed(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>

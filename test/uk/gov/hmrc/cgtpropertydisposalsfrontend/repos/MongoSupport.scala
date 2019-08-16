@@ -54,4 +54,3 @@ trait MongoSupport extends MongoSpecSupport with BeforeAndAfterEach with BeforeA
   }
 
 }
-

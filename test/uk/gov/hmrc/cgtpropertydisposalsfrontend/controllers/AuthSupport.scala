@@ -16,14 +16,15 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
+import org.joda.time.LocalDate
 import play.api.Configuration
-import play.api.mvc.PlayBodyParsers
-import uk.gov.hmrc.auth.core.{AuthConnector, ConfidenceLevel}
 import uk.gov.hmrc.auth.core.authorise.Predicate
-import uk.gov.hmrc.auth.core.retrieve.Retrieval
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
+import uk.gov.hmrc.auth.core.retrieve.{Name, Retrieval, ~}
+import uk.gov.hmrc.auth.core.{AuthConnector, ConfidenceLevel}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.AuthenticatedAction
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DateOfBirth
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -40,11 +41,24 @@ trait AuthSupport { this: ControllerSpec with SessionSupport =>
   )(instanceOf[ExecutionContext])
 
   def mockAuth[R](predicate: Predicate, retrieval: Retrieval[R])(result: Future[R]): Unit =
-    (mockAuthConnector.authorise(_: Predicate, _: Retrieval[R])(_: HeaderCarrier, _: ExecutionContext))
+    (mockAuthConnector
+      .authorise(_: Predicate, _: Retrieval[R])(_: HeaderCarrier, _: ExecutionContext))
       .expects(predicate, retrieval, *, *)
       .returning(result)
 
   def mockAuthWithCl200AndRetrievedNino(retrievedNino: String): Unit =
     mockAuth(ConfidenceLevel.L200, Retrievals.nino)(Future.successful(Some(retrievedNino)))
+
+  //TODO: move example retrievals into a trait
+  def mockAuthWithCl200AndRetrievedAllRetrievals(
+    retrievedNino: String,
+    retrievedName: Name,
+    retrievedDateOfBirth: DateOfBirth
+  ): Unit =
+    mockAuth(ConfidenceLevel.L200, Retrievals.nino and Retrievals.name and Retrievals.dateOfBirth)(
+      Future.successful(
+        new ~(new ~(Some(retrievedNino), Some(retrievedName)), Some(retrievedDateOfBirth.dob))
+      )
+    )
 
 }

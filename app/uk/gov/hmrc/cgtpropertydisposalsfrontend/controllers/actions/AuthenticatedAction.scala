@@ -18,13 +18,15 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
 import cats.syntax.either._
 import com.google.inject.{Inject, Singleton}
+import org.joda.time.LocalDate
 import play.api.Configuration
-import play.api.mvc.Results.{InternalServerError, _}
+import play.api.mvc.Results._
 import play.api.mvc._
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
+import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{NINO, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, NINO, Name, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
@@ -33,16 +35,18 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 
-final case class AuthenticatedRequest[A](nino: NINO, request: MessagesRequest[A]) extends WrappedRequest[A](request)
+final case class AuthenticatedRequest[A](nino: NINO, name: Name, dateOfBirth: DateOfBirth, request: MessagesRequest[A])
+    extends WrappedRequest[A](request)
 
 @Singleton
-class AuthenticatedAction @Inject() (
-    authConnector: AuthConnector,
-    config: Configuration,
-    errorHandler: ErrorHandler,
-    sessionStore: SessionStore
-)(implicit ec: ExecutionContext)
-  extends ActionRefiner[MessagesRequest, AuthenticatedRequest] with Logging { self =>
+class AuthenticatedAction @Inject()(
+  authConnector: AuthConnector,
+  config: Configuration,
+  errorHandler: ErrorHandler,
+  sessionStore: SessionStore)(implicit ec: ExecutionContext)
+    extends ActionRefiner[MessagesRequest, AuthenticatedRequest]
+    with Logging {
+  self =>
 
   val authorisedFunctions: AuthorisedFunctions = new AuthorisedFunctions {
     override def authConnector: AuthConnector = self.authConnector
@@ -71,48 +75,61 @@ class AuthenticatedAction @Inject() (
       (selfBaseUrl + successRelativeUrl) -> (selfBaseUrl + failureRelativeUrl)
   }
 
+  private def makeAuthenticatedRequest[A](
+    nino: String,
+    name: uk.gov.hmrc.auth.core.retrieve.Name,
+    dateOfBirth: LocalDate,
+    request: MessagesRequest[A]): Future[Either[Result, AuthenticatedRequest[A]]] =
+    name match {
+      case uk.gov.hmrc.auth.core.retrieve.Name(Some(forename), Some(surname)) =>
+        Right(AuthenticatedRequest(NINO(nino), Name(forename, surname), DateOfBirth(dateOfBirth), request))
+      case other =>
+        logger.warn(s"Failed to retrieve the complete name for this user: $other")
+        Left(errorHandler.errorResult()(request))
+    }
+
   @SuppressWarnings(Array("org.wartremover.warts.Product", "org.wartremover.warts.Serializable"))
   override protected def refine[A](request: MessagesRequest[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
-    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
+    implicit val hc: HeaderCarrier =
+      HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-    authorisedFunctions.authorised(ConfidenceLevel.L200).retrieve(Retrievals.nino) {
-      case None =>
-        logger.warn("Could not find NINO")
-        Left(errorHandler.errorResult()(request))
-
-      case Some(nino) =>
-        Right(AuthenticatedRequest(NINO(nino), request))
-    }.recoverWith {
-      case _: NoActiveSession =>
-        Left(Redirect(signInUrl, Map("continue" -> Seq(selfBaseUrl + request.uri), "origin" -> Seq(origin))))
-
-      case _: InsufficientConfidenceLevel =>
-        handleInsufficientConfidenceLevel(request, errorHandler.errorResult()(request)).map(Left(_))
-
-    }
+    authorisedFunctions
+      .authorised(ConfidenceLevel.L200)
+      .retrieve(Retrievals.nino and Retrievals.name and Retrievals.dateOfBirth) {
+        case Some(nino) ~ Some(name) ~ Some(dob) => makeAuthenticatedRequest(nino, name, dob, request)
+        case other =>
+          logger.warn(s"Failed to retrieve some information from the auth record: $other")
+          Left(errorHandler.errorResult()(request))
+      }
+      .recoverWith {
+        case _: NoActiveSession =>
+          Left(Redirect(signInUrl, Map("continue" -> Seq(selfBaseUrl + request.uri), "origin" -> Seq(origin))))
+        case _: InsufficientConfidenceLevel =>
+          handleInsufficientConfidenceLevel(request, errorHandler.errorResult()(request)).map(Left(_))
+      }
   }
 
   override protected def executionContext: ExecutionContext = ec
 
-  private def handleInsufficientConfidenceLevel(request: MessagesRequest[_], errorResponse: Result)(implicit hc: HeaderCarrier): Future[Result] =
-    sessionStore.store(SessionData.empty.copy(ivContinueUrl = Some(selfBaseUrl + request.uri)))
+  private def handleInsufficientConfidenceLevel(request: MessagesRequest[_], errorResponse: Result)(
+    implicit hc: HeaderCarrier): Future[Result] =
+    sessionStore
+      .store(SessionData.empty.copy(ivContinueUrl = Some(selfBaseUrl + request.uri)))
       .map {
         _.bimap(
           { e =>
             logger.warn("Could not store IV continue url", e)
             errorResponse
-          }, _ =>
+          },
+          _ =>
             Redirect(
               s"$ivUrl/mdtp/uplift",
               Map(
-                "origin" -> Seq(ivOrigin),
+                "origin"          -> Seq(ivOrigin),
                 "confidenceLevel" -> Seq("200"),
-                "completionURL" -> Seq(ivSuccessUrl),
-                "failureURL" -> Seq(ivFailureUrl)
-              )
-            )
+                "completionURL"   -> Seq(ivSuccessUrl),
+                "failureURL"      -> Seq(ivFailureUrl)))
         ).merge
       }
 
 }
-

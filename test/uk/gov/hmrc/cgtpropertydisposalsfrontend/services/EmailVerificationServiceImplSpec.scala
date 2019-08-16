@@ -35,8 +35,10 @@ class EmailVerificationServiceImplSpec extends WordSpec with Matchers with MockF
 
   val mockConnector = mock[EmailVerificationConnector]
 
-  def mockVerifyEmail(expectedEmail: Email, expectedId: UUID, expectedName: String)(result: Either[Error, HttpResponse]) =
-    (mockConnector.verifyEmail(_: Email, _: UUID, _: String)(_: HeaderCarrier))
+  def mockVerifyEmail(expectedEmail: Email, expectedId: UUID, expectedName: String)(
+    result: Either[Error, HttpResponse]) =
+    (mockConnector
+      .verifyEmail(_: Email, _: UUID, _: String)(_: HeaderCarrier))
       .expects(expectedEmail, expectedId, expectedName, *)
       .returning(EitherT.fromEither[Future](result))
 
@@ -46,9 +48,9 @@ class EmailVerificationServiceImplSpec extends WordSpec with Matchers with MockF
     "verifying emails" must {
 
       implicit val hc: HeaderCarrier = HeaderCarrier()
-      val email = Email("email")
-      val id = UUID.randomUUID()
-      val name = "Fred"
+      val email                      = Email("email")
+      val id                         = UUID.randomUUID()
+      val name                       = "Fred"
 
       "indicate when the email verification request has been requested" in {
         mockVerifyEmail(email, id, name)(Right(HttpResponse(CREATED)))
@@ -67,11 +69,11 @@ class EmailVerificationServiceImplSpec extends WordSpec with Matchers with MockF
           Left(Error(new Exception("uh oh"))),
           Right(HttpResponse(INTERNAL_SERVER_ERROR))
         ).foreach { response =>
-            mockVerifyEmail(email, id, name)(response)
+          mockVerifyEmail(email, id, name)(response)
 
-            await(service.verifyEmail(email, id, name).value).isLeft shouldBe true
+          await(service.verifyEmail(email, id, name).value).isLeft shouldBe true
 
-          }
+        }
 
       }
 

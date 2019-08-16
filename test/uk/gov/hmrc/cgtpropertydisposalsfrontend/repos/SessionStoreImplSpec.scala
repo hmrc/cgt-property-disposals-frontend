@@ -36,11 +36,12 @@ import scala.concurrent.duration._
 
 class SessionStoreImplSpec extends WordSpec with Matchers with MongoSupport with ScalaFutures {
 
-  val config = Configuration(ConfigFactory.parseString(
-    """
+  val config = Configuration(
+    ConfigFactory.parseString(
+      """
       |session-store.expiry-time = 30minutes
       |""".stripMargin
-  ))
+    ))
 
   val sessionStore = new SessionStoreImpl(reactiveMongoComponent, config)
 
@@ -68,22 +69,23 @@ class SessionStoreImplSpec extends WordSpec with Matchers with MongoSupport with
       "the connection to mongo is broken" in new TestEnvironment {
         withBrokenMongo { brokenMongo =>
           val sessionStore = new SessionStoreImpl(brokenMongo, config)
-          sessionStore.get().futureValue.isLeft shouldBe true
+          sessionStore.get().futureValue.isLeft              shouldBe true
           sessionStore.store(sessionData).futureValue.isLeft shouldBe true
         }
       }
 
       "the data in mongo cannot be parsed" in new TestEnvironment {
         val invalidData = JsObject(Map("businessPartnerRecord" -> JsNumber(1)))
-        val create: Future[DatabaseUpdate[Cache]] = sessionStore.cacheRepository.createOrUpdate(Id(sessionId.value), sessionStore.sessionKey, invalidData)
+        val create: Future[DatabaseUpdate[Cache]] =
+          sessionStore.cacheRepository.createOrUpdate(Id(sessionId.value), sessionStore.sessionKey, invalidData)
         create.futureValue.writeResult.inError shouldBe false
-        sessionStore.get().futureValue.isLeft shouldBe true
+        sessionStore.get().futureValue.isLeft  shouldBe true
       }
 
       "there is no session id in the header carrier" in {
         implicit val hc: HeaderCarrier = HeaderCarrier()
         sessionStore.store(sessionData).futureValue.isLeft shouldBe true
-        sessionStore.get().futureValue.isLeft shouldBe true
+        sessionStore.get().futureValue.isLeft              shouldBe true
       }
 
     }

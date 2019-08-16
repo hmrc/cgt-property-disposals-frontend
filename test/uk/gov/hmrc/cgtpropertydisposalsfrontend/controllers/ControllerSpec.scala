@@ -37,13 +37,14 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
 
   def buildFakeApplication(): Application =
     new GuiceApplicationBuilder()
-      .configure(Configuration(
-        ConfigFactory.parseString(
-          """
+      .configure(
+        Configuration(
+          ConfigFactory.parseString(
+            """
             | metrics.enabled = false
           """.stripMargin
-        )
-      ))
+          )
+        ))
       .overrides(overrideBindings: _*)
       .build()
 
@@ -52,7 +53,7 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
   def instanceOf[A: ClassTag]: A = fakeApplication.injector.instanceOf[A]
 
   lazy implicit val materializer: Materializer = fakeApplication.materializer
-  lazy val viewConfig = instanceOf[ViewConfig]
+  lazy val viewConfig                          = instanceOf[ViewConfig]
 
   abstract override def beforeAll(): Unit = {
     Play.start(fakeApplication)
@@ -67,15 +68,16 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
   def message(messageKey: String)(implicit messagesApi: MessagesApi): String =
     messagesApi(messageKey)(Lang.defaultLang)
 
-  private lazy val technicalErrorPageContent: String = instanceOf[ErrorHandler].internalServerErrorTemplate(FakeRequest()).body
+  private lazy val technicalErrorPageContent: String =
+    instanceOf[ErrorHandler].internalServerErrorTemplate(FakeRequest()).body
 
   def checkIsTechnicalErrorPage(result: Future[Result]): Unit = {
-    status(result) shouldBe INTERNAL_SERVER_ERROR
+    status(result)          shouldBe INTERNAL_SERVER_ERROR
     contentAsString(result) shouldBe technicalErrorPageContent
   }
 
   def checkIsRedirect(result: Future[Result], expectedRedirectUrl: String): Unit = {
-    status(result) shouldBe SEE_OTHER
+    status(result)           shouldBe SEE_OTHER
     redirectLocation(result) shouldBe Some(expectedRedirectUrl)
   }
 

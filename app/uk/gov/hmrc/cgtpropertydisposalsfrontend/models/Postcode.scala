@@ -34,9 +34,8 @@ object Postcode {
       mapping(
         "postcode" -> text
           .transform[String](_.trim, identity)
-          .verifying("invalid", s => postcodeRegexPredicate.test(s.toUpperCase.replaceAllLiterally(" ", "")))
-      )(Postcode.apply)(Postcode.unapply)
-    )
+          .verifying("invalid", s => postcodeRegexPredicate.test(s.toUpperCase.replaceAllLiterally(" ", ""))))(
+        Postcode.apply)(Postcode.unapply))
   }
 
 }

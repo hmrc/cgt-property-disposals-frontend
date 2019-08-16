@@ -26,7 +26,9 @@ import scala.concurrent.Future
 
 trait SessionUpdates {
 
-  def updateSession[R](sessionStore: SessionStore, request: R)(update: SessionData => SessionData)(implicit sessionProvider: SessionProvider[R], hc: HeaderCarrier): Future[Either[Error, Unit]] =
+  def updateSession[R](sessionStore: SessionStore, request: R)(update: SessionData => SessionData)(
+    implicit sessionProvider: SessionProvider[R],
+    hc: HeaderCarrier): Future[Either[Error, Unit]] =
     sessionStore.store(update(sessionProvider.toSession(request)))
 
 }
@@ -45,9 +47,11 @@ object SessionUpdates {
       override def toSession(a: A): SessionData = f(a)
     }
 
-    implicit def requestWithSessionDataInstance[A]: SessionProvider[RequestWithSessionData[A]] = instance(_.sessionData.getOrElse(SessionData.empty))
+    implicit def requestWithSessionDataInstance[A]: SessionProvider[RequestWithSessionData[A]] =
+      instance(_.sessionData.getOrElse(SessionData.empty))
 
-    implicit def requestWithSubscriptionDetails[A]: SessionProvider[RequestWithSubscriptionDetails[A]] = instance(_.sessionData)
+    implicit def requestWithSubscriptionDetails[A]: SessionProvider[RequestWithSubscriptionDetails[A]] =
+      instance(_.sessionData)
 
   }
 

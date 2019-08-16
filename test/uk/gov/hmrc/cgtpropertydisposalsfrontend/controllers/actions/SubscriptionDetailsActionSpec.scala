@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
+import org.joda.time.LocalDate
 import play.api.i18n.MessagesApi
 import play.api.mvc.Results.Ok
 import play.api.mvc.{MessagesRequest, PlayBodyParsers, Result}
@@ -23,7 +24,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, SessionSupport, routes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, NINO, SessionData, SubscriptionDetails, SubscriptionResponse, sample, subscriptionDetailsGen}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, Error, NINO, Name, SessionData, SubscriptionDetails, SubscriptionResponse, sample, subscriptionDetailsGen}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -37,16 +38,19 @@ class SubscriptionDetailsActionSpec extends ControllerSpec with SessionSupport {
 
     val subscriptionDetails = sample[SubscriptionDetails]
 
-      def performAction(sessionData: SessionData, requestUrl: String = "/"): Future[Result] = {
-        val messagesRequest = new MessagesRequest(FakeRequest("GET", requestUrl), instanceOf[MessagesApi])
-        val authenticatedRequest = AuthenticatedRequest(NINO("nino"), messagesRequest)
+    def performAction(sessionData: SessionData, requestUrl: String = "/"): Future[Result] = {
+      val messagesRequest = new MessagesRequest(FakeRequest("GET", requestUrl), instanceOf[MessagesApi])
+      val authenticatedRequest =
+        AuthenticatedRequest(NINO("nino"), Name("name", "lastName"), DateOfBirth(LocalDate.now()), messagesRequest)
 
-        action.invokeBlock(authenticatedRequest, { r: RequestWithSubscriptionDetails[_] =>
-          r.sessionData shouldBe sessionData
+      action.invokeBlock(
+        authenticatedRequest, { r: RequestWithSubscriptionDetails[_] =>
+          r.sessionData         shouldBe sessionData
           r.subscriptionDetails shouldBe subscriptionDetails
           Future.successful(Ok)
-        })
-      }
+        }
+      )
+    }
 
     "return an error if there is an error getting session data" in {
       mockGetSession(Future.successful(Left(Error(new Exception("Oh no!")))))
@@ -74,12 +78,14 @@ class SubscriptionDetailsActionSpec extends ControllerSpec with SessionSupport {
 
       "there are subscription details and a subscription response in session and the request is not " +
         "for the subscribed page" in {
-          val sessionData = SessionData.empty.copy(subscriptionDetails  = Some(subscriptionDetails), subscriptionResponse = Some(SubscriptionResponse("number")))
+        val sessionData = SessionData.empty.copy(
+          subscriptionDetails  = Some(subscriptionDetails),
+          subscriptionResponse = Some(SubscriptionResponse("number")))
 
-          mockGetSession(Future.successful(Right(Some(sessionData))))
+        mockGetSession(Future.successful(Right(Some(sessionData))))
 
-          checkIsRedirect(performAction(sessionData), routes.SubscriptionController.subscribed())
-        }
+        checkIsRedirect(performAction(sessionData), routes.SubscriptionController.subscribed())
+      }
 
     }
 
@@ -95,12 +101,14 @@ class SubscriptionDetailsActionSpec extends ControllerSpec with SessionSupport {
 
       "there are subscription details and a subscription response in session and the request is " +
         "for the subscribed page" in {
-          val sessionData = SessionData.empty.copy(subscriptionDetails  = Some(subscriptionDetails), subscriptionResponse = Some(SubscriptionResponse("number")))
+        val sessionData = SessionData.empty.copy(
+          subscriptionDetails  = Some(subscriptionDetails),
+          subscriptionResponse = Some(SubscriptionResponse("number")))
 
-          mockGetSession(Future.successful(Right(Some(sessionData))))
+        mockGetSession(Future.successful(Right(Some(sessionData))))
 
-          status(performAction(sessionData, routes.SubscriptionController.subscribed().url)) shouldBe OK
-        }
+        status(performAction(sessionData, routes.SubscriptionController.subscribed().url)) shouldBe OK
+      }
 
     }
   }

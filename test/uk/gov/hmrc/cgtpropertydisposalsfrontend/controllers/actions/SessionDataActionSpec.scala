@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
-import org.scalamock.scalatest.MockFactory
+import org.joda.time.LocalDate
 import play.api.i18n.MessagesApi
 import play.api.mvc.Results.Ok
-import play.api.mvc.{MessagesRequest, PlayBodyParsers, Result}
+import play.api.mvc.{MessagesRequest, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
@@ -37,15 +37,16 @@ class SessionDataActionSpec extends ControllerSpec with SessionSupport {
   "SessionDataAction" must {
 
     lazy val messagesRequest = new MessagesRequest(FakeRequest(), instanceOf[MessagesApi])
-    lazy val authenticatedRequest = AuthenticatedRequest(NINO("nino"), messagesRequest)
+    lazy val authenticatedRequest =
+      AuthenticatedRequest(NINO("nino"), Name("name", "lastName"), DateOfBirth(LocalDate.now()), messagesRequest)
 
     val sessionData = sample[SessionData]
 
-      def performAction(): Future[Result] =
-        action.invokeBlock(authenticatedRequest, { r: RequestWithSessionData[_] =>
-          r.sessionData shouldBe Some(sessionData)
-          Future.successful(Ok)
-        })
+    def performAction(): Future[Result] =
+      action.invokeBlock(authenticatedRequest, { r: RequestWithSessionData[_] =>
+        r.sessionData shouldBe Some(sessionData)
+        Future.successful(Ok)
+      })
 
     "return an error if there is an error getting session data" in {
       mockGetSession(Future.successful(Left(Error(new Exception("Oh no!")))))

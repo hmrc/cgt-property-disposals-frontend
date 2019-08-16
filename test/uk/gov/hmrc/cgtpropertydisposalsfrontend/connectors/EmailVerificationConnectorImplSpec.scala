@@ -33,9 +33,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with MockFactory with HttpSupport {
 
   val (protocol, host, port) = ("http", "host", "port")
-  val templateId = "id"
-  val linkExpiryTimeMinutes = 30
-  val selfUrl = "self"
+  val templateId             = "id"
+  val linkExpiryTimeMinutes  = 30
+  val selfUrl                = "self"
 
   val config = Configuration(
     ConfigFactory.parseString(
@@ -59,10 +59,10 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
     "handling requests to verify emails" must {
 
       implicit val hc: HeaderCarrier = HeaderCarrier()
-      val expectedUrl = s"$protocol://$host:$port/email-verification/verification-requests"
-      val email = Email("email@test.com")
-      val id = UUID.randomUUID()
-      val name = "Bob"
+      val expectedUrl                = s"$protocol://$host:$port/email-verification/verification-requests"
+      val email                      = Email("email@test.com")
+      val id                         = UUID.randomUUID()
+      val name                       = "Bob"
 
       val body = Json.parse(
         s"""
@@ -78,16 +78,16 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
 
       "send a request to the email verification service with the correct details " +
         "and return the response" in {
-          List(
-            HttpResponse(200, Some(JsString("hi"))),
-            HttpResponse(409),
-            HttpResponse(500)
-          ).foreach { response =>
-              mockPost(expectedUrl, Map.empty[String, String], body)(Some(response))
+        List(
+          HttpResponse(200, Some(JsString("hi"))),
+          HttpResponse(409),
+          HttpResponse(500)
+        ).foreach { response =>
+          mockPost(expectedUrl, Map.empty[String, String], body)(Some(response))
 
-              await(connector.verifyEmail(email, id, name).value) shouldBe Right(response)
-            }
+          await(connector.verifyEmail(email, id, name).value) shouldBe Right(response)
         }
+      }
 
       "return an error" when {
 

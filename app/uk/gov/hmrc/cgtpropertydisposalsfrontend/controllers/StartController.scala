@@ -32,13 +32,17 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class StartController @Inject() (
-    bprService: BusinessPartnerRecordService,
-    sessionStore: SessionStore,
-    errorHandler: ErrorHandler, cc: MessagesControllerComponents,
-    val authenticatedAction: AuthenticatedAction,
-    val sessionDataAction: SessionDataAction
-)(implicit ec: ExecutionContext) extends FrontendController(cc) with WithActions with Logging with SessionUpdates {
+class StartController @Inject()(
+  bprService: BusinessPartnerRecordService,
+  sessionStore: SessionStore,
+  errorHandler: ErrorHandler,
+  cc: MessagesControllerComponents,
+  val authenticatedAction: AuthenticatedAction,
+  val sessionDataAction: SessionDataAction)(implicit ec: ExecutionContext)
+    extends FrontendController(cc)
+    with WithActions
+    with Logging
+    with SessionUpdates {
 
   def start(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     (request.sessionData.flatMap(_.businessPartnerRecord), request.sessionData.flatMap(_.subscriptionDetails)) match {
@@ -48,7 +52,9 @@ class StartController @Inject() (
       case (maybeBpr, None) =>
         val result = for {
           bpr <- maybeBpr.fold(bprService.getBusinessPartnerRecord(request.authenticatedRequest.nino))(EitherT.pure(_))
-          subscriptionDetails <- EitherT.fromEither[Future](SubscriptionDetails.fromBusinessPartnerRecord(bpr)).leftMap(Error(_))
+          subscriptionDetails <- EitherT
+                                  .fromEither[Future](SubscriptionDetails.fromBusinessPartnerRecord(bpr))
+                                  .leftMap(Error(_))
           _ <- EitherT(updateSession(sessionStore, request)(_.copy(subscriptionDetails = Some(subscriptionDetails))))
         } yield subscriptionDetails
 

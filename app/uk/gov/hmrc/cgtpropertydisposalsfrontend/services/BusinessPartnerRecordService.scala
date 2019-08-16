@@ -36,10 +36,14 @@ trait BusinessPartnerRecordService {
 }
 
 @Singleton
-class BusinessPartnerRecordServiceImpl @Inject() (connector: CGTPropertyDisposalsConnector)(implicit ec: ExecutionContext) extends BusinessPartnerRecordService {
+class BusinessPartnerRecordServiceImpl @Inject()(connector: CGTPropertyDisposalsConnector)(
+  implicit ec: ExecutionContext)
+    extends BusinessPartnerRecordService {
 
-  override def getBusinessPartnerRecord(nino: NINO)(implicit hc: HeaderCarrier): EitherT[Future, Error, BusinessPartnerRecord] =
-    connector.getBusinessPartnerRecord(nino)
+  override def getBusinessPartnerRecord(nino: NINO)(
+    implicit hc: HeaderCarrier): EitherT[Future, Error, BusinessPartnerRecord] =
+    connector
+      .getBusinessPartnerRecord(nino)
       .subflatMap { response =>
         response.status match {
           case OK    => response.parseJSON[BusinessPartnerRecord]().leftMap(Error.apply)

@@ -32,14 +32,14 @@ trait CGTPropertyDisposalsConnector {
 
   def getBusinessPartnerRecord(nino: NINO)(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
 
-  def subscribe(subscriptionDetails: SubscriptionDetails)(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
+  def subscribe(subscriptionDetails: SubscriptionDetails)(
+    implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
 }
 
 @Singleton
-class CGTPropertyDisposalsConnectorImpl @Inject() (
-    http: HttpClient,
-    servicesConfig: ServicesConfig
-)(implicit ec: ExecutionContext) extends CGTPropertyDisposalsConnector {
+class CGTPropertyDisposalsConnectorImpl @Inject()(http: HttpClient, servicesConfig: ServicesConfig)(
+  implicit ec: ExecutionContext)
+    extends CGTPropertyDisposalsConnector {
 
   val baseUrl: String = servicesConfig.baseUrl("cgt-property-disposals") + "/cgt-property-disposals"
 
@@ -49,16 +49,17 @@ class CGTPropertyDisposalsConnectorImpl @Inject() (
 
   def getBusinessPartnerRecord(nino: NINO)(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
     EitherT[Future, Error, HttpResponse](
-      http.get(bprUrl(nino))
+      http
+        .get(bprUrl(nino))
         .map(Right(_))
-        .recover { case e => Left(Error(e)) }
-    )
+        .recover { case e => Left(Error(e)) })
 
-  def subscribe(subscriptionDetails: SubscriptionDetails)(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
+  def subscribe(subscriptionDetails: SubscriptionDetails)(
+    implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
     EitherT[Future, Error, HttpResponse](
-      http.post(subscribeUrl, Json.toJson(subscriptionDetails))
+      http
+        .post(subscribeUrl, Json.toJson(subscriptionDetails))
         .map(Right(_))
-        .recover { case e => Left(Error(e)) }
-    )
+        .recover { case e => Left(Error(e)) })
 
 }

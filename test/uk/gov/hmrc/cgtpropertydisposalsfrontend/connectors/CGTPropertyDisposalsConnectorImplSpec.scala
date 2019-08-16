@@ -31,8 +31,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with MockFactory with HttpSupport {
 
-  val config = Configuration(ConfigFactory.parseString(
-    """
+  val config = Configuration(
+    ConfigFactory.parseString(
+      """
       |microservice {
       |  services {
       |    cgt-property-disposals {
@@ -43,16 +44,17 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
       |  }
       |}
       |""".stripMargin
-  ))
+    ))
 
-  val connector = new CGTPropertyDisposalsConnectorImpl(mockHttp, new ServicesConfig(config, new RunMode(config, Mode.Test)))
+  val connector =
+    new CGTPropertyDisposalsConnectorImpl(mockHttp, new ServicesConfig(config, new RunMode(config, Mode.Test)))
 
   "CGTPropertyDisposalsConnectorImpl" when {
 
     "handling request to get the business partner record" must {
 
       implicit val hc: HeaderCarrier = HeaderCarrier()
-      val nino = NINO("AB123456C")
+      val nino                       = NINO("AB123456C")
 
       "do a get http call and return the result" in {
         List(
@@ -60,12 +62,12 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
           HttpResponse(200, Some(JsString("hi"))),
           HttpResponse(500)
         ).foreach { httpResponse =>
-            withClue(s"For http response [${httpResponse.toString}]") {
-              mockGet(s"http://host:123/cgt-property-disposals/${nino.value}/business-partner-record")(Some(httpResponse))
+          withClue(s"For http response [${httpResponse.toString}]") {
+            mockGet(s"http://host:123/cgt-property-disposals/${nino.value}/business-partner-record")(Some(httpResponse))
 
-              await(connector.getBusinessPartnerRecord(nino).value) shouldBe Right(httpResponse)
-            }
+            await(connector.getBusinessPartnerRecord(nino).value) shouldBe Right(httpResponse)
           }
+        }
       }
 
       "return an error" when {
@@ -82,7 +84,7 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
 
     "handling request to subscribe" must {
       implicit val hc: HeaderCarrier = HeaderCarrier()
-      val subscriptionDetails = sample[SubscriptionDetails]
+      val subscriptionDetails        = sample[SubscriptionDetails]
 
       "do a get http call and return the result" in {
         List(
@@ -90,18 +92,20 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
           HttpResponse(200, Some(JsString("hi"))),
           HttpResponse(500)
         ).foreach { httpResponse =>
-            withClue(s"For http response [${httpResponse.toString}]") {
-              mockPost(s"http://host:123/cgt-property-disposals/subscribe", Map.empty, Json.toJson(subscriptionDetails))(Some(httpResponse))
+          withClue(s"For http response [${httpResponse.toString}]") {
+            mockPost(s"http://host:123/cgt-property-disposals/subscribe", Map.empty, Json.toJson(subscriptionDetails))(
+              Some(httpResponse))
 
-              await(connector.subscribe(subscriptionDetails).value) shouldBe Right(httpResponse)
-            }
+            await(connector.subscribe(subscriptionDetails).value) shouldBe Right(httpResponse)
           }
+        }
       }
 
       "return an error" when {
 
         "the future fails" in {
-          mockPost(s"http://host:123/cgt-property-disposals/subscribe", Map.empty, Json.toJson(subscriptionDetails))(None)
+          mockPost(s"http://host:123/cgt-property-disposals/subscribe", Map.empty, Json.toJson(subscriptionDetails))(
+            None)
 
           await(connector.subscribe(subscriptionDetails).value).isLeft shouldBe true
         }

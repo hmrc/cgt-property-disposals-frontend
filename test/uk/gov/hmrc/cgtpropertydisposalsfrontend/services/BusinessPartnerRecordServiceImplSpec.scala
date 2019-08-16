@@ -36,14 +36,15 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
   val service = new BusinessPartnerRecordServiceImpl(mockConnector)
 
   def mockGetBPR(nino: NINO)(response: Either[Error, HttpResponse]) =
-    (mockConnector.getBusinessPartnerRecord(_: NINO)(_: HeaderCarrier))
+    (mockConnector
+      .getBusinessPartnerRecord(_: NINO)(_: HeaderCarrier))
       .expects(nino, *)
       .returning(EitherT.fromEither[Future](response))
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
-  val nino = NINO("AB123456C")
-  val address = Address.UkAddress("line1", Some("line2"), None, None, "postcode")
-  val bpr = BusinessPartnerRecord("name", "surname", Some("email"), address, "sap")
+  val nino                       = NINO("AB123456C")
+  val address                    = Address.UkAddress("line1", Some("line2"), None, None, "postcode")
+  val bpr                        = BusinessPartnerRecord("name", "surname", Some("email"), address, "sap")
 
   "The BusinessPartnerRecordServiceImpl" when {
 
@@ -51,11 +52,11 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
 
       "return an error" when {
 
-          def testError(response: => Either[Error, HttpResponse]) = {
-            mockGetBPR(nino)(response)
+        def testError(response: => Either[Error, HttpResponse]) = {
+          mockGetBPR(nino)(response)
 
-            await(service.getBusinessPartnerRecord(nino).value).isLeft shouldBe true
-          }
+          await(service.getBusinessPartnerRecord(nino).value).isLeft shouldBe true
+        }
 
         "the connector fails to make the call" in {
           testError(Left(Error(new Exception("Uh oh"))))
@@ -78,10 +79,10 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
       }
       "return the bpr when the http response comes back with status 200 and " +
         "the json body returns a bpr with a matching dob" in {
-          mockGetBPR(nino)(Right(HttpResponse(200, Some(Json.toJson(bpr)))))
+        mockGetBPR(nino)(Right(HttpResponse(200, Some(Json.toJson(bpr)))))
 
-          await(service.getBusinessPartnerRecord(nino).value) shouldBe Right(bpr)
-        }
+        await(service.getBusinessPartnerRecord(nino).value) shouldBe Right(bpr)
+      }
 
     }
 

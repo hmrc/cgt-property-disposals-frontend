@@ -14,28 +14,6 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
-
-class ReturnsControllerSpec extends ControllerSpec {
-
-  val controller = instanceOf[ReturnsController]
-
-  "The ReturnsController" when {
-
-    "handling requests to display the start page" must {
-
-      "display the start page" in {
-        val result = controller.start()(FakeRequest())
-        status(result)          shouldBe OK
-        contentAsString(result) should include("Start your return here")
-
-      }
-
-    }
-
-  }
-
-}
+final case class Name(forename: String, surname: String)
