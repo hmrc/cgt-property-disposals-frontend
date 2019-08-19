@@ -16,17 +16,15 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
-import cats.instances.string._
 import cats.syntax.either._
-import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.i18n.MessagesApi
-import play.api.mvc._
 import play.api.mvc.Results.SeeOther
-import shapeless.HList
+import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, SubscriptionDetails, SubscriptionResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.SubscriptionReady
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
@@ -35,8 +33,8 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 
-final case class RequestWithSubscriptionDetails[A](
-  subscriptionDetails: SubscriptionDetails,
+final case class RequestWithSubscriptionReady[A](
+  subscriptionReady: SubscriptionReady,
   sessionData: SessionData,
   authenticatedRequest: AuthenticatedRequest[A]
 ) extends WrappedRequest[A](authenticatedRequest)
@@ -45,45 +43,38 @@ final case class RequestWithSubscriptionDetails[A](
     authenticatedRequest.request.messagesApi
 }
 
-class SubscriptionDetailsAction @Inject()(sessionStore: SessionStore, errorHandler: ErrorHandler)(
-  implicit ec: ExecutionContext
-) extends ActionRefiner[AuthenticatedRequest, RequestWithSubscriptionDetails]
+@Singleton
+class SubscriptionReadyAction @Inject()(sessionStore: SessionStore, errorHandler: ErrorHandler)(
+  implicit ec: ExecutionContext)
+    extends ActionRefiner[AuthenticatedRequest, RequestWithSubscriptionReady]
     with Logging {
 
   override protected def executionContext: ExecutionContext = ec
 
   override protected def refine[A](
-    request: AuthenticatedRequest[A]
-  ): Future[Either[Result, RequestWithSubscriptionDetails[A]]] = {
-    implicit val hc: HeaderCarrier =
-      HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
+    request: AuthenticatedRequest[A]): Future[Either[Result, RequestWithSubscriptionReady[A]]] = {
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter
+      .fromHeadersAndSession(request.headers, Some(request.session))
 
     sessionStore
       .get()
-      .map(_.leftMap { e =>
-        logger.warn("Could not get session data", e)
-        errorHandler.errorResult()(request)
-      }.flatMap { maybeSessionData =>
-        (
-          maybeSessionData,
-          maybeSessionData.flatMap(_.subscriptionDetails),
-          maybeSessionData.flatMap((_.subscriptionResponse))
-        ) match {
-          case (Some(_), Some(_), Some(_))
-              if request.uri =!= routes.SubscriptionController
-                .subscribed()
-                .url =>
-            // user has already subscribed in this session
-            Left(SeeOther(routes.SubscriptionController.subscribed().url))
+      .map(
+        _.leftMap { e =>
+          logger.warn("Could not get session data", e)
+          errorHandler.errorResult()(request)
+        }.flatMap { maybeSessionData =>
+          (maybeSessionData, maybeSessionData.flatMap(_.subscriptionStatus)) match {
+            case (Some(_), Some(_: SubscriptionStatus.SubscriptionComplete)) =>
+              Left(SeeOther(routes.SubscriptionController.subscribed().url))
 
-          case (Some(sessionData), Some(subscriptionDetails), _) =>
-            Right(RequestWithSubscriptionDetails(subscriptionDetails, sessionData, request))
+            case (Some(sessionData), Some(ready: SubscriptionStatus.SubscriptionReady)) =>
+              Right(RequestWithSubscriptionReady(ready, sessionData, request))
 
-          case _ =>
-            Left(SeeOther(routes.StartController.start().url))
-
+            case _ =>
+              Left(SeeOther(routes.StartController.start().url))
+          }
         }
-      })
+      )
   }
 
 }

@@ -21,7 +21,8 @@ import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, SessionDataAction, SubscriptionDetailsAction, WithActions, WithSubscriptionDetailsActions}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{SubscriptionComplete, SubscriptionReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -30,7 +31,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.ExecutionContext
-import scala.util.Random
 
 @Singleton
 class SubscriptionController @Inject()(
@@ -40,7 +40,7 @@ class SubscriptionController @Inject()(
   cc: MessagesControllerComponents,
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
-  val subscriptionDetailsAction: SubscriptionDetailsAction,
+  val subscriptionDetailsAction: SubscriptionReadyAction,
   checkYourDetailsPage: views.html.subscription.check_your_details,
   subscribedPage: views.html.subscription.subscribed
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
@@ -51,15 +51,19 @@ class SubscriptionController @Inject()(
     with SessionUpdates {
 
   def checkYourDetails(): Action[AnyContent] =
-    authenticatedActionWithSubscriptionDetails { implicit request =>
-      Ok(checkYourDetailsPage(request.subscriptionDetails))
+    authenticatedActionWithSubscriptionReady { implicit request =>
+      Ok(checkYourDetailsPage(request.subscriptionReady.subscriptionDetails))
     }
 
   def checkYourDetailsSubmit(): Action[AnyContent] =
-    authenticatedActionWithSubscriptionDetails.async { implicit request =>
+    authenticatedActionWithSubscriptionReady.async { implicit request =>
+      val details = request.subscriptionReady.subscriptionDetails
       val result = for {
-        subscriptionResponse <- subscriptionService.subscribe(request.subscriptionDetails)
-        _                    <- EitherT(updateSession(sessionStore, request)(_.copy(subscriptionResponse = Some(subscriptionResponse))))
+        subscriptionResponse <- subscriptionService.subscribe(details)
+        _ <- EitherT(
+              updateSession(sessionStore, request)(
+                _.copy(subscriptionStatus = Some(SubscriptionComplete(details, subscriptionResponse)))
+              ))
       } yield subscriptionResponse
 
       result.fold(
@@ -74,14 +78,11 @@ class SubscriptionController @Inject()(
     }
 
   def subscribed(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
-    (request.sessionData.flatMap(_.subscriptionDetails), request.sessionData.flatMap(_.subscriptionResponse)) match {
-      case (None, _) => SeeOther(routes.StartController.start().url)
-      case (Some(_), None) =>
-        SeeOther(routes.SubscriptionController.checkYourDetails().url)
-      case (Some(_), Some(subscriptionResponse)) =>
-        Ok(subscribedPage(subscriptionResponse.cgtReferenceNumber))
+    request.sessionData.flatMap(_.subscriptionStatus) match {
+      case Some(SubscriptionComplete(_, complete)) => Ok(subscribedPage(complete.cgtReferenceNumber))
+      case Some(SubscriptionReady(_))              => SeeOther(routes.SubscriptionController.checkYourDetails().url)
+      case _                                       => SeeOther(routes.StartController.start().url)
     }
-
   }
 
 }

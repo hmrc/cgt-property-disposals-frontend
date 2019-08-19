@@ -22,7 +22,8 @@ import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, SubscriptionDetailsAction, WithSubscriptionDetailsActions}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, SubscriptionReadyAction, WithSubscriptionDetailsActions}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.SubscriptionReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Address, AddressLookupResult, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AddressLookupService
@@ -32,11 +33,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.ExecutionContext
+import shapeless.{Lens, lens}
 
 @Singleton
 class AddressController @Inject()(
   val authenticatedAction: AuthenticatedAction,
-  val subscriptionDetailsAction: SubscriptionDetailsAction,
+  val subscriptionDetailsAction: SubscriptionReadyAction,
   cc: MessagesControllerComponents,
   errorHandler: ErrorHandler,
   addressLookupService: AddressLookupService,
@@ -50,21 +52,18 @@ class AddressController @Inject()(
     with SessionUpdates {
 
   def enterPostcode(): Action[AnyContent] =
-    authenticatedActionWithSubscriptionDetails { implicit request =>
-      val form =
-        request.sessionData.addressLookupResult.fold(Postcode.form)(r => Postcode.form.fill(r.postcode))
+    authenticatedActionWithSubscriptionReady { implicit request =>
+      val form = request.sessionData.addressLookupResult.fold(Postcode.form)(r => Postcode.form.fill(r.postcode))
       Ok(enterPostcodePage(form))
     }
 
   def enterPostcodeSubmit(): Action[AnyContent] =
-    authenticatedActionWithSubscriptionDetails.async { implicit request =>
+    authenticatedActionWithSubscriptionReady.async { implicit request =>
       Postcode.form
         .bindFromRequest()
         .fold(
           formWithErrors => BadRequest(enterPostcodePage(formWithErrors)), { postcode =>
-            if (request.sessionData.addressLookupResult
-                  .map(_.postcode)
-                  .contains(postcode)) {
+            if (request.sessionData.addressLookupResult.map(_.postcode).contains(postcode)) {
               SeeOther(routes.AddressController.selectAddress().url)
             } else {
               val result = for {
@@ -83,14 +82,14 @@ class AddressController @Inject()(
         )
     }
   def selectAddress(): Action[AnyContent] =
-    authenticatedActionWithSubscriptionDetails { implicit request =>
+    authenticatedActionWithSubscriptionReady { implicit request =>
       request.sessionData.addressLookupResult match {
         case None =>
           SeeOther(routes.SubscriptionController.checkYourDetails().url)
 
         case Some(AddressLookupResult(_, addresses)) =>
           val form = addresses
-            .find(_ === request.subscriptionDetails.address)
+            .find(_ === request.subscriptionReady.subscriptionDetails.address)
             .fold(Address.addressSelectForm(addresses))(Address.addressSelectForm(addresses).fill(_))
 
           Ok(selectAddressPage(addresses, form))
@@ -98,7 +97,7 @@ class AddressController @Inject()(
     }
 
   def selectAddressSubmit(): Action[AnyContent] =
-    authenticatedActionWithSubscriptionDetails.async { implicit request =>
+    authenticatedActionWithSubscriptionReady.async { implicit request =>
       request.sessionData.addressLookupResult match {
         case None =>
           SeeOther(routes.SubscriptionController.checkYourDetails().url)
@@ -110,7 +109,7 @@ class AddressController @Inject()(
             .fold(
               e => BadRequest(selectAddressPage(addresses, e)), { address =>
                 updateSession(sessionStore, request)(
-                  _.copy(subscriptionDetails = Some(request.subscriptionDetails.copy(address = address)))
+                  _.copy(subscriptionStatus = Some(addressLens.set(request.subscriptionReady)(address)))
                 ).map(
                   _.fold(
                     { e =>
@@ -124,5 +123,8 @@ class AddressController @Inject()(
             )
       }
     }
+
+  val addressLens: Lens[SubscriptionReady, Address] =
+    lens[SubscriptionReady].subscriptionDetails.address
 
 }

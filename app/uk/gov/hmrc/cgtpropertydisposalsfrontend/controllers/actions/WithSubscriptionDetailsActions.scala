@@ -22,9 +22,9 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 trait WithSubscriptionDetailsActions { this: FrontendController =>
 
   val authenticatedAction: AuthenticatedAction
-  val subscriptionDetailsAction: SubscriptionDetailsAction
+  val subscriptionDetailsAction: SubscriptionReadyAction
 
-  val authenticatedActionWithSubscriptionDetails: ActionBuilder[RequestWithSubscriptionDetails, AnyContent] =
+  val authenticatedActionWithSubscriptionReady: ActionBuilder[RequestWithSubscriptionReady, AnyContent] =
     Action.andThen(authenticatedAction).andThen(subscriptionDetailsAction)
 
 }

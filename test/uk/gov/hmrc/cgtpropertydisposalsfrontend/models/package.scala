@@ -26,10 +26,12 @@ package object models {
   def sample[A: ClassTag](implicit gen: Gen[A]): A =
     gen.sample.getOrElse(sys.error(s"Could not generate instance of ${classTag[A].runtimeClass.getSimpleName}"))
 
-  implicit val subscriptionDetailsGen: Gen[SubscriptionDetails] =
-    implicitly[Arbitrary[SubscriptionDetails]].arbitrary
+  private def gen[A](implicit arb: Arbitrary[A]): Gen[A] = arb.arbitrary
 
-  implicit val sessionDataGen: Gen[SessionData] =
-    implicitly[Arbitrary[SessionData]].arbitrary
+  implicit val subscriptionDetailsGen: Gen[SubscriptionDetails] = gen[SubscriptionDetails]
+
+  implicit val sessionDataGen: Gen[SessionData] = gen[SessionData]
+
+  implicit val bprGen: Gen[BusinessPartnerRecord] = gen[BusinessPartnerRecord]
 
 }

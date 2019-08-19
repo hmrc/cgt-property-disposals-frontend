@@ -29,7 +29,10 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[AddressLookupConnectorImpl])
 trait AddressLookupConnector {
 
-  def lookupAddress(postcode: Postcode)(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
+  def lookupAddress(postcode: Postcode)(
+    implicit
+    hc: HeaderCarrier
+  ): EitherT[Future, Error, HttpResponse]
 
 }
 
@@ -41,20 +44,16 @@ class AddressLookupConnectorImpl @Inject()(http: HttpClient, servicesConfig: Ser
   val url: String = servicesConfig.baseUrl("address-lookup") + "/v2/uk/addresses"
 
   val headers: Map[String, String] = {
-    val userAgent = servicesConfig.getString("microservice.services.address-lookup.user-agent")
+    val userAgent = servicesConfig.getString(
+      "microservice.services.address-lookup.user-agent"
+    )
     Map("User-Agent" -> userAgent)
   }
 
   override def lookupAddress(postcode: Postcode)(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
     EitherT[Future, Error, HttpResponse](
       http
-        .get(
-          url,
-          Map(
-            "postcode" -> postcode.value
-              .replaceAllLiterally(" ", "")
-              .toUpperCase),
-          headers)
+        .get(url, Map("postcode" -> postcode.value.replaceAllLiterally(" ", "").toUpperCase), headers)
         .map(Right(_))
         .recover { case e => Left(Error(e)) }
     )

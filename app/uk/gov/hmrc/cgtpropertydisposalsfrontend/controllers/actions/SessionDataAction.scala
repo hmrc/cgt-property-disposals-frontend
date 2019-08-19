@@ -35,8 +35,7 @@ final case class RequestWithSessionData[A](
   authenticatedRequest: AuthenticatedRequest[A]
 ) extends WrappedRequest[A](authenticatedRequest)
     with PreferredMessagesProvider {
-  override def messagesApi: MessagesApi =
-    authenticatedRequest.request.messagesApi
+  override def messagesApi: MessagesApi = authenticatedRequest.request.messagesApi
 }
 
 @Singleton
@@ -47,17 +46,18 @@ class SessionDataAction @Inject()(sessionStore: SessionStore, errorHandler: Erro
   override protected def executionContext: ExecutionContext = ec
 
   override protected def refine[A](
-    request: AuthenticatedRequest[A]
-  ): Future[Either[Result, RequestWithSessionData[A]]] = {
+    request: AuthenticatedRequest[A]): Future[Either[Result, RequestWithSessionData[A]]] = {
     implicit val hc: HeaderCarrier =
       HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
     sessionStore
       .get()
-      .map(_.bimap({ e =>
-        logger.warn("Could not get session data", e)
-        errorHandler.errorResult()(request)
-      }, d => RequestWithSessionData(d, request)))
+      .map(
+        _.bimap({ e =>
+          logger.warn("Could not get session data", e)
+          errorHandler.errorResult()(request)
+        }, d => RequestWithSessionData(d, request))
+      )
   }
 
 }

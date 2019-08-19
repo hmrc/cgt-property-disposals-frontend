@@ -17,7 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates.SessionProvider
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{RequestWithSessionData, RequestWithSubscriptionDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{RequestWithSessionData, RequestWithSubscriptionReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.http.HeaderCarrier
@@ -51,7 +51,7 @@ object SessionUpdates {
     implicit def requestWithSessionDataInstance[A]: SessionProvider[RequestWithSessionData[A]] =
       instance(_.sessionData.getOrElse(SessionData.empty))
 
-    implicit def requestWithSubscriptionDetails[A]: SessionProvider[RequestWithSubscriptionDetails[A]] =
+    implicit def requestWithSubscriptionDetails[A]: SessionProvider[RequestWithSubscriptionReady[A]] =
       instance(_.sessionData)
 
   }

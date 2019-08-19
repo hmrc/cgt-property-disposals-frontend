@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import cats.syntax.either._
+import cats.data.NonEmptyList
 import play.api.libs.json.{Format, Json}
 
 final case class SubscriptionDetails(
@@ -31,10 +31,18 @@ object SubscriptionDetails {
 
   implicit val format: Format[SubscriptionDetails] = Json.format
 
-  def apply(bpr: BusinessPartnerRecord, name: Name): Either[String, SubscriptionDetails] =
-    Either.fromOption(
-      bpr.emailAddress.map(e => SubscriptionDetails(name.forename, name.surname, e, bpr.address, bpr.sapNumber)),
-      "email address missing"
-    )
+  def apply(bpr: BusinessPartnerRecord, name: Name): Either[NonEmptyList[MissingData], SubscriptionDetails] =
+    bpr.emailAddress
+      .fold[Either[NonEmptyList[MissingData], SubscriptionDetails]](
+        Left(NonEmptyList.one(MissingData.Email))
+      )(email => Right(SubscriptionDetails(name.forename, name.surname, email, bpr.address, bpr.sapNumber)))
+
+  sealed trait MissingData
+
+  object MissingData {
+
+    case object Email extends MissingData
+
+  }
 
 }
