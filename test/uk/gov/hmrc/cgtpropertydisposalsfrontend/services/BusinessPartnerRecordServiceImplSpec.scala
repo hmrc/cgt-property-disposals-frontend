@@ -18,7 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.services
 
 import cats.data.EitherT
 import cats.instances.future._
-import org.joda.time.LocalDate
+import java.time._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsNumber, Json}
@@ -45,7 +45,7 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
   implicit val hc: HeaderCarrier = HeaderCarrier()
   val nino                       = NINO("AB123456C")
   val name                       = Name("forename", "surname")
-  val dateOfBirth                = DateOfBirth(new LocalDate(2000, 4, 10))
+  val dateOfBirth                = DateOfBirth(LocalDate.of(2000, 4, 10))
   val address                    = Address.UkAddress("line1", Some("line2"), None, None, "postcode")
   val bpr                        = BusinessPartnerRecord("name", "surname", Some("email"), address, "sap")
 

@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import java.util.UUID
 
 import cats.data.EitherT
-import org.joda.time.LocalDate
+import java.time._
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -32,7 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, Error, NINO
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
 import uk.gov.hmrc.http.HeaderCarrier
-
+import org.joda.time.{LocalDate => JodaLocalDate}
 import scala.concurrent.Future
 
 class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with SessionSupport {
@@ -54,7 +54,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
   val nino        = NINO("AB123456C")
   val name        = Name("forename", "surname")
-  val dateOfBirth = DateOfBirth(new LocalDate(2000, 4, 10))
+  val dateOfBirth = new JodaLocalDate(2000, 4, 10)
 
   val subscriptionDetails = sample[SubscriptionDetails]
 

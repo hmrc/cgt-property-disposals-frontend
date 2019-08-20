@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
+import org.joda.time.{LocalDate => JodaLocalDate}
 import play.api.Configuration
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
@@ -23,7 +24,6 @@ import uk.gov.hmrc.auth.core.retrieve.{Name, Retrieval, ~}
 import uk.gov.hmrc.auth.core.{AuthConnector, ConfidenceLevel}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.AuthenticatedAction
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -48,13 +48,13 @@ trait AuthSupport { this: ControllerSpec with SessionSupport =>
   def mockAuthWithCl200AndRetrievedAllRetrievals(
     retrievedNino: String,
     retrievedName: uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Name,
-    retrievedDateOfBirth: DateOfBirth
+    retrievedDateOfBirth: JodaLocalDate
   ): Unit =
     mockAuth(ConfidenceLevel.L200, Retrievals.nino and Retrievals.name and Retrievals.dateOfBirth)(
       Future.successful(
         new ~(
           new ~(Some(retrievedNino), Some(Name(Some(retrievedName.forename), Some(retrievedName.surname)))),
-          Some(retrievedDateOfBirth.dob)
+          Some(retrievedDateOfBirth)
         )
       )
     )

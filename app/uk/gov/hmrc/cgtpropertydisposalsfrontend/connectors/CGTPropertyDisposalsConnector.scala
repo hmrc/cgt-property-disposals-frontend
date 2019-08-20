@@ -20,7 +20,7 @@ import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json.Json
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, Error, NINO, Name, SubscriptionDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BprRequest, DateOfBirth, Error, NINO, Name, SubscriptionDetails}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
@@ -46,16 +46,16 @@ class CGTPropertyDisposalsConnectorImpl @Inject()(http: HttpClient, servicesConf
 
   val baseUrl: String = servicesConfig.baseUrl("cgt-property-disposals") + "/cgt-property-disposals"
 
-  def bprUrl(nino: NINO): String = s"$baseUrl/${nino.value}/business-partner-record"
+  val bprUrl: String = s"$baseUrl/business-partner-record"
 
   val subscribeUrl: String = s"$baseUrl/subscribe"
 
-  def getBusinessPartnerRecord(nino: NINO, name: Name, dob: DateOfBirth)(
+  def getBusinessPartnerRecord(nino: NINO, name: Name, dateOfBirth: DateOfBirth)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] =
     EitherT[Future, Error, HttpResponse](
       http
-        .get(bprUrl(nino))
+        .post(bprUrl, Json.toJson(BprRequest(nino.value, name.forename, name.surname, dateOfBirth.value)))
         .map(Right(_))
         .recover { case e => Left(Error(e)) }
     )

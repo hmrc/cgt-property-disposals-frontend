@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
-import org.joda.time.LocalDate
+import java.time._
 import play.api.i18n.MessagesApi
 import play.api.mvc.Results.Ok
 import play.api.mvc.{MessagesRequest, Result}
@@ -38,7 +38,11 @@ class SessionDataActionSpec extends ControllerSpec with SessionSupport {
 
     lazy val messagesRequest = new MessagesRequest(FakeRequest(), instanceOf[MessagesApi])
     lazy val authenticatedRequest =
-      AuthenticatedRequest(NINO("nino"), Name("name", "lastName"), DateOfBirth(LocalDate.now()), messagesRequest)
+      AuthenticatedRequest(
+        NINO("nino"),
+        Name("name", "lastName"),
+        DateOfBirth(LocalDate.of(2000, 10, 1)),
+        messagesRequest)
 
     val sessionData = sample[SessionData]
 

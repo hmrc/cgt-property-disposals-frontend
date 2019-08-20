@@ -20,8 +20,8 @@ import java.time.LocalDate
 
 import play.api.libs.json.{Json, OFormat}
 
-final case class DateOfBirth(value: LocalDate)
+final case class BprRequest(nino: String, forename: String, surname: String, dateOfBirth: LocalDate)
 
-object DateOfBirth {
-  implicit val format: OFormat[DateOfBirth] = Json.format[DateOfBirth]
+object BprRequest {
+  implicit val format: OFormat[BprRequest] = Json.format[BprRequest]
 }

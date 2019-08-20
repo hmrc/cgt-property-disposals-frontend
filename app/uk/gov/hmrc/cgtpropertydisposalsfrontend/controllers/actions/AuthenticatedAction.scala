@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
+import java.time.LocalDate
+
 import cats.syntax.either._
 import com.google.inject.{Inject, Singleton}
-import org.joda.time.LocalDate
 import play.api.Configuration
 import play.api.mvc.Results._
 import play.api.mvc._
@@ -98,7 +99,8 @@ class AuthenticatedAction @Inject()(
     authorisedFunctions
       .authorised(ConfidenceLevel.L200)
       .retrieve(Retrievals.nino and Retrievals.name and Retrievals.dateOfBirth) {
-        case Some(nino) ~ Some(name) ~ Some(dob) => makeAuthenticatedRequest(nino, name, dob, request)
+        case Some(nino) ~ Some(name) ~ Some(dob) =>
+          makeAuthenticatedRequest(nino, name, LocalDate.parse(dob.toString), request)
         case other =>
           logger.warn(s"Failed to retrieve some information from the auth record: $other")
           Left(errorHandler.errorResult()(request))

@@ -17,16 +17,16 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
 import com.typesafe.config.ConfigFactory
-import org.joda.time.LocalDate
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.JsString
 import play.api.test.Helpers._
 import play.api.{Configuration, Mode}
 import play.api.libs.json.Json
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, NINO, Name, SubscriptionDetails, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BprRequest, DateOfBirth, NINO, Name, SubscriptionDetails, sample}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
+import java.time._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -58,16 +58,18 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
       implicit val hc: HeaderCarrier = HeaderCarrier()
       val nino                       = NINO("AB123456C")
       val name                       = Name("forename", "surname")
-      val dateOfBirth                = DateOfBirth(new LocalDate(2000, 4, 10))
+      val dateOfBirth                = DateOfBirth(LocalDate.of(2000, 4, 10))
+      val payload                    = Json.toJson(BprRequest(nino.value, name.forename, name.surname, LocalDate.of(2000, 4, 10)))
 
-      "do a get http call and return the result" in {
+      "do a POST http call and return the result" in {
         List(
           HttpResponse(200),
           HttpResponse(200, Some(JsString("hi"))),
           HttpResponse(500)
         ).foreach { httpResponse =>
           withClue(s"For http response [${httpResponse.toString}]") {
-            mockGet(s"http://host:123/cgt-property-disposals/${nino.value}/business-partner-record")(Some(httpResponse))
+            mockPost(s"http://host:123/cgt-property-disposals/business-partner-record", Map.empty, payload)(
+              Some(httpResponse))
 
             await(connector.getBusinessPartnerRecord(nino, name, dateOfBirth).value) shouldBe Right(httpResponse)
           }
@@ -77,7 +79,7 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
       "return an error" when {
 
         "the future fails" in {
-          mockGet(s"http://host:123/cgt-property-disposals/${nino.value}/business-partner-record")(None)
+          mockPost(s"http://host:123/cgt-property-disposals/business-partner-record", Map.empty, payload)(None)
 
           await(connector.getBusinessPartnerRecord(nino, name, dateOfBirth).value).isLeft shouldBe true
         }
@@ -90,7 +92,7 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
       implicit val hc: HeaderCarrier = HeaderCarrier()
       val subscriptionDetails        = sample[SubscriptionDetails]
 
-      "do a get http call and return the result" in {
+      "do a post http call and return the result" in {
         List(
           HttpResponse(200),
           HttpResponse(200, Some(JsString("hi"))),

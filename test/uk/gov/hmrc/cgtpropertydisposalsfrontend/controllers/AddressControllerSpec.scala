@@ -18,7 +18,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
-import org.joda.time.LocalDate
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -28,13 +27,13 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.UkAddress
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AddressLookupResult, DateOfBirth, Error, NINO, Name, Postcode, SessionData, SubscriptionDetails, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AddressLookupResult, Error, NINO, Name, Postcode, SessionData, SubscriptionDetails, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AddressLookupService
 import uk.gov.hmrc.http.HeaderCarrier
-
-import scala.concurrent.Future
+import org.joda.time.{LocalDate => JodaLocalDate}
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class AddressControllerSpec extends ControllerSpec with AuthSupport with SessionSupport {
 
@@ -61,7 +60,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
 
   val name = Name("forename", "surname")
 
-  val dateOfBirth = DateOfBirth(new LocalDate(2000, 4, 10))
+  val dateOfBirth = new JodaLocalDate(2000, 4, 10)
 
   val postcode = Postcode("AB1 2CD")
 

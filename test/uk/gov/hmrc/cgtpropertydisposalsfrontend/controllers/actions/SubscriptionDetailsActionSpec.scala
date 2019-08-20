@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
-import org.joda.time.LocalDate
+import java.time._
 import play.api.i18n.MessagesApi
 import play.api.mvc.Results.Ok
 import play.api.mvc.{MessagesRequest, PlayBodyParsers, Result}
