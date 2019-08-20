@@ -43,7 +43,8 @@ class AuthenticatedAction @Inject()(
   authConnector: AuthConnector,
   config: Configuration,
   errorHandler: ErrorHandler,
-  sessionStore: SessionStore)(implicit ec: ExecutionContext)
+  sessionStore: SessionStore
+)(implicit ec: ExecutionContext)
     extends ActionRefiner[MessagesRequest, AuthenticatedRequest]
     with Logging {
   self =>
@@ -79,7 +80,8 @@ class AuthenticatedAction @Inject()(
     nino: String,
     name: uk.gov.hmrc.auth.core.retrieve.Name,
     dateOfBirth: LocalDate,
-    request: MessagesRequest[A]): Future[Either[Result, AuthenticatedRequest[A]]] =
+    request: MessagesRequest[A]
+  ): Future[Either[Result, AuthenticatedRequest[A]]] =
     name match {
       case uk.gov.hmrc.auth.core.retrieve.Name(Some(forename), Some(surname)) =>
         Right(AuthenticatedRequest(NINO(nino), Name(forename, surname), DateOfBirth(dateOfBirth), request))
@@ -112,7 +114,8 @@ class AuthenticatedAction @Inject()(
   override protected def executionContext: ExecutionContext = ec
 
   private def handleInsufficientConfidenceLevel(request: MessagesRequest[_], errorResponse: Result)(
-    implicit hc: HeaderCarrier): Future[Result] =
+    implicit hc: HeaderCarrier
+  ): Future[Result] =
     sessionStore
       .store(SessionData.empty.copy(ivContinueUrl = Some(selfBaseUrl + request.uri)))
       .map {
@@ -128,7 +131,9 @@ class AuthenticatedAction @Inject()(
                 "origin"          -> Seq(ivOrigin),
                 "confidenceLevel" -> Seq("200"),
                 "completionURL"   -> Seq(ivSuccessUrl),
-                "failureURL"      -> Seq(ivFailureUrl)))
+                "failureURL"      -> Seq(ivFailureUrl)
+              )
+          )
         ).merge
       }
 

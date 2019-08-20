@@ -44,7 +44,8 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
             | metrics.enabled = false
           """.stripMargin
           )
-        ))
+        )
+      )
       .overrides(overrideBindings: _*)
       .build()
 

@@ -24,15 +24,15 @@ import play.api.inject.guice.GuiceableModule
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.auth.core.retrieve.Name
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.UkAddress
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, DateOfBirth, Error, NINO, SessionData, SubscriptionDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, DateOfBirth, Error, NINO, Name, SessionData, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordService
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSupport {
 
@@ -47,14 +47,18 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
   lazy val controller = instanceOf[StartController]
 
-  def mockGetBusinessPartnerRecord(nino: NINO)(result: Either[Error, BusinessPartnerRecord]) =
+  def mockGetBusinessPartnerRecord(nino: NINO, name: models.Name, dob: DateOfBirth)(
+    result: Either[Error, BusinessPartnerRecord]
+  ) =
     (mockService
-      .getBusinessPartnerRecord(_: NINO)(_: HeaderCarrier))
-      .expects(nino, *)
+      .getBusinessPartnerRecord(_: NINO, _: models.Name, _: DateOfBirth)(
+        _: HeaderCarrier
+      ))
+      .expects(nino, name, dob, *)
       .returning(EitherT.fromEither[Future](result))
 
   val nino         = NINO("AB123456C")
-  val name         = Name(Some("forename"), Some("surname"))
+  val name         = Name("forename", "surname")
   val dateOfBirth  = DateOfBirth(new LocalDate(2000, 4, 10))
   val emailAddress = "email"
   val bpr = BusinessPartnerRecord(
@@ -62,7 +66,8 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
     "surname",
     Some(emailAddress),
     UkAddress("line1", None, None, None, "postcode"),
-    "sap")
+    "sap"
+  )
   val subscriptionDetails = SubscriptionDetails(bpr.forename, bpr.surname, emailAddress, bpr.address, bpr.sapNumber)
 
   "The StartController" when {
@@ -80,7 +85,8 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             inSequence {
               mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
               mockGetSession(
-                Future.successful(Right(Some(SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails))))))
+                Future.successful(Right(Some(SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails)))))
+              )
             }
 
             checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
@@ -89,14 +95,12 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
         }
 
         "display an error page" when {
-
           "the call to get the BPR fails" in {
             inSequence {
               mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
               mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-              mockGetBusinessPartnerRecord(nino)(Left(Error("error")))
+              mockGetBusinessPartnerRecord(nino, name, dateOfBirth)(Left(Error("error")))
             }
-
             checkIsTechnicalErrorPage(performAction())
           }
 
@@ -104,7 +108,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             inSequence {
               mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
               mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-              mockGetBusinessPartnerRecord(nino)(Right(bpr.copy(emailAddress = None)))
+              mockGetBusinessPartnerRecord(nino, name, dateOfBirth)(Right(bpr.copy(emailAddress = None)))
             }
 
             checkIsTechnicalErrorPage(performAction())
@@ -114,9 +118,10 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             inSequence {
               mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
               mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-              mockGetBusinessPartnerRecord(nino)(Right(bpr))
+              mockGetBusinessPartnerRecord(nino, name, dateOfBirth)(Right(bpr))
               mockStoreSession(SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails)))(
-                Future.successful(Left(Error("Oh no!"))))
+                Future.successful(Left(Error("Oh no!")))
+              )
             }
 
             checkIsTechnicalErrorPage(performAction())
@@ -134,9 +139,10 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               inSequence {
                 mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
                 mockGetSession(Future.successful(Right(maybeSession)))
-                mockGetBusinessPartnerRecord(nino)(Right(bpr))
+                mockGetBusinessPartnerRecord(nino, name, dateOfBirth)(Right(bpr))
                 mockStoreSession(SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails)))(
-                  Future.successful(Right(())))
+                  Future.successful(Right(()))
+                )
               }
 
               checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
@@ -151,7 +157,8 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
               mockGetSession(Future.successful(Right(Some(session))))
               mockStoreSession(session.copy(subscriptionDetails = Some(subscriptionDetails)))(
-                Future.successful(Right(())))
+                Future.successful(Right(()))
+              )
             }
 
             checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())

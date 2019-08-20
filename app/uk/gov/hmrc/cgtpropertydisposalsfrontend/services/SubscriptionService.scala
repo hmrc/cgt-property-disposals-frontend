@@ -33,7 +33,8 @@ import scala.concurrent.{ExecutionContext, Future}
 trait SubscriptionService {
 
   def subscribe(subscriptionDetails: SubscriptionDetails)(
-    implicit hc: HeaderCarrier): EitherT[Future, Error, SubscriptionResponse]
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, SubscriptionResponse]
 
 }
 
@@ -41,8 +42,9 @@ trait SubscriptionService {
 class SubscriptionServiceImpl @Inject()(connector: CGTPropertyDisposalsConnector)(implicit ec: ExecutionContext)
     extends SubscriptionService {
 
-  override def subscribe(subscriptionDetails: SubscriptionDetails)(
-    implicit hc: HeaderCarrier): EitherT[Future, Error, SubscriptionResponse] =
+  override def subscribe(
+    subscriptionDetails: SubscriptionDetails
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, SubscriptionResponse] =
     connector.subscribe(subscriptionDetails).subflatMap { response =>
       if (response.status === 200)
         response.parseJSON[SubscriptionResponse]().leftMap(Error(_))

@@ -17,13 +17,14 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
 import com.typesafe.config.ConfigFactory
+import org.joda.time.LocalDate
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.JsString
 import play.api.test.Helpers._
 import play.api.{Configuration, Mode}
 import play.api.libs.json.Json
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{NINO, SubscriptionDetails, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, NINO, Name, SubscriptionDetails, sample}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 
@@ -44,7 +45,8 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
       |  }
       |}
       |""".stripMargin
-    ))
+    )
+  )
 
   val connector =
     new CGTPropertyDisposalsConnectorImpl(mockHttp, new ServicesConfig(config, new RunMode(config, Mode.Test)))
@@ -55,6 +57,8 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
 
       implicit val hc: HeaderCarrier = HeaderCarrier()
       val nino                       = NINO("AB123456C")
+      val name                       = Name("forename", "surname")
+      val dateOfBirth                = DateOfBirth(new LocalDate(2000, 4, 10))
 
       "do a get http call and return the result" in {
         List(
@@ -65,7 +69,7 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
           withClue(s"For http response [${httpResponse.toString}]") {
             mockGet(s"http://host:123/cgt-property-disposals/${nino.value}/business-partner-record")(Some(httpResponse))
 
-            await(connector.getBusinessPartnerRecord(nino).value) shouldBe Right(httpResponse)
+            await(connector.getBusinessPartnerRecord(nino, name, dateOfBirth).value) shouldBe Right(httpResponse)
           }
         }
       }
@@ -75,7 +79,7 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
         "the future fails" in {
           mockGet(s"http://host:123/cgt-property-disposals/${nino.value}/business-partner-record")(None)
 
-          await(connector.getBusinessPartnerRecord(nino).value).isLeft shouldBe true
+          await(connector.getBusinessPartnerRecord(nino, name, dateOfBirth).value).isLeft shouldBe true
         }
 
       }
@@ -94,7 +98,8 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
         ).foreach { httpResponse =>
           withClue(s"For http response [${httpResponse.toString}]") {
             mockPost(s"http://host:123/cgt-property-disposals/subscribe", Map.empty, Json.toJson(subscriptionDetails))(
-              Some(httpResponse))
+              Some(httpResponse)
+            )
 
             await(connector.subscribe(subscriptionDetails).value) shouldBe Right(httpResponse)
           }
@@ -105,7 +110,8 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
 
         "the future fails" in {
           mockPost(s"http://host:123/cgt-property-disposals/subscribe", Map.empty, Json.toJson(subscriptionDetails))(
-            None)
+            None
+          )
 
           await(connector.subscribe(subscriptionDetails).value).isLeft shouldBe true
         }

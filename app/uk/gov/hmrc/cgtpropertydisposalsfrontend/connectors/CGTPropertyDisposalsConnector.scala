@@ -20,7 +20,7 @@ import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json.Json
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, NINO, SubscriptionDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, Error, NINO, Name, SubscriptionDetails}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
@@ -30,16 +30,19 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[CGTPropertyDisposalsConnectorImpl])
 trait CGTPropertyDisposalsConnector {
 
-  def getBusinessPartnerRecord(nino: NINO)(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
+  def getBusinessPartnerRecord(nino: NINO, name: Name, dob: DateOfBirth)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, HttpResponse]
 
   def subscribe(subscriptionDetails: SubscriptionDetails)(
-    implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, HttpResponse]
 }
 
 @Singleton
 class CGTPropertyDisposalsConnectorImpl @Inject()(http: HttpClient, servicesConfig: ServicesConfig)(
-  implicit ec: ExecutionContext)
-    extends CGTPropertyDisposalsConnector {
+  implicit ec: ExecutionContext
+) extends CGTPropertyDisposalsConnector {
 
   val baseUrl: String = servicesConfig.baseUrl("cgt-property-disposals") + "/cgt-property-disposals"
 
@@ -47,19 +50,24 @@ class CGTPropertyDisposalsConnectorImpl @Inject()(http: HttpClient, servicesConf
 
   val subscribeUrl: String = s"$baseUrl/subscribe"
 
-  def getBusinessPartnerRecord(nino: NINO)(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
+  def getBusinessPartnerRecord(nino: NINO, name: Name, dob: DateOfBirth)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, HttpResponse] =
     EitherT[Future, Error, HttpResponse](
       http
         .get(bprUrl(nino))
         .map(Right(_))
-        .recover { case e => Left(Error(e)) })
+        .recover { case e => Left(Error(e)) }
+    )
 
-  def subscribe(subscriptionDetails: SubscriptionDetails)(
-    implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
+  def subscribe(
+    subscriptionDetails: SubscriptionDetails
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
     EitherT[Future, Error, HttpResponse](
       http
         .post(subscribeUrl, Json.toJson(subscriptionDetails))
         .map(Right(_))
-        .recover { case e => Left(Error(e)) })
+        .recover { case e => Left(Error(e)) }
+    )
 
 }

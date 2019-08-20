@@ -38,7 +38,8 @@ import scala.concurrent.duration.FiniteDuration
 trait EmailVerificationConnector {
 
   def verifyEmail(email: Email, id: UUID, name: String)(
-    implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, HttpResponse]
 
 }
 
@@ -69,7 +70,8 @@ class EmailVerificationConnectorImpl @Inject()(http: HttpClient, config: Configu
     s"$selfBaseUrl${routes.EmailController.verifyEmail(id).url}"
 
   def verifyEmail(email: Email, id: UUID, name: String)(
-    implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] = {
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, HttpResponse] = {
     val body =
       EmailVerificationRequest(email.value, templateId, linkExpiryTime, s"${continueUrl(id)}", Map("name" -> name))
 
@@ -77,7 +79,8 @@ class EmailVerificationConnectorImpl @Inject()(http: HttpClient, config: Configu
       http
         .post(url, Json.toJson(body))
         .map(Right(_))
-        .recover { case e => Left(Error(e)) })
+        .recover { case e => Left(Error(e)) }
+    )
   }
 
 }
@@ -89,7 +92,8 @@ object EmailVerificationConnectorImpl {
     templateId: String,
     linkExpiryDuration: String,
     continueUrl: String,
-    templateParameters: Map[String, String])
+    templateParameters: Map[String, String]
+  )
 
   implicit val formats: Format[EmailVerificationRequest] = Json.format[EmailVerificationRequest]
 

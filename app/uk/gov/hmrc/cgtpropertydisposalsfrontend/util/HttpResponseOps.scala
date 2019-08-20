@@ -38,7 +38,8 @@ object HttpResponseOps {
                   // there was JSON in the response but we couldn't read it
                   Left(s"Could not parse http response JSON: ${JsError(errors).prettyPrint()}"),
                 Right(_)
-              ))
+              )
+            )
         case Failure(error) ⇒
           // response.json failed in this case - there was no JSON in the response
           Left(s"Could not read http response as JSON: ${error.getMessage}")

@@ -35,8 +35,8 @@ trait AddressLookupConnector {
 
 @Singleton
 class AddressLookupConnectorImpl @Inject()(http: HttpClient, servicesConfig: ServicesConfig)(
-  implicit ec: ExecutionContext)
-    extends AddressLookupConnector {
+  implicit ec: ExecutionContext
+) extends AddressLookupConnector {
 
   val url: String = servicesConfig.baseUrl("address-lookup") + "/v2/uk/addresses"
 
@@ -50,5 +50,6 @@ class AddressLookupConnectorImpl @Inject()(http: HttpClient, servicesConfig: Ser
       http
         .get(url, Map("postcode" -> postcode.value.replaceAllLiterally(" ", "").toUpperCase), headers)
         .map(Right(_))
-        .recover { case e => Left(Error(e)) })
+        .recover { case e => Left(Error(e)) }
+    )
 }

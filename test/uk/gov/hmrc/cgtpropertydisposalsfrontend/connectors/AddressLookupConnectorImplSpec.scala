@@ -44,7 +44,8 @@ class AddressLookupConnectorImplSpec extends WordSpec with Matchers with MockFac
       |  }
       |}
       |""".stripMargin
-    ))
+    )
+  )
 
   val connector = new AddressLookupConnectorImpl(mockHttp, new ServicesConfig(config, new RunMode(config, Mode.Test)))
   "AddressLookupConnectorImpl" when {

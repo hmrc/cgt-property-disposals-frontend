@@ -41,7 +41,8 @@ class SessionStoreImplSpec extends WordSpec with Matchers with MongoSupport with
       """
       |session-store.expiry-time = 30minutes
       |""".stripMargin
-    ))
+    )
+  )
 
   val sessionStore = new SessionStoreImpl(reactiveMongoComponent, config)
 

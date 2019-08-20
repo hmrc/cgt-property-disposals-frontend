@@ -42,7 +42,8 @@ class SubscriptionController @Inject()(
   val sessionDataAction: SessionDataAction,
   val subscriptionDetailsAction: SubscriptionDetailsAction,
   checkYourDetailsPage: views.html.subscription.check_your_details,
-  subscribedPage: views.html.subscription.subscribed)(implicit viewConfig: ViewConfig, ec: ExecutionContext)
+  subscribedPage: views.html.subscription.subscribed
+)(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithSubscriptionDetailsActions
     with WithActions

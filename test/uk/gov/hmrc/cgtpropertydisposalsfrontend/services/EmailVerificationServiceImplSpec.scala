@@ -36,7 +36,8 @@ class EmailVerificationServiceImplSpec extends WordSpec with Matchers with MockF
   val mockConnector = mock[EmailVerificationConnector]
 
   def mockVerifyEmail(expectedEmail: Email, expectedId: UUID, expectedName: String)(
-    result: Either[Error, HttpResponse]) =
+    result: Either[Error, HttpResponse]
+  ) =
     (mockConnector
       .verifyEmail(_: Email, _: UUID, _: String)(_: HeaderCarrier))
       .expects(expectedEmail, expectedId, expectedName, *)

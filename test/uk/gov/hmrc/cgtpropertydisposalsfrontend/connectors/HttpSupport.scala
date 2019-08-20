@@ -32,7 +32,8 @@ trait HttpSupport { this: MockFactory with Matchers ⇒
   private val emptyMap = Map.empty[String, String]
 
   def mockGet[A](url: String, queryParams: Map[String, String] = emptyMap, headers: Map[String, String] = emptyMap)(
-    response: Option[A]) =
+    response: Option[A]
+  ) =
     (mockHttp
       .GET(_: String, _: Seq[(String, String)])(_: HttpReads[A], _: HeaderCarrier, _: ExecutionContext))
       .expects(where { (u: String, q: Seq[(String, String)], _: HttpReads[A], h: HeaderCarrier, _: ExecutionContext) ⇒
@@ -51,9 +52,11 @@ trait HttpSupport { this: MockFactory with Matchers ⇒
         _: Writes[A],
         _: HttpReads[HttpResponse],
         _: HeaderCarrier,
-        _: ExecutionContext))
+        _: ExecutionContext
+      ))
       .expects(url, body, headers.toSeq, *, *, *, *)
       .returning(
-        result.fold[Future[HttpResponse]](Future.failed(new Exception("Test exception message")))(Future.successful))
+        result.fold[Future[HttpResponse]](Future.failed(new Exception("Test exception message")))(Future.successful)
+      )
 
 }

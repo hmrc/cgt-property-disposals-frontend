@@ -38,21 +38,22 @@ import scala.concurrent.{ExecutionContext, Future}
 final case class RequestWithSubscriptionDetails[A](
   subscriptionDetails: SubscriptionDetails,
   sessionData: SessionData,
-  authenticatedRequest: AuthenticatedRequest[A])
-    extends WrappedRequest[A](authenticatedRequest)
+  authenticatedRequest: AuthenticatedRequest[A]
+) extends WrappedRequest[A](authenticatedRequest)
     with PreferredMessagesProvider {
   override def messagesApi: MessagesApi = authenticatedRequest.request.messagesApi
 }
 
 class SubscriptionDetailsAction @Inject()(sessionStore: SessionStore, errorHandler: ErrorHandler)(
-  implicit ec: ExecutionContext)
-    extends ActionRefiner[AuthenticatedRequest, RequestWithSubscriptionDetails]
+  implicit ec: ExecutionContext
+) extends ActionRefiner[AuthenticatedRequest, RequestWithSubscriptionDetails]
     with Logging {
 
   override protected def executionContext: ExecutionContext = ec
 
   override protected def refine[A](
-    request: AuthenticatedRequest[A]): Future[Either[Result, RequestWithSubscriptionDetails[A]]] = {
+    request: AuthenticatedRequest[A]
+  ): Future[Either[Result, RequestWithSubscriptionDetails[A]]] = {
     implicit val hc: HeaderCarrier =
       HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
@@ -65,7 +66,8 @@ class SubscriptionDetailsAction @Inject()(sessionStore: SessionStore, errorHandl
         (
           maybeSessionData,
           maybeSessionData.flatMap(_.subscriptionDetails),
-          maybeSessionData.flatMap((_.subscriptionResponse))) match {
+          maybeSessionData.flatMap((_.subscriptionResponse))
+        ) match {
           case (Some(_), Some(_), Some(_)) if request.uri =!= routes.SubscriptionController.subscribed().url =>
             // user has already subscribed in this session
             Left(SeeOther(routes.SubscriptionController.subscribed().url))

@@ -32,6 +32,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.{Name, ~}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, Email, EmailToBeVerified, Error, NINO, SessionData, SubscriptionDetails, UUIDGenerator, sample, subscriptionDetailsGen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
@@ -61,7 +62,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
   val nino        = NINO("AB123456C")
-  val name        = Name(Some("forename"), Some("surname"))
+  val name        = models.Name("forename", "surname")
   val dateOfBirth = DateOfBirth(new LocalDate(2000, 4, 10))
 
   val subscriptionDetails = sample[SubscriptionDetails]

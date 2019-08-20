@@ -48,7 +48,8 @@ class EmailController @Inject()(
   cc: MessagesControllerComponents,
   enterEmail: views.html.subscription.enter_email,
   checkYourInboxPage: views.html.subscription.check_your_inbox,
-  emailVerifiedPage: views.html.subscription.email_verified)(implicit viewConfig: ViewConfig, ec: ExecutionContext)
+  emailVerifiedPage: views.html.subscription.email_verified
+)(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithSubscriptionDetailsActions
     with Logging
@@ -92,8 +93,9 @@ class EmailController @Inject()(
 
   def checkYourInbox(): Action[AnyContent] = authenticatedActionWithSubscriptionDetails { implicit request =>
     request.sessionData.emailToBeVerified
-      .fold(SeeOther(routes.SubscriptionController.checkYourDetails().url))(emailToBeVerified =>
-        Ok(checkYourInboxPage(emailToBeVerified.email)))
+      .fold(SeeOther(routes.SubscriptionController.checkYourDetails().url))(
+        emailToBeVerified => Ok(checkYourInboxPage(emailToBeVerified.email))
+      )
   }
 
   def verifyEmail(p: UUID): Action[AnyContent] = authenticatedActionWithSubscriptionDetails.async { implicit request =>
@@ -101,7 +103,8 @@ class EmailController @Inject()(
       .fold[Future[Result]](SeeOther(routes.SubscriptionController.checkYourDetails().url)) { emailToBeVerified =>
         if (emailToBeVerified.id =!= p) {
           logger.warn(
-            s"Received verify email request where id sent ($p) did not match the id in session (${emailToBeVerified.id})")
+            s"Received verify email request where id sent ($p) did not match the id in session (${emailToBeVerified.id})"
+          )
           errorHandler.errorResult()
         } else {
           if (emailToBeVerified.verified) {
@@ -112,13 +115,13 @@ class EmailController @Inject()(
                 subscriptionDetails =
                   Some(request.subscriptionDetails.copy(emailAddress = emailToBeVerified.email.value)),
                 emailToBeVerified = Some(emailToBeVerified.copy(verified = true))
-              ))
-              .map(_.fold({ e =>
-                logger.warn("Could not store email verified result", e)
-                errorHandler.errorResult()
-              }, { _ =>
-                SeeOther(routes.EmailController.emailVerified().url)
-              }))
+              )
+            ).map(_.fold({ e =>
+              logger.warn("Could not store email verified result", e)
+              errorHandler.errorResult()
+            }, { _ =>
+              SeeOther(routes.EmailController.emailVerified().url)
+            }))
           }
         }
       }

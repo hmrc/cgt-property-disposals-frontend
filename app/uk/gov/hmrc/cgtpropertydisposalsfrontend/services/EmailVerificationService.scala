@@ -34,7 +34,8 @@ import scala.concurrent.{ExecutionContext, Future}
 trait EmailVerificationService {
 
   def verifyEmail(email: Email, id: UUID, name: String)(
-    implicit hc: HeaderCarrier): EitherT[Future, Error, EmailVerificationResponse]
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, EmailVerificationResponse]
 
 }
 
@@ -57,7 +58,8 @@ class EmailVerificationServiceImpl @Inject()(connector: EmailVerificationConnect
     extends EmailVerificationService {
 
   def verifyEmail(email: Email, id: UUID, name: String)(
-    implicit hc: HeaderCarrier): EitherT[Future, Error, EmailVerificationResponse] =
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, EmailVerificationResponse] =
     connector.verifyEmail(email, id, name).subflatMap { response =>
       response.status match {
         case CREATED =>

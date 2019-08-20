@@ -26,9 +26,9 @@ import scala.concurrent.Future
 
 trait SessionUpdates {
 
-  def updateSession[R](sessionStore: SessionStore, request: R)(update: SessionData => SessionData)(
-    implicit sessionProvider: SessionProvider[R],
-    hc: HeaderCarrier): Future[Either[Error, Unit]] =
+  def updateSession[R](sessionStore: SessionStore, request: R)(
+    update: SessionData => SessionData
+  )(implicit sessionProvider: SessionProvider[R], hc: HeaderCarrier): Future[Either[Error, Unit]] =
     sessionStore.store(update(sessionProvider.toSession(request)))
 
 }

@@ -80,7 +80,8 @@ class SubscriptionDetailsActionSpec extends ControllerSpec with SessionSupport {
         "for the subscribed page" in {
         val sessionData = SessionData.empty.copy(
           subscriptionDetails  = Some(subscriptionDetails),
-          subscriptionResponse = Some(SubscriptionResponse("number")))
+          subscriptionResponse = Some(SubscriptionResponse("number"))
+        )
 
         mockGetSession(Future.successful(Right(Some(sessionData))))
 
@@ -103,7 +104,8 @@ class SubscriptionDetailsActionSpec extends ControllerSpec with SessionSupport {
         "for the subscribed page" in {
         val sessionData = SessionData.empty.copy(
           subscriptionDetails  = Some(subscriptionDetails),
-          subscriptionResponse = Some(SubscriptionResponse("number")))
+          subscriptionResponse = Some(SubscriptionResponse("number"))
+        )
 
         mockGetSession(Future.successful(Right(Some(sessionData))))
 

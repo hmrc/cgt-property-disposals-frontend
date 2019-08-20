@@ -28,8 +28,7 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.auth.core.retrieve.Name
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, Error, NINO, SessionData, SubscriptionDetails, SubscriptionResponse, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, Error, NINO, Name, SessionData, SubscriptionDetails, SubscriptionResponse, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -54,7 +53,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
   val requestWithCSRFToken = FakeRequest().withCSRFToken
 
   val nino        = NINO("AB123456C")
-  val name        = Name(Some("forename"), Some("surname"))
+  val name        = Name("forename", "surname")
   val dateOfBirth = DateOfBirth(new LocalDate(2000, 4, 10))
 
   val subscriptionDetails = sample[SubscriptionDetails]
@@ -78,7 +77,8 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
           inSequence {
             mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
             mockGetSession(
-              Future.successful(Right(Some(SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails))))))
+              Future.successful(Right(Some(SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails)))))
+            )
           }
 
           val result = performAction()
@@ -124,7 +124,8 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
           inSequence {
             mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
             mockGetSession(
-              Future.successful(Right(Some(SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails))))))
+              Future.successful(Right(Some(SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails)))))
+            )
             mockSubscribe(subscriptionDetails)(Left(Error(new Exception(""))))
           }
 
@@ -138,7 +139,8 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
             mockGetSession(Future.successful(Right(Some(existingSessionData))))
             mockSubscribe(subscriptionDetails)(Right(subscriptionResponse))
             mockStoreSession(existingSessionData.copy(subscriptionResponse = Some(subscriptionResponse)))(
-              Future.successful(Left(Error(""))))
+              Future.successful(Left(Error("")))
+            )
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -156,7 +158,8 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
             mockGetSession(Future.successful(Right(Some(existingSessionData))))
             mockSubscribe(subscriptionDetails)(Right(subscriptionResponse))
             mockStoreSession(existingSessionData.copy(subscriptionResponse = Some(subscriptionResponse)))(
-              Future.successful(Right(())))
+              Future.successful(Right(()))
+            )
 
           }
 

@@ -30,8 +30,8 @@ class IvController @Inject()(
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   errorHandler: ErrorHandler,
-  cc: MessagesControllerComponents)
-    extends FrontendController(cc)
+  cc: MessagesControllerComponents
+) extends FrontendController(cc)
     with WithActions
     with Logging {
 

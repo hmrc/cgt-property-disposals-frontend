@@ -32,8 +32,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 final case class RequestWithSessionData[A](
   sessionData: Option[SessionData],
-  authenticatedRequest: AuthenticatedRequest[A])
-    extends WrappedRequest[A](authenticatedRequest)
+  authenticatedRequest: AuthenticatedRequest[A]
+) extends WrappedRequest[A](authenticatedRequest)
     with PreferredMessagesProvider {
   override def messagesApi: MessagesApi = authenticatedRequest.request.messagesApi
 }
@@ -46,7 +46,8 @@ class SessionDataAction @Inject()(sessionStore: SessionStore, errorHandler: Erro
   override protected def executionContext: ExecutionContext = ec
 
   override protected def refine[A](
-    request: AuthenticatedRequest[A]): Future[Either[Result, RequestWithSessionData[A]]] = {
+    request: AuthenticatedRequest[A]
+  ): Future[Either[Result, RequestWithSessionData[A]]] = {
     implicit val hc: HeaderCarrier =
       HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 

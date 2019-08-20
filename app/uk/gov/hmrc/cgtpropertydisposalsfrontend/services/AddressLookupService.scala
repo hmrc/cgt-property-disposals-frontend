@@ -48,8 +48,9 @@ trait AddressLookupService {
 class AddressLookupServiceImpl @Inject()(connector: AddressLookupConnector)(implicit ec: ExecutionContext)
     extends AddressLookupService {
 
-  override def lookupAddress(postcode: Postcode)(
-    implicit hc: HeaderCarrier): EitherT[Future, Error, AddressLookupResult] =
+  override def lookupAddress(
+    postcode: Postcode
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, AddressLookupResult] =
     connector.lookupAddress(postcode).subflatMap { response =>
       if (response.status === OK)
         response
@@ -98,7 +99,8 @@ object AddressLookupServiceImpl {
     town: String,
     county: Option[String],
     postcode: String,
-    country: Country)
+    country: Country
+  )
 
   final case class AddressLookupResponse(addresses: List[RawAddress])
 

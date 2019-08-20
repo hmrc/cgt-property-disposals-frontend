@@ -27,9 +27,8 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.auth.core.retrieve.Name
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.UkAddress
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AddressLookupResult, DateOfBirth, Error, NINO, Postcode, SessionData, SubscriptionDetails, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AddressLookupResult, DateOfBirth, Error, NINO, Name, Postcode, SessionData, SubscriptionDetails, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AddressLookupService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -60,7 +59,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
 
   val nino = NINO("AB123456C")
 
-  val name = Name(Some("forename"), Some("surname"))
+  val name = Name("forename", "surname")
 
   val dateOfBirth = DateOfBirth(new LocalDate(2000, 4, 10))
 
@@ -116,7 +115,8 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
           inSequence {
             mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
             mockGetSession(
-              Future.successful(Right(Some(SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails))))))
+              Future.successful(Right(Some(SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails)))))
+            )
           }
 
           contentAsString(performAction()) should include(message("address.postcode.title"))
@@ -191,7 +191,8 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
             mockGetSession(Future.successful(Right(Some(existingSessionData))))
             mockAddressLookup(postcode)(Right(addressLookupResult))
             mockStoreSession(existingSessionData.copy(addressLookupResult = Some(addressLookupResult)))(
-              Future.successful(Left(Error("Uh oh!"))))
+              Future.successful(Left(Error("Uh oh!")))
+            )
           }
 
           checkIsTechnicalErrorPage(performAction("postcode" -> postcode.value))
@@ -205,7 +206,8 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
           inSequence {
             mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
             mockGetSession(
-              Future.successful(Right(Some(existingSessionData.copy(addressLookupResult = Some(addressLookupResult))))))
+              Future.successful(Right(Some(existingSessionData.copy(addressLookupResult = Some(addressLookupResult)))))
+            )
           }
 
           val result = performAction("postcode" -> postcode.value)
@@ -239,7 +241,8 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
               mockGetSession(Future.successful(Right(Some(existingSessionData))))
               mockAddressLookup(formattedPostcode)(Right(addressLookupResult))
               mockStoreSession(existingSessionData.copy(addressLookupResult = Some(addressLookupResult)))(
-                Future.successful(Right(())))
+                Future.successful(Right(()))
+              )
             }
 
             val result = performAction("postcode" -> postcode)
@@ -256,7 +259,8 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
           mockGetSession(Future.successful(Right(Some(existingSessionData))))
           mockAddressLookup(postcode)(Right(addressLookupResult))
           mockStoreSession(existingSessionData.copy(addressLookupResult = Some(addressLookupResult)))(
-            Future.successful(Right(())))
+            Future.successful(Right(()))
+          )
         }
 
         val result = performAction("postcode" -> s"  ${postcode.value}  ")
@@ -279,7 +283,8 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
         inSequence {
           mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
           mockGetSession(
-            Future.successful(Right(Some(SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails))))))
+            Future.successful(Right(Some(SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails)))))
+          )
         }
 
         val result = performAction()
@@ -307,7 +312,8 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
       "there is an address lookup result in session and an address has already been selected in session" in {
         val session = SessionData.empty.copy(
           subscriptionDetails = Some(subscriptionDetails.copy(address = addressHead)),
-          addressLookupResult = Some(addressLookupResult))
+          addressLookupResult = Some(addressLookupResult)
+        )
 
         inSequence {
           mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
@@ -341,7 +347,8 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
         inSequence {
           mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
           mockGetSession(
-            Future.successful(Right(Some(SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails))))))
+            Future.successful(Right(Some(SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails)))))
+          )
         }
 
         val result = performAction()

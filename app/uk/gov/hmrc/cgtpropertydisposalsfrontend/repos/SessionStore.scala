@@ -43,8 +43,8 @@ trait SessionStore {
 
 @Singleton
 class SessionStoreImpl @Inject()(mongo: ReactiveMongoComponent, configuration: Configuration)(
-  implicit ec: ExecutionContext)
-    extends SessionStore {
+  implicit ec: ExecutionContext
+) extends SessionStore {
 
   val cacheRepository: CacheMongoRepository = {
     val expireAfter: FiniteDuration = configuration.underlying.get[FiniteDuration]("session-store.expiry-time").value
@@ -67,7 +67,8 @@ class SessionStoreImpl @Inject()(mongo: ReactiveMongoComponent, configuration: C
                         (data \ sessionKey)
                           .validate[SessionData]
                           .asEither
-                          .leftMap(e ⇒ Error(s"Could not parse session data from mongo: ${e.mkString("; ")}")))
+                          .leftMap(e ⇒ Error(s"Could not parse session data from mongo: ${e.mkString("; ")}"))
+                      )
             } yield result
 
             response.value

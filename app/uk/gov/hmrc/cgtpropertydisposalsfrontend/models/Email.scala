@@ -41,7 +41,9 @@ object Email {
         "email" ->
           text
             .transform[String](_.replaceAllLiterally(" ", ""), identity)
-            .verifying("invalid", emailRegex.test _))(Email.apply)(Email.unapply))
+            .verifying("invalid", emailRegex.test _)
+      )(Email.apply)(Email.unapply)
+    )
   }
 
 }

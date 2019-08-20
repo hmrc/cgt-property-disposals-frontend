@@ -42,7 +42,8 @@ class AddressController @Inject()(
   addressLookupService: AddressLookupService,
   sessionStore: SessionStore,
   enterPostcodePage: views.html.subscription.enter_postcode,
-  selectAddressPage: views.html.subscription.select_address)(implicit viewConfig: ViewConfig, ec: ExecutionContext)
+  selectAddressPage: views.html.subscription.select_address
+)(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with Logging
     with WithSubscriptionDetailsActions
@@ -64,7 +65,8 @@ class AddressController @Inject()(
             val result = for {
               addressLookupResult <- addressLookupService.lookupAddress(postcode)
               _ <- EitherT(
-                    updateSession(sessionStore, request)(_.copy(addressLookupResult = Some(addressLookupResult))))
+                    updateSession(sessionStore, request)(_.copy(addressLookupResult = Some(addressLookupResult)))
+                  )
             } yield addressLookupResult
 
             result.fold({ e =>
@@ -101,14 +103,16 @@ class AddressController @Inject()(
           .fold(
             e => BadRequest(selectAddressPage(addresses, e)), { address =>
               updateSession(sessionStore, request)(
-                _.copy(subscriptionDetails = Some(request.subscriptionDetails.copy(address = address))))
-                .map(_.fold(
+                _.copy(subscriptionDetails = Some(request.subscriptionDetails.copy(address = address)))
+              ).map(
+                _.fold(
                   { e =>
                     logger.warn("Could not store selected address in session", e)
                     errorHandler.errorResult()
                   },
                   _ => SeeOther(routes.SubscriptionController.checkYourDetails().url)
-                ))
+                )
+              )
             }
           )
     }

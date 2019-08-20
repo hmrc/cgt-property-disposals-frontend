@@ -18,12 +18,13 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.services
 
 import cats.data.EitherT
 import cats.instances.future._
+import org.joda.time.LocalDate
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsNumber, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Address, BusinessPartnerRecord, Error, NINO}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -35,14 +36,16 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
 
   val service = new BusinessPartnerRecordServiceImpl(mockConnector)
 
-  def mockGetBPR(nino: NINO)(response: Either[Error, HttpResponse]) =
+  def mockGetBPR(nino: NINO, name: Name, dob: DateOfBirth)(response: Either[Error, HttpResponse]) =
     (mockConnector
-      .getBusinessPartnerRecord(_: NINO)(_: HeaderCarrier))
-      .expects(nino, *)
+      .getBusinessPartnerRecord(_: NINO, _: Name, _: DateOfBirth)(_: HeaderCarrier))
+      .expects(nino, name, dob, *)
       .returning(EitherT.fromEither[Future](response))
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
   val nino                       = NINO("AB123456C")
+  val name                       = Name("forename", "surname")
+  val dateOfBirth                = DateOfBirth(new LocalDate(2000, 4, 10))
   val address                    = Address.UkAddress("line1", Some("line2"), None, None, "postcode")
   val bpr                        = BusinessPartnerRecord("name", "surname", Some("email"), address, "sap")
 
@@ -53,9 +56,9 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
       "return an error" when {
 
         def testError(response: => Either[Error, HttpResponse]) = {
-          mockGetBPR(nino)(response)
+          mockGetBPR(nino, name, dateOfBirth)(response)
 
-          await(service.getBusinessPartnerRecord(nino).value).isLeft shouldBe true
+          await(service.getBusinessPartnerRecord(nino, name, dateOfBirth).value).isLeft shouldBe true
         }
 
         "the connector fails to make the call" in {
@@ -79,9 +82,9 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
       }
       "return the bpr when the http response comes back with status 200 and " +
         "the json body returns a bpr with a matching dob" in {
-        mockGetBPR(nino)(Right(HttpResponse(200, Some(Json.toJson(bpr)))))
+        mockGetBPR(nino, name, dateOfBirth)(Right(HttpResponse(200, Some(Json.toJson(bpr)))))
 
-        await(service.getBusinessPartnerRecord(nino).value) shouldBe Right(bpr)
+        await(service.getBusinessPartnerRecord(nino, name, dateOfBirth).value) shouldBe Right(bpr)
       }
 
     }

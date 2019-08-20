@@ -25,9 +25,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.toFuture
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -38,7 +37,8 @@ class StartController @Inject()(
   errorHandler: ErrorHandler,
   cc: MessagesControllerComponents,
   val authenticatedAction: AuthenticatedAction,
-  val sessionDataAction: SessionDataAction)(implicit ec: ExecutionContext)
+  val sessionDataAction: SessionDataAction
+)(implicit ec: ExecutionContext)
     extends FrontendController(cc)
     with WithActions
     with Logging
@@ -51,7 +51,13 @@ class StartController @Inject()(
 
       case (maybeBpr, None) =>
         val result = for {
-          bpr <- maybeBpr.fold(bprService.getBusinessPartnerRecord(request.authenticatedRequest.nino))(EitherT.pure(_))
+          bpr <- maybeBpr.fold(
+                  bprService.getBusinessPartnerRecord(
+                    request.authenticatedRequest.nino,
+                    request.authenticatedRequest.name,
+                    request.authenticatedRequest.dateOfBirth
+                  )
+                )(EitherT.pure(_))
           subscriptionDetails <- EitherT
                                   .fromEither[Future](SubscriptionDetails.fromBusinessPartnerRecord(bpr))
                                   .leftMap(Error(_))
