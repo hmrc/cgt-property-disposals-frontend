@@ -59,7 +59,7 @@ class StartController @Inject()(
                   )
                 )(EitherT.pure(_))
           subscriptionDetails <- EitherT
-                                  .fromEither[Future](SubscriptionDetails.fromBusinessPartnerRecord(bpr))
+                                  .fromEither[Future](SubscriptionDetails(bpr, request.authenticatedRequest.name))
                                   .leftMap(Error(_))
           _ <- EitherT(updateSession(sessionStore, request)(_.copy(subscriptionDetails = Some(subscriptionDetails))))
         } yield subscriptionDetails

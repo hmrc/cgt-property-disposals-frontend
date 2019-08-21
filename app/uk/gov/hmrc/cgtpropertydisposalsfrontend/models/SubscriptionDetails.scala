@@ -31,9 +31,9 @@ object SubscriptionDetails {
 
   implicit val format: Format[SubscriptionDetails] = Json.format
 
-  def fromBusinessPartnerRecord(bpr: BusinessPartnerRecord): Either[String, SubscriptionDetails] =
+  def apply(bpr: BusinessPartnerRecord, name: Name): Either[String, SubscriptionDetails] =
     Either.fromOption(
-      bpr.emailAddress.map(e => SubscriptionDetails(bpr.forename, bpr.surname, e, bpr.address, bpr.sapNumber)),
+      bpr.emailAddress.map(e => SubscriptionDetails(name.forename, name.surname, e, bpr.address, bpr.sapNumber)),
       "email address missing"
     )
 

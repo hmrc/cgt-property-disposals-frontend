@@ -64,13 +64,11 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
   val dateOfBirth          = DateOfBirth(LocalDate.of(2000, 4, 10))
   val emailAddress         = "email"
   val bpr = BusinessPartnerRecord(
-    "forename",
-    "surname",
     Some(emailAddress),
     UkAddress("line1", None, None, None, "postcode"),
     "sap"
   )
-  val subscriptionDetails = SubscriptionDetails(bpr.forename, bpr.surname, emailAddress, bpr.address, bpr.sapNumber)
+  val subscriptionDetails = SubscriptionDetails(name.forename, name.surname, emailAddress, bpr.address, bpr.sapNumber)
 
   "The StartController" when {
 
