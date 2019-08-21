@@ -20,12 +20,13 @@ import java.time.LocalDate
 
 import cats.syntax.either._
 import com.google.inject.{Inject, Singleton}
+import org.joda.time.{LocalDate => JodaLocalDate}
 import play.api.Configuration
 import play.api.mvc.Results._
 import play.api.mvc._
-import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.auth.core.retrieve.~
+import uk.gov.hmrc.auth.core.retrieve.{~, _}
+import uk.gov.hmrc.auth.core.{ConfidenceLevel, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, NINO, Name, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -33,7 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
-
+import uk.gov.hmrc.auth.core.retrieve.{Name => RetrievalName}
 import scala.concurrent.{ExecutionContext, Future}
 
 final case class AuthenticatedRequest[A](nino: NINO, name: Name, dateOfBirth: DateOfBirth, request: MessagesRequest[A])
@@ -77,14 +78,28 @@ class AuthenticatedAction @Inject()(
       (selfBaseUrl + successRelativeUrl) -> (selfBaseUrl + failureRelativeUrl)
   }
 
-  private def makeAuthenticatedRequest[A](
+  private def makeAuthenticatedRequestWithItmpRetrieval[A](
     nino: String,
-    name: uk.gov.hmrc.auth.core.retrieve.Name,
+    name: ItmpName,
     dateOfBirth: LocalDate,
     request: MessagesRequest[A]
   ): Future[Either[Result, AuthenticatedRequest[A]]] =
     name match {
-      case uk.gov.hmrc.auth.core.retrieve.Name(Some(forename), Some(surname)) =>
+      case ItmpName(Some(givenName), _, Some(familyName)) =>
+        Right(AuthenticatedRequest(NINO(nino), Name(givenName, familyName), DateOfBirth(dateOfBirth), request))
+      case other =>
+        logger.warn(s"Failed to retrieve the complete name for this user: $other")
+        Left(errorHandler.errorResult()(request))
+    }
+
+  private def makeAuthenticatedRequestWithRetrieval[A](
+    nino: String,
+    name: RetrievalName,
+    dateOfBirth: LocalDate,
+    request: MessagesRequest[A]
+  ): Future[Either[Result, AuthenticatedRequest[A]]] =
+    name match {
+      case RetrievalName(Some(forename), Some(surname)) =>
         Right(AuthenticatedRequest(NINO(nino), Name(forename, surname), DateOfBirth(dateOfBirth), request))
       case other =>
         logger.warn(s"Failed to retrieve the complete name for this user: $other")
@@ -98,9 +113,11 @@ class AuthenticatedAction @Inject()(
 
     authorisedFunctions
       .authorised(ConfidenceLevel.L200)
-      .retrieve(Retrievals.nino and Retrievals.name and Retrievals.dateOfBirth) {
-        case Some(nino) ~ Some(name) ~ Some(dob) =>
-          makeAuthenticatedRequest(nino, name, LocalDate.parse(dob.toString), request)
+      .retrieve(v2.Retrievals.nino and v2.Retrievals.itmpName and v2.Retrievals.name and Retrievals.itmpDateOfBirth) {
+        case Some(nino) ~ Some(itmpName) ~ _ ~ Some(dob) =>
+          makeAuthenticatedRequestWithItmpRetrieval(nino, itmpName, LocalDate.parse(dob.toString), request)
+        case Some(nino) ~ None ~ Some(name) ~ Some(dob) =>
+          makeAuthenticatedRequestWithRetrieval(nino, name, LocalDate.parse(dob.toString), request)
         case other =>
           logger.warn(s"Failed to retrieve some information from the auth record: $other")
           Left(errorHandler.errorResult()(request))
