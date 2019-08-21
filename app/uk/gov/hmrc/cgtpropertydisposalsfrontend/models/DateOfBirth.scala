@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 import play.api.libs.json.{Json, OFormat}
 
-final case class DateOfBirth(value: LocalDate)
+final case class DateOfBirth(value: LocalDate) extends AnyVal
 
 object DateOfBirth {
   implicit val format: OFormat[DateOfBirth] = Json.format[DateOfBirth]
