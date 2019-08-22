@@ -47,6 +47,7 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
         )
       )
       .overrides(overrideBindings: _*)
+      .disable[play.modules.reactivemongo.ReactiveMongoHmrcModule]
       .build()
 
   lazy val fakeApplication: Application = buildFakeApplication()
