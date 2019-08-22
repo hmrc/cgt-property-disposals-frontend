@@ -23,8 +23,8 @@ import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.mvc.Results._
 import play.api.mvc._
-import uk.gov.hmrc.auth.core.{ConfidenceLevel, _}
 import uk.gov.hmrc.auth.core.retrieve.{~, Name => RetrievalName, _}
+import uk.gov.hmrc.auth.core.{ConfidenceLevel, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, NINO, Name, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -84,10 +84,16 @@ class AuthenticatedAction @Inject()(
 
   private def nonItpmNameToName(retrievalName: RetrievalName): Option[Name] =
     retrievalName match {
-      case RetrievalName(Some(name), _) => {
-        val Array(forename, surname) = name.split(' ')
-        Some(Name(forename, surname))
-      }
+      case RetrievalName(Some(name), _) =>
+        name.split(' ').toList match {
+          case Nil      => None // no name
+          case _ :: Nil => None // only one name
+          case ::(firstName, tl) =>
+            tl.lastOption match {
+              case Some(lastName) => Some(Name(firstName, lastName))
+              case None           => None
+            }
+        }
       case RetrievalName(None, _) => None
     }
 
@@ -165,7 +171,7 @@ class AuthenticatedAction @Inject()(
                 "completionURL"   -> Seq(ivSuccessUrl),
                 "failureURL"      -> Seq(ivFailureUrl)
               )
-          )
+            )
         ).merge
       }
 
