@@ -41,11 +41,16 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
 
   "IvController" when {
 
-    val retrievals = Retrievals.nino and Retrievals.name and Retrievals.dateOfBirth
-    val retrievalsResult = Future.successful(
-      new ~(new ~(Some("nino"), Some(Name(Some("forename"), Some("surname")))), Some(new LocalDate(2000, 4, 10)))
+    val retrievals = Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth
+    val retrievalsResult = Future successful (
+      new ~(
+        new ~(
+          new ~(Some("nino"), Some(ItmpName(Some("givenName"), Some("middleName"), Some("familyName")))),
+          Some(Name(Some("forename"), Some("surname")))
+        ),
+        Some(new LocalDate(2000, 4, 10))
+      )
     )
-
     "handling IV success request" must {
 
       "redirect to the IV continue URL if one is found in session" in {

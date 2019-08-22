@@ -64,13 +64,16 @@ class AddressLookupServiceImpl @Inject()(connector: AddressLookupConnector)(impl
   def toAddressLookupResult(r: AddressLookupResponse, postcode: Postcode): Either[String, AddressLookupResult] = {
     def toAddress(a: RawAddress): Either[String, Address] = {
       val lines: Either[String, (String, Option[String], Option[String], Option[String])] =
-        (a.lines ::: List(a.town, a.county.getOrElse(""))).filter(_.nonEmpty) match {
-          case Nil                         => Left("Could not find any lines of addesss")
-          case a1 :: Nil                   => Right((a1, None, None, None))
-          case a1 :: a2 :: Nil             => Right((a1, Some(a2), None, None))
-          case a1 :: a2 :: a3 :: Nil       => Right((a1, Some(a2), Some(a3), None))
-          case a1 :: a2 :: a3 :: a4 :: Nil => Right((a1, Some(a2), Some(a3), Some(a4)))
-          case a1 :: a2 :: a3 :: as        => Right((a1, Some(a2), Some(a3), Some(as.mkString(", "))))
+        (a.lines ::: List(a.town, a.county.getOrElse("")))
+          .filter(_.nonEmpty) match {
+          case Nil                   => Left("Could not find any lines of addesss")
+          case a1 :: Nil             => Right((a1, None, None, None))
+          case a1 :: a2 :: Nil       => Right((a1, Some(a2), None, None))
+          case a1 :: a2 :: a3 :: Nil => Right((a1, Some(a2), Some(a3), None))
+          case a1 :: a2 :: a3 :: a4 :: Nil =>
+            Right((a1, Some(a2), Some(a3), Some(a4)))
+          case a1 :: a2 :: a3 :: as =>
+            Right((a1, Some(a2), Some(a3), Some(as.mkString(", "))))
         }
 
       lines.map {
@@ -104,19 +107,22 @@ object AddressLookupServiceImpl {
 
   final case class AddressLookupResponse(addresses: List[RawAddress])
 
-  implicit val addressLookupResponseReads: Reads[AddressLookupResponse] = new Reads[AddressLookupResponse] {
-    case class Inner(address: RawAddress)
+  implicit val addressLookupResponseReads: Reads[AddressLookupResponse] =
+    new Reads[AddressLookupResponse] {
+      case class Inner(address: RawAddress)
 
-    implicit val countryReads: Reads[Country] = Json.reads[Country].map { c =>
-      if (c.code === "UK") Country("GB") else c
+      implicit val countryReads: Reads[Country] = Json.reads[Country].map { c =>
+        if (c.code === "UK") Country("GB") else c
+      }
+
+      implicit val rawAddressReads: Reads[RawAddress] = Json.reads
+
+      implicit val innerReads: Reads[Inner] = Json.reads[Inner]
+
+      override def reads(json: JsValue): JsResult[AddressLookupResponse] =
+        json
+          .validate[List[Inner]]
+          .map(l => AddressLookupResponse(l.map(_.address)))
     }
-
-    implicit val rawAddressReads: Reads[RawAddress] = Json.reads
-
-    implicit val innerReads: Reads[Inner] = Json.reads[Inner]
-
-    override def reads(json: JsValue): JsResult[AddressLookupResponse] =
-      json.validate[List[Inner]].map(l => AddressLookupResponse(l.map(_.address)))
-  }
 
 }

@@ -46,7 +46,8 @@ class SessionStoreImplSpec extends WordSpec with Matchers with MongoSupport with
 
   val sessionStore = new SessionStoreImpl(reactiveMongoComponent, config)
 
-  override implicit val patienceConfig: PatienceConfig = PatienceConfig(5.seconds, 500.millis)
+  override implicit val patienceConfig: PatienceConfig =
+    PatienceConfig(5.seconds, 500.millis)
 
   "SessionStoreImpl" must {
 

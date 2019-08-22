@@ -50,12 +50,13 @@ class SubscriptionController @Inject()(
     with Logging
     with SessionUpdates {
 
-  def checkYourDetails(): Action[AnyContent] = authenticatedActionWithSubscriptionDetails { implicit request =>
-    Ok(checkYourDetailsPage(request.subscriptionDetails))
-  }
+  def checkYourDetails(): Action[AnyContent] =
+    authenticatedActionWithSubscriptionDetails { implicit request =>
+      Ok(checkYourDetailsPage(request.subscriptionDetails))
+    }
 
-  def checkYourDetailsSubmit(): Action[AnyContent] = authenticatedActionWithSubscriptionDetails.async {
-    implicit request =>
+  def checkYourDetailsSubmit(): Action[AnyContent] =
+    authenticatedActionWithSubscriptionDetails.async { implicit request =>
       val result = for {
         subscriptionResponse <- subscriptionService.subscribe(request.subscriptionDetails)
         _                    <- EitherT(updateSession(sessionStore, request)(_.copy(subscriptionResponse = Some(subscriptionResponse))))
@@ -70,13 +71,15 @@ class SubscriptionController @Inject()(
           SeeOther(routes.SubscriptionController.subscribed().url)
         }
       )
-  }
+    }
 
   def subscribed(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
     (request.sessionData.flatMap(_.subscriptionDetails), request.sessionData.flatMap(_.subscriptionResponse)) match {
-      case (None, _)                             => SeeOther(routes.StartController.start().url)
-      case (Some(_), None)                       => SeeOther(routes.SubscriptionController.checkYourDetails().url)
-      case (Some(_), Some(subscriptionResponse)) => Ok(subscribedPage(subscriptionResponse.cgtReferenceNumber))
+      case (None, _) => SeeOther(routes.StartController.start().url)
+      case (Some(_), None) =>
+        SeeOther(routes.SubscriptionController.checkYourDetails().url)
+      case (Some(_), Some(subscriptionResponse)) =>
+        Ok(subscribedPage(subscriptionResponse.cgtReferenceNumber))
     }
 
   }

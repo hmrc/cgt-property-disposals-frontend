@@ -71,7 +71,10 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
             mockPost(s"http://host:123/cgt-property-disposals/business-partner-record", Map.empty, payload)(
               Some(httpResponse))
 
-            await(connector.getBusinessPartnerRecord(nino, name, dateOfBirth).value) shouldBe Right(httpResponse)
+            await(
+              connector
+                .getBusinessPartnerRecord(nino, name, dateOfBirth)
+                .value) shouldBe Right(httpResponse)
           }
         }
       }
@@ -81,7 +84,10 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
         "the future fails" in {
           mockPost(s"http://host:123/cgt-property-disposals/business-partner-record", Map.empty, payload)(None)
 
-          await(connector.getBusinessPartnerRecord(nino, name, dateOfBirth).value).isLeft shouldBe true
+          await(
+            connector
+              .getBusinessPartnerRecord(nino, name, dateOfBirth)
+              .value).isLeft shouldBe true
         }
 
       }

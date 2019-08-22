@@ -105,7 +105,8 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
     "handling submitted confirmation of subscription details" must {
 
-      def performAction(): Future[Result] = controller.checkYourDetailsSubmit()(requestWithCSRFToken)
+      def performAction(): Future[Result] =
+        controller.checkYourDetailsSubmit()(requestWithCSRFToken)
 
       val subscriptionResponse = SubscriptionResponse("number")
 

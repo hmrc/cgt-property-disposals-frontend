@@ -20,7 +20,7 @@ import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
-import java.time._
+import org.joda.time.{LocalDate => JodaLocalDate}
 import org.scalamock.handlers.CallHandler0
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
@@ -31,17 +31,17 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.auth.core.retrieve.{Name, ~}
+import uk.gov.hmrc.auth.core.retrieve.{ItmpName, Name, ~}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, Email, EmailToBeVerified, Error, NINO, SessionData, SubscriptionDetails, UUIDGenerator, sample, subscriptionDetailsGen}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, EmailToBeVerified, Error, NINO, SessionData, SubscriptionDetails, UUIDGenerator, sample, subscriptionDetailsGen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse.{EmailAlreadyVerified, EmailVerificationRequested}
 import uk.gov.hmrc.http.HeaderCarrier
-import org.joda.time.{LocalDate => JodaLocalDate}
-import scala.concurrent.Future
+
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSupport {
 
@@ -78,9 +78,15 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
       .expects(expectedEmail, expectedId, expectedName, *)
       .returning(EitherT.fromEither[Future](result))
 
-  val retrievals = Retrievals.nino and Retrievals.name and Retrievals.dateOfBirth
-  val retrievalsResult = Future.successful(
-    new ~(new ~(Some("nino"), Some(Name(Some("forename"), Some("surname")))), Some(LocalDate.of(2000, 4, 10)))
+  val retrievals = Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth
+  val retrievalsResult = Future successful (
+    new ~(
+      new ~(
+        new ~(Some("nino"), Some(ItmpName(Some("givenName"), Some("middleName"), Some("familyName")))),
+        Some(Name(Some("forename"), Some("surname")))
+      ),
+      Some(new JodaLocalDate(2000, 4, 10))
+    )
   )
 
   def subscriptionDetailsBehavior(performAction: () => Future[Result]): Unit =
@@ -112,7 +118,8 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
     "handling requests to display the enter email page" must {
 
-      def performAction(): Future[Result] = controller.enterEmail()(FakeRequest())
+      def performAction(): Future[Result] =
+        controller.enterEmail()(FakeRequest())
 
       behave like subscriptionDetailsBehavior(performAction)
 
@@ -155,7 +162,8 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
       def requestWithFormData(data: (String, String)*) =
         FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken
 
-      val session           = SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails))
+      val session =
+        SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails))
       val email             = Email("test@email.com")
       val id                = UUID.randomUUID()
       val emailToBeVerified = EmailToBeVerified(email, id, false)
@@ -278,7 +286,8 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
       "strip out spaces in emails" in {
         val emailWithSpaces    = " a @ b  "
         val emailWithoutSpaces = "a@b"
-        val emailToBeVerified  = EmailToBeVerified(Email(emailWithoutSpaces), id, false)
+        val emailToBeVerified =
+          EmailToBeVerified(Email(emailWithoutSpaces), id, false)
 
         inSequence {
           mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, retrievedDateOfBirth)
@@ -425,7 +434,8 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
     "handling verified email addresses" must {
 
-      val emailToBeVerified = EmailToBeVerified(Email("verified@email.com"), UUID.randomUUID(), true)
+      val emailToBeVerified =
+        EmailToBeVerified(Email("verified@email.com"), UUID.randomUUID(), true)
       val session = SessionData.empty.copy(
         subscriptionDetails = Some(subscriptionDetails),
         emailToBeVerified   = Some(emailToBeVerified)

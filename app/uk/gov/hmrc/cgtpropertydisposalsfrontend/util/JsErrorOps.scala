@@ -33,7 +33,9 @@ class JsErrorOps(val error: JsError) extends AnyVal {
     error.errors
       .map {
         case (jsPath, validationErrors) ⇒
-          jsPath.toString + ": [" + validationErrors.map(_.message).mkString(",") + "]"
+          jsPath.toString + ": [" + validationErrors
+            .map(_.message)
+            .mkString(",") + "]"
       }
       .mkString("; ")
 

@@ -29,7 +29,8 @@ final case class Email(value: String) extends AnyVal
 
 object Email {
 
-  implicit val format: Format[Email] = implicitly[Format[String]].inmap(Email(_), _.value)
+  implicit val format: Format[Email] =
+    implicitly[Format[String]].inmap(Email(_), _.value)
 
   implicit val eq: Eq[Email] = Eq.instance(_.value === _.value)
 

@@ -35,7 +35,8 @@ final case class RequestWithSessionData[A](
   authenticatedRequest: AuthenticatedRequest[A]
 ) extends WrappedRequest[A](authenticatedRequest)
     with PreferredMessagesProvider {
-  override def messagesApi: MessagesApi = authenticatedRequest.request.messagesApi
+  override def messagesApi: MessagesApi =
+    authenticatedRequest.request.messagesApi
 }
 
 @Singleton

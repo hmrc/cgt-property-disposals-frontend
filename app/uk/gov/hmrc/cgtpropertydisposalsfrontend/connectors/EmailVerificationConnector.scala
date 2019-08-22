@@ -48,7 +48,9 @@ class EmailVerificationConnectorImpl @Inject()(http: HttpClient, config: Configu
     extends EmailVerificationConnector {
 
   def getEmailVerificationConfig[A: Configs](key: String): A =
-    config.underlying.get[A](s"microservice.services.email-verification.$key").value
+    config.underlying
+      .get[A](s"microservice.services.email-verification.$key")
+      .value
 
   val url: String = {
     val protocol = getEmailVerificationConfig[String]("protocol")
@@ -60,7 +62,8 @@ class EmailVerificationConnectorImpl @Inject()(http: HttpClient, config: Configu
   val templateId: String = getEmailVerificationConfig[String]("template-id")
 
   val linkExpiryTime: String = {
-    val minutes = getEmailVerificationConfig[FiniteDuration]("link-expiry-time").toMinutes
+    val minutes =
+      getEmailVerificationConfig[FiniteDuration]("link-expiry-time").toMinutes
     java.time.Duration.ofMinutes(minutes).toString
   }
 
@@ -95,6 +98,7 @@ object EmailVerificationConnectorImpl {
     templateParameters: Map[String, String]
   )
 
-  implicit val formats: Format[EmailVerificationRequest] = Json.format[EmailVerificationRequest]
+  implicit val formats: Format[EmailVerificationRequest] =
+    Json.format[EmailVerificationRequest]
 
 }

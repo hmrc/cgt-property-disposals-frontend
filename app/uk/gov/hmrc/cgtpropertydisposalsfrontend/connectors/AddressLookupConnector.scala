@@ -48,7 +48,13 @@ class AddressLookupConnectorImpl @Inject()(http: HttpClient, servicesConfig: Ser
   override def lookupAddress(postcode: Postcode)(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
     EitherT[Future, Error, HttpResponse](
       http
-        .get(url, Map("postcode" -> postcode.value.replaceAllLiterally(" ", "").toUpperCase), headers)
+        .get(
+          url,
+          Map(
+            "postcode" -> postcode.value
+              .replaceAllLiterally(" ", "")
+              .toUpperCase),
+          headers)
         .map(Right(_))
         .recover { case e => Left(Error(e)) }
     )

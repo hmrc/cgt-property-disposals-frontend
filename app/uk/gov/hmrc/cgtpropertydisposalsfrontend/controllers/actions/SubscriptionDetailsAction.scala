@@ -41,7 +41,8 @@ final case class RequestWithSubscriptionDetails[A](
   authenticatedRequest: AuthenticatedRequest[A]
 ) extends WrappedRequest[A](authenticatedRequest)
     with PreferredMessagesProvider {
-  override def messagesApi: MessagesApi = authenticatedRequest.request.messagesApi
+  override def messagesApi: MessagesApi =
+    authenticatedRequest.request.messagesApi
 }
 
 class SubscriptionDetailsAction @Inject()(sessionStore: SessionStore, errorHandler: ErrorHandler)(
@@ -68,7 +69,10 @@ class SubscriptionDetailsAction @Inject()(sessionStore: SessionStore, errorHandl
           maybeSessionData.flatMap(_.subscriptionDetails),
           maybeSessionData.flatMap((_.subscriptionResponse))
         ) match {
-          case (Some(_), Some(_), Some(_)) if request.uri =!= routes.SubscriptionController.subscribed().url =>
+          case (Some(_), Some(_), Some(_))
+              if request.uri =!= routes.SubscriptionController
+                .subscribed()
+                .url =>
             // user has already subscribed in this session
             Left(SeeOther(routes.SubscriptionController.subscribed().url))
 

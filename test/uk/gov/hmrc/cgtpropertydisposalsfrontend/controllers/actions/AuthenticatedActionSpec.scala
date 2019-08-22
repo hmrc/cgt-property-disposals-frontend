@@ -44,7 +44,8 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
 
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
 
-  val (signInUrl, origin, selfBaseUrl, ivUrl, ivOrigin) = ("sign-in", "origin", "self-base-url", "ivUrl", "ivOrigin")
+  val (signInUrl, origin, selfBaseUrl, ivUrl, ivOrigin) =
+    ("sign-in", "origin", "self-base-url", "ivUrl", "ivOrigin")
 
   val (ivSuccessRelativeUrl, ivFailureRelativeUrl) = "/success" -> "/failure"
 
@@ -100,7 +101,9 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
           SessionRecordNotFound()
         ).foreach { e =>
           withClue(s"For error $e: ") {
-            mockAuth(ConfidenceLevel.L200, Retrievals.nino and Retrievals.name and Retrievals.dateOfBirth)(
+            mockAuth(
+              ConfidenceLevel.L200,
+              Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth)(
               Future.failed(e)
             )
 
@@ -195,7 +198,9 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
 
           "the IV continue url can't be stored in session" in new TestEnvironment {
             inSequence {
-              mockAuth(ConfidenceLevel.L200, Retrievals.nino and Retrievals.name and Retrievals.dateOfBirth)(
+              mockAuth(
+                ConfidenceLevel.L200,
+                Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth)(
                 Future.failed(InsufficientConfidenceLevel())
               )
               mockStoreSession(SessionData.empty.copy(ivContinueUrl = Some(selfBaseUrl + requestUri)))(
@@ -213,7 +218,9 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
 
           "the IV continue URL is stored in session" in new TestEnvironment {
             inSequence {
-              mockAuth(ConfidenceLevel.L200, Retrievals.nino and Retrievals.name and Retrievals.dateOfBirth)(
+              mockAuth(
+                ConfidenceLevel.L200,
+                Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth)(
                 Future.failed(InsufficientConfidenceLevel())
               )
               mockStoreSession(SessionData.empty.copy(ivContinueUrl = Some(selfBaseUrl + requestUri)))(
@@ -236,7 +243,9 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
             useRelativeUrls = false
           ) {
             inSequence {
-              mockAuth(ConfidenceLevel.L200, Retrievals.nino and Retrievals.name and Retrievals.dateOfBirth)(
+              mockAuth(
+                ConfidenceLevel.L200,
+                Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth)(
                 Future.failed(InsufficientConfidenceLevel())
               )
               mockStoreSession(SessionData.empty.copy(ivContinueUrl = Some(selfBaseUrl + requestUri)))(
@@ -274,7 +283,9 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
         ).foreach { e =>
           withClue(s"For error $e: ") {
             val exception = intercept[AuthorisationException] {
-              mockAuth(ConfidenceLevel.L200, Retrievals.nino and Retrievals.name and Retrievals.dateOfBirth)(
+              mockAuth(
+                ConfidenceLevel.L200,
+                Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth)(
                 Future.failed(e)
               )
 

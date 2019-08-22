@@ -36,7 +36,8 @@ class SessionDataActionSpec extends ControllerSpec with SessionSupport {
 
   "SessionDataAction" must {
 
-    lazy val messagesRequest = new MessagesRequest(FakeRequest(), instanceOf[MessagesApi])
+    lazy val messagesRequest =
+      new MessagesRequest(FakeRequest(), instanceOf[MessagesApi])
     lazy val authenticatedRequest =
       AuthenticatedRequest(
         NINO("nino"),

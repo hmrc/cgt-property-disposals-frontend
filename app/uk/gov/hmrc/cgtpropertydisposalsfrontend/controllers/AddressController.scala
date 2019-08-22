@@ -49,73 +49,80 @@ class AddressController @Inject()(
     with WithSubscriptionDetailsActions
     with SessionUpdates {
 
-  def enterPostcode(): Action[AnyContent] = authenticatedActionWithSubscriptionDetails { implicit request =>
-    val form = request.sessionData.addressLookupResult.fold(Postcode.form)(r => Postcode.form.fill(r.postcode))
-    Ok(enterPostcodePage(form))
-  }
-
-  def enterPostcodeSubmit(): Action[AnyContent] = authenticatedActionWithSubscriptionDetails.async { implicit request =>
-    Postcode.form
-      .bindFromRequest()
-      .fold(
-        formWithErrors => BadRequest(enterPostcodePage(formWithErrors)), { postcode =>
-          if (request.sessionData.addressLookupResult.map(_.postcode).contains(postcode)) {
-            SeeOther(routes.AddressController.selectAddress().url)
-          } else {
-            val result = for {
-              addressLookupResult <- addressLookupService.lookupAddress(postcode)
-              _ <- EitherT(
-                    updateSession(sessionStore, request)(_.copy(addressLookupResult = Some(addressLookupResult)))
-                  )
-            } yield addressLookupResult
-
-            result.fold({ e =>
-              logger.warn(s"Could not do address lookup for postcode", e)
-              errorHandler.errorResult()
-            }, _ => SeeOther(routes.AddressController.selectAddress().url))
-          }
-        }
-      )
-  }
-  def selectAddress(): Action[AnyContent] = authenticatedActionWithSubscriptionDetails { implicit request =>
-    request.sessionData.addressLookupResult match {
-      case None =>
-        SeeOther(routes.SubscriptionController.checkYourDetails().url)
-
-      case Some(AddressLookupResult(_, addresses)) =>
-        val form = addresses
-          .find(_ === request.subscriptionDetails.address)
-          .fold(Address.addressSelectForm(addresses))(Address.addressSelectForm(addresses).fill(_))
-
-        Ok(selectAddressPage(addresses, form))
+  def enterPostcode(): Action[AnyContent] =
+    authenticatedActionWithSubscriptionDetails { implicit request =>
+      val form =
+        request.sessionData.addressLookupResult.fold(Postcode.form)(r => Postcode.form.fill(r.postcode))
+      Ok(enterPostcodePage(form))
     }
-  }
 
-  def selectAddressSubmit(): Action[AnyContent] = authenticatedActionWithSubscriptionDetails.async { implicit request =>
-    request.sessionData.addressLookupResult match {
-      case None =>
-        SeeOther(routes.SubscriptionController.checkYourDetails().url)
+  def enterPostcodeSubmit(): Action[AnyContent] =
+    authenticatedActionWithSubscriptionDetails.async { implicit request =>
+      Postcode.form
+        .bindFromRequest()
+        .fold(
+          formWithErrors => BadRequest(enterPostcodePage(formWithErrors)), { postcode =>
+            if (request.sessionData.addressLookupResult
+                  .map(_.postcode)
+                  .contains(postcode)) {
+              SeeOther(routes.AddressController.selectAddress().url)
+            } else {
+              val result = for {
+                addressLookupResult <- addressLookupService.lookupAddress(postcode)
+                _ <- EitherT(
+                      updateSession(sessionStore, request)(_.copy(addressLookupResult = Some(addressLookupResult)))
+                    )
+              } yield addressLookupResult
 
-      case Some(AddressLookupResult(_, addresses)) =>
-        Address
-          .addressSelectForm(addresses)
-          .bindFromRequest()
-          .fold(
-            e => BadRequest(selectAddressPage(addresses, e)), { address =>
-              updateSession(sessionStore, request)(
-                _.copy(subscriptionDetails = Some(request.subscriptionDetails.copy(address = address)))
-              ).map(
-                _.fold(
-                  { e =>
-                    logger.warn("Could not store selected address in session", e)
-                    errorHandler.errorResult()
-                  },
-                  _ => SeeOther(routes.SubscriptionController.checkYourDetails().url)
-                )
-              )
+              result.fold({ e =>
+                logger.warn(s"Could not do address lookup for postcode", e)
+                errorHandler.errorResult()
+              }, _ => SeeOther(routes.AddressController.selectAddress().url))
             }
-          )
+          }
+        )
     }
-  }
+  def selectAddress(): Action[AnyContent] =
+    authenticatedActionWithSubscriptionDetails { implicit request =>
+      request.sessionData.addressLookupResult match {
+        case None =>
+          SeeOther(routes.SubscriptionController.checkYourDetails().url)
+
+        case Some(AddressLookupResult(_, addresses)) =>
+          val form = addresses
+            .find(_ === request.subscriptionDetails.address)
+            .fold(Address.addressSelectForm(addresses))(Address.addressSelectForm(addresses).fill(_))
+
+          Ok(selectAddressPage(addresses, form))
+      }
+    }
+
+  def selectAddressSubmit(): Action[AnyContent] =
+    authenticatedActionWithSubscriptionDetails.async { implicit request =>
+      request.sessionData.addressLookupResult match {
+        case None =>
+          SeeOther(routes.SubscriptionController.checkYourDetails().url)
+
+        case Some(AddressLookupResult(_, addresses)) =>
+          Address
+            .addressSelectForm(addresses)
+            .bindFromRequest()
+            .fold(
+              e => BadRequest(selectAddressPage(addresses, e)), { address =>
+                updateSession(sessionStore, request)(
+                  _.copy(subscriptionDetails = Some(request.subscriptionDetails.copy(address = address)))
+                ).map(
+                  _.fold(
+                    { e =>
+                      logger.warn("Could not store selected address in session", e)
+                      errorHandler.errorResult()
+                    },
+                    _ => SeeOther(routes.SubscriptionController.checkYourDetails().url)
+                  )
+                )
+              }
+            )
+      }
+    }
 
 }

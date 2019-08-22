@@ -17,7 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import java.time.LocalDate
-
+import org.joda.time.{LocalDate => JodaLocalDate}
 import cats.data.EitherT
 import cats.instances.future._
 import play.api.inject.bind
@@ -60,7 +60,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
   val nino                 = NINO("AB123456C")
   val name                 = Name("forename", "surname")
-  val retrievedDateOfBirth = org.joda.time.LocalDate.parse("2000-04-10")
+  val retrievedDateOfBirth = JodaLocalDate.parse("2000-04-10")
   val dateOfBirth          = DateOfBirth(LocalDate.of(2000, 4, 10))
   val emailAddress         = "email"
   val bpr = BusinessPartnerRecord(
@@ -151,7 +151,8 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
           "one doesn't exist in session and it is successfully retrieved using the retrieved auth NINO and " +
             "there is a BPR already in session" in {
-            val session = SessionData.empty.copy(businessPartnerRecord = Some(bpr))
+            val session =
+              SessionData.empty.copy(businessPartnerRecord = Some(bpr))
 
             inSequence {
               mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, retrievedDateOfBirth)

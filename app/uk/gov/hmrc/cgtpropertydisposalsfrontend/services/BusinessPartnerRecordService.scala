@@ -51,8 +51,10 @@ class BusinessPartnerRecordServiceImpl @Inject()(connector: CGTPropertyDisposals
       .getBusinessPartnerRecord(nino, name, dob)
       .subflatMap { response =>
         response.status match {
-          case OK    => response.parseJSON[BusinessPartnerRecord]().leftMap(Error.apply)
-          case other => Left(Error(s"Call to get BPR came back with status $other"))
+          case OK =>
+            response.parseJSON[BusinessPartnerRecord]().leftMap(Error.apply)
+          case other =>
+            Left(Error(s"Call to get BPR came back with status $other"))
         }
       }
 

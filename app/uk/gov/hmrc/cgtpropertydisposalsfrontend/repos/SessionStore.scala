@@ -47,7 +47,9 @@ class SessionStoreImpl @Inject()(mongo: ReactiveMongoComponent, configuration: C
 ) extends SessionStore {
 
   val cacheRepository: CacheMongoRepository = {
-    val expireAfter: FiniteDuration = configuration.underlying.get[FiniteDuration]("session-store.expiry-time").value
+    val expireAfter: FiniteDuration = configuration.underlying
+      .get[FiniteDuration]("session-store.expiry-time")
+      .value
 
     new CacheMongoRepository("sessions", expireAfter.toSeconds)(mongo.mongoConnector.db, ec)
   }

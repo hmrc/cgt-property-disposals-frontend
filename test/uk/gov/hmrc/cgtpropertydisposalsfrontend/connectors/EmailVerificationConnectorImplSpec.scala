@@ -59,10 +59,11 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
     "handling requests to verify emails" must {
 
       implicit val hc: HeaderCarrier = HeaderCarrier()
-      val expectedUrl                = s"$protocol://$host:$port/email-verification/verification-requests"
-      val email                      = Email("email@test.com")
-      val id                         = UUID.randomUUID()
-      val name                       = "Bob"
+      val expectedUrl =
+        s"$protocol://$host:$port/email-verification/verification-requests"
+      val email = Email("email@test.com")
+      val id    = UUID.randomUUID()
+      val name  = "Bob"
 
       val body = Json.parse(
         s"""
@@ -71,7 +72,9 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
            |"templateId": "$templateId",
            |"templateParameters": { "name" : "$name" },
            |"linkExpiryDuration" : "PT${linkExpiryTimeMinutes}M",
-           |"continueUrl" : "$selfUrl${routes.EmailController.verifyEmail(id).url}"
+           |"continueUrl" : "$selfUrl${routes.EmailController
+             .verifyEmail(id)
+             .url}"
            |}
            |""".stripMargin
       )

@@ -22,6 +22,7 @@ final case class SubscriptionResponse(cgtReferenceNumber: String) extends AnyVal
 
 object SubscriptionResponse {
 
-  implicit val format: Format[SubscriptionResponse] = Json.format[SubscriptionResponse]
+  implicit val format: Format[SubscriptionResponse] =
+    Json.format[SubscriptionResponse]
 
 }

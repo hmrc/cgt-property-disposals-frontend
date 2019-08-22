@@ -67,7 +67,8 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
   val subscriptionDetails = sample[SubscriptionDetails]
 
   val (addressHead, addresses) = {
-    def address(i: Int) = UkAddress(s"$i the Street", Some("The Town"), None, None, postcode.value)
+    def address(i: Int) =
+      UkAddress(s"$i the Street", Some("The Town"), None, None, postcode.value)
 
     val head = address(1)
     head -> (head :: (2 to 5).map(address).toList)
@@ -145,7 +146,8 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterPostcodeSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
 
-      val existingSessionData = SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails))
+      val existingSessionData =
+        SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails))
 
       behave like subscriptionDetailsBehavior(() => performAction())
 
@@ -232,8 +234,9 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
           "BFPO  12345"
         ).foreach { postcode =>
           withClue(s"For postcode '$postcode': ") {
-            val formattedPostcode   = Postcode(postcode.trim)
-            val addressLookupResult = AddressLookupResult(formattedPostcode, List())
+            val formattedPostcode = Postcode(postcode.trim)
+            val addressLookupResult =
+              AddressLookupResult(formattedPostcode, List())
 
             inSequence {
               mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
@@ -272,7 +275,8 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
 
   "handling requests to display the select address page" must {
 
-    def performAction(): Future[Result] = controller.selectAddress()(FakeRequest())
+    def performAction(): Future[Result] =
+      controller.selectAddress()(FakeRequest())
 
     behave like subscriptionDetailsBehavior(performAction)
 
