@@ -22,7 +22,7 @@ import cats.syntax.either._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.OK
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, Error, NINO}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, DateOfBirth, Error, NINO, Name}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -31,19 +31,30 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[BusinessPartnerRecordServiceImpl])
 trait BusinessPartnerRecordService {
 
-  def getBusinessPartnerRecord(nino: NINO)(implicit hc: HeaderCarrier): EitherT[Future, Error, BusinessPartnerRecord]
+  def getBusinessPartnerRecord(nino: NINO, name: Name, dob: DateOfBirth)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, BusinessPartnerRecord]
 
 }
 
 @Singleton
-class BusinessPartnerRecordServiceImpl @Inject() (connector: CGTPropertyDisposalsConnector)(implicit ec: ExecutionContext) extends BusinessPartnerRecordService {
+class BusinessPartnerRecordServiceImpl @Inject()(connector: CGTPropertyDisposalsConnector)(
+  implicit ec: ExecutionContext
+) extends BusinessPartnerRecordService {
 
-  override def getBusinessPartnerRecord(nino: NINO)(implicit hc: HeaderCarrier): EitherT[Future, Error, BusinessPartnerRecord] =
-    connector.getBusinessPartnerRecord(nino)
+  override def getBusinessPartnerRecord(
+    nino: NINO,
+    name: Name,
+    dob: DateOfBirth
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, BusinessPartnerRecord] =
+    connector
+      .getBusinessPartnerRecord(nino, name, dob)
       .subflatMap { response =>
         response.status match {
-          case OK    => response.parseJSON[BusinessPartnerRecord]().leftMap(Error.apply)
-          case other => Left(Error(s"Call to get BPR came back with status $other"))
+          case OK =>
+            response.parseJSON[BusinessPartnerRecord]().leftMap(Error.apply)
+          case other =>
+            Left(Error(s"Call to get BPR came back with status $other"))
         }
       }
 

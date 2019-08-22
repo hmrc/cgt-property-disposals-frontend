@@ -19,12 +19,12 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import play.api.libs.json.{Format, Json}
 
 final case class SessionData(
-    ivContinueUrl: Option[String],
-    businessPartnerRecord: Option[BusinessPartnerRecord],
-    emailToBeVerified: Option[EmailToBeVerified],
-    addressLookupResult: Option[AddressLookupResult],
-    subscriptionDetails: Option[SubscriptionDetails],
-    subscriptionResponse: Option[SubscriptionResponse]
+  ivContinueUrl: Option[String],
+  businessPartnerRecord: Option[BusinessPartnerRecord],
+  emailToBeVerified: Option[EmailToBeVerified],
+  addressLookupResult: Option[AddressLookupResult],
+  subscriptionDetails: Option[SubscriptionDetails],
+  subscriptionResponse: Option[SubscriptionResponse]
 )
 
 object SessionData {

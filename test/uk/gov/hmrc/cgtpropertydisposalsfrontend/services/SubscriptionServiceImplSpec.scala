@@ -35,7 +35,8 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
   val service = new SubscriptionServiceImpl(mockConnector)
 
   def mockSubscribe(expectedSubscriptionDetails: SubscriptionDetails)(response: Either[Error, HttpResponse]) =
-    (mockConnector.subscribe(_: SubscriptionDetails)(_: HeaderCarrier))
+    (mockConnector
+      .subscribe(_: SubscriptionDetails)(_: HeaderCarrier))
       .expects(expectedSubscriptionDetails, *)
       .returning(EitherT(Future.successful(response)))
 
@@ -44,7 +45,7 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
     "handling requests to subscribe" must {
 
       implicit val hc: HeaderCarrier = HeaderCarrier()
-      val subscriptionDetails = sample[SubscriptionDetails]
+      val subscriptionDetails        = sample[SubscriptionDetails]
 
       "return an error" when {
 
@@ -70,19 +71,19 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
 
       "return the subscription response if the call comes back with a " +
         "200 status and the JSON body can be parsed" in {
-          val cgtReferenceNumber = "number"
-          val jsonBody = Json.parse(
-            s"""
+        val cgtReferenceNumber = "number"
+        val jsonBody = Json.parse(
+          s"""
              |{
              |  "cgtReferenceNumber" : "$cgtReferenceNumber"
              |}
              |""".stripMargin
-          )
+        )
 
-          mockSubscribe(subscriptionDetails)(Right(HttpResponse(200, Some(jsonBody))))
+        mockSubscribe(subscriptionDetails)(Right(HttpResponse(200, Some(jsonBody))))
 
-          await(service.subscribe(subscriptionDetails).value) shouldBe Right(SubscriptionResponse(cgtReferenceNumber))
-        }
+        await(service.subscribe(subscriptionDetails).value) shouldBe Right(SubscriptionResponse(cgtReferenceNumber))
+      }
     }
 
   }

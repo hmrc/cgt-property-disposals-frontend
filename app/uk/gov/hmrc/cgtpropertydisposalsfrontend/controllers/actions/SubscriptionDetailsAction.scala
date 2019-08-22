@@ -36,44 +36,54 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 import scala.concurrent.{ExecutionContext, Future}
 
 final case class RequestWithSubscriptionDetails[A](
-    subscriptionDetails: SubscriptionDetails,
-    sessionData: SessionData,
-    authenticatedRequest: AuthenticatedRequest[A]
-) extends WrappedRequest[A](authenticatedRequest) with PreferredMessagesProvider {
-  override def messagesApi: MessagesApi = authenticatedRequest.request.messagesApi
+  subscriptionDetails: SubscriptionDetails,
+  sessionData: SessionData,
+  authenticatedRequest: AuthenticatedRequest[A]
+) extends WrappedRequest[A](authenticatedRequest)
+    with PreferredMessagesProvider {
+  override def messagesApi: MessagesApi =
+    authenticatedRequest.request.messagesApi
 }
 
-class SubscriptionDetailsAction @Inject() (
-    sessionStore: SessionStore,
-    errorHandler: ErrorHandler
-)(implicit ec: ExecutionContext) extends ActionRefiner[AuthenticatedRequest, RequestWithSubscriptionDetails] with Logging {
+class SubscriptionDetailsAction @Inject()(sessionStore: SessionStore, errorHandler: ErrorHandler)(
+  implicit ec: ExecutionContext
+) extends ActionRefiner[AuthenticatedRequest, RequestWithSubscriptionDetails]
+    with Logging {
 
   override protected def executionContext: ExecutionContext = ec
 
-  override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, RequestWithSubscriptionDetails[A]]] = {
-    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
+  override protected def refine[A](
+    request: AuthenticatedRequest[A]
+  ): Future[Either[Result, RequestWithSubscriptionDetails[A]]] = {
+    implicit val hc: HeaderCarrier =
+      HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-    sessionStore.get().map(
-      _.leftMap { e =>
+    sessionStore
+      .get()
+      .map(_.leftMap { e =>
         logger.warn("Could not get session data", e)
         errorHandler.errorResult()(request)
-      }
-        .flatMap { maybeSessionData =>
-          (maybeSessionData, maybeSessionData.flatMap(_.subscriptionDetails), maybeSessionData.flatMap((_.subscriptionResponse))) match {
-            case (Some(_), Some(_), Some(_)) if request.uri =!= routes.SubscriptionController.subscribed().url =>
-              // user has already subscribed in this session
-              Left(SeeOther(routes.SubscriptionController.subscribed().url))
+      }.flatMap { maybeSessionData =>
+        (
+          maybeSessionData,
+          maybeSessionData.flatMap(_.subscriptionDetails),
+          maybeSessionData.flatMap((_.subscriptionResponse))
+        ) match {
+          case (Some(_), Some(_), Some(_))
+              if request.uri =!= routes.SubscriptionController
+                .subscribed()
+                .url =>
+            // user has already subscribed in this session
+            Left(SeeOther(routes.SubscriptionController.subscribed().url))
 
-            case (Some(sessionData), Some(subscriptionDetails), _) =>
-              Right(RequestWithSubscriptionDetails(subscriptionDetails, sessionData, request))
+          case (Some(sessionData), Some(subscriptionDetails), _) =>
+            Right(RequestWithSubscriptionDetails(subscriptionDetails, sessionData, request))
 
-            case _ =>
-              Left(SeeOther(routes.StartController.start().url))
+          case _ =>
+            Left(SeeOther(routes.StartController.start().url))
 
-          }
         }
-    )
+      })
   }
 
 }
-

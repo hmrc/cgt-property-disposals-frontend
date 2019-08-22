@@ -30,8 +30,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class AddressLookupConnectorImplSpec extends WordSpec with Matchers with MockFactory with HttpSupport {
 
-  val config = Configuration(ConfigFactory.parseString(
-    """
+  val config = Configuration(
+    ConfigFactory.parseString(
+      """
       |microservice {
       |  services {
       |    address-lookup {
@@ -43,7 +44,8 @@ class AddressLookupConnectorImplSpec extends WordSpec with Matchers with MockFac
       |  }
       |}
       |""".stripMargin
-  ))
+    )
+  )
 
   val connector = new AddressLookupConnectorImpl(mockHttp, new ServicesConfig(config, new RunMode(config, Mode.Test)))
   "AddressLookupConnectorImpl" when {
@@ -51,7 +53,7 @@ class AddressLookupConnectorImplSpec extends WordSpec with Matchers with MockFac
     "handling request to lookup addresses" must {
 
       implicit val hc: HeaderCarrier = HeaderCarrier()
-      val postcode = Postcode("WC1X9BH")
+      val postcode                   = Postcode("WC1X9BH")
 
       "do a get http call and return the result" in {
         List(
@@ -59,16 +61,16 @@ class AddressLookupConnectorImplSpec extends WordSpec with Matchers with MockFac
           HttpResponse(200, Some(JsString("hi"))),
           HttpResponse(500)
         ).foreach { httpResponse =>
-            withClue(s"For http response [${httpResponse.toString}]") {
-              mockGet(
-                s"http://host:123/v2/uk/addresses",
-                Map("postcode" -> postcode.value),
-                Map("User-Agent" -> "agent")
-              )(Some(httpResponse))
+          withClue(s"For http response [${httpResponse.toString}]") {
+            mockGet(
+              s"http://host:123/v2/uk/addresses",
+              Map("postcode"   -> postcode.value),
+              Map("User-Agent" -> "agent")
+            )(Some(httpResponse))
 
-              await(connector.lookupAddress(postcode).value) shouldBe Right(httpResponse)
-            }
+            await(connector.lookupAddress(postcode).value) shouldBe Right(httpResponse)
           }
+        }
       }
 
       "get rid of all spaces and turn all lower case letters to upper case letters" in {
@@ -76,7 +78,7 @@ class AddressLookupConnectorImplSpec extends WordSpec with Matchers with MockFac
 
         mockGet(
           s"http://host:123/v2/uk/addresses",
-          Map("postcode" -> "AB12CD"),
+          Map("postcode"   -> "AB12CD"),
           Map("User-Agent" -> "agent")
         )(Some(response))
 
@@ -88,7 +90,7 @@ class AddressLookupConnectorImplSpec extends WordSpec with Matchers with MockFac
         "the future fails" in {
           mockGet(
             s"http://host:123/v2/uk/addresses",
-            Map("postcode" -> postcode.value),
+            Map("postcode"   -> postcode.value),
             Map("User-Agent" -> "agent")
           )(None)
 

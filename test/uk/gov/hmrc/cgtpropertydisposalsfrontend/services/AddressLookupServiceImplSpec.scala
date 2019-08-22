@@ -35,7 +35,8 @@ class AddressLookupServiceImplSpec extends WordSpec with Matchers with MockFacto
   val mockConnector = mock[AddressLookupConnector]
 
   def mockLookupAddress(expectedPostcode: Postcode)(result: Either[Error, HttpResponse]) =
-    (mockConnector.lookupAddress(_: Postcode)(_: HeaderCarrier))
+    (mockConnector
+      .lookupAddress(_: Postcode)(_: HeaderCarrier))
       .expects(expectedPostcode, *)
       .returning(EitherT.fromEither[Future](result))
 
@@ -46,7 +47,7 @@ class AddressLookupServiceImplSpec extends WordSpec with Matchers with MockFacto
     "handling address lookups" must {
 
       implicit val hc: HeaderCarrier = HeaderCarrier()
-      val postcode = Postcode("postcode")
+      val postcode                   = Postcode("postcode")
 
       "return an error" when {
 

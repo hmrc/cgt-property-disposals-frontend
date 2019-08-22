@@ -14,28 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import java.time.LocalDate
 
-class ReturnsControllerSpec extends ControllerSpec {
+import play.api.libs.json.{Json, OFormat}
 
-  val controller = instanceOf[ReturnsController]
+final case class DateOfBirth(value: LocalDate) extends AnyVal
 
-  "The ReturnsController" when {
-
-    "handling requests to display the start page" must {
-
-      "display the start page" in {
-        val result = controller.start()(FakeRequest())
-        status(result)          shouldBe OK
-        contentAsString(result) should include("Start your return here")
-
-      }
-
-    }
-
-  }
-
+object DateOfBirth {
+  implicit val format: OFormat[DateOfBirth] = Json.format[DateOfBirth]
 }

@@ -26,12 +26,14 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 @Singleton
-class IvController @Inject() (
-    val authenticatedAction: AuthenticatedAction,
-    val sessionDataAction: SessionDataAction,
-    errorHandler: ErrorHandler,
-    cc: MessagesControllerComponents
-) extends FrontendController(cc) with WithActions with Logging {
+class IvController @Inject()(
+  val authenticatedAction: AuthenticatedAction,
+  val sessionDataAction: SessionDataAction,
+  errorHandler: ErrorHandler,
+  cc: MessagesControllerComponents
+) extends FrontendController(cc)
+    with WithActions
+    with Logging {
 
   def ivSuccess(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
     request.sessionData.flatMap(_.ivContinueUrl) match {

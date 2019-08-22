@@ -20,18 +20,21 @@ import cats.syntax.either._
 import play.api.libs.json.{Format, Json}
 
 final case class SubscriptionDetails(
-    forename: String,
-    surname: String,
-    emailAddress: String,
-    address: Address,
-    sapNumber: String
+  forename: String,
+  surname: String,
+  emailAddress: String,
+  address: Address,
+  sapNumber: String
 )
 
 object SubscriptionDetails {
 
   implicit val format: Format[SubscriptionDetails] = Json.format
 
-  def fromBusinessPartnerRecord(bpr: BusinessPartnerRecord): Either[String, SubscriptionDetails] =
-    Either.fromOption(bpr.emailAddress.map(e => SubscriptionDetails(bpr.forename, bpr.surname, e, bpr.address, bpr.sapNumber)), "email address missing")
+  def apply(bpr: BusinessPartnerRecord, name: Name): Either[String, SubscriptionDetails] =
+    Either.fromOption(
+      bpr.emailAddress.map(e => SubscriptionDetails(name.forename, name.surname, e, bpr.address, bpr.sapNumber)),
+      "email address missing"
+    )
 
 }

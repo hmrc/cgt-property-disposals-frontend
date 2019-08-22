@@ -23,10 +23,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 @Singleton
-class LandingPageController @Inject() (
-    cc: MessagesControllerComponents,
-    landing_page: views.html.landing_page
-)(implicit viewConfig: ViewConfig) extends FrontendController(cc) {
+class LandingPageController @Inject()(cc: MessagesControllerComponents, landing_page: views.html.landing_page)(
+  implicit viewConfig: ViewConfig
+) extends FrontendController(cc) {
 
   def landingPage(): Action[AnyContent] = Action { implicit request =>
     Ok(landing_page())

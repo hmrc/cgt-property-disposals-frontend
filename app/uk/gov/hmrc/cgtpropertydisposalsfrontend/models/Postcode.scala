@@ -25,10 +25,13 @@ final case class Postcode(value: String) extends AnyVal
 
 object Postcode {
 
-  implicit val format: Format[Postcode] = implicitly[Format[String]].inmap(Postcode(_), _.value)
+  implicit val format: Format[Postcode] =
+    implicitly[Format[String]].inmap(Postcode(_), _.value)
 
   val form: Form[Postcode] = {
-    val postcodeRegexPredicate = "^[A-Z]{1,2}[0-9][0-9A-Z]?[0-9][A-Z]{2}$|BFPO[0-9]{1,5}$".r.pattern.asPredicate()
+    val postcodeRegexPredicate =
+      "^[A-Z]{1,2}[0-9][0-9A-Z]?[0-9][A-Z]{2}$|BFPO[0-9]{1,5}$".r.pattern
+        .asPredicate()
 
     Form(
       mapping(

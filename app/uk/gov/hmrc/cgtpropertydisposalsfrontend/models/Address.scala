@@ -27,22 +27,22 @@ sealed trait Address
 object Address {
 
   final case class UkAddress(
-      line1: String,
-      line2: Option[String],
-      line3: Option[String],
-      line4: Option[String],
-      postcode: String
+    line1: String,
+    line2: Option[String],
+    line3: Option[String],
+    line4: Option[String],
+    postcode: String
   ) extends Address {
     val countryCode: String = "GB"
   }
 
   final case class NonUkAddress(
-      line1: String,
-      line2: Option[String],
-      line3: Option[String],
-      line4: Option[String],
-      postcode: Option[String],
-      countryCode: String
+    line1: String,
+    line2: Option[String],
+    line3: Option[String],
+    line4: Option[String],
+    postcode: Option[String],
+    countryCode: String
   ) extends Address
 
   // the format instance using the play-json-derived-codecs library wraps
@@ -63,4 +63,3 @@ object Address {
     )
 
 }
-

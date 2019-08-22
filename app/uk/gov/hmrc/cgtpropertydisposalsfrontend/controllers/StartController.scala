@@ -25,20 +25,24 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.toFuture
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class StartController @Inject() (
-    bprService: BusinessPartnerRecordService,
-    sessionStore: SessionStore,
-    errorHandler: ErrorHandler, cc: MessagesControllerComponents,
-    val authenticatedAction: AuthenticatedAction,
-    val sessionDataAction: SessionDataAction
-)(implicit ec: ExecutionContext) extends FrontendController(cc) with WithActions with Logging with SessionUpdates {
+class StartController @Inject()(
+  bprService: BusinessPartnerRecordService,
+  sessionStore: SessionStore,
+  errorHandler: ErrorHandler,
+  cc: MessagesControllerComponents,
+  val authenticatedAction: AuthenticatedAction,
+  val sessionDataAction: SessionDataAction
+)(implicit ec: ExecutionContext)
+    extends FrontendController(cc)
+    with WithActions
+    with Logging
+    with SessionUpdates {
 
   def start(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     (request.sessionData.flatMap(_.businessPartnerRecord), request.sessionData.flatMap(_.subscriptionDetails)) match {
@@ -47,8 +51,16 @@ class StartController @Inject() (
 
       case (maybeBpr, None) =>
         val result = for {
-          bpr <- maybeBpr.fold(bprService.getBusinessPartnerRecord(request.authenticatedRequest.nino))(EitherT.pure(_))
-          subscriptionDetails <- EitherT.fromEither[Future](SubscriptionDetails.fromBusinessPartnerRecord(bpr)).leftMap(Error(_))
+          bpr <- maybeBpr.fold(
+                  bprService.getBusinessPartnerRecord(
+                    request.authenticatedRequest.nino,
+                    request.authenticatedRequest.name,
+                    request.authenticatedRequest.dateOfBirth
+                  )
+                )(EitherT.pure(_))
+          subscriptionDetails <- EitherT
+                                  .fromEither[Future](SubscriptionDetails(bpr, request.authenticatedRequest.name))
+                                  .leftMap(Error(_))
           _ <- EitherT(updateSession(sessionStore, request)(_.copy(subscriptionDetails = Some(subscriptionDetails))))
         } yield subscriptionDetails
 
