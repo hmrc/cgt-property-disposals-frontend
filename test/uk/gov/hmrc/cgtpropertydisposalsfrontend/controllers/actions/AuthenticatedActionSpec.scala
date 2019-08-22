@@ -21,7 +21,6 @@ import java.net.URLEncoder
 import com.typesafe.config.ConfigFactory
 import org.joda.time.LocalDate
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.mvc.MessagesRequest
@@ -80,7 +79,8 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
       @SuppressWarnings(Array("org.wartremover.warts.Any"))
       val request = new MessagesRequest[A](r, stub[MessagesApi])
       authenticatedAction.invokeBlock(request, { a: AuthenticatedRequest[A] =>
-        Future.successful(Ok(a.nino.value))
+        Future.successful(
+          Ok(a.nino.value + "|" + a.name.forename + "|" + a.name.surname + "|" + a.dateOfBirth.value.toString))
       })
     }
   }
@@ -103,7 +103,8 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
           withClue(s"For error $e: ") {
             mockAuth(
               ConfidenceLevel.L200,
-              Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth)(
+              Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth
+            )(
               Future.failed(e)
             )
 
@@ -133,7 +134,7 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
 
         val result = performAction(FakeRequest())
         status(result)          shouldBe OK
-        contentAsString(result) shouldBe "nino"
+        contentAsString(result) shouldBe "nino|givenName|familyName|2000-04-10"
       }
     }
 
@@ -156,13 +157,53 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
       }
     }
 
+    "handling a logged in user with CL200 and a NINO, and no ITMP name and complete non-ITMP name" must {
+      val retrievals = Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth
+      val retrievalsResult = Future successful (
+        new ~(
+          new ~(
+            new ~(Some("nino"), None),
+            Some(Name(Some("first-name second-name"), None))
+          ),
+          Some(new LocalDate(2000, 4, 10))
+        )
+      )
+      "effect the requested action" in new TestEnvironment {
+        mockAuth(ConfidenceLevel.L200, retrievals)(retrievalsResult)
+
+        val result = performAction(FakeRequest())
+        status(result)          shouldBe OK
+        contentAsString(result) shouldBe "nino|first-name|second-name|2000-04-10"
+      }
+    }
+
+    "handling a logged in user with CL200 and a NINO, and no ITMP name and complete non-ITMP name with more than two parts should only retrieve the first and last name" must {
+      val retrievals = Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth
+      val retrievalsResult = Future successful (
+        new ~(
+          new ~(
+            new ~(Some("nino"), None),
+            Some(Name(Some("first-name second-name third-name"), None))
+          ),
+          Some(new LocalDate(2000, 4, 10))
+        )
+      )
+      "effect the requested action" in new TestEnvironment {
+        mockAuth(ConfidenceLevel.L200, retrievals)(retrievalsResult)
+
+        val result = performAction(FakeRequest())
+        status(result)          shouldBe OK
+        contentAsString(result) shouldBe "nino|first-name|third-name|2000-04-10"
+      }
+    }
+
     "handling a logged in user with CL200 and a NINO, and no ITMP name and incomplete non-ITMP name" must {
       val retrievals = Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth
       val retrievalsResult = Future successful (
         new ~(
           new ~(
             new ~(Some("nino"), None),
-            Some(Name(None, Some("surname")))
+            Some(Name(Some("first-name-only"), None))
           ),
           Some(new LocalDate(2000, 4, 10))
         )
@@ -206,7 +247,8 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
             inSequence {
               mockAuth(
                 ConfidenceLevel.L200,
-                Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth)(
+                Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth
+              )(
                 Future.failed(InsufficientConfidenceLevel())
               )
               mockStoreSession(SessionData.empty.copy(ivContinueUrl = Some(selfBaseUrl + requestUri)))(
@@ -226,7 +268,8 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
             inSequence {
               mockAuth(
                 ConfidenceLevel.L200,
-                Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth)(
+                Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth
+              )(
                 Future.failed(InsufficientConfidenceLevel())
               )
               mockStoreSession(SessionData.empty.copy(ivContinueUrl = Some(selfBaseUrl + requestUri)))(
@@ -251,7 +294,8 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
             inSequence {
               mockAuth(
                 ConfidenceLevel.L200,
-                Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth)(
+                Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth
+              )(
                 Future.failed(InsufficientConfidenceLevel())
               )
               mockStoreSession(SessionData.empty.copy(ivContinueUrl = Some(selfBaseUrl + requestUri)))(
@@ -291,7 +335,8 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
             val exception = intercept[AuthorisationException] {
               mockAuth(
                 ConfidenceLevel.L200,
-                Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth)(
+                Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth
+              )(
                 Future.failed(e)
               )
 

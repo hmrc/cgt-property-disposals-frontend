@@ -171,7 +171,7 @@ class AuthenticatedAction @Inject()(
                 "completionURL"   -> Seq(ivSuccessUrl),
                 "failureURL"      -> Seq(ivFailureUrl)
               )
-            )
+          )
         ).merge
       }
 
