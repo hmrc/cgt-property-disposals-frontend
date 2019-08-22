@@ -136,57 +136,63 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
         contentAsString(result) shouldBe "nino"
       }
     }
-//
-//    //TODO: add another column
-//    //TODO: generate the combinbations -
-//    val failedRetrievalCombinations =
-//      Table(
-//        ("nino", "name", "dateOfBirth"),
-//        (Some("nino"), None, None),
-//        (Some("nino"), Some(Name(None, None)), None),
-//        (Some("nino"), Some(Name(Some("forename"), None)), None),
-//        (Some("nino"), Some(Name(None, Some("surname"))), None),
-//        (Some("nino"), Some(Name(Some("forename"), Some("surname"))), None),
-//        (Some("nino"), None, Some(new LocalDate(2000, 4, 10))),
-//        (Some("nino"), Some(Name(None, None)), Some(new LocalDate(2000, 4, 10))),
-//        (Some("nino"), Some(Name(Some("forename"), None)), Some(new LocalDate(2000, 4, 10))),
-//        (Some("nino"), Some(Name(None, Some("surname"))), Some(new LocalDate(2000, 4, 10))),
-//        (None, Some(Name(None, None)), None),
-//        (None, Some(Name(Some("forename"), None)), None),
-//        (None, Some(Name(None, Some("surname"))), None),
-//        (None, Some(Name(Some("forename"), Some("surname"))), None),
-//        (None, None, Some(new LocalDate(2000, 4, 10))),
-//        (None, Some(Name(None, None)), Some(new LocalDate(2000, 4, 10))),
-//        (None, Some(Name(Some("forename"), None)), Some(new LocalDate(2000, 4, 10))),
-//        (None, Some(Name(None, Some("surname"))), Some(new LocalDate(2000, 4, 10))),
-//        (None, Some(Name(Some("forename"), Some("surname"))), Some(new LocalDate(2000, 4, 10))),
-//        (Some("nino"), None, None),
-//        (Some("nino"), None, None),
-//        (Some("nino"), None, None),
-//        (Some("nino"), None, None),
-//        (Some("nino"), None, None),
-//        (Some("nino"), None, Some(new LocalDate(2000, 4, 10))),
-//        (Some("nino"), None, Some(new LocalDate(2000, 4, 10))),
-//        (Some("nino"), None, Some(new LocalDate(2000, 4, 10))),
-//        (Some("nino"), None, Some(new LocalDate(2000, 4, 10))),
-//        (Some("nino"), None, Some(new LocalDate(2000, 4, 10))),
-//        (None, None, None)
-//      )
-//
-//    "handling a logged in user with CL200 and some auth records cannot be retrieved" must {
-//      val retrievals = Retrievals.nino and Retrievals.name and Retrievals.dateOfBirth
-//      "effect the requested action" in new TestEnvironment {
-//        forAll(failedRetrievalCombinations) {
-//          (nino: Option[String], name: Option[Name], dateOfBirth: Option[LocalDate]) =>
-//            val retrievalsResult = Future.successful(
-//              new ~(new ~(nino, name), dateOfBirth)
-//            )
-//            mockAuth(ConfidenceLevel.L200, retrievals)(retrievalsResult)
-//            val result = performAction(FakeRequest())
-//            checkIsTechnicalErrorPage(result)
-//        }
-//      }
-//    }
+
+    "handling a logged in user with CL200 and a NINO, and an incomplete ITMP name" must {
+      val retrievals = Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth
+      val retrievalsResult = Future successful (
+        new ~(
+          new ~(
+            new ~(Some("nino"), Some(ItmpName(None, Some("middleName"), Some("familyName")))),
+            None
+          ),
+          Some(new LocalDate(2000, 4, 10))
+        )
+      )
+      "effect the requested action" in new TestEnvironment {
+        mockAuth(ConfidenceLevel.L200, retrievals)(retrievalsResult)
+
+        val result = performAction(FakeRequest())
+        checkIsTechnicalErrorPage(result)
+      }
+    }
+
+    "handling a logged in user with CL200 and a NINO, and no ITMP name and incomplete non-ITMP name" must {
+      val retrievals = Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth
+      val retrievalsResult = Future successful (
+        new ~(
+          new ~(
+            new ~(Some("nino"), None),
+            Some(Name(None, Some("surname")))
+          ),
+          Some(new LocalDate(2000, 4, 10))
+        )
+      )
+      "effect the requested action" in new TestEnvironment {
+        mockAuth(ConfidenceLevel.L200, retrievals)(retrievalsResult)
+
+        val result = performAction(FakeRequest())
+        checkIsTechnicalErrorPage(result)
+      }
+    }
+
+    "handling a logged in user with CL200 and a NINO and no ITMP name" must {
+      val retrievals = Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth
+      val retrievalsResult = Future successful (
+        new ~(
+          new ~(
+            new ~(Some("nino"), None),
+            None
+          ),
+          Some(new LocalDate(2000, 4, 10))
+        )
+      )
+      "effect the requested action" in new TestEnvironment {
+        mockAuth(ConfidenceLevel.L200, retrievals)(retrievalsResult)
+
+        val result = performAction(FakeRequest())
+        checkIsTechnicalErrorPage(result)
+      }
+    }
 
     "handling a logged in user" when {
 
