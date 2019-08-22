@@ -80,13 +80,24 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
       val request = new MessagesRequest[A](r, stub[MessagesApi])
       authenticatedAction.invokeBlock(request, { a: AuthenticatedRequest[A] =>
         Future.successful(
-          Ok(a.nino.value + "|" + a.name.forename + "|" + a.name.surname + "|" + a.dateOfBirth.value.toString))
+          Ok(
+            List(
+              a.nino.value,
+              a.name.forename,
+              a.name.surname,
+              a.dateOfBirth.value.toString,
+              a.email.map(_.value).toString
+            ).mkString("|")
+          ))
       })
     }
   }
 
   def urlEncode(s: String): String = URLEncoder.encode(s, "UTF-8")
 
+  val retrievals =
+    Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth and Retrievals.email
+  
   "AuthenticatedAction" when {
 
     "handling a not logged in user" must {
@@ -103,7 +114,7 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
           withClue(s"For error $e: ") {
             mockAuth(
               ConfidenceLevel.L200,
-              Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth
+              retrievals
             )(
               Future.failed(e)
             )
@@ -118,15 +129,17 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
       }
     }
 
-    "handling a logged in user with CL200 and a NINO, name, and date of birth can be retrieved" must {
-      val retrievals = Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth
+    "handling a logged in user with CL200 and all necessary data" must {
       val retrievalsResult = Future successful (
         new ~(
           new ~(
-            new ~(Some("nino"), Some(ItmpName(Some("givenName"), Some("middleName"), Some("familyName")))),
+            new ~(
+              new ~(Some("nino"), Some(ItmpName(Some("givenName"), Some("middleName"), Some("familyName")))),
             Some(Name(Some("forename"), Some("surname")))
           ),
           Some(new LocalDate(2000, 4, 10))
+          ),
+          Some("email")
         )
       )
       "effect the requested action" in new TestEnvironment {
@@ -134,19 +147,21 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
 
         val result = performAction(FakeRequest())
         status(result)          shouldBe OK
-        contentAsString(result) shouldBe "nino|givenName|familyName|2000-04-10"
+        contentAsString(result) shouldBe "nino|givenName|familyName|2000-04-10|Some(email)"
       }
     }
 
     "handling a logged in user with CL200 and a NINO, and an incomplete ITMP name" must {
-      val retrievals = Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth
       val retrievalsResult = Future successful (
         new ~(
           new ~(
+            new ~(
             new ~(Some("nino"), Some(ItmpName(None, Some("middleName"), Some("familyName")))),
             None
           ),
           Some(new LocalDate(2000, 4, 10))
+        ),
+      None
         )
       )
       "effect the requested action" in new TestEnvironment {
@@ -158,14 +173,17 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
     }
 
     "handling a logged in user with CL200 and a NINO, and no ITMP name and complete non-ITMP name" must {
-      val retrievals = Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth
+      
       val retrievalsResult = Future successful (
         new ~(
           new ~(
+            new ~(
             new ~(Some("nino"), None),
             Some(Name(Some("first-name second-name"), None))
           ),
           Some(new LocalDate(2000, 4, 10))
+          ),
+          None
         )
       )
       "effect the requested action" in new TestEnvironment {
@@ -173,19 +191,22 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
 
         val result = performAction(FakeRequest())
         status(result)          shouldBe OK
-        contentAsString(result) shouldBe "nino|first-name|second-name|2000-04-10"
+        contentAsString(result) shouldBe "nino|first-name|second-name|2000-04-10|None"
       }
     }
 
     "handling a logged in user with CL200 and a NINO, and no ITMP name and complete non-ITMP name with more than two parts should only retrieve the first and last name" must {
-      val retrievals = Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth
+      
       val retrievalsResult = Future successful (
         new ~(
           new ~(
+            new ~(
             new ~(Some("nino"), None),
             Some(Name(Some("first-name second-name third-name"), None))
           ),
           Some(new LocalDate(2000, 4, 10))
+          ),
+          Some("email")
         )
       )
       "effect the requested action" in new TestEnvironment {
@@ -193,19 +214,22 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
 
         val result = performAction(FakeRequest())
         status(result)          shouldBe OK
-        contentAsString(result) shouldBe "nino|first-name|third-name|2000-04-10"
+        contentAsString(result) shouldBe "nino|first-name|third-name|2000-04-10|Some(email)"
       }
     }
 
     "handling a logged in user with CL200 and a NINO, and no ITMP name and incomplete non-ITMP name" must {
-      val retrievals = Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth
+      
       val retrievalsResult = Future successful (
         new ~(
           new ~(
+            new ~(
             new ~(Some("nino"), None),
             Some(Name(Some("first-name-only"), None))
           ),
           Some(new LocalDate(2000, 4, 10))
+          ),
+          Some("email")
         )
       )
       "effect the requested action" in new TestEnvironment {
@@ -217,14 +241,17 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
     }
 
     "handling a logged in user with CL200 and a NINO and no ITMP name" must {
-      val retrievals = Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth
+      
       val retrievalsResult = Future successful (
         new ~(
           new ~(
+            new ~(
             new ~(Some("nino"), None),
             None
           ),
           Some(new LocalDate(2000, 4, 10))
+        ),
+          None
         )
       )
       "effect the requested action" in new TestEnvironment {
@@ -247,7 +274,7 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
             inSequence {
               mockAuth(
                 ConfidenceLevel.L200,
-                Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth
+                retrievals
               )(
                 Future.failed(InsufficientConfidenceLevel())
               )
@@ -268,7 +295,7 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
             inSequence {
               mockAuth(
                 ConfidenceLevel.L200,
-                Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth
+                retrievals
               )(
                 Future.failed(InsufficientConfidenceLevel())
               )
@@ -294,7 +321,7 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
             inSequence {
               mockAuth(
                 ConfidenceLevel.L200,
-                Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth
+                retrievals
               )(
                 Future.failed(InsufficientConfidenceLevel())
               )
@@ -335,7 +362,7 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
             val exception = intercept[AuthorisationException] {
               mockAuth(
                 ConfidenceLevel.L200,
-                Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth
+                retrievals
               )(
                 Future.failed(e)
               )

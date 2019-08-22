@@ -31,8 +31,8 @@ object SubscriptionDetails {
 
   implicit val format: Format[SubscriptionDetails] = Json.format
 
-  def apply(bpr: BusinessPartnerRecord, name: Name): Either[NonEmptyList[MissingData], SubscriptionDetails] =
-    bpr.emailAddress
+  def apply(bpr: BusinessPartnerRecord, name: Name, maybeEmail: Option[Email]): Either[NonEmptyList[MissingData], SubscriptionDetails] =
+    bpr.emailAddress.orElse(maybeEmail.map(_.value))
       .fold[Either[NonEmptyList[MissingData], SubscriptionDetails]](
         Left(NonEmptyList.one(MissingData.Email))
       )(email => Right(SubscriptionDetails(name.forename, name.surname, email, bpr.address, bpr.sapNumber)))

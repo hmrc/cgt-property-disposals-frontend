@@ -68,7 +68,9 @@ class StartController @Inject()(
                 request.authenticatedRequest.name,
                 request.authenticatedRequest.dateOfBirth
               ))(EitherT.pure(_))
-      maybeSubscriptionDetails <- EitherT.pure(SubscriptionDetails(bpr, request.authenticatedRequest.name))
+      maybeSubscriptionDetails <- EitherT.pure(
+        SubscriptionDetails(bpr, request.authenticatedRequest.name, request.authenticatedRequest.email)
+      )
       _ <- EitherT(
             maybeSubscriptionDetails.fold[Future[Either[Error, Unit]]](
               _ =>

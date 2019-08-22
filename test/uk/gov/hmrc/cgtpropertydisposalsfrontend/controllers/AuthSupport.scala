@@ -48,22 +48,26 @@ trait AuthSupport {
       .returning(result)
 
   def mockAuthWithCl200AndWithAllRetrievals(
-    retrievedNino: String,
-    retrievedName: Name,
-    retrievedDateOfBirth: LocalDate
-  ): Unit =
+                                                  retrievedNino: String,
+                                                  retrievedName: Name,
+                                                  retrievedDateOfBirth: LocalDate,
+                                                  retrievedEmail: Option[String]
+                                                ): Unit =
     mockAuth(
       ConfidenceLevel.L200,
-      Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth
+      Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth and Retrievals.email
     )(
       Future successful (
         new ~(
           new ~(
-            new ~(Some(retrievedNino), Some(ItmpName(Some(retrievedName.forename), None, Some(retrievedName.surname)))),
-            None
+            new ~(
+              new ~(Some(retrievedNino), Some(ItmpName(Some(retrievedName.forename), None, Some(retrievedName.surname)))),
+              None
+            ),
+            Some(new LocalDate(2000, 4, 10))
           ),
-          Some(new LocalDate(2000, 4, 10))
+          retrievedEmail
         )
-      )
+        )
     )
 }

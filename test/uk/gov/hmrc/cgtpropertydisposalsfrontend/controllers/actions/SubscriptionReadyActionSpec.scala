@@ -41,7 +41,13 @@ class SubscriptionReadyActionSpec extends ControllerSpec with SessionSupport {
     def performAction(sessionData: SessionData, requestUrl: String = "/"): Future[Result] = {
       val messagesRequest = new MessagesRequest(FakeRequest("GET", requestUrl), instanceOf[MessagesApi])
       val authenticatedRequest =
-        AuthenticatedRequest(NINO("nino"), Name("name", "lastName"), DateOfBirth(LocalDate.now()), messagesRequest)
+        AuthenticatedRequest(
+          NINO("nino"),
+          Name("name", "lastName"),
+          DateOfBirth(LocalDate.now()),
+          Some(Email("email")),
+          messagesRequest
+        )
 
       action.invokeBlock(
         authenticatedRequest, { r: RequestWithSubscriptionReady[_] =>

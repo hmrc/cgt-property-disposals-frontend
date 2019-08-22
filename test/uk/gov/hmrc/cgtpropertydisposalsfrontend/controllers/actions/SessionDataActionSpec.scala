@@ -43,6 +43,7 @@ class SessionDataActionSpec extends ControllerSpec with SessionSupport {
         NINO("nino"),
         Name("name", "lastName"),
         DateOfBirth(LocalDate.of(2000, 10, 1)),
+        Some(Email("email")),
         messagesRequest)
 
     val sessionData = sample[SessionData]
