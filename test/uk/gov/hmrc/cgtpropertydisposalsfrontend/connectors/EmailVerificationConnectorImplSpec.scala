@@ -25,7 +25,7 @@ import play.api.Configuration
 import play.api.libs.json.{JsString, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Email
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Name}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -63,14 +63,14 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
         s"$protocol://$host:$port/email-verification/verification-requests"
       val email = Email("email@test.com")
       val id    = UUID.randomUUID()
-      val name  = "Bob"
+      val name  = Name("Bob", "Lob")
 
       val body = Json.parse(
         s"""
            |{
            |"email": "${email.value}",
            |"templateId": "$templateId",
-           |"templateParameters": { "name" : "$name" },
+           |"templateParameters": { "name" : "${name.forename}" },
            |"linkExpiryDuration" : "PT${linkExpiryTimeMinutes}M",
            |"continueUrl" : "$selfUrl${routes.EmailController
              .verifyEmail(id)

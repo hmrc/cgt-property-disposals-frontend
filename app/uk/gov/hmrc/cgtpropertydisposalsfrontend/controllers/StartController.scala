@@ -16,17 +16,20 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
-import cats.data.EitherT
+import cats.data.{EitherT, NonEmptyList}
 import cats.instances.future._
 import com.google.inject.Inject
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, SessionDataAction, WithActions}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SubscriptionDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, AuthenticatedRequest, RequestWithSessionData, SessionDataAction, WithActions}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionDetails.MissingData
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{SubscriptionComplete, SubscriptionMissingData, SubscriptionReady}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, Error, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -45,34 +48,54 @@ class StartController @Inject()(
     with SessionUpdates {
 
   def start(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    (request.sessionData.flatMap(_.businessPartnerRecord), request.sessionData.flatMap(_.subscriptionDetails)) match {
-      case (_, Some(_)) =>
-        SeeOther(routes.SubscriptionController.checkYourDetails().url)
-
-      case (maybeBpr, None) =>
-        val result = for {
-          bpr <- maybeBpr.fold(
-                  bprService.getBusinessPartnerRecord(
-                    request.authenticatedRequest.nino,
-                    request.authenticatedRequest.name,
-                    request.authenticatedRequest.dateOfBirth
-                  )
-                )(EitherT.pure(_))
-          subscriptionDetails <- EitherT
-                                  .fromEither[Future](SubscriptionDetails(bpr, request.authenticatedRequest.name))
-                                  .leftMap(Error(_))
-          _ <- EitherT(updateSession(sessionStore, request)(_.copy(subscriptionDetails = Some(subscriptionDetails))))
-        } yield subscriptionDetails
-
-        result.value.map {
-          case Left(e) =>
-            logger.warn("Error while getting subscription details", e)
-            errorHandler.errorResult()
-
-          case Right(_) =>
-            SeeOther(routes.SubscriptionController.checkYourDetails().url)
-        }
+    request.sessionData.flatMap(_.subscriptionStatus) match {
+      case Some(_: SubscriptionReady)         => SeeOther(routes.SubscriptionController.checkYourDetails().url)
+      case Some(_: SubscriptionComplete)      => SeeOther(routes.SubscriptionController.subscribed().url)
+      case Some(SubscriptionMissingData(bpr)) => buildSubscriptionData(Some(bpr))
+      case None                               => buildSubscriptionData(None)
     }
+  }
+
+  def buildSubscriptionData(maybeBpr: Option[BusinessPartnerRecord])(
+    implicit
+    hc: HeaderCarrier,
+    request: RequestWithSessionData[_]
+  ): Future[Result] = {
+    val result = for {
+      bpr <- maybeBpr.fold(
+              bprService.getBusinessPartnerRecord(
+                request.authenticatedRequest.nino,
+                request.authenticatedRequest.name,
+                request.authenticatedRequest.dateOfBirth
+              ))(EitherT.pure(_))
+      maybeSubscriptionDetails <- EitherT.pure(SubscriptionDetails(bpr, request.authenticatedRequest.name))
+      _ <- EitherT(
+            maybeSubscriptionDetails.fold[Future[Either[Error, Unit]]](
+              _ =>
+                updateSession(sessionStore, request)(_.copy(subscriptionStatus = Some(SubscriptionMissingData(bpr)))),
+              subscriptionDetails =>
+                updateSession(sessionStore, request)(
+                  _.copy(subscriptionStatus = Some(SubscriptionReady(subscriptionDetails))))
+            )
+          )
+    } yield maybeSubscriptionDetails
+
+    result.fold(
+      { e =>
+        logger.warn("Error while getting subscription details", e)
+        errorHandler.errorResult()
+      }, {
+        case Left(missingData) =>
+          logger.info(
+            s"Could not find the following data for subscription details: ${missingData.toList.mkString(",")}")
+          missingData.head match {
+            case MissingData.Email => SeeOther(routes.EmailController.enterEmail().url)
+          }
+
+        case Right(_) =>
+          SeeOther(routes.SubscriptionController.checkYourDetails().url)
+      }
+    )
   }
 
 }

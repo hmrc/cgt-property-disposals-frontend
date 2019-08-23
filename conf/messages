@@ -48,9 +48,11 @@ subscription.cyaLabel.email=Email address
 subscription.cyaChange.email=your email address
 subscription.confirm=Before you continue you must confirm your details are correct.
 
-email.title=Enter the new email address
+email.title=Enter your email address
+email.amend.title=Enter the new email address
 email.helpText=For example, name@example.com
-email.extraContent=The email addresses you use for other government services will not change.
+email.extraContent=We will only use this email address to contact you about your Capital Gains Tax on UK property disposals.
+email.amend.extraContent=The email addresses you use for other government services will not change.
 email.invalid=Please enter a valid email address
 
 confirmEmail.title=You have 30 minutes to confirm your email address

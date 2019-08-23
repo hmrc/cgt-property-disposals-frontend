@@ -28,7 +28,8 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, Error, NINO, Name, SessionData, SubscriptionDetails, SubscriptionResponse, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{SubscriptionComplete, SubscriptionReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -58,6 +59,9 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
   val subscriptionDetails = sample[SubscriptionDetails]
 
+  val sessionWithSubscriptionDetails =
+    SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(subscriptionDetails)))
+
   def mockSubscribe(expectedSubscriptionDetails: SubscriptionDetails)(response: Either[Error, SubscriptionResponse]) =
     (mockSubscriptionService
       .subscribe(_: SubscriptionDetails)(_: HeaderCarrier))
@@ -75,10 +79,8 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
         "there are subscription details in session" in {
           inSequence {
-            mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
-            mockGetSession(
-              Future.successful(Right(Some(SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails)))))
-            )
+            mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth)
+            mockGetSession(Future.successful(Right(Some(sessionWithSubscriptionDetails))))
           }
 
           val result = performAction()
@@ -92,7 +94,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
         "there are no subscription details in session" in {
           inSequence {
-            mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
+            mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth)
             mockGetSession(Future.successful(Right(Some(SessionData.empty))))
           }
 
@@ -110,9 +112,13 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
       val subscriptionResponse = SubscriptionResponse("number")
 
+      val sessionWithSubscriptionComplete =
+        SessionData.empty.copy(
+          subscriptionStatus = Some(SubscriptionComplete(subscriptionDetails, subscriptionResponse)))
+
       "redirect to the start endpoint if there is no subscription details in session" in {
         inSequence {
-          mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
+          mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth)
           mockGetSession(Future.successful(Right(Some(SessionData.empty))))
         }
 
@@ -123,10 +129,8 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
         "there is an error during subscription" in {
           inSequence {
-            mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
-            mockGetSession(
-              Future.successful(Right(Some(SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails)))))
-            )
+            mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth)
+            mockGetSession(Future.successful(Right(Some(sessionWithSubscriptionDetails))))
             mockSubscribe(subscriptionDetails)(Left(Error(new Exception(""))))
           }
 
@@ -134,14 +138,11 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
         }
 
         "there is an error updating the session" in {
-          val existingSessionData = SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails))
           inSequence {
-            mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
-            mockGetSession(Future.successful(Right(Some(existingSessionData))))
+            mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth)
+            mockGetSession(Future.successful(Right(Some(sessionWithSubscriptionDetails))))
             mockSubscribe(subscriptionDetails)(Right(subscriptionResponse))
-            mockStoreSession(existingSessionData.copy(subscriptionResponse = Some(subscriptionResponse)))(
-              Future.successful(Left(Error("")))
-            )
+            mockStoreSession(sessionWithSubscriptionComplete)(Future.successful(Left(Error(""))))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -152,16 +153,11 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
       "redirect to the subscribed confirmation page" when {
 
         "subscription is successful and the session is updated successfully" in {
-          val existingSessionData = SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails))
-
           inSequence {
-            mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
-            mockGetSession(Future.successful(Right(Some(existingSessionData))))
+            mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth)
+            mockGetSession(Future.successful(Right(Some(sessionWithSubscriptionDetails))))
             mockSubscribe(subscriptionDetails)(Right(subscriptionResponse))
-            mockStoreSession(existingSessionData.copy(subscriptionResponse = Some(subscriptionResponse)))(
-              Future.successful(Right(()))
-            )
-
+            mockStoreSession(sessionWithSubscriptionComplete)(Future.successful(Right(())))
           }
 
           checkIsRedirect(performAction(), routes.SubscriptionController.subscribed())
@@ -180,7 +176,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
         "there is no session data" in {
           inSequence {
-            mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
+            mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth)
             mockGetSession(Future.successful(Right(None)))
           }
 
@@ -189,7 +185,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
         "there are no subscription details in session" in {
           inSequence {
-            mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
+            mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth)
             mockGetSession(Future.successful(Right(Some(SessionData.empty))))
           }
 
@@ -201,11 +197,9 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
       "redirect to the check your details page" when {
 
         "there is not subscription response in session but there are subscription details" in {
-          val session = SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails))
-
           inSequence {
-            mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth)
+            mockGetSession(Future.successful(Right(Some(sessionWithSubscriptionDetails))))
           }
 
           checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
@@ -217,12 +211,12 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
         "there is a subscription response and subscription details in session" in {
           val cgtReferenceNumber = UUID.randomUUID().toString
           val session = SessionData.empty.copy(
-            subscriptionDetails  = Some(subscriptionDetails),
-            subscriptionResponse = Some(SubscriptionResponse(cgtReferenceNumber))
+            subscriptionStatus =
+              Some(SubscriptionComplete(subscriptionDetails, SubscriptionResponse(cgtReferenceNumber)))
           )
 
           inSequence {
-            mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
+            mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth)
             mockGetSession(Future.successful(Right(Some(session))))
           }
 

@@ -26,7 +26,7 @@
  pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
 )
 
-@(email: Email)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(email: Email, continueCall: Call)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
 @title = @{messages("confirmEmail.verified.title")}
 
@@ -41,7 +41,7 @@
  <p>
   @messages("confirmEmail.verified.p2")
  </p>
- <a class="button" role="button" href="@{routes.SubscriptionController.checkYourDetails()}">
+ <a class="button" role="button" href="@continueCall">
   @messages("button.continue")
  </a>
 }

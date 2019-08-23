@@ -24,7 +24,7 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.EmailVerificationConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, Name}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse.{EmailAlreadyVerified, EmailVerificationRequested}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -35,11 +35,11 @@ class EmailVerificationServiceImplSpec extends WordSpec with Matchers with MockF
 
   val mockConnector = mock[EmailVerificationConnector]
 
-  def mockVerifyEmail(expectedEmail: Email, expectedId: UUID, expectedName: String)(
+  def mockVerifyEmail(expectedEmail: Email, expectedId: UUID, expectedName: Name)(
     result: Either[Error, HttpResponse]
   ) =
     (mockConnector
-      .verifyEmail(_: Email, _: UUID, _: String)(_: HeaderCarrier))
+      .verifyEmail(_: Email, _: UUID, _: Name)(_: HeaderCarrier))
       .expects(expectedEmail, expectedId, expectedName, *)
       .returning(EitherT.fromEither[Future](result))
 
@@ -51,7 +51,7 @@ class EmailVerificationServiceImplSpec extends WordSpec with Matchers with MockF
       implicit val hc: HeaderCarrier = HeaderCarrier()
       val email                      = Email("email")
       val id                         = UUID.randomUUID()
-      val name                       = "Fred"
+      val name                       = Name("Fred", "Bread")
 
       "indicate when the email verification request has been requested" in {
         mockVerifyEmail(email, id, name)(Right(HttpResponse(CREATED)))

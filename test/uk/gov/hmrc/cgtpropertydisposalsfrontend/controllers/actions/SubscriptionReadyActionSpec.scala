@@ -19,20 +19,20 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 import java.time._
 import play.api.i18n.MessagesApi
 import play.api.mvc.Results.Ok
-import play.api.mvc.{MessagesRequest, PlayBodyParsers, Result}
+import play.api.mvc.{MessagesRequest, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, SessionSupport, routes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, Error, NINO, Name, SessionData, SubscriptionDetails, SubscriptionResponse, sample, subscriptionDetailsGen}
-
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{SubscriptionComplete, SubscriptionReady}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class SubscriptionDetailsActionSpec extends ControllerSpec with SessionSupport {
+class SubscriptionReadyActionSpec extends ControllerSpec with SessionSupport {
 
   lazy val action =
-    new SubscriptionDetailsAction(mockSessionStore, instanceOf[ErrorHandler])
+    new SubscriptionReadyAction(mockSessionStore, instanceOf[ErrorHandler])
 
   "SubscriptionDetailsAction" must {
 
@@ -44,9 +44,9 @@ class SubscriptionDetailsActionSpec extends ControllerSpec with SessionSupport {
         AuthenticatedRequest(NINO("nino"), Name("name", "lastName"), DateOfBirth(LocalDate.now()), messagesRequest)
 
       action.invokeBlock(
-        authenticatedRequest, { r: RequestWithSubscriptionDetails[_] =>
-          r.sessionData         shouldBe sessionData
-          r.subscriptionDetails shouldBe subscriptionDetails
+        authenticatedRequest, { r: RequestWithSubscriptionReady[_] =>
+          r.sessionData       shouldBe sessionData
+          r.subscriptionReady shouldBe SubscriptionReady(subscriptionDetails)
           Future.successful(Ok)
         }
       )
@@ -79,8 +79,7 @@ class SubscriptionDetailsActionSpec extends ControllerSpec with SessionSupport {
       "there are subscription details and a subscription response in session and the request is not " +
         "for the subscribed page" in {
         val sessionData = SessionData.empty.copy(
-          subscriptionDetails  = Some(subscriptionDetails),
-          subscriptionResponse = Some(SubscriptionResponse("number"))
+          subscriptionStatus = Some(SubscriptionComplete(subscriptionDetails, SubscriptionResponse("number")))
         )
 
         mockGetSession(Future.successful(Right(Some(sessionData))))
@@ -93,23 +92,13 @@ class SubscriptionDetailsActionSpec extends ControllerSpec with SessionSupport {
     "perform the action with the subscription details" when {
 
       "the subscription details exist and no subscription response exists" in {
-        val sessionData = SessionData.empty.copy(subscriptionDetails = Some(subscriptionDetails))
-
-        mockGetSession(Future.successful(Right(Some(sessionData))))
-
-        status(performAction(sessionData)) shouldBe OK
-      }
-
-      "there are subscription details and a subscription response in session and the request is " +
-        "for the subscribed page" in {
         val sessionData = SessionData.empty.copy(
-          subscriptionDetails  = Some(subscriptionDetails),
-          subscriptionResponse = Some(SubscriptionResponse("number"))
+          subscriptionStatus = Some(SubscriptionReady(subscriptionDetails))
         )
 
         mockGetSession(Future.successful(Right(Some(sessionData))))
 
-        status(performAction(sessionData, routes.SubscriptionController.subscribed().url)) shouldBe OK
+        status(performAction(sessionData)) shouldBe OK
       }
 
     }

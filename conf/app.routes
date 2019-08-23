@@ -6,6 +6,10 @@ GET /start                                uk.gov.hmrc.cgtpropertydisposalsfronte
 GET  /iv/success                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.IvController.ivSuccess()
 GET  /iv/failure                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.IvController.ivFailure(journeyId: java.util.UUID)
 
+### Subscription - missing data
+GET  /subscription/enter-email            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailController.enterEmail()
+POST /subscription/enter-email            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailController.enterEmailSubmit()
+
 
 #### Subscription
 GET  /subscription/check-your-details     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SubscriptionController.checkYourDetails()
@@ -14,8 +18,8 @@ GET  /subscription/subscribed             uk.gov.hmrc.cgtpropertydisposalsfronte
 
 
 #### Change email
-GET  /subscription/change-email           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailController.enterEmail()
-POST /subscription/change-email           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailController.enterEmailSubmit()
+GET  /subscription/change-email           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailController.changeEmail()
+POST /subscription/change-email           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailController.changeEmailSubmit()
 GET  /subscription/check-your-inbox       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailController.checkYourInbox()
 GET  /subscription/verify-email           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailController.verifyEmail(p: java.util.UUID)
 GET  /subscription/email-verified         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailController.emailVerified()

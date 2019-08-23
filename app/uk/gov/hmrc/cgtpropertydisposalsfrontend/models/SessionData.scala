@@ -20,17 +20,15 @@ import play.api.libs.json.{Format, Json}
 
 final case class SessionData(
   ivContinueUrl: Option[String],
-  businessPartnerRecord: Option[BusinessPartnerRecord],
+  subscriptionStatus: Option[SubscriptionStatus],
   emailToBeVerified: Option[EmailToBeVerified],
-  addressLookupResult: Option[AddressLookupResult],
-  subscriptionDetails: Option[SubscriptionDetails],
-  subscriptionResponse: Option[SubscriptionResponse]
+  addressLookupResult: Option[AddressLookupResult]
 )
 
 object SessionData {
 
   implicit val format: Format[SessionData] = Json.format
 
-  val empty: SessionData = SessionData(None, None, None, None, None, None)
+  val empty: SessionData = SessionData(None, None, None, None)
 
 }

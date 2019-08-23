@@ -77,7 +77,7 @@ class SessionStoreImplSpec extends WordSpec with Matchers with MongoSupport with
       }
 
       "the data in mongo cannot be parsed" in new TestEnvironment {
-        val invalidData = JsObject(Map("businessPartnerRecord" -> JsNumber(1)))
+        val invalidData = JsObject(Map("subscriptionStatus" -> JsNumber(1)))
         val create: Future[DatabaseUpdate[Cache]] =
           sessionStore.cacheRepository.createOrUpdate(Id(sessionId.value), sessionStore.sessionKey, invalidData)
         create.futureValue.writeResult.inError shouldBe false

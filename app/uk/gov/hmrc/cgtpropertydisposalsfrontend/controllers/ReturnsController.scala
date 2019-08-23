@@ -16,15 +16,18 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-class ReturnsController @Inject()(cc: MessagesControllerComponents, startPage: views.html.returns.start)(
-  implicit viewConfig: ViewConfig
-) extends FrontendController(cc) {
+@Singleton
+class ReturnsController @Inject()(
+  cc: MessagesControllerComponents,
+  startPage: views.html.returns.start
+)(implicit viewConfig: ViewConfig)
+    extends FrontendController(cc) {
 
   def start(): Action[AnyContent] = Action { implicit request =>
     Ok(startPage())
