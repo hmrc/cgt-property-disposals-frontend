@@ -26,7 +26,7 @@ import play.api.mvc._
 import uk.gov.hmrc.auth.core.retrieve.{~, Name => RetrievalName, _}
 import uk.gov.hmrc.auth.core.{ConfidenceLevel, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, NINO, Name, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, Email, NINO, Name, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
@@ -35,7 +35,11 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 
-final case class AuthenticatedRequest[A](nino: NINO, name: Name, dateOfBirth: DateOfBirth, request: MessagesRequest[A])
+final case class AuthenticatedRequest[A](nino: NINO,
+                                         name: Name,
+                                         dateOfBirth: DateOfBirth,
+                                         email: Option[Email],
+                                         request: MessagesRequest[A])
     extends WrappedRequest[A](request)
 
 @Singleton
@@ -102,11 +106,18 @@ class AuthenticatedAction @Inject()(
     nino: String,
     name: A,
     dateOfBirth: LocalDate,
+    maybeEmail: Option[String],
     request: MessagesRequest[B]
   ): Future[Either[Result, AuthenticatedRequest[B]]] =
     f(name) match {
       case Some(name) =>
-        Right(AuthenticatedRequest(NINO(nino), Name(name.forename, name.surname), DateOfBirth(dateOfBirth), request))
+        Right(AuthenticatedRequest(
+          NINO(nino),
+          Name(name.forename, name.surname),
+          DateOfBirth(dateOfBirth),
+          maybeEmail.map(Email(_)),
+          request
+        ))
       case None => {
         logger.warn(s"Failed to retrieve name")
         Left(errorHandler.errorResult()(request))
@@ -120,21 +131,28 @@ class AuthenticatedAction @Inject()(
 
     authorisedFunctions
       .authorised(ConfidenceLevel.L200)
-      .retrieve(v2.Retrievals.nino and v2.Retrievals.itmpName and v2.Retrievals.name and v2.Retrievals.itmpDateOfBirth) {
-        case Some(nino) ~ Some(itmpName) ~ _ ~ Some(dob) =>
+      .retrieve(
+        v2.Retrievals.nino and
+        v2.Retrievals.itmpName and
+        v2.Retrievals.name and
+        v2.Retrievals.itmpDateOfBirth and
+        v2.Retrievals.email) {
+        case Some(nino) ~ Some(itmpName) ~ _ ~ Some(dob) ~ maybeEmail =>
           makeAuthenticatedRequestWithRetrieval(
             itmpNameToName,
             nino,
             itmpName,
             LocalDate.parse(dob.toString),
+            maybeEmail,
             request
           )
-        case Some(nino) ~ None ~ Some(name) ~ Some(dob) =>
+        case Some(nino) ~ None ~ Some(name) ~ Some(dob) ~ maybeEmail =>
           makeAuthenticatedRequestWithRetrieval(
             nonItpmNameToName,
             nino,
             name,
             LocalDate.parse(dob.toString),
+            maybeEmail,
             request
           )
         case other =>
