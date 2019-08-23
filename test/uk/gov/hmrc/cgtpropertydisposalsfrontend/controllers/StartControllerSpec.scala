@@ -86,7 +86,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           "there are subscription details in session" in {
             val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(subscriptionDetails)))
             inSequence {
-              mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, retrievedDateOfBirth)
+              mockAuthWithCl200AndWithAllRetrievals(nino.value, name, retrievedDateOfBirth)
               mockGetSession(Future.successful(Right(Some(session))))
             }
 
@@ -102,7 +102,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             val session            = SessionData.empty.copy(subscriptionStatus = Some(subscriptionStatus))
 
             inSequence {
-              mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, retrievedDateOfBirth)
+              mockAuthWithCl200AndWithAllRetrievals(nino.value, name, retrievedDateOfBirth)
               mockGetSession(Future.successful(Right(Some(session))))
             }
 
@@ -114,7 +114,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
         "display an error page" when {
           "the call to get the BPR fails" in {
             inSequence {
-              mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, retrievedDateOfBirth)
+              mockAuthWithCl200AndWithAllRetrievals(nino.value, name, retrievedDateOfBirth)
               mockGetSession(Future.successful(Right(Some(SessionData.empty))))
               mockGetBusinessPartnerRecord(nino, name, dateOfBirth)(Left(Error("error")))
             }
@@ -125,7 +125,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(subscriptionDetails)))
 
             inSequence {
-              mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, retrievedDateOfBirth)
+              mockAuthWithCl200AndWithAllRetrievals(nino.value, name, retrievedDateOfBirth)
               mockGetSession(Future.successful(Right(Some(SessionData.empty))))
               mockGetBusinessPartnerRecord(nino, name, dateOfBirth)(Right(bpr))
               mockStoreSession(session)(Future.successful(Left(Error("Oh no!"))))
@@ -146,7 +146,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(subscriptionDetails)))
 
               inSequence {
-                mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, retrievedDateOfBirth)
+                mockAuthWithCl200AndWithAllRetrievals(nino.value, name, retrievedDateOfBirth)
                 mockGetSession(Future.successful(Right(maybeSession)))
                 mockGetBusinessPartnerRecord(nino, name, dateOfBirth)(Right(bpr))
                 mockStoreSession(session)(Future.successful(Right(())))
@@ -163,7 +163,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(subscriptionDetails)))
 
             inSequence {
-              mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, retrievedDateOfBirth)
+              mockAuthWithCl200AndWithAllRetrievals(nino.value, name, retrievedDateOfBirth)
               mockGetSession(Future.successful(Right(Some(session))))
               mockStoreSession(updatedSession)(Future.successful(Right(())))
             }
@@ -180,7 +180,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               SessionData.empty.copy(subscriptionStatus = Some(SubscriptionMissingData(bprWithNoEmail)))
 
             inSequence {
-              mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, retrievedDateOfBirth)
+              mockAuthWithCl200AndWithAllRetrievals(nino.value, name, retrievedDateOfBirth)
               mockGetSession(Future.successful(Right(Some(SessionData.empty))))
               mockGetBusinessPartnerRecord(nino, name, dateOfBirth)(Right(bprWithNoEmail))
               mockStoreSession(updatedSession)(Future.successful(Right(())))

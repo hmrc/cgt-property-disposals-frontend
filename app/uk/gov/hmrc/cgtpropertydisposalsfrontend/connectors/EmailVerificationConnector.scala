@@ -27,7 +27,7 @@ import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.EmailVerificationConnectorImpl.EmailVerificationRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, Name}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
@@ -37,7 +37,7 @@ import scala.concurrent.duration.FiniteDuration
 @ImplementedBy(classOf[EmailVerificationConnectorImpl])
 trait EmailVerificationConnector {
 
-  def verifyEmail(email: Email, id: UUID, name: String)(
+  def verifyEmail(email: Email, id: UUID, name: Name)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
@@ -72,11 +72,11 @@ class EmailVerificationConnectorImpl @Inject()(http: HttpClient, config: Configu
   def continueUrl(id: UUID): String =
     s"$selfBaseUrl${routes.EmailController.verifyEmail(id).url}"
 
-  def verifyEmail(email: Email, id: UUID, name: String)(
+  def verifyEmail(email: Email, id: UUID, name: Name)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] = {
     val body =
-      EmailVerificationRequest(email.value, templateId, linkExpiryTime, s"${continueUrl(id)}", Map("name" -> name))
+      EmailVerificationRequest(email.value, templateId, linkExpiryTime, s"${continueUrl(id)}", Map("name" -> name.forename))
 
     EitherT[Future, Error, HttpResponse](
       http

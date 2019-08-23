@@ -79,7 +79,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
         "there are subscription details in session" in {
           inSequence {
-            mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
+            mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth)
             mockGetSession(Future.successful(Right(Some(sessionWithSubscriptionDetails))))
           }
 
@@ -94,7 +94,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
         "there are no subscription details in session" in {
           inSequence {
-            mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
+            mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth)
             mockGetSession(Future.successful(Right(Some(SessionData.empty))))
           }
 
@@ -118,7 +118,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
       "redirect to the start endpoint if there is no subscription details in session" in {
         inSequence {
-          mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
+          mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth)
           mockGetSession(Future.successful(Right(Some(SessionData.empty))))
         }
 
@@ -129,7 +129,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
         "there is an error during subscription" in {
           inSequence {
-            mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
+            mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth)
             mockGetSession(Future.successful(Right(Some(sessionWithSubscriptionDetails))))
             mockSubscribe(subscriptionDetails)(Left(Error(new Exception(""))))
           }
@@ -139,7 +139,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
         "there is an error updating the session" in {
           inSequence {
-            mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
+            mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth)
             mockGetSession(Future.successful(Right(Some(sessionWithSubscriptionDetails))))
             mockSubscribe(subscriptionDetails)(Right(subscriptionResponse))
             mockStoreSession(sessionWithSubscriptionComplete)(Future.successful(Left(Error(""))))
@@ -154,7 +154,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
         "subscription is successful and the session is updated successfully" in {
           inSequence {
-            mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
+            mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth)
             mockGetSession(Future.successful(Right(Some(sessionWithSubscriptionDetails))))
             mockSubscribe(subscriptionDetails)(Right(subscriptionResponse))
             mockStoreSession(sessionWithSubscriptionComplete)(Future.successful(Right(())))
@@ -176,7 +176,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
         "there is no session data" in {
           inSequence {
-            mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
+            mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth)
             mockGetSession(Future.successful(Right(None)))
           }
 
@@ -185,7 +185,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
         "there are no subscription details in session" in {
           inSequence {
-            mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
+            mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth)
             mockGetSession(Future.successful(Right(Some(SessionData.empty))))
           }
 
@@ -198,7 +198,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
         "there is not subscription response in session but there are subscription details" in {
           inSequence {
-            mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
+            mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth)
             mockGetSession(Future.successful(Right(Some(sessionWithSubscriptionDetails))))
           }
 
@@ -216,7 +216,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
           )
 
           inSequence {
-            mockAuthWithCl200AndRetrievedAllRetrievals(nino.value, name, dateOfBirth)
+            mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth)
             mockGetSession(Future.successful(Right(Some(session))))
           }
 

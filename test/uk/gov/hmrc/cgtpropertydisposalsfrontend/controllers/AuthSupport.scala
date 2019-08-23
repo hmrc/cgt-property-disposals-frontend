@@ -47,7 +47,7 @@ trait AuthSupport {
       .expects(predicate, retrieval, *, *)
       .returning(result)
 
-  def mockAuthWithCl200AndRetrievedAllRetrievals(
+  def mockAuthWithCl200AndWithAllRetrievals(
     retrievedNino: String,
     retrievedName: Name,
     retrievedDateOfBirth: LocalDate

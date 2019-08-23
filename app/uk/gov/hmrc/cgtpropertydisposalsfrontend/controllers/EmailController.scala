@@ -100,8 +100,8 @@ class EmailController @Inject()(
 
                 val name =
                   subscriptionStatus.fold(
-                    _ => request.authenticatedRequest.name.forename,
-                    _.subscriptionDetails.forename
+                    _ => request.authenticatedRequest.name,
+                    s => Name(s.subscriptionDetails.forename, s.subscriptionDetails.surname)
                   )
 
                 val result = for {
