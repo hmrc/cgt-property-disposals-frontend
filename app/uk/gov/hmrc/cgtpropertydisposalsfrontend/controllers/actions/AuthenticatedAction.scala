@@ -115,7 +115,7 @@ class AuthenticatedAction @Inject()(
           NINO(nino),
           Name(name.forename, name.surname),
           DateOfBirth(dateOfBirth),
-          maybeEmail.map(Email(_)),
+          maybeEmail.filter(_.nonEmpty).map(Email(_)),
           request
         ))
       case None => {
