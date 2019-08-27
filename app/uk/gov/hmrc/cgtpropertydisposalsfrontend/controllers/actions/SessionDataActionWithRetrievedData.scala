@@ -25,22 +25,27 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 
 import scala.concurrent.ExecutionContext
 
-final case class RequestWithSessionData[A](
-  sessionData: Option[SessionData],
-  authenticatedRequest: AuthenticatedRequest[A]
-) extends WrappedRequest[A](authenticatedRequest)
+final case class RequestWithSessionDataAndRetrievedData[A](
+                                                                         sessionData: Option[SessionData],
+                                                                         authenticatedRequest: AuthenticatedRequestWithRetrievedData[A]
+                                                                       )
+  extends WrappedRequest[A](authenticatedRequest)
     with PreferredMessagesProvider {
   override def messagesApi: MessagesApi = authenticatedRequest.request.messagesApi
 }
 
 @Singleton
-class SessionDataAction @Inject()(val sessionStore: SessionStore,
-                                  val errorHandler: ErrorHandler
-                                  )(implicit val executionContext: ExecutionContext)
-  extends SessionDataActionBase[AuthenticatedRequest, RequestWithSessionData] {
+class SessionDataActionWithRetrievedData @Inject()(val sessionStore: SessionStore,
+                                                   val errorHandler: ErrorHandler
+                                                  )(implicit val executionContext: ExecutionContext)
+  extends SessionDataActionBase[AuthenticatedRequestWithRetrievedData, RequestWithSessionDataAndRetrievedData] {
 
   def sessionDataAction[A](sessionData: Option[SessionData],
-                           request: AuthenticatedRequest[A]): RequestWithSessionData[A] =
-    RequestWithSessionData(sessionData, request)
+                           request: AuthenticatedRequestWithRetrievedData[A]
+                          ): RequestWithSessionDataAndRetrievedData[A] =
+    RequestWithSessionDataAndRetrievedData(sessionData, request)
+
 
 }
+
+

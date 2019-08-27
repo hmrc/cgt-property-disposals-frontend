@@ -23,7 +23,7 @@ sealed trait SubscriptionStatus
 
 object SubscriptionStatus {
 
-  final case class SubscriptionMissingData(businessPartnerRecord: BusinessPartnerRecord) extends SubscriptionStatus
+  final case class SubscriptionMissingData(businessPartnerRecord: BusinessPartnerRecord, name: Name) extends SubscriptionStatus
 
   final case class SubscriptionReady(subscriptionDetails: SubscriptionDetails) extends SubscriptionStatus
 

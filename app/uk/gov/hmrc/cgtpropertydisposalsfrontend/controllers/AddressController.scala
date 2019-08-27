@@ -22,7 +22,7 @@ import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, SubscriptionReadyAction, WithSubscriptionDetailsActions}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedActionBase, AuthenticatedActionWithRetrievedData, AuthenticatedAction, SubscriptionReadyAction, WithSubscriptionDetailsActions}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.SubscriptionReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Address, AddressLookupResult, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -37,14 +37,14 @@ import shapeless.{Lens, lens}
 
 @Singleton
 class AddressController @Inject()(
-  val authenticatedAction: AuthenticatedAction,
-  val subscriptionDetailsAction: SubscriptionReadyAction,
-  cc: MessagesControllerComponents,
-  errorHandler: ErrorHandler,
-  addressLookupService: AddressLookupService,
-  sessionStore: SessionStore,
-  enterPostcodePage: views.html.subscription.enter_postcode,
-  selectAddressPage: views.html.subscription.select_address
+                                   val authenticatedAction: AuthenticatedAction,
+                                   val subscriptionDetailsAction: SubscriptionReadyAction,
+                                   cc: MessagesControllerComponents,
+                                   errorHandler: ErrorHandler,
+                                   addressLookupService: AddressLookupService,
+                                   sessionStore: SessionStore,
+                                   enterPostcodePage: views.html.subscription.enter_postcode,
+                                   selectAddressPage: views.html.subscription.select_address
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with Logging

@@ -21,7 +21,7 @@ import cats.instances.future._
 import com.google.inject.Inject
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, AuthenticatedRequest, RequestWithSessionData, SessionDataAction, WithActions}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedActionWithRetrievedData, RequestWithSessionDataAndRetrievedData,SessionDataActionWithRetrievedData, WithAuthRetrievalsAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionDetails.MissingData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{SubscriptionComplete, SubscriptionMissingData, SubscriptionReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, Error, SubscriptionDetails}
@@ -35,37 +35,39 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import scala.concurrent.{ExecutionContext, Future}
 
 class StartController @Inject()(
-  bprService: BusinessPartnerRecordService,
-  sessionStore: SessionStore,
-  errorHandler: ErrorHandler,
-  cc: MessagesControllerComponents,
-  val authenticatedAction: AuthenticatedAction,
-  val sessionDataAction: SessionDataAction
+                                 bprService: BusinessPartnerRecordService,
+                                 sessionStore: SessionStore,
+                                 errorHandler: ErrorHandler,
+                                 cc: MessagesControllerComponents,
+                                 val authenticatedActionWithRetrievedData: AuthenticatedActionWithRetrievedData,
+                                 val sessionDataAction: SessionDataActionWithRetrievedData
 )(implicit ec: ExecutionContext)
     extends FrontendController(cc)
-    with WithActions
+    with WithAuthRetrievalsAndSessionDataAction
     with Logging
     with SessionUpdates {
 
-  def start(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+  def start(): Action[AnyContent] = authenticatedActionWithRetrievedDataAndSessionData.async { implicit request =>
     request.sessionData.flatMap(_.subscriptionStatus) match {
-      case Some(_: SubscriptionReady)         => SeeOther(routes.SubscriptionController.checkYourDetails().url)
-      case Some(_: SubscriptionComplete)      => SeeOther(routes.SubscriptionController.subscribed().url)
-      case Some(SubscriptionMissingData(bpr)) => buildSubscriptionData(Some(bpr))
-      case None                               => buildSubscriptionData(None)
+      case Some(_: SubscriptionReady)           => SeeOther(routes.SubscriptionController.checkYourDetails().url)
+      case Some(_: SubscriptionComplete)        => SeeOther(routes.SubscriptionController.subscribed().url)
+      case Some(SubscriptionMissingData(bpr,_)) => buildSubscriptionData(Some(bpr))
+      case None                                 => buildSubscriptionData(None)
     }
   }
 
   def buildSubscriptionData(maybeBpr: Option[BusinessPartnerRecord])(
     implicit
     hc: HeaderCarrier,
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionDataAndRetrievedData[_]
   ): Future[Result] = {
+    lazy val name = request.authenticatedRequest.name
+
     val result = for {
       bpr <- maybeBpr.fold(
               bprService.getBusinessPartnerRecord(
                 request.authenticatedRequest.nino,
-                request.authenticatedRequest.name,
+                name,
                 request.authenticatedRequest.dateOfBirth
               ))(EitherT.pure(_))
       maybeSubscriptionDetails <- EitherT.pure(
@@ -74,7 +76,7 @@ class StartController @Inject()(
       _ <- EitherT(
             maybeSubscriptionDetails.fold[Future[Either[Error, Unit]]](
               _ =>
-                updateSession(sessionStore, request)(_.copy(subscriptionStatus = Some(SubscriptionMissingData(bpr)))),
+                updateSession(sessionStore, request)(_.copy(subscriptionStatus = Some(SubscriptionMissingData(bpr, name)))),
               subscriptionDetails =>
                 updateSession(sessionStore, request)(
                   _.copy(subscriptionStatus = Some(SubscriptionReady(subscriptionDetails))))

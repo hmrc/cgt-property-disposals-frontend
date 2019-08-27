@@ -1,0 +1,251 @@
+[33mcommit a3aca1357b6126d776d7706fdfbc9196084534a6[m[33m ([m[1;36mHEAD -> [m[1;32mretrieve-data-in-one-place[m[33m)[m
+Author: Andy <AndyHWChung@users.noreply.github.com>
+Date:   Fri Aug 23 15:07:53 2019 +0100
+
+    WIP
+
+[33mcommit e6c7524a0b3ed4265c0c64f7be8e1c1fe3d315e0[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m
+Author: Andrew Chung <26929776+AndyHWChung@users.noreply.github.com>
+Date:   Fri Aug 23 15:18:26 2019 +0100
+
+    cpdp-505: gg email now retrieved (#22)
+
+[33mcommit 58db389ee308c8ed293c01414cb09d6ecd8f5499[m[33m ([m[1;33mtag: v0.21.0[m[33m)[m
+Author: Andrew Chung <26929776+AndyHWChung@users.noreply.github.com>
+Date:   Fri Aug 23 14:14:04 2019 +0100
+
+    cpdp-504: user goes through email verification journey if no email ca… (#21)
+    
+    * cpdp-504: user goes through email verification journey if no email can be retrieved
+    
+    * made use of Name data type; renamed def in test
+
+[33mcommit 93d00c7e786283ab8ad0e428d4476c74618f8c7c[m[33m ([m[1;33mtag: v0.20.0[m[33m)[m
+Author: Mika'il Khan <co.category@gmail.com>
+Date:   Thu Aug 22 16:35:02 2019 +0100
+
+    CPDP-503: retrieve name and dob for subscription (#20)
+
+[33mcommit 60085667501d1ed4eeffdbeb7824f2935e6543ea[m[33m ([m[1;33mtag: v0.19.0[m[33m, [m[1;33mtag: v0.18.0[m[33m)[m
+Merge: d1b5705 7caa7a5
+Author: Mika'il Khan <co.category@gmail.com>
+Date:   Thu Aug 15 11:32:09 2019 +0100
+
+    Merge pull request #18 from hmrc/cpdp-438-subscription-confirmation-page
+    
+    Cpdp 438 subscription confirmation page
+
+[33mcommit 7caa7a5d46144405bfa9e03030e4b37e2877ab41[m[33m ([m[1;31morigin/cpdp-438-subscription-confirmation-page[m[33m)[m
+Author: Andy <AndyHWChung@users.noreply.github.com>
+Date:   Thu Aug 15 11:09:16 2019 +0100
+
+    improved some more formatting
+
+[33mcommit e388d8024317769e4f914468fac299ebbe59c483[m
+Author: Andy <AndyHWChung@users.noreply.github.com>
+Date:   Thu Aug 15 11:02:40 2019 +0100
+
+    fixed some typos; improved formatting
+
+[33mcommit 565829d331ad28040560e9725731fd2989bd2ef8[m
+Author: Andy <AndyHWChung@users.noreply.github.com>
+Date:   Thu Aug 15 09:52:07 2019 +0100
+
+    fixed spec
+
+[33mcommit de7a527e541abffe2d106c2bde058351395010a1[m
+Merge: 021f6f0 d1b5705
+Author: Andy <AndyHWChung@users.noreply.github.com>
+Date:   Thu Aug 15 09:50:23 2019 +0100
+
+    Merge branch 'master' into cpdp-438-subscription-confirmation-page
+
+[33mcommit d1b5705b55bc39483828f0d6a4ec30176aafd198[m[33m ([m[1;33mtag: v0.17.0[m[33m)[m
+Author: Andrew Chung <26929776+AndyHWChung@users.noreply.github.com>
+Date:   Thu Aug 15 09:43:05 2019 +0100
+
+    cpdp-435: added in postcode regex (#19)
+    
+    * cpdp-435: added in postcode regex
+    
+    * added extra test cases
+
+[33mcommit 021f6f0467dbf9eb91fcac3a2a5087fbaa99c261[m
+Author: Andy <AndyHWChung@users.noreply.github.com>
+Date:   Wed Aug 14 17:04:04 2019 +0100
+
+    fixed spec wording
+
+[33mcommit f33b7ab79c293a8be3819c9ce2d6d27928ee07bf[m
+Author: Alistair Macdonald <1460971+nubz@users.noreply.github.com>
+Date:   Wed Aug 14 17:01:03 2019 +0100
+
+    Cpdp 500 sign out (#17)
+
+[33mcommit df5e7c255c0882b3ac60d2d5694161a8b0c548f9[m
+Author: Andy <AndyHWChung@users.noreply.github.com>
+Date:   Wed Aug 14 13:34:13 2019 +0100
+
+    integrated with BE
+
+[33mcommit b19fe622cd02eec5505f6d247c58aa6c88d37df5[m
+Author: Andy <AndyHWChung@users.noreply.github.com>
+Date:   Tue Aug 13 16:44:28 2019 +0100
+
+    some refactoring
+
+[33mcommit 7e326f40c30408eb8368379d646da7c3ec0cfd9e[m
+Author: Andy <AndyHWChung@users.noreply.github.com>
+Date:   Mon Aug 12 16:47:56 2019 +0100
+
+    WIP
+
+[33mcommit 150fdb63f50f774929953b3898ea24d397dc6e3a[m
+Author: Alistair Macdonald <1460971+nubz@users.noreply.github.com>
+Date:   Mon Aug 12 11:20:28 2019 +0100
+
+    cpdp-438: removed continueUrl and put reference in template instead of messages
+
+[33mcommit f79039e6b14742f1c748b731ebc3f275839a759e[m
+Author: Alistair Macdonald <1460971+nubz@users.noreply.github.com>
+Date:   Mon Aug 12 11:07:35 2019 +0100
+
+    cpdp-438: added messages and page components
+
+[33mcommit 11de055df1b3c6c530c3ee88a6f8115a312dc85b[m
+Author: Andy <AndyHWChung@users.noreply.github.com>
+Date:   Mon Aug 12 10:06:49 2019 +0100
+
+    added continue url to subscribed page
+
+[33mcommit c019082e6860c43eb32650d9593bf8581f91ad7e[m
+Author: Andy <AndyHWChung@users.noreply.github.com>
+Date:   Mon Aug 12 10:01:46 2019 +0100
+
+    created endpoints
+
+[33mcommit c1100d20d392e3a9c31875b230eef94c85fc0230[m[33m ([m[1;33mtag: v0.16.0[m[33m)[m
+Author: Andrew Chung <26929776+AndyHWChung@users.noreply.github.com>
+Date:   Mon Aug 12 13:02:56 2019 +0100
+
+    cpdp-438 - refactored session data
+
+[33mcommit 209f018bff2ca5d6adc1acf5dae88bd4abf47e0a[m[33m ([m[1;33mtag: v0.15.0[m[33m)[m
+Author: Andrew Chung <26929776+AndyHWChung@users.noreply.github.com>
+Date:   Fri Aug 9 15:17:55 2019 +0100
+
+    cpdp-435: implemented change address pages (#15)
+
+[33mcommit 955e9e341f8e875a482b422c0548f09328b5da31[m[33m ([m[1;33mtag: v0.14.0[m[33m)[m
+Author: Andrew Chung <26929776+AndyHWChung@users.noreply.github.com>
+Date:   Fri Aug 9 10:46:44 2019 +0100
+
+    cpdp-436: addded in basic email address validation (#14)
+
+[33mcommit d36157e16b5644c3247e5a677e6fe53691542da9[m[33m ([m[1;33mtag: v0.13.0[m[33m)[m
+Author: Andrew Chung <26929776+AndyHWChung@users.noreply.github.com>
+Date:   Wed Aug 7 16:35:33 2019 +0100
+
+    cpdp-416: IV continue URLs are now relative or absolute (#13)
+
+[33mcommit a398ffcb9999b938cdfdda06773dda3f89a4ae44[m[33m ([m[1;33mtag: v0.12.0[m[33m)[m
+Author: Andrew Chung <26929776+AndyHWChung@users.noreply.github.com>
+Date:   Wed Aug 7 14:58:23 2019 +0100
+
+    cpdp-436: added in name to email verification template params (#12)
+
+[33mcommit ae5cf713b6b7acbdf5ae47e2654b3fba4fd701f0[m[33m ([m[1;33mtag: v0.11.0[m[33m)[m
+Author: Andrew Chung <26929776+AndyHWChung@users.noreply.github.com>
+Date:   Mon Aug 5 14:46:50 2019 +0100
+
+    cpdp-436: implemented change email journey for subscription
+
+[33mcommit 70095a34873d1ce5a346e134c8e2b3da4b074113[m[33m ([m[1;33mtag: v0.10.0[m[33m)[m
+Author: Andrew Chung <26929776+AndyHWChung@users.noreply.github.com>
+Date:   Fri Aug 2 10:07:25 2019 +0100
+
+    cpdp-416: NINO now retrieved from auth record
+
+[33mcommit b387102235dbff661bbbc0597cd128c3dca20023[m[33m ([m[1;33mtag: v0.9.0[m[33m)[m
+Author: Andrew Chung <26929776+AndyHWChung@users.noreply.github.com>
+Date:   Thu Aug 1 11:21:24 2019 +0100
+
+    cpdp-433: implemented check your details page with BPR
+
+[33mcommit 40583fc68e688ef94d165450ea96ecc15947d1d8[m[33m ([m[1;33mtag: v0.8.0[m[33m)[m
+Author: Andrew Chung <26929776+AndyHWChung@users.noreply.github.com>
+Date:   Thu Jul 25 11:54:59 2019 +0100
+
+    CPDP-432: DOB page (#8)
+
+[33mcommit 6acff5b0f7fdbcb0531d03c1e532ccc2a42e16dd[m[33m ([m[1;33mtag: v0.7.0[m[33m)[m
+Author: Andrew Chung <26929776+AndyHWChung@users.noreply.github.com>
+Date:   Wed Jul 24 16:24:15 2019 +0100
+
+    CPDP-431: spaces in NINO are now stripped; removed stray scriptElem string
+
+[33mcommit e6c257b6c6430bf15906dd477ca43a1ee7d6a1fb[m[33m ([m[1;33mtag: v0.6.0[m[33m)[m
+Author: Andrew Chung <26929776+AndyHWChung@users.noreply.github.com>
+Date:   Wed Jul 24 15:32:17 2019 +0100
+
+    CPDP-431: NINO page
+
+[33mcommit cc01a9493dba67b505732ca77a19a3831a20e432[m[33m ([m[1;33mtag: v0.5.0[m[33m)[m
+Author: Andrew Chung <26929776+AndyHWChung@users.noreply.github.com>
+Date:   Tue Jul 23 09:58:27 2019 +0100
+
+    CPDP-415: Added landing page
+
+[33mcommit d5e041dde5ef3f7e9dafe3d471f2b6e11bd2afc8[m[33m ([m[1;33mtag: v0.4.0[m[33m, [m[1;33mtag: v0.3.0[m[33m)[m
+Author: Andrew Chung <26929776+AndyHWChung@users.noreply.github.com>
+Date:   Tue Jul 9 09:29:58 2019 +0100
+
+    Wrote dummy spec too allow for build job (#4)
+
+[33mcommit 22258e2eaa7baa584f7db5ef41efab37bb7ce170[m[33m ([m[1;33mtag: v0.2.0[m[33m, [m[1;33mtag: v0.1.0[m[33m)[m
+Author: Andrew Chung <26929776+AndyHWChung@users.noreply.github.com>
+Date:   Fri Jul 5 16:50:12 2019 +0100
+
+    Fixed wartremover packaging errros (#3)
+
+[33mcommit 8d2f07f31896adf1c1ab4c6ccaedc894da339e88[m
+Author: Andrew Chung <26929776+AndyHWChung@users.noreply.github.com>
+Date:   Thu Jul 4 11:56:36 2019 +0100
+
+    CPDP-233: Upgraded to play 2.6 (#2)
+
+[33mcommit 9eec6b067e528cc4d4556b201d2ede6511a3c564[m
+Author: Andrew Chung <26929776+AndyHWChung@users.noreply.github.com>
+Date:   Wed Jul 3 16:03:50 2019 +0100
+
+    CPDP-231 & CPDP-232: Introduced wartremover and scalariform (#1)
+
+[33mcommit 0cb093dcc912b108662435f16c608c691fd74965[m
+Author: Jenkins user <jenkins@ip-10-35-66-169.eu-west-2.compute.internal>
+Date:   Wed Jul 3 08:48:05 2019 +0000
+
+    Creating new service cgt-property-disposals-frontend
+
+[33mcommit 5b618e89cf41bcc0bea0893074b5938c39e1f8b9[m
+Author: hmrc-web-operations <hmrc-web-operations@digital.hmrc.gov.uk>
+Date:   Wed Jul 3 08:47:56 2019 +0000
+
+    adding repository.yaml
+
+[33mcommit 08c893405187bfcd2d14256561c25ff180ba4e8b[m
+Author: hmrc-web-operations <hmrc-web-operations@digital.hmrc.gov.uk>
+Date:   Wed Jul 3 08:47:56 2019 +0000
+
+    adding README.md
+
+[33mcommit c4127dac85f2ecfc1e9f70266349e63ddef2fd89[m
+Author: hmrc-web-operations <hmrc-web-operations@digital.hmrc.gov.uk>
+Date:   Wed Jul 3 08:47:56 2019 +0000
+
+    adding .gitignore
+
+[33mcommit 91d3c4dbf9d68170d6c08d6a205bd1e26cda896d[m
+Author: hmrc-web-operations <hmrc-web-operations@users.noreply.github.com>
+Date:   Wed Jul 3 09:47:53 2019 +0100
+
+    Initial commit

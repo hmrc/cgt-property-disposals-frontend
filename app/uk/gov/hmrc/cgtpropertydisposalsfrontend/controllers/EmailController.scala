@@ -26,7 +26,7 @@ import shapeless.{Lens, lens}
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithActions}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{SubscriptionComplete, SubscriptionMissingData, SubscriptionReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -53,7 +53,7 @@ class EmailController @Inject()(
                                  emailVerifiedPage: views.html.subscription.email_verified
                                )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
   extends FrontendController(cc)
-    with WithActions
+    with WithAuthAndSessionDataAction
     with Logging
     with SessionUpdates {
 
@@ -100,7 +100,7 @@ class EmailController @Inject()(
 
                 val name =
                   subscriptionStatus.fold(
-                    _ => request.authenticatedRequest.name,
+                    s => s.name,
                     s => Name(s.subscriptionDetails.forename, s.subscriptionDetails.surname)
                   )
 

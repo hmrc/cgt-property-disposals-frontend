@@ -16,33 +16,43 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
+import java.time._
 import play.api.i18n.MessagesApi
-import play.api.mvc.{MessagesRequest, Result}
 import play.api.mvc.Results.Ok
+import play.api.mvc.{MessagesRequest, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, Email, Error, NINO, Name, SessionData, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-class SessionDataActionSpec  extends ControllerSpec with SessionSupport {
+class SessionDataActionWithRetrievedDataSpec extends ControllerSpec with SessionSupport {
 
-  lazy val action: SessionDataAction = new SessionDataAction(mockSessionStore, instanceOf[ErrorHandler])
+  lazy val action: SessionDataActionWithRetrievedData =
+    new SessionDataActionWithRetrievedData(mockSessionStore, instanceOf[ErrorHandler])
 
   "SessionDataActionWithRetrievedData" must {
 
-    lazy val messagesRequest = new MessagesRequest(FakeRequest(), instanceOf[MessagesApi])
-    lazy val authenticatedRequest = AuthenticatedRequest(messagesRequest)
+    lazy val messagesRequest =
+      new MessagesRequest(FakeRequest(), instanceOf[MessagesApi])
+
+    lazy val authenticatedRequest =
+      AuthenticatedRequestWithRetrievedData(
+        NINO("nino"),
+        Name("name", "lastName"),
+        DateOfBirth(LocalDate.of(2000, 10, 1)),
+        Some(Email("email")),
+        messagesRequest)
 
     val sessionData = sample[SessionData]
 
     def performAction(): Future[Result] =
-      action.invokeBlock(authenticatedRequest, { r: RequestWithSessionData[_] =>
-        r.sessionData shouldBe Some(sessionData)
+      action.invokeBlock(authenticatedRequest, { r: RequestWithSessionDataAndRetrievedData[_] =>
         r.messagesApi shouldBe messagesRequest.messagesApi
+        r.sessionData shouldBe Some(sessionData)
         Future.successful(Ok)
       })
 

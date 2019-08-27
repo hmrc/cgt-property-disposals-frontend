@@ -34,7 +34,7 @@ class ErrorHandler @Inject()(val messagesApi: MessagesApi, error_template: views
   ): Html =
     error_template(pageTitle, heading, message)
 
-  def errorResult()(implicit request: Request[_]): Result =
+  def errorResult[R <: Request[_]]()(implicit request: R): Result =
     InternalServerError(internalServerErrorTemplate)
 
 }

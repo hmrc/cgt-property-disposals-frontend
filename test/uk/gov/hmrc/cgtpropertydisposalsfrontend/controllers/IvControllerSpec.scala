@@ -41,25 +41,12 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
 
   "IvController" when {
 
-    val retrievals = Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth and Retrievals.email
-    val retrievalsResult = Future successful (
-      new ~(
-        new ~(
-          new ~(
-            new ~(Some("nino"), Some(ItmpName(Some("givenName"), Some("middleName"), Some("familyName")))),
-          Some(Name(Some("forename"), Some("surname")))
-        ),
-        Some(new LocalDate(2000, 4, 10))
-        ),
-        None
-      )
-    )
     "handling IV success request" must {
 
       "redirect to the IV continue URL if one is found in session" in {
         val ivContinueUrl = "continue"
         inSequence {
-          mockAuth(ConfidenceLevel.L200, retrievals)(retrievalsResult)
+          mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(ivContinueUrl = Some(ivContinueUrl))))))
         }
 
@@ -69,7 +56,7 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
 
       "show an error page if there is no IV continue URL in session" in {
         inSequence {
-          mockAuth(ConfidenceLevel.L200, retrievals)(retrievalsResult)
+          mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(SessionData.empty))))
         }
 

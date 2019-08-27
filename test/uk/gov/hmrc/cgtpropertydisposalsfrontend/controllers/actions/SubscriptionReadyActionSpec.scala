@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
-import java.time._
 import play.api.i18n.MessagesApi
 import play.api.mvc.Results.Ok
 import play.api.mvc.{MessagesRequest, Result}
@@ -26,8 +25,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, SessionSupport, routes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{SubscriptionComplete, SubscriptionReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
-import scala.concurrent.Future
+
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class SubscriptionReadyActionSpec extends ControllerSpec with SessionSupport {
 
@@ -40,19 +40,13 @@ class SubscriptionReadyActionSpec extends ControllerSpec with SessionSupport {
 
     def performAction(sessionData: SessionData, requestUrl: String = "/"): Future[Result] = {
       val messagesRequest = new MessagesRequest(FakeRequest("GET", requestUrl), instanceOf[MessagesApi])
-      val authenticatedRequest =
-        AuthenticatedRequest(
-          NINO("nino"),
-          Name("name", "lastName"),
-          DateOfBirth(LocalDate.now()),
-          Some(Email("email")),
-          messagesRequest
-        )
+      val authenticatedRequest = AuthenticatedRequest(messagesRequest)
 
       action.invokeBlock(
         authenticatedRequest, { r: RequestWithSubscriptionReady[_] =>
           r.sessionData       shouldBe sessionData
           r.subscriptionReady shouldBe SubscriptionReady(subscriptionDetails)
+          r.messagesApi shouldBe messagesRequest.messagesApi
           Future.successful(Ok)
         }
       )
