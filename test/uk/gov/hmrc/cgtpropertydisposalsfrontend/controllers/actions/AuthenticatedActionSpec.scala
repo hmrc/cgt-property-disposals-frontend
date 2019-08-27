@@ -151,6 +151,28 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
       }
     }
 
+    "handling a logged in user with CL200 and a defined but empty email" must {
+      val retrievalsResult = Future successful (
+        new ~(
+          new ~(
+            new ~(
+              new ~(Some("nino"), Some(ItmpName(Some("givenName"), Some("middleName"), Some("familyName")))),
+              Some(Name(Some("forename"), Some("surname")))
+            ),
+            Some(new LocalDate(2000, 4, 10))
+          ),
+          Some("")
+        )
+        )
+      "effect the requested action" in new TestEnvironment {
+        mockAuth(ConfidenceLevel.L200, retrievals)(retrievalsResult)
+
+        val result = performAction(FakeRequest())
+        status(result)          shouldBe OK
+        contentAsString(result) shouldBe "nino|givenName|familyName|2000-04-10|None"
+      }
+    }
+
     "handling a logged in user with CL200 and a NINO, and an incomplete ITMP name" must {
       val retrievalsResult = Future successful (
         new ~(
