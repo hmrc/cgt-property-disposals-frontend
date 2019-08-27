@@ -13,6 +13,7 @@ generic.warning=Warning
 generic.day=Day
 generic.month=Month
 generic.year=Year
+generic.back=Back
 
 error.summary.heading=There’s a problem
 

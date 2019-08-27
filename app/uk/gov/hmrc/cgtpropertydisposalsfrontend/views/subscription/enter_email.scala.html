@@ -27,10 +27,11 @@
  formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
  pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
  textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
- submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button
+ submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+ backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@(form: Form[Email], amendingEmail: Boolean)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[Email], amendingEmail: Boolean, backLink: Option[Call])(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"email"}
 @title = @{messages(if(amendingEmail) "email.amend.title" else "email.title")}
@@ -38,6 +39,8 @@
 @labelWithCaption = @{Html(s"""<span class="heading-secondary">${messages("subscription.caption")}</span>$title""")}
 
 @mainTemplate(title = title, hasErrors = hasErrors) {
+
+ @backLink.map(link => backLinkComponent(link))
 
  @if(hasErrors) {
    @errorSummary(form)
