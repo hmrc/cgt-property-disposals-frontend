@@ -131,10 +131,14 @@ class EmailController @Inject()(
   def checkYourInbox(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withSubscriptionData(request) {
-        case (sessionData, _) =>
+        case (sessionData, subscriptionStatus) =>
+          val backLink = subscriptionStatus.fold(
+            _ => routes.EmailController.enterEmail,
+            _ => routes.EmailController.changeEmail
+          )
           sessionData.emailToBeVerified.fold(
             SeeOther(routes.SubscriptionController.checkYourDetails().url)
-          )(emailToBeVerified => Ok(checkYourInboxPage(emailToBeVerified.email)))
+          )(emailToBeVerified => Ok(checkYourInboxPage(emailToBeVerified.email, backLink)))
       }
     }
 

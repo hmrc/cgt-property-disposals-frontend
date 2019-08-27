@@ -54,7 +54,7 @@ class AddressController @Inject()(
   def enterPostcode(): Action[AnyContent] =
     authenticatedActionWithSubscriptionReady { implicit request =>
       val form = request.sessionData.addressLookupResult.fold(Postcode.form)(r => Postcode.form.fill(r.postcode))
-      Ok(enterPostcodePage(form))
+      Ok(enterPostcodePage(form, routes.SubscriptionController.checkYourDetails))
     }
 
   def enterPostcodeSubmit(): Action[AnyContent] =
@@ -62,7 +62,7 @@ class AddressController @Inject()(
       Postcode.form
         .bindFromRequest()
         .fold(
-          formWithErrors => BadRequest(enterPostcodePage(formWithErrors)), { postcode =>
+          formWithErrors => BadRequest(enterPostcodePage(formWithErrors, routes.SubscriptionController.checkYourDetails)), { postcode =>
             if (request.sessionData.addressLookupResult.map(_.postcode).contains(postcode)) {
               SeeOther(routes.AddressController.selectAddress().url)
             } else {
@@ -92,7 +92,7 @@ class AddressController @Inject()(
             .find(_ === request.subscriptionReady.subscriptionDetails.address)
             .fold(Address.addressSelectForm(addresses))(Address.addressSelectForm(addresses).fill(_))
 
-          Ok(selectAddressPage(addresses, form))
+          Ok(selectAddressPage(addresses, form, routes.AddressController.enterPostcode))
       }
     }
 
@@ -107,7 +107,7 @@ class AddressController @Inject()(
             .addressSelectForm(addresses)
             .bindFromRequest()
             .fold(
-              e => BadRequest(selectAddressPage(addresses, e)), { address =>
+              e => BadRequest(selectAddressPage(addresses, e, routes.AddressController.enterPostcode)), { address =>
                 updateSession(sessionStore, request)(
                   _.copy(subscriptionStatus = Some(addressLens.set(request.subscriptionReady)(address)))
                 ).map(

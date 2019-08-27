@@ -25,10 +25,11 @@
  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
  details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
  errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
- formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
+ formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+ backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@(form: Form[Postcode])(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[Postcode], backLink: Call)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"postcode"}
 @title = @{messages("address.postcode.title")}
@@ -39,6 +40,8 @@
  }
 
 @mainTemplate(title = title) {
+
+ @backLinkComponent(backLink)
 
  @if(hasErrors) {
   @errorSummary(form)
