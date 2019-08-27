@@ -22,9 +22,9 @@ import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.uuid._
 import cats.syntax.eq._
-import shapeless.{lens, Lens}
+import shapeless.{Lens, lens}
 import com.google.inject.{Inject, Singleton}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithActions}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{SubscriptionComplete, SubscriptionMissingData, SubscriptionReady}
@@ -48,7 +48,7 @@ class EmailController @Inject()(
                                  uuidGenerator: UUIDGenerator,
                                  errorHandler: ErrorHandler,
                                  cc: MessagesControllerComponents,
-                                 enterEmail: views.html.subscription.enter_email,
+                                 enterEmailPage: views.html.subscription.enter_email,
                                  checkYourInboxPage: views.html.subscription.check_your_inbox,
                                  emailVerifiedPage: views.html.subscription.email_verified
                                )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
@@ -68,31 +68,31 @@ class EmailController @Inject()(
       case _ => SeeOther(routes.StartController.start().url)
     }
 
-  def changeEmail(): Action[AnyContent] = enterOrChangeEmail()
+  def changeEmail(): Action[AnyContent] = enterOrChangeEmail(Some(routes.SubscriptionController.checkYourDetails))
 
-  def enterEmail(): Action[AnyContent] = enterOrChangeEmail()
+  def enterEmail(): Action[AnyContent] = enterOrChangeEmail(None)
 
-  private def enterOrChangeEmail(): Action[AnyContent] =
+  private def enterOrChangeEmail(backLink: Option[Call]): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withSubscriptionData(request) {
         case (sessionData, subscriptionStatus) =>
           val form = sessionData.emailToBeVerified.fold(Email.form)(e => Email.form.fill(e.email))
-          Ok(enterEmail(form, subscriptionStatus.isRight))
+          Ok(enterEmailPage(form, subscriptionStatus.isRight, backLink))
       }
     }
 
-  def changeEmailSubmit(): Action[AnyContent] = enterOrChangeEmailSubmit()
+  def changeEmailSubmit(): Action[AnyContent] = enterOrChangeEmailSubmit(Some(routes.SubscriptionController.checkYourDetails))
 
-  def enterEmailSubmit(): Action[AnyContent] = enterOrChangeEmailSubmit()
+  def enterEmailSubmit(): Action[AnyContent] = enterOrChangeEmailSubmit(None)
 
-  private def enterOrChangeEmailSubmit(): Action[AnyContent] =
+  private def enterOrChangeEmailSubmit(backLink: Option[Call]): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withSubscriptionData(request) {
         case (sessionData, subscriptionStatus) =>
           Email.form
             .bindFromRequest()
             .fold(
-              formWithErrors => BadRequest(enterEmail(formWithErrors, subscriptionStatus.isRight)), { email =>
+              formWithErrors => BadRequest(enterEmailPage(formWithErrors, subscriptionStatus.isRight, backLink)), { email =>
                 val emailToBeVerified = sessionData.emailToBeVerified match {
                   case Some(e) if e.email === email => e
                   case _                            => EmailToBeVerified(email, uuidGenerator.nextId(), verified = false)
@@ -131,10 +131,14 @@ class EmailController @Inject()(
   def checkYourInbox(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withSubscriptionData(request) {
-        case (sessionData, _) =>
+        case (sessionData, subscriptionStatus) =>
+          val backLink = subscriptionStatus.fold(
+            _ => routes.EmailController.enterEmail,
+            _ => routes.EmailController.changeEmail
+          )
           sessionData.emailToBeVerified.fold(
             SeeOther(routes.SubscriptionController.checkYourDetails().url)
-          )(emailToBeVerified => Ok(checkYourInboxPage(emailToBeVerified.email)))
+          )(emailToBeVerified => Ok(checkYourInboxPage(emailToBeVerified.email, backLink)))
       }
     }
 

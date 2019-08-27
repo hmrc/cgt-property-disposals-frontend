@@ -25,14 +25,17 @@
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
  formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
  pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
- submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button
+ submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+ backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@(email: Email)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(email: Email, backLink: Call)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
 @title = @{messages("confirmEmail.title")}
 
 @mainTemplate(title = title) {
+
+ @backLinkComponent(backLink)
 
  @pageHeading(title, Some(messages("subscription.caption")))
 
