@@ -18,7 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import cats.syntax.either._
 import play.api.Configuration
-import play.api.mvc.Result
+import play.api.mvc.{Request, Result}
 import play.api.mvc.Results.Redirect
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionDataAndRetrievedData
@@ -58,7 +58,7 @@ trait IvBehaviour { this: Logging =>
   }
 
 
-  def updateSessionAndRedirectToIV(request: RequestWithSessionDataAndRetrievedData[_])(
+  def updateSessionAndRedirectToIV[R[_] <: Request[_]](request: R[_])(
     implicit hc: HeaderCarrier, ec: ExecutionContext
   ): Future[Result] =
     sessionStore

@@ -18,35 +18,67 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import cats.syntax.either._
 import com.google.inject.Inject
+import play.api.Configuration
 import play.api.data.{Form, FormError}
-import play.api.data.Forms.{boolean, of, mapping}
+import play.api.data.Forms.{boolean, mapping, of}
 import play.api.data.format.Formatter
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.InsufficientConfidenceLevel
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 
+import scala.concurrent.{ExecutionContext, Future}
+
 class InsufficientConfidenceLevelController @Inject()(
+                                                       val authenticatedAction: AuthenticatedAction,
+                                                       val sessionDataAction: SessionDataAction,
+                                                       val sessionStore: SessionStore,
+                                                       val errorHandler: ErrorHandler,
+                                                       val config: Configuration,
                                                        doYouHaveANinoPage: views.html.do_you_have_a_nino,
                                                        cc: MessagesControllerComponents)
                                                      (
-                                                       implicit viewConfig: ViewConfig
+                                                       implicit viewConfig: ViewConfig,
+                                                       ec: ExecutionContext
                                                      )
-  extends FrontendController(cc){
+  extends FrontendController(cc)
+    with IvBehaviour
+    with Logging
+    with WithAuthAndSessionDataAction
+    with DefaultRedirects {
+  import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.toFuture
 
-  def doYouHaveNINO(): Action[AnyContent] = Action { implicit request =>
-    Ok(doYouHaveANinoPage(InsufficientConfidenceLevelController.haveANinoForm))
+  private def withInsufficientConfidenceLevelUser(
+    f: => Future[Result])(implicit request: RequestWithSessionData[_]): Future[Result] =
+    request.sessionData.flatMap(_.subscriptionStatus) match {
+      case Some(InsufficientConfidenceLevel) => f
+      case other                             => defaultRedirect(other)
+    }
+
+
+  def doYouHaveNINO(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withInsufficientConfidenceLevelUser{
+      Ok(doYouHaveANinoPage(InsufficientConfidenceLevelController.haveANinoForm))
+    }
   }
 
-  def doYouHaveNINOSubmit(): Action[AnyContent] = Action { implicit request =>
-    InsufficientConfidenceLevelController.haveANinoForm.bindFromRequest().fold(
-      e => BadRequest(doYouHaveANinoPage(e)),
-      boolean => Ok(s"Got answer $boolean")
-    )
-
+  def doYouHaveNINOSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withInsufficientConfidenceLevelUser {
+      InsufficientConfidenceLevelController.haveANinoForm.bindFromRequest().fold(
+        e => BadRequest(doYouHaveANinoPage(e)),
+        hasNino =>
+          if (hasNino) {
+            updateSessionAndRedirectToIV(request)
+          } else {
+            Ok(s"Got answer $hasNino")
+          }
+      )
+    }
   }
-
-
 
 }
 
@@ -61,10 +93,10 @@ object InsufficientConfidenceLevelController {
     def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Boolean] = {
       Either.fromOption(data.get(key), Seq(FormError(key, "error.required")))
         .flatMap{
-        case "true"  => Right(true)
-        case "false" => Right(false)
-        case _       => Left(Seq(FormError(key, "error.boolean", Nil)))
-      }
+          case "true"  => Right(true)
+          case "false" => Right(false)
+          case _       => Left(Seq(FormError(key, "error.boolean", Nil)))
+        }
     }
 
     def unbind(key: String, value: Boolean): Map[String, String] = Map(key -> value.toString)

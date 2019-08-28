@@ -22,6 +22,7 @@ import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{SubscriptionComplete, SubscriptionReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
@@ -48,7 +49,8 @@ class SubscriptionController @Inject()(
     with WithSubscriptionDetailsActions
     with WithAuthAndSessionDataAction
     with Logging
-    with SessionUpdates {
+    with SessionUpdates
+    with DefaultRedirects {
 
   def checkYourDetails(): Action[AnyContent] =
     authenticatedActionWithSubscriptionReady { implicit request =>
@@ -80,8 +82,7 @@ class SubscriptionController @Inject()(
   def subscribed(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
     request.sessionData.flatMap(_.subscriptionStatus) match {
       case Some(SubscriptionComplete(_, complete)) => Ok(subscribedPage(complete.cgtReferenceNumber))
-      case Some(SubscriptionReady(_))              => SeeOther(routes.SubscriptionController.checkYourDetails().url)
-      case _                                       => SeeOther(routes.StartController.start().url)
+      case other                                   => defaultRedirect(other)
     }
   }
 

@@ -30,29 +30,19 @@ trait AuthActionSpec { this: MockFactory =>
 
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
 
-  val (signInUrl, origin, selfBaseUrl, ivUrl, ivOrigin) =
-    ("sign-in", "origin", "self-base-url", "ivUrl", "ivOrigin")
+  val (signInUrl, origin, selfBaseUrl) = ("sign-in", "origin", "self-base-url")
 
-  val (ivSuccessRelativeUrl, ivFailureRelativeUrl) = "/success" -> "/failure"
 
-  def newConfig(useRelativeUrls: Boolean): Configuration =
+  val config: Configuration =
     Configuration(
       ConfigFactory.parseString(
         s"""
            |gg.url    = "$signInUrl"
            |gg.origin = "$origin"
            |self.url  = "$selfBaseUrl"
-           |iv {
-           |  url         = "$ivUrl"
-           |  origin      = "$ivOrigin"
-           |  success-relative-url = "$ivSuccessRelativeUrl"
-           |  failure-relative-url = "$ivFailureRelativeUrl"
-           |  use-relative-urls = $useRelativeUrls
-           |}
     """.stripMargin
       )
     )
-
 
   def mockAuth[R](predicate: Predicate, retrieval: Retrieval[R])(result: Future[R]): Unit =
     (mockAuthConnector

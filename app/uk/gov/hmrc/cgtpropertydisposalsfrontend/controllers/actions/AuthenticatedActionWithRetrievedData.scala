@@ -21,7 +21,7 @@ import java.time.LocalDate
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.mvc._
-import play.api.mvc.Results.{Ok, Redirect}
+import play.api.mvc.Results.Ok
 import uk.gov.hmrc.auth.core.retrieve.{~, Name => RetrievalName, _}
 import uk.gov.hmrc.auth.core.{ConfidenceLevel, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler

@@ -18,14 +18,14 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import java.time.LocalDate
 
-import org.joda.time.{LocalDate => JodaLocalDate}
 import cats.data.EitherT
 import cats.instances.future._
+import org.joda.time.{LocalDate => JodaLocalDate}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
-import play.api.mvc.Result
+import play.api.mvc.{AnyContent, Request, Result}
 import play.api.test.FakeRequest
-import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector}
+import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, ConfidenceLevel}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus._
@@ -37,7 +37,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSupport {
+class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSupport with IvBehaviourSupport {
 
   val mockService = mock[BusinessPartnerRecordService]
 
@@ -47,6 +47,8 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
       bind[SessionStore].toInstance(mockSessionStore),
       bind[BusinessPartnerRecordService].toInstance(mockService)
     )
+
+  override lazy val additionalConfig = ivConfig(useRelativeUrls = false)
 
   lazy val controller = instanceOf[StartController]
 
@@ -76,8 +78,101 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
     "handling requests to start a journey" when {
 
-      def performAction(): Future[Result] =
-        controller.start()(FakeRequest())
+      def performAction(rh: Request[AnyContent] = FakeRequest()): Future[Result] =
+        controller.start()(rh)
+
+      "handling users with insufficient confidence level" must {
+
+        "show an error" when {
+
+          "the session cannot be updated when there is a nino in the auth record" in {
+            val request = FakeRequest("GET", "/uri")
+
+            inSequence {
+              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), Some("nino"), None, None, None)
+              mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+              mockStoreSession(SessionData.empty.copy(ivContinueUrl = Some(s"$selfBaseUrl${request.uri}")))(Future.successful(Left(Error(""))))
+            }
+
+            checkIsTechnicalErrorPage(performAction(request))
+          }
+
+          "the session cannot be updated when there is not a nino in the auth record" in {
+            val request = FakeRequest("GET", "/uri")
+
+            inSequence {
+              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), None, None, None, None)
+              mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+              mockStoreSession(SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.InsufficientConfidenceLevel)))(Future.successful(Left(Error(""))))
+            }
+
+            checkIsTechnicalErrorPage(performAction(request))
+          }
+        }
+
+        "redirect to the IV journey" when {
+
+          "the user does not have sufficient confidence level and there is a NINO in the auth record" in {
+            val request = FakeRequest("GET", "/uri")
+
+            inSequence {
+              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), Some("nino"), None, None, None)
+              mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+              mockStoreSession(SessionData.empty.copy(ivContinueUrl = Some(s"$selfBaseUrl${request.uri}")))(Future.successful(Right(())))
+            }
+
+            checkIsRedirectToIv(performAction(request), false)
+          }
+
+          "the user does not have sufficient confidence level and there is a NINO in the auth record and " +
+            "the application is configured to use absoluate URLs for IV" in new ControllerSpec  {
+            override val overrideBindings =
+              List[GuiceableModule](
+                bind[AuthConnector].toInstance(mockAuthConnector),
+                bind[SessionStore].toInstance(mockSessionStore),
+                bind[BusinessPartnerRecordService].toInstance(mockService)
+              )
+
+            override lazy val additionalConfig = ivConfig(useRelativeUrls = true)
+            val controller = instanceOf[StartController]
+            val request = FakeRequest("GET", "/uri")
+
+            inSequence {
+              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), Some("nino"), None, None, None)
+              mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+              mockStoreSession(SessionData.empty.copy(ivContinueUrl = Some(s"$selfBaseUrl${request.uri}")))(Future.successful(Right(())))
+            }
+
+            checkIsRedirectToIv(controller.start()(request), true)
+          }
+
+        }
+
+        "redirect to the do you have a nino page" when {
+
+          "the user does not have sufficient confidence level and there is no NINO in the auth record" in {
+            inSequence {
+              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), None, None, None, None)
+              mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+              mockStoreSession(SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.InsufficientConfidenceLevel)))(Future.successful(Right(())))
+            }
+
+            checkIsRedirect(performAction(), routes.InsufficientConfidenceLevelController.doYouHaveNINO())
+          }
+
+          "the session data indicates they do not have sufficient confidence level" in {
+            inSequence {
+              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), None, None, None, None)
+              mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.InsufficientConfidenceLevel))))))
+            }
+
+            checkIsRedirect(performAction(), routes.InsufficientConfidenceLevelController.doYouHaveNINO())
+          }
+
+        }
+
+
+      }
 
       "the user is not enrolled and is not subscribed in ETMP" must {
 

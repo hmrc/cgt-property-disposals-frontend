@@ -38,6 +38,7 @@ class IvController @Inject()(
   def ivSuccess(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
     request.sessionData.flatMap(_.ivContinueUrl) match {
       case Some(ivContinueUrl) =>
+        // TODO: make this always go to start endpoint
         SeeOther(ivContinueUrl)
 
       case None =>

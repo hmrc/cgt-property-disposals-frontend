@@ -34,4 +34,8 @@ package object models {
 
   implicit val bprGen: Gen[BusinessPartnerRecord] = gen[BusinessPartnerRecord]
 
+  implicit val nameGen: Gen[Name] = gen[Name]
+
+  implicit val subscriptionResponseGen: Gen[SubscriptionResponse] = gen[SubscriptionResponse]
+
 }

@@ -21,13 +21,13 @@ import cats.instances.future._
 import cats.syntax.either._
 import com.google.inject.Inject
 import play.api.Configuration
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, MessagesRequest, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, MessagesRequest, Request, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedActionWithRetrievedData, RequestWithSessionDataAndRetrievedData, SessionDataActionWithRetrievedData, WithAuthRetrievalsAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionDetails.MissingData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{SubscriptionComplete, SubscriptionMissingData, SubscriptionReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Individual
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, Error, Name, SessionData, SubscriptionDetails, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, Error, NINO, Name, SessionData, SubscriptionDetails, SubscriptionStatus, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
@@ -57,10 +57,11 @@ class StartController @Inject()(
     (request.authenticatedRequest.userType,
       request.sessionData.flatMap(_.subscriptionStatus)
     ) match {
+      case (_, Some(SubscriptionStatus.InsufficientConfidenceLevel)) =>
+        SeeOther(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url)
+
       case (UserType.InsufficientConfidenceLevel(maybeNino), _) =>
-        maybeNino.fold[Future[Result]](
-          SeeOther(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url)
-        )( _ => updateSessionAndRedirectToIV(request))
+        handleInsufficientConfidenceLevel(maybeNino)
 
       case (_, Some(_: SubscriptionReady))         =>
         SeeOther(routes.SubscriptionController.checkYourDetails().url)
@@ -76,7 +77,25 @@ class StartController @Inject()(
     }
   }
 
-  def buildSubscriptionData(individual: Individual,
+  private def handleInsufficientConfidenceLevel(maybeNino: Option[NINO])(
+    implicit request: RequestWithSessionDataAndRetrievedData[AnyContent]
+  ): Future[Result] = maybeNino match {
+    case None =>
+      updateSession(sessionStore, request)(_.copy(subscriptionStatus = Some(SubscriptionStatus.InsufficientConfidenceLevel)))
+        .map{
+          case Left(e) =>
+          logger.warn("Could not update session with insufficient confidence level", e)
+          errorHandler.errorResult()
+
+          case Right(_) =>
+            SeeOther(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url)
+        }
+
+    case Some(_) =>
+      updateSessionAndRedirectToIV(request)
+  }
+
+  private def buildSubscriptionData(individual: Individual,
                              maybeBpr: Option[BusinessPartnerRecord])(
     implicit
     hc: HeaderCarrier,

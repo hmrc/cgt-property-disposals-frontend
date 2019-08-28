@@ -24,10 +24,11 @@ import cats.instances.uuid._
 import cats.syntax.eq._
 import shapeless.{Lens, lens}
 import com.google.inject.{Inject, Singleton}
+import play.api.mvc.Results.SeeOther
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, RequestWithSessionDataAndRetrievedData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{SubscriptionComplete, SubscriptionMissingData, SubscriptionReady}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{InsufficientConfidenceLevel, SubscriptionComplete, SubscriptionMissingData, SubscriptionReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Individual
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -56,7 +57,8 @@ class EmailController @Inject()(
   extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with Logging
-    with SessionUpdates {
+    with SessionUpdates
+    with DefaultRedirects {
 
   def withSubscriptionData(requestWithSessionData: RequestWithSessionData[_])(
     f: (SessionData, Either[SubscriptionMissingData, SubscriptionReady]) => Future[Result]
@@ -64,10 +66,9 @@ class EmailController @Inject()(
     (requestWithSessionData.sessionData,
       requestWithSessionData.sessionData.flatMap(_.subscriptionStatus)
     ) match {
-      case (Some(d), Some(s: SubscriptionMissingData)) => f(d, Left(s))
-      case (Some(d), Some(s: SubscriptionReady))       => f(d, Right(s))
-      case (Some(_), Some(_: SubscriptionComplete))    => SeeOther(routes.SubscriptionController.subscribed().url)
-      case _ => SeeOther(routes.StartController.start().url)
+      case (Some(d), Some(s: SubscriptionMissingData))  => f(d, Left(s))
+      case (Some(d), Some(s: SubscriptionReady))        => f(d, Right(s))
+      case (_, s)                                       => defaultRedirect(s)
     }
 
   def changeEmail(): Action[AnyContent] = enterOrChangeEmail(Some(routes.SubscriptionController.checkYourDetails))

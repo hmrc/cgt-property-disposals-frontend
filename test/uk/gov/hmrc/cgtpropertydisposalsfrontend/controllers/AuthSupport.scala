@@ -50,6 +50,28 @@ trait AuthSupport {
   def mockAuthWithNoRetrievals(): Unit =
     mockAuth(EmptyPredicate, EmptyRetrieval)(Future.successful(()))
 
+  val expectedRetrievals =
+    Retrievals.confidenceLevel and Retrievals.affinityGroup and Retrievals.nino and
+      Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth and Retrievals.email
+
+  def mockAuthWithAllRetrievals(
+    retrievedConfidenceLevel: ConfidenceLevel,
+    retrievedAffinityGroup: Option[AffinityGroup],
+    retrievedNino: Option[String],
+    retrievedName: Option[Name],
+    retrievedDateOfBirth: Option[LocalDate],
+    retrievedEmail: Option[String]): Unit =
+    mockAuth(EmptyPredicate, expectedRetrievals)(
+      Future successful (
+        new ~(retrievedConfidenceLevel, retrievedAffinityGroup) and
+          retrievedNino and
+          retrievedName.map(name => ItmpName(Some(name.forename), None, Some(name.surname))) and
+          None and
+          retrievedDateOfBirth and
+          retrievedEmail
+        )
+    )
+
   def mockAuthWithCl200AndWithAllRetrievals(
                                              retrievedAffinityGroup: AffinityGroup,
                                              retrievedNino: String,
@@ -57,18 +79,12 @@ trait AuthSupport {
                                              retrievedDateOfBirth: LocalDate,
                                              retrievedEmail: Option[String]
                                            ): Unit =
-    mockAuth(
-      EmptyPredicate,
-      Retrievals.confidenceLevel and Retrievals.affinityGroup and Retrievals.nino
-        and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth and Retrievals.email
-    )(
-      Future successful (
-        new ~(ConfidenceLevel.L200, Some(retrievedAffinityGroup)) and
-          Some(retrievedNino) and
-          Some(ItmpName(Some(retrievedName.forename), None, Some(retrievedName.surname))) and
-          None and
-          Some(retrievedDateOfBirth) and
-          retrievedEmail
-        )
+    mockAuthWithAllRetrievals(
+      ConfidenceLevel.L200,
+      Some(retrievedAffinityGroup),
+      Some(retrievedNino),
+      Some(retrievedName),
+      Some(retrievedDateOfBirth),
+      retrievedEmail
     )
 }

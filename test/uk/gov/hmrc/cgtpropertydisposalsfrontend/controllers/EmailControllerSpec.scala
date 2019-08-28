@@ -116,6 +116,21 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
     }
 
+    "redirect to the do you have a nino page" when {
+
+      "the session data indicates the user does not have sufficient confidence level" in {
+        val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.InsufficientConfidenceLevel))
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(Future.successful(Right(Some(session))))
+        }
+
+        val result = performAction()
+        checkIsRedirect(result, routes.InsufficientConfidenceLevelController.doYouHaveNINO())
+      }
+
+    }
+
   }
 
   "EmailController" when {
