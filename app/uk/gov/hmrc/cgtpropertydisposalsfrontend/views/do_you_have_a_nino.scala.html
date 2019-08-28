@@ -18,15 +18,36 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template
+ mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+ pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+ submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+ errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+ formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+ yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no
 )
 
 @(form: Form[Boolean])(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
-@mainTemplate(title = "You got a NINO?") {
+@key = @{"hasNino"}
+@title = @{messages("haveANino.title")}
+@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-  <h1>You got a NINO?</h1>
+@mainTemplate(title = title) {
+
+ @if(hasErrors) {
+  @errorSummary(form)
+ }
+
+  @formWrapper(routes.InsufficientConfidenceLevelController.doYouHaveNINOSubmit(), 'novalidate -> "novalidate") {
+   @yesNo(
+    fieldId = key,
+    label = pageHeading(title),
+    labelAsHeading = true,
+    errorKey = form.error(key).map(e => e.message),
+    hasErrors = hasErrors,
+    selected = form.value
+   )
+   @submitButton(messages("button.continue"))
+  }
 
 }
-
-
