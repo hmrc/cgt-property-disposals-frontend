@@ -14,51 +14,39 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import cats.syntax.either._
 import play.api.Configuration
+import play.api.mvc.Result
 import play.api.mvc.Results.Redirect
-import play.api.mvc.{ActionRefiner, MessagesRequest, Request, Result}
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, InsufficientConfidenceLevel, NoActiveSession}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionDataAndRetrievedData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait AuthenticatedActionBase [P[_]]
-  extends ActionRefiner[MessagesRequest,P] with Logging { self  =>
+trait IvBehaviour { this: Logging =>
 
-  val authConnector: AuthConnector
   val config: Configuration
-  val errorHandler: ErrorHandler
+
   val sessionStore: SessionStore
-  implicit val executionContext: ExecutionContext
 
-  def authorisedFunction[A](auth: AuthorisedFunctions, request: MessagesRequest[A]): Future[Either[Result,P[A]]]
-
-  private val authorisedFunctions: AuthorisedFunctions = new AuthorisedFunctions {
-    override def authConnector: AuthConnector = self.authConnector
-  }
+  val errorHandler: ErrorHandler
 
   private def getString(key: String): String = config.underlying.getString(key)
 
-  private val signInUrl: String = getString("gg.url")
+  val selfBaseUrl: String = getString("self.url")
 
-  private val origin: String = getString("gg.origin")
+  val ivUrl: String = getString("iv.url")
 
-  private val selfBaseUrl: String = getString("self.url")
+  val ivOrigin: String = getString("iv.origin")
 
-  private val ivUrl: String = getString("iv.url")
-
-  private val ivOrigin: String = getString("iv.origin")
-
-  private val (ivSuccessUrl: String, ivFailureUrl: String) = {
+  val (ivSuccessUrl: String, ivFailureUrl: String) = {
     val useRelativeUrls = config.underlying.getBoolean("iv.use-relative-urls")
     val (successRelativeUrl, failureRelativeUrl) =
       getString("iv.success-relative-url") -> getString("iv.failure-relative-url")
@@ -69,18 +57,9 @@ trait AuthenticatedActionBase [P[_]]
       (selfBaseUrl + successRelativeUrl) -> (selfBaseUrl + failureRelativeUrl)
   }
 
-  override protected def refine[A](request: MessagesRequest[A]): Future[Either[Result, P[A]]] = {
-    implicit val hc: HeaderCarrier =
-      HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-    authorisedFunction[A](authorisedFunctions, request).recoverWith{
-      case _: NoActiveSession =>
-        Future.successful(Left(Redirect(signInUrl, Map("continue" -> Seq(selfBaseUrl + request.uri), "origin" -> Seq(origin)))))
-    }
-  }
-
-  private def handleInsufficientConfidenceLevel(request: MessagesRequest[_], errorResponse: Result)(
-    implicit hc: HeaderCarrier
+  def updateSessionAndRedirectToIV(request: RequestWithSessionDataAndRetrievedData[_])(
+    implicit hc: HeaderCarrier, ec: ExecutionContext
   ): Future[Result] =
     sessionStore
       .store(SessionData.empty.copy(ivContinueUrl = Some(selfBaseUrl + request.uri)))
@@ -88,7 +67,7 @@ trait AuthenticatedActionBase [P[_]]
         _.bimap(
           { e =>
             logger.warn("Could not store IV continue url", e)
-            errorResponse
+            errorHandler.errorResult()(request)
           },
           _ =>
             Redirect(
@@ -103,7 +82,4 @@ trait AuthenticatedActionBase [P[_]]
         ).merge
       }
 
-  }
-
-
-
+}

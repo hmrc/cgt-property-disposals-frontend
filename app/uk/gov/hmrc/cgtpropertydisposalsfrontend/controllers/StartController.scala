@@ -39,36 +39,18 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class StartController @Inject()(
                                  bprService: BusinessPartnerRecordService,
-                                 sessionStore: SessionStore,
-                                 errorHandler: ErrorHandler,
+                                 val sessionStore: SessionStore,
+                                 val errorHandler: ErrorHandler,
                                  cc: MessagesControllerComponents,
                                  val authenticatedActionWithRetrievedData: AuthenticatedActionWithRetrievedData,
                                  val sessionDataAction: SessionDataActionWithRetrievedData,
-                                 config: Configuration
+                                 val config: Configuration
                                )(implicit ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthRetrievalsAndSessionDataAction
     with Logging
-    with SessionUpdates {
-
-  private def getString(key: String): String = config.underlying.getString(key)
-
-  val selfBaseUrl: String = getString("self.url")
-
-  val ivUrl: String = getString("iv.url")
-
-  val ivOrigin: String = getString("iv.origin")
-
-  val (ivSuccessUrl: String, ivFailureUrl: String) = {
-    val useRelativeUrls = config.underlying.getBoolean("iv.use-relative-urls")
-    val (successRelativeUrl, failureRelativeUrl) =
-      getString("iv.success-relative-url") -> getString("iv.failure-relative-url")
-
-    if (useRelativeUrls)
-      successRelativeUrl -> failureRelativeUrl
-    else
-      (selfBaseUrl + successRelativeUrl) -> (selfBaseUrl + failureRelativeUrl)
-  }
+    with SessionUpdates
+    with IvBehaviour {
 
 
   def start(): Action[AnyContent] = authenticatedActionWithRetrievedDataAndSessionData.async { implicit request =>
@@ -78,9 +60,7 @@ class StartController @Inject()(
       case (UserType.InsufficientConfidenceLevel(maybeNino), _) =>
         maybeNino.fold[Future[Result]](
           SeeOther(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url)
-        )( _ =>
-          updateSessionAndRedirectToIV(request)
-        )
+        )( _ => updateSessionAndRedirectToIV(request))
 
       case (_, Some(_: SubscriptionReady))         =>
         SeeOther(routes.SubscriptionController.checkYourDetails().url)
@@ -102,8 +82,6 @@ class StartController @Inject()(
     hc: HeaderCarrier,
     request: RequestWithSessionDataAndRetrievedData[_]
   ): Future[Result] = {
-    lazy val name = Name("", "") // TODO: sort out /// request.authenticatedRequest.name
-
     val result = for {
       bpr <- maybeBpr.fold(
               bprService.getBusinessPartnerRecord(
@@ -117,7 +95,8 @@ class StartController @Inject()(
       _ <- EitherT(
             maybeSubscriptionDetails.fold[Future[Either[Error, Unit]]](
               _ =>
-                updateSession(sessionStore, request)(_.copy(subscriptionStatus = Some(SubscriptionMissingData(bpr, name)))),
+                updateSession(sessionStore, request)(
+                  _.copy(subscriptionStatus = Some(SubscriptionMissingData(bpr, individual.name)))),
               subscriptionDetails =>
                 updateSession(sessionStore, request)(
                   _.copy(subscriptionStatus = Some(SubscriptionReady(subscriptionDetails))))
@@ -142,29 +121,5 @@ class StartController @Inject()(
       }
     )
   }
-
-  private def updateSessionAndRedirectToIV(request: RequestWithSessionDataAndRetrievedData[_])(
-    implicit hc: HeaderCarrier
-  ): Future[Result] =
-    sessionStore
-      .store(SessionData.empty.copy(ivContinueUrl = Some(selfBaseUrl + request.uri)))
-      .map {
-        _.bimap(
-          { e =>
-            logger.warn("Could not store IV continue url", e)
-            errorHandler.errorResult()(request)
-          },
-          _ =>
-            Redirect(
-              s"$ivUrl/mdtp/uplift",
-              Map(
-                "origin"          -> Seq(ivOrigin),
-                "confidenceLevel" -> Seq("200"),
-                "completionURL"   -> Seq(ivSuccessUrl),
-                "failureURL"      -> Seq(ivFailureUrl)
-              )
-            )
-        ).merge
-      }
 
 }

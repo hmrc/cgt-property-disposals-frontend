@@ -21,7 +21,7 @@ import play.api.Configuration
 import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.{EmptyRetrieval, ItmpName, Retrieval, ~}
-import uk.gov.hmrc.auth.core.{AuthConnector, ConfidenceLevel}
+import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, ConfidenceLevel}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.AuthenticatedActionWithRetrievedData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Name
@@ -51,26 +51,24 @@ trait AuthSupport {
     mockAuth(EmptyPredicate, EmptyRetrieval)(Future.successful(()))
 
   def mockAuthWithCl200AndWithAllRetrievals(
-                                                  retrievedNino: String,
-                                                  retrievedName: Name,
-                                                  retrievedDateOfBirth: LocalDate,
-                                                  retrievedEmail: Option[String]
-                                                ): Unit =
+                                             retrievedAffinityGroup: AffinityGroup,
+                                             retrievedNino: String,
+                                             retrievedName: Name,
+                                             retrievedDateOfBirth: LocalDate,
+                                             retrievedEmail: Option[String]
+                                           ): Unit =
     mockAuth(
-      ConfidenceLevel.L200,
-      Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth and Retrievals.email
+      EmptyPredicate,
+      Retrievals.confidenceLevel and Retrievals.affinityGroup and Retrievals.nino
+        and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth and Retrievals.email
     )(
       Future successful (
-        new ~(
-          new ~(
-            new ~(
-              new ~(Some(retrievedNino), Some(ItmpName(Some(retrievedName.forename), None, Some(retrievedName.surname)))),
-              None
-            ),
-            Some(new LocalDate(2000, 4, 10))
-          ),
+        new ~(ConfidenceLevel.L200, Some(retrievedAffinityGroup)) and
+          Some(retrievedNino) and
+          Some(ItmpName(Some(retrievedName.forename), None, Some(retrievedName.surname))) and
+          None and
+          Some(retrievedDateOfBirth) and
           retrievedEmail
-        )
         )
     )
 }
