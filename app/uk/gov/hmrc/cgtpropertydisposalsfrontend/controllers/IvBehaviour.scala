@@ -34,8 +34,6 @@ trait IvBehaviour { this: Logging =>
 
   val config: Configuration
 
-  val sessionStore: SessionStore
-
   val errorHandler: ErrorHandler
 
   private def getString(key: String): String = config.underlying.getString(key)
@@ -57,29 +55,15 @@ trait IvBehaviour { this: Logging =>
       (selfBaseUrl + successRelativeUrl) -> (selfBaseUrl + failureRelativeUrl)
   }
 
-
-  def updateSessionAndRedirectToIV[R[_] <: Request[_]](request: R[_])(
-    implicit hc: HeaderCarrier, ec: ExecutionContext
-  ): Future[Result] =
-    sessionStore
-      .store(SessionData.empty.copy(ivContinueUrl = Some(selfBaseUrl + request.uri)))
-      .map {
-        _.bimap(
-          { e =>
-            logger.warn("Could not store IV continue url", e)
-            errorHandler.errorResult()(request)
-          },
-          _ =>
-            Redirect(
-              s"$ivUrl/mdtp/uplift",
-              Map(
-                "origin"          -> Seq(ivOrigin),
-                "confidenceLevel" -> Seq("200"),
-                "completionURL"   -> Seq(ivSuccessUrl),
-                "failureURL"      -> Seq(ivFailureUrl)
-              )
-            )
-        ).merge
-      }
+  val redirectToIv: Result =
+     Redirect(
+       s"$ivUrl/mdtp/uplift",
+       Map(
+         "origin"          -> Seq(ivOrigin),
+         "confidenceLevel" -> Seq("200"),
+         "completionURL"   -> Seq(ivSuccessUrl),
+         "failureURL"      -> Seq(ivFailureUrl)
+       )
+     )
 
 }

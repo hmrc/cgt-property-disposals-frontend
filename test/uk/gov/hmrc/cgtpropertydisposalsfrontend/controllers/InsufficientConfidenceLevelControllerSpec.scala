@@ -168,11 +168,32 @@ class InsufficientConfidenceLevelControllerSpec
           inSequence{
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(session(InsufficientConfidenceLevel)))))
-            mockStoreSession(SessionData.empty.copy(ivContinueUrl = Some(s"$selfBaseUrl/")))(Future.successful(Right(())))
           }
 
           val result = performAction("hasNino" -> "true")
           checkIsRedirectToIv(result, false)
+        }
+
+        "the user indicates that they do have a NINO and the application " +
+          "has been configured to used absolute urls to iv" in new ControllerSpec {
+
+          override val overrideBindings =
+            List[GuiceableModule](
+              bind[AuthConnector].toInstance(mockAuthConnector),
+              bind[SessionStore].toInstance(mockSessionStore)
+            )
+
+          override lazy val additionalConfig = ivConfig(useRelativeUrls = true)
+
+          lazy val controller = instanceOf[InsufficientConfidenceLevelController]
+
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(session(InsufficientConfidenceLevel)))))
+          }
+
+          val result = controller.doYouHaveNINOSubmit()(FakeRequest().withFormUrlEncodedBody("hasNino" -> "true").withCSRFToken)
+          checkIsRedirectToIv(result, true)
         }
 
 

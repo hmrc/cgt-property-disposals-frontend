@@ -92,7 +92,7 @@ class StartController @Inject()(
         }
 
     case Some(_) =>
-      updateSessionAndRedirectToIV(request)
+      redirectToIv
   }
 
   private def buildSubscriptionData(individual: Individual,

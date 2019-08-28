@@ -85,18 +85,6 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
         "show an error" when {
 
-          "the session cannot be updated when there is a nino in the auth record" in {
-            val request = FakeRequest("GET", "/uri")
-
-            inSequence {
-              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), Some("nino"), None, None, None)
-              mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-              mockStoreSession(SessionData.empty.copy(ivContinueUrl = Some(s"$selfBaseUrl${request.uri}")))(Future.successful(Left(Error(""))))
-            }
-
-            checkIsTechnicalErrorPage(performAction(request))
-          }
-
           "the session cannot be updated when there is not a nino in the auth record" in {
             val request = FakeRequest("GET", "/uri")
 
@@ -118,7 +106,6 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             inSequence {
               mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), Some("nino"), None, None, None)
               mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-              mockStoreSession(SessionData.empty.copy(ivContinueUrl = Some(s"$selfBaseUrl${request.uri}")))(Future.successful(Right(())))
             }
 
             checkIsRedirectToIv(performAction(request), false)
@@ -140,7 +127,6 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             inSequence {
               mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), Some("nino"), None, None, None)
               mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-              mockStoreSession(SessionData.empty.copy(ivContinueUrl = Some(s"$selfBaseUrl${request.uri}")))(Future.successful(Right(())))
             }
 
             checkIsRedirectToIv(controller.start()(request), true)

@@ -72,7 +72,7 @@ class InsufficientConfidenceLevelController @Inject()(
         e => BadRequest(doYouHaveANinoPage(e)),
         hasNino =>
           if (hasNino) {
-            updateSessionAndRedirectToIV(request)
+            redirectToIv
           } else {
             Ok(s"Got answer $hasNino")
           }

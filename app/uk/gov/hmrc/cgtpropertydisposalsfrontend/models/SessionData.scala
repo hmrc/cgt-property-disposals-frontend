@@ -16,10 +16,10 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
+import cats.Eq
 import play.api.libs.json.{Format, Json}
 
 final case class SessionData(
-  ivContinueUrl: Option[String],
   subscriptionStatus: Option[SubscriptionStatus],
   emailToBeVerified: Option[EmailToBeVerified],
   addressLookupResult: Option[AddressLookupResult]
@@ -29,6 +29,8 @@ object SessionData {
 
   implicit val format: Format[SessionData] = Json.format
 
-  val empty: SessionData = SessionData(None, None, None, None)
+  implicit val eq: Eq[SessionData] = Eq.fromUniversalEquals[SessionData]
+
+  val empty: SessionData = SessionData(None, None, None)
 
 }
