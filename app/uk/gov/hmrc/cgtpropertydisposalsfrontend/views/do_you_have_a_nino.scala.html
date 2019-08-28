@@ -32,7 +32,7 @@
 @title = @{messages("haveANino.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title) {
+@mainTemplate(title = title, hasErrors = hasErrors) {
 
  @if(hasErrors) {
   @errorSummary(form)
