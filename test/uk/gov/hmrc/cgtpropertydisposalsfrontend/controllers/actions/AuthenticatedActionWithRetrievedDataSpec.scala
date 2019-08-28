@@ -17,20 +17,23 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
 import java.net.URLEncoder
+import java.time.LocalDate
 
-import org.joda.time.LocalDate
+import julienrf.json.derived
+import org.joda.time.{LocalDate => JodaLocalDate}
 import org.scalamock.scalatest.MockFactory
 import play.api.i18n.MessagesApi
-import play.api.mvc.MessagesRequest
+import play.api.libs.json.{Json, OFormat}
+import play.api.mvc.{MessagesRequest, Result}
 import play.api.mvc.Results.Ok
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.auth.core.retrieve.{ItmpName, Name, ~}
+import uk.gov.hmrc.auth.core.retrieve.{ItmpName, ~, Name => GGName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, Email, Error, NINO, Name, SessionData, UserType}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -44,21 +47,14 @@ class AuthenticatedActionWithRetrievedDataSpec
     val authenticatedAction =
       new AuthenticatedActionWithRetrievedData(mockAuthConnector, config, instanceOf[ErrorHandler], mockSessionStore)
 
-    def performAction[A](r: FakeRequest[A]) = {
+    implicit val userTypeFormat: OFormat[UserType] = derived.oformat[UserType]
+    
+    def performAction[A](r: FakeRequest[A]): Future[Result] = {
       @SuppressWarnings(Array("org.wartremover.warts.Any"))
       val request = new MessagesRequest[A](r, stub[MessagesApi])
       authenticatedAction.invokeBlock(request, { a: AuthenticatedRequestWithRetrievedData[A] =>
       a.request.messagesApi shouldBe request.messagesApi
-        Future.successful(
-          Ok(
-            List(
-              a.nino.value,
-              a.name.forename,
-              a.name.surname,
-              a.dateOfBirth.value.toString,
-              a.email.map(_.value).toString
-            ).mkString("|")
-          ))
+        Future.successful(Ok(Json.toJson(a.userType)))
       })
     }
   }
@@ -100,19 +96,26 @@ class AuthenticatedActionWithRetrievedDataSpec
           new ~(
             new ~(
               new ~(Some("nino"), Some(ItmpName(Some("givenName"), Some("middleName"), Some("familyName")))),
-            Some(Name(Some("forename"), Some("surname")))
+            Some(GGName(Some("forename"), Some("surname")))
           ),
-          Some(new LocalDate(2000, 4, 10))
+          Some(new JodaLocalDate(2000, 4, 10))
           ),
           Some("email")
         )
       )
+      val expectedRetrieval =
+        UserType.Individual(
+          NINO("nino"),
+          Name("givenName", "familyName"),
+          DateOfBirth(LocalDate.of(2000, 4, 10)),
+          Some(Email("email")))
+
       "effect the requested action" in new TestEnvironment {
         mockAuth(ConfidenceLevel.L200, retrievals)(retrievalsResult)
 
         val result = performAction(FakeRequest())
         status(result)          shouldBe OK
-        contentAsString(result) shouldBe "nino|givenName|familyName|2000-04-10|Some(email)"
+        contentAsJson(result) shouldBe Json.toJson(expectedRetrieval)
       }
     }
 
@@ -122,19 +125,26 @@ class AuthenticatedActionWithRetrievedDataSpec
           new ~(
             new ~(
               new ~(Some("nino"), Some(ItmpName(Some("givenName"), Some("middleName"), Some("familyName")))),
-              Some(Name(Some("forename"), Some("surname")))
+              Some(GGName(Some("forename"), Some("surname")))
             ),
-            Some(new LocalDate(2000, 4, 10))
+            Some(new JodaLocalDate(2000, 4, 10))
           ),
           Some("")
         )
         )
+      val expectedRetrieval =
+        UserType.Individual(
+          NINO("nino"),
+          Name("givenName", "familyName"),
+          DateOfBirth(LocalDate.of(2000, 4, 10)),
+          None)
+
       "effect the requested action" in new TestEnvironment {
         mockAuth(ConfidenceLevel.L200, retrievals)(retrievalsResult)
 
         val result = performAction(FakeRequest())
-        status(result)          shouldBe OK
-        contentAsString(result) shouldBe "nino|givenName|familyName|2000-04-10|None"
+        status(result)        shouldBe OK
+        contentAsJson(result) shouldBe Json.toJson(expectedRetrieval)
       }
     }
 
@@ -147,7 +157,7 @@ class AuthenticatedActionWithRetrievedDataSpec
             new ~(Some("nino"), Some(ItmpName(None, Some("middleName"), Some("familyName")))),
             None
           ),
-          Some(new LocalDate(2000, 4, 10))
+          Some(new JodaLocalDate(2000, 4, 10))
         ),
       None
         )
@@ -167,19 +177,26 @@ class AuthenticatedActionWithRetrievedDataSpec
           new ~(
             new ~(
             new ~(Some("nino"), None),
-            Some(Name(Some("first-name second-name"), None))
+            Some(GGName(Some("first-name second-name"), None))
           ),
-          Some(new LocalDate(2000, 4, 10))
+          Some(new JodaLocalDate(2000, 4, 10))
           ),
           None
         )
       )
+      val expectedRetrieval =
+        UserType.Individual(
+          NINO("nino"),
+          Name("first-name", "second-name"),
+          DateOfBirth(LocalDate.of(2000, 4, 10)),
+          None)
+
       "effect the requested action" in new TestEnvironment {
         mockAuth(ConfidenceLevel.L200, retrievals)(retrievalsResult)
 
         val result = performAction(FakeRequest())
         status(result)          shouldBe OK
-        contentAsString(result) shouldBe "nino|first-name|second-name|2000-04-10|None"
+        contentAsJson(result) shouldBe Json.toJson(expectedRetrieval)
       }
     }
 
@@ -191,19 +208,27 @@ class AuthenticatedActionWithRetrievedDataSpec
           new ~(
             new ~(
             new ~(Some("nino"), None),
-            Some(Name(Some("first-name second-name third-name"), None))
+            Some(GGName(Some("first-name second-name third-name"), None))
           ),
-          Some(new LocalDate(2000, 4, 10))
+          Some(new JodaLocalDate(2000, 4, 10))
           ),
           Some("email")
         )
       )
+
+      val expectedRetrieval =
+        UserType.Individual(
+          NINO("nino"),
+          Name("givenName", "third-name"),
+          DateOfBirth(LocalDate.of(2000, 4, 10)),
+          Some(Email("email")))
+
       "effect the requested action" in new TestEnvironment {
         mockAuth(ConfidenceLevel.L200, retrievals)(retrievalsResult)
 
         val result = performAction(FakeRequest())
         status(result)          shouldBe OK
-        contentAsString(result) shouldBe "nino|first-name|third-name|2000-04-10|Some(email)"
+        contentAsJson(result) shouldBe Json.toJson(expectedRetrieval)
       }
     }
 
@@ -213,9 +238,9 @@ class AuthenticatedActionWithRetrievedDataSpec
           new ~(
             new ~(
               new ~(Some("nino"), None),
-              Some(Name(ggName, None))
+              Some(GGName(ggName, None))
             ),
-            Some(new LocalDate(2000, 4, 10))
+            Some(new JodaLocalDate(2000, 4, 10))
           ),
           Some("email")
         )
@@ -245,12 +270,12 @@ class AuthenticatedActionWithRetrievedDataSpec
             new ~(Some("nino"), None),
             None
           ),
-          Some(new LocalDate(2000, 4, 10))
+          Some(new JodaLocalDate(2000, 4, 10))
         ),
           None
         )
       )
-      "effect the requested action" in new TestEnvironment {
+      "show an error" in new TestEnvironment {
         mockAuth(ConfidenceLevel.L200, retrievals)(retrievalsResult)
 
         val result = performAction(FakeRequest())

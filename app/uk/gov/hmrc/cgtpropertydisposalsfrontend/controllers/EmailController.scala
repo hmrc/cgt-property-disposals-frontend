@@ -62,16 +62,11 @@ class EmailController @Inject()(
     f: (SessionData, Either[SubscriptionMissingData, SubscriptionReady]) => Future[Result]
   ): Future[Result] =
     (requestWithSessionData.sessionData,
-      requestWithSessionData.sessionData.flatMap(_.subscriptionStatus) // ,
-//    requestWithSessionData.authenticatedRequest.userType
+      requestWithSessionData.sessionData.flatMap(_.subscriptionStatus)
     ) match {
-      case (Some(d), Some(s: SubscriptionMissingData)) =>
-        f(d, Left(s))
-      case (Some(d), Some(s: SubscriptionReady))       =>
-        f(d, Right(s))
-      case (Some(_), Some(_: SubscriptionComplete)) =>
-        SeeOther(routes.SubscriptionController.subscribed().url)
-
+      case (Some(d), Some(s: SubscriptionMissingData)) => f(d, Left(s))
+      case (Some(d), Some(s: SubscriptionReady))       => f(d, Right(s))
+      case (Some(_), Some(_: SubscriptionComplete))    => SeeOther(routes.SubscriptionController.subscribed().url)
       case _ => SeeOther(routes.StartController.start().url)
     }
 
@@ -107,7 +102,7 @@ class EmailController @Inject()(
 
                 val name =
                   subscriptionStatus.fold(
-                    _ => Name("", ""), // individual.name, TODO: sort out
+                    s => s.name,
                     s => Name(s.subscriptionDetails.forename, s.subscriptionDetails.surname)
                   )
 
@@ -140,8 +135,8 @@ class EmailController @Inject()(
       withSubscriptionData(request) {
         case (sessionData, subscriptionStatus) =>
           val backLink = subscriptionStatus.fold(
-            _ => routes.EmailController.enterEmail,
-            _ => routes.EmailController.changeEmail
+            _ => routes.EmailController.enterEmail(),
+            _ => routes.EmailController.changeEmail()
           )
           sessionData.emailToBeVerified.fold(
             SeeOther(routes.SubscriptionController.checkYourDetails().url)

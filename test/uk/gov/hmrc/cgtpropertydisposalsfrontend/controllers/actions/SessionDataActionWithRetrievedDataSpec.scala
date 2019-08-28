@@ -41,10 +41,12 @@ class SessionDataActionWithRetrievedDataSpec extends ControllerSpec with Session
 
     lazy val authenticatedRequest =
       AuthenticatedRequestWithRetrievedData(
-        NINO("nino"),
-        Name("name", "lastName"),
-        DateOfBirth(LocalDate.of(2000, 10, 1)),
-        Some(Email("email")),
+        UserType.Individual(
+          NINO("nino"),
+          Name("name", "lastName"),
+          DateOfBirth(LocalDate.of(2000, 10, 1)),
+          Some(Email("email"))
+        ),
         messagesRequest)
 
     val sessionData = sample[SessionData]

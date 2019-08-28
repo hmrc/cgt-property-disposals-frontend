@@ -16,9 +16,11 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
+import cats.syntax.either._
 import com.google.inject.Inject
-import play.api.data.Form
-import play.api.data.Forms.{boolean, mapping}
+import play.api.data.{Form, FormError}
+import play.api.data.Forms.{boolean, of, mapping}
+import play.api.data.format.Formatter
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
@@ -51,10 +53,28 @@ class InsufficientConfidenceLevelController @Inject()(
 
 object InsufficientConfidenceLevelController {
 
+  //don't want to use out-of-box boolean formatter - that one defaults null values to false
+  val booleanFormatter: Formatter[Boolean] = new Formatter[Boolean] {
+
+    override val format = Some(("format.boolean", Nil))
+
+    def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Boolean] = {
+      Either.fromOption(data.get(key), Seq(FormError(key, "error.required")))
+        .flatMap{
+        case "true"  => Right(true)
+        case "false" => Right(false)
+        case _       => Left(Seq(FormError(key, "error.boolean", Nil)))
+      }
+    }
+
+    def unbind(key: String, value: Boolean): Map[String, String] = Map(key -> value.toString)
+  }
+
+
   val haveANinoForm: Form[Boolean] =
     Form(
       mapping(
-        "hasNino" -> boolean
+        "hasNino" -> of(booleanFormatter)
       )(identity)(Some(_))
     )
 
