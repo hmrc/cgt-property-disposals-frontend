@@ -16,15 +16,18 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
-import cats.data.{EitherT, NonEmptyList}
+import cats.data.EitherT
 import cats.instances.future._
+import cats.syntax.either._
 import com.google.inject.Inject
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.Configuration
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, MessagesRequest, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedActionWithRetrievedData, RequestWithSessionDataAndRetrievedData,SessionDataActionWithRetrievedData, WithAuthRetrievalsAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedActionWithRetrievedData, RequestWithSessionDataAndRetrievedData, SessionDataActionWithRetrievedData, WithAuthRetrievalsAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionDetails.MissingData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{SubscriptionComplete, SubscriptionMissingData, SubscriptionReady}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, Error, SubscriptionDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Individual
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, Error, Name, SessionData, SubscriptionDetails, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
@@ -40,38 +43,76 @@ class StartController @Inject()(
                                  errorHandler: ErrorHandler,
                                  cc: MessagesControllerComponents,
                                  val authenticatedActionWithRetrievedData: AuthenticatedActionWithRetrievedData,
-                                 val sessionDataAction: SessionDataActionWithRetrievedData
-)(implicit ec: ExecutionContext)
+                                 val sessionDataAction: SessionDataActionWithRetrievedData,
+                                 config: Configuration
+                               )(implicit ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthRetrievalsAndSessionDataAction
     with Logging
     with SessionUpdates {
 
+  private def getString(key: String): String = config.underlying.getString(key)
+
+  val selfBaseUrl: String = getString("self.url")
+
+  val ivUrl: String = getString("iv.url")
+
+  val ivOrigin: String = getString("iv.origin")
+
+  val (ivSuccessUrl: String, ivFailureUrl: String) = {
+    val useRelativeUrls = config.underlying.getBoolean("iv.use-relative-urls")
+    val (successRelativeUrl, failureRelativeUrl) =
+      getString("iv.success-relative-url") -> getString("iv.failure-relative-url")
+
+    if (useRelativeUrls)
+      successRelativeUrl -> failureRelativeUrl
+    else
+      (selfBaseUrl + successRelativeUrl) -> (selfBaseUrl + failureRelativeUrl)
+  }
+
+
   def start(): Action[AnyContent] = authenticatedActionWithRetrievedDataAndSessionData.async { implicit request =>
-    request.sessionData.flatMap(_.subscriptionStatus) match {
-      case Some(_: SubscriptionReady)           => SeeOther(routes.SubscriptionController.checkYourDetails().url)
-      case Some(_: SubscriptionComplete)        => SeeOther(routes.SubscriptionController.subscribed().url)
-      case Some(SubscriptionMissingData(bpr,_)) => buildSubscriptionData(Some(bpr))
-      case None                                 => buildSubscriptionData(None)
+    (request.authenticatedRequest.userType,
+      request.sessionData.flatMap(_.subscriptionStatus)
+    ) match {
+      case (UserType.InsufficientConfidenceLevel(maybeNino), _) =>
+        maybeNino.fold[Future[Result]](
+          SeeOther(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url)
+        )( _ =>
+          updateSessionAndRedirectToIV(request)
+        )
+
+      case (_, Some(_: SubscriptionReady))         =>
+        SeeOther(routes.SubscriptionController.checkYourDetails().url)
+
+     case (_, Some(_: SubscriptionComplete))      =>
+        SeeOther(routes.SubscriptionController.subscribed().url)
+
+      case (i: UserType.Individual, Some(SubscriptionMissingData(bpr, _))) =>
+        buildSubscriptionData(i, Some(bpr))
+
+      case (i: UserType.Individual, None) =>
+        buildSubscriptionData(i, None)
     }
   }
 
-  def buildSubscriptionData(maybeBpr: Option[BusinessPartnerRecord])(
+  def buildSubscriptionData(individual: Individual,
+                             maybeBpr: Option[BusinessPartnerRecord])(
     implicit
     hc: HeaderCarrier,
     request: RequestWithSessionDataAndRetrievedData[_]
   ): Future[Result] = {
-    lazy val name = request.authenticatedRequest.name
+    lazy val name = Name("", "") // TODO: sort out /// request.authenticatedRequest.name
 
     val result = for {
       bpr <- maybeBpr.fold(
               bprService.getBusinessPartnerRecord(
-                request.authenticatedRequest.nino,
-                name,
-                request.authenticatedRequest.dateOfBirth
+                individual.nino,
+                individual.name,
+                individual.dateOfBirth
               ))(EitherT.pure(_))
       maybeSubscriptionDetails <- EitherT.pure(
-        SubscriptionDetails(bpr, request.authenticatedRequest.name, request.authenticatedRequest.email)
+        SubscriptionDetails(bpr, individual.name, individual.email)
       )
       _ <- EitherT(
             maybeSubscriptionDetails.fold[Future[Either[Error, Unit]]](
@@ -101,5 +142,29 @@ class StartController @Inject()(
       }
     )
   }
+
+  private def updateSessionAndRedirectToIV(request: RequestWithSessionDataAndRetrievedData[_])(
+    implicit hc: HeaderCarrier
+  ): Future[Result] =
+    sessionStore
+      .store(SessionData.empty.copy(ivContinueUrl = Some(selfBaseUrl + request.uri)))
+      .map {
+        _.bimap(
+          { e =>
+            logger.warn("Could not store IV continue url", e)
+            errorHandler.errorResult()(request)
+          },
+          _ =>
+            Redirect(
+              s"$ivUrl/mdtp/uplift",
+              Map(
+                "origin"          -> Seq(ivOrigin),
+                "confidenceLevel" -> Seq("200"),
+                "completionURL"   -> Seq(ivSuccessUrl),
+                "failureURL"      -> Seq(ivFailureUrl)
+              )
+            )
+        ).merge
+      }
 
 }

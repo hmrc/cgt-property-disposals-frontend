@@ -26,8 +26,9 @@ import shapeless.{Lens, lens}
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, RequestWithSessionDataAndRetrievedData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{SubscriptionComplete, SubscriptionMissingData, SubscriptionReady}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Individual
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
@@ -60,11 +61,17 @@ class EmailController @Inject()(
   def withSubscriptionData(requestWithSessionData: RequestWithSessionData[_])(
     f: (SessionData, Either[SubscriptionMissingData, SubscriptionReady]) => Future[Result]
   ): Future[Result] =
-    (requestWithSessionData.sessionData, requestWithSessionData.sessionData.flatMap(_.subscriptionStatus)) match {
-      case (Some(d), Some(s: SubscriptionMissingData)) => f(d, Left(s))
-      case (Some(d), Some(s: SubscriptionReady))       => f(d, Right(s))
+    (requestWithSessionData.sessionData,
+      requestWithSessionData.sessionData.flatMap(_.subscriptionStatus) // ,
+//    requestWithSessionData.authenticatedRequest.userType
+    ) match {
+      case (Some(d), Some(s: SubscriptionMissingData)) =>
+        f(d, Left(s))
+      case (Some(d), Some(s: SubscriptionReady))       =>
+        f(d, Right(s))
       case (Some(_), Some(_: SubscriptionComplete)) =>
         SeeOther(routes.SubscriptionController.subscribed().url)
+
       case _ => SeeOther(routes.StartController.start().url)
     }
 
@@ -100,7 +107,7 @@ class EmailController @Inject()(
 
                 val name =
                   subscriptionStatus.fold(
-                    s => s.name,
+                    _ => Name("", ""), // individual.name, TODO: sort out
                     s => Name(s.subscriptionDetails.forename, s.subscriptionDetails.surname)
                   )
 

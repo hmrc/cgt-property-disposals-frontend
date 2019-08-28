@@ -21,10 +21,11 @@ import java.time.LocalDate
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.mvc._
+import play.api.mvc.Results.{Ok, Redirect}
 import uk.gov.hmrc.auth.core.retrieve.{~, Name => RetrievalName, _}
 import uk.gov.hmrc.auth.core.{ConfidenceLevel, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, Email, NINO, Name}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, Email, NINO, Name, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.toFuture
 import uk.gov.hmrc.http.HeaderCarrier
@@ -32,10 +33,7 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 
-final case class AuthenticatedRequestWithRetrievedData[A](nino: NINO,
-                                                          name: Name,
-                                                          dateOfBirth: DateOfBirth,
-                                                          email: Option[Email],
+final case class AuthenticatedRequestWithRetrievedData[A](userType: UserType,
                                                           request: MessagesRequest[A])
   extends WrappedRequest[A](request)
 
@@ -54,7 +52,7 @@ class AuthenticatedActionWithRetrievedData @Inject()(
       case _                                              => None
     }
 
-  private def nonItmpNameToName(retrievalName: RetrievalName): Option[Name] =
+  private def ggNameToName(retrievalName: RetrievalName): Option[Name] =
     retrievalName match {
       case RetrievalName(Some(name), _) =>
         name.split(' ').toList.filter(_.nonEmpty) match {
@@ -80,10 +78,12 @@ class AuthenticatedActionWithRetrievedData @Inject()(
     f(name) match {
       case Some(name) =>
         Right(AuthenticatedRequestWithRetrievedData(
+          UserType.Individual(
           NINO(nino),
           Name(name.forename, name.surname),
           DateOfBirth(dateOfBirth),
-          maybeEmail.map(Email(_)),
+          maybeEmail.filter(_.nonEmpty).map(Email(_))
+          ),
           request
         ))
       case None => {
@@ -99,35 +99,52 @@ class AuthenticatedActionWithRetrievedData @Inject()(
       HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
     auth
-      .authorised(ConfidenceLevel.L200)
+      .authorised()
       .retrieve(
-        v2.Retrievals.nino and
-        v2.Retrievals.itmpName and
-        v2.Retrievals.name and
-        v2.Retrievals.itmpDateOfBirth and
-        v2.Retrievals.email) {
-        case Some(nino) ~ Some(itmpName) ~ _ ~ Some(dob) ~ maybeEmail =>
-          makeAuthenticatedRequestWithRetrieval(
-            itmpNameToName,
-            nino,
-            itmpName,
-            LocalDate.parse(dob.toString),
-            maybeEmail.filter(_.nonEmpty),
-            request
-          )
-        case Some(nino) ~ None ~ Some(name) ~ Some(dob) ~ maybeEmail =>
-          makeAuthenticatedRequestWithRetrieval(
-            nonItmpNameToName,
-            nino,
-            name,
-            LocalDate.parse(dob.toString),
-            maybeEmail,
-            request
-          )
-        case other =>
-          logger.warn(s"Failed to retrieve some information from the auth record: $other")
+        v2.Retrievals.confidenceLevel and
+          v2.Retrievals.affinityGroup and
+          v2.Retrievals.nino and
+          v2.Retrievals.itmpName and
+          v2.Retrievals.name and
+          v2.Retrievals.itmpDateOfBirth and
+          v2.Retrievals.email
+      ) {
+        case cl ~ Some(AffinityGroup.Individual) ~ maybeNino ~ _ ~ _ ~ _ ~ _ if cl < ConfidenceLevel.L200 =>
+          Right(AuthenticatedRequestWithRetrievedData(UserType.InsufficientConfidenceLevel(maybeNino.map(NINO)), request))
+
+        case individual @ _ ~ Some(AffinityGroup.Individual) ~ _ ~ _ ~ _ ~ _ ~ _ =>
+          individual match {
+            case  _ ~ _ ~ Some(nino) ~ Some(itmpName) ~ _ ~ Some(dob) ~ maybeEmail =>
+              makeAuthenticatedRequestWithRetrieval(
+                itmpNameToName,
+                nino,
+                itmpName,
+                LocalDate.parse(dob.toString),
+                maybeEmail,
+                request
+              )
+            case _ ~ _ ~ Some(nino) ~ None ~ Some(name) ~ Some(dob) ~ maybeEmail =>
+              makeAuthenticatedRequestWithRetrieval(
+                ggNameToName,
+                nino,
+                name,
+                LocalDate.parse(dob.toString),
+                maybeEmail,
+                request
+              )
+            case other =>
+              logger.warn(s"Failed to retrieve some information from the auth record: $other")
+              Left(errorHandler.errorResult()(request))
+          }
+
+        case _ @  _ ~ Some(AffinityGroup.Organisation) ~ _ ~ _ ~ _ ~ _ ~ _ =>
+          Left(Ok("Placeholder: detected organisation affinity group. In future will check if this is a trust"))
+
+
+        case _ @ _ ~ otherAffinityGroup ~ _ ~ _ ~ _ ~ _ ~ _ =>
+          logger.warn(s"Got request for unsupported affinity group $otherAffinityGroup")
           Left(errorHandler.errorResult()(request))
+
       }
   }
-
 }
