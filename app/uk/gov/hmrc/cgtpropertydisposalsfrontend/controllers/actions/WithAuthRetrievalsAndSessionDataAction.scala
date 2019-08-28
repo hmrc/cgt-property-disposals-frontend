@@ -19,12 +19,13 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 import play.api.mvc.{ActionBuilder, AnyContent}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-trait WithActions { this: FrontendController =>
+trait WithAuthRetrievalsAndSessionDataAction { this: FrontendController =>
 
-  val authenticatedAction: AuthenticatedAction
-  val sessionDataAction: SessionDataAction
+  val authenticatedActionWithRetrievedData: AuthenticatedActionWithRetrievedData
 
-  val authenticatedActionWithSessionData: ActionBuilder[RequestWithSessionData, AnyContent] =
-    Action.andThen(authenticatedAction).andThen(sessionDataAction)
+  val sessionDataAction: SessionDataActionWithRetrievedData
+
+  val authenticatedActionWithRetrievedDataAndSessionData: ActionBuilder[RequestWithSessionDataAndRetrievedData, AnyContent] =
+    Action.andThen(authenticatedActionWithRetrievedData).andThen(sessionDataAction)
 
 }

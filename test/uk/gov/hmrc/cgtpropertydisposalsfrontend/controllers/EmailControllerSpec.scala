@@ -30,14 +30,12 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{SubscriptionComplete, SubscriptionMissingData, SubscriptionReady}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, Email, EmailToBeVerified, Error, NINO, Name, SessionData, SubscriptionDetails, SubscriptionResponse, SubscriptionStatus, UUIDGenerator, sample, subscriptionDetailsGen}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, Email, EmailToBeVerified, Error, Name, SessionData, SubscriptionDetails, SubscriptionResponse, SubscriptionStatus, UUIDGenerator, sample, subscriptionDetailsGen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse.{EmailAlreadyVerified, EmailVerificationRequested}
 import uk.gov.hmrc.http.HeaderCarrier
-
-import org.joda.time.{LocalDate => JodaLocalDate}
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -60,11 +58,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
-  val nino = NINO("AB123456C")
-
-  val name = Name("forename", "surname")
-
-  val dateOfBirth = new JodaLocalDate(2000, 4, 10)
+  val name = Name("Bob", "Cob")
 
   val bpr = sample[BusinessPartnerRecord]
 
@@ -85,7 +79,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
       "there is no session data" in {
         inSequence {
-          mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth, None)
+          mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(None)))
         }
 
@@ -95,7 +89,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
       "there is no subscription details in session" in {
         inSequence {
-          mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth, None)
+          mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(SessionData.empty))))
         }
 
@@ -111,7 +105,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
         val session = SessionData.empty.copy(
           subscriptionStatus = Some(SubscriptionComplete(subscriptionDetails, SubscriptionResponse(""))))
         inSequence {
-          mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth, None)
+          mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(session))))
         }
 
@@ -135,7 +129,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
         behave like commonDisplayEmailBehaviour(
           performAction,
-          SubscriptionMissingData(bpr),
+          SubscriptionMissingData(bpr, name),
           "email.title"
         )
       }
@@ -163,7 +157,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
           "there is a BPR in session and there is no email to be verified in session" in {
             inSequence {
-              mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth, None)
+              mockAuthWithNoRetrievals()
               mockGetSession(Future.successful(Right(Some(sessionData))))
             }
 
@@ -177,7 +171,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             )
 
             inSequence {
-              mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth, None)
+              mockAuthWithNoRetrievals()
               mockGetSession(Future.successful(Right(Some(session))))
             }
 
@@ -204,7 +198,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
         behave like commonEmailSubmitBehaviour(
           performAction,
-          SubscriptionMissingData(bpr),
+          SubscriptionMissingData(bpr, name),
           name,
           "email.title"
         )
@@ -240,7 +234,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           def testError(email: String): Unit =
             withClue(s"For email '$email': ") {
               inSequence {
-                mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth, None)
+                mockAuthWithNoRetrievals()
                 mockGetSession(Future.successful(Right(Some(sessionData))))
               }
 
@@ -278,7 +272,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
           "the email to be verified cannot be stored in session" in {
             inSequence {
-              mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth, None)
+              mockAuthWithNoRetrievals()
               mockGetSession(Future.successful(Right(Some(sessionData))))
               mockUuidGenerator(id)
               mockStoreSession(sessionData.copy(emailToBeVerified = Some(emailToBeVerified)))(
@@ -291,7 +285,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
           "the call to verify the email fails" in {
             inSequence {
-              mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth, None)
+              mockAuthWithNoRetrievals()
               mockGetSession(Future.successful(Right(Some(sessionData))))
               mockUuidGenerator(id)
               mockStoreSession(sessionData.copy(emailToBeVerified = Some(emailToBeVerified)))(
@@ -307,7 +301,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
         "redirect to confirm email when the email address has already been verified" in {
           inSequence {
-            mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth, None)
+            mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData))))
             mockUuidGenerator(id)
             mockStoreSession(sessionData.copy(emailToBeVerified = Some(emailToBeVerified)))(
@@ -322,7 +316,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
         "redirect to the check you inbox page when the email address verification request " +
           "has successfully been sent" in {
           inSequence {
-            mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth, None)
+            mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData))))
             mockUuidGenerator(id)
             mockStoreSession(sessionData.copy(emailToBeVerified = Some(emailToBeVerified)))(
@@ -337,7 +331,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
         "reuse the same id in the continue url if there is an existing email to be verified in session " +
           "and the emails match" in {
           inSequence {
-            mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth, None)
+            mockAuthWithNoRetrievals()
             mockGetSession(
               Future.successful(Right(Some(sessionData.copy(emailToBeVerified = Some(emailToBeVerified))))))
             mockStoreSession(sessionData.copy(emailToBeVerified = Some(emailToBeVerified)))(
@@ -355,7 +349,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           val emailToBeVerified  = EmailToBeVerified(Email(emailWithoutSpaces), id, false)
 
           inSequence {
-            mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth, None)
+            mockAuthWithNoRetrievals()
             mockGetSession(
               Future.successful(Right(Some(sessionData.copy(emailToBeVerified = Some(emailToBeVerified))))))
             mockStoreSession(sessionData.copy(emailToBeVerified = Some(emailToBeVerified)))(
@@ -375,7 +369,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
         controller.checkYourInbox()(FakeRequest())
 
       "on the missing subscription details journey" must {
-        behave like commonCheckInboxBehaviour(SubscriptionMissingData(bpr))
+        behave like commonCheckInboxBehaviour(SubscriptionMissingData(bpr, name))
       }
 
       "changing the email before subscription" must {
@@ -391,7 +385,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
         val id                = UUID.randomUUID()
         val emailToBeVerified = EmailToBeVerified(email, id, false)
         val sessionData = SessionData.empty.copy(
-          subscriptionStatus = Some(SubscriptionMissingData(bpr)),
+          subscriptionStatus = Some(SubscriptionMissingData(bpr, name)),
           emailToBeVerified  = Some(emailToBeVerified)
         )
 
@@ -399,7 +393,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
           "there is no email to be verified in session" in {
             inSequence {
-              mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth, None)
+              mockAuthWithNoRetrievals()
               mockGetSession(Future.successful(Right(Some(sessionData.copy(emailToBeVerified = None)))))
             }
 
@@ -411,7 +405,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
         "show the check your inbox page when there is a BPR in session and there is an " +
           "email to be verified in session" in {
           inSequence {
-            mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth, None)
+            mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData))))
           }
 
@@ -428,7 +422,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
       def performAction(id: UUID) = controller.verifyEmail(id)(FakeRequest())
 
       "on the missing subscription details journey" must {
-        val subscriptionStatus = SubscriptionMissingData(bpr)
+        val subscriptionStatus = SubscriptionMissingData(bpr, name)
 
         behave like commonVerifyEmailBehaviour(
           subscriptionStatus,
@@ -466,7 +460,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
           "there is no email to be verified in session" in {
             inSequence {
-              mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth, None)
+              mockAuthWithNoRetrievals()
               mockGetSession(Future.successful(Right(Some(sessionData.copy(emailToBeVerified = None)))))
             }
 
@@ -479,7 +473,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
           "the id in the URL does not match the ID in session" in {
             inSequence {
-              mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth, None)
+              mockAuthWithNoRetrievals()
               mockGetSession(Future.successful(Right(Some(sessionData))))
             }
 
@@ -488,7 +482,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
           "there is an error updating the session" in {
             inSequence {
-              mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth, None)
+              mockAuthWithNoRetrievals()
               mockGetSession(Future.successful(Right(Some(sessionData))))
               mockStoreSession(
                 sessionData.copy(
@@ -506,7 +500,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
           "the session indicates the email has already been verified" in {
             inSequence {
-              mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth, None)
+              mockAuthWithNoRetrievals()
               mockGetSession(
                 Future.successful(
                   Right(Some(sessionData.copy(emailToBeVerified = Some(emailToBeVerified.copy(verified = true)))))))
@@ -517,7 +511,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
           "the session is updated" in {
             inSequence {
-              mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth, None)
+              mockAuthWithNoRetrievals()
               mockGetSession(Future.successful(Right(Some(sessionData))))
               mockStoreSession(
                 sessionData.copy(
@@ -539,7 +533,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
       def performAction() = controller.emailVerified()(FakeRequest())
 
       "on the missing subscription details journey" must {
-        behave like commonEmailVerifiedBehaviour(SubscriptionMissingData(bpr), routes.StartController.start().url)
+        behave like commonEmailVerifiedBehaviour(SubscriptionMissingData(bpr, name), routes.StartController.start().url)
       }
 
       "changing the email before subscription" must {
@@ -568,7 +562,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
           "the email has not been verified" in {
             inSequence {
-              mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth, None)
+              mockAuthWithNoRetrievals()
               mockGetSession(
                 Future.successful(
                   Right(Some(sessionData.copy(emailToBeVerified = Some(emailToBeVerified.copy(verified = false)))))))
@@ -583,7 +577,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
           "there is no email to be verified in session" in {
             inSequence {
-              mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth, None)
+              mockAuthWithNoRetrievals()
               mockGetSession(Future.successful(Right(Some(sessionData.copy(emailToBeVerified = None)))))
             }
 
@@ -597,7 +591,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
           "the email has been verified" in {
             inSequence {
-              mockAuthWithCl200AndWithAllRetrievals(nino.value, name, dateOfBirth, None)
+              mockAuthWithNoRetrievals()
               mockGetSession(Future.successful(Right(Some(sessionData))))
             }
 

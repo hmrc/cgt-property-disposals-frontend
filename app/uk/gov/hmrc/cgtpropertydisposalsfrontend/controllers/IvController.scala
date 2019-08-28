@@ -21,18 +21,18 @@ import java.util.UUID
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, SessionDataAction, WithActions}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 @Singleton
 class IvController @Inject()(
-  val authenticatedAction: AuthenticatedAction,
-  val sessionDataAction: SessionDataAction,
-  errorHandler: ErrorHandler,
-  cc: MessagesControllerComponents
+                              val authenticatedAction: AuthenticatedAction,
+                              val sessionDataAction: SessionDataAction,
+                              errorHandler: ErrorHandler,
+                              cc: MessagesControllerComponents
 ) extends FrontendController(cc)
-    with WithActions
+    with WithAuthAndSessionDataAction
     with Logging {
 
   def ivSuccess(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>

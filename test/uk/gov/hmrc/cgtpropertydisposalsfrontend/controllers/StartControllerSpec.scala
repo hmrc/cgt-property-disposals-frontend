@@ -175,7 +175,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
           "one doesn't exist in session and it is successfully retrieved using the retrieved auth NINO and " +
             "there is a BPR already in session" in {
-            val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionMissingData(bpr)))
+            val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionMissingData(bpr, name)))
             val updatedSession =
               SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(subscriptionDetails)))
 
@@ -194,7 +194,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           "there is no email in the BPR or the auth record" in {
             val bprWithNoEmail = bpr.copy(emailAddress = None)
             val updatedSession =
-              SessionData.empty.copy(subscriptionStatus = Some(SubscriptionMissingData(bprWithNoEmail)))
+              SessionData.empty.copy(subscriptionStatus = Some(SubscriptionMissingData(bprWithNoEmail, name)))
 
             inSequence {
               mockAuthWithCl200AndWithAllRetrievals(nino.value, name, retrievedDateOfBirth, None)

@@ -34,19 +34,19 @@ import scala.concurrent.ExecutionContext
 
 @Singleton
 class SubscriptionController @Inject()(
-  subscriptionService: SubscriptionService,
-  sessionStore: SessionStore,
-  errorHandler: ErrorHandler,
-  cc: MessagesControllerComponents,
-  val authenticatedAction: AuthenticatedAction,
-  val sessionDataAction: SessionDataAction,
-  val subscriptionDetailsAction: SubscriptionReadyAction,
-  checkYourDetailsPage: views.html.subscription.check_your_details,
-  subscribedPage: views.html.subscription.subscribed
+                                        subscriptionService: SubscriptionService,
+                                        sessionStore: SessionStore,
+                                        errorHandler: ErrorHandler,
+                                        cc: MessagesControllerComponents,
+                                        val authenticatedAction: AuthenticatedAction,
+                                        val sessionDataAction: SessionDataAction,
+                                        val subscriptionDetailsAction: SubscriptionReadyAction,
+                                        checkYourDetailsPage: views.html.subscription.check_your_details,
+                                        subscribedPage: views.html.subscription.subscribed
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithSubscriptionDetailsActions
-    with WithActions
+    with WithAuthAndSessionDataAction
     with Logging
     with SessionUpdates {
 

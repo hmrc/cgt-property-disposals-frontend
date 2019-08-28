@@ -18,12 +18,12 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import org.joda.time.LocalDate
 import play.api.Configuration
-import uk.gov.hmrc.auth.core.authorise.Predicate
+import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.auth.core.retrieve.{ItmpName, Retrieval, ~}
+import uk.gov.hmrc.auth.core.retrieve.{EmptyRetrieval, ItmpName, Retrieval, ~}
 import uk.gov.hmrc.auth.core.{AuthConnector, ConfidenceLevel}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.AuthenticatedAction
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.AuthenticatedActionWithRetrievedData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Name
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -34,7 +34,7 @@ trait AuthSupport {
 
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
 
-  lazy val testAuthenticatedAction = new AuthenticatedAction(
+  lazy val testAuthenticatedAction = new AuthenticatedActionWithRetrievedData(
     mockAuthConnector,
     instanceOf[Configuration],
     instanceOf[ErrorHandler],
@@ -46,6 +46,9 @@ trait AuthSupport {
       .authorise(_: Predicate, _: Retrieval[R])(_: HeaderCarrier, _: ExecutionContext))
       .expects(predicate, retrieval, *, *)
       .returning(result)
+
+  def mockAuthWithNoRetrievals(): Unit =
+    mockAuth(EmptyPredicate, EmptyRetrieval)(Future.successful(()))
 
   def mockAuthWithCl200AndWithAllRetrievals(
                                                   retrievedNino: String,

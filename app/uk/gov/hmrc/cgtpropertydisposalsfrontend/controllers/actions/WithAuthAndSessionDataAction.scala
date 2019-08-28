@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.mvc.{ActionBuilder, AnyContent}
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-final case class Name(forename: String, surname: String)
+trait WithAuthAndSessionDataAction { this: FrontendController =>
 
-object Name {
+  val authenticatedAction: AuthenticatedAction
 
-  implicit val format: OFormat[Name] = Json.format[Name]
+  val sessionDataAction: SessionDataAction
+
+  val authenticatedActionWithSessionData: ActionBuilder[RequestWithSessionData, AnyContent] =
+    Action.andThen(authenticatedAction).andThen(sessionDataAction)
 
 }
