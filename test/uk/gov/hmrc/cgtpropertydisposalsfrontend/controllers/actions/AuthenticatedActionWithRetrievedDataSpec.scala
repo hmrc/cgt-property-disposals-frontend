@@ -17,20 +17,25 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
 import java.net.URLEncoder
+import java.time.LocalDate
 
-import org.joda.time.LocalDate
+import julienrf.json.derived
+import org.joda.time.{LocalDate => JodaLocalDate}
 import org.scalamock.scalatest.MockFactory
 import play.api.i18n.MessagesApi
-import play.api.mvc.MessagesRequest
+import play.api.libs.json.{Json, OFormat}
+import play.api.mvc.{MessagesRequest, Result}
 import play.api.mvc.Results.Ok
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.auth.core.retrieve.{ItmpName, Name, ~}
+import uk.gov.hmrc.auth.core.retrieve.{ItmpName, ~, Name => GGName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RetrievalOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, Email, NINO, Name, UserType}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -38,41 +43,31 @@ import scala.concurrent.Future
 class AuthenticatedActionWithRetrievedDataSpec
   extends ControllerSpec with MockFactory with SessionSupport with AuthActionSpec {
 
-  class TestEnvironment(useRelativeUrls: Boolean = true) {
-    val config = newConfig(useRelativeUrls)
 
     val authenticatedAction =
       new AuthenticatedActionWithRetrievedData(mockAuthConnector, config, instanceOf[ErrorHandler], mockSessionStore)
 
-    def performAction[A](r: FakeRequest[A]) = {
+    implicit val ninoFormat: OFormat[NINO] = Json.format[NINO]
+    implicit val userTypeFormat: OFormat[UserType] = derived.oformat[UserType]
+
+    def performAction[A](r: FakeRequest[A]): Future[Result] = {
       @SuppressWarnings(Array("org.wartremover.warts.Any"))
       val request = new MessagesRequest[A](r, stub[MessagesApi])
       authenticatedAction.invokeBlock(request, { a: AuthenticatedRequestWithRetrievedData[A] =>
-      a.request.messagesApi shouldBe request.messagesApi
-        Future.successful(
-          Ok(
-            List(
-              a.nino.value,
-              a.name.forename,
-              a.name.surname,
-              a.dateOfBirth.value.toString,
-              a.email.map(_.value).toString
-            ).mkString("|")
-          ))
+        a.request.messagesApi shouldBe request.messagesApi
+        Future.successful(Ok(Json.toJson(a.userType)))
       })
     }
-  }
-
-  def urlEncode(s: String): String = URLEncoder.encode(s, "UTF-8")
 
   val retrievals =
-    Retrievals.nino and Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth and Retrievals.email
-  
+    Retrievals.confidenceLevel and Retrievals.affinityGroup and Retrievals.nino and
+      Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth and Retrievals.email
+
   "AuthenticatedActionWithRetrievedData" when {
 
     "handling a not logged in user" must {
 
-      "redirect to the login page" in new TestEnvironment {
+      "redirect to the login page" in {
         val requestUri = "/abc"
 
         List[NoActiveSession](
@@ -82,7 +77,7 @@ class AuthenticatedActionWithRetrievedDataSpec
           SessionRecordNotFound()
         ).foreach { e =>
           withClue(s"For error $e: ") {
-            mockAuth(ConfidenceLevel.L200, retrievals)(Future.failed(e))
+            mockAuth(EmptyPredicate, retrievals)(Future.failed(e))
 
             val result = performAction(FakeRequest("GET", requestUri))
             status(result) shouldBe SEE_OTHER
@@ -94,66 +89,114 @@ class AuthenticatedActionWithRetrievedDataSpec
       }
     }
 
+    "handling agents or unknown affinity groups" must {
+
+      "show an error page" in {
+        List(
+          Some(AffinityGroup.Agent),
+          None
+        ).foreach{ affinityGroup =>
+          withClue(s"For affinity group $affinityGroup: "){
+            val retrievalsResult = Future successful (
+              new ~(ConfidenceLevel.L50, affinityGroup) and None and None and None and None and None
+              )
+
+            mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+
+
+            checkIsTechnicalErrorPage(performAction(FakeRequest()))
+          }
+        }
+
+      }
+
+    }
+
+    "handling organisations" must {
+
+      "show a placeholder page" in {
+
+        val retrievalsResult = Future successful (
+          new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation)) and None and None and None and None and None
+          )
+
+        mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+
+        val result  = performAction(FakeRequest())
+        status(result) shouldBe OK
+        contentAsString(result) shouldBe "Placeholder: detected organisation affinity group. In future will check if this is a trust"
+      }
+
+
+    }
+  }
+
+  "handling individuals" when {
+
     "handling a logged in user with CL200 and all necessary data" must {
       val retrievalsResult = Future successful (
-        new ~(
-          new ~(
-            new ~(
-              new ~(Some("nino"), Some(ItmpName(Some("givenName"), Some("middleName"), Some("familyName")))),
-            Some(Name(Some("forename"), Some("surname")))
-          ),
-          Some(new LocalDate(2000, 4, 10))
-          ),
+        new ~(ConfidenceLevel.L200, Some(AffinityGroup.Individual)) and
+          Some("nino") and
+          Some(ItmpName(Some("givenName"), Some("middleName"), Some("familyName"))) and
+          Some(GGName(Some("forename"), Some("surname"))) and
+          Some(new JodaLocalDate(2000, 4, 10)) and
           Some("email")
         )
-      )
-      "effect the requested action" in new TestEnvironment {
-        mockAuth(ConfidenceLevel.L200, retrievals)(retrievalsResult)
+
+      val expectedRetrieval =
+        UserType.Individual(
+          NINO("nino"),
+          Name("givenName", "familyName"),
+          DateOfBirth(LocalDate.of(2000, 4, 10)),
+          Some(Email("email")))
+
+      "effect the requested action" in {
+        mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
 
         val result = performAction(FakeRequest())
         status(result)          shouldBe OK
-        contentAsString(result) shouldBe "nino|givenName|familyName|2000-04-10|Some(email)"
+        contentAsJson(result) shouldBe Json.toJson(expectedRetrieval)
       }
     }
 
     "handling a logged in user with CL200 and a defined but empty email" must {
       val retrievalsResult = Future successful (
-        new ~(
-          new ~(
-            new ~(
-              new ~(Some("nino"), Some(ItmpName(Some("givenName"), Some("middleName"), Some("familyName")))),
-              Some(Name(Some("forename"), Some("surname")))
-            ),
-            Some(new LocalDate(2000, 4, 10))
-          ),
+        new ~(ConfidenceLevel.L200, Some(AffinityGroup.Individual)) and
+          Some("nino") and
+          Some(ItmpName(Some("givenName"), Some("middleName"), Some("familyName"))) and
+          Some(GGName(Some("forename"), Some("surname"))) and
+          Some(new JodaLocalDate(2000, 4, 10)) and
           Some("")
         )
-        )
-      "effect the requested action" in new TestEnvironment {
-        mockAuth(ConfidenceLevel.L200, retrievals)(retrievalsResult)
+
+      val expectedRetrieval =
+        UserType.Individual(
+          NINO("nino"),
+          Name("givenName", "familyName"),
+          DateOfBirth(LocalDate.of(2000, 4, 10)),
+          None)
+
+      "effect the requested action" in {
+        mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
 
         val result = performAction(FakeRequest())
-        status(result)          shouldBe OK
-        contentAsString(result) shouldBe "nino|givenName|familyName|2000-04-10|None"
+        status(result)        shouldBe OK
+        contentAsJson(result) shouldBe Json.toJson(expectedRetrieval)
       }
     }
 
 
     "handling a logged in user with CL200 and a NINO, and an incomplete ITMP name" must {
       val retrievalsResult = Future successful (
-        new ~(
-          new ~(
-            new ~(
-            new ~(Some("nino"), Some(ItmpName(None, Some("middleName"), Some("familyName")))),
-            None
-          ),
-          Some(new LocalDate(2000, 4, 10))
-        ),
-      None
+        new ~(ConfidenceLevel.L200, Some(AffinityGroup.Individual)) and
+          Some("nino") and
+          Some(ItmpName(None, Some("middleName"), Some("familyName"))) and
+          None and
+          Some(new JodaLocalDate(2000, 4, 10)) and
+          Some("email")
         )
-      )
-      "show an error" in new TestEnvironment {
-        mockAuth(ConfidenceLevel.L200, retrievals)(retrievalsResult)
+      "show an error" in {
+        mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
 
         val result = performAction(FakeRequest())
         checkIsTechnicalErrorPage(result)
@@ -161,73 +204,76 @@ class AuthenticatedActionWithRetrievedDataSpec
     }
 
     "handling a logged in user with CL200 and a NINO, and no ITMP name and complete non-ITMP name" must {
-      
       val retrievalsResult = Future successful (
-        new ~(
-          new ~(
-            new ~(
-            new ~(Some("nino"), None),
-            Some(Name(Some("first-name second-name"), None))
-          ),
-          Some(new LocalDate(2000, 4, 10))
-          ),
+        new ~(ConfidenceLevel.L200, Some(AffinityGroup.Individual)) and
+          Some("nino") and
+          None and
+          Some(GGName(Some("first-name second-name"), None)) and
+          Some(new JodaLocalDate(2000, 4, 10)) and
           None
         )
-      )
-      "effect the requested action" in new TestEnvironment {
-        mockAuth(ConfidenceLevel.L200, retrievals)(retrievalsResult)
+      val expectedRetrieval =
+        UserType.Individual(
+          NINO("nino"),
+          Name("first-name", "second-name"),
+          DateOfBirth(LocalDate.of(2000, 4, 10)),
+          None)
+
+      "effect the requested action" in {
+        mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
 
         val result = performAction(FakeRequest())
         status(result)          shouldBe OK
-        contentAsString(result) shouldBe "nino|first-name|second-name|2000-04-10|None"
+        contentAsJson(result) shouldBe Json.toJson(expectedRetrieval)
       }
     }
 
     "handling a logged in user with CL200 and a NINO, and no ITMP name and complete non-ITMP name " +
       "with more than two parts should only retrieve the first and last name" must {
-      
       val retrievalsResult = Future successful (
-        new ~(
-          new ~(
-            new ~(
-            new ~(Some("nino"), None),
-            Some(Name(Some("first-name second-name third-name"), None))
-          ),
-          Some(new LocalDate(2000, 4, 10))
-          ),
+        new ~(ConfidenceLevel.L200, Some(AffinityGroup.Individual)) and
+          Some("nino") and
+          None and
+          Some(GGName(Some("first-name second-name third-name"), None)) and
+          Some(new JodaLocalDate(2000, 4, 10)) and
           Some("email")
         )
-      )
-      "effect the requested action" in new TestEnvironment {
-        mockAuth(ConfidenceLevel.L200, retrievals)(retrievalsResult)
+
+      val expectedRetrieval =
+        UserType.Individual(
+          NINO("nino"),
+          Name("first-name", "third-name"),
+          DateOfBirth(LocalDate.of(2000, 4, 10)),
+          Some(Email("email")))
+
+      "effect the requested action" in {
+        mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
 
         val result = performAction(FakeRequest())
         status(result)          shouldBe OK
-        contentAsString(result) shouldBe "nino|first-name|third-name|2000-04-10|Some(email)"
+        contentAsJson(result) shouldBe Json.toJson(expectedRetrieval)
       }
     }
 
     "handling a logged in user with CL200 and a NINO, and no ITMP name and incomplete non-ITMP name" must {
+
       def retrievalsResult(ggName: Option[String]) = Future successful (
-        new ~(
-          new ~(
-            new ~(
-              new ~(Some("nino"), None),
-              Some(Name(ggName, None))
-            ),
-            Some(new LocalDate(2000, 4, 10))
-          ),
+        new ~(ConfidenceLevel.L200, Some(AffinityGroup.Individual)) and
+          Some("nino") and
+          None and
+          Some(GGName(ggName, None)) and
+          Some(new JodaLocalDate(2000, 4, 10)) and
           Some("email")
         )
-        )
-      "show an error" in new TestEnvironment {
+
+      "show an error" in {
         List(
           Some("first-name-only"),
           Some(""),
           None
         ).foreach{ name =>
           withClue(s"For name '$name': "){
-            mockAuth(ConfidenceLevel.L200, retrievals)(retrievalsResult(name))
+            mockAuth(EmptyPredicate, retrievals)(retrievalsResult(name))
 
             val result = performAction(FakeRequest())
             checkIsTechnicalErrorPage(result)
@@ -237,21 +283,17 @@ class AuthenticatedActionWithRetrievedDataSpec
     }
 
     "handling a logged in user with CL200 and a NINO and no ITMP name" must {
-      
       val retrievalsResult = Future successful (
-        new ~(
-          new ~(
-            new ~(
-            new ~(Some("nino"), None),
-            None
-          ),
-          Some(new LocalDate(2000, 4, 10))
-        ),
+        new ~(ConfidenceLevel.L200, Some(AffinityGroup.Individual)) and
+          Some("nino") and
+          None and
+          None and
+          Some(new JodaLocalDate(2000, 4, 10)) and
           None
         )
-      )
-      "effect the requested action" in new TestEnvironment {
-        mockAuth(ConfidenceLevel.L200, retrievals)(retrievalsResult)
+
+      "show an error" in {
+        mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
 
         val result = performAction(FakeRequest())
         checkIsTechnicalErrorPage(result)
@@ -262,116 +304,55 @@ class AuthenticatedActionWithRetrievedDataSpec
 
       "the CL is less than 200" must {
 
-        val requestUri = "/uri"
+        "indicate so in the result" in {
+          import ConfidenceLevel._
+          for{
+            cl        <- List[ConfidenceLevel](L0, L50, L100)
+            mayBeNino <- List[Option[NINO]](Some(NINO("nino")), None)
+          }{
+            withClue(s"For confidence level $cl "){
+              val retrievalsResult = Future successful (
+                new ~(cl, Some(AffinityGroup.Individual)) and mayBeNino.map(_.value) and
+                  None and None and None and None
+                )
 
-        "show an error response " when {
+              mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
 
-          "the IV continue url can't be stored in session" in new TestEnvironment {
-            inSequence {
-              mockAuth(
-                ConfidenceLevel.L200,
-                retrievals
-              )(
-                Future.failed(InsufficientConfidenceLevel())
-              )
-              mockStoreSession(SessionData.empty.copy(ivContinueUrl = Some(selfBaseUrl + requestUri)))(
-                Future.successful(Left(Error("Oh no!")))
-              )
-            }
-
-            val result = performAction(FakeRequest("GET", requestUri))
-            checkIsTechnicalErrorPage(result)
-          }
-
-        }
-
-        "redirect to IV" when {
-
-          "the IV continue URL is stored in session" in new TestEnvironment {
-            inSequence {
-              mockAuth(
-                ConfidenceLevel.L200,
-                retrievals
-              )(
-                Future.failed(InsufficientConfidenceLevel())
-              )
-              mockStoreSession(SessionData.empty.copy(ivContinueUrl = Some(selfBaseUrl + requestUri)))(
-                Future.successful(Right(()))
+              val result = performAction(FakeRequest())
+              status(result) shouldBe OK
+              contentAsJson(result) shouldBe Json.toJson(
+                UserType.InsufficientConfidenceLevel(mayBeNino)
               )
             }
-
-            val result = performAction(FakeRequest("GET", requestUri))
-            status(result) shouldBe SEE_OTHER
-            redirectLocation(result) shouldBe Some(
-              s"$ivUrl/mdtp/uplift?" +
-                s"origin=$ivOrigin&" +
-                s"confidenceLevel=200&" +
-                s"completionURL=${urlEncode(ivSuccessRelativeUrl)}&" +
-                s"failureURL=${urlEncode(ivFailureRelativeUrl)}"
-            )
-          }
-
-          "the IV continue URL is stored in session and use absolute urls when configured to do so" in new TestEnvironment(
-            useRelativeUrls = false
-          ) {
-            inSequence {
-              mockAuth(
-                ConfidenceLevel.L200,
-                retrievals
-              )(
-                Future.failed(InsufficientConfidenceLevel())
-              )
-              mockStoreSession(SessionData.empty.copy(ivContinueUrl = Some(selfBaseUrl + requestUri)))(
-                Future.successful(Right(()))
-              )
-            }
-
-            val result = performAction(FakeRequest("GET", requestUri))
-            status(result) shouldBe SEE_OTHER
-            redirectLocation(result) shouldBe Some(
-              s"$ivUrl/mdtp/uplift?" +
-                s"origin=$ivOrigin&" +
-                s"confidenceLevel=200&" +
-                s"completionURL=${urlEncode(selfBaseUrl + ivSuccessRelativeUrl)}&" +
-                s"failureURL=${urlEncode(selfBaseUrl + ivFailureRelativeUrl)}"
-            )
-          }
-
-        }
-
-      }
-
-    }
-
-    "handling the case when an authorisation exception is thrown" must {
-
-      "throw an exception" in new TestEnvironment {
-        List[AuthorisationException](
-          InsufficientEnrolments(),
-          UnsupportedAffinityGroup(),
-          UnsupportedCredentialRole(),
-          UnsupportedAuthProvider(),
-          IncorrectCredentialStrength(),
-          InternalError()
-        ).foreach { e =>
-          withClue(s"For error $e: ") {
-            val exception = intercept[AuthorisationException] {
-              mockAuth(
-                ConfidenceLevel.L200,
-                retrievals
-              )(
-                Future.failed(e)
-              )
-
-              await(performAction(FakeRequest()))
-            }
-
-            exception shouldBe e
           }
         }
       }
     }
+  }
 
+  "handling the case when an authorisation exception is thrown" must {
+
+    "throw an exception" in {
+      List[AuthorisationException](
+        InsufficientEnrolments(),
+        UnsupportedAffinityGroup(),
+        UnsupportedCredentialRole(),
+        UnsupportedAuthProvider(),
+        IncorrectCredentialStrength(),
+        InternalError()
+      ).foreach { e =>
+        withClue(s"For error $e: ") {
+          val exception = intercept[AuthorisationException] {
+            mockAuth(EmptyPredicate, retrievals)(Future.failed(e))
+
+            await(performAction(FakeRequest()))
+          }
+
+          exception shouldBe e
+        }
+      }
+    }
   }
 
 }
+

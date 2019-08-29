@@ -14,6 +14,8 @@ generic.day=Day
 generic.month=Month
 generic.year=Year
 generic.back=Back
+generic.yes=Yes
+generic.no=No
 
 error.summary.heading=There’s a problem
 
@@ -34,6 +36,10 @@ nino.title=Enter your National Insurance number
 nino.helpText=It’s on your National Insurance card, benefit letter, payslip or P60.<br>For example, ‘QQ 12 34 56 C’.
 nino.invalid=Your National Insurance number must be entered as 9 alphanumeric characters. For example, ‘QQ 12 34 56 C’
 nino.generic.error=National Insurance number must be entered as 9 alphanumeric characters. For example, ‘QQ 12 34 56 C’
+
+haveANino.title=Do you have a National Insurance number?
+hasNino.error.required=Select yes if you have a National Insurance number
+hasNino.error.boolean=Select yes if you have a National Insurance number
 
 dob.title=What is your date of birth?
 dob.helpText=For example, 31 3 1980

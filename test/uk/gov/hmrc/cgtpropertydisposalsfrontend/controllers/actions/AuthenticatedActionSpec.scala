@@ -36,13 +36,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class AuthenticatedActionSpec
   extends ControllerSpec with MockFactory with SessionSupport with AuthActionSpec {
 
-  class TestEnvironment(useRelativeUrls: Boolean = true) {
-    val config = newConfig(useRelativeUrls)
+   val authenticatedAction =
+     new AuthenticatedAction(mockAuthConnector, config, instanceOf[ErrorHandler], mockSessionStore)
 
-    val authenticatedAction =
-      new AuthenticatedAction(mockAuthConnector, config, instanceOf[ErrorHandler], mockSessionStore)
-
-    def performAction[A](r: FakeRequest[A]): Future[Result] = {
+  def performAction[A](r: FakeRequest[A]): Future[Result] = {
       @SuppressWarnings(Array("org.wartremover.warts.Any"))
       val request = new MessagesRequest[A](r, stub[MessagesApi])
       authenticatedAction.invokeBlock(request, { a: AuthenticatedRequest[A] =>
@@ -50,15 +47,12 @@ class AuthenticatedActionSpec
         Future.successful(Ok)
       })
     }
-  }
-
-  def urlEncode(s: String): String = URLEncoder.encode(s, "UTF-8")
 
   "AuthenticatedAction" when {
 
     "handling a not logged in user" must {
 
-      "redirect to the login page" in new TestEnvironment {
+      "redirect to the login page" in {
         val requestUri = "/abc"
 
         List[NoActiveSession](
@@ -84,7 +78,7 @@ class AuthenticatedActionSpec
 
     "handling a logged in user" must {
 
-      "effect the request action" in new TestEnvironment{
+      "effect the request action" in {
         mockAuth(EmptyPredicate, EmptyRetrieval)(Future.successful(()))
 
         val result = performAction(FakeRequest())
@@ -95,7 +89,7 @@ class AuthenticatedActionSpec
 
     "handling the case when an authorisation exception is thrown" must {
 
-      "throw an exception" in new TestEnvironment {
+      "throw an exception" in {
         List[AuthorisationException](
           InsufficientEnrolments(),
           UnsupportedAffinityGroup(),

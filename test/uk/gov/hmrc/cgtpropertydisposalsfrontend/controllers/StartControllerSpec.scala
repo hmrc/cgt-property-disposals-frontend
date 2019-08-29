@@ -18,14 +18,14 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import java.time.LocalDate
 
-import org.joda.time.{LocalDate => JodaLocalDate}
 import cats.data.EitherT
 import cats.instances.future._
+import org.joda.time.{LocalDate => JodaLocalDate}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
-import play.api.mvc.Result
+import play.api.mvc.{AnyContent, Request, Result}
 import play.api.test.FakeRequest
-import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, ConfidenceLevel}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus._
@@ -37,7 +37,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSupport {
+class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSupport with IvBehaviourSupport {
 
   val mockService = mock[BusinessPartnerRecordService]
 
@@ -47,6 +47,8 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
       bind[SessionStore].toInstance(mockSessionStore),
       bind[BusinessPartnerRecordService].toInstance(mockService)
     )
+
+  override lazy val additionalConfig = ivConfig(useRelativeUrls = false)
 
   lazy val controller = instanceOf[StartController]
 
@@ -76,8 +78,87 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
     "handling requests to start a journey" when {
 
-      def performAction(): Future[Result] =
-        controller.start()(FakeRequest())
+      def performAction(rh: Request[AnyContent] = FakeRequest()): Future[Result] =
+        controller.start()(rh)
+
+      "handling users with insufficient confidence level" must {
+
+        "show an error" when {
+
+          "the session cannot be updated when there is not a nino in the auth record" in {
+            val request = FakeRequest("GET", "/uri")
+
+            inSequence {
+              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), None, None, None, None)
+              mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+              mockStoreSession(SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.InsufficientConfidenceLevel)))(Future.successful(Left(Error(""))))
+            }
+
+            checkIsTechnicalErrorPage(performAction(request))
+          }
+        }
+
+        "redirect to the IV journey" when {
+
+          "the user does not have sufficient confidence level and there is a NINO in the auth record" in {
+            val request = FakeRequest("GET", "/uri")
+
+            inSequence {
+              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), Some("nino"), None, None, None)
+              mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+            }
+
+            checkIsRedirectToIv(performAction(request), false)
+          }
+
+          "the user does not have sufficient confidence level and there is a NINO in the auth record and " +
+            "the application is configured to use absoluate URLs for IV" in new ControllerSpec  {
+            override val overrideBindings =
+              List[GuiceableModule](
+                bind[AuthConnector].toInstance(mockAuthConnector),
+                bind[SessionStore].toInstance(mockSessionStore),
+                bind[BusinessPartnerRecordService].toInstance(mockService)
+              )
+
+            override lazy val additionalConfig = ivConfig(useRelativeUrls = true)
+            val controller = instanceOf[StartController]
+            val request = FakeRequest("GET", "/uri")
+
+            inSequence {
+              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), Some("nino"), None, None, None)
+              mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+            }
+
+            checkIsRedirectToIv(controller.start()(request), true)
+          }
+
+        }
+
+        "redirect to the do you have a nino page" when {
+
+          "the user does not have sufficient confidence level and there is no NINO in the auth record" in {
+            inSequence {
+              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), None, None, None, None)
+              mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+              mockStoreSession(SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.InsufficientConfidenceLevel)))(Future.successful(Right(())))
+            }
+
+            checkIsRedirect(performAction(), routes.InsufficientConfidenceLevelController.doYouHaveNINO())
+          }
+
+          "the session data indicates they do not have sufficient confidence level" in {
+            inSequence {
+              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), None, None, None, None)
+              mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.InsufficientConfidenceLevel))))))
+            }
+
+            checkIsRedirect(performAction(), routes.InsufficientConfidenceLevelController.doYouHaveNINO())
+          }
+
+        }
+
+
+      }
 
       "the user is not enrolled and is not subscribed in ETMP" must {
 
@@ -86,7 +167,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           "there are subscription details in session" in {
             val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(subscriptionDetails)))
             inSequence {
-              mockAuthWithCl200AndWithAllRetrievals(nino.value, name, retrievedDateOfBirth, None)
+              mockAuthWithCl200AndWithAllRetrievals(AffinityGroup.Individual, nino.value, name, retrievedDateOfBirth, None)
               mockGetSession(Future.successful(Right(Some(session))))
             }
 
@@ -102,7 +183,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             val session            = SessionData.empty.copy(subscriptionStatus = Some(subscriptionStatus))
 
             inSequence {
-              mockAuthWithCl200AndWithAllRetrievals(nino.value, name, retrievedDateOfBirth, None)
+              mockAuthWithCl200AndWithAllRetrievals(AffinityGroup.Individual, nino.value, name, retrievedDateOfBirth, None)
               mockGetSession(Future.successful(Right(Some(session))))
             }
 
@@ -114,7 +195,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
         "display an error page" when {
           "the call to get the BPR fails" in {
             inSequence {
-              mockAuthWithCl200AndWithAllRetrievals(nino.value, name, retrievedDateOfBirth, None)
+              mockAuthWithCl200AndWithAllRetrievals(AffinityGroup.Individual, nino.value, name, retrievedDateOfBirth, None)
               mockGetSession(Future.successful(Right(Some(SessionData.empty))))
               mockGetBusinessPartnerRecord(nino, name, dateOfBirth)(Left(Error("error")))
             }
@@ -125,7 +206,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(subscriptionDetails)))
 
             inSequence {
-              mockAuthWithCl200AndWithAllRetrievals(nino.value, name, retrievedDateOfBirth, None)
+              mockAuthWithCl200AndWithAllRetrievals(AffinityGroup.Individual, nino.value, name, retrievedDateOfBirth, None)
               mockGetSession(Future.successful(Right(Some(SessionData.empty))))
               mockGetBusinessPartnerRecord(nino, name, dateOfBirth)(Right(bpr))
               mockStoreSession(session)(Future.successful(Left(Error("Oh no!"))))
@@ -146,7 +227,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(subscriptionDetails)))
 
               inSequence {
-                mockAuthWithCl200AndWithAllRetrievals(nino.value, name, retrievedDateOfBirth, None)
+                mockAuthWithCl200AndWithAllRetrievals(AffinityGroup.Individual, nino.value, name, retrievedDateOfBirth, None)
                 mockGetSession(Future.successful(Right(maybeSession)))
                 mockGetBusinessPartnerRecord(nino, name, dateOfBirth)(Right(bpr))
                 mockStoreSession(session)(Future.successful(Right(())))
@@ -164,7 +245,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             ))
 
             inSequence {
-              mockAuthWithCl200AndWithAllRetrievals(nino.value, name, retrievedDateOfBirth, Some(ggEmail))
+              mockAuthWithCl200AndWithAllRetrievals(AffinityGroup.Individual, nino.value, name, retrievedDateOfBirth, Some(ggEmail))
               mockGetSession(Future.successful(Right(Some(SessionData.empty))))
               mockGetBusinessPartnerRecord(nino, name, dateOfBirth)(Right(bprWithNoEmail))
               mockStoreSession(session)(Future.successful(Right(())))
@@ -180,7 +261,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(subscriptionDetails)))
 
             inSequence {
-              mockAuthWithCl200AndWithAllRetrievals(nino.value, name, retrievedDateOfBirth, None)
+              mockAuthWithCl200AndWithAllRetrievals(AffinityGroup.Individual, nino.value, name, retrievedDateOfBirth, None)
               mockGetSession(Future.successful(Right(Some(session))))
               mockStoreSession(updatedSession)(Future.successful(Right(())))
             }
@@ -197,7 +278,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               SessionData.empty.copy(subscriptionStatus = Some(SubscriptionMissingData(bprWithNoEmail, name)))
 
             inSequence {
-              mockAuthWithCl200AndWithAllRetrievals(nino.value, name, retrievedDateOfBirth, None)
+              mockAuthWithCl200AndWithAllRetrievals(AffinityGroup.Individual, nino.value, name, retrievedDateOfBirth, None)
               mockGetSession(Future.successful(Right(Some(SessionData.empty))))
               mockGetBusinessPartnerRecord(nino, name, dateOfBirth)(Right(bprWithNoEmail))
               mockStoreSession(updatedSession)(Future.successful(Right(())))

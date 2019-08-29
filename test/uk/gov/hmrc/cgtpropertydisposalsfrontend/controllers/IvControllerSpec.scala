@@ -21,11 +21,13 @@ import java.util.UUID
 import org.joda.time.LocalDate
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
+import play.api.mvc.Result
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{AuthConnector, ConfidenceLevel}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.InsufficientConfidenceLevel
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 
 import scala.concurrent.Future
@@ -43,24 +45,51 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
 
     "handling IV success request" must {
 
-      "redirect to the IV continue URL if one is found in session" in {
-        val ivContinueUrl = "continue"
+      def performAction(): Future[Result] = controller.ivSuccess()(FakeRequest())
+
+      val nonEmptySession =
+       SessionData.empty.copy(subscriptionStatus = Some(InsufficientConfidenceLevel))
+
+      "clear the session and redirect to the start endpoint" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(ivContinueUrl = Some(ivContinueUrl))))))
+          mockGetSession(Future.successful(Right(Some(nonEmptySession))))
+          mockStoreSession(SessionData.empty)(Future.successful(Right(())))
         }
 
-        val result = controller.ivSuccess()(FakeRequest())
-        checkIsRedirect(result, ivContinueUrl)
+        checkIsRedirect(performAction(), routes.StartController.start())
       }
 
-      "show an error page if there is no IV continue URL in session" in {
+      "show an error page if there is an error clearing the session" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+          mockGetSession(Future.successful(Right(Some(nonEmptySession))))
+          mockStoreSession(SessionData.empty)(Future.successful(Left(Error(""))))
         }
 
-        checkIsTechnicalErrorPage(controller.ivSuccess()(FakeRequest()))
+        checkIsTechnicalErrorPage(performAction())
+      }
+
+      "not update the session" when {
+
+        "there is no session data" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(None)))
+          }
+
+          checkIsRedirect(performAction(), routes.StartController.start())
+        }
+
+        "the session data is empty" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+          }
+
+          checkIsRedirect(performAction(), routes.StartController.start())
+        }
+
       }
 
     }

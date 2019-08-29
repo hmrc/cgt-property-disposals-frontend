@@ -16,21 +16,17 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import cats.Eq
-import play.api.libs.json.{Format, Json}
+sealed trait UserType
 
-final case class SessionData(
-  subscriptionStatus: Option[SubscriptionStatus],
-  emailToBeVerified: Option[EmailToBeVerified],
-  addressLookupResult: Option[AddressLookupResult]
-)
+object UserType {
 
-object SessionData {
+  final case class Individual(
+                               nino: NINO,
+                               name: Name,
+                               dateOfBirth: DateOfBirth,
+                               email: Option[Email]
+                             ) extends UserType
 
-  implicit val format: Format[SessionData] = Json.format
-
-  implicit val eq: Eq[SessionData] = Eq.fromUniversalEquals[SessionData]
-
-  val empty: SessionData = SessionData(None, None, None)
+  final case class InsufficientConfidenceLevel(nino: Option[NINO]) extends UserType
 
 }

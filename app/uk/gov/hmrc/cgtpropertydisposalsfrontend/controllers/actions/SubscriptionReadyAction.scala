@@ -22,7 +22,7 @@ import play.api.i18n.MessagesApi
 import play.api.mvc.Results.SeeOther
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{DefaultRedirects, routes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.SubscriptionReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -47,7 +47,8 @@ final case class RequestWithSubscriptionReady[A](
 class SubscriptionReadyAction @Inject()(sessionStore: SessionStore, errorHandler: ErrorHandler)(
   implicit ec: ExecutionContext)
     extends ActionRefiner[AuthenticatedRequest, RequestWithSubscriptionReady]
-    with Logging {
+    with Logging
+      with DefaultRedirects {
 
   override protected def executionContext: ExecutionContext = ec
 
@@ -64,14 +65,11 @@ class SubscriptionReadyAction @Inject()(sessionStore: SessionStore, errorHandler
           errorHandler.errorResult()(request)
         }.flatMap { maybeSessionData =>
           (maybeSessionData, maybeSessionData.flatMap(_.subscriptionStatus)) match {
-            case (Some(_), Some(_: SubscriptionStatus.SubscriptionComplete)) =>
-              Left(SeeOther(routes.SubscriptionController.subscribed().url))
-
             case (Some(sessionData), Some(ready: SubscriptionStatus.SubscriptionReady)) =>
               Right(RequestWithSubscriptionReady(ready, sessionData, request))
 
-            case _ =>
-              Left(SeeOther(routes.StartController.start().url))
+            case (_, other) =>
+              Left(defaultRedirect(other))
           }
         }
       )

@@ -28,7 +28,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{SubscriptionMissingData, SubscriptionReady}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AddressLookupResult, BusinessPartnerRecord, Error, NINO, Name, Postcode, SessionData, SubscriptionDetails, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AddressLookupResult, BusinessPartnerRecord, Error, NINO, Name, Postcode, SessionData, SubscriptionDetails, SubscriptionStatus, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AddressLookupService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -73,8 +73,8 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
 
   val addressLookupResult = AddressLookupResult(postcode, addresses)
 
-  def subscriptionDetailsBehavior(performAction: () => Future[Result]): Unit =
-    "redirect to check your details" when {
+  def subscriptionDetailsBehavior(performAction: () => Future[Result]): Unit = {
+    "redirect to the start endpoint" when {
 
       "there is no session data" in {
         inSequence {
@@ -100,6 +100,22 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
       }
 
     }
+
+    "redirect to the do you have a nino page" when {
+
+      "the session data indicates the user does not have sufficient confidence level" in {
+        val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.InsufficientConfidenceLevel))
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(Future.successful(Right(Some(session))))
+        }
+
+        val result = performAction()
+        checkIsRedirect(result, routes.InsufficientConfidenceLevelController.doYouHaveNINO())
+      }
+
+    }
+  }
 
   "AddressController" when {
 

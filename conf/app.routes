@@ -6,6 +6,10 @@ GET /start                                uk.gov.hmrc.cgtpropertydisposalsfronte
 GET  /iv/success                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.IvController.ivSuccess()
 GET  /iv/failure                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.IvController.ivFailure(journeyId: java.util.UUID)
 
+### Insufficient CL
+GET  /iv/nino                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.InsufficientConfidenceLevelController.doYouHaveNINO()
+POST /iv/nino                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.InsufficientConfidenceLevelController.doYouHaveNINOSubmit()
+
 ### Subscription - missing data
 GET  /subscription/enter-email            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailController.enterEmail()
 POST /subscription/enter-email            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailController.enterEmailSubmit()

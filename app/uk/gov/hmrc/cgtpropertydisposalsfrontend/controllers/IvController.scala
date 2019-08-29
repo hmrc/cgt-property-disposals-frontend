@@ -18,31 +18,44 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import java.util.UUID
 
+import cats.syntax.eq._
+
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class IvController @Inject()(
+                              sessionStore: SessionStore,
                               val authenticatedAction: AuthenticatedAction,
                               val sessionDataAction: SessionDataAction,
                               errorHandler: ErrorHandler,
                               cc: MessagesControllerComponents
-) extends FrontendController(cc)
-    with WithAuthAndSessionDataAction
-    with Logging {
+                            )(implicit ec: ExecutionContext) extends FrontendController(cc)
+  with WithAuthAndSessionDataAction
+  with Logging
+  with SessionUpdates {
 
-  def ivSuccess(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
-    request.sessionData.flatMap(_.ivContinueUrl) match {
-      case Some(ivContinueUrl) =>
-        SeeOther(ivContinueUrl)
+  def ivSuccess(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    if (request.sessionData.forall(_ === SessionData.empty)) {
+      SeeOther(routes.StartController.start().url)
+    } else {
+      updateSession(sessionStore, request)(_ => SessionData.empty).map {
+        case Left(e) =>
+          logger.warn("Could not clear session after IV success", e)
+          errorHandler.errorResult()
 
-      case None =>
-        logger.warn("Could not get ivContinueUrl from session")
-        InternalServerError(errorHandler.internalServerErrorTemplate)
+        case Right(_) =>
+          SeeOther(routes.StartController.start().url)
+      }
     }
   }
 

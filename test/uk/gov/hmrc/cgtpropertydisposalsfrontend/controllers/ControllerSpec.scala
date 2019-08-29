@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
+import java.net.URLEncoder
+
 import akka.stream.Materializer
 import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
@@ -35,6 +37,8 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
 
   val overrideBindings: List[GuiceableModule] = List.empty[GuiceableModule]
 
+  lazy val additionalConfig = Configuration()
+
   def buildFakeApplication(): Application =
     new GuiceApplicationBuilder()
       .configure(
@@ -44,7 +48,7 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
             | metrics.enabled = false
           """.stripMargin
           )
-        )
+        ) ++ additionalConfig
       )
       .overrides(overrideBindings: _*)
       .disable[play.modules.reactivemongo.ReactiveMongoHmrcModule]
@@ -85,5 +89,7 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
 
   def checkIsRedirect(result: Future[Result], expectedRedirectCall: Call): Unit =
     checkIsRedirect(result, expectedRedirectCall.url)
+
+  def urlEncode(s: String): String = URLEncoder.encode(s, "UTF-8")
 
 }

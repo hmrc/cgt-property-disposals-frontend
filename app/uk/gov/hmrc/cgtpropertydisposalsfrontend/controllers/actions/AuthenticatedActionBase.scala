@@ -16,16 +16,13 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
-import cats.syntax.either._
 import play.api.Configuration
 import play.api.mvc.Results.Redirect
-import play.api.mvc.{ActionRefiner, MessagesRequest, Request, Result}
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, InsufficientConfidenceLevel, NoActiveSession}
+import play.api.mvc.{ActionRefiner, MessagesRequest, Result}
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, NoActiveSession}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
@@ -54,21 +51,6 @@ trait AuthenticatedActionBase [P[_]]
 
   private val selfBaseUrl: String = getString("self.url")
 
-  private val ivUrl: String = getString("iv.url")
-
-  private val ivOrigin: String = getString("iv.origin")
-
-  private val (ivSuccessUrl: String, ivFailureUrl: String) = {
-    val useRelativeUrls = config.underlying.getBoolean("iv.use-relative-urls")
-    val (successRelativeUrl, failureRelativeUrl) =
-      getString("iv.success-relative-url") -> getString("iv.failure-relative-url")
-
-    if (useRelativeUrls)
-      successRelativeUrl -> failureRelativeUrl
-    else
-      (selfBaseUrl + successRelativeUrl) -> (selfBaseUrl + failureRelativeUrl)
-  }
-
   override protected def refine[A](request: MessagesRequest[A]): Future[Either[Result, P[A]]] = {
     implicit val hc: HeaderCarrier =
       HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
@@ -76,38 +58,7 @@ trait AuthenticatedActionBase [P[_]]
     authorisedFunction[A](authorisedFunctions, request).recoverWith{
       case _: NoActiveSession =>
         Future.successful(Left(Redirect(signInUrl, Map("continue" -> Seq(selfBaseUrl + request.uri), "origin" -> Seq(origin)))))
-
-      case _: InsufficientConfidenceLevel =>
-        handleInsufficientConfidenceLevel(request, errorHandler.errorResult()(request)).map(Left(_))
-
     }
   }
 
-  private def handleInsufficientConfidenceLevel(request: MessagesRequest[_], errorResponse: Result)(
-    implicit hc: HeaderCarrier
-  ): Future[Result] =
-    sessionStore
-      .store(SessionData.empty.copy(ivContinueUrl = Some(selfBaseUrl + request.uri)))
-      .map {
-        _.bimap(
-          { e =>
-            logger.warn("Could not store IV continue url", e)
-            errorResponse
-          },
-          _ =>
-            Redirect(
-              s"$ivUrl/mdtp/uplift",
-              Map(
-                "origin"          -> Seq(ivOrigin),
-                "confidenceLevel" -> Seq("200"),
-                "completionURL"   -> Seq(ivSuccessUrl),
-                "failureURL"      -> Seq(ivFailureUrl)
-              )
-            )
-        ).merge
-      }
-
   }
-
-
-

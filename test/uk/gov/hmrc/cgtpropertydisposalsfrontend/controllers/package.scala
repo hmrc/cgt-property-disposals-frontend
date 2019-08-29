@@ -14,23 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
+package uk.gov.hmrc.cgtpropertydisposalsfrontend
 
-import cats.Eq
-import play.api.libs.json.{Format, Json}
+import uk.gov.hmrc.auth.core.retrieve.~
 
-final case class SessionData(
-  subscriptionStatus: Option[SubscriptionStatus],
-  emailToBeVerified: Option[EmailToBeVerified],
-  addressLookupResult: Option[AddressLookupResult]
-)
+package object controllers {
 
-object SessionData {
-
-  implicit val format: Format[SessionData] = Json.format
-
-  implicit val eq: Eq[SessionData] = Eq.fromUniversalEquals[SessionData]
-
-  val empty: SessionData = SessionData(None, None, None)
+  implicit class RetrievalOps[A, B](val r: ~[A, B]) {
+    def and[C](c: C): ~[~[A, B], C] = new ~(r, c)
+  }
 
 }
