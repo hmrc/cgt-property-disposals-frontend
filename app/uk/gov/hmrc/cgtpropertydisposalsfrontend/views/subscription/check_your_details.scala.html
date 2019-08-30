@@ -16,6 +16,8 @@
 
 @import play.api.data.Form
 
+@import cats.syntax.either._
+
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionDetails
@@ -43,9 +45,11 @@
 
  @pageHeading(title, Some(messages("subscription.caption")))
 
- <p class="lede">
-  @messages("subscription.lede", details.forename, details.surname)
- </p>
+  @details.contactName.toOption.map { name =>
+  <p class="lede">
+   @messages("subscription.lede", name.forename, name.surname)
+  </p>
+ }
 
  <div class="panel panel-border-wide">
   <p>

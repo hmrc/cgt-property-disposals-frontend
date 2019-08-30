@@ -26,7 +26,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedActionWithRetrievedData, RequestWithSessionDataAndRetrievedData, SessionDataActionWithRetrievedData, WithAuthRetrievalsAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionDetails.MissingData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{SubscriptionComplete, SubscriptionMissingData, SubscriptionReady}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Individual
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Individual, Trust}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, Error, NINO, Name, SessionData, SubscriptionDetails, SubscriptionStatus, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordService
@@ -70,10 +70,13 @@ class StartController @Inject()(
         SeeOther(routes.SubscriptionController.subscribed().url)
 
       case (i: UserType.Individual, Some(SubscriptionMissingData(bpr, _))) =>
-        buildSubscriptionData(i, Some(bpr))
+        buildIndividualSubscriptionData(i, Some(bpr))
 
       case (i: UserType.Individual, None) =>
-        buildSubscriptionData(i, None)
+        buildIndividualSubscriptionData(i, None)
+
+      case (t: UserType.Trust, _) =>
+        Ok(s"Got trust with sautr ${t.sautr.value}")
     }
   }
 
@@ -95,19 +98,18 @@ class StartController @Inject()(
       redirectToIv
   }
 
-  private def buildSubscriptionData(individual: Individual,
-                             maybeBpr: Option[BusinessPartnerRecord])(
+  private def buildTrustSubscriptionData(trust: Trust)(
+    implicit  hc: HeaderCarrier,
+    request: RequestWithSessionDataAndRetrievedData[_]): Future[Result] = ???
+
+  private def buildIndividualSubscriptionData(individual: Individual,
+                                              maybeBpr: Option[BusinessPartnerRecord])(
     implicit
     hc: HeaderCarrier,
     request: RequestWithSessionDataAndRetrievedData[_]
   ): Future[Result] = {
     val result = for {
-      bpr <- maybeBpr.fold(
-              bprService.getBusinessPartnerRecord(
-                individual.nino,
-                individual.name,
-                individual.dateOfBirth
-              ))(EitherT.pure(_))
+      bpr <- maybeBpr.fold(bprService.getBusinessPartnerRecord(Right(individual)))(EitherT.pure(_))
       maybeSubscriptionDetails <- EitherT.pure(
         SubscriptionDetails(bpr, individual.name, individual.email)
       )

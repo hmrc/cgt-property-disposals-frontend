@@ -14,19 +14,20 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
-import play.api.libs.json.{Format, Json}
+import com.google.inject.{Inject, Singleton}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-final case class BusinessPartnerRecord(
-  emailAddress: Option[String],
-  address: Address,
-  sapNumber: String,
-  organisationName: Option[String]
-)
+@Singleton
+class RegisterTrustController @Inject()(cc: MessagesControllerComponents)
+  extends FrontendController(cc){
 
-object BusinessPartnerRecord {
 
-  implicit val format: Format[BusinessPartnerRecord] = Json.format
+  def registerYourTrust(): Action[AnyContent] = Action { implicit request =>
+    Ok("You need to register your trust to use this service")
+  }
 
 }
+

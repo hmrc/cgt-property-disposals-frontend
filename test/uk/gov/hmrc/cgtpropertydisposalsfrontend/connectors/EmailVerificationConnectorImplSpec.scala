@@ -25,7 +25,7 @@ import play.api.Configuration
 import play.api.libs.json.{JsString, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Name}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Name, TrustName}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -64,13 +64,14 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
       val email = Email("email@test.com")
       val id    = UUID.randomUUID()
       val name  = Name("Bob", "Lob")
+      val trustName = TrustName("trust")
 
-      val body = Json.parse(
+      def body(name: Either[TrustName,Name]) = Json.parse(
         s"""
            |{
            |"email": "${email.value}",
            |"templateId": "$templateId",
-           |"templateParameters": { "name" : "${name.forename}" },
+           |"templateParameters": { "name" : "${name.fold(_.value, _.forename)}" },
            |"linkExpiryDuration" : "PT${linkExpiryTimeMinutes}M",
            |"continueUrl" : "$selfUrl${routes.EmailController
              .verifyEmail(id)
@@ -80,24 +81,35 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
       )
 
       "send a request to the email verification service with the correct details " +
-        "and return the response" in {
-        List(
-          HttpResponse(200, Some(JsString("hi"))),
-          HttpResponse(409),
-          HttpResponse(500)
-        ).foreach { response =>
-          mockPost(expectedUrl, Map.empty[String, String], body)(Some(response))
+        "and return the response" when {
 
-          await(connector.verifyEmail(email, id, name).value) shouldBe Right(response)
+        "handling individuals" in {
+            List(
+              HttpResponse(200, Some(JsString("hi"))),
+              HttpResponse(409),
+              HttpResponse(500)
+            ).foreach { response =>
+              mockPost(expectedUrl, Map.empty[String, String], body(Right(name)))(Some(response))
+
+              await(connector.verifyEmail(email, id, Right(name)).value) shouldBe Right(response)
+            }
+        }
+
+        "handling trusts" in {
+          val response = HttpResponse(200, Some(JsString("hi")))
+          mockPost(expectedUrl, Map.empty[String, String], body(Left(trustName)))(Some(response))
+
+          await(connector.verifyEmail(email, id, Left(trustName)).value) shouldBe Right(response)
+
         }
       }
 
       "return an error" when {
 
         "the future fails" in {
-          mockPost(expectedUrl, Map.empty[String, String], body)(None)
+          mockPost(expectedUrl, Map.empty[String, String], body(Right(name)))(None)
 
-          await(connector.verifyEmail(email, id, name).value).isLeft shouldBe true
+          await(connector.verifyEmail(email, id, Right(name)).value).isLeft shouldBe true
         }
 
       }

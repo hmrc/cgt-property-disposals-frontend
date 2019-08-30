@@ -16,11 +16,15 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
+import java.time.LocalDate
+
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnectorImpl.BprRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BprRequest, DateOfBirth, Error, NINO, Name, SubscriptionDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Individual, Trust}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SubscriptionDetails}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
@@ -30,7 +34,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[CGTPropertyDisposalsConnectorImpl])
 trait CGTPropertyDisposalsConnector {
 
-  def getBusinessPartnerRecord(nino: NINO, name: Name, dob: DateOfBirth)(
+  def getBusinessPartnerRecord(entity: Either[Trust,Individual])(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
@@ -46,19 +50,21 @@ class CGTPropertyDisposalsConnectorImpl @Inject()(http: HttpClient, servicesConf
 
   val baseUrl: String = servicesConfig.baseUrl("cgt-property-disposals") + "/cgt-property-disposals"
 
-  val bprUrl: String = s"$baseUrl/business-partner-record"
+  val bprBaseUrl: String = s"$baseUrl/business-partner-record"
 
   val subscribeUrl: String = s"$baseUrl/subscribe"
 
-  def getBusinessPartnerRecord(nino: NINO, name: Name, dateOfBirth: DateOfBirth)(
+  def getBusinessPartnerRecord(entity: Either[Trust,Individual])(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] =
-    EitherT[Future, Error, HttpResponse](
-      http
-        .post(bprUrl, Json.toJson(BprRequest(nino.value, name.forename, name.surname, dateOfBirth.value)))
-        .map(Right(_))
-        .recover { case e => Left(Error(e)) }
+   EitherT[Future, Error, HttpResponse](
+    entity.fold(
+      t => http.get(s"$bprBaseUrl/sautr/${t.sautr.value}"),
+      i => http.post(s"$bprBaseUrl/nino/${i.nino.value}", Json.toJson(BprRequest(i.name.forename, i.name.surname, i.dateOfBirth.value)))
     )
+      .map(Right(_))
+      .recover { case e => Left(Error(e)) }
+  )
 
   def subscribe(
     subscriptionDetails: SubscriptionDetails
@@ -69,5 +75,17 @@ class CGTPropertyDisposalsConnectorImpl @Inject()(http: HttpClient, servicesConf
         .map(Right(_))
         .recover { case e => Left(Error(e)) }
     )
+
+}
+
+object CGTPropertyDisposalsConnectorImpl {
+
+  final case class BprRequest(forename: String, surname: String, dateOfBirth: LocalDate)
+
+  object BprRequest {
+
+    implicit val format: OFormat[BprRequest] = Json.format[BprRequest]
+
+  }
 
 }

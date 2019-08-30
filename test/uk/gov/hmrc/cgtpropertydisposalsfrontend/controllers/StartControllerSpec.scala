@@ -25,7 +25,7 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{AnyContent, Request, Result}
 import play.api.test.FakeRequest
-import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, ConfidenceLevel}
+import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, ConfidenceLevel, Enrolment, EnrolmentIdentifier}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus._
@@ -64,6 +64,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
   val nino                 = NINO("AB123456C")
   val name                 = Name("forename", "surname")
+  val trustName            = TrustName("trust")
   val retrievedDateOfBirth = JodaLocalDate.parse("2000-04-10")
   val dateOfBirth          = DateOfBirth(LocalDate.of(2000, 4, 10))
   val emailAddress         = "email"
@@ -72,7 +73,6 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
     UkAddress("line1", None, None, None, "postcode"),
     "sap"
   )
-  val subscriptionDetails = SubscriptionDetails(name.forename, name.surname, emailAddress, bpr.address, bpr.sapNumber)
 
   "The StartController" when {
 
@@ -89,7 +89,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             val request = FakeRequest("GET", "/uri")
 
             inSequence {
-              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), None, None, None, None)
+              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), None, None, None, None, Set.empty)
               mockGetSession(Future.successful(Right(Some(SessionData.empty))))
               mockStoreSession(SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.InsufficientConfidenceLevel)))(Future.successful(Left(Error(""))))
             }
@@ -104,7 +104,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             val request = FakeRequest("GET", "/uri")
 
             inSequence {
-              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), Some("nino"), None, None, None)
+              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), Some("nino"), None, None, None, Set.empty)
               mockGetSession(Future.successful(Right(Some(SessionData.empty))))
             }
 
@@ -125,7 +125,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             val request = FakeRequest("GET", "/uri")
 
             inSequence {
-              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), Some("nino"), None, None, None)
+              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), Some("nino"), None, None, None, Set.empty)
               mockGetSession(Future.successful(Right(Some(SessionData.empty))))
             }
 
@@ -138,7 +138,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
           "the user does not have sufficient confidence level and there is no NINO in the auth record" in {
             inSequence {
-              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), None, None, None, None)
+              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), None, None, None, None, Set.empty)
               mockGetSession(Future.successful(Right(Some(SessionData.empty))))
               mockStoreSession(SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.InsufficientConfidenceLevel)))(Future.successful(Right(())))
             }
@@ -148,7 +148,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
           "the session data indicates they do not have sufficient confidence level" in {
             inSequence {
-              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), None, None, None, None)
+              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), None, None, None, None, Set.empty)
               mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.InsufficientConfidenceLevel))))))
             }
 
@@ -160,132 +160,177 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
       }
 
-      "the user is not enrolled and is not subscribed in ETMP" must {
+      "the user is not enrolled and is not subscribed in ETMP" when {
 
-        "redirect to check subscription details" when {
 
-          "there are subscription details in session" in {
-            val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(subscriptionDetails)))
-            inSequence {
-              mockAuthWithCl200AndWithAllRetrievals(AffinityGroup.Individual, nino.value, name, retrievedDateOfBirth, None)
-              mockGetSession(Future.successful(Right(Some(session))))
+        "handling individuals" must {
+
+          val individualSubscriptionDetails = SubscriptionDetails(Right(name), emailAddress, bpr.address, bpr.sapNumber)
+
+          "redirect to check subscription details" when {
+
+            "there are subscription details in session" in {
+              val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(individualSubscriptionDetails)))
+              inSequence {
+                mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, name, retrievedDateOfBirth, None)
+                mockGetSession(Future.successful(Right(Some(session))))
+              }
+
+              checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
             }
 
-            checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
           }
 
-        }
+          "redirect to the subscription confirmation page" when {
 
-        "redirect to the subscription confirmation page" when {
-
-          "the session data indicates the user has already subscribed" in {
-            val subscriptionStatus = SubscriptionComplete(subscriptionDetails, SubscriptionResponse(""))
-            val session            = SessionData.empty.copy(subscriptionStatus = Some(subscriptionStatus))
-
-            inSequence {
-              mockAuthWithCl200AndWithAllRetrievals(AffinityGroup.Individual, nino.value, name, retrievedDateOfBirth, None)
-              mockGetSession(Future.successful(Right(Some(session))))
-            }
-
-            checkIsRedirect(performAction(), routes.SubscriptionController.subscribed())
-          }
-
-        }
-
-        "display an error page" when {
-          "the call to get the BPR fails" in {
-            inSequence {
-              mockAuthWithCl200AndWithAllRetrievals(AffinityGroup.Individual, nino.value, name, retrievedDateOfBirth, None)
-              mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-              mockGetBusinessPartnerRecord(nino, name, dateOfBirth)(Left(Error("error")))
-            }
-            checkIsTechnicalErrorPage(performAction())
-          }
-
-          "the call to get BPR succeeds but it cannot be written to session" in {
-            val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(subscriptionDetails)))
-
-            inSequence {
-              mockAuthWithCl200AndWithAllRetrievals(AffinityGroup.Individual, nino.value, name, retrievedDateOfBirth, None)
-              mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-              mockGetBusinessPartnerRecord(nino, name, dateOfBirth)(Right(bpr))
-              mockStoreSession(session)(Future.successful(Left(Error("Oh no!"))))
-            }
-
-            checkIsTechnicalErrorPage(performAction())
-          }
-
-        }
-
-        "redirect to check subscription details" when {
-
-          "one doesn't exist in session and it is successfully retrieved using the retrieved auth NINO, name and date of birth" in {
-            List(
-              Some(SessionData.empty),
-              None
-            ).foreach { maybeSession =>
-              val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(subscriptionDetails)))
+            "the session data indicates the user has already subscribed" in {
+              val subscriptionStatus = SubscriptionComplete(individualSubscriptionDetails, SubscriptionResponse(""))
+              val session = SessionData.empty.copy(subscriptionStatus = Some(subscriptionStatus))
 
               inSequence {
-                mockAuthWithCl200AndWithAllRetrievals(AffinityGroup.Individual, nino.value, name, retrievedDateOfBirth, None)
-                mockGetSession(Future.successful(Right(maybeSession)))
+                mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, name, retrievedDateOfBirth, None)
+                mockGetSession(Future.successful(Right(Some(session))))
+              }
+
+              checkIsRedirect(performAction(), routes.SubscriptionController.subscribed())
+            }
+
+          }
+
+          "display an error page" when {
+            "the call to get the BPR fails" in {
+              inSequence {
+                mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, name, retrievedDateOfBirth, None)
+                mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+                mockGetBusinessPartnerRecord(nino, name, dateOfBirth)(Left(Error("error")))
+              }
+              checkIsTechnicalErrorPage(performAction())
+            }
+
+            "the call to get BPR succeeds but it cannot be written to session" in {
+              val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(individualSubscriptionDetails)))
+
+              inSequence {
+                mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, name, retrievedDateOfBirth, None)
+                mockGetSession(Future.successful(Right(Some(SessionData.empty))))
                 mockGetBusinessPartnerRecord(nino, name, dateOfBirth)(Right(bpr))
+                mockStoreSession(session)(Future.successful(Left(Error("Oh no!"))))
+              }
+
+              checkIsTechnicalErrorPage(performAction())
+            }
+
+          }
+
+          "redirect to check subscription details" when {
+
+            "one doesn't exist in session and it is successfully retrieved using the retrieved auth NINO, name and date of birth" in {
+              List(
+                Some(SessionData.empty),
+                None
+              ).foreach { maybeSession =>
+                val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(individualSubscriptionDetails)))
+
+                inSequence {
+                  mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, name, retrievedDateOfBirth, None)
+                  mockGetSession(Future.successful(Right(maybeSession)))
+                  mockGetBusinessPartnerRecord(nino, name, dateOfBirth)(Right(bpr))
+                  mockStoreSession(session)(Future.successful(Right(())))
+                }
+
+                checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
+              }
+            }
+
+            "an email does not exist in the retrieved BPR but one has been retrieved in the auth record" in {
+              val bprWithNoEmail = bpr.copy(emailAddress = None)
+              val ggEmail = "email"
+              val session = SessionData.empty.copy(subscriptionStatus = Some(
+                SubscriptionReady(individualSubscriptionDetails.copy(emailAddress = ggEmail))
+              ))
+
+              inSequence {
+                mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, name, retrievedDateOfBirth, Some(ggEmail))
+                mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+                mockGetBusinessPartnerRecord(nino, name, dateOfBirth)(Right(bprWithNoEmail))
                 mockStoreSession(session)(Future.successful(Right(())))
               }
 
               checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
             }
-          }
 
-          "an email does not exist in the retrieved BPR but one has been retrieved in the auth record" in {
-            val bprWithNoEmail = bpr.copy(emailAddress = None)
-            val ggEmail = "email"
-            val session = SessionData.empty.copy(subscriptionStatus = Some(
-              SubscriptionReady(subscriptionDetails.copy(emailAddress = ggEmail))
-            ))
+            "one doesn't exist in session and it is successfully retrieved using the retrieved auth NINO and " +
+              "there is a BPR already in session" in {
+              val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionMissingData(bpr, name)))
+              val updatedSession =
+                SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(individualSubscriptionDetails)))
 
-            inSequence {
-              mockAuthWithCl200AndWithAllRetrievals(AffinityGroup.Individual, nino.value, name, retrievedDateOfBirth, Some(ggEmail))
-              mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-              mockGetBusinessPartnerRecord(nino, name, dateOfBirth)(Right(bprWithNoEmail))
-              mockStoreSession(session)(Future.successful(Right(())))
+              inSequence {
+                mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, name, retrievedDateOfBirth, None)
+                mockGetSession(Future.successful(Right(Some(session))))
+                mockStoreSession(updatedSession)(Future.successful(Right(())))
+              }
+              checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
             }
 
-            checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
           }
 
-          "one doesn't exist in session and it is successfully retrieved using the retrieved auth NINO and " +
-            "there is a BPR already in session" in {
-            val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionMissingData(bpr, name)))
-            val updatedSession =
-              SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(subscriptionDetails)))
+          "redirect to enter email" when {
 
-            inSequence {
-              mockAuthWithCl200AndWithAllRetrievals(AffinityGroup.Individual, nino.value, name, retrievedDateOfBirth, None)
-              mockGetSession(Future.successful(Right(Some(session))))
-              mockStoreSession(updatedSession)(Future.successful(Right(())))
+            "there is no email in the BPR or the auth record" in {
+              val bprWithNoEmail = bpr.copy(emailAddress = None)
+              val updatedSession =
+                SessionData.empty.copy(subscriptionStatus = Some(SubscriptionMissingData(bprWithNoEmail, name)))
+
+              inSequence {
+                mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, name, retrievedDateOfBirth, None)
+                mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+                mockGetBusinessPartnerRecord(nino, name, dateOfBirth)(Right(bprWithNoEmail))
+                mockStoreSession(updatedSession)(Future.successful(Right(())))
+              }
+
+              checkIsRedirect(performAction(), routes.EmailController.enterEmail().url)
             }
-            checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
+
           }
 
         }
 
-        "redirect to enter email" when {
+        "handling trusts" must {
 
-          "there is no email in the BPR or the auth record" in {
-            val bprWithNoEmail = bpr.copy(emailAddress = None)
-            val updatedSession =
-              SessionData.empty.copy(subscriptionStatus = Some(SubscriptionMissingData(bprWithNoEmail, name)))
+          val sautr = SAUTR("sautr")
+          val trustSubscriptionDetails = SubscriptionDetails(Left(trustName), emailAddress, bpr.address, bpr.sapNumber)
 
-            inSequence {
-              mockAuthWithCl200AndWithAllRetrievals(AffinityGroup.Individual, nino.value, name, retrievedDateOfBirth, None)
-              mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-              mockGetBusinessPartnerRecord(nino, name, dateOfBirth)(Right(bprWithNoEmail))
-              mockStoreSession(updatedSession)(Future.successful(Right(())))
+          "redirect to check subscription details" when {
+
+            "there are subscription details in session" in {
+              val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(trustSubscriptionDetails)))
+              inSequence {
+                mockAuthWithCl200AndWithAllTrustRetrievals(sautr)
+                mockGetSession(Future.successful(Right(Some(session))))
+              }
+
+              checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
             }
 
-            checkIsRedirect(performAction(), routes.EmailController.enterEmail().url)
           }
+
+          "redirect to the subscription confirmation page" when {
+
+            "the session data indicates the user has already subscribed" in {
+              val subscriptionStatus = SubscriptionComplete(trustSubscriptionDetails, SubscriptionResponse(""))
+              val session = SessionData.empty.copy(subscriptionStatus = Some(subscriptionStatus))
+
+              inSequence {
+                mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, name, retrievedDateOfBirth, None)
+                mockGetSession(Future.successful(Right(Some(session))))
+              }
+
+              checkIsRedirect(performAction(), routes.SubscriptionController.subscribed())
+            }
+
+          }
+
 
         }
 

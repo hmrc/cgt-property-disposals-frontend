@@ -30,7 +30,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{SubscriptionComplete, SubscriptionMissingData, SubscriptionReady}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, Email, EmailToBeVerified, Error, Name, SessionData, SubscriptionDetails, SubscriptionResponse, SubscriptionStatus, UUIDGenerator, sample, subscriptionDetailsGen}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, Email, EmailToBeVerified, Error, Name, SessionData, SubscriptionDetails, SubscriptionResponse, SubscriptionStatus, TrustName, UUIDGenerator, sample, subscriptionDetailsGen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse
@@ -67,10 +67,10 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
   def mockUuidGenerator(uuid: UUID): CallHandler0[UUID] =
     (mockUuidGenerator.nextId: () => UUID).expects().returning(uuid)
 
-  def mockEmailVerification(expectedEmail: Email, expectedId: UUID, expectedName: Name)(
+  def mockEmailVerification(expectedEmail: Email, expectedId: UUID, expectedName: Either[TrustName,Name])(
     result: Either[Error, EmailVerificationResponse]) =
     (mockService
-      .verifyEmail(_: Email, _: UUID, _: Name)(_: HeaderCarrier))
+      .verifyEmail(_: Email, _: UUID, _: Either[TrustName,Name])(_: HeaderCarrier))
       .expects(expectedEmail, expectedId, expectedName, *)
       .returning(EitherT.fromEither[Future](result))
 
@@ -214,7 +214,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
         behave like commonEmailSubmitBehaviour(
           performAction,
           SubscriptionMissingData(bpr, name),
-          name,
+          Right(name),
           "email.title"
         )
       }
@@ -228,7 +228,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
         behave like commonEmailSubmitBehaviour(
           performAction,
           SubscriptionReady(subscriptionDetails),
-          Name(subscriptionDetails.forename, subscriptionDetails.surname),
+          subscriptionDetails.contactName,
           "email.amend.title"
         )
       }
@@ -236,7 +236,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
       def commonEmailSubmitBehaviour(
         performAction: (String, String) => Future[Result],
         subscriptionStatus: SubscriptionStatus,
-        expectedName: Name,
+        expectedName: Either[TrustName,Name],
         titleKey: String
       ): Unit = {
         val email             = Email("test@email.com")

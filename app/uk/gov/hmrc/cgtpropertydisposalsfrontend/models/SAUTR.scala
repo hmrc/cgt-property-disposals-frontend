@@ -16,12 +16,4 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import java.time.LocalDate
-
-import play.api.libs.json.{Json, OFormat}
-
-final case class BprRequest(nino: String, forename: String, surname: String, dateOfBirth: LocalDate)
-
-object BprRequest {
-  implicit val format: OFormat[BprRequest] = Json.format[BprRequest]
-}
+final case class SAUTR(value: String) extends AnyVal
