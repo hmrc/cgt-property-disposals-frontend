@@ -81,7 +81,7 @@ class EmailVerificationConnectorImpl @Inject()(http: HttpClient, config: Configu
         templateId,
         linkExpiryTime,
         s"${continueUrl(id)}",
-        Map("name" -> name.fold(_.value, _.forename))
+        Map("name" -> name.fold(_.value, _.firstName))
       )
 
     EitherT[Future, Error, HttpResponse](

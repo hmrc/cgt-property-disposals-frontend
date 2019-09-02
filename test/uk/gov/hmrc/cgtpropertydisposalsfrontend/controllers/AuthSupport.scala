@@ -67,7 +67,7 @@ trait AuthSupport {
       Future successful (
         new ~(retrievedConfidenceLevel, retrievedAffinityGroup) and
           retrievedNino and
-          retrievedName.map(name => ItmpName(Some(name.forename), None, Some(name.surname))) and
+          retrievedName.map(name => ItmpName(Some(name.firstName), None, Some(name.lastName))) and
           None and
           retrievedDateOfBirth and
           retrievedEmail and

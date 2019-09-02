@@ -71,7 +71,7 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
            |{
            |"email": "${email.value}",
            |"templateId": "$templateId",
-           |"templateParameters": { "name" : "${name.fold(_.value, _.forename)}" },
+           |"templateParameters": { "name" : "${name.fold(_.value, _.firstName)}" },
            |"linkExpiryDuration" : "PT${linkExpiryTimeMinutes}M",
            |"continueUrl" : "$selfUrl${routes.EmailController
              .verifyEmail(id)

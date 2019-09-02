@@ -64,7 +64,7 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
         val nino = NINO("AB123456C")
         val name = Name("forename", "surname")
         val dateOfBirth = DateOfBirth(LocalDate.of(2000, 4, 10))
-        val payload = Json.toJson(BprRequest(name.forename, name.surname, LocalDate.of(2000, 4, 10)))
+        val payload = Json.toJson(BprRequest(name.getFirstName, name.getLastName, LocalDate.of(2000, 4, 10)))
         val individual = Individual(nino, name, dateOfBirth, None)
 
         "do a POST http call and return the result" in {

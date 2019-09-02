@@ -60,7 +60,7 @@ class CGTPropertyDisposalsConnectorImpl @Inject()(http: HttpClient, servicesConf
    EitherT[Future, Error, HttpResponse](
     entity.fold(
       t => http.get(s"$bprBaseUrl/sautr/${t.sautr.value}"),
-      i => http.post(s"$bprBaseUrl/nino/${i.nino.value}", Json.toJson(BprRequest(i.name.forename, i.name.surname, i.dateOfBirth.value)))
+      i => http.post(s"$bprBaseUrl/nino/${i.nino.value}", Json.toJson(BprRequest(i.name.firstName, i.name.lastName, i.dateOfBirth.value)))
     )
       .map(Right(_))
       .recover { case e => Left(Error(e)) }
@@ -68,13 +68,14 @@ class CGTPropertyDisposalsConnectorImpl @Inject()(http: HttpClient, servicesConf
 
   def subscribe(
     subscriptionDetails: SubscriptionDetails
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] = {
     EitherT[Future, Error, HttpResponse](
       http
         .post(subscribeUrl, Json.toJson(subscriptionDetails))
         .map(Right(_))
         .recover { case e => Left(Error(e)) }
     )
+  }
 
 }
 

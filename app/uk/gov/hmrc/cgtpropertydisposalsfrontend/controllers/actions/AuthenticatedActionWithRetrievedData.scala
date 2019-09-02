@@ -81,7 +81,7 @@ class AuthenticatedActionWithRetrievedData @Inject()(
         Right(AuthenticatedRequestWithRetrievedData(
           UserType.Individual(
           NINO(nino),
-          Name(name.forename, name.surname),
+          Name(name.firstName, name.lastName),
           DateOfBirth(dateOfBirth),
           maybeEmail.filter(_.nonEmpty).map(Email(_))
           ),

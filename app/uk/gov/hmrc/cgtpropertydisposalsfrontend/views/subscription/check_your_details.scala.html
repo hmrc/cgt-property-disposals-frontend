@@ -45,11 +45,9 @@
 
  @pageHeading(title, Some(messages("subscription.caption")))
 
-  @details.contactName.toOption.map { name =>
-  <p class="lede">
-   @messages("subscription.lede", name.forename, name.surname)
-  </p>
- }
+ <p class="lede">
+  @messages("subscription.lede", details.contactName.fold(_.value, n => s"${n.forename} ${n.surname}"))
+ </p>
 
  <div class="panel panel-border-wide">
   <p>

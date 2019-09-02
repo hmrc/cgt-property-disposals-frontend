@@ -47,7 +47,7 @@ dob.invalid=Enter a real date of birth
 
 subscription.caption=Create account
 subscription.title=Check your contact details
-subscription.lede={0} {1} these are the details we hold for you.
+subscription.lede={0} these are the details we hold for you.
 subscription.p=We’ll only use these if we need to contact you about your Capital Gains Tax. You’ll need to change them if they are wrong.
 subscription.cyaLabel.address=Home address
 subscription.cyaChange.address=your home address
