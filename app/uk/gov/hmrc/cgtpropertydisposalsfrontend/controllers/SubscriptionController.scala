@@ -22,10 +22,9 @@ import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{SubscriptionComplete, SubscriptionReady}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.SubscriptionComplete
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{SubscriptionService, TaxEnrolmentService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -35,15 +34,16 @@ import scala.concurrent.ExecutionContext
 
 @Singleton
 class SubscriptionController @Inject()(
-                                        subscriptionService: SubscriptionService,
-                                        sessionStore: SessionStore,
-                                        errorHandler: ErrorHandler,
-                                        cc: MessagesControllerComponents,
-                                        val authenticatedAction: AuthenticatedAction,
-                                        val sessionDataAction: SessionDataAction,
-                                        val subscriptionDetailsAction: SubscriptionReadyAction,
-                                        checkYourDetailsPage: views.html.subscription.check_your_details,
-                                        subscribedPage: views.html.subscription.subscribed
+  subscriptionService: SubscriptionService,
+  taxEnrolmentService: TaxEnrolmentService,
+  sessionStore: SessionStore,
+  errorHandler: ErrorHandler,
+  cc: MessagesControllerComponents,
+  val authenticatedAction: AuthenticatedAction,
+  val sessionDataAction: SessionDataAction,
+  val subscriptionDetailsAction: SubscriptionReadyAction,
+  checkYourDetailsPage: views.html.subscription.check_your_details,
+  subscribedPage: views.html.subscription.subscribed
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithSubscriptionDetailsActions
@@ -62,10 +62,12 @@ class SubscriptionController @Inject()(
       val details = request.subscriptionReady.subscriptionDetails
       val result = for {
         subscriptionResponse <- subscriptionService.subscribe(details)
+        _                    <- taxEnrolmentService.allocateEnrolmentToGroup(subscriptionResponse)
         _ <- EitherT(
               updateSession(sessionStore, request)(
                 _.copy(subscriptionStatus = Some(SubscriptionComplete(details, subscriptionResponse)))
-              ))
+              )
+            )
       } yield subscriptionResponse
 
       result.fold(

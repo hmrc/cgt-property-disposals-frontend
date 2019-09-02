@@ -60,7 +60,8 @@ trait AuthSupport {
     retrievedNino: Option[String],
     retrievedName: Option[Name],
     retrievedDateOfBirth: Option[LocalDate],
-    retrievedEmail: Option[String]): Unit =
+    retrievedEmail: Option[String]
+  ): Unit =
     mockAuth(EmptyPredicate, expectedRetrievals)(
       Future successful (
         new ~(retrievedConfidenceLevel, retrievedAffinityGroup) and
@@ -69,16 +70,16 @@ trait AuthSupport {
           None and
           retrievedDateOfBirth and
           retrievedEmail
-        )
+      )
     )
 
   def mockAuthWithCl200AndWithAllRetrievals(
-                                             retrievedAffinityGroup: AffinityGroup,
-                                             retrievedNino: String,
-                                             retrievedName: Name,
-                                             retrievedDateOfBirth: LocalDate,
-                                             retrievedEmail: Option[String]
-                                           ): Unit =
+    retrievedAffinityGroup: AffinityGroup,
+    retrievedNino: String,
+    retrievedName: Name,
+    retrievedDateOfBirth: LocalDate,
+    retrievedEmail: Option[String]
+  ): Unit =
     mockAuthWithAllRetrievals(
       ConfidenceLevel.L200,
       Some(retrievedAffinityGroup),
