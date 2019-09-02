@@ -21,13 +21,13 @@ import cats.instances.future._
 import cats.syntax.either._
 import com.google.inject.Inject
 import play.api.Configuration
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, MessagesRequest, Request, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedActionWithRetrievedData, RequestWithSessionDataAndRetrievedData, SessionDataActionWithRetrievedData, WithAuthRetrievalsAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionDetails.MissingData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{SubscriptionComplete, SubscriptionMissingData, SubscriptionReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Individual, Trust}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, Error, NINO, Name, SessionData, SubscriptionDetails, SubscriptionStatus, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, Email, Error, NINO, SessionData, SubscriptionDetails, SubscriptionStatus, TrustName, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
@@ -76,7 +76,7 @@ class StartController @Inject()(
         buildIndividualSubscriptionData(i, None)
 
       case (t: UserType.Trust, _) =>
-        Ok(s"Got trust with sautr ${t.sautr.value}")
+        buildTrustSubscriptionData(t)
     }
   }
 
@@ -100,7 +100,38 @@ class StartController @Inject()(
 
   private def buildTrustSubscriptionData(trust: Trust)(
     implicit  hc: HeaderCarrier,
-    request: RequestWithSessionDataAndRetrievedData[_]): Future[Result] = ???
+    request: RequestWithSessionDataAndRetrievedData[_]): Future[Result] = {
+    val result =
+      for{
+        bprWithNameAndEmail <- bprService.getBusinessPartnerRecord(Left(trust))
+          .subflatMap[Error,(BusinessPartnerRecord,TrustName,Email)]{ bpr =>
+          (bpr.organisationName, bpr.emailAddress) match {
+            case (None, None) =>
+              Left(Error("Could not find trust name or email address from business partner record"))
+            case (Some(_), None) =>
+              Left(Error("Could not find trust name from business partner record"))
+            case (None, Some(_)) =>
+              Left(Error("Could not find email address from business partner record"))
+            case (Some(n), Some(e)) =>
+              Right((bpr, TrustName(n), Email(e)))
+          }
+        }
+      subscriptionDetails = SubscriptionDetails(
+        Left(bprWithNameAndEmail._2),
+        bprWithNameAndEmail._3.value,
+        bprWithNameAndEmail._1.address,
+        bprWithNameAndEmail._1.sapNumber
+      )
+      _ <- EitherT(updateSession(sessionStore, request)(_.copy(subscriptionStatus = Some(SubscriptionReady(subscriptionDetails)))))
+      } yield ()
+
+    result.fold({ e =>
+      logger.warn(s"Could not build subscription data for trust with SAUTR ${trust.sautr}", e)
+      errorHandler.errorResult()
+    },
+      _ => SeeOther(routes.SubscriptionController.checkYourDetails().url)
+    )
+  }
 
   private def buildIndividualSubscriptionData(individual: Individual,
                                               maybeBpr: Option[BusinessPartnerRecord])(

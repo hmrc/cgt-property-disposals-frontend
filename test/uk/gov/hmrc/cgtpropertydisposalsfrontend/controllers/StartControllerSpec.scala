@@ -25,10 +25,10 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{AnyContent, Request, Result}
 import play.api.test.FakeRequest
-import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, ConfidenceLevel, Enrolment, EnrolmentIdentifier}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models
+import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, ConfidenceLevel}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Individual, Trust}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordService
@@ -52,14 +52,12 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
   lazy val controller = instanceOf[StartController]
 
-  def mockGetBusinessPartnerRecord(nino: NINO, name: models.Name, dob: DateOfBirth)(
+  def mockGetBusinessPartnerRecord(entity: Either[Trust,Individual])(
     result: Either[Error, BusinessPartnerRecord]
   ) =
     (mockService
-      .getBusinessPartnerRecord(_: NINO, _: models.Name, _: DateOfBirth)(
-        _: HeaderCarrier
-      ))
-      .expects(nino, name, dob, *)
+      .getBusinessPartnerRecord(_: Either[Trust,Individual])(_: HeaderCarrier))
+      .expects(entity, *)
       .returning(EitherT.fromEither[Future](result))
 
   val nino                 = NINO("AB123456C")
@@ -71,8 +69,10 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
   val bpr = BusinessPartnerRecord(
     Some(emailAddress),
     UkAddress("line1", None, None, None, "postcode"),
-    "sap"
+    "sap",
+    Some("org")
   )
+  val individual           = Individual(nino ,name, dateOfBirth, None)
 
   "The StartController" when {
 
@@ -81,7 +81,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
       def performAction(rh: Request[AnyContent] = FakeRequest()): Future[Result] =
         controller.start()(rh)
 
-      "handling users with insufficient confidence level" must {
+      "handling individual users with insufficient confidence level" must {
 
         "show an error" when {
 
@@ -202,7 +202,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               inSequence {
                 mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, name, retrievedDateOfBirth, None)
                 mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-                mockGetBusinessPartnerRecord(nino, name, dateOfBirth)(Left(Error("error")))
+                mockGetBusinessPartnerRecord(Right(individual))(Left(Error("error")))
               }
               checkIsTechnicalErrorPage(performAction())
             }
@@ -213,7 +213,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               inSequence {
                 mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, name, retrievedDateOfBirth, None)
                 mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-                mockGetBusinessPartnerRecord(nino, name, dateOfBirth)(Right(bpr))
+                mockGetBusinessPartnerRecord(Right(individual))(Right(bpr))
                 mockStoreSession(session)(Future.successful(Left(Error("Oh no!"))))
               }
 
@@ -234,7 +234,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 inSequence {
                   mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, name, retrievedDateOfBirth, None)
                   mockGetSession(Future.successful(Right(maybeSession)))
-                  mockGetBusinessPartnerRecord(nino, name, dateOfBirth)(Right(bpr))
+                  mockGetBusinessPartnerRecord(Right(individual))(Right(bpr))
                   mockStoreSession(session)(Future.successful(Right(())))
                 }
 
@@ -252,7 +252,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               inSequence {
                 mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, name, retrievedDateOfBirth, Some(ggEmail))
                 mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-                mockGetBusinessPartnerRecord(nino, name, dateOfBirth)(Right(bprWithNoEmail))
+                mockGetBusinessPartnerRecord(Right(individual.copy(email = Some(Email(ggEmail)))))(Right(bprWithNoEmail))
                 mockStoreSession(session)(Future.successful(Right(())))
               }
 
@@ -285,7 +285,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               inSequence {
                 mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, name, retrievedDateOfBirth, None)
                 mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-                mockGetBusinessPartnerRecord(nino, name, dateOfBirth)(Right(bprWithNoEmail))
+                mockGetBusinessPartnerRecord(Right(individual))(Right(bprWithNoEmail))
                 mockStoreSession(updatedSession)(Future.successful(Right(())))
               }
 
@@ -299,6 +299,11 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
         "handling trusts" must {
 
           val sautr = SAUTR("sautr")
+          val trust = Trust(sautr)
+          val trustName = TrustName("trustname")
+          val address = UkAddress("line 1", None, None, None, "postcode")
+          val sapNumber = "sap"
+          val bpr = BusinessPartnerRecord(Some(emailAddress), address ,sapNumber, Some(trustName.value))
           val trustSubscriptionDetails = SubscriptionDetails(Left(trustName), emailAddress, bpr.address, bpr.sapNumber)
 
           "redirect to check subscription details" when {
@@ -322,7 +327,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               val session = SessionData.empty.copy(subscriptionStatus = Some(subscriptionStatus))
 
               inSequence {
-                mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, name, retrievedDateOfBirth, None)
+                mockAuthWithCl200AndWithAllTrustRetrievals(sautr)
                 mockGetSession(Future.successful(Right(Some(session))))
               }
 
@@ -331,6 +336,79 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
           }
 
+          "show an error page" when {
+
+            "there is an error getting the BPR" in {
+              inSequence {
+                mockAuthWithCl200AndWithAllTrustRetrievals(sautr)
+                mockGetSession(Future.successful(Right(None)))
+                mockGetBusinessPartnerRecord(Left(trust))(Left(Error("")))
+              }
+
+              checkIsTechnicalErrorPage(performAction())
+            }
+
+            "the BPR doesn't contain an email address" in {
+              inSequence {
+                mockAuthWithCl200AndWithAllTrustRetrievals(sautr)
+                mockGetSession(Future.successful(Right(None)))
+                mockGetBusinessPartnerRecord(Left(trust))(Right(bpr.copy(emailAddress = None)))
+              }
+
+              checkIsTechnicalErrorPage(performAction())
+            }
+
+            "the BPR doesn't contain an organisation name" in {
+              inSequence {
+                mockAuthWithCl200AndWithAllTrustRetrievals(sautr)
+                mockGetSession(Future.successful(Right(None)))
+                mockGetBusinessPartnerRecord(Left(trust))(Right(bpr.copy(organisationName = None)))
+              }
+
+              checkIsTechnicalErrorPage(performAction())
+            }
+
+            "the BPR doesn't contain either an email address or organisation name" in {
+              inSequence {
+                mockAuthWithCl200AndWithAllTrustRetrievals(sautr)
+                mockGetSession(Future.successful(Right(None)))
+                mockGetBusinessPartnerRecord(Left(trust))(Right(bpr.copy(emailAddress = None, organisationName = None)))
+              }
+
+              checkIsTechnicalErrorPage(performAction())
+            }
+
+            "there is an error updating the session" in {
+              inSequence {
+                mockAuthWithCl200AndWithAllTrustRetrievals(sautr)
+                mockGetSession(Future.successful(Right(None)))
+                mockGetBusinessPartnerRecord(Left(trust))(Right(bpr))
+                mockStoreSession(
+                  SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(trustSubscriptionDetails)))
+                )(Future.successful(Left(Error(""))))
+              }
+
+              checkIsTechnicalErrorPage(performAction())
+            }
+
+          }
+
+          "redirect to check your details" when {
+
+            "there is an email and organisation name in the BPR and the session has been updated" in {
+              inSequence {
+                mockAuthWithCl200AndWithAllTrustRetrievals(sautr)
+                mockGetSession(Future.successful(Right(None)))
+                mockGetBusinessPartnerRecord(Left(trust))(Right(bpr))
+                mockStoreSession(
+                  SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(trustSubscriptionDetails)))
+                )(Future.successful(Right(())))
+              }
+
+              checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
+            }
+
+          }
 
         }
 
