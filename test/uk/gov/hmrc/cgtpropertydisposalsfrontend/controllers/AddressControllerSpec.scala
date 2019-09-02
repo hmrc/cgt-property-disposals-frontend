@@ -104,7 +104,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
     "redirect to the do you have a nino page" when {
 
       "the session data indicates the user does not have sufficient confidence level" in {
-        val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.InsufficientConfidenceLevel))
+        val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualInsufficientConfidenceLevel))
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(session))))
@@ -112,6 +112,21 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
 
         val result = performAction()
         checkIsRedirect(result, routes.InsufficientConfidenceLevelController.doYouHaveNINO())
+      }
+
+    }
+
+    "redirect to the register your trust page" when {
+
+      "the session data indicates the user is an organisation without a registered trust associated with it" in {
+        val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.OrganisationUnregisteredTrust))
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(Future.successful(Right(Some(session))))
+        }
+
+        val result = performAction()
+        checkIsRedirect(result, routes.RegisterTrustController.registerYourTrust())
       }
 
     }

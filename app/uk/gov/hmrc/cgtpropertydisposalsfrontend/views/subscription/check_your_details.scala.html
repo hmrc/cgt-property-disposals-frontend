@@ -46,7 +46,7 @@
  @pageHeading(title, Some(messages("subscription.caption")))
 
  <p class="lede">
-  @messages("subscription.lede", details.contactName.fold(_.value, n => s"${n.forename} ${n.surname}"))
+  @messages("subscription.lede", details.contactName.fold(_.value, n => s"${n.firstName} ${n.lastName}"))
  </p>
 
  <div class="panel panel-border-wide">

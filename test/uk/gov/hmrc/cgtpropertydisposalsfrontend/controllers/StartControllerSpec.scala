@@ -91,7 +91,17 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             inSequence {
               mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), None, None, None, None, Set.empty)
               mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-              mockStoreSession(SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.InsufficientConfidenceLevel)))(Future.successful(Left(Error(""))))
+              mockStoreSession(SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualInsufficientConfidenceLevel)))(Future.successful(Left(Error(""))))
+            }
+
+            checkIsTechnicalErrorPage(performAction(request))
+          }
+
+          "an individual user logs in but the session data indicates an organisation" in {
+            val request = FakeRequest("GET", "/uri")
+            inSequence {
+              mockAuthWithAllRetrievals(ConfidenceLevel.L200, Some(AffinityGroup.Individual), Some("nino"), Some(name), Some(retrievedDateOfBirth), None, Set.empty)
+              mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(subscriptionStatus = Some(OrganisationUnregisteredTrust))))))
             }
 
             checkIsTechnicalErrorPage(performAction(request))
@@ -140,7 +150,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             inSequence {
               mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), None, None, None, None, Set.empty)
               mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-              mockStoreSession(SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.InsufficientConfidenceLevel)))(Future.successful(Right(())))
+              mockStoreSession(SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualInsufficientConfidenceLevel)))(Future.successful(Right(())))
             }
 
             checkIsRedirect(performAction(), routes.InsufficientConfidenceLevelController.doYouHaveNINO())
@@ -149,7 +159,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           "the session data indicates they do not have sufficient confidence level" in {
             inSequence {
               mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), None, None, None, None, Set.empty)
-              mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.InsufficientConfidenceLevel))))))
+              mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualInsufficientConfidenceLevel))))))
             }
 
             checkIsRedirect(performAction(), routes.InsufficientConfidenceLevelController.doYouHaveNINO())

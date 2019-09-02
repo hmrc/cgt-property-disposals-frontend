@@ -25,7 +25,7 @@ import play.api.data.format.Formatter
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.InsufficientConfidenceLevel
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.IndividualInsufficientConfidenceLevel
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
@@ -55,7 +55,7 @@ class InsufficientConfidenceLevelController @Inject()(
   private def withInsufficientConfidenceLevelUser(
     f: => Future[Result])(implicit request: RequestWithSessionData[_]): Future[Result] =
     request.sessionData.flatMap(_.subscriptionStatus) match {
-      case Some(InsufficientConfidenceLevel) => f
+      case Some(IndividualInsufficientConfidenceLevel) => f
       case other                             => defaultRedirect(other)
     }
 

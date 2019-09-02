@@ -27,7 +27,7 @@ import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{AuthConnector, ConfidenceLevel}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.InsufficientConfidenceLevel
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.IndividualInsufficientConfidenceLevel
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 
 import scala.concurrent.Future
@@ -48,7 +48,7 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
       def performAction(): Future[Result] = controller.ivSuccess()(FakeRequest())
 
       val nonEmptySession =
-       SessionData.empty.copy(subscriptionStatus = Some(InsufficientConfidenceLevel))
+       SessionData.empty.copy(subscriptionStatus = Some(IndividualInsufficientConfidenceLevel))
 
       "clear the session and redirect to the start endpoint" in {
         inSequence {

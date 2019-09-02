@@ -23,7 +23,9 @@ sealed trait SubscriptionStatus
 
 object SubscriptionStatus {
 
-  final case object InsufficientConfidenceLevel extends SubscriptionStatus
+  final case object OrganisationUnregisteredTrust extends SubscriptionStatus
+
+  final case object IndividualInsufficientConfidenceLevel extends SubscriptionStatus
 
   final case class SubscriptionMissingData(businessPartnerRecord: BusinessPartnerRecord, name: Name) extends SubscriptionStatus
 

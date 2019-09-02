@@ -57,7 +57,7 @@ class StartController @Inject()(
     (request.authenticatedRequest.userType,
       request.sessionData.flatMap(_.subscriptionStatus)
     ) match {
-      case (_, Some(SubscriptionStatus.InsufficientConfidenceLevel)) =>
+      case (_, Some(SubscriptionStatus.IndividualInsufficientConfidenceLevel)) =>
         SeeOther(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url)
 
       case (UserType.InsufficientConfidenceLevel(maybeNino), _) =>
@@ -77,6 +77,11 @@ class StartController @Inject()(
 
       case (t: UserType.Trust, _) =>
         buildTrustSubscriptionData(t)
+
+      case (_: Individual, Some(SubscriptionStatus.OrganisationUnregisteredTrust)) =>
+        logger.warn("Invalid state: logged in user was an individual but session data indicated an organisation")
+        errorHandler.errorResult()
+
     }
   }
 
@@ -84,7 +89,7 @@ class StartController @Inject()(
     implicit request: RequestWithSessionDataAndRetrievedData[AnyContent]
   ): Future[Result] = maybeNino match {
     case None =>
-      updateSession(sessionStore, request)(_.copy(subscriptionStatus = Some(SubscriptionStatus.InsufficientConfidenceLevel)))
+      updateSession(sessionStore, request)(_.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualInsufficientConfidenceLevel)))
         .map{
           case Left(e) =>
           logger.warn("Could not update session with insufficient confidence level", e)
