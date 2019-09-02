@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import java.util.UUID
 
 import cats.data.EitherT
-import java.time._
+import org.scalacheck.ScalacheckShapeless._
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -33,7 +33,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{Subsc
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
 import uk.gov.hmrc.http.HeaderCarrier
-import org.joda.time.{LocalDate => JodaLocalDate}
 import scala.concurrent.Future
 
 class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with SessionSupport {
@@ -102,7 +101,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
       "redirect to the do you have a nino page" when {
 
         "the session data indicates the user does not have sufficient confidence level" in {
-          val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualInsufficientConfidenceLevel))
+          val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualInsufficientConfidenceLevel(None, None)))
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(session))))
@@ -179,7 +178,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
       "redirect to the do you have a nino page" when {
 
         "the session data indicates the user does not have sufficient confidence level" in {
-          val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualInsufficientConfidenceLevel))
+          val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualInsufficientConfidenceLevel(None, None)))
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(session))))
@@ -250,7 +249,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
       "redirect to the do you have a nino page" when {
 
         "the session data indicates the user does not have sufficient confidence level" in {
-          val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualInsufficientConfidenceLevel))
+          val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualInsufficientConfidenceLevel(None, None)))
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(session))))

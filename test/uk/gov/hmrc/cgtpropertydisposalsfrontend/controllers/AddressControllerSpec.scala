@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
+import org.scalacheck.ScalacheckShapeless._
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -104,7 +105,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
     "redirect to the do you have a nino page" when {
 
       "the session data indicates the user does not have sufficient confidence level" in {
-        val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualInsufficientConfidenceLevel))
+        val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualInsufficientConfidenceLevel(None, None)))
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(session))))

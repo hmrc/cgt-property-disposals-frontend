@@ -41,6 +41,14 @@ haveANino.title=Do you have a National Insurance number?
 hasNino.error.required=Select yes if you have a National Insurance number
 hasNino.error.boolean=Select yes if you have a National Insurance number
 
+haveAnSaUtr.title=Do you have a Self Assessment Unique Taxpayer Reference?
+hasSaUtr.error.required=Select yes if you have a Self Assessment Taxpayer Reference
+hasSaUtr.error.boolean=Select yes if you have a Self Assessment Taxpayer Reference
+saUtr.label=Enter your Self Assessment Unique Taxpayer Reference
+saUtr.helpText=You can find this on letters from HMRC about your Self Assessment returns. For example, 9163259195
+saUtr.error.required=Enter your Self Assessment Taxpayer Reference
+saUtr.error.pattern=Self Assessment Taxpayer references must only include up to 15 letters and numbers
+
 dob.title=What is your date of birth?
 dob.helpText=For example, 31 3 1980
 dob.invalid=Enter a real date of birth
@@ -99,3 +107,6 @@ registerTrust.title=Register your trust
 registerTrust.p=To report and pay Capital Gains Tax on UK property disposals you will need to register your trust with HMRC.
 registerTrust.buttonText=Register your trust
 
+registration.start.title=You need to register with HMRC before starting
+registration.start.p=Because we hold no details about your tax affairs you will need to register to be able to create an account to report and pay Capital Gains Tax on UK property disposals.
+registration.start.buttonText=Start registration

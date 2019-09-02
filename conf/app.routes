@@ -10,10 +10,16 @@ GET  /iv/failure                          uk.gov.hmrc.cgtpropertydisposalsfronte
 ### Insufficient CL
 GET  /iv/nino                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.InsufficientConfidenceLevelController.doYouHaveNINO()
 POST /iv/nino                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.InsufficientConfidenceLevelController.doYouHaveNINOSubmit()
+GET  /iv/saUtr                            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()
+POST /iv/saUtr                            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.InsufficientConfidenceLevelController.doYouHaveSaUtrSubmit()
+
+### Registration
+GET  /registration/start                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegistrationController.startRegistration()
 
 ### Subscription - missing data
 GET  /subscription/enter-email            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailController.enterEmail()
 POST /subscription/enter-email            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailController.enterEmailSubmit()
+
 
 
 #### Subscription

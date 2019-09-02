@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{Json, OFormat}
 
-final case class SAUTR(value: String) extends AnyVal
+final case class HasSAUTR(value: Option[SAUTR]) extends AnyVal
 
-object SAUTR {
+object HasSAUTR {
 
-  implicit val format: Format[SAUTR] = Json.format[SAUTR]
+  implicit val format: OFormat[HasSAUTR] = Json.format[HasSAUTR]
 
 }

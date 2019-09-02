@@ -25,7 +25,9 @@
   labelAsHeading: Boolean = false,
   errorKey: Option[String] = None,
   hasErrors: Boolean = false,
-  selected: Option[Boolean] = None
+  selected: Option[Boolean] = None,
+  yesContent: Option[Html] = None,
+  noContent: Option[Html] = None
 )(implicit messages: Messages)
 
 @classes = @{if(hasErrors) "form-group form-group-error" else "form-group" }
@@ -45,7 +47,7 @@
       @errorInline(fieldId, messages(s"$fieldId.$e"), Seq("error-message"))
     }
 
-    <div class="multiple-choice">
+    <div class="multiple-choice"@if(yesContent.nonEmpty){ data-target="yes-content" }>
       <input id="@{fieldId}-true"
        name="@fieldId"
        value="true"
@@ -57,7 +59,9 @@
       </label>
     </div>
 
-   <div class="multiple-choice">
+    @yesContent.map(content => Html(s"""<div id="yes-content" class="panel panel-indent js-hidden" aria-hidden="true">$content</div>"""))
+
+   <div class="multiple-choice"@if(noContent.nonEmpty){ data-target="no-content" }>
       <input id="@{fieldId}-false"
        name="@fieldId"
        value="false"
@@ -68,6 +72,8 @@
         @messages("generic.no")
       </label>
     </div>
+
+    @noContent.map(content => Html(s"""<div id="no-content" class="panel panel-indent js-hidden" aria-hidden="true">$content</div>"""))
 
   </fieldset>
 </div>

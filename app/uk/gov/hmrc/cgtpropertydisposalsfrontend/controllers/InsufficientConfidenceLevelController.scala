@@ -16,20 +16,26 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
+import cats.instances.string._
 import cats.syntax.either._
+import cats.syntax.eq._
 import com.google.inject.Inject
 import play.api.Configuration
 import play.api.data.{Form, FormError}
-import play.api.data.Forms.{boolean, mapping, of}
+import play.api.data.Forms.{mapping, of, optional, text}
 import play.api.data.format.Formatter
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{HasSAUTR, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.IndividualInsufficientConfidenceLevel
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
+import uk.gov.hmrc.referencechecker.SelfAssessmentReferenceChecker
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -39,7 +45,10 @@ class InsufficientConfidenceLevelController @Inject()(
                                                        val sessionStore: SessionStore,
                                                        val errorHandler: ErrorHandler,
                                                        val config: Configuration,
+                                                       businessPartnerRecordService: BusinessPartnerRecordService,
                                                        doYouHaveANinoPage: views.html.do_you_have_a_nino,
+                                                       doYouHaveAnSaUtrPage: views.html.do_you_have_an_sa_utr,
+                                                       startRegistrationPage: views.html.registration.registration_start,
                                                        cc: MessagesControllerComponents)
                                                      (
                                                        implicit viewConfig: ViewConfig,
@@ -49,36 +58,89 @@ class InsufficientConfidenceLevelController @Inject()(
     with IvBehaviour
     with Logging
     with WithAuthAndSessionDataAction
-    with DefaultRedirects {
+    with DefaultRedirects
+    with SessionUpdates {
   import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.toFuture
+  import InsufficientConfidenceLevelController._
 
   private def withInsufficientConfidenceLevelUser(
-    f: => Future[Result])(implicit request: RequestWithSessionData[_]): Future[Result] =
+    f: IndividualInsufficientConfidenceLevel => Future[Result])(implicit request: RequestWithSessionData[_]): Future[Result] =
     request.sessionData.flatMap(_.subscriptionStatus) match {
-      case Some(IndividualInsufficientConfidenceLevel) => f
+      case Some(i: IndividualInsufficientConfidenceLevel) => f(i)
       case other                             => defaultRedirect(other)
     }
 
 
   def doYouHaveNINO(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withInsufficientConfidenceLevelUser{
-      Ok(doYouHaveANinoPage(InsufficientConfidenceLevelController.haveANinoForm))
+    withInsufficientConfidenceLevelUser{ case IndividualInsufficientConfidenceLevel(hasNino, _) =>
+      val form = hasNino.fold(haveANinoForm)(haveANinoForm.fill)
+      Ok(doYouHaveANinoPage(form))
     }
   }
 
   def doYouHaveNINOSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withInsufficientConfidenceLevelUser {
+    withInsufficientConfidenceLevelUser { insufficientConfidenceLevel =>
       InsufficientConfidenceLevelController.haveANinoForm.bindFromRequest().fold(
         e => BadRequest(doYouHaveANinoPage(e)),
         hasNino =>
-          if (hasNino) {
-            redirectToIv
-          } else {
-            Ok(s"Got answer $hasNino")
+          updateSession(sessionStore, request)(
+            _.copy(subscriptionStatus = Some(insufficientConfidenceLevel.copy(hasNino = Some(hasNino))))
+          ).map{
+            case Left(e) =>
+            logger.warn("Could not update session after has NINO page submit",e )
+            errorHandler.errorResult()
+
+            case Right(_) =>
+              if (hasNino) {
+                redirectToIv
+              } else {
+                Redirect(routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr())
+              }
+
+          }
+     )
+    }
+  }
+
+  def doYouHaveAnSaUtr(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withInsufficientConfidenceLevelUser{ case IndividualInsufficientConfidenceLevel(hasNino, hasSaUtr) =>
+      hasNino.fold(
+        SeeOther(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url)
+      ){ _ =>
+        val form = hasSaUtr.fold(hasSaUtrForm)(s => hasSaUtrForm.fill(s.value))
+        Ok(doYouHaveAnSaUtrPage(form, routes.InsufficientConfidenceLevelController.doYouHaveNINO()))
+      }
+    }
+  }
+
+  def doYouHaveSaUtrSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withInsufficientConfidenceLevelUser { insufficientConfidenceLevel =>
+    insufficientConfidenceLevel.hasNino.fold[Future[Result]](
+      SeeOther(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url)
+    ) { _ =>
+      hasSaUtrForm.bindFromRequest().fold(
+        e => BadRequest(doYouHaveAnSaUtrPage(e, routes.InsufficientConfidenceLevelController.doYouHaveNINO())),
+        maybeSautr =>
+          updateSession(sessionStore, request)(
+            _.copy(subscriptionStatus = Some(insufficientConfidenceLevel.copy(hasSautr = Some(HasSAUTR(maybeSautr)))))
+          ).map {
+            case Left(e) =>
+              logger.warn("Could not update session after has SAUTR page submit", e)
+              errorHandler.errorResult()
+
+            case Right(_) =>
+              maybeSautr.fold(
+                Redirect(routes.RegistrationController.startRegistration())
+              ){ sautr =>
+              // TODO: get BPR here
+                Ok(s"Your Self Assessment Unique Taxpayer Reference is ${sautr.value}, call bpr")
+              }
           }
       )
     }
+    }
   }
+
 
 }
 
@@ -111,4 +173,34 @@ object InsufficientConfidenceLevelController {
     )
 
 
+  val hasSaUtrForm: Form[Option[SAUTR]] = {
+      val saUtrFormatter = new Formatter[Option[String]] {
+        override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Option[String]] =
+          data.get("hasSaUtr") match {
+            // if "true" make sure we have an saUtr
+            case Some("true") ⇒
+              data.get("saUtr").filter(_.trim().nonEmpty) match {
+                case Some(s) => if( SelfAssessmentReferenceChecker.isValid(s)) Right(Some(s)) else Left(Seq(FormError(key, "error.pattern")))
+                case None => Left(Seq(FormError(key, "error.required")))
+              }
+            // if the value is "false" ignore any new saUtr that has been entered
+            case _          ⇒ Right(None)
+          }
+
+        override def unbind(key: String, value: Option[String]): Map[String, String] =
+          optional(text).withPrefix(key).unbind(value)
+      }
+
+      Form(
+        mapping(
+          "hasSaUtr" → text.verifying(l ⇒ l === "true" || l === "false"),
+          "saUtr" → of(saUtrFormatter)
+        ){
+          case (_, sautr) => sautr.map(SAUTR(_))
+        }{
+          maybeSaUtr =>
+            Some(maybeSaUtr.fold[(String,Option[String])]("false" -> None)(s => "true" -> Some(s.value)))
+        }
+      )
+  }
 }

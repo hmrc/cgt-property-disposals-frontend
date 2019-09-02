@@ -58,11 +58,10 @@ class AuthenticatedActionWithRetrievedData @Inject()(
       case RetrievalName(Some(name), _) =>
         name.split(' ').toList.filter(_.nonEmpty) match {
           case Nil      => None // no name
-          case _ :: Nil => None // only one name
-          case ::(firstName, tl) =>
+          case firstName :: tl =>
             tl.lastOption match {
               case Some(lastName) => Some(Name(firstName, lastName))
-              case None           => None
+              case None           => None // only one name
             }
         }
       case RetrievalName(None, _) => None

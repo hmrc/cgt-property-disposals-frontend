@@ -21,3 +21,13 @@ input:focus, textarea:focus, select:focus, #global-header input:focus {
     outline-offset: 0;
 }
 .govuk-check-your-answers { margin: 30px 0 60px 0; }
+
+/* misalignment of panel border on radios with revealing content */
+.multiple-choice + .panel-indent {
+    margin-left: 16px;
+}
+
+/* overriding backwards-compatibility.scss that forces 92% in a panel indent */
+.multiple-choice + .panel-indent .form-control {
+    width: 50%;
+}

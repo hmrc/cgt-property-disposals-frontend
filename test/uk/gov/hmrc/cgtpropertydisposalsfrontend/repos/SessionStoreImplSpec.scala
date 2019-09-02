@@ -19,8 +19,10 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos
 import java.util.UUID
 
 import com.typesafe.config.ConfigFactory
+import org.scalacheck.ScalacheckShapeless._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{Matchers, WordSpec}
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.Configuration
 import play.api.libs.json.{JsNumber, JsObject}
 import uk.gov.hmrc.cache.model.{Cache, Id}
@@ -34,7 +36,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class SessionStoreImplSpec extends WordSpec with Matchers with MongoSupport with ScalaFutures {
+class SessionStoreImplSpec extends WordSpec with Matchers with MongoSupport with ScalaFutures with ScalaCheckDrivenPropertyChecks {
 
   val config = Configuration(
     ConfigFactory.parseString(
@@ -51,15 +53,16 @@ class SessionStoreImplSpec extends WordSpec with Matchers with MongoSupport with
 
   "SessionStoreImpl" must {
 
-    val sessionData = sample[SessionData]
 
     "be able to insert SessionData into mongo and read it back" in new TestEnvironment {
-      val result = sessionStore.store(sessionData)
+      forAll { sessionData: SessionData =>
+        val result = sessionStore.store(sessionData)
 
-      result.futureValue should be(Right(()))
+        result.futureValue should be(Right(()))
 
-      val getResult = sessionStore.get()
-      getResult.futureValue should be(Right(Some(sessionData)))
+        val getResult = sessionStore.get()
+        getResult.futureValue should be(Right(Some(sessionData)))
+      }
     }
 
     "return no SessionData if there is no data in mongo" in new TestEnvironment {
@@ -69,6 +72,8 @@ class SessionStoreImplSpec extends WordSpec with Matchers with MongoSupport with
     "return an error" when {
 
       "the connection to mongo is broken" in new TestEnvironment {
+        val sessionData = sample[SessionData]
+
         withBrokenMongo { brokenMongo =>
           val sessionStore = new SessionStoreImpl(brokenMongo, config)
           sessionStore.get().futureValue.isLeft              shouldBe true
@@ -86,6 +91,8 @@ class SessionStoreImplSpec extends WordSpec with Matchers with MongoSupport with
 
       "there is no session id in the header carrier" in {
         implicit val hc: HeaderCarrier = HeaderCarrier()
+        val sessionData = sample[SessionData]
+
         sessionStore.store(sessionData).futureValue.isLeft shouldBe true
         sessionStore.get().futureValue.isLeft              shouldBe true
       }
