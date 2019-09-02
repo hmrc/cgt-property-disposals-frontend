@@ -95,3 +95,7 @@ subscribed.p2=Your account number is
 subscribed.buttonText=Start a new return
 subscribed.linkText=Go to your CGT on UK property account
 
+registerTrust.title=Register your trust
+registerTrust.p=To report and pay Capital Gains Tax on UK property disposals you will need to register your trust with HMRC.
+registerTrust.buttonText=Register your trust
+

@@ -18,13 +18,16 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class RegisterTrustController @Inject()(
                                          registerYourTrustPage: views.html.register_your_trust,
-                                         cc: MessagesControllerComponents)
+                                         cc: MessagesControllerComponents)(implicit viewConfig: ViewConfig, ec: ExecutionContext)
   extends FrontendController(cc){
 
 

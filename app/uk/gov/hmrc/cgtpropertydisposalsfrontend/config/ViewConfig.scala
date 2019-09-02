@@ -39,4 +39,5 @@ class ViewConfig @Inject()(servicesConfig: ServicesConfig) {
   val betaFeedbackUrlNoAuth: String =
     s"$contactHost/contact/beta-feedback-unauthenticated?service=$contactFormServiceIdentifier"
   val signOutUrl: String = s"$companyAuthUrl$signOutUri"
+  val trustRegistrationUrl: String = loadConfig(s"trust-registration.url")
 }

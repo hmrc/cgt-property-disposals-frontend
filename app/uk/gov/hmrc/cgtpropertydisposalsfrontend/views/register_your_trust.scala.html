@@ -14,8 +14,27 @@
  * limitations under the License.
  *@
 
- @this()
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 
-<h1>Register your trust</h1>
+@this(
+       mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+       pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+       buttonLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.button_link
+)
+
+@()(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+
+@title = @{messages("registerTrust.title")}
+
+@mainTemplate(title = title) {
+
+   @pageHeading(title)
+   <p>
+    @messages("registerTrust.p")
+   </p>
+   @buttonLink(messages("registerTrust.buttonText"), appConfig.trustRegistrationUrl)
+
+ }
+
 
     
