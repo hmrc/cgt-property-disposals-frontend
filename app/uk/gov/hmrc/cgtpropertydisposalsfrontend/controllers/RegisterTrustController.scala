@@ -18,15 +18,18 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 @Singleton
-class RegisterTrustController @Inject()(cc: MessagesControllerComponents)
+class RegisterTrustController @Inject()(
+                                         registerYourTrustPage: views.html.register_your_trust,
+                                         cc: MessagesControllerComponents)
   extends FrontendController(cc){
 
 
   def registerYourTrust(): Action[AnyContent] = Action { implicit request =>
-    Ok("You need to register your trust to use this service")
+    Ok(registerYourTrustPage())
   }
 
 }
