@@ -21,34 +21,3 @@ input:focus, textarea:focus, select:focus, #global-header input:focus {
     outline-offset: 0;
 }
 .govuk-check-your-answers { margin: 30px 0 60px 0; }
-
-/*
-    Using govuk styles for back link instead of Assets Frontend
- */
-a.back-link {
-    font-size: 16px;
-    position: relative;
-    padding-left: 14px;
-    margin-bottom: 15px;
-}
-a.back-link:before {
-    display: block;
-    width: 0;
-    height: 0;
-    border-style: solid;
-    border-color: transparent;
-    -webkit-clip-path: polygon(0% 50%, 100% 100%, 100% 0%);
-    clip-path: polygon(0% 50%, 100% 100%, 100% 0%);
-    border-width: 5px 6px 5px 0;
-    border-right-color: inherit;
-    content: "";
-    position: absolute;
-    top: -1px;
-    bottom: 1px;
-    left: 0;
-    margin: auto;
-    padding-right: 0;
-}
-a.back-link:link, a.back-link:visited, a.back-link:hover, a.back-link:active, a.back-link:focus {
-    color: #0b0c0c;
-}
