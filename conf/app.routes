@@ -2,6 +2,7 @@ GET /                                     controllers.Default.redirect(to = "/cg
 GET /landing-page                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.LandingPageController.landingPage()
 GET /start                                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.start()
 
+
 #### IV
 GET  /iv/success                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.IvController.ivSuccess()
 GET  /iv/failure                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.IvController.ivFailure(journeyId: java.util.UUID)
@@ -35,6 +36,10 @@ POST /subscription/change-address         uk.gov.hmrc.cgtpropertydisposalsfronte
 
 GET   /subscription/select-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.selectAddress()
 POST  /subscription/select-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.selectAddressSubmit()
+
+
+#### Error pages
+GET  /register-your-trust                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegisterTrustController.registerYourTrust()
 
 
 ### Return journey

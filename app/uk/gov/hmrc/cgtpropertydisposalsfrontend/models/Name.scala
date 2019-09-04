@@ -18,7 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import play.api.libs.json.{Json, OFormat}
 
-final case class Name(forename: String, surname: String)
+final case class Name(firstName: String, lastName: String)
 
 object Name {
 

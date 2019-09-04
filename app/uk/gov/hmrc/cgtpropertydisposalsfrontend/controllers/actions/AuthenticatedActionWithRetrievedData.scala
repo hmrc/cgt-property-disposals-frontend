@@ -21,11 +21,12 @@ import java.time.LocalDate
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.mvc._
-import play.api.mvc.Results.Ok
+import play.api.mvc.Results.SeeOther
 import uk.gov.hmrc.auth.core.retrieve.{~, Name => RetrievalName, _}
 import uk.gov.hmrc.auth.core.{ConfidenceLevel, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, Email, NINO, Name, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, Email, NINO, Name, SAUTR, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.toFuture
 import uk.gov.hmrc.http.HeaderCarrier
@@ -80,7 +81,7 @@ class AuthenticatedActionWithRetrievedData @Inject()(
         Right(AuthenticatedRequestWithRetrievedData(
           UserType.Individual(
           NINO(nino),
-          Name(name.forename, name.surname),
+          Name(name.firstName, name.lastName),
           DateOfBirth(dateOfBirth),
           maybeEmail.filter(_.nonEmpty).map(Email(_))
           ),
@@ -107,14 +108,15 @@ class AuthenticatedActionWithRetrievedData @Inject()(
           v2.Retrievals.itmpName and
           v2.Retrievals.name and
           v2.Retrievals.itmpDateOfBirth and
-          v2.Retrievals.email
+          v2.Retrievals.email and
+        v2.Retrievals.allEnrolments
       ) {
-        case cl ~ Some(AffinityGroup.Individual) ~ maybeNino ~ _ ~ _ ~ _ ~ _ if cl < ConfidenceLevel.L200 =>
+        case cl ~ Some(AffinityGroup.Individual) ~ maybeNino ~ _ ~ _ ~ _ ~ _ ~ _ if cl < ConfidenceLevel.L200 =>
           Right(AuthenticatedRequestWithRetrievedData(UserType.InsufficientConfidenceLevel(maybeNino.map(NINO)), request))
 
-        case individual @ _ ~ Some(AffinityGroup.Individual) ~ _ ~ _ ~ _ ~ _ ~ _ =>
+        case individual @ _ ~ Some(AffinityGroup.Individual) ~ _ ~ _ ~ _ ~ _ ~ _ ~ _ =>
           individual match {
-            case  _ ~ _ ~ Some(nino) ~ Some(itmpName) ~ _ ~ Some(dob) ~ maybeEmail =>
+            case  _ ~ _ ~ Some(nino) ~ Some(itmpName) ~ _ ~ Some(dob) ~ maybeEmail ~ _ =>
               makeAuthenticatedRequestWithRetrieval(
                 itmpNameToName,
                 nino,
@@ -123,7 +125,7 @@ class AuthenticatedActionWithRetrievedData @Inject()(
                 maybeEmail,
                 request
               )
-            case _ ~ _ ~ Some(nino) ~ None ~ Some(name) ~ Some(dob) ~ maybeEmail =>
+            case _ ~ _ ~ Some(nino) ~ None ~ Some(name) ~ Some(dob) ~ maybeEmail ~ _ =>
               makeAuthenticatedRequestWithRetrieval(
                 ggNameToName,
                 nino,
@@ -137,14 +139,36 @@ class AuthenticatedActionWithRetrievedData @Inject()(
               Left(errorHandler.errorResult()(request))
           }
 
-        case _ @  _ ~ Some(AffinityGroup.Organisation) ~ _ ~ _ ~ _ ~ _ ~ _ =>
-          Left(Ok("Placeholder: detected organisation affinity group. In future will check if this is a trust"))
+        case _ @  _ ~ Some(AffinityGroup.Organisation) ~ _ ~ _ ~ _ ~ _ ~ _ ~ enrolments =>
+          handleOrganisation(request, enrolments)
 
-
-        case _ @ _ ~ otherAffinityGroup ~ _ ~ _ ~ _ ~ _ ~ _ =>
+        case _ @ _ ~ otherAffinityGroup ~ _ ~ _ ~ _ ~ _ ~ _ ~ _ =>
           logger.warn(s"Got request for unsupported affinity group $otherAffinityGroup")
           Left(errorHandler.errorResult()(request))
 
       }
   }
+
+  private def handleOrganisation[A](request: MessagesRequest[A],
+                                    enrolments: Enrolments
+                                   ): Either[Result, AuthenticatedRequestWithRetrievedData[A]] =
+  // work out if it is an organisation or not
+    enrolments.getEnrolment("HMRC-TERS-ORG") match {
+      case None =>
+        Left(SeeOther(routes.RegisterTrustController.registerYourTrust().url))
+
+      case Some(trustEnrolment) =>
+        trustEnrolment.getIdentifier("SAUTR")
+          .fold[Either[Result, AuthenticatedRequestWithRetrievedData[A]]]{
+            logger.warn(
+              s"Could not find SAUTR identifier for user with trust enrolment $trustEnrolment. " +
+                s"Found identifier keys [${trustEnrolment.identifiers.map(_.key).mkString(",")}]"
+            )
+            Left(errorHandler.errorResult()(request))
+          }( id =>
+            Right(AuthenticatedRequestWithRetrievedData(UserType.Trust(SAUTR(id.value)), request))
+          )
+    }
+
+
 }

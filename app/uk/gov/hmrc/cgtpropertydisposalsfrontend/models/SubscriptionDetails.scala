@@ -17,17 +17,29 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import cats.data.NonEmptyList
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{Format, JsObject, JsResult, JsValue, Json}
 
 final case class SubscriptionDetails(
-  forename: String,
-  surname: String,
-  emailAddress: String,
-  address: Address,
-  sapNumber: String
+                                      contactName: Either[TrustName,Name],
+                                      emailAddress: String,
+                                      address: Address,
+                                      sapNumber: String
 )
 
 object SubscriptionDetails {
+
+  implicit def eitherFormat[A, B](implicit aFormat: Format[A], bFormat: Format[B]): Format[Either[A, B]] =
+    new Format[Either[A, B]] {
+      override def reads(json: JsValue): JsResult[Either[A, B]] =
+        (json \ "l").validate[A].map[Either[A, B]](Left(_))
+          .orElse((json \ "r").validate[B].map(Right(_)))
+
+      override def writes(o: Either[A, B]): JsValue =
+        o.fold(
+          a ⇒ JsObject(Seq("l" → Json.toJson(a))),
+          b ⇒ JsObject(Seq("r" → Json.toJson(b)))
+        )
+    }
 
   implicit val format: Format[SubscriptionDetails] = Json.format
 
@@ -35,7 +47,7 @@ object SubscriptionDetails {
     bpr.emailAddress.orElse(maybeEmail.map(_.value))
       .fold[Either[NonEmptyList[MissingData], SubscriptionDetails]](
         Left(NonEmptyList.one(MissingData.Email))
-      )(email => Right(SubscriptionDetails(name.forename, name.surname, email, bpr.address, bpr.sapNumber)))
+      )(email => Right(SubscriptionDetails(Right(name), email, bpr.address, bpr.sapNumber)))
 
   sealed trait MissingData
 

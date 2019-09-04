@@ -47,7 +47,7 @@ dob.invalid=Enter a real date of birth
 
 subscription.caption=Create account
 subscription.title=Check your contact details
-subscription.lede={0} {1} these are the details we hold for you.
+subscription.lede={0} these are the details we hold for you.
 subscription.p=We’ll only use these if we need to contact you about your Capital Gains Tax. You’ll need to change them if they are wrong.
 subscription.cyaLabel.address=Home address
 subscription.cyaChange.address=your home address
@@ -94,4 +94,8 @@ subscribed.p1=Your Capital Gains Tax (CGT) on UK property disposals account has 
 subscribed.p2=Your account number is
 subscribed.buttonText=Start a new return
 subscribed.linkText=Go to your CGT on UK property account
+
+registerTrust.title=Register your trust
+registerTrust.p=To report and pay Capital Gains Tax on UK property disposals you will need to register your trust with HMRC.
+registerTrust.buttonText=Register your trust
 

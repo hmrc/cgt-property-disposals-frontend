@@ -19,11 +19,13 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.services
 import cats.data.EitherT
 import cats.instances.future._
 import java.time._
+
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsNumber, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Individual, Trust}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -36,19 +38,22 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
 
   val service = new BusinessPartnerRecordServiceImpl(mockConnector)
 
-  def mockGetBPR(nino: NINO, name: Name, dob: DateOfBirth)(response: Either[Error, HttpResponse]) =
+  def mockGetBPR(entity: Either[Trust,Individual])(response: Either[Error, HttpResponse]) =
     (mockConnector
-      .getBusinessPartnerRecord(_: NINO, _: Name, _: DateOfBirth)(_: HeaderCarrier))
-      .expects(nino, name, dob, *)
+      .getBusinessPartnerRecord(_: Either[Trust,Individual])(_: HeaderCarrier))
+      .expects(entity, *)
       .returning(EitherT.fromEither[Future](response))
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
+  val sautr                      = SAUTR("1234566789")
   val nino                       = NINO("AB123456C")
   val name                       = Name("forename", "surname")
   val dateOfBirth                = DateOfBirth(LocalDate.of(2000, 4, 10))
+  val individual                 = Individual(nino, name, dateOfBirth, None)
+  val trust                      = Trust(sautr)
   val address =
     Address.UkAddress("line1", Some("line2"), None, None, "postcode")
-  val bpr = BusinessPartnerRecord(Some("email"), address, "sap")
+  val bpr = BusinessPartnerRecord(Some("email"), address, "sap", Some("org"))
 
   "The BusinessPartnerRecordServiceImpl" when {
 
@@ -57,9 +62,9 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
       "return an error" when {
 
         def testError(response: => Either[Error, HttpResponse]) = {
-          mockGetBPR(nino, name, dateOfBirth)(response)
+          mockGetBPR(Right(individual))(response)
 
-          await(service.getBusinessPartnerRecord(nino, name, dateOfBirth).value).isLeft shouldBe true
+          await(service.getBusinessPartnerRecord(Right(individual)).value).isLeft shouldBe true
         }
 
         "the connector fails to make the call" in {
@@ -83,9 +88,9 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
       }
       "return the bpr when the http response comes back with status 200 and " +
         "the json body returns a bpr with a matching dob" in {
-        mockGetBPR(nino, name, dateOfBirth)(Right(HttpResponse(200, Some(Json.toJson(bpr)))))
+        mockGetBPR(Left(trust))(Right(HttpResponse(200, Some(Json.toJson(bpr)))))
 
-        await(service.getBusinessPartnerRecord(nino, name, dateOfBirth).value) shouldBe Right(bpr)
+        await(service.getBusinessPartnerRecord(Left(trust)).value) shouldBe Right(bpr)
       }
 
     }

@@ -21,10 +21,10 @@ import play.api.Configuration
 import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.{EmptyRetrieval, ItmpName, Retrieval, ~}
-import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, ConfidenceLevel}
+import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, ConfidenceLevel, Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.AuthenticatedActionWithRetrievedData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Name
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Name, SAUTR}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -52,7 +52,8 @@ trait AuthSupport {
 
   val expectedRetrievals =
     Retrievals.confidenceLevel and Retrievals.affinityGroup and Retrievals.nino and
-      Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth and Retrievals.email
+      Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth and
+      Retrievals.email and Retrievals.allEnrolments
 
   def mockAuthWithAllRetrievals(
     retrievedConfidenceLevel: ConfidenceLevel,
@@ -60,20 +61,21 @@ trait AuthSupport {
     retrievedNino: Option[String],
     retrievedName: Option[Name],
     retrievedDateOfBirth: Option[LocalDate],
-    retrievedEmail: Option[String]): Unit =
+    retrievedEmail: Option[String],
+    retrievedEnrolments: Set[Enrolment]): Unit =
     mockAuth(EmptyPredicate, expectedRetrievals)(
       Future successful (
         new ~(retrievedConfidenceLevel, retrievedAffinityGroup) and
           retrievedNino and
-          retrievedName.map(name => ItmpName(Some(name.forename), None, Some(name.surname))) and
+          retrievedName.map(name => ItmpName(Some(name.firstName), None, Some(name.lastName))) and
           None and
           retrievedDateOfBirth and
-          retrievedEmail
+          retrievedEmail and
+          Enrolments(retrievedEnrolments)
         )
     )
 
-  def mockAuthWithCl200AndWithAllRetrievals(
-                                             retrievedAffinityGroup: AffinityGroup,
+  def mockAuthWithCl200AndWithAllIndividualRetrievals(
                                              retrievedNino: String,
                                              retrievedName: Name,
                                              retrievedDateOfBirth: LocalDate,
@@ -81,10 +83,23 @@ trait AuthSupport {
                                            ): Unit =
     mockAuthWithAllRetrievals(
       ConfidenceLevel.L200,
-      Some(retrievedAffinityGroup),
+      Some(AffinityGroup.Individual),
       Some(retrievedNino),
       Some(retrievedName),
       Some(retrievedDateOfBirth),
-      retrievedEmail
+      retrievedEmail,
+      Set.empty
     )
+
+  def mockAuthWithCl200AndWithAllTrustRetrievals(sautr: SAUTR): Unit =
+    mockAuthWithAllRetrievals(
+      ConfidenceLevel.L200,
+      Some(AffinityGroup.Organisation),
+      None,
+      None,
+      None,
+      None,
+      Set(Enrolment("HMRC-TERS-ORG", Seq(EnrolmentIdentifier("SAUTR", sautr.value)), ""))
+    )
+
 }

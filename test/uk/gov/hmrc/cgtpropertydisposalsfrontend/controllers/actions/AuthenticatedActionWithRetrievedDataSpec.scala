@@ -33,9 +33,9 @@ import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.{ItmpName, ~, Name => GGName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RetrievalOps
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{RetrievalOps, routes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, Email, NINO, Name, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, Email, NINO, Name, SAUTR, UserType}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -48,6 +48,7 @@ class AuthenticatedActionWithRetrievedDataSpec
       new AuthenticatedActionWithRetrievedData(mockAuthConnector, config, instanceOf[ErrorHandler], mockSessionStore)
 
     implicit val ninoFormat: OFormat[NINO] = Json.format[NINO]
+    implicit val sautrFormat: OFormat[SAUTR] = Json.format[SAUTR]
     implicit val userTypeFormat: OFormat[UserType] = derived.oformat[UserType]
 
     def performAction[A](r: FakeRequest[A]): Future[Result] = {
@@ -61,7 +62,10 @@ class AuthenticatedActionWithRetrievedDataSpec
 
   val retrievals =
     Retrievals.confidenceLevel and Retrievals.affinityGroup and Retrievals.nino and
-      Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth and Retrievals.email
+      Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth and Retrievals.email and
+      Retrievals.allEnrolments
+
+  val emptyEnrolments = Enrolments(Set.empty)
 
   "AuthenticatedActionWithRetrievedData" when {
 
@@ -98,7 +102,8 @@ class AuthenticatedActionWithRetrievedDataSpec
         ).foreach{ affinityGroup =>
           withClue(s"For affinity group $affinityGroup: "){
             val retrievalsResult = Future successful (
-              new ~(ConfidenceLevel.L50, affinityGroup) and None and None and None and None and None
+              new ~(ConfidenceLevel.L50, affinityGroup) and
+                None and None and None and None and None and emptyEnrolments
               )
 
             mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
@@ -114,17 +119,62 @@ class AuthenticatedActionWithRetrievedDataSpec
 
     "handling organisations" must {
 
-      "show a placeholder page" in {
+      "redirect to the register trust page" when {
 
-        val retrievalsResult = Future successful (
-          new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation)) and None and None and None and None and None
+        "the organisation does not have a trust enrolment" in {
+          val retrievalsResult = Future successful (
+            new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation))
+              and None and None and None and None and None and emptyEnrolments
+            )
+
+          mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+
+          val result  = performAction(FakeRequest())
+          checkIsRedirect(result, routes.RegisterTrustController.registerYourTrust())
+        }
+
+      }
+
+      "show an error page" when {
+
+        "the organisation has a trust enrolment but a SAUTR cannot be found" in {
+          val trustEnrolment = Enrolment("HMRC-TERS-ORG")
+          val retrievalsResult = Future successful (
+            new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation))
+          and None and None and None and None and None and Enrolments(Set(trustEnrolment))
           )
 
-        mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+          mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
 
-        val result  = performAction(FakeRequest())
-        status(result) shouldBe OK
-        contentAsString(result) shouldBe "Placeholder: detected organisation affinity group. In future will check if this is a trust"
+          val result  = performAction(FakeRequest())
+          checkIsTechnicalErrorPage(result)
+        }
+
+      }
+
+      "effect the request action" when {
+
+        "the organisation has a trust enrolment and a SAUTR can be found" in {
+          val sautr = SAUTR("123456")
+          val trustEnrolment =
+            Enrolment(
+            "HMRC-TERS-ORG",
+              Seq(EnrolmentIdentifier("SAUTR", sautr.value)),
+              "state"
+            )
+
+          val retrievalsResult = Future successful (
+            new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation))
+              and None and None and None and None and None and Enrolments(Set(trustEnrolment))
+            )
+
+          mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+
+          val result  = performAction(FakeRequest())
+          status(result) shouldBe OK
+          contentAsJson(result) shouldBe Json.toJson(UserType.Trust(sautr))
+        }
+
       }
 
 
@@ -140,7 +190,8 @@ class AuthenticatedActionWithRetrievedDataSpec
           Some(ItmpName(Some("givenName"), Some("middleName"), Some("familyName"))) and
           Some(GGName(Some("forename"), Some("surname"))) and
           Some(new JodaLocalDate(2000, 4, 10)) and
-          Some("email")
+          Some("email") and
+          emptyEnrolments
         )
 
       val expectedRetrieval =
@@ -166,7 +217,8 @@ class AuthenticatedActionWithRetrievedDataSpec
           Some(ItmpName(Some("givenName"), Some("middleName"), Some("familyName"))) and
           Some(GGName(Some("forename"), Some("surname"))) and
           Some(new JodaLocalDate(2000, 4, 10)) and
-          Some("")
+          Some("") and
+          emptyEnrolments
         )
 
       val expectedRetrieval =
@@ -193,7 +245,8 @@ class AuthenticatedActionWithRetrievedDataSpec
           Some(ItmpName(None, Some("middleName"), Some("familyName"))) and
           None and
           Some(new JodaLocalDate(2000, 4, 10)) and
-          Some("email")
+          Some("email") and
+          emptyEnrolments
         )
       "show an error" in {
         mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
@@ -210,7 +263,8 @@ class AuthenticatedActionWithRetrievedDataSpec
           None and
           Some(GGName(Some("first-name second-name"), None)) and
           Some(new JodaLocalDate(2000, 4, 10)) and
-          None
+          None and
+          emptyEnrolments
         )
       val expectedRetrieval =
         UserType.Individual(
@@ -236,7 +290,8 @@ class AuthenticatedActionWithRetrievedDataSpec
           None and
           Some(GGName(Some("first-name second-name third-name"), None)) and
           Some(new JodaLocalDate(2000, 4, 10)) and
-          Some("email")
+          Some("email") and
+          emptyEnrolments
         )
 
       val expectedRetrieval =
@@ -263,7 +318,8 @@ class AuthenticatedActionWithRetrievedDataSpec
           None and
           Some(GGName(ggName, None)) and
           Some(new JodaLocalDate(2000, 4, 10)) and
-          Some("email")
+          Some("email") and
+          emptyEnrolments
         )
 
       "show an error" in {
@@ -289,7 +345,8 @@ class AuthenticatedActionWithRetrievedDataSpec
           None and
           None and
           Some(new JodaLocalDate(2000, 4, 10)) and
-          None
+          None and
+          emptyEnrolments
         )
 
       "show an error" in {
@@ -313,7 +370,7 @@ class AuthenticatedActionWithRetrievedDataSpec
             withClue(s"For confidence level $cl "){
               val retrievalsResult = Future successful (
                 new ~(cl, Some(AffinityGroup.Individual)) and mayBeNino.map(_.value) and
-                  None and None and None and None
+                  None and None and None and None and emptyEnrolments
                 )
 
               mockAuth(EmptyPredicate, retrievals)(retrievalsResult)

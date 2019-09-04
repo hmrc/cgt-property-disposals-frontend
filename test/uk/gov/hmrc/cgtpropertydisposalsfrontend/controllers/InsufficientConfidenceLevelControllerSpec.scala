@@ -116,7 +116,7 @@ class InsufficientConfidenceLevelControllerSpec
         "the session indicates that the user does not have sufficient confidence level" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(InsufficientConfidenceLevel)))))
+            mockGetSession(Future.successful(Right(Some(session(IndividualInsufficientConfidenceLevel)))))
           }
 
           val result = performAction()
@@ -141,7 +141,7 @@ class InsufficientConfidenceLevelControllerSpec
         "no data has been submitted" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(InsufficientConfidenceLevel)))))
+            mockGetSession(Future.successful(Right(Some(session(IndividualInsufficientConfidenceLevel)))))
           }
 
           val result = performAction()
@@ -152,7 +152,7 @@ class InsufficientConfidenceLevelControllerSpec
         "the submitted data cannot be parsed" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(InsufficientConfidenceLevel)))))
+            mockGetSession(Future.successful(Right(Some(session(IndividualInsufficientConfidenceLevel)))))
           }
 
           val result = performAction("hasNino" -> "blah")
@@ -167,7 +167,7 @@ class InsufficientConfidenceLevelControllerSpec
         "the user indicates that they do have a NINO" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(InsufficientConfidenceLevel)))))
+            mockGetSession(Future.successful(Right(Some(session(IndividualInsufficientConfidenceLevel)))))
           }
 
           val result = performAction("hasNino" -> "true")
@@ -189,7 +189,7 @@ class InsufficientConfidenceLevelControllerSpec
 
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(InsufficientConfidenceLevel)))))
+            mockGetSession(Future.successful(Right(Some(session(IndividualInsufficientConfidenceLevel)))))
           }
 
           val result = controller.doYouHaveNINOSubmit()(FakeRequest().withFormUrlEncodedBody("hasNino" -> "true").withCSRFToken)
@@ -204,7 +204,7 @@ class InsufficientConfidenceLevelControllerSpec
         "the user indicates that they do not have a NINO" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(InsufficientConfidenceLevel)))))
+            mockGetSession(Future.successful(Right(Some(session(IndividualInsufficientConfidenceLevel)))))
           }
 
           val result = performAction("hasNino" -> "false")

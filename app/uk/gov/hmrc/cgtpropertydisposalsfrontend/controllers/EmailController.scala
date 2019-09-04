@@ -28,7 +28,7 @@ import play.api.mvc.Results.SeeOther
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, RequestWithSessionDataAndRetrievedData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{InsufficientConfidenceLevel, SubscriptionComplete, SubscriptionMissingData, SubscriptionReady}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{IndividualInsufficientConfidenceLevel, SubscriptionComplete, SubscriptionMissingData, SubscriptionReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Individual
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -103,8 +103,8 @@ class EmailController @Inject()(
 
                 val name =
                   subscriptionStatus.fold(
-                    s => s.name,
-                    s => Name(s.subscriptionDetails.forename, s.subscriptionDetails.surname)
+                    s => Right(s.name),
+                    s => s.subscriptionDetails.contactName
                   )
 
                 val result = for {
