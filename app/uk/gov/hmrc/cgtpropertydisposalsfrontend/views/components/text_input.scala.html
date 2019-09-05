@@ -22,16 +22,21 @@
   fieldId: String,
   label: Html,
   value: String,
-  helpText: Option[Html],
+  helpText: Option[Html] = None,
   labelAsHeading: Boolean = false,
   errorKey: Option[String],
   hasErrors: Boolean,
   extraContent: Option[Html] = None,
-  inputType: Option[String] = Some("text")
+  inputType: Option[String] = Some("text"),
+  inputClass: Option[String] = None
 )(implicit messages: Messages)
 
 @classes = @{if(hasErrors) "form-group form-group-error" else "form-group" }
-@inputClasses = @{if(hasErrors) "form-control form-control-error" else "form-control" }
+@inputClasses = @{if(hasErrors) {
+  s"form-control form-control-error ${inputClass.getOrElse("")}"
+} else {
+  s"form-control ${inputClass.getOrElse("")}"
+}}
 @hintTextKey = @{s"${{fieldId}}-form-hint"}
 @extraContentKey = @{s"${{fieldId}}-extra-content"}
 @hintIdWithHintText = @{helpText.map(hintTextKey -> _)}

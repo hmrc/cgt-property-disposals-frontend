@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import cats.Eq
 import julienrf.json.derived
 import play.api.data.Form
-import play.api.data.Forms.{mapping, number}
+import play.api.data.Forms.{mapping, number, nonEmptyText, optional, text}
 import play.api.libs.json.OFormat
 
 sealed trait Address
@@ -60,6 +60,17 @@ object Address {
           .verifying("invalid", i => i >= 0 && i < addresses.size)
           .transform[Address](addresses.apply, addresses.indexOf(_))
       )(identity)(Some(_))
+    )
+
+  def ukAddressForm: Form[UkAddress] =
+    Form(
+      mapping(
+        "address-line1" -> nonEmptyText,
+        "address-line2" -> optional(text),
+        "address-line3" -> optional(text),
+        "address-line4" -> optional(text),
+        "postcode" -> nonEmptyText
+      )(UkAddress.apply)(UkAddress.unapply)
     )
 
 }

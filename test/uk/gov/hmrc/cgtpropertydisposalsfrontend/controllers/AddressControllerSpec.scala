@@ -27,9 +27,9 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.UkAddress
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{SubscriptionMissingData, SubscriptionReady}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AddressLookupResult, BusinessPartnerRecord, Error, NINO, Name, Postcode, SessionData, SubscriptionDetails, SubscriptionStatus, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AddressLookupRequest, AddressLookupResult, BusinessPartnerRecord, Error, NINO, Name, Postcode, SessionData, SubscriptionDetails, SubscriptionStatus, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AddressLookupService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -41,10 +41,10 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
 
   val mockService = mock[AddressLookupService]
 
-  def mockAddressLookup(expectedPostcode: Postcode)(result: Either[Error, AddressLookupResult]) =
+  def mockAddressLookup(expectedPostcode: Postcode, filter: Option[String] = None)(result: Either[Error, AddressLookupResult]) =
     (mockService
-      .lookupAddress(_: Postcode)(_: HeaderCarrier))
-      .expects(expectedPostcode, *)
+      .lookupAddress(_: Postcode, _: Option[String])(_: HeaderCarrier))
+      .expects(expectedPostcode, filter, *)
       .returning(EitherT.fromEither[Future](result))
 
   override val overrideBindings: List[GuiceableModule] =
@@ -62,17 +62,18 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
 
   val postcode = Postcode("AB1 2CD")
 
-  val subscriptionDetails = sample[SubscriptionDetails]
+  def address(i: Int) =
+    UkAddress(s"$i the Street", Some("The Town"), None, None, postcode.value)
+
+  val subscriptionDetails: SubscriptionDetails =
+    sample[SubscriptionDetails].copy(address = address(1))
 
   val (addressHead, addresses) = {
-    def address(i: Int) =
-      UkAddress(s"$i the Street", Some("The Town"), None, None, postcode.value)
-
     val head = address(1)
     head -> (head :: (2 to 5).map(address).toList)
   }
 
-  val addressLookupResult = AddressLookupResult(postcode, addresses)
+  val addressLookupResult = AddressLookupResult(postcode, None, addresses)
 
   def subscriptionDetailsBehavior(performAction: () => Future[Result]): Unit = {
     "redirect to the start endpoint" when {
@@ -138,6 +139,146 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
 
   "AddressController" when {
 
+    "handling requests to display the enter address page" must {
+
+      def performAction() = controller.enterAddress()(FakeRequest())
+
+      behave like subscriptionDetailsBehavior(performAction)
+
+      "display an error page" when {
+        "there is an error when clearing address lookup results in session" in {
+          val session = SessionData.empty.copy(
+            subscriptionStatus = Some(SubscriptionReady(subscriptionDetails)),
+            addressLookupResult = Some(addressLookupResult)
+          )
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(session))))
+            mockStoreSession(session.copy(
+              addressLookupResult = None
+            ))(Future(Left(Error(""))))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+
+        }
+        "there is a non-UK address in the session" in {
+          val nonUkAddress = NonUkAddress("some line 1", None, None, None, None, "NZ")
+          val session = SessionData.empty.copy(
+            subscriptionStatus = Some(SubscriptionReady(subscriptionDetails.copy(address = nonUkAddress)))
+          )
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(session))))
+          }
+          checkIsTechnicalErrorPage(performAction())
+        }
+      }
+
+      "display the enter address page" when {
+        "the address lookup results have been cleared from session" in {
+          val session = SessionData.empty.copy(
+            subscriptionStatus = Some(SubscriptionReady(subscriptionDetails)),
+            addressLookupResult = Some(addressLookupResult)
+          )
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(session))))
+            mockStoreSession(session.copy(
+              addressLookupResult = None
+            ))(Future(Right(())))
+          }
+
+          val result = performAction()
+          status(result) shouldBe OK
+          contentAsString(result) should include (message("address.uk.title"))
+        }
+        "there are no address lookup results to clear from session" in {
+          val session = SessionData.empty.copy(
+            subscriptionStatus = Some(SubscriptionReady(subscriptionDetails))
+          )
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(session))))
+          }
+
+          val result = performAction()
+          status(result) shouldBe OK
+          contentAsString(result) should include (message("address.uk.title"))
+        }
+      }
+
+    }
+
+    "handling submitted addresses from enter address page" must {
+
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.enterAddressSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
+
+      val existingSessionData =
+        SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(subscriptionDetails)))
+
+      behave like subscriptionDetailsBehavior(() => performAction())
+
+      "return a form error" when {
+        "address line 1 is empty" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(existingSessionData))))
+          }
+          val result = performAction("postcode" -> "W1A2HV")
+          status(result) shouldBe BAD_REQUEST
+          contentAsString(result) should include (message("address-line1.error.required"))
+        }
+        "address postcode is empty" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(existingSessionData))))
+          }
+          val result = performAction("address-line1" -> "Some street")
+          status(result) shouldBe BAD_REQUEST
+          contentAsString(result) should include (message("postcode.error.required"))
+        }
+      }
+      "display an error page" when {
+        "the address cannot be stored in the session" in {
+          val session = SessionData.empty.copy(
+            subscriptionStatus = Some(SubscriptionReady(subscriptionDetails))
+          )
+          val updatedSession = SessionData.empty.copy(
+            subscriptionStatus = Some(SubscriptionReady(subscriptionDetails.copy(
+              address = UkAddress("Test street", None, None, None, "W1A2HR")
+            )))
+          )
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(session))))
+            mockStoreSession(updatedSession)(Future(Left(Error(""))))
+          }
+          checkIsTechnicalErrorPage(performAction("address-line1" -> "Test street", "postcode" -> "W1A2HR"))
+        }
+      }
+      "redirect to check your details page" when {
+        "address has been stored in session" in {
+          val session = SessionData.empty.copy(
+            subscriptionStatus = Some(SubscriptionReady(subscriptionDetails))
+          )
+          val updatedSession = SessionData.empty.copy(
+            subscriptionStatus = Some(SubscriptionReady(subscriptionDetails.copy(
+              address = UkAddress("Some street", None, None, None, "W1A2HR")
+            )))
+          )
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(session))))
+            mockStoreSession(updatedSession)(Future.successful(Right(())))
+          }
+          val result = performAction("address-line1" -> "Some street", "postcode" -> "W1A2HR")
+          checkIsRedirect(result, routes.SubscriptionController.checkYourDetails())
+        }
+      }
+    }
+
     "handling requests to display the enter postcode page" must {
 
       def performAction() = controller.enterPostcode()(FakeRequest())
@@ -157,7 +298,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
         }
 
         "there is an address lookup result in session" in {
-          val addressLookupResult = AddressLookupResult(postcode, List.empty)
+          val addressLookupResult = AddressLookupResult(postcode, None, List.empty)
           val session = SessionData.empty.copy(
             subscriptionStatus  = Some(SubscriptionReady(subscriptionDetails)),
             addressLookupResult = Some(addressLookupResult)
@@ -272,7 +413,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
           withClue(s"For postcode '$postcode': ") {
             val formattedPostcode = Postcode(postcode.trim)
             val addressLookupResult =
-              AddressLookupResult(formattedPostcode, List())
+              AddressLookupResult(formattedPostcode, None, List())
 
             inSequence {
               mockAuthWithNoRetrievals()
@@ -347,24 +488,6 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
         val result = performAction()
         status(result)          shouldBe OK
         contentAsString(result) should include(message("address-select.title"))
-      }
-
-      "there is an address lookup result in session and an address has already been selected in session" in {
-        val session = SessionData.empty.copy(
-          subscriptionStatus  = Some(SubscriptionReady(subscriptionDetails.copy(address = addressHead))),
-          addressLookupResult = Some(addressLookupResult)
-        )
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(session))))
-        }
-
-        val result = performAction()
-        status(result) shouldBe OK
-        val content = contentAsString(result)
-        content should include(message("address-select.title"))
-        content should include("""checked="checked"""")
       }
 
     }

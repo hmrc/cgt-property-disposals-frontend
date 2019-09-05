@@ -16,7 +16,7 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Postcode
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AddressLookupRequest
 
 @this(
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -29,9 +29,10 @@
  backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@(form: Form[Postcode], backLink: Call)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[AddressLookupRequest], backLink: Call)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"postcode"}
+@postcodeFilterKey = @{"filter"}
 @title = @{messages("address.postcode.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @detailsContent = {
@@ -51,14 +52,26 @@
 
  @formWrapper(routes.AddressController.enterPostcodeSubmit(), 'novalidate -> "novalidate") {
    @textInput(
+    fieldId = postcodeFilterKey,
+    label = Html(messages("address.postcodeFilter.label")),
+    helpText = Some(Html(messages("address.postcodeFilter.helpText"))),
+    errorKey = form.error(postcodeFilterKey).map(e => e.message),
+    value = form.data.getOrElse(postcodeFilterKey, ""),
+    hasErrors = form.error(postcodeFilterKey).nonEmpty
+   )
+   @textInput(
     fieldId = key,
-    labelAsHeading = false,
     label = Html(messages("address.postcode.label")),
     helpText = Some(Html(messages("address.postcode.helpText"))),
     errorKey = form.error(key).map(e => e.message),
     value = form.data.getOrElse(key, ""),
-    hasErrors = hasErrors
+    hasErrors = hasErrors,
+     inputClass = Some("form-control-1-4")
    )
+
+   <p>
+     <a href="@{routes.AddressController.enterAddress().url}">@messages("address.manual.linkText")</a>
+   </p>
 
    @submitButton(messages("button.findAddress"))
  }

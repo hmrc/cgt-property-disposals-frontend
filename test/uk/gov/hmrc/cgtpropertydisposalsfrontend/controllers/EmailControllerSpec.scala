@@ -403,23 +403,30 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
         controller.checkYourInbox()(FakeRequest())
 
       "on the missing subscription details journey" must {
-        behave like commonCheckInboxBehaviour(SubscriptionMissingData(bpr, Right(name)))
+
+        behave like commonCheckInboxBehaviour(
+          SubscriptionMissingData(bpr, name),
+          routes.EmailController.enterEmail().url
+        )
       }
 
       "changing the email before subscription" must {
-        behave like commonCheckInboxBehaviour(SubscriptionReady(subscriptionDetails))
+        behave like commonCheckInboxBehaviour(
+          SubscriptionReady(subscriptionDetails),
+          routes.EmailController.changeEmail().url
+        )
       }
 
       "on any journey" must {
         behave like subscriptionDetailsBehavior(() => performAction())
       }
 
-      def commonCheckInboxBehaviour(subscriptionStatus: SubscriptionStatus): Unit = {
+      def commonCheckInboxBehaviour(subscriptionStatus: SubscriptionStatus, expectedBackLink: String): Unit = {
         val email             = Email("test@email.com")
         val id                = UUID.randomUUID()
         val emailToBeVerified = EmailToBeVerified(email, id, false)
         val sessionData = SessionData.empty.copy(
-          subscriptionStatus = Some(SubscriptionMissingData(bpr, Right(name))),
+          subscriptionStatus = Some(subscriptionStatus),
           emailToBeVerified  = Some(emailToBeVerified)
         )
 
@@ -444,8 +451,10 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           }
 
           val result = performAction()
+          val resultAsString = contentAsString(result)
           status(result)          shouldBe OK
-          contentAsString(result) should include(message("confirmEmail.title"))
+          resultAsString should include(message("confirmEmail.title"))
+          resultAsString should include(expectedBackLink)
         }
       }
 
