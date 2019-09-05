@@ -17,7 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import julienrf.json.derived
-import play.api.libs.json.OFormat
+import play.api.libs.json.{Format, JsDefined, JsNull, JsObject, JsResult, JsSuccess, JsUndefined, JsValue, Json, OFormat, OWrites, Reads, Writes}
 
 sealed trait SubscriptionStatus
 
@@ -25,12 +25,15 @@ object SubscriptionStatus {
 
   final case object OrganisationUnregisteredTrust extends SubscriptionStatus
 
-  final case object IndividualInsufficientConfidenceLevel extends SubscriptionStatus
+  final case class IndividualInsufficientConfidenceLevel(hasNino: Option[Boolean], hasSautr: Option[HasSAUTR]) extends SubscriptionStatus
 
+  // individual is missing data in order to continue on with subscription
   final case class SubscriptionMissingData(businessPartnerRecord: BusinessPartnerRecord, name: Name) extends SubscriptionStatus
 
+  // subscription details have been gathered and are ready to be used to subscribe
   final case class SubscriptionReady(subscriptionDetails: SubscriptionDetails) extends SubscriptionStatus
 
+  // subscription has been done successfully
   final case class SubscriptionComplete(
     subscriptionDetails: SubscriptionDetails,
     subscriptionResponse: SubscriptionResponse)

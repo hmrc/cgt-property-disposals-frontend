@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
+import org.scalacheck.ScalacheckShapeless._
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -122,7 +123,7 @@ class RegisterTrustControllerSpec extends ControllerSpec with AuthSupport with S
 
         "the session data indicates the user is an individual who has insufficient confidence level" in {
           val sessionData = SessionData.empty.copy(subscriptionStatus =
-            Some(IndividualInsufficientConfidenceLevel))
+            Some(IndividualInsufficientConfidenceLevel(None,None)))
 
           inSequence{
             mockAuthWithNoRetrievals()

@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import org.scalacheck.Arbitrary
+import play.api.libs.json.{Json, OFormat}
 
-import scala.reflect._
+final case class HasSAUTR(value: Option[SAUTR]) extends AnyVal
 
-package object models {
+object HasSAUTR {
 
-  def sample[A: ClassTag](implicit gen: Arbitrary[A]): A =
-    gen.arbitrary.sample.getOrElse(sys.error(s"Could not generate instance of ${classTag[A].runtimeClass.getSimpleName}"))
+  implicit val format: OFormat[HasSAUTR] = Json.format[HasSAUTR]
 
 }

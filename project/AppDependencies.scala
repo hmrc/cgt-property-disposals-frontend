@@ -13,7 +13,8 @@ object AppDependencies {
     "uk.gov.hmrc"             %% "mongo-caching"            % "6.6.0-play-26",
     "org.typelevel"           %% "cats-core"                % "1.6.1",
     "com.github.kxbmap"       %% "configs"                  % "0.4.4",
-    "org.julienrf"            %% "play-json-derived-codecs" % "3.3"
+    "org.julienrf"            %% "play-json-derived-codecs" % "3.3",
+    "uk.gov.hmrc"             %% "domain"                   % "5.6.0-play-26"
   )
 
   val test = Seq(
