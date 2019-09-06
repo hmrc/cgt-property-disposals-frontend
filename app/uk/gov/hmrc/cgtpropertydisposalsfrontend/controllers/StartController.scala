@@ -77,7 +77,7 @@ class StartController @Inject()(
       case (t: UserType.Trust, _) =>
         buildTrustSubscriptionData(t)
 
-      case (UserType.NonTrustOrgansation, _) | (_, Some(SubscriptionStatus.OrganisationUnregisteredTrust)) =>
+      case (UserType.OrganisationUnregisteredTrust, _) | (_, Some(SubscriptionStatus.OrganisationUnregisteredTrust)) =>
         handleNonTrustOrganisation()
     }
   }

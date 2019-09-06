@@ -155,7 +155,7 @@ class AuthenticatedActionWithRetrievedData @Inject()(
   // work out if it is an organisation or not
     enrolments.getEnrolment("HMRC-TERS-ORG") match {
       case None =>
-        Right(AuthenticatedRequestWithRetrievedData(UserType.NonTrustOrgansation, request))
+        Right(AuthenticatedRequestWithRetrievedData(UserType.OrganisationUnregisteredTrust, request))
 
       case Some(trustEnrolment) =>
         trustEnrolment.getIdentifier("SAUTR")

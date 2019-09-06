@@ -130,7 +130,7 @@ class AuthenticatedActionWithRetrievedDataSpec
           val result  = performAction(FakeRequest())
 
         status(result) shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(UserType.NonTrustOrgansation)
+        contentAsJson(result) shouldBe Json.toJson(UserType.OrganisationUnregisteredTrust)
       }
 
       "show an error page" when {
