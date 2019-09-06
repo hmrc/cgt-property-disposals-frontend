@@ -81,6 +81,51 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
       def performAction(rh: Request[AnyContent] = FakeRequest()): Future[Result] =
         controller.start()(rh)
 
+      "handling non trust organisations" must {
+
+        val nonTrustOrganisationSession =
+          SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.NonTrustOrganisation))
+
+        "show an error page" when {
+
+          "there is an error storing the session in mongo" in {
+
+            inSequence {
+              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Organisation), None, None, None, None, Set.empty)
+              mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+              mockStoreSession(nonTrustOrganisationSession)(Future.successful(Left(Error(""))))
+            }
+
+            checkIsTechnicalErrorPage(performAction(FakeRequest()))
+
+          }
+
+        }
+
+        "redirect to the register trust page" when {
+          "the session does not need updating" in {
+            inSequence {
+              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Organisation), None, None, None, None, Set.empty)
+              mockGetSession(Future.successful(Right(Some(nonTrustOrganisationSession))))
+            }
+
+            checkIsRedirect(performAction(FakeRequest()), routes.RegisterTrustController.registerYourTrust())
+          }
+
+          "the session data is updated when it is required" in {
+            inSequence {
+              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Organisation), None, None, None, None, Set.empty)
+              mockGetSession(Future.successful(Right(None)))
+              mockStoreSession(nonTrustOrganisationSession)(Future.successful(Right(())))
+
+            }
+
+            checkIsRedirect(performAction(FakeRequest()), routes.RegisterTrustController.registerYourTrust())          }
+        }
+
+
+      }
+
       "handling individual users with insufficient confidence level" must {
 
         "show an error" when {
@@ -97,15 +142,6 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             checkIsTechnicalErrorPage(performAction(request))
           }
 
-          "an individual user logs in but the session data indicates an organisation" in {
-            val request = FakeRequest("GET", "/uri")
-            inSequence {
-              mockAuthWithAllRetrievals(ConfidenceLevel.L200, Some(AffinityGroup.Individual), Some("nino"), Some(name), Some(retrievedDateOfBirth), None, Set.empty)
-              mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(subscriptionStatus = Some(OrganisationUnregisteredTrust))))))
-            }
-
-            checkIsTechnicalErrorPage(performAction(request))
-          }
         }
 
         "redirect to the IV journey" when {

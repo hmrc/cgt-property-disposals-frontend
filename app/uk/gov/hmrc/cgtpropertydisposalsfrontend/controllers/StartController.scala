@@ -77,12 +77,32 @@ class StartController @Inject()(
       case (t: UserType.Trust, _) =>
         buildTrustSubscriptionData(t)
 
-      case (_: Individual, Some(SubscriptionStatus.OrganisationUnregisteredTrust)) =>
-        logger.warn("Invalid state: logged in user was an individual but session data indicated an organisation")
-        errorHandler.errorResult()
-
+      case (UserType.NonTrustOrgansation, _) | (_, Some(SubscriptionStatus.NonTrustOrganisation)) =>
+        handleNonTrustOrganisation()
     }
   }
+
+  private def handleNonTrustOrganisation()(
+    implicit request: RequestWithSessionDataAndRetrievedData[_]
+  ): Future[Result] = {
+    lazy val redirectToRegisterTrustPage =
+      SeeOther(routes.RegisterTrustController.registerYourTrust().url)
+
+    if(request.sessionData.flatMap(_.subscriptionStatus).contains(SubscriptionStatus.NonTrustOrganisation)){
+      redirectToRegisterTrustPage
+    } else {
+      updateSession(sessionStore, request)(_.copy(subscriptionStatus = Some(SubscriptionStatus.NonTrustOrganisation)))
+        .map{
+          case Left(e) =>
+            logger.warn("Could not update session", e)
+            errorHandler.errorResult()
+
+          case Right(_) =>
+            redirectToRegisterTrustPage
+        }
+    }
+  }
+
 
   private def handleInsufficientConfidenceLevel(maybeNino: Option[NINO])(
     implicit request: RequestWithSessionDataAndRetrievedData[AnyContent]

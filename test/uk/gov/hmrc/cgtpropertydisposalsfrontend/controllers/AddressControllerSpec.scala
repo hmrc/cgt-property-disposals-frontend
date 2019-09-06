@@ -120,7 +120,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
     "redirect to the register your trust page" when {
 
       "the session data indicates the user is an organisation without a registered trust associated with it" in {
-        val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.OrganisationUnregisteredTrust))
+        val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.NonTrustOrganisation))
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(session))))

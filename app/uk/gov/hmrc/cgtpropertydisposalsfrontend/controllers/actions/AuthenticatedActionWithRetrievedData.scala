@@ -26,6 +26,7 @@ import uk.gov.hmrc.auth.core.retrieve.{~, Name => RetrievalName, _}
 import uk.gov.hmrc.auth.core.{ConfidenceLevel, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.NonTrustOrganisation
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, Email, NINO, Name, SAUTR, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.toFuture
@@ -154,7 +155,7 @@ class AuthenticatedActionWithRetrievedData @Inject()(
   // work out if it is an organisation or not
     enrolments.getEnrolment("HMRC-TERS-ORG") match {
       case None =>
-        Left(SeeOther(routes.RegisterTrustController.registerYourTrust().url))
+        Right(AuthenticatedRequestWithRetrievedData(UserType.NonTrustOrgansation, request))
 
       case Some(trustEnrolment) =>
         trustEnrolment.getIdentifier("SAUTR")

@@ -17,13 +17,13 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import julienrf.json.derived
-import play.api.libs.json.{Format, JsDefined, JsNull, JsObject, JsResult, JsSuccess, JsUndefined, JsValue, Json, OFormat, OWrites, Reads, Writes}
+import play.api.libs.json.OFormat
 
 sealed trait SubscriptionStatus
 
 object SubscriptionStatus {
 
-  final case object OrganisationUnregisteredTrust extends SubscriptionStatus
+  final case object NonTrustOrganisation extends SubscriptionStatus
 
   final case class IndividualInsufficientConfidenceLevel(hasNino: Option[Boolean], hasSautr: Option[HasSAUTR]) extends SubscriptionStatus
 

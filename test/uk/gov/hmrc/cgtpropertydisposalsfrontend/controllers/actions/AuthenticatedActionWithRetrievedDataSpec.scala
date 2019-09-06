@@ -119,9 +119,7 @@ class AuthenticatedActionWithRetrievedDataSpec
 
     "handling organisations" must {
 
-      "redirect to the register trust page" when {
-
-        "the organisation does not have a trust enrolment" in {
+      "indicate when the organisation does not have a trust enrolment" in {
           val retrievalsResult = Future successful (
             new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation))
               and None and None and None and None and None and emptyEnrolments
@@ -130,9 +128,9 @@ class AuthenticatedActionWithRetrievedDataSpec
           mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
 
           val result  = performAction(FakeRequest())
-          checkIsRedirect(result, routes.RegisterTrustController.registerYourTrust())
-        }
 
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe Json.toJson(UserType.NonTrustOrgansation)
       }
 
       "show an error page" when {
