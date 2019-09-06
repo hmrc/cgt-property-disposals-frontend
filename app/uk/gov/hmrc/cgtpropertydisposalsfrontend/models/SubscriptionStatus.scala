@@ -23,9 +23,9 @@ sealed trait SubscriptionStatus
 
 object SubscriptionStatus {
 
-  final case object NonTrustOrganisation extends SubscriptionStatus
+  final case object OrganisationUnregisteredTrust extends SubscriptionStatus
 
-  final case class IndividualInsufficientConfidenceLevel(hasNino: Option[Boolean], hasSautr: Option[HasSAUTR]) extends SubscriptionStatus
+  final case class IndividualWithInsufficientConfidenceLevel(hasNino: Option[Boolean], hasSautr: Option[HasSAUTR]) extends SubscriptionStatus
 
   // individual is missing data in order to continue on with subscription
   final case class SubscriptionMissingData(businessPartnerRecord: BusinessPartnerRecord, name: Name) extends SubscriptionStatus

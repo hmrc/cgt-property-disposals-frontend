@@ -20,7 +20,7 @@ import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.NonTrustOrganisation
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.OrganisationUnregisteredTrust
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
@@ -37,7 +37,7 @@ class RegisterTrustController @Inject()(
 
   def registerYourTrust(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
     request.sessionData.flatMap(_.subscriptionStatus) match {
-      case Some(NonTrustOrganisation) =>  Ok(registerYourTrustPage())
+      case Some(OrganisationUnregisteredTrust) =>  Ok(registerYourTrustPage())
       case other                      => defaultRedirect(other)
     }
   }

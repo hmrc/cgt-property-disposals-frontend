@@ -28,7 +28,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{HasSAUTR, SAUTR}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.IndividualInsufficientConfidenceLevel
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.IndividualWithInsufficientConfidenceLevel
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -64,15 +64,15 @@ class InsufficientConfidenceLevelController @Inject()(
   import InsufficientConfidenceLevelController._
 
   private def withInsufficientConfidenceLevelUser(
-    f: IndividualInsufficientConfidenceLevel => Future[Result])(implicit request: RequestWithSessionData[_]): Future[Result] =
+    f: IndividualWithInsufficientConfidenceLevel => Future[Result])(implicit request: RequestWithSessionData[_]): Future[Result] =
     request.sessionData.flatMap(_.subscriptionStatus) match {
-      case Some(i: IndividualInsufficientConfidenceLevel) => f(i)
+      case Some(i: IndividualWithInsufficientConfidenceLevel) => f(i)
       case other                             => defaultRedirect(other)
     }
 
 
   def doYouHaveNINO(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withInsufficientConfidenceLevelUser{ case IndividualInsufficientConfidenceLevel(hasNino, _) =>
+    withInsufficientConfidenceLevelUser{ case IndividualWithInsufficientConfidenceLevel(hasNino, _) =>
       val form = hasNino.fold(haveANinoForm)(haveANinoForm.fill)
       Ok(doYouHaveANinoPage(form))
     }
@@ -103,7 +103,7 @@ class InsufficientConfidenceLevelController @Inject()(
   }
 
   def doYouHaveAnSaUtr(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withInsufficientConfidenceLevelUser{ case IndividualInsufficientConfidenceLevel(hasNino, hasSaUtr) =>
+    withInsufficientConfidenceLevelUser{ case IndividualWithInsufficientConfidenceLevel(hasNino, hasSaUtr) =>
       hasNino.fold(
         SeeOther(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url)
       ){ _ =>

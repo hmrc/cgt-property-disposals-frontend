@@ -84,7 +84,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
       "handling non trust organisations" must {
 
         val nonTrustOrganisationSession =
-          SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.NonTrustOrganisation))
+          SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.OrganisationUnregisteredTrust))
 
         "show an error page" when {
 
@@ -136,7 +136,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             inSequence {
               mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), None, None, None, None, Set.empty)
               mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-              mockStoreSession(SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualInsufficientConfidenceLevel(None,None))))(Future.successful(Left(Error(""))))
+              mockStoreSession(SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None,None))))(Future.successful(Left(Error(""))))
             }
 
             checkIsTechnicalErrorPage(performAction(request))
@@ -186,7 +186,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             inSequence {
               mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), None, None, None, None, Set.empty)
               mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-              mockStoreSession(SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualInsufficientConfidenceLevel(None,None))))(Future.successful(Right(())))
+              mockStoreSession(SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None,None))))(Future.successful(Right(())))
             }
 
             checkIsRedirect(performAction(), routes.InsufficientConfidenceLevelController.doYouHaveNINO())
@@ -195,7 +195,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           "the session data indicates they do not have sufficient confidence level" in {
             inSequence {
               mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), None, None, None, None, Set.empty)
-              mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualInsufficientConfidenceLevel(None,None)))))))
+              mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None,None)))))))
             }
 
             checkIsRedirect(performAction(), routes.InsufficientConfidenceLevelController.doYouHaveNINO())

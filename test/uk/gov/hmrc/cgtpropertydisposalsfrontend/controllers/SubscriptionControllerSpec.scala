@@ -101,7 +101,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
       "redirect to the do you have a nino page" when {
 
         "the session data indicates the user does not have sufficient confidence level" in {
-          val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualInsufficientConfidenceLevel(None, None)))
+          val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None)))
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(session))))
@@ -178,7 +178,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
       "redirect to the do you have a nino page" when {
 
         "the session data indicates the user does not have sufficient confidence level" in {
-          val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualInsufficientConfidenceLevel(None, None)))
+          val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None)))
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(session))))
@@ -193,7 +193,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
       "redirect to the register your trust page" when {
 
         "the session data indicates the user is an organisation without a registered trust associated with it" in {
-          val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.NonTrustOrganisation))
+          val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.OrganisationUnregisteredTrust))
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(session))))
@@ -249,7 +249,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
       "redirect to the do you have a nino page" when {
 
         "the session data indicates the user does not have sufficient confidence level" in {
-          val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualInsufficientConfidenceLevel(None, None)))
+          val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None)))
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(session))))
@@ -264,7 +264,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
       "redirect to the register your trust page" when {
 
         "the session data indicates the user is an organisation without a registered trust associated with it" in {
-          val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.NonTrustOrganisation))
+          val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.OrganisationUnregisteredTrust))
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(session))))

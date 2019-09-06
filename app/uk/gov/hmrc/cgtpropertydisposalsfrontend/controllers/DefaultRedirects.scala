@@ -29,8 +29,8 @@ trait DefaultRedirects {
         case Some(_: SubscriptionMissingData)  => routes.StartController.start()
         case Some(_: SubscriptionReady)        => routes.SubscriptionController.checkYourDetails()
         case Some(_: SubscriptionComplete)     => routes.SubscriptionController.subscribed()
-        case Some(_: IndividualInsufficientConfidenceLevel) => routes.InsufficientConfidenceLevelController.doYouHaveNINO()
-        case Some(NonTrustOrganisation)  => routes.RegisterTrustController.registerYourTrust()
+        case Some(_: IndividualWithInsufficientConfidenceLevel) => routes.InsufficientConfidenceLevelController.doYouHaveNINO()
+        case Some(OrganisationUnregisteredTrust)  => routes.RegisterTrustController.registerYourTrust()
         case None                              => routes.StartController.start()
       }
 
