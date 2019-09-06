@@ -20,11 +20,11 @@ import java.time.LocalDate
 
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{JsNull, Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnectorImpl.BprRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Individual, Trust}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SubscriptionDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, NINO, SAUTR, SubscriptionDetails}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
@@ -50,7 +50,11 @@ class CGTPropertyDisposalsConnectorImpl @Inject()(http: HttpClient, servicesConf
 
   val baseUrl: String = servicesConfig.baseUrl("cgt-property-disposals") + "/cgt-property-disposals"
 
-  val bprBaseUrl: String = s"$baseUrl/business-partner-record"
+  def bprUrl(id: Either[SAUTR,NINO]): String =
+    id.fold(
+     sautr => s"$baseUrl/business-partner-record/sautr/${sautr.value}",
+     nino => s"$baseUrl/business-partner-record/nino/${nino.value}"
+    )
 
   val subscribeUrl: String = s"$baseUrl/subscribe"
 
@@ -59,8 +63,8 @@ class CGTPropertyDisposalsConnectorImpl @Inject()(http: HttpClient, servicesConf
   ): EitherT[Future, Error, HttpResponse] =
    EitherT[Future, Error, HttpResponse](
     entity.fold(
-      t => http.get(s"$bprBaseUrl/sautr/${t.sautr.value}"),
-      i => http.post(s"$bprBaseUrl/nino/${i.nino.value}", Json.toJson(BprRequest(i.name.firstName, i.name.lastName, i.dateOfBirth.value)))
+      t => http.post(bprUrl(Left(t.sautr)), JsNull),
+      i => http.post(bprUrl(i.id), Json.toJson(BprRequest(i.name.firstName, i.name.lastName, i.dateOfBirth.map(_.value))))
     )
       .map(Right(_))
       .recover { case e => Left(Error(e)) }
@@ -81,7 +85,7 @@ class CGTPropertyDisposalsConnectorImpl @Inject()(http: HttpClient, servicesConf
 
 object CGTPropertyDisposalsConnectorImpl {
 
-  final case class BprRequest(forename: String, surname: String, dateOfBirth: LocalDate)
+  final case class BprRequest(forename: String, surname: String, dateOfBirth: Option[LocalDate])
 
   object BprRequest {
 

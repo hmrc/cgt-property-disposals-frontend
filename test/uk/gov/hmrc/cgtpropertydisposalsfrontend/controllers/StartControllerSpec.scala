@@ -25,6 +25,7 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{AnyContent, Request, Result}
 import play.api.test.FakeRequest
+import uk.gov.hmrc.auth.core.ConfidenceLevel.L50
 import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, ConfidenceLevel}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus._
@@ -52,27 +53,27 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
   lazy val controller = instanceOf[StartController]
 
-  def mockGetBusinessPartnerRecord(entity: Either[Trust,Individual])(
+  def mockGetBusinessPartnerRecord(entity: Either[Trust, Individual])(
     result: Either[Error, BusinessPartnerRecord]
   ) =
     (mockService
-      .getBusinessPartnerRecord(_: Either[Trust,Individual])(_: HeaderCarrier))
+      .getBusinessPartnerRecord(_: Either[Trust, Individual])(_: HeaderCarrier))
       .expects(entity, *)
       .returning(EitherT.fromEither[Future](result))
 
-  val nino                 = NINO("AB123456C")
-  val name                 = Name("forename", "surname")
-  val trustName            = TrustName("trust")
+  val nino = NINO("AB123456C")
+  val name = Name("forename", "surname")
+  val trustName = TrustName("trust")
   val retrievedDateOfBirth = JodaLocalDate.parse("2000-04-10")
-  val dateOfBirth          = DateOfBirth(LocalDate.of(2000, 4, 10))
-  val emailAddress         = "email"
+  val dateOfBirth = DateOfBirth(LocalDate.of(2000, 4, 10))
+  val emailAddress = "email"
   val bpr = BusinessPartnerRecord(
     Some(emailAddress),
     UkAddress("line1", None, None, None, "postcode"),
     "sap",
     Some("org")
   )
-  val individual           = Individual(nino ,name, dateOfBirth, None)
+  val individual = Individual(Right(nino), name, Some(dateOfBirth), None)
 
   "The StartController" when {
 
@@ -97,7 +98,6 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             }
 
             checkIsTechnicalErrorPage(performAction(FakeRequest()))
-
           }
 
         }
@@ -120,89 +120,213 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
             }
 
-            checkIsRedirect(performAction(FakeRequest()), routes.RegisterTrustController.registerYourTrust())          }
+            checkIsRedirect(performAction(FakeRequest()), routes.RegisterTrustController.registerYourTrust())
+          }
         }
 
 
       }
 
-      "handling individual users with insufficient confidence level" must {
+      "handling individual users with insufficient confidence level" when {
 
-        "show an error" when {
+        "the session has not been updated to indicate so" must {
 
-          "the session cannot be updated when there is not a nino in the auth record" in {
-            val request = FakeRequest("GET", "/uri")
+          "show an error" when {
 
-            inSequence {
-              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), None, None, None, None, Set.empty)
-              mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-              mockStoreSession(SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None,None))))(Future.successful(Left(Error(""))))
+            "the session cannot be updated when there is not a nino in the auth record" in {
+              inSequence {
+                mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), None, Some(name), None, None, Set.empty)
+                mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+                mockStoreSession(SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, name, None))))(Future.successful(Left(Error(""))))
+              }
+
+              checkIsTechnicalErrorPage(performAction())
             }
 
-            checkIsTechnicalErrorPage(performAction(request))
+            "a name cannot be retrieved" in {
+              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), None, None, None, None, Set.empty)
+
+              checkIsTechnicalErrorPage(performAction())
+
+            }
+
+          }
+
+          "redirect to the IV journey" when {
+
+            "the user does not have sufficient confidence level and there is a NINO in the auth record" in {
+              val request = FakeRequest("GET", "/uri")
+
+              inSequence {
+                mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), Some("nino"), Some(name), None, None, Set.empty)
+                mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+              }
+
+              checkIsRedirectToIv(performAction(request), false)
+            }
+
+            "the user does not have sufficient confidence level and there is a NINO in the auth record and " +
+              "the application is configured to use absoluate URLs for IV" in new ControllerSpec {
+              override val overrideBindings =
+                List[GuiceableModule](
+                  bind[AuthConnector].toInstance(mockAuthConnector),
+                  bind[SessionStore].toInstance(mockSessionStore),
+                  bind[BusinessPartnerRecordService].toInstance(mockService)
+                )
+
+              override lazy val additionalConfig = ivConfig(useRelativeUrls = true)
+              val controller = instanceOf[StartController]
+              val request = FakeRequest("GET", "/uri")
+
+              inSequence {
+                mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), Some("nino"), Some(name), None, None, Set.empty)
+                mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+              }
+
+              checkIsRedirectToIv(controller.start()(request), true)
+            }
+
+          }
+
+          "redirect to the do you have a nino page" when {
+
+            "the user does not have sufficient confidence level and there is no NINO in the auth record" in {
+              inSequence {
+                mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), None, Some(name), None, None, Set.empty)
+                mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+                mockStoreSession(SessionData.empty.copy(subscriptionStatus = Some(
+                  SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, name, None)
+                )))(Future.successful(Right(())))
+              }
+
+              checkIsRedirect(performAction(), routes.InsufficientConfidenceLevelController.doYouHaveNINO())
+            }
+
+            "the session data indicates they do not have sufficient confidence level" in {
+              inSequence {
+                mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), None, Some(name), None, None, Set.empty)
+                mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(subscriptionStatus = Some(
+                  SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, name, None)
+                ))))))
+              }
+
+              checkIsRedirect(performAction(), routes.InsufficientConfidenceLevelController.doYouHaveNINO())
+            }
+
           }
 
         }
 
-        "redirect to the IV journey" when {
 
-          "the user does not have sufficient confidence level and there is a NINO in the auth record" in {
-            val request = FakeRequest("GET", "/uri")
+        "the session data has been updated to indicate so" when {
 
-            inSequence {
-              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), Some("nino"), None, None, None, Set.empty)
-              mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+          "the user has not indicated that they have an SA UTR" must {
+
+            "redirect to the do you have a nino page" in {
+
             }
 
-            checkIsRedirectToIv(performAction(request), false)
           }
 
-          "the user does not have sufficient confidence level and there is a NINO in the auth record and " +
-            "the application is configured to use absoluate URLs for IV" in new ControllerSpec  {
-            override val overrideBindings =
-              List[GuiceableModule](
-                bind[AuthConnector].toInstance(mockAuthConnector),
-                bind[SessionStore].toInstance(mockSessionStore),
-                bind[BusinessPartnerRecordService].toInstance(mockService)
-              )
+          "the user has indicated that they have an SA UTR" must {
 
-            override lazy val additionalConfig = ivConfig(useRelativeUrls = true)
-            val controller = instanceOf[StartController]
-            val request = FakeRequest("GET", "/uri")
+            val sautr = SAUTR("1234567890")
 
-            inSequence {
-              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), Some("nino"), None, None, None, Set.empty)
-              mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+            val email = Email("email")
+
+            def sessionData(email: Option[Email]) = SessionData.empty.copy(
+              subscriptionStatus = Some(
+                IndividualWithInsufficientConfidenceLevel(
+                  Some(false), Some(HasSAUTR(Some(sautr))), name, email))
+            )
+
+            def individual(email: Option[Email]) =
+              Individual(Left(sautr), name, None, email)
+
+            val individualSubscriptionDetails = SubscriptionDetails(Right(name), emailAddress, bpr.address, bpr.sapNumber)
+
+            "display an error page" when {
+              "the call to get the BPR fails" in {
+                inSequence {
+                  mockAuthWithAllRetrievals(L50, Some(AffinityGroup.Individual), None, Some(name), None, None, Set.empty)
+                  mockGetSession(Future.successful(Right(Some(sessionData(None)))))
+                  mockGetBusinessPartnerRecord(Right(individual(None)))(Left(Error("error")))
+                }
+                checkIsTechnicalErrorPage(performAction())
+              }
+
+              "the call to get BPR succeeds but it cannot be written to session" in {
+                val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(individualSubscriptionDetails)))
+
+                inSequence {
+                  mockAuthWithAllRetrievals(L50, Some(AffinityGroup.Individual), None, Some(name), None, None, Set.empty)
+                  mockGetSession(Future.successful(Right(Some(sessionData(None)))))
+                  mockGetBusinessPartnerRecord(Right(individual(None)))(Right(bpr))
+                  mockStoreSession(session)(Future.successful(Left(Error("Oh no!"))))
+                }
+
+                checkIsTechnicalErrorPage(performAction())
+              }
+
             }
 
-            checkIsRedirectToIv(controller.start()(request), true)
+            "redirect to check subscription details" when {
+
+              "it is successfully retrieved" in {
+                val session = SessionData.empty.copy(subscriptionStatus = Some(
+                  SubscriptionReady(individualSubscriptionDetails)
+                ))
+
+                inSequence {
+                  mockAuthWithAllRetrievals(L50, Some(AffinityGroup.Individual), None, Some(name), None, None, Set.empty)
+                  mockGetSession(Future.successful(Right(Some(sessionData(Some(email))))))
+                  mockGetBusinessPartnerRecord(Right(individual(Some(email))))(Right(bpr))
+                  mockStoreSession(session)(Future.successful(Right(())))
+                }
+
+                checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
+              }
+
+              "an email does not exist in the retrieved BPR but one has been retrieved in the auth record" in {
+                val bprWithNoEmail = bpr.copy(emailAddress = None)
+                val ggEmail = Email("gg-email")
+                val updatedSession = SessionData.empty.copy(subscriptionStatus = Some(
+                  SubscriptionReady(individualSubscriptionDetails.copy(emailAddress = ggEmail.value))
+                ))
+
+                inSequence {
+                  mockAuthWithAllRetrievals(L50, Some(AffinityGroup.Individual), None, Some(name), None, None, Set.empty)
+                  mockGetSession(Future.successful(Right(Some(sessionData(Some(ggEmail))))))
+                  mockGetBusinessPartnerRecord(Right(individual(Some(ggEmail))))(Right(bprWithNoEmail))
+                  mockStoreSession(updatedSession)(Future.successful(Right(())))
+                }
+
+                checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
+              }
+
+            }
+
+            "redirect to enter email" when {
+
+              "there is no email in the BPR or the auth record" in {
+                val bprWithNoEmail = bpr.copy(emailAddress = None)
+                val updatedSession =
+                  SessionData.empty.copy(subscriptionStatus = Some(SubscriptionMissingData(bprWithNoEmail, name)))
+
+                inSequence {
+                  mockAuthWithAllRetrievals(L50, Some(AffinityGroup.Individual), None, Some(name), None, None, Set.empty)
+                  mockGetSession(Future.successful(Right(Some(sessionData(None)))))
+                  mockGetBusinessPartnerRecord(Right(individual(None)))(Right(bprWithNoEmail))
+                  mockStoreSession(updatedSession)(Future.successful(Right(())))
+                }
+
+                checkIsRedirect(performAction(), routes.EmailController.enterEmail().url)
+              }
+
+            }
           }
 
         }
-
-        "redirect to the do you have a nino page" when {
-
-          "the user does not have sufficient confidence level and there is no NINO in the auth record" in {
-            inSequence {
-              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), None, None, None, None, Set.empty)
-              mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-              mockStoreSession(SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None,None))))(Future.successful(Right(())))
-            }
-
-            checkIsRedirect(performAction(), routes.InsufficientConfidenceLevelController.doYouHaveNINO())
-          }
-
-          "the session data indicates they do not have sufficient confidence level" in {
-            inSequence {
-              mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), None, None, None, None, Set.empty)
-              mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None,None)))))))
-            }
-
-            checkIsRedirect(performAction(), routes.InsufficientConfidenceLevelController.doYouHaveNINO())
-          }
-
-        }
-
 
       }
 
@@ -349,7 +473,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           val trustName = TrustName("trustname")
           val address = UkAddress("line 1", None, None, None, "postcode")
           val sapNumber = "sap"
-          val bpr = BusinessPartnerRecord(Some(emailAddress), address ,sapNumber, Some(trustName.value))
+          val bpr = BusinessPartnerRecord(Some(emailAddress), address, sapNumber, Some(trustName.value))
           val trustSubscriptionDetails = SubscriptionDetails(Left(trustName), emailAddress, bpr.address, bpr.sapNumber)
 
           "redirect to check subscription details" when {
@@ -462,5 +586,5 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
     }
 
   }
-
 }
+

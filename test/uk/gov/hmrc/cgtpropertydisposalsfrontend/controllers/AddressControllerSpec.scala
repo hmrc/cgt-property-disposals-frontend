@@ -105,7 +105,10 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
     "redirect to the do you have a nino page" when {
 
       "the session data indicates the user does not have sufficient confidence level" in {
-        val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None)))
+        val session = SessionData.empty.copy(subscriptionStatus = Some(
+          SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, name, None)
+        ))
+
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(session))))

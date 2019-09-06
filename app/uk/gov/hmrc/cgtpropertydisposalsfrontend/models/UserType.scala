@@ -21,9 +21,9 @@ sealed trait UserType
 object UserType {
 
   final case class Individual(
-                               nino: NINO,
+                               id: Either[SAUTR,NINO],
                                name: Name,
-                               dateOfBirth: DateOfBirth,
+                               dateOfBirth: Option[DateOfBirth],
                                email: Option[Email]
                              ) extends UserType
 
@@ -31,6 +31,9 @@ object UserType {
 
   final case object OrganisationUnregisteredTrust extends UserType
 
-  final case class InsufficientConfidenceLevel(nino: Option[NINO]) extends UserType
+  final case class InsufficientConfidenceLevel(nino: Option[NINO],
+                                               name: Name,
+                                               email: Option[Email]
+                                              ) extends UserType
 
 }

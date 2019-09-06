@@ -123,7 +123,7 @@ class RegisterTrustControllerSpec extends ControllerSpec with AuthSupport with S
 
         "the session data indicates the user is an individual who has insufficient confidence level" in {
           val sessionData = SessionData.empty.copy(subscriptionStatus =
-            Some(IndividualWithInsufficientConfidenceLevel(None,None)))
+            Some(IndividualWithInsufficientConfidenceLevel(None,None, name, None)))
 
           inSequence{
             mockAuthWithNoRetrievals()

@@ -39,7 +39,7 @@ class RegistrationController @Inject()(
 
   def startRegistration(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
     request.sessionData.flatMap(_.subscriptionStatus) match {
-      case Some(IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)))) =>
+      case Some(IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)), _, _)) =>
         Ok(startRegistrationPage(routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()))
       case _ =>
         SeeOther(routes.StartController.start().url)

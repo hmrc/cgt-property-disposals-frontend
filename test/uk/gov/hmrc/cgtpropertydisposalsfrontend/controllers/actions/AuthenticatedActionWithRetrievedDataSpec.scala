@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
-import java.net.URLEncoder
 import java.time.LocalDate
 
 import julienrf.json.derived
@@ -36,6 +35,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{RetrievalOps, routes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, Email, NINO, Name, SAUTR, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherFormat.eitherFormat
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -194,9 +194,9 @@ class AuthenticatedActionWithRetrievedDataSpec
 
       val expectedRetrieval =
         UserType.Individual(
-          NINO("nino"),
+          Right(NINO("nino")),
           Name("givenName", "familyName"),
-          DateOfBirth(LocalDate.of(2000, 4, 10)),
+          Some(DateOfBirth(LocalDate.of(2000, 4, 10))),
           Some(Email("email")))
 
       "effect the requested action" in {
@@ -221,9 +221,9 @@ class AuthenticatedActionWithRetrievedDataSpec
 
       val expectedRetrieval =
         UserType.Individual(
-          NINO("nino"),
+          Right(NINO("nino")),
           Name("givenName", "familyName"),
-          DateOfBirth(LocalDate.of(2000, 4, 10)),
+          Some(DateOfBirth(LocalDate.of(2000, 4, 10))),
           None)
 
       "effect the requested action" in {
@@ -266,9 +266,9 @@ class AuthenticatedActionWithRetrievedDataSpec
         )
       val expectedRetrieval =
         UserType.Individual(
-          NINO("nino"),
+          Right(NINO("nino")),
           Name("first-name", "second-name"),
-          DateOfBirth(LocalDate.of(2000, 4, 10)),
+          Some(DateOfBirth(LocalDate.of(2000, 4, 10))),
           None)
 
       "effect the requested action" in {
@@ -294,9 +294,9 @@ class AuthenticatedActionWithRetrievedDataSpec
 
       val expectedRetrieval =
         UserType.Individual(
-          NINO("nino"),
+          Right(NINO("nino")),
           Name("first-name", "third-name"),
-          DateOfBirth(LocalDate.of(2000, 4, 10)),
+          Some(DateOfBirth(LocalDate.of(2000, 4, 10))),
           Some(Email("email")))
 
       "effect the requested action" in {
@@ -359,16 +359,19 @@ class AuthenticatedActionWithRetrievedDataSpec
 
       "the CL is less than 200" must {
 
+        import ConfidenceLevel._
+
         "indicate so in the result" in {
-          import ConfidenceLevel._
           for{
             cl        <- List[ConfidenceLevel](L0, L50, L100)
             mayBeNino <- List[Option[NINO]](Some(NINO("nino")), None)
           }{
             withClue(s"For confidence level $cl "){
               val retrievalsResult = Future successful (
-                new ~(cl, Some(AffinityGroup.Individual)) and mayBeNino.map(_.value) and
-                  None and None and None and None and emptyEnrolments
+                new ~(cl, Some(AffinityGroup.Individual)) and
+                  mayBeNino.map(_.value) and
+                  Some(ItmpName(Some("name"), None, Some("familyName"))) and
+                  None and None and Some("email") and emptyEnrolments
                 )
 
               mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
@@ -376,11 +379,49 @@ class AuthenticatedActionWithRetrievedDataSpec
               val result = performAction(FakeRequest())
               status(result) shouldBe OK
               contentAsJson(result) shouldBe Json.toJson(
-                UserType.InsufficientConfidenceLevel(mayBeNino)
+                UserType.InsufficientConfidenceLevel(mayBeNino, Name("name", "familyName"), Some(Email("email")))
               )
             }
           }
+
         }
+
+        "filter out empty emails" in {
+          val retrievalsResult = Future successful (
+            new ~(L50, Some(AffinityGroup.Individual)) and
+              None and
+              Some(ItmpName(Some("name"), None, Some("familyName"))) and
+              None and None and Some("") and emptyEnrolments
+            )
+
+          mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+
+          val result = performAction(FakeRequest())
+          status(result) shouldBe OK
+          contentAsJson(result) shouldBe Json.toJson(
+            UserType.InsufficientConfidenceLevel(None, Name("name", "familyName"), None)
+          )
+
+        }
+
+        "return an error" when {
+
+          "a name is not found" in {
+            val retrievalsResult = Future successful (
+              new ~(L50, Some(AffinityGroup.Individual)) and
+                Some("nino") and
+                None and
+                None and None and None and emptyEnrolments
+              )
+
+            mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+
+            val result = performAction(FakeRequest())
+            checkIsTechnicalErrorPage(result)
+          }
+
+        }
+
       }
     }
   }

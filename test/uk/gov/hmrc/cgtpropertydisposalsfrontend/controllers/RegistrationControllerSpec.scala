@@ -28,7 +28,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.IndividualWithInsufficientConfidenceLevel
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{HasSAUTR, SessionData, SubscriptionStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{HasSAUTR, Name, SessionData, SubscriptionStatus, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 
 import scala.concurrent.Future
@@ -48,6 +48,8 @@ class RegistrationControllerSpec
 
   implicit val subscriptionStatusEq: Eq[SubscriptionStatus] = Eq.fromUniversalEquals
 
+  val name = sample[Name]
+
   "RegistrationController" when {
 
     "handling requests to show the registration start page" must {
@@ -61,8 +63,8 @@ class RegistrationControllerSpec
           "they have indicated that they have no NINO or SA UTR" in {
           val sessionData =
             SessionData.empty.copy(subscriptionStatus = Some(
-              IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None))
-              )))
+              IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)), name, None))
+              )
 
           inSequence{
             mockAuthWithNoRetrievals()
@@ -80,10 +82,14 @@ class RegistrationControllerSpec
       "redirect to the start endpoint" when {
 
         "the session data indicates otherwise" in {
+          def isValidStatus(subscriptionStatus: SubscriptionStatus): Boolean = subscriptionStatus match {
+            case IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)), _, _) => true
+            case _ => false
+          }
+
           forAll { subscriptionStatus: SubscriptionStatus =>
-            whenever(subscriptionStatus =!= IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)))) {
-              val sessionData =
-                SessionData.empty.copy(subscriptionStatus = Some(subscriptionStatus))
+            whenever(!isValidStatus(subscriptionStatus)) {
+              val sessionData = SessionData.empty.copy(subscriptionStatus = Some(subscriptionStatus))
 
               inSequence {
                 mockAuthWithNoRetrievals()

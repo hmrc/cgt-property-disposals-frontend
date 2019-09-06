@@ -56,17 +56,21 @@ class StartController @Inject()(
     (request.authenticatedRequest.userType,
       request.sessionData.flatMap(_.subscriptionStatus)
     ) match {
-      case (_, Some(_: SubscriptionStatus.IndividualWithInsufficientConfidenceLevel)) =>
-        SeeOther(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url)
-
-      case (UserType.InsufficientConfidenceLevel(maybeNino), _) =>
-        handleInsufficientConfidenceLevel(maybeNino)
+      case (_, Some(i: SubscriptionStatus.IndividualWithInsufficientConfidenceLevel)) =>
+        i.hasSautr.flatMap(_.value).fold[Future[Result]](
+          SeeOther(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url)
+        )(sautr =>
+          buildIndividualSubscriptionData(Individual(Left(sautr), i.name, None, i.email), None)
+        )
 
       case (_, Some(_: SubscriptionReady))         =>
         SeeOther(routes.SubscriptionController.checkYourDetails().url)
 
-     case (_, Some(_: SubscriptionComplete))      =>
-        SeeOther(routes.SubscriptionController.subscribed().url)
+      case (_, Some(_: SubscriptionComplete))      =>
+      SeeOther(routes.SubscriptionController.subscribed().url)
+
+      case (UserType.InsufficientConfidenceLevel(maybeNino, name, maybeEmail), _) =>
+        handleInsufficientConfidenceLevel(maybeNino, name, maybeEmail)
 
       case (i: UserType.Individual, Some(SubscriptionMissingData(bpr, _))) =>
         buildIndividualSubscriptionData(i, Some(bpr))
@@ -104,11 +108,13 @@ class StartController @Inject()(
   }
 
 
-  private def handleInsufficientConfidenceLevel(maybeNino: Option[NINO])(
+  private def handleInsufficientConfidenceLevel(maybeNino: Option[NINO], name: Name, maybeEmail: Option[Email])(
     implicit request: RequestWithSessionDataAndRetrievedData[AnyContent]
   ): Future[Result] = maybeNino match {
     case None =>
-      updateSession(sessionStore, request)(_.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None))))
+      val subscriptionStatus =
+        SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, name, maybeEmail)
+      updateSession(sessionStore, request)(_.copy(subscriptionStatus = Some(subscriptionStatus)))
         .map{
           case Left(e) =>
           logger.warn("Could not update session with insufficient confidence level", e)

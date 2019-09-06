@@ -63,6 +63,8 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
       .expects(expectedSubscriptionDetails, *)
       .returning(EitherT(Future.successful(response)))
 
+  val name = sample[Name]
+
   "The SubscriptionController" when {
 
     "handling requests to check subscription details" must {
@@ -101,7 +103,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
       "redirect to the do you have a nino page" when {
 
         "the session data indicates the user does not have sufficient confidence level" in {
-          val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None)))
+          val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, name, None)))
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(session))))
@@ -178,7 +180,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
       "redirect to the do you have a nino page" when {
 
         "the session data indicates the user does not have sufficient confidence level" in {
-          val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None)))
+          val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, name, None)))
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(session))))
@@ -249,7 +251,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
       "redirect to the do you have a nino page" when {
 
         "the session data indicates the user does not have sufficient confidence level" in {
-          val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None)))
+          val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, name, None)))
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(session))))

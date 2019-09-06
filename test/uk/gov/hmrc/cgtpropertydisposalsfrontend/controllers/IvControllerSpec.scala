@@ -18,16 +18,14 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import java.util.UUID
 
-import org.joda.time.LocalDate
+import org.scalacheck.ScalacheckShapeless._
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.Result
 import play.api.test.FakeRequest
-import uk.gov.hmrc.auth.core.retrieve._
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.auth.core.{AuthConnector, ConfidenceLevel}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.IndividualWithInsufficientConfidenceLevel
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, Name, SessionData, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 
 import scala.concurrent.Future
@@ -41,6 +39,8 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
 
   lazy val controller = instanceOf[IvController]
 
+  val name = sample[Name]
+
   "IvController" when {
 
     "handling IV success request" must {
@@ -48,7 +48,7 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
       def performAction(): Future[Result] = controller.ivSuccess()(FakeRequest())
 
       val nonEmptySession =
-       SessionData.empty.copy(subscriptionStatus = Some(IndividualWithInsufficientConfidenceLevel(None, None)))
+       SessionData.empty.copy(subscriptionStatus = Some(IndividualWithInsufficientConfidenceLevel(None, None, name, None)))
 
       "clear the session and redirect to the start endpoint" in {
         inSequence {

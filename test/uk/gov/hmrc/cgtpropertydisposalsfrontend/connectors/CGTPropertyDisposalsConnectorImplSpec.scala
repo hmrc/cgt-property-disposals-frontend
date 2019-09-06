@@ -20,10 +20,9 @@ import com.typesafe.config.ConfigFactory
 import org.scalacheck.ScalacheckShapeless._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
-import play.api.libs.json.JsString
+import play.api.libs.json.{JsNull, JsString, Json}
 import play.api.test.Helpers._
 import play.api.{Configuration, Mode}
-import play.api.libs.json.Json
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnectorImpl.BprRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, NINO, Name, SAUTR, SubscriptionDetails, sample}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -65,8 +64,8 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
         val nino = NINO("AB123456C")
         val name = Name("forename", "surname")
         val dateOfBirth = DateOfBirth(LocalDate.of(2000, 4, 10))
-        val payload = Json.toJson(BprRequest(name.firstName, name.lastName, LocalDate.of(2000, 4, 10)))
-        val individual = Individual(nino, name, dateOfBirth, None)
+        val payload = Json.toJson(BprRequest(name.firstName, name.lastName, Some(dateOfBirth.value)))
+        val individual = Individual(Right(nino), name, Some(dateOfBirth), None)
 
         "do a POST http call and return the result" in {
           List(
@@ -100,19 +99,67 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
         }
       }
 
-      "handling organisations with SAUTRs" must {
-        val sautr = SAUTR("sautr")
-        val trust = Trust(sautr)
+      "handling individuals with SAUTRs" must {
 
-        "do a GET http call and return the result" in {
+        val sautr = SAUTR("1234567890")
+        val name = Name("forename", "surname")
+        val dateOfBirth = DateOfBirth(LocalDate.of(2000, 4, 10))
+        val payload = Json.toJson(BprRequest(name.firstName, name.lastName, Some(dateOfBirth.value)))
+        val individual = Individual(Left(sautr), name, Some(dateOfBirth), None)
+
+        "do a POST http call and return the result" in {
           List(
             HttpResponse(200),
             HttpResponse(200, Some(JsString("hi"))),
             HttpResponse(500)
           ).foreach { httpResponse =>
             withClue(s"For http response [${httpResponse.toString}]") {
-              mockGet(s"http://host:123/cgt-property-disposals/business-partner-record/sautr/${sautr.value}", Map.empty)(
-                Some(httpResponse))
+              mockPost(
+                s"http://host:123/cgt-property-disposals/business-partner-record/sautr/${sautr.value}",
+                Map.empty,
+                payload)(Some(httpResponse))
+
+              await(
+                connector
+                  .getBusinessPartnerRecord(Right(individual))
+                  .value) shouldBe Right(httpResponse)
+            }
+          }
+        }
+
+        "return an error" when {
+
+          "the future fails" in {
+            mockPost(
+              s"http://host:123/cgt-property-disposals/business-partner-record/sautr/${sautr.value}",
+              Map.empty,
+              payload)(None)
+
+            await(
+              connector
+                .getBusinessPartnerRecord(Right(individual))
+                .value).isLeft shouldBe true
+          }
+
+        }
+      }
+
+      "handling organisations with SAUTRs" must {
+        val sautr = SAUTR("sautr")
+        val trust = Trust(sautr)
+
+        "do a POST http call and return the result" in {
+          List(
+            HttpResponse(200),
+            HttpResponse(200, Some(JsString("hi"))),
+            HttpResponse(500)
+          ).foreach { httpResponse =>
+            withClue(s"For http response [${httpResponse.toString}]") {
+              mockPost(
+                s"http://host:123/cgt-property-disposals/business-partner-record/sautr/${sautr.value}",
+                Map.empty,
+                JsNull
+              )(Some(httpResponse))
 
               await(
                 connector
@@ -125,7 +172,11 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
         "return an error" when {
 
           "the future fails" in {
-            mockGet(s"http://host:123/cgt-property-disposals/business-partner-record/sautr/${sautr.value}", Map.empty)(None)
+            mockPost(
+              s"http://host:123/cgt-property-disposals/business-partner-record/sautr/${sautr.value}",
+              Map.empty,
+              JsNull
+            )(None)
 
             await(
               connector
