@@ -38,7 +38,7 @@ class RegisterTrustController @Inject()(
   def registerYourTrust(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
     request.sessionData.flatMap(_.subscriptionStatus) match {
       case Some(OrganisationUnregisteredTrust) =>  Ok(registerYourTrustPage())
-      case other                               => defaultRedirect(other)
+      case other                      => defaultRedirect(other)
     }
   }
 

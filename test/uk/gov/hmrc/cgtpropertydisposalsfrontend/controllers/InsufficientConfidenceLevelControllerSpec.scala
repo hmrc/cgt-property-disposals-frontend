@@ -118,7 +118,7 @@ class InsufficientConfidenceLevelControllerSpec
         "the session indicates that the user does not have sufficient confidence level" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualInsufficientConfidenceLevel(None, None))))))
+            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(None, None))))))
           }
 
           val result = performAction()
@@ -131,7 +131,7 @@ class InsufficientConfidenceLevelControllerSpec
           "has previously answered this question" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualInsufficientConfidenceLevel(Some(true), None))))))
+            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(Some(true), None))))))
           }
 
           val result = performAction()
@@ -157,7 +157,7 @@ class InsufficientConfidenceLevelControllerSpec
         "no data has been submitted" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualInsufficientConfidenceLevel(None, None))))))
+            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(None, None))))))
           }
 
           val result = performAction()
@@ -168,7 +168,7 @@ class InsufficientConfidenceLevelControllerSpec
         "the submitted data cannot be parsed" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualInsufficientConfidenceLevel(None, None))))))
+            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(None, None))))))
           }
 
           val result = performAction("hasNino" -> "blah")
@@ -183,8 +183,8 @@ class InsufficientConfidenceLevelControllerSpec
         "the user indicates that they do have a NINO" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualInsufficientConfidenceLevel(None, None))))))
-            mockStoreSession(session(IndividualInsufficientConfidenceLevel(Some(true), None)))(Future.successful(Right(())))
+            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(None, None))))))
+            mockStoreSession(session(IndividualWithInsufficientConfidenceLevel(Some(true), None)))(Future.successful(Right(())))
           }
 
           val result = performAction("hasNino" -> "true")
@@ -206,8 +206,8 @@ class InsufficientConfidenceLevelControllerSpec
 
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualInsufficientConfidenceLevel(None, None))))))
-            mockStoreSession(session(IndividualInsufficientConfidenceLevel(Some(true), None)))(Future.successful(Right(())))
+            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(None, None))))))
+            mockStoreSession(session(IndividualWithInsufficientConfidenceLevel(Some(true), None)))(Future.successful(Right(())))
           }
 
           val result = controller.doYouHaveNINOSubmit()(FakeRequest().withFormUrlEncodedBody("hasNino" -> "true").withCSRFToken)
@@ -222,8 +222,8 @@ class InsufficientConfidenceLevelControllerSpec
         "the user indicates that they do not have a NINO" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualInsufficientConfidenceLevel(Some(false), None))))))
-            mockStoreSession(session(IndividualInsufficientConfidenceLevel(Some(false), None)))(Future.successful(Right(())))
+            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(Some(false), None))))))
+            mockStoreSession(session(IndividualWithInsufficientConfidenceLevel(Some(false), None)))(Future.successful(Right(())))
           }
 
           val result = performAction("hasNino" -> "false")
@@ -247,7 +247,7 @@ class InsufficientConfidenceLevelControllerSpec
         "the session data indicates the user hasn't selected whether or not they have a NINO" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualInsufficientConfidenceLevel(None, None))))))
+            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(None, None))))))
           }
 
           checkIsRedirect(performAction(), routes.InsufficientConfidenceLevelController.doYouHaveNINO())
@@ -261,7 +261,7 @@ class InsufficientConfidenceLevelControllerSpec
           "has indicated that they do not have a NINO" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualInsufficientConfidenceLevel(Some(false), None))))))
+            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(Some(false), None))))))
           }
 
           val result = performAction()
@@ -276,7 +276,7 @@ class InsufficientConfidenceLevelControllerSpec
           val sautr = SAUTR("12345")
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(Some(sautr)))))))))
+            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(Some(sautr)))))))))
           }
 
           val result = performAction()
@@ -292,7 +292,7 @@ class InsufficientConfidenceLevelControllerSpec
           "do not have an SAUTR" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None))))))))
+            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None))))))))
           }
 
           val result = performAction()
@@ -318,7 +318,7 @@ class InsufficientConfidenceLevelControllerSpec
         "the session data indicates the user hasn't selected whether or not they have a NINO" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualInsufficientConfidenceLevel(None, None))))))
+            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(None, None))))))
           }
 
           checkIsRedirect(performAction(), routes.InsufficientConfidenceLevelController.doYouHaveNINO())
@@ -331,7 +331,7 @@ class InsufficientConfidenceLevelControllerSpec
         "the user did not select an option" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualInsufficientConfidenceLevel(Some(false), None))))))
+            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(Some(false), None))))))
           }
 
           val result = performAction()
@@ -342,7 +342,7 @@ class InsufficientConfidenceLevelControllerSpec
         "the SA UTR entered is not valid" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualInsufficientConfidenceLevel(Some(false), None))))))
+            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(Some(false), None))))))
           }
 
           val result = performAction("hasSaUtr" -> "true", "saUtr" -> "not-an-sautr")
@@ -353,7 +353,7 @@ class InsufficientConfidenceLevelControllerSpec
         "the user says they have an SAUTR but does not enter one" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualInsufficientConfidenceLevel(Some(false), None))))))
+            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(Some(false), None))))))
           }
 
           val result = performAction("hasSaUtr" -> "true")
@@ -372,8 +372,8 @@ class InsufficientConfidenceLevelControllerSpec
 
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualInsufficientConfidenceLevel(Some(false), None))))))
-            mockStoreSession(session(IndividualInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(Some(SAUTR(sautr.value)))))))(Future.successful(Right(())))
+            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(Some(false), None))))))
+            mockStoreSession(session(IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(Some(SAUTR(sautr.value)))))))(Future.successful(Right(())))
           }
 
           val result = performAction("hasSaUtr" -> "true", "saUtr" -> sautr.utr)
@@ -388,8 +388,8 @@ class InsufficientConfidenceLevelControllerSpec
         "the user indicates they do not have an SA UTR" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualInsufficientConfidenceLevel(Some(false), None))))))
-            mockStoreSession(session(IndividualInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)))))(Future.successful(Right(())))
+            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(Some(false), None))))))
+            mockStoreSession(session(IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)))))(Future.successful(Right(())))
           }
 
           val result = performAction("hasSaUtr" -> "false")

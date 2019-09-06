@@ -56,7 +56,7 @@ class StartController @Inject()(
     (request.authenticatedRequest.userType,
       request.sessionData.flatMap(_.subscriptionStatus)
     ) match {
-      case (_, Some(_: SubscriptionStatus.IndividualInsufficientConfidenceLevel)) =>
+      case (_, Some(_: SubscriptionStatus.IndividualWithInsufficientConfidenceLevel)) =>
         SeeOther(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url)
 
       case (UserType.InsufficientConfidenceLevel(maybeNino), _) =>
@@ -77,18 +77,38 @@ class StartController @Inject()(
       case (t: UserType.Trust, _) =>
         buildTrustSubscriptionData(t)
 
-      case (_: Individual, Some(SubscriptionStatus.OrganisationUnregisteredTrust)) =>
-        logger.warn("Invalid state: logged in user was an individual but session data indicated an organisation")
-        errorHandler.errorResult()
-
+      case (UserType.OrganisationUnregisteredTrust, _) | (_, Some(SubscriptionStatus.OrganisationUnregisteredTrust)) =>
+        handleNonTrustOrganisation()
     }
   }
+
+  private def handleNonTrustOrganisation()(
+    implicit request: RequestWithSessionDataAndRetrievedData[_]
+  ): Future[Result] = {
+    lazy val redirectToRegisterTrustPage =
+      SeeOther(routes.RegisterTrustController.registerYourTrust().url)
+
+    if(request.sessionData.flatMap(_.subscriptionStatus).contains(SubscriptionStatus.OrganisationUnregisteredTrust)){
+      redirectToRegisterTrustPage
+    } else {
+      updateSession(sessionStore, request)(_.copy(subscriptionStatus = Some(SubscriptionStatus.OrganisationUnregisteredTrust)))
+        .map{
+          case Left(e) =>
+            logger.warn("Could not update session", e)
+            errorHandler.errorResult()
+
+          case Right(_) =>
+            redirectToRegisterTrustPage
+        }
+    }
+  }
+
 
   private def handleInsufficientConfidenceLevel(maybeNino: Option[NINO])(
     implicit request: RequestWithSessionDataAndRetrievedData[AnyContent]
   ): Future[Result] = maybeNino match {
     case None =>
-      updateSession(sessionStore, request)(_.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualInsufficientConfidenceLevel(None, None))))
+      updateSession(sessionStore, request)(_.copy(subscriptionStatus = Some(SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None))))
         .map{
           case Left(e) =>
           logger.warn("Could not update session with insufficient confidence level", e)

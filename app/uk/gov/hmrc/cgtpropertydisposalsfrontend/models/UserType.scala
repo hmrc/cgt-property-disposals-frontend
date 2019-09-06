@@ -29,6 +29,8 @@ object UserType {
 
   final case class Trust(sautr: SAUTR) extends UserType
 
+  final case object OrganisationUnregisteredTrust extends UserType
+
   final case class InsufficientConfidenceLevel(nino: Option[NINO]) extends UserType
 
 }

@@ -27,7 +27,7 @@ import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.IndividualInsufficientConfidenceLevel
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.IndividualWithInsufficientConfidenceLevel
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{HasSAUTR, SessionData, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 
@@ -61,7 +61,7 @@ class RegistrationControllerSpec
           "they have indicated that they have no NINO or SA UTR" in {
           val sessionData =
             SessionData.empty.copy(subscriptionStatus = Some(
-              IndividualInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None))
+              IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None))
               )))
 
           inSequence{
@@ -81,7 +81,7 @@ class RegistrationControllerSpec
 
         "the session data indicates otherwise" in {
           forAll { subscriptionStatus: SubscriptionStatus =>
-            whenever(subscriptionStatus =!= IndividualInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)))) {
+            whenever(subscriptionStatus =!= IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)))) {
               val sessionData =
                 SessionData.empty.copy(subscriptionStatus = Some(subscriptionStatus))
 

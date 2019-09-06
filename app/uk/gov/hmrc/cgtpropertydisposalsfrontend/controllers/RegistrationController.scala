@@ -20,7 +20,7 @@ import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.IndividualInsufficientConfidenceLevel
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.IndividualWithInsufficientConfidenceLevel
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{HasSAUTR, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -39,7 +39,7 @@ class RegistrationController @Inject()(
 
   def startRegistration(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
     request.sessionData.flatMap(_.subscriptionStatus) match {
-      case Some(IndividualInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)))) =>
+      case Some(IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)))) =>
         Ok(startRegistrationPage(routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()))
       case _ =>
         SeeOther(routes.StartController.start().url)
