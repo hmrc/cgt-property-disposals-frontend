@@ -31,9 +31,10 @@ object UserType {
 
   final case object OrganisationUnregisteredTrust extends UserType
 
-  final case class InsufficientConfidenceLevel(nino: Option[NINO],
-                                               name: Name,
-                                               email: Option[Email]
-                                              ) extends UserType
+  final case class IndividualWithInsufficientConfidenceLevel(
+                                                              nino: Option[NINO],
+                                                              name: Name,
+                                                              email: Option[Email]
+                                                            ) extends UserType
 
 }

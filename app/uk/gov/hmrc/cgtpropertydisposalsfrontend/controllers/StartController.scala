@@ -69,7 +69,7 @@ class StartController @Inject()(
       case (_, Some(_: SubscriptionComplete))      =>
       SeeOther(routes.SubscriptionController.subscribed().url)
 
-      case (UserType.InsufficientConfidenceLevel(maybeNino, name, maybeEmail), _) =>
+      case (UserType.IndividualWithInsufficientConfidenceLevel(maybeNino, name, maybeEmail), _) =>
         handleInsufficientConfidenceLevel(maybeNino, name, maybeEmail)
 
       case (i: UserType.Individual, Some(SubscriptionMissingData(bpr, _))) =>

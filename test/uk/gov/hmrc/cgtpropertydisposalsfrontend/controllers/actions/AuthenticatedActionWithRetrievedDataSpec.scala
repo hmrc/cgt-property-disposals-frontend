@@ -379,7 +379,7 @@ class AuthenticatedActionWithRetrievedDataSpec
               val result = performAction(FakeRequest())
               status(result) shouldBe OK
               contentAsJson(result) shouldBe Json.toJson(
-                UserType.InsufficientConfidenceLevel(mayBeNino, Name("name", "familyName"), Some(Email("email")))
+                UserType.IndividualWithInsufficientConfidenceLevel(mayBeNino, Name("name", "familyName"), Some(Email("email")))
               )
             }
           }
@@ -399,7 +399,7 @@ class AuthenticatedActionWithRetrievedDataSpec
           val result = performAction(FakeRequest())
           status(result) shouldBe OK
           contentAsJson(result) shouldBe Json.toJson(
-            UserType.InsufficientConfidenceLevel(None, Name("name", "familyName"), None)
+            UserType.IndividualWithInsufficientConfidenceLevel(None, Name("name", "familyName"), None)
           )
 
         }

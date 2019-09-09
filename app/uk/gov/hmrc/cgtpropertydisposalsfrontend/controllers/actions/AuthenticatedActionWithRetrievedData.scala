@@ -69,7 +69,7 @@ class AuthenticatedActionWithRetrievedData @Inject()(
         case cl ~ Some(AffinityGroup.Individual) ~ maybeNino ~ maybeItmpName ~ maybeGGName ~ _ ~ maybeEmail ~ _ if cl < ConfidenceLevel.L200 =>
           withName(maybeItmpName, maybeGGName, request)(name =>
             Right(AuthenticatedRequestWithRetrievedData(
-              UserType.InsufficientConfidenceLevel(maybeNino.map(NINO),
+              UserType.IndividualWithInsufficientConfidenceLevel(maybeNino.map(NINO),
                 name,
                 maybeEmail.filter(_.nonEmpty).map(Email(_))
               ),
