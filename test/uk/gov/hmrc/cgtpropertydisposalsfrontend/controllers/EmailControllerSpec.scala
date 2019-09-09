@@ -163,7 +163,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
         behave like commonDisplayEmailBehaviour(
           performAction,
-          SubscriptionMissingData(bpr, name),
+          SubscriptionMissingData(bpr, Right(name)),
           "email.title"
         )
       }
@@ -232,7 +232,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
         behave like commonEmailSubmitBehaviour(
           performAction,
-          SubscriptionMissingData(bpr, name),
+          SubscriptionMissingData(bpr, Right(name)),
           Right(name),
           "email.title"
         )
@@ -403,7 +403,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
         controller.checkYourInbox()(FakeRequest())
 
       "on the missing subscription details journey" must {
-        behave like commonCheckInboxBehaviour(SubscriptionMissingData(bpr, name))
+        behave like commonCheckInboxBehaviour(SubscriptionMissingData(bpr, Right(name)))
       }
 
       "changing the email before subscription" must {
@@ -419,7 +419,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
         val id                = UUID.randomUUID()
         val emailToBeVerified = EmailToBeVerified(email, id, false)
         val sessionData = SessionData.empty.copy(
-          subscriptionStatus = Some(SubscriptionMissingData(bpr, name)),
+          subscriptionStatus = Some(SubscriptionMissingData(bpr, Right(name))),
           emailToBeVerified  = Some(emailToBeVerified)
         )
 
@@ -456,7 +456,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
       def performAction(id: UUID) = controller.verifyEmail(id)(FakeRequest())
 
       "on the missing subscription details journey" must {
-        val subscriptionStatus = SubscriptionMissingData(bpr, name)
+        val subscriptionStatus = SubscriptionMissingData(bpr, Right(name))
 
         behave like commonVerifyEmailBehaviour(
           subscriptionStatus,
@@ -567,7 +567,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
       def performAction() = controller.emailVerified()(FakeRequest())
 
       "on the missing subscription details journey" must {
-        behave like commonEmailVerifiedBehaviour(SubscriptionMissingData(bpr, name), routes.StartController.start().url)
+        behave like commonEmailVerifiedBehaviour(SubscriptionMissingData(bpr, Right(name)), routes.StartController.start().url)
       }
 
       "changing the email before subscription" must {

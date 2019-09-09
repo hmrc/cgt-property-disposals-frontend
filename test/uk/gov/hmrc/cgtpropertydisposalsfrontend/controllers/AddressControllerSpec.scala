@@ -93,7 +93,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
           mockAuthWithNoRetrievals()
           mockGetSession(
             Future.successful(
-              Right(Some(SessionData.empty.copy(subscriptionStatus = Some(SubscriptionMissingData(bpr, name)))))))
+              Right(Some(SessionData.empty.copy(subscriptionStatus = Some(SubscriptionMissingData(bpr, Right(name))))))))
         }
 
         val result = performAction()

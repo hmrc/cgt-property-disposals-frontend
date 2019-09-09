@@ -175,7 +175,7 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
 
       "handling organisations with SAUTRs" must {
         val sautr = SAUTR("sautr")
-        val trust = Trust(sautr)
+        val trust = Trust(sautr, None)
 
         def payload(requiresNameMatch: Boolean) =
           Json.parse(

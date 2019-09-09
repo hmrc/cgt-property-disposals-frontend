@@ -27,7 +27,7 @@ object UserType {
                                email: Option[Email]
                              ) extends UserType
 
-  final case class Trust(sautr: SAUTR) extends UserType
+  final case class Trust(sautr: SAUTR, email: Option[Email]) extends UserType
 
   final case object OrganisationUnregisteredTrust extends UserType
 

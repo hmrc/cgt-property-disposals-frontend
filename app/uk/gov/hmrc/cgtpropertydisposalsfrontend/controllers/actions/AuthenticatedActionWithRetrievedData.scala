@@ -25,8 +25,6 @@ import play.api.mvc.Results.SeeOther
 import uk.gov.hmrc.auth.core.retrieve.{~, Name => GGName, _}
 import uk.gov.hmrc.auth.core.{ConfidenceLevel, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.OrganisationUnregisteredTrust
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, Email, NINO, Name, SAUTR, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.toFuture
@@ -93,8 +91,8 @@ class AuthenticatedActionWithRetrievedData @Inject()(
 
           }
 
-        case _ @  _ ~ Some(AffinityGroup.Organisation) ~ _ ~ _ ~ _ ~ _ ~ _ ~ enrolments =>
-          handleOrganisation(request, enrolments)
+        case _ @  _ ~ Some(AffinityGroup.Organisation) ~ _ ~ _ ~ _ ~ _ ~ maybeEmail ~ enrolments =>
+          handleOrganisation(request, enrolments, maybeEmail)
 
         case _ @ _ ~ otherAffinityGroup ~ _ ~ _ ~ _ ~ _ ~ _ ~ _ =>
           logger.warn(s"Got request for unsupported affinity group $otherAffinityGroup")
@@ -139,7 +137,8 @@ class AuthenticatedActionWithRetrievedData @Inject()(
     LocalDate.of(jodaDate.getYear, jodaDate.getMonthOfYear, jodaDate.getDayOfMonth)
 
   private def handleOrganisation[A](request: MessagesRequest[A],
-                                    enrolments: Enrolments
+                                    enrolments: Enrolments,
+                                    email: Option[String]
                                    ): Either[Result, AuthenticatedRequestWithRetrievedData[A]] =
   // work out if it is an organisation or not
     enrolments.getEnrolment("HMRC-TERS-ORG") match {
@@ -155,7 +154,10 @@ class AuthenticatedActionWithRetrievedData @Inject()(
             )
             Left(errorHandler.errorResult()(request))
           }( id =>
-            Right(AuthenticatedRequestWithRetrievedData(UserType.Trust(SAUTR(id.value)), request))
+            Right(AuthenticatedRequestWithRetrievedData(
+              UserType.Trust(SAUTR(id.value), email.filter(_.nonEmpty).map(Email(_))),
+              request
+            ))
           )
     }
 

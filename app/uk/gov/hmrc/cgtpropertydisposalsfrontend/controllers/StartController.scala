@@ -133,33 +133,46 @@ class StartController @Inject()(
     request: RequestWithSessionDataAndRetrievedData[_]): Future[Result] = {
     val result =
       for{
-        bprWithNameAndEmail <- bprService.getBusinessPartnerRecord(Left(trust), false)
-          .subflatMap[Error,(BusinessPartnerRecord,TrustName,Email)]{ bpr =>
-          (bpr.organisationName, bpr.emailAddress) match {
-            case (None, None) =>
-              Left(Error("Could not find trust name or email address from business partner record"))
-            case (Some(_), None) =>
-              Left(Error("Could not find trust name from business partner record"))
-            case (None, Some(_)) =>
-              Left(Error("Could not find email address from business partner record"))
-            case (Some(n), Some(e)) =>
-              Right((bpr, TrustName(n), Email(e)))
-          }
+        bprWithTrustName <- bprService.getBusinessPartnerRecord(Left(trust), false)
+          .subflatMap[Error,(BusinessPartnerRecord,TrustName)]{ bpr =>
+          bpr.organisationName.fold[Either[Error,(BusinessPartnerRecord,TrustName)]](
+            Left(Error("Could not find trust name from business partner record"))
+          )( trustName =>
+            Right((bpr, TrustName(trustName)))
+          )
         }
-      subscriptionDetails = SubscriptionDetails(
-        Left(bprWithNameAndEmail._2),
-        bprWithNameAndEmail._3.value,
-        bprWithNameAndEmail._1.address,
-        bprWithNameAndEmail._1.sapNumber
-      )
-      _ <- EitherT(updateSession(sessionStore, request)(_.copy(subscriptionStatus = Some(SubscriptionReady(subscriptionDetails)))))
-      } yield ()
+      maybeSubscriptionDetails <- EitherT.pure(
+          bprWithTrustName._1.emailAddress.orElse(trust.email.map(_.value))
+            .fold[Either[MissingData.Email.type,SubscriptionDetails]](
+                Left(SubscriptionDetails.MissingData.Email)
+              ){ email =>
+            Right(SubscriptionDetails(
+              Left(bprWithTrustName._2),
+              email,
+              bprWithTrustName._1.address,
+              bprWithTrustName._1.sapNumber
+            ))
+          }
+        )
+      _ <- EitherT(maybeSubscriptionDetails.fold(
+        _ =>
+          updateSession(sessionStore, request)(_.copy(subscriptionStatus = Some(
+            SubscriptionMissingData(bprWithTrustName._1, Left(bprWithTrustName._2))))),
+        subscriptionDetails =>
+          updateSession(sessionStore, request)(_.copy(subscriptionStatus = Some(
+            SubscriptionReady(subscriptionDetails))))
+      ))
+      } yield maybeSubscriptionDetails
 
     result.fold({ e =>
       logger.warn(s"Could not build subscription data for trust with SAUTR ${trust.sautr}", e)
       errorHandler.errorResult()
     },
-      _ => SeeOther(routes.SubscriptionController.checkYourDetails().url)
+      {
+        case Left(MissingData.Email) => SeeOther(routes.EmailController.enterEmail().url)
+        case Right(_)                => SeeOther(routes.SubscriptionController.checkYourDetails().url)
+      }
+
     )
   }
 
@@ -179,7 +192,7 @@ class StartController @Inject()(
             maybeSubscriptionDetails.fold[Future[Either[Error, Unit]]](
               _ =>
                 updateSession(sessionStore, request)(
-                  _.copy(subscriptionStatus = Some(SubscriptionMissingData(bpr, individual.name)))),
+                  _.copy(subscriptionStatus = Some(SubscriptionMissingData(bpr, Right(individual.name))))),
               subscriptionDetails =>
                 updateSession(sessionStore, request)(
                   _.copy(subscriptionStatus = Some(SubscriptionReady(subscriptionDetails))))

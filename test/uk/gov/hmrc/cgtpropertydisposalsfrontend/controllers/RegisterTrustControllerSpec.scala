@@ -76,7 +76,7 @@ class RegisterTrustControllerSpec extends ControllerSpec with AuthSupport with S
 
         "the session data indicates that an individual is missing data for subscription" in {
           val sessionData = SessionData.empty.copy(subscriptionStatus =
-            Some(SubscriptionMissingData(bpr, name)))
+            Some(SubscriptionMissingData(bpr, Right(name))))
 
           inSequence{
             mockAuthWithNoRetrievals()

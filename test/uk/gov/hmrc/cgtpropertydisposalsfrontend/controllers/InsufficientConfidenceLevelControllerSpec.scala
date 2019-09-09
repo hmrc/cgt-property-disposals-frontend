@@ -71,7 +71,7 @@ class InsufficientConfidenceLevelControllerSpec
 
       "there is data missing for subscription" in {
         test(
-          Some(session(SubscriptionMissingData(bpr, name))),
+          Some(session(SubscriptionMissingData(bpr, Right(name)))),
           routes.StartController.start()
         )
       }

@@ -311,7 +311,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               "there is no email in the BPR or the auth record" in {
                 val bprWithNoEmail = bpr.copy(emailAddress = None)
                 val updatedSession =
-                  SessionData.empty.copy(subscriptionStatus = Some(SubscriptionMissingData(bprWithNoEmail, name)))
+                  SessionData.empty.copy(subscriptionStatus = Some(SubscriptionMissingData(bprWithNoEmail, Right(name))))
 
                 inSequence {
                   mockAuthWithAllRetrievals(L50, Some(AffinityGroup.Individual), None, Some(name), None, None, Set.empty)
@@ -431,7 +431,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
             "one doesn't exist in session and it is successfully retrieved using the retrieved auth NINO and " +
               "there is a BPR already in session" in {
-              val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionMissingData(bpr, name)))
+              val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionMissingData(bpr, Right(name))))
               val updatedSession =
                 SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(individualSubscriptionDetails)))
 
@@ -450,7 +450,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             "there is no email in the BPR or the auth record" in {
               val bprWithNoEmail = bpr.copy(emailAddress = None)
               val updatedSession =
-                SessionData.empty.copy(subscriptionStatus = Some(SubscriptionMissingData(bprWithNoEmail, name)))
+                SessionData.empty.copy(subscriptionStatus = Some(SubscriptionMissingData(bprWithNoEmail, Right(name))))
 
               inSequence {
                 mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, name, retrievedDateOfBirth, None)
@@ -469,7 +469,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
         "handling trusts" must {
 
           val sautr = SAUTR("sautr")
-          val trust = Trust(sautr)
+          val trust = Trust(sautr, None)
           val trustName = TrustName("trustname")
           val address = UkAddress("line 1", None, None, None, "postcode")
           val sapNumber = "sap"
@@ -481,7 +481,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             "there are subscription details in session" in {
               val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(trustSubscriptionDetails)))
               inSequence {
-                mockAuthWithCl200AndWithAllTrustRetrievals(sautr)
+                mockAuthWithAllTrustRetrievals(sautr, None)
                 mockGetSession(Future.successful(Right(Some(session))))
               }
 
@@ -497,7 +497,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               val session = SessionData.empty.copy(subscriptionStatus = Some(subscriptionStatus))
 
               inSequence {
-                mockAuthWithCl200AndWithAllTrustRetrievals(sautr)
+                mockAuthWithAllTrustRetrievals(sautr, None)
                 mockGetSession(Future.successful(Right(Some(session))))
               }
 
@@ -510,7 +510,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
             "there is an error getting the BPR" in {
               inSequence {
-                mockAuthWithCl200AndWithAllTrustRetrievals(sautr)
+                mockAuthWithAllTrustRetrievals(sautr, None)
                 mockGetSession(Future.successful(Right(None)))
                 mockGetBusinessPartnerRecord(Left(trust), false)(Left(Error("")))
               }
@@ -518,19 +518,9 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               checkIsTechnicalErrorPage(performAction())
             }
 
-            "the BPR doesn't contain an email address" in {
-              inSequence {
-                mockAuthWithCl200AndWithAllTrustRetrievals(sautr)
-                mockGetSession(Future.successful(Right(None)))
-                mockGetBusinessPartnerRecord(Left(trust), false)(Right(bpr.copy(emailAddress = None)))
-              }
-
-              checkIsTechnicalErrorPage(performAction())
-            }
-
             "the BPR doesn't contain an organisation name" in {
               inSequence {
-                mockAuthWithCl200AndWithAllTrustRetrievals(sautr)
+                mockAuthWithAllTrustRetrievals(sautr, None)
                 mockGetSession(Future.successful(Right(None)))
                 mockGetBusinessPartnerRecord(Left(trust), false)(Right(bpr.copy(organisationName = None)))
               }
@@ -538,19 +528,9 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               checkIsTechnicalErrorPage(performAction())
             }
 
-            "the BPR doesn't contain either an email address or organisation name" in {
-              inSequence {
-                mockAuthWithCl200AndWithAllTrustRetrievals(sautr)
-                mockGetSession(Future.successful(Right(None)))
-                mockGetBusinessPartnerRecord(Left(trust), false)(Right(bpr.copy(emailAddress = None, organisationName = None)))
-              }
-
-              checkIsTechnicalErrorPage(performAction())
-            }
-
             "there is an error updating the session" in {
               inSequence {
-                mockAuthWithCl200AndWithAllTrustRetrievals(sautr)
+                mockAuthWithAllTrustRetrievals(sautr, None)
                 mockGetSession(Future.successful(Right(None)))
                 mockGetBusinessPartnerRecord(Left(trust), false)(Right(bpr))
                 mockStoreSession(
@@ -567,7 +547,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
             "there is an email and organisation name in the BPR and the session has been updated" in {
               inSequence {
-                mockAuthWithCl200AndWithAllTrustRetrievals(sautr)
+                mockAuthWithAllTrustRetrievals(sautr, None)
                 mockGetSession(Future.successful(Right(None)))
                 mockGetBusinessPartnerRecord(Left(trust), false)(Right(bpr))
                 mockStoreSession(
@@ -576,6 +556,40 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               }
 
               checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
+            }
+
+            "there is an organisation name in the BPR but no email but there is an email in the " +
+              "auth record" in {
+              inSequence {
+                mockAuthWithAllTrustRetrievals(sautr, Some("email"))
+                mockGetSession(Future.successful(Right(None)))
+                mockGetBusinessPartnerRecord(Left(trust.copy(email = Some(Email("email")))), false)(Right(bpr.copy(emailAddress = None)))
+                mockStoreSession(
+                  SessionData.empty.copy(subscriptionStatus = Some(
+                    SubscriptionReady(trustSubscriptionDetails.copy(emailAddress = "email"))))
+                )(Future.successful(Right(())))
+              }
+
+              checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
+            }
+          }
+
+          "redirect to the enter email page" when {
+
+            "there is no email in the BPR or in the auth record" in {
+              val bprWithNoEmail = bpr.copy(emailAddress = None)
+
+              inSequence {
+                mockAuthWithAllTrustRetrievals(sautr, None)
+                mockGetSession(Future.successful(Right(None)))
+                mockGetBusinessPartnerRecord(Left(trust), false)(Right(bprWithNoEmail))
+                mockStoreSession(
+                  SessionData.empty.copy(subscriptionStatus = Some(
+                    SubscriptionMissingData(bprWithNoEmail, Left(trustName))))
+                )(Future.successful(Right(())))
+              }
+
+              checkIsRedirect(performAction(), routes.EmailController.enterEmail())
             }
 
           }
