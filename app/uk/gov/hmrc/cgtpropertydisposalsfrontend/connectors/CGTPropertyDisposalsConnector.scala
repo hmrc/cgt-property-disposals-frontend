@@ -19,12 +19,15 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 import java.time.LocalDate
 
 import cats.data.EitherT
+import cats.syntax.either._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import play.api.libs.json.{JsNull, Json, OFormat}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnectorImpl.BprRequest
+import julienrf.json.derived
+import play.api.libs.json.{JsNull, Json, OFormat, OWrites, Reads, Writes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnectorImpl.OutgoingBprRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Individual, Trust}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, NINO, SAUTR, SubscriptionDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SubscriptionDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherFormat.eitherFormat
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
@@ -34,7 +37,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[CGTPropertyDisposalsConnectorImpl])
 trait CGTPropertyDisposalsConnector {
 
-  def getBusinessPartnerRecord(entity: Either[Trust,Individual])(
+  def getBusinessPartnerRecord(entity: Either[Trust,Individual], requiresNameMatch: Boolean)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
@@ -50,29 +53,30 @@ class CGTPropertyDisposalsConnectorImpl @Inject()(http: HttpClient, servicesConf
 
   val baseUrl: String = servicesConfig.baseUrl("cgt-property-disposals") + "/cgt-property-disposals"
 
-  def bprUrl(id: Either[SAUTR,NINO]): String =
-    id.fold(
-     sautr => s"$baseUrl/business-partner-record/sautr/${sautr.value}",
-     nino => s"$baseUrl/business-partner-record/nino/${nino.value}"
-    )
+  val bprUrl: String = s"$baseUrl/business-partner-record"
 
   val subscribeUrl: String = s"$baseUrl/subscribe"
 
-  def getBusinessPartnerRecord(entity: Either[Trust,Individual])(
+  def getBusinessPartnerRecord(entity: Either[Trust,Individual], requiresNameMatch: Boolean)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, HttpResponse] =
-   EitherT[Future, Error, HttpResponse](
-    entity.fold(
-      trust => http.post(bprUrl(Left(trust.sautr)), JsNull),
-      { individual =>
-        val bprRequest =
-          BprRequest(individual.name.firstName, individual.name.lastName, individual.dateOfBirth.map(_.value))
-        http.post(bprUrl(individual.id), Json.toJson(bprRequest))
-      }
+  ): EitherT[Future, Error, HttpResponse] = {
+    val outgoingRequest = entity.fold[OutgoingBprRequest](
+      trust => OutgoingBprRequest.OrganisationBprRequest(trust.sautr.value, requiresNameMatch),
+      individual => OutgoingBprRequest.IndividualBprRequest(
+        individual.id.bimap(_.value, _.value),
+        individual.name.firstName,
+        individual.name.lastName,
+        individual.dateOfBirth.map(_.value),
+        requiresNameMatch
+      )
     )
-      .map(Right(_))
-      .recover { case e => Left(Error(e)) }
-  )
+
+    EitherT[Future, Error, HttpResponse](
+       http.post(bprUrl, Json.toJson(outgoingRequest))
+        .map(Right(_))
+        .recover { case e => Left(Error(e)) }
+    )
+  }
 
   def subscribe(
     subscriptionDetails: SubscriptionDetails
@@ -89,11 +93,25 @@ class CGTPropertyDisposalsConnectorImpl @Inject()(http: HttpClient, servicesConf
 
 object CGTPropertyDisposalsConnectorImpl {
 
-  final case class BprRequest(forename: String, surname: String, dateOfBirth: Option[LocalDate])
+  private sealed trait OutgoingBprRequest
 
-  object BprRequest {
+  private object OutgoingBprRequest {
+    final case class IndividualBprRequest(id: Either[String,String],
+                                          forename: String,
+                                          surname: String,
+                                          dateOfBirth: Option[LocalDate],
+                                          requiresNameMatch: Boolean
+                                         ) extends OutgoingBprRequest
 
-    implicit val format: OFormat[BprRequest] = Json.format[BprRequest]
+    final case class OrganisationBprRequest(sautr: String,
+                                            requiresNameMatch: Boolean
+                                           ) extends OutgoingBprRequest
+
+
+    implicit val individualBprRequestWrites: Writes[IndividualBprRequest] = Json.writes[IndividualBprRequest]
+
+    @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
+    implicit val format: OWrites[OutgoingBprRequest] = derived.owrites[OutgoingBprRequest]
 
   }
 

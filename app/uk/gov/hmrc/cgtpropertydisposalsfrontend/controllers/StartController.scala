@@ -60,7 +60,7 @@ class StartController @Inject()(
         i.hasSautr.flatMap(_.value).fold[Future[Result]](
           SeeOther(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url)
         )(sautr =>
-          buildIndividualSubscriptionData(Individual(Left(sautr), i.name, None, i.email), None)
+          buildIndividualSubscriptionData(Individual(Left(sautr), i.name, None, i.email), None, true)
         )
 
       case (_, Some(_: SubscriptionReady))         =>
@@ -73,10 +73,10 @@ class StartController @Inject()(
         handleInsufficientConfidenceLevel(maybeNino, name, maybeEmail)
 
       case (i: UserType.Individual, Some(SubscriptionMissingData(bpr, _))) =>
-        buildIndividualSubscriptionData(i, Some(bpr))
+        buildIndividualSubscriptionData(i, Some(bpr), false)
 
       case (i: UserType.Individual, None) =>
-        buildIndividualSubscriptionData(i, None)
+        buildIndividualSubscriptionData(i, None, false)
 
       case (t: UserType.Trust, _) =>
         buildTrustSubscriptionData(t)
@@ -133,7 +133,7 @@ class StartController @Inject()(
     request: RequestWithSessionDataAndRetrievedData[_]): Future[Result] = {
     val result =
       for{
-        bprWithNameAndEmail <- bprService.getBusinessPartnerRecord(Left(trust))
+        bprWithNameAndEmail <- bprService.getBusinessPartnerRecord(Left(trust), false)
           .subflatMap[Error,(BusinessPartnerRecord,TrustName,Email)]{ bpr =>
           (bpr.organisationName, bpr.emailAddress) match {
             case (None, None) =>
@@ -164,13 +164,14 @@ class StartController @Inject()(
   }
 
   private def buildIndividualSubscriptionData(individual: Individual,
-                                              maybeBpr: Option[BusinessPartnerRecord])(
+                                              maybeBpr: Option[BusinessPartnerRecord],
+                                              requiresNameMatch: Boolean)(
     implicit
     hc: HeaderCarrier,
     request: RequestWithSessionDataAndRetrievedData[_]
   ): Future[Result] = {
     val result = for {
-      bpr <- maybeBpr.fold(bprService.getBusinessPartnerRecord(Right(individual)))(EitherT.pure(_))
+      bpr <- maybeBpr.fold(bprService.getBusinessPartnerRecord(Right(individual), requiresNameMatch))(EitherT.pure(_))
       maybeSubscriptionDetails <- EitherT.pure(
         SubscriptionDetails(bpr, individual.name, individual.email)
       )
