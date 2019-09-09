@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
+import cats.data.EitherT
+import cats.instances.future._
 import cats.instances.string._
 import cats.syntax.either._
 import cats.syntax.eq._
@@ -27,8 +29,9 @@ import play.api.data.format.Formatter
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{HasSAUTR, SAUTR}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.IndividualWithInsufficientConfidenceLevel
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{HasSAUTR, Name, SAUTR}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{IndividualWithInsufficientConfidenceLevel, SubscriptionMissingData, SubscriptionReady}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Individual
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -72,7 +75,7 @@ class InsufficientConfidenceLevelController @Inject()(
 
 
   def doYouHaveNINO(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withInsufficientConfidenceLevelUser{ case IndividualWithInsufficientConfidenceLevel(hasNino, _) =>
+    withInsufficientConfidenceLevelUser{ case IndividualWithInsufficientConfidenceLevel(hasNino, _, _, _) =>
       val form = hasNino.fold(haveANinoForm)(haveANinoForm.fill)
       Ok(doYouHaveANinoPage(form))
     }
@@ -96,14 +99,13 @@ class InsufficientConfidenceLevelController @Inject()(
               } else {
                 Redirect(routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr())
               }
-
           }
      )
     }
   }
 
   def doYouHaveAnSaUtr(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withInsufficientConfidenceLevelUser{ case IndividualWithInsufficientConfidenceLevel(hasNino, hasSaUtr) =>
+    withInsufficientConfidenceLevelUser{ case IndividualWithInsufficientConfidenceLevel(hasNino, hasSaUtr, _, _) =>
       hasNino.fold(
         SeeOther(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url)
       ){ _ =>
@@ -131,16 +133,14 @@ class InsufficientConfidenceLevelController @Inject()(
             case Right(_) =>
               maybeSautr.fold(
                 Redirect(routes.RegistrationController.startRegistration())
-              ){ sautr =>
-              // TODO: get BPR here
-                Ok(s"Your Self Assessment Unique Taxpayer Reference is ${sautr.value}, call bpr")
+              ){ _ =>
+                Redirect(routes.StartController.start())
               }
           }
       )
     }
     }
   }
-
 
 }
 

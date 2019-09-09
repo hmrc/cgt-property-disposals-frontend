@@ -49,7 +49,7 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
   val nino                       = NINO("AB123456C")
   val name                       = Name("forename", "surname")
   val dateOfBirth                = DateOfBirth(LocalDate.of(2000, 4, 10))
-  val individual                 = Individual(nino, name, dateOfBirth, None)
+  val individual                 = Individual(Right(nino), name, Some(dateOfBirth), None)
   val trust                      = Trust(sautr)
   val address =
     Address.UkAddress("line1", Some("line2"), None, None, "postcode")

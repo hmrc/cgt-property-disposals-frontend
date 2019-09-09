@@ -17,12 +17,12 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
 import java.time.LocalDate
-
+import org.joda.time.{LocalDate => JodaLocaDate}
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.mvc._
 import play.api.mvc.Results.SeeOther
-import uk.gov.hmrc.auth.core.retrieve.{~, Name => RetrievalName, _}
+import uk.gov.hmrc.auth.core.retrieve.{~, Name => GGName, _}
 import uk.gov.hmrc.auth.core.{ConfidenceLevel, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
@@ -41,57 +41,12 @@ final case class AuthenticatedRequestWithRetrievedData[A](userType: UserType,
 
 @Singleton
 class AuthenticatedActionWithRetrievedData @Inject()(
-  val authConnector: AuthConnector,
-  val config: Configuration,
-  val errorHandler: ErrorHandler,
-  val sessionStore: SessionStore
-)(implicit val executionContext: ExecutionContext)
-    extends AuthenticatedActionBase[AuthenticatedRequestWithRetrievedData] {
-
-  private def itmpNameToName(itmpName: ItmpName): Option[Name] =
-    itmpName match {
-      case ItmpName(Some(givenName), _, Some(familyName)) => Some(Name(givenName, familyName))
-      case _                                              => None
-    }
-
-  private def ggNameToName(retrievalName: RetrievalName): Option[Name] =
-    retrievalName match {
-      case RetrievalName(Some(name), _) =>
-        name.split(' ').toList.filter(_.nonEmpty) match {
-          case Nil      => None // no name
-          case firstName :: tl =>
-            tl.lastOption match {
-              case Some(lastName) => Some(Name(firstName, lastName))
-              case None           => None // only one name
-            }
-        }
-      case RetrievalName(None, _) => None
-    }
-
-  private def makeAuthenticatedRequestWithRetrieval[A, B](
-    f: (A) => Option[Name],
-    nino: String,
-    name: A,
-    dateOfBirth: LocalDate,
-    maybeEmail: Option[String],
-    request: MessagesRequest[B]
-  ): Future[Either[Result, AuthenticatedRequestWithRetrievedData[B]]] =
-    f(name) match {
-      case Some(name) =>
-        Right(AuthenticatedRequestWithRetrievedData(
-          UserType.Individual(
-          NINO(nino),
-          Name(name.firstName, name.lastName),
-          DateOfBirth(dateOfBirth),
-          maybeEmail.filter(_.nonEmpty).map(Email(_))
-          ),
-          request
-        ))
-      case None => {
-        logger.warn(s"Failed to retrieve name")
-        Left(errorHandler.errorResult()(request))
-      }
-    }
+                                                      val authConnector: AuthConnector,
+                                                      val config: Configuration,
+                                                      val errorHandler: ErrorHandler,
+                                                      val sessionStore: SessionStore
+                                                    )(implicit val executionContext: ExecutionContext)
+  extends AuthenticatedActionBase[AuthenticatedRequestWithRetrievedData] {
 
   override def authorisedFunction[A](auth: AuthorisedFunctions,
                                      request: MessagesRequest[A]
@@ -109,34 +64,33 @@ class AuthenticatedActionWithRetrievedData @Inject()(
           v2.Retrievals.name and
           v2.Retrievals.itmpDateOfBirth and
           v2.Retrievals.email and
-        v2.Retrievals.allEnrolments
+          v2.Retrievals.allEnrolments
       ) {
-        case cl ~ Some(AffinityGroup.Individual) ~ maybeNino ~ _ ~ _ ~ _ ~ _ ~ _ if cl < ConfidenceLevel.L200 =>
-          Right(AuthenticatedRequestWithRetrievedData(UserType.InsufficientConfidenceLevel(maybeNino.map(NINO)), request))
+        case cl ~ Some(AffinityGroup.Individual) ~ maybeNino ~ maybeItmpName ~ maybeGGName ~ _ ~ maybeEmail ~ _ if cl < ConfidenceLevel.L200 =>
+          withName(maybeItmpName, maybeGGName, request)(name =>
+            Right(AuthenticatedRequestWithRetrievedData(
+              UserType.IndividualWithInsufficientConfidenceLevel(maybeNino.map(NINO),
+                name,
+                maybeEmail.filter(_.nonEmpty).map(Email(_))
+              ),
+              request))
+          )
 
         case individual @ _ ~ Some(AffinityGroup.Individual) ~ _ ~ _ ~ _ ~ _ ~ _ ~ _ =>
           individual match {
-            case  _ ~ _ ~ Some(nino) ~ Some(itmpName) ~ _ ~ Some(dob) ~ maybeEmail ~ _ =>
-              makeAuthenticatedRequestWithRetrieval(
-                itmpNameToName,
-                nino,
-                itmpName,
-                LocalDate.parse(dob.toString),
-                maybeEmail,
-                request
+            case  _ ~ _ ~ Some(nino) ~ maybeItmpName ~ maybeGGName ~ maybeDob ~ maybeEmail ~ _ =>
+              withName(maybeItmpName, maybeGGName, request)( name =>
+                Right(AuthenticatedRequestWithRetrievedData(
+                  UserType.Individual(
+                    Right(NINO(nino)),
+                    name,
+                    maybeDob.map(d => DateOfBirth(toLocalDate(d))),
+                    maybeEmail.filter(_.nonEmpty).map(Email(_))
+                  ),
+                  request
+                ))
               )
-            case _ ~ _ ~ Some(nino) ~ None ~ Some(name) ~ Some(dob) ~ maybeEmail ~ _ =>
-              makeAuthenticatedRequestWithRetrieval(
-                ggNameToName,
-                nino,
-                name,
-                LocalDate.parse(dob.toString),
-                maybeEmail,
-                request
-              )
-            case other =>
-              logger.warn(s"Failed to retrieve some information from the auth record: $other")
-              Left(errorHandler.errorResult()(request))
+
           }
 
         case _ @  _ ~ Some(AffinityGroup.Organisation) ~ _ ~ _ ~ _ ~ _ ~ _ ~ enrolments =>
@@ -148,6 +102,41 @@ class AuthenticatedActionWithRetrievedData @Inject()(
 
       }
   }
+
+  private def withName[A](itmpName: Option[ItmpName],
+                          ggName: Option[GGName],
+                          request: MessagesRequest[A]
+                         )(f: Name => Either[Result, AuthenticatedRequestWithRetrievedData[A]]
+                         ): Either[Result, AuthenticatedRequestWithRetrievedData[A]] = {
+    def itmpNameToName(itmpName: ItmpName): Option[Name] =
+      itmpName match {
+        case ItmpName(Some(givenName), _, Some(familyName)) => Some(Name(givenName, familyName))
+        case _                                              => None
+      }
+
+    def ggNameToName(ggName: GGName): Option[Name] =
+      ggName match {
+        case GGName(Some(name), _) =>
+          name.split(' ').toList.filter(_.nonEmpty) match {
+            case Nil      => None // no name
+            case firstName :: tl =>
+              tl.lastOption match {
+                case Some(lastName) => Some(Name(firstName, lastName))
+                case None           => None // only one name
+              }
+          }
+        case GGName(None, _) => None
+      }
+
+    itmpName.flatMap(itmpNameToName).orElse(ggName.flatMap(ggNameToName))
+      .fold[Either[Result, AuthenticatedRequestWithRetrievedData[A]]]{
+        logger.warn(s"Failed to retrieve name")
+        Left(errorHandler.errorResult()(request))
+      }(f)
+  }
+
+  private def toLocalDate(jodaDate: JodaLocaDate): LocalDate =
+    LocalDate.of(jodaDate.getYear, jodaDate.getMonthOfYear, jodaDate.getDayOfMonth)
 
   private def handleOrganisation[A](request: MessagesRequest[A],
                                     enrolments: Enrolments

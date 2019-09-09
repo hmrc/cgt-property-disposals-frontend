@@ -23,6 +23,7 @@ import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
 import play.api.i18n.{Lang, MessagesApi}
+import play.api.inject.bind
 import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
 import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
@@ -45,13 +46,13 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
         Configuration(
           ConfigFactory.parseString(
             """
-            | metrics.enabled = false
+              | metrics.enabled = false
           """.stripMargin
           )
         ) ++ additionalConfig
       )
+      .disable[uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore]
       .overrides(overrideBindings: _*)
-      .disable[play.modules.reactivemongo.ReactiveMongoHmrcModule]
       .build()
 
   lazy val fakeApplication: Application = buildFakeApplication()
