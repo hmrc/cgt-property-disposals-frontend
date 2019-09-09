@@ -63,8 +63,12 @@ class CGTPropertyDisposalsConnectorImpl @Inject()(http: HttpClient, servicesConf
   ): EitherT[Future, Error, HttpResponse] =
    EitherT[Future, Error, HttpResponse](
     entity.fold(
-      t => http.post(bprUrl(Left(t.sautr)), JsNull),
-      i => http.post(bprUrl(i.id), Json.toJson(BprRequest(i.name.firstName, i.name.lastName, i.dateOfBirth.map(_.value))))
+      trust => http.post(bprUrl(Left(trust.sautr)), JsNull),
+      { individual =>
+        val bprRequest =
+          BprRequest(individual.name.firstName, individual.name.lastName, individual.dateOfBirth.map(_.value))
+        http.post(bprUrl(individual.id), Json.toJson(bprRequest))
+      }
     )
       .map(Right(_))
       .recover { case e => Left(Error(e)) }
