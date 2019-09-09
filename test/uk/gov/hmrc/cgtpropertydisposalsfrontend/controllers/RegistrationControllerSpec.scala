@@ -25,6 +25,7 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.Result
 import play.api.test.FakeRequest
+import play.api.test.CSRFTokenHelper._
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.IndividualWithInsufficientConfidenceLevel
@@ -106,6 +107,105 @@ class RegistrationControllerSpec
       }
 
 
+    }
+
+    "handling requests to show the select entity type page" must {
+      def performAction(): Future[Result] =
+        controller.selectEntityType()(FakeRequest())
+      "show the page" when {
+        "the session data indicates that the user has no digital footprint and " +
+          "the user has opted to start registration" in {
+          val sessionData =
+            SessionData.empty.copy(subscriptionStatus = Some(
+              IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)), name, None))
+            )
+
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData))))
+          }
+
+          val result = performAction()
+          status(result) shouldBe OK
+          contentAsString(result) should include(message("entityType.title"))
+        }
+      }
+    }
+
+    "handling requests to submit the selected entity type" must {
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.selectEntityTypeSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
+      val sessionData =
+        SessionData.empty.copy(subscriptionStatus = Some(
+          IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)), name, None))
+        )
+
+      "show the page with errors" when {
+        "the request submits no selection" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData))))
+          }
+
+          val result = performAction()
+          status(result) shouldBe BAD_REQUEST
+          contentAsString(result) should include(message("entityType.error.required"))
+        }
+
+        "the request submits an invalid value" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData))))
+          }
+          val result = performAction("entityType" -> "2")
+          status(result) shouldBe BAD_REQUEST
+          contentAsString(result) should include(message("entityType.invalid"))
+        }
+      }
+
+      "redirect to the wrong gg account page" when {
+        "the request selects trust" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData))))
+          }
+          val result = performAction("entityType" -> "1")
+          checkIsRedirect(result, routes.RegistrationController.wrongGGAccountForTrusts())
+        }
+      }
+
+      "continue the registration journey" when {
+        "the request selects individual" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData))))
+          }
+          val result = performAction("entityType" -> "0")
+          status(result) shouldBe OK
+        }
+      }
+
+    }
+
+    "handling requests to view the wrong gg account page" must {
+      def performAction(): Future[Result] =
+        controller.wrongGGAccountForTrusts()(FakeRequest())
+      val sessionData =
+        SessionData.empty.copy(subscriptionStatus = Some(
+          IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)), name, None))
+        )
+
+      "show the page" when {
+        "the endpoint is requested" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData))))
+          }
+          val result = performAction()
+          status(result) shouldBe OK
+          contentAsString(result) should include(message("wrongAccountForTrusts.title"))
+        }
+      }
     }
 
   }

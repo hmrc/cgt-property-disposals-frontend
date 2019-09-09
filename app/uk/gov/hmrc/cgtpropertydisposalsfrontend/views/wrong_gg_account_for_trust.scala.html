@@ -15,7 +15,6 @@
  *@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 
 @this(
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -26,13 +25,18 @@
 
 @(backLink: Call)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
-@title = @{messages("registration.start.title")}
+@title = @{messages("wrongAccountForTrusts.title")}
 
 @mainTemplate(title = title) {
   @backLinkComponent(backLink)
   @pageHeading(title)
   <p>
-    @messages("registration.start.p")
+   @messages("wrongAccountForTrusts.p")
   </p>
-  @buttonLink(messages("registration.start.buttonText"), routes.RegistrationController.selectEntityType().url)
+ <p>
+   <a href="@appConfig.signOutUrl">@messages("service.signOut")</a>
+ </p>
 }
+
+
+    
