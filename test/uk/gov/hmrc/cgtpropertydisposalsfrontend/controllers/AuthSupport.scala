@@ -91,14 +91,14 @@ trait AuthSupport {
       Set.empty
     )
 
-  def mockAuthWithCl200AndWithAllTrustRetrievals(sautr: SAUTR): Unit =
+  def mockAuthWithAllTrustRetrievals(sautr: SAUTR, email: Option[String]): Unit =
     mockAuthWithAllRetrievals(
-      ConfidenceLevel.L200,
+      ConfidenceLevel.L50,
       Some(AffinityGroup.Organisation),
       None,
       None,
       None,
-      None,
+      email,
       Set(Enrolment("HMRC-TERS-ORG", Seq(EnrolmentIdentifier("SAUTR", sautr.value)), ""))
     )
 

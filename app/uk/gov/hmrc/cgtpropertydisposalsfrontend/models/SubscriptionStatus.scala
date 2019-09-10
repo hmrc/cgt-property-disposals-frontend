@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import julienrf.json.derived
 import play.api.libs.json.OFormat
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherFormat.eitherFormat
 
 sealed trait SubscriptionStatus
 
@@ -31,8 +32,10 @@ object SubscriptionStatus {
                                                           name: Name,
                                                           email: Option[Email]) extends SubscriptionStatus
 
-  // individual is missing data in order to continue on with subscription
-  final case class SubscriptionMissingData(businessPartnerRecord: BusinessPartnerRecord, name: Name) extends SubscriptionStatus
+  // entity is missing data in order to continue on with subscription
+  final case class SubscriptionMissingData(businessPartnerRecord: BusinessPartnerRecord,
+                                           name: Either[TrustName,Name]
+                                          ) extends SubscriptionStatus
 
   // subscription details have been gathered and are ready to be used to subscribe
   final case class SubscriptionReady(subscriptionDetails: SubscriptionDetails) extends SubscriptionStatus

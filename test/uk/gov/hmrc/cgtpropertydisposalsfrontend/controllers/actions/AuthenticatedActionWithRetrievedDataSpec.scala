@@ -163,16 +163,37 @@ class AuthenticatedActionWithRetrievedDataSpec
 
           val retrievalsResult = Future successful (
             new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation))
-              and None and None and None and None and None and Enrolments(Set(trustEnrolment))
+              and None and None and None and None and Some("email") and Enrolments(Set(trustEnrolment))
             )
 
           mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
 
           val result  = performAction(FakeRequest())
           status(result) shouldBe OK
-          contentAsJson(result) shouldBe Json.toJson(UserType.Trust(sautr))
+          contentAsJson(result) shouldBe Json.toJson(UserType.Trust(sautr, Some(Email("email"))))
         }
 
+      }
+
+      "filter out empty emails" in {
+        val sautr = SAUTR("123456")
+        val trustEnrolment =
+          Enrolment(
+            "HMRC-TERS-ORG",
+            Seq(EnrolmentIdentifier("SAUTR", sautr.value)),
+            "state"
+          )
+
+        val retrievalsResult = Future successful (
+          new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation))
+            and None and None and None and None and Some("") and Enrolments(Set(trustEnrolment))
+          )
+
+        mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+
+        val result  = performAction(FakeRequest())
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe Json.toJson(UserType.Trust(sautr, None))
       }
 
 

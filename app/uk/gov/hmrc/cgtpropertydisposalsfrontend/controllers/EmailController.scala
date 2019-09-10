@@ -101,11 +101,7 @@ class EmailController @Inject()(
                   case _                            => EmailToBeVerified(email, uuidGenerator.nextId(), verified = false)
                 }
 
-                val name =
-                  subscriptionStatus.fold(
-                    s => Right(s.name),
-                    s => s.subscriptionDetails.contactName
-                  )
+                val name = subscriptionStatus.fold(_.name, _.subscriptionDetails.contactName)
 
                 val result = for {
                   _ <- EitherT(
