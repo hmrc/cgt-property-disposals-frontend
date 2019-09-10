@@ -41,7 +41,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
 
   val mockService = mock[AddressLookupService]
 
-  def mockAddressLookup(expectedPostcode: Postcode, filter: Option[String] = None)(result: Either[Error, AddressLookupResult]) =
+  def mockAddressLookup(expectedPostcode: Postcode, filter: Option[String])(result: Either[Error, AddressLookupResult]) =
     (mockService
       .lookupAddress(_: Postcode, _: Option[String])(_: HeaderCarrier))
       .expects(expectedPostcode, filter, *)
@@ -318,7 +318,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
 
     }
 
-    "handling submitted postcodes" must {
+    "handling submitted postcodes and filters" must {
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterPostcodeSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
@@ -357,7 +357,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(existingSessionData))))
-            mockAddressLookup(postcode)(Left(Error("Uh oh!")))
+            mockAddressLookup(postcode, None)(Left(Error("Uh oh!")))
           }
 
           checkIsTechnicalErrorPage(performAction("postcode" -> postcode.value))
@@ -367,7 +367,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(existingSessionData))))
-            mockAddressLookup(postcode)(Right(addressLookupResult))
+            mockAddressLookup(postcode, None)(Right(addressLookupResult))
             mockStoreSession(existingSessionData.copy(addressLookupResult = Some(addressLookupResult)))(
               Future.successful(Left(Error("Uh oh!")))
             )
@@ -418,7 +418,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(Future.successful(Right(Some(existingSessionData))))
-              mockAddressLookup(formattedPostcode)(Right(addressLookupResult))
+              mockAddressLookup(formattedPostcode, None)(Right(addressLookupResult))
               mockStoreSession(existingSessionData.copy(addressLookupResult = Some(addressLookupResult)))(
                 Future.successful(Right(()))
               )
@@ -436,13 +436,41 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(existingSessionData))))
-          mockAddressLookup(postcode)(Right(addressLookupResult))
+          mockAddressLookup(postcode, None)(Right(addressLookupResult))
           mockStoreSession(existingSessionData.copy(addressLookupResult = Some(addressLookupResult)))(
             Future.successful(Right(()))
           )
         }
 
         val result = performAction("postcode" -> s"  ${postcode.value}  ")
+        checkIsRedirect(result, routes.AddressController.selectAddress())
+      }
+
+      "be ok with empty filter field and redirect to select address page" in {
+        val filter = ""
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(Future.successful(Right(Some(existingSessionData))))
+          mockAddressLookup(postcode, None)(Right(addressLookupResult))
+          mockStoreSession(existingSessionData.copy(addressLookupResult = Some(addressLookupResult)))(
+            Future.successful(Right(()))
+          )
+        }
+        val result = performAction("filter" -> filter, "postcode" -> postcode.value)
+        checkIsRedirect(result, routes.AddressController.selectAddress())
+      }
+
+      "redirect to select address page when filter is submitted" in {
+        val filter = "1"
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(Future.successful(Right(Some(existingSessionData))))
+          mockAddressLookup(postcode, Some(filter))(Right(addressLookupResult))
+          mockStoreSession(existingSessionData.copy(addressLookupResult = Some(addressLookupResult)))(
+            Future.successful(Right(()))
+          )
+        }
+        val result = performAction("filter" -> filter, "postcode" -> postcode.value)
         checkIsRedirect(result, routes.AddressController.selectAddress())
       }
 

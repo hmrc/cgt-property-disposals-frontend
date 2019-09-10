@@ -103,7 +103,6 @@ class AddressController @Inject()(
         .fold(
           formWithErrors => BadRequest(enterPostcodePage(formWithErrors, routes.SubscriptionController.checkYourDetails())),
           { case AddressLookupRequest(postcode, filter) =>
-            // TODO: need to search session data with filter also
             if (request.sessionData.addressLookupResult.map(_.postcode).contains(postcode)
               && request.sessionData.addressLookupResult.map(_.filter).contains(filter)
             ) {

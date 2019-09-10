@@ -32,7 +32,7 @@ object AddressLookupRequest {
         "postcode" -> text
           .transform[Postcode](s => Postcode(s.trim), _.value)
           .verifying("invalid", s => postcodeRegexPredicate.test(s.value.toUpperCase.replaceAllLiterally(" ", ""))),
-        "filter" -> optional(text)
+        "filter" -> optional(text).transform[Option[String]](_.filter(_.nonEmpty), identity)
       )(AddressLookupRequest.apply)(AddressLookupRequest.unapply)
     )
   }
