@@ -53,36 +53,11 @@ class RegistrationControllerSpec
 
   "RegistrationController" when {
 
-    "handling requests to show the registration start page" must {
-
-      def performAction(): Future[Result] =
-        controller.startRegistration()(FakeRequest())
-
-      "show the page" when {
-
-        "the session data indicates that the user has no digital footprint and " +
-          "they have indicated that they have no NINO or SA UTR" in {
-          val sessionData =
-            SessionData.empty.copy(subscriptionStatus = Some(
-              IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)), name, None))
-              )
-
-          inSequence{
-            mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData))))
-          }
-
-          val result = performAction()
-          status(result) shouldBe OK
-          contentAsString(result) should include(message("registration.start.title"))
-        }
-
-
-      }
+    def redirectToStartBehaviour(performAction: () => Future[Result]): Unit = {
 
       "redirect to the start endpoint" when {
 
-        "the session data indicates otherwise" in {
+        "the session data indicates that user should not see page" in {
           def isValidStatus(subscriptionStatus: SubscriptionStatus): Boolean = subscriptionStatus match {
             case IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)), _, _) => true
             case _ => false
@@ -103,15 +78,46 @@ class RegistrationControllerSpec
 
         }
 
+      }
+    }
+
+    "handling requests to show the registration start page" must {
+
+      def performAction(): Future[Result] =
+        controller.startRegistration()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+      "show the page" when {
+
+        "the session data indicates that the user has no digital footprint and " +
+          "they have indicated that they have no NINO or SA UTR" in {
+          val sessionData =
+            SessionData.empty.copy(subscriptionStatus = Some(
+              IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)), name, None))
+              )
+
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData))))
+          }
+
+          val result = performAction()
+          status(result) shouldBe OK
+          contentAsString(result) should include(message("registration.start.title"))
+        }
 
       }
-
 
     }
 
     "handling requests to show the select entity type page" must {
+
       def performAction(): Future[Result] =
         controller.selectEntityType()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
       "show the page" when {
         "the session data indicates that the user has no digital footprint and " +
           "the user has opted to start registration" in {
@@ -133,12 +139,16 @@ class RegistrationControllerSpec
     }
 
     "handling requests to submit the selected entity type" must {
+
       def performAction(formData: (String, String)*): Future[Result] =
         controller.selectEntityTypeSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
+
       val sessionData =
         SessionData.empty.copy(subscriptionStatus = Some(
           IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)), name, None))
         )
+
+      behave like redirectToStartBehaviour(() => performAction())
 
       "show the page with errors" when {
         "the request submits no selection" in {
@@ -188,12 +198,16 @@ class RegistrationControllerSpec
     }
 
     "handling requests to view the wrong gg account page" must {
+
       def performAction(): Future[Result] =
         controller.wrongGGAccountForTrusts()(FakeRequest())
+
       val sessionData =
         SessionData.empty.copy(subscriptionStatus = Some(
           IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)), name, None))
         )
+
+      behave like redirectToStartBehaviour(performAction)
 
       "show the page" when {
         "the endpoint is requested" in {
