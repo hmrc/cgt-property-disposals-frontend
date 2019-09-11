@@ -43,6 +43,9 @@ POST /subscription/change-address         uk.gov.hmrc.cgtpropertydisposalsfronte
 GET   /subscription/select-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.selectAddress()
 POST  /subscription/select-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.selectAddressSubmit()
 
+GET   /subscription/enter-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.enterAddress()
+POST  /subscription/enter-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.enterAddressSubmit()
+
 
 #### Error pages
 GET  /register-your-trust                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegisterTrustController.registerYourTrust()

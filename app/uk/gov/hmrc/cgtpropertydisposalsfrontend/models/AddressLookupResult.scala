@@ -20,6 +20,7 @@ import play.api.libs.json.{Format, Json}
 
 final case class AddressLookupResult(
   postcode: Postcode,
+  filter: Option[String],
   addresses: List[Address]
 )
 

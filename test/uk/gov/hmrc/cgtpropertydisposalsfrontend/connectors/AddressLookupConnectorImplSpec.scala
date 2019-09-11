@@ -68,9 +68,21 @@ class AddressLookupConnectorImplSpec extends WordSpec with Matchers with MockFac
               Map("User-Agent" -> "agent")
             )(Some(httpResponse))
 
-            await(connector.lookupAddress(postcode).value) shouldBe Right(httpResponse)
+            await(connector.lookupAddress(postcode, None).value) shouldBe Right(httpResponse)
           }
         }
+      }
+
+      "include the filter in the query parameters if one is passed in" in {
+        val filter: String = "8"
+        val httpResponse = HttpResponse(200)
+        mockGet(
+          s"http://host:123/v2/uk/addresses",
+          Map("postcode"   -> postcode.value, "filter" -> filter),
+          Map("User-Agent" -> "agent")
+        )(Some(httpResponse))
+
+        await(connector.lookupAddress(postcode, Some(filter)).value) shouldBe Right(httpResponse)
       }
 
       "get rid of all spaces and turn all lower case letters to upper case letters" in {
@@ -82,7 +94,7 @@ class AddressLookupConnectorImplSpec extends WordSpec with Matchers with MockFac
           Map("User-Agent" -> "agent")
         )(Some(response))
 
-        await(connector.lookupAddress(Postcode(" ab1 2C d ")).value) shouldBe Right(response)
+        await(connector.lookupAddress(Postcode(" ab1 2C d "), None).value) shouldBe Right(response)
       }
 
       "return an error" when {
@@ -94,7 +106,7 @@ class AddressLookupConnectorImplSpec extends WordSpec with Matchers with MockFac
             Map("User-Agent" -> "agent")
           )(None)
 
-          await(connector.lookupAddress(postcode).value).isLeft shouldBe true
+          await(connector.lookupAddress(postcode, None).value).isLeft shouldBe true
         }
 
       }

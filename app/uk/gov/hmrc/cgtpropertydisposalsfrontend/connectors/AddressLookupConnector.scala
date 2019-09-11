@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
+import java.net.URLEncoder
+
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
@@ -29,7 +31,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[AddressLookupConnectorImpl])
 trait AddressLookupConnector {
 
-  def lookupAddress(postcode: Postcode)(
+  def lookupAddress(postcode: Postcode, filter: Option[String])(
     implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
@@ -50,11 +52,17 @@ class AddressLookupConnectorImpl @Inject()(http: HttpClient, servicesConfig: Ser
     Map("User-Agent" -> userAgent)
   }
 
-  override def lookupAddress(postcode: Postcode)(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
+  override def lookupAddress(postcode: Postcode, filter: Option[String])(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] = {
+    val queryParameters = {
+      val paramMap = Map("postcode" -> postcode.value.replaceAllLiterally(" ", "").toUpperCase)
+      filter.fold(paramMap)(f => paramMap.updated("filter", URLEncoder.encode(f, "UTF-8")))
+    }
+
     EitherT[Future, Error, HttpResponse](
       http
-        .get(url, Map("postcode" -> postcode.value.replaceAllLiterally(" ", "").toUpperCase), headers)
+        .get(url, queryParameters, headers)
         .map(Right(_))
         .recover { case e => Left(Error(e)) }
     )
+  }
 }

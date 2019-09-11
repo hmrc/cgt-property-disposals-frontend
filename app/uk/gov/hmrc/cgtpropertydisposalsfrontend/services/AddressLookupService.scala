@@ -40,7 +40,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[AddressLookupServiceImpl])
 trait AddressLookupService {
 
-  def lookupAddress(postcode: Postcode)(implicit hc: HeaderCarrier): EitherT[Future, Error, AddressLookupResult]
+  def lookupAddress(postcode: Postcode, filter: Option[String])(implicit hc: HeaderCarrier): EitherT[Future, Error, AddressLookupResult]
 
 }
 
@@ -49,24 +49,25 @@ class AddressLookupServiceImpl @Inject()(connector: AddressLookupConnector)(impl
     extends AddressLookupService {
 
   override def lookupAddress(
-    postcode: Postcode
+    postcode: Postcode,
+    filter: Option[String]
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, AddressLookupResult] =
-    connector.lookupAddress(postcode).subflatMap { response =>
+    connector.lookupAddress(postcode, filter).subflatMap { response =>
       if (response.status === OK)
         response
           .parseJSON[AddressLookupResponse]()
-          .flatMap(toAddressLookupResult(_, postcode))
+          .flatMap(toAddressLookupResult(_, postcode, filter))
           .leftMap(Error(_))
       else
         Left(Error(s"Response to address lookup came back with status ${response.status}"))
     }
 
-  def toAddressLookupResult(r: AddressLookupResponse, postcode: Postcode): Either[String, AddressLookupResult] = {
+  def toAddressLookupResult(r: AddressLookupResponse, postcode: Postcode, filter: Option[String]): Either[String, AddressLookupResult] = {
     def toAddress(a: RawAddress): Either[String, Address] = {
       val lines: Either[String, (String, Option[String], Option[String], Option[String])] =
         (a.lines ::: List(a.town, a.county.getOrElse("")))
           .filter(_.nonEmpty) match {
-          case Nil                   => Left("Could not find any lines of addesss")
+          case Nil                   => Left("Could not find any lines of address")
           case a1 :: Nil             => Right((a1, None, None, None))
           case a1 :: a2 :: Nil       => Right((a1, Some(a2), None, None))
           case a1 :: a2 :: a3 :: Nil => Right((a1, Some(a2), Some(a3), None))
@@ -88,7 +89,7 @@ class AddressLookupServiceImpl @Inject()(connector: AddressLookupConnector)(impl
     r.addresses
       .map(toAddress)
       .sequence[Either[String, ?], Address]
-      .map(AddressLookupResult(postcode, _))
+      .map(AddressLookupResult(postcode, filter, _))
   }
 
 }

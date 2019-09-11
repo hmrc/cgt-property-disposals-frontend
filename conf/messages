@@ -90,6 +90,18 @@ address.postcode.notInUk=The property is not in the UK
 address.postcode.p1=You cannot use this service to report and pay Capital Gains Tax if the property is not in the UK.
 address.postcode.p2=If you have to report and pay Capital Gains Tax on a property outside of the UK, you’ll need to use the 'real time' Capital Gains Tax service <a href="#">or your Self Assessment return</a>.
 postcode.invalid=Please enter a valid UK postcode
+address.postcodeFilter.label=Property name or number (optional)
+address.postcodeFilter.helpText=For example, The Mill, Flat A or 37b
+address.manual.linkText=Enter address manually
+address.lookup.linkText=Lookup address with postcode
+
+address.uk.title=Enter your address
+address.uk.line1.label=Building or street
+address.uk.line2.label=Building or street line 2 (optional)
+address.uk.line3.label=Town or city (optional)
+address.uk.line4.label=County (optional)
+address-line1.error.required=Enter building and street
+postcode.error.required=Enter postcode
 
 address-select.title=Select the address of the property
 address-select.manualOption=None of the above (Enter address manually)

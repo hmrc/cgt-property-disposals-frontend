@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import play.api.data.Form
-import play.api.data.Forms.{mapping, text}
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Format
 
@@ -27,19 +25,5 @@ object Postcode {
 
   implicit val format: Format[Postcode] =
     implicitly[Format[String]].inmap(Postcode(_), _.value)
-
-  val form: Form[Postcode] = {
-    val postcodeRegexPredicate =
-      "^[A-Z]{1,2}[0-9][0-9A-Z]?[0-9][A-Z]{2}$|BFPO[0-9]{1,5}$".r.pattern
-        .asPredicate()
-
-    Form(
-      mapping(
-        "postcode" -> text
-          .transform[String](_.trim, identity)
-          .verifying("invalid", s => postcodeRegexPredicate.test(s.toUpperCase.replaceAllLiterally(" ", "")))
-      )(Postcode.apply)(Postcode.unapply)
-    )
-  }
 
 }

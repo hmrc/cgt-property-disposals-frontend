@@ -55,6 +55,11 @@
    errorKey = form.error(key).map(e => e.message),
    hasErrors = hasErrors
   )
+
+  <p>
+   <a href="@{routes.AddressController.enterAddress().url}">@messages("address.manual.linkText")</a>
+  </p>
+
   @submitButton(messages("button.continue"))
  }
 
