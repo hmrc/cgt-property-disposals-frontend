@@ -60,7 +60,8 @@
       errorKey = form.error(saUtrKey).map(e => e.message),
       hasErrors = form.error(saUtrKey).nonEmpty,
       label = Html(messages("saUtr.label")),
-      helpText = Some(Html(messages("saUtr.helpText")))
+      helpText = Some(Html(messages("saUtr.helpText"))),
+      inputType = Some("number")
     ))
    )
    @submitButton(messages("button.continue"))
