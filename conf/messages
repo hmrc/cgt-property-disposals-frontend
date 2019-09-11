@@ -42,12 +42,12 @@ hasNino.error.required=Select yes if you have a National Insurance number
 hasNino.error.boolean=Select yes if you have a National Insurance number
 
 haveAnSaUtr.title=Do you have a Self Assessment Unique Taxpayer Reference?
-hasSaUtr.error.required=Select yes if you have a Self Assessment Taxpayer Reference
-hasSaUtr.error.boolean=Select yes if you have a Self Assessment Taxpayer Reference
+hasSaUtr.error.required=Select yes if you have a Self Assessment Unique Taxpayer Reference
+hasSaUtr.error.boolean=Select yes if you have a Self Assessment Unique Taxpayer Reference
 saUtr.label=Enter your Self Assessment Unique Taxpayer Reference
 saUtr.helpText=You can find this on letters from HMRC about your Self Assessment returns. For example, 9163259195
-saUtr.error.required=Enter your Self Assessment Taxpayer Reference
-saUtr.error.pattern=Self Assessment Taxpayer references must only include up to 15 letters and numbers
+saUtr.error.required=Enter your Self Assessment Unique Taxpayer Reference
+saUtr.error.pattern=Self Assessment Unique Taxpayer References must be 10 numbers, for example 9163259195
 
 dob.title=What is your date of birth?
 dob.helpText=For example, 31 3 1980
