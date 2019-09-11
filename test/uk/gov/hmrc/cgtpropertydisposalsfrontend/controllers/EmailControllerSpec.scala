@@ -405,7 +405,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
       "on the missing subscription details journey" must {
 
         behave like commonCheckInboxBehaviour(
-          SubscriptionMissingData(bpr, name),
+          SubscriptionMissingData(bpr, Right(name)),
           routes.EmailController.enterEmail().url
         )
       }

@@ -39,16 +39,16 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class AddressController @Inject()(
-                                   val authenticatedAction: AuthenticatedAction,
-                                   val subscriptionDetailsAction: SubscriptionReadyAction,
-                                   cc: MessagesControllerComponents,
-                                   errorHandler: ErrorHandler,
-                                   addressLookupService: AddressLookupService,
-                                   sessionStore: SessionStore,
-                                   enterPostcodePage: views.html.subscription.enter_postcode,
-                                   selectAddressPage: views.html.subscription.select_address,
-                                   enterAddressPage: views.html.subscription.enter_address,
-                                   addressDisplay: views.html.components.address_display
+   val authenticatedAction: AuthenticatedAction,
+   val subscriptionDetailsAction: SubscriptionReadyAction,
+   cc: MessagesControllerComponents,
+   errorHandler: ErrorHandler,
+   addressLookupService: AddressLookupService,
+   sessionStore: SessionStore,
+   enterPostcodePage: views.html.subscription.enter_postcode,
+   selectAddressPage: views.html.subscription.select_address,
+   enterAddressPage: views.html.subscription.enter_address,
+   addressDisplay: views.html.components.address_display
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with Logging
