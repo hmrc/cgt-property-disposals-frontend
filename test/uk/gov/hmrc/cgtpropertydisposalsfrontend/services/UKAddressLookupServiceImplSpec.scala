@@ -30,7 +30,7 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class AddressLookupServiceImplSpec extends WordSpec with Matchers with MockFactory {
+class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
   val mockConnector = mock[AddressLookupConnector]
 
@@ -40,7 +40,7 @@ class AddressLookupServiceImplSpec extends WordSpec with Matchers with MockFacto
       .expects(expectedPostcode, filter, *)
       .returning(EitherT.fromEither[Future](result))
 
-  val service = new AddressLookupServiceImpl(mockConnector)
+  val service = new UKAddressLookupServiceImpl(mockConnector)
 
   "AddressLookupServiceImpl" when {
 
@@ -107,43 +107,39 @@ class AddressLookupServiceImplSpec extends WordSpec with Matchers with MockFacto
             |[
             |  {
             |    "address": {
-            |      "lines": [ ],
+            |      "lines": [ "line1", "line2" ],
             |      "town": "town",
-            |      "postcode": "ABC 123",
-            |      "country": {
-            |        "code": "GB"
-            |      }
+            |      "county" :"county",
+            |      "postcode": "ABC 123"
             |    }
             |  },
             |  {
             |    "address": {
-            |      "lines": [ ],
+            |      "lines": [ "line1" ],
+            |      "town": "town",
+            |      "postcode": "ABC 123"
+            |    }
+            |  },
+            |  {
+            |    "address": {
+            |      "lines": [ "line1" ],
             |      "town": "town",
             |      "county" : "county",
-            |      "postcode": "ABC 123",
-            |      "country": {
-            |        "code": "GB"
-            |      }
+            |      "postcode": "ABC 123"
             |    }
             |  },
             |  {
             |    "address": {
             |      "lines": [ "line1", "line2" ],
             |      "town": "town",
-            |      "postcode": "ABC 123",
-            |      "country": {
-            |        "code": "FR"
-            |      }
+            |      "postcode": "ABC 123"
             |    }
             |  },
             |  {
             |    "address": {
             |      "lines": [ "line1", "line2", "line3" ],
             |      "town": "town",
-            |      "postcode": "ABC 123",
-            |      "country": {
-            |        "code": "GB"
-            |      }
+            |      "postcode": "ABC 123"
             |    }
             |  }
             |]
@@ -157,74 +153,11 @@ class AddressLookupServiceImplSpec extends WordSpec with Matchers with MockFacto
             postcode,
             None,
             List[Address](
-              UkAddress("town", None, None, None, "ABC 123"),
-              UkAddress("town", Some("county"), None, None, "ABC 123"),
-              NonUkAddress("line1", Some("line2"), Some("town"), None, Some("ABC 123"), "FR"),
-              UkAddress("line1", Some("line2"), Some("line3"), Some("town"), "ABC 123")
-            )
-          )
-        )
-      }
-
-      "convert country codes of 'UK' to 'GB'" in {
-        val json = Json.parse(
-          """
-            |[
-            |  {
-            |    "address": {
-            |      "lines": [ "line1" ],
-            |      "town": "town",
-            |      "postcode": "ABC 123",
-            |      "country": {
-            |        "code": "UK",
-            |        "name": "United Kingdom"
-            |      }
-            |    }
-            |  }
-            |]
-            |""".stripMargin
-        )
-
-        mockLookupAddress(postcode)(Right(HttpResponse(200, Some(json))))
-
-        await(service.lookupAddress(postcode, None).value) shouldBe Right(
-          AddressLookupResult(
-            postcode,
-            None,
-            List(
-              UkAddress("line1", Some("town"), None, None, "ABC 123")
-            )
-          )
-        )
-      }
-
-      "concatenate lines of address when there are more than four in the response" in {
-        val json = Json.parse(
-          """
-            |[
-            |  {
-            |    "address": {
-            |      "lines": [ "line1", "line2", "line3", "line4" ],
-            |      "town": "town",
-            |      "postcode": "ABC 123",
-            |      "country": {
-            |        "code": "UK",
-            |        "name": "United Kingdom"
-            |      }
-            |    }
-            |  }
-            |]
-            |""".stripMargin
-        )
-
-        mockLookupAddress(postcode)(Right(HttpResponse(200, Some(json))))
-
-        await(service.lookupAddress(postcode, None).value) shouldBe Right(
-          AddressLookupResult(
-            postcode,
-            None,
-            List(
-              UkAddress("line1", Some("line2"), Some("line3"), Some("line4, town"), "ABC 123")
+              UkAddress("line1", Some("line2"), Some("town"), Some("county"), "ABC 123"),
+              UkAddress("line1", None, Some("town"), None, "ABC 123"),
+              UkAddress("line1", None,  Some("town"), Some("county"), "ABC 123"),
+              UkAddress("line1", Some("line2"), Some("town"), None, "ABC 123"),
+              UkAddress("line1", Some("line2, line3"), Some("town"), None, "ABC 123")
             )
           )
         )

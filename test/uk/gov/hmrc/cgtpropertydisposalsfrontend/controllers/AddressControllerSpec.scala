@@ -31,7 +31,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.{NonUkAddress, Uk
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{SubscriptionMissingData, SubscriptionReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AddressLookupRequest, AddressLookupResult, BusinessPartnerRecord, Error, NINO, Name, Postcode, SessionData, SubscriptionDetails, SubscriptionStatus, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AddressLookupService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -39,7 +39,7 @@ import scala.concurrent.Future
 
 class AddressControllerSpec extends ControllerSpec with AuthSupport with SessionSupport {
 
-  val mockService = mock[AddressLookupService]
+  val mockService = mock[UKAddressLookupService]
 
   def mockAddressLookup(expectedPostcode: Postcode, filter: Option[String])(result: Either[Error, AddressLookupResult]) =
     (mockService
@@ -51,7 +51,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
     List(
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
-      bind[AddressLookupService].toInstance(mockService)
+      bind[UKAddressLookupService].toInstance(mockService)
     )
 
   lazy val controller = instanceOf[AddressController]
@@ -265,7 +265,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
           )
           val updatedSession = SessionData.empty.copy(
             subscriptionStatus = Some(SubscriptionReady(subscriptionDetails.copy(
-              address = UkAddress("Some street", None, None, None, "W1A2HR")
+              address = UkAddress("Flat 1", Some("The Street"), Some("The Town"), Some("Countyshire"), "W1A2HR")
             )))
           )
           inSequence {
@@ -273,7 +273,13 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
             mockGetSession(Future.successful(Right(Some(session))))
             mockStoreSession(updatedSession)(Future.successful(Right(())))
           }
-          val result = performAction("address-line1" -> "Some street", "postcode" -> "W1A2HR")
+          val result = performAction(
+            "address-line1" -> "Flat 1",
+            "address-line2" -> "The Street",
+            "address-town" -> "The Town",
+            "address-county" -> "Countyshire",
+            "postcode" -> "W1A2HR"
+          )
           checkIsRedirect(result, routes.SubscriptionController.checkYourDetails())
         }
       }
