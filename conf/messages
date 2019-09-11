@@ -122,3 +122,12 @@ registerTrust.buttonText=Register your trust
 registration.start.title=You need to register with HMRC before starting
 registration.start.p=Because we hold no details about your tax affairs you will need to register to be able to create an account to report and pay Capital Gains Tax on UK property disposals.
 registration.start.buttonText=Start registration
+
+entityType.title=Select which type of entity you are registering
+entityType.individual=Individual
+entityType.trust=A trust that I represent
+entityType.error.required=Select whether you are an individual or a trust
+entityType.invalid=Select either individual or trust
+
+wrongAccountForTrusts.title=Wrong type of Government Gateway account for trusts
+wrongAccountForTrusts.p=In order to register to Report and Pay Capital Gains Tax on UK Property Disposals you need to sign in with the Government Gateway account associated with your trust, or if one does not exist then you will need to create a new Government Gateway account, set up as an organisation and not an individual, to use for registering your trust.

@@ -15,6 +15,9 @@ POST /iv/saUtr                            uk.gov.hmrc.cgtpropertydisposalsfronte
 
 ### Registration
 GET  /registration/start                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegistrationController.startRegistration()
+GET  /registration/select-entity-type     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegistrationController.selectEntityType()
+POST /registration/select-entity-type     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegistrationController.selectEntityTypeSubmit()
+GET  /wrong-account-for-trusts            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegistrationController.wrongGGAccountForTrusts()
 
 ### Subscription - missing data
 GET  /subscription/enter-email            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailController.enterEmail()
