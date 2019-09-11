@@ -70,13 +70,15 @@ class RegistrationController @Inject()(
     )
   }
 
-  def selectEntityTypeSubmit(): Action[AnyContent] =  authenticatedActionWithSessionData { implicit request =>
-    RegistrationController.selectEntityTypeForm.bindFromRequest().fold(
-      e => BadRequest(selectEntityTypePage(e, routes.RegistrationController.startRegistration())),
-      {
-        case EntityType.Individual => Ok("You can register as an individual")
-        case EntityType.Trust => Redirect(routes.RegistrationController.wrongGGAccountForTrusts())
-      }
+  def selectEntityTypeSubmit(): Action[AnyContent] =  authenticatedActionWithSessionData.async { implicit request =>
+    carryOnIfValidUser(request)(_ =>
+      RegistrationController.selectEntityTypeForm.bindFromRequest().fold(
+        e => BadRequest(selectEntityTypePage(e, routes.RegistrationController.startRegistration())),
+        {
+          case EntityType.Individual => Ok("You can register as an individual")
+          case EntityType.Trust => Redirect(routes.RegistrationController.wrongGGAccountForTrusts())
+        }
+      )
     )
   }
 
