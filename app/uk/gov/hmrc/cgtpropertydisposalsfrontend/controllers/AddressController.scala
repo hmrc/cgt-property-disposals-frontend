@@ -29,7 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Line
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.SubscriptionReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Address, AddressLookupRequest, AddressLookupResult, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AddressLookupService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -39,16 +39,16 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class AddressController @Inject()(
-   val authenticatedAction: AuthenticatedAction,
-   val subscriptionDetailsAction: SubscriptionReadyAction,
-   cc: MessagesControllerComponents,
-   errorHandler: ErrorHandler,
-   addressLookupService: AddressLookupService,
-   sessionStore: SessionStore,
-   enterPostcodePage: views.html.subscription.enter_postcode,
-   selectAddressPage: views.html.subscription.select_address,
-   enterAddressPage: views.html.subscription.enter_address,
-   addressDisplay: views.html.components.address_display
+                                   val authenticatedAction: AuthenticatedAction,
+                                   val subscriptionDetailsAction: SubscriptionReadyAction,
+                                   cc: MessagesControllerComponents,
+                                   errorHandler: ErrorHandler,
+                                   ukAddressLookupService: UKAddressLookupService,
+                                   sessionStore: SessionStore,
+                                   enterPostcodePage: views.html.subscription.enter_postcode,
+                                   selectAddressPage: views.html.subscription.select_address,
+                                   enterAddressPage: views.html.subscription.enter_address,
+                                   addressDisplay: views.html.components.address_display
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with Logging
@@ -109,7 +109,7 @@ class AddressController @Inject()(
               SeeOther(routes.AddressController.selectAddress().url)
             } else {
               val result = for {
-                addressLookupResult <- addressLookupService.lookupAddress(postcode, filter)
+                addressLookupResult <- ukAddressLookupService.lookupAddress(postcode, filter)
                 _ <- EitherT(
                       updateSession(sessionStore, request)(_.copy(addressLookupResult = Some(addressLookupResult)))
                     )
