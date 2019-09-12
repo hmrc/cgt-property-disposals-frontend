@@ -223,7 +223,18 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           "the user has not indicated that they have an SA UTR" must {
 
             "redirect to the do you have a nino page" in {
+              def sessionData = SessionData.empty.copy(
+                subscriptionStatus = Some(
+                  IndividualWithInsufficientConfidenceLevel(
+                    Some(false), None, name, None))
+              )
 
+              inSequence {
+                mockAuthWithAllRetrievals(L50, Some(AffinityGroup.Individual), None, Some(name), None, None, Set.empty)
+                mockGetSession(Future.successful(Right(Some(sessionData))))
+              }
+
+              checkIsRedirect(performAction(), routes.InsufficientConfidenceLevelController.doYouHaveNINO())
             }
 
           }
@@ -328,6 +339,46 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
         }
 
+        "the session data indicates that some subscription details are missing" must {
+
+          "redirect to check your details" when {
+
+            "the session data indicates there is subscription data missing and there is now enough " +
+              "data to proceed to the check your details page" in {
+              val individualSubscriptionDetails = SubscriptionDetails(Right(name), emailAddress, bpr.address, bpr.sapNumber)
+                val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionMissingData(bpr, Right(name))))
+                val updatedSession =
+                  SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(individualSubscriptionDetails)))
+
+                inSequence {
+                  mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), None, Some(name), None, None, Set.empty)
+                  mockGetSession(Future.successful(Right(Some(session))))
+                  mockStoreSession(updatedSession)(Future.successful(Right(())))
+                }
+                checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
+              }
+            }
+
+
+          "redirect to enter email" when {
+
+            "the email address is still missing" in {
+                val bprWithNoEmail = bpr.copy(emailAddress = None)
+                val sessionData =
+                  SessionData.empty.copy(subscriptionStatus = Some(SubscriptionMissingData(bprWithNoEmail, Right(name))))
+
+                inSequence {
+                  mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), None, Some(name), None, None, Set.empty)
+                  mockGetSession(Future.successful(Right(Some(sessionData))))
+                }
+
+                checkIsRedirect(performAction(), routes.EmailController.enterEmail().url)
+            }
+
+          }
+
+        }
+
       }
 
       "the user is not enrolled and is not subscribed in ETMP" when {
@@ -394,7 +445,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
           "redirect to check subscription details" when {
 
-            "one doesn't exist in session and it is successfully retrieved using the retrieved auth NINO, name and date of birth" in {
+            "there is no session data and a bpr is successfully retrieved using the retrieved auth NINO, name and date of birth" in {
               List(
                 Some(SessionData.empty),
                 None
@@ -429,18 +480,17 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
             }
 
-            "one doesn't exist in session and it is successfully retrieved using the retrieved auth NINO and " +
-              "there is a BPR already in session" in {
-              val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionMissingData(bpr, Right(name))))
-              val updatedSession =
-                SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(individualSubscriptionDetails)))
+            "the session data indicates there is subscription data missing and there is now enough data to proceed" in {
+                  val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionMissingData(bpr, Right(name))))
+                  val updatedSession =
+                    SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(individualSubscriptionDetails)))
 
-              inSequence {
-                mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, name, retrievedDateOfBirth, None)
-                mockGetSession(Future.successful(Right(Some(session))))
-                mockStoreSession(updatedSession)(Future.successful(Right(())))
-              }
-              checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
+                  inSequence {
+                    mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, name, retrievedDateOfBirth, None)
+                    mockGetSession(Future.successful(Right(Some(session))))
+                    mockStoreSession(updatedSession)(Future.successful(Right(())))
+                  }
+                  checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
             }
 
           }
@@ -462,6 +512,20 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               checkIsRedirect(performAction(), routes.EmailController.enterEmail().url)
             }
 
+            "the session data indicates there is data missing for subscription and the email address " +
+              "is still missing" in {
+                val bprWithNoEmail = bpr.copy(emailAddress = None)
+                val sessionData =
+                  SessionData.empty.copy(subscriptionStatus = Some(SubscriptionMissingData(bprWithNoEmail, Right(name))))
+
+                inSequence {
+                  mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, name, retrievedDateOfBirth, None)
+                  mockGetSession(Future.successful(Right(Some(sessionData))))
+                }
+
+                checkIsRedirect(performAction(), routes.EmailController.enterEmail().url)
+              }
+
           }
 
         }
@@ -475,20 +539,6 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           val sapNumber = "sap"
           val bpr = BusinessPartnerRecord(Some(emailAddress), address, sapNumber, Some(trustName.value))
           val trustSubscriptionDetails = SubscriptionDetails(Left(trustName), emailAddress, bpr.address, bpr.sapNumber)
-
-          "redirect to check subscription details" when {
-
-            "there are subscription details in session" in {
-              val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(trustSubscriptionDetails)))
-              inSequence {
-                mockAuthWithAllTrustRetrievals(sautr, None)
-                mockGetSession(Future.successful(Right(Some(session))))
-              }
-
-              checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
-            }
-
-          }
 
           "redirect to the subscription confirmation page" when {
 
@@ -541,6 +591,20 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               checkIsTechnicalErrorPage(performAction())
             }
 
+            "the session data indicates there is data missing for subscription and the trust name" +
+              "is missing" in {
+              val bprWithNoTrustName = bpr.copy(organisationName = None)
+              val sessionData =
+                SessionData.empty.copy(subscriptionStatus = Some(SubscriptionMissingData(bprWithNoTrustName, Right(name))))
+
+              inSequence {
+                mockAuthWithAllTrustRetrievals(sautr, None)
+                mockGetSession(Future.successful(Right(Some(sessionData))))
+              }
+
+              checkIsTechnicalErrorPage(performAction())
+            }
+
           }
 
           "redirect to check your details" when {
@@ -572,6 +636,30 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
               checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
             }
+
+
+            "there are subscription details in session" in {
+              val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(trustSubscriptionDetails)))
+              inSequence {
+                mockAuthWithAllTrustRetrievals(sautr, None)
+                mockGetSession(Future.successful(Right(Some(session))))
+              }
+
+              checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
+            }
+
+            "the session data indicates there is subscription data missing and there is now enough data to proceed" in {
+              val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionMissingData(bpr, Left(trustName))))
+              val updatedSession =
+                SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(trustSubscriptionDetails)))
+
+              inSequence {
+                mockAuthWithAllTrustRetrievals(sautr, None)
+                mockGetSession(Future.successful(Right(Some(session))))
+                mockStoreSession(updatedSession)(Future.successful(Right(())))
+              }
+              checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
+            }
           }
 
           "redirect to the enter email page" when {
@@ -590,6 +678,20 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               }
 
               checkIsRedirect(performAction(), routes.EmailController.enterEmail())
+            }
+
+            "the session data indicates there is data missing for subscription and the email address " +
+              "is still missing" in {
+              val bprWithNoEmail = bpr.copy(emailAddress = None)
+              val sessionData =
+                SessionData.empty.copy(subscriptionStatus = Some(SubscriptionMissingData(bprWithNoEmail, Right(name))))
+
+              inSequence {
+                mockAuthWithAllTrustRetrievals(sautr, None)
+                mockGetSession(Future.successful(Right(Some(sessionData))))
+              }
+
+              checkIsRedirect(performAction(), routes.EmailController.enterEmail().url)
             }
 
           }
