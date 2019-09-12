@@ -58,25 +58,29 @@ class AuthenticatedActionWithRetrievedData @Inject()(
         v2.Retrievals.confidenceLevel and
           v2.Retrievals.affinityGroup and
           v2.Retrievals.nino and
+          v2.Retrievals.saUtr and
           v2.Retrievals.itmpName and
           v2.Retrievals.name and
           v2.Retrievals.itmpDateOfBirth and
           v2.Retrievals.email and
           v2.Retrievals.allEnrolments
       ) {
-        case cl ~ Some(AffinityGroup.Individual) ~ maybeNino ~ maybeItmpName ~ maybeGGName ~ _ ~ maybeEmail ~ _ if cl < ConfidenceLevel.L200 =>
+        case cl ~ Some(AffinityGroup.Individual) ~ maybeNino ~ maybeSautr ~ maybeItmpName ~
+          maybeGGName ~ _ ~ maybeEmail ~ _ if cl < ConfidenceLevel.L200 =>
           withName(maybeItmpName, maybeGGName, request)(name =>
             Right(AuthenticatedRequestWithRetrievedData(
-              UserType.IndividualWithInsufficientConfidenceLevel(maybeNino.map(NINO),
+              UserType.IndividualWithInsufficientConfidenceLevel(
+                maybeNino.map(NINO),
+                maybeSautr.map(SAUTR(_)),
                 name,
                 maybeEmail.filter(_.nonEmpty).map(Email(_))
               ),
               request))
           )
 
-        case individual @ _ ~ Some(AffinityGroup.Individual) ~ _ ~ _ ~ _ ~ _ ~ _ ~ _ =>
+        case individual @ _ ~ Some(AffinityGroup.Individual) ~ _ ~ _ ~ _ ~ _ ~ _ ~ _ ~ _ =>
           individual match {
-            case  _ ~ _ ~ Some(nino) ~ maybeItmpName ~ maybeGGName ~ maybeDob ~ maybeEmail ~ _ =>
+            case  _ ~ _ ~ Some(nino) ~ _ ~ maybeItmpName ~ maybeGGName ~ maybeDob ~ maybeEmail ~ _ =>
               withName(maybeItmpName, maybeGGName, request)( name =>
                 Right(AuthenticatedRequestWithRetrievedData(
                   UserType.Individual(
@@ -91,10 +95,10 @@ class AuthenticatedActionWithRetrievedData @Inject()(
 
           }
 
-        case _ @  _ ~ Some(AffinityGroup.Organisation) ~ _ ~ _ ~ _ ~ _ ~ maybeEmail ~ enrolments =>
+        case _ @  _ ~ Some(AffinityGroup.Organisation) ~ _ ~ _ ~ _ ~ _ ~ _ ~ maybeEmail ~ enrolments =>
           handleOrganisation(request, enrolments, maybeEmail)
 
-        case _ @ _ ~ otherAffinityGroup ~ _ ~ _ ~ _ ~ _ ~ _ ~ _ =>
+        case _ @ _ ~ otherAffinityGroup ~ _ ~ _ ~ _ ~ _ ~ _ ~ _ ~ _ =>
           logger.warn(s"Got request for unsupported affinity group $otherAffinityGroup")
           Left(errorHandler.errorResult()(request))
 
