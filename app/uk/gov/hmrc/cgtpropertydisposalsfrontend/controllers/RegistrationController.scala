@@ -20,12 +20,12 @@ import cats.syntax.eq._
 import cats.instances.int._
 import com.google.inject.{Inject, Singleton}
 import play.api.data.Form
-import play.api.data.Forms.{mapping, nonEmptyText, number}
+import play.api.data.Forms.{mapping, number}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.IndividualWithInsufficientConfidenceLevel
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.HasSAUTR
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{IndividualWithInsufficientConfidenceLevel, SubscriptionMissingData, SubscriptionReady}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{HasSAUTR, Name, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.toFuture
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -42,6 +42,7 @@ class RegistrationController @Inject()(
     startRegistrationPage: views.html.registration.registration_start,
     selectEntityTypePage: views.html.registration.select_entity_type,
     wrongGGAccountForTrustPage: views.html.wrong_gg_account_for_trust,
+    enterNamePage: views.html.registration.enter_name,
     cc: MessagesControllerComponents
   )(
     implicit viewConfig: ViewConfig,
@@ -75,7 +76,7 @@ class RegistrationController @Inject()(
       RegistrationController.selectEntityTypeForm.bindFromRequest().fold(
         e => BadRequest(selectEntityTypePage(e, routes.RegistrationController.startRegistration())),
         {
-          case EntityType.Individual => Ok("You can register as an individual")
+          case EntityType.Individual => Redirect(routes.RegistrationController.enterName())
           case EntityType.Trust => Redirect(routes.RegistrationController.wrongGGAccountForTrusts())
         }
       )
@@ -88,6 +89,19 @@ class RegistrationController @Inject()(
     )
   }
 
+  def enterName(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    carryOnIfValidUser(request)(_ =>
+      Ok(enterNamePage(Name.form, routes.RegistrationController.selectEntityType()))
+    )
+  }
+
+  def enterNameSubmit(): Action[AnyContent] =  authenticatedActionWithSessionData.async { implicit request =>
+    carryOnIfValidUser(request)(_ =>
+      Name.form.bindFromRequest().fold(
+        e => BadRequest(enterNamePage(e, routes.RegistrationController.selectEntityType())),
+        name => Ok(s"your name is ${name.firstName} ${name.lastName}"))
+      )
+  }
 }
 
 object RegistrationController {

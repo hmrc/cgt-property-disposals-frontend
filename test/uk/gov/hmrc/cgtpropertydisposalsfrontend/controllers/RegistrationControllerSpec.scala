@@ -191,10 +191,116 @@ class RegistrationControllerSpec
             mockGetSession(Future.successful(Right(Some(sessionData))))
           }
           val result = performAction("entityType" -> "0")
+          checkIsRedirect(result, routes.RegistrationController.enterName())
+        }
+      }
+
+    }
+
+    "handling requests to view the enter name page" must {
+      def performAction(): Future[Result] =
+        controller.enterName()(FakeRequest())
+
+      val sessionData =
+        SessionData.empty.copy(subscriptionStatus = Some(
+          IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)), name, None))
+        )
+
+      behave like redirectToStartBehaviour(performAction)
+
+      "show the page" when {
+        "the endpoint is requested" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData))))
+          }
+          val result = performAction()
+          status(result) shouldBe OK
+          contentAsString(result) should include(message("enterName.title"))
+        }
+      }
+    }
+
+    "handling requests to submit the enter name page" must {
+
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.enterNameSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
+
+      val sessionData =
+        SessionData.empty.copy(subscriptionStatus = Some(
+          IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)), name, None))
+        )
+
+      behave like redirectToStartBehaviour(() => performAction())
+
+      "be successful" when {
+        "the request submits valid values" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData))))
+          }
+          val result = performAction("firstName" -> "Bob", "lastName" -> "Smith")
+          status(result) shouldBe OK
+        }
+        "request submits valid values with leading and trailing spaces" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData))))
+          }
+          val result = performAction("firstName" -> " Bob ", "lastName" -> " Smith ")
           status(result) shouldBe OK
         }
       }
 
+      "show the page with errors" when {
+        "the request submits no selection" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData))))
+          }
+          val result = performAction()
+          status(result) shouldBe BAD_REQUEST
+          val resultAsString = contentAsString(result)
+          resultAsString should include(message("firstName.error.required"))
+          resultAsString should include(message("lastName.error.required"))
+        }
+        "the request submits a first name that is too long" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData))))
+          }
+          val result = performAction("firstName" -> "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "lastName" -> "Smith")
+          status(result) shouldBe BAD_REQUEST
+          contentAsString(result) should include(message("firstName.error.tooLong"))
+        }
+        "the request submits a first name with illegal characters" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData))))
+          }
+          val result = performAction("firstName" -> "999", "lastName" -> "Smith")
+          status(result) shouldBe BAD_REQUEST
+          contentAsString(result) should include(message("firstName.error.pattern"))
+        }
+        "the request submits a last name that is too long" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData))))
+          }
+          val result = performAction("firstName" -> "Bob", "lastName" -> "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+          status(result) shouldBe BAD_REQUEST
+          contentAsString(result) should include(message("lastName.error.tooLong"))
+        }
+        "the request submits a last name with illegal characters" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData))))
+          }
+          val result = performAction("firstName" -> "Bob", "lastName" -> "i99")
+          status(result) shouldBe BAD_REQUEST
+          contentAsString(result) should include(message("lastName.error.pattern"))
+        }
+      }
     }
 
     "handling requests to view the wrong gg account page" must {
