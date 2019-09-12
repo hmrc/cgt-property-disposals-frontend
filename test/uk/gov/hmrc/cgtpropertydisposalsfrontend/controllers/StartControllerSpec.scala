@@ -343,7 +343,8 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
           "redirect to check your details" when {
 
-            "the session data indicates there is subscription data missing and there is now enough data to proceed" in {
+            "the session data indicates there is subscription data missing and there is now enough " +
+              "data to proceed to the check your details page" in {
               val individualSubscriptionDetails = SubscriptionDetails(Right(name), emailAddress, bpr.address, bpr.sapNumber)
                 val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionMissingData(bpr, Right(name))))
                 val updatedSession =
