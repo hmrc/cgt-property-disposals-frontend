@@ -20,7 +20,7 @@ import julienrf.json.derived
 import play.api.libs.json.OFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherFormat.eitherFormat
 
-sealed trait SubscriptionStatus
+sealed trait SubscriptionStatus extends Product with Serializable
 
 object SubscriptionStatus {
 

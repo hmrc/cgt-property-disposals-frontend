@@ -16,9 +16,18 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-sealed trait DisplayFormat extends Product with Serializable
+import julienrf.json.derived
+import play.api.libs.json.OFormat
 
-object DisplayFormat {
-  case object Block extends DisplayFormat
-  case object Line extends DisplayFormat
+sealed trait RegistrationStatus extends Product with Serializable
+
+object RegistrationStatus {
+
+  final case object IndividualWantsToRegisterTrust extends RegistrationStatus
+
+  final case class IndividualSupplyingInformation(name: Option[Name]) extends RegistrationStatus
+
+  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
+  implicit val format: OFormat[RegistrationStatus] = derived.oformat[RegistrationStatus]
+
 }

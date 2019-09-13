@@ -224,7 +224,7 @@ class InsufficientConfidenceLevelControllerSpec
         "the user indicates that they do not have a NINO" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(Some(false), None, name, None))))))
+            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(None, None, name, None))))))
             mockStoreSession(session(IndividualWithInsufficientConfidenceLevel(Some(false), None, name, None)))(Future.successful(Right(())))
           }
 
@@ -232,6 +232,29 @@ class InsufficientConfidenceLevelControllerSpec
           checkIsRedirect(result, routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr())
         }
 
+      }
+
+      "not update the session" when {
+
+        "the user has previously indicated that they have a NINO" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(Some(true), None, name, None))))))
+          }
+
+          val result = performAction("hasNino" -> "true")
+          checkIsRedirectToIv(result, false)
+        }
+
+        "the user has previously indicated that they do not have a NINO" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(Some(false), None, name, None))))))
+          }
+
+          val result = performAction("hasNino" -> "false")
+          checkIsRedirect(result, routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr())
+        }
       }
 
 

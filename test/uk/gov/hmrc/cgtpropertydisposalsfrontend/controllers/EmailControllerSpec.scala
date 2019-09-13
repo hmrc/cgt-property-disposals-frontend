@@ -333,7 +333,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
         }
 
-        "redirect to confirm email when the email address has already been verified" in {
+        "redirect to confirm email when the email address has been verified" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData))))
@@ -368,8 +368,6 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             mockAuthWithNoRetrievals()
             mockGetSession(
               Future.successful(Right(Some(sessionData.copy(emailToBeVerified = Some(emailToBeVerified))))))
-            mockStoreSession(sessionData.copy(emailToBeVerified = Some(emailToBeVerified)))(
-              Future.successful(Right(())))
             mockEmailVerification(email, id, expectedName)(Right(EmailVerificationRequested))
           }
 
@@ -386,8 +384,6 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             mockAuthWithNoRetrievals()
             mockGetSession(
               Future.successful(Right(Some(sessionData.copy(emailToBeVerified = Some(emailToBeVerified))))))
-            mockStoreSession(sessionData.copy(emailToBeVerified = Some(emailToBeVerified)))(
-              Future.successful(Right(())))
             mockEmailVerification(Email(emailWithoutSpaces), id, expectedName)(Right(EmailVerificationRequested))
           }
 

@@ -93,7 +93,7 @@ class CGTPropertyDisposalsConnectorImpl @Inject()(http: HttpClient, servicesConf
 
 object CGTPropertyDisposalsConnectorImpl {
 
-  private sealed trait OutgoingBprRequest
+  private sealed trait OutgoingBprRequest extends Product with Serializable
 
   private object OutgoingBprRequest {
     final case class IndividualBprRequest(id: Either[String,String],

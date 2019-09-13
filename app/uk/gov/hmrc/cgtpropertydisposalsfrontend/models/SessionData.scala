@@ -21,6 +21,7 @@ import play.api.libs.json.{Format, Json}
 
 final case class SessionData(
   subscriptionStatus: Option[SubscriptionStatus],
+  registrationStatus: Option[RegistrationStatus],
   emailToBeVerified: Option[EmailToBeVerified],
   addressLookupResult: Option[AddressLookupResult]
 )
@@ -31,6 +32,6 @@ object SessionData {
 
   implicit val eq: Eq[SessionData] = Eq.fromUniversalEquals[SessionData]
 
-  val empty: SessionData = SessionData(None, None, None)
+  val empty: SessionData = SessionData(None, None, None, None)
 
 }

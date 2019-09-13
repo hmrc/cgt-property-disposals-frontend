@@ -68,9 +68,10 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
   val subscriptionDetails: SubscriptionDetails =
     sample[SubscriptionDetails].copy(address = address(1))
 
-  val (addressHead, addresses) = {
+  val (addressHead, lastAddress, lastAddressIndex, addresses) = {
     val head = address(1)
-    head -> (head :: (2 to 5).map(address).toList)
+    val last = address(5)
+    (head, last, 4, head :: ((2 to 4).map(address).toList ::: List(last)))
   }
 
   val addressLookupResult = AddressLookupResult(postcode, None, addresses)
@@ -586,7 +587,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
       "the selected address cannot be stored in session" in {
         val updatedSession = existingSession.copy(
           subscriptionStatus =
-            Some(existingSubscriptionReady.copy(subscriptionDetails = subscriptionDetails.copy(address = addressHead)))
+            Some(existingSubscriptionReady.copy(subscriptionDetails = subscriptionDetails.copy(address = lastAddress)))
         )
 
         inSequence {
@@ -595,7 +596,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
           mockStoreSession(updatedSession)(Future.successful(Left(Error(""))))
         }
 
-        checkIsTechnicalErrorPage(performAction("address-select" -> "0"))
+        checkIsTechnicalErrorPage(performAction("address-select" -> s"${lastAddressIndex}"))
       }
 
     }
@@ -605,7 +606,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
       "the selected address is stored in session" in {
         val updatedSession = existingSession.copy(
           subscriptionStatus =
-            Some(existingSubscriptionReady.copy(subscriptionDetails = subscriptionDetails.copy(address = addressHead)))
+            Some(existingSubscriptionReady.copy(subscriptionDetails = subscriptionDetails.copy(address = lastAddress)))
         )
 
         inSequence {
@@ -614,11 +615,29 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
           mockStoreSession(updatedSession)(Future.successful(Right(())))
         }
 
-        val result = performAction("address-select" -> "0")
+        val result = performAction("address-select" -> s"$lastAddressIndex")
         checkIsRedirect(result, routes.SubscriptionController.checkYourDetails())
       }
 
     }
+
+    "not update the session" when {
+
+      "the user selects an address which is already in their subscription details" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(Future.successful(Right(Some(existingSession))))
+        }
+
+        val result = performAction("address-select" -> "0")
+        checkIsRedirect(result, routes.SubscriptionController.checkYourDetails())
+      }
+
+
+    }
+
+
+
 
   }
 

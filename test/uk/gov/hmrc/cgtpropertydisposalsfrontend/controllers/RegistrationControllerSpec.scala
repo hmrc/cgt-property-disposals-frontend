@@ -27,9 +27,10 @@ import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.CSRFTokenHelper._
 import play.api.test.Helpers._
+import shapeless.{Lens, lens}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.IndividualWithInsufficientConfidenceLevel
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{HasSAUTR, Name, SessionData, SubscriptionStatus, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, HasSAUTR, Name, RegistrationStatus, SessionData, SubscriptionStatus, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 
 import scala.concurrent.Future
@@ -50,6 +51,11 @@ class RegistrationControllerSpec
   implicit val subscriptionStatusEq: Eq[SubscriptionStatus] = Eq.fromUniversalEquals
 
   val name = sample[Name]
+
+  val expectedSubscriptionStatus =
+    IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)), name, None)
+
+  val registrationStatusLens: Lens[SessionData, Option[RegistrationStatus]] = lens[SessionData].registrationStatus
 
   "RegistrationController" when {
 
@@ -81,6 +87,40 @@ class RegistrationControllerSpec
       }
     }
 
+    def commonIndividualRegistrationBehaviour(performAction: () => Future[Result]): Unit = {
+      val sessionData =
+        SessionData.empty.copy(subscriptionStatus = Some(expectedSubscriptionStatus))
+
+      "redirect to the start registration endpoint" when {
+
+        "there is no registration status in the session" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData.copy(registrationStatus = None)))))
+          }
+
+          checkIsRedirect(performAction(), routes.RegistrationController.startRegistration())
+        }
+
+      }
+
+      "redirect to the wrong gg account page" when {
+
+        "the session data indicates that the user wishes to register a trust" in {
+          val session = sessionData.copy(registrationStatus = Some(RegistrationStatus.IndividualWantsToRegisterTrust))
+
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(session))))
+          }
+
+          checkIsRedirect(performAction(), routes.RegistrationController.wrongGGAccountForTrusts())
+        }
+
+      }
+    }
+
+
     "handling requests to show the registration start page" must {
 
       def performAction(): Future[Result] =
@@ -93,9 +133,7 @@ class RegistrationControllerSpec
         "the session data indicates that the user has no digital footprint and " +
           "they have indicated that they have no NINO or SA UTR" in {
           val sessionData =
-            SessionData.empty.copy(subscriptionStatus = Some(
-              IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)), name, None))
-              )
+            SessionData.empty.copy(subscriptionStatus = Some(expectedSubscriptionStatus))
 
           inSequence{
             mockAuthWithNoRetrievals()
@@ -119,12 +157,11 @@ class RegistrationControllerSpec
       behave like redirectToStartBehaviour(performAction)
 
       "show the page" when {
+
         "the session data indicates that the user has no digital footprint and " +
           "the user has opted to start registration" in {
           val sessionData =
-            SessionData.empty.copy(subscriptionStatus = Some(
-              IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)), name, None))
-            )
+            SessionData.empty.copy(subscriptionStatus = Some(expectedSubscriptionStatus))
 
           inSequence{
             mockAuthWithNoRetrievals()
@@ -136,6 +173,31 @@ class RegistrationControllerSpec
           contentAsString(result) should include(message("entityType.title"))
         }
       }
+
+      "prepopulate the form if the user has previously answered the question" in {
+        List(
+          RegistrationStatus.IndividualWantsToRegisterTrust,
+          RegistrationStatus.IndividualSupplyingInformation(None)
+        ).foreach{ registrationStatus =>
+          val sessionData =
+            SessionData.empty.copy(
+              subscriptionStatus = Some(expectedSubscriptionStatus),
+              registrationStatus = Some(registrationStatus)
+            )
+
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData))))
+          }
+
+          val result = performAction()
+          status(result) shouldBe OK
+          contentAsString(result) should include(message("entityType.title"))
+          contentAsString(result) should include("""checked="checked"""")
+        }
+
+      }
+
     }
 
     "handling requests to submit the selected entity type" must {
@@ -144,9 +206,7 @@ class RegistrationControllerSpec
         controller.selectEntityTypeSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
 
       val sessionData =
-        SessionData.empty.copy(subscriptionStatus = Some(
-          IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)), name, None))
-        )
+        SessionData.empty.copy(subscriptionStatus = Some(expectedSubscriptionStatus))
 
       behave like redirectToStartBehaviour(() => performAction())
 
@@ -175,24 +235,86 @@ class RegistrationControllerSpec
 
       "redirect to the wrong gg account page" when {
         "the request selects trust" in {
+          val updatedSession =
+            sessionData.copy(registrationStatus = Some(RegistrationStatus.IndividualWantsToRegisterTrust))
+
           inSequence{
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData))))
+            mockStoreSession(updatedSession)(Future.successful(Right(())))
           }
           val result = performAction("entityType" -> "1")
           checkIsRedirect(result, routes.RegistrationController.wrongGGAccountForTrusts())
         }
-      }
 
       "continue the registration journey" when {
         "the request selects individual" in {
+          val updatedSession =
+            sessionData.copy(registrationStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None)))
+
           inSequence{
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData))))
+            mockStoreSession(updatedSession)(Future.successful(Right(())))
           }
           val result = performAction("entityType" -> "0")
           checkIsRedirect(result, routes.RegistrationController.enterName())
         }
+
+      }
+
+      "display an error page" when {
+
+        "the session cannot be updated" in {
+          List[(String,RegistrationStatus)](
+            "0" -> RegistrationStatus.IndividualSupplyingInformation(None),
+            "1" -> RegistrationStatus.IndividualWantsToRegisterTrust
+          ).foreach{ case (entityType, registrationStatus) =>
+
+            inSequence{
+              mockAuthWithNoRetrievals()
+              mockGetSession(Future.successful(Right(Some(sessionData))))
+              mockStoreSession(sessionData.copy(registrationStatus = Some(registrationStatus)))(Future.successful(Left(Error(""))))
+            }
+
+            checkIsTechnicalErrorPage(performAction("entityType" -> entityType))
+          }
+
+
+        }
+
+      }
+
+        "not update the session" when {
+
+          "the user selects trust and has previously indicated that they wish to register a trust" in {
+            val session =
+              sessionData.copy(registrationStatus = Some(RegistrationStatus.IndividualWantsToRegisterTrust))
+
+            inSequence{
+              mockAuthWithNoRetrievals()
+              mockGetSession(Future.successful(Right(Some(session))))
+            }
+            val result = performAction("entityType" -> "1")
+            checkIsRedirect(result, routes.RegistrationController.wrongGGAccountForTrusts())
+
+          }
+
+          "the user selects individual and has previously indicated that they wish to register as an individual" in {
+            val session =
+              sessionData.copy(registrationStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None)))
+
+            inSequence{
+              mockAuthWithNoRetrievals()
+              mockGetSession(Future.successful(Right(Some(session))))
+            }
+            val result = performAction("entityType" -> "0")
+            checkIsRedirect(result, routes.RegistrationController.enterName())
+
+          }
+
+        }
+
       }
 
     }
@@ -202,11 +324,14 @@ class RegistrationControllerSpec
         controller.enterName()(FakeRequest())
 
       val sessionData =
-        SessionData.empty.copy(subscriptionStatus = Some(
-          IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)), name, None))
+        SessionData.empty.copy(
+          subscriptionStatus = Some(expectedSubscriptionStatus),
+          registrationStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None))
         )
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like commonIndividualRegistrationBehaviour(performAction)
 
       "show the page" when {
         "the endpoint is requested" in {
@@ -218,7 +343,28 @@ class RegistrationControllerSpec
           status(result) shouldBe OK
           contentAsString(result) should include(message("enterName.title"))
         }
+
+        "the endpoint is requested and the user has previously entered a name" in {
+          val name = sample[Name]
+          val sessionDataWithName = registrationStatusLens.set(sessionData)(
+            Some(RegistrationStatus.IndividualSupplyingInformation(Some(name)))
+          )
+
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionDataWithName))))
+          }
+          val result = performAction()
+          status(result) shouldBe OK
+
+          val content = contentAsString(result)
+          content should include(message("enterName.title"))
+          content should include(name.firstName)
+          content should include(name.lastName)
+        }
+
       }
+
     }
 
     "handling requests to submit the enter name page" must {
@@ -227,28 +373,72 @@ class RegistrationControllerSpec
         controller.enterNameSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
 
       val sessionData =
-        SessionData.empty.copy(subscriptionStatus = Some(
-          IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)), name, None))
+        SessionData.empty.copy(
+          subscriptionStatus = Some(expectedSubscriptionStatus),
+          registrationStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None))
         )
+
+      val name = Name("Bob", "Smith")
+
+      val updatedSession =
+      registrationStatusLens.set(sessionData)(
+          Some(RegistrationStatus.IndividualSupplyingInformation(Some(name)))
+      )
 
       behave like redirectToStartBehaviour(() => performAction())
 
+      behave like commonIndividualRegistrationBehaviour(() => performAction())
+
       "be successful" when {
+
         "the request submits valid values" in {
           inSequence{
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData))))
+            mockStoreSession(updatedSession)(Future.successful(Right(())))
           }
-          val result = performAction("firstName" -> "Bob", "lastName" -> "Smith")
+          val result = performAction("firstName" -> name.firstName, "lastName" -> name.lastName)
           status(result) shouldBe OK
         }
         "request submits valid values with leading and trailing spaces" in {
           inSequence{
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData))))
+            mockStoreSession(updatedSession)(Future.successful(Right(())))
           }
-          val result = performAction("firstName" -> " Bob ", "lastName" -> " Smith ")
+
+          val result = performAction("firstName" -> s" ${name.firstName}  ", "lastName" -> s" ${name.lastName} ")
           status(result) shouldBe OK
+        }
+      }
+
+      "not update the session" when {
+
+        "the name submitted is the same in the session" in {
+          val session =
+            registrationStatusLens.set(sessionData)(
+              Some(RegistrationStatus.IndividualSupplyingInformation(Some(name)))
+            )
+
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(session))))
+          }
+          val result = performAction("firstName" -> name.firstName, "lastName" -> name.lastName)
+          status(result) shouldBe OK
+        }
+
+      }
+
+      "display an error page" when {
+        "the session cannot be updated" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData))))
+            mockStoreSession(updatedSession)(Future.successful(Left(Error(""))))
+          }
+
+          checkIsTechnicalErrorPage(performAction("firstName" -> name.firstName, "lastName" -> name.lastName))
         }
       }
 
@@ -269,7 +459,7 @@ class RegistrationControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData))))
           }
-          val result = performAction("firstName" -> "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "lastName" -> "Smith")
+          val result = performAction("firstName" -> List.fill(36)("a").mkString(""), "lastName" -> "Smith")
           status(result) shouldBe BAD_REQUEST
           contentAsString(result) should include(message("firstName.error.tooLong"))
         }
@@ -287,7 +477,7 @@ class RegistrationControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData))))
           }
-          val result = performAction("firstName" -> "Bob", "lastName" -> "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+          val result = performAction("firstName" -> "Bob", "lastName" -> List.fill(36)("a").mkString(""))
           status(result) shouldBe BAD_REQUEST
           contentAsString(result) should include(message("lastName.error.tooLong"))
         }
@@ -301,6 +491,7 @@ class RegistrationControllerSpec
           contentAsString(result) should include(message("lastName.error.pattern"))
         }
       }
+
     }
 
     "handling requests to view the wrong gg account page" must {
@@ -309,8 +500,9 @@ class RegistrationControllerSpec
         controller.wrongGGAccountForTrusts()(FakeRequest())
 
       val sessionData =
-        SessionData.empty.copy(subscriptionStatus = Some(
-          IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)), name, None))
+        SessionData.empty.copy(
+          subscriptionStatus = Some(expectedSubscriptionStatus),
+          registrationStatus = Some(RegistrationStatus.IndividualWantsToRegisterTrust)
         )
 
       behave like redirectToStartBehaviour(performAction)
@@ -326,6 +518,21 @@ class RegistrationControllerSpec
           contentAsString(result) should include(message("wrongAccountForTrusts.title"))
         }
       }
+
+      "redirect to the start registration endpoint" when {
+
+        "the session indicates that they want to register as an individual" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(
+              sessionData.copy(registrationStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None))))
+            )))
+          }
+          checkIsRedirect(performAction(), routes.RegistrationController.startRegistration())
+        }
+
+      }
+
     }
 
   }

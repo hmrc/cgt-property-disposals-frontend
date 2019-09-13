@@ -41,7 +41,7 @@ trait EmailVerificationService {
 
 object EmailVerificationService {
 
-  sealed trait EmailVerificationResponse
+  sealed trait EmailVerificationResponse extends Product with Serializable
 
   object EmailVerificationResponse {
 

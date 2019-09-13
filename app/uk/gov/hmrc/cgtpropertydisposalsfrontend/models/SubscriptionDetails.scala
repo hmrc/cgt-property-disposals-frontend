@@ -37,7 +37,7 @@ object SubscriptionDetails {
         Left(NonEmptyList.one(MissingData.Email))
       )(email => Right(SubscriptionDetails(Right(name), email, bpr.address, bpr.sapNumber)))
 
-  sealed trait MissingData
+  sealed trait MissingData extends Product with Serializable
 
   object MissingData {
 
