@@ -32,14 +32,14 @@ object Name {
       "^[a-zA-Z &`\\-'^]{1,35}$".r.pattern
         .asPredicate()
 
-    def f(s: String): ValidationResult =
+    def validateName(s: String): ValidationResult =
       if(s.length > 35) Invalid("error.tooLong")
       else if(!nameRegexPredicate.test(s)) Invalid("error.pattern")
       else Valid
 
     val nameMapping = nonEmptyText
-      .transform[String](a => a.trim, identity)
-      .verifying(Constraint[String](f(_)))
+      .transform[String](_.trim, identity)
+      .verifying(Constraint[String](validateName(_)))
 
     Form(
       mapping(

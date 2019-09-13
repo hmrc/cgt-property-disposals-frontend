@@ -152,7 +152,7 @@ class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFac
           AddressLookupResult(
             postcode,
             None,
-            List[Address](
+            List(
               UkAddress("line1", Some("line2"), Some("town"), Some("county"), "ABC 123"),
               UkAddress("line1", None, Some("town"), None, "ABC 123"),
               UkAddress("line1", None,  Some("town"), Some("county"), "ABC 123"),
