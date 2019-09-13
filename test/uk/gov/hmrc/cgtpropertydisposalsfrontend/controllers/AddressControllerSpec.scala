@@ -367,7 +367,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
         contentAsString(result) should include(message("filter.error.noResults"))
       }
 
-      "show form errors when no results are found for a postcode and session has stored search" in {
+      "show form errors when no results are found for a postcode within a stored search" in {
         val p = Postcode("NW19AX")
         val addressLookupResult = AddressLookupResult(p, None, List())
         inSequence {
@@ -379,7 +379,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
         contentAsString(result) should include(message("postcode.error.noResults"))
       }
 
-      "show form errors when no results are found for a filter and session has stored search" in {
+      "show form errors when no results are found for a filter within a stored search" in {
         val p = Postcode("NW19AX")
         val filter = "Some filter"
         val addressLookupResult = AddressLookupResult(p, Some(filter), List())
