@@ -102,6 +102,8 @@ address.uk.line3.label=Town or city (optional)
 address.uk.line4.label=County (optional)
 address-line1.error.required=Enter building and street
 postcode.error.required=Enter postcode
+postcode.error.noResults=No addresses found for this postcode, check what you entered, if it is correct then enter the address manually
+filter.error.noResults=No addresses found for this property name or number at this postcode, if it is correct then enter the address manually
 
 address-select.title=Select the address of the property
 address-select.manualOption=None of the above (Enter address manually)

@@ -65,8 +65,8 @@
     helpText = Some(Html(messages("address.postcode.helpText"))),
     errorKey = form.error(key).map(e => e.message),
     value = form.data.getOrElse(key, ""),
-    hasErrors = hasErrors,
-     inputClass = Some("form-control-1-4")
+    hasErrors = form.error(key).nonEmpty,
+    inputClass = Some("form-control-1-4")
    )
 
    <p>
