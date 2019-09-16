@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
+import cats.syntax.either._
 import com.google.inject.Inject
 import play.api.Configuration
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
@@ -45,7 +46,7 @@ class StartController @Inject()(
                                  val sessionDataAction: SessionDataActionWithRetrievedData,
                                  val config: Configuration
                                )(implicit ec: ExecutionContext)
-    extends FrontendController(cc)
+  extends FrontendController(cc)
     with WithAuthRetrievalsAndSessionDataAction
     with Logging
     with SessionUpdates
@@ -56,18 +57,20 @@ class StartController @Inject()(
     (request.authenticatedRequest.userType,
       request.sessionData.flatMap(_.journeyStatus)
     ) match {
-      case (_, Some(i: SubscriptionStatus.IndividualWithInsufficientConfidenceLevel)) =>
-        i.hasSautr.flatMap(_.value).fold[Future[Result]](
-          SeeOther(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url)
-        )(sautr =>
-          buildIndividualSubscriptionData(Individual(Left(sautr), i.name, None, i.email), None, true)
-        )
 
       case (_, Some(_: SubscriptionStatus.SubscriptionReady))         =>
         SeeOther(routes.SubscriptionController.checkYourDetails().url)
 
       case (_, Some(_: SubscriptionStatus.SubscriptionComplete))      =>
-      SeeOther(routes.SubscriptionController.subscribed().url)
+        SeeOther(routes.SubscriptionController.subscribed().url)
+
+      case (_, Some(i: SubscriptionStatus.IndividualWithInsufficientConfidenceLevel)) =>
+        // this is not the first time a person with individual insufficient confidence level has come to start
+        i.hasSautr.flatMap(_.value).fold[Future[Result]](
+          SeeOther(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url)
+        )(sautr =>
+          buildIndividualSubscriptionData(Individual(Left(sautr), i.name, None, i.email), true)
+        )
 
       case (_, Some(_: RegistrationStatus.IndividualSupplyingInformation)) =>
         SeeOther(routes.RegistrationController.startRegistration().url)
@@ -75,14 +78,20 @@ class StartController @Inject()(
       case (_, Some(RegistrationStatus.IndividualWantsToRegisterTrust)) =>
         SeeOther(routes.RegistrationController.startRegistration().url)
 
-      case (UserType.IndividualWithInsufficientConfidenceLevel(maybeNino, name, maybeEmail), _) =>
-        handleInsufficientConfidenceLevel(maybeNino, name, maybeEmail)
+      case (UserType.IndividualWithInsufficientConfidenceLevel(maybeNino, name, maybeEmail), None) => // this is the first time a person with individual insufficient confidence level has come to start
+      handleInsufficientConfidenceLevel(maybeNino, name, maybeEmail)
 
       case (i: UserType.Individual, Some(SubscriptionStatus.SubscriptionMissingData(bpr, _))) =>
-        buildIndividualSubscriptionData(i, Some(bpr), false)
+        handleSubscriptionMissingData(bpr, Right(i.name), i.email)
+
+      case (i: UserType.IndividualWithInsufficientConfidenceLevel, Some(SubscriptionStatus.SubscriptionMissingData(bpr, _))) =>
+        handleSubscriptionMissingData(bpr, Right(i.name), i.email)
+
+      case (t: UserType.Trust, Some(SubscriptionStatus.SubscriptionMissingData(bpr, _))) =>
+        handleSubscriptionMissingData(bpr, Left(bpr.organisationName.map(TrustName(_))), t.email)
 
       case (i: UserType.Individual, None) =>
-        buildIndividualSubscriptionData(i, None, false)
+        buildIndividualSubscriptionData(i, false)
 
       case (t: UserType.Trust, _) =>
         buildTrustSubscriptionData(t)
@@ -123,8 +132,8 @@ class StartController @Inject()(
       updateSession(sessionStore, request)(_.copy(journeyStatus = Some(subscriptionStatus)))
         .map{
           case Left(e) =>
-          logger.warn("Could not update session with insufficient confidence level", e)
-          errorHandler.errorResult()
+            logger.warn("Could not update session with insufficient confidence level", e)
+            errorHandler.errorResult()
 
           case Right(_) =>
             SeeOther(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url)
@@ -141,33 +150,33 @@ class StartController @Inject()(
       for{
         bprWithTrustName <- bprService.getBusinessPartnerRecord(Left(trust), false)
           .subflatMap[Error,(BusinessPartnerRecord,TrustName)]{ bpr =>
-          bpr.organisationName.fold[Either[Error,(BusinessPartnerRecord,TrustName)]](
-            Left(Error("Could not find trust name from business partner record"))
-          )( trustName =>
-            Right((bpr, TrustName(trustName)))
-          )
-        }
-      maybeSubscriptionDetails <- EitherT.pure(
+            bpr.organisationName.fold[Either[Error,(BusinessPartnerRecord,TrustName)]](
+              Left(Error("Could not find trust name from business partner record"))
+            )( trustName =>
+              Right((bpr, TrustName(trustName)))
+            )
+          }
+        maybeSubscriptionDetails <- EitherT.pure(
           bprWithTrustName._1.emailAddress.orElse(trust.email.map(_.value))
             .fold[Either[MissingData.Email.type,SubscriptionDetails]](
-                Left(SubscriptionDetails.MissingData.Email)
-              ){ email =>
-            Right(SubscriptionDetails(
-              Left(bprWithTrustName._2),
-              email,
-              bprWithTrustName._1.address,
-              bprWithTrustName._1.sapNumber
-            ))
-          }
+              Left(SubscriptionDetails.MissingData.Email)
+            ){ email =>
+              Right(SubscriptionDetails(
+                Left(bprWithTrustName._2),
+                email,
+                bprWithTrustName._1.address,
+                bprWithTrustName._1.sapNumber
+              ))
+            }
         )
-      _ <- EitherT(maybeSubscriptionDetails.fold(
-        _ =>
-          updateSession(sessionStore, request)(_.copy(journeyStatus = Some(
-            SubscriptionStatus.SubscriptionMissingData(bprWithTrustName._1, Left(bprWithTrustName._2))))),
-        subscriptionDetails =>
-          updateSession(sessionStore, request)(_.copy(journeyStatus = Some(
-            SubscriptionStatus.SubscriptionReady(subscriptionDetails))))
-      ))
+        _ <- EitherT(maybeSubscriptionDetails.fold(
+          _ =>
+            updateSession(sessionStore, request)(_.copy(journeyStatus = Some(
+              SubscriptionStatus.SubscriptionMissingData(bprWithTrustName._1, Left(bprWithTrustName._2))))),
+          subscriptionDetails =>
+            updateSession(sessionStore, request)(_.copy(journeyStatus = Some(
+              SubscriptionStatus.SubscriptionReady(subscriptionDetails))))
+        ))
       } yield maybeSubscriptionDetails
 
     result.fold({ e =>
@@ -182,28 +191,50 @@ class StartController @Inject()(
     )
   }
 
+  private def handleSubscriptionMissingData(bpr: BusinessPartnerRecord,
+                                            name: Either[Option[TrustName],Name],
+                                            retrievedEmail: Option[Email])(
+                                             implicit request: RequestWithSessionDataAndRetrievedData[_]
+                                           ): Future[Result] = {
+    SubscriptionDetails(bpr, name, retrievedEmail).fold(
+      {
+        missingData =>
+          logger.info(
+            s"Could not find the following data for subscription details: ${missingData.toList.mkString(",")}")
+          missingData.head match {
+            case MissingData.TrustName => errorHandler.errorResult()
+            case MissingData.Email => SeeOther(routes.EmailController.enterEmail().url)
+          }
+      }, subscriptionDetails =>
+        updateSession(sessionStore, request)(
+          _.copy(subscriptionStatus = Some(SubscriptionReady(subscriptionDetails)))
+        ).map{ _ =>
+          SeeOther(routes.SubscriptionController.checkYourDetails().url)
+        }
+    )
+  }
+
   private def buildIndividualSubscriptionData(individual: Individual,
-                                              maybeBpr: Option[BusinessPartnerRecord],
                                               requiresNameMatch: Boolean)(
-    implicit
-    hc: HeaderCarrier,
-    request: RequestWithSessionDataAndRetrievedData[_]
-  ): Future[Result] = {
+                                               implicit
+                                               hc: HeaderCarrier,
+                                               request: RequestWithSessionDataAndRetrievedData[_]
+                                             ): Future[Result] = {
     val result = for {
-      bpr <- maybeBpr.fold(bprService.getBusinessPartnerRecord(Right(individual), requiresNameMatch))(EitherT.pure(_))
+      bpr <- bprService.getBusinessPartnerRecord(Right(individual), requiresNameMatch)
       maybeSubscriptionDetails <- EitherT.pure(
-        SubscriptionDetails(bpr, individual.name, individual.email)
+        SubscriptionDetails(bpr, Right(individual.name), individual.email)
       )
       _ <- EitherT(
-            maybeSubscriptionDetails.fold[Future[Either[Error, Unit]]](
-              _ =>
-                updateSession(sessionStore, request)(
-                  _.copy(journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bpr, Right(individual.name))))),
-              subscriptionDetails =>
-                updateSession(sessionStore, request)(
-                  _.copy(journeyStatus = Some(SubscriptionStatus.SubscriptionReady(subscriptionDetails))))
-            )
-          )
+        maybeSubscriptionDetails.fold[Future[Either[Error, Unit]]](
+          _ =>
+            updateSession(sessionStore, request)(
+              _.copy(journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bpr, Right(individual.name))))),
+          subscriptionDetails =>
+            updateSession(sessionStore, request)(
+              _.copy(journeyStatus = Some(SubscriptionStatus.SubscriptionReady(subscriptionDetails))))
+        )
+      )
     } yield maybeSubscriptionDetails
 
     result.fold(
@@ -215,6 +246,8 @@ class StartController @Inject()(
           logger.info(
             s"Could not find the following data for subscription details: ${missingData.toList.mkString(",")}")
           missingData.head match {
+              // missing trust name is not actually a valid case but we must handle it
+            case MissingData.TrustName => errorHandler.errorResult()
             case MissingData.Email => SeeOther(routes.EmailController.enterEmail().url)
           }
 

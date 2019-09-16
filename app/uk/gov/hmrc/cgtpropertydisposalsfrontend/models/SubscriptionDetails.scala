@@ -16,7 +16,10 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import cats.data.NonEmptyList
+import cats.syntax.applicative._
+import cats.syntax.apply._
+import cats.data.Validated._
+import cats.data.{NonEmptyList, Validated, ValidatedNel}
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherFormat.eitherFormat
 
@@ -31,17 +34,35 @@ object SubscriptionDetails {
 
   implicit val format: Format[SubscriptionDetails] = Json.format
 
-  def apply(bpr: BusinessPartnerRecord, name: Name, maybeEmail: Option[Email]): Either[NonEmptyList[MissingData], SubscriptionDetails] =
-    bpr.emailAddress.orElse(maybeEmail.map(_.value))
-      .fold[Either[NonEmptyList[MissingData], SubscriptionDetails]](
-        Left(NonEmptyList.one(MissingData.Email))
-      )(email => Right(SubscriptionDetails(Right(name), email, bpr.address, bpr.sapNumber)))
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  def apply(bpr: BusinessPartnerRecord,
+            name: Either[Option[TrustName],Name],
+            maybeEmail: Option[Email]
+           ): Either[NonEmptyList[MissingData], SubscriptionDetails] = {
+    val emailValidation: ValidatedNel[MissingData, String] =
+      bpr.emailAddress.orElse(maybeEmail.map(_.value))
+        .fold[ValidatedNel[MissingData,String]](
+          Invalid(NonEmptyList.one(MissingData.Email)))(a => Valid(a))
+
+    val trustNameValidation: ValidatedNel[MissingData, Either[TrustName, Name]] =
+      name match {
+      case Left(None) => Invalid(NonEmptyList.one(MissingData.TrustName))
+      case Left(Some(trustName)) => Valid(Left(trustName))
+      case Right(name) => Valid(Right(name))
+    }
+
+    (emailValidation, trustNameValidation).mapN{ case (email, name) =>
+      SubscriptionDetails(name, email, bpr.address, bpr.sapNumber)
+    }.toEither
+  }
 
   sealed trait MissingData extends Product with Serializable
 
   object MissingData {
 
     case object Email extends MissingData
+
+    case object TrustName extends MissingData
 
   }
 

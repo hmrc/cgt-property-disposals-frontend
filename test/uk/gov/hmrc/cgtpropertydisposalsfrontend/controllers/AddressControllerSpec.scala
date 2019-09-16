@@ -361,6 +361,66 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
 
       behave like subscriptionDetailsBehavior(() => performAction())
 
+      "show form errors when no results are found for a postcode" in {
+        val p = Postcode("NW19AX")
+        val addressLookupResult = AddressLookupResult(p, None, List())
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(Future.successful(Right(Some(existingSessionData))))
+          mockAddressLookup(p, None)(Right(addressLookupResult))
+          mockStoreSession(existingSessionData.copy(addressLookupResult = Some(addressLookupResult)))(
+            Future.successful(Right(()))
+          )
+        }
+        val result = performAction("postcode" -> p.value)
+        status(result)          shouldBe BAD_REQUEST
+        contentAsString(result) should include(message("postcode.error.noResults"))
+      }
+
+      "show form errors when no results are found for a filter" in {
+        val p = Postcode("NW19AX")
+        val filter = "Some filter"
+        val addressLookupResult = AddressLookupResult(p, Some(filter), List())
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(Future.successful(Right(Some(existingSessionData))))
+          mockAddressLookup(p, Some(filter))(Right(addressLookupResult))
+          mockStoreSession(existingSessionData.copy(addressLookupResult = Some(addressLookupResult)))(
+            Future.successful(Right(()))
+          )
+        }
+        val result = performAction("postcode" -> p.value, "filter" -> filter)
+        status(result)          shouldBe BAD_REQUEST
+        contentAsString(result) should include(message("filter.error.noResults"))
+      }
+
+      "show form errors when no results are found for a postcode within a stored search" in {
+        val p = Postcode("NW19AX")
+        val addressLookupResult = AddressLookupResult(p, None, List())
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(Future.successful(Right(Some(existingSessionData.copy(addressLookupResult = Some(addressLookupResult))))))
+        }
+        val result = performAction("postcode" -> p.value)
+        status(result)          shouldBe BAD_REQUEST
+        contentAsString(result) should include(message("postcode.error.noResults"))
+      }
+
+      "show form errors when no results are found for a filter within a stored search" in {
+        val p = Postcode("NW19AX")
+        val filter = "Some filter"
+        val addressLookupResult = AddressLookupResult(p, Some(filter), List())
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(Future.successful(
+            Right(Some(existingSessionData.copy(addressLookupResult = Some(addressLookupResult))))
+          ))
+        }
+        val result = performAction("postcode" -> p.value, "filter" -> filter)
+        status(result)          shouldBe BAD_REQUEST
+        contentAsString(result) should include(message("filter.error.noResults"))
+      }
+
       "show form errors when the postcode isn't valid" in {
         List(
           "A00A",
@@ -446,7 +506,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
           withClue(s"For postcode '$postcode': ") {
             val formattedPostcode = Postcode(postcode.trim)
             val addressLookupResult =
-              AddressLookupResult(formattedPostcode, None, List())
+              AddressLookupResult(formattedPostcode, None, List(sample[UkAddress]))
 
             inSequence {
               mockAuthWithNoRetrievals()
