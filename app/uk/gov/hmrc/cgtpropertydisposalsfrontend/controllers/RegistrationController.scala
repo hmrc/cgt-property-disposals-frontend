@@ -24,8 +24,9 @@ import play.api.data.Forms.{mapping, number}
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{IndividualWithInsufficientConfidenceLevel, SubscriptionMissingData, SubscriptionReady}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{HasSAUTR, Name, RegistrationStatus, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{HasSAUTR, Name}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
@@ -49,51 +50,57 @@ class RegistrationController @Inject()(
                                         implicit viewConfig: ViewConfig,
                                         ec: ExecutionContext
                                       )
-  extends FrontendController(cc) with WithAuthAndSessionDataAction with SessionUpdates with Logging {
+  extends FrontendController(cc) with WithAuthAndSessionDataAction with SessionUpdates with DefaultRedirects with Logging {
   import RegistrationController._
 
-  private def carryOnIfIndividualWithInsufficientConfidenceLevel(request: RequestWithSessionData[_])(
-    f: (IndividualWithInsufficientConfidenceLevel, Option[RegistrationStatus]) => Future[Result]): Future[Result] =
-    request.sessionData.flatMap(_.subscriptionStatus) match {
-      case Some(u @ IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)), _, _))
-      => f(u, request.sessionData.flatMap(_.registrationStatus))
-      case _
-      =>  SeeOther(routes.StartController.start().url)
+
+  private def withValidUser(request: RequestWithSessionData[_])(
+    f: Either[IndividualWithInsufficientConfidenceLevel,RegistrationStatus] => Future[Result]
+  ): Future[Result] =
+    request.sessionData.flatMap(_.journeyStatus) match {
+      case Some(u @ IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)), _, _)) =>
+        f(Left(u))
+
+      case Some(r: RegistrationStatus) =>
+        f(Right(r))
+
+      case _ =>
+        SeeOther(routes.StartController.start().url)
     }
 
   private def carryOnIfIndividualSupplyingDetails(request: RequestWithSessionData[_])(
-    f: (IndividualWithInsufficientConfidenceLevel, RegistrationStatus.IndividualSupplyingInformation) => Future[Result]): Future[Result] =
-    carryOnIfIndividualWithInsufficientConfidenceLevel(request){ case (i, r) =>
-      r match {
-        case Some(supplyingInfo: RegistrationStatus.IndividualSupplyingInformation) =>
-          f(i, supplyingInfo)
+  f: RegistrationStatus.IndividualSupplyingInformation => Future[Result]): Future[Result] =
+  withValidUser(request){
+      case Right(supplyingInfo: RegistrationStatus.IndividualSupplyingInformation) =>
+      f(supplyingInfo)
 
-        case Some(RegistrationStatus.IndividualWantsToRegisterTrust) =>
-          Redirect(routes.RegistrationController.wrongGGAccountForTrusts())
+      case Right(RegistrationStatus.IndividualWantsToRegisterTrust) =>
+      Redirect(routes.RegistrationController.wrongGGAccountForTrusts())
 
-        case None =>
-          Redirect(routes.RegistrationController.startRegistration())
-      }
-
+      case Left(_) =>
+      Redirect(routes.RegistrationController.startRegistration().url)
     }
 
+
   def startRegistration(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    carryOnIfIndividualWithInsufficientConfidenceLevel(request) { case _ =>
+    withValidUser(request) { case _ =>
       Ok(startRegistrationPage(routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()))
     }
   }
 
   def selectEntityType():  Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    carryOnIfIndividualWithInsufficientConfidenceLevel(request) { case (_, registrationStatus) =>
+    withValidUser(request) { status =>
       val form = {
         val blankForm = RegistrationController.selectEntityTypeForm
-        registrationStatus.fold(blankForm){
-          case _: RegistrationStatus.IndividualSupplyingInformation =>
-            blankForm.fill(EntityType.Individual)
+        status.fold(_ => blankForm,
+          {
+            case _: RegistrationStatus.IndividualSupplyingInformation =>
+              blankForm.fill(EntityType.Individual)
 
-          case RegistrationStatus.IndividualWantsToRegisterTrust =>
-            blankForm.fill(EntityType.Trust)
-        }
+            case RegistrationStatus.IndividualWantsToRegisterTrust =>
+              blankForm.fill(EntityType.Trust)
+          }
+        )
       }
 
       Ok(selectEntityTypePage(form, routes.RegistrationController.startRegistration()))
@@ -101,7 +108,7 @@ class RegistrationController @Inject()(
   }
 
   def selectEntityTypeSubmit(): Action[AnyContent] =  authenticatedActionWithSessionData.async { implicit request =>
-    carryOnIfIndividualWithInsufficientConfidenceLevel(request) { case (_, registrationStatus) =>
+    withValidUser(request) { status =>
       RegistrationController.selectEntityTypeForm.bindFromRequest().fold(
         e => BadRequest(selectEntityTypePage(e, routes.RegistrationController.startRegistration())),
         { entityType =>
@@ -112,13 +119,13 @@ class RegistrationController @Inject()(
               RegistrationStatus.IndividualWantsToRegisterTrust -> routes.RegistrationController.wrongGGAccountForTrusts()
           }
 
-          (registrationStatus, newRegistrationStatus) match {
-            case (Some(_: RegistrationStatus.IndividualSupplyingInformation), _: RegistrationStatus.IndividualSupplyingInformation) |
-              (Some(RegistrationStatus.IndividualWantsToRegisterTrust), RegistrationStatus.IndividualWantsToRegisterTrust) =>
+          (status, newRegistrationStatus) match {
+            case (Right(_: RegistrationStatus.IndividualSupplyingInformation), _: RegistrationStatus.IndividualSupplyingInformation) |
+                 (Right(RegistrationStatus.IndividualWantsToRegisterTrust), RegistrationStatus.IndividualWantsToRegisterTrust) =>
               Redirect(redirectTo)
 
             case _ =>
-              updateSession(sessionStore, request)(_.copy(registrationStatus = Some(newRegistrationStatus))).map {
+              updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newRegistrationStatus))).map {
                 case Left(e) =>
                   logger.warn("Could not update registration status", e)
                   errorHandler.errorResult()
@@ -132,9 +139,9 @@ class RegistrationController @Inject()(
   }
 
   def wrongGGAccountForTrusts(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    carryOnIfIndividualWithInsufficientConfidenceLevel(request) { case (_, registrationStatus) =>
-      registrationStatus match {
-        case Some(RegistrationStatus.IndividualWantsToRegisterTrust) =>
+    withValidUser(request) { status =>
+      status match {
+        case Right(RegistrationStatus.IndividualWantsToRegisterTrust) =>
           Ok(wrongGGAccountForTrustPage(routes.RegistrationController.selectEntityType()))
 
         case _ =>
@@ -144,7 +151,7 @@ class RegistrationController @Inject()(
   }
 
   def enterName(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    carryOnIfIndividualSupplyingDetails(request) { case (_, supplyingInformation ) =>
+    carryOnIfIndividualSupplyingDetails(request) { supplyingInformation =>
       val form = {
         supplyingInformation.name.fold(Name.form)(Name.form.fill)
       }
@@ -154,20 +161,20 @@ class RegistrationController @Inject()(
   }
 
   def enterNameSubmit(): Action[AnyContent] =  authenticatedActionWithSessionData.async { implicit request =>
-    carryOnIfIndividualSupplyingDetails(request) { case (_, supplyingInformation) =>
+    carryOnIfIndividualSupplyingDetails(request) { supplyingInformation =>
       Name.form.bindFromRequest().fold(
         e => BadRequest(enterNamePage(e, routes.RegistrationController.selectEntityType())),
         name =>
-        updateSession(sessionStore, request)(
-          _.copy(registrationStatus = Some(supplyingInformation.copy(name = Some(name))))
-        ).map{
-          case Left(e) =>
-          logger.warn("Could not update registration status with name", e)
-          errorHandler.errorResult()
+          updateSession(sessionStore, request)(
+            _.copy(journeyStatus = Some(supplyingInformation.copy(name = Some(name))))
+          ).map{
+            case Left(e) =>
+              logger.warn("Could not update registration status with name", e)
+              errorHandler.errorResult()
 
-          case Right(_) =>
-            Ok(s"your name is ${name.firstName} ${name.lastName}")
-        }
+            case Right(_) =>
+              Ok(s"your name is ${name.firstName} ${name.lastName}")
+          }
       )
     }
   }

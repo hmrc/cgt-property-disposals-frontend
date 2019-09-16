@@ -25,9 +25,8 @@ import shapeless.{Lens, lens}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSubscriptionReady, SubscriptionReadyAction, WithSubscriptionDetailsActions}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.{NonUkAddress, UkAddress}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Line
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.SubscriptionReady
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Address, AddressLookupRequest, AddressLookupResult, Postcode}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Address, AddressLookupRequest, AddressLookupResult}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
@@ -157,7 +156,7 @@ class AddressController @Inject()(
 
   private def storeAddress(address: Address)(implicit request: RequestWithSubscriptionReady[_]): Future[Result] =
     updateSession(sessionStore, request)(
-      _.copy(subscriptionStatus = Some(addressLens.set(request.subscriptionReady)(address)))
+      _.copy(journeyStatus = Some(addressLens.set(request.subscriptionReady)(address)))
     ).map(
       _.fold(
         { e =>

@@ -29,8 +29,10 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.Helpers._
 import shapeless.{Lens, lens}
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.IndividualWithInsufficientConfidenceLevel
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, HasSAUTR, Name, RegistrationStatus, SessionData, SubscriptionStatus, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.IndividualWithInsufficientConfidenceLevel
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, HasSAUTR, JourneyStatus, Name, SessionData, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 
 import scala.concurrent.Future
@@ -52,10 +54,10 @@ class RegistrationControllerSpec
 
   val name = sample[Name]
 
-  val expectedSubscriptionStatus =
+  val individualWithInsufficentCLSubscriptionStatus =
     IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)), name, None)
 
-  val registrationStatusLens: Lens[SessionData, Option[RegistrationStatus]] = lens[SessionData].registrationStatus
+  val journeyStatusLens: Lens[SessionData, Option[JourneyStatus]] = lens[SessionData].journeyStatus
 
   "RegistrationController" when {
 
@@ -71,7 +73,7 @@ class RegistrationControllerSpec
 
           forAll { subscriptionStatus: SubscriptionStatus =>
             whenever(!isValidStatus(subscriptionStatus)) {
-              val sessionData = SessionData.empty.copy(subscriptionStatus = Some(subscriptionStatus))
+              val sessionData = SessionData.empty.copy(journeyStatus = Some(subscriptionStatus))
 
               inSequence {
                 mockAuthWithNoRetrievals()
@@ -89,17 +91,17 @@ class RegistrationControllerSpec
 
     def commonIndividualRegistrationBehaviour(performAction: () => Future[Result]): Unit = {
       val sessionData =
-        SessionData.empty.copy(subscriptionStatus = Some(expectedSubscriptionStatus))
+        SessionData.empty.copy(journeyStatus = Some(individualWithInsufficentCLSubscriptionStatus))
 
-      "redirect to the start registration endpoint" when {
+      "redirect to the start endpoint" when {
 
         "there is no registration status in the session" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData.copy(registrationStatus = None)))))
+            mockGetSession(Future.successful(Right(Some(sessionData.copy(journeyStatus = None)))))
           }
 
-          checkIsRedirect(performAction(), routes.RegistrationController.startRegistration())
+          checkIsRedirect(performAction(), routes.StartController.start())
         }
 
       }
@@ -107,7 +109,7 @@ class RegistrationControllerSpec
       "redirect to the wrong gg account page" when {
 
         "the session data indicates that the user wishes to register a trust" in {
-          val session = sessionData.copy(registrationStatus = Some(RegistrationStatus.IndividualWantsToRegisterTrust))
+          val session = sessionData.copy(journeyStatus = Some(RegistrationStatus.IndividualWantsToRegisterTrust))
 
           inSequence{
             mockAuthWithNoRetrievals()
@@ -118,6 +120,23 @@ class RegistrationControllerSpec
         }
 
       }
+
+      "redirect to the registration start page" when {
+
+        "the session data indicates the user has insufficient confidence level and has no NINO " +
+          "or SA UTR" in {
+          val session = sessionData.copy(journeyStatus = Some(individualWithInsufficentCLSubscriptionStatus))
+
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(session))))
+          }
+
+          checkIsRedirect(performAction(), routes.RegistrationController.startRegistration())
+        }
+
+      }
+
     }
 
 
@@ -133,7 +152,7 @@ class RegistrationControllerSpec
         "the session data indicates that the user has no digital footprint and " +
           "they have indicated that they have no NINO or SA UTR" in {
           val sessionData =
-            SessionData.empty.copy(subscriptionStatus = Some(expectedSubscriptionStatus))
+            SessionData.empty.copy(journeyStatus = Some(individualWithInsufficentCLSubscriptionStatus))
 
           inSequence{
             mockAuthWithNoRetrievals()
@@ -161,7 +180,7 @@ class RegistrationControllerSpec
         "the session data indicates that the user has no digital footprint and " +
           "the user has opted to start registration" in {
           val sessionData =
-            SessionData.empty.copy(subscriptionStatus = Some(expectedSubscriptionStatus))
+            SessionData.empty.copy(journeyStatus = Some(individualWithInsufficentCLSubscriptionStatus))
 
           inSequence{
             mockAuthWithNoRetrievals()
@@ -178,11 +197,10 @@ class RegistrationControllerSpec
         List(
           RegistrationStatus.IndividualWantsToRegisterTrust,
           RegistrationStatus.IndividualSupplyingInformation(None)
-        ).foreach{ registrationStatus =>
+        ).foreach{ journeyStatus =>
           val sessionData =
             SessionData.empty.copy(
-              subscriptionStatus = Some(expectedSubscriptionStatus),
-              registrationStatus = Some(registrationStatus)
+              journeyStatus = Some(journeyStatus)
             )
 
           inSequence{
@@ -206,7 +224,7 @@ class RegistrationControllerSpec
         controller.selectEntityTypeSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
 
       val sessionData =
-        SessionData.empty.copy(subscriptionStatus = Some(expectedSubscriptionStatus))
+        SessionData.empty.copy(journeyStatus = Some(individualWithInsufficentCLSubscriptionStatus))
 
       behave like redirectToStartBehaviour(() => performAction())
 
@@ -236,7 +254,7 @@ class RegistrationControllerSpec
       "redirect to the wrong gg account page" when {
         "the request selects trust" in {
           val updatedSession =
-            sessionData.copy(registrationStatus = Some(RegistrationStatus.IndividualWantsToRegisterTrust))
+            sessionData.copy(journeyStatus = Some(RegistrationStatus.IndividualWantsToRegisterTrust))
 
           inSequence{
             mockAuthWithNoRetrievals()
@@ -250,7 +268,7 @@ class RegistrationControllerSpec
       "continue the registration journey" when {
         "the request selects individual" in {
           val updatedSession =
-            sessionData.copy(registrationStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None)))
+            sessionData.copy(journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None)))
 
           inSequence{
             mockAuthWithNoRetrievals()
@@ -274,7 +292,7 @@ class RegistrationControllerSpec
             inSequence{
               mockAuthWithNoRetrievals()
               mockGetSession(Future.successful(Right(Some(sessionData))))
-              mockStoreSession(sessionData.copy(registrationStatus = Some(registrationStatus)))(Future.successful(Left(Error(""))))
+              mockStoreSession(sessionData.copy(journeyStatus = Some(registrationStatus)))(Future.successful(Left(Error(""))))
             }
 
             checkIsTechnicalErrorPage(performAction("entityType" -> entityType))
@@ -289,7 +307,7 @@ class RegistrationControllerSpec
 
           "the user selects trust and has previously indicated that they wish to register a trust" in {
             val session =
-              sessionData.copy(registrationStatus = Some(RegistrationStatus.IndividualWantsToRegisterTrust))
+              sessionData.copy(journeyStatus = Some(RegistrationStatus.IndividualWantsToRegisterTrust))
 
             inSequence{
               mockAuthWithNoRetrievals()
@@ -302,7 +320,7 @@ class RegistrationControllerSpec
 
           "the user selects individual and has previously indicated that they wish to register as an individual" in {
             val session =
-              sessionData.copy(registrationStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None)))
+              sessionData.copy(journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None)))
 
             inSequence{
               mockAuthWithNoRetrievals()
@@ -325,8 +343,7 @@ class RegistrationControllerSpec
 
       val sessionData =
         SessionData.empty.copy(
-          subscriptionStatus = Some(expectedSubscriptionStatus),
-          registrationStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None))
+          journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None))
         )
 
       behave like redirectToStartBehaviour(performAction)
@@ -346,7 +363,7 @@ class RegistrationControllerSpec
 
         "the endpoint is requested and the user has previously entered a name" in {
           val name = sample[Name]
-          val sessionDataWithName = registrationStatusLens.set(sessionData)(
+          val sessionDataWithName = journeyStatusLens.set(sessionData)(
             Some(RegistrationStatus.IndividualSupplyingInformation(Some(name)))
           )
 
@@ -374,14 +391,13 @@ class RegistrationControllerSpec
 
       val sessionData =
         SessionData.empty.copy(
-          subscriptionStatus = Some(expectedSubscriptionStatus),
-          registrationStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None))
+          journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None))
         )
 
       val name = Name("Bob", "Smith")
 
       val updatedSession =
-      registrationStatusLens.set(sessionData)(
+      journeyStatusLens.set(sessionData)(
           Some(RegistrationStatus.IndividualSupplyingInformation(Some(name)))
       )
 
@@ -416,7 +432,7 @@ class RegistrationControllerSpec
 
         "the name submitted is the same in the session" in {
           val session =
-            registrationStatusLens.set(sessionData)(
+            journeyStatusLens.set(sessionData)(
               Some(RegistrationStatus.IndividualSupplyingInformation(Some(name)))
             )
 
@@ -501,8 +517,7 @@ class RegistrationControllerSpec
 
       val sessionData =
         SessionData.empty.copy(
-          subscriptionStatus = Some(expectedSubscriptionStatus),
-          registrationStatus = Some(RegistrationStatus.IndividualWantsToRegisterTrust)
+          journeyStatus = Some(RegistrationStatus.IndividualWantsToRegisterTrust)
         )
 
       behave like redirectToStartBehaviour(performAction)
@@ -525,7 +540,7 @@ class RegistrationControllerSpec
           inSequence{
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(
-              sessionData.copy(registrationStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None))))
+              sessionData.copy(journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None))))
             )))
           }
           checkIsRedirect(performAction(), routes.RegistrationController.startRegistration())

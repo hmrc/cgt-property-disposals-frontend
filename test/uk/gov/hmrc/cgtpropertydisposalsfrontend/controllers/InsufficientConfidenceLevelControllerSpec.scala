@@ -25,8 +25,9 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, HasSAUTR, Name, SAUTR, SessionData, SubscriptionDetails, SubscriptionResponse, SubscriptionStatus, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{RegistrationStatus, SubscriptionStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, HasSAUTR, Name, SAUTR, SessionData, SubscriptionDetails, SubscriptionResponse, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.domain.SaUtrGenerator
 
@@ -48,7 +49,7 @@ class InsufficientConfidenceLevelControllerSpec
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
   def session(subscriptionStatus: SubscriptionStatus) =
-    SessionData.empty.copy(subscriptionStatus = Some(subscriptionStatus))
+    SessionData.empty.copy(journeyStatus = Some(subscriptionStatus))
 
   val name = Name("name", "surname")
 
@@ -103,6 +104,30 @@ class InsufficientConfidenceLevelControllerSpec
           routes.SubscriptionController.subscribed()
         )
       }
+    }
+
+    "redirect to the registration start endpoint" when {
+
+      "the session data indicates the user has started a registration journey" in {
+        List(
+          RegistrationStatus.IndividualWantsToRegisterTrust,
+          sample[RegistrationStatus.IndividualSupplyingInformation]
+        ).foreach{ registrationStatus =>
+          withClue(s"For registration status $registrationStatus: "){
+            val session = SessionData.empty.copy(journeyStatus = Some(registrationStatus))
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(Future.successful(Right(Some(session))))
+            }
+
+            checkIsRedirect(performAction(), routes.RegistrationController.startRegistration())
+          }
+
+        }
+
+      }
+
     }
   }
 

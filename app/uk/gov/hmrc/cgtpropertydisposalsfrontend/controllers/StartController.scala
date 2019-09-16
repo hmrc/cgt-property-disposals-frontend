@@ -24,7 +24,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedActionWithRetrievedData, RequestWithSessionDataAndRetrievedData, SessionDataActionWithRetrievedData, WithAuthRetrievalsAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionDetails.MissingData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{SubscriptionComplete, SubscriptionMissingData, SubscriptionReady}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{RegistrationStatus, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -54,7 +54,7 @@ class StartController @Inject()(
 
   def start(): Action[AnyContent] = authenticatedActionWithRetrievedDataAndSessionData.async { implicit request =>
     (request.authenticatedRequest.userType,
-      request.sessionData.flatMap(_.subscriptionStatus)
+      request.sessionData.flatMap(_.journeyStatus)
     ) match {
       case (_, Some(i: SubscriptionStatus.IndividualWithInsufficientConfidenceLevel)) =>
         i.hasSautr.flatMap(_.value).fold[Future[Result]](
@@ -63,16 +63,22 @@ class StartController @Inject()(
           buildIndividualSubscriptionData(Individual(Left(sautr), i.name, None, i.email), None, true)
         )
 
-      case (_, Some(_: SubscriptionReady))         =>
+      case (_, Some(_: SubscriptionStatus.SubscriptionReady))         =>
         SeeOther(routes.SubscriptionController.checkYourDetails().url)
 
-      case (_, Some(_: SubscriptionComplete))      =>
+      case (_, Some(_: SubscriptionStatus.SubscriptionComplete))      =>
       SeeOther(routes.SubscriptionController.subscribed().url)
+
+      case (_, Some(_: RegistrationStatus.IndividualSupplyingInformation)) =>
+        SeeOther(routes.RegistrationController.startRegistration().url)
+
+      case (_, Some(RegistrationStatus.IndividualWantsToRegisterTrust)) =>
+        SeeOther(routes.RegistrationController.startRegistration().url)
 
       case (UserType.IndividualWithInsufficientConfidenceLevel(maybeNino, name, maybeEmail), _) =>
         handleInsufficientConfidenceLevel(maybeNino, name, maybeEmail)
 
-      case (i: UserType.Individual, Some(SubscriptionMissingData(bpr, _))) =>
+      case (i: UserType.Individual, Some(SubscriptionStatus.SubscriptionMissingData(bpr, _))) =>
         buildIndividualSubscriptionData(i, Some(bpr), false)
 
       case (i: UserType.Individual, None) =>
@@ -92,10 +98,10 @@ class StartController @Inject()(
     lazy val redirectToRegisterTrustPage =
       SeeOther(routes.RegisterTrustController.registerYourTrust().url)
 
-    if(request.sessionData.flatMap(_.subscriptionStatus).contains(SubscriptionStatus.OrganisationUnregisteredTrust)){
+    if(request.sessionData.flatMap(_.journeyStatus).contains(SubscriptionStatus.OrganisationUnregisteredTrust)){
       redirectToRegisterTrustPage
     } else {
-      updateSession(sessionStore, request)(_.copy(subscriptionStatus = Some(SubscriptionStatus.OrganisationUnregisteredTrust)))
+      updateSession(sessionStore, request)(_.copy(journeyStatus = Some(SubscriptionStatus.OrganisationUnregisteredTrust)))
         .map{
           case Left(e) =>
             logger.warn("Could not update session", e)
@@ -114,7 +120,7 @@ class StartController @Inject()(
     case None =>
       val subscriptionStatus =
         SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, name, maybeEmail)
-      updateSession(sessionStore, request)(_.copy(subscriptionStatus = Some(subscriptionStatus)))
+      updateSession(sessionStore, request)(_.copy(journeyStatus = Some(subscriptionStatus)))
         .map{
           case Left(e) =>
           logger.warn("Could not update session with insufficient confidence level", e)
@@ -156,11 +162,11 @@ class StartController @Inject()(
         )
       _ <- EitherT(maybeSubscriptionDetails.fold(
         _ =>
-          updateSession(sessionStore, request)(_.copy(subscriptionStatus = Some(
-            SubscriptionMissingData(bprWithTrustName._1, Left(bprWithTrustName._2))))),
+          updateSession(sessionStore, request)(_.copy(journeyStatus = Some(
+            SubscriptionStatus.SubscriptionMissingData(bprWithTrustName._1, Left(bprWithTrustName._2))))),
         subscriptionDetails =>
-          updateSession(sessionStore, request)(_.copy(subscriptionStatus = Some(
-            SubscriptionReady(subscriptionDetails))))
+          updateSession(sessionStore, request)(_.copy(journeyStatus = Some(
+            SubscriptionStatus.SubscriptionReady(subscriptionDetails))))
       ))
       } yield maybeSubscriptionDetails
 
@@ -192,10 +198,10 @@ class StartController @Inject()(
             maybeSubscriptionDetails.fold[Future[Either[Error, Unit]]](
               _ =>
                 updateSession(sessionStore, request)(
-                  _.copy(subscriptionStatus = Some(SubscriptionMissingData(bpr, Right(individual.name))))),
+                  _.copy(journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bpr, Right(individual.name))))),
               subscriptionDetails =>
                 updateSession(sessionStore, request)(
-                  _.copy(subscriptionStatus = Some(SubscriptionReady(subscriptionDetails))))
+                  _.copy(journeyStatus = Some(SubscriptionStatus.SubscriptionReady(subscriptionDetails))))
             )
           )
     } yield maybeSubscriptionDetails

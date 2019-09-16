@@ -16,25 +16,40 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
-import play.api.mvc.Result
+import play.api.mvc.{Call, Result}
 import play.api.mvc.Results.SeeOther
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{RegistrationStatus, SubscriptionStatus}
 
 trait DefaultRedirects {
 
-  def defaultRedirect(subscriptionStatus: Option[SubscriptionStatus]): Result = {
+  def defaultRedirect(subscriptionStatus: Option[JourneyStatus]): Result = {
     val redirectTo =
       subscriptionStatus match {
-        case Some(_: SubscriptionMissingData)  => routes.StartController.start()
-        case Some(_: SubscriptionReady)        => routes.SubscriptionController.checkYourDetails()
-        case Some(_: SubscriptionComplete)     => routes.SubscriptionController.subscribed()
-        case Some(_: IndividualWithInsufficientConfidenceLevel) => routes.InsufficientConfidenceLevelController.doYouHaveNINO()
-        case Some(OrganisationUnregisteredTrust)  => routes.RegisterTrustController.registerYourTrust()
+        case Some(s: SubscriptionStatus)  => subscriptionDefaults(s)
+        case Some(r: RegistrationStatus) => registrationDefaults(r)
         case None                              => routes.StartController.start()
       }
 
     SeeOther(redirectTo.url)
   }
+
+  private def subscriptionDefaults(subscriptionStatus: SubscriptionStatus): Call = {
+    import SubscriptionStatus._
+    subscriptionStatus match {
+    case _: SubscriptionMissingData  => routes.StartController.start()
+    case _: SubscriptionReady        => routes.SubscriptionController.checkYourDetails()
+    case _: SubscriptionComplete     => routes.SubscriptionController.subscribed()
+    case _: IndividualWithInsufficientConfidenceLevel => routes.InsufficientConfidenceLevelController.doYouHaveNINO()
+    case OrganisationUnregisteredTrust  => routes.RegisterTrustController.registerYourTrust()
+    }
+  }
+
+  private def registrationDefaults(registrationStatus: RegistrationStatus): Call = {
+    registrationStatus match {
+      case _ => routes.RegistrationController.startRegistration()
+    }
+  }
+
 
 }
