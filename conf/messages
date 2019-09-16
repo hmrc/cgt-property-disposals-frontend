@@ -53,7 +53,7 @@ dob.title=What is your date of birth?
 dob.helpText=For example, 31 3 1980
 dob.invalid=Enter a real date of birth
 
-subscription.caption=Create account
+subscription.caption=Enrolment
 subscription.title=Check your contact details
 subscription.lede={0} these are the details we hold for you.
 subscription.p=We’ll only use these if we need to contact you about your Capital Gains Tax. You’ll need to change them if they are wrong.
@@ -62,6 +62,8 @@ subscription.cyaChange.address=your home address
 subscription.cyaLabel.email=Email address
 subscription.cyaChange.email=your email address
 subscription.confirm=Before you continue you must confirm your details are correct.
+
+subscription.postcode.title=Find the address by postcode
 
 email.title=Enter your email address
 email.amend.title=Enter the new email address
@@ -83,7 +85,6 @@ confirmEmail.verified.p1=We’ll use this address to contact you about your Capi
 confirmEmail.verified.p2=Your email has not been updated in other government services.
 
 address.caption=Property address
-address.postcode.title=Find the address by postcode
 address.postcode.label=Postcode
 address.postcode.helpText=Enter the postcode of the contact address.
 address.postcode.notInUk=The property is not in the UK
@@ -105,11 +106,28 @@ postcode.error.required=Enter postcode
 postcode.error.noResults=No addresses found for this postcode, check what you entered, if it is correct then enter the address manually
 filter.error.noResults=No addresses found for this property name or number at this postcode, if it is correct then enter the address manually
 
+subscription.isUk.title=Do you live in the UK?
+registration.isUk.title=Do you live in the UK?
+
+nonUkAddress.title=Enter your non-UK address
+nonUkAddress.line1.label=Address line 1
+nonUkAddress.line2.label=Address line 2 (optional)
+nonUkAddress.line3.label=Address line 3 (optional)
+nonUkAddress.line4.label=Address line 4 (optional)
+countryCode.label=Country
+nonUkAddress-line1.error.required=Enter the first line of the address
+countryCode.error.required=Enter the country
+countryCode.error.notFound=Enter a country from the options presented as you type
+
 address-select.title=Select the address of the property
 address-select.manualOption=None of the above (Enter address manually)
 address-select.error.required=Select an address
 address-select.error.number=Select an address
 address-select.invalid=Select an address
+
+country-code.label=Country
+country-code.error.required=Enter country
+country-code.error.enum=Country must be a valid country, select the matching country from the list as you type
 
 subscribed.title=Account created
 subscribed.p1=Your Capital Gains Tax (CGT) on UK property disposals account has been created.

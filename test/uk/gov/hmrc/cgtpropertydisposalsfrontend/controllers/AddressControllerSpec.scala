@@ -168,7 +168,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
 
     "handling requests to display the enter address page" must {
 
-      def performAction() = controller.enterAddress()(FakeRequest())
+      def performAction() = controller.enterUkAddress()(FakeRequest())
 
       behave like subscriptionDetailsBehavior(performAction)
 
@@ -240,7 +240,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
     "handling submitted addresses from enter address page" must {
 
       def performAction(formData: (String, String)*): Future[Result] =
-        controller.enterAddressSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
+        controller.enterUkAddressSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
 
       val existingSessionData =
         SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(subscriptionDetails)))

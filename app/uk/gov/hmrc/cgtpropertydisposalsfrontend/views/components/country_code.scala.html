@@ -1,0 +1,40 @@
+@*
+ * Copyright 2019 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.Country
+
+@this(
+  errorInline: uk.gov.hmrc.play.views.html.helpers.ErrorInline
+)
+
+@(countries: List[Country], selected: Option[String], label: String, errorKey: Option[String], hasErrors: Boolean)(implicit messages: Messages)
+
+@key = @{"countryCode"}
+@classes = @{if(hasErrors) "form-group form-group-error" else "form-group" }
+@inputClasses = @{if(hasErrors) "form-control form-control-error"  else "form-control"}
+
+<div class="@classes">
+ <label class="form-label" for="@key">@label</label>
+  @errorKey.map { e =>
+   @errorInline(key, messages(s"$key.$e"), Seq("error-message"))
+ }
+ <select id="@key" name="@key" class="@inputClasses">
+    <option value=""></option>
+    @for(country <- countries) {
+      <option value="@{country.code}" @{if(selected.contains(country.code)) { s" selected" }}>@{country.name}</option>
+    }
+ </select>
+</div>

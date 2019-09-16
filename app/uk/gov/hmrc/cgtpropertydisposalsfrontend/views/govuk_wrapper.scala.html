@@ -50,6 +50,7 @@
     @uiHead(
       linkElem = None,
       headScripts = None)
+    <link rel="stylesheet" href='@routes.Assets.at("stylesheets/location-autocomplete.min.css")' />
     <link rel="stylesheet" href='@routes.Assets.at("stylesheets/cgtpd.css")' />
     <meta name="format-detection" content="telephone=no" />
 }
@@ -72,7 +73,8 @@
 
 @withCustomJS = {
   @scriptElem
-  <script>$('.error-summary').focus()</script>
+  <script src='@routes.Assets.at("javascript/location-autocomplete.min.js")'></script>
+  <script src='@routes.Assets.at("javascript/cgtpd.js")'></script>
 }
 
 @bodyEnd = {

@@ -16,8 +16,6 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Line
 
 @this(
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -25,42 +23,33 @@
  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
  errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
  formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
- radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group,
- addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
+ yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no,
  backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
+@(form: Form[Boolean], backLink: Call, journey: String)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
-@(addresses: List[Address], form: Form[Address], backLink: Call)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
-
-@key = @{"address-select"}
-@title = @{messages("address-select.title")}
+@key = @{"isUk"}
+@title = @{messages(s"$journey.isUk.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @mainTemplate(title = title, hasErrors = hasErrors) {
+  @backLinkComponent(backLink)
 
- @backLinkComponent(backLink)
+  @if(hasErrors) {
+    @errorSummary(form)
+  }
 
- @if(hasErrors) {
-  @errorSummary(form)
- }
-
- @formWrapper(routes.AddressController.selectAddressSubmit(), 'novalidate -> "novalidate") {
-  @radioGroup(
-   fieldId = key,
-   options = addresses.map(a => addressDisplay(a, Line)),
-   selected = form.value.map(addresses.indexOf(_)),
-   label = pageHeading(title, Some(messages("subscription.caption"))),
-   labelAsHeading = true,
-   errorKey = form.error(key).map(e => e.message),
-   hasErrors = hasErrors
-  )
-
-  <p>
-   <a href="@{routes.AddressController.enterUkAddress().url}">@messages("address.manual.linkText")</a>
-  </p>
-
-  @submitButton(messages("button.continue"))
- }
+  @formWrapper(routes.AddressController.isUkSubmit(), 'novalidate -> "novalidate") {
+   @yesNo(
+    fieldId = key,
+    label = pageHeading(title, Some(messages(s"$journey.caption"))),
+    labelAsHeading = true,
+    errorKey = form.error(key).map(e => e.message),
+    hasErrors = hasErrors,
+    selected = form.value
+   )
+   @submitButton(messages("button.continue"))
+  }
 
 }
