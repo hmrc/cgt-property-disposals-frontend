@@ -96,7 +96,7 @@ class StartController @Inject()(
       case (t: UserType.Trust, _) =>
         buildTrustSubscriptionData(t)
 
-      case (UserType.OrganisationUnregisteredTrust, _) | (_, Some(SubscriptionStatus.OrganisationUnregisteredTrust)) =>
+      case (UserType.OrganisationUnregisteredTrust, _) | (_, Some(SubscriptionStatus.UnregisteredTrust)) =>
         handleNonTrustOrganisation()
     }
   }
@@ -107,10 +107,10 @@ class StartController @Inject()(
     lazy val redirectToRegisterTrustPage =
       SeeOther(routes.RegisterTrustController.registerYourTrust().url)
 
-    if(request.sessionData.flatMap(_.journeyStatus).contains(SubscriptionStatus.OrganisationUnregisteredTrust)){
+    if(request.sessionData.flatMap(_.journeyStatus).contains(SubscriptionStatus.UnregisteredTrust)){
       redirectToRegisterTrustPage
     } else {
-      updateSession(sessionStore, request)(_.copy(journeyStatus = Some(SubscriptionStatus.OrganisationUnregisteredTrust)))
+      updateSession(sessionStore, request)(_.copy(journeyStatus = Some(SubscriptionStatus.UnregisteredTrust)))
         .map{
           case Left(e) =>
             logger.warn("Could not update session", e)
@@ -207,7 +207,7 @@ class StartController @Inject()(
           }
       }, subscriptionDetails =>
         updateSession(sessionStore, request)(
-          _.copy(subscriptionStatus = Some(SubscriptionReady(subscriptionDetails)))
+          _.copy(journeyStatus = Some(SubscriptionStatus.SubscriptionReady(subscriptionDetails)))
         ).map{ _ =>
           SeeOther(routes.SubscriptionController.checkYourDetails().url)
         }

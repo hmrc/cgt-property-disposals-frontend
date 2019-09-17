@@ -138,7 +138,7 @@ class RegisterTrustControllerSpec extends ControllerSpec with AuthSupport with S
       "show the register your trust page" when {
 
         "the session data indicates the user is an organisation which is not associated with a registered trust" in {
-          val sessionData = SessionData.empty.copy(journeyStatus = Some(OrganisationUnregisteredTrust))
+          val sessionData = SessionData.empty.copy(journeyStatus = Some(UnregisteredTrust))
 
           inSequence{
             mockAuthWithNoRetrievals()

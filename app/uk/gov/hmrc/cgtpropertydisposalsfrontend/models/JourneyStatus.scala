@@ -32,7 +32,7 @@ object JourneyStatus {
 
   object SubscriptionStatus {
 
-    final case object OrganisationUnregisteredTrust extends SubscriptionStatus
+    final case object UnregisteredTrust extends SubscriptionStatus
 
     final case class IndividualWithInsufficientConfidenceLevel(
                                                                 hasNino: Option[Boolean],

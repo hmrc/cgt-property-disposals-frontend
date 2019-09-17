@@ -196,7 +196,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
       "redirect to the register your trust page" when {
 
         "the session data indicates the user is an organisation without a registered trust associated with it" in {
-          val session = SessionData.empty.copy(journeyStatus = Some(SubscriptionStatus.OrganisationUnregisteredTrust))
+          val session = SessionData.empty.copy(journeyStatus = Some(SubscriptionStatus.UnregisteredTrust))
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(session))))
@@ -267,7 +267,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
       "redirect to the register your trust page" when {
 
         "the session data indicates the user is an organisation without a registered trust associated with it" in {
-          val session = SessionData.empty.copy(journeyStatus = Some(SubscriptionStatus.OrganisationUnregisteredTrust))
+          val session = SessionData.empty.copy(journeyStatus = Some(SubscriptionStatus.UnregisteredTrust))
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(session))))

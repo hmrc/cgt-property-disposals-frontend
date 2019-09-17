@@ -87,7 +87,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
       "handling non trust organisations" must {
 
         val nonTrustOrganisationSession =
-          SessionData.empty.copy(journeyStatus = Some(SubscriptionStatus.OrganisationUnregisteredTrust))
+          SessionData.empty.copy(journeyStatus = Some(SubscriptionStatus.UnregisteredTrust))
 
         "show an error page" when {
 
