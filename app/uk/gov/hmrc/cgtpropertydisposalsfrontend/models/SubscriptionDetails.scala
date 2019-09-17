@@ -56,7 +56,7 @@ object SubscriptionDetails {
     }.toEither
   }
 
-  sealed trait MissingData
+  sealed trait MissingData extends Product with Serializable
 
   object MissingData {
 

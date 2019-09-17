@@ -133,3 +133,13 @@ entityType.invalid=Select either individual or trust
 
 wrongAccountForTrusts.title=Wrong type of Government Gateway account for trusts
 wrongAccountForTrusts.p=In order to register to Report and Pay Capital Gains Tax on UK Property Disposals you need to sign in with the Government Gateway account associated with your trust, or if one does not exist then you will need to create a new Government Gateway account, set up as an organisation and not an individual, to use for registering your trust.
+
+enterName.title=Enter your full name
+enterName.firstName.label=First name
+enterName.lastName.label=Last name
+firstName.error.required=Enter your first name
+firstName.error.tooLong=First name must be less than 36 characters
+firstName.error.pattern=First name can only include letters, apostrophes, hyphens, spaces and ampersands
+lastName.error.required=Enter your last name
+lastName.error.tooLong=Last name must be less than 36 characters
+lastName.error.pattern=Last name can only include letters, apostrophes, hyphens, spaces and ampersands

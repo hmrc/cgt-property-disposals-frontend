@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-sealed trait DisplayFormat
+sealed trait DisplayFormat extends Product with Serializable
 
 object DisplayFormat {
   case object Block extends DisplayFormat

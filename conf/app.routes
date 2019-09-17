@@ -18,6 +18,8 @@ GET  /registration/start                  uk.gov.hmrc.cgtpropertydisposalsfronte
 GET  /registration/select-entity-type     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegistrationController.selectEntityType()
 POST /registration/select-entity-type     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegistrationController.selectEntityTypeSubmit()
 GET  /wrong-account-for-trusts            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegistrationController.wrongGGAccountForTrusts()
+GET  /registration/enter-name             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegistrationController.enterName()
+POST /registration/enter-name             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegistrationController.enterNameSubmit()
 
 ### Subscription - missing data
 GET  /subscription/enter-email            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailController.enterEmail()

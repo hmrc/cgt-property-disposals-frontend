@@ -28,8 +28,9 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.{NonUkAddress, UkAddress}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{SubscriptionMissingData, SubscriptionReady}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AddressLookupRequest, AddressLookupResult, BusinessPartnerRecord, Error, NINO, Name, Postcode, SessionData, SubscriptionDetails, SubscriptionStatus, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{RegistrationStatus, SubscriptionStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AddressLookupResult, BusinessPartnerRecord, Error, NINO, Name, Postcode, SessionData, SubscriptionDetails, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -68,9 +69,10 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
   val subscriptionDetails: SubscriptionDetails =
     sample[SubscriptionDetails].copy(address = address(1))
 
-  val (addressHead, addresses) = {
+  val (addressHead, lastAddress, lastAddressIndex, addresses) = {
     val head = address(1)
-    head -> (head :: (2 to 5).map(address).toList)
+    val last = address(5)
+    (head, last, 4, head :: ((2 to 4).map(address).toList ::: List(last)))
   }
 
   val addressLookupResult = AddressLookupResult(postcode, None, addresses)
@@ -94,7 +96,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
           mockAuthWithNoRetrievals()
           mockGetSession(
             Future.successful(
-              Right(Some(SessionData.empty.copy(subscriptionStatus = Some(SubscriptionMissingData(bpr, Right(name))))))))
+              Right(Some(SessionData.empty.copy(journeyStatus = Some(SubscriptionMissingData(bpr, Right(name))))))))
         }
 
         val result = performAction()
@@ -106,7 +108,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
     "redirect to the do you have a nino page" when {
 
       "the session data indicates the user does not have sufficient confidence level" in {
-        val session = SessionData.empty.copy(subscriptionStatus = Some(
+        val session = SessionData.empty.copy(journeyStatus = Some(
           SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, name, None)
         ))
 
@@ -124,7 +126,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
     "redirect to the register your trust page" when {
 
       "the session data indicates the user is an organisation without a registered trust associated with it" in {
-        val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.OrganisationUnregisteredTrust))
+        val session = SessionData.empty.copy(journeyStatus = Some(SubscriptionStatus.UnregisteredTrust))
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(session))))
@@ -135,6 +137,31 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
       }
 
     }
+
+    "redirect to the registration start endpoint" when {
+
+      "the session data indicates the user has started a registration journey" in {
+        List(
+          RegistrationStatus.IndividualWantsToRegisterTrust,
+          sample[RegistrationStatus.IndividualSupplyingInformation]
+        ).foreach{ registrationStatus =>
+          withClue(s"For registration status $registrationStatus: "){
+            val session = SessionData.empty.copy(journeyStatus = Some(registrationStatus))
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(Future.successful(Right(Some(session))))
+            }
+
+            checkIsRedirect(performAction(), routes.RegistrationController.startRegistration())
+          }
+
+        }
+
+      }
+
+    }
+
   }
 
   "AddressController" when {
@@ -148,7 +175,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
       "display an error page" when {
         "there is an error when clearing address lookup results in session" in {
           val session = SessionData.empty.copy(
-            subscriptionStatus = Some(SubscriptionReady(subscriptionDetails)),
+            journeyStatus = Some(SubscriptionReady(subscriptionDetails)),
             addressLookupResult = Some(addressLookupResult)
           )
           inSequence {
@@ -165,7 +192,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
         "there is a non-UK address in the session" in {
           val nonUkAddress = NonUkAddress("some line 1", None, None, None, None, "NZ")
           val session = SessionData.empty.copy(
-            subscriptionStatus = Some(SubscriptionReady(subscriptionDetails.copy(address = nonUkAddress)))
+            journeyStatus = Some(SubscriptionReady(subscriptionDetails.copy(address = nonUkAddress)))
           )
           inSequence {
             mockAuthWithNoRetrievals()
@@ -178,7 +205,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
       "display the enter address page" when {
         "the address lookup results have been cleared from session" in {
           val session = SessionData.empty.copy(
-            subscriptionStatus = Some(SubscriptionReady(subscriptionDetails)),
+            journeyStatus = Some(SubscriptionReady(subscriptionDetails)),
             addressLookupResult = Some(addressLookupResult)
           )
           inSequence {
@@ -195,7 +222,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
         }
         "there are no address lookup results to clear from session" in {
           val session = SessionData.empty.copy(
-            subscriptionStatus = Some(SubscriptionReady(subscriptionDetails))
+            journeyStatus = Some(SubscriptionReady(subscriptionDetails))
           )
           inSequence {
             mockAuthWithNoRetrievals()
@@ -216,7 +243,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
         controller.enterAddressSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
 
       val existingSessionData =
-        SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(subscriptionDetails)))
+        SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(subscriptionDetails)))
 
       behave like subscriptionDetailsBehavior(() => performAction())
 
@@ -243,10 +270,10 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
       "display an error page" when {
         "the address cannot be stored in the session" in {
           val session = SessionData.empty.copy(
-            subscriptionStatus = Some(SubscriptionReady(subscriptionDetails))
+            journeyStatus = Some(SubscriptionReady(subscriptionDetails))
           )
           val updatedSession = SessionData.empty.copy(
-            subscriptionStatus = Some(SubscriptionReady(subscriptionDetails.copy(
+            journeyStatus = Some(SubscriptionReady(subscriptionDetails.copy(
               address = UkAddress("Test street", None, None, None, "W1A2HR")
             )))
           )
@@ -261,10 +288,10 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
       "redirect to check your details page" when {
         "address has been stored in session" in {
           val session = SessionData.empty.copy(
-            subscriptionStatus = Some(SubscriptionReady(subscriptionDetails))
+            journeyStatus = Some(SubscriptionReady(subscriptionDetails))
           )
           val updatedSession = SessionData.empty.copy(
-            subscriptionStatus = Some(SubscriptionReady(subscriptionDetails.copy(
+            journeyStatus = Some(SubscriptionReady(subscriptionDetails.copy(
               address = UkAddress("Flat 1", Some("The Street"), Some("The Town"), Some("Countyshire"), "W1A2HR")
             )))
           )
@@ -294,7 +321,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
       "display the enter postcode page" when {
 
         "there is no address lookup result in session" in {
-          val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(subscriptionDetails)))
+          val session = SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(subscriptionDetails)))
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(session))))
@@ -306,7 +333,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
         "there is an address lookup result in session" in {
           val addressLookupResult = AddressLookupResult(postcode, None, List.empty)
           val session = SessionData.empty.copy(
-            subscriptionStatus  = Some(SubscriptionReady(subscriptionDetails)),
+            journeyStatus  = Some(SubscriptionReady(subscriptionDetails)),
             addressLookupResult = Some(addressLookupResult)
           )
 
@@ -330,7 +357,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
         controller.enterPostcodeSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
 
       val existingSessionData =
-        SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(subscriptionDetails)))
+        SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(subscriptionDetails)))
 
       behave like subscriptionDetailsBehavior(() => performAction())
 
@@ -554,7 +581,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
     "redirect to the check your details page" when {
 
       "there is not address lookup result in session" in {
-        val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(subscriptionDetails)))
+        val session = SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(subscriptionDetails)))
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(session))))
@@ -570,7 +597,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
 
       "there is an address lookup result in session" in {
         val session = SessionData.empty.copy(
-          subscriptionStatus  = Some(SubscriptionReady(subscriptionDetails)),
+          journeyStatus  = Some(SubscriptionReady(subscriptionDetails)),
           addressLookupResult = Some(addressLookupResult)
         )
 
@@ -596,7 +623,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
     val existingSubscriptionReady = SubscriptionReady(subscriptionDetails)
 
     val existingSession = SessionData.empty.copy(
-      subscriptionStatus  = Some(existingSubscriptionReady),
+      journeyStatus  = Some(existingSubscriptionReady),
       addressLookupResult = Some(addressLookupResult)
     )
 
@@ -605,7 +632,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
     "redirect to the check your details page" when {
 
       "there is no address lookup result in session" in {
-        val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionReady(subscriptionDetails)))
+        val session = SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(subscriptionDetails)))
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(session))))
@@ -645,8 +672,8 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
 
       "the selected address cannot be stored in session" in {
         val updatedSession = existingSession.copy(
-          subscriptionStatus =
-            Some(existingSubscriptionReady.copy(subscriptionDetails = subscriptionDetails.copy(address = addressHead)))
+          journeyStatus =
+            Some(existingSubscriptionReady.copy(subscriptionDetails = subscriptionDetails.copy(address = lastAddress)))
         )
 
         inSequence {
@@ -655,7 +682,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
           mockStoreSession(updatedSession)(Future.successful(Left(Error(""))))
         }
 
-        checkIsTechnicalErrorPage(performAction("address-select" -> "0"))
+        checkIsTechnicalErrorPage(performAction("address-select" -> s"${lastAddressIndex}"))
       }
 
     }
@@ -664,8 +691,8 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
 
       "the selected address is stored in session" in {
         val updatedSession = existingSession.copy(
-          subscriptionStatus =
-            Some(existingSubscriptionReady.copy(subscriptionDetails = subscriptionDetails.copy(address = addressHead)))
+          journeyStatus =
+            Some(existingSubscriptionReady.copy(subscriptionDetails = subscriptionDetails.copy(address = lastAddress)))
         )
 
         inSequence {
@@ -674,11 +701,29 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
           mockStoreSession(updatedSession)(Future.successful(Right(())))
         }
 
-        val result = performAction("address-select" -> "0")
+        val result = performAction("address-select" -> s"$lastAddressIndex")
         checkIsRedirect(result, routes.SubscriptionController.checkYourDetails())
       }
 
     }
+
+    "not update the session" when {
+
+      "the user selects an address which is already in their subscription details" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(Future.successful(Right(Some(existingSession))))
+        }
+
+        val result = performAction("address-select" -> "0")
+        checkIsRedirect(result, routes.SubscriptionController.checkYourDetails())
+      }
+
+
+    }
+
+
+
 
   }
 

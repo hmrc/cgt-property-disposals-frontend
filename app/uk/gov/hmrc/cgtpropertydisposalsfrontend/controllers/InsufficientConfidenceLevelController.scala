@@ -29,8 +29,8 @@ import play.api.data.format.Formatter
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{HasSAUTR, Name, SAUTR}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{IndividualWithInsufficientConfidenceLevel, SubscriptionMissingData, SubscriptionReady}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{HasSAUTR, SAUTR}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -67,7 +67,7 @@ class InsufficientConfidenceLevelController @Inject()(
 
   private def withInsufficientConfidenceLevelUser(
     f: IndividualWithInsufficientConfidenceLevel => Future[Result])(implicit request: RequestWithSessionData[_]): Future[Result] =
-    request.sessionData.flatMap(_.subscriptionStatus) match {
+    request.sessionData.flatMap(_.journeyStatus) match {
       case Some(i: IndividualWithInsufficientConfidenceLevel) => f(i)
       case other                             => defaultRedirect(other)
     }
@@ -86,7 +86,7 @@ class InsufficientConfidenceLevelController @Inject()(
         e => BadRequest(doYouHaveANinoPage(e)),
         hasNino =>
           updateSession(sessionStore, request)(
-            _.copy(subscriptionStatus = Some(insufficientConfidenceLevel.copy(hasNino = Some(hasNino))))
+            _.copy(journeyStatus = Some(insufficientConfidenceLevel.copy(hasNino = Some(hasNino))))
           ).map{
             case Left(e) =>
             logger.warn("Could not update session after has NINO page submit",e )
@@ -123,7 +123,7 @@ class InsufficientConfidenceLevelController @Inject()(
         e => BadRequest(doYouHaveAnSaUtrPage(e, routes.InsufficientConfidenceLevelController.doYouHaveNINO())),
         maybeSautr =>
           updateSession(sessionStore, request)(
-            _.copy(subscriptionStatus = Some(insufficientConfidenceLevel.copy(hasSautr = Some(HasSAUTR(maybeSautr)))))
+            _.copy(journeyStatus = Some(insufficientConfidenceLevel.copy(hasSautr = Some(HasSAUTR(maybeSautr)))))
           ).map {
             case Left(e) =>
               logger.warn("Could not update session after has SAUTR page submit", e)

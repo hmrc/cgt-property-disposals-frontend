@@ -22,8 +22,8 @@ import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{SubscriptionComplete, SubscriptionReady}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -64,7 +64,7 @@ class SubscriptionController @Inject()(
         subscriptionResponse <- subscriptionService.subscribe(details)
         _ <- EitherT(
               updateSession(sessionStore, request)(
-                _.copy(subscriptionStatus = Some(SubscriptionComplete(details, subscriptionResponse)))
+                _.copy(journeyStatus = Some(SubscriptionComplete(details, subscriptionResponse)))
               ))
       } yield subscriptionResponse
 
@@ -80,7 +80,7 @@ class SubscriptionController @Inject()(
     }
 
   def subscribed(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
-    request.sessionData.flatMap(_.subscriptionStatus) match {
+    request.sessionData.flatMap(_.journeyStatus) match {
       case Some(SubscriptionComplete(_, complete)) => Ok(subscribedPage(complete.cgtReferenceNumber))
       case other                                   => defaultRedirect(other)
     }
