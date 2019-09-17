@@ -25,9 +25,6 @@ sealed trait JourneyStatus extends Product with Serializable
 
 object JourneyStatus {
 
-  ////
-  // Subscription Journey
-  ////
   sealed trait SubscriptionStatus extends JourneyStatus with Product with Serializable
 
   object SubscriptionStatus {
@@ -56,10 +53,6 @@ object JourneyStatus {
 
   }
 
-
-  ////
-  // Subscription Journey
-  ////
   sealed trait RegistrationStatus extends JourneyStatus with Product with Serializable
 
   object RegistrationStatus {
