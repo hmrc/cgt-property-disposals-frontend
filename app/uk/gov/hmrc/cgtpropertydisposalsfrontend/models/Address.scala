@@ -22,7 +22,7 @@ import play.api.data.Form
 import play.api.data.Forms.{mapping, number, nonEmptyText, optional, text}
 import play.api.libs.json.OFormat
 
-sealed trait Address
+sealed trait Address extends Product with Serializable
 
 object Address {
 

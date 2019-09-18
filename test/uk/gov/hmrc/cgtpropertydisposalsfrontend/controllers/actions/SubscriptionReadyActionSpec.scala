@@ -24,7 +24,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, SessionSupport, routes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{SubscriptionComplete, SubscriptionReady}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -80,7 +80,7 @@ class SubscriptionReadyActionSpec extends ControllerSpec with SessionSupport {
       "there are subscription details and a subscription response in session and the request is not " +
         "for the subscribed page" in {
         val sessionData = SessionData.empty.copy(
-          subscriptionStatus = Some(SubscriptionComplete(subscriptionDetails, SubscriptionResponse("number")))
+          journeyStatus = Some(SubscriptionComplete(subscriptionDetails, SubscriptionResponse("number")))
         )
 
         mockGetSession(Future.successful(Right(Some(sessionData))))
@@ -94,7 +94,7 @@ class SubscriptionReadyActionSpec extends ControllerSpec with SessionSupport {
 
       "the subscription details exist and no subscription response exists" in {
         val sessionData = SessionData.empty.copy(
-          subscriptionStatus = Some(SubscriptionReady(subscriptionDetails))
+          journeyStatus = Some(SubscriptionReady(subscriptionDetails))
         )
 
         mockGetSession(Future.successful(Right(Some(sessionData))))

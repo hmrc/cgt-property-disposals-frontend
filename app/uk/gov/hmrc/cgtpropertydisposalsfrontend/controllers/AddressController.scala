@@ -19,15 +19,16 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.eq._
+import cats.instances.string._
+import cats.instances.option._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import shapeless.{Lens, lens}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSubscriptionReady, SubscriptionReadyAction, WithSubscriptionDetailsActions}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.{NonUkAddress, UkAddress}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Line
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.SubscriptionReady
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Address, AddressLookupRequest, AddressLookupResult, Postcode}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Address, AddressLookupRequest, AddressLookupResult}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
@@ -103,23 +104,36 @@ class AddressController @Inject()(
         .fold(
           formWithErrors => BadRequest(enterPostcodePage(formWithErrors, routes.SubscriptionController.checkYourDetails())),
           { case AddressLookupRequest(postcode, filter) =>
-            if (request.sessionData.addressLookupResult.map(_.postcode).contains(postcode)
-              && request.sessionData.addressLookupResult.map(_.filter).contains(filter)
-            ) {
-              SeeOther(routes.AddressController.selectAddress().url)
-            } else {
-              val result = for {
-                addressLookupResult <- ukAddressLookupService.lookupAddress(postcode, filter)
-                _ <- EitherT(
-                      updateSession(sessionStore, request)(_.copy(addressLookupResult = Some(addressLookupResult)))
-                    )
-              } yield addressLookupResult
 
-              result.fold({ e =>
-                logger.warn(s"Could not do address lookup for postcode", e)
-                errorHandler.errorResult()
-              }, _ => SeeOther(routes.AddressController.selectAddress().url))
+            def handleEmptyAddresses(r: AddressLookupResult) = {
+              val errorKey = r.filter.fold("postcode")(_ => "filter")
+              BadRequest(enterPostcodePage(
+                AddressLookupRequest.form.bindFromRequest().withError(errorKey, "error.noResults"),
+                routes.SubscriptionController.checkYourDetails()
+              ))
             }
+
+            request.sessionData.addressLookupResult match {
+              case Some(a: AddressLookupResult) if a.postcode.value === postcode.value && a.filter === filter =>
+                if (a.addresses.isEmpty) handleEmptyAddresses(a) else SeeOther(routes.AddressController.selectAddress().url)
+              case _ =>
+                val result = for {
+                  addressLookupResult <- ukAddressLookupService.lookupAddress(postcode, filter)
+                  _ <- EitherT(
+                    updateSession(sessionStore, request)(_.copy(addressLookupResult = Some(addressLookupResult)))
+                  )
+                } yield addressLookupResult
+
+                result.fold({ e =>
+                  logger.warn(s"Could not do address lookup for postcode", e)
+                  errorHandler.errorResult()
+                }, r =>
+                  if (r.addresses.isEmpty) {
+                      handleEmptyAddresses(r)
+                  } else Redirect(routes.AddressController.selectAddress())
+                )
+              }
+
           }
         )
     }
@@ -157,7 +171,7 @@ class AddressController @Inject()(
 
   private def storeAddress(address: Address)(implicit request: RequestWithSubscriptionReady[_]): Future[Result] =
     updateSession(sessionStore, request)(
-      _.copy(subscriptionStatus = Some(addressLens.set(request.subscriptionReady)(address)))
+      _.copy(journeyStatus = Some(addressLens.set(request.subscriptionReady)(address)))
     ).map(
       _.fold(
         { e =>

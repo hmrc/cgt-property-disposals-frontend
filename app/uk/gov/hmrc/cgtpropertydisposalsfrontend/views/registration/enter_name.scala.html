@@ -14,10 +14,9 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegistrationController.EntityType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
-
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Name
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -25,38 +24,41 @@
         submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
         errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group,
+        textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
         backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
-@(form: Form[EntityType], backLink: Call)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
-@toMessage(entityType: EntityType) = @{
-  entityType match {
-    case EntityType.Individual => Html(messages("entityType.individual"))
-    case EntityType.Trust      => Html(messages("entityType.trust"))
-  }
-}
-@key = @{"entityType"}
-@title = @{messages("entityType.title")}
+@(form: Form[Name], backLink: Call)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+
+@firstNameKey = @{"firstName"}
+@lastNameKey = @{"lastName"}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-@options = @{List(EntityType.Individual, EntityType.Trust).map(toMessage)}
+@title = @{messages("enterName.title")}
 
 @mainTemplate(title = title, hasErrors = hasErrors) {
 
   @backLinkComponent(backLink)
+
   @if(hasErrors) {
     @errorSummary(form)
   }
 
-  @formWrapper(routes.RegistrationController.selectEntityTypeSubmit(), 'novalidate -> "novalidate") {
-    @radioGroup(
-      fieldId = key,
-      label = pageHeading(title),
-      options = options,
-      labelAsHeading = true,
-      errorKey = form.error(key).map(e => e.message),
-      hasErrors = hasErrors,
-      selected = form.value.map(entity => options.indexOf(toMessage(entity)))
+  @pageHeading(title)
+
+  @formWrapper(routes.RegistrationController.enterNameSubmit(), 'novalidate -> "novalidate") {
+    @textInput(
+      fieldId = firstNameKey,
+      value = form.data.getOrElse(firstNameKey, ""),
+      errorKey = form.error(firstNameKey).map(e => e.message),
+      hasErrors = form.error(firstNameKey).nonEmpty,
+      label = Html(messages("enterName.firstName.label"))
+    )
+    @textInput(
+      fieldId = lastNameKey,
+      value = form.data.getOrElse(lastNameKey, ""),
+      errorKey = form.error(lastNameKey).map(e => e.message),
+      hasErrors = form.error(lastNameKey).nonEmpty,
+      label = Html(messages("enterName.lastName.label"))
     )
     @submitButton(messages("button.continue"))
   }

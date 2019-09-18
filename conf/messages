@@ -102,6 +102,8 @@ address.uk.line3.label=Town or city (optional)
 address.uk.line4.label=County (optional)
 address-line1.error.required=Enter building and street
 postcode.error.required=Enter postcode
+postcode.error.noResults=No addresses found for this postcode, check what you entered, if it is correct then enter the address manually
+filter.error.noResults=No addresses found for this property name or number at this postcode, if it is correct then enter the address manually
 
 address-select.title=Select the address of the property
 address-select.manualOption=None of the above (Enter address manually)
@@ -131,3 +133,13 @@ entityType.invalid=Select either individual or trust
 
 wrongAccountForTrusts.title=Wrong type of Government Gateway account for trusts
 wrongAccountForTrusts.p=In order to register to Report and Pay Capital Gains Tax on UK Property Disposals you need to sign in with the Government Gateway account associated with your trust, or if one does not exist then you will need to create a new Government Gateway account, set up as an organisation and not an individual, to use for registering your trust.
+
+enterName.title=Enter your full name
+enterName.firstName.label=First name
+enterName.lastName.label=Last name
+firstName.error.required=Enter your first name
+firstName.error.tooLong=First name must be less than 36 characters
+firstName.error.pattern=First name can only include letters, apostrophes, hyphens, spaces and ampersands
+lastName.error.required=Enter your last name
+lastName.error.tooLong=Last name must be less than 36 characters
+lastName.error.pattern=Last name can only include letters, apostrophes, hyphens, spaces and ampersands

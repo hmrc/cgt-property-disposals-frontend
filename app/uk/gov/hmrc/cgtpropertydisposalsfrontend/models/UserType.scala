@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-sealed trait UserType
+sealed trait UserType extends Product with Serializable
 
 object UserType {
 

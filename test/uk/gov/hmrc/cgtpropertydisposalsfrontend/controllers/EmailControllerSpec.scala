@@ -30,7 +30,8 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{SubscriptionComplete, SubscriptionMissingData, SubscriptionReady}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{RegistrationStatus, SubscriptionStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
@@ -104,7 +105,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
       "the session data indicates the user has already subscribed" in {
         val session = SessionData.empty.copy(
-          subscriptionStatus = Some(SubscriptionComplete(subscriptionDetails, SubscriptionResponse(""))))
+          journeyStatus = Some(SubscriptionComplete(subscriptionDetails, SubscriptionResponse(""))))
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(session))))
@@ -120,7 +121,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
     "redirect to the do you have a nino page" when {
 
       "the session data indicates the user does not have sufficient confidence level" in {
-        val session = SessionData.empty.copy(subscriptionStatus = Some(
+        val session = SessionData.empty.copy(journeyStatus = Some(
           SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None,None, name, None)
         ))
 
@@ -138,7 +139,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
     "redirect to the register your trust page" when {
 
       "the session data indicates the user is an organisation without a registered trust associated with it" in {
-        val session = SessionData.empty.copy(subscriptionStatus = Some(SubscriptionStatus.OrganisationUnregisteredTrust))
+        val session = SessionData.empty.copy(journeyStatus = Some(SubscriptionStatus.UnregisteredTrust))
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(session))))
@@ -146,6 +147,30 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
         val result = performAction()
         checkIsRedirect(result, routes.RegisterTrustController.registerYourTrust())
+      }
+
+    }
+
+    "redirect to the registration start endpoint" when {
+
+      "the session data indicates the user has started a registration journey" in {
+        List(
+          RegistrationStatus.IndividualWantsToRegisterTrust,
+          sample[RegistrationStatus.IndividualSupplyingInformation]
+        ).foreach{ registrationStatus =>
+          withClue(s"For registration status $registrationStatus: "){
+            val session = SessionData.empty.copy(journeyStatus = Some(registrationStatus))
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(Future.successful(Right(Some(session))))
+            }
+
+            checkIsRedirect(performAction(), routes.RegistrationController.startRegistration())
+          }
+
+        }
+
       }
 
     }
@@ -185,7 +210,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
         subscriptionStatus: SubscriptionStatus,
         titleKey: String
       ): Unit = {
-        val sessionData = SessionData.empty.copy(subscriptionStatus = Some(subscriptionStatus))
+        val sessionData = SessionData.empty.copy(journeyStatus = Some(subscriptionStatus))
 
         "display the enter email page" when {
 
@@ -261,7 +286,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
         val email             = Email("test@email.com")
         val id                = UUID.randomUUID()
         val emailToBeVerified = EmailToBeVerified(email, id, false)
-        val sessionData       = SessionData.empty.copy(subscriptionStatus = Some(subscriptionStatus))
+        val sessionData       = SessionData.empty.copy(journeyStatus = Some(subscriptionStatus))
 
         "show a form error" when {
 
@@ -333,7 +358,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
         }
 
-        "redirect to confirm email when the email address has already been verified" in {
+        "redirect to confirm email when the email address has been verified" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData))))
@@ -368,8 +393,6 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             mockAuthWithNoRetrievals()
             mockGetSession(
               Future.successful(Right(Some(sessionData.copy(emailToBeVerified = Some(emailToBeVerified))))))
-            mockStoreSession(sessionData.copy(emailToBeVerified = Some(emailToBeVerified)))(
-              Future.successful(Right(())))
             mockEmailVerification(email, id, expectedName)(Right(EmailVerificationRequested))
           }
 
@@ -386,8 +409,6 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             mockAuthWithNoRetrievals()
             mockGetSession(
               Future.successful(Right(Some(sessionData.copy(emailToBeVerified = Some(emailToBeVerified))))))
-            mockStoreSession(sessionData.copy(emailToBeVerified = Some(emailToBeVerified)))(
-              Future.successful(Right(())))
             mockEmailVerification(Email(emailWithoutSpaces), id, expectedName)(Right(EmailVerificationRequested))
           }
 
@@ -426,7 +447,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
         val id                = UUID.randomUUID()
         val emailToBeVerified = EmailToBeVerified(email, id, false)
         val sessionData = SessionData.empty.copy(
-          subscriptionStatus = Some(subscriptionStatus),
+          journeyStatus = Some(subscriptionStatus),
           emailToBeVerified  = Some(emailToBeVerified)
         )
 
@@ -495,7 +516,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
         val emailToBeVerified = EmailToBeVerified(email, id, false)
 
         val sessionData = SessionData.empty.copy(
-          subscriptionStatus = Some(subscriptionStatus),
+          journeyStatus = Some(subscriptionStatus),
           emailToBeVerified  = Some(emailToBeVerified)
         )
 
@@ -530,7 +551,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               mockStoreSession(
                 sessionData.copy(
                   emailToBeVerified  = Some(emailToBeVerified.copy(verified = true)),
-                  subscriptionStatus = Some(updateEmail(emailToBeVerified.email.value))
+                  journeyStatus = Some(updateEmail(emailToBeVerified.email.value))
                 ))(Future.successful(Left(Error(""))))
             }
 
@@ -559,7 +580,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               mockStoreSession(
                 sessionData.copy(
                   emailToBeVerified  = Some(emailToBeVerified.copy(verified = true)),
-                  subscriptionStatus = Some(updateEmail(emailToBeVerified.email.value))
+                  journeyStatus = Some(updateEmail(emailToBeVerified.email.value))
                 ))(Future.successful(Right(())))
             }
 
@@ -597,7 +618,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
         val emailToBeVerified = EmailToBeVerified(Email("verified@email.com"), UUID.randomUUID(), true)
 
         val sessionData = SessionData.empty.copy(
-          subscriptionStatus = Some(subscriptionStatus),
+          journeyStatus = Some(subscriptionStatus),
           emailToBeVerified  = Some(emailToBeVerified)
         )
 

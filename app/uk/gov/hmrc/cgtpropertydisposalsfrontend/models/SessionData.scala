@@ -20,9 +20,9 @@ import cats.Eq
 import play.api.libs.json.{Format, Json}
 
 final case class SessionData(
-  subscriptionStatus: Option[SubscriptionStatus],
-  emailToBeVerified: Option[EmailToBeVerified],
-  addressLookupResult: Option[AddressLookupResult]
+                              journeyStatus: Option[JourneyStatus],
+                              emailToBeVerified: Option[EmailToBeVerified],
+                              addressLookupResult: Option[AddressLookupResult]
 )
 
 object SessionData {

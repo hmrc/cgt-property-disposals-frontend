@@ -24,12 +24,11 @@ import cats.instances.uuid._
 import cats.syntax.eq._
 import shapeless.{Lens, lens}
 import com.google.inject.{Inject, Singleton}
-import play.api.mvc.Results.SeeOther
 import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, RequestWithSessionDataAndRetrievedData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.{IndividualWithInsufficientConfidenceLevel, SubscriptionComplete, SubscriptionMissingData, SubscriptionReady}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Individual
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
@@ -64,7 +63,7 @@ class EmailController @Inject()(
     f: (SessionData, Either[SubscriptionMissingData, SubscriptionReady]) => Future[Result]
   ): Future[Result] =
     (requestWithSessionData.sessionData,
-      requestWithSessionData.sessionData.flatMap(_.subscriptionStatus)
+      requestWithSessionData.sessionData.flatMap(_.journeyStatus)
     ) match {
       case (Some(d), Some(s: SubscriptionMissingData))  => f(d, Left(s))
       case (Some(d), Some(s: SubscriptionReady))        => f(d, Right(s))
@@ -165,7 +164,7 @@ class EmailController @Inject()(
                         subscriptionReadyEmailLens.set(_)(email)
                       )
                     s.copy(
-                      subscriptionStatus = Some(updatedSubscriptionStatus),
+                      journeyStatus = Some(updatedSubscriptionStatus),
                       emailToBeVerified = Some(emailToBeVerified.copy(verified = true))
                     )
                 }.map(

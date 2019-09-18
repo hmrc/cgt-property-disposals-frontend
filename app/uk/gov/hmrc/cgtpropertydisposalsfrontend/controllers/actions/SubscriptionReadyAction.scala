@@ -19,12 +19,12 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 import cats.syntax.either._
 import com.google.inject.{Inject, Singleton}
 import play.api.i18n.MessagesApi
-import play.api.mvc.Results.SeeOther
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{DefaultRedirects, routes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionStatus.SubscriptionReady
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, SubscriptionStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DefaultRedirects
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
@@ -64,7 +64,7 @@ class SubscriptionReadyAction @Inject()(sessionStore: SessionStore, errorHandler
           logger.warn("Could not get session data", e)
           errorHandler.errorResult()(request)
         }.flatMap { maybeSessionData =>
-          (maybeSessionData, maybeSessionData.flatMap(_.subscriptionStatus)) match {
+          (maybeSessionData, maybeSessionData.flatMap(_.journeyStatus)) match {
             case (Some(sessionData), Some(ready: SubscriptionStatus.SubscriptionReady)) =>
               Right(RequestWithSubscriptionReady(ready, sessionData, request))
 
