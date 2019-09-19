@@ -408,14 +408,15 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               ).foreach { maybeSession =>
                 val session = SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(individualSubscriptionDetails)))
 
-              inSequence {
-                mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, name, retrievedDateOfBirth, None)
-                mockGetSession(Future.successful(Right(maybeSession)))
-                mockGetBusinessPartnerRecord(Right(individual), false)(Right(bpr))
-                mockStoreSession(session)(Future.successful(Right(())))
-              }
+                inSequence {
+                  mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, name, retrievedDateOfBirth, None)
+                  mockGetSession(Future.successful(Right(maybeSession)))
+                  mockGetBusinessPartnerRecord(Right(individual), false)(Right(bpr))
+                  mockStoreSession(session)(Future.successful(Right(())))
+                }
 
-              checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
+                checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
+              }
             }
 
           "the user has CL<200 and there is no session data and a bpr is successfully retrieved " +
@@ -519,7 +520,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                   val session = SessionData.empty.copy(journeyStatus = Some(registrationStatus))
 
                   inSequence {
-                    mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), None, Some(name), None, None, Set.empty)
+                    mockAuthWithAllRetrievals(ConfidenceLevel.L50, Some(AffinityGroup.Individual), None, None, Some(name), None, None, Set.empty)
                     mockGetSession(Future.successful(Right(Some(session))))
                   }
 
@@ -529,34 +530,6 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               }
             }
 
-
-          }
-
-          "display an error page" when {
-            "the call to get the BPR fails" in {
-              inSequence {
-                mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, name, retrievedDateOfBirth, None)
-                mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-                mockGetBusinessPartnerRecord(Right(individual), false)(Left(Error("error")))
-              }
-              checkIsTechnicalErrorPage(performAction())
-            }
-
-          }
-
-          "redirect to the subscription confirmation page" when {
-
-            "the session data indicates the user has already subscribed" in {
-              val subscriptionStatus = SubscriptionComplete(individualSubscriptionDetails, SubscriptionResponse(""))
-              val session = SessionData.empty.copy(journeyStatus = Some(subscriptionStatus))
-
-              inSequence {
-                mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, name, retrievedDateOfBirth, None)
-                mockGetSession(Future.successful(Right(Some(session))))
-              }
-
-              checkIsRedirect(performAction(), routes.SubscriptionController.subscribed())
-            }
 
           }
 
