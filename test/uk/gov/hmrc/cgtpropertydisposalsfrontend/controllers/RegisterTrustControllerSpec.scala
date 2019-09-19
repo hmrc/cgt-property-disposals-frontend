@@ -77,7 +77,7 @@ class RegisterTrustControllerSpec extends ControllerSpec with AuthSupport with S
 
         "the session data indicates that an individual is missing data for subscription" in {
           val sessionData = SessionData.empty.copy(journeyStatus =
-            Some(SubscriptionMissingData(bpr, Right(name))))
+            Some(SubscriptionMissingData(bpr)))
 
           inSequence{
             mockAuthWithNoRetrievals()
@@ -124,7 +124,7 @@ class RegisterTrustControllerSpec extends ControllerSpec with AuthSupport with S
 
         "the session data indicates the user is an individual who has insufficient confidence level" in {
           val sessionData = SessionData.empty.copy(journeyStatus =
-            Some(IndividualWithInsufficientConfidenceLevel(None,None, name, None)))
+            Some(IndividualWithInsufficientConfidenceLevel(None, None, None)))
 
           inSequence{
             mockAuthWithNoRetrievals()

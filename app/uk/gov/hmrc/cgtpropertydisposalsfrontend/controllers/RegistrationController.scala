@@ -26,7 +26,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{HasSAUTR, Name}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Name
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
@@ -58,7 +58,7 @@ class RegistrationController @Inject()(
     f: Either[IndividualWithInsufficientConfidenceLevel,RegistrationStatus] => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(u @ IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)), _, _)) =>
+      case Some(u @ IndividualWithInsufficientConfidenceLevel(Some(false), Some(false), _)) =>
         f(Left(u))
 
       case Some(r: RegistrationStatus) =>

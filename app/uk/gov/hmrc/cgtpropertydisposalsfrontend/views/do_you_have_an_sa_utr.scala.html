@@ -29,7 +29,7 @@
  backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@(form: Form[Option[SAUTR]], backLink: Call)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[Boolean], backLink: Call)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"hasSaUtr"}
 @saUtrKey = @{"saUtr"}
@@ -53,16 +53,7 @@
     selected = form.data.get(key).map(f => f match {
       case "true" => true
       case _ => false
-    }),
-    yesContent = Some(textInput(
-      fieldId = saUtrKey,
-      value = form.data.getOrElse(saUtrKey, ""),
-      errorKey = form.error(saUtrKey).map(e => e.message),
-      hasErrors = form.error(saUtrKey).nonEmpty,
-      label = Html(messages("saUtr.label")),
-      helpText = Some(Html(messages("saUtr.helpText"))),
-      inputType = Some("number")
-    ))
+    })
    )
    @submitButton(messages("button.continue"))
   }
