@@ -78,8 +78,9 @@ class StartController @Inject()(
       case (_, Some(RegistrationStatus.IndividualWantsToRegisterTrust)) =>
         SeeOther(routes.RegistrationController.startRegistration().url)
 
-      case (UserType.IndividualWithInsufficientConfidenceLevel(maybeNino, name, maybeEmail), None) => // this is the first time a person with individual insufficient confidence level has come to start
-      handleInsufficientConfidenceLevel(maybeNino, name, maybeEmail)
+      case (UserType.IndividualWithInsufficientConfidenceLevel(maybeNino, maybeSautr, name, maybeEmail), None) =>
+        // this is the first time a person with individual insufficient confidence level has come to start
+      handleInsufficientConfidenceLevel(maybeNino, maybeSautr, name, maybeEmail)
 
       case (i: UserType.Individual, Some(SubscriptionStatus.SubscriptionMissingData(bpr, _))) =>
         handleSubscriptionMissingData(bpr, Right(i.name), i.email)
@@ -123,21 +124,30 @@ class StartController @Inject()(
   }
 
 
-  private def handleInsufficientConfidenceLevel(maybeNino: Option[NINO], name: Name, maybeEmail: Option[Email])(
+  private def handleInsufficientConfidenceLevel(maybeNino: Option[NINO],
+                                                maybeSautr: Option[SAUTR],
+                                                name: Name,
+                                                maybeEmail: Option[Email])(
     implicit request: RequestWithSessionDataAndRetrievedData[AnyContent]
   ): Future[Result] = maybeNino match {
     case None =>
-      val subscriptionStatus =
-        SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, name, maybeEmail)
-      updateSession(sessionStore, request)(_.copy(journeyStatus = Some(subscriptionStatus)))
-        .map{
-          case Left(e) =>
-            logger.warn("Could not update session with insufficient confidence level", e)
-            errorHandler.errorResult()
+      maybeSautr match {
+        case Some(sautr) =>
+          buildIndividualSubscriptionData(Individual(Left(sautr), name, None, maybeEmail), false)
 
-          case Right(_) =>
-            SeeOther(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url)
-        }
+        case None =>
+          val subscriptionStatus =
+            SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, name, maybeEmail)
+          updateSession(sessionStore, request)(_.copy(journeyStatus = Some(subscriptionStatus)))
+            .map{
+              case Left(e) =>
+                logger.warn("Could not update session with insufficient confidence level", e)
+                errorHandler.errorResult()
+
+              case Right(_) =>
+                SeeOther(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url)
+            }
+      }
 
     case Some(_) =>
       redirectToIv

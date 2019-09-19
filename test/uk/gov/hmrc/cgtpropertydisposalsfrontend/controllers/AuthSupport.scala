@@ -52,13 +52,14 @@ trait AuthSupport {
 
   val expectedRetrievals =
     Retrievals.confidenceLevel and Retrievals.affinityGroup and Retrievals.nino and
-      Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth and
-      Retrievals.email and Retrievals.allEnrolments
+      Retrievals.saUtr and Retrievals.itmpName and Retrievals.name and
+      Retrievals.itmpDateOfBirth and Retrievals.email and Retrievals.allEnrolments
 
   def mockAuthWithAllRetrievals(
     retrievedConfidenceLevel: ConfidenceLevel,
     retrievedAffinityGroup: Option[AffinityGroup],
     retrievedNino: Option[String],
+    retrievedSautr: Option[String],
     retrievedName: Option[Name],
     retrievedDateOfBirth: Option[LocalDate],
     retrievedEmail: Option[String],
@@ -67,6 +68,7 @@ trait AuthSupport {
       Future successful (
         new ~(retrievedConfidenceLevel, retrievedAffinityGroup) and
           retrievedNino and
+          retrievedSautr and
           retrievedName.map(name => ItmpName(Some(name.firstName), None, Some(name.lastName))) and
           None and
           retrievedDateOfBirth and
@@ -85,6 +87,7 @@ trait AuthSupport {
       ConfidenceLevel.L200,
       Some(AffinityGroup.Individual),
       Some(retrievedNino),
+      None,
       Some(retrievedName),
       Some(retrievedDateOfBirth),
       retrievedEmail,
@@ -95,6 +98,7 @@ trait AuthSupport {
     mockAuthWithAllRetrievals(
       ConfidenceLevel.L50,
       Some(AffinityGroup.Organisation),
+      None,
       None,
       None,
       None,

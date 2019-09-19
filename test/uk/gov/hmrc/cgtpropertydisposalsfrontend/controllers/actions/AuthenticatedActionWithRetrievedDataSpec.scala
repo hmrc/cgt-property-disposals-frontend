@@ -61,7 +61,7 @@ class AuthenticatedActionWithRetrievedDataSpec
     }
 
   val retrievals =
-    Retrievals.confidenceLevel and Retrievals.affinityGroup and Retrievals.nino and
+    Retrievals.confidenceLevel and Retrievals.affinityGroup and Retrievals.nino and Retrievals.saUtr and
       Retrievals.itmpName and Retrievals.name and Retrievals.itmpDateOfBirth and Retrievals.email and
       Retrievals.allEnrolments
 
@@ -103,7 +103,7 @@ class AuthenticatedActionWithRetrievedDataSpec
           withClue(s"For affinity group $affinityGroup: "){
             val retrievalsResult = Future successful (
               new ~(ConfidenceLevel.L50, affinityGroup) and
-                None and None and None and None and None and emptyEnrolments
+                None and None and None and None and None and None and emptyEnrolments
               )
 
             mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
@@ -122,7 +122,7 @@ class AuthenticatedActionWithRetrievedDataSpec
       "indicate when the organisation does not have a trust enrolment" in {
           val retrievalsResult = Future successful (
             new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation))
-              and None and None and None and None and None and emptyEnrolments
+              and None and None and None and None and None and None and emptyEnrolments
             )
 
           mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
@@ -139,7 +139,7 @@ class AuthenticatedActionWithRetrievedDataSpec
           val trustEnrolment = Enrolment("HMRC-TERS-ORG")
           val retrievalsResult = Future successful (
             new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation))
-          and None and None and None and None and None and Enrolments(Set(trustEnrolment))
+              and None and None and None and None and None and None and Enrolments(Set(trustEnrolment))
           )
 
           mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
@@ -163,7 +163,7 @@ class AuthenticatedActionWithRetrievedDataSpec
 
           val retrievalsResult = Future successful (
             new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation))
-              and None and None and None and None and Some("email") and Enrolments(Set(trustEnrolment))
+              and None and None and None and None and None and Some("email") and Enrolments(Set(trustEnrolment))
             )
 
           mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
@@ -186,7 +186,7 @@ class AuthenticatedActionWithRetrievedDataSpec
 
         val retrievalsResult = Future successful (
           new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation))
-            and None and None and None and None and Some("") and Enrolments(Set(trustEnrolment))
+            and None and None and None and None and None and Some("") and Enrolments(Set(trustEnrolment))
           )
 
         mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
@@ -206,6 +206,7 @@ class AuthenticatedActionWithRetrievedDataSpec
       val retrievalsResult = Future successful (
         new ~(ConfidenceLevel.L200, Some(AffinityGroup.Individual)) and
           Some("nino") and
+          None and
           Some(ItmpName(Some("givenName"), Some("middleName"), Some("familyName"))) and
           Some(GGName(Some("forename"), Some("surname"))) and
           Some(new JodaLocalDate(2000, 4, 10)) and
@@ -233,6 +234,7 @@ class AuthenticatedActionWithRetrievedDataSpec
       val retrievalsResult = Future successful (
         new ~(ConfidenceLevel.L200, Some(AffinityGroup.Individual)) and
           Some("nino") and
+          None and
           Some(ItmpName(Some("givenName"), Some("middleName"), Some("familyName"))) and
           Some(GGName(Some("forename"), Some("surname"))) and
           Some(new JodaLocalDate(2000, 4, 10)) and
@@ -261,6 +263,7 @@ class AuthenticatedActionWithRetrievedDataSpec
       val retrievalsResult = Future successful (
         new ~(ConfidenceLevel.L200, Some(AffinityGroup.Individual)) and
           Some("nino") and
+          None and
           Some(ItmpName(None, Some("middleName"), Some("familyName"))) and
           None and
           Some(new JodaLocalDate(2000, 4, 10)) and
@@ -279,6 +282,7 @@ class AuthenticatedActionWithRetrievedDataSpec
       val retrievalsResult = Future successful (
         new ~(ConfidenceLevel.L200, Some(AffinityGroup.Individual)) and
           Some("nino") and
+          None and
           None and
           Some(GGName(Some("first-name second-name"), None)) and
           Some(new JodaLocalDate(2000, 4, 10)) and
@@ -306,6 +310,7 @@ class AuthenticatedActionWithRetrievedDataSpec
       val retrievalsResult = Future successful (
         new ~(ConfidenceLevel.L200, Some(AffinityGroup.Individual)) and
           Some("nino") and
+          None and
           None and
           Some(GGName(Some("first-name second-name third-name"), None)) and
           Some(new JodaLocalDate(2000, 4, 10)) and
@@ -335,6 +340,7 @@ class AuthenticatedActionWithRetrievedDataSpec
         new ~(ConfidenceLevel.L200, Some(AffinityGroup.Individual)) and
           Some("nino") and
           None and
+          None and
           Some(GGName(ggName, None)) and
           Some(new JodaLocalDate(2000, 4, 10)) and
           Some("email") and
@@ -361,6 +367,7 @@ class AuthenticatedActionWithRetrievedDataSpec
       val retrievalsResult = Future successful (
         new ~(ConfidenceLevel.L200, Some(AffinityGroup.Individual)) and
           Some("nino") and
+          None and
           None and
           None and
           Some(new JodaLocalDate(2000, 4, 10)) and
@@ -391,6 +398,7 @@ class AuthenticatedActionWithRetrievedDataSpec
               val retrievalsResult = Future successful (
                 new ~(cl, Some(AffinityGroup.Individual)) and
                   mayBeNino.map(_.value) and
+                  None and
                   Some(ItmpName(Some("name"), None, Some("familyName"))) and
                   None and None and Some("email") and emptyEnrolments
                 )
@@ -400,7 +408,7 @@ class AuthenticatedActionWithRetrievedDataSpec
               val result = performAction(FakeRequest())
               status(result) shouldBe OK
               contentAsJson(result) shouldBe Json.toJson(
-                UserType.IndividualWithInsufficientConfidenceLevel(mayBeNino, Name("name", "familyName"), Some(Email("email")))
+                UserType.IndividualWithInsufficientConfidenceLevel(mayBeNino, None, Name("name", "familyName"), Some(Email("email")))
               )
             }
           }
@@ -411,6 +419,7 @@ class AuthenticatedActionWithRetrievedDataSpec
           val retrievalsResult = Future successful (
             new ~(L50, Some(AffinityGroup.Individual)) and
               None and
+              None and
               Some(ItmpName(Some("name"), None, Some("familyName"))) and
               None and None and Some("") and emptyEnrolments
             )
@@ -420,7 +429,7 @@ class AuthenticatedActionWithRetrievedDataSpec
           val result = performAction(FakeRequest())
           status(result) shouldBe OK
           contentAsJson(result) shouldBe Json.toJson(
-            UserType.IndividualWithInsufficientConfidenceLevel(None, Name("name", "familyName"), None)
+            UserType.IndividualWithInsufficientConfidenceLevel(None, None, Name("name", "familyName"), None)
           )
 
         }
@@ -431,6 +440,7 @@ class AuthenticatedActionWithRetrievedDataSpec
             val retrievalsResult = Future successful (
               new ~(L50, Some(AffinityGroup.Individual)) and
                 Some("nino") and
+                None and
                 None and
                 None and None and None and emptyEnrolments
               )
