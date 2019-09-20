@@ -109,6 +109,8 @@ filter.error.noResults=No addresses found for this property name or number at th
 subscription.isUk.title=Do you live in the UK?
 registration.isUk.title=Do you live in the UK?
 
+isUk.error.required=Select yes if your address is in the UK
+
 nonUkAddress.title=Enter your non-UK address
 nonUkAddress.line1.label=Address line 1
 nonUkAddress.line2.label=Address line 2 (optional)

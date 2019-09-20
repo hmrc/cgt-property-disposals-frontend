@@ -67,7 +67,17 @@ class AddressController @Inject()(
 
   def isUk: Action[AnyContent] =
     authenticatedActionWithSubscriptionReady.async { implicit request =>
-      Ok(isUkPage(Address.isUkForm, Journey.continue(), Journey.name))
+      if(request.sessionData.addressLookupResult.nonEmpty) {
+        updateSession(sessionStore, request)(_.copy(addressLookupResult = None)).map {
+          case Left(e) =>
+            logger.warn(s"Could not clear addressLookupResult", e)
+            errorHandler.errorResult()
+          case Right(_) =>
+            Ok(isUkPage(Address.isUkForm, Journey.continue(), Journey.name))
+        }
+      } else {
+        Ok(isUkPage(Address.isUkForm, Journey.continue(), Journey.name))
+      }
     }
 
   def isUkSubmit: Action[AnyContent] =
@@ -99,9 +109,9 @@ class AddressController @Inject()(
     }
 
   def enterNonUkAddress(): Action[AnyContent] =
-  authenticatedActionWithSubscriptionReady.async { implicit request =>
-    Ok(enterNonUkAddressPage(Address.nonUkAddressForm, routes.AddressController.isUk()))
-  }
+    authenticatedActionWithSubscriptionReady.async { implicit request =>
+      Ok(enterNonUkAddressPage(Address.nonUkAddressForm, routes.AddressController.isUk()))
+    }
 
   def enterNonUkAddressSubmit(): Action[AnyContent] =
     authenticatedActionWithSubscriptionReady.async { implicit request =>

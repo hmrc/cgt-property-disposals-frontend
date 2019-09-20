@@ -16,7 +16,8 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.{ NonUkAddress, Country, CountryCodes }
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.NonUkAddress
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Country
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -88,7 +89,7 @@
       )
 
       @countryCode(
-        countries = CountryCodes,
+        countries = Country.countries,
         selected = form.data.get(countryCodeKey),
         label = messages(s"${countryCodeKey}.label"),
         hasErrors = form.error(countryCodeKey).nonEmpty,
