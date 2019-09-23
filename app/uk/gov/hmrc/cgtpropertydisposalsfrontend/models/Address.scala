@@ -41,12 +41,12 @@ object Address {
   }
 
   final case class NonUkAddress(
-    line1: String,
-    line2: Option[String],
-    line3: Option[String],
-    line4: Option[String],
-    postcode: Option[String],
-    countryCode: Country
+                                 line1: String,
+                                 line2: Option[String],
+                                 line3: Option[String],
+                                 line4: Option[String],
+                                 postcode: Option[String],
+                                 country: Country
   ) extends Address
 
   // the format instance using the play-json-derived-codecs library wraps
@@ -80,7 +80,11 @@ object Address {
   def nonUkAddressForm: Form[NonUkAddress] = {
     val countryFormatter = new Formatter[Country] {
       override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Country] = data.get(key) match {
-        case Some(c) => Either.fromOption(Country.countries.find(_.code === c), Seq(FormError(key, "error.notFound")))
+        case Some(c) =>
+          Either.fromOption(
+            Country.countryCodeToCountryName.get(c).map(name => Country(c, Some(name))),
+            Seq(FormError(key, "error.notFound"))
+          )
         case None => Left(Seq(FormError(key, "error.required")))
       }
 

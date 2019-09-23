@@ -16,7 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{Json, OFormat, Reads}
+
 import scala.io.Source
 
 final case class Country(
@@ -28,11 +29,20 @@ object Country {
 
   implicit val countryFormat: OFormat[Country] = Json.format[Country]
 
-  val countries: List[Country] = {
+  type CountryCode = String
+  type CountryName = String
+
+  private final case class InternalCountry(code: CountryCode, name: CountryName)
+  private implicit val reads: Reads[InternalCountry] = Json.reads[InternalCountry]
+
+  val countryCodeToCountryName: Map[CountryCode, CountryName] = {
     val source = Source.fromInputStream(getClass.getResourceAsStream("/resources/countries.json"))
     try {
       val jsonString = source.getLines().toList.mkString("")
-      Json.parse(jsonString).validate[List[Country]].fold(e => sys.error(s"could not parse countries.json file: $e"), identity)
+      val countries =
+        Json.parse(jsonString).validate[List[InternalCountry]].fold(e => sys.error(s"could not parse countries.json file: $e"), identity)
+
+      countries.map(c => c.code -> c.name).toMap
     } finally {
       source.close()
     }

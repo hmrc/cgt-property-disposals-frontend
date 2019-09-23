@@ -15,12 +15,12 @@
  *@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Country
-
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Country.{CountryCode, CountryName}
 @this(
   errorInline: uk.gov.hmrc.play.views.html.helpers.ErrorInline
 )
 
-@(countries: List[Country], selected: Option[String], label: String, errorKey: Option[String], hasErrors: Boolean)(implicit messages: Messages)
+@(countryCodeToCountryName: Map[CountryCode,CountryName], selected: Option[String], label: String, errorKey: Option[String], hasErrors: Boolean)(implicit messages: Messages)
 
 @key = @{"countryCode"}
 @classes = @{if(hasErrors) "form-group form-group-error" else "form-group" }
@@ -33,8 +33,8 @@
  }
  <select id="@key" name="@key" class="@inputClasses">
     <option value=""></option>
-    @for(country <- countries) {
-      <option value="@{country.code}" @{if(selected.contains(country.code)) { s" selected" }}>@{country.name}</option>
+    @for(country <- countryCodeToCountryName) {
+      <option value="@{country._1}" @{if(selected.contains(country._1)) { s" selected" }}>@{country._2}</option>
     }
  </select>
 </div>
