@@ -28,7 +28,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.BusinessPartnerRecordRequest.IndividualBusinessPartnerRecordRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormat, Name, SAUTR}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Name, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -198,14 +198,14 @@ object InsufficientConfidenceLevelController {
   val haveANinoForm: Form[Boolean] =
     Form(
       mapping(
-        "hasNino" -> of(BooleanFormat.formatter)
+        "hasNino" -> of(BooleanFormatter.formatter)
       )(identity)(Some(_))
     )
 
   val hasSaUtrForm: Form[Boolean] =
     Form(
       mapping(
-        "hasSaUtr" -> of(BooleanFormat.formatter)
+        "hasSaUtr" -> of(BooleanFormatter.formatter)
       )(identity)(Some(_))
     )
 

@@ -20,7 +20,7 @@ import play.api.data.FormError
 import play.api.data.format.Formatter
 import cats.syntax.either._
 
-object BooleanFormat {
+object BooleanFormatter {
   //don't want to use out-of-box boolean formatter - that one defaults null values to false
   val formatter: Formatter[Boolean] = new Formatter[Boolean] {
 

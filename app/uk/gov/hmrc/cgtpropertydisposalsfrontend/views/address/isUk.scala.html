@@ -27,10 +27,10 @@
  backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@(form: Form[Boolean], backLink: Call, journey: String)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[Boolean], backLink: Call)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"isUk"}
-@title = @{messages(s"$journey.isUk.title")}
+@title = @{messages("subscription.isUk.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @mainTemplate(title = title, hasErrors = hasErrors) {
@@ -43,7 +43,7 @@
   @formWrapper(routes.AddressController.isUkSubmit(), 'novalidate -> "novalidate") {
    @yesNo(
     fieldId = key,
-    label = pageHeading(title, Some(messages(s"$journey.caption"))),
+    label = pageHeading(title, Some(messages("subscription.caption"))),
     labelAsHeading = true,
     errorKey = form.error(key).map(e => e.message),
     hasErrors = hasErrors,

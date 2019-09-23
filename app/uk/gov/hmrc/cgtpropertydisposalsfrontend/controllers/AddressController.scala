@@ -57,14 +57,6 @@ class AddressController @Inject()(
     with WithSubscriptionDetailsActions
     with SessionUpdates {
 
-  // should probably be lifted out of here...
-  object Journey {
-    // continue: a route to continue beyond the address (or as back link to exit address)
-    def continue(): Call = routes.SubscriptionController.checkYourDetails()
-    // name: the name of the journey to be used in template message keys
-    val name: String = "subscription"
-  }
-
   def isUk: Action[AnyContent] =
     authenticatedActionWithSubscriptionReady.async { implicit request =>
       if(request.sessionData.addressLookupResult.nonEmpty) {
@@ -73,10 +65,10 @@ class AddressController @Inject()(
             logger.warn(s"Could not clear addressLookupResult", e)
             errorHandler.errorResult()
           case Right(_) =>
-            Ok(isUkPage(Address.isUkForm, Journey.continue(), Journey.name))
+            Ok(isUkPage(Address.isUkForm, routes.SubscriptionController.checkYourDetails()))
         }
       } else {
-        Ok(isUkPage(Address.isUkForm, Journey.continue(), Journey.name))
+        Ok(isUkPage(Address.isUkForm, routes.SubscriptionController.checkYourDetails()))
       }
     }
 
@@ -85,7 +77,7 @@ class AddressController @Inject()(
       Address.isUkForm
         .bindFromRequest()
         .fold[Future[Result]](
-          formWithErrors => BadRequest(isUkPage(formWithErrors, Journey.continue(), Journey.name)),
+          formWithErrors => BadRequest(isUkPage(formWithErrors, routes.SubscriptionController.checkYourDetails())),
           {
             case true  => Redirect(routes.AddressController.enterPostcode())
             case false => Redirect(routes.AddressController.enterNonUkAddress())
@@ -95,7 +87,7 @@ class AddressController @Inject()(
 
   def enterUkAddress(): Action[AnyContent] =
     authenticatedActionWithSubscriptionReady.async { implicit request =>
-      Ok(enterUkAddressPage(Address.ukAddressForm, Journey.continue()))
+      Ok(enterUkAddressPage(Address.ukAddressForm, routes.SubscriptionController.checkYourDetails()))
     }
 
   def enterUkAddressSubmit(): Action[AnyContent] =
@@ -103,7 +95,7 @@ class AddressController @Inject()(
       Address.ukAddressForm
         .bindFromRequest()
         .fold[Future[Result]](
-          formWithErrors => BadRequest(enterUkAddressPage(formWithErrors, Journey.continue())),
+          formWithErrors => BadRequest(enterUkAddressPage(formWithErrors, routes.SubscriptionController.checkYourDetails())),
           storeAddress
         )
     }
@@ -175,7 +167,7 @@ class AddressController @Inject()(
     authenticatedActionWithSubscriptionReady { implicit request =>
       request.sessionData.addressLookupResult match {
         case None =>
-          SeeOther(Journey.continue().url)
+          SeeOther(routes.SubscriptionController.checkYourDetails().url)
 
         case Some(AddressLookupResult(_, _, addresses)) =>
           val form = Address.addressSelectForm(addresses)
@@ -187,7 +179,7 @@ class AddressController @Inject()(
     authenticatedActionWithSubscriptionReady.async { implicit request =>
       request.sessionData.addressLookupResult match {
         case None =>
-          SeeOther(Journey.continue().url)
+          SeeOther(routes.SubscriptionController.checkYourDetails().url)
 
         case Some(AddressLookupResult(_, _, addresses)) =>
           Address
@@ -213,7 +205,7 @@ class AddressController @Inject()(
           logger.warn("Could not store selected address in session", e)
           errorHandler.errorResult()
         },
-        _ => SeeOther(Journey.continue().url)
+        _ => SeeOther(routes.SubscriptionController.checkYourDetails().url)
       )
     )
 }

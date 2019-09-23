@@ -18,35 +18,33 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import cats.Eq
 import cats.syntax.either._
-import cats.syntax.eq._
-import cats.instances.string._
 import julienrf.json.derived
-import play.api.data.{Form, FormError}
 import play.api.data.Forms.{mapping, nonEmptyText, number, of, optional, text}
 import play.api.data.format.Formatter
-import play.api.libs.json.{Json, OFormat}
+import play.api.data.{Form, FormError}
+import play.api.libs.json.OFormat
 
 sealed trait Address extends Product with Serializable
 
 object Address {
 
   final case class UkAddress(
-                              line1: String,
-                              line2: Option[String],
-                              town: Option[String],
-                              county: Option[String],
-                              postcode: String
+    line1: String,
+    line2: Option[String],
+    town: Option[String],
+    county: Option[String],
+    postcode: String
   ) extends Address {
     val countryCode: String = "GB"
   }
 
   final case class NonUkAddress(
-                                 line1: String,
-                                 line2: Option[String],
-                                 line3: Option[String],
-                                 line4: Option[String],
-                                 postcode: Option[String],
-                                 country: Country
+    line1: String,
+    line2: Option[String],
+    line3: Option[String],
+    line4: Option[String],
+    postcode: Option[String],
+    country: Country
   ) extends Address
 
   // the format instance using the play-json-derived-codecs library wraps
@@ -73,7 +71,7 @@ object Address {
         "address-line2"  -> optional(text),
         "address-town"   -> optional(text),
         "address-county" -> optional(text),
-        "postcode" -> nonEmptyText
+        "postcode"       -> nonEmptyText
       )(UkAddress.apply)(UkAddress.unapply)
     )
 
@@ -92,12 +90,12 @@ object Address {
     }
     Form(
       mapping(
-        "nonUkAddress-line1"  -> nonEmptyText,
-        "nonUkAddress-line2"  -> optional(text),
-        "nonUkAddress-line3"   -> optional(text),
+        "nonUkAddress-line1" -> nonEmptyText,
+        "nonUkAddress-line2" -> optional(text),
+        "nonUkAddress-line3" -> optional(text),
         "nonUkAddress-line4" -> optional(text),
-        "postcode" -> optional(text),
-        "countryCode" -> of(countryFormatter)
+        "postcode"           -> optional(text),
+        "countryCode"        -> of(countryFormatter)
       )(NonUkAddress.apply)(NonUkAddress.unapply)
     )
   }
@@ -105,7 +103,7 @@ object Address {
   def isUkForm: Form[Boolean] =
     Form(
       mapping(
-        "isUk" -> of(BooleanFormat.formatter)
+        "isUk" -> of(BooleanFormatter.formatter)
       )(identity)(Some(_))
     )
 
