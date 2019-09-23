@@ -20,14 +20,13 @@ import java.util.UUID
 
 import com.typesafe.config.ConfigFactory
 import org.scalacheck.ScalacheckShapeless._
-import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.{Matchers, WordSpec}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.Configuration
 import play.api.libs.json.{JsNumber, JsObject}
 import uk.gov.hmrc.cache.model.{Cache, Id}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, _}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.SessionId
 import uk.gov.hmrc.mongo.DatabaseUpdate
@@ -36,7 +35,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class SessionStoreImplSpec extends WordSpec with Matchers with MongoSupport with ScalaFutures with ScalaCheckDrivenPropertyChecks {
+class SessionStoreImplSpec
+    extends WordSpec
+    with Matchers
+    with MongoSupport
+    with ScalaFutures
+    with Eventually
+    with ScalaCheckDrivenPropertyChecks {
 
   val config = Configuration(
     ConfigFactory.parseString(
@@ -59,8 +64,10 @@ class SessionStoreImplSpec extends WordSpec with Matchers with MongoSupport with
 
         result.futureValue should be(Right(()))
 
-        val getResult = sessionStore.get()
-        getResult.futureValue should be(Right(Some(sessionData)))
+        eventually {
+          val getResult = sessionStore.get()
+          getResult.futureValue should be(Right(Some(sessionData)))
+        }
       }
     }
 
@@ -90,7 +97,7 @@ class SessionStoreImplSpec extends WordSpec with Matchers with MongoSupport with
 
       "there is no session id in the header carrier" in {
         implicit val hc: HeaderCarrier = HeaderCarrier()
-        val sessionData = sample[SessionData]
+        val sessionData                = sample[SessionData]
 
         sessionStore.store(sessionData).futureValue.isLeft shouldBe true
         sessionStore.get().futureValue.isLeft              shouldBe true
