@@ -22,8 +22,6 @@ object UserType {
 
   final case class Individual(
                                id: Either[SAUTR,NINO],
-                               name: Name,
-                               dateOfBirth: Option[DateOfBirth],
                                email: Option[Email]
                              ) extends UserType
 
@@ -33,7 +31,7 @@ object UserType {
 
   final case class IndividualWithInsufficientConfidenceLevel(
                                                               nino: Option[NINO],
-                                                              name: Name,
+                                                              sautr: Option[SAUTR],
                                                               email: Option[Email]
                                                             ) extends UserType
 

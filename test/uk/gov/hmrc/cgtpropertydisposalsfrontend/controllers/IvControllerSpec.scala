@@ -48,7 +48,7 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
       def performAction(): Future[Result] = controller.ivSuccess()(FakeRequest())
 
       val nonEmptySession =
-       SessionData.empty.copy(journeyStatus = Some(IndividualWithInsufficientConfidenceLevel(None, None, name, None)))
+       SessionData.empty.copy(journeyStatus = Some(IndividualWithInsufficientConfidenceLevel(None, None, None)))
 
       "clear the session and redirect to the start endpoint" in {
         inSequence {

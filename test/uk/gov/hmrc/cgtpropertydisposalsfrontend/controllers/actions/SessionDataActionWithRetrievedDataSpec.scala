@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
-import java.time._
 import org.scalacheck.ScalacheckShapeless._
 import play.api.i18n.MessagesApi
 import play.api.mvc.Results.Ok
@@ -44,8 +43,6 @@ class SessionDataActionWithRetrievedDataSpec extends ControllerSpec with Session
       AuthenticatedRequestWithRetrievedData(
         UserType.Individual(
           Right(NINO("nino")),
-          Name("name", "lastName"),
-          Some( DateOfBirth(LocalDate.of(2000, 10, 1))),
           Some(Email("email"))
         ),
         messagesRequest)

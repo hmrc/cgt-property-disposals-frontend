@@ -44,6 +44,9 @@ hasNino.error.boolean=Select yes if you have a National Insurance number
 haveAnSaUtr.title=Do you have a Self Assessment Unique Taxpayer Reference?
 hasSaUtr.error.required=Select yes if you have a Self Assessment Unique Taxpayer Reference
 hasSaUtr.error.boolean=Select yes if you have a Self Assessment Unique Taxpayer Reference
+
+
+enterSaUtr.title=Tell us your Self Assessment Unique Taxpayer Reference and full name
 saUtr.label=Enter your Self Assessment Unique Taxpayer Reference
 saUtr.helpText=You can find this on letters from HMRC about your Self Assessment returns. For example, 9163259195
 saUtr.error.required=Enter your Self Assessment Unique Taxpayer Reference

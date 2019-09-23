@@ -16,18 +16,22 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import play.api.libs.json.{Format, Json}
+import julienrf.json.derived
+import play.api.libs.json.OFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherFormat.eitherFormat
 
-final case class BusinessPartnerRecord(
-  emailAddress: Option[String],
-  address: Address,
-  sapNumber: String,
-  name: Either[TrustName, Name]
-)
+sealed trait BusinessPartnerRecordRequest extends Product with Serializable
 
-object BusinessPartnerRecord {
+object BusinessPartnerRecordRequest {
 
-  implicit val format: Format[BusinessPartnerRecord] = Json.format
+  final case class IndividualBusinessPartnerRecordRequest(
+    id: Either[SAUTR, NINO],
+    nameMatch: Option[Name]
+  ) extends BusinessPartnerRecordRequest
+
+  final case class TrustBusinessPartnerRecordRequest(id: SAUTR) extends BusinessPartnerRecordRequest
+
+  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
+  implicit val format: OFormat[BusinessPartnerRecordRequest] = derived.oformat[BusinessPartnerRecordRequest]
 
 }

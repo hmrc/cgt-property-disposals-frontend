@@ -16,4 +16,12 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
+import play.api.libs.json.{Json, OFormat}
+
 final case class NINO(value: String) extends AnyVal
+
+object NINO {
+
+  implicit val format: OFormat[NINO] = Json.format[NINO]
+
+}
