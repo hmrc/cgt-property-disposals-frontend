@@ -17,12 +17,13 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import play.api.libs.json.{Json, OFormat, Reads}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Country.{CountryCode, CountryName}
 
 import scala.io.Source
 
 final case class Country(
-  code: String,
-  name: Option[String]
+  code: CountryCode,
+  name: Option[CountryName]
 )
 
 object Country {
