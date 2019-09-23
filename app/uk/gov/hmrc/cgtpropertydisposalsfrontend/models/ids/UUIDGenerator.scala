@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids
 
-import play.api.libs.json.{Format, Json}
+import java.util.UUID
 
-final case class SAUTR(value: String) extends AnyVal
+import com.google.inject.{ImplementedBy, Singleton}
 
-object SAUTR {
+@ImplementedBy(classOf[UUIDGeneratorImpl])
+trait UUIDGenerator {
 
-  implicit val format: Format[SAUTR] = Json.format[SAUTR]
+  def nextId(): UUID
+
+}
+
+@Singleton
+class UUIDGeneratorImpl extends UUIDGenerator {
+
+  def nextId(): UUID = UUID.randomUUID()
 
 }

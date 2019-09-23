@@ -26,7 +26,9 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, Name, SessionData, SubscriptionDetails, SubscriptionResponse, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecord
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Name, SessionData, SubscriptionDetails, SubscriptionResponse, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 
 import scala.concurrent.Future
@@ -124,7 +126,7 @@ class RegisterTrustControllerSpec extends ControllerSpec with AuthSupport with S
 
         "the session data indicates the user is an individual who has insufficient confidence level" in {
           val sessionData = SessionData.empty.copy(journeyStatus =
-            Some(IndividualWithInsufficientConfidenceLevel(None, None, None)))
+            Some(IndividualWithInsufficientConfidenceLevel(None, None, None, sample[GGCredId])))
 
           inSequence{
             mockAuthWithNoRetrievals()

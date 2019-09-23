@@ -16,15 +16,10 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos
 
-import cats.data.OptionT
-import cats.instances.either._
-import cats.syntax.either._
 import configs.syntax._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.Configuration
-import play.api.libs.json.Json
 import play.modules.reactivemongo.ReactiveMongoComponent
-import uk.gov.hmrc.cache.model.Id
 import uk.gov.hmrc.cache.repository.CacheMongoRepository
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -44,7 +39,7 @@ trait SessionStore {
 @Singleton
 class SessionStoreImpl @Inject()(mongo: ReactiveMongoComponent, configuration: Configuration)(
   implicit ec: ExecutionContext
-) extends SessionStore {
+) extends SessionStore with Repo {
 
   val cacheRepository: CacheMongoRepository = {
     val expireAfter: FiniteDuration = configuration.underlying
@@ -58,44 +53,14 @@ class SessionStoreImpl @Inject()(mongo: ReactiveMongoComponent, configuration: C
 
   def get()(implicit hc: HeaderCarrier): Future[Either[Error, Option[SessionData]]] =
     hc.sessionId.map(_.value) match {
-      case Some(sessionId) ⇒
-        cacheRepository
-          .findById(Id(sessionId))
-          .map { maybeCache =>
-            val response: OptionT[Either[Error, ?], SessionData] = for {
-              cache ← OptionT.fromOption[Either[Error, ?]](maybeCache)
-              data ← OptionT.fromOption[Either[Error, ?]](cache.data)
-              result ← OptionT.liftF[Either[Error, ?], SessionData](
-                        (data \ sessionKey)
-                          .validate[SessionData]
-                          .asEither
-                          .leftMap(e ⇒ Error(s"Could not parse session data from mongo: ${e.mkString("; ")}"))
-                      )
-            } yield result
-
-            response.value
-          }
-          .recover { case e ⇒ Left(Error(e)) }
-
-      case None =>
-        Future.successful(Left(Error("no session id found in headers - cannot query mongo")))
+      case Some(sessionId) ⇒ get[SessionData](sessionId)
+      case None => Future.successful(Left(Error("no session id found in headers - cannot query mongo")))
     }
 
   def store(sessionData: SessionData)(implicit hc: HeaderCarrier): Future[Either[Error, Unit]] =
     hc.sessionId.map(_.value) match {
-      case Some(sessionId) ⇒
-        cacheRepository
-          .createOrUpdate(Id(sessionId), sessionKey, Json.toJson(sessionData))
-          .map[Either[Error, Unit]] { dbUpdate ⇒
-            if (dbUpdate.writeResult.inError)
-              Left(Error(dbUpdate.writeResult.errmsg.getOrElse("unknown error during inserting session data in mongo")))
-            else
-              Right(())
-          }
-          .recover { case e ⇒ Left(Error(e)) }
-
-      case None ⇒
-        Future.successful(Left(Error("no session id found in headers - cannot store data in mongo")))
+      case Some(sessionId) ⇒ store(sessionId, sessionData)
+      case None ⇒ Future.successful(Left(Error("no session id found in headers - cannot store data in mongo")))
     }
 
 }

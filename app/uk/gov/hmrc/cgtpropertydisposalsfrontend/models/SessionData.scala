@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import cats.Eq
 import play.api.libs.json.{Format, Json}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.AddressLookupResult
 
 final case class SessionData(
                               journeyStatus: Option[JourneyStatus],

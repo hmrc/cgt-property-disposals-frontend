@@ -14,20 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids
 
-import org.scalatest.{FunSuite, Matchers, WordSpec}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+import play.api.libs.json.{Json, OFormat}
 
-class AddressSpec extends WordSpec with Matchers {
+final case class NINO(value: String) extends AnyVal
 
-  "Address" must {
+object NINO {
 
-    "have a country code method on uk addresses which always returns the same value" in {
-      val ukAddress = UkAddress("line1", None, None, None, "postcode")
-      ukAddress.countryCode shouldBe "GB"
-    }
-
-  }
+  implicit val format: OFormat[NINO] = Json.format[NINO]
 
 }

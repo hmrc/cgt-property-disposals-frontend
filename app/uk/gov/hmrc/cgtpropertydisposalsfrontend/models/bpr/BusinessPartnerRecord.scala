@@ -14,22 +14,22 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr
 
-import java.util.UUID
+import play.api.libs.json.{Format, Json}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Name, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
 
-import com.google.inject.{ImplementedBy, Singleton}
+final case class BusinessPartnerRecord(
+  emailAddress: Option[String],
+  address: Address,
+  sapNumber: String,
+  name: Either[TrustName, Name]
+)
 
-@ImplementedBy(classOf[UUIDGeneratorImpl])
-trait UUIDGenerator {
+object BusinessPartnerRecord {
 
-  def nextId(): UUID
-
-}
-
-@Singleton
-class UUIDGeneratorImpl extends UUIDGenerator {
-
-  def nextId(): UUID = UUID.randomUUID()
+  implicit val format: Format[BusinessPartnerRecord] = Json.format
 
 }

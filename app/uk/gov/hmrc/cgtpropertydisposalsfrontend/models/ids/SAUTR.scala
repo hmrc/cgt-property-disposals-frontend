@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids
 
-import play.api.libs.functional.syntax._
-import play.api.libs.json.Format
+import play.api.libs.json.{Format, Json}
 
-final case class Postcode(value: String) extends AnyVal
+final case class SAUTR(value: String) extends AnyVal
 
-object Postcode {
+object SAUTR {
 
-  implicit val format: Format[Postcode] =
-    implicitly[Format[String]].inmap(Postcode(_), _.value)
+  implicit val format: Format[SAUTR] = Json.format[SAUTR]
 
 }

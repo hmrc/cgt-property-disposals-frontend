@@ -22,7 +22,9 @@ import cats.syntax.either._
 import cats.data.Validated._
 import cats.data.{NonEmptyList, Validated, ValidatedNel}
 import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherFormat.eitherFormat
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecord
 
 final case class SubscriptionDetails(
                                       contactName: Either[TrustName,Name],

@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.functional.syntax._
+import play.api.libs.json.Format
 
-final case class NINO(value: String) extends AnyVal
+final case class Postcode(value: String) extends AnyVal
 
-object NINO {
+object Postcode {
 
-  implicit val format: OFormat[NINO] = Json.format[NINO]
+  implicit val format: Format[Postcode] =
+    implicitly[Format[String]].inmap(Postcode(_), _.value)
 
 }

@@ -32,6 +32,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.IndividualWithInsufficientConfidenceLevel
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, Name, SessionData, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 
@@ -55,7 +56,7 @@ class RegistrationControllerSpec
   val name = sample[Name]
 
   val individualWithInsufficentCLSubscriptionStatus =
-    IndividualWithInsufficientConfidenceLevel(Some(false), Some(false), None)
+    IndividualWithInsufficientConfidenceLevel(Some(false), Some(false), None, GGCredId("id"))
 
   val journeyStatusLens: Lens[SessionData, Option[JourneyStatus]] = lens[SessionData].journeyStatus
 
@@ -67,7 +68,7 @@ class RegistrationControllerSpec
 
         "the session data indicates that user should not see page" in {
           def isValidStatus(subscriptionStatus: SubscriptionStatus): Boolean = subscriptionStatus match {
-            case IndividualWithInsufficientConfidenceLevel(Some(false), Some(false), _) => true
+            case IndividualWithInsufficientConfidenceLevel(Some(false), Some(false), _, _) => true
             case _ => false
           }
 

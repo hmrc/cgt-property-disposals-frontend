@@ -14,6 +14,8 @@ GET  /iv/saUtr                            uk.gov.hmrc.cgtpropertydisposalsfronte
 POST /iv/saUtr                            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.InsufficientConfidenceLevelController.doYouHaveSaUtrSubmit()
 GET  /iv/enter-sautr                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.InsufficientConfidenceLevelController.enterSautrAndName()
 POST /iv/enter-sautr                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.InsufficientConfidenceLevelController.enterSautrAndNameSubmit()
+GET  /iv/too-many-attempts                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.InsufficientConfidenceLevelController.tooManyAttempts()
+
 
 ### Registration
 GET  /registration/start                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegistrationController.startRegistration()

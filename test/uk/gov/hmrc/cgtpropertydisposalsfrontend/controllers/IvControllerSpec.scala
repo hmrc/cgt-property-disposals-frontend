@@ -25,6 +25,7 @@ import play.api.mvc.Result
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.IndividualWithInsufficientConfidenceLevel
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, Name, SessionData, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 
@@ -48,7 +49,7 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
       def performAction(): Future[Result] = controller.ivSuccess()(FakeRequest())
 
       val nonEmptySession =
-       SessionData.empty.copy(journeyStatus = Some(IndividualWithInsufficientConfidenceLevel(None, None, None)))
+       SessionData.empty.copy(journeyStatus = Some(IndividualWithInsufficientConfidenceLevel(None, None, None, sample[GGCredId])))
 
       "clear the session and redirect to the start endpoint" in {
         inSequence {

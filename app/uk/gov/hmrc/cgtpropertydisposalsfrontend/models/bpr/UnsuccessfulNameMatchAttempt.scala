@@ -14,20 +14,9 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr
 
-import org.scalatest.{FunSuite, Matchers, WordSpec}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
-
-class AddressSpec extends WordSpec with Matchers {
-
-  "Address" must {
-
-    "have a country code method on uk addresses which always returns the same value" in {
-      val ukAddress = UkAddress("line1", None, None, None, "postcode")
-      ukAddress.countryCode shouldBe "GB"
-    }
-
-  }
-
-}
+final case class NumberOfUnsuccessfulNameMatchAttempts(
+  unsuccesfulAttempts: Int,
+  maximumAttempts: Int
+)

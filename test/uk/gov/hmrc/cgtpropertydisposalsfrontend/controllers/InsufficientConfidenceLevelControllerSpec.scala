@@ -27,28 +27,31 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.BusinessPartnerRecordRequest.IndividualBusinessPartnerRecordRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{RegistrationStatus, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, BusinessPartnerRecordRequest, Error, NINO, Name, SAUTR, SessionData, SubscriptionDetails, SubscriptionResponse, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, BusinessPartnerRecordResponse, NameMatchError, NumberOfUnsuccessfulNameMatchAttempts}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecordRequest.IndividualBusinessPartnerRecordRequest
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.NameMatchError.BackendError
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, SAUTR}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, Name, SessionData, SubscriptionDetails, SubscriptionResponse, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{BusinessPartnerRecordNameMatchRetryService, BusinessPartnerRecordService}
 import uk.gov.hmrc.domain.SaUtrGenerator
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class InsufficientConfidenceLevelControllerSpec
   extends ControllerSpec with IvBehaviourSupport with SessionSupport with AuthSupport with NameFormValidationTests {
 
-  val mockBprService = mock[BusinessPartnerRecordService]
+  val mockBprNameMatchService = mock[BusinessPartnerRecordNameMatchRetryService]
 
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
-      bind[BusinessPartnerRecordService].toInstance(mockBprService)
+      bind[BusinessPartnerRecordNameMatchRetryService].toInstance(mockBprNameMatchService)
     )
 
   override lazy val additionalConfig = ivConfig(useRelativeUrls = false)
@@ -57,12 +60,24 @@ class InsufficientConfidenceLevelControllerSpec
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
-  def mockGetBusinessPartnerRecord(
-        sautr: SAUTR,
-        nameMatch: Name)(result: Either[Error,BusinessPartnerRecord]): Unit =
-    (mockBprService.getBusinessPartnerRecord(_: BusinessPartnerRecordRequest)(_: HeaderCarrier))
-    .expects(IndividualBusinessPartnerRecordRequest(Left(sautr), Some(nameMatch)), *)
+  def mockGetNumberOfUnsuccessfulAttempts(ggCredId: GGCredId)(result: Either[NameMatchError,NumberOfUnsuccessfulNameMatchAttempts]) =
+    (mockBprNameMatchService.getNumberOfUnsuccessfulAttempts(_: GGCredId)(_: ExecutionContext))
+    .expects(ggCredId, *)
     .returning(EitherT.fromEither[Future](result))
+
+  def mockAttemptNameMatch(
+                            sautr: SAUTR,
+                            name: Name,
+                            ggCredId: GGCredId,
+                            numberOfPreviousUnsuccessfulAtempts: Int
+                          )(result: Either[NameMatchError,BusinessPartnerRecord]) =
+    (
+      mockBprNameMatchService.attemptBusinessPartnerRecordNameMatch(
+      _: SAUTR, _: Name,_: GGCredId, _: Int)(_: ExecutionContext, _: HeaderCarrier)
+      )
+      .expects(sautr, name, ggCredId, numberOfPreviousUnsuccessfulAtempts, *, *)
+      .returning(EitherT.fromEither[Future](result))
+
 
   def session(subscriptionStatus: SubscriptionStatus) =
     SessionData.empty.copy(journeyStatus = Some(subscriptionStatus))
@@ -160,7 +175,9 @@ class InsufficientConfidenceLevelControllerSpec
         "the session indicates that the user does not have sufficient confidence level" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(None, None, None))))))
+            mockGetSession(Future.successful(Right(Some(
+              session(IndividualWithInsufficientConfidenceLevel(None, None, None, sample[GGCredId])))
+            )))
           }
 
           val result = performAction()
@@ -173,7 +190,9 @@ class InsufficientConfidenceLevelControllerSpec
           "has previously answered this question" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(Some(true), None,  None))))))
+            mockGetSession(Future.successful(Right(Some(
+              session(IndividualWithInsufficientConfidenceLevel(Some(true), None,  None, sample[GGCredId]))
+            ))))
           }
 
           val result = performAction()
@@ -199,7 +218,9 @@ class InsufficientConfidenceLevelControllerSpec
         "no data has been submitted" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(None, None, None))))))
+            mockGetSession(Future.successful(Right(Some(
+              session(IndividualWithInsufficientConfidenceLevel(None, None, None, sample[GGCredId]))
+            ))))
           }
 
           val result = performAction()
@@ -210,7 +231,9 @@ class InsufficientConfidenceLevelControllerSpec
         "the submitted data cannot be parsed" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(None, None, None))))))
+            mockGetSession(Future.successful(Right(Some(
+              session(IndividualWithInsufficientConfidenceLevel(None, None, None, sample[GGCredId]))
+            ))))
           }
 
           val result = performAction("hasNino" -> "blah")
@@ -223,10 +246,15 @@ class InsufficientConfidenceLevelControllerSpec
       "redirect to the IV journey" when {
 
         "the user indicates that they do have a NINO" in {
+          val credId = sample[GGCredId]
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(None, None, None))))))
-            mockStoreSession(session(IndividualWithInsufficientConfidenceLevel(Some(true), None, None)))(Future.successful(Right(())))
+            mockGetSession(Future.successful(Right(Some(
+              session(IndividualWithInsufficientConfidenceLevel(None, None, None, credId))
+            ))))
+            mockStoreSession(
+              session(IndividualWithInsufficientConfidenceLevel(Some(true), None, None, credId))
+            )(Future.successful(Right(())))
           }
 
           val result = performAction("hasNino" -> "true")
@@ -238,6 +266,7 @@ class InsufficientConfidenceLevelControllerSpec
 
           override val overrideBindings =
             List[GuiceableModule](
+              bind[BusinessPartnerRecordNameMatchRetryService].toInstance(mockBprNameMatchService),
               bind[AuthConnector].toInstance(mockAuthConnector),
               bind[SessionStore].toInstance(mockSessionStore)
             )
@@ -245,11 +274,16 @@ class InsufficientConfidenceLevelControllerSpec
           override lazy val additionalConfig = ivConfig(useRelativeUrls = true)
 
           lazy val controller = instanceOf[InsufficientConfidenceLevelController]
+          val credId = sample[GGCredId]
 
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(None, None, None))))))
-            mockStoreSession(session(IndividualWithInsufficientConfidenceLevel(Some(true), None, None)))(Future.successful(Right(())))
+            mockGetSession(Future.successful(Right(Some(
+              session(IndividualWithInsufficientConfidenceLevel(None, None, None, credId))
+            ))))
+            mockStoreSession(
+              session(IndividualWithInsufficientConfidenceLevel(Some(true), None, None, credId))
+            )(Future.successful(Right(())))
           }
 
           val result = controller.doYouHaveNINOSubmit()(FakeRequest().withFormUrlEncodedBody("hasNino" -> "true").withCSRFToken)
@@ -262,10 +296,15 @@ class InsufficientConfidenceLevelControllerSpec
       "redirect to ask if the user has an SAUTR" when {
 
         "the user indicates that they do not have a NINO" in {
+          val credId = sample[GGCredId]
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(None, None, None))))))
-            mockStoreSession(session(IndividualWithInsufficientConfidenceLevel(Some(false), None, None)))(Future.successful(Right(())))
+            mockGetSession(Future.successful(Right(Some(
+              session(IndividualWithInsufficientConfidenceLevel(None, None, None, credId))
+            ))))
+            mockStoreSession(
+              session(IndividualWithInsufficientConfidenceLevel(Some(false), None, None, credId))
+            )(Future.successful(Right(())))
           }
 
           val result = performAction("hasNino" -> "false")
@@ -279,7 +318,9 @@ class InsufficientConfidenceLevelControllerSpec
         "the user has previously indicated that they have a NINO" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(Some(true), None, None))))))
+            mockGetSession(Future.successful(Right(Some(
+              session(IndividualWithInsufficientConfidenceLevel(Some(true), None, None, sample[GGCredId])))
+            )))
           }
 
           val result = performAction("hasNino" -> "true")
@@ -289,7 +330,9 @@ class InsufficientConfidenceLevelControllerSpec
         "the user has previously indicated that they do not have a NINO" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(Some(false), None, None))))))
+            mockGetSession(Future.successful(Right(Some(
+              session(IndividualWithInsufficientConfidenceLevel(Some(false), None, None, sample[GGCredId]))
+            ))))
           }
 
           val result = performAction("hasNino" -> "false")
@@ -312,7 +355,9 @@ class InsufficientConfidenceLevelControllerSpec
         "the session data indicates the user hasn't selected whether or not they have a NINO" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(None, None, None))))))
+            mockGetSession(Future.successful(Right(Some(
+              session(IndividualWithInsufficientConfidenceLevel(None, None, None, sample[GGCredId]))
+            ))))
           }
 
           checkIsRedirect(performAction(), routes.InsufficientConfidenceLevelController.doYouHaveNINO())
@@ -326,7 +371,9 @@ class InsufficientConfidenceLevelControllerSpec
           "has indicated that they do not have a NINO" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(Some(false), None, None))))))
+            mockGetSession(Future.successful(Right(Some(
+              session(IndividualWithInsufficientConfidenceLevel(Some(false), None, None, sample[GGCredId]))
+            ))))
           }
 
           val result = performAction()
@@ -338,10 +385,11 @@ class InsufficientConfidenceLevelControllerSpec
         "the session indicates that the user does not have sufficient confidence level and the user " +
           "has indicated that they do not have a NINO and the user has previously indicated that they " +
           "have an SAUTR" in {
-          val sautr = SAUTR("12345")
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(Some(false), Some(true), None))))))
+            mockGetSession(Future.successful(Right(Some(
+              session(IndividualWithInsufficientConfidenceLevel(Some(false), Some(true), None, sample[GGCredId]))
+            ))))
           }
 
           val result = performAction()
@@ -356,7 +404,9 @@ class InsufficientConfidenceLevelControllerSpec
           "do not have an SAUTR" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(Some(false), Some(false), None))))))
+            mockGetSession(Future.successful(Right(Some(
+              session(IndividualWithInsufficientConfidenceLevel(Some(false), Some(false), None, sample[GGCredId]))
+            ))))
           }
 
           val result = performAction()
@@ -382,7 +432,9 @@ class InsufficientConfidenceLevelControllerSpec
         "the session data indicates the user hasn't selected whether or not they have a NINO" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(None, None, None))))))
+            mockGetSession(Future.successful(Right(Some(
+              session(IndividualWithInsufficientConfidenceLevel(None, None, None, sample[GGCredId]))
+            ))))
           }
 
           checkIsRedirect(performAction(), routes.InsufficientConfidenceLevelController.doYouHaveNINO())
@@ -395,7 +447,9 @@ class InsufficientConfidenceLevelControllerSpec
         "the user did not select an option" in {
           inSequence{
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(IndividualWithInsufficientConfidenceLevel(Some(false), None, None))))))
+            mockGetSession(Future.successful(Right(Some(
+              session(IndividualWithInsufficientConfidenceLevel(Some(false), None, None, sample[GGCredId]))
+            ))))
           }
 
           val result = performAction()
@@ -409,7 +463,7 @@ class InsufficientConfidenceLevelControllerSpec
 
         "the user indicates they have an SA UTR and enters in a valid one" in {
           val subscriptionStatus =
-            IndividualWithInsufficientConfidenceLevel(Some(false), None, None)
+            IndividualWithInsufficientConfidenceLevel(Some(false), None, None, sample[GGCredId])
 
           inSequence{
             mockAuthWithNoRetrievals()
@@ -427,7 +481,7 @@ class InsufficientConfidenceLevelControllerSpec
 
         "the user indicates they do not have an SA UTR" in {
           val subscriptionStatus =
-            IndividualWithInsufficientConfidenceLevel(Some(false), None, None)
+            IndividualWithInsufficientConfidenceLevel(Some(false), None, None, sample[GGCredId])
 
           inSequence{
             mockAuthWithNoRetrievals()
@@ -446,6 +500,8 @@ class InsufficientConfidenceLevelControllerSpec
 
     "handling requests to enter an SAUTR and name" must {
 
+      val ggCredId = sample[GGCredId]
+
       def performAction(): Future[Result] =
         controller.enterSautrAndName()(FakeRequest())
 
@@ -457,7 +513,7 @@ class InsufficientConfidenceLevelControllerSpec
           inSequence{
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(session(
-              IndividualWithInsufficientConfidenceLevel(hasNino, hasSautr, None)
+              IndividualWithInsufficientConfidenceLevel(hasNino, hasSautr, None, ggCredId)
             )))))
           }
 
@@ -489,12 +545,45 @@ class InsufficientConfidenceLevelControllerSpec
           inSequence{
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(session(
-              IndividualWithInsufficientConfidenceLevel(Some(false), Some(true), None)
+              IndividualWithInsufficientConfidenceLevel(Some(false), Some(true), None, ggCredId)
             )))))
+            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(NumberOfUnsuccessfulNameMatchAttempts(1, 2)))
           }
 
           val result = performAction()
           contentAsString(result) should include(message("enterSaUtr.title"))
+        }
+
+      }
+
+      "redirect to the too many attempts page" when {
+
+        "the user has tried to do a name match too many times" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(session(
+              IndividualWithInsufficientConfidenceLevel(Some(false), Some(true), None, ggCredId)
+            )))))
+            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(NameMatchError.TooManyUnsuccessfulAttempts()))
+          }
+
+          checkIsRedirect(performAction(), routes.InsufficientConfidenceLevelController.tooManyAttempts())
+        }
+
+      }
+
+      "show an error page" when {
+
+        "there is an error trying to see how many times a user has attempted to do a name match" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(session(
+              IndividualWithInsufficientConfidenceLevel(Some(false), Some(true), None, ggCredId)
+            )))))
+            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(NameMatchError.BackendError(Error(""))))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
         }
 
       }
@@ -509,8 +598,10 @@ class InsufficientConfidenceLevelControllerSpec
 
       val bpr = sample[BusinessPartnerRecord]
 
+      val ggCredId = sample[GGCredId]
+
       val expectedSessionData =
-        session(IndividualWithInsufficientConfidenceLevel(Some(false), Some(true), None))
+        session(IndividualWithInsufficientConfidenceLevel(Some(false), Some(true), None, ggCredId))
 
 
       def performAction(formData: (String,String)*): Future[Result] =
@@ -522,9 +613,8 @@ class InsufficientConfidenceLevelControllerSpec
         data => performAction(data :+ ("saUtr" -> validSautr.value): _*),
         () => inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(session(
-            IndividualWithInsufficientConfidenceLevel(Some(false), Some(true), None)
-          )))))
+          mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+          mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(NumberOfUnsuccessfulNameMatchAttempts(1, 2)))
         }
       )
 
@@ -534,7 +624,7 @@ class InsufficientConfidenceLevelControllerSpec
           inSequence{
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(session(
-              IndividualWithInsufficientConfidenceLevel(hasNino, hasSautr, None)
+              IndividualWithInsufficientConfidenceLevel(hasNino, hasSautr, None, sample[GGCredId])
             )))))
           }
 
@@ -567,6 +657,7 @@ class InsufficientConfidenceLevelControllerSpec
           inSequence{
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(NumberOfUnsuccessfulNameMatchAttempts(1, 2)))
           }
 
           val result = performAction("firstName" -> validName.firstName, "lastName" -> validName.lastName)
@@ -578,6 +669,7 @@ class InsufficientConfidenceLevelControllerSpec
           inSequence{
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(NumberOfUnsuccessfulNameMatchAttempts(1, 2)))
           }
 
           val result = performAction(
@@ -593,6 +685,7 @@ class InsufficientConfidenceLevelControllerSpec
           inSequence{
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(NumberOfUnsuccessfulNameMatchAttempts(1, 2)))
           }
 
           val result = performAction(
@@ -604,15 +697,52 @@ class InsufficientConfidenceLevelControllerSpec
           contentAsString(result) should include(message("saUtr.error.pattern"))
         }
 
+        "a valid SA UTR and name are entered but they cannot be matched to a BPR and the " +
+          "user has not yet made too many unsuccessful attempts" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(NumberOfUnsuccessfulNameMatchAttempts(1, 2)))
+            mockAttemptNameMatch(validSautr, validName, ggCredId, 1)(
+              Left(NameMatchError.NameMatchFailed(
+                validSautr,
+                validName,
+                NumberOfUnsuccessfulNameMatchAttempts(2, 3))
+              ))
+          }
+
+          val result = performAction(
+            "firstName" -> validName.firstName,
+            "lastName" -> validName.lastName,
+            "saUtr" -> validSautr.value
+          )
+          status(result) shouldBe BAD_REQUEST
+          // TODO: test for error message
+        }
+
       }
 
       "display an error page" when {
+
+        "there is an error retrieving the number of previous unsuccessful attempts" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(NameMatchError.BackendError(Error(""))))
+          }
+
+          val result = performAction()
+
+          checkIsTechnicalErrorPage(result)
+        }
+
 
         "there is an error getting the BPR" in {
           inSequence{
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(expectedSessionData))))
-            mockGetBusinessPartnerRecord(validSautr, validName)(Left(Error("")))
+            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(NumberOfUnsuccessfulNameMatchAttempts(1, 2)))
+            mockAttemptNameMatch(validSautr, validName, ggCredId, 1)(Left(NameMatchError.BackendError(Error(""))))
           }
 
           val result = performAction(
@@ -628,7 +758,8 @@ class InsufficientConfidenceLevelControllerSpec
           inSequence{
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(expectedSessionData))))
-            mockGetBusinessPartnerRecord(validSautr, validName)(Right(bpr))
+            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(NumberOfUnsuccessfulNameMatchAttempts(1, 2)))
+            mockAttemptNameMatch(validSautr, validName, ggCredId, 1)(Right(bpr))
             mockStoreSession(session(SubscriptionMissingData(bpr)))(Future.successful(Left(Error(""))))
           }
 
@@ -649,7 +780,8 @@ class InsufficientConfidenceLevelControllerSpec
           inSequence{
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(expectedSessionData))))
-            mockGetBusinessPartnerRecord(validSautr, validName)(Right(bpr))
+            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(NumberOfUnsuccessfulNameMatchAttempts(1, 2)))
+            mockAttemptNameMatch(validSautr, validName, ggCredId, 1)(Right(bpr))
             mockStoreSession(session(SubscriptionMissingData(bpr)))(Future.successful(Right(())))
           }
 
@@ -660,6 +792,40 @@ class InsufficientConfidenceLevelControllerSpec
           )
 
           checkIsRedirect(result, routes.StartController.start())
+        }
+
+      }
+
+      "redirect to the too many attempts page" when {
+
+        "the user has attempted to perform a name match too many times" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(NameMatchError.TooManyUnsuccessfulAttempts()))
+          }
+
+          val result = performAction()
+          checkIsRedirect(result, routes.InsufficientConfidenceLevelController.tooManyAttempts())
+
+        }
+
+        "the user has not initially made too many unsuccessful attempts but submits " +
+          "details which do not match a BPR and have now made too many attempts" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(NumberOfUnsuccessfulNameMatchAttempts(1, 2)))
+            mockAttemptNameMatch(validSautr, validName, ggCredId, 1)(Left(NameMatchError.TooManyUnsuccessfulAttempts()))
+          }
+
+          val result = performAction(
+            "firstName" -> validName.firstName,
+            "lastName" -> validName.lastName,
+            "saUtr" -> validSautr.value
+          )
+
+          checkIsRedirect(result, routes.InsufficientConfidenceLevelController.tooManyAttempts())
         }
 
       }

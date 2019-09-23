@@ -27,11 +27,14 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.{NonUkAddress, UkAddress}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Country
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{RegistrationStatus, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AddressLookupResult, BusinessPartnerRecord, Error, NINO, Name, Postcode, SessionData, SubscriptionDetails, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{AddressLookupResult, Postcode}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecord
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, Name, SessionData, SubscriptionDetails, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -110,7 +113,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
 
       "the session data indicates the user does not have sufficient confidence level" in {
         val session = SessionData.empty.copy(journeyStatus = Some(
-          SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, None)
+          SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, None, sample[GGCredId])
         ))
 
         inSequence {
@@ -444,7 +447,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
                 Some("The Town"),
                 None,
                 None,
-                Country("NZ", Some("New Zealand"))
+                models.address.Country("NZ", Some("New Zealand"))
               )
             ))
             ))
@@ -483,7 +486,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
         }
 
         "there is an address lookup result in session" in {
-          val addressLookupResult = AddressLookupResult(postcode, None, List.empty)
+          val addressLookupResult = models.address.AddressLookupResult(postcode, None, List.empty)
           val session = SessionData.empty.copy(
             journeyStatus  = Some(SubscriptionReady(subscriptionDetails)),
             addressLookupResult = Some(addressLookupResult)
@@ -532,7 +535,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
       "show form errors when no results are found for a filter" in {
         val p = Postcode("NW19AX")
         val filter = "Some filter"
-        val addressLookupResult = AddressLookupResult(p, Some(filter), List())
+        val addressLookupResult = models.address.AddressLookupResult(p, Some(filter), List())
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(existingSessionData))))
@@ -548,7 +551,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
 
       "show form errors when no results are found for a postcode within a stored search" in {
         val p = Postcode("NW19AX")
-        val addressLookupResult = AddressLookupResult(p, None, List())
+        val addressLookupResult = models.address.AddressLookupResult(p, None, List())
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(existingSessionData.copy(addressLookupResult = Some(addressLookupResult))))))
@@ -561,7 +564,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
       "show form errors when no results are found for a filter within a stored search" in {
         val p = Postcode("NW19AX")
         val filter = "Some filter"
-        val addressLookupResult = AddressLookupResult(p, Some(filter), List())
+        val addressLookupResult = models.address.AddressLookupResult(p, Some(filter), List())
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(

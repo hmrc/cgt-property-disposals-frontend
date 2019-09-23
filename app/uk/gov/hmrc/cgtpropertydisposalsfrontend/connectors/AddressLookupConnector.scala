@@ -21,7 +21,8 @@ import java.net.URLEncoder
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, Postcode}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient

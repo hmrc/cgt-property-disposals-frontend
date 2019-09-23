@@ -27,13 +27,18 @@ import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{AnyContent, Request, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.ConfidenceLevel.L50
+import uk.gov.hmrc.auth.core.retrieve.Credentials
 import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, ConfidenceLevel}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.UkAddress
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.BusinessPartnerRecordRequest.{IndividualBusinessPartnerRecordRequest, TrustBusinessPartnerRecordRequest}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{RegistrationStatus, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Individual, Trust}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, BusinessPartnerRecordResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecordRequest._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -57,7 +62,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
   lazy val controller = instanceOf[StartController]
 
   def mockGetBusinessPartnerRecord(request: BusinessPartnerRecordRequest)(
-    result: Either[Error, BusinessPartnerRecord]
+    result: Either[Error, BusinessPartnerRecordResponse]
   ) =
     (mockService
       .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest)(_: HeaderCarrier))
@@ -71,6 +76,8 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
   val emailAddress         = "email"
 
   val individual = Individual(Right(nino), None)
+  val retrievedGGCredId = Credentials("gg", "GovernmentGateway")
+  val ggCredId = GGCredId(retrievedGGCredId.providerId)
 
   "The StartController" when {
 
@@ -95,7 +102,8 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 None,
                 None,
                 None,
-                Set.empty
+                Set.empty,
+                Some(retrievedGGCredId)
               )
               mockGetSession(Future.successful(Right(Some(SessionData.empty))))
               mockStoreSession(nonTrustOrganisationSession)(Future.successful(Left(Error(""))))
@@ -115,7 +123,8 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 None,
                 None,
                 None,
-                Set.empty
+                Set.empty,
+                Some(retrievedGGCredId)
               )
               mockGetSession(Future.successful(Right(Some(nonTrustOrganisationSession))))
             }
@@ -131,7 +140,8 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 None,
                 None,
                 None,
-                Set.empty
+                Set.empty,
+                Some(retrievedGGCredId)
               )
               mockGetSession(Future.successful(Right(None)))
               mockStoreSession(nonTrustOrganisationSession)(Future.successful(Right(())))
@@ -158,12 +168,14 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                   None,
                   None,
                   None,
-                  Set.empty
+                  Set.empty,
+                  Some(retrievedGGCredId)
                 )
                 mockGetSession(Future.successful(Right(Some(SessionData.empty))))
                 mockStoreSession(
                   SessionData.empty.copy(
-                    journeyStatus = Some(SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, None))
+                    journeyStatus = Some(SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(
+                      None, None, None, ggCredId))
                   )
                 )(Future.successful(Left(Error(""))))
               }
@@ -185,7 +197,8 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                   Some("nino"),
                   None,
                   None,
-                  Set.empty
+                  Set.empty,
+                  Some(retrievedGGCredId)
                 )
                 mockGetSession(Future.successful(Right(Some(SessionData.empty))))
               }
@@ -213,7 +226,8 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                   Some("nino"),
                   None,
                   None,
-                  Set.empty
+                  Set.empty,
+                  Some(retrievedGGCredId)
                 )
                 mockGetSession(Future.successful(Right(Some(SessionData.empty))))
               }
@@ -233,13 +247,14 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                   None,
                   None,
                   None,
-                  Set.empty
+                  Set.empty,
+                  Some(retrievedGGCredId)
                 )
                 mockGetSession(Future.successful(Right(Some(SessionData.empty))))
                 mockStoreSession(
                   SessionData.empty.copy(
                     journeyStatus = Some(
-                      SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, None)
+                      SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, None, ggCredId)
                     )
                   )
                 )(Future.successful(Right(())))
@@ -256,7 +271,8 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                   None,
                   None,
                   None,
-                  Set.empty
+                  Set.empty,
+                  Some(retrievedGGCredId)
                 )
                 mockGetSession(
                   Future.successful(
@@ -264,7 +280,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                       Some(
                         SessionData.empty.copy(
                           journeyStatus = Some(
-                            SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, None)
+                            SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, None, ggCredId)
                           )
                         )
                       )
@@ -285,11 +301,11 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
             "redirect to the do you have a nino page" in {
               def sessionData = SessionData.empty.copy(
-                journeyStatus = Some(IndividualWithInsufficientConfidenceLevel(Some(false), None, None))
+                journeyStatus = Some(IndividualWithInsufficientConfidenceLevel(Some(false), None, None, ggCredId))
               )
 
               inSequence {
-                mockAuthWithAllRetrievals(L50, Some(AffinityGroup.Individual), None, None, None, Set.empty)
+                mockAuthWithAllRetrievals(L50, Some(AffinityGroup.Individual), None, None, None, Set.empty, Some(retrievedGGCredId))
                 mockGetSession(Future.successful(Right(Some(sessionData))))
               }
 
@@ -300,7 +316,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
         "the session data indicates that some subscription details are missing" must {
 
-          val bpr = BusinessPartnerRecord(
+          val bpr = models.bpr.BusinessPartnerRecord(
             Some(emailAddress),
             sample[Address],
             "sap",
@@ -326,7 +342,8 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                   None,
                   None,
                   None,
-                  Set.empty
+                  Set.empty,
+                  Some(retrievedGGCredId)
                 )
                 mockGetSession(Future.successful(Right(Some(session))))
                 mockStoreSession(updatedSession)(Future.successful(Right(())))
@@ -349,7 +366,8 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                   None,
                   None,
                   None,
-                  Set.empty
+                  Set.empty,
+                  Some(retrievedGGCredId)
                 )
                 mockGetSession(Future.successful(Right(Some(sessionData))))
               }
@@ -365,7 +383,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
       "the user is not enrolled and is not subscribed in ETMP" when {
 
-        val bpr = BusinessPartnerRecord(
+        val bpr = models.bpr.BusinessPartnerRecord(
           Some(emailAddress),
           sample[UkAddress],
           "sap",
@@ -400,7 +418,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 inSequence {
                   mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, None)
                   mockGetSession(Future.successful(Right(maybeSession)))
-                  mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Right(nino), None))(Right(bpr))
+                  mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Right(nino), None))(Right(BusinessPartnerRecordResponse(Some(bpr))))
                   mockStoreSession(session)(Future.successful(Right(())))
                 }
 
@@ -424,10 +442,11 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                     None,
                     Some("sautr"),
                     None,
-                    Set.empty
+                    Set.empty,
+                    Some(retrievedGGCredId)
                   )
                   mockGetSession(Future.successful(Right(maybeSession)))
-                  mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Left(SAUTR("sautr")), None))(Right(bpr))
+                  mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Left(SAUTR("sautr")), None))(Right(BusinessPartnerRecordResponse(Some(bpr))))
                   mockStoreSession(session)(Future.successful(Right(())))
                 }
 
@@ -448,7 +467,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, Some(ggEmail))
                 mockGetSession(Future.successful(Right(Some(SessionData.empty))))
                 mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Right(nino), None))(
-                  Right(bprWithNoEmail)
+                  Right(BusinessPartnerRecordResponse(Some(bprWithNoEmail)))
                 )
                 mockStoreSession(session)(Future.successful(Right(())))
               }
@@ -473,10 +492,13 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                   None,
                   Some(sautr.value),
                   Some(ggEmail),
-                  Set.empty
+                  Set.empty,
+                  Some(retrievedGGCredId)
                 )
                 mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-                mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Left(sautr), None))(Right(bprWithNoEmail))
+                mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Left(sautr), None))(
+                  Right(BusinessPartnerRecordResponse(Some(bprWithNoEmail)))
+                )
                 mockStoreSession(session)(Future.successful(Right(())))
               }
 
@@ -531,7 +553,8 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                       None,
                       None,
                       None,
-                      Set.empty
+                      Set.empty,
+                      Some(retrievedGGCredId)
                     )
                     mockGetSession(Future.successful(Right(Some(session))))
                   }
@@ -554,6 +577,18 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               checkIsTechnicalErrorPage(performAction())
             }
 
+            "the call to get a BPR returns no data for a user with CL200" in {
+              inSequence {
+                mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, None)
+                mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+                mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Right(nino), None))(
+                  Right(BusinessPartnerRecordResponse(None))
+                )
+              }
+
+              checkIsTechnicalErrorPage(performAction())
+            }
+
             "the user has CL200 and the call to get BPR succeeds but it cannot be written to session" in {
               val session =
                 SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(individualSubscriptionDetails)))
@@ -561,8 +596,32 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               inSequence {
                 mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, None)
                 mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-                mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Right(nino), None))(Right(bpr))
+                mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Right(nino), None))(
+                  Right(BusinessPartnerRecordResponse(Some(bpr)))
+                  )
                 mockStoreSession(session)(Future.successful(Left(Error("Oh no!"))))
+              }
+
+              checkIsTechnicalErrorPage(performAction())
+            }
+
+
+            "the user has CL<200 call to get a BPR returns no data for a user with CL200" in {
+
+              inSequence {
+                mockAuthWithAllRetrievals(
+                  ConfidenceLevel.L50,
+                  Some(AffinityGroup.Individual),
+                  None,
+                  Some("sautr"),
+                  None,
+                  Set.empty,
+                  Some(retrievedGGCredId)
+                )
+                mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+                mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Left(SAUTR("sautr")), None))(
+                  Right(BusinessPartnerRecordResponse(None))
+                )
               }
 
               checkIsTechnicalErrorPage(performAction())
@@ -579,10 +638,13 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                   None,
                   Some("sautr"),
                   None,
-                  Set.empty
+                  Set.empty,
+                  Some(retrievedGGCredId)
                 )
                 mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-                mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Left(SAUTR("sautr")), None))(Right(bpr))
+                mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Left(SAUTR("sautr")), None))(
+                  Right(BusinessPartnerRecordResponse(Some(bpr)))
+                )
                 mockStoreSession(session)(Future.successful(Left(Error("Oh no!"))))
               }
 
@@ -601,7 +663,9 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               inSequence {
                 mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, None)
                 mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-                mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Right(nino), None))(Right(bprWithNoEmail))
+                mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Right(nino), None))(
+                  Right(BusinessPartnerRecordResponse(Some(bprWithNoEmail)))
+                )
                 mockStoreSession(updatedSession)(Future.successful(Right(())))
               }
 
@@ -620,10 +684,13 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                   None,
                   Some("sautr"),
                   None,
-                  Set.empty
+                  Set.empty,
+                  Some(retrievedGGCredId)
                 )
                 mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-                mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Left(SAUTR("sautr")), None))(Right(bprWithNoEmail))
+                mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Left(SAUTR("sautr")), None))(
+                  Right(BusinessPartnerRecordResponse(Some(bprWithNoEmail)))
+                )
                 mockStoreSession(updatedSession)(Future.successful(Right(())))
               }
 
@@ -690,7 +757,9 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               inSequence {
                 mockAuthWithAllTrustRetrievals(sautr, None)
                 mockGetSession(Future.successful(Right(None)))
-                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(sautr))(Right(bpr.copy(name = Right(Name("", "")))))
+                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(sautr))(
+                  Right(BusinessPartnerRecordResponse(Some(bpr.copy(name = Right(Name("", ""))))))
+                )
               }
 
               checkIsTechnicalErrorPage(performAction())
@@ -700,10 +769,24 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               inSequence {
                 mockAuthWithAllTrustRetrievals(sautr, None)
                 mockGetSession(Future.successful(Right(None)))
-                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(sautr))(Right(bpr))
+                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(sautr))(
+                  Right(BusinessPartnerRecordResponse(Some(bpr)))
+                )
                 mockStoreSession(
                   SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(trustSubscriptionDetails)))
                 )(Future.successful(Left(Error(""))))
+              }
+
+              checkIsTechnicalErrorPage(performAction())
+            }
+
+            "a BPR cannot be found" in {
+              inSequence {
+                mockAuthWithAllTrustRetrievals(sautr, None)
+                mockGetSession(Future.successful(Right(None)))
+                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(sautr))(
+                  Right(BusinessPartnerRecordResponse(None))
+                )
               }
 
               checkIsTechnicalErrorPage(performAction())
@@ -717,7 +800,9 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               inSequence {
                 mockAuthWithAllTrustRetrievals(sautr, None)
                 mockGetSession(Future.successful(Right(None)))
-                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(sautr))(Right(bpr))
+                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(sautr))(
+                  Right(BusinessPartnerRecordResponse(Some(bpr)))
+                )
                 mockStoreSession(
                   SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(trustSubscriptionDetails)))
                 )(Future.successful(Right(())))
@@ -732,7 +817,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 mockAuthWithAllTrustRetrievals(sautr, Some("email"))
                 mockGetSession(Future.successful(Right(None)))
                 mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(sautr))(
-                  Right(bpr.copy(emailAddress = None))
+                  Right(BusinessPartnerRecordResponse(Some(bpr.copy(emailAddress = None))))
                 )
                 mockStoreSession(
                   SessionData.empty.copy(
@@ -776,7 +861,9 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               inSequence {
                 mockAuthWithAllTrustRetrievals(sautr, None)
                 mockGetSession(Future.successful(Right(None)))
-                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(sautr))(Right(bprWithNoEmail))
+                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(sautr))(
+                  Right(BusinessPartnerRecordResponse(Some(bprWithNoEmail)))
+                )
                 mockStoreSession(
                   SessionData.empty.copy(journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail)))
                 )(Future.successful(Right(())))
