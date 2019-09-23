@@ -33,14 +33,11 @@ object JourneyStatus {
 
     final case class IndividualWithInsufficientConfidenceLevel(
                                                                 hasNino: Option[Boolean],
-                                                                hasSautr: Option[HasSAUTR],
-                                                                name: Name,
+                                                                hasSautr: Option[Boolean],
                                                                 email: Option[Email]) extends SubscriptionStatus
 
     // entity is missing data in order to continue on with subscription
-    final case class SubscriptionMissingData(businessPartnerRecord: BusinessPartnerRecord,
-                                             name: Either[TrustName, Name]
-                                            ) extends SubscriptionStatus
+    final case class SubscriptionMissingData(businessPartnerRecord: BusinessPartnerRecord) extends SubscriptionStatus
 
     // subscription details have been gathered and are ready to be used to subscribe
     final case class SubscriptionReady(subscriptionDetails: SubscriptionDetails) extends SubscriptionStatus

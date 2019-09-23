@@ -96,7 +96,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
           mockAuthWithNoRetrievals()
           mockGetSession(
             Future.successful(
-              Right(Some(SessionData.empty.copy(journeyStatus = Some(SubscriptionMissingData(bpr, Right(name))))))))
+              Right(Some(SessionData.empty.copy(journeyStatus = Some(SubscriptionMissingData(bpr)))))))
         }
 
         val result = performAction()
@@ -109,7 +109,7 @@ class AddressControllerSpec extends ControllerSpec with AuthSupport with Session
 
       "the session data indicates the user does not have sufficient confidence level" in {
         val session = SessionData.empty.copy(journeyStatus = Some(
-          SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, name, None)
+          SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, None)
         ))
 
         inSequence {

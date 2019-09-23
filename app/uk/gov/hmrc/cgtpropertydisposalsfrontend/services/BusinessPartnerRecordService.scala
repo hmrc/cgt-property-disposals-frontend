@@ -22,8 +22,7 @@ import cats.syntax.either._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.OK
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Individual, Trust}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, Error}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, BusinessPartnerRecordRequest, Error, NINO, Name, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -32,7 +31,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[BusinessPartnerRecordServiceImpl])
 trait BusinessPartnerRecordService {
 
-  def getBusinessPartnerRecord(entity: Either[Trust,Individual], requiresNameMatch: Boolean)(
+  def getBusinessPartnerRecord(request: BusinessPartnerRecordRequest)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, BusinessPartnerRecord]
 
@@ -43,11 +42,11 @@ class BusinessPartnerRecordServiceImpl @Inject()(connector: CGTPropertyDisposals
   implicit ec: ExecutionContext
 ) extends BusinessPartnerRecordService {
 
-  override def getBusinessPartnerRecord(entity: Either[Trust,Individual], requiresNameMatch: Boolean)(
+  override def getBusinessPartnerRecord(request: BusinessPartnerRecordRequest)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, BusinessPartnerRecord] =
     connector
-      .getBusinessPartnerRecord(entity, requiresNameMatch)
+      .getBusinessPartnerRecord(request)
       .subflatMap { response =>
         response.status match {
           case OK =>

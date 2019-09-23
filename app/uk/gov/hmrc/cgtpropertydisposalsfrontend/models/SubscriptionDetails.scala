@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import cats.syntax.applicative._
 import cats.syntax.apply._
+import cats.syntax.either._
 import cats.data.Validated._
 import cats.data.{NonEmptyList, Validated, ValidatedNel}
 import play.api.libs.json.{Format, Json}
@@ -28,7 +29,7 @@ final case class SubscriptionDetails(
                                       emailAddress: String,
                                       address: Address,
                                       sapNumber: String
-)
+                                    )
 
 object SubscriptionDetails {
 
@@ -36,24 +37,12 @@ object SubscriptionDetails {
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   def apply(bpr: BusinessPartnerRecord,
-            name: Either[Option[TrustName],Name],
             maybeEmail: Option[Email]
            ): Either[NonEmptyList[MissingData], SubscriptionDetails] = {
-    val emailValidation: ValidatedNel[MissingData, String] =
-      bpr.emailAddress.orElse(maybeEmail.map(_.value))
-        .fold[ValidatedNel[MissingData,String]](
-          Invalid(NonEmptyList.one(MissingData.Email)))(a => Valid(a))
-
-    val trustNameValidation: ValidatedNel[MissingData, Either[TrustName, Name]] =
-      name match {
-      case Left(None) => Invalid(NonEmptyList.one(MissingData.TrustName))
-      case Left(Some(trustName)) => Valid(Left(trustName))
-      case Right(name) => Valid(Right(name))
-    }
-
-    (emailValidation, trustNameValidation).mapN{ case (email, name) =>
-      SubscriptionDetails(name, email, bpr.address, bpr.sapNumber)
-    }.toEither
+    Either.fromOption(
+      bpr.emailAddress.orElse(maybeEmail.map(_.value)),
+      NonEmptyList.one(MissingData.Email)
+    ).map( email => SubscriptionDetails(bpr.name, email, bpr.address, bpr.sapNumber))
   }
 
   sealed trait MissingData extends Product with Serializable
@@ -61,8 +50,6 @@ object SubscriptionDetails {
   object MissingData {
 
     case object Email extends MissingData
-
-    case object TrustName extends MissingData
 
   }
 

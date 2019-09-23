@@ -32,13 +32,13 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.IndividualWithInsufficientConfidenceLevel
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, HasSAUTR, JourneyStatus, Name, SessionData, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, Name, SessionData, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 
 import scala.concurrent.Future
 
 class RegistrationControllerSpec
-  extends ControllerSpec with AuthSupport with SessionSupport with ScalaCheckDrivenPropertyChecks {
+  extends ControllerSpec with AuthSupport with SessionSupport with ScalaCheckDrivenPropertyChecks with NameFormValidationTests {
 
   override val overrideBindings =
     List[GuiceableModule](
@@ -55,7 +55,7 @@ class RegistrationControllerSpec
   val name = sample[Name]
 
   val individualWithInsufficentCLSubscriptionStatus =
-    IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)), name, None)
+    IndividualWithInsufficientConfidenceLevel(Some(false), Some(false), None)
 
   val journeyStatusLens: Lens[SessionData, Option[JourneyStatus]] = lens[SessionData].journeyStatus
 
@@ -67,7 +67,7 @@ class RegistrationControllerSpec
 
         "the session data indicates that user should not see page" in {
           def isValidStatus(subscriptionStatus: SubscriptionStatus): Boolean = subscriptionStatus match {
-            case IndividualWithInsufficientConfidenceLevel(Some(false), Some(HasSAUTR(None)), _, _) => true
+            case IndividualWithInsufficientConfidenceLevel(Some(false), Some(false), _) => true
             case _ => false
           }
 
@@ -405,6 +405,14 @@ class RegistrationControllerSpec
 
       behave like commonIndividualRegistrationBehaviour(() => performAction())
 
+      behave like nameFormValidationTests(
+        performAction,
+        () => inSequence{
+          mockAuthWithNoRetrievals()
+          mockGetSession(Future.successful(Right(Some(sessionData))))
+        }
+      )
+
       "be successful" when {
 
         "the request submits valid values" in {
@@ -458,55 +466,6 @@ class RegistrationControllerSpec
         }
       }
 
-      "show the page with errors" when {
-        "the request submits no selection" in {
-          inSequence{
-            mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData))))
-          }
-          val result = performAction()
-          status(result) shouldBe BAD_REQUEST
-          val resultAsString = contentAsString(result)
-          resultAsString should include(message("firstName.error.required"))
-          resultAsString should include(message("lastName.error.required"))
-        }
-        "the request submits a first name that is too long" in {
-          inSequence{
-            mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData))))
-          }
-          val result = performAction("firstName" -> List.fill(36)("a").mkString(""), "lastName" -> "Smith")
-          status(result) shouldBe BAD_REQUEST
-          contentAsString(result) should include(message("firstName.error.tooLong"))
-        }
-        "the request submits a first name with illegal characters" in {
-          inSequence{
-            mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData))))
-          }
-          val result = performAction("firstName" -> "999", "lastName" -> "Smith")
-          status(result) shouldBe BAD_REQUEST
-          contentAsString(result) should include(message("firstName.error.pattern"))
-        }
-        "the request submits a last name that is too long" in {
-          inSequence{
-            mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData))))
-          }
-          val result = performAction("firstName" -> "Bob", "lastName" -> List.fill(36)("a").mkString(""))
-          status(result) shouldBe BAD_REQUEST
-          contentAsString(result) should include(message("lastName.error.tooLong"))
-        }
-        "the request submits a last name with illegal characters" in {
-          inSequence{
-            mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData))))
-          }
-          val result = performAction("firstName" -> "Bob", "lastName" -> "i99")
-          status(result) shouldBe BAD_REQUEST
-          contentAsString(result) should include(message("lastName.error.pattern"))
-        }
-      }
 
     }
 

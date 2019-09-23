@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import play.api.data.Form
-import play.api.data.Forms.{mapping, nonEmptyText}
+import play.api.data.{Form, Mapping}
+import play.api.data.Forms.{mapping => formMapping, nonEmptyText}
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationResult}
 import play.api.libs.json.{Json, OFormat}
 
@@ -27,7 +27,7 @@ object Name {
 
   implicit val format: OFormat[Name] = Json.format[Name]
 
-  val form: Form[Name] = {
+  val mapping: Mapping[String] = {
     val nameRegexPredicate =
       "^[a-zA-Z &`\\-'^]{1,35}$".r.pattern
         .asPredicate()
@@ -37,15 +37,16 @@ object Name {
       else if(!nameRegexPredicate.test(s)) Invalid("error.pattern")
       else Valid
 
-    val nameMapping = nonEmptyText
+    nonEmptyText
       .transform[String](_.trim, identity)
       .verifying(Constraint[String](validateName(_)))
+  }
 
+  val form: Form[Name] =
     Form(
-      mapping(
-        "firstName" -> nameMapping,
-        "lastName" -> nameMapping
+      formMapping(
+        "firstName" -> mapping,
+        "lastName" -> mapping
       )(Name.apply)(Name.unapply)
     )
-  }
 }

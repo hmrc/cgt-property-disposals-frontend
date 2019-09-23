@@ -12,6 +12,8 @@ GET  /iv/nino                             uk.gov.hmrc.cgtpropertydisposalsfronte
 POST /iv/nino                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.InsufficientConfidenceLevelController.doYouHaveNINOSubmit()
 GET  /iv/saUtr                            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()
 POST /iv/saUtr                            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.InsufficientConfidenceLevelController.doYouHaveSaUtrSubmit()
+GET  /iv/enter-sautr                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.InsufficientConfidenceLevelController.enterSautrAndName()
+POST /iv/enter-sautr                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.InsufficientConfidenceLevelController.enterSautrAndNameSubmit()
 
 ### Registration
 GET  /registration/start                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegistrationController.startRegistration()

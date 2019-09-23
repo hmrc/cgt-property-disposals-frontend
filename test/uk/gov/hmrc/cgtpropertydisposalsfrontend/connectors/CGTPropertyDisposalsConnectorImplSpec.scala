@@ -20,15 +20,12 @@ import com.typesafe.config.ConfigFactory
 import org.scalacheck.ScalacheckShapeless._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
-import play.api.libs.json.{JsNull, JsString, Json}
+import play.api.libs.json.{JsString, Json}
 import play.api.test.Helpers._
 import play.api.{Configuration, Mode}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{DateOfBirth, NINO, Name, SAUTR, SubscriptionDetails, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
-import java.time._
-
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Individual, Trust}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -57,182 +54,47 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    "handling request to get the business partner record" when {
+    "handling request to get the business partner record" must {
 
       val bprUrl = "http://host:123/cgt-property-disposals/business-partner-record"
+      val bprRequest = sample[BusinessPartnerRecordRequest]
 
-      "handling individuals with NINOs" must {
-        val nino = NINO("AB123456C")
-        val name = Name("forename", "surname")
-        val dateOfBirth = DateOfBirth(LocalDate.of(2000, 4, 10))
-        def payload(requiresNameMatch: Boolean) =
-          Json.parse(
-            s"""
-              |{
-              |  "IndividualBprRequest" : {
-              |    "id" : { "r" : "${nino.value}" },
-              |    "forename" : "forename",
-              |    "surname"  : "surname",
-              |    "dateOfBirth" : "2000-04-10",
-              |    "requiresNameMatch" : $requiresNameMatch
-              |  }
-              |}
-              |""".stripMargin
-          )
-
-        val individual = Individual(Right(nino), name, Some(dateOfBirth), None)
-
-        "do a POST http call and return the result" in {
-          List(
-            HttpResponse(200),
-            HttpResponse(200, Some(JsString("hi"))),
-            HttpResponse(500)
-          ).foreach { httpResponse =>
-            withClue(s"For http response [${httpResponse.toString}]") {
-              mockPost(bprUrl, Map.empty, payload(true))(
-                Some(httpResponse))
-
-              await(
-                connector
-                  .getBusinessPartnerRecord(Right(individual), true)
-                  .value) shouldBe Right(httpResponse)
-            }
-          }
-        }
-
-        "return an error" when {
-
-          "the future fails" in {
-            mockPost(bprUrl, Map.empty, payload(false))(None)
+      "do a POST http call and return the result" in {
+        List(
+          HttpResponse(200),
+          HttpResponse(200, Some(JsString("hi"))),
+          HttpResponse(500)
+        ).foreach { httpResponse =>
+          withClue(s"For http response [${httpResponse.toString}]") {
+            mockPost(bprUrl, Map.empty, Json.toJson(bprRequest))(Some(httpResponse))
 
             await(
               connector
-                .getBusinessPartnerRecord(Right(individual), false)
-                .value).isLeft shouldBe true
+                .getBusinessPartnerRecord(bprRequest)
+                .value
+            ) shouldBe Right(httpResponse)
           }
-
         }
       }
 
-      "handling individuals with SAUTRs" must {
+      "return an error" when {
 
-        val sautr = SAUTR("1234567890")
-        val name = Name("forename", "surname")
-        val dateOfBirth = DateOfBirth(LocalDate.of(2000, 4, 10))
-        def payload(requiresNameMatch: Boolean) =
-          Json.parse(
-            s"""
-               |{
-               |  "IndividualBprRequest" : {
-               |    "id" : { "l" : "${sautr.value}" },
-               |    "forename" : "forename",
-               |    "surname"  : "surname",
-               |    "dateOfBirth" : "2000-04-10",
-               |    "requiresNameMatch" : $requiresNameMatch
-               |  }
-               |}
-               |""".stripMargin
-          )
+        "the future fails" in {
+          mockPost(bprUrl, Map.empty, Json.toJson(bprRequest))(None)
 
-        val individual = Individual(Left(sautr), name, Some(dateOfBirth), None)
-
-        "do a POST http call and return the result" in {
-          List(
-            HttpResponse(200),
-            HttpResponse(200, Some(JsString("hi"))),
-            HttpResponse(500)
-          ).foreach { httpResponse =>
-            withClue(s"For http response [${httpResponse.toString}]") {
-              mockPost(
-                bprUrl,
-                Map.empty,
-                payload(true))(Some(httpResponse))
-
-              await(
-                connector
-                  .getBusinessPartnerRecord(Right(individual), true)
-                  .value) shouldBe Right(httpResponse)
-            }
-          }
+          await(
+            connector
+              .getBusinessPartnerRecord(bprRequest)
+              .value
+          ).isLeft shouldBe true
         }
 
-        "return an error" when {
-
-          "the future fails" in {
-            mockPost(
-              bprUrl,
-              Map.empty,
-              payload(false))(None)
-
-            await(
-              connector
-                .getBusinessPartnerRecord(Right(individual), false)
-                .value).isLeft shouldBe true
-          }
-
-        }
-      }
-
-      "handling organisations with SAUTRs" must {
-        val sautr = SAUTR("sautr")
-        val trust = Trust(sautr, None)
-
-        def payload(requiresNameMatch: Boolean) =
-          Json.parse(
-            s"""
-               |{
-               |  "OrganisationBprRequest" : {
-               |    "sautr" : "${sautr.value}",
-               |    "requiresNameMatch" : $requiresNameMatch
-               |  }
-               |}
-               |""".stripMargin
-          )
-
-
-        "do a POST http call and return the result" in {
-          List(
-            HttpResponse(200),
-            HttpResponse(200, Some(JsString("hi"))),
-            HttpResponse(500)
-          ).foreach { httpResponse =>
-            withClue(s"For http response [${httpResponse.toString}]") {
-              mockPost(
-                bprUrl,
-                Map.empty,
-                payload(false)
-              )(Some(httpResponse))
-
-              await(
-                connector
-                  .getBusinessPartnerRecord(Left(trust), false)
-                  .value) shouldBe Right(httpResponse)
-            }
-          }
-        }
-
-        "return an error" when {
-
-          "the future fails" in {
-            mockPost(
-              bprUrl,
-              Map.empty,
-              payload(true)
-            )(None)
-
-            await(
-              connector
-                .getBusinessPartnerRecord(Left(trust), true)
-                .value).isLeft shouldBe true
-          }
-
-        }
       }
 
     }
 
     "handling request to subscribe" must {
-      val subscriptionDetails        = sample[SubscriptionDetails]
+      val subscriptionDetails = sample[SubscriptionDetails]
 
       "do a post http call and return the result" in {
         List(

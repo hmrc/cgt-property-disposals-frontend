@@ -21,6 +21,7 @@ import cats.instances.future._
 import java.time._
 
 import org.scalamock.scalatest.MockFactory
+import org.scalacheck.ScalacheckShapeless._
 import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsNumber, Json}
 import play.api.test.Helpers._
@@ -38,22 +39,15 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
 
   val service = new BusinessPartnerRecordServiceImpl(mockConnector)
 
-  def mockGetBPR(entity: Either[Trust,Individual], requiresNameMatch: Boolean)(response: Either[Error, HttpResponse]) =
+  def mockGetBPR(request: BusinessPartnerRecordRequest)(response: Either[Error, HttpResponse]) =
     (mockConnector
-      .getBusinessPartnerRecord(_: Either[Trust,Individual], _: Boolean)(_: HeaderCarrier))
-      .expects(entity, requiresNameMatch, *)
+      .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest)(_: HeaderCarrier))
+      .expects(request, *)
       .returning(EitherT.fromEither[Future](response))
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
-  val sautr                      = SAUTR("1234566789")
-  val nino                       = NINO("AB123456C")
-  val name                       = Name("forename", "surname")
-  val dateOfBirth                = DateOfBirth(LocalDate.of(2000, 4, 10))
-  val individual                 = Individual(Right(nino), name, Some(dateOfBirth), None)
-  val trust                      = Trust(sautr, None)
-  val address =
-    Address.UkAddress("line1", Some("line2"), None, None, "postcode")
-  val bpr = BusinessPartnerRecord(Some("email"), address, "sap", Some("org"))
+  val bprRequest = sample[BusinessPartnerRecordRequest]
+  val bpr = sample[BusinessPartnerRecord]
 
   "The BusinessPartnerRecordServiceImpl" when {
 
@@ -62,9 +56,9 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
       "return an error" when {
 
         def testError(response: => Either[Error, HttpResponse]) = {
-          mockGetBPR(Right(individual), true)(response)
+          mockGetBPR(bprRequest)(response)
 
-          await(service.getBusinessPartnerRecord(Right(individual), true).value).isLeft shouldBe true
+          await(service.getBusinessPartnerRecord(bprRequest).value).isLeft shouldBe true
         }
 
         "the connector fails to make the call" in {
@@ -88,9 +82,9 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
       }
       "return the bpr when the http response comes back with status 200 and " +
         "the json body returns a bpr with a matching dob" in {
-        mockGetBPR(Left(trust), false)(Right(HttpResponse(200, Some(Json.toJson(bpr)))))
+        mockGetBPR(bprRequest)(Right(HttpResponse(200, Some(Json.toJson(bpr)))))
 
-        await(service.getBusinessPartnerRecord(Left(trust), false).value) shouldBe Right(bpr)
+        await(service.getBusinessPartnerRecord(bprRequest).value) shouldBe Right(bpr)
       }
 
     }

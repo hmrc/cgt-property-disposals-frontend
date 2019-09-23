@@ -122,7 +122,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
       "the session data indicates the user does not have sufficient confidence level" in {
         val session = SessionData.empty.copy(journeyStatus = Some(
-          SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None,None, name, None)
+          SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None,None, None)
         ))
 
         inSequence {
@@ -188,7 +188,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
         behave like commonDisplayEmailBehaviour(
           performAction,
-          SubscriptionMissingData(bpr, Right(name)),
+          SubscriptionMissingData(bpr),
           "email.title"
         )
       }
@@ -257,8 +257,8 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
         behave like commonEmailSubmitBehaviour(
           performAction,
-          SubscriptionMissingData(bpr, Right(name)),
-          Right(name),
+          SubscriptionMissingData(bpr),
+          bpr.name,
           "email.title"
         )
       }
@@ -426,7 +426,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
       "on the missing subscription details journey" must {
 
         behave like commonCheckInboxBehaviour(
-          SubscriptionMissingData(bpr, Right(name)),
+          SubscriptionMissingData(bpr),
           routes.EmailController.enterEmail().url
         )
       }
@@ -486,7 +486,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
       def performAction(id: UUID) = controller.verifyEmail(id)(FakeRequest())
 
       "on the missing subscription details journey" must {
-        val subscriptionStatus = SubscriptionMissingData(bpr, Right(name))
+        val subscriptionStatus = SubscriptionMissingData(bpr)
 
         behave like commonVerifyEmailBehaviour(
           subscriptionStatus,
@@ -597,7 +597,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
       def performAction() = controller.emailVerified()(FakeRequest())
 
       "on the missing subscription details journey" must {
-        behave like commonEmailVerifiedBehaviour(SubscriptionMissingData(bpr, Right(name)), routes.StartController.start().url)
+        behave like commonEmailVerifiedBehaviour(SubscriptionMissingData(bpr), routes.StartController.start().url)
       }
 
       "changing the email before subscription" must {
