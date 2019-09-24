@@ -18,19 +18,17 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
-import cats.syntax.either._
 import com.google.inject.Inject
 import play.api.Configuration
 import play.api.data.Forms.{mapping, nonEmptyText, of}
-import play.api.data.format.Formatter
-import play.api.data.{Form, FormError}
+import play.api.data.Form
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.BusinessPartnerRecordRequest.IndividualBusinessPartnerRecordRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Name, SAUTR}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Name, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -197,34 +195,17 @@ class InsufficientConfidenceLevelController @Inject()(
 
 object InsufficientConfidenceLevelController {
 
-  //don't want to use out-of-box boolean formatter - that one defaults null values to false
-  val booleanFormatter: Formatter[Boolean] = new Formatter[Boolean] {
-
-    override val format = Some(("format.boolean", Nil))
-
-    def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Boolean] =
-      Either
-        .fromOption(data.get(key), Seq(FormError(key, "error.required")))
-        .flatMap {
-          case "true"  => Right(true)
-          case "false" => Right(false)
-          case _       => Left(Seq(FormError(key, "error.boolean", Nil)))
-        }
-
-    def unbind(key: String, value: Boolean): Map[String, String] = Map(key -> value.toString)
-  }
-
   val haveANinoForm: Form[Boolean] =
     Form(
       mapping(
-        "hasNino" -> of(booleanFormatter)
+        "hasNino" -> of(BooleanFormatter.formatter)
       )(identity)(Some(_))
     )
 
   val hasSaUtrForm: Form[Boolean] =
     Form(
       mapping(
-        "hasSaUtr" -> of(booleanFormatter)
+        "hasSaUtr" -> of(BooleanFormatter.formatter)
       )(identity)(Some(_))
     )
 

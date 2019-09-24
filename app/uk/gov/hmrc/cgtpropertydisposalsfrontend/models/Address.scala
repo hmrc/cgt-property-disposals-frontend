@@ -17,9 +17,11 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import cats.Eq
+import cats.syntax.either._
 import julienrf.json.derived
-import play.api.data.Form
-import play.api.data.Forms.{mapping, number, nonEmptyText, optional, text}
+import play.api.data.Forms.{mapping, nonEmptyText, number, of, optional, text}
+import play.api.data.format.Formatter
+import play.api.data.{Form, FormError}
 import play.api.libs.json.OFormat
 
 sealed trait Address extends Product with Serializable
@@ -27,11 +29,11 @@ sealed trait Address extends Product with Serializable
 object Address {
 
   final case class UkAddress(
-                              line1: String,
-                              line2: Option[String],
-                              town: Option[String],
-                              county: Option[String],
-                              postcode: String
+    line1: String,
+    line2: Option[String],
+    town: Option[String],
+    county: Option[String],
+    postcode: String
   ) extends Address {
     val countryCode: String = "GB"
   }
@@ -42,7 +44,7 @@ object Address {
     line3: Option[String],
     line4: Option[String],
     postcode: Option[String],
-    countryCode: String
+    country: Country
   ) extends Address
 
   // the format instance using the play-json-derived-codecs library wraps
@@ -69,8 +71,40 @@ object Address {
         "address-line2"  -> optional(text),
         "address-town"   -> optional(text),
         "address-county" -> optional(text),
-        "postcode" -> nonEmptyText
+        "postcode"       -> nonEmptyText
       )(UkAddress.apply)(UkAddress.unapply)
+    )
+
+  def nonUkAddressForm: Form[NonUkAddress] = {
+    val countryFormatter = new Formatter[Country] {
+      override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Country] = data.get(key) match {
+        case Some(c) =>
+          Either.fromOption(
+            Country.countryCodeToCountryName.get(c).map(name => Country(c, Some(name))),
+            Seq(FormError(key, "error.notFound"))
+          )
+        case None => Left(Seq(FormError(key, "error.required")))
+      }
+
+      override def unbind(key: String, value: Country): Map[String, String] = Map(key -> value.code)
+    }
+    Form(
+      mapping(
+        "nonUkAddress-line1" -> nonEmptyText,
+        "nonUkAddress-line2" -> optional(text),
+        "nonUkAddress-line3" -> optional(text),
+        "nonUkAddress-line4" -> optional(text),
+        "postcode"           -> optional(text),
+        "countryCode"        -> of(countryFormatter)
+      )(NonUkAddress.apply)(NonUkAddress.unapply)
+    )
+  }
+
+  def isUkForm: Form[Boolean] =
+    Form(
+      mapping(
+        "isUk" -> of(BooleanFormatter.formatter)
+      )(identity)(Some(_))
     )
 
 }

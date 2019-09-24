@@ -18,15 +18,14 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
-import cats.syntax.eq._
-import cats.instances.string._
 import cats.instances.option._
+import cats.instances.string._
+import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc._
 import shapeless.{Lens, lens}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSubscriptionReady, SubscriptionReadyAction, WithSubscriptionDetailsActions}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Address, AddressLookupRequest, AddressLookupResult}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -40,52 +39,78 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class AddressController @Inject()(
-                                   val authenticatedAction: AuthenticatedAction,
-                                   val subscriptionDetailsAction: SubscriptionReadyAction,
-                                   cc: MessagesControllerComponents,
-                                   errorHandler: ErrorHandler,
-                                   ukAddressLookupService: UKAddressLookupService,
-                                   sessionStore: SessionStore,
-                                   enterPostcodePage: views.html.subscription.enter_postcode,
-                                   selectAddressPage: views.html.subscription.select_address,
-                                   enterAddressPage: views.html.subscription.enter_address,
-                                   addressDisplay: views.html.components.address_display
+  val authenticatedAction: AuthenticatedAction,
+  val subscriptionDetailsAction: SubscriptionReadyAction,
+  cc: MessagesControllerComponents,
+  errorHandler: ErrorHandler,
+  ukAddressLookupService: UKAddressLookupService,
+  sessionStore: SessionStore,
+  enterPostcodePage: views.html.subscription.enter_postcode,
+  selectAddressPage: views.html.subscription.select_address,
+  addressDisplay: views.html.components.address_display,
+  enterUkAddressPage: views.html.address.enter_uk_address,
+  enterNonUkAddressPage: views.html.address.enter_nonUk_address,
+  isUkPage: views.html.address.isUk
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with Logging
     with WithSubscriptionDetailsActions
     with SessionUpdates {
 
-  def enterAddress(): Action[AnyContent] =
+  def isUk: Action[AnyContent] =
     authenticatedActionWithSubscriptionReady.async { implicit request =>
-    lazy val showEnterAddressPage =
-      request.subscriptionReady.subscriptionDetails.address match {
-        case u: UkAddress =>
-          Ok(enterAddressPage(Address.ukAddressForm.fill(u), routes.SubscriptionController.checkYourDetails()))
-        case _: NonUkAddress =>
-          logger.warn("Expected UK addresses but found non-UK address")
-          errorHandler.errorResult()
-      }
       if(request.sessionData.addressLookupResult.nonEmpty) {
         updateSession(sessionStore, request)(_.copy(addressLookupResult = None)).map {
           case Left(e) =>
             logger.warn(s"Could not clear addressLookupResult", e)
             errorHandler.errorResult()
           case Right(_) =>
-            showEnterAddressPage
+            Ok(isUkPage(Address.isUkForm, routes.SubscriptionController.checkYourDetails()))
         }
       } else {
-        showEnterAddressPage
+        Ok(isUkPage(Address.isUkForm, routes.SubscriptionController.checkYourDetails()))
       }
-
     }
 
-  def enterAddressSubmit(): Action[AnyContent] =
+  def isUkSubmit: Action[AnyContent] =
+    authenticatedActionWithSubscriptionReady.async { implicit request =>
+      Address.isUkForm
+        .bindFromRequest()
+        .fold[Future[Result]](
+          formWithErrors => BadRequest(isUkPage(formWithErrors, routes.SubscriptionController.checkYourDetails())),
+          {
+            case true  => Redirect(routes.AddressController.enterPostcode())
+            case false => Redirect(routes.AddressController.enterNonUkAddress())
+          }
+        )
+    }
+
+  def enterUkAddress(): Action[AnyContent] =
+    authenticatedActionWithSubscriptionReady.async { implicit request =>
+      Ok(enterUkAddressPage(Address.ukAddressForm, routes.SubscriptionController.checkYourDetails()))
+    }
+
+  def enterUkAddressSubmit(): Action[AnyContent] =
     authenticatedActionWithSubscriptionReady.async { implicit request =>
       Address.ukAddressForm
         .bindFromRequest()
         .fold[Future[Result]](
-          formWithErrors => BadRequest(enterAddressPage(formWithErrors, routes.SubscriptionController.checkYourDetails())),
+          formWithErrors => BadRequest(enterUkAddressPage(formWithErrors, routes.SubscriptionController.checkYourDetails())),
+          storeAddress
+        )
+    }
+
+  def enterNonUkAddress(): Action[AnyContent] =
+    authenticatedActionWithSubscriptionReady.async { implicit request =>
+      Ok(enterNonUkAddressPage(Address.nonUkAddressForm, routes.AddressController.isUk()))
+    }
+
+  def enterNonUkAddressSubmit(): Action[AnyContent] =
+    authenticatedActionWithSubscriptionReady.async { implicit request =>
+      Address.nonUkAddressForm
+        .bindFromRequest()
+        .fold[Future[Result]](
+          formWithErrors => BadRequest(enterNonUkAddressPage(formWithErrors, routes.AddressController.isUk())),
           storeAddress
         )
     }
@@ -94,7 +119,7 @@ class AddressController @Inject()(
     authenticatedActionWithSubscriptionReady { implicit request =>
       val form = request.sessionData.addressLookupResult
         .fold(AddressLookupRequest.form)(r => AddressLookupRequest.form.fill(AddressLookupRequest(r.postcode, r.filter)))
-      Ok(enterPostcodePage(form, routes.SubscriptionController.checkYourDetails()))
+      Ok(enterPostcodePage(form, routes.AddressController.isUk()))
     }
 
   def enterPostcodeSubmit(): Action[AnyContent] =
@@ -102,14 +127,14 @@ class AddressController @Inject()(
       AddressLookupRequest.form
         .bindFromRequest()
         .fold(
-          formWithErrors => BadRequest(enterPostcodePage(formWithErrors, routes.SubscriptionController.checkYourDetails())),
+          formWithErrors => BadRequest(enterPostcodePage(formWithErrors, routes.AddressController.isUk())),
           { case AddressLookupRequest(postcode, filter) =>
 
             def handleEmptyAddresses(r: AddressLookupResult) = {
               val errorKey = r.filter.fold("postcode")(_ => "filter")
               BadRequest(enterPostcodePage(
                 AddressLookupRequest.form.bindFromRequest().withError(errorKey, "error.noResults"),
-                routes.SubscriptionController.checkYourDetails()
+                routes.AddressController.isUk()
               ))
             }
 
@@ -137,6 +162,7 @@ class AddressController @Inject()(
           }
         )
     }
+
   def selectAddress(): Action[AnyContent] =
     authenticatedActionWithSubscriptionReady { implicit request =>
       request.sessionData.addressLookupResult match {
@@ -166,6 +192,7 @@ class AddressController @Inject()(
       }
     }
 
+  // this is coupled with subscription journey and session store
   val addressLens: Lens[SubscriptionReady, Address] =
     lens[SubscriptionReady].subscriptionDetails.address
 

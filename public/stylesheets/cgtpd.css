@@ -31,3 +31,11 @@ input:focus, textarea:focus, select:focus, #global-header input:focus {
 .multiple-choice + .panel-indent .form-control {
     width: 50%;
 }
+
+.autocomplete__wrapper {
+    width: 50%;
+}
+
+.autocomplete__wrapper input[type="text"] {
+    width: 100%;
+}

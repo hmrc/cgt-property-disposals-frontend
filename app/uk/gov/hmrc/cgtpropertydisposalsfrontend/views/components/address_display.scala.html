@@ -19,6 +19,8 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Block
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Line
+@import cats.syntax.eq._
+@import cats.instances.string._
 
 @this()
 
@@ -28,9 +30,9 @@
    case (UkAddress(l1,l2,l3,l4,postcode), Block) => {
     <div>
      @l1<br />
-     @l2.map(l => Html(s"""$l<br />"""))
-     @l3.map(l => Html(s"""$l<br />"""))
-     @l4.map(l => Html(s"""$l<br />"""))
+     @l2.map(l => Html(s"$l<br />"))
+     @l3.map(l => Html(s"$l<br />"))
+     @l4.map(l => Html(s"$l<br />"))
      @postcode
     </div>
    }
@@ -45,23 +47,24 @@
      </span>
     }
 
-   case (NonUkAddress(l1,l2,l3,l4,postcode,countryCode), Block) => {
+   case (NonUkAddress(l1,l2,l3,l4,postcode,country), Block) => {
     <div>
      @l1<br />
-     @l2.map(l => Html(s"""$l<br />"""))
-     @l3.map(l => Html(s"""$l<br />"""))
-     @l4.map(l => Html(s"""$l<br />"""))
-     @postcode.map(p => p)
+     @l2.map(l => Html(s"$l<br />"))
+     @l3.map(l => Html(s"$l<br />"))
+     @l4.map(l => Html(s"$l<br />"))
+     @postcode.map(p => Html(s"$p<br />"))
+     @country.name
     </div>
    }
-   case (NonUkAddress(l1,l2,l3,l4,postcode,countryCode), Line) => {
+   case (NonUkAddress(l1,l2,l3,l4,postcode,country), Line) => {
      <span>
       @l1,
       @l2.map(l => s"$l, ")
       @l3.map(l => s"$l, ")
       @l4.map(l => s"$l, ")
-      @postcode.map(p => p)
+      @postcode.map(p => s"$p, ")
+      @country.name
      </span>
     }
   }
-
