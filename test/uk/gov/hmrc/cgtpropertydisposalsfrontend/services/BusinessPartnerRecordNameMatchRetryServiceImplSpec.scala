@@ -24,7 +24,7 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
 import play.api.Configuration
 import play.api.test.Helpers._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, BusinessPartnerRecordResponse, NameMatchError, NumberOfUnsuccessfulNameMatchAttempts}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, BusinessPartnerRecordResponse, NameMatchError, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecordRequest.IndividualBusinessPartnerRecordRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, Name, sample}
@@ -53,17 +53,17 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
 
   val service = new BusinessPartnerRecordNameMatchRetryServiceImpl(bprService, retryStore, config)
 
-  def mockGetNumberOfUnsccessfulAttempts(expectedGGCredID: GGCredId)(result: Either[Error, Option[Int]]) =
+  def mockGetNumberOfUnsccessfulAttempts(expectedGGCredID: GGCredId)(result: Either[Error, Option[UnsuccessfulNameMatchAttempts]]) =
     (retryStore
       .get(_: GGCredId))
       .expects(expectedGGCredID)
       .returning(Future.successful(result))
 
   def mockStoreNumberOfUnsccessfulAttempts(expectedGGCredID: GGCredId,
-                                          expectedNumberOfUnsuccessfulAttempts: Int)(result: Either[Error, Unit]) =
+                                           unsuccessfulNameMatchAttempts: UnsuccessfulNameMatchAttempts)(result: Either[Error, Unit]) =
     (retryStore
-      .store(_: GGCredId, _: Int))
-      .expects(expectedGGCredID, expectedNumberOfUnsuccessfulAttempts)
+      .store(_: GGCredId, _: UnsuccessfulNameMatchAttempts))
+      .expects(expectedGGCredID, unsuccessfulNameMatchAttempts)
       .returning(Future.successful(result))
 
 
@@ -104,10 +104,12 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
       "return the number of attempts" when {
 
         "a number can be found and it's less than the configured maximum" in {
-          mockGetNumberOfUnsccessfulAttempts(ggCredId)(Right(Some(1)))
+          mockGetNumberOfUnsccessfulAttempts(ggCredId)(Right(Some(
+            UnsuccessfulNameMatchAttempts(1,maxRetries,name,sautr)
+          )))
 
           await(service.getNumberOfUnsuccessfulAttempts(ggCredId).value) shouldBe Right(
-            Some(NumberOfUnsuccessfulNameMatchAttempts(1, maxRetries))
+            Some(UnsuccessfulNameMatchAttempts(1, maxRetries, name, sautr))
           )
 
         }
@@ -129,7 +131,9 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
       "indicate when too many unsuccessful attempts have been made" when {
 
         "a number can be found and it's equal to the configured maximum" in {
-          mockGetNumberOfUnsccessfulAttempts(ggCredId)(Right(Some(maxRetries)))
+          mockGetNumberOfUnsccessfulAttempts(ggCredId)(Right(Some(
+            UnsuccessfulNameMatchAttempts(maxRetries,maxRetries,name,sautr)
+          )))
 
           testIsErrorOfType[NameMatchError.TooManyUnsuccessfulAttempts](
             service.getNumberOfUnsuccessfulAttempts(ggCredId)
@@ -137,7 +141,9 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
         }
 
         "a number can be found and it's greater than the configured maximum" in {
-          mockGetNumberOfUnsccessfulAttempts(ggCredId)(Right(Some(maxRetries + 1)))
+          mockGetNumberOfUnsccessfulAttempts(ggCredId)(Right(Some(
+            UnsuccessfulNameMatchAttempts(maxRetries + 1,maxRetries,name,sautr)
+          )))
 
           testIsErrorOfType[NameMatchError.TooManyUnsuccessfulAttempts](
             service.getNumberOfUnsuccessfulAttempts(ggCredId)
@@ -160,7 +166,7 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
               sautr,
               name,
               ggCredId,
-              maxRetries
+              Some(UnsuccessfulNameMatchAttempts(maxRetries, maxRetries, sample[Name], sample[SAUTR]))
             )
           )
         }
@@ -171,7 +177,7 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
               sautr,
               name,
               ggCredId,
-              maxRetries + 1
+              Some(UnsuccessfulNameMatchAttempts(maxRetries + 1, maxRetries, sample[Name], sample[SAUTR]))
             )
           )
         }
@@ -180,7 +186,10 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
           "unsuccessful attempts" in {
           inSequence {
             mockGetBpr(sautr, name)(Right(BusinessPartnerRecordResponse(None)))
-            mockStoreNumberOfUnsccessfulAttempts(ggCredId, maxRetries)(Right(()))
+            mockStoreNumberOfUnsccessfulAttempts(
+              ggCredId,
+              UnsuccessfulNameMatchAttempts(maxRetries, maxRetries, name, sautr)
+            )(Right(()))
           }
 
           testIsErrorOfType[NameMatchError.TooManyUnsuccessfulAttempts](
@@ -188,7 +197,7 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
               sautr,
               name,
               ggCredId,
-              maxRetries - 1
+              Some(UnsuccessfulNameMatchAttempts(maxRetries - 1, maxRetries, sample[Name], sample[SAUTR]))
             )
           )
         }
@@ -207,7 +216,7 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
               sautr,
               name,
               ggCredId,
-              0
+              None
             )
           )
         }
@@ -215,7 +224,9 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
         "there is an error updating the number of unsuccessful attempts in the retry store" in {
           inSequence {
             mockGetBpr(sautr, name)(Right(BusinessPartnerRecordResponse(None)))
-            mockStoreNumberOfUnsccessfulAttempts(ggCredId, 1)(Left(Error("")))
+            mockStoreNumberOfUnsccessfulAttempts(ggCredId,
+              UnsuccessfulNameMatchAttempts(1, maxRetries, name, sautr)
+              )(Left(Error("")))
           }
 
           testIsErrorOfType[NameMatchError.BackendError](
@@ -223,7 +234,7 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
               sautr,
               name,
               ggCredId,
-              0
+              None
             )
           )
         }
@@ -236,7 +247,9 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
           "unsuccessful attempts" in {
           inSequence {
             mockGetBpr(sautr, name)(Right(BusinessPartnerRecordResponse(None)))
-            mockStoreNumberOfUnsccessfulAttempts(ggCredId, 1)(Right(()))
+            mockStoreNumberOfUnsccessfulAttempts(ggCredId,
+              UnsuccessfulNameMatchAttempts(1, maxRetries, name, sautr)
+            )(Right(()))
           }
 
           testIsErrorOfType[NameMatchError.NameMatchFailed](
@@ -244,9 +257,21 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
               sautr,
               name,
               ggCredId,
-              0
+              None
             )
           )
+        }
+
+        "the name and sautr passed in are the same as the previous attempt" in {
+          testIsErrorOfType[NameMatchError.NameMatchFailed](
+            service.attemptBusinessPartnerRecordNameMatch(
+              sautr,
+              name,
+              ggCredId,
+              Some(UnsuccessfulNameMatchAttempts(1, maxRetries, name, sautr))
+            )
+          )
+
         }
 
       }
@@ -262,7 +287,7 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
               sautr,
               name,
               ggCredId,
-              0
+             None
             )
 
           await(result.value) shouldBe Right(bpr)

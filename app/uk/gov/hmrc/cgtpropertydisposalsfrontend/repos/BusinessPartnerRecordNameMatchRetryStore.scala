@@ -21,6 +21,7 @@ import configs.syntax._
 import play.api.Configuration
 import play.modules.reactivemongo.ReactiveMongoComponent
 import uk.gov.hmrc.cache.repository.CacheMongoRepository
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.UnsuccessfulNameMatchAttempts
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 
@@ -30,12 +31,11 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[BusinessPartnerRecordNameMatchRetryStoreImpl])
 trait BusinessPartnerRecordNameMatchRetryStore {
 
-  def get(ggCredId: GGCredId): Future[Either[Error, Option[Int]]]
+  def get(ggCredId: GGCredId): Future[Either[Error, Option[UnsuccessfulNameMatchAttempts]]]
 
-  def store(ggCredId: GGCredId, numberOfRetries: Int): Future[Either[Error, Unit]]
+  def store(ggCredId: GGCredId, unsuccessfulAttempts: UnsuccessfulNameMatchAttempts): Future[Either[Error, Unit]]
 
 }
-
 
 @Singleton
 class BusinessPartnerRecordNameMatchRetryStoreImpl @Inject()(mongo: ReactiveMongoComponent, configuration: Configuration)(
@@ -52,11 +52,11 @@ class BusinessPartnerRecordNameMatchRetryStoreImpl @Inject()(mongo: ReactiveMong
 
   val sessionKey = "bpr-name-match-retries"
 
-  override def get(ggCredId: GGCredId): Future[Either[Error, Option[Int]]] =
-    get[Int](ggCredId.value)
+  override def get(ggCredId: GGCredId): Future[Either[Error, Option[UnsuccessfulNameMatchAttempts]]] =
+    get[UnsuccessfulNameMatchAttempts](ggCredId.value)
 
-  override def store(ggCredId: GGCredId, numberOfRetries: Int): Future[Either[Error, Unit]] =
-    store(ggCredId.value, numberOfRetries)
+  override def store(ggCredId: GGCredId, unsuccessfulAttempts: UnsuccessfulNameMatchAttempts): Future[Either[Error, Unit]] =
+    store(ggCredId.value, unsuccessfulAttempts)
 
 }
 

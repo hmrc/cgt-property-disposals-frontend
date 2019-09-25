@@ -23,6 +23,7 @@ import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import play.api.Configuration
 import play.api.libs.json.{JsObject, JsString}
 import uk.gov.hmrc.cache.model.{Cache, Id}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.UnsuccessfulNameMatchAttempts
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.sample
 import uk.gov.hmrc.mongo.DatabaseUpdate
@@ -30,7 +31,6 @@ import uk.gov.hmrc.mongo.DatabaseUpdate
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
-import scala.util.Random
 
 class BusinessPartnerRecordNameMatchRetryStoreImplSpec extends WordSpec with Matchers with MongoSupport with ScalaFutures with Eventually {
 
@@ -50,13 +50,13 @@ class BusinessPartnerRecordNameMatchRetryStoreImplSpec extends WordSpec with Mat
   "BusinessPartnerRecordNameMatchRetryStoreImpl" must {
 
     "be able to insert retry data into mongo and read it back" in new TestEnvironment {
-      val result = sessionStore.store(ggCredId, numberOfRetries)
+      val result = sessionStore.store(ggCredId, unsuccessfulAttempts)
 
       result.futureValue should be(Right(()))
 
       eventually {
         val getResult = sessionStore.get(ggCredId)
-        getResult.futureValue should be(Right(Some(numberOfRetries)))
+        getResult.futureValue should be(Right(Some(unsuccessfulAttempts)))
       }
 
     }
@@ -71,7 +71,7 @@ class BusinessPartnerRecordNameMatchRetryStoreImplSpec extends WordSpec with Mat
         withBrokenMongo { brokenMongo =>
           val sessionStore = new BusinessPartnerRecordNameMatchRetryStoreImpl(brokenMongo, config)
           sessionStore.get(ggCredId).futureValue.isLeft              shouldBe true
-          sessionStore.store(ggCredId, numberOfRetries).futureValue.isLeft shouldBe true
+          sessionStore.store(ggCredId, unsuccessfulAttempts).futureValue.isLeft shouldBe true
         }
       }
 
@@ -90,7 +90,7 @@ class BusinessPartnerRecordNameMatchRetryStoreImplSpec extends WordSpec with Mat
 
   class TestEnvironment {
     val ggCredId = sample[GGCredId]
-    val numberOfRetries = Random.nextInt()
+    val unsuccessfulAttempts = sample[UnsuccessfulNameMatchAttempts]
   }
 
 }

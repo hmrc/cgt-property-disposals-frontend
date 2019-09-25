@@ -16,6 +16,9 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids
 
+import cats.Eq
+import cats.instances.string._
+import cats.syntax.eq._
 import play.api.libs.json.{Format, Json}
 
 final case class SAUTR(value: String) extends AnyVal
@@ -23,5 +26,7 @@ final case class SAUTR(value: String) extends AnyVal
 object SAUTR {
 
   implicit val format: Format[SAUTR] = Json.format[SAUTR]
+
+  implicit val eq: Eq[SAUTR] = Eq.instance(_.value === _.value)
 
 }

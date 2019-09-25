@@ -16,7 +16,19 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr
 
-final case class NumberOfUnsuccessfulNameMatchAttempts(
+import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Name
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.SAUTR
+
+final case class UnsuccessfulNameMatchAttempts(
   unsuccesfulAttempts: Int,
-  maximumAttempts: Int
+  maximumAttempts: Int,
+  lastNameTried: Name,
+  lastSAUTRTried: SAUTR
 )
+
+object UnsuccessfulNameMatchAttempts {
+
+  implicit val format: OFormat[UnsuccessfulNameMatchAttempts] = Json.format
+
+}
