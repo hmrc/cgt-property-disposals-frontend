@@ -36,7 +36,7 @@
     @form.errors.map { error =>
       <li>
         <a href="#@error.key" data-focuses="@error.key">
-        @messages(s"${error.key}.${error.message}")
+        @messages(s"${error.key}.${error.message}", error.args: _*)
         </a>
       </li>
     }

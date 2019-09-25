@@ -51,6 +51,8 @@ saUtr.label=Enter your Self Assessment Unique Taxpayer Reference
 saUtr.helpText=You can find this on letters from HMRC about your Self Assessment returns. For example, 9163259195
 saUtr.error.required=Enter your Self Assessment Unique Taxpayer Reference
 saUtr.error.pattern=Self Assessment Unique Taxpayer References must be 10 numbers, for example 9163259195
+enterSaUtr.error.notFound=Could not find your details. You’ve tried {0} out of a maximum {1} times
+
 
 dob.title=What is your date of birth?
 dob.helpText=For example, 31 3 1980

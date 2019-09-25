@@ -18,19 +18,18 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
-import cats.syntax.either._
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
-import play.api.data.Forms.{mapping, nonEmptyText, of}
 import play.api.data.Form
+import play.api.data.Forms.{mapping, nonEmptyText, of}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Name}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.{BusinessPartnerRecord, NameMatchError}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.{BusinessPartnerRecord, NameMatchError, NumberOfUnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.SAUTR
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, Name}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.{BusinessPartnerRecordNameMatchRetryStore, SessionStore}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordNameMatchRetryService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -43,19 +42,19 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class InsufficientConfidenceLevelController @Inject()(
-                                                       val authenticatedAction: AuthenticatedAction,
-                                                       val sessionDataAction: SessionDataAction,
-                                                       val sessionStore: SessionStore,
-                                                       val errorHandler: ErrorHandler,
-                                                       val config: Configuration,
-                                                       bprNameMatchService: BusinessPartnerRecordNameMatchRetryService,
-                                                       sautrNameMatchRetryStore: BusinessPartnerRecordNameMatchRetryStore,
-                                                       doYouHaveANinoPage: views.html.do_you_have_a_nino,
-                                                       doYouHaveAnSaUtrPage: views.html.do_you_have_an_sa_utr,
-                                                       enterSautrAndNamePage: views.html.enter_sa_utr_and_name,
-                                                       tooManyUnsuccessfulNameMatchesPage: views.html.too_many_name_match_attempts,
-                                                       startRegistrationPage: views.html.registration.registration_start,
-                                                       cc: MessagesControllerComponents
+  val authenticatedAction: AuthenticatedAction,
+  val sessionDataAction: SessionDataAction,
+  val sessionStore: SessionStore,
+  val errorHandler: ErrorHandler,
+  val config: Configuration,
+  bprNameMatchService: BusinessPartnerRecordNameMatchRetryService,
+  sautrNameMatchRetryStore: BusinessPartnerRecordNameMatchRetryStore,
+  doYouHaveANinoPage: views.html.do_you_have_a_nino,
+  doYouHaveAnSaUtrPage: views.html.do_you_have_an_sa_utr,
+  enterSautrAndNamePage: views.html.enter_sa_utr_and_name,
+  tooManyUnsuccessfulNameMatchesPage: views.html.too_many_name_match_attempts,
+  startRegistrationPage: views.html.registration.registration_start,
+  cc: MessagesControllerComponents
 )(
   implicit viewConfig: ViewConfig,
   ec: ExecutionContext
@@ -153,11 +152,18 @@ class InsufficientConfidenceLevelController @Inject()(
     withInsufficientConfidenceLevelUser { insufficientConfidenceLevel =>
       (insufficientConfidenceLevel.hasNino, insufficientConfidenceLevel.hasSautr) match {
         case (Some(false), Some(true)) =>
-          bprNameMatchService.getNumberOfUnsuccessfulAttempts(insufficientConfidenceLevel.ggCredId)
-              .fold(
-                handleNameMatchError,
-                  _ => Ok(enterSautrAndNamePage(InsufficientConfidenceLevelController.sautrAndNameForm))
+          bprNameMatchService
+            .getNumberOfUnsuccessfulAttempts(insufficientConfidenceLevel.ggCredId)
+            .fold(
+              handleNameMatchError, { numberOfUnsuccessfulNameMatchAttempts =>
+                val form = numberOfUnsuccessfulNameMatchAttempts.fold(
+                  InsufficientConfidenceLevelController.sautrAndNameForm
+                )(
+                  InsufficientConfidenceLevelController.sautrAndNameForm.withUnsuccessfulAttemptsError
                 )
+                Ok(enterSautrAndNamePage(form))
+              }
+            )
 
         case _ =>
           Redirect(routes.InsufficientConfidenceLevelController.doYouHaveNINO())
@@ -171,39 +177,55 @@ class InsufficientConfidenceLevelController @Inject()(
         case (Some(false), Some(true)) =>
           val result =
             for {
-              unsuccessfulAttempts <- bprNameMatchService.getNumberOfUnsuccessfulAttempts(insufficientConfidenceLevel.ggCredId)
+              unsuccessfulAttempts <- bprNameMatchService.getNumberOfUnsuccessfulAttempts(
+                                       insufficientConfidenceLevel.ggCredId
+                                     )
               bpr <- {
                 InsufficientConfidenceLevelController.sautrAndNameForm
                   .bindFromRequest()
                   .fold[EitherT[Future, NameMatchError, BusinessPartnerRecord]](
-                    e => EitherT.fromEither[Future](Left(NameMatchError.ValidationError(e))),
-                    { case (sautr, name) =>
-                      for {
-                        bpr <- bprNameMatchService.attemptBusinessPartnerRecordNameMatch(
-                          sautr,
-                          name,
-                          insufficientConfidenceLevel.ggCredId,
-                          unsuccessfulAttempts.unsuccesfulAttempts
-                        )
-                        _ <- EitherT(
-                          updateSession(sessionStore, request)(
-                            _.copy(journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bpr)))
-                          )
-                        ).leftMap[NameMatchError](NameMatchError.BackendError(_))
-                      } yield bpr
-                    })
+                    e => EitherT.fromEither[Future](Left(NameMatchError.ValidationError(e))), {
+                      case (sautr, name) =>
+                        for {
+                          bpr <- bprNameMatchService
+                                  .attemptBusinessPartnerRecordNameMatch(
+                                    sautr,
+                                    name,
+                                    insufficientConfidenceLevel.ggCredId,
+                                    unsuccessfulAttempts.map(_.unsuccesfulAttempts).getOrElse(0)
+                                  )
+                                  .subflatMap(
+                                    bpr =>
+                                      if (bpr.name.isLeft) {
+                                        Left(
+                                          NameMatchError.BackendError(
+                                            Error("Found BPR for trust but expected one for an individual")
+                                          )
+                                        )
+                                      } else {
+                                        Right(bpr)
+                                      }
+                                  )
+                          _ <- EitherT(
+                                updateSession(sessionStore, request)(
+                                  _.copy(journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bpr)))
+                                )
+                              ).leftMap[NameMatchError](NameMatchError.BackendError)
+                        } yield bpr
+                    }
+                  )
               }
             } yield bpr
 
           result
             .fold(
               handleNameMatchError,
-               _ => Redirect(routes.StartController.start())
+              _ => Redirect(routes.StartController.start())
             )
 
-      case _ =>
-        Redirect(routes.InsufficientConfidenceLevelController.doYouHaveNINO())
-    }
+        case _ =>
+          Redirect(routes.InsufficientConfidenceLevelController.doYouHaveNINO())
+      }
     }
   }
 
@@ -211,10 +233,9 @@ class InsufficientConfidenceLevelController @Inject()(
     Ok(tooManyUnsuccessfulNameMatchesPage())
   }
 
-
-  private def handleNameMatchError(nameMatchError: NameMatchError
-                                  )(implicit request: RequestWithSessionData[_]
-  ): Result = nameMatchError match {
+  private def handleNameMatchError(
+    nameMatchError: NameMatchError
+  )(implicit request: RequestWithSessionData[_]): Result = nameMatchError match {
     case NameMatchError.BackendError(error) =>
       logger.warn("Could not get BPR with entered SA UTR", error)
       errorHandler.errorResult()
@@ -223,14 +244,15 @@ class InsufficientConfidenceLevelController @Inject()(
       BadRequest(enterSautrAndNamePage(formWithErrors))
 
     case NameMatchError.NameMatchFailed(sautr, name, unsuccessfulAttempts) =>
-      BadRequest(enterSautrAndNamePage(
-        InsufficientConfidenceLevelController.sautrAndNameForm.fill(sautr -> name))
-      )
+      val form =
+        InsufficientConfidenceLevelController.sautrAndNameForm
+          .fill(sautr -> name)
+          .withUnsuccessfulAttemptsError(unsuccessfulAttempts)
+      BadRequest(enterSautrAndNamePage(form))
 
     case NameMatchError.TooManyUnsuccessfulAttempts() =>
       Redirect(routes.InsufficientConfidenceLevelController.tooManyAttempts())
   }
-
 
 }
 
@@ -264,5 +286,19 @@ object InsufficientConfidenceLevelController {
         case (sautr, name) => Some((sautr.value, name.firstName, name.lastName))
       }
     )
+
+  implicit class SAUTRAndNameFormOps(val form: Form[(SAUTR, Name)]) extends AnyVal {
+
+    def withUnsuccessfulAttemptsError(
+      numberOfUnsuccessfulNameMatchAttempts: NumberOfUnsuccessfulNameMatchAttempts
+    ): Form[(SAUTR, Name)] =
+      form
+        .withGlobalError(
+          "error.notFound",
+          numberOfUnsuccessfulNameMatchAttempts.unsuccesfulAttempts,
+          numberOfUnsuccessfulNameMatchAttempts.maximumAttempts
+        )
+
+  }
 
 }

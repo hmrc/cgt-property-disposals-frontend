@@ -107,20 +107,20 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
           mockGetNumberOfUnsccessfulAttempts(ggCredId)(Right(Some(1)))
 
           await(service.getNumberOfUnsuccessfulAttempts(ggCredId).value) shouldBe Right(
-            NumberOfUnsuccessfulNameMatchAttempts(1, maxRetries)
+            Some(NumberOfUnsuccessfulNameMatchAttempts(1, maxRetries))
           )
 
         }
 
       }
 
-      "return zero" when {
+      "return None" when {
 
         "there is no record of attempts for the given gg cred id" in {
           mockGetNumberOfUnsccessfulAttempts(ggCredId)(Right(None))
 
           await(service.getNumberOfUnsuccessfulAttempts(ggCredId).value) shouldBe Right(
-            NumberOfUnsuccessfulNameMatchAttempts(0, maxRetries)
+            None
           )
         }
 
