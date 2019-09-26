@@ -77,6 +77,9 @@ class RegistrationController @Inject()(
       case Right(RegistrationStatus.IndividualWantsToRegisterTrust) =>
       Redirect(routes.RegistrationController.wrongGGAccountForTrusts())
 
+      case Right(_: RegistrationStatus.RegistrationReady) =>
+        Redirect(routes.RegistrationController.checkYourAnswers())
+
       case Left(_) =>
       Redirect(routes.RegistrationController.startRegistration().url)
     }
@@ -94,7 +97,7 @@ class RegistrationController @Inject()(
         val blankForm = RegistrationController.selectEntityTypeForm
         status.fold(_ => blankForm,
           {
-            case _: RegistrationStatus.IndividualSupplyingInformation =>
+            case _: RegistrationStatus.IndividualSupplyingInformation | _: RegistrationStatus.RegistrationReady =>
               blankForm.fill(EntityType.Individual)
 
             case RegistrationStatus.IndividualWantsToRegisterTrust =>
@@ -114,7 +117,7 @@ class RegistrationController @Inject()(
         { entityType =>
           val (newRegistrationStatus, redirectTo): (RegistrationStatus, Call) = entityType match {
             case EntityType.Individual =>
-              RegistrationStatus.IndividualSupplyingInformation(None) -> routes.RegistrationController.enterName()
+              RegistrationStatus.IndividualSupplyingInformation(None, None) -> routes.RegistrationController.enterName()
             case EntityType.Trust =>
               RegistrationStatus.IndividualWantsToRegisterTrust -> routes.RegistrationController.wrongGGAccountForTrusts()
           }
@@ -139,14 +142,12 @@ class RegistrationController @Inject()(
   }
 
   def wrongGGAccountForTrusts(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withValidUser(request) { status =>
-      status match {
+    withValidUser(request) {
         case Right(RegistrationStatus.IndividualWantsToRegisterTrust) =>
           Ok(wrongGGAccountForTrustPage(routes.RegistrationController.selectEntityType()))
 
         case _ =>
           Redirect(routes.RegistrationController.startRegistration())
-      }
     }
   }
 
@@ -173,11 +174,18 @@ class RegistrationController @Inject()(
               errorHandler.errorResult()
 
             case Right(_) =>
-              Ok(s"your name is ${name.firstName} ${name.lastName}")
+              Redirect(address.routes.RegistrationAddressController.isUk())
           }
       )
     }
   }
+
+
+  def checkYourAnswers(): Action[AnyContent] = Action { implicit request =>
+    Ok("placeholder for registration check your answers")
+  }
+
+
 }
 
 object RegistrationController {

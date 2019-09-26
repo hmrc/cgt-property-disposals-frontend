@@ -32,7 +32,11 @@
 )
 
 
-@(form: Form[NonUkAddress], backLink: Call, journey: String = "subscription")(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[NonUkAddress],
+        backLink: Call,
+        submit: Call,
+        journey: String = "subscription"
+        )(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"nonUkAddress"}
 @line1Key = @{s"${key}-line1"}
@@ -53,7 +57,7 @@
 
   @pageHeading(title, Some(messages(s"$journey.caption")))
 
-  @formWrapper(routes.AddressController.enterNonUkAddressSubmit(), 'novalidate -> "novalidate") {
+  @formWrapper(submit, 'novalidate -> "novalidate") {
     <fieldset id="@key">
       @textInput(
         fieldId = line1Key,

@@ -197,7 +197,7 @@ class RegistrationControllerSpec
       "prepopulate the form if the user has previously answered the question" in {
         List(
           RegistrationStatus.IndividualWantsToRegisterTrust,
-          RegistrationStatus.IndividualSupplyingInformation(None)
+          RegistrationStatus.IndividualSupplyingInformation(None, None)
         ).foreach{ journeyStatus =>
           val sessionData =
             SessionData.empty.copy(
@@ -269,7 +269,7 @@ class RegistrationControllerSpec
       "continue the registration journey" when {
         "the request selects individual" in {
           val updatedSession =
-            sessionData.copy(journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None)))
+            sessionData.copy(journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None, None)))
 
           inSequence{
             mockAuthWithNoRetrievals()
@@ -286,7 +286,7 @@ class RegistrationControllerSpec
 
         "the session cannot be updated" in {
           List[(String,RegistrationStatus)](
-            "0" -> RegistrationStatus.IndividualSupplyingInformation(None),
+            "0" -> RegistrationStatus.IndividualSupplyingInformation(None, None),
             "1" -> RegistrationStatus.IndividualWantsToRegisterTrust
           ).foreach{ case (entityType, registrationStatus) =>
 
@@ -321,7 +321,7 @@ class RegistrationControllerSpec
 
           "the user selects individual and has previously indicated that they wish to register as an individual" in {
             val session =
-              sessionData.copy(journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None)))
+              sessionData.copy(journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None, None)))
 
             inSequence{
               mockAuthWithNoRetrievals()
@@ -344,7 +344,7 @@ class RegistrationControllerSpec
 
       val sessionData =
         SessionData.empty.copy(
-          journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None))
+          journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None, None))
         )
 
       behave like redirectToStartBehaviour(performAction)
@@ -365,7 +365,7 @@ class RegistrationControllerSpec
         "the endpoint is requested and the user has previously entered a name" in {
           val name = sample[Name]
           val sessionDataWithName = journeyStatusLens.set(sessionData)(
-            Some(RegistrationStatus.IndividualSupplyingInformation(Some(name)))
+            Some(RegistrationStatus.IndividualSupplyingInformation(Some(name), None))
           )
 
           inSequence{
@@ -392,14 +392,14 @@ class RegistrationControllerSpec
 
       val sessionData =
         SessionData.empty.copy(
-          journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None))
+          journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None, None))
         )
 
       val name = Name("Bob", "Smith")
 
       val updatedSession =
       journeyStatusLens.set(sessionData)(
-          Some(RegistrationStatus.IndividualSupplyingInformation(Some(name)))
+          Some(RegistrationStatus.IndividualSupplyingInformation(Some(name), None))
       )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -414,7 +414,7 @@ class RegistrationControllerSpec
         }
       )
 
-      "be successful" when {
+      "redirect to the is uk address page" when {
 
         "the request submits valid values" in {
           inSequence{
@@ -423,8 +423,9 @@ class RegistrationControllerSpec
             mockStoreSession(updatedSession)(Future.successful(Right(())))
           }
           val result = performAction("firstName" -> name.firstName, "lastName" -> name.lastName)
-          status(result) shouldBe OK
+          checkIsRedirect(result, address.routes.RegistrationAddressController.isUk())
         }
+
         "request submits valid values with leading and trailing spaces" in {
           inSequence{
             mockAuthWithNoRetrievals()
@@ -433,8 +434,9 @@ class RegistrationControllerSpec
           }
 
           val result = performAction("firstName" -> s" ${name.firstName}  ", "lastName" -> s" ${name.lastName} ")
-          status(result) shouldBe OK
+          checkIsRedirect(result, address.routes.RegistrationAddressController.isUk())
         }
+
       }
 
       "not update the session" when {
@@ -442,7 +444,7 @@ class RegistrationControllerSpec
         "the name submitted is the same in the session" in {
           val session =
             journeyStatusLens.set(sessionData)(
-              Some(RegistrationStatus.IndividualSupplyingInformation(Some(name)))
+              Some(RegistrationStatus.IndividualSupplyingInformation(Some(name), None))
             )
 
           inSequence{
@@ -450,7 +452,7 @@ class RegistrationControllerSpec
             mockGetSession(Future.successful(Right(Some(session))))
           }
           val result = performAction("firstName" -> name.firstName, "lastName" -> name.lastName)
-          status(result) shouldBe OK
+          checkIsRedirect(result, address.routes.RegistrationAddressController.isUk())
         }
 
       }
@@ -500,7 +502,7 @@ class RegistrationControllerSpec
           inSequence{
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(
-              sessionData.copy(journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None))))
+              sessionData.copy(journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None, None))))
             )))
           }
           checkIsRedirect(performAction(), routes.RegistrationController.startRegistration())

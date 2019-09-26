@@ -30,7 +30,7 @@
 )
 
 
-@(form: Form[UkAddress], backLink: Call)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[UkAddress], backLink: Call, submit: Call, enterPostcode: Call)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"address"}
 @line1Key = @{s"${key}-line1"}
@@ -52,7 +52,7 @@
 
   @pageHeading(title, Some(messages("subscription.caption")))
 
-  @formWrapper(routes.AddressController.enterUkAddressSubmit(), 'novalidate -> "novalidate") {
+  @formWrapper(submit, 'novalidate -> "novalidate") {
     <fieldset id="@key">
       @textInput(
         fieldId = line1Key,
@@ -95,7 +95,7 @@
     </fieldset>
 
     <p>
-      <a href="@{routes.AddressController.enterPostcode().url}">@messages("address.lookup.linkText")</a>
+      <a href="@{enterPostcode.url}">@messages("address.lookup.linkText")</a>
     </p>
 
     @submitButton(messages("button.continue"))
