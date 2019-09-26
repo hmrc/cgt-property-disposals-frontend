@@ -37,17 +37,13 @@
 @firstNameKey = @{"firstName"}
 @lastNameKey = @{"lastName"}
 
-@mainTemplate(title = title) {
+@mainTemplate(title = title, hasErrors = hasErrors) {
 
  @if(hasErrors) {
   @errorSummary(form)
  }
 
  @pageHeading(title)
-
-  @form.globalError.map{ formError =>
-   <h2>@messages(s"enterSaUtr.${formError.message}", formError.args: _*)</h2>
- }
 
  @formWrapper(routes.InsufficientConfidenceLevelController.enterSautrAndNameSubmit(), 'novalidate -> "novalidate") {
   @textInput(

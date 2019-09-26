@@ -33,13 +33,24 @@
   </h2>
 
   <ul class="error-summary-list">
-    @form.errors.map { error =>
-      <li>
-        <a href="#@error.key" data-focuses="@error.key">
-        @messages(s"${error.key}.${error.message}", error.args: _*)
-        </a>
-      </li>
+    @if(form.globalErrors.nonEmpty) {
+      @form.globalErrors.map { error =>
+        <li>
+          <span class="error-message">
+            @messages(s"${error.message}", error.args: _*)
+          </span>
+        </li>
+      }
+    } else {
+      @form.errors.map { error =>
+        <li>
+          <a href="#@error.key" data-focuses="@error.key">
+            @messages(s"${error.key}.${error.message}", error.args: _*)
+          </a>
+        </li>
+      }
     }
+
   </ul>
 
 </div>

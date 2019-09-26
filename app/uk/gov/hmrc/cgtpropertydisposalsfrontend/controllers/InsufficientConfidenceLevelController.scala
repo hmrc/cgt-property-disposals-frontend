@@ -310,7 +310,7 @@ object InsufficientConfidenceLevelController {
     ): Form[(SAUTR, Name)] =
       form
         .withGlobalError(
-          "error.notFound",
+          "enterSaUtr.error.notFound",
           numberOfUnsuccessfulNameMatchAttempts.unsuccesfulAttempts,
           numberOfUnsuccessfulNameMatchAttempts.maximumAttempts
         )
