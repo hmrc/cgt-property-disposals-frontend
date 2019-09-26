@@ -1056,7 +1056,7 @@ class InsufficientConfidenceLevelControllerSpec
 
               val result = performAction()
               status(result)          shouldBe OK
-              contentAsString(result) should include("There, there")
+              contentAsString(result) should include(message("enterSaUtr.tooManyAttempts.title"))
             }
           }
 
