@@ -52,6 +52,10 @@ saUtr.helpText=You can find this on letters from HMRC about your Self Assessment
 saUtr.error.required=Enter your Self Assessment Unique Taxpayer Reference
 saUtr.error.pattern=Self Assessment Unique Taxpayer References must be 10 numbers, for example 9163259195
 enterSaUtr.error.notFound=We could not find your details using the exact name and reference you have entered. You’ve tried {0} out of a maximum {1} times
+enterSaUtr.tooManyAttempts.title=Too many attempts
+enterSaUtr.tooManyAttempts.p1=You’ve tried to enter your Self Assessmnent Unique Taxpayer Reference and name too many times.
+enterSaUtr.tooManyAttempts.p2=Please check any correspondence you have relating to your Self Assessment account and ensure you are using the exact names as printed on that correspondence. You can try again later.
+
 
 dob.title=What is your date of birth?
 dob.helpText=For example, 31 3 1980

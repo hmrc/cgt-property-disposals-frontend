@@ -23,15 +23,15 @@
 
 @()(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
-@title = @{ "Oh no" }
+@title = @{messages("enterSaUtr.tooManyAttempts.title")}
 
 @mainTemplate(title = title) {
     @pageHeading(title)
     <p>
-    You've tried to enter your SA UTR and name too many times
+    @messages("enterSaUtr.tooManyAttempts.p1")
     </p>
     <p>
-    There, there. Try again in a weeks time.
+    @messages("enterSaUtr.tooManyAttempts.p2")
     </p>
 }
 
