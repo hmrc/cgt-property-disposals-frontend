@@ -16,8 +16,11 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
+import cats.Eq
+import cats.instances.string._
+import cats.syntax.eq._
 import play.api.data.{Form, Mapping}
-import play.api.data.Forms.{mapping => formMapping, nonEmptyText}
+import play.api.data.Forms.{nonEmptyText, mapping => formMapping}
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationResult}
 import play.api.libs.json.{Json, OFormat}
 
@@ -26,6 +29,10 @@ final case class Name(firstName: String, lastName: String)
 object Name {
 
   implicit val format: OFormat[Name] = Json.format[Name]
+
+  implicit val eq: Eq[Name] = Eq.instance{
+    case (n1, n2) => n1.firstName === n2.firstName && n1.lastName === n2.lastName
+  }
 
   val mapping: Mapping[String] = {
     val nameRegexPredicate =

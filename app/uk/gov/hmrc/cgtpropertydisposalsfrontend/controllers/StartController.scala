@@ -18,20 +18,24 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import cats.data.EitherT
 import cats.instances.future._
+import cats.syntax.either._
 import com.google.inject.Inject
 import play.api.Configuration
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedActionWithRetrievedData, RequestWithSessionDataAndRetrievedData, SessionDataActionWithRetrievedData, WithAuthRetrievalsAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.BusinessPartnerRecordRequest.{IndividualBusinessPartnerRecordRequest, TrustBusinessPartnerRecordRequest}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecordRequest.{IndividualBusinessPartnerRecordRequest, TrustBusinessPartnerRecordRequest}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{RegistrationStatus, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionDetails.MissingData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecord
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.toFuture
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
@@ -53,6 +57,7 @@ class StartController @Inject()(
     with IvBehaviour {
 
   def start(): Action[AnyContent] = authenticatedActionWithRetrievedDataAndSessionData.async { implicit request =>
+
     (request.authenticatedRequest.userType, request.sessionData.flatMap(_.journeyStatus)) match {
 
       case (_, Some(_: SubscriptionStatus.SubscriptionReady)) =>
@@ -71,9 +76,9 @@ class StartController @Inject()(
       case (_, Some(RegistrationStatus.IndividualWantsToRegisterTrust)) =>
         SeeOther(routes.RegistrationController.startRegistration().url)
 
-      case (UserType.IndividualWithInsufficientConfidenceLevel(maybeNino, maybeSautr, maybeEmail), None) =>
+      case (UserType.IndividualWithInsufficientConfidenceLevel(maybeNino, maybeSautr, maybeEmail, ggCredId), None) =>
         // this is the first time a person with individual insufficient confidence level has come to start
-        handleInsufficientConfidenceLevel(maybeNino, maybeSautr, maybeEmail)
+        handleInsufficientConfidenceLevel(maybeNino, maybeSautr, maybeEmail, ggCredId)
 
       case (i: UserType.Individual, Some(SubscriptionStatus.SubscriptionMissingData(bpr))) =>
         handleSubscriptionMissingData(bpr, i.email)
@@ -122,7 +127,8 @@ class StartController @Inject()(
   private def handleInsufficientConfidenceLevel(
     maybeNino: Option[NINO],
     maybeSautr: Option[SAUTR],
-    maybeEmail: Option[Email]
+    maybeEmail: Option[Email],
+    ggCredId: GGCredId
   )(
     implicit request: RequestWithSessionDataAndRetrievedData[AnyContent]
   ): Future[Result] = maybeNino match {
@@ -133,7 +139,7 @@ class StartController @Inject()(
 
         case None =>
           val subscriptionStatus =
-            SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, maybeEmail)
+            SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, maybeEmail, ggCredId)
           updateSession(sessionStore, request)(_.copy(journeyStatus = Some(subscriptionStatus)))
             .map {
               case Left(e) =>
@@ -154,14 +160,15 @@ class StartController @Inject()(
   )(implicit hc: HeaderCarrier, request: RequestWithSessionDataAndRetrievedData[_]): Future[Result] = {
     val result =
       for {
-        bprWithTrustName <- bprService
-                             .getBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(trust.sautr))
-                             .subflatMap[Error, (BusinessPartnerRecord, TrustName)] { bpr =>
-                               bpr.name.fold[Either[Error, (BusinessPartnerRecord, TrustName)]](
-                                 trustName => Right((bpr, trustName)),
-                                 _ => Left(Error("Found individual name but expected trust name in business partner record"))
-                               )
-                             }
+        bprResponse <- bprService.getBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(trust.sautr))
+
+        bprWithTrustName <- EitherT.fromEither[Future](
+          Either.fromOption(bprResponse.businessPartnerRecord, Error("Could not find BPR for trust"))
+            .flatMap(bpr =>
+              bpr.name.fold[Either[Error,(BusinessPartnerRecord,TrustName)]](
+                trustName => Right((bpr, trustName)),
+                _ => Left(Error("Found individual name but expected trust name in business partner record"))
+          )))
         maybeSubscriptionDetails <- EitherT.pure(
                                      bprWithTrustName._1.emailAddress
                                        .orElse(trust.email.map(_.value))
@@ -230,7 +237,8 @@ class StartController @Inject()(
     request: RequestWithSessionDataAndRetrievedData[_]
   ): Future[Result] = {
     val result = for {
-      bpr <- bprService.getBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(individual.id, None))
+      bprResponse <- bprService.getBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(individual.id, None))
+      bpr <- EitherT.fromEither[Future](Either.fromOption(bprResponse.businessPartnerRecord, Error("Could not find BPR for individual")))
       maybeSubscriptionDetails <- EitherT.pure(SubscriptionDetails(bpr, individual.email))
       _ <- EitherT(
             maybeSubscriptionDetails.fold[Future[Either[Error, Unit]]](

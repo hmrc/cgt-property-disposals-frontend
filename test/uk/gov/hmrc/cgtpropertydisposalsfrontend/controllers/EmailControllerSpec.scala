@@ -33,6 +33,8 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{RegistrationStatus, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecord
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse
@@ -122,7 +124,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
       "the session data indicates the user does not have sufficient confidence level" in {
         val session = SessionData.empty.copy(journeyStatus = Some(
-          SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None,None, None)
+          SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None,None, None, sample[GGCredId])
         ))
 
         inSequence {

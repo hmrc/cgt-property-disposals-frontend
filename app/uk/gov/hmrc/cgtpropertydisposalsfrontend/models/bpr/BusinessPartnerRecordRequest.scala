@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr
 
 import julienrf.json.derived
 import play.api.libs.json.OFormat
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherFormat.eitherFormat
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{NINO, SAUTR}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Name
+
 
 sealed trait BusinessPartnerRecordRequest extends Product with Serializable
 

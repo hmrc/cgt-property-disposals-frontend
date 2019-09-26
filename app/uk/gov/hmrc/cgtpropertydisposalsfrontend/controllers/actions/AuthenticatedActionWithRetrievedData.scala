@@ -19,12 +19,13 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.mvc._
-import uk.gov.hmrc.auth.core.retrieve._
-import uk.gov.hmrc.auth.core.{ConfidenceLevel, _}
+import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
+import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, AuthorisedFunctions, ConfidenceLevel, Enrolments}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, NINO, SAUTR, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, NINO, SAUTR}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.toFuture
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
@@ -52,44 +53,69 @@ class AuthenticatedActionWithRetrievedData @Inject()(
     auth
       .authorised()
       .retrieve(
-        v2.Retrievals.confidenceLevel and
-          v2.Retrievals.affinityGroup and
-          v2.Retrievals.nino and
-          v2.Retrievals.saUtr and
-          v2.Retrievals.email and
-          v2.Retrievals.allEnrolments
-      ) {
-        case cl ~ Some(AffinityGroup.Individual) ~ maybeNino ~ maybeSautr ~ maybeEmail ~ _ if cl < ConfidenceLevel.L200 =>
-            Right(AuthenticatedRequestWithRetrievedData(
-              UserType.IndividualWithInsufficientConfidenceLevel(
-                maybeNino.map(NINO(_)),
-                maybeSautr.map(SAUTR(_)),
-                maybeEmail.filter(_.nonEmpty).map(Email(_))
-              ),
-              request))
+        Retrievals.confidenceLevel and
+          Retrievals.affinityGroup and
+          Retrievals.nino and
+          Retrievals.saUtr and
+          Retrievals.email and
+          Retrievals.allEnrolments and
+          Retrievals.credentials
+      ) { case retrievedData@_ ~ _ ~ _ ~ _ ~ _ ~ _ ~ creds =>
+        withGGCredentials(creds, request) { ggCredId =>
+          val result = retrievedData match {
+            case cl ~ Some(AffinityGroup.Individual) ~ maybeNino ~ maybeSautr ~ maybeEmail ~ _ ~ _ if cl < ConfidenceLevel.L200 =>
+              Right(AuthenticatedRequestWithRetrievedData(
+                UserType.IndividualWithInsufficientConfidenceLevel(
+                  maybeNino.map(NINO(_)),
+                  maybeSautr.map(SAUTR(_)),
+                  maybeEmail.filter(_.nonEmpty).map(Email(_)),
+                  ggCredId
+                ),
+                request))
 
-        case individual @ _ ~ Some(AffinityGroup.Individual) ~ _ ~ _ ~ _ ~ _ =>
-          individual match {
-            case  _ ~ _ ~ Some(nino) ~ _ ~ maybeEmail ~ _ =>
-                Right(AuthenticatedRequestWithRetrievedData(
-                  UserType.Individual(
-                    Right(NINO(nino)),
-                    maybeEmail.filter(_.nonEmpty).map(Email(_))
-                  ),
-                  request
-                ))
+            case individual@_ ~ Some(AffinityGroup.Individual) ~ _ ~ _ ~ _ ~ _ ~ _ =>
+              individual match {
+                case _ ~ _ ~ Some(nino) ~ _ ~ maybeEmail ~ _ ~ _ =>
+                  Right(AuthenticatedRequestWithRetrievedData(
+                    UserType.Individual(
+                      Right(NINO(nino)),
+                      maybeEmail.filter(_.nonEmpty).map(Email(_))
+                    ),
+                    request
+                  ))
+
+              }
+
+            case _@_ ~ Some(AffinityGroup.Organisation) ~ _ ~ _ ~ maybeEmail ~ enrolments ~ _ =>
+              handleOrganisation(request, enrolments, maybeEmail)
+
+            case _@_ ~ otherAffinityGroup ~ _ ~ _ ~ _ ~ _ ~ creds =>
+              logger.warn(s"Got request for unsupported affinity group $otherAffinityGroup")
+              Left(errorHandler.errorResult()(request))
 
           }
 
-        case _ @  _ ~ Some(AffinityGroup.Organisation) ~ _ ~ _ ~ maybeEmail ~ enrolments =>
-          handleOrganisation(request, enrolments, maybeEmail)
-
-        case _ @ _ ~ otherAffinityGroup ~ _ ~ _ ~ _ ~ _ =>
-          logger.warn(s"Got request for unsupported affinity group $otherAffinityGroup")
-          Left(errorHandler.errorResult()(request))
-
+          Future.successful(result)
+        }
       }
+
   }
+
+  private def withGGCredentials[A](credentials: Option[Credentials], request: MessagesRequest[A])(
+    f: GGCredId => Future[Either[Result, AuthenticatedRequestWithRetrievedData[A]]]
+  ): Future[Either[Result, AuthenticatedRequestWithRetrievedData[A]]] =
+    credentials match {
+      case None =>
+        logger.warn("No credentials were retrieved")
+        Future.successful(Left(errorHandler.errorResult()(request)))
+
+      case Some(Credentials(id, "GovernmentGateway")) =>
+        f(GGCredId(id))
+
+      case Some(Credentials(_, otherProvider)) =>
+        logger.warn(s"User logged in with unsupported provider: $otherProvider")
+        Future.successful(Left(errorHandler.errorResult()(request)))
+    }
 
   private def handleOrganisation[A](request: MessagesRequest[A],
                                     enrolments: Enrolments,

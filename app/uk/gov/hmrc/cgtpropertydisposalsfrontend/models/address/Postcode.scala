@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address
 
-import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherFormat.eitherFormat
+import play.api.libs.functional.syntax._
+import play.api.libs.json.Format
 
-final case class BusinessPartnerRecord(
-  emailAddress: Option[String],
-  address: Address,
-  sapNumber: String,
-  name: Either[TrustName, Name]
-)
+final case class Postcode(value: String) extends AnyVal
 
-object BusinessPartnerRecord {
+object Postcode {
 
-  implicit val format: Format[BusinessPartnerRecord] = Json.format
+  implicit val format: Format[Postcode] =
+    implicitly[Format[String]].inmap(Postcode(_), _.value)
 
 }

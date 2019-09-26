@@ -58,7 +58,7 @@ class RegistrationController @Inject()(
     f: Either[IndividualWithInsufficientConfidenceLevel,RegistrationStatus] => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(u @ IndividualWithInsufficientConfidenceLevel(Some(false), Some(false), _)) =>
+      case Some(u @ IndividualWithInsufficientConfidenceLevel(Some(false), Some(false), _, _)) =>
         f(Left(u))
 
       case Some(r: RegistrationStatus) =>

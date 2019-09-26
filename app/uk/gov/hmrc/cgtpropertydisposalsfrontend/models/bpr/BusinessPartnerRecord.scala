@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr
 
 import play.api.libs.json.{Format, Json}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Name, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
 
-final case class SAUTR(value: String) extends AnyVal
+final case class BusinessPartnerRecord(
+  emailAddress: Option[String],
+  address: Address,
+  sapNumber: String,
+  name: Either[TrustName, Name]
+)
 
-object SAUTR {
+object BusinessPartnerRecord {
 
-  implicit val format: Format[SAUTR] = Json.format[SAUTR]
+  implicit val format: Format[BusinessPartnerRecord] = Json.format
 
 }

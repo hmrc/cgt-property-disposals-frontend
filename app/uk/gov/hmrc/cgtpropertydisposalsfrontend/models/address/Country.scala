@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address
 
 import play.api.libs.json.{Json, OFormat, Reads}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Country.{CountryCode, CountryName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country.{CountryCode, CountryName}
 
 import scala.io.Source
 

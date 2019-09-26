@@ -14,18 +14,21 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Name
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.SAUTR
 
-final case class AddressLookupResult(
-  postcode: Postcode,
-  filter: Option[String],
-  addresses: List[Address]
+final case class UnsuccessfulNameMatchAttempts(
+  unsuccesfulAttempts: Int,
+  maximumAttempts: Int,
+  lastNameTried: Name,
+  lastSAUTRTried: SAUTR
 )
 
-object AddressLookupResult {
+object UnsuccessfulNameMatchAttempts {
 
-  implicit val format: Format[AddressLookupResult] = Json.format
+  implicit val format: OFormat[UnsuccessfulNameMatchAttempts] = Json.format
 
 }

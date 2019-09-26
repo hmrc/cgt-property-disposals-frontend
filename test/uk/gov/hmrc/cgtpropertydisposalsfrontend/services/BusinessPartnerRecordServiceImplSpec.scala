@@ -28,6 +28,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Individual, Trust}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, BusinessPartnerRecordResponse}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -80,13 +81,24 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
         }
 
       }
-      "return the bpr when the http response comes back with status 200 and " +
-        "the json body returns a bpr with a matching dob" in {
-        mockGetBPR(bprRequest)(Right(HttpResponse(200, Some(Json.toJson(bpr)))))
 
-        await(service.getBusinessPartnerRecord(bprRequest).value) shouldBe Right(bpr)
+      "return the bpr when the http response comes back with status 200 and " +
+        "the json body returns a bpr" in {
+        val response = BusinessPartnerRecordResponse(Some(bpr))
+
+        mockGetBPR(bprRequest)(Right(HttpResponse(200, Some(Json.toJson(response)))))
+
+        await(service.getBusinessPartnerRecord(bprRequest).value) shouldBe Right(response)
       }
 
+      "return nothing when the http response comes back with status 200 and " +
+        "the json body does not contain a bpr" in {
+        val response = BusinessPartnerRecordResponse(Some(bpr))
+
+        mockGetBPR(bprRequest)(Right(HttpResponse(200, Some(Json.toJson(response)))))
+
+        await(service.getBusinessPartnerRecord(bprRequest).value) shouldBe Right(response)
+      }
     }
 
   }

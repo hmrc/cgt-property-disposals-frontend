@@ -22,7 +22,8 @@ import cats.syntax.either._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.OK
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BusinessPartnerRecord, BusinessPartnerRecordRequest, Error, NINO, Name, SAUTR}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.{BusinessPartnerRecordRequest, BusinessPartnerRecordResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -33,7 +34,7 @@ trait BusinessPartnerRecordService {
 
   def getBusinessPartnerRecord(request: BusinessPartnerRecordRequest)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, BusinessPartnerRecord]
+  ): EitherT[Future, Error, BusinessPartnerRecordResponse]
 
 }
 
@@ -44,16 +45,17 @@ class BusinessPartnerRecordServiceImpl @Inject()(connector: CGTPropertyDisposals
 
   override def getBusinessPartnerRecord(request: BusinessPartnerRecordRequest)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, BusinessPartnerRecord] =
+  ): EitherT[Future, Error, BusinessPartnerRecordResponse] = {
     connector
       .getBusinessPartnerRecord(request)
       .subflatMap { response =>
         response.status match {
           case OK =>
-            response.parseJSON[BusinessPartnerRecord]().leftMap(Error.apply)
+            response.parseJSON[BusinessPartnerRecordResponse]().leftMap(Error.apply)
           case other =>
             Left(Error(s"Call to get BPR came back with status $other"))
         }
       }
+  }
 
 }

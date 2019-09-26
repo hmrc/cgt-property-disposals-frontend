@@ -22,7 +22,7 @@ import org.scalatest.{FunSuite, Matchers, WordSpec}
 import play.api.libs.json.JsString
 import play.api.test.Helpers._
 import play.api.{Configuration, Mode}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{NINO, Postcode}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 

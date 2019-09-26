@@ -16,9 +16,12 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
+import cats.Applicative
+import cats.instances.either._
+import cats.syntax.traverse._
 import play.api.libs.json.{Format, JsObject, JsResult, JsValue, Json}
 
-object EitherFormat {
+object EitherUtils {
 
   implicit def eitherFormat[A, B](implicit aFormat: Format[A], bFormat: Format[B]): Format[Either[A, B]] =
     new Format[Either[A, B]] {
@@ -32,5 +35,16 @@ object EitherFormat {
           b ⇒ JsObject(Seq("r" → Json.toJson(b)))
         )
     }
+
+
+  implicit class EitherOps[A,B](val e: Either[A,B]) extends AnyVal {
+
+    @SuppressWarnings(Array("org.wartremover.warts.Any"))
+    // go from Either[F[C],B] to F[Either[C,B]]
+    def leftSequence[F[_],C](implicit ap: Applicative[F], ev: A <:< F[C]): F[Either[C,B]] = {
+      ap.map(e.swap.sequence[F,C])(_.swap)
+    }
+
+  }
 
 }

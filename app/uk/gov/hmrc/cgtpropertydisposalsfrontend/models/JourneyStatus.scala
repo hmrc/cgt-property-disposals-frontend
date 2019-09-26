@@ -18,7 +18,9 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import julienrf.json.derived
 import play.api.libs.json.OFormat
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherFormat.eitherFormat
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecord
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 
 sealed trait JourneyStatus extends Product with Serializable
 
@@ -34,7 +36,8 @@ object JourneyStatus {
     final case class IndividualWithInsufficientConfidenceLevel(
                                                                 hasNino: Option[Boolean],
                                                                 hasSautr: Option[Boolean],
-                                                                email: Option[Email]) extends SubscriptionStatus
+                                                                email: Option[Email],
+                                                                ggCredId: GGCredId) extends SubscriptionStatus
 
     // entity is missing data in order to continue on with subscription
     final case class SubscriptionMissingData(businessPartnerRecord: BusinessPartnerRecord) extends SubscriptionStatus

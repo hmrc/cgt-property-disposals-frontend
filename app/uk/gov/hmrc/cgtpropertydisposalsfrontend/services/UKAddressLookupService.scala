@@ -29,8 +29,9 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.OK
 import play.api.libs.json.{JsResult, JsValue, Json, Reads}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.AddressLookupConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Address.{NonUkAddress, UkAddress}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Address, AddressLookupResult, Error, Postcode}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressLookupResult, Postcode}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupServiceImpl.{AddressLookupResponse, RawAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier

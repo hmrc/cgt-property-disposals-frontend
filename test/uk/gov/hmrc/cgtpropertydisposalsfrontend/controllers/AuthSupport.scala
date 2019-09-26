@@ -19,11 +19,11 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import play.api.Configuration
 import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.auth.core.retrieve.{EmptyRetrieval, Retrieval, ~}
+import uk.gov.hmrc.auth.core.retrieve.{Credentials, EmptyRetrieval, Retrieval, ~}
 import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, ConfidenceLevel, Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.AuthenticatedActionWithRetrievedData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SAUTR
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.SAUTR
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -51,7 +51,7 @@ trait AuthSupport {
 
   val expectedRetrievals =
     Retrievals.confidenceLevel and Retrievals.affinityGroup and Retrievals.nino and
-      Retrievals.saUtr and Retrievals.email and Retrievals.allEnrolments
+      Retrievals.saUtr and Retrievals.email and Retrievals.allEnrolments and Retrievals.credentials
 
   def mockAuthWithAllRetrievals(
     retrievedConfidenceLevel: ConfidenceLevel,
@@ -59,14 +59,16 @@ trait AuthSupport {
     retrievedNino: Option[String],
     retrievedSautr: Option[String],
     retrievedEmail: Option[String],
-    retrievedEnrolments: Set[Enrolment]): Unit =
+    retrievedEnrolments: Set[Enrolment],
+    retrievedCredentials: Option[Credentials]): Unit =
     mockAuth(EmptyPredicate, expectedRetrievals)(
       Future successful (
         new ~(retrievedConfidenceLevel, retrievedAffinityGroup) and
           retrievedNino and
           retrievedSautr and
           retrievedEmail and
-          Enrolments(retrievedEnrolments)
+          Enrolments(retrievedEnrolments) and
+          retrievedCredentials
         )
     )
 
@@ -80,7 +82,8 @@ trait AuthSupport {
       Some(retrievedNino),
       None,
       retrievedEmail,
-      Set.empty
+      Set.empty,
+      Some(Credentials("gg-cred-id", "GovernmentGateway"))
     )
 
   def mockAuthWithAllTrustRetrievals(sautr: SAUTR, email: Option[String]): Unit =
@@ -90,7 +93,8 @@ trait AuthSupport {
       None,
       None,
       email,
-      Set(Enrolment("HMRC-TERS-ORG", Seq(EnrolmentIdentifier("SAUTR", sautr.value)), ""))
+      Set(Enrolment("HMRC-TERS-ORG", Seq(EnrolmentIdentifier("SAUTR", sautr.value)), "")),
+      Some(Credentials("gg-cred-id", "GovernmentGateway"))
     )
 
 }

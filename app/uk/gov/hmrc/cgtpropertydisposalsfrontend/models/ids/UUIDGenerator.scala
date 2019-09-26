@@ -14,20 +14,22 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids
 
-import org.scalatest.{FunSuite, Matchers, WordSpec}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+import java.util.UUID
 
-class AddressSpec extends WordSpec with Matchers {
+import com.google.inject.{ImplementedBy, Singleton}
 
-  "Address" must {
+@ImplementedBy(classOf[UUIDGeneratorImpl])
+trait UUIDGenerator {
 
-    "have a country code method on uk addresses which always returns the same value" in {
-      val ukAddress = UkAddress("line1", None, None, None, "postcode")
-      ukAddress.countryCode shouldBe "GB"
-    }
+  def nextId(): UUID
 
-  }
+}
+
+@Singleton
+class UUIDGeneratorImpl extends UUIDGenerator {
+
+  def nextId(): UUID = UUID.randomUUID()
 
 }

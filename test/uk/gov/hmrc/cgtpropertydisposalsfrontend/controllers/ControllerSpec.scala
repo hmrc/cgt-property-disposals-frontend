@@ -72,8 +72,8 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
     super.afterAll()
   }
 
-  def message(messageKey: String)(implicit messagesApi: MessagesApi): String =
-    messagesApi(messageKey)(Lang.defaultLang)
+  def message(messageKey: String, args: Any*)(implicit messagesApi: MessagesApi): String =
+    messagesApi(messageKey, args: _*)(Lang.defaultLang)
 
   private lazy val technicalErrorPageContent: String =
     instanceOf[ErrorHandler].internalServerErrorTemplate(FakeRequest()).body

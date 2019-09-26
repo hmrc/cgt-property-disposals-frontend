@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, NINO, SAUTR}
+
 sealed trait UserType extends Product with Serializable
 
 object UserType {
@@ -32,7 +34,8 @@ object UserType {
   final case class IndividualWithInsufficientConfidenceLevel(
                                                               nino: Option[NINO],
                                                               sautr: Option[SAUTR],
-                                                              email: Option[Email]
+                                                              email: Option[Email],
+                                                              credId: GGCredId
                                                             ) extends UserType
 
 }
