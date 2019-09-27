@@ -16,7 +16,7 @@ if(countryEl) {
   // when it is resolved we can remove this code
   var wrapper = document.querySelector('.country-code-wrapper');
   function resetSelectIfEmpty (e) {
-    if (e.target.id === 'countryCode' && e.target.value === '') {
+    if (e.target.id === 'countryCode' && e.target.value.trim() === '') {
       var countrySelect = document.querySelector("#countryCode-select");
       if (countrySelect) {
         countrySelect.value = ''
