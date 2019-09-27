@@ -126,7 +126,7 @@ nonUkAddress.line3.label=Address line 3 (optional)
 nonUkAddress.line4.label=Address line 4 (optional)
 countryCode.label=Country
 nonUkAddress-line1.error.required=Enter the first line of the address
-countryCode.error.required=Enter the country
+countryCode.error.required=Enter a country from the options presented as you type
 countryCode.error.notFound=Enter a country from the options presented as you type
 
 address-select.title=Select the address of the property

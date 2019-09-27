@@ -26,7 +26,7 @@
 @classes = @{if(hasErrors) "form-group form-group-error" else "form-group" }
 @inputClasses = @{if(hasErrors) "form-control form-control-error"  else "form-control"}
 
-<div class="@classes">
+<div class="@classes country-code-wrapper">
  <label class="form-label" for="@key">@label</label>
   @errorKey.map { e =>
    @errorInline(key, messages(s"$key.$e"), Seq("error-message"))
