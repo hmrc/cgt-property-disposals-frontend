@@ -20,6 +20,7 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionDetails
 @import scala.util.Try
 @import views.html.helper.CSRF
@@ -59,7 +60,7 @@
   @cyaRow(
    messages("subscription.cyaLabel.address"),
    addressDisplay(details.address, Block),
-   Some(cyaChange(messages("subscription.cyaChange.address"), routes.AddressController.isUk().url))
+   Some(cyaChange(messages("subscription.cyaChange.address"), address.routes.SubscriptionAddressController.isUk().url))
   )
   @cyaRow(
     messages("subscription.cyaLabel.email"),

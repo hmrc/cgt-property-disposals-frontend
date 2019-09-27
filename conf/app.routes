@@ -24,6 +24,25 @@ POST /registration/select-entity-type     uk.gov.hmrc.cgtpropertydisposalsfronte
 GET  /wrong-account-for-trusts            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegistrationController.wrongGGAccountForTrusts()
 GET  /registration/enter-name             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegistrationController.enterName()
 POST /registration/enter-name             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegistrationController.enterNameSubmit()
+GET  /registration/check-your-answers     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegistrationController.checkYourAnswers()
+
+#### Registration Change address
+GET  /registration/is-address-in-uk       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.RegistrationAddressController.isUk()
+POST /registration/is-address-in-uk       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.RegistrationAddressController.isUkSubmit()
+
+GET  /registration/change-address         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.RegistrationAddressController.enterPostcode()
+POST /registration/change-address         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.RegistrationAddressController.enterPostcodeSubmit()
+
+GET   /registration/select-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.RegistrationAddressController.selectAddress()
+POST  /registration/select-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.RegistrationAddressController.selectAddressSubmit()
+
+GET   /registration/enter-uk-address      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.RegistrationAddressController.enterUkAddress()
+POST  /registration/enter-uk-address      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.RegistrationAddressController.enterUkAddressSubmit()
+
+GET  /registration/enter-non-uk-address  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.RegistrationAddressController.enterNonUkAddress()
+POST /registration/enter-non-uk-address  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.RegistrationAddressController.enterNonUkAddressSubmit()
+
+
 
 ### Subscription - missing data
 GET  /subscription/enter-email            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailController.enterEmail()
@@ -45,21 +64,22 @@ GET  /subscription/verify-email           uk.gov.hmrc.cgtpropertydisposalsfronte
 GET  /subscription/email-verified         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailController.emailVerified()
 
 
-GET  /subscription/is-address-in-uk       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.isUk()
-POST /subscription/is-address-in-uk       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.isUkSubmit()
 
-#### Change address
-GET  /subscription/change-address         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.enterPostcode()
-POST /subscription/change-address         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.enterPostcodeSubmit()
+#### Subscription Change address
+GET  /subscription/is-address-in-uk       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.SubscriptionAddressController.isUk()
+POST /subscription/is-address-in-uk       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.SubscriptionAddressController.isUkSubmit()
 
-GET   /subscription/select-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.selectAddress()
-POST  /subscription/select-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.selectAddressSubmit()
+GET  /subscription/change-address         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.SubscriptionAddressController.enterPostcode()
+POST /subscription/change-address         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.SubscriptionAddressController.enterPostcodeSubmit()
 
-GET   /subscription/enter-uk-address      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.enterUkAddress()
-POST  /subscription/enter-uk-address      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.enterUkAddressSubmit()
+GET   /subscription/select-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.SubscriptionAddressController.selectAddress()
+POST  /subscription/select-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.SubscriptionAddressController.selectAddressSubmit()
 
-GET  /subscription/enter-non-uk-address  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.enterNonUkAddress()
-POST /subscription/enter-non-uk-address  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressController.enterNonUkAddressSubmit()
+GET   /subscription/enter-uk-address      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.SubscriptionAddressController.enterUkAddress()
+POST  /subscription/enter-uk-address      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.SubscriptionAddressController.enterUkAddressSubmit()
+
+GET  /subscription/enter-non-uk-address  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.SubscriptionAddressController.enterNonUkAddress()
+POST /subscription/enter-non-uk-address  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.SubscriptionAddressController.enterNonUkAddressSubmit()
 
 
 #### Error pages

@@ -567,6 +567,32 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
           }
 
+          "redirect to the registration check your answers page" when {
+
+            "the session indicates the user is ready to register" in {
+              val session = SessionData.empty.copy(journeyStatus = Some(
+                RegistrationStatus.RegistrationReady(sample[Name], sample[Address])
+              ))
+
+              inSequence {
+                mockAuthWithAllRetrievals(
+                  ConfidenceLevel.L50,
+                  Some(AffinityGroup.Individual),
+                  None,
+                  None,
+                  None,
+                  Set.empty,
+                  Some(retrievedGGCredId)
+                )
+                mockGetSession(Future.successful(Right(Some(session))))
+              }
+
+              checkIsRedirect(performAction(), routes.RegistrationController.checkYourAnswers())
+
+            }
+
+          }
+
           "display an error page" when {
             "the call to get the BPR fails" in {
               inSequence {

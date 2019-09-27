@@ -19,6 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import julienrf.json.derived
 import play.api.libs.json.OFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 
@@ -59,7 +60,9 @@ object JourneyStatus {
 
     final case object IndividualWantsToRegisterTrust extends RegistrationStatus
 
-    final case class IndividualSupplyingInformation(name: Option[Name]) extends RegistrationStatus
+    final case class IndividualSupplyingInformation(name: Option[Name], address: Option[Address]) extends RegistrationStatus
+
+    final case class RegistrationReady(name: Name, address: Address) extends RegistrationStatus
 
   }
 

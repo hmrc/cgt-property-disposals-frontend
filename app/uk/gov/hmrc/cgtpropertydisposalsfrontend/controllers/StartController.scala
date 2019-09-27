@@ -70,6 +70,9 @@ class StartController @Inject()(
         // this is not the first time a person with individual insufficient confidence level has come to start
         SeeOther(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url)
 
+      case (_, Some(_: RegistrationStatus.RegistrationReady)) =>
+        SeeOther(routes.RegistrationController.checkYourAnswers().url)
+
       case (_, Some(_: RegistrationStatus.IndividualSupplyingInformation)) =>
         SeeOther(routes.RegistrationController.startRegistration().url)
 

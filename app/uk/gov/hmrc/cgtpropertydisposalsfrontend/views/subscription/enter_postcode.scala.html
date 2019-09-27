@@ -29,7 +29,11 @@
  backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@(form: Form[AddressLookupRequest], backLink: Call, journey: String = "subscription")(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[AddressLookupRequest],
+        backLink: Call,
+        submit: Call,
+        enterUkAddress: Call,
+        journey: String = "subscription")(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"postcode"}
 @postcodeFilterKey = @{"filter"}
@@ -50,7 +54,7 @@
 
  @pageHeading(title, Some(messages(s"$journey.caption")))
 
- @formWrapper(routes.AddressController.enterPostcodeSubmit(), 'novalidate -> "novalidate") {
+ @formWrapper(submit, 'novalidate -> "novalidate") {
    @textInput(
     fieldId = postcodeFilterKey,
     label = Html(messages("address.postcodeFilter.label")),
@@ -70,7 +74,7 @@
    )
 
    <p>
-     <a href="@{routes.AddressController.enterUkAddress().url}">@messages("address.manual.linkText")</a>
+     <a href="@{enterUkAddress.url}">@messages("address.manual.linkText")</a>
    </p>
 
    @submitButton(messages("button.findAddress"))
