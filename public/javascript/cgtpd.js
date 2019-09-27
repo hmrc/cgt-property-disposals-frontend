@@ -16,10 +16,17 @@ if(countryEl) {
   // when it is resolved we can remove this code
   var wrapper = document.querySelector('.country-code-wrapper');
   function resetSelectIfEmpty (e) {
-    if (e.target.id === 'countryCode' && e.target.value.trim() === '') {
+    if (e.target.id === 'countryCode') {
+      var val = e.target.value.trim();
       var countrySelect = document.querySelector("#countryCode-select");
       if (countrySelect) {
-        countrySelect.value = ''
+        var countriesArray = Array.prototype.slice.call(countrySelect.options);
+        var matches = countriesArray.filter(function (o) {
+          return o.text === val
+        });
+        if (!matches.length) {
+          countrySelect.value = ''
+        }
       }
     }
   }

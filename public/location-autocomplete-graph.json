@@ -976,22 +976,6 @@
       "en-GB": "Gabon"
     }
   },
-  "country:GB": {
-    "edges": {
-      "from": [
-      ]
-    },
-    "meta": {
-      "canonical": true,
-      "canonical-mask": 1,
-      "display-name": true,
-      "stable-name": true
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "United Kingdom"
-    }
-  },
   "country:GD": {
     "edges": {
       "from": [
@@ -3953,23 +3937,6 @@
       "en-GB": "Amrica"
     }
   },
-  "nym:An Rywvaneth Unys": {
-    "edges": {
-      "from": [
-        "country:GB"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": false,
-      "stable-name": false
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "An Rywvaneth Unys"
-    }
-  },
   "nym:Anguilla": {
     "edges": {
       "from": [
@@ -5092,23 +5059,6 @@
       "en-GB": "Bielaruś"
     }
   },
-  "nym:Bitain": {
-    "edges": {
-      "from": [
-        "country:GB"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": false,
-      "stable-name": false
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "Bitain"
-    }
-  },
   "nym:Bolivarian Republic of Venezuela": {
     "edges": {
       "from": [
@@ -5245,57 +5195,6 @@
       "en-GB": "Brazzaville"
     }
   },
-  "nym:Briain": {
-    "edges": {
-      "from": [
-        "country:GB"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": false,
-      "stable-name": false
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "Briain"
-    }
-  },
-  "nym:Britain": {
-    "edges": {
-      "from": [
-        "country:GB"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": false,
-      "stable-name": false
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "Britain"
-    }
-  },
-  "nym:Britiain": {
-    "edges": {
-      "from": [
-        "country:GB"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": false,
-      "stable-name": false
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "Britiain"
-    }
-  },
   "nym:British Guiana": {
     "edges": {
       "from": [
@@ -5328,23 +5227,6 @@
     "names": {
       "cy": false,
       "en-GB": "British Honduras"
-    }
-  },
-  "nym:Brtain": {
-    "edges": {
-      "from": [
-        "country:GB"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": false,
-      "stable-name": false
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "Brtain"
     }
   },
   "nym:Brunei Darussalam": {
@@ -7319,23 +7201,6 @@
       "en-GB": "England"
     }
   },
-  "nym:Englsnd": {
-    "edges": {
-      "from": [
-        "country:GB"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": false,
-      "stable-name": false
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "Englsnd"
-    }
-  },
   "nym:Ertra": {
     "edges": {
       "from": [
@@ -8067,23 +7932,6 @@
       "en-GB": "GA"
     }
   },
-  "nym:GB": {
-    "edges": {
-      "from": [
-        "country:GB"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": false,
-      "stable-name": false
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "GB"
-    }
-  },
   "nym:GBN": {
     "edges": {
       "from": [
@@ -8543,57 +8391,6 @@
       "en-GB": "Grand Duchy of Luxembourg"
     }
   },
-  "nym:Grat Britain": {
-    "edges": {
-      "from": [
-        "country:GB"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": false,
-      "stable-name": false
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "Grat Britain"
-    }
-  },
-  "nym:Great Britain": {
-    "edges": {
-      "from": [
-        "uk:GBN"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": true,
-      "stable-name": true
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "Great Britain"
-    }
-  },
-  "nym:Great Britan": {
-    "edges": {
-      "from": [
-        "country:GB"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": false,
-      "stable-name": false
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "Great Britan"
-    }
-  },
   "nym:Greenland": {
     "edges": {
       "from": [
@@ -8626,23 +8423,6 @@
     "names": {
       "cy": false,
       "en-GB": "Grenada"
-    }
-  },
-  "nym:Gret Britain": {
-    "edges": {
-      "from": [
-        "country:GB"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": false,
-      "stable-name": false
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "Gret Britain"
     }
   },
   "nym:Gronland": {
@@ -15989,40 +15769,6 @@
       "en-GB": "Réunion"
     }
   },
-  "nym:Rìoghachd Aonaichte": {
-    "edges": {
-      "from": [
-        "country:GB"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": false,
-      "stable-name": false
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "Rìoghachd Aonaichte"
-    }
-  },
-  "nym:Ríocht Aontaithe": {
-    "edges": {
-      "from": [
-        "country:GB"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": false,
-      "stable-name": false
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "Ríocht Aontaithe"
-    }
-  },
   "nym:SA": {
     "edges": {
       "from": [
@@ -16684,40 +16430,6 @@
     "names": {
       "cy": false,
       "en-GB": "Schweiz"
-    }
-  },
-  "nym:Scotland": {
-    "edges": {
-      "from": [
-        "uk:SCT"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": true,
-      "stable-name": true
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "Scotland"
-    }
-  },
-  "nym:Scottland": {
-    "edges": {
-      "from": [
-        "country:GB"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": false,
-      "stable-name": false
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "Scottland"
     }
   },
   "nym:Sesel": {
@@ -20902,23 +20614,6 @@
       "en-GB": "The United Arab Emirates"
     }
   },
-  "nym:The United Kingdom of Great Britain and Northern Ireland": {
-    "edges": {
-      "from": [
-        "country:GB"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": true,
-      "stable-name": true
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "The United Kingdom of Great Britain and Northern Ireland"
-    }
-  },
   "nym:The United Mexican States": {
     "edges": {
       "from": [
@@ -21344,23 +21039,6 @@
       "en-GB": "Tūns"
     }
   },
-  "nym:U.K.": {
-    "edges": {
-      "from": [
-        "country:GB"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": false,
-      "stable-name": false
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "U.K."
-    }
-  },
   "nym:U.S.": {
     "edges": {
       "from": [
@@ -21444,23 +21122,6 @@
     "names": {
       "cy": false,
       "en-GB": "UG"
-    }
-  },
-  "nym:UK": {
-    "edges": {
-      "from": [
-        "country:GB"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": false,
-      "stable-name": false
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "UK"
     }
   },
   "nym:UM": {
@@ -21701,23 +21362,6 @@
       "en-GB": "United Arab Republic"
     }
   },
-  "nym:United Kingdom of Great Britain and Northern Ireland": {
-    "edges": {
-      "from": [
-        "country:GB"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": false,
-      "stable-name": false
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "United Kingdom of Great Britain and Northern Ireland"
-    }
-  },
   "nym:United Mexican States": {
     "edges": {
       "from": [
@@ -21869,23 +21513,6 @@
     "names": {
       "cy": false,
       "en-GB": "Unites States"
-    }
-  },
-  "nym:Unitit Kinrick": {
-    "edges": {
-      "from": [
-        "country:GB"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": false,
-      "stable-name": false
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "Unitit Kinrick"
     }
   },
   "nym:Untied State": {
@@ -22447,23 +22074,6 @@
     "names": {
       "cy": false,
       "en-GB": "Xīnjiāpō"
-    }
-  },
-  "nym:Y Deyrnas Unedig": {
-    "edges": {
-      "from": [
-        "country:GB"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": false,
-      "stable-name": false
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "Y Deyrnas Unedig"
     }
   },
   "nym:YE": {
@@ -27067,91 +26677,6 @@
     "names": {
       "cy": false,
       "en-GB": "Mayotte"
-    }
-  },
-  "uk:ENG": {
-    "edges": {
-      "from": [
-        "country:GB"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": true,
-      "stable-name": true
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "England"
-    }
-  },
-  "uk:GBN": {
-    "edges": {
-      "from": [
-        "country:GB"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": true,
-      "stable-name": true
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "Great Britain"
-    }
-  },
-  "uk:NIR": {
-    "edges": {
-      "from": [
-        "country:GB"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": true,
-      "stable-name": true
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "Northern Ireland"
-    }
-  },
-  "uk:SCT": {
-    "edges": {
-      "from": [
-        "country:GB"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": true,
-      "stable-name": true
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "Scotland"
-    }
-  },
-  "uk:WLS": {
-    "edges": {
-      "from": [
-        "country:GB"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": true,
-      "stable-name": true
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "Wales"
     }
   }
 }
