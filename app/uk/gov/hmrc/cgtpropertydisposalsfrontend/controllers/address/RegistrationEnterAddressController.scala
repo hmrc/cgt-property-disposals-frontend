@@ -20,10 +20,10 @@ import com.google.inject.{Inject, Singleton}
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.AddressController.UpdateAddress
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{DefaultRedirects, SessionUpdates}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, name}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.IndividualSupplyingInformation
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -33,15 +33,15 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class RegistrationAddressController @Inject()(
+class RegistrationEnterAddressController @Inject()(
   val errorHandler: ErrorHandler,
   val ukAddressLookupService: UKAddressLookupService,
   val sessionStore: SessionStore,
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   cc: MessagesControllerComponents,
-  val enterPostcodePage: views.html.subscription.enter_postcode,
-  val selectAddressPage: views.html.subscription.select_address,
+  val enterPostcodePage: views.html.address.enter_postcode,
+  val selectAddressPage: views.html.address.select_address,
   val addressDisplay: views.html.components.address_display,
   val enterUkAddressPage: views.html.address.enter_uk_address,
   val enterNonUkAddressPage: views.html.address.enter_nonUk_address,
@@ -51,32 +51,30 @@ class RegistrationAddressController @Inject()(
     with Logging
     with WithAuthAndSessionDataAction
     with SessionUpdates
-    with DefaultRedirects
     with AddressController[IndividualSupplyingInformation] {
 
   def validJourney(
     request: RequestWithSessionData[_]
-  ): Either[Result, (SessionData, IndividualSupplyingInformation, UpdateAddress[IndividualSupplyingInformation])] =
+  ): Either[Result, (SessionData, IndividualSupplyingInformation)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((sessionData, r @ IndividualSupplyingInformation(Some(_), None))) =>
-        Right((sessionData, r, {
-          case (address, journey) => journey.copy(address = Some(address))
-        }))
-
-      case other => Left(defaultRedirect(other.map(_._2)))
+      case Some((sessionData, r @ IndividualSupplyingInformation(Some(_), None, _))) => Right(sessionData -> r)
+      case _ => Left(Redirect(controllers.routes.StartController.start()))
     }
 
-  protected lazy val backLinkCall: Call                = controllers.routes.RegistrationController.enterName()
-  protected lazy val isUkCall: Call                    = routes.RegistrationAddressController.isUk()
-  protected lazy val isUkSubmitCall: Call              = routes.RegistrationAddressController.isUkSubmit()
-  protected lazy val enterUkAddressCall: Call          = routes.RegistrationAddressController.enterNonUkAddress()
-  protected lazy val enterUkAddressSubmitCall: Call    = routes.RegistrationAddressController.enterUkAddressSubmit()
-  protected lazy val enterNonUkAddressCall: Call       = routes.RegistrationAddressController.enterNonUkAddress()
-  protected lazy val enterNonUkAddressSubmitCall: Call = routes.RegistrationAddressController.enterNonUkAddressSubmit()
-  protected lazy val enterPostcodeCall: Call           = routes.RegistrationAddressController.enterPostcode()
-  protected lazy val enterPostcodeSubmitCall: Call     = routes.RegistrationAddressController.enterPostcodeSubmit()
-  protected lazy val selectAddressCall: Call           = routes.RegistrationAddressController.selectAddress()
-  protected lazy val selectAddressSubmitCall: Call     = routes.RegistrationAddressController.selectAddressSubmit()
+  def updateAddress(journey: IndividualSupplyingInformation, address: Address): JourneyStatus =
+    journey.copy(address = Some(address))
+
+  protected lazy val backLinkCall: Call                = name.routes.RegistrationEnterNameController.enterIndividualName()
+  protected lazy val isUkCall: Call                    = routes.RegistrationEnterAddressController.isUk()
+  protected lazy val isUkSubmitCall: Call              = routes.RegistrationEnterAddressController.isUkSubmit()
+  protected lazy val enterUkAddressCall: Call          = routes.RegistrationEnterAddressController.enterNonUkAddress()
+  protected lazy val enterUkAddressSubmitCall: Call    = routes.RegistrationEnterAddressController.enterUkAddressSubmit()
+  protected lazy val enterNonUkAddressCall: Call       = routes.RegistrationEnterAddressController.enterNonUkAddress()
+  protected lazy val enterNonUkAddressSubmitCall: Call = routes.RegistrationEnterAddressController.enterNonUkAddressSubmit()
+  protected lazy val enterPostcodeCall: Call           = routes.RegistrationEnterAddressController.enterPostcode()
+  protected lazy val enterPostcodeSubmitCall: Call     = routes.RegistrationEnterAddressController.enterPostcodeSubmit()
+  protected lazy val selectAddressCall: Call           = routes.RegistrationEnterAddressController.selectAddress()
+  protected lazy val selectAddressSubmitCall: Call     = routes.RegistrationEnterAddressController.selectAddressSubmit()
   protected lazy val continueCall: Call                = controllers.routes.RegistrationController.checkYourAnswers()
 
 }

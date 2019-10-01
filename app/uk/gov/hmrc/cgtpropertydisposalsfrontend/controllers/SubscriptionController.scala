@@ -50,8 +50,7 @@ class SubscriptionController @Inject()(
     with WithSubscriptionDetailsActions
     with WithAuthAndSessionDataAction
     with Logging
-    with SessionUpdates
-    with DefaultRedirects {
+    with SessionUpdates {
 
   def checkYourDetails(): Action[AnyContent] =
     authenticatedActionWithSubscriptionReady { implicit request =>
@@ -83,7 +82,7 @@ class SubscriptionController @Inject()(
   def subscribed(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
     request.sessionData.flatMap(_.journeyStatus) match {
       case Some(SubscriptionComplete(_, complete)) => Ok(subscribedPage(complete.cgtReferenceNumber))
-      case other                                   => defaultRedirect(other)
+      case _                                       => Redirect(routes.StartController.start())
     }
   }
 

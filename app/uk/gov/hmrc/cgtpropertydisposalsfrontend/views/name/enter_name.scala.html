@@ -28,7 +28,7 @@
         backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@(form: Form[Name], backLink: Call)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[Name], backLink: Call, submit: Call)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
 @firstNameKey = @{"firstName"}
 @lastNameKey = @{"lastName"}
@@ -45,7 +45,7 @@
 
   @pageHeading(title)
 
-  @formWrapper(routes.RegistrationController.enterNameSubmit(), 'novalidate -> "novalidate") {
+  @formWrapper(submit, 'novalidate -> "novalidate") {
     @textInput(
       fieldId = firstNameKey,
       value = form.data.getOrElse(firstNameKey, ""),

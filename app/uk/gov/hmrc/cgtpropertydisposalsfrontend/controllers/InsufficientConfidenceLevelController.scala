@@ -34,7 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.{BusinessPartnerRecordName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordNameMatchRetryService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import uk.gov.hmrc.referencechecker.SelfAssessmentReferenceChecker
@@ -63,7 +63,6 @@ class InsufficientConfidenceLevelController @Inject()(
     with IvBehaviour
     with Logging
     with WithAuthAndSessionDataAction
-    with DefaultRedirects
     with SessionUpdates {
   import InsufficientConfidenceLevelController._
   import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.toFuture
@@ -73,7 +72,7 @@ class InsufficientConfidenceLevelController @Inject()(
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
       case Some(i: IndividualWithInsufficientConfidenceLevel) => f(i)
-      case other                                              => defaultRedirect(other)
+      case _ => Redirect(controllers.routes.StartController.start())
     }
 
   def doYouHaveNINO(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>

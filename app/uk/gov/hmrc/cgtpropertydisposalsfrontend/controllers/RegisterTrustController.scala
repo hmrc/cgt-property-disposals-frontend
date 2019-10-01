@@ -32,13 +32,13 @@ class RegisterTrustController @Inject()(
                                          val sessionDataAction: SessionDataAction,
                                          registerYourTrustPage: views.html.register_your_trust,
                                          cc: MessagesControllerComponents)(implicit viewConfig: ViewConfig, ec: ExecutionContext)
-  extends FrontendController(cc) with WithAuthAndSessionDataAction with DefaultRedirects {
+  extends FrontendController(cc) with WithAuthAndSessionDataAction {
 
 
   def registerYourTrust(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
     request.sessionData.flatMap(_.journeyStatus) match {
       case Some(UnregisteredTrust) =>  Ok(registerYourTrustPage())
-      case other                      => defaultRedirect(other)
+      case _                       =>  Redirect(routes.StartController.start())
     }
   }
 

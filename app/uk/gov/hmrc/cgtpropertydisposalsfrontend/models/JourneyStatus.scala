@@ -60,9 +60,11 @@ object JourneyStatus {
 
     final case object IndividualWantsToRegisterTrust extends RegistrationStatus
 
-    final case class IndividualSupplyingInformation(name: Option[Name], address: Option[Address]) extends RegistrationStatus
+    final case class IndividualSupplyingInformation(name: Option[Name], address: Option[Address], email: Option[Email]) extends RegistrationStatus
 
-    final case class RegistrationReady(name: Name, address: Address) extends RegistrationStatus
+    final case class IndividualMissingEmail(name: Name, address: Address) extends RegistrationStatus
+
+    final case class RegistrationReady(name: Name, address: Address, email: Email) extends RegistrationStatus
 
   }
 

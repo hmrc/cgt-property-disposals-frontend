@@ -19,6 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import cats.data.EitherT
 import cats.instances.future._
 import org.scalacheck.ScalacheckShapeless._
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -45,7 +46,9 @@ class InsufficientConfidenceLevelControllerSpec
     with IvBehaviourSupport
     with SessionSupport
     with AuthSupport
-    with NameFormValidationTests {
+      with ScalaCheckDrivenPropertyChecks
+    with NameFormValidationTests
+    with RedirectToStartBehaviour{
 
   val mockBprNameMatchService = mock[BusinessPartnerRecordNameMatchRetryService]
 
@@ -96,82 +99,15 @@ class InsufficientConfidenceLevelControllerSpec
 
   val name = Name("name", "surname")
 
-  def commonBehaviour(performAction: () => Future[Result]) = {
-    val bpr                  = sample[BusinessPartnerRecord]
-    val subscriptionDetails  = sample[SubscriptionDetails]
-    val subscriptionResponse = sample[SubscriptionResponse]
-
-    def test(sessionData: Option[SessionData], expectedRedirectTo: Call): Unit = {
-      inSequence {
-        mockAuthWithNoRetrievals()
-        mockGetSession(Future.successful(Right(sessionData)))
+  def commonBehaviour(performAction: () => Future[Result]) =
+    redirectToStartWhenInvalidJourney(
+      performAction,
+      {
+        case _: IndividualWithInsufficientConfidenceLevel => true
+        case _ => false
       }
+    )
 
-      checkIsRedirect(performAction(), expectedRedirectTo)
-    }
-
-    "redirect to the start endpoint" when {
-
-      "there is data missing for subscription" in {
-        test(
-          Some(session(SubscriptionMissingData(bpr))),
-          routes.StartController.start()
-        )
-      }
-
-      "there is no session data" in {
-        test(
-          None,
-          routes.StartController.start()
-        )
-      }
-    }
-
-    "redirect to check your details" when {
-
-      "the session data indicates that subscription is ready" in {
-        test(
-          Some(session(SubscriptionReady(subscriptionDetails))),
-          routes.SubscriptionController.checkYourDetails()
-        )
-      }
-
-    }
-
-    "redirect to the subscription confirmation page" when {
-
-      "the session data indicates that the user has successfully subscribed" in {
-        test(
-          Some(session(SubscriptionComplete(subscriptionDetails, subscriptionResponse))),
-          routes.SubscriptionController.subscribed()
-        )
-      }
-    }
-
-    "redirect to the registration start endpoint" when {
-
-      "the session data indicates the user has started a registration journey" in {
-        List(
-          RegistrationStatus.IndividualWantsToRegisterTrust,
-          sample[RegistrationStatus.IndividualSupplyingInformation]
-        ).foreach { registrationStatus =>
-          withClue(s"For registration status $registrationStatus: ") {
-            val session = SessionData.empty.copy(journeyStatus = Some(registrationStatus))
-
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(session))))
-            }
-
-            checkIsRedirect(performAction(), routes.RegistrationController.startRegistration())
-          }
-
-        }
-
-      }
-
-    }
-  }
 
   "InsufficientConfidenceLevelController" when {
 

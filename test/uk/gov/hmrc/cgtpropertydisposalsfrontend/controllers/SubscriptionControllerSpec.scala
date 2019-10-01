@@ -20,6 +20,7 @@ import java.util.UUID
 
 import cats.data.EitherT
 import org.scalacheck.ScalacheckShapeless._
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -38,7 +39,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with SessionSupport {
+class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with SessionSupport with ScalaCheckDrivenPropertyChecks with RedirectToStartBehaviour {
 
   val mockSubscriptionService = mock[SubscriptionService]
 
@@ -68,12 +69,23 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
   val name = sample[Name]
 
+  def redirectToStart(performAction: () => Future[Result]) =
+    redirectToStartWhenInvalidJourney(
+      performAction,
+      {
+        case _: SubscriptionReady => true
+        case _ => false
+      }
+    )
+
   "The SubscriptionController" when {
 
     "handling requests to check subscription details" must {
 
       def performAction(): Future[Result] =
         controller.checkYourDetails()(requestWithCSRFToken)
+
+      behave like redirectToStart(performAction)
 
       "show the check you details page" when {
 
@@ -86,34 +98,6 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
           val result = performAction()
           status(result)          shouldBe OK
           contentAsString(result) should include(message("subscription.title"))
-        }
-
-      }
-
-      "redirect to start a journey" when {
-
-        "there are no subscription details in session" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-          }
-
-          checkIsRedirect(performAction(), routes.StartController.start())
-        }
-
-      }
-
-      "redirect to the do you have a nino page" when {
-
-        "the session data indicates the user does not have sufficient confidence level" in {
-          val session = SessionData.empty.copy(journeyStatus = Some(SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, None, sample[GGCredId])))
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
-          }
-
-          val result = performAction()
-          checkIsRedirect(result, routes.InsufficientConfidenceLevelController.doYouHaveNINO())
         }
 
       }
@@ -131,14 +115,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
         SessionData.empty.copy(
           journeyStatus = Some(SubscriptionComplete(subscriptionDetails, subscriptionResponse)))
 
-      "redirect to the start endpoint if there is no subscription details in session" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-        }
-
-        checkIsRedirect(performAction(), routes.StartController.start())
-      }
+      behave like redirectToStart(performAction)
 
       "return an error" when {
 
@@ -180,36 +157,6 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
       }
 
-      "redirect to the do you have a nino page" when {
-
-        "the session data indicates the user does not have sufficient confidence level" in {
-          val session = SessionData.empty.copy(journeyStatus = Some(SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, None, sample[GGCredId])))
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
-          }
-
-          val result = performAction()
-          checkIsRedirect(result, routes.InsufficientConfidenceLevelController.doYouHaveNINO())
-        }
-
-      }
-
-      "redirect to the register your trust page" when {
-
-        "the session data indicates the user is an organisation without a registered trust associated with it" in {
-          val session = SessionData.empty.copy(journeyStatus = Some(SubscriptionStatus.UnregisteredTrust))
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
-          }
-
-          val result = performAction()
-          checkIsRedirect(result, routes.RegisterTrustController.registerYourTrust())
-        }
-
-      }
-
     }
 
     "handling requests to display the subscribed page" must {
@@ -217,71 +164,13 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
       def performAction(): Future[Result] =
         controller.subscribed()(FakeRequest())
 
-      "redirect to the start endpoint" when {
-
-        "there is no session data" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(None)))
-          }
-
-          checkIsRedirect(performAction(), routes.StartController.start())
+      redirectToStartWhenInvalidJourney(
+        performAction,
+        {
+          case _: SubscriptionComplete => true
+          case _ => false
         }
-
-        "there are no subscription details in session" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-          }
-
-          checkIsRedirect(performAction(), routes.StartController.start())
-        }
-
-      }
-
-      "redirect to the check your details page" when {
-
-        "there is not subscription response in session but there are subscription details" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionWithSubscriptionDetails))))
-          }
-
-          checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
-        }
-      }
-
-      "redirect to the do you have a nino page" when {
-
-        "the session data indicates the user does not have sufficient confidence level" in {
-          val session = SessionData.empty.copy(journeyStatus = Some(
-            SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, None, sample[GGCredId])
-          ))
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
-          }
-
-          val result = performAction()
-          checkIsRedirect(result, routes.InsufficientConfidenceLevelController.doYouHaveNINO())
-        }
-
-      }
-
-      "redirect to the register your trust page" when {
-
-        "the session data indicates the user is an organisation without a registered trust associated with it" in {
-          val session = SessionData.empty.copy(journeyStatus = Some(SubscriptionStatus.UnregisteredTrust))
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
-          }
-
-          val result = performAction()
-          checkIsRedirect(result, routes.RegisterTrustController.registerYourTrust())
-        }
-
-      }
+      )
 
       "display the subscription confirmation page" when {
 

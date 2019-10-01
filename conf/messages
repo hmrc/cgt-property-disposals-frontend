@@ -61,15 +61,29 @@ dob.title=What is your date of birth?
 dob.helpText=For example, 31 3 1980
 dob.invalid=Enter a real date of birth
 
-subscription.caption=Enrolment
+subscription.caption=Create a CGT on UK property account
 subscription.title=Check your contact details
 subscription.lede={0} these are the details we hold for you.
 subscription.p=We’ll only use these if we need to contact you about your Capital Gains Tax. You’ll need to change them if they are wrong.
-subscription.cyaLabel.address=Home address
-subscription.cyaChange.address=your home address
+subscription.cyaLabel.address=Contact address
+subscription.cyaChange.address=your contact address
 subscription.cyaLabel.email=Email address
 subscription.cyaChange.email=your email address
 subscription.confirm=Before you continue you must confirm your details are correct.
+
+registration.caption=Create a CGT on UK property account
+registration.title=Check your contact details
+registration.lede=These are the details we hold for you. Before you continue, you must confirm they are correct.
+registration.p=We’ll only use these details if we need to contact you about this service.
+registration.cyaLabel.firstName=First name
+registration.cyaChange.firstName=your first name
+registration.cyaLabel.lastName=Last name
+registration.cyaChange.lastName=your last name
+registration.cyaLabel.address=Contact address
+registration.cyaChange.address=your contact address
+registration.cyaLabel.email=Email address
+registration.cyaChange.email=your email address
+registration.confirm=Before you continue you must confirm your details are correct.
 
 subscription.postcode.title=Find the address by postcode
 

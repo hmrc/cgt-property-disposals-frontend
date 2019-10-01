@@ -22,6 +22,7 @@ import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.{CONFLICT, CREATED}
+import play.api.mvc.Call
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.EmailVerificationConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, Name, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse
@@ -33,7 +34,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[EmailVerificationServiceImpl])
 trait EmailVerificationService {
 
-  def verifyEmail(email: Email, id: UUID, name: Either[TrustName,Name])(
+  def verifyEmail(email: Email, name: Either[TrustName,Name], continueCall: Call)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, EmailVerificationResponse]
 
@@ -57,10 +58,10 @@ object EmailVerificationService {
 class EmailVerificationServiceImpl @Inject()(connector: EmailVerificationConnector)(implicit ec: ExecutionContext)
     extends EmailVerificationService {
 
-  def verifyEmail(email: Email, id: UUID, name: Either[TrustName,Name])(
+  def verifyEmail(email: Email, name: Either[TrustName,Name], continueCall: Call)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, EmailVerificationResponse] =
-    connector.verifyEmail(email, id, name).subflatMap { response =>
+    connector.verifyEmail(email, name, continueCall).subflatMap { response =>
       response.status match {
         case CREATED =>
           Right(EmailVerificationRequested)
