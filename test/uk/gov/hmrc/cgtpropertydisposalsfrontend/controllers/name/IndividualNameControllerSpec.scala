@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.name
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name
 
 import org.scalacheck.ScalacheckShapeless._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -24,23 +24,23 @@ import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, Result}
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.NameController
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, NameFormValidationTests, RedirectToStartBehaviour, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 
 import scala.concurrent.Future
 
-trait NameControllerSpec[J <: JourneyStatus] extends NameFormValidationTests with RedirectToStartBehaviour {
+trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidationTests with RedirectToStartBehaviour {
   this: ControllerSpec with AuthSupport with SessionSupport with ScalaCheckDrivenPropertyChecks  =>
 
-  val controller: NameController[J]
+  val controller: IndividualNameController[J]
 
   val validJourney: J
 
   lazy val sessionDataWithValidJourney = SessionData.empty.copy(journeyStatus = Some(validJourney))
 
-  def updateName(name: Name, journey: J): JourneyStatus
+  def updateName(name: IndividualName, journey: J): JourneyStatus
 
   def isValidJourney(journey: JourneyStatus): Boolean
 
@@ -71,7 +71,7 @@ trait NameControllerSpec[J <: JourneyStatus] extends NameFormValidationTests wit
       }
 
       "the endpoint is requested and the user has previously entered a name" in {
-        val name = sample[Name]
+        val name = sample[IndividualName]
         val sessionDataWithName =
           sessionDataWithValidJourney.copy(journeyStatus = Some(updateName(name, validJourney)))
 
@@ -95,7 +95,7 @@ trait NameControllerSpec[J <: JourneyStatus] extends NameFormValidationTests wit
     performAction: Seq[(String, String)] => Future[Result],
     continueCall: Call
   )(implicit messagesApi: MessagesApi): Unit = {
-    val name = Name("Bob", "Tob")
+    val name = IndividualName("Bob", "Tob")
     val updatedSession =
       sessionDataWithValidJourney.copy(journeyStatus = Some(updateName(name, validJourney)))
 

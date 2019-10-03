@@ -25,7 +25,8 @@ import play.api.libs.json.{Format, Json}
 import play.api.mvc.Call
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.EmailVerificationConnectorImpl.EmailVerificationRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, Name, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
@@ -35,7 +36,7 @@ import scala.concurrent.duration.FiniteDuration
 @ImplementedBy(classOf[EmailVerificationConnectorImpl])
 trait EmailVerificationConnector {
 
-  def verifyEmail(email: Email, name: Either[TrustName,Name], continueCall: Call)(
+  def verifyEmail(email: Email, name: Either[TrustName,IndividualName], continueCall: Call)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
@@ -67,7 +68,7 @@ class EmailVerificationConnectorImpl @Inject()(http: HttpClient, config: Configu
 
   val selfBaseUrl: String = config.underlying.get[String]("self.url").value
 
-  def verifyEmail(email: Email, name: Either[TrustName,Name], continueCall: Call)(
+  def verifyEmail(email: Email, name: Either[TrustName,IndividualName], continueCall: Call)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] = {
     val body =

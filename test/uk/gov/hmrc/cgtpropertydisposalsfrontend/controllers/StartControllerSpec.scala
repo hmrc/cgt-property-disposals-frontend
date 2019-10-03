@@ -40,6 +40,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, BusinessPartnerRecordResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecordRequest._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, NINO, SAUTR}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -71,10 +72,10 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
       .returning(EitherT.fromEither[Future](result))
 
   val nino                 = NINO("AB123456C")
-  val name                 = Name("forename", "surname")
+  val name                 = IndividualName("forename", "surname")
   val trustName            = TrustName("trust")
   val retrievedDateOfBirth = JodaLocalDate.parse("2000-04-10")
-  val emailAddress         = "email"
+  val emailAddress         = Email("email")
 
   val individual = Individual(Right(nino), None)
   val retrievedGGCredId = Credentials("gg", "GovernmentGateway")
@@ -329,7 +330,13 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             "the session data indicates there is subscription data missing and there is now enough " +
               "data to proceed to the check your details page" in {
               val individualSubscriptionDetails =
-                SubscriptionDetails(Right(name), emailAddress, bpr.address, bpr.sapNumber)
+                SubscriptionDetails(
+                  Right(name),
+                  emailAddress,
+                  bpr.address,
+                  ContactName(s"${name.firstName} ${name.lastName}"),
+                  bpr.sapNumber
+                )
 
               val session = SessionData.empty.copy(journeyStatus = Some(SubscriptionMissingData(bpr)))
 
@@ -384,16 +391,24 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
       "the user is not enrolled and is not subscribed in ETMP" when {
 
+        val name = sample[IndividualName]
+
         val bpr = models.bpr.BusinessPartnerRecord(
           Some(emailAddress),
           sample[UkAddress],
           "sap",
-          Right(sample[Name])
+          Right(name)
         )
 
         "handling individuals" must {
 
-          val individualSubscriptionDetails = SubscriptionDetails(bpr.name, emailAddress, bpr.address, bpr.sapNumber)
+          val individualSubscriptionDetails = SubscriptionDetails(
+            Right(name),
+            emailAddress,
+            bpr.address,
+            ContactName(s"${name.firstName} ${name.lastName}"),
+            bpr.sapNumber
+          )
 
           "redirect to check subscription details" when {
 
@@ -457,7 +472,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
             "an email does not exist in the retrieved BPR but one has been retrieved in the auth record" in {
               val bprWithNoEmail = bpr.copy(emailAddress = None)
-              val ggEmail        = "email"
+              val ggEmail        = Email("email")
               val session = SessionData.empty.copy(
                 journeyStatus = Some(
                   SubscriptionReady(individualSubscriptionDetails.copy(emailAddress = ggEmail))
@@ -465,7 +480,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               )
 
               inSequence {
-                mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, Some(ggEmail))
+                mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, Some(ggEmail.value))
                 mockGetSession(Future.successful(Right(Some(SessionData.empty))))
                 mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Right(nino), None))(
                   Right(BusinessPartnerRecordResponse(Some(bprWithNoEmail)))
@@ -478,7 +493,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
             "the user has CL<200 and an email does not exist in the retrieved BPR but one has been retrieved in the auth record" in {
               val bprWithNoEmail = bpr.copy(emailAddress = None)
-              val ggEmail        = "email"
+              val ggEmail        = Email("email")
               val session = SessionData.empty.copy(
                 journeyStatus = Some(
                   SubscriptionReady(individualSubscriptionDetails.copy(emailAddress = ggEmail))
@@ -492,7 +507,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                   Some(AffinityGroup.Individual),
                   None,
                   Some(sautr.value),
-                  Some(ggEmail),
+                  Some(ggEmail.value),
                   Set.empty,
                   Some(retrievedGGCredId)
                 )
@@ -593,7 +608,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
               "the session data indicates that the user is missing an email for registration" in {
                 val session = SessionData.empty.copy(journeyStatus = Some(
-                  IndividualMissingEmail(sample[Name], sample[Address])
+                  IndividualMissingEmail(sample[IndividualName], sample[Address])
                 ))
 
                 inSequence {
@@ -766,12 +781,12 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
         "handling trusts" must {
 
           val sautr                    = SAUTR("sautr")
-          val trust                    = Trust(sautr, None)
           val trustName                = TrustName("trustname")
           val address                  = UkAddress("line 1", None, None, None, "postcode")
           val sapNumber                = "sap"
           val bpr                      = BusinessPartnerRecord(Some(emailAddress), address, sapNumber, Left(trustName))
-          val trustSubscriptionDetails = SubscriptionDetails(Left(trustName), emailAddress, bpr.address, bpr.sapNumber)
+          val trustSubscriptionDetails =
+            SubscriptionDetails(Left(trustName), emailAddress, bpr.address, ContactName(trustName.value), bpr.sapNumber)
 
           "redirect to the subscription confirmation page" when {
 
@@ -806,7 +821,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 mockAuthWithAllTrustRetrievals(sautr, None)
                 mockGetSession(Future.successful(Right(None)))
                 mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(sautr))(
-                  Right(BusinessPartnerRecordResponse(Some(bpr.copy(name = Right(Name("", ""))))))
+                  Right(BusinessPartnerRecordResponse(Some(bpr.copy(name = Right(IndividualName("", ""))))))
                 )
               }
 
@@ -869,7 +884,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 )
                 mockStoreSession(
                   SessionData.empty.copy(
-                    journeyStatus = Some(SubscriptionReady(trustSubscriptionDetails.copy(emailAddress = "email")))
+                    journeyStatus = Some(SubscriptionReady(trustSubscriptionDetails.copy(emailAddress = Email("email"))))
                   )
                 )(Future.successful(Right(())))
               }

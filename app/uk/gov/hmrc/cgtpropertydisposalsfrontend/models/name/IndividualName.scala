@@ -14,23 +14,23 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name
 
 import cats.Eq
 import cats.instances.string._
 import cats.syntax.eq._
-import play.api.data.{Form, Mapping}
 import play.api.data.Forms.{nonEmptyText, mapping => formMapping}
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationResult}
+import play.api.data.{Form, Mapping}
 import play.api.libs.json.{Json, OFormat}
 
-final case class Name(firstName: String, lastName: String)
+final case class IndividualName(firstName: String, lastName: String)
 
-object Name {
+object IndividualName {
 
-  implicit val format: OFormat[Name] = Json.format[Name]
+  implicit val format: OFormat[IndividualName] = Json.format[IndividualName]
 
-  implicit val eq: Eq[Name] = Eq.instance{
+  implicit val eq: Eq[IndividualName] = Eq.instance{
     case (n1, n2) => n1.firstName === n2.firstName && n1.lastName === n2.lastName
   }
 
@@ -49,11 +49,11 @@ object Name {
       .verifying(Constraint[String](validateName(_)))
   }
 
-  val form: Form[Name] =
+  val form: Form[IndividualName] =
     Form(
       formMapping(
         "firstName" -> mapping,
         "lastName" -> mapping
-      )(Name.apply)(Name.unapply)
+      )(IndividualName.apply)(IndividualName.unapply)
     )
 }

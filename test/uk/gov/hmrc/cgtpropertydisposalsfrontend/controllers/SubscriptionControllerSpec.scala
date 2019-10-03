@@ -33,6 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -67,7 +68,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
       .expects(expectedSubscriptionDetails, *)
       .returning(EitherT(Future.successful(response)))
 
-  val name = sample[Name]
+  val name = sample[IndividualName]
 
   def redirectToStart(performAction: () => Future[Result]) =
     redirectToStartWhenInvalidJourney(

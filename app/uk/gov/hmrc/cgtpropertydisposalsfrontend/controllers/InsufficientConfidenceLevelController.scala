@@ -29,7 +29,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscriptio
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.{BusinessPartnerRecord, NameMatchError, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, SAUTR}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, Name}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.{BusinessPartnerRecordNameMatchRetryStore, SessionStore}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordNameMatchRetryService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -217,10 +218,10 @@ class InsufficientConfidenceLevelController @Inject()(
   }
 
   private def attemptNameMatchAndUpdateSession(
-    sautr: SAUTR,
-    name: Name,
-    ggCredId: GGCredId,
-    previousUnsucessfulAttempt: Option[UnsuccessfulNameMatchAttempts]
+                                                sautr: SAUTR,
+                                                name: IndividualName,
+                                                ggCredId: GGCredId,
+                                                previousUnsucessfulAttempt: Option[UnsuccessfulNameMatchAttempts]
   )(
     implicit hc: HeaderCarrier,
     request: RequestWithSessionData[_]
@@ -287,26 +288,26 @@ object InsufficientConfidenceLevelController {
       )(identity)(Some(_))
     )
 
-  val sautrAndNameForm: Form[(SAUTR, Name)] =
+  val sautrAndNameForm: Form[(SAUTR, IndividualName)] =
     Form(
       mapping(
         "saUtr" -> nonEmptyText
           .transform[String](_.trim, identity)
           .verifying("error.pattern", SelfAssessmentReferenceChecker.isValid(_)),
-        "firstName" -> Name.mapping,
-        "lastName"  -> Name.mapping
+        "firstName" -> IndividualName.mapping,
+        "lastName"  -> IndividualName.mapping
       ) {
-        case (sautr, firstName, lastName) => SAUTR(sautr) -> Name(firstName, lastName)
+        case (sautr, firstName, lastName) => SAUTR(sautr) -> IndividualName(firstName, lastName)
       } {
         case (sautr, name) => Some((sautr.value, name.firstName, name.lastName))
       }
     )
 
-  implicit class SAUTRAndNameFormOps(val form: Form[(SAUTR, Name)]) extends AnyVal {
+  implicit class SAUTRAndNameFormOps(val form: Form[(SAUTR, IndividualName)]) extends AnyVal {
 
     def withUnsuccessfulAttemptsError(
       numberOfUnsuccessfulNameMatchAttempts: UnsuccessfulNameMatchAttempts
-    ): Form[(SAUTR, Name)] =
+    ): Form[(SAUTR, IndividualName)] =
       form
         .withGlobalError(
           "enterSaUtr.error.notFound",

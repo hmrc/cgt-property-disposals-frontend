@@ -17,8 +17,8 @@
 @import play.api.data.Form
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Name
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.SAUTR
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 
 @this(
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -29,7 +29,7 @@
  errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary
 )
 
-@(form: Form[(SAUTR,Name)])(implicit request: Request[_], messages: Messages, appConfig: ViewConfig)
+@(form: Form[(SAUTR,IndividualName)])(implicit request: Request[_], messages: Messages, appConfig: ViewConfig)
 
 @title = @{messages("enterSaUtr.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}

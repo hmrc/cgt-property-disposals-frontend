@@ -23,7 +23,8 @@ import org.scalatest.{Matchers, WordSpec}
 import play.api.mvc.Call
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.EmailVerificationConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, Name, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse.{EmailAlreadyVerified, EmailVerificationRequested}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -36,12 +37,12 @@ class EmailVerificationServiceImplSpec extends WordSpec with Matchers with MockF
 
   def mockVerifyEmail(
                        expectedEmail: Email,
-                       expectedName: Either[TrustName,Name],
+                       expectedName: Either[TrustName,IndividualName],
                        expectedContinueCall: Call)(
     result: Either[Error, HttpResponse]
   ) =
     (mockConnector
-      .verifyEmail(_: Email, _: Either[TrustName,Name], _: Call)(_: HeaderCarrier))
+      .verifyEmail(_: Email, _: Either[TrustName,IndividualName], _: Call)(_: HeaderCarrier))
       .expects(expectedEmail, expectedName, expectedContinueCall, *)
       .returning(EitherT.fromEither[Future](result))
 
@@ -52,7 +53,7 @@ class EmailVerificationServiceImplSpec extends WordSpec with Matchers with MockF
 
       implicit val hc: HeaderCarrier = HeaderCarrier()
       val email                      = Email("email")
-      val name                       = Name("Fred", "Bread")
+      val name                       = IndividualName("Fred", "Bread")
       val continueCall               = Call("GET", "/")
 
       "indicate when the email verification request has been requested" in {

@@ -33,6 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{Registrati
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.{BusinessPartnerRecord, NameMatchError, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordNameMatchRetryService
 import uk.gov.hmrc.domain.SaUtrGenerator
@@ -74,16 +75,16 @@ class InsufficientConfidenceLevelControllerSpec
       .returning(EitherT.fromEither[Future](result))
 
   def mockAttemptNameMatch(
-    sautr: SAUTR,
-    name: Name,
-    ggCredId: GGCredId,
-    previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts]
+                            sautr: SAUTR,
+                            name: IndividualName,
+                            ggCredId: GGCredId,
+                            previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts]
   )(result: Either[NameMatchError, BusinessPartnerRecord]) =
     (
       mockBprNameMatchService
         .attemptBusinessPartnerRecordNameMatch(
           _: SAUTR,
-          _: Name,
+          _: IndividualName,
           _: GGCredId,
           _: Option[UnsuccessfulNameMatchAttempts]
         )(
@@ -97,7 +98,7 @@ class InsufficientConfidenceLevelControllerSpec
   def session(subscriptionStatus: SubscriptionStatus) =
     SessionData.empty.copy(journeyStatus = Some(subscriptionStatus))
 
-  val name = Name("name", "surname")
+  val name = IndividualName("name", "surname")
 
   def commonBehaviour(performAction: () => Future[Result]) =
     redirectToStartWhenInvalidJourney(
@@ -619,7 +620,7 @@ class InsufficientConfidenceLevelControllerSpec
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
               Right(
                 Some(
-                  UnsuccessfulNameMatchAttempts(1, 2, sample[Name], sample[SAUTR])
+                  UnsuccessfulNameMatchAttempts(1, 2, sample[IndividualName], sample[SAUTR])
                 )
               )
             )
@@ -686,7 +687,7 @@ class InsufficientConfidenceLevelControllerSpec
 
       val validSautr = SAUTR((new SaUtrGenerator).nextSaUtr.utr)
 
-      val validName = Name("Elaine", "Belaine")
+      val validName = IndividualName("Elaine", "Belaine")
 
       val bpr = sample[BusinessPartnerRecord].copy(name = Right(validName))
 
@@ -695,7 +696,7 @@ class InsufficientConfidenceLevelControllerSpec
       val expectedSessionData =
         session(TryingToGetIndividualsFootprint(Some(false), Some(true), None, ggCredId))
 
-      val previousUnsuccessfulNameMatchAttempt = UnsuccessfulNameMatchAttempts(1, 3, sample[Name], sample[SAUTR])
+      val previousUnsuccessfulNameMatchAttempt = UnsuccessfulNameMatchAttempts(1, 3, sample[IndividualName], sample[SAUTR])
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterSautrAndNameSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
@@ -1003,7 +1004,7 @@ class InsufficientConfidenceLevelControllerSpec
                 mockAuthWithNoRetrievals()
                 mockGetSession(Future.successful(Right(Some(expectedSessionData))))
                 mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
-                  Right(Some(UnsuccessfulNameMatchAttempts(1, 2, sample[Name], sample[SAUTR])))
+                  Right(Some(UnsuccessfulNameMatchAttempts(1, 2, sample[IndividualName], sample[SAUTR])))
                 )
               }
 

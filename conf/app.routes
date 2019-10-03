@@ -22,12 +22,12 @@ GET  /registration/start                  uk.gov.hmrc.cgtpropertydisposalsfronte
 GET  /registration/select-entity-type     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegistrationController.selectEntityType()
 POST /registration/select-entity-type     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegistrationController.selectEntityTypeSubmit()
 GET  /wrong-account-for-trusts            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegistrationController.wrongGGAccountForTrusts()
-GET  /registration/enter-name             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.RegistrationEnterNameController.enterIndividualName()
-POST /registration/enter-name             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.RegistrationEnterNameController.enterIndividualNameSubmit()
+GET  /registration/enter-name             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.RegistrationEnterIndividualNameController.enterIndividualName()
+POST /registration/enter-name             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.RegistrationEnterIndividualNameController.enterIndividualNameSubmit()
 GET  /registration/check-your-answers     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegistrationController.checkYourAnswers()
 
-GET  /registration/amend-details/enter-name             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.RegistrationChangeNameController.enterIndividualName()
-POST /registration/amend-details/enter-name             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.RegistrationChangeNameController.enterIndividualNameSubmit()
+GET  /registration/amend-details/enter-name             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.RegistrationChangeIndividualNameController.enterIndividualName()
+POST /registration/amend-details/enter-name             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.RegistrationChangeIndividualNameController.enterIndividualNameSubmit()
 
 ### Registratino - missing email
 GET  /registration/enter-email            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email.RegistrationEnterEmailController.enterEmail()
@@ -89,6 +89,9 @@ GET  /subscription/amend-details/check-your-inbox       uk.gov.hmrc.cgtpropertyd
 GET  /subscription/amend-details/verify-email           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email.SubscriptionChangeEmailController.verifyEmail(p: java.util.UUID)
 GET  /subscription/amend-details/email-verified         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email.SubscriptionChangeEmailController.emailVerified()
 
+### Change contact name
+GET  /subscription/amend-details/enter-contact-name      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.ContactNameController.enterContactName()
+POST /subscription/amend-details/enter-contact-name      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.ContactNameController.enterContactNameSubmit()
 
 #### Subscription Change address
 GET  /subscription/is-address-in-uk      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.SubscriptionAddressController.isUk()

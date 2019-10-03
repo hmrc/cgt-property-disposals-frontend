@@ -18,14 +18,15 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr
 
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Name, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Email
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 
 final case class BusinessPartnerRecord(
-  emailAddress: Option[String],
+  emailAddress: Option[Email],
   address: Address,
   sapNumber: String,
-  name: Either[TrustName, Name]
+  name: Either[TrustName, IndividualName]
 )
 
 object BusinessPartnerRecord {

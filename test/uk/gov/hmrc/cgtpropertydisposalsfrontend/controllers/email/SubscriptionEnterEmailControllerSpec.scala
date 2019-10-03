@@ -43,10 +43,10 @@ class SubscriptionEnterEmailControllerSpec
     SubscriptionMissingData(sample[BusinessPartnerRecord].copy(emailAddress = None))
 
   override val validVerificationCompleteJourneyStatus: SubscriptionMissingData =
-    SubscriptionMissingData(sample[BusinessPartnerRecord].copy(emailAddress = Some(sample[Email].value)))
+    SubscriptionMissingData(sample[BusinessPartnerRecord].copy(emailAddress = Some(sample[Email])))
 
   override def updateEmail(journey: SubscriptionMissingData, email: Email): SubscriptionMissingData =
-    journey.copy(businessPartnerRecord = journey.businessPartnerRecord.copy(emailAddress = Some(email.value)))
+    journey.copy(businessPartnerRecord = journey.businessPartnerRecord.copy(emailAddress = Some(email)))
 
   override lazy val controller: SubscriptionEnterEmailController = instanceOf[SubscriptionEnterEmailController]
 

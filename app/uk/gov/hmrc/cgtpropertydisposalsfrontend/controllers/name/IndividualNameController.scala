@@ -20,7 +20,8 @@ import play.api.mvc.{Action, AnyContent, Call, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{RequestWithSessionData, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, Name, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
@@ -29,7 +30,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait NameController[J <: JourneyStatus] { this: FrontendController with WithAuthAndSessionDataAction with SessionUpdates with Logging =>
+trait IndividualNameController[J <: JourneyStatus] { this: FrontendController with WithAuthAndSessionDataAction with SessionUpdates with Logging =>
 
   implicit val viewConfig: ViewConfig
   implicit val ec: ExecutionContext
@@ -41,9 +42,9 @@ trait NameController[J <: JourneyStatus] { this: FrontendController with WithAut
 
   def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, J)]
 
-  def updateName(journey: J, name: Name): JourneyStatus
+  def updateName(journey: J, name: IndividualName): JourneyStatus
 
-  def name(journey: J): Option[Name]
+  def name(journey: J): Option[IndividualName]
 
   protected val backLinkCall: Call
   protected val enterNameSubmitCall: Call
@@ -58,7 +59,7 @@ trait NameController[J <: JourneyStatus] { this: FrontendController with WithAut
   def enterIndividualName(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request){ case (_, journey) =>
       val form = {
-        name(journey).fold(Name.form)(Name.form.fill)
+        name(journey).fold(IndividualName.form)(IndividualName.form.fill)
       }
 
       Ok(enterNamePage(form, backLinkCall, enterNameSubmitCall))
@@ -67,7 +68,7 @@ trait NameController[J <: JourneyStatus] { this: FrontendController with WithAut
 
   def enterIndividualNameSubmit(): Action[AnyContent] =  authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request){ case (_, journey) =>
-      Name.form.bindFromRequest().fold(
+      IndividualName.form.bindFromRequest().fold(
         e => BadRequest(enterNamePage(e, backLinkCall, enterNameSubmitCall)),
         name =>
           updateSession(sessionStore, request)(

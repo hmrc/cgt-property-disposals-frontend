@@ -21,6 +21,7 @@ import play.api.libs.json.OFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 
 sealed trait JourneyStatus extends Product with Serializable
 
@@ -63,14 +64,14 @@ object JourneyStatus {
     final case object IndividualWantsToRegisterTrust extends RegistrationStatus
 
     // user is supplying information for subscription
-    final case class IndividualSupplyingInformation(name: Option[Name], address: Option[Address], email: Option[Email])
+    final case class IndividualSupplyingInformation(name: Option[IndividualName], address: Option[Address], email: Option[Email])
         extends RegistrationStatus
 
     // we are capturing an email for a user who doesn't have one we can retrieve
-    final case class IndividualMissingEmail(name: Name, address: Address) extends RegistrationStatus
+    final case class IndividualMissingEmail(name: IndividualName, address: Address) extends RegistrationStatus
 
     // we have all the details necessary for registration
-    final case class RegistrationReady(name: Name, address: Address, email: Email) extends RegistrationStatus
+    final case class RegistrationReady(name: IndividualName, address: Address, email: Email) extends RegistrationStatus
 
   }
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))

@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.name
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name
 
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.RegistrationEnterNameController
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.IndividualSupplyingInformation
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, Name}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus
 
-class RegistrationEnterNameControllerSpec
+class RegistrationEnterIndividualNameControllerSpec
     extends ControllerSpec
     with AuthSupport
     with SessionSupport
-    with NameControllerSpec[IndividualSupplyingInformation]
+    with IndividualNameControllerSpec[IndividualSupplyingInformation]
     with ScalaCheckDrivenPropertyChecks {
 
-  override lazy val controller: RegistrationEnterNameController = instanceOf[RegistrationEnterNameController]
+  override lazy val controller: RegistrationEnterIndividualNameController = instanceOf[RegistrationEnterIndividualNameController]
 
   override lazy val validJourney: IndividualSupplyingInformation = IndividualSupplyingInformation(None, None, None)
 
@@ -42,12 +42,12 @@ class RegistrationEnterNameControllerSpec
     case _ => false
   }
 
-  override def updateName(name: Name, journey: IndividualSupplyingInformation): JourneyStatus =
+  override def updateName(name: IndividualName, journey: IndividualSupplyingInformation): JourneyStatus =
     journey.copy(name = Some(name))
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
-  "RegistrationEnterNameController" when {
+  "RegistrationEnterIndividualNameController" when {
 
     "handling requests to display the enter name page" must {
 

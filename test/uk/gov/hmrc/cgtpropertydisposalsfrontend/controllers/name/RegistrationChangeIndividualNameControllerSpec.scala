@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.name
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name
 
 import org.scalacheck.ScalacheckShapeless._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -22,16 +22,16 @@ import play.api.i18n.MessagesApi
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.RegistrationChangeNameController
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, Name, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, sample}
 
-class RegistrationChangeNameControllerSpec
+class RegistrationChangeIndividualNameControllerSpec
     extends ControllerSpec
     with AuthSupport
     with SessionSupport
-    with NameControllerSpec[RegistrationReady]
+    with IndividualNameControllerSpec[RegistrationReady]
     with ScalaCheckDrivenPropertyChecks {
 
   def isValidJourney(journey: JourneyStatus): Boolean = journey match {
@@ -39,16 +39,16 @@ class RegistrationChangeNameControllerSpec
     case _ => false
   }
 
-  override lazy val controller: RegistrationChangeNameController = instanceOf[RegistrationChangeNameController]
+  override lazy val controller: RegistrationChangeIndividualNameController = instanceOf[RegistrationChangeIndividualNameController]
 
   override lazy val validJourney: RegistrationReady = sample[RegistrationReady]
 
-  override def updateName(name: Name, journey: RegistrationReady): JourneyStatus =
+  override def updateName(name: IndividualName, journey: RegistrationReady): JourneyStatus =
     journey.copy(name = name)
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
-  "RegistrationEnterNameController" when {
+  "RegistrationEnterIndividualNameController" when {
 
     "handling requests to display the enter name page" must {
 

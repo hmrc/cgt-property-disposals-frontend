@@ -104,7 +104,7 @@ class RegistrationController @Inject()(
                 None,
                 None,
                 status.fold(_.email, _ => None)
-              ) -> name.routes.RegistrationEnterNameController.enterIndividualName()
+              ) -> name.routes.RegistrationEnterIndividualNameController.enterIndividualName()
             case EntityType.Trust =>
               RegistrationStatus.IndividualWantsToRegisterTrust -> routes.RegistrationController.wrongGGAccountForTrusts()
           }
@@ -145,7 +145,7 @@ class RegistrationController @Inject()(
         Ok(checkYourDetailsPage(r))
 
       case Some(RegistrationStatus.IndividualSupplyingInformation(None, _, _)) =>
-        Redirect(name.routes.RegistrationEnterNameController.enterIndividualName())
+        Redirect(name.routes.RegistrationEnterIndividualNameController.enterIndividualName())
 
       case Some(RegistrationStatus.IndividualSupplyingInformation(_, None, _)) =>
         Redirect(address.routes.RegistrationEnterAddressController.isUk())

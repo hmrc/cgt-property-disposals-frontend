@@ -17,14 +17,14 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Name
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.SAUTR
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 
 final case class UnsuccessfulNameMatchAttempts(
-  unsuccesfulAttempts: Int,
-  maximumAttempts: Int,
-  lastNameTried: Name,
-  lastSAUTRTried: SAUTR
+                                                unsuccesfulAttempts: Int,
+                                                maximumAttempts: Int,
+                                                lastNameTried: IndividualName,
+                                                lastSAUTRTried: SAUTR
 )
 
 object UnsuccessfulNameMatchAttempts {

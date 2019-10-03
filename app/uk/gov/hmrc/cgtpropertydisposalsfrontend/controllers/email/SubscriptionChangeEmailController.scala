@@ -26,8 +26,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, JourneyStatus, Name, SessionData, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -66,14 +67,14 @@ class SubscriptionChangeEmailController @Inject()(
   override def validVerificationCompleteJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, SubscriptionReady)] =
     validJourney(request)
 
-  val subscriptionReadyEmailLens: Lens[SubscriptionReady, String] =
+  val subscriptionReadyEmailLens: Lens[SubscriptionReady, Email] =
     lens[SubscriptionReady].subscriptionDetails.emailAddress
 
   override def updateEmail(journey: SubscriptionReady, email: Email): SubscriptionReady =
-    subscriptionReadyEmailLens.set(journey)(email.value)
+    subscriptionReadyEmailLens.set(journey)(email)
 
-  override def name(journeyStatus: SubscriptionReady): Either[TrustName, Name] =
-    journeyStatus.subscriptionDetails.contactName
+  override def name(journeyStatus: SubscriptionReady): Either[TrustName, IndividualName] =
+    journeyStatus.subscriptionDetails.name
 
   override lazy protected val backLinkCall: Option[Call] = Some(controllers.routes.SubscriptionController.checkYourDetails())
   override lazy protected val enterEmailCall: Call = routes.SubscriptionChangeEmailController.enterEmail()

@@ -16,36 +16,44 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import cats.syntax.applicative._
-import cats.syntax.apply._
+import cats.data.NonEmptyList
 import cats.syntax.either._
-import cats.data.Validated._
-import cats.data.{NonEmptyList, Validated, ValidatedNel}
 import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecord
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
 
 final case class SubscriptionDetails(
-                                      contactName: Either[TrustName,Name],
-                                      emailAddress: String,
+                                      name: Either[TrustName, IndividualName],
+                                      emailAddress: Email,
                                       address: Address,
+                                      contactName: ContactName,
                                       sapNumber: String
-                                    )
+)
 
 object SubscriptionDetails {
 
   implicit val format: Format[SubscriptionDetails] = Json.format
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  def apply(bpr: BusinessPartnerRecord,
-            maybeEmail: Option[Email]
-           ): Either[NonEmptyList[MissingData], SubscriptionDetails] = {
-    Either.fromOption(
-      bpr.emailAddress.orElse(maybeEmail.map(_.value)),
-      NonEmptyList.one(MissingData.Email)
-    ).map( email => SubscriptionDetails(bpr.name, email, bpr.address, bpr.sapNumber))
-  }
+  def apply(
+    bpr: BusinessPartnerRecord,
+    maybeEmail: Option[Email]
+  ): Either[NonEmptyList[MissingData], SubscriptionDetails] =
+    Either
+      .fromOption(
+        bpr.emailAddress.orElse(maybeEmail),
+        NonEmptyList.one(MissingData.Email)
+      )
+      .map(email =>
+        SubscriptionDetails(
+          bpr.name,
+          email,
+          bpr.address,
+          ContactName(bpr.name.fold(_.value, n => s"${n.firstName} ${n.lastName}")),
+          bpr.sapNumber
+        ))
 
   sealed trait MissingData extends Product with Serializable
 
