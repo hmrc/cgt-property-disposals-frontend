@@ -328,7 +328,13 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             "the session data indicates there is subscription data missing and there is now enough " +
               "data to proceed to the check your details page" in {
               val individualSubscriptionDetails =
-                SubscriptionDetails(Right(name), emailAddress, bpr.address, bpr.sapNumber)
+                SubscriptionDetails(
+                  Right(name),
+                  emailAddress,
+                  bpr.address,
+                  s"${name.firstName} ${name.lastName}",
+                  bpr.sapNumber
+                )
 
               val session = SessionData.empty.copy(journeyStatus = Some(SubscriptionMissingData(bpr)))
 
@@ -383,16 +389,24 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
       "the user is not enrolled and is not subscribed in ETMP" when {
 
+        val name = sample[Name]
+
         val bpr = models.bpr.BusinessPartnerRecord(
           Some(emailAddress),
           sample[UkAddress],
           "sap",
-          Right(sample[Name])
+          Right(name)
         )
 
         "handling individuals" must {
 
-          val individualSubscriptionDetails = SubscriptionDetails(bpr.name, emailAddress, bpr.address, bpr.sapNumber)
+          val individualSubscriptionDetails = SubscriptionDetails(
+            Right(name),
+            emailAddress,
+            bpr.address,
+            s"${name.firstName} ${name.lastName}",
+            bpr.sapNumber
+          )
 
           "redirect to check subscription details" when {
 
@@ -744,12 +758,12 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
         "handling trusts" must {
 
           val sautr                    = SAUTR("sautr")
-          val trust                    = Trust(sautr, None)
           val trustName                = TrustName("trustname")
           val address                  = UkAddress("line 1", None, None, None, "postcode")
           val sapNumber                = "sap"
           val bpr                      = BusinessPartnerRecord(Some(emailAddress), address, sapNumber, Left(trustName))
-          val trustSubscriptionDetails = SubscriptionDetails(Left(trustName), emailAddress, bpr.address, bpr.sapNumber)
+          val trustSubscriptionDetails =
+            SubscriptionDetails(Left(trustName), emailAddress, bpr.address, trustName.value, bpr.sapNumber)
 
           "redirect to the subscription confirmation page" when {
 

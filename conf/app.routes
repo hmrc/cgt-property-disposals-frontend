@@ -64,6 +64,9 @@ GET  /subscription/verify-email           uk.gov.hmrc.cgtpropertydisposalsfronte
 GET  /subscription/email-verified         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailController.emailVerified()
 
 
+### Change contact name
+GET  /subscription/amend-details/enter-contact-name      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.contactname.ContactNameController.enterContactName()
+POST /subscription/amend-details/enter-contact-name      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.contactname.ContactNameController.enterContactNameSubmit()
 
 #### Subscription Change address
 GET  /subscription/is-address-in-uk       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.SubscriptionAddressController.isUk()

@@ -183,6 +183,7 @@ class StartController @Inject()(
                                              Left(bprWithTrustName._2),
                                              email,
                                              bprWithTrustName._1.address,
+                                             ContactName(bprWithTrustName._2.value),
                                              bprWithTrustName._1.sapNumber
                                            )
                                          )

@@ -21,6 +21,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.contactname
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionDetails
 @import scala.util.Try
 @import views.html.helper.CSRF
@@ -47,7 +48,7 @@
  @pageHeading(title, Some(messages("subscription.caption")))
 
  <p class="lede">
-  @messages("subscription.lede", details.contactName.fold(_.value, n => s"${n.firstName} ${n.lastName}"))
+  @messages("subscription.lede", details.name.fold(_.value, n => s"${n.firstName} ${n.lastName}"))
  </p>
 
  <div class="panel panel-border-wide">
@@ -57,6 +58,11 @@
  </div>
 
  @cyaSection() {
+  @cyaRow(
+   messages("subscription.cyaLabel.contactName"),
+   Html(details.contactName.value),
+   Some(cyaChange(messages("subscription.cyaChange.contactName"), contactname.routes.ContactNameController.enterContactName().url))
+  )
   @cyaRow(
    messages("subscription.cyaLabel.address"),
    addressDisplay(details.address, Block),

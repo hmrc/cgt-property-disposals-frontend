@@ -274,7 +274,7 @@ class EmailControllerSpec extends ControllerSpec with AuthSupport with SessionSu
         behave like commonEmailSubmitBehaviour(
           performAction,
           SubscriptionReady(subscriptionDetails),
-          subscriptionDetails.contactName,
+          subscriptionDetails.name,
           "email.amend.title"
         )
       }

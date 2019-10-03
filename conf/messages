@@ -65,6 +65,8 @@ subscription.caption=Enrolment
 subscription.title=Check your contact details
 subscription.lede={0} these are the details we hold for you.
 subscription.p=We’ll only use these if we need to contact you about your Capital Gains Tax. You’ll need to change them if they are wrong.
+subscription.cyaLabel.contactName=Contact name
+subscription.cyaChange.contactName=your contact name
 subscription.cyaLabel.address=Home address
 subscription.cyaChange.address=your home address
 subscription.cyaLabel.email=Email address
@@ -91,6 +93,11 @@ confirmEmail.verified.title=Email address verified
 confirmEmail.verified.intro={0} has been verified.
 confirmEmail.verified.p1=We’ll use this address to contact you about your Capital Gains Tax.
 confirmEmail.verified.p2=Your email has not been updated in other government services.
+
+
+contactName.title=Change your contact name for this service
+contactName.extraContent=We’ll only use the name on any contact letters or emails we send to you about this service. Your details in other government services will not change.
+contactName.error.pattern=Please enter a valid contact name
 
 address.caption=Property address
 address.postcode.label=Postcode
