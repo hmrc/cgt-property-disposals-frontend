@@ -75,34 +75,6 @@ class RegistrationControllerSpec
       )
     }
 
-    "handling requests to show the registration start page" must {
-
-      def performAction(): Future[Result] =
-        controller.startRegistration()(FakeRequest())
-
-      behave like redirectToStartBehaviour(performAction)
-
-      "show the page" when {
-
-        "the session data indicates that the user has no digital footprint and " +
-          "they have indicated that they have no NINO or SA UTR" in {
-          val sessionData =
-            SessionData.empty.copy(journeyStatus = Some(individualWithInsufficentCLSubscriptionStatus))
-
-          inSequence{
-            mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData))))
-          }
-
-          val result = performAction()
-          status(result) shouldBe OK
-          contentAsString(result) should include(message("registration.start.title"))
-        }
-
-      }
-
-    }
-
     "handling requests to show the select entity type page" must {
 
       def performAction(): Future[Result] =
@@ -305,7 +277,7 @@ class RegistrationControllerSpec
               sessionData.copy(journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None, None, None))))
             )))
           }
-          checkIsRedirect(performAction(), routes.RegistrationController.startRegistration())
+          checkIsRedirect(performAction(), routes.RegistrationController.selectEntityType())
         }
 
       }
