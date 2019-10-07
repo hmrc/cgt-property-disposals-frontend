@@ -71,7 +71,7 @@ class SubscriptionAddressController @Inject()(
   protected lazy val backLinkCall: Call                = controllers.routes.SubscriptionController.checkYourDetails()
   protected lazy val isUkCall: Call                    = routes.SubscriptionAddressController.isUk()
   protected lazy val isUkSubmitCall: Call              = routes.SubscriptionAddressController.isUkSubmit()
-  protected lazy val enterUkAddressCall: Call          = routes.SubscriptionAddressController.enterNonUkAddress()
+  protected lazy val enterUkAddressCall: Call          = routes.SubscriptionAddressController.enterUkAddress()
   protected lazy val enterUkAddressSubmitCall: Call    = routes.SubscriptionAddressController.enterUkAddressSubmit()
   protected lazy val enterNonUkAddressCall: Call       = routes.SubscriptionAddressController.enterNonUkAddress()
   protected lazy val enterNonUkAddressSubmitCall: Call = routes.SubscriptionAddressController.enterNonUkAddressSubmit()

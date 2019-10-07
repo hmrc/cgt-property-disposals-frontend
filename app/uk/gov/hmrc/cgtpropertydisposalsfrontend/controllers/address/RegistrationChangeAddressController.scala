@@ -67,7 +67,7 @@ class RegistrationChangeAddressController @Inject()(
   protected lazy val backLinkCall: Call                = controllers.routes.RegistrationController.checkYourAnswers()
   protected lazy val isUkCall: Call                    = routes.RegistrationChangeAddressController.isUk()
   protected lazy val isUkSubmitCall: Call              = routes.RegistrationChangeAddressController.isUkSubmit()
-  protected lazy val enterUkAddressCall: Call          = routes.RegistrationChangeAddressController.enterNonUkAddress()
+  protected lazy val enterUkAddressCall: Call          = routes.RegistrationChangeAddressController.enterUkAddress()
   protected lazy val enterUkAddressSubmitCall: Call    = routes.RegistrationChangeAddressController.enterUkAddressSubmit()
   protected lazy val enterNonUkAddressCall: Call       = routes.RegistrationChangeAddressController.enterNonUkAddress()
   protected lazy val enterNonUkAddressSubmitCall: Call = routes.RegistrationChangeAddressController.enterNonUkAddressSubmit()
