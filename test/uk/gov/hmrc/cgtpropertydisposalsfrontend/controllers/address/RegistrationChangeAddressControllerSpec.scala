@@ -24,33 +24,33 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SubscriptionDetails, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.sample
 
 import scala.concurrent.Future
 
-class SubscriptionAddressControllerSpec
-    extends AddressControllerSpec[SubscriptionReady]
+class RegistrationChangeAddressControllerSpec
+    extends AddressControllerSpec[RegistrationReady]
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
-  val subscriptionDetails: SubscriptionDetails =
-    sample[SubscriptionDetails].copy(address = address(1))
+  val validJourneyStatus = sample[RegistrationReady]
 
-  val validJourneyStatus = SubscriptionReady(subscriptionDetails)
-
-  lazy val controller = instanceOf[SubscriptionAddressController]
+  lazy val controller = instanceOf[RegistrationChangeAddressController]
 
   lazy implicit val messagesApi: MessagesApi = controller.messagesApi
 
-  override def updateAddress(journey: SubscriptionReady, address: Address): SubscriptionReady =
-    journey.copy(subscriptionDetails = journey.subscriptionDetails.copy(address = address))
+  override def updateAddress(
+    journey: RegistrationReady,
+    address: Address
+  ): RegistrationReady =
+    journey.copy(address = address)
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
       performAction, {
-        case _: SubscriptionReady => true
+        case _: RegistrationReady => true
         case _                    => false
       }
     )
@@ -73,8 +73,8 @@ class SubscriptionAddressControllerSpec
 
       behave like submitIsUkBehaviour(
         performAction,
-        routes.SubscriptionAddressController.enterPostcode(),
-        routes.SubscriptionAddressController.enterNonUkAddress()
+        routes.RegistrationChangeAddressController.enterPostcode(),
+        routes.RegistrationChangeAddressController.enterNonUkAddress()
       )
 
     }
@@ -98,7 +98,7 @@ class SubscriptionAddressControllerSpec
 
       behave like submitEnterUkAddress(
         performAction,
-        controllers.routes.SubscriptionController.checkYourDetails()
+        controllers.routes.RegistrationController.checkYourAnswers()
       )
 
     }
@@ -119,7 +119,10 @@ class SubscriptionAddressControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction())
 
-      behave like submitEnterNonUkAddress(performAction, controllers.routes.SubscriptionController.checkYourDetails())
+      behave like submitEnterNonUkAddress(
+        performAction,
+        controllers.routes.RegistrationController.checkYourAnswers()
+      )
     }
 
     "handling requests to display the enter postcode page" must {
@@ -139,7 +142,10 @@ class SubscriptionAddressControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
-      behave like submitEnterPostcode(performAction, routes.SubscriptionAddressController.selectAddress())
+      behave like submitEnterPostcode(
+        performAction,
+        routes.RegistrationChangeAddressController.selectAddress()
+      )
 
     }
 
@@ -150,7 +156,7 @@ class SubscriptionAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like displaySelectAddress(performAction, controllers.routes.SubscriptionController.checkYourDetails())
+      behave like displaySelectAddress(performAction, controllers.routes.RegistrationController.checkYourAnswers())
 
     }
 
@@ -163,25 +169,9 @@ class SubscriptionAddressControllerSpec
 
       behave like submitSelectAddress(
         performAction,
-        controllers.routes.SubscriptionController.checkYourDetails(),
-        controllers.routes.SubscriptionController.checkYourDetails()
+        controllers.routes.RegistrationController.checkYourAnswers(),
+        controllers.routes.RegistrationController.checkYourAnswers()
       )
-
-      "not update the session" when {
-
-        "the user selects an address which is already in their subscription details" in {
-          val session = sessionWithValidJourneyStatus.copy(addressLookupResult = Some(addressLookupResult))
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
-          }
-
-          val result = performAction(Seq("address-select" -> "0"))
-          checkIsRedirect(result, controllers.routes.SubscriptionController.checkYourDetails())
-        }
-
-      }
 
     }
   }

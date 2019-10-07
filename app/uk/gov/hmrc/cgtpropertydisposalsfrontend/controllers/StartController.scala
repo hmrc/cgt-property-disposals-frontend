@@ -61,23 +61,26 @@ class StartController @Inject()(
     (request.authenticatedRequest.userType, request.sessionData.flatMap(_.journeyStatus)) match {
 
       case (_, Some(_: SubscriptionStatus.SubscriptionReady)) =>
-        SeeOther(routes.SubscriptionController.checkYourDetails().url)
+        Redirect(routes.SubscriptionController.checkYourDetails())
 
       case (_, Some(_: SubscriptionStatus.SubscriptionComplete)) =>
-        SeeOther(routes.SubscriptionController.subscribed().url)
+        Redirect(routes.SubscriptionController.subscribed())
 
-      case (_, Some(i: SubscriptionStatus.IndividualWithInsufficientConfidenceLevel)) =>
+      case (_, Some(i: SubscriptionStatus.TryingToGetIndividualsFootprint)) =>
         // this is not the first time a person with individual insufficient confidence level has come to start
-        SeeOther(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url)
+        Redirect(routes.InsufficientConfidenceLevelController.doYouHaveNINO())
 
       case (_, Some(_: RegistrationStatus.RegistrationReady)) =>
-        SeeOther(routes.RegistrationController.checkYourAnswers().url)
+        Redirect(routes.RegistrationController.checkYourAnswers())
 
       case (_, Some(_: RegistrationStatus.IndividualSupplyingInformation)) =>
-        SeeOther(routes.RegistrationController.startRegistration().url)
+        Redirect(routes.RegistrationController.startRegistration())
+
+      case (_, Some(_: RegistrationStatus.IndividualMissingEmail)) =>
+        Redirect(email.routes.RegistrationEnterEmailController.enterEmail())
 
       case (_, Some(RegistrationStatus.IndividualWantsToRegisterTrust)) =>
-        SeeOther(routes.RegistrationController.startRegistration().url)
+        Redirect(routes.RegistrationController.startRegistration())
 
       case (UserType.IndividualWithInsufficientConfidenceLevel(maybeNino, maybeSautr, maybeEmail, ggCredId), None) =>
         // this is the first time a person with individual insufficient confidence level has come to start
@@ -110,7 +113,7 @@ class StartController @Inject()(
     implicit request: RequestWithSessionDataAndRetrievedData[_]
   ): Future[Result] = {
     lazy val redirectToRegisterTrustPage =
-      SeeOther(routes.RegisterTrustController.registerYourTrust().url)
+      Redirect(routes.RegisterTrustController.registerYourTrust())
 
     if (request.sessionData.flatMap(_.journeyStatus).contains(SubscriptionStatus.UnregisteredTrust)) {
       redirectToRegisterTrustPage
@@ -142,7 +145,7 @@ class StartController @Inject()(
 
         case None =>
           val subscriptionStatus =
-            SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, maybeEmail, ggCredId)
+            SubscriptionStatus.TryingToGetIndividualsFootprint(None, None, maybeEmail, ggCredId)
           updateSession(sessionStore, request)(_.copy(journeyStatus = Some(subscriptionStatus)))
             .map {
               case Left(e) =>
@@ -150,7 +153,7 @@ class StartController @Inject()(
                 errorHandler.errorResult()
 
               case Right(_) =>
-                SeeOther(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url)
+                Redirect(routes.InsufficientConfidenceLevelController.doYouHaveNINO())
             }
       }
 
@@ -210,8 +213,8 @@ class StartController @Inject()(
         logger.warn(s"Could not build subscription data for trust with SAUTR ${trust.sautr}", e)
         errorHandler.errorResult()
       }, {
-        case Left(MissingData.Email) => SeeOther(routes.EmailController.enterEmail().url)
-        case Right(_)                => SeeOther(routes.SubscriptionController.checkYourDetails().url)
+        case Left(MissingData.Email) => Redirect(email.routes.SubscriptionEnterEmailController.enterEmail())
+        case Right(_)                => Redirect(routes.SubscriptionController.checkYourDetails())
       }
     )
   }
@@ -223,14 +226,14 @@ class StartController @Inject()(
       { missingData =>
         logger.info(s"Could not find the following data for subscription details: ${missingData.toList.mkString(",")}")
         missingData.head match {
-          case MissingData.Email => SeeOther(routes.EmailController.enterEmail().url)
+          case MissingData.Email => Redirect(email.routes.SubscriptionEnterEmailController.enterEmail())
         }
       },
       subscriptionDetails =>
         updateSession(sessionStore, request)(
           _.copy(journeyStatus = Some(SubscriptionStatus.SubscriptionReady(subscriptionDetails)))
         ).map { _ =>
-          SeeOther(routes.SubscriptionController.checkYourDetails().url)
+          Redirect(routes.SubscriptionController.checkYourDetails())
         }
     )
 
@@ -267,11 +270,11 @@ class StartController @Inject()(
             s"Could not find the following data for subscription details: ${missingData.toList.mkString(",")}"
           )
           missingData.head match {
-            case MissingData.Email     => SeeOther(routes.EmailController.enterEmail().url)
+            case MissingData.Email     => Redirect(email.routes.SubscriptionEnterEmailController.enterEmail())
           }
 
         case Right(_) =>
-          SeeOther(routes.SubscriptionController.checkYourDetails().url)
+          Redirect(routes.SubscriptionController.checkYourDetails())
       }
     )
   }

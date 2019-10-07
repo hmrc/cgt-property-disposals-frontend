@@ -24,8 +24,7 @@ import cats.syntax.eq._
 import play.api.mvc.{Action, AnyContent, Call, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{RequestWithSessionData, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.AddressController.UpdateAddress
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{DefaultRedirects, SessionUpdates}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -37,20 +36,14 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
-object AddressController {
-
-  type UpdateAddress[J <: JourneyStatus] = (Address,J) => JourneyStatus
-
-}
-
 trait AddressController[J <: JourneyStatus] {
-  this: FrontendController with Logging with WithAuthAndSessionDataAction with SessionUpdates with DefaultRedirects =>
+  this: FrontendController with Logging with WithAuthAndSessionDataAction with SessionUpdates =>
 
   val errorHandler: ErrorHandler
   val ukAddressLookupService: UKAddressLookupService
   val sessionStore: SessionStore
-  val enterPostcodePage: views.html.subscription.enter_postcode
-  val selectAddressPage: views.html.subscription.select_address
+  val enterPostcodePage: views.html.address.enter_postcode
+  val selectAddressPage: views.html.address.select_address
   val addressDisplay: views.html.components.address_display
   val enterUkAddressPage: views.html.address.enter_uk_address
   val enterNonUkAddressPage: views.html.address.enter_nonUk_address
@@ -58,7 +51,9 @@ trait AddressController[J <: JourneyStatus] {
   implicit val viewConfig: ViewConfig
   implicit val ec: ExecutionContext
 
-  def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, J, UpdateAddress[J])]
+  def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, J)]
+
+  def updateAddress(journey: J, address: Address): JourneyStatus
 
   protected val backLinkCall: Call
   protected val isUkCall: Call
@@ -74,14 +69,14 @@ trait AddressController[J <: JourneyStatus] {
   protected val continueCall: Call
 
   private def withValidJourney(request: RequestWithSessionData[_])(
-    f: (SessionData, J, UpdateAddress[J]) => Future[Result]
+    f: (SessionData, J) => Future[Result]
   ): Future[Result] =
     validJourney(request).fold[Future[Result]](toFuture, f.tupled)
 
   def isUk(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) {
-        case (sessionData, _, _) =>
+        case (sessionData, _) =>
           if (sessionData.addressLookupResult.nonEmpty) {
             updateSession(sessionStore, request)(_.copy(addressLookupResult = None)).map {
               case Left(e) =>
@@ -99,7 +94,7 @@ trait AddressController[J <: JourneyStatus] {
   def isUkSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) {
-        case (_, _, _) =>
+        case (_, _) =>
           Address.isUkForm
             .bindFromRequest()
             .fold[Future[Result]](
@@ -114,7 +109,7 @@ trait AddressController[J <: JourneyStatus] {
   def enterUkAddress(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) {
-        case (_, _, _) =>
+        case (_, _) =>
           Ok(enterUkAddressPage(Address.ukAddressForm, backLinkCall, enterUkAddressSubmitCall, enterPostcodeCall))
       }
     }
@@ -122,7 +117,7 @@ trait AddressController[J <: JourneyStatus] {
   def enterUkAddressSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) {
-        case (_, journeyStatus, updateAddress) =>
+        case (_, journeyStatus) =>
           Address.ukAddressForm
             .bindFromRequest()
             .fold[Future[Result]](
@@ -130,7 +125,7 @@ trait AddressController[J <: JourneyStatus] {
                 BadRequest(
                   enterUkAddressPage(formWithErrors, backLinkCall, enterUkAddressSubmitCall, enterPostcodeCall)
                 ),
-              storeAddress(continueCall, journeyStatus, updateAddress)
+              storeAddress(continueCall, journeyStatus)
             )
       }
     }
@@ -138,20 +133,20 @@ trait AddressController[J <: JourneyStatus] {
   def enterNonUkAddress(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) {
-        case (_, _, _) =>
-          Ok(enterNonUkAddressPage(Address.nonUkAddressForm, isUkCall, isUkSubmitCall))
+        case (_, _) =>
+          Ok(enterNonUkAddressPage(Address.nonUkAddressForm, isUkCall, enterNonUkAddressSubmitCall))
       }
     }
 
   def enterNonUkAddressSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) {
-        case (_, journeyStatus, updateAddress) =>
+        case (_, journeyStatus) =>
           Address.nonUkAddressForm
             .bindFromRequest()
             .fold[Future[Result]](
-              formWithErrors => BadRequest(enterNonUkAddressPage(formWithErrors, isUkCall, isUkSubmitCall)),
-              storeAddress(continueCall, journeyStatus, updateAddress)
+              formWithErrors => BadRequest(enterNonUkAddressPage(formWithErrors, isUkCall, enterNonUkAddressSubmitCall)),
+              storeAddress(continueCall, journeyStatus)
             )
       }
     }
@@ -159,7 +154,7 @@ trait AddressController[J <: JourneyStatus] {
   def enterPostcode(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) {
-        case (sessionData, _, _) =>
+        case (sessionData, _) =>
           val form = sessionData.addressLookupResult
             .fold(AddressLookupRequest.form)(
               r => AddressLookupRequest.form.fill(AddressLookupRequest(r.postcode, r.filter))
@@ -171,7 +166,7 @@ trait AddressController[J <: JourneyStatus] {
   def enterPostcodeSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) {
-        case (sessionData, _, _) =>
+        case (sessionData, _) =>
           AddressLookupRequest.form
             .bindFromRequest()
             .fold(
@@ -226,7 +221,7 @@ trait AddressController[J <: JourneyStatus] {
   def selectAddress(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) {
-        case (sessionData, _, _) =>
+        case (sessionData, _) =>
           sessionData.addressLookupResult match {
             case None =>
               Redirect(backLinkCall)
@@ -241,7 +236,7 @@ trait AddressController[J <: JourneyStatus] {
   def selectAddressSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) {
-        case (sessionData, journeyStatus, updateAddress) =>
+        case (sessionData, journeyStatus) =>
           sessionData.addressLookupResult match {
             case None =>
               Redirect(backLinkCall)
@@ -255,7 +250,7 @@ trait AddressController[J <: JourneyStatus] {
                     BadRequest(
                       selectAddressPage(addresses, e, enterPostcodeCall, selectAddressSubmitCall, enterUkAddressCall)
                     ),
-                  storeAddress(continueCall, journeyStatus, updateAddress)
+                  storeAddress(continueCall, journeyStatus)
                 )
           }
       }
@@ -263,10 +258,9 @@ trait AddressController[J <: JourneyStatus] {
 
   private def storeAddress(
     continue: Call,
-    currentJourneyStatus: J,
-    updateAddress: UpdateAddress[J]
+    currentJourneyStatus: J
   )(address: Address)(implicit request: RequestWithSessionData[_]): Future[Result] =
-    updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updateAddress(address, currentJourneyStatus))))
+    updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updateAddress( currentJourneyStatus, address))))
       .map(
         _.fold(
           { e =>

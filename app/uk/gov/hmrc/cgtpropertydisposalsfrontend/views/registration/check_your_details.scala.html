@@ -22,7 +22,8 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionDetails
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
 @import scala.util.Try
 @import views.html.helper.CSRF
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Block
@@ -38,41 +39,51 @@
  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button
 )
 
-@(details: SubscriptionDetails)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(details: RegistrationReady)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
-@title = @{messages("subscription.title")}
-@label = @{Html(s"""<span class="form-label-bold">${messages("subscription.confirmLabel")}</span>""")}
+@title = @{messages("registration.title")}
+@label = @{Html(s"""<span class="form-label-bold">${messages("registration.confirmLabel")}</span>""")}
 
 @mainTemplate(title = title) {
 
- @pageHeading(title, Some(messages("subscription.caption")))
+ @pageHeading(title, Some(messages("registration.caption")))
 
  <p class="lede">
-  @messages("subscription.lede", details.contactName.fold(_.value, n => s"${n.firstName} ${n.lastName}"))
+  @messages("registration.lede")
  </p>
 
  <div class="panel panel-border-wide">
   <p>
-   @messages("subscription.p")
+   @messages("registration.p")
   </p>
  </div>
 
  @cyaSection() {
   @cyaRow(
-   messages("subscription.cyaLabel.address"),
-   addressDisplay(details.address, Block),
-   Some(cyaChange(messages("subscription.cyaChange.address"), address.routes.SubscriptionAddressController.isUk().url))
+    messages("registration.cyaLabel.firstName"),
+    Html(details.name.firstName),
+    Some(cyaChange(messages("registration.cyaChange.firstName"), name.routes.RegistrationChangeNameController.enterIndividualName().url))
+  )
+    @cyaRow(
+    messages("registration.cyaLabel.lastName"),
+    Html(details.name.lastName),
+    Some(cyaChange(messages("registration.cyaChange.lastName"), name.routes.RegistrationChangeNameController.enterIndividualName().url))
   )
   @cyaRow(
-    messages("subscription.cyaLabel.email"),
-    Html(details.emailAddress),
-    Some(cyaChange(messages("subscription.cyaChange.email"), email.routes.SubscriptionChangeEmailController.enterEmail().url))
+   messages("registration.cyaLabel.address"),
+   addressDisplay(details.address, Block),
+   Some(cyaChange(messages("registration.cyaChange.address"), address.routes.RegistrationChangeAddressController.isUk().url))
+  )
+  @cyaRow(
+    messages("registration.cyaLabel.email"),
+    Html(details.email.value),
+    Some(cyaChange(messages("registration.cyaChange.email"), email.routes.RegistrationChangeEmailController.enterEmail().url))
    )
  }
 
  @formWrapper(routes.SubscriptionController.checkYourDetailsSubmit(), 'novalidate -> "novalidate") {
   <p>
-   @messages("subscription.confirm")
+   @messages("registration.confirm")
   </p>
   @submitButton(messages("button.confirmAndContinue"))
  }

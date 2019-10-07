@@ -23,7 +23,7 @@ import play.api.mvc.{MessagesRequest, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, SessionSupport, routes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, RedirectToStartBehaviour, SessionSupport, routes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 
@@ -59,6 +59,7 @@ class SubscriptionReadyActionSpec extends ControllerSpec with SessionSupport {
       checkIsTechnicalErrorPage(performAction(sample[SessionData]))
     }
 
+
     "redirect to the start journey endpoint" when {
 
       "there is no session data in store" in {
@@ -75,24 +76,9 @@ class SubscriptionReadyActionSpec extends ControllerSpec with SessionSupport {
 
     }
 
-    "redirect to the subscribed page" when {
-
-      "there are subscription details and a subscription response in session and the request is not " +
-        "for the subscribed page" in {
-        val sessionData = SessionData.empty.copy(
-          journeyStatus = Some(SubscriptionComplete(subscriptionDetails, SubscriptionResponse("number")))
-        )
-
-        mockGetSession(Future.successful(Right(Some(sessionData))))
-
-        checkIsRedirect(performAction(sessionData), routes.SubscriptionController.subscribed())
-      }
-
-    }
-
     "perform the action with the subscription details" when {
 
-      "the subscription details exist and no subscription response exists" in {
+      "the session data indicates that subscription is ready" in {
         val sessionData = SessionData.empty.copy(
           journeyStatus = Some(SubscriptionReady(subscriptionDetails))
         )

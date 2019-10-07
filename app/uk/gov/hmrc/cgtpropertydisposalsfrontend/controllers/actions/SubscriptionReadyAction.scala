@@ -20,8 +20,9 @@ import cats.syntax.either._
 import com.google.inject.{Inject, Singleton}
 import play.api.i18n.MessagesApi
 import play.api.mvc._
+import play.api.mvc.Results.Redirect
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DefaultRedirects
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
@@ -47,8 +48,7 @@ final case class RequestWithSubscriptionReady[A](
 class SubscriptionReadyAction @Inject()(sessionStore: SessionStore, errorHandler: ErrorHandler)(
   implicit ec: ExecutionContext)
     extends ActionRefiner[AuthenticatedRequest, RequestWithSubscriptionReady]
-    with Logging
-      with DefaultRedirects {
+    with Logging {
 
   override protected def executionContext: ExecutionContext = ec
 
@@ -68,8 +68,8 @@ class SubscriptionReadyAction @Inject()(sessionStore: SessionStore, errorHandler
             case (Some(sessionData), Some(ready: SubscriptionStatus.SubscriptionReady)) =>
               Right(RequestWithSubscriptionReady(ready, sessionData, request))
 
-            case (_, other) =>
-              Left(defaultRedirect(other))
+            case (_, _) =>
+              Left(Redirect(controllers.routes.StartController.start()))
           }
         }
       )

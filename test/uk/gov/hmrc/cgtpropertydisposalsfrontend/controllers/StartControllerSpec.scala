@@ -30,6 +30,7 @@ import uk.gov.hmrc.auth.core.ConfidenceLevel.L50
 import uk.gov.hmrc.auth.core.retrieve.Credentials
 import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, ConfidenceLevel}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{RegistrationStatus, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Individual, Trust}
@@ -174,7 +175,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 mockGetSession(Future.successful(Right(Some(SessionData.empty))))
                 mockStoreSession(
                   SessionData.empty.copy(
-                    journeyStatus = Some(SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(
+                    journeyStatus = Some(SubscriptionStatus.TryingToGetIndividualsFootprint(
                       None, None, None, ggCredId))
                   )
                 )(Future.successful(Left(Error(""))))
@@ -254,7 +255,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 mockStoreSession(
                   SessionData.empty.copy(
                     journeyStatus = Some(
-                      SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, None, ggCredId)
+                      SubscriptionStatus.TryingToGetIndividualsFootprint(None, None, None, ggCredId)
                     )
                   )
                 )(Future.successful(Right(())))
@@ -280,7 +281,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                       Some(
                         SessionData.empty.copy(
                           journeyStatus = Some(
-                            SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, None, ggCredId)
+                            SubscriptionStatus.TryingToGetIndividualsFootprint(None, None, None, ggCredId)
                           )
                         )
                       )
@@ -301,7 +302,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
             "redirect to the do you have a nino page" in {
               def sessionData = SessionData.empty.copy(
-                journeyStatus = Some(IndividualWithInsufficientConfidenceLevel(Some(false), None, None, ggCredId))
+                journeyStatus = Some(TryingToGetIndividualsFootprint(Some(false), None, None, ggCredId))
               )
 
               inSequence {
@@ -372,7 +373,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 mockGetSession(Future.successful(Right(Some(sessionData))))
               }
 
-              checkIsRedirect(performAction(), routes.EmailController.enterEmail().url)
+              checkIsRedirect(performAction(), email.routes.SubscriptionEnterEmailController.enterEmail().url)
             }
 
           }
@@ -570,9 +571,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           "redirect to the registration check your answers page" when {
 
             "the session indicates the user is ready to register" in {
-              val session = SessionData.empty.copy(journeyStatus = Some(
-                RegistrationStatus.RegistrationReady(sample[Name], sample[Address])
-              ))
+              val session = SessionData.empty.copy(journeyStatus = Some(sample[RegistrationReady]))
 
               inSequence {
                 mockAuthWithAllRetrievals(
@@ -588,7 +587,30 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               }
 
               checkIsRedirect(performAction(), routes.RegistrationController.checkYourAnswers())
+            }
 
+            "redirect to the registration enter email page" when {
+
+              "the session data indicates that the user is missing an email for registration" in {
+                val session = SessionData.empty.copy(journeyStatus = Some(
+                  IndividualMissingEmail(sample[Name], sample[Address])
+                ))
+
+                inSequence {
+                  mockAuthWithAllRetrievals(
+                    ConfidenceLevel.L50,
+                    Some(AffinityGroup.Individual),
+                    None,
+                    None,
+                    None,
+                    Set.empty,
+                    Some(retrievedGGCredId)
+                  )
+                  mockGetSession(Future.successful(Right(Some(session))))
+                }
+
+                checkIsRedirect(performAction(), email.routes.RegistrationEnterEmailController.enterEmail())
+              }
             }
 
           }
@@ -695,7 +717,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 mockStoreSession(updatedSession)(Future.successful(Right(())))
               }
 
-              checkIsRedirect(performAction(), routes.EmailController.enterEmail().url)
+              checkIsRedirect(performAction(), email.routes.SubscriptionEnterEmailController.enterEmail().url)
             }
 
             "there is no email in the BPR or the auth record for a user with CL < 200" in {
@@ -720,7 +742,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 mockStoreSession(updatedSession)(Future.successful(Right(())))
               }
 
-              checkIsRedirect(performAction(), routes.EmailController.enterEmail().url)
+              checkIsRedirect(performAction(), email.routes.SubscriptionEnterEmailController.enterEmail().url)
             }
 
             "the session data indicates there is data missing for subscription and the email address " +
@@ -734,7 +756,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 mockGetSession(Future.successful(Right(Some(sessionData))))
               }
 
-              checkIsRedirect(performAction(), routes.EmailController.enterEmail().url)
+              checkIsRedirect(performAction(), email.routes.SubscriptionEnterEmailController.enterEmail().url)
             }
 
           }
@@ -895,7 +917,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 )(Future.successful(Right(())))
               }
 
-              checkIsRedirect(performAction(), routes.EmailController.enterEmail())
+              checkIsRedirect(performAction(), email.routes.SubscriptionEnterEmailController.enterEmail())
             }
 
             "the session data indicates there is data missing for subscription and the email address " +
@@ -909,7 +931,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 mockGetSession(Future.successful(Right(Some(sessionData))))
               }
 
-              checkIsRedirect(performAction(), routes.EmailController.enterEmail().url)
+              checkIsRedirect(performAction(), email.routes.SubscriptionEnterEmailController.enterEmail().url)
             }
 
           }

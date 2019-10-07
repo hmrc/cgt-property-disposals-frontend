@@ -19,6 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import cats.data.EitherT
 import cats.instances.future._
 import org.scalacheck.ScalacheckShapeless._
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -45,7 +46,9 @@ class InsufficientConfidenceLevelControllerSpec
     with IvBehaviourSupport
     with SessionSupport
     with AuthSupport
-    with NameFormValidationTests {
+      with ScalaCheckDrivenPropertyChecks
+    with NameFormValidationTests
+    with RedirectToStartBehaviour{
 
   val mockBprNameMatchService = mock[BusinessPartnerRecordNameMatchRetryService]
 
@@ -96,82 +99,15 @@ class InsufficientConfidenceLevelControllerSpec
 
   val name = Name("name", "surname")
 
-  def commonBehaviour(performAction: () => Future[Result]) = {
-    val bpr                  = sample[BusinessPartnerRecord]
-    val subscriptionDetails  = sample[SubscriptionDetails]
-    val subscriptionResponse = sample[SubscriptionResponse]
-
-    def test(sessionData: Option[SessionData], expectedRedirectTo: Call): Unit = {
-      inSequence {
-        mockAuthWithNoRetrievals()
-        mockGetSession(Future.successful(Right(sessionData)))
+  def commonBehaviour(performAction: () => Future[Result]) =
+    redirectToStartWhenInvalidJourney(
+      performAction,
+      {
+        case _: TryingToGetIndividualsFootprint => true
+        case _ => false
       }
+    )
 
-      checkIsRedirect(performAction(), expectedRedirectTo)
-    }
-
-    "redirect to the start endpoint" when {
-
-      "there is data missing for subscription" in {
-        test(
-          Some(session(SubscriptionMissingData(bpr))),
-          routes.StartController.start()
-        )
-      }
-
-      "there is no session data" in {
-        test(
-          None,
-          routes.StartController.start()
-        )
-      }
-    }
-
-    "redirect to check your details" when {
-
-      "the session data indicates that subscription is ready" in {
-        test(
-          Some(session(SubscriptionReady(subscriptionDetails))),
-          routes.SubscriptionController.checkYourDetails()
-        )
-      }
-
-    }
-
-    "redirect to the subscription confirmation page" when {
-
-      "the session data indicates that the user has successfully subscribed" in {
-        test(
-          Some(session(SubscriptionComplete(subscriptionDetails, subscriptionResponse))),
-          routes.SubscriptionController.subscribed()
-        )
-      }
-    }
-
-    "redirect to the registration start endpoint" when {
-
-      "the session data indicates the user has started a registration journey" in {
-        List(
-          RegistrationStatus.IndividualWantsToRegisterTrust,
-          sample[RegistrationStatus.IndividualSupplyingInformation]
-        ).foreach { registrationStatus =>
-          withClue(s"For registration status $registrationStatus: ") {
-            val session = SessionData.empty.copy(journeyStatus = Some(registrationStatus))
-
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(session))))
-            }
-
-            checkIsRedirect(performAction(), routes.RegistrationController.startRegistration())
-          }
-
-        }
-
-      }
-
-    }
-  }
 
   "InsufficientConfidenceLevelController" when {
 
@@ -189,7 +125,7 @@ class InsufficientConfidenceLevelControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               Future.successful(
-                Right(Some(session(IndividualWithInsufficientConfidenceLevel(None, None, None, sample[GGCredId]))))
+                Right(Some(session(TryingToGetIndividualsFootprint(None, None, None, sample[GGCredId]))))
               )
             )
           }
@@ -208,7 +144,7 @@ class InsufficientConfidenceLevelControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    session(IndividualWithInsufficientConfidenceLevel(Some(true), None, None, sample[GGCredId]))
+                    session(TryingToGetIndividualsFootprint(Some(true), None, None, sample[GGCredId]))
                   )
                 )
               )
@@ -242,7 +178,7 @@ class InsufficientConfidenceLevelControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    session(IndividualWithInsufficientConfidenceLevel(None, None, None, sample[GGCredId]))
+                    session(TryingToGetIndividualsFootprint(None, None, None, sample[GGCredId]))
                   )
                 )
               )
@@ -261,7 +197,7 @@ class InsufficientConfidenceLevelControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    session(IndividualWithInsufficientConfidenceLevel(None, None, None, sample[GGCredId]))
+                    session(TryingToGetIndividualsFootprint(None, None, None, sample[GGCredId]))
                   )
                 )
               )
@@ -285,13 +221,13 @@ class InsufficientConfidenceLevelControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    session(IndividualWithInsufficientConfidenceLevel(None, None, None, credId))
+                    session(TryingToGetIndividualsFootprint(None, None, None, credId))
                   )
                 )
               )
             )
             mockStoreSession(
-              session(IndividualWithInsufficientConfidenceLevel(Some(true), None, None, credId))
+              session(TryingToGetIndividualsFootprint(Some(true), None, None, credId))
             )(Future.successful(Right(())))
           }
 
@@ -320,13 +256,13 @@ class InsufficientConfidenceLevelControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    session(IndividualWithInsufficientConfidenceLevel(None, None, None, credId))
+                    session(TryingToGetIndividualsFootprint(None, None, None, credId))
                   )
                 )
               )
             )
             mockStoreSession(
-              session(IndividualWithInsufficientConfidenceLevel(Some(true), None, None, credId))
+              session(TryingToGetIndividualsFootprint(Some(true), None, None, credId))
             )(Future.successful(Right(())))
           }
 
@@ -347,13 +283,13 @@ class InsufficientConfidenceLevelControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    session(IndividualWithInsufficientConfidenceLevel(None, None, None, credId))
+                    session(TryingToGetIndividualsFootprint(None, None, None, credId))
                   )
                 )
               )
             )
             mockStoreSession(
-              session(IndividualWithInsufficientConfidenceLevel(Some(false), None, None, credId))
+              session(TryingToGetIndividualsFootprint(Some(false), None, None, credId))
             )(Future.successful(Right(())))
           }
 
@@ -371,7 +307,7 @@ class InsufficientConfidenceLevelControllerSpec
             mockGetSession(
               Future.successful(
                 Right(
-                  Some(session(IndividualWithInsufficientConfidenceLevel(Some(true), None, None, sample[GGCredId])))
+                  Some(session(TryingToGetIndividualsFootprint(Some(true), None, None, sample[GGCredId])))
                 )
               )
             )
@@ -388,7 +324,7 @@ class InsufficientConfidenceLevelControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    session(IndividualWithInsufficientConfidenceLevel(Some(false), None, None, sample[GGCredId]))
+                    session(TryingToGetIndividualsFootprint(Some(false), None, None, sample[GGCredId]))
                   )
                 )
               )
@@ -418,7 +354,7 @@ class InsufficientConfidenceLevelControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    session(IndividualWithInsufficientConfidenceLevel(None, None, None, sample[GGCredId]))
+                    session(TryingToGetIndividualsFootprint(None, None, None, sample[GGCredId]))
                   )
                 )
               )
@@ -440,7 +376,7 @@ class InsufficientConfidenceLevelControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    session(IndividualWithInsufficientConfidenceLevel(Some(false), None, None, sample[GGCredId]))
+                    session(TryingToGetIndividualsFootprint(Some(false), None, None, sample[GGCredId]))
                   )
                 )
               )
@@ -462,7 +398,7 @@ class InsufficientConfidenceLevelControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    session(IndividualWithInsufficientConfidenceLevel(Some(false), Some(true), None, sample[GGCredId]))
+                    session(TryingToGetIndividualsFootprint(Some(false), Some(true), None, sample[GGCredId]))
                   )
                 )
               )
@@ -485,7 +421,7 @@ class InsufficientConfidenceLevelControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    session(IndividualWithInsufficientConfidenceLevel(Some(false), Some(false), None, sample[GGCredId]))
+                    session(TryingToGetIndividualsFootprint(Some(false), Some(false), None, sample[GGCredId]))
                   )
                 )
               )
@@ -519,7 +455,7 @@ class InsufficientConfidenceLevelControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    session(IndividualWithInsufficientConfidenceLevel(None, None, None, sample[GGCredId]))
+                    session(TryingToGetIndividualsFootprint(None, None, None, sample[GGCredId]))
                   )
                 )
               )
@@ -540,7 +476,7 @@ class InsufficientConfidenceLevelControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    session(IndividualWithInsufficientConfidenceLevel(Some(false), None, None, sample[GGCredId]))
+                    session(TryingToGetIndividualsFootprint(Some(false), None, None, sample[GGCredId]))
                   )
                 )
               )
@@ -558,7 +494,7 @@ class InsufficientConfidenceLevelControllerSpec
 
         "the user indicates they have an SA UTR and enters in a valid one" in {
           val subscriptionStatus =
-            IndividualWithInsufficientConfidenceLevel(Some(false), None, None, sample[GGCredId])
+            TryingToGetIndividualsFootprint(Some(false), None, None, sample[GGCredId])
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -576,7 +512,7 @@ class InsufficientConfidenceLevelControllerSpec
 
         "the user indicates they do not have an SA UTR" in {
           val subscriptionStatus =
-            IndividualWithInsufficientConfidenceLevel(Some(false), None, None, sample[GGCredId])
+            TryingToGetIndividualsFootprint(Some(false), None, None, sample[GGCredId])
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -611,7 +547,7 @@ class InsufficientConfidenceLevelControllerSpec
                 Right(
                   Some(
                     session(
-                      IndividualWithInsufficientConfidenceLevel(hasNino, hasSautr, None, ggCredId)
+                      TryingToGetIndividualsFootprint(hasNino, hasSautr, None, ggCredId)
                     )
                   )
                 )
@@ -651,7 +587,7 @@ class InsufficientConfidenceLevelControllerSpec
                 Right(
                   Some(
                     session(
-                      IndividualWithInsufficientConfidenceLevel(Some(false), Some(true), None, ggCredId)
+                      TryingToGetIndividualsFootprint(Some(false), Some(true), None, ggCredId)
                     )
                   )
                 )
@@ -674,7 +610,7 @@ class InsufficientConfidenceLevelControllerSpec
                 Right(
                   Some(
                     session(
-                      IndividualWithInsufficientConfidenceLevel(Some(false), Some(true), None, ggCredId)
+                      TryingToGetIndividualsFootprint(Some(false), Some(true), None, ggCredId)
                     )
                   )
                 )
@@ -706,7 +642,7 @@ class InsufficientConfidenceLevelControllerSpec
                 Right(
                   Some(
                     session(
-                      IndividualWithInsufficientConfidenceLevel(Some(false), Some(true), None, ggCredId)
+                      TryingToGetIndividualsFootprint(Some(false), Some(true), None, ggCredId)
                     )
                   )
                 )
@@ -730,7 +666,7 @@ class InsufficientConfidenceLevelControllerSpec
                 Right(
                   Some(
                     session(
-                      IndividualWithInsufficientConfidenceLevel(Some(false), Some(true), None, ggCredId)
+                      TryingToGetIndividualsFootprint(Some(false), Some(true), None, ggCredId)
                     )
                   )
                 )
@@ -757,7 +693,7 @@ class InsufficientConfidenceLevelControllerSpec
       val ggCredId = sample[GGCredId]
 
       val expectedSessionData =
-        session(IndividualWithInsufficientConfidenceLevel(Some(false), Some(true), None, ggCredId))
+        session(TryingToGetIndividualsFootprint(Some(false), Some(true), None, ggCredId))
 
       val previousUnsuccessfulNameMatchAttempt = UnsuccessfulNameMatchAttempts(1, 3, sample[Name], sample[SAUTR])
 
@@ -788,7 +724,7 @@ class InsufficientConfidenceLevelControllerSpec
                 Right(
                   Some(
                     session(
-                      IndividualWithInsufficientConfidenceLevel(hasNino, hasSautr, None, sample[GGCredId])
+                      TryingToGetIndividualsFootprint(hasNino, hasSautr, None, sample[GGCredId])
                     )
                   )
                 )

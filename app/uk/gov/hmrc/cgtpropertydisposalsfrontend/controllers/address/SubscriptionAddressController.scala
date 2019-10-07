@@ -21,11 +21,10 @@ import play.api.mvc._
 import shapeless.{Lens, lens}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.AddressController.UpdateAddress
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{DefaultRedirects, SessionUpdates}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -42,8 +41,8 @@ class SubscriptionAddressController @Inject()(
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   cc: MessagesControllerComponents,
-  val enterPostcodePage: views.html.subscription.enter_postcode,
-  val selectAddressPage: views.html.subscription.select_address,
+  val enterPostcodePage: views.html.address.enter_postcode,
+  val selectAddressPage: views.html.address.select_address,
   val addressDisplay: views.html.components.address_display,
   val enterUkAddressPage: views.html.address.enter_uk_address,
   val enterNonUkAddressPage: views.html.address.enter_nonUk_address,
@@ -53,7 +52,6 @@ class SubscriptionAddressController @Inject()(
     with Logging
     with WithAuthAndSessionDataAction
     with SessionUpdates
-    with DefaultRedirects
     with AddressController[SubscriptionReady] {
 
   val subscriptionReadyAddressLens: Lens[SubscriptionReady, Address] =
@@ -61,15 +59,14 @@ class SubscriptionAddressController @Inject()(
 
   def validJourney(
     request: RequestWithSessionData[_]
-  ): Either[Result, (SessionData, SubscriptionReady, UpdateAddress[SubscriptionReady])] =
+  ): Either[Result, (SessionData, SubscriptionReady)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((sessionData, s: SubscriptionReady)) =>
-        Right((sessionData, s, {
-          case (address, journey) => subscriptionReadyAddressLens.set(journey)(address)
-        }))
-
-      case other => Left(defaultRedirect(other.map(_._2)))
+      case Some((sessionData, s: SubscriptionReady)) => Right(sessionData -> s)
+      case _ => Left(Redirect(controllers.routes.StartController.start()))
     }
+
+  def updateAddress(journey: SubscriptionReady, address: Address): JourneyStatus =
+    subscriptionReadyAddressLens.set(journey)(address)
 
   protected lazy val backLinkCall: Call                = controllers.routes.SubscriptionController.checkYourDetails()
   protected lazy val isUkCall: Call                    = routes.SubscriptionAddressController.isUk()
