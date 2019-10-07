@@ -68,16 +68,16 @@ class InsufficientConfidenceLevelController @Inject()(
   import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.toFuture
 
   private def withInsufficientConfidenceLevelUser(
-    f: IndividualWithInsufficientConfidenceLevel => Future[Result]
+    f: TryingToGetIndividualsFootprint => Future[Result]
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(i: IndividualWithInsufficientConfidenceLevel) => f(i)
+      case Some(i: TryingToGetIndividualsFootprint) => f(i)
       case _ => Redirect(controllers.routes.StartController.start())
     }
 
   def doYouHaveNINO(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withInsufficientConfidenceLevelUser {
-      case IndividualWithInsufficientConfidenceLevel(hasNino, _, _, _) =>
+      case TryingToGetIndividualsFootprint(hasNino, _, _, _) =>
         val form = hasNino.fold(haveANinoForm)(haveANinoForm.fill)
         Ok(doYouHaveANinoPage(form))
     }
@@ -110,7 +110,7 @@ class InsufficientConfidenceLevelController @Inject()(
 
   def doYouHaveAnSaUtr(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withInsufficientConfidenceLevelUser {
-      case IndividualWithInsufficientConfidenceLevel(hasNino, hasSaUtr, _, _) =>
+      case TryingToGetIndividualsFootprint(hasNino, hasSaUtr, _, _) =>
         hasNino.fold(
           SeeOther(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url)
         ) { _ =>

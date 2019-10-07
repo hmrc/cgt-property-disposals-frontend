@@ -66,7 +66,7 @@ class StartController @Inject()(
       case (_, Some(_: SubscriptionStatus.SubscriptionComplete)) =>
         Redirect(routes.SubscriptionController.subscribed())
 
-      case (_, Some(i: SubscriptionStatus.IndividualWithInsufficientConfidenceLevel)) =>
+      case (_, Some(i: SubscriptionStatus.TryingToGetIndividualsFootprint)) =>
         // this is not the first time a person with individual insufficient confidence level has come to start
         Redirect(routes.InsufficientConfidenceLevelController.doYouHaveNINO())
 
@@ -145,7 +145,7 @@ class StartController @Inject()(
 
         case None =>
           val subscriptionStatus =
-            SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, maybeEmail, ggCredId)
+            SubscriptionStatus.TryingToGetIndividualsFootprint(None, None, maybeEmail, ggCredId)
           updateSession(sessionStore, request)(_.copy(journeyStatus = Some(subscriptionStatus)))
             .map {
               case Left(e) =>

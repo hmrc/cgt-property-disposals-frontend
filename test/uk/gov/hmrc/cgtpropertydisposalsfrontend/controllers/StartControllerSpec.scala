@@ -175,7 +175,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 mockGetSession(Future.successful(Right(Some(SessionData.empty))))
                 mockStoreSession(
                   SessionData.empty.copy(
-                    journeyStatus = Some(SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(
+                    journeyStatus = Some(SubscriptionStatus.TryingToGetIndividualsFootprint(
                       None, None, None, ggCredId))
                   )
                 )(Future.successful(Left(Error(""))))
@@ -255,7 +255,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 mockStoreSession(
                   SessionData.empty.copy(
                     journeyStatus = Some(
-                      SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, None, ggCredId)
+                      SubscriptionStatus.TryingToGetIndividualsFootprint(None, None, None, ggCredId)
                     )
                   )
                 )(Future.successful(Right(())))
@@ -281,7 +281,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                       Some(
                         SessionData.empty.copy(
                           journeyStatus = Some(
-                            SubscriptionStatus.IndividualWithInsufficientConfidenceLevel(None, None, None, ggCredId)
+                            SubscriptionStatus.TryingToGetIndividualsFootprint(None, None, None, ggCredId)
                           )
                         )
                       )
@@ -302,7 +302,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
             "redirect to the do you have a nino page" in {
               def sessionData = SessionData.empty.copy(
-                journeyStatus = Some(IndividualWithInsufficientConfidenceLevel(Some(false), None, None, ggCredId))
+                journeyStatus = Some(TryingToGetIndividualsFootprint(Some(false), None, None, ggCredId))
               )
 
               inSequence {

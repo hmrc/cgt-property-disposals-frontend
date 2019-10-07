@@ -55,10 +55,10 @@ class RegistrationController @Inject()(
 
 
   private def withValidUser(request: RequestWithSessionData[_])(
-    f: Either[IndividualWithInsufficientConfidenceLevel,RegistrationStatus] => Future[Result]
+    f: Either[TryingToGetIndividualsFootprint,RegistrationStatus] => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(u @ IndividualWithInsufficientConfidenceLevel(Some(false), Some(false), _, _)) =>
+      case Some(u @ TryingToGetIndividualsFootprint(Some(false), Some(false), _, _)) =>
         f(Left(u))
 
       case Some(r: RegistrationStatus) =>

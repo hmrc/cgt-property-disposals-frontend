@@ -18,13 +18,11 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import julienrf.json.derived
 import play.api.libs.json.OFormat
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 
 sealed trait JourneyStatus extends Product with Serializable
-
 
 object JourneyStatus {
 
@@ -32,13 +30,16 @@ object JourneyStatus {
 
   object SubscriptionStatus {
 
+    // user with affinity organisation is trying to subscribe without having a trust enrolment
     final case object UnregisteredTrust extends SubscriptionStatus
 
-    final case class IndividualWithInsufficientConfidenceLevel(
-                                                                hasNino: Option[Boolean],
-                                                                hasSautr: Option[Boolean],
-                                                                email: Option[Email],
-                                                                ggCredId: GGCredId) extends SubscriptionStatus
+    // we cannot automatically find an identifier for an individual to get their business partner record
+    final case class TryingToGetIndividualsFootprint(
+      hasNino: Option[Boolean],
+      hasSautr: Option[Boolean],
+      email: Option[Email],
+      ggCredId: GGCredId
+    ) extends SubscriptionStatus
 
     // entity is missing data in order to continue on with subscription
     final case class SubscriptionMissingData(businessPartnerRecord: BusinessPartnerRecord) extends SubscriptionStatus
@@ -48,9 +49,9 @@ object JourneyStatus {
 
     // subscription has been done successfully
     final case class SubscriptionComplete(
-                                           subscriptionDetails: SubscriptionDetails,
-                                           subscriptionResponse: SubscriptionResponse)
-      extends SubscriptionStatus
+      subscriptionDetails: SubscriptionDetails,
+      subscriptionResponse: SubscriptionResponse
+    ) extends SubscriptionStatus
 
   }
 
@@ -58,17 +59,20 @@ object JourneyStatus {
 
   object RegistrationStatus {
 
+    // user with individual account has said they want to register a trust
     final case object IndividualWantsToRegisterTrust extends RegistrationStatus
 
-    final case class IndividualSupplyingInformation(name: Option[Name], address: Option[Address], email: Option[Email]) extends RegistrationStatus
+    // user is supplying information for subscription
+    final case class IndividualSupplyingInformation(name: Option[Name], address: Option[Address], email: Option[Email])
+        extends RegistrationStatus
 
+    // we are capturing an email for a user who doesn't have one we can retrieve
     final case class IndividualMissingEmail(name: Name, address: Address) extends RegistrationStatus
 
+    // we have all the details necessary for registration
     final case class RegistrationReady(name: Name, address: Address, email: Email) extends RegistrationStatus
 
   }
-
-
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   implicit val format: OFormat[JourneyStatus] = derived.oformat[JourneyStatus]
 

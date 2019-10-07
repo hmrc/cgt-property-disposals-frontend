@@ -30,7 +30,7 @@ import shapeless.{Lens, lens}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.{routes => nameroutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.IndividualWithInsufficientConfidenceLevel
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.TryingToGetIndividualsFootprint
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
@@ -57,7 +57,7 @@ class RegistrationControllerSpec
   val name = sample[Name]
 
   val individualWithInsufficentCLSubscriptionStatus =
-    IndividualWithInsufficientConfidenceLevel(Some(false), Some(false), None, GGCredId("id"))
+    TryingToGetIndividualsFootprint(Some(false), Some(false), None, GGCredId("id"))
 
   val journeyStatusLens: Lens[SessionData, Option[JourneyStatus]] = lens[SessionData].journeyStatus
 
@@ -67,7 +67,7 @@ class RegistrationControllerSpec
       redirectToStartWhenInvalidJourney(
         performAction,
         {
-          case IndividualWithInsufficientConfidenceLevel(Some(false), Some(false), _, _) => true
+          case TryingToGetIndividualsFootprint(Some(false), Some(false), _, _) => true
           case r: RegistrationStatus => true
           case _ => false
         }
