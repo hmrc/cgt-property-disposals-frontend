@@ -16,24 +16,28 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
         pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+        textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
         submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
         errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
         backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@(form: Form[IndividualName], backLink: Call, submit: Call)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
-@firstNameKey = @{"firstName"}
-@lastNameKey = @{"lastName"}
+@(form: Form[ContactName],
+        backLink: Call,
+        submit: Call
+        )(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+
+@key = @{"contactName"}
+@title = @{messages(s"${key}.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-@title = @{messages("enterName.title")}
 
 @mainTemplate(title = title, hasErrors = hasErrors) {
 
@@ -43,23 +47,21 @@
     @errorSummary(form)
   }
 
-  @pageHeading(title)
+  @pageHeading(title, Some(messages(s"subscription.caption")))
 
   @formWrapper(submit, 'novalidate -> "novalidate") {
-    @textInput(
-      fieldId = firstNameKey,
-      value = form.data.getOrElse(firstNameKey, ""),
-      errorKey = form.error(firstNameKey).map(e => e.message),
-      hasErrors = form.error(firstNameKey).nonEmpty,
-      label = Html(messages("enterName.firstName.label"))
-    )
-    @textInput(
-      fieldId = lastNameKey,
-      value = form.data.getOrElse(lastNameKey, ""),
-      errorKey = form.error(lastNameKey).map(e => e.message),
-      hasErrors = form.error(lastNameKey).nonEmpty,
-      label = Html(messages("enterName.lastName.label"))
-    )
+      @textInput(
+        fieldId = key,
+        label = Html(""),
+        errorKey = form.error(key).map(e => e.message),
+        value = form.data.getOrElse(key, ""),
+        hasErrors = form.error(key).nonEmpty,
+        inputClass = Some("form-control-3-4"),
+        extraContent = Some(Html(s"""<p class="lede">${messages("contactName.extraContent")}</p>"""))
+
+      )
+
     @submitButton(messages("button.continue"))
   }
+
 }

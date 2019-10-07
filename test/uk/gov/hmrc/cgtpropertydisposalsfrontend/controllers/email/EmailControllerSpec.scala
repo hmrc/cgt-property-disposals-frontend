@@ -28,12 +28,10 @@ import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, Result}
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionComplete
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{RegistrationStatus, SubscriptionStatus}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, UUIDGenerator}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, EmailToBeVerified, Error, JourneyStatus, Name, SessionData, SubscriptionDetails, SubscriptionResponse, TrustName, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, EmailToBeVerified, Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse
@@ -44,7 +42,9 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney <: JourneyStatus]
-  extends ControllerSpec with AuthSupport with SessionSupport {
+    extends ControllerSpec
+    with AuthSupport
+    with SessionSupport {
 
   val validJourneyStatus: Journey
 
@@ -52,7 +52,7 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
 
   def updateEmail(journey: Journey, email: Email): VerificationCompleteJourney
 
-  val controller: EmailController[Journey,VerificationCompleteJourney]
+  val controller: EmailController[Journey, VerificationCompleteJourney]
 
   val isAmendJourney: Boolean
 
@@ -70,11 +70,11 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
 
   def mockEmailVerification(
     expectedEmail: Email,
-    expectedName: Either[TrustName, Name],
+    expectedName: Either[TrustName, IndividualName],
     expectedContinue: Call
   )(result: Either[Error, EmailVerificationResponse]) =
     (mockService
-      .verifyEmail(_: Email, _: Either[TrustName, Name], _: Call)(_: HeaderCarrier))
+      .verifyEmail(_: Email, _: Either[TrustName, IndividualName], _: Call)(_: HeaderCarrier))
       .expects(expectedEmail, expectedName, expectedContinue, *)
       .returning(EitherT.fromEither[Future](result))
 
@@ -87,7 +87,7 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
   def enterEmailPage(performAction: () => Future[Result])(
     implicit messagesApi: MessagesApi
   ): Unit = {
-    val titleKey = if(isAmendJourney) "email.amend.title" else "email.title"
+    val titleKey = if (isAmendJourney) "email.amend.title" else "email.title"
 
     "display the enter email page" when {
 
@@ -121,14 +121,14 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
 
   def enterEmailSubmit(
     performAction: (String, String) => Future[Result],
-    expectedName: Either[TrustName, Name],
-    verifyEmailCall:  UUID => Call,
+    expectedName: Either[TrustName, IndividualName],
+    verifyEmailCall: UUID => Call,
     checkYourInboxCall: Call
   )(implicit messagesApi: MessagesApi): Unit = {
     val email             = Email("test@email.com")
     val id                = UUID.randomUUID()
     val emailToBeVerified = EmailToBeVerified(email, id, false)
-    val titleKey = if(isAmendJourney) "email.amend.title" else "email.title"
+    val titleKey          = if (isAmendJourney) "email.amend.title" else "email.title"
 
     "show a form error" when {
 
@@ -406,7 +406,7 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
     val emailToBeVerified = EmailToBeVerified(Email("verified@email.com"), UUID.randomUUID(), true)
 
     val sessionData = SessionData.empty.copy(
-      journeyStatus = Some(validVerificationCompleteJourneyStatus),
+      journeyStatus     = Some(validVerificationCompleteJourneyStatus),
       emailToBeVerified = Some(emailToBeVerified)
     )
 

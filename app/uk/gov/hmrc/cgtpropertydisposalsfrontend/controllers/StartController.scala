@@ -31,6 +31,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, NINO, SAUTR}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
@@ -177,7 +178,7 @@ class StartController @Inject()(
           )))
         maybeSubscriptionDetails <- EitherT.pure(
                                      bprWithTrustName._1.emailAddress
-                                       .orElse(trust.email.map(_.value))
+                                       .orElse(trust.email)
                                        .fold[Either[MissingData.Email.type, SubscriptionDetails]](
                                          Left(SubscriptionDetails.MissingData.Email)
                                        ) { email =>
@@ -186,6 +187,7 @@ class StartController @Inject()(
                                              Left(bprWithTrustName._2),
                                              email,
                                              bprWithTrustName._1.address,
+                                             ContactName(bprWithTrustName._2.value),
                                              bprWithTrustName._1.sapNumber
                                            )
                                          )

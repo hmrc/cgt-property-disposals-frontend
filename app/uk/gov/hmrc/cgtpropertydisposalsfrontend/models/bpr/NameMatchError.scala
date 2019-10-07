@@ -18,7 +18,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr
 
 import play.api.data.Form
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.SAUTR
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, Name}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 
 sealed trait NameMatchError extends Product with Serializable
 
@@ -30,6 +31,6 @@ object NameMatchError {
 
   final case class NameMatchFailed(unsuccessfulNameMatchAttempts: UnsuccessfulNameMatchAttempts) extends NameMatchError
 
-  final case class ValidationError(formWithErrors: Form[(SAUTR, Name)]) extends NameMatchError
+  final case class ValidationError(formWithErrors: Form[(SAUTR, IndividualName)]) extends NameMatchError
 
 }

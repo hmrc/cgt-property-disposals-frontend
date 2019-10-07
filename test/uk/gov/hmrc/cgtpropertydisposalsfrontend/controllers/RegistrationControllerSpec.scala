@@ -34,7 +34,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscriptio
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, JourneyStatus, Name, SessionData, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, JourneyStatus, SessionData, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 
 import scala.concurrent.Future
@@ -54,7 +55,7 @@ class RegistrationControllerSpec
 
   implicit val subscriptionStatusEq: Eq[SubscriptionStatus] = Eq.fromUniversalEquals
 
-  val name = sample[Name]
+  val name = sample[IndividualName]
 
   val individualWithInsufficentCLSubscriptionStatus =
     TryingToGetIndividualsFootprint(Some(false), Some(false), None, GGCredId("id"))
@@ -210,7 +211,7 @@ class RegistrationControllerSpec
             mockStoreSession(updatedSession)(Future.successful(Right(())))
           }
           val result = performAction("entityType" -> "0")
-          checkIsRedirect(result, nameroutes.RegistrationEnterNameController.enterIndividualName())
+          checkIsRedirect(result, nameroutes.RegistrationEnterIndividualNameController.enterIndividualName())
         }
 
       }
@@ -261,7 +262,7 @@ class RegistrationControllerSpec
               mockGetSession(Future.successful(Right(Some(session))))
             }
             val result = performAction("entityType" -> "0")
-            checkIsRedirect(result, nameroutes.RegistrationEnterNameController.enterIndividualName())
+            checkIsRedirect(result, nameroutes.RegistrationEnterIndividualNameController.enterIndividualName())
 
           }
 
@@ -335,7 +336,7 @@ class RegistrationControllerSpec
             ))))
           }
 
-          checkIsRedirect(performAction(), nameroutes.RegistrationEnterNameController.enterIndividualName())
+          checkIsRedirect(performAction(), nameroutes.RegistrationEnterIndividualNameController.enterIndividualName())
         }
 
       }
@@ -347,7 +348,7 @@ class RegistrationControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(
               SessionData.empty.copy(journeyStatus = Some(
-                RegistrationStatus.IndividualSupplyingInformation(Some(sample[Name]), None, None)
+                RegistrationStatus.IndividualSupplyingInformation(Some(sample[IndividualName]), None, None)
               ))
             ))))
           }
@@ -360,7 +361,7 @@ class RegistrationControllerSpec
       "redirect to the enter email journey" when {
 
         "no email can be found" in {
-          val name = sample[Name]
+          val name = sample[IndividualName]
           val address = sample[Address]
 
           inSequence{
@@ -383,7 +384,7 @@ class RegistrationControllerSpec
       "show an error page" when {
 
         "the session cannot be updated when there is no email" in {
-          val name = sample[Name]
+          val name = sample[IndividualName]
           val address = sample[Address]
 
           inSequence{
@@ -402,7 +403,7 @@ class RegistrationControllerSpec
         }
 
         "the session cannot be updated when all the necessary details can be found" in {
-          val name = sample[Name]
+          val name = sample[IndividualName]
           val address = sample[Address]
           val email = sample[Email]
 
@@ -430,7 +431,7 @@ class RegistrationControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(
               SessionData.empty.copy(journeyStatus = Some(
-                RegistrationStatus.RegistrationReady(sample[Name], sample[Address], sample[Email])
+                RegistrationStatus.RegistrationReady(sample[IndividualName], sample[Address], sample[Email])
               ))
             ))))
           }
@@ -440,7 +441,7 @@ class RegistrationControllerSpec
         }
 
         "the user has just finished supplying all the necessary details" in {
-          val name = sample[Name]
+          val name = sample[IndividualName]
           val address = sample[Address]
           val email = sample[Email]
 

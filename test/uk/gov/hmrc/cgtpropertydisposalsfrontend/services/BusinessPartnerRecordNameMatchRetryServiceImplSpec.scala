@@ -27,7 +27,8 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, BusinessPartnerRecordResponse, NameMatchError, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecordRequest.IndividualBusinessPartnerRecordRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, SAUTR}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, Name, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.BusinessPartnerRecordNameMatchRetryStore
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -67,7 +68,7 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
       .returning(Future.successful(result))
 
 
-  def mockGetBpr(expectedSautr: SAUTR, expectedName: Name)(result: Either[Error, BusinessPartnerRecordResponse]) =
+  def mockGetBpr(expectedSautr: SAUTR, expectedName: IndividualName)(result: Either[Error, BusinessPartnerRecordResponse]) =
     (bprService
       .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest)(_: HeaderCarrier))
       .expects(IndividualBusinessPartnerRecordRequest(Left(expectedSautr), Some(expectedName)), *)
@@ -77,7 +78,7 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
 
     val ggCredId = sample[GGCredId]
     val sautr    = sample[SAUTR]
-    val name     = sample[Name]
+    val name     = sample[IndividualName]
 
     def testIsErrorOfType[E <: NameMatchError: ClassTag](
                                                           result: EitherT[Future, NameMatchError, _]
@@ -166,7 +167,7 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
               sautr,
               name,
               ggCredId,
-              Some(UnsuccessfulNameMatchAttempts(maxRetries, maxRetries, sample[Name], sample[SAUTR]))
+              Some(UnsuccessfulNameMatchAttempts(maxRetries, maxRetries, sample[IndividualName], sample[SAUTR]))
             )
           )
         }
@@ -177,7 +178,7 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
               sautr,
               name,
               ggCredId,
-              Some(UnsuccessfulNameMatchAttempts(maxRetries + 1, maxRetries, sample[Name], sample[SAUTR]))
+              Some(UnsuccessfulNameMatchAttempts(maxRetries + 1, maxRetries, sample[IndividualName], sample[SAUTR]))
             )
           )
         }
@@ -197,7 +198,7 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
               sautr,
               name,
               ggCredId,
-              Some(UnsuccessfulNameMatchAttempts(maxRetries - 1, maxRetries, sample[Name], sample[SAUTR]))
+              Some(UnsuccessfulNameMatchAttempts(maxRetries - 1, maxRetries, sample[IndividualName], sample[SAUTR]))
             )
           )
         }

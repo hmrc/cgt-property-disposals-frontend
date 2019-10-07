@@ -20,7 +20,7 @@ import julienrf.json.derived
 import play.api.libs.json.OFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Name
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 
 
 sealed trait BusinessPartnerRecordRequest extends Product with Serializable
@@ -29,7 +29,7 @@ object BusinessPartnerRecordRequest {
 
   final case class IndividualBusinessPartnerRecordRequest(
     id: Either[SAUTR, NINO],
-    nameMatch: Option[Name]
+    nameMatch: Option[IndividualName]
   ) extends BusinessPartnerRecordRequest
 
   final case class TrustBusinessPartnerRecordRequest(id: SAUTR) extends BusinessPartnerRecordRequest

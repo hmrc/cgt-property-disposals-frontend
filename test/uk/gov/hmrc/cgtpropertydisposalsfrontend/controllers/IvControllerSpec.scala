@@ -26,7 +26,8 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.TryingToGetIndividualsFootprint
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, Name, SessionData, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 
 import scala.concurrent.Future
@@ -40,7 +41,7 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
 
   lazy val controller = instanceOf[IvController]
 
-  val name = sample[Name]
+  val name = sample[IndividualName]
 
   "IvController" when {
 

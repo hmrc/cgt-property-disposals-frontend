@@ -23,7 +23,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, Name, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -31,7 +32,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.ExecutionContext
 
-class RegistrationChangeNameController @Inject()(
+class RegistrationChangeIndividualNameController @Inject()(
                                                  val authenticatedAction: AuthenticatedAction,
                                                  val sessionDataAction: SessionDataAction,
                                                  cc: MessagesControllerComponents,
@@ -43,7 +44,7 @@ class RegistrationChangeNameController @Inject()(
     with WithAuthAndSessionDataAction
     with SessionUpdates
     with Logging
-    with NameController[RegistrationReady]{
+    with IndividualNameController[RegistrationReady]{
 
   override def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, RegistrationReady)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
@@ -52,13 +53,13 @@ class RegistrationChangeNameController @Inject()(
     }
 
 
-  override def updateName(journey: RegistrationReady, name: Name): JourneyStatus =
+  override def updateName(journey: RegistrationReady, name: IndividualName): JourneyStatus =
     journey.copy(name = name)
 
-  override def name(journey: RegistrationReady): Option[Name] = Some(journey.name)
+  override def name(journey: RegistrationReady): Option[IndividualName] = Some(journey.name)
 
   override protected lazy val backLinkCall: Call = controllers.routes.RegistrationController.checkYourAnswers()
-  override protected lazy val enterNameSubmitCall: Call = routes.RegistrationChangeNameController.enterIndividualNameSubmit()
+  override protected lazy val enterNameSubmitCall: Call = routes.RegistrationChangeIndividualNameController.enterIndividualNameSubmit()
   override protected lazy val continueCall: Call = controllers.routes.RegistrationController.checkYourAnswers()
 
 }

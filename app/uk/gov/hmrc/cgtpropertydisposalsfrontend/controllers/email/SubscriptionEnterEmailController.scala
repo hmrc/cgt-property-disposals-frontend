@@ -26,8 +26,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionMissingData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, JourneyStatus, Name, SessionData, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -66,13 +67,13 @@ class SubscriptionEnterEmailController @Inject()(
   override def validVerificationCompleteJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, SubscriptionMissingData)] =
     validJourney(request)
 
-  val subscriptionMissingDataEmailLens: Lens[SubscriptionMissingData, Option[String]] =
+  val subscriptionMissingDataEmailLens: Lens[SubscriptionMissingData, Option[Email]] =
     lens[SubscriptionMissingData].businessPartnerRecord.emailAddress
 
   override def updateEmail(journey: SubscriptionMissingData, email: Email): SubscriptionMissingData =
-    subscriptionMissingDataEmailLens.set(journey)(Some(email.value))
+    subscriptionMissingDataEmailLens.set(journey)(Some(email))
 
-  override def name(journeyStatus: SubscriptionMissingData): Either[TrustName, Name] =
+  override def name(journeyStatus: SubscriptionMissingData): Either[TrustName, IndividualName] =
     journeyStatus.businessPartnerRecord.name
 
   override lazy protected val backLinkCall: Option[Call] = None

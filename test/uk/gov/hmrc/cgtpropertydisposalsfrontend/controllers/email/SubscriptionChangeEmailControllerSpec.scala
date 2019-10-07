@@ -45,7 +45,7 @@ class SubscriptionChangeEmailControllerSpec
     validJourneyStatus
 
   override def updateEmail(journey: SubscriptionReady, email: Email): SubscriptionReady =
-    journey.copy(subscriptionDetails = journey.subscriptionDetails.copy(emailAddress = email.value))
+    journey.copy(subscriptionDetails = journey.subscriptionDetails.copy(emailAddress = email))
 
   override lazy val controller: SubscriptionChangeEmailController = instanceOf[SubscriptionChangeEmailController]
 
@@ -82,7 +82,7 @@ class SubscriptionChangeEmailControllerSpec
       behave like redirectToStartBehaviour(() => performAction("", ""))
       behave like enterEmailSubmit(
         performAction,
-        validJourneyStatus.subscriptionDetails.contactName,
+        validJourneyStatus.subscriptionDetails.name,
         routes.SubscriptionChangeEmailController.verifyEmail,
         routes.SubscriptionChangeEmailController.checkYourInbox()
       )
