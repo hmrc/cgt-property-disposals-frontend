@@ -40,7 +40,6 @@ class RegistrationController @Inject()(
                                         val sessionDataAction: SessionDataAction,
                                         val sessionStore: SessionStore,
                                         val errorHandler: ErrorHandler,
-                                        startRegistrationPage: views.html.registration.registration_start,
                                         selectEntityTypePage: views.html.registration.select_entity_type,
                                         wrongGGAccountForTrustPage: views.html.wrong_gg_account_for_trust,
                                         enterNamePage: views.html.name.enter_name,
@@ -68,12 +67,6 @@ class RegistrationController @Inject()(
         SeeOther(routes.StartController.start().url)
     }
 
-  def startRegistration(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withValidUser(request) { case _ =>
-      Ok(startRegistrationPage(routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()))
-    }
-  }
-
   def selectEntityType():  Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidUser(request) { status =>
       val form = {
@@ -89,14 +82,14 @@ class RegistrationController @Inject()(
         )
       }
 
-      Ok(selectEntityTypePage(form, routes.RegistrationController.startRegistration()))
+      Ok(selectEntityTypePage(form, routes.InsufficientConfidenceLevelController.enterSautrAndName()))
     }
   }
 
   def selectEntityTypeSubmit(): Action[AnyContent] =  authenticatedActionWithSessionData.async { implicit request =>
     withValidUser(request) { status =>
       RegistrationController.selectEntityTypeForm.bindFromRequest().fold(
-        e => BadRequest(selectEntityTypePage(e, routes.RegistrationController.startRegistration())),
+        e => BadRequest(selectEntityTypePage(e, routes.InsufficientConfidenceLevelController.enterSautrAndName())),
         { entityType =>
           val (newRegistrationStatus, redirectTo): (RegistrationStatus, Call) = entityType match {
             case EntityType.Individual =>
@@ -134,7 +127,7 @@ class RegistrationController @Inject()(
           Ok(wrongGGAccountForTrustPage(routes.RegistrationController.selectEntityType()))
 
         case _ =>
-          Redirect(routes.RegistrationController.startRegistration())
+          Redirect(routes.RegistrationController.selectEntityType())
     }
   }
 

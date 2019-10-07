@@ -75,13 +75,13 @@ class StartController @Inject()(
         Redirect(routes.RegistrationController.checkYourAnswers())
 
       case (_, Some(_: RegistrationStatus.IndividualSupplyingInformation)) =>
-        Redirect(routes.RegistrationController.startRegistration())
+        Redirect(routes.RegistrationController.selectEntityType())
 
       case (_, Some(_: RegistrationStatus.IndividualMissingEmail)) =>
         Redirect(email.routes.RegistrationEnterEmailController.enterEmail())
 
       case (_, Some(RegistrationStatus.IndividualWantsToRegisterTrust)) =>
-        Redirect(routes.RegistrationController.startRegistration())
+        Redirect(routes.RegistrationController.selectEntityType())
 
       case (UserType.IndividualWithInsufficientConfidenceLevel(maybeNino, maybeSautr, maybeEmail, ggCredId), None) =>
         // this is the first time a person with individual insufficient confidence level has come to start

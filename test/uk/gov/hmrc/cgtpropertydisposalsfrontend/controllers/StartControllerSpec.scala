@@ -575,7 +575,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                     mockGetSession(Future.successful(Right(Some(session))))
                   }
 
-                  checkIsRedirect(performAction(), routes.RegistrationController.startRegistration())
+                  checkIsRedirect(performAction(), routes.RegistrationController.selectEntityType())
                 }
 
               }

@@ -18,7 +18,6 @@ GET  /iv/too-many-attempts                uk.gov.hmrc.cgtpropertydisposalsfronte
 
 
 ### Registration
-GET  /registration/start                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegistrationController.startRegistration()
 GET  /registration/select-entity-type     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegistrationController.selectEntityType()
 POST /registration/select-entity-type     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegistrationController.selectEntityTypeSubmit()
 GET  /wrong-account-for-trusts            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegistrationController.wrongGGAccountForTrusts()

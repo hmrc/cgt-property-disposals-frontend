@@ -509,7 +509,7 @@ class InsufficientConfidenceLevelControllerSpec
 
       }
 
-      "redirect to the registration start journey" when {
+      "redirect to the registration journey" when {
 
         "the user indicates they do not have an SA UTR" in {
           val subscriptionStatus =
@@ -522,7 +522,7 @@ class InsufficientConfidenceLevelControllerSpec
           }
 
           val result = performAction("hasSaUtr" -> "false")
-          checkIsRedirect(result, routes.RegistrationController.startRegistration())
+          checkIsRedirect(result, routes.RegistrationController.selectEntityType())
         }
 
       }

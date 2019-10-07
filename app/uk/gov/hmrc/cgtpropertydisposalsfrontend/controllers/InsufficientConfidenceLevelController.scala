@@ -55,7 +55,6 @@ class InsufficientConfidenceLevelController @Inject()(
   doYouHaveAnSaUtrPage: views.html.do_you_have_an_sa_utr,
   enterSautrAndNamePage: views.html.enter_sa_utr_and_name,
   tooManyUnsuccessfulNameMatchesPage: views.html.too_many_name_match_attempts,
-  startRegistrationPage: views.html.registration.registration_start,
   cc: MessagesControllerComponents
 )(
   implicit viewConfig: ViewConfig,
@@ -142,7 +141,7 @@ class InsufficientConfidenceLevelController @Inject()(
                   if (hasSautr)
                     Redirect(routes.InsufficientConfidenceLevelController.enterSautrAndName())
                   else
-                    Redirect(routes.RegistrationController.startRegistration())
+                    Redirect(routes.RegistrationController.selectEntityType())
               }
           )
       }
