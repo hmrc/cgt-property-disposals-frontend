@@ -21,9 +21,9 @@ import cats.instances.future._
 import cats.syntax.either._
 import com.google.inject.Inject
 import play.api.Configuration
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedActionWithRetrievedData, RequestWithSessionDataAndRetrievedData, SessionDataActionWithRetrievedData, WithAuthRetrievalsAndSessionDataAction}
+import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, AuthenticatedActionWithRetrievedData, RequestWithSessionDataAndRetrievedData, SessionDataAction, SessionDataActionWithRetrievedData, WithAuthAndSessionDataAction, WithAuthRetrievalsAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecordRequest.{IndividualBusinessPartnerRecordRequest, TrustBusinessPartnerRecordRequest}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{RegistrationStatus, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionDetails.MissingData
@@ -37,23 +37,28 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordSe
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.toFuture
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class StartController @Inject()(
-  bprService: BusinessPartnerRecordService,
-  val sessionStore: SessionStore,
-  val errorHandler: ErrorHandler,
-  cc: MessagesControllerComponents,
-  val authenticatedActionWithRetrievedData: AuthenticatedActionWithRetrievedData,
-  val sessionDataAction: SessionDataActionWithRetrievedData,
-  val config: Configuration
-)(implicit ec: ExecutionContext)
+                                 bprService: BusinessPartnerRecordService,
+                                 val sessionStore: SessionStore,
+                                 val errorHandler: ErrorHandler,
+                                 cc: MessagesControllerComponents,
+                                 val authenticatedActionWithRetrievedData: AuthenticatedActionWithRetrievedData,
+                                 val sessionDataActionWithRetrievedData: SessionDataActionWithRetrievedData,
+                                 val authenticatedAction: AuthenticatedAction,
+                                 val sessionDataAction: SessionDataAction,
+                                 val config: Configuration,
+                                 weNeedMoreDetailsPage: views.html.we_need_more_details
+)(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthRetrievalsAndSessionDataAction
-    with Logging
+      with WithAuthAndSessionDataAction
+      with Logging
     with SessionUpdates
     with IvBehaviour {
 
@@ -110,6 +115,13 @@ class StartController @Inject()(
     }
   }
 
+  def weNeedMoreDetails(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
+    request.sessionData.flatMap(_.needMoreDetailsContinueUrl) match {
+      case None              => Redirect(routes.StartController.start())
+      case Some(continueUrl) => Ok(weNeedMoreDetailsPage(continueUrl))
+    }
+  }
+
   private def handleNonTrustOrganisation()(
     implicit request: RequestWithSessionDataAndRetrievedData[_]
   ): Future[Result] = {
@@ -147,14 +159,18 @@ class StartController @Inject()(
         case None =>
           val subscriptionStatus =
             SubscriptionStatus.TryingToGetIndividualsFootprint(None, None, maybeEmail, ggCredId)
-          updateSession(sessionStore, request)(_.copy(journeyStatus = Some(subscriptionStatus)))
+          updateSession(sessionStore, request)(
+            _.copy(
+              journeyStatus = Some(subscriptionStatus),
+              needMoreDetailsContinueUrl = Some(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url))
+          )
             .map {
               case Left(e) =>
                 logger.warn("Could not update session with insufficient confidence level", e)
                 errorHandler.errorResult()
 
               case Right(_) =>
-                Redirect(routes.InsufficientConfidenceLevelController.doYouHaveNINO())
+                Redirect(routes.StartController.weNeedMoreDetails())
             }
       }
 
@@ -198,8 +214,8 @@ class StartController @Inject()(
                 _ =>
                   updateSession(sessionStore, request)(
                     _.copy(
-                      journeyStatus =
-                        Some(SubscriptionStatus.SubscriptionMissingData(bprWithTrustName._1))
+                      journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bprWithTrustName._1)),
+                      needMoreDetailsContinueUrl = Some(email.routes.SubscriptionEnterEmailController.enterEmail().url)
                     )
                   ),
                 subscriptionDetails =>
@@ -215,7 +231,7 @@ class StartController @Inject()(
         logger.warn(s"Could not build subscription data for trust with SAUTR ${trust.sautr}", e)
         errorHandler.errorResult()
       }, {
-        case Left(MissingData.Email) => Redirect(email.routes.SubscriptionEnterEmailController.enterEmail())
+        case Left(MissingData.Email) => Redirect(routes.StartController.weNeedMoreDetails())
         case Right(_)                => Redirect(routes.SubscriptionController.checkYourDetails())
       }
     )
@@ -252,7 +268,10 @@ class StartController @Inject()(
             maybeSubscriptionDetails.fold[Future[Either[Error, Unit]]](
               _ =>
                 updateSession(sessionStore, request)(
-                  _.copy(journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bpr)))
+                  _.copy(
+                    journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bpr)),
+                    needMoreDetailsContinueUrl = Some(email.routes.SubscriptionEnterEmailController.enterEmail().url)
+                  )
                 ),
               subscriptionDetails =>
                 updateSession(sessionStore, request)(
@@ -272,7 +291,7 @@ class StartController @Inject()(
             s"Could not find the following data for subscription details: ${missingData.toList.mkString(",")}"
           )
           missingData.head match {
-            case MissingData.Email     => Redirect(email.routes.SubscriptionEnterEmailController.enterEmail())
+            case MissingData.Email     => Redirect(routes.StartController.weNeedMoreDetails())
           }
 
         case Right(_) =>
