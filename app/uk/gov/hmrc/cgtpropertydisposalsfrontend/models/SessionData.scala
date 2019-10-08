@@ -23,7 +23,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.AddressLookupResu
 final case class SessionData(
                               journeyStatus: Option[JourneyStatus],
                               emailToBeVerified: Option[EmailToBeVerified],
-                              addressLookupResult: Option[AddressLookupResult]
+                              addressLookupResult: Option[AddressLookupResult],
+                              needMoreDetailsContinueUrl: Option[String]
 )
 
 object SessionData {
@@ -32,6 +33,6 @@ object SessionData {
 
   implicit val eq: Eq[SessionData] = Eq.fromUniversalEquals[SessionData]
 
-  val empty: SessionData = SessionData(None, None, None)
+  val empty: SessionData = SessionData(None, None, None, None)
 
 }

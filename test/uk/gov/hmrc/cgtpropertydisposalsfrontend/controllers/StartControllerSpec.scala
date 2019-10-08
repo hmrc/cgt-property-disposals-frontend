@@ -16,16 +16,16 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
-import java.time.LocalDate
-
 import cats.data.EitherT
 import cats.instances.future._
 import org.joda.time.{LocalDate => JodaLocalDate}
 import org.scalacheck.ScalacheckShapeless._
+import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{AnyContent, Request, Result}
 import play.api.test.FakeRequest
+import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.ConfidenceLevel.L50
 import uk.gov.hmrc.auth.core.retrieve.Credentials
 import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, ConfidenceLevel}
@@ -62,6 +62,8 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
   override lazy val additionalConfig = ivConfig(useRelativeUrls = false)
 
   lazy val controller = instanceOf[StartController]
+
+  lazy implicit val messagesApi: MessagesApi = controller.messagesApi
 
   def mockGetBusinessPartnerRecord(request: BusinessPartnerRecordRequest)(
     result: Either[Error, BusinessPartnerRecordResponse]
@@ -177,7 +179,8 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 mockStoreSession(
                   SessionData.empty.copy(
                     journeyStatus = Some(SubscriptionStatus.TryingToGetIndividualsFootprint(
-                      None, None, None, ggCredId))
+                      None, None, None, ggCredId)),
+                    needMoreDetailsContinueUrl = Some(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url)
                   )
                 )(Future.successful(Left(Error(""))))
               }
@@ -239,7 +242,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
           }
 
-          "redirect to the do you have a nino page" when {
+          "redirect to the we need more details page" when {
 
             "the user does not have sufficient confidence level and there is no NINO in the auth record" in {
               inSequence {
@@ -257,12 +260,13 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                   SessionData.empty.copy(
                     journeyStatus = Some(
                       SubscriptionStatus.TryingToGetIndividualsFootprint(None, None, None, ggCredId)
-                    )
+                    ),
+                    needMoreDetailsContinueUrl = Some(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url)
                   )
                 )(Future.successful(Right(())))
               }
 
-              checkIsRedirect(performAction(), routes.InsufficientConfidenceLevelController.doYouHaveNINO())
+              checkIsRedirect(performAction(), routes.StartController.weNeedMoreDetails())
             }
 
             "the session data indicates they do not have sufficient confidence level" in {
@@ -716,12 +720,15 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
           }
 
-          "redirect to enter email" when {
+          "redirect to enter we need more details page" when {
 
             "there is no email in the BPR or the auth record for a user with CL 200" in {
               val bprWithNoEmail = bpr.copy(emailAddress = None)
               val updatedSession =
-                SessionData.empty.copy(journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail)))
+                SessionData.empty.copy(
+                  journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail)),
+                  needMoreDetailsContinueUrl = Some(email.routes.SubscriptionEnterEmailController.enterEmail().url)
+                )
 
               inSequence {
                 mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, None)
@@ -732,13 +739,16 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 mockStoreSession(updatedSession)(Future.successful(Right(())))
               }
 
-              checkIsRedirect(performAction(), email.routes.SubscriptionEnterEmailController.enterEmail().url)
+              checkIsRedirect(performAction(), routes.StartController.weNeedMoreDetails())
             }
 
             "there is no email in the BPR or the auth record for a user with CL < 200" in {
               val bprWithNoEmail     = bpr.copy(emailAddress = None)
               val updatedSession =
-                SessionData.empty.copy(journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail)))
+                SessionData.empty.copy(
+                  journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail)),
+                  needMoreDetailsContinueUrl = Some(email.routes.SubscriptionEnterEmailController.enterEmail().url)
+                )
 
               inSequence {
                 mockAuthWithAllRetrievals(
@@ -757,7 +767,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 mockStoreSession(updatedSession)(Future.successful(Right(())))
               }
 
-              checkIsRedirect(performAction(), email.routes.SubscriptionEnterEmailController.enterEmail().url)
+              checkIsRedirect(performAction(), routes.StartController.weNeedMoreDetails())
             }
 
             "the session data indicates there is data missing for subscription and the email address " +
@@ -916,7 +926,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             }
           }
 
-          "redirect to the enter email page" when {
+          "redirect to the we need more details page" when {
 
             "there is no email in the BPR or in the auth record" in {
               val bprWithNoEmail = bpr.copy(emailAddress = None)
@@ -928,11 +938,14 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                   Right(BusinessPartnerRecordResponse(Some(bprWithNoEmail)))
                 )
                 mockStoreSession(
-                  SessionData.empty.copy(journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail)))
+                  SessionData.empty.copy(
+                    journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail)),
+                    needMoreDetailsContinueUrl = Some(email.routes.SubscriptionEnterEmailController.enterEmail().url)
+                  )
                 )(Future.successful(Right(())))
               }
 
-              checkIsRedirect(performAction(), email.routes.SubscriptionEnterEmailController.enterEmail())
+              checkIsRedirect(performAction(), routes.StartController.weNeedMoreDetails())
             }
 
             "the session data indicates there is data missing for subscription and the email address " +
@@ -955,6 +968,51 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
       }
     }
+
+    "handling requests to display the need more details page" must {
+
+      def performAction(): Future[Result] = controller.weNeedMoreDetails()(FakeRequest())
+
+      "redirect to the start endpoint" when {
+
+        "there is no continue url in session" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(
+              journeyStatus = Some(sample[JourneyStatus])
+            )))))
+          }
+
+          checkIsRedirect(performAction(), routes.StartController.start())
+        }
+
+      }
+
+      "display the page" when {
+
+        "there is a continue url in session" in {
+          val continueUrl = "/continue/url"
+
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(
+              journeyStatus = Some(sample[JourneyStatus]),
+              needMoreDetailsContinueUrl = Some(continueUrl)
+            )))))
+          }
+
+          val result = performAction()
+          val content = contentAsString(result)
+
+          status(result) shouldBe OK
+          content should include(message("weNeedMoreDetails.title"))
+          content should include(continueUrl)
+        }
+      }
+
+
+    }
+
 
   }
 

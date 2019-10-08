@@ -24,7 +24,7 @@
  pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
 )
 
-@(continueUrl: Call)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(continueUrl: String)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
 @title = @{messages("weNeedMoreDetails.title")}
 
@@ -37,5 +37,5 @@
    <li>@messages("weNeedMoreDetails.1")</li>
    <li>@messages("weNeedMoreDetails.2")</li>
   </ol>
- @buttonLink(messages("button.continue"), continueUrl.url)
+ @buttonLink(messages("button.continue"), continueUrl)
 }

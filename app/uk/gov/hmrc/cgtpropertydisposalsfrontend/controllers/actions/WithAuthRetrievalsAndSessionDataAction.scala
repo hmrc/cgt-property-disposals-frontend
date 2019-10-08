@@ -23,9 +23,9 @@ trait WithAuthRetrievalsAndSessionDataAction { this: FrontendController =>
 
   val authenticatedActionWithRetrievedData: AuthenticatedActionWithRetrievedData
 
-  val sessionDataAction: SessionDataActionWithRetrievedData
+  val sessionDataActionWithRetrievedData: SessionDataActionWithRetrievedData
 
   val authenticatedActionWithRetrievedDataAndSessionData: ActionBuilder[RequestWithSessionDataAndRetrievedData, AnyContent] =
-    Action.andThen(authenticatedActionWithRetrievedData).andThen(sessionDataAction)
+    Action.andThen(authenticatedActionWithRetrievedData).andThen(sessionDataActionWithRetrievedData)
 
 }
