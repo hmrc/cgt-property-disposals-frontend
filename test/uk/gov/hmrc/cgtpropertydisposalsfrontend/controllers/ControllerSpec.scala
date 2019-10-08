@@ -29,6 +29,7 @@ import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Application, Configuration, Play}
+import play.modules.reactivemongo.ReactiveMongoComponent
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 
 import scala.concurrent.Future
@@ -51,7 +52,6 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
           )
         ) ++ additionalConfig
       )
-      .disable[uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore]
       .overrides(overrideBindings: _*)
       .build()
 
@@ -69,6 +69,7 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
 
   override def afterAll(): Unit = {
     Play.stop(fakeApplication)
+    Thread.sleep(3000)
     super.afterAll()
   }
 

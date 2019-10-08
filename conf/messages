@@ -193,3 +193,9 @@ firstName.error.pattern=First name can only include letters, apostrophes, hyphen
 lastName.error.required=Enter your last name
 lastName.error.tooLong=Last name must be less than 36 characters
 lastName.error.pattern=Last name can only include letters, apostrophes, hyphens, spaces and ampersands
+
+weNeedMoreDetails.title=We need more details
+weNeedMoreDetails.caption=Create a CGT on UK property account
+weNeedMoreDetails.p=This is so you can:
+weNeedMoreDetails.1=Create a Capital Gains Tax (CGT) on UK property account.
+weNeedMoreDetails.2=Report your CGT on UK property sales or disposals.

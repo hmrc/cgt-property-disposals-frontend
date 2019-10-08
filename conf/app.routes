@@ -1,7 +1,7 @@
 GET /                                     controllers.Default.redirect(to = "/cgt-property-disposals/landing-page")
 GET /landing-page                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.LandingPageController.landingPage()
 GET /start                                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.start()
-
+GET /we-need-more-details                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.weNeedMoreDetails()
 
 #### IV
 GET  /iv/success                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.IvController.ivSuccess()

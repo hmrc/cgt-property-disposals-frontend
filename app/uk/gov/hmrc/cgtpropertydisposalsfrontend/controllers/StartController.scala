@@ -21,8 +21,8 @@ import cats.instances.future._
 import cats.syntax.either._
 import com.google.inject.Inject
 import play.api.Configuration
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
+import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedActionWithRetrievedData, RequestWithSessionDataAndRetrievedData, SessionDataActionWithRetrievedData, WithAuthRetrievalsAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecordRequest.{IndividualBusinessPartnerRecordRequest, TrustBusinessPartnerRecordRequest}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{RegistrationStatus, SubscriptionStatus}
@@ -37,6 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordSe
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.toFuture
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
@@ -49,8 +50,9 @@ class StartController @Inject()(
   cc: MessagesControllerComponents,
   val authenticatedActionWithRetrievedData: AuthenticatedActionWithRetrievedData,
   val sessionDataAction: SessionDataActionWithRetrievedData,
-  val config: Configuration
-)(implicit ec: ExecutionContext)
+  val config: Configuration,
+  weNeedMoreDetailsPage: views.html.we_need_more_details
+)(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthRetrievalsAndSessionDataAction
     with Logging
@@ -108,6 +110,12 @@ class StartController @Inject()(
       case (UserType.OrganisationUnregisteredTrust, _) | (_, Some(SubscriptionStatus.UnregisteredTrust)) =>
         handleNonTrustOrganisation()
     }
+  }
+
+  def weNeedMoreDetails(): Action[AnyContent] = Action { implicit request =>
+    // TODO: eval which route to redirect to
+    val continueUrl: Call = routes.InsufficientConfidenceLevelController.doYouHaveNINO()
+    Ok(weNeedMoreDetailsPage(continueUrl))
   }
 
   private def handleNonTrustOrganisation()(
