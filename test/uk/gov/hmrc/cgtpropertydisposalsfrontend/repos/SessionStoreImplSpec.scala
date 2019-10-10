@@ -20,41 +20,31 @@ import java.util.UUID
 
 import com.typesafe.config.ConfigFactory
 import org.scalacheck.ScalacheckShapeless._
-import org.scalatest.concurrent.{Eventually, ScalaFutures}
+import org.scalatest.concurrent.Eventually
 import org.scalatest.{Matchers, WordSpec}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.Configuration
 import play.api.libs.json.{JsNumber, JsObject}
+import play.api.test.Helpers._
 import uk.gov.hmrc.cache.model.{Cache, Id}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, _}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStoreSpec._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStoreSpec.TestEnvironment
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.SessionId
 import uk.gov.hmrc.mongo.DatabaseUpdate
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.concurrent.duration._
 
 class SessionStoreImplSpec
     extends WordSpec
     with Matchers
     with MongoSupport
-    with ScalaFutures
     with Eventually
     with ScalaCheckDrivenPropertyChecks {
 
-  val config = Configuration(
-    ConfigFactory.parseString(
-      """
-      |session-store.expiry-time = 30minutes
-      |""".stripMargin
-    )
-  )
-
   val sessionStore = new SessionStoreImpl(reactiveMongoComponent, config)
-
-  override implicit val patienceConfig: PatienceConfig =
-    PatienceConfig(5.seconds, 500.millis)
 
   "SessionStoreImpl" must {
 
@@ -62,50 +52,81 @@ class SessionStoreImplSpec
       forAll { sessionData: SessionData =>
         val result = sessionStore.store(sessionData)
 
-        result.futureValue should be(Right(()))
+        await(result) should be(Right(()))
 
         eventually {
           val getResult = sessionStore.get()
-          getResult.futureValue should be(Right(Some(sessionData)))
+          await(getResult) should be(Right(Some(sessionData)))
         }
       }
     }
 
     "return no SessionData if there is no data in mongo" in new TestEnvironment {
-      sessionStore.get().futureValue should be(Right(None))
+      await(sessionStore.get()) should be(Right(None))
     }
 
     "return an error" when {
-
-      "the connection to mongo is broken" in new TestEnvironment {
-        val sessionData = sample[SessionData]
-
-        withBrokenMongo { brokenMongo =>
-          val sessionStore = new SessionStoreImpl(brokenMongo, config)
-          sessionStore.get().futureValue.isLeft              shouldBe true
-          sessionStore.store(sessionData).futureValue.isLeft shouldBe true
-        }
-      }
 
       "the data in mongo cannot be parsed" in new TestEnvironment {
         val invalidData = JsObject(Map("journeyStatus" -> JsNumber(1)))
         val create: Future[DatabaseUpdate[Cache]] =
           sessionStore.cacheRepository.createOrUpdate(Id(sessionId.value), sessionStore.sessionKey, invalidData)
-        create.futureValue.writeResult.inError shouldBe false
-        sessionStore.get().futureValue.isLeft  shouldBe true
+        await(create).writeResult.inError shouldBe false
+        await(sessionStore.get()).isLeft  shouldBe true
       }
 
       "there is no session id in the header carrier" in {
         implicit val hc: HeaderCarrier = HeaderCarrier()
         val sessionData                = sample[SessionData]
 
-        sessionStore.store(sessionData).futureValue.isLeft shouldBe true
-        sessionStore.get().futureValue.isLeft              shouldBe true
+        await(sessionStore.store(sessionData)).isLeft shouldBe true
+        await(sessionStore.get()).isLeft              shouldBe true
       }
 
     }
 
   }
+
+
+}
+
+class SessionStoreFailureSpec extends WordSpec with Matchers with MongoSupport {
+
+  val sessionStore = new SessionStoreImpl(reactiveMongoComponent, config)
+
+  reactiveMongoComponent.mongoConnector.helper.driver.close()
+
+  val mongoIsBrokenAndAttemptingTo = new AfterWord("mongo is broken and attempting to")
+
+  "SessionStore" must {
+
+    "return an error" when mongoIsBrokenAndAttemptingTo {
+
+      "insert a record" in new TestEnvironment {
+        await(sessionStore.get()).isLeft              shouldBe true
+      }
+
+      "read a record" in new TestEnvironment{
+        val sessionData = sample[SessionData]
+
+        await(sessionStore.store(sessionData)).isLeft shouldBe true
+      }
+
+    }
+
+  }
+
+}
+
+object SessionStoreSpec {
+
+  val config = Configuration(
+    ConfigFactory.parseString(
+      """
+        |session-store.expiry-time = 30minutes
+        |""".stripMargin
+    )
+  )
 
   class TestEnvironment {
 
@@ -114,5 +135,6 @@ class SessionStoreImplSpec
     implicit val hc: HeaderCarrier = HeaderCarrier(sessionId = Some(sessionId))
 
   }
+
 
 }

@@ -18,21 +18,23 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos
 
 import com.typesafe.config.ConfigFactory
 import org.scalacheck.ScalacheckShapeless._
+import org.scalatest.concurrent.Eventually
 import org.scalatest.{Matchers, WordSpec}
-import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import play.api.Configuration
 import play.api.libs.json.{JsObject, JsString}
+import play.api.test.Helpers._
 import uk.gov.hmrc.cache.model.{Cache, Id}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.UnsuccessfulNameMatchAttempts
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.sample
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.BusinessPartnerRecordNameMatchRetryStoreSpec._
 import uk.gov.hmrc.mongo.DatabaseUpdate
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class BusinessPartnerRecordNameMatchRetryStoreImplSpec extends WordSpec with Matchers with MongoSupport with ScalaFutures with Eventually {
+object BusinessPartnerRecordNameMatchRetryStoreSpec {
 
   val config = Configuration(
     ConfigFactory.parseString(
@@ -42,7 +44,20 @@ class BusinessPartnerRecordNameMatchRetryStoreImplSpec extends WordSpec with Mat
     )
   )
 
-  val sessionStore = new BusinessPartnerRecordNameMatchRetryStoreImpl(reactiveMongoComponent, config)
+  class TestEnvironment {
+    val ggCredId             = sample[GGCredId]
+    val unsuccessfulAttempts = sample[UnsuccessfulNameMatchAttempts]
+  }
+
+}
+
+class BusinessPartnerRecordNameMatchRetryStoreImplSpec
+    extends WordSpec
+    with Matchers
+    with MongoSupport
+    with Eventually {
+
+  val retryStore = new BusinessPartnerRecordNameMatchRetryStoreImpl(reactiveMongoComponent, config)
 
   override implicit val patienceConfig: PatienceConfig =
     PatienceConfig(5.seconds, 500.millis)
@@ -50,47 +65,58 @@ class BusinessPartnerRecordNameMatchRetryStoreImplSpec extends WordSpec with Mat
   "BusinessPartnerRecordNameMatchRetryStoreImpl" must {
 
     "be able to insert retry data into mongo and read it back" in new TestEnvironment {
-      val result = sessionStore.store(ggCredId, unsuccessfulAttempts)
+      val result = retryStore.store(ggCredId, unsuccessfulAttempts)
 
-      result.futureValue should be(Right(()))
+      await(result) should be(Right(()))
 
       eventually {
-        val getResult = sessionStore.get(ggCredId)
-        getResult.futureValue should be(Right(Some(unsuccessfulAttempts)))
+        val getResult = retryStore.get(ggCredId)
+        await(getResult) should be(Right(Some(unsuccessfulAttempts)))
       }
 
     }
 
     "return no retry data if there is no data in mongo" in new TestEnvironment {
-      sessionStore.get(sample[GGCredId]).futureValue should be(Right(None))
+      await(retryStore.get(sample[GGCredId])) should be(Right(None))
     }
 
     "return an error" when {
 
-      "the connection to mongo is broken" in new TestEnvironment {
-        withBrokenMongo { brokenMongo =>
-          val sessionStore = new BusinessPartnerRecordNameMatchRetryStoreImpl(brokenMongo, config)
-          sessionStore.get(ggCredId).futureValue.isLeft              shouldBe true
-          sessionStore.store(ggCredId, unsuccessfulAttempts).futureValue.isLeft shouldBe true
-        }
-      }
-
       "the data in mongo cannot be parsed" in new TestEnvironment {
         val invalidData = JsObject(Map("numberOfRetriesDone" -> JsString("1")))
         val create: Future[DatabaseUpdate[Cache]] =
-          sessionStore.cacheRepository.createOrUpdate(Id(ggCredId.value), sessionStore.sessionKey, invalidData)
-        create.futureValue.writeResult.inError shouldBe false
-        sessionStore.get(ggCredId).futureValue.isLeft  shouldBe true
+          retryStore.cacheRepository.createOrUpdate(Id(ggCredId.value), retryStore.sessionKey, invalidData)
+        await(create).writeResult.inError      shouldBe false
+        await(retryStore.get(ggCredId)).isLeft shouldBe true
       }
-
 
     }
 
   }
 
-  class TestEnvironment {
-    val ggCredId = sample[GGCredId]
-    val unsuccessfulAttempts = sample[UnsuccessfulNameMatchAttempts]
+}
+
+class BusinessPartnerRecordNameMatchRetryStoreFailureSpec extends WordSpec with Matchers with MongoSupport {
+
+  val retryStore = new BusinessPartnerRecordNameMatchRetryStoreImpl(reactiveMongoComponent, config)
+  reactiveMongoComponent.mongoConnector.helper.driver.close()
+
+  val mongoIsBrokenAndAttemptingTo = new AfterWord("mongo is broken and attempting to")
+
+  "BusinessPartnerRecordNameMatchRetryStore" must {
+
+    "return an error" when mongoIsBrokenAndAttemptingTo {
+
+      "insert a record" in new TestEnvironment {
+        await(retryStore.get(ggCredId)).isLeft shouldBe true
+      }
+
+      "read a record" in new TestEnvironment {
+        await(retryStore.store(ggCredId, unsuccessfulAttempts)).isLeft shouldBe true
+      }
+
+    }
+
   }
 
 }
