@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name
 
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
@@ -32,6 +32,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.ExecutionContext
 
+@Singleton
 class RegistrationChangeIndividualNameController @Inject()(
                                                  val authenticatedAction: AuthenticatedAction,
                                                  val sessionDataAction: SessionDataAction,
