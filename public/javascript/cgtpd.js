@@ -22,7 +22,7 @@ if(countryEl) {
       if (countrySelect) {
         var countriesArray = Array.prototype.slice.call(countrySelect.options);
         var matches = countriesArray.filter(function (o) {
-          return o.text === val
+          return o.text !== '' && o.text === val
         });
         if (!matches.length) {
           countrySelect.value = ''
