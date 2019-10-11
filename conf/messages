@@ -111,8 +111,9 @@ confirmEmail.verified.p2=Your email has not been updated in other government ser
 
 contactName.title=Change your contact name for this service
 contactName.extraContent=We’ll only use the name on any contact letters or emails we send to you about this service. Your details in other government services will not change.
-contactName.error.pattern=Please enter a valid contact name
-contactName.error.required=Please enter a valid contact name
+contactName.error.pattern=Contact name must only include letters, numbers, hyphens, apostrophes, commas, ampersands and spaces
+contactName.error.required=Enter your contact name
+contactName.error.tooLong=Contact name must must be 105 characters or fewer
 
 address.caption=Property address
 address.postcode.label=Postcode
