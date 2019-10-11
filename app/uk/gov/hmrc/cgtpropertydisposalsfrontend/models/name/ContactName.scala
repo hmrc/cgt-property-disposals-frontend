@@ -16,8 +16,12 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name
 
-import play.api.data.Form
-import play.api.data.Forms.{mapping, text}
+import cats.Eq
+import cats.instances.string._
+import cats.syntax.eq._
+import play.api.data.Forms.{nonEmptyText, mapping => formMapping}
+import play.api.data.validation.{Constraint, Invalid, Valid, ValidationResult}
+import play.api.data.{Form, Mapping}
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Format
 
@@ -28,16 +32,28 @@ object ContactName {
   implicit val format: Format[ContactName] =
     implicitly[Format[String]].inmap(ContactName(_), _.value)
 
-  val form: Form[ContactName] = {
-    val regexPredicate = "^[a-zA-Z0-9 &,`\\-\\'\\.^]{1,105}$".r.pattern.asPredicate()
+  implicit val eq: Eq[ContactName] = Eq.instance{
+    case (n1, n2) => n1.value === n2.value
+  }
+
+  val mapping: Mapping[String] = {
+    val regexPredicate = "^[a-zA-Z0-9 &,`\\-\'.^]{1,105}$".r.pattern.asPredicate()
+
+    def validateContactName(s: String): ValidationResult =
+      if(s.length > 105) Invalid("error.tooLong")
+      else if(!regexPredicate.test(s)) Invalid("error.pattern")
+      else Valid
+
+    nonEmptyText
+      .transform[String](_.trim, identity)
+      .verifying(Constraint[String](validateContactName(_)))
+  }
+
+  val form: Form[ContactName] =
     Form(
-      mapping(
-        "contactName" -> text
-          .transform[String](_.trim, identity)
-           .verifying("error.required", _.nonEmpty)
-          .verifying("error.pattern", regexPredicate.test(_))
+      formMapping(
+        "contactName" -> mapping
       )(ContactName.apply)(ContactName.unapply)
     )
-  }
 
 }
