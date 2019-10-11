@@ -26,7 +26,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
@@ -74,8 +74,8 @@ class SubscriptionChangeEmailController @Inject()(
   override def updateEmail(journey: SubscriptionReady, email: Email): SubscriptionReady =
     subscriptionReadyEmailLens.set(journey)(email)
 
-  override def name(journeyStatus: SubscriptionReady): Either[TrustName, IndividualName] =
-    journeyStatus.subscriptionDetails.name
+  override def name(journeyStatus: SubscriptionReady): ContactName =
+    journeyStatus.subscriptionDetails.contactName
 
   override lazy protected val backLinkCall: Option[Call] = Some(
     controllers.routes.SubscriptionController.checkYourDetails()

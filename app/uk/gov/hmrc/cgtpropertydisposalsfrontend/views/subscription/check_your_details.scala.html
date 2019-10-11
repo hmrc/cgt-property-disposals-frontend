@@ -49,7 +49,7 @@
  @pageHeading(title, Some(messages("subscription.caption")))
 
  <p class="lede">
-  @messages("subscription.lede", details.name.fold(_.value, n => s"${n.firstName} ${n.lastName}"))
+  @messages("subscription.lede", details.name.fold(_.value, n => n.makeSingleName))
  </p>
 
  <div class="panel panel-border-wide">

@@ -26,7 +26,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -72,9 +72,8 @@ class RegistrationChangeEmailController @Inject()(
   override def updateEmail(journey: RegistrationReady, email: Email): RegistrationReady =
     journey.copy(registrationDetails = journey.registrationDetails.copy(emailAddress = email))
 
-  override def name(journeyStatus: RegistrationReady): Either[TrustName, IndividualName] =
-    Right(journeyStatus.registrationDetails.name)
-
+  override def name(journeyStatus: RegistrationReady): ContactName =
+    ContactName(journeyStatus.registrationDetails.name.makeSingleName())
   override lazy protected val backLinkCall: Option[Call] = Some(
     controllers.routes.RegistrationController.checkYourAnswers()
   )

@@ -360,7 +360,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                   Right(name),
                   emailAddress,
                   bpr.address,
-                  ContactName(s"${name.firstName} ${name.lastName}"),
+                  ContactName(name.makeSingleName),
                   bpr.sapNumber
                 )
 
@@ -434,7 +434,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             Right(name),
             emailAddress,
             bpr.address,
-            ContactName(s"${name.firstName} ${name.lastName}"),
+            ContactName(name.makeSingleName()),
             bpr.sapNumber
           )
 
