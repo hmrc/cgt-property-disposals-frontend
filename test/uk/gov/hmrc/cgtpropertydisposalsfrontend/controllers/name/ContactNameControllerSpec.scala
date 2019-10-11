@@ -129,7 +129,7 @@ class ContactNameControllerSpec
           }
 
         "the contact name is too long" in {
-          testFormError("contactName" -> List.fill(106)('a').mkString(""))("contactName.error.pattern")
+          testFormError("contactName" -> List.fill(106)('a').mkString(""))("contactName.error.tooLong")
         }
 
         "the contact name contains an invalid character" in {
