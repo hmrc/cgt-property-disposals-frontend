@@ -65,7 +65,7 @@ class StartController @Inject()(
   def start(): Action[AnyContent] = authenticatedActionWithRetrievedDataAndSessionData.async { implicit request =>
     (request.authenticatedRequest.userType, request.sessionData.flatMap(_.journeyStatus)) match {
 
-      case (_, Some(_: SubscriptionStatus.Subscribed)) =>
+      case (UserType.Subscribed(cgtReference, gGCredId), None) =>
         Redirect(routes.HomeController.start())
 
       case (_, Some(_: SubscriptionStatus.SubscriptionReady)) =>
