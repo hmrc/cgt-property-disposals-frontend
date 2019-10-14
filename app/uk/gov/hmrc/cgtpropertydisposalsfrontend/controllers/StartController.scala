@@ -21,22 +21,21 @@ import cats.instances.future._
 import cats.syntax.either._
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
-import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, AuthenticatedActionWithRetrievedData, RequestWithSessionDataAndRetrievedData, SessionDataAction, SessionDataActionWithRetrievedData, WithAuthAndSessionDataAction, WithAuthRetrievalsAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecordRequest.{IndividualBusinessPartnerRecordRequest, TrustBusinessPartnerRecordRequest}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{RegistrationStatus, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionDetails.MissingData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecord
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecordRequest.{IndividualBusinessPartnerRecordRequest, TrustBusinessPartnerRecordRequest}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.toFuture
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
@@ -45,27 +44,29 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class StartController @Inject()(
-                                 bprService: BusinessPartnerRecordService,
-                                 val sessionStore: SessionStore,
-                                 val errorHandler: ErrorHandler,
-                                 cc: MessagesControllerComponents,
-                                 val authenticatedActionWithRetrievedData: AuthenticatedActionWithRetrievedData,
-                                 val sessionDataActionWithRetrievedData: SessionDataActionWithRetrievedData,
-                                 val authenticatedAction: AuthenticatedAction,
-                                 val sessionDataAction: SessionDataAction,
-                                 val config: Configuration,
-                                 weNeedMoreDetailsPage: views.html.we_need_more_details
+  bprService: BusinessPartnerRecordService,
+  val sessionStore: SessionStore,
+  val errorHandler: ErrorHandler,
+  cc: MessagesControllerComponents,
+  val authenticatedActionWithRetrievedData: AuthenticatedActionWithRetrievedData,
+  val sessionDataActionWithRetrievedData: SessionDataActionWithRetrievedData,
+  val authenticatedAction: AuthenticatedAction,
+  val sessionDataAction: SessionDataAction,
+  val config: Configuration,
+  weNeedMoreDetailsPage: views.html.we_need_more_details
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthRetrievalsAndSessionDataAction
-      with WithAuthAndSessionDataAction
-      with Logging
+    with WithAuthAndSessionDataAction
+    with Logging
     with SessionUpdates
     with IvBehaviour {
 
   def start(): Action[AnyContent] = authenticatedActionWithRetrievedDataAndSessionData.async { implicit request =>
-
     (request.authenticatedRequest.userType, request.sessionData.flatMap(_.journeyStatus)) match {
+
+      case (_, Some(_: SubscriptionStatus.Subscribed)) =>
+        Redirect(routes.HomeController.start())
 
       case (_, Some(_: SubscriptionStatus.SubscriptionReady)) =>
         Redirect(routes.SubscriptionController.checkYourDetails())
@@ -162,17 +163,17 @@ class StartController @Inject()(
             SubscriptionStatus.TryingToGetIndividualsFootprint(None, None, maybeEmail, ggCredId)
           updateSession(sessionStore, request)(
             _.copy(
-              journeyStatus = Some(subscriptionStatus),
-              needMoreDetailsContinueUrl = Some(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url))
-          )
-            .map {
-              case Left(e) =>
-                logger.warn("Could not update session with insufficient confidence level", e)
-                errorHandler.errorResult()
+              journeyStatus              = Some(subscriptionStatus),
+              needMoreDetailsContinueUrl = Some(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url)
+            )
+          ).map {
+            case Left(e) =>
+              logger.warn("Could not update session with insufficient confidence level", e)
+              errorHandler.errorResult()
 
-              case Right(_) =>
-                Redirect(routes.StartController.weNeedMoreDetails())
-            }
+            case Right(_) =>
+              Redirect(routes.StartController.weNeedMoreDetails())
+          }
       }
 
     case Some(_) =>
@@ -187,12 +188,21 @@ class StartController @Inject()(
         bprResponse <- bprService.getBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(trust.sautr))
 
         bprWithTrustName <- EitherT.fromEither[Future](
-          Either.fromOption(bprResponse.businessPartnerRecord, Error("Could not find BPR for trust"))
-            .flatMap(bpr =>
-              bpr.name.fold[Either[Error,(BusinessPartnerRecord,TrustName)]](
-                trustName => Right((bpr, trustName)),
-                _ => Left(Error("Found individual name but expected trust name in business partner record"))
-          )))
+                             Either
+                               .fromOption(bprResponse.businessPartnerRecord, Error("Could not find BPR for trust"))
+                               .flatMap(
+                                 bpr =>
+                                   bpr.name.fold[Either[Error, (BusinessPartnerRecord, TrustName)]](
+                                     trustName => Right((bpr, trustName)),
+                                     _ =>
+                                       Left(
+                                         Error(
+                                           "Found individual name but expected trust name in business partner record"
+                                         )
+                                       )
+                                   )
+                               )
+                           )
         maybeSubscriptionDetails <- EitherT.pure(
                                      bprWithTrustName._1.emailAddress
                                        .orElse(trust.email)
@@ -215,7 +225,7 @@ class StartController @Inject()(
                 _ =>
                   updateSession(sessionStore, request)(
                     _.copy(
-                      journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bprWithTrustName._1)),
+                      journeyStatus              = Some(SubscriptionStatus.SubscriptionMissingData(bprWithTrustName._1)),
                       needMoreDetailsContinueUrl = Some(email.routes.SubscriptionEnterEmailController.enterEmail().url)
                     )
                   ),
@@ -263,14 +273,16 @@ class StartController @Inject()(
   ): Future[Result] = {
     val result = for {
       bprResponse <- bprService.getBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(individual.id, None))
-      bpr <- EitherT.fromEither[Future](Either.fromOption(bprResponse.businessPartnerRecord, Error("Could not find BPR for individual")))
+      bpr <- EitherT.fromEither[Future](
+              Either.fromOption(bprResponse.businessPartnerRecord, Error("Could not find BPR for individual"))
+            )
       maybeSubscriptionDetails <- EitherT.pure(SubscriptionDetails(bpr, individual.email))
       _ <- EitherT(
             maybeSubscriptionDetails.fold[Future[Either[Error, Unit]]](
               _ =>
                 updateSession(sessionStore, request)(
                   _.copy(
-                    journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bpr)),
+                    journeyStatus              = Some(SubscriptionStatus.SubscriptionMissingData(bpr)),
                     needMoreDetailsContinueUrl = Some(email.routes.SubscriptionEnterEmailController.enterEmail().url)
                   )
                 ),
@@ -292,7 +304,7 @@ class StartController @Inject()(
             s"Could not find the following data for subscription details: ${missingData.toList.mkString(",")}"
           )
           missingData.head match {
-            case MissingData.Email     => Redirect(routes.StartController.weNeedMoreDetails())
+            case MissingData.Email => Redirect(routes.StartController.weNeedMoreDetails())
           }
 
         case Right(_) =>

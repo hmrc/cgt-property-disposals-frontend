@@ -14,23 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.util
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids
 
-import play.api.Logger
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import play.api.libs.json.{Json, OFormat}
 
-trait Logging {
+final case class CgtReference(value: String) extends AnyVal
 
-  val logger: Logger = Logger(this.getClass)
-
-}
-
-object Logging {
-
-  implicit class LoggerOps(val l: Logger) extends AnyVal {
-    def warn(msg: => String, e: => Error): Unit =
-      e.value.fold(e => l.warn(s"$msg: $e"), e => l.warn(msg, e))
-
-  }
-
+object CgtReference {
+  implicit val format: OFormat[CgtReference] = Json.format
 }

@@ -28,21 +28,22 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse.{EmailAlreadyVerified, EmailVerificationRequested}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class EmailVerificationServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
   val mockConnector = mock[EmailVerificationConnector]
 
   def mockVerifyEmail(
-                       expectedEmail: Email,
-                       expectedName: Either[TrustName,IndividualName],
-                       expectedContinueCall: Call)(
+    expectedEmail: Email,
+    expectedName: Either[TrustName, IndividualName],
+    expectedContinueCall: Call
+  )(
     result: Either[Error, HttpResponse]
   ) =
     (mockConnector
-      .verifyEmail(_: Email, _: Either[TrustName,IndividualName], _: Call)(_: HeaderCarrier))
+      .verifyEmail(_: Email, _: Either[TrustName, IndividualName], _: Call)(_: HeaderCarrier))
       .expects(expectedEmail, expectedName, expectedContinueCall, *)
       .returning(EitherT.fromEither[Future](result))
 

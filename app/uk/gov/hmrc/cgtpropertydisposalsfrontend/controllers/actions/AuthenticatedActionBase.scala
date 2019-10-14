@@ -28,8 +28,7 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait AuthenticatedActionBase [P[_]]
-  extends ActionRefiner[MessagesRequest,P] with Logging { self  =>
+trait AuthenticatedActionBase[P[_]] extends ActionRefiner[MessagesRequest, P] with Logging { self =>
 
   val authConnector: AuthConnector
   val config: Configuration
@@ -37,7 +36,7 @@ trait AuthenticatedActionBase [P[_]]
   val sessionStore: SessionStore
   implicit val executionContext: ExecutionContext
 
-  def authorisedFunction[A](auth: AuthorisedFunctions, request: MessagesRequest[A]): Future[Either[Result,P[A]]]
+  def authorisedFunction[A](auth: AuthorisedFunctions, request: MessagesRequest[A]): Future[Either[Result, P[A]]]
 
   private val authorisedFunctions: AuthorisedFunctions = new AuthorisedFunctions {
     override def authConnector: AuthConnector = self.authConnector
@@ -55,10 +54,12 @@ trait AuthenticatedActionBase [P[_]]
     implicit val hc: HeaderCarrier =
       HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-    authorisedFunction[A](authorisedFunctions, request).recoverWith{
+    authorisedFunction[A](authorisedFunctions, request).recoverWith {
       case _: NoActiveSession =>
-        Future.successful(Left(Redirect(signInUrl, Map("continue" -> Seq(selfBaseUrl + request.uri), "origin" -> Seq(origin)))))
+        Future.successful(
+          Left(Redirect(signInUrl, Map("continue" -> Seq(selfBaseUrl + request.uri), "origin" -> Seq(origin))))
+        )
     }
   }
 
-  }
+}

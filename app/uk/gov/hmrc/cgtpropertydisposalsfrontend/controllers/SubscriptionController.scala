@@ -22,29 +22,27 @@ import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
-import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.ExecutionContext
 
 @Singleton
 class SubscriptionController @Inject()(
-                                        subscriptionService: SubscriptionService,
-                                        sessionStore: SessionStore,
-                                        errorHandler: ErrorHandler,
-                                        cc: MessagesControllerComponents,
-                                        val authenticatedAction: AuthenticatedAction,
-                                        val sessionDataAction: SessionDataAction,
-                                        val subscriptionDetailsAction: SubscriptionReadyAction,
-                                        checkYourDetailsPage: views.html.subscription.check_your_details,
-                                        subscribedPage: views.html.subscription.subscribed
+  subscriptionService: SubscriptionService,
+  sessionStore: SessionStore,
+  errorHandler: ErrorHandler,
+  cc: MessagesControllerComponents,
+  val authenticatedAction: AuthenticatedAction,
+  val sessionDataAction: SessionDataAction,
+  val subscriptionDetailsAction: SubscriptionReadyAction,
+  checkYourDetailsPage: views.html.subscription.check_your_details,
+  subscribedPage: views.html.subscription.subscribed
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithSubscriptionDetailsActions
@@ -65,7 +63,8 @@ class SubscriptionController @Inject()(
         _ <- EitherT(
               updateSession(sessionStore, request)(
                 _.copy(journeyStatus = Some(SubscriptionComplete(details, subscriptionResponse)))
-              ))
+              )
+            )
       } yield subscriptionResponse
 
       result.fold(

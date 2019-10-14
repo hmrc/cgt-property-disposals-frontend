@@ -19,15 +19,14 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.IndividualSupplyingInformation
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.ExecutionContext
@@ -45,12 +44,14 @@ class RegistrationEnterIndividualNameController @Inject()(
     with WithAuthAndSessionDataAction
     with SessionUpdates
     with Logging
-with IndividualNameController[IndividualSupplyingInformation]{
+    with IndividualNameController[IndividualSupplyingInformation] {
 
-  override def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, IndividualSupplyingInformation)] =
+  override def validJourney(
+    request: RequestWithSessionData[_]
+  ): Either[Result, (SessionData, IndividualSupplyingInformation)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, i: IndividualSupplyingInformation)) => Right(sessionData -> i)
-      case _ => Left(Redirect(controllers.routes.StartController.start()))
+      case _                                                      => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   override def updateName(journey: IndividualSupplyingInformation, name: IndividualName): JourneyStatus =
@@ -59,7 +60,8 @@ with IndividualNameController[IndividualSupplyingInformation]{
   override def name(journey: IndividualSupplyingInformation): Option[IndividualName] = journey.name
 
   override protected lazy val backLinkCall: Call = controllers.routes.RegistrationController.selectEntityType()
-  override protected lazy val enterNameSubmitCall: Call = routes.RegistrationEnterIndividualNameController.enterIndividualNameSubmit()
+  override protected lazy val enterNameSubmitCall: Call =
+    routes.RegistrationEnterIndividualNameController.enterIndividualNameSubmit()
   override protected lazy val continueCall: Call = controllers.address.routes.RegistrationEnterAddressController.isUk()
 
 }

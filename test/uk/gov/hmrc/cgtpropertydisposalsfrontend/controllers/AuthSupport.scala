@@ -20,10 +20,11 @@ import play.api.Configuration
 import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, EmptyRetrieval, Retrieval, ~}
-import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, ConfidenceLevel, Enrolment, EnrolmentIdentifier, Enrolments}
+import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.AuthenticatedActionWithRetrievedData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.SAUTR
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -31,9 +32,11 @@ import scala.concurrent.{ExecutionContext, Future}
 trait AuthSupport {
   this: ControllerSpec with SessionSupport =>
 
-  val mockAuthConnector: AuthConnector = mock[AuthConnector]
+  val mockAuthConnector: AuthConnector             = mock[AuthConnector]
+  val mockSubscriptionService: SubscriptionService = mock[SubscriptionService]
 
   lazy val testAuthenticatedAction = new AuthenticatedActionWithRetrievedData(
+    mockSubscriptionService,
     mockAuthConnector,
     instanceOf[Configuration],
     instanceOf[ErrorHandler],
@@ -60,7 +63,8 @@ trait AuthSupport {
     retrievedSautr: Option[String],
     retrievedEmail: Option[String],
     retrievedEnrolments: Set[Enrolment],
-    retrievedCredentials: Option[Credentials]): Unit =
+    retrievedCredentials: Option[Credentials]
+  ): Unit =
     mockAuth(EmptyPredicate, expectedRetrievals)(
       Future successful (
         new ~(retrievedConfidenceLevel, retrievedAffinityGroup) and
@@ -69,13 +73,13 @@ trait AuthSupport {
           retrievedEmail and
           Enrolments(retrievedEnrolments) and
           retrievedCredentials
-        )
+      )
     )
 
   def mockAuthWithCl200AndWithAllIndividualRetrievals(
-                                             retrievedNino: String,
-                                             retrievedEmail: Option[String]
-                                           ): Unit =
+    retrievedNino: String,
+    retrievedEmail: Option[String]
+  ): Unit =
     mockAuthWithAllRetrievals(
       ConfidenceLevel.L200,
       Some(AffinityGroup.Individual),

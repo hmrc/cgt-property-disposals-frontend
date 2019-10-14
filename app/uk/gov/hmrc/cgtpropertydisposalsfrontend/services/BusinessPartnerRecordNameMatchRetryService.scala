@@ -40,10 +40,10 @@ trait BusinessPartnerRecordNameMatchRetryService {
   ): EitherT[Future, NameMatchError, Option[UnsuccessfulNameMatchAttempts]]
 
   def attemptBusinessPartnerRecordNameMatch(
-                                             sautr: SAUTR,
-                                             name: IndividualName,
-                                             ggCredId: GGCredId,
-                                             previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts]
+    sautr: SAUTR,
+    name: IndividualName,
+    ggCredId: GGCredId,
+    previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts]
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): EitherT[Future, NameMatchError, BusinessPartnerRecord]
 
 }
@@ -74,10 +74,10 @@ class BusinessPartnerRecordNameMatchRetryServiceImpl @Inject()(
       }
 
   def attemptBusinessPartnerRecordNameMatch(
-                                             sautr: SAUTR,
-                                             name: IndividualName,
-                                             ggCredId: GGCredId,
-                                             previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts]
+    sautr: SAUTR,
+    name: IndividualName,
+    ggCredId: GGCredId,
+    previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts]
   )(implicit ec: ExecutionContext, hc: HeaderCarrier): EitherT[Future, NameMatchError, BusinessPartnerRecord] =
     previousUnsuccessfulNameMatchAttempts match {
       case Some(UnsuccessfulNameMatchAttempts(previousAttempts, _, _, _))
@@ -98,11 +98,11 @@ class BusinessPartnerRecordNameMatchRetryServiceImpl @Inject()(
     }
 
   private def extractBpr(
-                          bprResponse: BusinessPartnerRecordResponse,
-                          sautr: SAUTR,
-                          name: IndividualName,
-                          ggCredId: GGCredId,
-                          previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts]
+    bprResponse: BusinessPartnerRecordResponse,
+    sautr: SAUTR,
+    name: IndividualName,
+    ggCredId: GGCredId,
+    previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts]
   )(implicit ec: ExecutionContext): EitherT[Future, NameMatchError, BusinessPartnerRecord] =
     EitherT[Future, NameMatchError, BusinessPartnerRecord] {
       Either
@@ -114,10 +114,10 @@ class BusinessPartnerRecordNameMatchRetryServiceImpl @Inject()(
     }
 
   private def handleBprNotFound(
-                                 sautr: SAUTR,
-                                 name: IndividualName,
-                                 ggCredId: GGCredId,
-                                 previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts]
+    sautr: SAUTR,
+    name: IndividualName,
+    ggCredId: GGCredId,
+    previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts]
   )(
     implicit ec: ExecutionContext
   ): Future[NameMatchError] = {

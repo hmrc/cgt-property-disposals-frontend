@@ -27,7 +27,7 @@ trait NameFormValidationTests { this: ControllerSpec =>
   def nameFormValidationTests(
     performAction: Seq[(String, String)] => Future[Result],
     mockActions: () => Unit
-  )(implicit messagesApi: MessagesApi): Unit = {
+  )(implicit messagesApi: MessagesApi): Unit =
     "show the page with errors" when {
 
       "the request submits no selection" in {
@@ -44,11 +44,9 @@ trait NameFormValidationTests { this: ControllerSpec =>
         mockActions()
 
         val result = performAction(
-          Seq(
-            "firstName" -> List.fill(36)("a").mkString(""),
-            "lastName" -> "Smith")
+          Seq("firstName" -> List.fill(36)("a").mkString(""), "lastName" -> "Smith")
         )
-        status(result) shouldBe BAD_REQUEST
+        status(result)          shouldBe BAD_REQUEST
         contentAsString(result) should include(message("firstName.error.tooLong"))
       }
 
@@ -58,10 +56,10 @@ trait NameFormValidationTests { this: ControllerSpec =>
         val result = performAction(
           Seq(
             "firstName" -> "999",
-            "lastName" -> "Smith"
+            "lastName"  -> "Smith"
           )
         )
-        status(result) shouldBe BAD_REQUEST
+        status(result)          shouldBe BAD_REQUEST
         contentAsString(result) should include(message("firstName.error.pattern"))
       }
 
@@ -71,10 +69,10 @@ trait NameFormValidationTests { this: ControllerSpec =>
         val result = performAction(
           Seq(
             "firstName" -> "Bob",
-            "lastName" -> List.fill(36)("a").mkString("")
+            "lastName"  -> List.fill(36)("a").mkString("")
           )
         )
-        status(result) shouldBe BAD_REQUEST
+        status(result)          shouldBe BAD_REQUEST
         contentAsString(result) should include(message("lastName.error.tooLong"))
       }
 
@@ -84,14 +82,13 @@ trait NameFormValidationTests { this: ControllerSpec =>
         val result = performAction(
           Seq(
             "firstName" -> "Bob",
-            "lastName" -> "i99"
+            "lastName"  -> "i99"
           )
         )
-        status(result) shouldBe BAD_REQUEST
+        status(result)          shouldBe BAD_REQUEST
         contentAsString(result) should include(message("lastName.error.pattern"))
       }
 
     }
-  }
 
 }

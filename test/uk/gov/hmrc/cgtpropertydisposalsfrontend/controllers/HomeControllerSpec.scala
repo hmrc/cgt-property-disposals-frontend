@@ -16,21 +16,26 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
-import com.google.inject.{Inject, Singleton}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
-import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import play.api.test.FakeRequest
+import play.api.test.Helpers._
 
-@Singleton
-class ReturnsController @Inject()(
-  cc: MessagesControllerComponents,
-  startPage: views.html.returns.start
-)(implicit viewConfig: ViewConfig)
-    extends FrontendController(cc) {
+class HomeControllerSpec extends ControllerSpec {
 
-  def start(): Action[AnyContent] = Action { implicit request =>
-    Ok(startPage())
+  val controller = instanceOf[HomeController]
+
+  "The ReturnsController" when {
+
+    "handling requests to display the start page" must {
+
+      "display the start page" in {
+        val result = controller.start()(FakeRequest())
+        status(result)          shouldBe OK
+        contentAsString(result) should include("Start your return here")
+
+      }
+
+    }
+
   }
 
 }

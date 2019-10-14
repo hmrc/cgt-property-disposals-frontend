@@ -642,8 +642,8 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
   )(implicit messagesApi: MessagesApi): Unit = {
     val sessionWithValidJourneyStatusAndAddressLookupResult =
       sessionWithValidJourneyStatus.copy(
-      addressLookupResult = Some(addressLookupResult)
-    )
+        addressLookupResult = Some(addressLookupResult)
+      )
 
     "redirect to the check your details page" when {
 

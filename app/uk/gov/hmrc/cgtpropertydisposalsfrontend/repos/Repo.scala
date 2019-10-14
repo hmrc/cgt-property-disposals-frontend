@@ -22,7 +22,7 @@ import cats.syntax.either._
 import play.api.libs.json.{Json, Reads, Writes}
 import uk.gov.hmrc.cache.model.Id
 import uk.gov.hmrc.cache.repository.CacheRepository
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -32,7 +32,7 @@ trait Repo {
 
   val sessionKey: String
 
-  protected def get[A : Reads](id: String)(implicit ec: ExecutionContext): Future[Either[Error, Option[A]]] =
+  protected def get[A: Reads](id: String)(implicit ec: ExecutionContext): Future[Either[Error, Option[A]]] =
     cacheRepository
       .findById(Id(id))
       .map { maybeCache =>
@@ -40,11 +40,11 @@ trait Repo {
           cache ← OptionT.fromOption[Either[Error, ?]](maybeCache)
           data ← OptionT.fromOption[Either[Error, ?]](cache.data)
           result ← OptionT.liftF[Either[Error, ?], A](
-            (data \ sessionKey)
-              .validate[A]
-              .asEither
-              .leftMap(e ⇒ Error(s"Could not parse session data from mongo: ${e.mkString("; ")}"))
-          )
+                    (data \ sessionKey)
+                      .validate[A]
+                      .asEither
+                      .leftMap(e ⇒ Error(s"Could not parse session data from mongo: ${e.mkString("; ")}"))
+                  )
         } yield result
 
         response.value

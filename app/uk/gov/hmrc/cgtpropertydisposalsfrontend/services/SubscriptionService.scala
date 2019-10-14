@@ -18,11 +18,12 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.services
 
 import cats.data.EitherT
 import cats.instances.future._
+import cats.instances.int._
 import cats.syntax.either._
 import cats.syntax.eq._
-import cats.instances.int._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SubscriptionDetails, SubscriptionResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -36,6 +37,8 @@ trait SubscriptionService {
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, SubscriptionResponse]
 
+  def hasSubscription(
+    )(implicit hc: HeaderCarrier): EitherT[Future, Error, Option[CgtReference]]
 }
 
 @Singleton
@@ -50,6 +53,17 @@ class SubscriptionServiceImpl @Inject()(connector: CGTPropertyDisposalsConnector
         response.parseJSON[SubscriptionResponse]().leftMap(Error(_))
       else
         Left(Error(s"call to subscribe came back with status ${response.status}"))
+    }
+
+  override def hasSubscription(
+    )(implicit hc: HeaderCarrier): EitherT[Future, Error, Option[CgtReference]] =
+    connector.getSubscriptionStatus().subflatMap { response =>
+      if (response.status === 200)
+        response.parseJSON[CgtReference]().leftMap(Error(_)).map { cgtReference =>
+          Some(cgtReference)
+        } else if (response.status === 204) Right(None)
+      else
+        Left(Error(s"call to get subscription status came back with status ${response.status}"))
     }
 
 }

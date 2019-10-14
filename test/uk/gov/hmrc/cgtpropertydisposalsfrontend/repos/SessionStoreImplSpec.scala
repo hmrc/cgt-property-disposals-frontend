@@ -28,8 +28,7 @@ import play.api.libs.json.{JsNumber, JsObject}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cache.model.{Cache, Id}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStoreSpec._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStoreSpec.TestEnvironment
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStoreSpec.{TestEnvironment, _}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.SessionId
 import uk.gov.hmrc.mongo.DatabaseUpdate
@@ -87,7 +86,6 @@ class SessionStoreImplSpec
 
   }
 
-
 }
 
 class SessionStoreFailureSpec extends WordSpec with Matchers with MongoSupport {
@@ -103,10 +101,10 @@ class SessionStoreFailureSpec extends WordSpec with Matchers with MongoSupport {
     "return an error" when mongoIsBrokenAndAttemptingTo {
 
       "insert a record" in new TestEnvironment {
-        await(sessionStore.get()).isLeft              shouldBe true
+        await(sessionStore.get()).isLeft shouldBe true
       }
 
-      "read a record" in new TestEnvironment{
+      "read a record" in new TestEnvironment {
         val sessionData = sample[SessionData]
 
         await(sessionStore.store(sessionData)).isLeft shouldBe true
@@ -135,6 +133,5 @@ object SessionStoreSpec {
     implicit val hc: HeaderCarrier = HeaderCarrier(sessionId = Some(sessionId))
 
   }
-
 
 }

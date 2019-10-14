@@ -110,6 +110,6 @@ GET  /register-your-trust                 uk.gov.hmrc.cgtpropertydisposalsfronte
 
 
 ### Return journey
-GET  /return/start                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.ReturnsController.start()
+GET  /return/start                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.HomeController.start()
 
 GET  /assets/*file                        controllers.Assets.at(path="/public", file)

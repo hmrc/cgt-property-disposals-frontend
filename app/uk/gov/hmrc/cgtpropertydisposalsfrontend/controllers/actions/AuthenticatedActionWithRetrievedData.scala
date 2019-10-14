@@ -19,34 +19,37 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.mvc._
-import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
+import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, AuthorisedFunctions, ConfidenceLevel, Enrolments}
+import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, NINO, SAUTR}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 
-final case class AuthenticatedRequestWithRetrievedData[A](userType: UserType,
-                                                          request: MessagesRequest[A])
-  extends WrappedRequest[A](request)
+final case class AuthenticatedRequestWithRetrievedData[A](userType: UserType, request: MessagesRequest[A])
+    extends WrappedRequest[A](request)
 
 @Singleton
 class AuthenticatedActionWithRetrievedData @Inject()(
-                                                      val authConnector: AuthConnector,
-                                                      val config: Configuration,
-                                                      val errorHandler: ErrorHandler,
-                                                      val sessionStore: SessionStore
-                                                    )(implicit val executionContext: ExecutionContext)
-  extends AuthenticatedActionBase[AuthenticatedRequestWithRetrievedData] {
+  val subscriptionService: SubscriptionService,
+  val authConnector: AuthConnector,
+  val config: Configuration,
+  val errorHandler: ErrorHandler,
+  val sessionStore: SessionStore
+)(implicit val executionContext: ExecutionContext)
+    extends AuthenticatedActionBase[AuthenticatedRequestWithRetrievedData] {
 
-  override def authorisedFunction[A](auth: AuthorisedFunctions,
-                                     request: MessagesRequest[A]
-                                    ): Future[Either[Result, AuthenticatedRequestWithRetrievedData[A]]] = {
+  override def authorisedFunction[A](
+    auth: AuthorisedFunctions,
+    request: MessagesRequest[A]
+  ): Future[Either[Result, AuthenticatedRequestWithRetrievedData[A]]] = {
+
     implicit val hc: HeaderCarrier =
       HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
@@ -60,87 +63,127 @@ class AuthenticatedActionWithRetrievedData @Inject()(
           Retrievals.email and
           Retrievals.allEnrolments and
           Retrievals.credentials
-      ) { case retrievedData@_ ~ _ ~ _ ~ _ ~ _ ~ _ ~ creds =>
-        withGGCredentials(creds, request) { ggCredId =>
-          val result = retrievedData match {
-            case cl ~ Some(AffinityGroup.Individual) ~ maybeNino ~ maybeSautr ~ maybeEmail ~ _ ~ _ if cl < ConfidenceLevel.L200 =>
-              Right(AuthenticatedRequestWithRetrievedData(
-                UserType.IndividualWithInsufficientConfidenceLevel(
-                  maybeNino.map(NINO(_)),
-                  maybeSautr.map(SAUTR(_)),
-                  maybeEmail.filter(_.nonEmpty).map(Email(_)),
-                  ggCredId
-                ),
-                request))
-
-            case individual@_ ~ Some(AffinityGroup.Individual) ~ _ ~ _ ~ _ ~ _ ~ _ =>
-              individual match {
-                case _ ~ _ ~ Some(nino) ~ _ ~ maybeEmail ~ _ ~ _ =>
-                  Right(AuthenticatedRequestWithRetrievedData(
-                    UserType.Individual(
-                      Right(NINO(nino)),
-                      maybeEmail.filter(_.nonEmpty).map(Email(_))
-                    ),
+      ) {
+        case retrievedData @ _ ~ _ ~ _ ~ _ ~ _ ~ allEnrolments ~ creds =>
+          hasSubscribed(allEnrolments, request) map {
+            case Left(errorResult) => Left(errorResult)
+            case Right(Some(cgtReference)) =>
+              withGGCredentials(creds, request) { ggCredId =>
+                Right(
+                  AuthenticatedRequestWithRetrievedData(
+                    UserType.Subscribed(cgtReference.value, ggCredId),
                     request
-                  ))
-
+                  )
+                )
               }
+            case Right(None) =>
+              withGGCredentials(creds, request) { ggCredId =>
+                val result = retrievedData match {
+                  case cl ~ Some(AffinityGroup.Individual) ~ maybeNino ~ maybeSautr ~ maybeEmail ~ _ ~ _
+                      if cl < ConfidenceLevel.L200 =>
+                    Right(
+                      AuthenticatedRequestWithRetrievedData(
+                        UserType.IndividualWithInsufficientConfidenceLevel(
+                          maybeNino.map(NINO(_)),
+                          maybeSautr.map(SAUTR(_)),
+                          maybeEmail.filter(_.nonEmpty).map(Email(_)),
+                          ggCredId
+                        ),
+                        request
+                      )
+                    )
 
-            case _@_ ~ Some(AffinityGroup.Organisation) ~ _ ~ _ ~ maybeEmail ~ enrolments ~ _ =>
-              handleOrganisation(request, enrolments, maybeEmail)
+                  case individual @ _ ~ Some(AffinityGroup.Individual) ~ _ ~ _ ~ _ ~ _ ~ _ =>
+                    individual match {
+                      case _ ~ _ ~ Some(nino) ~ _ ~ maybeEmail ~ _ ~ _ =>
+                        Right(
+                          AuthenticatedRequestWithRetrievedData(
+                            UserType.Individual(
+                              Right(NINO(nino)),
+                              maybeEmail.filter(_.nonEmpty).map(Email(_))
+                            ),
+                            request
+                          )
+                        )
+                    }
 
-            case _@_ ~ otherAffinityGroup ~ _ ~ _ ~ _ ~ _ ~ creds =>
-              logger.warn(s"Got request for unsupported affinity group $otherAffinityGroup")
-              Left(errorHandler.errorResult()(request))
+                  case _ @_ ~ Some(AffinityGroup.Organisation) ~ _ ~ _ ~ maybeEmail ~ enrolments ~ _ =>
+                    handleOrganisation(request, enrolments, maybeEmail)
 
+                  case _ @_ ~ otherAffinityGroup ~ _ ~ _ ~ _ ~ _ ~ creds =>
+                    logger.warn(s"Got request for unsupported affinity group $otherAffinityGroup")
+                    Left(errorHandler.errorResult()(request))
+                }
+                result
+              }
           }
-
-          Future.successful(result)
-        }
       }
-
   }
 
+  private def hasSubscribed[A](enrolments: Enrolments, request: MessagesRequest[A])(
+    implicit hc: HeaderCarrier
+  ): Future[Either[Result, Option[CgtReference]]] =
+    enrolments.getEnrolment("HMRC-CGT-PD") match {
+      case Some(cgtEnrolment) =>
+        cgtEnrolment.getIdentifier("CGTPDRef") match {
+          case Some(cgtReference) => Future.successful(Right(Some(CgtReference(cgtReference.value))))
+          case None               => Future.successful(Left(errorHandler.errorResult()(request)))
+        }
+      case None =>
+        subscriptionService.hasSubscription().value.map {
+          case Left(_) => Left(errorHandler.errorResult()(request))
+          case Right(maybeCgtReference) =>
+            maybeCgtReference match {
+              case Some(cgtReference) => Right(Some(cgtReference))
+              case None               => Right(None)
+            }
+        }
+    }
+
   private def withGGCredentials[A](credentials: Option[Credentials], request: MessagesRequest[A])(
-    f: GGCredId => Future[Either[Result, AuthenticatedRequestWithRetrievedData[A]]]
-  ): Future[Either[Result, AuthenticatedRequestWithRetrievedData[A]]] =
+    f: GGCredId => Either[Result, AuthenticatedRequestWithRetrievedData[A]]
+  ): Either[Result, AuthenticatedRequestWithRetrievedData[A]] =
     credentials match {
       case None =>
         logger.warn("No credentials were retrieved")
-        Future.successful(Left(errorHandler.errorResult()(request)))
+        Left(errorHandler.errorResult()(request))
 
       case Some(Credentials(id, "GovernmentGateway")) =>
         f(GGCredId(id))
 
       case Some(Credentials(_, otherProvider)) =>
         logger.warn(s"User logged in with unsupported provider: $otherProvider")
-        Future.successful(Left(errorHandler.errorResult()(request)))
+        Left(errorHandler.errorResult()(request))
     }
 
-  private def handleOrganisation[A](request: MessagesRequest[A],
-                                    enrolments: Enrolments,
-                                    email: Option[String]
-                                   ): Either[Result, AuthenticatedRequestWithRetrievedData[A]] =
-  // work out if it is an organisation or not
+  private def handleOrganisation[A](
+    request: MessagesRequest[A],
+    enrolments: Enrolments,
+    email: Option[String]
+  ): Either[Result, AuthenticatedRequestWithRetrievedData[A]] =
+    // work out if it is an organisation or not
     enrolments.getEnrolment("HMRC-TERS-ORG") match {
       case None =>
         Right(AuthenticatedRequestWithRetrievedData(UserType.OrganisationUnregisteredTrust, request))
 
       case Some(trustEnrolment) =>
-        trustEnrolment.getIdentifier("SAUTR")
-          .fold[Either[Result, AuthenticatedRequestWithRetrievedData[A]]]{
+        trustEnrolment
+          .getIdentifier("SAUTR")
+          .fold[Either[Result, AuthenticatedRequestWithRetrievedData[A]]] {
             logger.warn(
               s"Could not find SAUTR identifier for user with trust enrolment $trustEnrolment. " +
                 s"Found identifier keys [${trustEnrolment.identifiers.map(_.key).mkString(",")}]"
             )
             Left(errorHandler.errorResult()(request))
-          }( id =>
-            Right(AuthenticatedRequestWithRetrievedData(
-              UserType.Trust(SAUTR(id.value), email.filter(_.nonEmpty).map(Email(_))),
-              request
-            ))
+          }(
+            id =>
+              Right(
+                AuthenticatedRequestWithRetrievedData(
+                  UserType.Trust(SAUTR(id.value), email.filter(_.nonEmpty).map(Email(_))),
+                  request
+                )
+              )
           )
     }
-
 
 }

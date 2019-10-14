@@ -29,10 +29,8 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
@@ -40,9 +38,12 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with SessionSupport with ScalaCheckDrivenPropertyChecks with RedirectToStartBehaviour {
-
-  val mockSubscriptionService = mock[SubscriptionService]
+class SubscriptionControllerSpec
+    extends ControllerSpec
+    with AuthSupport
+    with SessionSupport
+    with ScalaCheckDrivenPropertyChecks
+    with RedirectToStartBehaviour {
 
   override val overrideBindings =
     List[GuiceableModule](
@@ -72,10 +73,9 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
 
   def redirectToStart(performAction: () => Future[Result]) =
     redirectToStartWhenInvalidJourney(
-      performAction,
-      {
+      performAction, {
         case _: SubscriptionReady => true
-        case _ => false
+        case _                    => false
       }
     )
 
@@ -113,8 +113,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
       val subscriptionResponse = SubscriptionResponse("number")
 
       val sessionWithSubscriptionComplete =
-        SessionData.empty.copy(
-          journeyStatus = Some(SubscriptionComplete(subscriptionDetails, subscriptionResponse)))
+        SessionData.empty.copy(journeyStatus = Some(SubscriptionComplete(subscriptionDetails, subscriptionResponse)))
 
       behave like redirectToStart(performAction)
 
@@ -166,10 +165,9 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
         controller.subscribed()(FakeRequest())
 
       redirectToStartWhenInvalidJourney(
-        performAction,
-        {
+        performAction, {
           case _: SubscriptionComplete => true
-          case _ => false
+          case _                       => false
         }
       )
 
@@ -178,8 +176,7 @@ class SubscriptionControllerSpec extends ControllerSpec with AuthSupport with Se
         "there is a subscription response and subscription details in session" in {
           val cgtReferenceNumber = UUID.randomUUID().toString
           val session = SessionData.empty.copy(
-            journeyStatus =
-              Some(SubscriptionComplete(subscriptionDetails, SubscriptionResponse(cgtReferenceNumber)))
+            journeyStatus = Some(SubscriptionComplete(subscriptionDetails, SubscriptionResponse(cgtReferenceNumber)))
           )
 
           inSequence {

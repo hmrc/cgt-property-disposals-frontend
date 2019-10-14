@@ -23,7 +23,7 @@ import play.api.mvc.{MessagesRequest, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, RedirectToStartBehaviour, SessionSupport, routes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, SessionSupport, routes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 
@@ -40,14 +40,14 @@ class SubscriptionReadyActionSpec extends ControllerSpec with SessionSupport {
     val subscriptionDetails = sample[SubscriptionDetails]
 
     def performAction(sessionData: SessionData, requestUrl: String = "/"): Future[Result] = {
-      val messagesRequest = new MessagesRequest(FakeRequest("GET", requestUrl), instanceOf[MessagesApi])
+      val messagesRequest      = new MessagesRequest(FakeRequest("GET", requestUrl), instanceOf[MessagesApi])
       val authenticatedRequest = AuthenticatedRequest(messagesRequest)
 
       action.invokeBlock(
         authenticatedRequest, { r: RequestWithSubscriptionReady[_] =>
           r.sessionData       shouldBe sessionData
           r.subscriptionReady shouldBe SubscriptionReady(subscriptionDetails)
-          r.messagesApi shouldBe messagesRequest.messagesApi
+          r.messagesApi       shouldBe messagesRequest.messagesApi
           Future.successful(Ok)
         }
       )
@@ -58,7 +58,6 @@ class SubscriptionReadyActionSpec extends ControllerSpec with SessionSupport {
 
       checkIsTechnicalErrorPage(performAction(sample[SessionData]))
     }
-
 
     "redirect to the start journey endpoint" when {
 

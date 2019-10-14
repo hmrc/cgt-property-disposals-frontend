@@ -28,12 +28,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionMissingData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecord
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, JourneyStatus, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, sample}
 
 import scala.concurrent.Future
 
 class SubscriptionEnterEmailControllerSpec
-    extends EmailControllerSpec[SubscriptionMissingData,SubscriptionMissingData]
+    extends EmailControllerSpec[SubscriptionMissingData, SubscriptionMissingData]
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 

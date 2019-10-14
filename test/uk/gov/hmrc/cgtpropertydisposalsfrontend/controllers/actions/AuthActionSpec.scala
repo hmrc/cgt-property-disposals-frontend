@@ -22,16 +22,17 @@ import play.api.Configuration
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
 trait AuthActionSpec { this: MockFactory =>
 
-  val mockAuthConnector: AuthConnector = mock[AuthConnector]
+  val mockAuthConnector: AuthConnector             = mock[AuthConnector]
+  val mockSubscriptionService: SubscriptionService = mock[SubscriptionService]
 
   val (signInUrl, origin, selfBaseUrl) = ("sign-in", "origin", "self-base-url")
-
 
   val config: Configuration =
     Configuration(
@@ -51,4 +52,3 @@ trait AuthActionSpec { this: MockFactory =>
       .returning(result)
 
 }
-

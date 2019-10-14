@@ -23,19 +23,24 @@ sealed trait UserType extends Product with Serializable
 object UserType {
 
   final case class Individual(
-                               id: Either[SAUTR,NINO],
-                               email: Option[Email]
-                             ) extends UserType
+    id: Either[SAUTR, NINO],
+    email: Option[Email]
+  ) extends UserType
 
   final case class Trust(sautr: SAUTR, email: Option[Email]) extends UserType
 
   final case object OrganisationUnregisteredTrust extends UserType
 
   final case class IndividualWithInsufficientConfidenceLevel(
-                                                              nino: Option[NINO],
-                                                              sautr: Option[SAUTR],
-                                                              email: Option[Email],
-                                                              credId: GGCredId
-                                                            ) extends UserType
+    nino: Option[NINO],
+    sautr: Option[SAUTR],
+    email: Option[Email],
+    credId: GGCredId
+  ) extends UserType
+
+  final case class Subscribed(
+    ref: String,
+    credId: GGCredId
+  ) extends UserType
 
 }

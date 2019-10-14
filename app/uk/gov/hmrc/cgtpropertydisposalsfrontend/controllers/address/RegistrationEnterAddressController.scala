@@ -22,8 +22,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, name}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.IndividualSupplyingInformation
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -58,23 +58,24 @@ class RegistrationEnterAddressController @Inject()(
   ): Either[Result, (SessionData, IndividualSupplyingInformation)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, r @ IndividualSupplyingInformation(Some(_), None, _))) => Right(sessionData -> r)
-      case _ => Left(Redirect(controllers.routes.StartController.start()))
+      case _                                                                         => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   def updateAddress(journey: IndividualSupplyingInformation, address: Address): JourneyStatus =
     journey.copy(address = Some(address))
 
-  protected lazy val backLinkCall: Call                = name.routes.RegistrationEnterIndividualNameController.enterIndividualName()
-  protected lazy val isUkCall: Call                    = routes.RegistrationEnterAddressController.isUk()
-  protected lazy val isUkSubmitCall: Call              = routes.RegistrationEnterAddressController.isUkSubmit()
-  protected lazy val enterUkAddressCall: Call          = routes.RegistrationEnterAddressController.enterUkAddress()
-  protected lazy val enterUkAddressSubmitCall: Call    = routes.RegistrationEnterAddressController.enterUkAddressSubmit()
-  protected lazy val enterNonUkAddressCall: Call       = routes.RegistrationEnterAddressController.enterNonUkAddress()
-  protected lazy val enterNonUkAddressSubmitCall: Call = routes.RegistrationEnterAddressController.enterNonUkAddressSubmit()
-  protected lazy val enterPostcodeCall: Call           = routes.RegistrationEnterAddressController.enterPostcode()
-  protected lazy val enterPostcodeSubmitCall: Call     = routes.RegistrationEnterAddressController.enterPostcodeSubmit()
-  protected lazy val selectAddressCall: Call           = routes.RegistrationEnterAddressController.selectAddress()
-  protected lazy val selectAddressSubmitCall: Call     = routes.RegistrationEnterAddressController.selectAddressSubmit()
-  protected lazy val continueCall: Call                = controllers.routes.RegistrationController.checkYourAnswers()
+  protected lazy val backLinkCall: Call             = name.routes.RegistrationEnterIndividualNameController.enterIndividualName()
+  protected lazy val isUkCall: Call                 = routes.RegistrationEnterAddressController.isUk()
+  protected lazy val isUkSubmitCall: Call           = routes.RegistrationEnterAddressController.isUkSubmit()
+  protected lazy val enterUkAddressCall: Call       = routes.RegistrationEnterAddressController.enterUkAddress()
+  protected lazy val enterUkAddressSubmitCall: Call = routes.RegistrationEnterAddressController.enterUkAddressSubmit()
+  protected lazy val enterNonUkAddressCall: Call    = routes.RegistrationEnterAddressController.enterNonUkAddress()
+  protected lazy val enterNonUkAddressSubmitCall: Call =
+    routes.RegistrationEnterAddressController.enterNonUkAddressSubmit()
+  protected lazy val enterPostcodeCall: Call       = routes.RegistrationEnterAddressController.enterPostcode()
+  protected lazy val enterPostcodeSubmitCall: Call = routes.RegistrationEnterAddressController.enterPostcodeSubmit()
+  protected lazy val selectAddressCall: Call       = routes.RegistrationEnterAddressController.selectAddress()
+  protected lazy val selectAddressSubmitCall: Call = routes.RegistrationEnterAddressController.selectAddressSubmit()
+  protected lazy val continueCall: Call            = controllers.routes.RegistrationController.checkYourAnswers()
 
 }

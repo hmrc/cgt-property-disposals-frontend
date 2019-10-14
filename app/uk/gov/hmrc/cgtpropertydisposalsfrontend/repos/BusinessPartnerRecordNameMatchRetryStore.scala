@@ -21,9 +21,9 @@ import configs.syntax._
 import play.api.Configuration
 import play.modules.reactivemongo.ReactiveMongoComponent
 import uk.gov.hmrc.cache.repository.CacheMongoRepository
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.UnsuccessfulNameMatchAttempts
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
@@ -38,9 +38,13 @@ trait BusinessPartnerRecordNameMatchRetryStore {
 }
 
 @Singleton
-class BusinessPartnerRecordNameMatchRetryStoreImpl @Inject()(mongo: ReactiveMongoComponent, configuration: Configuration)(
+class BusinessPartnerRecordNameMatchRetryStoreImpl @Inject()(
+  mongo: ReactiveMongoComponent,
+  configuration: Configuration
+)(
   implicit ec: ExecutionContext
-) extends BusinessPartnerRecordNameMatchRetryStore with Repo {
+) extends BusinessPartnerRecordNameMatchRetryStore
+    with Repo {
 
   val cacheRepository: CacheMongoRepository = {
     val expireAfter: FiniteDuration = configuration.underlying
@@ -55,9 +59,10 @@ class BusinessPartnerRecordNameMatchRetryStoreImpl @Inject()(mongo: ReactiveMong
   override def get(ggCredId: GGCredId): Future[Either[Error, Option[UnsuccessfulNameMatchAttempts]]] =
     get[UnsuccessfulNameMatchAttempts](ggCredId.value)
 
-  override def store(ggCredId: GGCredId, unsuccessfulAttempts: UnsuccessfulNameMatchAttempts): Future[Either[Error, Unit]] =
+  override def store(
+    ggCredId: GGCredId,
+    unsuccessfulAttempts: UnsuccessfulNameMatchAttempts
+  ): Future[Either[Error, Unit]] =
     store(ggCredId.value, unsuccessfulAttempts)
 
 }
-
-

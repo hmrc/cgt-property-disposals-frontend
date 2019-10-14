@@ -21,8 +21,8 @@ import java.net.URLEncoder
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
@@ -53,7 +53,9 @@ class AddressLookupConnectorImpl @Inject()(http: HttpClient, servicesConfig: Ser
     Map("User-Agent" -> userAgent)
   }
 
-  override def lookupAddress(postcode: Postcode, filter: Option[String])(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] = {
+  override def lookupAddress(postcode: Postcode, filter: Option[String])(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, HttpResponse] = {
     val queryParameters = {
       val paramMap = Map("postcode" -> postcode.value.replaceAllLiterally(" ", "").toUpperCase)
       filter.fold(paramMap)(f => paramMap.updated("filter", URLEncoder.encode(f, "UTF-8")))

@@ -17,9 +17,9 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr
 
 import play.api.data.Form
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.SAUTR
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 
 sealed trait NameMatchError extends Product with Serializable
 

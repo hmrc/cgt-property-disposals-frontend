@@ -21,10 +21,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.SAUTR
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 
 final case class UnsuccessfulNameMatchAttempts(
-                                                unsuccesfulAttempts: Int,
-                                                maximumAttempts: Int,
-                                                lastNameTried: IndividualName,
-                                                lastSAUTRTried: SAUTR
+  unsuccesfulAttempts: Int,
+  maximumAttempts: Int,
+  lastNameTried: IndividualName,
+  lastSAUTRTried: SAUTR
 )
 
 object UnsuccessfulNameMatchAttempts {

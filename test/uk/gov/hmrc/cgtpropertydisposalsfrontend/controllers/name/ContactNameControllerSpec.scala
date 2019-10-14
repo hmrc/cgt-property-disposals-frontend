@@ -55,10 +55,9 @@ class ContactNameControllerSpec
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
-      performAction,
-      {
+      performAction, {
         case _: SubscriptionReady => true
-        case _ => false
+        case _                    => false
       }
     )
 
@@ -82,7 +81,7 @@ class ContactNameControllerSpec
 
           val result = performAction()
           status(result)          shouldBe OK
-          contentAsString(result) should include(message ("contactName.title"))
+          contentAsString(result) should include(message("contactName.title"))
         }
 
       }
@@ -90,10 +89,10 @@ class ContactNameControllerSpec
     }
 
     "handling submitted contact names" must {
-      def performAction(formData: Seq[(String,String)]): Future[Result] =
+      def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.enterContactNameSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
 
-      val subscriptionReadyContactNameLens: Lens[SubscriptionReady,ContactName] =
+      val subscriptionReadyContactNameLens: Lens[SubscriptionReady, ContactName] =
         lens[SubscriptionReady].subscriptionDetails.contactName
 
       val previousSubscriptionReady =
@@ -107,25 +106,26 @@ class ContactNameControllerSpec
       val updatedSessionData = SessionData.empty.copy(
         journeyStatus = Some(
           subscriptionReadyContactNameLens.set(previousSubscriptionReady)(validContactName)
-        ))
+        )
+      )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
       "show a form error" when {
 
-        def testFormError(formData: (String,String)*)(expectedErrorMessageKey: String): Unit =
+        def testFormError(formData: (String, String)*)(expectedErrorMessageKey: String): Unit =
           withClue(s"For form data [$formData]: ") {
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(Future.successful(Right(Some(previousSessionData))))
             }
 
-            val result = performAction(formData)
+            val result  = performAction(formData)
             val content = contentAsString(result)
 
             status(result) shouldBe BAD_REQUEST
-            content should include(message("contactName.title"))
-            content should include(message(expectedErrorMessageKey))
+            content        should include(message("contactName.title"))
+            content        should include(message(expectedErrorMessageKey))
           }
 
         "the contact name is too long" in {
