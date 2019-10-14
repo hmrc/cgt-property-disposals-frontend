@@ -163,6 +163,45 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
       }
     }
 
+    "handling request to register without id and subscribe" must {
+      val registrationDetails = sample[RegistrationDetails]
+
+      "do a post http call and return the result" in {
+        List(
+          HttpResponse(200),
+          HttpResponse(200, Some(JsString("hi"))),
+          HttpResponse(500)
+        ).foreach { httpResponse =>
+          withClue(s"For http response [${httpResponse.toString}]") {
+            mockPost(
+              s"http://host:123/cgt-property-disposals/register-without-id-and-subscribe",
+              Map.empty,
+              Json.toJson(registrationDetails)
+            )(
+              Some(httpResponse)
+            )
+
+            await(connector.registerWithoutIdAndSubscribe(registrationDetails).value) shouldBe Right(httpResponse)
+          }
+        }
+      }
+
+      "return an error" when {
+
+        "the future fails" in {
+          mockPost(
+            s"http://host:123/cgt-property-disposals/register-without-id-and-subscribe",
+            Map.empty,
+            Json.toJson(registrationDetails)
+          )(
+            None
+          )
+
+          await(connector.registerWithoutIdAndSubscribe(registrationDetails).value).isLeft shouldBe true
+        }
+
+      }
+    }
   }
 
 }

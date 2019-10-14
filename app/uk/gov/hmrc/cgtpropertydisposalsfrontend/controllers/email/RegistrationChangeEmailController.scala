@@ -70,13 +70,15 @@ class RegistrationChangeEmailController @Inject()(
     validJourney(request)
 
   override def updateEmail(journey: RegistrationReady, email: Email): RegistrationReady =
-    RegistrationReady(journey.name, journey.address, email)
+    journey.copy(registrationDetails = journey.registrationDetails.copy(emailAddress = email))
 
   override def name(journeyStatus: RegistrationReady): Either[TrustName, IndividualName] =
-    Right(journeyStatus.name)
+    Right(journeyStatus.registrationDetails.name)
+
   override lazy protected val backLinkCall: Option[Call] = Some(
     controllers.routes.RegistrationController.checkYourAnswers()
   )
+
   override lazy protected val enterEmailCall: Call          = routes.RegistrationChangeEmailController.enterEmail()
   override lazy protected val enterEmailSubmitCall: Call    = routes.RegistrationChangeEmailController.enterEmailSubmit()
   override lazy protected val checkYourInboxCall: Call      = routes.RegistrationChangeEmailController.checkYourInbox()

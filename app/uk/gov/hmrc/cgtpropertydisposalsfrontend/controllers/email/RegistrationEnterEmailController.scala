@@ -71,10 +71,11 @@ class RegistrationEnterEmailController @Inject()(
     }
 
   override def updateEmail(journey: IndividualMissingEmail, email: Email): RegistrationReady =
-    RegistrationReady(journey.name, journey.address, email)
+    RegistrationReady(RegistrationDetails(journey.name, email, journey.address))
 
   override def name(journeyStatus: IndividualMissingEmail): Either[TrustName, IndividualName] =
     Right(journeyStatus.name)
+
   override lazy protected val backLinkCall: Option[Call]    = None
   override lazy protected val enterEmailCall: Call          = routes.RegistrationEnterEmailController.enterEmail()
   override lazy protected val enterEmailSubmitCall: Call    = routes.RegistrationEnterEmailController.enterEmailSubmit()

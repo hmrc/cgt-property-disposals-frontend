@@ -17,6 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import cats.Eq
+import cats.data.EitherT
 import org.scalacheck.ScalacheckShapeless._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
@@ -29,13 +30,16 @@ import play.api.test.Helpers._
 import shapeless.{Lens, lens}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.{routes => nameroutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{RegistrationStatus, SubscriptionStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{RegistrationStatus, Subscribed, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.TryingToGetIndividualsFootprint
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
@@ -50,7 +54,8 @@ class RegistrationControllerSpec
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
-      bind[SessionStore].toInstance(mockSessionStore)
+      bind[SessionStore].toInstance(mockSessionStore),
+      bind[SubscriptionService].toInstance(mockSubscriptionService)
     )
 
   lazy val controller = instanceOf[RegistrationController]
@@ -65,6 +70,11 @@ class RegistrationControllerSpec
     TryingToGetIndividualsFootprint(Some(false), Some(false), None, GGCredId("id"))
 
   val journeyStatusLens: Lens[SessionData, Option[JourneyStatus]] = lens[SessionData].journeyStatus
+
+  def mockRegisterWithoutIdAndSubscribe(registrationDetails: RegistrationDetails)(result: Either[Error,SubscriptionResponse]) =
+    (mockSubscriptionService.registerWithoutIdAndSubscribe(_: RegistrationDetails)(_: HeaderCarrier))
+    .expects(registrationDetails, *)
+    .returning(EitherT(Future.successful(result)))
 
   "RegistrationController" when {
 
@@ -434,26 +444,14 @@ class RegistrationControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    SessionData.empty.copy(
-                      journeyStatus = Some(
-                        RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), Some(email))
-                      )
-                    )
-                  )
-                )
-              )
-            )
-            mockStoreSession(
-              SessionData.empty.copy(
-                journeyStatus = Some(
-                  RegistrationStatus.RegistrationReady(name, address, email)
-                )
-              )
-            )(Future.successful(Left(Error(""))))
+            mockGetSession(Future.successful(Right(Some(
+              SessionData.empty.copy(journeyStatus = Some(
+                RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), Some(email))
+              ))
+            ))))
+            mockStoreSession(SessionData.empty.copy(journeyStatus = Some(
+              RegistrationStatus.RegistrationReady(RegistrationDetails(name, email, address))
+            )))(Future.successful(Left(Error(""))))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -466,19 +464,13 @@ class RegistrationControllerSpec
         "the session data indicates the user us ready to register" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    SessionData.empty.copy(
-                      journeyStatus = Some(
-                        RegistrationStatus.RegistrationReady(sample[IndividualName], sample[Address], sample[Email])
-                      )
-                    )
-                  )
+            mockGetSession(Future.successful(Right(Some(
+              SessionData.empty.copy(journeyStatus = Some(
+                RegistrationStatus.RegistrationReady(
+                  RegistrationDetails(sample[IndividualName], sample[Email], sample[Address])
                 )
-              )
-            )
+              ))
+            ))))
           }
 
           val result = performAction()
@@ -492,26 +484,14 @@ class RegistrationControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    SessionData.empty.copy(
-                      journeyStatus = Some(
-                        RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), Some(email))
-                      )
-                    )
-                  )
-                )
-              )
-            )
-            mockStoreSession(
-              SessionData.empty.copy(
-                journeyStatus = Some(
-                  RegistrationStatus.RegistrationReady(name, address, email)
-                )
-              )
-            )(Future.successful(Right(())))
+            mockGetSession(Future.successful(Right(Some(
+              SessionData.empty.copy(journeyStatus = Some(
+                RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), Some(email))
+              ))
+            ))))
+            mockStoreSession(SessionData.empty.copy(journeyStatus = Some(
+              RegistrationStatus.RegistrationReady(RegistrationDetails(name, email, address))
+            )))(Future.successful(Right(())))
           }
 
           val result = performAction()
@@ -521,6 +501,92 @@ class RegistrationControllerSpec
       }
 
     }
+
+    "handling submit check your answers requests" must {
+
+      def performAction(): Future[Result] = controller.checkYourAnswersSubmit()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        performAction,
+        {
+          case RegistrationReady(_) => true
+          case _ => false
+        }
+      )
+
+      val registrationReady = sample[RegistrationReady]
+      val sessionData = SessionData.empty.copy(journeyStatus = Some(registrationReady))
+      val subscriptionResponse = sample[SubscriptionResponse]
+      val subscribedDetails = {
+        val details = registrationReady.registrationDetails
+        SubscribedDetails(
+          Right(details.name),
+          details.emailAddress,
+          details.address,
+          ContactName(s"${details.name.firstName} ${details.name.lastName}"),
+          CgtReference(subscriptionResponse.cgtReferenceNumber)
+        )
+      }
+
+      "show an error page" when {
+
+        "the call to register without id and subscribe fails" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData))))
+            mockRegisterWithoutIdAndSubscribe(
+              registrationDetails = registrationReady.registrationDetails
+            )(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
+        "the session data cannot be updated" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData))))
+            mockRegisterWithoutIdAndSubscribe(
+              registrationDetails = registrationReady.registrationDetails
+            )(Right(subscriptionResponse))
+            mockStoreSession(
+              SessionData.empty.copy(journeyStatus =
+                Some(Subscribed(subscribedDetails))
+              )
+            )(Future.successful(Left(Error(""))))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
+      }
+
+      "redirect to the subscription confirmation page" when {
+
+        "the call to register without id and subscribe succeeds and the " +
+          "session data has been updated" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData))))
+            mockRegisterWithoutIdAndSubscribe(
+              registrationDetails = registrationReady.registrationDetails
+            )(Right(subscriptionResponse))
+            mockStoreSession(
+              SessionData.empty.copy(journeyStatus =
+                Some(Subscribed(subscribedDetails))
+              )
+            )(Future.successful(Right(())))
+          }
+
+          checkIsRedirect(performAction(), routes.SubscriptionController.subscribed())
+        }
+
+
+      }
+
+
+    }
+
 
   }
 

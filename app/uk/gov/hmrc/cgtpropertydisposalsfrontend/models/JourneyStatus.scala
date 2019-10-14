@@ -70,7 +70,7 @@ object JourneyStatus {
     final case class IndividualMissingEmail(name: IndividualName, address: Address) extends RegistrationStatus
 
     // we have all the details necessary for registration
-    final case class RegistrationReady(name: IndividualName, address: Address, email: Email) extends RegistrationStatus
+    final case class RegistrationReady(registrationDetails: RegistrationDetails) extends RegistrationStatus
 
   }
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))

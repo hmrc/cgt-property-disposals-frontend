@@ -20,6 +20,8 @@ import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json.Json
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, RegistrationDetails, SubscriptionDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecordRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SubscriptionDetails}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -39,9 +41,14 @@ trait CGTPropertyDisposalsConnector {
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
+  def registerWithoutIdAndSubscribe(registrationDetails: RegistrationDetails)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, HttpResponse]
+
   def getSubscriptionStatus()(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
+
 }
 
 @Singleton
@@ -54,6 +61,8 @@ class CGTPropertyDisposalsConnectorImpl @Inject()(http: HttpClient, servicesConf
   val bprUrl: String = s"$baseUrl/business-partner-record"
 
   val subscribeUrl: String = s"$baseUrl/subscribe"
+
+  val registerWithoutIdAndSubscribeUrl: String = s"$baseUrl/register-without-id-and-subscribe"
 
   val subscriptionStatusUrl: String = s"$baseUrl/check-subscription-status"
 
@@ -77,14 +86,25 @@ class CGTPropertyDisposalsConnectorImpl @Inject()(http: HttpClient, servicesConf
         .recover { case e => Left(Error(e)) }
     )
 
-  override def getSubscriptionStatus()(
+  override def registerWithoutIdAndSubscribe(registrationDetails: RegistrationDetails)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, HttpResponse] =
+  ): EitherT[Future, Error, HttpResponse] = {
     EitherT[Future, Error, HttpResponse](
       http
-        .get(subscriptionStatusUrl)
+        .post(registerWithoutIdAndSubscribeUrl, Json.toJson(registrationDetails))
         .map(Right(_))
         .recover { case e => Left(Error(e)) }
     )
+  }
+
+  override def getSubscriptionStatus()(
+  implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, HttpResponse] =
+  EitherT[Future, Error, HttpResponse](
+  http
+  .get(subscriptionStatusUrl)
+  .map(Right(_))
+  .recover { case e => Left(Error(e)) }
+  )
 
 }
