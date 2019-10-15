@@ -16,6 +16,6 @@
 
 @this()
 
-@(hintText: String, url: String)
+@(hintText: String, url: String, label: Option[String] = None)(implicit request: Request[_], messages: Messages)
 
-<a href="@url">Change<span class="visuallyhidden"> @hintText</span></a>
+<a href="@url">@{label.getOrElse(messages("cya.change"))}<span class="visuallyhidden"> @hintText</span></a>

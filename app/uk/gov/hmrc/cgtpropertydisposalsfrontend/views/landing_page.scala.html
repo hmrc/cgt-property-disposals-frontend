@@ -18,7 +18,8 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template
+    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+    warningMessage: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 )
 
 @()(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
@@ -37,7 +38,7 @@
   <li>@messages("landingPage.list1.bullet3")</li>
  </ul>
 
- @components.warning(messages("landingPage.warning"))
+ @warningMessage(messages("landingPage.warning"))
 
 
  <p>@messages("landingPage.p2")</p>

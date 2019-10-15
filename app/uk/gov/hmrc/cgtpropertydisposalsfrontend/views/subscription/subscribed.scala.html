@@ -33,7 +33,6 @@
   <p>@Html(messages("subscribed.p2")) <strong class="bold">@cgtReference</strong>.</p>
   @buttonLink(messages("subscribed.buttonText"), routes.ReturnsController.start().url)
   <p>
-   <a href="#">@messages("subscribed.linkText")</a>
+   <a href="@{routes.TmpAccountController.manageYourDetails().url}">@messages("subscribed.linkText")</a>
   </p>
 }
-

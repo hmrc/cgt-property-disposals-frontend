@@ -17,6 +17,9 @@ generic.back=Back
 generic.yes=Yes
 generic.no=No
 
+cya.change=Change
+cya.add=Add
+
 error.summary.heading=There’s a problem
 
 landingPage.title=Report and pay Capital Gains Tax on UK property
@@ -200,3 +203,16 @@ weNeedMoreDetails.caption=Create a CGT on UK property account
 weNeedMoreDetails.p=This is so you can:
 weNeedMoreDetails.1=Create a Capital Gains Tax (CGT) on UK property account.
 weNeedMoreDetails.2=Report your CGT on UK property sales or disposals.
+
+account.caption=CGT on UK property account
+account.manageYourDetails.title=Welcome, {0}
+account.manageYourDetails.subtitle=Account number: {0}
+account.manageYourDetails.betaNotice=This service is in private beta until 6 April 2020. On that date you will be able to come back and send a CGT on UK property disposals return for disposals made on or after 6 April 2020.
+account.manageYourDetails.contactHeading=Contact details
+account.manageYourDetails.p=We’ll only use these details if we need to contact you about this service.
+account.manageYourDetails.personalDetailsHeading=Your personal details
+account.manageYourDetails.personal.p=These are the details we hold about you. If you need to change them, go to GOV.UK and
+account.manageYourDetails.personal.linkText=tell HMRC about changes to your details (opens in a new window)
+account.manageYourDetails.telephone=Telephone
+account.manageYourDetails.cyaChange.telephone=your telephone number
+account.manageYourDetails.addTelephone=Add a phone number
