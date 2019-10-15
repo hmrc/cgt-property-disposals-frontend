@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, NINO, SAUTR}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
 
 sealed trait UserType extends Product with Serializable
 
@@ -39,7 +39,7 @@ object UserType {
   ) extends UserType
 
   final case class Subscribed(
-    ref: String,
+    cgtReference: CgtReference,
     credId: GGCredId
   ) extends UserType
 

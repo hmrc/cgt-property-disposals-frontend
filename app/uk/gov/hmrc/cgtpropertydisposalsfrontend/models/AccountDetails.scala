@@ -16,53 +16,20 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import cats.data.NonEmptyList
-import cats.syntax.either._
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecord
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
 
-final case class SubscriptionDetails(
+final case class AccountDetails(
   name: Either[TrustName, IndividualName],
   emailAddress: Email,
   address: Address,
   contactName: ContactName,
-  sapNumber: String
+  cgtReference: CgtReference
 )
 
-object SubscriptionDetails {
-
-  implicit val format: Format[SubscriptionDetails] = Json.format
-
-  @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  def apply(
-    bpr: BusinessPartnerRecord,
-    maybeEmail: Option[Email]
-  ): Either[NonEmptyList[MissingData], SubscriptionDetails] =
-    Either
-      .fromOption(
-        bpr.emailAddress.orElse(maybeEmail),
-        NonEmptyList.one(MissingData.Email)
-      )
-      .map(
-        email =>
-          SubscriptionDetails(
-            bpr.name,
-            email,
-            bpr.address,
-            ContactName(bpr.name.fold(_.value, n => s"${n.firstName} ${n.lastName}")),
-            bpr.sapNumber
-          )
-      )
-
-  sealed trait MissingData extends Product with Serializable
-
-  object MissingData {
-
-    case object Email extends MissingData
-
-  }
-
+object AccountDetails {
+  implicit val format: Format[AccountDetails] = Json.format
 }

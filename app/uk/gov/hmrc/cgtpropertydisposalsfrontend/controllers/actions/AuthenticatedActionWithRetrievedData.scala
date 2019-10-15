@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
+import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.mvc._
@@ -71,7 +72,7 @@ class AuthenticatedActionWithRetrievedData @Inject()(
               withGGCredentials(creds, request) { ggCredId =>
                 Right(
                   AuthenticatedRequestWithRetrievedData(
-                    UserType.Subscribed(cgtReference.value, ggCredId),
+                    UserType.Subscribed(CgtReference(cgtReference.value), ggCredId),
                     request
                   )
                 )
@@ -127,17 +128,15 @@ class AuthenticatedActionWithRetrievedData @Inject()(
       case Some(cgtEnrolment) =>
         cgtEnrolment.getIdentifier("CGTPDRef") match {
           case Some(cgtReference) => Future.successful(Right(Some(CgtReference(cgtReference.value))))
-          case None               => Future.successful(Left(errorHandler.errorResult()(request)))
+          case None =>
+            logger.warn(s"CGT identifier value is missing from the enrolment")
+            Future.successful(Left(errorHandler.errorResult()(request)))
         }
       case None =>
-        subscriptionService.hasSubscription().value.map {
-          case Left(_) => Left(errorHandler.errorResult()(request))
-          case Right(maybeCgtReference) =>
-            maybeCgtReference match {
-              case Some(cgtReference) => Right(Some(cgtReference))
-              case None               => Right(None)
-            }
-        }
+        subscriptionService
+          .hasSubscription()
+          .leftMap(_ => errorHandler.errorResult()(request))
+          .value
     }
 
   private def withGGCredentials[A](credentials: Option[Credentials], request: MessagesRequest[A])(

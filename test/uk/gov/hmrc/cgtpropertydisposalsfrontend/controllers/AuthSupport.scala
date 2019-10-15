@@ -101,4 +101,15 @@ trait AuthSupport {
       Some(Credentials("gg-cred-id", "GovernmentGateway"))
     )
 
+  def mockAuthWithCgtEnrolmentRetrievals(): Unit =
+    mockAuthWithAllRetrievals(
+      ConfidenceLevel.L200,
+      Some(AffinityGroup.Individual),
+      None,
+      None,
+      None,
+      Set(Enrolment("HMRC-CGT-PD", Seq(EnrolmentIdentifier("CGTPDRef", "XCGTP123456789")), "")),
+      Some(Credentials("gg-cred-id", "GovernmentGateway"))
+    )
+
 }

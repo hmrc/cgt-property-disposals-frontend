@@ -47,20 +47,13 @@ object JourneyStatus {
 
     // subscription details have been gathered and are ready to be used to subscribe
     final case class SubscriptionReady(subscriptionDetails: SubscriptionDetails) extends SubscriptionStatus
-
-    // subscription has been done successfully
-    final case class SubscriptionComplete(
-      subscriptionDetails: SubscriptionDetails,
-      subscriptionResponse: SubscriptionResponse
-    ) extends SubscriptionStatus
-
-    // subscription has been submitted to ETMP
-    final case class Subscribed(
-      subscriptionDetails: SubscriptionDetails,
-      subscriptionResponse: SubscriptionResponse
-    ) extends SubscriptionStatus
-
   }
+
+  // subscription has been submitted to ETMP
+  final case class Subscribed(accountDetails: AccountDetails)
+      extends JourneyStatus
+      with Product
+      with Serializable
 
   sealed trait RegistrationStatus extends JourneyStatus with Product with Serializable
 

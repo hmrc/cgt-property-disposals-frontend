@@ -29,8 +29,10 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
@@ -59,6 +61,13 @@ class SubscriptionControllerSpec
   val requestWithCSRFToken = FakeRequest().withCSRFToken
 
   val subscriptionDetails = sample[SubscriptionDetails]
+  val accountDetails = AccountDetails(
+    subscriptionDetails.name,
+    subscriptionDetails.emailAddress,
+    subscriptionDetails.address,
+    subscriptionDetails.contactName,
+    CgtReference("number")
+  )
 
   val sessionWithSubscriptionDetails =
     SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(subscriptionDetails)))
@@ -113,7 +122,7 @@ class SubscriptionControllerSpec
       val subscriptionResponse = SubscriptionResponse("number")
 
       val sessionWithSubscriptionComplete =
-        SessionData.empty.copy(journeyStatus = Some(SubscriptionComplete(subscriptionDetails, subscriptionResponse)))
+        SessionData.empty.copy(journeyStatus = Some(Subscribed(accountDetails)))
 
       behave like redirectToStart(performAction)
 
@@ -166,8 +175,8 @@ class SubscriptionControllerSpec
 
       redirectToStartWhenInvalidJourney(
         performAction, {
-          case _: SubscriptionComplete => true
-          case _                       => false
+          case _: Subscribed => true
+          case _             => false
         }
       )
 
@@ -176,7 +185,17 @@ class SubscriptionControllerSpec
         "there is a subscription response and subscription details in session" in {
           val cgtReferenceNumber = UUID.randomUUID().toString
           val session = SessionData.empty.copy(
-            journeyStatus = Some(SubscriptionComplete(subscriptionDetails, SubscriptionResponse(cgtReferenceNumber)))
+            journeyStatus = Some(
+              Subscribed(
+                AccountDetails(
+                  subscriptionDetails.name,
+                  subscriptionDetails.emailAddress,
+                  subscriptionDetails.address,
+                  subscriptionDetails.contactName,
+                  CgtReference(cgtReferenceNumber)
+                )
+              )
+            )
           )
 
           inSequence {

@@ -28,11 +28,11 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.ConfidenceLevel.L50
 import uk.gov.hmrc.auth.core.retrieve.Credentials
-import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, ConfidenceLevel, Enrolment, EnrolmentIdentifier, Enrolments}
+import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, ConfidenceLevel}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{RegistrationStatus, SubscriptionStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{RegistrationStatus, Subscribed, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Individual
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
@@ -577,16 +577,23 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           "redirect to the subscription confirmation page" when {
 
             "the session data indicates the user has already subscribed" in {
-              val subscriptionStatus = SubscriptionComplete(individualSubscriptionDetails, SubscriptionResponse(""))
-              val session            = SessionData.empty.copy(journeyStatus = Some(subscriptionStatus))
+              val subscriptionStatus = Subscribed(
+                AccountDetails(
+                  individualSubscriptionDetails.name,
+                  individualSubscriptionDetails.emailAddress,
+                  individualSubscriptionDetails.address,
+                  individualSubscriptionDetails.contactName,
+                  CgtReference("number")
+                )
+              )
+              val session = SessionData.empty.copy(journeyStatus = Some(subscriptionStatus))
 
               inSequence {
-                mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, None)
-                mockHasSubscription()(Right(None))
+                mockAuthWithCgtEnrolmentRetrievals()
                 mockGetSession(Future.successful(Right(Some(session))))
               }
 
-              checkIsRedirect(performAction(), routes.SubscriptionController.subscribed())
+              checkIsRedirect(performAction(), routes.HomeController.start())
             }
 
           }
@@ -850,8 +857,16 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           "redirect to the subscription confirmation page" when {
 
             "the session data indicates the user has already subscribed" in {
-              val subscriptionStatus = SubscriptionComplete(trustSubscriptionDetails, SubscriptionResponse(""))
-              val session            = SessionData.empty.copy(journeyStatus = Some(subscriptionStatus))
+              val subscriptionStatus = Subscribed(
+                AccountDetails(
+                  trustSubscriptionDetails.name,
+                  trustSubscriptionDetails.emailAddress,
+                  trustSubscriptionDetails.address,
+                  trustSubscriptionDetails.contactName,
+                  CgtReference("number")
+                )
+              )
+              val session = SessionData.empty.copy(journeyStatus = Some(subscriptionStatus))
 
               inSequence {
                 mockAuthWithAllTrustRetrievals(sautr, None)
@@ -859,7 +874,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 mockGetSession(Future.successful(Right(Some(session))))
               }
 
-              checkIsRedirect(performAction(), routes.SubscriptionController.subscribed())
+              checkIsRedirect(performAction(), routes.HomeController.start())
             }
 
           }

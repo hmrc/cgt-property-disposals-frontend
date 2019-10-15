@@ -101,7 +101,7 @@ class AuthenticatedActionWithRetrievedDataSpec
         val result = performAction(FakeRequest())
 
         status(result)        shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(UserType.Subscribed("XCGT123456789", GGCredId("id")))
+        contentAsJson(result) shouldBe Json.toJson(UserType.Subscribed(CgtReference("XCGT123456789"), GGCredId("id")))
 
       }
     }
@@ -142,7 +142,7 @@ class AuthenticatedActionWithRetrievedDataSpec
         val result = performAction(FakeRequest())
 
         status(result)        shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(UserType.Subscribed("XCGT123456789", GGCredId("id")))
+        contentAsJson(result) shouldBe Json.toJson(UserType.Subscribed(CgtReference("XCGT123456789"), GGCredId("id")))
 
       }
     }

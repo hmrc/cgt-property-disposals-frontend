@@ -22,7 +22,9 @@ import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AccountDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -62,7 +64,19 @@ class SubscriptionController @Inject()(
         subscriptionResponse <- subscriptionService.subscribe(details)
         _ <- EitherT(
               updateSession(sessionStore, request)(
-                _.copy(journeyStatus = Some(SubscriptionComplete(details, subscriptionResponse)))
+                _.copy(
+                  journeyStatus = Some(
+                    Subscribed(
+                      AccountDetails(
+                        details.name,
+                        details.emailAddress,
+                        details.address,
+                        details.contactName,
+                        CgtReference(subscriptionResponse.cgtReferenceNumber)
+                      )
+                    )
+                  )
+                )
               )
             )
       } yield subscriptionResponse
@@ -80,8 +94,8 @@ class SubscriptionController @Inject()(
 
   def subscribed(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
     request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(SubscriptionComplete(_, complete)) => Ok(subscribedPage(complete.cgtReferenceNumber))
-      case _                                       => Redirect(routes.StartController.start())
+      case Some(Subscribed(accountDetails)) => Ok(subscribedPage(accountDetails.cgtReference.value))
+      case _                                => Redirect(routes.StartController.start())
     }
   }
 

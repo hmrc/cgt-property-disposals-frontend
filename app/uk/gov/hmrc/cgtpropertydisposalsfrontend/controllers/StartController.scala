@@ -39,7 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -68,11 +68,11 @@ class StartController @Inject()(
       case (UserType.Subscribed(cgtReference, gGCredId), None) =>
         Redirect(routes.HomeController.start())
 
+      case (_, Some(_: Subscribed)) =>
+        Redirect(routes.HomeController.start())
+
       case (_, Some(_: SubscriptionStatus.SubscriptionReady)) =>
         Redirect(routes.SubscriptionController.checkYourDetails())
-
-      case (_, Some(_: SubscriptionStatus.SubscriptionComplete)) =>
-        Redirect(routes.SubscriptionController.subscribed())
 
       case (_, Some(i: SubscriptionStatus.TryingToGetIndividualsFootprint)) =>
         // this is not the first time a person with individual insufficient confidence level has come to start
