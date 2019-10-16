@@ -16,12 +16,11 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos
 
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Matchers, Suite, WordSpec}
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach, Matchers, Suite}
 import play.modules.reactivemongo.ReactiveMongoComponent
 import uk.gov.hmrc.mongo.{MongoConnector, MongoSpecSupport}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 trait MongoSupport extends MongoSpecSupport with BeforeAndAfterEach with BeforeAndAfterAll { this: Suite with Matchers ⇒
 
@@ -43,4 +42,3 @@ trait MongoSupport extends MongoSpecSupport with BeforeAndAfterEach with BeforeA
   }
 
 }
-

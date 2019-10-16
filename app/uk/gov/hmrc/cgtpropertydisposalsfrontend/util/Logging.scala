@@ -16,8 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.util
 
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import play.api.Logger
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 
 trait Logging {
 

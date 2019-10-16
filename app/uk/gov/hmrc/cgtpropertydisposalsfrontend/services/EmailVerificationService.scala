@@ -33,7 +33,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[EmailVerificationServiceImpl])
 trait EmailVerificationService {
 
-  def verifyEmail(email: Email, name: Either[TrustName,IndividualName], continueCall: Call)(
+  def verifyEmail(email: Email, name: Either[TrustName, IndividualName], continueCall: Call)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, EmailVerificationResponse]
 
@@ -57,7 +57,7 @@ object EmailVerificationService {
 class EmailVerificationServiceImpl @Inject()(connector: EmailVerificationConnector)(implicit ec: ExecutionContext)
     extends EmailVerificationService {
 
-  def verifyEmail(email: Email, name: Either[TrustName,IndividualName], continueCall: Call)(
+  def verifyEmail(email: Email, name: Either[TrustName, IndividualName], continueCall: Call)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, EmailVerificationResponse] =
     connector.verifyEmail(email, name, continueCall).subflatMap { response =>

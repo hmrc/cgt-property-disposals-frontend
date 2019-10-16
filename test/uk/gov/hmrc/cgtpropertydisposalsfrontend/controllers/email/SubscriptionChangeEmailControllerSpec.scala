@@ -27,12 +27,12 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, JourneyStatus, SubscriptionDetails, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, sample}
 
 import scala.concurrent.Future
 
 class SubscriptionChangeEmailControllerSpec
-    extends EmailControllerSpec[SubscriptionReady,SubscriptionReady]
+    extends EmailControllerSpec[SubscriptionReady, SubscriptionReady]
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 

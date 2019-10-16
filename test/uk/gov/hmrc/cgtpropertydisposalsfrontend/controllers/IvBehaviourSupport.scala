@@ -45,15 +45,16 @@ trait IvBehaviourSupport { this: ControllerSpec =>
     )
 
   def checkIsRedirectToIv(result: Future[Result], useRelativeUrls: Boolean): Unit = {
-    val expectedCompletionUrl = if(useRelativeUrls) ivSuccessRelativeUrl else s"$selfBaseUrl$ivSuccessRelativeUrl"
-    val expectedFailureUrl = if(useRelativeUrls) ivFailureRelativeUrl else s"$selfBaseUrl$ivFailureRelativeUrl"
+    val expectedCompletionUrl = if (useRelativeUrls) ivSuccessRelativeUrl else s"$selfBaseUrl$ivSuccessRelativeUrl"
+    val expectedFailureUrl    = if (useRelativeUrls) ivFailureRelativeUrl else s"$selfBaseUrl$ivFailureRelativeUrl"
 
-    checkIsRedirect(result,
-                    s"$ivUrl/mdtp/uplift?" +
-                      s"origin=$ivOrigin&" +
-                      s"confidenceLevel=200&" +
-                      s"completionURL=${urlEncode(expectedCompletionUrl)}&" +
-                      s"failureURL=${urlEncode(expectedFailureUrl)}"
+    checkIsRedirect(
+      result,
+      s"$ivUrl/mdtp/uplift?" +
+        s"origin=$ivOrigin&" +
+        s"confidenceLevel=200&" +
+        s"completionURL=${urlEncode(expectedCompletionUrl)}&" +
+        s"failureURL=${urlEncode(expectedFailureUrl)}"
     )
   }
 

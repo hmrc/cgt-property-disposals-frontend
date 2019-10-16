@@ -18,15 +18,12 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.services
 
 import cats.data.EitherT
 import cats.instances.future._
-import java.time._
-
-import org.scalamock.scalatest.MockFactory
 import org.scalacheck.ScalacheckShapeless._
+import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsNumber, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Individual, Trust}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, BusinessPartnerRecordResponse}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -47,8 +44,8 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
       .returning(EitherT.fromEither[Future](response))
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
-  val bprRequest = sample[BusinessPartnerRecordRequest]
-  val bpr = sample[BusinessPartnerRecord]
+  val bprRequest                 = sample[BusinessPartnerRecordRequest]
+  val bpr                        = sample[BusinessPartnerRecord]
 
   "The BusinessPartnerRecordServiceImpl" when {
 

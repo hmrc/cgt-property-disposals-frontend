@@ -16,37 +16,34 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
-import java.net.URLEncoder
-
 import org.scalamock.scalatest.MockFactory
 import play.api.i18n.MessagesApi
-import play.api.mvc.{MessagesRequest, Result}
 import play.api.mvc.Results.Ok
+import play.api.mvc.{MessagesRequest, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
-import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, SessionSupport}
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-class AuthenticatedActionSpec
-  extends ControllerSpec with MockFactory with SessionSupport with AuthActionSpec {
+class AuthenticatedActionSpec extends ControllerSpec with MockFactory with SessionSupport with AuthActionSpec {
 
-   val authenticatedAction =
-     new AuthenticatedAction(mockAuthConnector, config, instanceOf[ErrorHandler], mockSessionStore)
+  val authenticatedAction =
+    new AuthenticatedAction(mockAuthConnector, config, instanceOf[ErrorHandler], mockSessionStore)
 
   def performAction[A](r: FakeRequest[A]): Future[Result] = {
-      @SuppressWarnings(Array("org.wartremover.warts.Any"))
-      val request = new MessagesRequest[A](r, stub[MessagesApi])
-      authenticatedAction.invokeBlock(request, { a: AuthenticatedRequest[A] =>
-        a.request.messagesApi shouldBe request.messagesApi
-        Future.successful(Ok)
-      })
-    }
+    @SuppressWarnings(Array("org.wartremover.warts.Any"))
+    val request = new MessagesRequest[A](r, stub[MessagesApi])
+    authenticatedAction.invokeBlock(request, { a: AuthenticatedRequest[A] =>
+      a.request.messagesApi shouldBe request.messagesApi
+      Future.successful(Ok)
+    })
+  }
 
   "AuthenticatedAction" when {
 
@@ -73,8 +70,6 @@ class AuthenticatedActionSpec
         }
       }
     }
-
-
 
     "handling a logged in user" must {
 
@@ -111,6 +106,5 @@ class AuthenticatedActionSpec
     }
 
   }
-
 
 }

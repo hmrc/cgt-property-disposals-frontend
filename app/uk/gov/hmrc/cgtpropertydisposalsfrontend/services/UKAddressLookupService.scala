@@ -21,7 +21,6 @@ import cats.instances.either._
 import cats.instances.future._
 import cats.instances.int._
 import cats.instances.list._
-import cats.instances.string._
 import cats.syntax.either._
 import cats.syntax.eq._
 import cats.syntax.traverse._
@@ -29,9 +28,9 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.OK
 import play.api.libs.json.{JsResult, JsValue, Json, Reads}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.AddressLookupConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressLookupResult, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressLookupResult, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupServiceImpl.{AddressLookupResponse, RawAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -41,7 +40,9 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[UKAddressLookupServiceImpl])
 trait UKAddressLookupService {
 
-  def lookupAddress(postcode: Postcode, filter: Option[String])(implicit hc: HeaderCarrier): EitherT[Future, Error, AddressLookupResult]
+  def lookupAddress(postcode: Postcode, filter: Option[String])(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, AddressLookupResult]
 
 }
 
@@ -63,16 +64,21 @@ class UKAddressLookupServiceImpl @Inject()(connector: AddressLookupConnector)(im
         Left(Error(s"Response to address lookup came back with status ${response.status}"))
     }
 
-  def toAddressLookupResult(r: AddressLookupResponse, postcode: Postcode, filter: Option[String]): Either[String, AddressLookupResult] = {
+  def toAddressLookupResult(
+    r: AddressLookupResponse,
+    postcode: Postcode,
+    filter: Option[String]
+  ): Either[String, AddressLookupResult] = {
     def toAddress(a: RawAddress): Either[String, Address] = {
-      val lines: Either[String,(String,Option[String])] = a.lines match {
+      val lines: Either[String, (String, Option[String])] = a.lines match {
         case Nil       => Left("Could not find any lines of address")
         case a1 :: Nil => Right(a1 -> None)
         case a1 :: as  => Right(a1 -> Some(as.mkString(", ")))
       }
 
-      lines.map{ case (l1, l2) =>
-        UkAddress(l1, l2, Some(a.town), a.county, a.postcode)
+      lines.map {
+        case (l1, l2) =>
+          UkAddress(l1, l2, Some(a.town), a.county, a.postcode)
       }
     }
 

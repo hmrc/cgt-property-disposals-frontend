@@ -24,10 +24,10 @@ import cats.instances.uuid._
 import cats.syntax.eq._
 import play.api.mvc.{Action, AnyContent, Call, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{RequestWithSessionData, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{RequestWithSessionData, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
@@ -59,7 +59,9 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
 
   def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, Journey)]
 
-  def validVerificationCompleteJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, VerificationCompleteJourney)]
+  def validVerificationCompleteJourney(
+    request: RequestWithSessionData[_]
+  ): Either[Result, (SessionData, VerificationCompleteJourney)]
 
   def name(journeyStatus: Journey): Either[TrustName, IndividualName]
 
@@ -91,9 +93,10 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
           Email.form
             .bindFromRequest()
             .fold(
-              formWithErrors => BadRequest(
-                enterEmailPage(formWithErrors, isAmendJourney, backLinkCall, enterEmailSubmitCall)
-              ), { email =>
+              formWithErrors =>
+                BadRequest(
+                  enterEmailPage(formWithErrors, isAmendJourney, backLinkCall, enterEmailSubmitCall)
+                ), { email =>
                 val emailToBeVerified = sessionData.emailToBeVerified match {
                   case Some(e) if e.email === email => e
                   case _                            => EmailToBeVerified(email, uuidGenerator.nextId(), verified = false)
@@ -103,7 +106,8 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
                   _ <- EitherT(
                         updateSession(sessionStore, request)(_.copy(emailToBeVerified = Some(emailToBeVerified)))
                       )
-                  result <- emailVerificationService.verifyEmail(email, name(journey), verifyEmailCall(emailToBeVerified.id))
+                  result <- emailVerificationService
+                             .verifyEmail(email, name(journey), verifyEmailCall(emailToBeVerified.id))
                 } yield result
 
                 result.fold(
@@ -129,9 +133,12 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
         case (sessionData, _) =>
           sessionData.emailToBeVerified.fold(
             Redirect(enterEmailCall)
-          )(emailToBeVerified => Ok(
-            checkYourInboxPage(emailToBeVerified.email, enterEmailCall, enterEmailCall, enterEmailSubmitCall)
-          ))
+          )(
+            emailToBeVerified =>
+              Ok(
+                checkYourInboxPage(emailToBeVerified.email, enterEmailCall, enterEmailCall, enterEmailSubmitCall)
+              )
+          )
       }
     }
 
@@ -176,21 +183,23 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
   def emailVerified(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       validVerificationCompleteJourney(request)
-      .fold[Future[Result]](toFuture,{
-        case (sessionData, _) =>
-          sessionData.emailToBeVerified.fold(
-            Redirect(enterEmailCall)
-          ) { emailToBeVerified =>
-            if (emailToBeVerified.verified) {
-              Ok(emailVerifiedPage(emailToBeVerified.email, emailVerifiedContinueCall))
-            } else {
-              logger.warn(
-                "Email verified endpoint called but email was not verified"
-              )
-              errorHandler.errorResult()
-            }
+        .fold[Future[Result]](
+          toFuture, {
+            case (sessionData, _) =>
+              sessionData.emailToBeVerified.fold(
+                Redirect(enterEmailCall)
+              ) { emailToBeVerified =>
+                if (emailToBeVerified.verified) {
+                  Ok(emailVerifiedPage(emailToBeVerified.email, emailVerifiedContinueCall))
+                } else {
+                  logger.warn(
+                    "Email verified endpoint called but email was not verified"
+                  )
+                  errorHandler.errorResult()
+                }
+              }
           }
-      })
+        )
 
     }
 

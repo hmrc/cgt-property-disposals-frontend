@@ -34,13 +34,14 @@ final case class RequestWithSessionData[A](
 }
 
 @Singleton
-class SessionDataAction @Inject()(val sessionStore: SessionStore,
-                                  val errorHandler: ErrorHandler
-                                  )(implicit val executionContext: ExecutionContext)
-  extends SessionDataActionBase[AuthenticatedRequest, RequestWithSessionData] {
+class SessionDataAction @Inject()(val sessionStore: SessionStore, val errorHandler: ErrorHandler)(
+  implicit val executionContext: ExecutionContext
+) extends SessionDataActionBase[AuthenticatedRequest, RequestWithSessionData] {
 
-  def sessionDataAction[A](sessionData: Option[SessionData],
-                           request: AuthenticatedRequest[A]): RequestWithSessionData[A] =
+  def sessionDataAction[A](
+    sessionData: Option[SessionData],
+    request: AuthenticatedRequest[A]
+  ): RequestWithSessionData[A] =
     RequestWithSessionData(sessionData, request)
 
 }

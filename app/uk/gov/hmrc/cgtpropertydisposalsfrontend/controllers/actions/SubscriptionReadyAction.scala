@@ -19,8 +19,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 import cats.syntax.either._
 import com.google.inject.{Inject, Singleton}
 import play.api.i18n.MessagesApi
-import play.api.mvc._
 import play.api.mvc.Results.Redirect
+import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus
@@ -46,14 +46,15 @@ final case class RequestWithSubscriptionReady[A](
 
 @Singleton
 class SubscriptionReadyAction @Inject()(sessionStore: SessionStore, errorHandler: ErrorHandler)(
-  implicit ec: ExecutionContext)
-    extends ActionRefiner[AuthenticatedRequest, RequestWithSubscriptionReady]
+  implicit ec: ExecutionContext
+) extends ActionRefiner[AuthenticatedRequest, RequestWithSubscriptionReady]
     with Logging {
 
   override protected def executionContext: ExecutionContext = ec
 
   override protected def refine[A](
-    request: AuthenticatedRequest[A]): Future[Either[Result, RequestWithSubscriptionReady[A]]] = {
+    request: AuthenticatedRequest[A]
+  ): Future[Either[Result, RequestWithSubscriptionReady[A]]] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter
       .fromHeadersAndSession(request.headers, Some(request.session))
 

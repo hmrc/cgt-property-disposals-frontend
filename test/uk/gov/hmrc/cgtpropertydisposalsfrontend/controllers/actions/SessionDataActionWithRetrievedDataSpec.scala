@@ -46,16 +46,19 @@ class SessionDataActionWithRetrievedDataSpec extends ControllerSpec with Session
           Right(NINO("nino")),
           Some(Email("email"))
         ),
-        messagesRequest)
+        messagesRequest
+      )
 
     val sessionData = sample[SessionData]
 
     def performAction(): Future[Result] =
-      action.invokeBlock(authenticatedRequest, { r: RequestWithSessionDataAndRetrievedData[_] =>
-        r.messagesApi shouldBe messagesRequest.messagesApi
-        r.sessionData shouldBe Some(sessionData)
-        Future.successful(Ok)
-      })
+      action.invokeBlock(
+        authenticatedRequest, { r: RequestWithSessionDataAndRetrievedData[_] =>
+          r.messagesApi shouldBe messagesRequest.messagesApi
+          r.sessionData shouldBe Some(sessionData)
+          Future.successful(Ok)
+        }
+      )
 
     "return an error if there is an error getting session data" in {
       mockGetSession(Future.successful(Left(Error(new Exception("Oh no!")))))

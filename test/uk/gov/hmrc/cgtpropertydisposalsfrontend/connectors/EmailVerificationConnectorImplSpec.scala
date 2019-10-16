@@ -23,8 +23,8 @@ import play.api.Configuration
 import play.api.libs.json.{JsString, Json}
 import play.api.mvc.Call
 import play.api.test.Helpers._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Email
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -60,12 +60,12 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
       implicit val hc: HeaderCarrier = HeaderCarrier()
       val expectedUrl =
         s"$protocol://$host:$port/email-verification/verification-requests"
-      val email = Email("email@test.com")
-      val name  = IndividualName("Bob", "Lob")
-      val trustName = TrustName("trust")
+      val email              = Email("email@test.com")
+      val name               = IndividualName("Bob", "Lob")
+      val trustName          = TrustName("trust")
       val continueCall: Call = Call("GET", s"/url")
 
-      def body(name: Either[TrustName,IndividualName]) = Json.parse(
+      def body(name: Either[TrustName, IndividualName]) = Json.parse(
         s"""
            |{
            |"email": "${email.value}",
@@ -81,15 +81,15 @@ class EmailVerificationConnectorImplSpec extends WordSpec with Matchers with Moc
         "and return the response" when {
 
         "handling individuals" in {
-            List(
-              HttpResponse(200, Some(JsString("hi"))),
-              HttpResponse(409),
-              HttpResponse(500)
-            ).foreach { response =>
-              mockPost(expectedUrl, Map.empty[String, String], body(Right(name)))(Some(response))
+          List(
+            HttpResponse(200, Some(JsString("hi"))),
+            HttpResponse(409),
+            HttpResponse(500)
+          ).foreach { response =>
+            mockPost(expectedUrl, Map.empty[String, String], body(Right(name)))(Some(response))
 
-              await(connector.verifyEmail(email, Right(name), continueCall).value) shouldBe Right(response)
-            }
+            await(connector.verifyEmail(email, Right(name), continueCall).value) shouldBe Right(response)
+          }
         }
 
         "handling trusts" in {

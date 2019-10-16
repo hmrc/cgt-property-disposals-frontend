@@ -16,16 +16,16 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos
 
-import configs.syntax._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
+import configs.syntax._
 import play.api.Configuration
 import play.modules.reactivemongo.ReactiveMongoComponent
 import uk.gov.hmrc.cache.repository.CacheMongoRepository
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[SessionStoreImpl])
 trait SessionStore {
@@ -39,7 +39,8 @@ trait SessionStore {
 @Singleton
 class SessionStoreImpl @Inject()(mongo: ReactiveMongoComponent, configuration: Configuration)(
   implicit ec: ExecutionContext
-) extends SessionStore with Repo {
+) extends SessionStore
+    with Repo {
 
   val cacheRepository: CacheMongoRepository = {
     val expireAfter: FiniteDuration = configuration.underlying

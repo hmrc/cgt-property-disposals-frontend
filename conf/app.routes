@@ -109,7 +109,7 @@ POST /subscription/enter-non-uk-address  uk.gov.hmrc.cgtpropertydisposalsfronten
 GET  /register-your-trust                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegisterTrustController.registerYourTrust()
 
 
-### Return journey
-GET  /return/start                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.ReturnsController.start()
+### Subscribed Journey
+GET  /subscribed/start                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.HomeController.start()
 
 GET  /assets/*file                        controllers.Assets.at(path="/public", file)

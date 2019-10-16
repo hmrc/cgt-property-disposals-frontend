@@ -32,7 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, sample}
 import scala.concurrent.Future
 
 class RegistrationEnterEmailControllerSpec
-    extends EmailControllerSpec[IndividualMissingEmail,RegistrationReady]
+    extends EmailControllerSpec[IndividualMissingEmail, RegistrationReady]
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 

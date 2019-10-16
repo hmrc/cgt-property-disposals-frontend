@@ -34,47 +34,48 @@ import scala.concurrent.ExecutionContext
 
 @Singleton
 class RegistrationChangeAddressController @Inject()(
-                                                    val errorHandler: ErrorHandler,
-                                                    val ukAddressLookupService: UKAddressLookupService,
-                                                    val sessionStore: SessionStore,
-                                                    val authenticatedAction: AuthenticatedAction,
-                                                    val sessionDataAction: SessionDataAction,
-                                                    cc: MessagesControllerComponents,
-                                                    val enterPostcodePage: views.html.address.enter_postcode,
-                                                    val selectAddressPage: views.html.address.select_address,
-                                                    val addressDisplay: views.html.components.address_display,
-                                                    val enterUkAddressPage: views.html.address.enter_uk_address,
-                                                    val enterNonUkAddressPage: views.html.address.enter_nonUk_address,
-                                                    val isUkPage: views.html.address.isUk
-                                                  )(implicit val viewConfig: ViewConfig, val ec: ExecutionContext)
-  extends FrontendController(cc)
+  val errorHandler: ErrorHandler,
+  val ukAddressLookupService: UKAddressLookupService,
+  val sessionStore: SessionStore,
+  val authenticatedAction: AuthenticatedAction,
+  val sessionDataAction: SessionDataAction,
+  cc: MessagesControllerComponents,
+  val enterPostcodePage: views.html.address.enter_postcode,
+  val selectAddressPage: views.html.address.select_address,
+  val addressDisplay: views.html.components.address_display,
+  val enterUkAddressPage: views.html.address.enter_uk_address,
+  val enterNonUkAddressPage: views.html.address.enter_nonUk_address,
+  val isUkPage: views.html.address.isUk
+)(implicit val viewConfig: ViewConfig, val ec: ExecutionContext)
+    extends FrontendController(cc)
     with Logging
     with WithAuthAndSessionDataAction
     with SessionUpdates
     with AddressController[RegistrationReady] {
 
   def validJourney(
-                    request: RequestWithSessionData[_]
-                  ): Either[Result, (SessionData, RegistrationReady)] =
+    request: RequestWithSessionData[_]
+  ): Either[Result, (SessionData, RegistrationReady)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, r: RegistrationReady)) => Right(sessionData -> r)
-      case _ => Left(Redirect(controllers.routes.StartController.start()))
+      case _                                         => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   def updateAddress(journey: RegistrationReady, address: Address): JourneyStatus =
     journey.copy(address = address)
 
-  protected lazy val backLinkCall: Call                = controllers.routes.RegistrationController.checkYourAnswers()
-  protected lazy val isUkCall: Call                    = routes.RegistrationChangeAddressController.isUk()
-  protected lazy val isUkSubmitCall: Call              = routes.RegistrationChangeAddressController.isUkSubmit()
-  protected lazy val enterUkAddressCall: Call          = routes.RegistrationChangeAddressController.enterUkAddress()
-  protected lazy val enterUkAddressSubmitCall: Call    = routes.RegistrationChangeAddressController.enterUkAddressSubmit()
-  protected lazy val enterNonUkAddressCall: Call       = routes.RegistrationChangeAddressController.enterNonUkAddress()
-  protected lazy val enterNonUkAddressSubmitCall: Call = routes.RegistrationChangeAddressController.enterNonUkAddressSubmit()
-  protected lazy val enterPostcodeCall: Call           = routes.RegistrationChangeAddressController.enterPostcode()
-  protected lazy val enterPostcodeSubmitCall: Call     = routes.RegistrationChangeAddressController.enterPostcodeSubmit()
-  protected lazy val selectAddressCall: Call           = routes.RegistrationChangeAddressController.selectAddress()
-  protected lazy val selectAddressSubmitCall: Call     = routes.RegistrationChangeAddressController.selectAddressSubmit()
-  protected lazy val continueCall: Call                = controllers.routes.RegistrationController.checkYourAnswers()
+  protected lazy val backLinkCall: Call             = controllers.routes.RegistrationController.checkYourAnswers()
+  protected lazy val isUkCall: Call                 = routes.RegistrationChangeAddressController.isUk()
+  protected lazy val isUkSubmitCall: Call           = routes.RegistrationChangeAddressController.isUkSubmit()
+  protected lazy val enterUkAddressCall: Call       = routes.RegistrationChangeAddressController.enterUkAddress()
+  protected lazy val enterUkAddressSubmitCall: Call = routes.RegistrationChangeAddressController.enterUkAddressSubmit()
+  protected lazy val enterNonUkAddressCall: Call    = routes.RegistrationChangeAddressController.enterNonUkAddress()
+  protected lazy val enterNonUkAddressSubmitCall: Call =
+    routes.RegistrationChangeAddressController.enterNonUkAddressSubmit()
+  protected lazy val enterPostcodeCall: Call       = routes.RegistrationChangeAddressController.enterPostcode()
+  protected lazy val enterPostcodeSubmitCall: Call = routes.RegistrationChangeAddressController.enterPostcodeSubmit()
+  protected lazy val selectAddressCall: Call       = routes.RegistrationChangeAddressController.selectAddress()
+  protected lazy val selectAddressSubmitCall: Call = routes.RegistrationChangeAddressController.selectAddressSubmit()
+  protected lazy val continueCall: Call            = controllers.routes.RegistrationController.checkYourAnswers()
 
 }

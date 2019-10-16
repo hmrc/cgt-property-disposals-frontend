@@ -28,8 +28,7 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait SessionDataActionBase[R[_] <: Request[_], P[_] <: Request[_]]
-  extends ActionRefiner[R, P] with Logging {
+trait SessionDataActionBase[R[_] <: Request[_], P[_] <: Request[_]] extends ActionRefiner[R, P] with Logging {
 
   val sessionStore: SessionStore
 
@@ -37,22 +36,18 @@ trait SessionDataActionBase[R[_] <: Request[_], P[_] <: Request[_]]
 
   implicit val executionContext: ExecutionContext
 
-  def sessionDataAction[A](sessionData: Option[SessionData],
-                           request: R[A]): P[A]
-
+  def sessionDataAction[A](sessionData: Option[SessionData], request: R[A]): P[A]
 
   override protected def refine[A](request: R[A]): Future[Either[Result, P[A]]] = {
     implicit val hc: HeaderCarrier =
       HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-    sessionStore.get()
-      .map(
-        _.bimap({ e =>
-          logger.warn("Could not get session data", e)
-          errorHandler.errorResult()(request)
-        },
-          sessionDataAction(_, request)
-        ))
+    sessionStore
+      .get()
+      .map(_.bimap({ e =>
+        logger.warn("Could not get session data", e)
+        errorHandler.errorResult()(request)
+      }, sessionDataAction(_, request)))
 
   }
 

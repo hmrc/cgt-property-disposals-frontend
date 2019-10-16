@@ -24,8 +24,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, RegistrationReady}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
@@ -52,7 +52,7 @@ class RegistrationEnterEmailController @Inject()(
     with WithAuthAndSessionDataAction
     with Logging
     with SessionUpdates
-    with EmailController[IndividualMissingEmail,RegistrationReady] {
+    with EmailController[IndividualMissingEmail, RegistrationReady] {
 
   override val isAmendJourney: Boolean = false
 
@@ -62,7 +62,9 @@ class RegistrationEnterEmailController @Inject()(
       case _                                              => Left(Redirect(controllers.routes.StartController.start()))
     }
 
-  override def validVerificationCompleteJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, RegistrationReady)] =
+  override def validVerificationCompleteJourney(
+    request: RequestWithSessionData[_]
+  ): Either[Result, (SessionData, RegistrationReady)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, r: RegistrationReady)) => Right(sessionData -> r)
       case _                                         => Left(Redirect(controllers.routes.StartController.start()))

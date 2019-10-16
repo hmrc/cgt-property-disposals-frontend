@@ -14,28 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids
 
-import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.libs.json.{Json, OFormat}
 
-class ReturnsControllerSpec extends ControllerSpec {
+final case class CgtReference(value: String) extends AnyVal
 
-  val controller = instanceOf[ReturnsController]
-
-  "The ReturnsController" when {
-
-    "handling requests to display the start page" must {
-
-      "display the start page" in {
-        val result = controller.start()(FakeRequest())
-        status(result)          shouldBe OK
-        contentAsString(result) should include("Start your return here")
-
-      }
-
-    }
-
-  }
-
+object CgtReference {
+  implicit val format: OFormat[CgtReference] = Json.format
 }

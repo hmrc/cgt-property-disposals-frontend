@@ -32,7 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, sample}
 import scala.concurrent.Future
 
 class RegistrationChangeEmailControllerSpec
-  extends EmailControllerSpec[RegistrationReady,RegistrationReady]
+    extends EmailControllerSpec[RegistrationReady, RegistrationReady]
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
@@ -55,7 +55,7 @@ class RegistrationChangeEmailControllerSpec
     redirectToStartWhenInvalidJourney(
       performAction, {
         case _: RegistrationReady => true
-        case _                         => false
+        case _                    => false
       }
     )
 
