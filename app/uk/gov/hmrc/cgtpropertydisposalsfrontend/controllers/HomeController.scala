@@ -19,9 +19,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedActionWithRetrievedData, RequestWithSessionDataAndRetrievedData, SessionDataActionWithRetrievedData, WithAuthRetrievalsAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.TryingToGetIndividualsFootprint
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
@@ -30,30 +29,29 @@ import scala.concurrent.Future
 
 @Singleton
 class HomeController @Inject()(
-  val authenticatedActionWithRetrievedData: AuthenticatedActionWithRetrievedData,
-  val sessionDataActionWithRetrievedData: SessionDataActionWithRetrievedData,
+  val authenticatedAction: AuthenticatedAction,
+  val sessionDataAction: SessionDataAction,
   cc: MessagesControllerComponents,
   startPage: views.html.subscribed.start
 )(implicit viewConfig: ViewConfig)
     extends FrontendController(cc)
-    with WithAuthRetrievalsAndSessionDataAction
+    with WithAuthAndSessionDataAction
     with SessionUpdates
     with Logging {
 
-  def start(): Action[AnyContent] = authenticatedActionWithRetrievedDataAndSessionData.async {
-    implicit request: RequestWithSessionDataAndRetrievedData[AnyContent] =>
-      withSubscribedUser(request) { status =>
+  def start(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request: RequestWithSessionData[AnyContent] =>
+      withSubscribedUser(request) { _ =>
         Ok(startPage())
       }
   }
 
-  //TODO: how to handle the left case?
-  private def withSubscribedUser(request: RequestWithSessionDataAndRetrievedData[_])(
-    f: Either[TryingToGetIndividualsFootprint, Subscribed] => Future[Result]
+  private def withSubscribedUser(request: RequestWithSessionData[_])(
+    f: Subscribed => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
       case Some(r: Subscribed) =>
-        f(Right(r))
+        f(r)
       case _ =>
         Future.successful(SeeOther(routes.StartController.start().url))
     }

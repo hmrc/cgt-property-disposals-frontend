@@ -24,14 +24,15 @@ import play.api.Configuration
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{RegistrationStatus, SubscriptionStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{RegistrationStatus, Subscribed, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionDetails.MissingData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecordRequest.{IndividualBusinessPartnerRecordRequest, TrustBusinessPartnerRecordRequest}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, NINO, SAUTR}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
@@ -39,7 +40,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
+
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -66,7 +67,15 @@ class StartController @Inject()(
     (request.authenticatedRequest.userType, request.sessionData.flatMap(_.journeyStatus)) match {
 
       case (UserType.Subscribed(cgtReference, gGCredId), None) =>
-        Redirect(routes.HomeController.start())
+        // TODO: take this out when the Display API is integrated
+        val dummyAccountDetails = AccountDetails(
+          Right(IndividualName("Joe", "Bloggs")),
+          Email("joe.bloggs@gmail.com"),
+          UkAddress("line1", None, None, None, "KO11OK"),
+          ContactName("Joe Bloggs"),
+          cgtReference
+        )
+        handleSubscribedUser(dummyAccountDetails)
 
       case (_, Some(_: Subscribed)) =>
         Redirect(routes.HomeController.start())
@@ -121,6 +130,27 @@ class StartController @Inject()(
     request.sessionData.flatMap(_.needMoreDetailsContinueUrl) match {
       case None              => Redirect(routes.StartController.start())
       case Some(continueUrl) => Ok(weNeedMoreDetailsPage(continueUrl))
+    }
+  }
+
+  private def handleSubscribedUser(accountDetails: AccountDetails)(
+    implicit request: RequestWithSessionDataAndRetrievedData[_]
+  ): Future[Result] = {
+    lazy val redirectToHomePage =
+      Redirect(routes.HomeController.start())
+
+    if (request.sessionData.flatMap(_.journeyStatus).contains(Subscribed(accountDetails))) {
+      redirectToHomePage
+    } else {
+      updateSession(sessionStore, request)(_.copy(journeyStatus = Some(Subscribed(accountDetails))))
+        .map {
+          case Left(e) =>
+            logger.warn("Could not update session", e)
+            errorHandler.errorResult()
+
+          case Right(_) =>
+            redirectToHomePage
+        }
     }
   }
 

@@ -20,6 +20,7 @@ import org.scalacheck.ScalacheckShapeless._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
+import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
@@ -46,31 +47,36 @@ class HomeControllerSpec
 
   val subscribed = sample[Subscribed]
 
+  def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
+    redirectToStartWhenInvalidJourney(
+      performAction, {
+        case _: Subscribed => true
+        case _             => false
+      }
+    )
+
   "The Home Controller" when {
 
-    "handling requests to display the start page" must {
+    def performAction(): Future[Result] = controller.start()(FakeRequest())
+
+    "handling requests" must {
 
       "display the home page" in {
         val sessionData =
           SessionData.empty.copy(journeyStatus = Some(subscribed))
 
         inSequence {
-          mockAuthWithCgtEnrolmentRetrievals
+          mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionData))))
         }
-        val result = controller.start()(FakeRequest())
+        val result = performAction()
         status(result)          shouldBe 200
         contentAsString(result) should include("Start your return")
       }
 
-      "redirect to start end point if not subscribed" in {
-        inSequence {
-          mockAuthWithCgtEnrolmentRetrievals
-          mockGetSession(Future.successful(Right(None)))
-        }
-        val result = controller.start()(FakeRequest())
-        status(result) shouldBe 303
-      }
+      behave like redirectToStartBehaviour(performAction)
+
     }
+
   }
 }
