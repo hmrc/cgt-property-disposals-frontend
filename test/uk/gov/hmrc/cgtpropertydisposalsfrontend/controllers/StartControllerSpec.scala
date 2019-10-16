@@ -578,7 +578,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
             "the session data indicates the user has already subscribed" in {
               val subscriptionStatus = Subscribed(
-                AccountDetails(
+                SubscribedDetails(
                   individualSubscriptionDetails.name,
                   individualSubscriptionDetails.emailAddress,
                   individualSubscriptionDetails.address,
@@ -858,7 +858,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
             "the session data indicates the user has already subscribed" in {
               val subscriptionStatus = Subscribed(
-                AccountDetails(
+                SubscribedDetails(
                   trustSubscriptionDetails.name,
                   trustSubscriptionDetails.emailAddress,
                   trustSubscriptionDetails.address,

@@ -22,7 +22,7 @@ import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AccountDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -67,7 +67,7 @@ class SubscriptionController @Inject()(
                 _.copy(
                   journeyStatus = Some(
                     Subscribed(
-                      AccountDetails(
+                      SubscribedDetails(
                         details.name,
                         details.emailAddress,
                         details.address,

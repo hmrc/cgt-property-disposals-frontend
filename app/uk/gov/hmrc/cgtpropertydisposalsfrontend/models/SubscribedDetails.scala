@@ -22,7 +22,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
 
-final case class AccountDetails(
+final case class SubscribedDetails(
   name: Either[TrustName, IndividualName],
   emailAddress: Email,
   address: Address,
@@ -30,6 +30,6 @@ final case class AccountDetails(
   cgtReference: CgtReference
 )
 
-object AccountDetails {
-  implicit val format: Format[AccountDetails] = Json.format
+object SubscribedDetails {
+  implicit val format: Format[SubscribedDetails] = Json.format
 }

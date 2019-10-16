@@ -61,7 +61,7 @@ class SubscriptionControllerSpec
   val requestWithCSRFToken = FakeRequest().withCSRFToken
 
   val subscriptionDetails = sample[SubscriptionDetails]
-  val accountDetails = AccountDetails(
+  val accountDetails = SubscribedDetails(
     subscriptionDetails.name,
     subscriptionDetails.emailAddress,
     subscriptionDetails.address,
@@ -187,7 +187,7 @@ class SubscriptionControllerSpec
           val session = SessionData.empty.copy(
             journeyStatus = Some(
               Subscribed(
-                AccountDetails(
+                SubscribedDetails(
                   subscriptionDetails.name,
                   subscriptionDetails.emailAddress,
                   subscriptionDetails.address,

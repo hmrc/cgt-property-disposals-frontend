@@ -50,7 +50,7 @@ object JourneyStatus {
   }
 
   // subscription has been submitted to ETMP
-  final case class Subscribed(accountDetails: AccountDetails) extends JourneyStatus
+  final case class Subscribed(accountDetails: SubscribedDetails) extends JourneyStatus
 
   sealed trait RegistrationStatus extends JourneyStatus with Product with Serializable
 

@@ -68,7 +68,7 @@ class StartController @Inject()(
 
       case (UserType.Subscribed(cgtReference, gGCredId), None) =>
         // TODO: take this out when the Display API is integrated
-        val dummyAccountDetails = AccountDetails(
+        val dummyAccountDetails = SubscribedDetails(
           Right(IndividualName("Joe", "Bloggs")),
           Email("joe.bloggs@gmail.com"),
           UkAddress("line1", None, None, None, "KO11OK"),
@@ -133,7 +133,7 @@ class StartController @Inject()(
     }
   }
 
-  private def handleSubscribedUser(accountDetails: AccountDetails)(
+  private def handleSubscribedUser(accountDetails: SubscribedDetails)(
     implicit request: RequestWithSessionDataAndRetrievedData[_]
   ): Future[Result] = {
     lazy val redirectToHomePage =
