@@ -23,7 +23,7 @@ import org.scalatest.{Matchers, WordSpec}
 import play.api.mvc.Call
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.EmailVerificationConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse.{EmailAlreadyVerified, EmailVerificationRequested}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -37,13 +37,13 @@ class EmailVerificationServiceImplSpec extends WordSpec with Matchers with MockF
 
   def mockVerifyEmail(
     expectedEmail: Email,
-    expectedName: Either[TrustName, IndividualName],
+    expectedName: ContactName,
     expectedContinueCall: Call
   )(
     result: Either[Error, HttpResponse]
   ) =
     (mockConnector
-      .verifyEmail(_: Email, _: Either[TrustName, IndividualName], _: Call)(_: HeaderCarrier))
+      .verifyEmail(_: Email, _: ContactName, _: Call)(_: HeaderCarrier))
       .expects(expectedEmail, expectedName, expectedContinueCall, *)
       .returning(EitherT.fromEither[Future](result))
 
@@ -54,19 +54,19 @@ class EmailVerificationServiceImplSpec extends WordSpec with Matchers with MockF
 
       implicit val hc: HeaderCarrier = HeaderCarrier()
       val email                      = Email("email")
-      val name                       = IndividualName("Fred", "Bread")
+      val name                       = ContactName("Fred Bread")
       val continueCall               = Call("GET", "/")
 
       "indicate when the email verification request has been requested" in {
-        mockVerifyEmail(email, Right(name), continueCall)(Right(HttpResponse(CREATED)))
+        mockVerifyEmail(email, name, continueCall)(Right(HttpResponse(CREATED)))
 
-        await(service.verifyEmail(email, Right(name), continueCall).value) shouldBe Right(EmailVerificationRequested)
+        await(service.verifyEmail(email, name, continueCall).value) shouldBe Right(EmailVerificationRequested)
       }
 
       "indicate when the email address has already been verified" in {
-        mockVerifyEmail(email, Right(name), continueCall)(Right(HttpResponse(CONFLICT)))
+        mockVerifyEmail(email, name, continueCall)(Right(HttpResponse(CONFLICT)))
 
-        await(service.verifyEmail(email, Right(name), continueCall).value) shouldBe Right(EmailAlreadyVerified)
+        await(service.verifyEmail(email, name, continueCall).value) shouldBe Right(EmailAlreadyVerified)
       }
 
       "indicate when there is an error verifying the email address" in {
@@ -74,9 +74,9 @@ class EmailVerificationServiceImplSpec extends WordSpec with Matchers with MockF
           Left(Error(new Exception("uh oh"))),
           Right(HttpResponse(INTERNAL_SERVER_ERROR))
         ).foreach { response =>
-          mockVerifyEmail(email, Right(name), continueCall)(response)
+          mockVerifyEmail(email, name, continueCall)(response)
 
-          await(service.verifyEmail(email, Right(name), continueCall).value).isLeft shouldBe true
+          await(service.verifyEmail(email, name, continueCall).value).isLeft shouldBe true
 
         }
 

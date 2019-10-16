@@ -82,7 +82,7 @@ class SubscriptionChangeEmailControllerSpec
       behave like redirectToStartBehaviour(() => performAction("", ""))
       behave like enterEmailSubmit(
         performAction,
-        validJourneyStatus.subscriptionDetails.name,
+        validJourneyStatus.subscriptionDetails.contactName,
         routes.SubscriptionChangeEmailController.verifyEmail,
         routes.SubscriptionChangeEmailController.checkYourInbox()
       )

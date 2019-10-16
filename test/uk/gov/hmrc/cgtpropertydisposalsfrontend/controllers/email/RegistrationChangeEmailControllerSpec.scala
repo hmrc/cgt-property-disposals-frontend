@@ -27,6 +27,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, sample}
 
 import scala.concurrent.Future
@@ -83,7 +84,7 @@ class RegistrationChangeEmailControllerSpec
 
       behave like enterEmailSubmit(
         performAction,
-        Right(validJourneyStatus.registrationDetails.name),
+        ContactName(validJourneyStatus.registrationDetails.name.makeSingleName()),
         routes.RegistrationChangeEmailController.verifyEmail,
         routes.RegistrationChangeEmailController.checkYourInbox()
       )
