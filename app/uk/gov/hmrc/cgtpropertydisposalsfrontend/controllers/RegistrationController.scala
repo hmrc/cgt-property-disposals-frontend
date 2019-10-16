@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
+import cats.data.EitherT
+import cats.instances.future._
 import cats.instances.int._
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
@@ -24,9 +26,13 @@ import play.api.data.Forms.{mapping, number}
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{RegistrationStatus, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{RegistrationDetails, SessionData, SubscribedDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -40,6 +46,7 @@ class RegistrationController @Inject()(
   val sessionDataAction: SessionDataAction,
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
+  subscriptionService: SubscriptionService,
   selectEntityTypePage: views.html.registration.select_entity_type,
   wrongGGAccountForTrustPage: views.html.wrong_gg_account_for_trust,
   enterNamePage: views.html.name.enter_name,
@@ -141,7 +148,7 @@ class RegistrationController @Inject()(
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     request.sessionData.flatMap(_.journeyStatus) match {
       case Some(r: RegistrationStatus.RegistrationReady) =>
-        Ok(checkYourDetailsPage(r))
+        Ok(checkYourDetailsPage(r.registrationDetails))
 
       case Some(RegistrationStatus.IndividualSupplyingInformation(None, _, _)) =>
         Redirect(name.routes.RegistrationEnterIndividualNameController.enterIndividualName())
@@ -162,14 +169,14 @@ class RegistrationController @Inject()(
         }
 
       case Some(RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), Some(email))) =>
-        val r = RegistrationStatus.RegistrationReady(name, address, email)
+        val r = RegistrationStatus.RegistrationReady(RegistrationDetails(name, email, address))
         updateSession(sessionStore, request)(_.copy(journeyStatus = Some(r))).map {
           case Left(error) =>
             logger.warn("Could not update session for registration ready", error)
             errorHandler.errorResult()
 
           case Right(_) =>
-            Ok(checkYourDetailsPage(r))
+            Ok(checkYourDetailsPage(r.registrationDetails))
         }
 
       case _ =>
@@ -177,6 +184,38 @@ class RegistrationController @Inject()(
 
     }
 
+  }
+
+  def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    request.sessionData.flatMap(_.journeyStatus) match {
+      case Some(RegistrationStatus.RegistrationReady(registrationDetails)) =>
+        val result = for {
+          subscriptionResponse <- subscriptionService.registerWithoutIdAndSubscribe(registrationDetails)
+        _   <- EitherT(updateSession(sessionStore,request)(_ =>
+          SessionData.empty.copy(journeyStatus = Some(
+            Subscribed(
+              SubscribedDetails(
+                Right(registrationDetails.name),
+                registrationDetails.emailAddress,
+                registrationDetails.address,
+                ContactName(s"${registrationDetails.name.firstName} ${registrationDetails.name.lastName}"),
+                CgtReference(subscriptionResponse.cgtReferenceNumber)
+              )
+              )))
+        ))
+        } yield ()
+
+        result.fold({
+          e =>
+          logger.warn("Could not register without id and subscribe", e)
+          errorHandler.errorResult()
+        },
+          _ => Redirect(routes.SubscriptionController.subscribed())
+        )
+
+      case _ =>
+        Redirect(routes.StartController.start())
+    }
   }
 
 }

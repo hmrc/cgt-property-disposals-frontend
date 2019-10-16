@@ -53,9 +53,9 @@ class RegistrationChangeIndividualNameController @Inject()(
     }
 
   override def updateName(journey: RegistrationReady, name: IndividualName): JourneyStatus =
-    journey.copy(name = name)
+    journey.copy(registrationDetails = journey.registrationDetails.copy(name = name))
 
-  override def name(journey: RegistrationReady): Option[IndividualName] = Some(journey.name)
+  override def name(journey: RegistrationReady): Option[IndividualName] = Some(journey.registrationDetails.name)
 
   override protected lazy val backLinkCall: Call = controllers.routes.RegistrationController.checkYourAnswers()
   override protected lazy val enterNameSubmitCall: Call =

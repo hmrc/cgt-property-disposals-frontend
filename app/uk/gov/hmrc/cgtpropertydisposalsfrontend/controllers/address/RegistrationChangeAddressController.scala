@@ -62,7 +62,7 @@ class RegistrationChangeAddressController @Inject()(
     }
 
   def updateAddress(journey: RegistrationReady, address: Address): JourneyStatus =
-    journey.copy(address = address)
+    journey.copy(registrationDetails = journey.registrationDetails.copy(address = address))
 
   protected lazy val backLinkCall: Call             = controllers.routes.RegistrationController.checkYourAnswers()
   protected lazy val isUkCall: Call                 = routes.RegistrationChangeAddressController.isUk()

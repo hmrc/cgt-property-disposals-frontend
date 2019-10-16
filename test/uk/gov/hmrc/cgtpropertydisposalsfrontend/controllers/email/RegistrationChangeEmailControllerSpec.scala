@@ -45,7 +45,7 @@ class RegistrationChangeEmailControllerSpec
     validJourneyStatus
 
   override def updateEmail(journey: RegistrationReady, email: Email): RegistrationReady =
-    journey.copy(email = email)
+    journey.copy(registrationDetails = journey.registrationDetails.copy(emailAddress = email))
 
   override lazy val controller: RegistrationChangeEmailController = instanceOf[RegistrationChangeEmailController]
 
@@ -83,7 +83,7 @@ class RegistrationChangeEmailControllerSpec
 
       behave like enterEmailSubmit(
         performAction,
-        Right(validJourneyStatus.name),
+        Right(validJourneyStatus.registrationDetails.name),
         routes.RegistrationChangeEmailController.verifyEmail,
         routes.RegistrationChangeEmailController.checkYourInbox()
       )

@@ -45,7 +45,7 @@ class RegistrationChangeAddressControllerSpec
     journey: RegistrationReady,
     address: Address
   ): RegistrationReady =
-    journey.copy(address = address)
+    journey.copy(registrationDetails = journey.registrationDetails.copy(address = address))
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(

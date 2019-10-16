@@ -24,6 +24,7 @@ GET  /wrong-account-for-trusts            uk.gov.hmrc.cgtpropertydisposalsfronte
 GET  /registration/enter-name             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.RegistrationEnterIndividualNameController.enterIndividualName()
 POST /registration/enter-name             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.RegistrationEnterIndividualNameController.enterIndividualNameSubmit()
 GET  /registration/check-your-answers     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegistrationController.checkYourAnswers()
+POST /registration/check-your-answers     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegistrationController.checkYourAnswersSubmit()
 
 GET  /registration/amend-details/enter-name             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.RegistrationChangeIndividualNameController.enterIndividualName()
 POST /registration/amend-details/enter-name             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.RegistrationChangeIndividualNameController.enterIndividualNameSubmit()

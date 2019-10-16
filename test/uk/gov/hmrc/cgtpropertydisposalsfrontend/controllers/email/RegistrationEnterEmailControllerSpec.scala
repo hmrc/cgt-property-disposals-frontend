@@ -27,7 +27,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, RegistrationReady}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, RegistrationDetails, sample}
 
 import scala.concurrent.Future
 
@@ -45,7 +45,7 @@ class RegistrationEnterEmailControllerSpec
     sample[RegistrationReady]
 
   override def updateEmail(journey: IndividualMissingEmail, email: Email): RegistrationReady =
-    RegistrationReady(journey.name, journey.address, email)
+    RegistrationReady(RegistrationDetails(journey.name, email, journey.address))
 
   override lazy val controller: RegistrationEnterEmailController = instanceOf[RegistrationEnterEmailController]
 
