@@ -48,13 +48,13 @@ object SubscriptionDetails {
       )
       .map(
         email =>
-          SubscriptionDetails(
-            bpr.name,
-            email,
-            bpr.address,
-            ContactName(bpr.name.fold(_.value, n => s"${n.firstName} ${n.lastName}")),
-            bpr.sapNumber
-          )
+        SubscriptionDetails(
+          bpr.name,
+          email,
+          bpr.address,
+          ContactName(bpr.name.fold(_.value, n => n.makeSingleName())),
+          bpr.sapNumber
+        )
       )
 
   sealed trait MissingData extends Product with Serializable

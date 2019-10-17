@@ -26,7 +26,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionMissingData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
@@ -76,8 +76,8 @@ class SubscriptionEnterEmailController @Inject()(
   override def updateEmail(journey: SubscriptionMissingData, email: Email): SubscriptionMissingData =
     subscriptionMissingDataEmailLens.set(journey)(Some(email))
 
-  override def name(journeyStatus: SubscriptionMissingData): Either[TrustName, IndividualName] =
-    journeyStatus.businessPartnerRecord.name
+  override def name(journeyStatus: SubscriptionMissingData): ContactName =
+    ContactName(journeyStatus.businessPartnerRecord.name.fold(_.value, n => n.makeSingleName()))
 
   override lazy protected val backLinkCall: Option[Call]      = None
   override lazy protected val enterEmailCall: Call            = routes.SubscriptionEnterEmailController.enterEmail()

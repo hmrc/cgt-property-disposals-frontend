@@ -28,7 +28,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{RequestWithSessionData, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse.{EmailAlreadyVerified, EmailVerificationRequested}
@@ -63,7 +63,7 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
     request: RequestWithSessionData[_]
   ): Either[Result, (SessionData, VerificationCompleteJourney)]
 
-  def name(journeyStatus: Journey): Either[TrustName, IndividualName]
+  def name(journeyStatus: Journey): ContactName
 
   private def withValidJourney(request: RequestWithSessionData[_])(
     f: (SessionData, Journey) => Future[Result]

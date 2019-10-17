@@ -30,7 +30,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, EmailToBeVerified, Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
@@ -69,12 +69,12 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
     )
 
   def mockEmailVerification(
-    expectedEmail: Email,
-    expectedName: Either[TrustName, IndividualName],
-    expectedContinue: Call
+                             expectedEmail: Email,
+                             expectedName: ContactName,
+                             expectedContinue: Call
   )(result: Either[Error, EmailVerificationResponse]) =
     (mockService
-      .verifyEmail(_: Email, _: Either[TrustName, IndividualName], _: Call)(_: HeaderCarrier))
+      .verifyEmail(_: Email, _: ContactName, _: Call)(_: HeaderCarrier))
       .expects(expectedEmail, expectedName, expectedContinue, *)
       .returning(EitherT.fromEither[Future](result))
 
@@ -121,7 +121,7 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
 
   def enterEmailSubmit(
     performAction: (String, String) => Future[Result],
-    expectedName: Either[TrustName, IndividualName],
+    expectedName: ContactName,
     verifyEmailCall: UUID => Call,
     checkYourInboxCall: Call
   )(implicit messagesApi: MessagesApi): Unit = {

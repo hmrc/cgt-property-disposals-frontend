@@ -28,6 +28,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionMissingData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecord
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, sample}
 
 import scala.concurrent.Future
@@ -83,7 +84,7 @@ class SubscriptionEnterEmailControllerSpec
 
       behave like enterEmailSubmit(
         performAction,
-        validJourneyStatus.businessPartnerRecord.name,
+        ContactName(validJourneyStatus.businessPartnerRecord.name.fold(_.value, n => n.makeSingleName())),
         routes.SubscriptionEnterEmailController.verifyEmail,
         routes.SubscriptionEnterEmailController.checkYourInbox()
       )

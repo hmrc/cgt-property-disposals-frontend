@@ -34,6 +34,10 @@ object IndividualName {
     case (n1, n2) => n1.firstName === n2.firstName && n1.lastName === n2.lastName
   }
 
+  implicit class IndividualNameOps(val name: IndividualName) extends AnyVal {
+    def makeSingleName(): String = name.firstName + " " + name.lastName
+  }
+
   val mapping: Mapping[String] = {
     val nameRegexPredicate =
       "^[a-zA-Z &`\\-'^]{1,35}$".r.pattern

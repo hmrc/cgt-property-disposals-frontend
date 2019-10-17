@@ -26,7 +26,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -73,9 +73,8 @@ class RegistrationEnterEmailController @Inject()(
   override def updateEmail(journey: IndividualMissingEmail, email: Email): RegistrationReady =
     RegistrationReady(RegistrationDetails(journey.name, email, journey.address))
 
-  override def name(journeyStatus: IndividualMissingEmail): Either[TrustName, IndividualName] =
-    Right(journeyStatus.name)
-
+  override def name(journeyStatus: IndividualMissingEmail): ContactName =
+    ContactName(journeyStatus.name.makeSingleName())
   override lazy protected val backLinkCall: Option[Call]    = None
   override lazy protected val enterEmailCall: Call          = routes.RegistrationEnterEmailController.enterEmail()
   override lazy protected val enterEmailSubmitCall: Call    = routes.RegistrationEnterEmailController.enterEmailSubmit()

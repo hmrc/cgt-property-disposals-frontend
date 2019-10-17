@@ -27,6 +27,7 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, RegistrationReady}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, RegistrationDetails, sample}
 
 import scala.concurrent.Future
@@ -83,7 +84,7 @@ class RegistrationEnterEmailControllerSpec
 
       behave like enterEmailSubmit(
         performAction,
-        Right(validJourneyStatus.name),
+        ContactName(validJourneyStatus.name.makeSingleName()),
         routes.RegistrationEnterEmailController.verifyEmail,
         routes.RegistrationEnterEmailController.checkYourInbox()
       )
