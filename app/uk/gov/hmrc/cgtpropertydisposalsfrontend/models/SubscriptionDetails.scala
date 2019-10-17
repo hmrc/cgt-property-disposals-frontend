@@ -19,17 +19,17 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import cats.data.NonEmptyList
 import cats.syntax.either._
 import play.api.libs.json.{Format, Json}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecord
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
 
 final case class SubscriptionDetails(
-                                      name: Either[TrustName, IndividualName],
-                                      emailAddress: Email,
-                                      address: Address,
-                                      contactName: ContactName,
-                                      sapNumber: String
+  name: Either[TrustName, IndividualName],
+  emailAddress: Email,
+  address: Address,
+  contactName: ContactName,
+  sapNumber: String
 )
 
 object SubscriptionDetails {
@@ -46,14 +46,16 @@ object SubscriptionDetails {
         bpr.emailAddress.orElse(maybeEmail),
         NonEmptyList.one(MissingData.Email)
       )
-      .map(email =>
+      .map(
+        email =>
         SubscriptionDetails(
           bpr.name,
           email,
           bpr.address,
-          ContactName(bpr.name.fold(_.value, n => s"${n.firstName} ${n.lastName}")),
+          ContactName(bpr.name.fold(_.value, n => n.makeSingleName())),
           bpr.sapNumber
-        ))
+        )
+      )
 
   sealed trait MissingData extends Product with Serializable
 

@@ -44,7 +44,7 @@ class RegistrationChangeIndividualNameControllerSpec
   override lazy val validJourney: RegistrationReady = sample[RegistrationReady]
 
   override def updateName(name: IndividualName, journey: RegistrationReady): JourneyStatus =
-    journey.copy(name = name)
+    journey.copy(registrationDetails = journey.registrationDetails.copy(name = name))
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 

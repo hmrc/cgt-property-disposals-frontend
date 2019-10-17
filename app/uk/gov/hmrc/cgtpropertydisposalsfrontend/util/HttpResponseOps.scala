@@ -17,8 +17,8 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.util
 
 import play.api.libs.json.{JsDefined, JsError, JsLookupResult, Reads}
-import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.JsErrorOps._
+import uk.gov.hmrc.http.HttpResponse
 
 import scala.util.{Failure, Success, Try}
 

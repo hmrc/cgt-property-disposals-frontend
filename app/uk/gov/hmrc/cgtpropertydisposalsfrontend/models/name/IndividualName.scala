@@ -30,8 +30,12 @@ object IndividualName {
 
   implicit val format: OFormat[IndividualName] = Json.format[IndividualName]
 
-  implicit val eq: Eq[IndividualName] = Eq.instance{
+  implicit val eq: Eq[IndividualName] = Eq.instance {
     case (n1, n2) => n1.firstName === n2.firstName && n1.lastName === n2.lastName
+  }
+
+  implicit class IndividualNameOps(val name: IndividualName) extends AnyVal {
+    def makeSingleName(): String = name.firstName + " " + name.lastName
   }
 
   val mapping: Mapping[String] = {
@@ -40,8 +44,8 @@ object IndividualName {
         .asPredicate()
 
     def validateName(s: String): ValidationResult =
-      if(s.length > 35) Invalid("error.tooLong")
-      else if(!nameRegexPredicate.test(s)) Invalid("error.pattern")
+      if (s.length > 35) Invalid("error.tooLong")
+      else if (!nameRegexPredicate.test(s)) Invalid("error.pattern")
       else Valid
 
     nonEmptyText
@@ -53,7 +57,7 @@ object IndividualName {
     Form(
       formMapping(
         "firstName" -> mapping,
-        "lastName" -> mapping
+        "lastName"  -> mapping
       )(IndividualName.apply)(IndividualName.unapply)
     )
 }

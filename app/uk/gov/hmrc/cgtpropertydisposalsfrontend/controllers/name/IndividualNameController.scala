@@ -23,14 +23,15 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{RequestWith
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait IndividualNameController[J <: JourneyStatus] { this: FrontendController with WithAuthAndSessionDataAction with SessionUpdates with Logging =>
+trait IndividualNameController[J <: JourneyStatus] {
+  this: FrontendController with WithAuthAndSessionDataAction with SessionUpdates with Logging =>
 
   implicit val viewConfig: ViewConfig
   implicit val ec: ExecutionContext
@@ -50,38 +51,41 @@ trait IndividualNameController[J <: JourneyStatus] { this: FrontendController wi
   protected val enterNameSubmitCall: Call
   protected val continueCall: Call
 
-
   private def withValidJourney(request: RequestWithSessionData[_])(
     f: (SessionData, J) => Future[Result]
   ): Future[Result] =
     validJourney(request).fold[Future[Result]](toFuture, f.tupled)
 
   def enterIndividualName(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withValidJourney(request){ case (_, journey) =>
-      val form = {
-        name(journey).fold(IndividualName.form)(IndividualName.form.fill)
-      }
+    withValidJourney(request) {
+      case (_, journey) =>
+        val form = {
+          name(journey).fold(IndividualName.form)(IndividualName.form.fill)
+        }
 
-      Ok(enterNamePage(form, backLinkCall, enterNameSubmitCall))
+        Ok(enterNamePage(form, backLinkCall, enterNameSubmitCall))
     }
   }
 
-  def enterIndividualNameSubmit(): Action[AnyContent] =  authenticatedActionWithSessionData.async { implicit request =>
-    withValidJourney(request){ case (_, journey) =>
-      IndividualName.form.bindFromRequest().fold(
-        e => BadRequest(enterNamePage(e, backLinkCall, enterNameSubmitCall)),
-        name =>
-          updateSession(sessionStore, request)(
-            _.copy(journeyStatus = Some(updateName(journey, name)))
-          ).map{
-            case Left(e) =>
-              logger.warn("Could not update registration status with name", e)
-              errorHandler.errorResult()
+  def enterIndividualNameSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withValidJourney(request) {
+      case (_, journey) =>
+        IndividualName.form
+          .bindFromRequest()
+          .fold(
+            e => BadRequest(enterNamePage(e, backLinkCall, enterNameSubmitCall)),
+            name =>
+              updateSession(sessionStore, request)(
+                _.copy(journeyStatus = Some(updateName(journey, name)))
+              ).map {
+                case Left(e) =>
+                  logger.warn("Could not update registration status with name", e)
+                  errorHandler.errorResult()
 
-            case Right(_) =>
-              Redirect(continueCall)
-          }
-      )
+                case Right(_) =>
+                  Redirect(continueCall)
+              }
+          )
     }
   }
 

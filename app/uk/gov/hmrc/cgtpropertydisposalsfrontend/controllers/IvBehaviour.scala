@@ -16,19 +16,11 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
-import cats.syntax.either._
 import play.api.Configuration
-import play.api.mvc.{Request, Result}
+import play.api.mvc.Result
 import play.api.mvc.Results.Redirect
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionDataAndRetrievedData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
-import uk.gov.hmrc.http.HeaderCarrier
-
-import scala.concurrent.{ExecutionContext, Future}
 
 trait IvBehaviour { this: Logging =>
 
@@ -56,14 +48,14 @@ trait IvBehaviour { this: Logging =>
   }
 
   val redirectToIv: Result =
-     Redirect(
-       s"$ivUrl/mdtp/uplift",
-       Map(
-         "origin"          -> Seq(ivOrigin),
-         "confidenceLevel" -> Seq("200"),
-         "completionURL"   -> Seq(ivSuccessUrl),
-         "failureURL"      -> Seq(ivFailureUrl)
-       )
-     )
+    Redirect(
+      s"$ivUrl/mdtp/uplift",
+      Map(
+        "origin"          -> Seq(ivOrigin),
+        "confidenceLevel" -> Seq("200"),
+        "completionURL"   -> Seq(ivSuccessUrl),
+        "failureURL"      -> Seq(ivFailureUrl)
+      )
+    )
 
 }

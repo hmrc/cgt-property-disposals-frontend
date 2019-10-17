@@ -23,16 +23,16 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
-import play.api.mvc.{Call, Result}
+import play.api.mvc.Result
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{RegistrationStatus, SubscriptionStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.{BusinessPartnerRecord, NameMatchError, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, SAUTR}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordNameMatchRetryService
@@ -47,9 +47,9 @@ class InsufficientConfidenceLevelControllerSpec
     with IvBehaviourSupport
     with SessionSupport
     with AuthSupport
-      with ScalaCheckDrivenPropertyChecks
+    with ScalaCheckDrivenPropertyChecks
     with NameFormValidationTests
-    with RedirectToStartBehaviour{
+    with RedirectToStartBehaviour {
 
   val mockBprNameMatchService = mock[BusinessPartnerRecordNameMatchRetryService]
 
@@ -75,10 +75,10 @@ class InsufficientConfidenceLevelControllerSpec
       .returning(EitherT.fromEither[Future](result))
 
   def mockAttemptNameMatch(
-                            sautr: SAUTR,
-                            name: IndividualName,
-                            ggCredId: GGCredId,
-                            previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts]
+    sautr: SAUTR,
+    name: IndividualName,
+    ggCredId: GGCredId,
+    previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts]
   )(result: Either[NameMatchError, BusinessPartnerRecord]) =
     (
       mockBprNameMatchService
@@ -102,13 +102,11 @@ class InsufficientConfidenceLevelControllerSpec
 
   def commonBehaviour(performAction: () => Future[Result]) =
     redirectToStartWhenInvalidJourney(
-      performAction,
-      {
+      performAction, {
         case _: TryingToGetIndividualsFootprint => true
-        case _ => false
+        case _                                  => false
       }
     )
-
 
   "InsufficientConfidenceLevelController" when {
 
@@ -696,7 +694,8 @@ class InsufficientConfidenceLevelControllerSpec
       val expectedSessionData =
         session(TryingToGetIndividualsFootprint(Some(false), Some(true), None, ggCredId))
 
-      val previousUnsuccessfulNameMatchAttempt = UnsuccessfulNameMatchAttempts(1, 3, sample[IndividualName], sample[SAUTR])
+      val previousUnsuccessfulNameMatchAttempt =
+        UnsuccessfulNameMatchAttempts(1, 3, sample[IndividualName], sample[SAUTR])
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterSautrAndNameSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)

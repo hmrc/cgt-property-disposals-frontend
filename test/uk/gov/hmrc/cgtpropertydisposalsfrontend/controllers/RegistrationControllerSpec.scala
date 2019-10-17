@@ -17,36 +17,45 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import cats.Eq
+import cats.data.EitherT
 import org.scalacheck.ScalacheckShapeless._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.Result
-import play.api.test.FakeRequest
 import play.api.test.CSRFTokenHelper._
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import shapeless.{Lens, lens}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.{routes => nameroutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{RegistrationStatus, Subscribed, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.TryingToGetIndividualsFootprint
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, JourneyStatus, SessionData, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
 class RegistrationControllerSpec
-  extends ControllerSpec with AuthSupport with SessionSupport with ScalaCheckDrivenPropertyChecks with NameFormValidationTests with RedirectToStartBehaviour {
+    extends ControllerSpec
+    with AuthSupport
+    with SessionSupport
+    with ScalaCheckDrivenPropertyChecks
+    with NameFormValidationTests
+    with RedirectToStartBehaviour {
 
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
-      bind[SessionStore].toInstance(mockSessionStore)
+      bind[SessionStore].toInstance(mockSessionStore),
+      bind[SubscriptionService].toInstance(mockSubscriptionService)
     )
 
   lazy val controller = instanceOf[RegistrationController]
@@ -62,18 +71,21 @@ class RegistrationControllerSpec
 
   val journeyStatusLens: Lens[SessionData, Option[JourneyStatus]] = lens[SessionData].journeyStatus
 
+  def mockRegisterWithoutIdAndSubscribe(registrationDetails: RegistrationDetails)(result: Either[Error,SubscriptionResponse]) =
+    (mockSubscriptionService.registerWithoutIdAndSubscribe(_: RegistrationDetails)(_: HeaderCarrier))
+    .expects(registrationDetails, *)
+    .returning(EitherT(Future.successful(result)))
+
   "RegistrationController" when {
 
-    def redirectToStartBehaviour(performAction: () => Future[Result]): Unit = {
+    def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
       redirectToStartWhenInvalidJourney(
-        performAction,
-        {
+        performAction, {
           case TryingToGetIndividualsFootprint(Some(false), Some(false), _, _) => true
-          case r: RegistrationStatus => true
-          case _ => false
+          case r: RegistrationStatus                                           => true
+          case _                                                               => false
         }
       )
-    }
 
     "handling requests to show the select entity type page" must {
 
@@ -89,13 +101,13 @@ class RegistrationControllerSpec
           val sessionData =
             SessionData.empty.copy(journeyStatus = Some(individualWithInsufficentCLSubscriptionStatus))
 
-          inSequence{
+          inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData))))
           }
 
           val result = performAction()
-          status(result) shouldBe OK
+          status(result)          shouldBe OK
           contentAsString(result) should include(message("entityType.title"))
         }
       }
@@ -104,19 +116,19 @@ class RegistrationControllerSpec
         List(
           RegistrationStatus.IndividualWantsToRegisterTrust,
           RegistrationStatus.IndividualSupplyingInformation(None, None, None)
-        ).foreach{ journeyStatus =>
+        ).foreach { journeyStatus =>
           val sessionData =
             SessionData.empty.copy(
               journeyStatus = Some(journeyStatus)
             )
 
-          inSequence{
+          inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData))))
           }
 
           val result = performAction()
-          status(result) shouldBe OK
+          status(result)          shouldBe OK
           contentAsString(result) should include(message("entityType.title"))
           contentAsString(result) should include("""checked="checked"""")
         }
@@ -137,23 +149,23 @@ class RegistrationControllerSpec
 
       "show the page with errors" when {
         "the request submits no selection" in {
-          inSequence{
+          inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData))))
           }
 
           val result = performAction()
-          status(result) shouldBe BAD_REQUEST
+          status(result)          shouldBe BAD_REQUEST
           contentAsString(result) should include(message("entityType.error.required"))
         }
 
         "the request submits an invalid value" in {
-          inSequence{
+          inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData))))
           }
           val result = performAction("entityType" -> "2")
-          status(result) shouldBe BAD_REQUEST
+          status(result)          shouldBe BAD_REQUEST
           contentAsString(result) should include(message("entityType.invalid"))
         }
       }
@@ -163,7 +175,7 @@ class RegistrationControllerSpec
           val updatedSession =
             sessionData.copy(journeyStatus = Some(RegistrationStatus.IndividualWantsToRegisterTrust))
 
-          inSequence{
+          inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData))))
             mockStoreSession(updatedSession)(Future.successful(Right(())))
@@ -172,43 +184,46 @@ class RegistrationControllerSpec
           checkIsRedirect(result, routes.RegistrationController.wrongGGAccountForTrusts())
         }
 
-      "continue the registration journey" when {
-        "the request selects individual" in {
-          val updatedSession =
-            sessionData.copy(journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None, None, None)))
+        "continue the registration journey" when {
+          "the request selects individual" in {
+            val updatedSession =
+              sessionData.copy(
+                journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None, None, None))
+              )
 
-          inSequence{
-            mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData))))
-            mockStoreSession(updatedSession)(Future.successful(Right(())))
-          }
-          val result = performAction("entityType" -> "0")
-          checkIsRedirect(result, nameroutes.RegistrationEnterIndividualNameController.enterIndividualName())
-        }
-
-      }
-
-      "display an error page" when {
-
-        "the session cannot be updated" in {
-          List[(String,RegistrationStatus)](
-            "0" -> RegistrationStatus.IndividualSupplyingInformation(None, None, None),
-            "1" -> RegistrationStatus.IndividualWantsToRegisterTrust
-          ).foreach{ case (entityType, registrationStatus) =>
-
-            inSequence{
+            inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(Future.successful(Right(Some(sessionData))))
-              mockStoreSession(sessionData.copy(journeyStatus = Some(registrationStatus)))(Future.successful(Left(Error(""))))
+              mockStoreSession(updatedSession)(Future.successful(Right(())))
             }
-
-            checkIsTechnicalErrorPage(performAction("entityType" -> entityType))
+            val result = performAction("entityType" -> "0")
+            checkIsRedirect(result, nameroutes.RegistrationEnterIndividualNameController.enterIndividualName())
           }
-
 
         }
 
-      }
+        "display an error page" when {
+
+          "the session cannot be updated" in {
+            List[(String, RegistrationStatus)](
+              "0" -> RegistrationStatus.IndividualSupplyingInformation(None, None, None),
+              "1" -> RegistrationStatus.IndividualWantsToRegisterTrust
+            ).foreach {
+              case (entityType, registrationStatus) =>
+                inSequence {
+                  mockAuthWithNoRetrievals()
+                  mockGetSession(Future.successful(Right(Some(sessionData))))
+                  mockStoreSession(sessionData.copy(journeyStatus = Some(registrationStatus)))(
+                    Future.successful(Left(Error("")))
+                  )
+                }
+
+                checkIsTechnicalErrorPage(performAction("entityType" -> entityType))
+            }
+
+          }
+
+        }
 
         "not update the session" when {
 
@@ -216,7 +231,7 @@ class RegistrationControllerSpec
             val session =
               sessionData.copy(journeyStatus = Some(RegistrationStatus.IndividualWantsToRegisterTrust))
 
-            inSequence{
+            inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(Future.successful(Right(Some(session))))
             }
@@ -227,9 +242,11 @@ class RegistrationControllerSpec
 
           "the user selects individual and has previously indicated that they wish to register as an individual" in {
             val session =
-              sessionData.copy(journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None, None, None)))
+              sessionData.copy(
+                journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None, None, None))
+              )
 
-            inSequence{
+            inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(Future.successful(Right(Some(session))))
             }
@@ -258,12 +275,12 @@ class RegistrationControllerSpec
 
       "show the page" when {
         "the endpoint is requested" in {
-          inSequence{
+          inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData))))
           }
           val result = performAction()
-          status(result) shouldBe OK
+          status(result)          shouldBe OK
           contentAsString(result) should include(message("wrongAccountForTrusts.title"))
         }
       }
@@ -271,11 +288,18 @@ class RegistrationControllerSpec
       "redirect to the start registration endpoint" when {
 
         "the session indicates that they want to register as an individual" in {
-          inSequence{
+          inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(
-              sessionData.copy(journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None, None, None))))
-            )))
+            mockGetSession(
+              Future.successful(
+                Right(
+                  Some(
+                    sessionData
+                      .copy(journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None, None, None)))
+                  )
+                )
+              )
+            )
           }
           checkIsRedirect(performAction(), routes.RegistrationController.selectEntityType())
         }
@@ -289,23 +313,30 @@ class RegistrationControllerSpec
       def performAction(): Future[Result] = controller.checkYourAnswers()(FakeRequest())
 
       redirectToStartWhenInvalidJourney(
-        performAction,
-        {
+        performAction, {
           case _: RegistrationStatus.RegistrationReady | _: RegistrationStatus.IndividualSupplyingInformation => true
-          case _ => false
+          case _                                                                                              => false
         }
       )
 
       "redirect to the enter name page" when {
 
         "no name can be found" in {
-          inSequence{
+          inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(
-              SessionData.empty.copy(journeyStatus = Some(
-                RegistrationStatus.IndividualSupplyingInformation(None, None, None)
-              ))
-            ))))
+            mockGetSession(
+              Future.successful(
+                Right(
+                  Some(
+                    SessionData.empty.copy(
+                      journeyStatus = Some(
+                        RegistrationStatus.IndividualSupplyingInformation(None, None, None)
+                      )
+                    )
+                  )
+                )
+              )
+            )
           }
 
           checkIsRedirect(performAction(), nameroutes.RegistrationEnterIndividualNameController.enterIndividualName())
@@ -316,13 +347,21 @@ class RegistrationControllerSpec
       "redirect to the enter address journey" when {
 
         "no address can be found" in {
-          inSequence{
+          inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(
-              SessionData.empty.copy(journeyStatus = Some(
-                RegistrationStatus.IndividualSupplyingInformation(Some(sample[IndividualName]), None, None)
-              ))
-            ))))
+            mockGetSession(
+              Future.successful(
+                Right(
+                  Some(
+                    SessionData.empty.copy(
+                      journeyStatus = Some(
+                        RegistrationStatus.IndividualSupplyingInformation(Some(sample[IndividualName]), None, None)
+                      )
+                    )
+                  )
+                )
+              )
+            )
           }
 
           checkIsRedirect(performAction(), address.routes.RegistrationEnterAddressController.isUk())
@@ -333,19 +372,31 @@ class RegistrationControllerSpec
       "redirect to the enter email journey" when {
 
         "no email can be found" in {
-          val name = sample[IndividualName]
+          val name    = sample[IndividualName]
           val address = sample[Address]
 
-          inSequence{
+          inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(
-              SessionData.empty.copy(journeyStatus = Some(
-                RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), None)
-              ))
-            ))))
-            mockStoreSession(SessionData.empty.copy(journeyStatus = Some(
-              RegistrationStatus.IndividualMissingEmail(name, address)
-            )))(Future.successful(Right(())))
+            mockGetSession(
+              Future.successful(
+                Right(
+                  Some(
+                    SessionData.empty.copy(
+                      journeyStatus = Some(
+                        RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), None)
+                      )
+                    )
+                  )
+                )
+              )
+            )
+            mockStoreSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  RegistrationStatus.IndividualMissingEmail(name, address)
+                )
+              )
+            )(Future.successful(Right(())))
           }
 
           checkIsRedirect(performAction(), email.routes.RegistrationEnterEmailController.enterEmail())
@@ -356,30 +407,42 @@ class RegistrationControllerSpec
       "show an error page" when {
 
         "the session cannot be updated when there is no email" in {
-          val name = sample[IndividualName]
+          val name    = sample[IndividualName]
           val address = sample[Address]
 
-          inSequence{
+          inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(
-              SessionData.empty.copy(journeyStatus = Some(
-                RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), None)
-              ))
-            ))))
-            mockStoreSession(SessionData.empty.copy(journeyStatus = Some(
-              RegistrationStatus.IndividualMissingEmail(name, address)
-            )))(Future.successful(Left(Error(""))))
+            mockGetSession(
+              Future.successful(
+                Right(
+                  Some(
+                    SessionData.empty.copy(
+                      journeyStatus = Some(
+                        RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), None)
+                      )
+                    )
+                  )
+                )
+              )
+            )
+            mockStoreSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  RegistrationStatus.IndividualMissingEmail(name, address)
+                )
+              )
+            )(Future.successful(Left(Error(""))))
           }
 
           checkIsTechnicalErrorPage(performAction())
         }
 
         "the session cannot be updated when all the necessary details can be found" in {
-          val name = sample[IndividualName]
+          val name    = sample[IndividualName]
           val address = sample[Address]
-          val email = sample[Email]
+          val email   = sample[Email]
 
-          inSequence{
+          inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(
               SessionData.empty.copy(journeyStatus = Some(
@@ -387,7 +450,7 @@ class RegistrationControllerSpec
               ))
             ))))
             mockStoreSession(SessionData.empty.copy(journeyStatus = Some(
-              RegistrationStatus.RegistrationReady(name, address, email)
+              RegistrationStatus.RegistrationReady(RegistrationDetails(name, email, address))
             )))(Future.successful(Left(Error(""))))
           }
 
@@ -399,11 +462,13 @@ class RegistrationControllerSpec
       "display the page" when {
 
         "the session data indicates the user us ready to register" in {
-          inSequence{
+          inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(
               SessionData.empty.copy(journeyStatus = Some(
-                RegistrationStatus.RegistrationReady(sample[IndividualName], sample[Address], sample[Email])
+                RegistrationStatus.RegistrationReady(
+                  RegistrationDetails(sample[IndividualName], sample[Email], sample[Address])
+                )
               ))
             ))))
           }
@@ -413,11 +478,11 @@ class RegistrationControllerSpec
         }
 
         "the user has just finished supplying all the necessary details" in {
-          val name = sample[IndividualName]
+          val name    = sample[IndividualName]
           val address = sample[Address]
-          val email = sample[Email]
+          val email   = sample[Email]
 
-          inSequence{
+          inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(
               SessionData.empty.copy(journeyStatus = Some(
@@ -425,7 +490,7 @@ class RegistrationControllerSpec
               ))
             ))))
             mockStoreSession(SessionData.empty.copy(journeyStatus = Some(
-              RegistrationStatus.RegistrationReady(name, address, email)
+              RegistrationStatus.RegistrationReady(RegistrationDetails(name, email, address))
             )))(Future.successful(Right(())))
           }
 
@@ -433,10 +498,95 @@ class RegistrationControllerSpec
           status(result) shouldBe OK
         }
 
-
       }
 
     }
+
+    "handling submit check your answers requests" must {
+
+      def performAction(): Future[Result] = controller.checkYourAnswersSubmit()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        performAction,
+        {
+          case RegistrationReady(_) => true
+          case _ => false
+        }
+      )
+
+      val registrationReady = sample[RegistrationReady]
+      val sessionData = SessionData.empty.copy(journeyStatus = Some(registrationReady))
+      val subscriptionResponse = sample[SubscriptionResponse]
+      val subscribedDetails = {
+        val details = registrationReady.registrationDetails
+        SubscribedDetails(
+          Right(details.name),
+          details.emailAddress,
+          details.address,
+          ContactName(s"${details.name.firstName} ${details.name.lastName}"),
+          CgtReference(subscriptionResponse.cgtReferenceNumber)
+        )
+      }
+
+      "show an error page" when {
+
+        "the call to register without id and subscribe fails" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData))))
+            mockRegisterWithoutIdAndSubscribe(
+              registrationDetails = registrationReady.registrationDetails
+            )(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
+        "the session data cannot be updated" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData))))
+            mockRegisterWithoutIdAndSubscribe(
+              registrationDetails = registrationReady.registrationDetails
+            )(Right(subscriptionResponse))
+            mockStoreSession(
+              SessionData.empty.copy(journeyStatus =
+                Some(Subscribed(subscribedDetails))
+              )
+            )(Future.successful(Left(Error(""))))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
+      }
+
+      "redirect to the subscription confirmation page" when {
+
+        "the call to register without id and subscribe succeeds and the " +
+          "session data has been updated" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData))))
+            mockRegisterWithoutIdAndSubscribe(
+              registrationDetails = registrationReady.registrationDetails
+            )(Right(subscriptionResponse))
+            mockStoreSession(
+              SessionData.empty.copy(journeyStatus =
+                Some(Subscribed(subscribedDetails))
+              )
+            )(Future.successful(Right(())))
+          }
+
+          checkIsRedirect(performAction(), routes.SubscriptionController.subscribed())
+        }
+
+
+      }
+
+
+    }
+
 
   }
 

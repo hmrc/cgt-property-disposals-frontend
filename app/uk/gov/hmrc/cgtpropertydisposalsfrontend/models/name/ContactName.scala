@@ -32,7 +32,7 @@ object ContactName {
   implicit val format: Format[ContactName] =
     implicitly[Format[String]].inmap(ContactName(_), _.value)
 
-  implicit val eq: Eq[ContactName] = Eq.instance{
+  implicit val eq: Eq[ContactName] = Eq.instance {
     case (n1, n2) => n1.value === n2.value
   }
 
@@ -40,8 +40,8 @@ object ContactName {
     val regexPredicate = "^[a-zA-Z0-9 &,`\\-\'.^]{1,105}$".r.pattern.asPredicate()
 
     def validateContactName(s: String): ValidationResult =
-      if(s.length > 105) Invalid("error.tooLong")
-      else if(!regexPredicate.test(s)) Invalid("error.pattern")
+      if (s.length > 105) Invalid("error.tooLong")
+      else if (!regexPredicate.test(s)) Invalid("error.pattern")
       else Valid
 
     nonEmptyText

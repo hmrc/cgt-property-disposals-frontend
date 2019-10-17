@@ -16,20 +16,17 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import org.scalatest.{Matchers, WordSpec}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGeneratorImpl
+import play.api.libs.json.{Format, Json}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
 
-class UUIDGeneratorImplSpec extends WordSpec with Matchers {
 
-  "UUIDIDGeneratorImpl" must {
-
-    "generate random UUID's" in {
-      val generator = new UUIDGeneratorImpl()
-
-      val list = List.fill(100)(generator.nextId())
-      list.distinct shouldBe list
-    }
-
-  }
-
+final case class RegistrationDetails(
+                                      name: IndividualName,
+                                      emailAddress: Email,
+                                      address: Address
+                                    )
+object RegistrationDetails {
+  implicit val format: Format[RegistrationDetails] = Json.format[RegistrationDetails]
 }

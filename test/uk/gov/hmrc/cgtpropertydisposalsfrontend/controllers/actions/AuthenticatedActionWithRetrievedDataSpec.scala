@@ -16,47 +16,63 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
+import cats.data.EitherT
 import julienrf.json.derived
 import org.scalamock.scalatest.MockFactory
 import play.api.i18n.MessagesApi
 import play.api.libs.json.{Json, OFormat}
-import play.api.mvc.{MessagesRequest, Result}
 import play.api.mvc.Results.Ok
+import play.api.mvc.{MessagesRequest, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import uk.gov.hmrc.auth.core.ConfidenceLevel.{L0, L100, L50}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RetrievalOps
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, RetrievalOps, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, NINO, SAUTR}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, UserType}
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class AuthenticatedActionWithRetrievedDataSpec
-  extends ControllerSpec with MockFactory with SessionSupport with AuthActionSpec {
+    extends ControllerSpec
+    with MockFactory
+    with SessionSupport
+    with AuthActionSpec {
 
+  val authenticatedAction =
+    new AuthenticatedActionWithRetrievedData(
+      mockSubscriptionService,
+      mockAuthConnector,
+      config,
+      instanceOf[ErrorHandler],
+      mockSessionStore
+    )
 
-    val authenticatedAction =
-      new AuthenticatedActionWithRetrievedData(mockAuthConnector, config, instanceOf[ErrorHandler], mockSessionStore)
+  def mockHasSubscription()(response: Either[Error, Option[CgtReference]]) =
+    (mockSubscriptionService
+      .hasSubscription()(_: HeaderCarrier))
+      .expects(*)
+      .returning(EitherT(Future.successful(response)))
 
-    implicit val ninoFormat: OFormat[NINO] = Json.format[NINO]
-    implicit val sautrFormat: OFormat[SAUTR] = Json.format[SAUTR]
-    implicit val userTypeFormat: OFormat[UserType] = derived.oformat[UserType]
+  implicit val ninoFormat: OFormat[NINO]         = Json.format[NINO]
+  implicit val sautrFormat: OFormat[SAUTR]       = Json.format[SAUTR]
+  implicit val userTypeFormat: OFormat[UserType] = derived.oformat[UserType]
 
-    def performAction[A](r: FakeRequest[A]): Future[Result] = {
-      @SuppressWarnings(Array("org.wartremover.warts.Any"))
-      val request = new MessagesRequest[A](r, stub[MessagesApi])
-      authenticatedAction.invokeBlock(request, { a: AuthenticatedRequestWithRetrievedData[A] =>
-        a.request.messagesApi shouldBe request.messagesApi
-        Future.successful(Ok(Json.toJson(a.userType)))
-      })
-    }
+  def performAction[A](r: FakeRequest[A]): Future[Result] = {
+    @SuppressWarnings(Array("org.wartremover.warts.Any"))
+    val request = new MessagesRequest[A](r, stub[MessagesApi])
+    authenticatedAction.invokeBlock(request, { a: AuthenticatedRequestWithRetrievedData[A] =>
+      a.request.messagesApi shouldBe request.messagesApi
+      Future.successful(Ok(Json.toJson(a.userType)))
+    })
+  }
 
   val retrievals =
     Retrievals.confidenceLevel and Retrievals.affinityGroup and Retrievals.nino and
@@ -64,9 +80,124 @@ class AuthenticatedActionWithRetrievedDataSpec
 
   val emptyEnrolments = Enrolments(Set.empty)
 
+  val cgtEnrolment = Enrolments(
+    Set(Enrolment("HMRC-CGT-PD", Seq(EnrolmentIdentifier("CGTPDRef", "XCGT123456789")), "Activated", None))
+  )
+
   val ggCredentials = Credentials("id", "GovernmentGateway")
 
   "AuthenticatedActionWithRetrievedData" when {
+
+    "handling a logged in user with a cgt enrolment" must {
+
+      "return the subscribed user details" in {
+        val retrievalsResult = Future successful (
+          new ~(ConfidenceLevel.L200, Some(AffinityGroup.Organisation)) and
+            None and None and None and cgtEnrolment and Some(ggCredentials)
+        )
+
+        mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+
+        val result = performAction(FakeRequest())
+
+        status(result)        shouldBe OK
+        contentAsJson(result) shouldBe Json.toJson(UserType.Subscribed(CgtReference("XCGT123456789"), GGCredId("id")))
+
+      }
+    }
+
+    "handling a logged in user with a corrupted cgt enrolment" must {
+
+      "return an error" in {
+
+        val badCgtEnrolment = Enrolments(
+          Set(Enrolment("HMRC-CGT-PD", Seq(EnrolmentIdentifier("XXXX-XXXX", "XCGT123456789")), "Activated", None))
+        )
+
+        val retrievalsResult = Future successful (
+          new ~(ConfidenceLevel.L200, Some(AffinityGroup.Organisation)) and
+            None and None and None and badCgtEnrolment and Some(ggCredentials)
+        )
+        mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+        val result = performAction(FakeRequest())
+
+        status(result) shouldBe INTERNAL_SERVER_ERROR
+
+      }
+    }
+
+    "handling a logged in user who has no GG CGT enrolment but has successfully submitted a subscription to ETMP" must {
+
+      "return the cgt reference" in {
+        val retrievalsResult = Future successful (
+          new ~(ConfidenceLevel.L200, Some(AffinityGroup.Organisation)) and
+            None and None and None and emptyEnrolments and Some(ggCredentials)
+        )
+
+        inSequence {
+          mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+          mockHasSubscription()(Right(Some(CgtReference("XCGT123456789"))))
+        }
+
+        val result = performAction(FakeRequest())
+
+        status(result)        shouldBe OK
+        contentAsJson(result) shouldBe Json.toJson(UserType.Subscribed(CgtReference("XCGT123456789"), GGCredId("id")))
+
+      }
+    }
+
+    "handling a logged in user who has no GG CGT enrolment and no subscription in ETMP" must {
+
+      "allow the user to proceed" in {
+        val retrievalsResult = Future successful (
+          new ~(ConfidenceLevel.L200, Some(AffinityGroup.Individual)) and
+            Some("nino") and
+            None and
+            Some("") and
+            emptyEnrolments and
+            Some(ggCredentials)
+        )
+
+        val expectedRetrieval =
+          UserType.Individual(Right(NINO("nino")), None)
+
+        inSequence {
+          mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+          mockHasSubscription()(Right(None))
+        }
+
+        val result = performAction(FakeRequest())
+
+        status(result)        shouldBe OK
+        contentAsJson(result) shouldBe Json.toJson(expectedRetrieval)
+
+      }
+    }
+
+    "handling a logged in user who has no CGT enrolment and there is an error querying the backend for the subscription status" must {
+
+      "return an error" in {
+        val retrievalsResult = Future successful (
+          new ~(ConfidenceLevel.L200, Some(AffinityGroup.Individual)) and
+            Some("nino") and
+            None and
+            Some("") and
+            emptyEnrolments and
+            Some(ggCredentials)
+        )
+
+        inSequence {
+          mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+          mockHasSubscription()(Left(Error("Mongo error")))
+        }
+
+        val result = performAction(FakeRequest())
+
+        status(result) shouldBe INTERNAL_SERVER_ERROR
+
+      }
+    }
 
     "handling a not logged in user" must {
 
@@ -105,22 +236,24 @@ class AuthenticatedActionWithRetrievedDataSpec
             credentials
 
         "no credentials can be retrieved" in {
+          mockHasSubscription()(Right(None))
           mockAuth(EmptyPredicate, retrievals)(Future.successful(retrievalResult(None)))
 
           checkIsTechnicalErrorPage(performAction(FakeRequest()))
         }
 
         "the retrieved credentials are not GovernmentGateway credentials" in {
-          mockAuth(EmptyPredicate, retrievals)(Future.successful(
-            retrievalResult(Some(Credentials("id", "provider")))
-          ))
+          mockHasSubscription()(Right(None))
+          mockAuth(EmptyPredicate, retrievals)(
+            Future.successful(
+              retrievalResult(Some(Credentials("id", "provider")))
+            )
+          )
 
           checkIsTechnicalErrorPage(performAction(FakeRequest()))
         }
 
-
       }
-
 
     }
 
@@ -130,15 +263,15 @@ class AuthenticatedActionWithRetrievedDataSpec
         List(
           Some(AffinityGroup.Agent),
           None
-        ).foreach{ affinityGroup =>
-          withClue(s"For affinity group $affinityGroup: "){
+        ).foreach { affinityGroup =>
+          withClue(s"For affinity group $affinityGroup: ") {
             val retrievalsResult = Future successful (
               new ~(ConfidenceLevel.L50, affinityGroup) and
                 None and None and None and emptyEnrolments and Some(ggCredentials)
-              )
+            )
 
+            mockHasSubscription()(Right(None))
             mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
-
 
             checkIsTechnicalErrorPage(performAction(FakeRequest()))
           }
@@ -151,16 +284,17 @@ class AuthenticatedActionWithRetrievedDataSpec
     "handling organisations" must {
 
       "indicate when the organisation does not have a trust enrolment" in {
-          val retrievalsResult = Future successful (
-            new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation)) and
-              None and None and None and emptyEnrolments and Some(ggCredentials)
-            )
+        val retrievalsResult = Future successful (
+          new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation)) and
+            None and None and None and emptyEnrolments and Some(ggCredentials)
+        )
 
-          mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+        mockHasSubscription()(Right(None))
+        mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
 
-          val result  = performAction(FakeRequest())
+        val result = performAction(FakeRequest())
 
-        status(result) shouldBe OK
+        status(result)        shouldBe OK
         contentAsJson(result) shouldBe Json.toJson(UserType.OrganisationUnregisteredTrust)
       }
 
@@ -173,9 +307,10 @@ class AuthenticatedActionWithRetrievedDataSpec
               and None and None and None and Enrolments(Set(trustEnrolment)) and Some(ggCredentials)
           )
 
+          mockHasSubscription()(Right(None))
           mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
 
-          val result  = performAction(FakeRequest())
+          val result = performAction(FakeRequest())
           checkIsTechnicalErrorPage(result)
         }
 
@@ -187,7 +322,7 @@ class AuthenticatedActionWithRetrievedDataSpec
           val sautr = SAUTR("123456")
           val trustEnrolment =
             Enrolment(
-            "HMRC-TERS-ORG",
+              "HMRC-TERS-ORG",
               Seq(EnrolmentIdentifier("SAUTR", sautr.value)),
               "state"
             )
@@ -195,12 +330,13 @@ class AuthenticatedActionWithRetrievedDataSpec
           val retrievalsResult = Future successful (
             new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation))
               and None and None and Some("email") and Enrolments(Set(trustEnrolment)) and Some(ggCredentials)
-            )
+          )
 
+          mockHasSubscription()(Right(None))
           mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
 
-          val result  = performAction(FakeRequest())
-          status(result) shouldBe OK
+          val result = performAction(FakeRequest())
+          status(result)        shouldBe OK
           contentAsJson(result) shouldBe Json.toJson(UserType.Trust(sautr, Some(Email("email"))))
         }
 
@@ -218,15 +354,15 @@ class AuthenticatedActionWithRetrievedDataSpec
         val retrievalsResult = Future successful (
           new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation))
             and None and None and Some("") and Enrolments(Set(trustEnrolment)) and Some(ggCredentials)
-          )
+        )
 
+        mockHasSubscription()(Right(None))
         mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
 
-        val result  = performAction(FakeRequest())
-        status(result) shouldBe OK
+        val result = performAction(FakeRequest())
+        status(result)        shouldBe OK
         contentAsJson(result) shouldBe Json.toJson(UserType.Trust(sautr, None))
       }
-
 
     }
   }
@@ -241,18 +377,17 @@ class AuthenticatedActionWithRetrievedDataSpec
           Some("email") and
           emptyEnrolments and
           Some(ggCredentials)
-        )
+      )
 
       val expectedRetrieval =
-        UserType.Individual(
-          Right(NINO("nino")),
-          Some(Email("email")))
+        UserType.Individual(Right(NINO("nino")), Some(Email("email")))
 
       "effect the requested action" in {
+        mockHasSubscription()(Right(None))
         mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
 
         val result = performAction(FakeRequest())
-        status(result)          shouldBe OK
+        status(result)        shouldBe OK
         contentAsJson(result) shouldBe Json.toJson(expectedRetrieval)
       }
     }
@@ -265,14 +400,13 @@ class AuthenticatedActionWithRetrievedDataSpec
           Some("") and
           emptyEnrolments and
           Some(ggCredentials)
-        )
+      )
 
       val expectedRetrieval =
-        UserType.Individual(
-          Right(NINO("nino")),
-          None)
+        UserType.Individual(Right(NINO("nino")), None)
 
       "effect the requested action" in {
+        mockHasSubscription()(Right(None))
         mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
 
         val result = performAction(FakeRequest())
@@ -285,30 +419,32 @@ class AuthenticatedActionWithRetrievedDataSpec
 
       "the CL is less than 200" must {
 
-        import ConfidenceLevel._
-
         "indicate so in the result" in {
-          for{
+          for {
             cl        <- List[ConfidenceLevel](L0, L50, L100)
             mayBeNino <- List[Option[NINO]](Some(NINO("nino")), None)
-          }{
-            withClue(s"For confidence level $cl "){
+          } {
+            withClue(s"For confidence level $cl ") {
               val retrievalsResult = Future successful (
                 new ~(cl, Some(AffinityGroup.Individual)) and
                   mayBeNino.map(_.value) and
                   None and
                   Some("email") and
-                  emptyEnrolments  and
+                  emptyEnrolments and
                   Some(ggCredentials)
-                )
+              )
 
+              mockHasSubscription()(Right(None))
               mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
 
               val result = performAction(FakeRequest())
               status(result) shouldBe OK
               contentAsJson(result) shouldBe Json.toJson(
                 UserType.IndividualWithInsufficientConfidenceLevel(
-                  mayBeNino, None, Some(Email("email")), GGCredId(ggCredentials.providerId)
+                  mayBeNino,
+                  None,
+                  Some(Email("email")),
+                  GGCredId(ggCredentials.providerId)
                 )
               )
             }
@@ -320,15 +456,19 @@ class AuthenticatedActionWithRetrievedDataSpec
           val retrievalsResult = Future successful (
             new ~(L50, Some(AffinityGroup.Individual)) and
               None and None and Some("") and emptyEnrolments and Some(ggCredentials)
-            )
+          )
 
+          mockHasSubscription()(Right(None))
           mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
 
           val result = performAction(FakeRequest())
           status(result) shouldBe OK
           contentAsJson(result) shouldBe Json.toJson(
             UserType.IndividualWithInsufficientConfidenceLevel(
-              None, None, None, GGCredId(ggCredentials.providerId)
+              None,
+              None,
+              None,
+              GGCredId(ggCredentials.providerId)
             )
           )
 
@@ -363,4 +503,3 @@ class AuthenticatedActionWithRetrievedDataSpec
   }
 
 }
-

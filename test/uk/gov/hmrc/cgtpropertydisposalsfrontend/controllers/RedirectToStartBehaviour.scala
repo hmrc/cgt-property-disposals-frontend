@@ -23,7 +23,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, SessionDa
 
 import scala.concurrent.Future
 
-trait RedirectToStartBehaviour { this: ControllerSpec with AuthSupport with SessionSupport with ScalaCheckDrivenPropertyChecks =>
+trait RedirectToStartBehaviour {
+  this: ControllerSpec with AuthSupport with SessionSupport with ScalaCheckDrivenPropertyChecks =>
 
   def redirectToStartWhenInvalidJourney(
     performAction: () => Future[Result],
@@ -32,9 +33,9 @@ trait RedirectToStartBehaviour { this: ControllerSpec with AuthSupport with Sess
     "redirect to the start endpoint" when {
 
       "there is no journey status in session" in {
-        inSequence{
-        mockAuthWithNoRetrievals()
-        mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(Future.successful(Right(Some(SessionData.empty))))
         }
 
         checkIsRedirect(performAction(), routes.StartController.start())
@@ -43,7 +44,7 @@ trait RedirectToStartBehaviour { this: ControllerSpec with AuthSupport with Sess
       "the journey status in session is not valid" in {
         forAll { j: JourneyStatus =>
           whenever(!isValidJourneyStatus(j)) {
-            inSequence{
+            inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(journeyStatus = Some(j))))))
             }

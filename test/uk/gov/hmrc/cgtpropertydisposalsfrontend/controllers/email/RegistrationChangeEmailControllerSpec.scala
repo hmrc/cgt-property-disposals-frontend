@@ -27,12 +27,13 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, sample}
 
 import scala.concurrent.Future
 
 class RegistrationChangeEmailControllerSpec
-  extends EmailControllerSpec[RegistrationReady,RegistrationReady]
+    extends EmailControllerSpec[RegistrationReady, RegistrationReady]
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
@@ -45,7 +46,7 @@ class RegistrationChangeEmailControllerSpec
     validJourneyStatus
 
   override def updateEmail(journey: RegistrationReady, email: Email): RegistrationReady =
-    journey.copy(email = email)
+    journey.copy(registrationDetails = journey.registrationDetails.copy(emailAddress = email))
 
   override lazy val controller: RegistrationChangeEmailController = instanceOf[RegistrationChangeEmailController]
 
@@ -55,7 +56,7 @@ class RegistrationChangeEmailControllerSpec
     redirectToStartWhenInvalidJourney(
       performAction, {
         case _: RegistrationReady => true
-        case _                         => false
+        case _                    => false
       }
     )
 
@@ -83,7 +84,7 @@ class RegistrationChangeEmailControllerSpec
 
       behave like enterEmailSubmit(
         performAction,
-        Right(validJourneyStatus.name),
+        ContactName(validJourneyStatus.registrationDetails.name.makeSingleName()),
         routes.RegistrationChangeEmailController.verifyEmail,
         routes.RegistrationChangeEmailController.checkYourInbox()
       )

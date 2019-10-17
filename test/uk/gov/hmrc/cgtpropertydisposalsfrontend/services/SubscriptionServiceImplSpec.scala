@@ -23,11 +23,13 @@ import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsNumber, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SubscriptionDetails, SubscriptionResponse, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, RegistrationDetails, SubscriptionDetails, SubscriptionResponse, sample}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SubscriptionDetails, SubscriptionResponse, sample}
 
 class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
@@ -41,7 +43,58 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
       .expects(expectedSubscriptionDetails, *)
       .returning(EitherT(Future.successful(response)))
 
+  def mockHasSubscription()(response: Either[Error, HttpResponse]) =
+    (mockConnector
+      .getSubscriptionStatus()(_: HeaderCarrier))
+      .expects(*)
+      .returning(EitherT(Future.successful(response)))
+
+  def mockRegisterWithoutIdAndSubscribe(expectedRegistrationDetails: RegistrationDetails)(response: Either[Error, HttpResponse]) =
+    (mockConnector
+      .registerWithoutIdAndSubscribe(_: RegistrationDetails)(_: HeaderCarrier))
+      .expects(expectedRegistrationDetails, *)
+      .returning(EitherT(Future.successful(response)))
+
+
   "SubscriptionServiceImpl" when {
+
+    "handling request to check if subscribed" must {
+
+      implicit val hc: HeaderCarrier = HeaderCarrier()
+
+      "return an error" when {
+
+        "the http call comes back with a status other than 200 or 204" in {
+          mockHasSubscription()(Right(HttpResponse(400)))
+          await(service.hasSubscription().value).isLeft shouldBe true
+        }
+
+        "there is no JSON in the body of the http response" in {
+          mockHasSubscription()(Right(HttpResponse(200)))
+          await(service.hasSubscription().value).isLeft shouldBe true
+        }
+
+      }
+
+      "return the cgt reference if the call comes back with a 200" in {
+        val cgtReferenceNumber = "number"
+        val jsonBody = Json.parse(
+          s"""
+             |{
+             |  "value" : "$cgtReferenceNumber"
+             |}
+             |""".stripMargin
+        )
+
+        mockHasSubscription()(Right(HttpResponse(200, Some(jsonBody))))
+        await(service.hasSubscription().value) shouldBe Right(Some(CgtReference(cgtReferenceNumber)))
+      }
+
+      "return None if the call comes back with a 204" in {
+        mockHasSubscription()(Right(HttpResponse(204)))
+        await(service.hasSubscription().value) shouldBe Right(None)
+      }
+    }
 
     "handling requests to subscribe" must {
 
@@ -52,19 +105,16 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
 
         "the http call comes back with a status other than 200" in {
           mockSubscribe(subscriptionDetails)(Right(HttpResponse(500)))
-
           await(service.subscribe(subscriptionDetails).value).isLeft shouldBe true
         }
 
         "there is no JSON in the body of the http response" in {
           mockSubscribe(subscriptionDetails)(Right(HttpResponse(200)))
-
           await(service.subscribe(subscriptionDetails).value).isLeft shouldBe true
         }
 
         "the JSON body of the response cannot be parsed" in {
           mockSubscribe(subscriptionDetails)(Right(HttpResponse(200, Some(JsNumber(1)))))
-
           await(service.subscribe(subscriptionDetails).value).isLeft shouldBe true
         }
 
@@ -82,8 +132,51 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
         )
 
         mockSubscribe(subscriptionDetails)(Right(HttpResponse(200, Some(jsonBody))))
-
         await(service.subscribe(subscriptionDetails).value) shouldBe Right(SubscriptionResponse(cgtReferenceNumber))
+      }
+    }
+
+    "handling requests to register without id and subscribe" must {
+
+      implicit val hc: HeaderCarrier = HeaderCarrier()
+      val registrationDetails        = sample[RegistrationDetails]
+
+      "return an error" when {
+
+        "the http call comes back with a status other than 200" in {
+          mockRegisterWithoutIdAndSubscribe(registrationDetails)(Right(HttpResponse(500)))
+
+          await(service.registerWithoutIdAndSubscribe(registrationDetails).value).isLeft shouldBe true
+        }
+
+        "there is no JSON in the body of the http response" in {
+          mockRegisterWithoutIdAndSubscribe(registrationDetails)(Right(HttpResponse(200)))
+
+          await(service.registerWithoutIdAndSubscribe(registrationDetails).value).isLeft shouldBe true
+        }
+
+        "the JSON body of the response cannot be parsed" in {
+          mockRegisterWithoutIdAndSubscribe(registrationDetails)(Right(HttpResponse(200, Some(JsNumber(1)))))
+
+          await(service.registerWithoutIdAndSubscribe(registrationDetails).value).isLeft shouldBe true
+        }
+
+      }
+
+      "return the subscription response if the call comes back with a " +
+        "200 status and the JSON body can be parsed" in {
+        val cgtReferenceNumber = "number"
+        val jsonBody = Json.parse(
+          s"""
+             |{
+             |  "cgtReferenceNumber" : "$cgtReferenceNumber"
+             |}
+             |""".stripMargin
+        )
+
+        mockRegisterWithoutIdAndSubscribe(registrationDetails)(Right(HttpResponse(200, Some(jsonBody))))
+
+        await(service.registerWithoutIdAndSubscribe(registrationDetails).value) shouldBe Right(SubscriptionResponse(cgtReferenceNumber))
       }
     }
 

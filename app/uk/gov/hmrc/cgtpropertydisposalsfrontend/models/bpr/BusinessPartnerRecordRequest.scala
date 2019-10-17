@@ -18,10 +18,9 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr
 
 import julienrf.json.derived
 import play.api.libs.json.OFormat
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
-
 
 sealed trait BusinessPartnerRecordRequest extends Product with Serializable
 

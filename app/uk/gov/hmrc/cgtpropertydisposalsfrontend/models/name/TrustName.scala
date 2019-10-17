@@ -22,6 +22,6 @@ final case class TrustName(value: String) extends AnyVal
 
 object TrustName {
 
-implicit val format: Format[TrustName] = Json.format[TrustName]
+  implicit val format: Format[TrustName] = Json.format[TrustName]
 
 }

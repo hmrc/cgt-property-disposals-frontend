@@ -47,14 +47,10 @@ object JourneyStatus {
 
     // subscription details have been gathered and are ready to be used to subscribe
     final case class SubscriptionReady(subscriptionDetails: SubscriptionDetails) extends SubscriptionStatus
-
-    // subscription has been done successfully
-    final case class SubscriptionComplete(
-      subscriptionDetails: SubscriptionDetails,
-      subscriptionResponse: SubscriptionResponse
-    ) extends SubscriptionStatus
-
   }
+
+  // subscription has been submitted to ETMP
+  final case class Subscribed(accountDetails: SubscribedDetails) extends JourneyStatus
 
   sealed trait RegistrationStatus extends JourneyStatus with Product with Serializable
 
@@ -64,14 +60,17 @@ object JourneyStatus {
     final case object IndividualWantsToRegisterTrust extends RegistrationStatus
 
     // user is supplying information for subscription
-    final case class IndividualSupplyingInformation(name: Option[IndividualName], address: Option[Address], email: Option[Email])
-        extends RegistrationStatus
+    final case class IndividualSupplyingInformation(
+      name: Option[IndividualName],
+      address: Option[Address],
+      email: Option[Email]
+    ) extends RegistrationStatus
 
     // we are capturing an email for a user who doesn't have one we can retrieve
     final case class IndividualMissingEmail(name: IndividualName, address: Address) extends RegistrationStatus
 
     // we have all the details necessary for registration
-    final case class RegistrationReady(name: IndividualName, address: Address, email: Email) extends RegistrationStatus
+    final case class RegistrationReady(registrationDetails: RegistrationDetails) extends RegistrationStatus
 
   }
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))

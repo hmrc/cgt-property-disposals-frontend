@@ -19,30 +19,30 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import java.util.UUID
 
 import cats.syntax.eq._
-
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.ExecutionContext
 
 @Singleton
 class IvController @Inject()(
-                              sessionStore: SessionStore,
-                              val authenticatedAction: AuthenticatedAction,
-                              val sessionDataAction: SessionDataAction,
-                              errorHandler: ErrorHandler,
-                              cc: MessagesControllerComponents
-                            )(implicit ec: ExecutionContext) extends FrontendController(cc)
-  with WithAuthAndSessionDataAction
-  with Logging
-  with SessionUpdates {
+  sessionStore: SessionStore,
+  val authenticatedAction: AuthenticatedAction,
+  val sessionDataAction: SessionDataAction,
+  errorHandler: ErrorHandler,
+  cc: MessagesControllerComponents
+)(implicit ec: ExecutionContext)
+    extends FrontendController(cc)
+    with WithAuthAndSessionDataAction
+    with Logging
+    with SessionUpdates {
 
   def ivSuccess(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     if (request.sessionData.forall(_ === SessionData.empty)) {

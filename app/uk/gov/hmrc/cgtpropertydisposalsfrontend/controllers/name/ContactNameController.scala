@@ -34,19 +34,24 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ContactNameController @Inject()(
-                                       cc: MessagesControllerComponents,
-                                       errorHandler: ErrorHandler,
-                                       sessionStore: SessionStore,
-                                       val authenticatedAction: AuthenticatedAction,
-                                       val sessionDataAction: SessionDataAction,
-                                       enterContactNamePage: views.html.contactname.contact_name
-)(implicit viewConfig: ViewConfig, ec: ExecutionContext) extends FrontendController(cc) with WithAuthAndSessionDataAction with SessionUpdates with Logging {
+  cc: MessagesControllerComponents,
+  errorHandler: ErrorHandler,
+  sessionStore: SessionStore,
+  val authenticatedAction: AuthenticatedAction,
+  val sessionDataAction: SessionDataAction,
+  enterContactNamePage: views.html.contactname.contact_name
+)(implicit viewConfig: ViewConfig, ec: ExecutionContext)
+    extends FrontendController(cc)
+    with WithAuthAndSessionDataAction
+    with SessionUpdates
+    with Logging {
 
-
-  private def withSubscriptionReady(request: RequestWithSessionData[_])(f: SubscriptionReady => Future[Result]): Future[Result] =
+  private def withSubscriptionReady(
+    request: RequestWithSessionData[_]
+  )(f: SubscriptionReady => Future[Result]): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
       case Some(s: SubscriptionReady) => f(s)
-      case _ => Redirect(controllers.routes.StartController.start())
+      case _                          => Redirect(controllers.routes.StartController.start())
     }
 
   private def enterContactNamePageWithForm(form: Form[ContactName])(implicit request: RequestWithSessionData[_]) =
@@ -57,30 +62,34 @@ class ContactNameController @Inject()(
     )
 
   def enterContactName(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withSubscriptionReady(request){ subscriptionReady =>
-       Ok(enterContactNamePageWithForm(
-         ContactName.form.fill(subscriptionReady.subscriptionDetails.contactName)
-       ))
+    withSubscriptionReady(request) { subscriptionReady =>
+      Ok(
+        enterContactNamePageWithForm(
+          ContactName.form.fill(subscriptionReady.subscriptionDetails.contactName)
+        )
+      )
     }
   }
 
   def enterContactNameSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withSubscriptionReady(request){ case SubscriptionReady(subscriptionDetails) =>
-      ContactName.form.bindFromRequest().fold(
-        formWithErrors => BadRequest(enterContactNamePageWithForm(formWithErrors)),
-        { contactName =>
-          updateSession(sessionStore, request)(
-            _.copy(journeyStatus = Some(SubscriptionReady(subscriptionDetails.copy(contactName = contactName))))
-          ).map{
-            case Left(e) =>
-            logger.warn("Could not update contact name in session", e)
-            errorHandler.errorResult()
+    withSubscriptionReady(request) {
+      case SubscriptionReady(subscriptionDetails) =>
+        ContactName.form
+          .bindFromRequest()
+          .fold(
+            formWithErrors => BadRequest(enterContactNamePageWithForm(formWithErrors)), { contactName =>
+              updateSession(sessionStore, request)(
+                _.copy(journeyStatus = Some(SubscriptionReady(subscriptionDetails.copy(contactName = contactName))))
+              ).map {
+                case Left(e) =>
+                  logger.warn("Could not update contact name in session", e)
+                  errorHandler.errorResult()
 
-            case Right(_) =>
-            Redirect(controllers.routes.SubscriptionController.checkYourDetails())
-          }
-        }
-      )
+                case Right(_) =>
+                  Redirect(controllers.routes.SubscriptionController.checkYourDetails())
+              }
+            }
+          )
     }
   }
 

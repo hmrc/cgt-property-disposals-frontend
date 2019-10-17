@@ -22,7 +22,7 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.{CONFLICT, CREATED}
 import play.api.mvc.Call
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.EmailVerificationConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse.{EmailAlreadyVerified, EmailVerificationRequested}
@@ -33,7 +33,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[EmailVerificationServiceImpl])
 trait EmailVerificationService {
 
-  def verifyEmail(email: Email, name: Either[TrustName,IndividualName], continueCall: Call)(
+  def verifyEmail(email: Email, name: ContactName, continueCall: Call)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, EmailVerificationResponse]
 
@@ -57,7 +57,7 @@ object EmailVerificationService {
 class EmailVerificationServiceImpl @Inject()(connector: EmailVerificationConnector)(implicit ec: ExecutionContext)
     extends EmailVerificationService {
 
-  def verifyEmail(email: Email, name: Either[TrustName,IndividualName], continueCall: Call)(
+  def verifyEmail(email: Email, name: ContactName, continueCall: Call)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, EmailVerificationResponse] =
     connector.verifyEmail(email, name, continueCall).subflatMap { response =>

@@ -28,17 +28,18 @@ import scala.concurrent.ExecutionContext
 
 @Singleton
 class RegisterTrustController @Inject()(
-                                         val authenticatedAction: AuthenticatedAction,
-                                         val sessionDataAction: SessionDataAction,
-                                         registerYourTrustPage: views.html.register_your_trust,
-                                         cc: MessagesControllerComponents)(implicit viewConfig: ViewConfig, ec: ExecutionContext)
-  extends FrontendController(cc) with WithAuthAndSessionDataAction {
-
+  val authenticatedAction: AuthenticatedAction,
+  val sessionDataAction: SessionDataAction,
+  registerYourTrustPage: views.html.register_your_trust,
+  cc: MessagesControllerComponents
+)(implicit viewConfig: ViewConfig, ec: ExecutionContext)
+    extends FrontendController(cc)
+    with WithAuthAndSessionDataAction {
 
   def registerYourTrust(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
     request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(UnregisteredTrust) =>  Ok(registerYourTrustPage())
-      case _                       =>  Redirect(routes.StartController.start())
+      case Some(UnregisteredTrust) => Ok(registerYourTrustPage())
+      case _                       => Redirect(routes.StartController.start())
     }
   }
 

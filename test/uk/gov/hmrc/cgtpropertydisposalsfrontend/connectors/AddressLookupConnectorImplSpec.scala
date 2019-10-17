@@ -18,7 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
 import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
-import org.scalatest.{FunSuite, Matchers, WordSpec}
+import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.JsString
 import play.api.test.Helpers._
 import play.api.{Configuration, Mode}
@@ -75,7 +75,7 @@ class AddressLookupConnectorImplSpec extends WordSpec with Matchers with MockFac
 
       "include the filter in the query parameters if one is passed in" in {
         val filter: String = "8"
-        val httpResponse = HttpResponse(200)
+        val httpResponse   = HttpResponse(200)
         mockGet(
           s"http://host:123/v2/uk/addresses",
           Map("postcode"   -> postcode.value, "filter" -> filter),

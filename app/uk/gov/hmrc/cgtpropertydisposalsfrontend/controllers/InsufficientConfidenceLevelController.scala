@@ -72,7 +72,7 @@ class InsufficientConfidenceLevelController @Inject()(
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
       case Some(i: TryingToGetIndividualsFootprint) => f(i)
-      case _ => Redirect(controllers.routes.StartController.start())
+      case _                                        => Redirect(controllers.routes.StartController.start())
     }
 
   def doYouHaveNINO(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
@@ -184,9 +184,14 @@ class InsufficientConfidenceLevelController @Inject()(
                 InsufficientConfidenceLevelController.sautrAndNameForm
                   .bindFromRequest()
                   .fold[EitherT[Future, NameMatchError, BusinessPartnerRecord]](
-                    e => EitherT.fromEither[Future](Left(NameMatchError.ValidationError(e))),
-                    { case (sautr, name) =>
-                      attemptNameMatchAndUpdateSession(sautr, name, insufficientConfidenceLevel.ggCredId, unsuccessfulAttempts)
+                    e => EitherT.fromEither[Future](Left(NameMatchError.ValidationError(e))), {
+                      case (sautr, name) =>
+                        attemptNameMatchAndUpdateSession(
+                          sautr,
+                          name,
+                          insufficientConfidenceLevel.ggCredId,
+                          unsuccessfulAttempts
+                        )
                     }
                   )
               }
@@ -206,21 +211,24 @@ class InsufficientConfidenceLevelController @Inject()(
 
   def tooManyAttempts(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withInsufficientConfidenceLevelUser { insufficientConfidenceLevel =>
-      bprNameMatchService.getNumberOfUnsuccessfulAttempts(
-        insufficientConfidenceLevel.ggCredId
-      ).value.map{
-        case Left(NameMatchError.TooManyUnsuccessfulAttempts()) => Ok(tooManyUnsuccessfulNameMatchesPage())
-        case Left(otherNameMatchError) => handleNameMatchError(otherNameMatchError)
-        case Right(_) => Redirect(routes.InsufficientConfidenceLevelController.enterSautrAndName())
-      }
+      bprNameMatchService
+        .getNumberOfUnsuccessfulAttempts(
+          insufficientConfidenceLevel.ggCredId
+        )
+        .value
+        .map {
+          case Left(NameMatchError.TooManyUnsuccessfulAttempts()) => Ok(tooManyUnsuccessfulNameMatchesPage())
+          case Left(otherNameMatchError)                          => handleNameMatchError(otherNameMatchError)
+          case Right(_)                                           => Redirect(routes.InsufficientConfidenceLevelController.enterSautrAndName())
+        }
     }
   }
 
   private def attemptNameMatchAndUpdateSession(
-                                                sautr: SAUTR,
-                                                name: IndividualName,
-                                                ggCredId: GGCredId,
-                                                previousUnsucessfulAttempt: Option[UnsuccessfulNameMatchAttempts]
+    sautr: SAUTR,
+    name: IndividualName,
+    ggCredId: GGCredId,
+    previousUnsucessfulAttempt: Option[UnsuccessfulNameMatchAttempts]
   )(
     implicit hc: HeaderCarrier,
     request: RequestWithSessionData[_]

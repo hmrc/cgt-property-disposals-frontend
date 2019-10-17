@@ -23,19 +23,21 @@ import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsNumber, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.AddressLookupConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{AddressLookupResult, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{AddressLookupResult, Postcode}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
   val mockConnector = mock[AddressLookupConnector]
 
-  def mockLookupAddress(expectedPostcode: Postcode, filter: Option[String] = None)(result: Either[Error, HttpResponse]) =
+  def mockLookupAddress(expectedPostcode: Postcode, filter: Option[String] = None)(
+    result: Either[Error, HttpResponse]
+  ) =
     (mockConnector
       .lookupAddress(_: Postcode, _: Option[String])(_: HeaderCarrier))
       .expects(expectedPostcode, filter, *)
@@ -156,7 +158,7 @@ class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFac
             List(
               UkAddress("line1", Some("line2"), Some("town"), Some("county"), "ABC 123"),
               UkAddress("line1", None, Some("town"), None, "ABC 123"),
-              UkAddress("line1", None,  Some("town"), Some("county"), "ABC 123"),
+              UkAddress("line1", None, Some("town"), Some("county"), "ABC 123"),
               UkAddress("line1", Some("line2"), Some("town"), None, "ABC 123"),
               UkAddress("line1", Some("line2, line3"), Some("town"), None, "ABC 123")
             )

@@ -23,10 +23,10 @@ import cats.instances.string._
 import cats.syntax.eq._
 import play.api.mvc.{Action, AnyContent, Call, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{RequestWithSessionData, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{RequestWithSessionData, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
@@ -99,7 +99,7 @@ trait AddressController[J <: JourneyStatus] {
             .bindFromRequest()
             .fold[Future[Result]](
               formWithErrors => BadRequest(isUkPage(formWithErrors, backLinkCall, isUkSubmitCall)), {
-                case true => Redirect(enterPostcodeCall)
+                case true  => Redirect(enterPostcodeCall)
                 case false => Redirect(enterNonUkAddressCall)
               }
             )
@@ -145,7 +145,8 @@ trait AddressController[J <: JourneyStatus] {
           Address.nonUkAddressForm
             .bindFromRequest()
             .fold[Future[Result]](
-              formWithErrors => BadRequest(enterNonUkAddressPage(formWithErrors, isUkCall, enterNonUkAddressSubmitCall)),
+              formWithErrors =>
+                BadRequest(enterNonUkAddressPage(formWithErrors, isUkCall, enterNonUkAddressSubmitCall)),
               storeAddress(continueCall, journeyStatus)
             )
       }
@@ -195,10 +196,10 @@ trait AddressController[J <: JourneyStatus] {
                       val result = for {
                         addressLookupResult <- ukAddressLookupService.lookupAddress(postcode, filter)
                         _ <- EitherT(
-                          updateSession(sessionStore, request)(
-                            _.copy(addressLookupResult = Some(addressLookupResult))
-                          )
-                        )
+                              updateSession(sessionStore, request)(
+                                _.copy(addressLookupResult = Some(addressLookupResult))
+                              )
+                            )
                       } yield addressLookupResult
 
                       result.fold(
@@ -260,7 +261,7 @@ trait AddressController[J <: JourneyStatus] {
     continue: Call,
     currentJourneyStatus: J
   )(address: Address)(implicit request: RequestWithSessionData[_]): Future[Result] =
-    updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updateAddress( currentJourneyStatus, address))))
+    updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updateAddress(currentJourneyStatus, address))))
       .map(
         _.fold(
           { e =>
@@ -272,5 +273,3 @@ trait AddressController[J <: JourneyStatus] {
       )
 
 }
-
-

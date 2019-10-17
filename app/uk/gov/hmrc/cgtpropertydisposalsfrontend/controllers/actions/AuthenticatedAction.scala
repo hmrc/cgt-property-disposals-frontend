@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
-
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.mvc._
@@ -32,16 +31,17 @@ final case class AuthenticatedRequest[A](request: MessagesRequest[A]) extends Wr
 
 @Singleton
 class AuthenticatedAction @Inject()(
-                                                      val authConnector: AuthConnector,
-                                                      val config: Configuration,
-                                                      val errorHandler: ErrorHandler,
-                                                      val sessionStore: SessionStore
-                                                    )(implicit val executionContext: ExecutionContext)
-  extends AuthenticatedActionBase[AuthenticatedRequest] {
+  val authConnector: AuthConnector,
+  val config: Configuration,
+  val errorHandler: ErrorHandler,
+  val sessionStore: SessionStore
+)(implicit val executionContext: ExecutionContext)
+    extends AuthenticatedActionBase[AuthenticatedRequest] {
 
-  override def authorisedFunction[A](auth: AuthorisedFunctions,
-                                     request: MessagesRequest[A]
-                                    ): Future[Either[Result, AuthenticatedRequest[A]]] = {
+  override def authorisedFunction[A](
+    auth: AuthorisedFunctions,
+    request: MessagesRequest[A]
+  ): Future[Either[Result, AuthenticatedRequest[A]]] = {
     implicit val hc: HeaderCarrier =
       HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 

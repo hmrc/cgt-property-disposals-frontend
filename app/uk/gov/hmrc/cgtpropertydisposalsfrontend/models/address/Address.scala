@@ -19,9 +19,9 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address
 import cats.Eq
 import cats.syntax.either._
 import julienrf.json.derived
-import play.api.data.{Form, FormError}
-import play.api.data.format.Formatter
 import play.api.data.Forms.{mapping, nonEmptyText, number, of, optional, text}
+import play.api.data.format.Formatter
+import play.api.data.{Form, FormError}
 import play.api.libs.json.OFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.BooleanFormatter
 
