@@ -113,7 +113,7 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
 
       behave like commonBehaviour(
         () => connector.subscribe(subscriptionDetails).value,
-        mockPost("http://host:123/cgt-property-disposals/subscribe", Map.empty, Json.toJson(subscriptionDetails))(_)
+        mockPost("http://host:123/cgt-property-disposals/subscription", Map.empty, Json.toJson(subscriptionDetails))(_)
       )
     }
 

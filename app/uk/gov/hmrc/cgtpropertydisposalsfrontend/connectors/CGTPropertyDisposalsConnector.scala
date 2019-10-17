@@ -63,7 +63,7 @@ class CGTPropertyDisposalsConnectorImpl @Inject()(http: HttpClient, servicesConf
 
   val bprUrl: String = s"$baseUrl/business-partner-record"
 
-  val subscribeUrl: String = s"$baseUrl/subscribe"
+  val subscribeUrl: String = s"$baseUrl/subscription"
 
   val registerWithoutIdAndSubscribeUrl: String = s"$baseUrl/register-without-id-and-subscribe"
 
