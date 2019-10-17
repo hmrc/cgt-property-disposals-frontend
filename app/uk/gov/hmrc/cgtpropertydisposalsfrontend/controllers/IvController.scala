@@ -26,7 +26,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.iv.IvErrorResponse
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.iv.IvErrorStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.IvService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
@@ -84,27 +84,16 @@ class IvController @Inject()(
             logger.warn("Could not check IV journey error status", e)
             Redirect(routes.IvController.getTechnicalIssue())
           }, {
-            //The journey has not been completed yet.
-            //This result can only occur when a service asks for the result too early (before receiving the redirect from IV)
-            case IvErrorResponse.Incomplete => Redirect(routes.IvController.getTechnicalIssue())
-
-            case IvErrorResponse.FailedMatching => Redirect(routes.IvController.getFailedMatching())
-
-            case IvErrorResponse.FailedIV => Redirect(routes.IvController.getFailedIV())
-
-            case IvErrorResponse.InsufficientEvidence => Redirect(routes.IvController.getInsufficientEvidence())
-
-            case IvErrorResponse.LockedOut => Redirect(routes.IvController.getLockedOut())
-
-            case IvErrorResponse.UserAborted => Redirect(routes.IvController.getUserAborted())
-
-            case IvErrorResponse.Timeout => Redirect(routes.IvController.getTimedOut())
-
-            case IvErrorResponse.TechnicalIssue => Redirect(routes.IvController.getTechnicalIssue())
-
-            case IvErrorResponse.PreconditionFailed => Redirect(routes.IvController.getPreconditionFailed())
-
-            case IvErrorResponse.Unknown(value) =>
+            case IvErrorStatus.Incomplete           => Redirect(routes.IvController.getTechnicalIssue())
+            case IvErrorStatus.FailedMatching       => Redirect(routes.IvController.getFailedMatching())
+            case IvErrorStatus.FailedIV             => Redirect(routes.IvController.getFailedIV())
+            case IvErrorStatus.InsufficientEvidence => Redirect(routes.IvController.getInsufficientEvidence())
+            case IvErrorStatus.LockedOut            => Redirect(routes.IvController.getLockedOut())
+            case IvErrorStatus.UserAborted          => Redirect(routes.IvController.getUserAborted())
+            case IvErrorStatus.Timeout              => Redirect(routes.IvController.getTimedOut())
+            case IvErrorStatus.TechnicalIssue       => Redirect(routes.IvController.getTechnicalIssue())
+            case IvErrorStatus.PreconditionFailed   => Redirect(routes.IvController.getPreconditionFailed())
+            case IvErrorStatus.Unknown(value) =>
               logger.warn(s"Received unknown error response status from IV: $value")
               Redirect(routes.IvController.getTechnicalIssue())
           }

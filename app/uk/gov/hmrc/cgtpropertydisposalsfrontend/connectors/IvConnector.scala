@@ -22,7 +22,6 @@ import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
@@ -38,8 +37,7 @@ trait IvConnector {
 @Singleton
 class IvConnectorImpl @Inject()(http: HttpClient, servicesConfig: ServicesConfig)(
   implicit ec: ExecutionContext
-) extends IvConnector
-    with Logging {
+) extends IvConnector {
 
   val baseUrl: String = servicesConfig.baseUrl("iv")
 

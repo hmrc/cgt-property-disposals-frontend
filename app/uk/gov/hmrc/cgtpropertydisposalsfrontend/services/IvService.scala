@@ -28,7 +28,7 @@ import play.api.libs.json.{Json, Reads}
 import play.mvc.Http.Status.OK
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.IvConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.iv.IvErrorResponse
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.iv.IvErrorStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.IvServiceImpl.IvStatusResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -38,7 +38,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[IvServiceImpl])
 trait IvService {
 
-  def getFailedJourneyStatus(journeyId: UUID)(implicit hc: HeaderCarrier): EitherT[Future, Error, IvErrorResponse]
+  def getFailedJourneyStatus(journeyId: UUID)(implicit hc: HeaderCarrier): EitherT[Future, Error, IvErrorStatus]
 
 }
 
@@ -47,15 +47,13 @@ class IvServiceImpl @Inject()(connector: IvConnector)(implicit ec: ExecutionCont
 
   override def getFailedJourneyStatus(
     journeyId: UUID
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, IvErrorResponse] =
-    connector.getFailedJourneyStatus(journeyId).subflatMap[Error,IvErrorResponse] { response =>
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, IvErrorStatus] =
+    connector.getFailedJourneyStatus(journeyId).subflatMap[Error,IvErrorStatus] { response =>
       if(response.status === OK){
         response.parseJSON[IvStatusResponse]().bimap(
           Error(_),
-          r => {
-            println(s"Got $r\n\n\n")
-            IvErrorResponse.fromString(r.result)
-          })
+          r => IvErrorStatus.fromString(r.result)
+        )
       } else {
         Left(Error(s"Call to check status of failed IV journey came back with status ${response.status}"))
       }
