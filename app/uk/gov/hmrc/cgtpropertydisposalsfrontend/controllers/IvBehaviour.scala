@@ -20,9 +20,8 @@ import play.api.Configuration
 import play.api.mvc.Result
 import play.api.mvc.Results.Redirect
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 
-trait IvBehaviour { this: Logging =>
+trait IvBehaviour {
 
   val config: Configuration
 
@@ -30,13 +29,13 @@ trait IvBehaviour { this: Logging =>
 
   private def getString(key: String): String = config.underlying.getString(key)
 
-  val selfBaseUrl: String = getString("self.url")
+  private val selfBaseUrl: String = getString("self.url")
 
-  val ivUrl: String = getString("iv.url")
+  private val ivUrl: String = getString("iv.url")
 
-  val ivOrigin: String = getString("iv.origin")
+  private val ivOrigin: String = getString("iv.origin")
 
-  val (ivSuccessUrl: String, ivFailureUrl: String) = {
+  private val (ivSuccessUrl: String, ivFailureUrl: String) = {
     val useRelativeUrls = config.underlying.getBoolean("iv.use-relative-urls")
     val (successRelativeUrl, failureRelativeUrl) =
       getString("iv.success-relative-url") -> getString("iv.failure-relative-url")
@@ -57,5 +56,9 @@ trait IvBehaviour { this: Logging =>
         "failureURL"      -> Seq(ivFailureUrl)
       )
     )
+
+  val redirectToIvUrl: String =
+    s"$ivUrl/mdtp/uplift?origin=$ivOrigin&confidenceLevel=200&completionURL=$ivSuccessUrl&failureURL=$ivFailureUrl"
+
 
 }

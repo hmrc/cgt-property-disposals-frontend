@@ -47,7 +47,7 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
 
     "handling IV success request" must {
 
-      def performAction(): Future[Result] = controller.ivSuccess()(FakeRequest())
+      def performAction(): Future[Result] = controller.ivSuccessCallback()(FakeRequest())
 
       val nonEmptySession =
         SessionData.empty.copy(
@@ -100,7 +100,7 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
 
     "handling IV failure requests" must {
       "show an error page" in {
-        checkIsTechnicalErrorPage(controller.ivFailure(UUID.randomUUID())(FakeRequest()))
+        checkIsTechnicalErrorPage(controller.ivFailureCallback(UUID.randomUUID())(FakeRequest()))
       }
 
     }
