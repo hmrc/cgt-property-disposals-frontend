@@ -66,7 +66,9 @@ class SubscriptionControllerSpec
     subscriptionDetails.emailAddress,
     subscriptionDetails.address,
     subscriptionDetails.contactName,
-    CgtReference("number")
+    CgtReference("number"),
+    None,
+    registeredWithId = true
   )
 
   val sessionWithSubscriptionDetails =
@@ -192,7 +194,9 @@ class SubscriptionControllerSpec
                   subscriptionDetails.emailAddress,
                   subscriptionDetails.address,
                   subscriptionDetails.contactName,
-                  CgtReference(cgtReferenceNumber)
+                  CgtReference(cgtReferenceNumber),
+                  None,
+                  registeredWithId = true
                 )
               )
             )

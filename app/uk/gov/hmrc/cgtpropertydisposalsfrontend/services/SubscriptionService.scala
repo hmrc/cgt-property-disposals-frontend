@@ -24,7 +24,7 @@ import cats.syntax.eq._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, RegistrationDetails, SubscriptionDetails, SubscriptionResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, RegistrationDetails, SubscribedDetails, SubscriptionDetails, SubscriptionResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -43,6 +43,11 @@ trait SubscriptionService {
 
   def hasSubscription(
     )(implicit hc: HeaderCarrier): EitherT[Future, Error, Option[CgtReference]]
+
+  def getSubscribedDetails(cgtReference: CgtReference)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, SubscribedDetails]
+
 }
 
 @Singleton
@@ -55,7 +60,7 @@ class SubscriptionServiceImpl @Inject()(connector: CGTPropertyDisposalsConnector
     connector.subscribe(subscriptionDetails)
       .subflatMap(handleSubscriptionResponse(_, "subscribe"))
 
-  def registerWithoutIdAndSubscribe(registrationDetails: RegistrationDetails)(
+  override def registerWithoutIdAndSubscribe(registrationDetails: RegistrationDetails)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, SubscriptionResponse] =
     connector.registerWithoutIdAndSubscribe(registrationDetails)
@@ -79,6 +84,16 @@ class SubscriptionServiceImpl @Inject()(connector: CGTPropertyDisposalsConnector
         } else if (response.status === 204) Right(None)
       else
         Left(Error(s"call to get subscription status came back with status ${response.status}"))
+    }
+
+  def getSubscribedDetails(cgtReference: CgtReference)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, SubscribedDetails] =
+    connector.getSubscribedDetails(cgtReference).subflatMap{ response =>
+      if(response.status === 200)
+        response.parseJSON[SubscribedDetails]().leftMap(Error(_))
+      else
+        Left(Error(s"Call to get subscribed details came back with status ${response.status}"))
     }
 
 }

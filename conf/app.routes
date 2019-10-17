@@ -105,13 +105,10 @@ POST /subscription/enter-uk-address      uk.gov.hmrc.cgtpropertydisposalsfronten
 GET  /subscription/enter-non-uk-address  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.SubscriptionAddressController.enterNonUkAddress()
 POST /subscription/enter-non-uk-address  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.SubscriptionAddressController.enterNonUkAddressSubmit()
 
-GET /account/manage-your-details         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.TmpAccountController.manageYourDetails()
+### Subscribed Journey
+GET /account/manage-your-details         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.HomeController.homepage
 
 #### Error pages
 GET  /register-your-trust                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegisterTrustController.registerYourTrust()
-
-
-### Subscribed Journey
-GET  /subscribed/start                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.HomeController.start()
 
 GET  /assets/*file                        controllers.Assets.at(path="/public", file)

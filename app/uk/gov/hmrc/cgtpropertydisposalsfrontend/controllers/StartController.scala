@@ -28,13 +28,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{Registrati
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionDetails.MissingData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecordRequest.{IndividualBusinessPartnerRecordRequest, TrustBusinessPartnerRecordRequest}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, NINO, SAUTR}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{BusinessPartnerRecordService, SubscriptionService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -54,6 +53,7 @@ class StartController @Inject()(
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   val config: Configuration,
+  subscriptionService: SubscriptionService,
   weNeedMoreDetailsPage: views.html.we_need_more_details
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
@@ -66,19 +66,8 @@ class StartController @Inject()(
   def start(): Action[AnyContent] = authenticatedActionWithRetrievedDataAndSessionData.async { implicit request =>
     (request.authenticatedRequest.userType, request.sessionData.flatMap(_.journeyStatus)) match {
 
-      case (UserType.Subscribed(cgtReference, gGCredId), None) =>
-        // TODO: take this out when the Display API is integrated
-        val dummyAccountDetails = SubscribedDetails(
-          Right(IndividualName("Joe", "Bloggs")),
-          Email("joe.bloggs@gmail.com"),
-          UkAddress("line1", None, None, None, "KO11OK"),
-          ContactName("Joe Bloggs"),
-          cgtReference
-        )
-        handleSubscribedUser(dummyAccountDetails)
-
       case (_, Some(_: Subscribed)) =>
-        Redirect(routes.HomeController.start())
+        Redirect(routes.HomeController.homepage())
 
       case (_, Some(_: SubscriptionStatus.SubscriptionReady)) =>
         Redirect(routes.SubscriptionController.checkYourDetails())
@@ -98,6 +87,9 @@ class StartController @Inject()(
 
       case (_, Some(RegistrationStatus.IndividualWantsToRegisterTrust)) =>
         Redirect(routes.RegistrationController.selectEntityType())
+
+      case (UserType.Subscribed(cgtReference, _), _) =>
+        handleSubscribedUser(cgtReference)
 
       case (UserType.IndividualWithInsufficientConfidenceLevel(maybeNino, maybeSautr, maybeEmail, ggCredId), None) =>
         // this is the first time a person with individual insufficient confidence level has come to start
@@ -133,25 +125,18 @@ class StartController @Inject()(
     }
   }
 
-  private def handleSubscribedUser(accountDetails: SubscribedDetails)(
+  private def handleSubscribedUser(cgtReference: CgtReference)(
     implicit request: RequestWithSessionDataAndRetrievedData[_]
   ): Future[Result] = {
-    lazy val redirectToHomePage =
-      Redirect(routes.HomeController.start())
+    val result = for {
+      subscribedDetails <- subscriptionService.getSubscribedDetails(cgtReference)
+      _                 <- EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(Subscribed(subscribedDetails)))))
+    } yield ()
 
-    if (request.sessionData.flatMap(_.journeyStatus).contains(Subscribed(accountDetails))) {
-      redirectToHomePage
-    } else {
-      updateSession(sessionStore, request)(_.copy(journeyStatus = Some(Subscribed(accountDetails))))
-        .map {
-          case Left(e) =>
-            logger.warn("Could not update session", e)
-            errorHandler.errorResult()
-
-          case Right(_) =>
-            redirectToHomePage
-        }
-    }
+    result.fold({ e =>
+      logger.warn("Could not get subscribed details", e)
+      errorHandler.errorResult()
+    }, _ => Redirect(routes.HomeController.homepage()))
   }
 
   private def handleNonTrustOrganisation()(

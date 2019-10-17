@@ -23,13 +23,12 @@ import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsNumber, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, RegistrationDetails, SubscriptionDetails, SubscriptionResponse, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, RegistrationDetails, SubscribedDetails, SubscriptionDetails, SubscriptionResponse, sample}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SubscriptionDetails, SubscriptionResponse, sample}
 
 class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
@@ -55,12 +54,18 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
       .expects(expectedRegistrationDetails, *)
       .returning(EitherT(Future.successful(response)))
 
+  def mockGetSusbcribedDetails(cgtReference: CgtReference)(response: Either[Error, HttpResponse]) =
+    (mockConnector
+      .getSubscribedDetails(_: CgtReference)(_: HeaderCarrier))
+      .expects(cgtReference, *)
+      .returning(EitherT(Future.successful(response)))
+
 
   "SubscriptionServiceImpl" when {
 
-    "handling request to check if subscribed" must {
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
-      implicit val hc: HeaderCarrier = HeaderCarrier()
+    "handling request to check if subscribed" must {
 
       "return an error" when {
 
@@ -98,7 +103,6 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
 
     "handling requests to subscribe" must {
 
-      implicit val hc: HeaderCarrier = HeaderCarrier()
       val subscriptionDetails        = sample[SubscriptionDetails]
 
       "return an error" when {
@@ -138,7 +142,6 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
 
     "handling requests to register without id and subscribe" must {
 
-      implicit val hc: HeaderCarrier = HeaderCarrier()
       val registrationDetails        = sample[RegistrationDetails]
 
       "return an error" when {
@@ -178,6 +181,43 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
 
         await(service.registerWithoutIdAndSubscribe(registrationDetails).value) shouldBe Right(SubscriptionResponse(cgtReferenceNumber))
       }
+    }
+
+
+    "handling requests to get subscribed details" must {
+
+      val cgtReference = sample[CgtReference]
+
+      "return an error" when {
+
+        "the http call comes back with a status other than 200" in {
+          mockGetSusbcribedDetails(cgtReference)(Right(HttpResponse(500)))
+
+          await(service.getSubscribedDetails(cgtReference).value).isLeft shouldBe true
+        }
+
+        "there is no JSON in the body of the http response" in {
+          mockGetSusbcribedDetails(cgtReference)(Right(HttpResponse(200)))
+
+          await(service.getSubscribedDetails(cgtReference).value).isLeft shouldBe true
+        }
+
+        "the JSON body of the response cannot be parsed" in {
+          mockGetSusbcribedDetails(cgtReference)(Right(HttpResponse(200, Some(JsNumber(1)))))
+
+          await(service.getSubscribedDetails(cgtReference).value).isLeft shouldBe true
+        }
+      }
+
+      "return subscribed details if the call comes back with status 200 and the JSON " +
+        "body of the response can be parsed" in {
+        val subscribedDetails = sample[SubscribedDetails]
+
+        mockGetSusbcribedDetails(cgtReference)(Right(HttpResponse(200, Some(Json.toJson(subscribedDetails)))))
+
+        await(service.getSubscribedDetails(cgtReference).value) shouldBe Right(subscribedDetails)
+      }
+
     }
 
   }

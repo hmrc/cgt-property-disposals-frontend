@@ -199,7 +199,9 @@ class RegistrationController @Inject()(
                 registrationDetails.emailAddress,
                 registrationDetails.address,
                 ContactName(s"${registrationDetails.name.firstName} ${registrationDetails.name.lastName}"),
-                CgtReference(subscriptionResponse.cgtReferenceNumber)
+                CgtReference(subscriptionResponse.cgtReferenceNumber),
+                None,
+                registeredWithId = false
               )
               )))
         ))
