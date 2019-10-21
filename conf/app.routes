@@ -14,6 +14,8 @@ GET  /failed-iv-user-rejected             uk.gov.hmrc.cgtpropertydisposalsfronte
 GET  /failed-iv-time-out                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.IvController.getTimedOut()
 GET  /failed-iv-technical-issue           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.IvController.getTechnicalIssue()
 GET  /failed-iv-precondition-failed       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.IvController.getPreconditionFailed()
+POST /iv/retry                            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.IvController.retry()
+
 ### Insufficient CL
 GET  /iv/nino                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.InsufficientConfidenceLevelController.doYouHaveNINO()
 POST /iv/nino                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.InsufficientConfidenceLevelController.doYouHaveNINOSubmit()

@@ -75,6 +75,10 @@ class IvController @Inject()(
     }
   }
 
+  def retry():  Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request => redirectToIv
+  }
+
   def ivFailureCallback(journeyId: UUID): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
       ivService

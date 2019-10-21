@@ -8,6 +8,8 @@ button.continue=Continue
 button.confirmAndContinue=Confirm and continue
 button.resendEmail=Resend email
 button.findAddress=Find address
+button.tryAgain=Try again
+button.startAgain=Start again
 
 generic.warning=Warning
 generic.day=Day
@@ -206,6 +208,7 @@ weNeedMoreDetails.2=Report your CGT on UK property sales or disposals.
 iv.lockedOut.title=We were not able to confirm your identity
 iv.lockedOut.p1=You have tried to confirm your identity too many times.
 iv.lockedOut.p2=You’ll need to wait 24 hours and try again.
+iv.exitToGovUk=Exit to GOV.UK
 
 # IV User Aborted
 iv.userAborted.title=We were not able to verify your identity
@@ -236,8 +239,10 @@ iv.insufficientEvidence.textphone.title=Textphone:
 iv.insufficientEvidence.textphone.number=0300 200 3319
 iv.insufficientEvidence.outside-uk-telephone.title=Outside UK:
 iv.insufficientEvidence.outside-uk-telephone.number=+44 135 535 9022
-iv.insufficientEvidence.h2=What happens next?
-iv.insufficientEvidence.p2=You’ll be able to apply for a Help to Save account by phone, after we’ve been able to verify your identity.
+iv.insufficientEvidence.openingTimes=Opening times:
+iv.insufficientEvidence.openingTimes.p1=Monday to Friday : 8am to 8pm
+iv.insufficientEvidence.openingTimes.p2=Saturday: 8am to 4pm
+iv.insufficientEvidence.openingTimes.p3=Closed Sundays and bank holidays.
 
 # IV Timed Out
 iv.timeout.title=Your session has ended

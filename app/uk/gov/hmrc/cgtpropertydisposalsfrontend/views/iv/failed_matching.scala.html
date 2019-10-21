@@ -15,10 +15,14 @@
  *@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 
 @this(
- mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template
- )
+ mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+ formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+ submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+ pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
+)
 
 @(retryUrl: String)(implicit request: Request[_], messages: Messages, viewConfig: ViewConfig)
 
@@ -26,15 +30,18 @@
 
 @mainTemplate(title = title) {
 
- <h1 class="heading-large">@title</h1>
-  <p>@messages("iv.failedMatching.p1")</p>
-  <p>@messages("iv.failedMatching.p2")</p>
+ @pageHeading(title)
+ <p>@messages("iv.failedMatching.p1")</p>
+ <p>@messages("iv.failedMatching.p2")</p>
 
-  <ul class="bullets">
-    <li>@messages("iv.failedMatching.li1")</li>
-    <li>@messages("iv.failedMatching.li2")</li>
-    <li>@messages("iv.failedMatching.li3")</li>
-  </ul>
+ <ul class="bullets">
+   <li>@messages("iv.failedMatching.li1")</li>
+   <li>@messages("iv.failedMatching.li2")</li>
+   <li>@messages("iv.failedMatching.li3")</li>
+ </ul>
 
+ @formWrapper(routes.IvController.retry(), 'novalidate -> "novalidate") {
+  @submitButton(messages("button.tryAgain"))
+ }
 
 }   

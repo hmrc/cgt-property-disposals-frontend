@@ -17,8 +17,9 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 
 @this(
- mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template
- )
+ mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+ pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
+)
 
 @()(implicit request: Request[_], messages: Messages, viewConfig: ViewConfig)
 
@@ -26,9 +27,11 @@
 
 @mainTemplate(title = title) {
 
-  <h1 class="heading-large">@title</h1>
+  @pageHeading(title)
   <p>@messages("iv.lockedOut.p1")</p>
   <p>@messages("iv.lockedOut.p2")</p>
+  <p>
+   <a href="https://www.gov.uk">@messages("iv.exitToGovUk")</a>
+  </p>
 
-}   
-    
+}

@@ -17,8 +17,9 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 
 @this(
- mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template
- )
+ mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+ pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
+)
 
 @()(implicit request: Request[_], messages: Messages, viewConfig: ViewConfig)
 
@@ -26,27 +27,27 @@
 
 @mainTemplate(title = title) {
 
-   <h1 class="heading-large">@title</h1>
-    <p>@messages("iv.insufficientEvidence.p1"))</p>
-    <p>
-        @messages("iv.insufficientEvidence.telephone.title")
-        <br />
-        <span class="bold">@messages("iv.insufficientEvidence.telephone.number")</span>
-    </p>
-    <p>
-        @messages("iv.insufficientEvidence.textphone.title")
-        <br />
-        <span class="bold">@messages("iv.insufficientEvidence.textphone.number")</span>
-    </p>
-    <p>
-        @messages("iv.insufficientEvidence.outside-uk-telephone.title")
-        <br />
-        <span class="bold">@messages("iv.insufficientEvidence.outside-uk-telephone.number")</span>
-    </p>
-    <section class="subsection">
-        <h2>@messages("iv.insufficientEvidence.h2")</h2>
-        <p>@Html(messages("iv.insufficientEvidence.p2"))</p>
-    </section>
+   @pageHeading(title)
+  <p>@messages("iv.insufficientEvidence.p1"))</p>
+  <p>
+      @messages("iv.insufficientEvidence.telephone.title")
+      <br />
+      <span class="bold">@messages("iv.insufficientEvidence.telephone.number")</span>
+  </p>
+  <p>
+      @messages("iv.insufficientEvidence.textphone.title")
+      <br />
+      <span class="bold">@messages("iv.insufficientEvidence.textphone.number")</span>
+  </p>
+  <p>
+      @messages("iv.insufficientEvidence.outside-uk-telephone.title")
+      <br />
+      <span class="bold">@messages("iv.insufficientEvidence.outside-uk-telephone.number")</span>
+  </p>
+
+  <p>@messages("iv.insufficientEvidence.openingTimes")</p>
+  <p>@messages("iv.insufficientEvidence.openingTimes.p1")<br />@messages("iv.insufficientEvidence.openingTimes.p2")</p>
+  <p>@messages("iv.insufficientEvidence.openingTimes.p3")</p>
 
 }   
   
