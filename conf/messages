@@ -243,6 +243,10 @@ iv.insufficientEvidence.openingTimes=Opening times:
 iv.insufficientEvidence.openingTimes.p1=Monday to Friday : 8am to 8pm
 iv.insufficientEvidence.openingTimes.p2=Saturday: 8am to 4pm
 iv.insufficientEvidence.openingTimes.p3=Closed Sundays and bank holidays.
+iv.insufficientEvidence.helpWithCallCharges=Find out about call charges
+iv.insufficientEvidence.getHelp=Get help
+iv.insufficientEvidence.additionalNeedsLink=dealing with HMRC if you have additional needs
+
 
 # IV Timed Out
 iv.timeout.title=Your session has ended
