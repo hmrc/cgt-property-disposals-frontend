@@ -57,8 +57,4 @@ trait IvBehaviour {
       )
     )
 
-  val redirectToIvUrl: String =
-    s"$ivUrl/mdtp/uplift?origin=$ivOrigin&confidenceLevel=200&completionURL=$ivSuccessUrl&failureURL=$ivFailureUrl"
-
-
 }
