@@ -22,16 +22,16 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 @Singleton
 class ViewConfig @Inject()(servicesConfig: ServicesConfig) {
 
-  private def loadConfig(key: String): String = servicesConfig.getString(key)
+  private def getString(key: String): String = servicesConfig.getString(key)
 
-  private val contactHost                  = servicesConfig.getString(s"contact-frontend.host")
-  private val companyAuthUrl: String       = loadConfig(s"company-auth-frontend.url")
-  private val signOutUri: String           = loadConfig(s"sign-out.uri")
+  private val contactHost                  = getString("contact-frontend.host")
+  private val companyAuthUrl: String       = getString("company-auth-frontend.url")
+  private val signOutUri: String           = getString("sign-out.uri")
   private val contactFormServiceIdentifier = "CGTPD"
 
-  val assetsPrefix: String   = loadConfig(s"assets.url") + loadConfig(s"assets.version")
-  val analyticsToken: String = loadConfig(s"google-analytics.token")
-  val analyticsHost: String  = loadConfig(s"google-analytics.host")
+  val assetsPrefix: String   = getString("assets.url") + getString("assets.version")
+  val analyticsToken: String = getString("google-analytics.token")
+  val analyticsHost: String  = getString("google-analytics.host")
   val reportAProblemPartialUrl: String =
     s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
   val reportAProblemNonJSUrl: String =
@@ -39,5 +39,7 @@ class ViewConfig @Inject()(servicesConfig: ServicesConfig) {
   val betaFeedbackUrlNoAuth: String =
     s"$contactHost/contact/beta-feedback-unauthenticated?service=$contactFormServiceIdentifier"
   val signOutUrl: String           = s"$companyAuthUrl$signOutUri"
-  val trustRegistrationUrl: String = loadConfig(s"trust-registration.url")
+  val trustRegistrationUrl: String = getString("external-url.trust-registration")
+  val callChargesUrl: String = getString("external-url.gov-call-charges")
+  val additionalNeedsUrl: String = getString("external-url.additional-needs")
 }
