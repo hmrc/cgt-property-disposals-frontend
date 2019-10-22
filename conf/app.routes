@@ -4,8 +4,17 @@ GET /start                                uk.gov.hmrc.cgtpropertydisposalsfronte
 GET /we-need-more-details                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.weNeedMoreDetails()
 
 #### IV
-GET  /iv/success                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.IvController.ivSuccess()
-GET  /iv/failure                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.IvController.ivFailure(journeyId: java.util.UUID)
+GET  /iv/success                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.IvController.ivSuccessCallback()
+GET  /iv/failure                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.IvController.ivFailureCallback(journeyId: java.util.UUID)
+GET  /failed-iv-matching                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.IvController.getFailedMatching()
+GET  /failed-iv                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.IvController.getFailedIV()
+GET  /failed-iv-insufficient-evidence     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.IvController.getInsufficientEvidence()
+GET  /failed-iv-locked-out                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.IvController.getLockedOut()
+GET  /failed-iv-user-rejected             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.IvController.getUserAborted()
+GET  /failed-iv-time-out                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.IvController.getTimedOut()
+GET  /failed-iv-technical-issue           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.IvController.getTechnicalIssue()
+GET  /failed-iv-precondition-failed       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.IvController.getPreconditionFailed()
+POST /iv/retry                            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.IvController.retry()
 
 ### Insufficient CL
 GET  /iv/nino                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.InsufficientConfidenceLevelController.doYouHaveNINO()
@@ -15,7 +24,6 @@ POST /iv/saUtr                            uk.gov.hmrc.cgtpropertydisposalsfronte
 GET  /iv/enter-sautr                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.InsufficientConfidenceLevelController.enterSautrAndName()
 POST /iv/enter-sautr                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.InsufficientConfidenceLevelController.enterSautrAndNameSubmit()
 GET  /iv/too-many-attempts                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.InsufficientConfidenceLevelController.tooManyAttempts()
-
 
 ### Registration
 GET  /registration/select-entity-type     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegistrationController.selectEntityType()

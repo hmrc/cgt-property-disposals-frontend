@@ -8,6 +8,8 @@ button.continue=Continue
 button.confirmAndContinue=Confirm and continue
 button.resendEmail=Resend email
 button.findAddress=Find address
+button.tryAgain=Try again
+button.startAgain=Start again
 
 generic.warning=Warning
 generic.day=Day
@@ -200,3 +202,62 @@ weNeedMoreDetails.caption=Create a CGT on UK property account
 weNeedMoreDetails.p=This is so you can:
 weNeedMoreDetails.1=Create a Capital Gains Tax (CGT) on UK property account.
 weNeedMoreDetails.2=Report your CGT on UK property sales or disposals.
+
+
+# IV Locked Out
+iv.lockedOut.title=We were not able to confirm your identity
+iv.lockedOut.p1=You have tried to confirm your identity too many times.
+iv.lockedOut.p2=You’ll need to wait 24 hours and try again.
+iv.exitToGovUk=Exit to GOV.UK
+
+# IV User Aborted
+iv.userAborted.title=We were not able to verify your identity
+iv.userAborted.p1=You have not provided enough information.
+iv.userAborted.p2=To apply for a Capital Gains Tax on UK property account you’ll need to answer security questions. These will be based on the information we already hold about you.
+iv.userAborted.p3=This is to prevent anyone other than you accessing your personal details.
+
+# Failed IV
+iv.failedIv.title=We were not able to confirm your identity
+iv.failedIv.p1=You did not answer all the questions correctly.
+iv.failedIv.p2=Your answers to the questions need to match the answers we already have for you.
+iv.failedIv.p3=You’ll need to try again.
+
+# Failed Matching
+iv.failedMatching.title=We were not able to verify your identity
+iv.failedMatching.p1=You’ll need to try again.
+iv.failedMatching.p2=You’ll need to check you entered your details correctly, such as your:
+iv.failedMatching.li1=name
+iv.failedMatching.li2=date of birth
+iv.failedMatching.li3=National Insurance number
+
+# Insufficient Evidence
+iv.insufficientEvidence.title=We were not able to confirm your identity
+iv.insufficientEvidence.p1=You’ll need to call us and we’ll ask you for more details. You’ll be able to apply for a Capital Gains Tax on UK property account by phone, once we have confirmed your identity.
+iv.insufficientEvidence.telephone.title=Telephone:
+iv.insufficientEvidence.telephone.number=0300 200 3300
+iv.insufficientEvidence.textphone.title=Textphone:
+iv.insufficientEvidence.textphone.number=0300 200 3319
+iv.insufficientEvidence.outside-uk-telephone.title=Outside UK:
+iv.insufficientEvidence.outside-uk-telephone.number=+44 135 535 9022
+iv.insufficientEvidence.openingTimes=Opening times:
+iv.insufficientEvidence.openingTimes.p1=Monday to Friday : 8am to 8pm
+iv.insufficientEvidence.openingTimes.p2=Saturday: 8am to 4pm
+iv.insufficientEvidence.openingTimes.p3=Closed Sundays and bank holidays.
+iv.insufficientEvidence.helpWithCallCharges=Find out about call charges
+iv.insufficientEvidence.getHelp=Get help
+iv.insufficientEvidence.additionalNeedsLink=dealing with HMRC if you have additional needs
+
+
+# IV Timed Out
+iv.timeout.title=Your session has ended
+iv.timeout.p1=You’ve been inactive for too long so we’ve ended your session.
+iv.timeout.p2=You’ll need to start again.
+
+# IV Technical Issue
+iv.technicalIssue.title=Sorry, there is a problem with the service
+iv.technicalIssue.p=You’ll need to try again later.
+
+
+# IV Precondition Failed
+iv.preconditionFailed.title=You’re not able to use this service
+iv.preconditionFailed.p1=We’ve checked the details in your Government Gateway account and you do not meet the criteria to use this service.
