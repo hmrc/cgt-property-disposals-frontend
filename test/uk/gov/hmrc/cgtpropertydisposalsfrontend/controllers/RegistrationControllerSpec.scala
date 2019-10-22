@@ -524,7 +524,9 @@ class RegistrationControllerSpec
           details.emailAddress,
           details.address,
           ContactName(s"${details.name.firstName} ${details.name.lastName}"),
-          CgtReference(subscriptionResponse.cgtReferenceNumber)
+          CgtReference(subscriptionResponse.cgtReferenceNumber),
+          None,
+          registeredWithId = false
         )
       }
 

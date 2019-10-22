@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,17 +12,18 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-@this(
- mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template
-)
+import play.api.libs.functional.syntax._
+import play.api.libs.json.Format
 
-@()(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+final case class TelephoneNumber(value: String) extends AnyVal
 
-@mainTemplate(title = "Start your return") {
-  <h1>Start your return here</h1>
+object TelephoneNumber {
+
+  implicit val format: Format[TelephoneNumber] =
+    implicitly[Format[String]].inmap(TelephoneNumber(_), _.value)
+
 }
-

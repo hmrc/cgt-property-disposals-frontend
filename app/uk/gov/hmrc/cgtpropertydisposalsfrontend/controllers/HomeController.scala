@@ -32,17 +32,17 @@ class HomeController @Inject()(
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   cc: MessagesControllerComponents,
-  startPage: views.html.subscribed.start
-)(implicit viewConfig: ViewConfig)
+  manageYourDetailsPage: views.html.account.manage_your_details
+                              )(implicit viewConfig: ViewConfig)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with SessionUpdates
     with Logging {
 
-  def start(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+  def homepage(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request: RequestWithSessionData[AnyContent] =>
-      withSubscribedUser(request) { _ =>
-        Ok(startPage())
+      withSubscribedUser(request) { subscribed =>
+        Ok(manageYourDetailsPage(subscribed.subscribedDetails))
       }
   }
 

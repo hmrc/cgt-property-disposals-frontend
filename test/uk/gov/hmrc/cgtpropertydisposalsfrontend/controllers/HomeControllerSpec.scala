@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import org.scalacheck.ScalacheckShapeless._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.Result
@@ -45,6 +46,8 @@ class HomeControllerSpec
 
   val controller = instanceOf[HomeController]
 
+  implicit val messagesApi: MessagesApi = controller.messagesApi
+
   val subscribed = sample[Subscribed]
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
@@ -57,7 +60,7 @@ class HomeControllerSpec
 
   "The Home Controller" when {
 
-    def performAction(): Future[Result] = controller.start()(FakeRequest())
+    def performAction(): Future[Result] = controller.homepage()(FakeRequest())
 
     "handling requests" must {
 
@@ -71,7 +74,7 @@ class HomeControllerSpec
         }
         val result = performAction()
         status(result)          shouldBe 200
-        contentAsString(result) should include("Start your return")
+        contentAsString(result) should include(message("account.manageYourDetails.p"))
       }
 
       behave like redirectToStartBehaviour(performAction)

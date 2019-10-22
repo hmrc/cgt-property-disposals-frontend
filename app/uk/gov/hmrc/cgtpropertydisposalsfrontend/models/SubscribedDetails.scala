@@ -27,7 +27,9 @@ final case class SubscribedDetails(
   emailAddress: Email,
   address: Address,
   contactName: ContactName,
-  cgtReference: CgtReference
+  cgtReference: CgtReference,
+  telephoneNumber: Option[TelephoneNumber],
+  registeredWithId: Boolean
 )
 
 object SubscribedDetails {

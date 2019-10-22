@@ -72,7 +72,9 @@ class SubscriptionController @Inject()(
                         details.emailAddress,
                         details.address,
                         details.contactName,
-                        CgtReference(subscriptionResponse.cgtReferenceNumber)
+                        CgtReference(subscriptionResponse.cgtReferenceNumber),
+                        None,
+                        registeredWithId = true
                       )
                     )
                   )

@@ -28,7 +28,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.ConfidenceLevel.L50
 import uk.gov.hmrc.auth.core.retrieve.Credentials
-import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, ConfidenceLevel}
+import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, ConfidenceLevel, Enrolment, EnrolmentIdentifier}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
@@ -50,13 +50,13 @@ import scala.concurrent.Future
 
 class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSupport with IvBehaviourSupport {
 
-  val mockService = mock[BusinessPartnerRecordService]
+  val mockBprService = mock[BusinessPartnerRecordService]
 
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
-      bind[BusinessPartnerRecordService].toInstance(mockService),
+      bind[BusinessPartnerRecordService].toInstance(mockBprService),
       bind[SubscriptionService].toInstance(mockSubscriptionService)
     )
 
@@ -69,7 +69,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
   def mockGetBusinessPartnerRecord(request: BusinessPartnerRecordRequest)(
     result: Either[Error, BusinessPartnerRecordResponse]
   ) =
-    (mockService
+    (mockBprService
       .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest)(_: HeaderCarrier))
       .expects(request, *)
       .returning(EitherT.fromEither[Future](result))
@@ -78,6 +78,12 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
     (mockSubscriptionService
       .hasSubscription()(_: HeaderCarrier))
       .expects(*)
+      .returning(EitherT(Future.successful(response)))
+
+  def mockGetSubscribedDetails(cgtReference: CgtReference)(response: Either[Error, SubscribedDetails]) =
+    (mockSubscriptionService
+      .getSubscribedDetails(_: CgtReference)(_: HeaderCarrier))
+      .expects(cgtReference, *)
       .returning(EitherT(Future.successful(response)))
 
   val nino                 = NINO("AB123456C")
@@ -227,7 +233,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 List[GuiceableModule](
                   bind[AuthConnector].toInstance(mockAuthConnector),
                   bind[SessionStore].toInstance(mockSessionStore),
-                  bind[BusinessPartnerRecordService].toInstance(mockService),
+                  bind[BusinessPartnerRecordService].toInstance(mockBprService),
                   bind[SubscriptionService].toInstance(mockSubscriptionService)
                 )
 
@@ -583,7 +589,9 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                   individualSubscriptionDetails.emailAddress,
                   individualSubscriptionDetails.address,
                   individualSubscriptionDetails.contactName,
-                  CgtReference("number")
+                  CgtReference("number"),
+                  None,
+                  registeredWithId = true
                 )
               )
               val session = SessionData.empty.copy(journeyStatus = Some(subscriptionStatus))
@@ -593,7 +601,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 mockGetSession(Future.successful(Right(Some(session))))
               }
 
-              checkIsRedirect(performAction(), routes.HomeController.start())
+              checkIsRedirect(performAction(), routes.HomeController.homepage())
             }
 
           }
@@ -863,7 +871,9 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                   trustSubscriptionDetails.emailAddress,
                   trustSubscriptionDetails.address,
                   trustSubscriptionDetails.contactName,
-                  CgtReference("number")
+                  CgtReference("number"),
+                  None,
+                  registeredWithId = false
                 )
               )
               val session = SessionData.empty.copy(journeyStatus = Some(subscriptionStatus))
@@ -874,7 +884,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 mockGetSession(Future.successful(Right(Some(session))))
               }
 
-              checkIsRedirect(performAction(), routes.HomeController.start())
+              checkIsRedirect(performAction(), routes.HomeController.homepage())
             }
 
           }
@@ -1038,6 +1048,107 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               checkIsRedirect(performAction(), email.routes.SubscriptionEnterEmailController.enterEmail().url)
             }
 
+          }
+
+        }
+
+      }
+
+      "the user has a CGT enrolment" when {
+
+        val cgtReference = sample[CgtReference]
+        val cgtEnrolment = Enrolment(
+          "HMRC-CGT-PD",
+          Seq(EnrolmentIdentifier("CGTPDRef", cgtReference.value)),
+        "")
+        val subscribedDetails = sample[SubscribedDetails].copy(cgtReference = cgtReference)
+
+        val sessionWithSubscribed = SessionData.empty.copy(
+          journeyStatus = Some(Subscribed(subscribedDetails))
+        )
+
+        "the session data indicates they have subscribed" must {
+
+          "redirect to the homepage" in {
+            inSequence{
+              mockAuthWithAllRetrievals(
+                ConfidenceLevel.L200,
+                Some(AffinityGroup.Individual),
+                None,
+                None,
+                None,
+                Set(cgtEnrolment),
+                Some(retrievedGGCredId)
+              )
+              mockGetSession(Future.successful(Right(Some(sessionWithSubscribed))))
+            }
+
+            checkIsRedirect(performAction(), routes.HomeController.homepage())
+          }
+
+        }
+
+        "the session data does not indicate they have subscribed" must {
+
+          "show an error page" when {
+
+            "the call to get the subscribed details fails" in {
+              inSequence{
+                mockAuthWithAllRetrievals(
+                  ConfidenceLevel.L200,
+                  Some(AffinityGroup.Individual),
+                  None,
+                  None,
+                  None,
+                  Set(cgtEnrolment),
+                  Some(retrievedGGCredId)
+                )
+                mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+                mockGetSubscribedDetails(cgtReference)(Left(Error("")))
+              }
+
+              checkIsTechnicalErrorPage(performAction())
+            }
+
+            "the session cannot be updated with the subscribed details" in {
+              inSequence{
+                mockAuthWithAllRetrievals(
+                  ConfidenceLevel.L200,
+                  Some(AffinityGroup.Individual),
+                  None,
+                  None,
+                  None,
+                  Set(cgtEnrolment),
+                  Some(retrievedGGCredId)
+                )
+                mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+                mockGetSubscribedDetails(cgtReference)(Right(subscribedDetails))
+                mockStoreSession(sessionWithSubscribed)(Future.successful(Left(Error(""))))
+              }
+
+              checkIsTechnicalErrorPage(performAction())
+            }
+
+          }
+
+          "redirect to the homepage when the subscribed details are obtained and the " +
+            "ssion data has been successfully updated" in {
+            inSequence{
+              mockAuthWithAllRetrievals(
+                ConfidenceLevel.L200,
+                Some(AffinityGroup.Individual),
+                None,
+                None,
+                None,
+                Set(cgtEnrolment),
+                Some(retrievedGGCredId)
+              )
+              mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+              mockGetSubscribedDetails(cgtReference)(Right(subscribedDetails))
+              mockStoreSession(sessionWithSubscribed)(Future.successful(Right(())))
+            }
+
+            checkIsRedirect(performAction(), routes.HomeController.homepage())
           }
 
         }

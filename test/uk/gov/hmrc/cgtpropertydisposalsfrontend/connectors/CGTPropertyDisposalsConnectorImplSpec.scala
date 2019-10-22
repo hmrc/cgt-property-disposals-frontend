@@ -25,10 +25,12 @@ import play.api.test.Helpers._
 import play.api.{Configuration, Mode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecordRequest
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with MockFactory with HttpSupport {
 
@@ -55,24 +57,20 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    "handling request to get the subscription status" must {
-
-      val subscriptionStatusUrl = "http://host:123/cgt-property-disposals/check-subscription-status"
-
-      "do a GET http call and return the result" in {
+    def commonBehaviour(
+      performAction: () => Future[Either[Error, HttpResponse]],
+      mockActions: Option[HttpResponse] => Unit
+    ): Unit = {
+      "do a http call and return the result" in {
         List(
           HttpResponse(204),
           HttpResponse(200, Some(JsString("hi"))),
           HttpResponse(500)
         ).foreach { httpResponse =>
           withClue(s"For http response [${httpResponse.toString}]") {
-            mockGet(subscriptionStatusUrl, Map.empty)(Some(httpResponse))
+            mockActions(Some(httpResponse))
 
-            await(
-              connector
-                .getSubscriptionStatus()
-                .value
-            ) shouldBe Right(httpResponse)
+            await(performAction()) shouldBe Right(httpResponse)
           }
         }
       }
@@ -80,16 +78,22 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
       "return an error" when {
 
         "the future fails" in {
-          mockGet(subscriptionStatusUrl, Map.empty)(None)
+          mockActions(None)
 
-          await(
-            connector
-              .getSubscriptionStatus()
-              .value
-          ).isLeft shouldBe true
+          await(performAction()).isLeft shouldBe true
         }
 
       }
+    }
+
+    "handling request to get the subscription status" must {
+
+      val subscriptionStatusUrl = "http://host:123/cgt-property-disposals/check-subscription-status"
+
+      behave like commonBehaviour(
+        () => connector.getSubscriptionStatus().value,
+        mockGet(subscriptionStatusUrl, Map.empty)(_)
+      )
     }
 
     "handling request to get the business partner record" must {
@@ -97,110 +101,47 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
       val bprUrl     = "http://host:123/cgt-property-disposals/business-partner-record"
       val bprRequest = sample[BusinessPartnerRecordRequest]
 
-      "do a POST http call and return the result" in {
-        List(
-          HttpResponse(200),
-          HttpResponse(200, Some(JsString("hi"))),
-          HttpResponse(500)
-        ).foreach { httpResponse =>
-          withClue(s"For http response [${httpResponse.toString}]") {
-            mockPost(bprUrl, Map.empty, Json.toJson(bprRequest))(Some(httpResponse))
-
-            await(
-              connector
-                .getBusinessPartnerRecord(bprRequest)
-                .value
-            ) shouldBe Right(httpResponse)
-          }
-        }
-      }
-
-      "return an error" when {
-
-        "the future fails" in {
-          mockPost(bprUrl, Map.empty, Json.toJson(bprRequest))(None)
-
-          await(
-            connector
-              .getBusinessPartnerRecord(bprRequest)
-              .value
-          ).isLeft shouldBe true
-        }
-
-      }
+      behave like commonBehaviour(
+        () => connector.getBusinessPartnerRecord(bprRequest).value,
+        mockPost(bprUrl, Map.empty, Json.toJson(bprRequest))(_)
+      )
 
     }
 
     "handling request to subscribe" must {
       val subscriptionDetails = sample[SubscriptionDetails]
 
-      "do a post http call and return the result" in {
-        List(
-          HttpResponse(200),
-          HttpResponse(200, Some(JsString("hi"))),
-          HttpResponse(500)
-        ).foreach { httpResponse =>
-          withClue(s"For http response [${httpResponse.toString}]") {
-            mockPost(s"http://host:123/cgt-property-disposals/subscribe", Map.empty, Json.toJson(subscriptionDetails))(
-              Some(httpResponse)
-            )
-
-            await(connector.subscribe(subscriptionDetails).value) shouldBe Right(httpResponse)
-          }
-        }
-      }
-
-      "return an error" when {
-
-        "the future fails" in {
-          mockPost(s"http://host:123/cgt-property-disposals/subscribe", Map.empty, Json.toJson(subscriptionDetails))(
-            None
-          )
-
-          await(connector.subscribe(subscriptionDetails).value).isLeft shouldBe true
-        }
-
-      }
+      behave like commonBehaviour(
+        () => connector.subscribe(subscriptionDetails).value,
+        mockPost("http://host:123/cgt-property-disposals/subscription", Map.empty, Json.toJson(subscriptionDetails))(_)
+      )
     }
 
     "handling request to register without id and subscribe" must {
       val registrationDetails = sample[RegistrationDetails]
 
-      "do a post http call and return the result" in {
-        List(
-          HttpResponse(200),
-          HttpResponse(200, Some(JsString("hi"))),
-          HttpResponse(500)
-        ).foreach { httpResponse =>
-          withClue(s"For http response [${httpResponse.toString}]") {
-            mockPost(
-              s"http://host:123/cgt-property-disposals/register-without-id-and-subscribe",
-              Map.empty,
-              Json.toJson(registrationDetails)
-            )(
-              Some(httpResponse)
-            )
+      behave like commonBehaviour(
+        () => connector.registerWithoutIdAndSubscribe(registrationDetails).value,
+        mockPost(
+          "http://host:123/cgt-property-disposals/register-without-id-and-subscribe",
+          Map.empty,
+          Json.toJson(registrationDetails)
+        )(_)
+      )
 
-            await(connector.registerWithoutIdAndSubscribe(registrationDetails).value) shouldBe Right(httpResponse)
-          }
-        }
-      }
+    }
 
-      "return an error" when {
+    "handling request to get subscribed details" must {
+      val cgtReference = sample[CgtReference]
 
-        "the future fails" in {
-          mockPost(
-            s"http://host:123/cgt-property-disposals/register-without-id-and-subscribe",
-            Map.empty,
-            Json.toJson(registrationDetails)
-          )(
-            None
-          )
+      behave like commonBehaviour(
+        () => connector.getSubscribedDetails(cgtReference).value,
+        mockGet(
+          s"http://host:123/cgt-property-disposals/subscription/${cgtReference.value}",
+          Map.empty
+        )(_)
+      )
 
-          await(connector.registerWithoutIdAndSubscribe(registrationDetails).value).isLeft shouldBe true
-        }
-
-      }
     }
   }
 

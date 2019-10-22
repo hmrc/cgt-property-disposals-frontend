@@ -31,9 +31,8 @@
   @pageHeading(title)
   <p>@messages("subscribed.p1")</p>
   <p>@Html(messages("subscribed.p2")) <strong class="bold">@cgtReference</strong>.</p>
-  @buttonLink(messages("subscribed.buttonText"), routes.HomeController.start().url)
+  @buttonLink(messages("subscribed.buttonText"), routes.HomeController.homepage().url)
   <p>
-   <a href="#">@messages("subscribed.linkText")</a>
+   <a href="@{routes.HomeController.homepage().url}">@messages("subscribed.linkText")</a>
   </p>
 }
-
