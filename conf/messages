@@ -214,7 +214,7 @@ iv.lockedOut.p2=You’ll need to wait 24 hours and try again.
 iv.exitToGovUk=Exit to GOV.UK
 
 # IV User Aborted
-iv.userAborted.title=We were not able to verify your identity
+iv.userAborted.title=We were not able to confirm your identity
 iv.userAborted.p1=You have not provided enough information.
 iv.userAborted.p2=To apply for a Capital Gains Tax on UK property account you’ll need to answer security questions. These will be based on the information we already hold about you.
 iv.userAborted.p3=This is to prevent anyone other than you accessing your personal details.
@@ -226,7 +226,7 @@ iv.failedIv.p2=Your answers to the questions need to match the answers we alread
 iv.failedIv.p3=You’ll need to try again.
 
 # Failed Matching
-iv.failedMatching.title=We were not able to verify your identity
+iv.failedMatching.title=We were not able to confirm your identity
 iv.failedMatching.p1=You’ll need to try again.
 iv.failedMatching.p2=You’ll need to check you entered your details correctly, such as your:
 iv.failedMatching.li1=name
