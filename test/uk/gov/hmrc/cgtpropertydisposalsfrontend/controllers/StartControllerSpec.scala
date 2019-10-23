@@ -105,8 +105,10 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
       "handling non trust organisations" must {
 
-        val nonTrustOrganisationSession =
-          SessionData.empty.copy(journeyStatus = Some(SubscriptionStatus.UnregisteredTrust))
+        val determiningIfOrganisationIsTrustSession =
+          SessionData.empty.copy(journeyStatus = Some(SubscriptionStatus.DeterminingIfOrganisationIsTrust(None)))
+
+        lazy val needMoreDetailsContinueUrl = routes.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrust().url
 
         "show an error page" when {
 
@@ -123,7 +125,9 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               )
               mockHasSubscription()(Right(None))
               mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-              mockStoreSession(nonTrustOrganisationSession)(Future.successful(Left(Error(""))))
+              mockStoreSession(determiningIfOrganisationIsTrustSession.copy(
+                needMoreDetailsContinueUrl = Some(needMoreDetailsContinueUrl)
+              ))(Future.successful(Left(Error(""))))
             }
 
             checkIsTechnicalErrorPage(performAction(FakeRequest()))
@@ -132,7 +136,9 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
         }
 
         "redirect to the register trust page" when {
-          "the session does not need updating" in {
+          "the session already has the relevant journey status in it" in {
+            val journey = DeterminingIfOrganisationIsTrust(Some(true))
+            val sessionData = SessionData.empty.copy(journeyStatus = Some(journey))
             inSequence {
               mockAuthWithAllRetrievals(
                 ConfidenceLevel.L50,
@@ -144,13 +150,16 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 Some(retrievedGGCredId)
               )
               mockHasSubscription()(Right(None))
-              mockGetSession(Future.successful(Right(Some(nonTrustOrganisationSession))))
+              mockGetSession(Future.successful(Right(Some(sessionData))))
+                mockStoreSession(sessionData.copy(
+                needMoreDetailsContinueUrl = Some(needMoreDetailsContinueUrl)
+              ))(Future.successful(Right(())))
             }
 
-            checkIsRedirect(performAction(FakeRequest()), routes.RegisterTrustController.registerYourTrust())
+            checkIsRedirect(performAction(FakeRequest()), routes.StartController.weNeedMoreDetails())
           }
 
-          "the session data is updated when it is required" in {
+          "the session data is updated when there is no relevant journey status in it" in {
             inSequence {
               mockAuthWithAllRetrievals(
                 ConfidenceLevel.L50,
@@ -163,11 +172,13 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               )
               mockHasSubscription()(Right(None))
               mockGetSession(Future.successful(Right(None)))
-              mockStoreSession(nonTrustOrganisationSession)(Future.successful(Right(())))
+              mockStoreSession(determiningIfOrganisationIsTrustSession.copy(
+                needMoreDetailsContinueUrl = Some(needMoreDetailsContinueUrl)
+              ))(Future.successful(Right(())))
 
             }
 
-            checkIsRedirect(performAction(FakeRequest()), routes.RegisterTrustController.registerYourTrust())
+            checkIsRedirect(performAction(FakeRequest()), routes.StartController.weNeedMoreDetails())
           }
         }
 

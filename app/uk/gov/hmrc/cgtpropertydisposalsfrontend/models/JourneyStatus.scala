@@ -32,7 +32,9 @@ object JourneyStatus {
   object SubscriptionStatus {
 
     // user with affinity organisation is trying to subscribe without having a trust enrolment
-    final case object UnregisteredTrust extends SubscriptionStatus
+    final case class DeterminingIfOrganisationIsTrust(
+      isReportingForTrust: Option[Boolean]
+    ) extends SubscriptionStatus
 
     // we cannot automatically find an identifier for an individual to get their business partner record
     final case class TryingToGetIndividualsFootprint(
