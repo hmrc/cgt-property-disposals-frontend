@@ -76,7 +76,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           inSequence{
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(
-              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(None))
+              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(None, None))
             ))))
           }
 
@@ -89,7 +89,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           inSequence{
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(
-              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(Some(true)))
+              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(Some(true), None))
             ))))
           }
 
@@ -118,7 +118,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(
-              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(None))
+              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(None, None))
             ))))
           }
 
@@ -131,7 +131,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(
-              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(None))
+              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(None, None))
             ))))
           }
 
@@ -148,11 +148,11 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(
-              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(None))
+              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(None, None))
             ))))
             mockStoreSession(
               SessionData.empty.copy(
-                journeyStatus = Some(DeterminingIfOrganisationIsTrust(Some(true)))
+                journeyStatus = Some(DeterminingIfOrganisationIsTrust(Some(true), None))
               )
             )(Future.successful(Left(Error(""))))
           }
@@ -168,11 +168,11 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(
-              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(None))
+              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(None, None))
             ))))
             mockStoreSession(
               SessionData.empty.copy(
-                journeyStatus = Some(DeterminingIfOrganisationIsTrust(Some(false)))
+                journeyStatus = Some(DeterminingIfOrganisationIsTrust(Some(false), None))
               )
             )(Future.successful(Right(())))
           }
@@ -192,11 +192,11 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(
-              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(None))
+              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(None, None))
             ))))
             mockStoreSession(
               SessionData.empty.copy(
-                journeyStatus = Some(DeterminingIfOrganisationIsTrust(Some(true)))
+                journeyStatus = Some(DeterminingIfOrganisationIsTrust(Some(true), None))
               )
             )(Future.successful(Right(())))
           }
@@ -223,7 +223,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(
-              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(None))
+              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(None, None))
             ))))
           }
 
@@ -234,7 +234,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(
-              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(Some(true)))
+              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(Some(true), None))
             ))))
           }
 
@@ -249,7 +249,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(
-              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(Some(false)))
+              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(Some(false), None))
             ))))
           }
 
@@ -262,12 +262,201 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
     }
 
-    "handling requests to display the 'do you have a TRN page'" must {
+    "handling requests to display the 'do you have a TRN' page" must {
 
-      "display the page" in {
-        val result = controller.doYouHaveATrn()(FakeRequest())
-        status(result) shouldBe OK
-        contentAsString(result) should include("Do you have a TRN?")
+      def performAction(): Future[Result] =
+        controller.doYouHaveATrn()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+      "redirect to the start endpoint" when {
+
+        "the user has not indicated whether or not they are reporting for a trust" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(
+              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(None, None))
+            ))))
+          }
+
+          checkIsRedirect(performAction(), routes.StartController.start())
+        }
+
+        "the user has indicated that they are not reporting for a trust" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(
+              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(Some(false), None))
+            ))))
+          }
+
+          checkIsRedirect(performAction(), routes.StartController.start())
+        }
+
+      }
+
+      "show the page" when {
+
+        "the user has not selected an option before" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(
+              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(Some(true), None))
+            ))))
+          }
+
+          val result = performAction()
+          status(result) shouldBe OK
+          contentAsString(result) should include(message("haveATrn.title"))
+        }
+
+        "the user has selected an option before" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(
+              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(Some(true), Some(true)))
+            ))))
+          }
+
+          val result = performAction()
+          val content = contentAsString(result)
+
+          status(result) shouldBe OK
+          content should include(message("haveATrn.title"))
+          content should include("checked=\"checked\"")
+        }
+
+      }
+
+    }
+
+    "handling submitted answers from the 'do you have a TRN' page" must {
+
+      def performAction(formData: (String,String)*): Future[Result] =
+        controller.doYouHaveATrnSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
+
+      behave like redirectToStartBehaviour(() => performAction())
+
+      "redirect to the start endpoint" when {
+
+        "the user has not indicated whether or not they are reporting for a trust" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(
+              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(None, None))
+            ))))
+          }
+
+          checkIsRedirect(performAction(), routes.StartController.start())
+        }
+
+        "the user has indicated that they are not reporting for a trust" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(
+              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(Some(false), None))
+            ))))
+          }
+
+          checkIsRedirect(performAction(), routes.StartController.start())
+        }
+
+      }
+
+      "show a form error" when {
+
+        "an option has not been selected" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(
+              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(Some(true), None))
+            ))))
+          }
+
+          val result = performAction()
+          status(result) shouldBe BAD_REQUEST
+          contentAsString(result) should include(message("hasTrn.error.required"))
+        }
+
+        "the data submitted cannot be read" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(
+              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(Some(true), None))
+            ))))
+          }
+
+          val result = performAction("hasTrn" -> "123")
+          status(result) shouldBe BAD_REQUEST
+          contentAsString(result) should include(message("hasTrn.error.boolean"))
+        }
+
+      }
+
+      "show an error page" when {
+
+        "the answer cannot be stored in mongo" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(
+              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(Some(true), None))
+            ))))
+            mockStoreSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(DeterminingIfOrganisationIsTrust(Some(true), Some(true)))
+              )
+            )(Future.successful(Left(Error(""))))
+          }
+
+          checkIsTechnicalErrorPage(performAction("hasTrn" -> "true"))
+        }
+
+      }
+
+      "redirect to the 'register your trust' page" when {
+
+        "the user does not have a TRN" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(
+              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(Some(true), None))
+            ))))
+            mockStoreSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(DeterminingIfOrganisationIsTrust(Some(true), Some(false)))
+              )
+            )(Future.successful(Right(())))
+          }
+
+          checkIsRedirect(
+            performAction("hasTrn" -> "false"),
+            routes.DeterminingIfOrganisationIsTrustController.registerYourTrust()
+          )
+        }
+
+
+      }
+
+      "redirect to the 'enter trn' page" when {
+
+        "the user does  have a TRN" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(
+              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(Some(true), None))
+            ))))
+            mockStoreSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(DeterminingIfOrganisationIsTrust(Some(true), Some(true)))
+              )
+            )(Future.successful(Right(())))
+          }
+
+          checkIsRedirect(
+            performAction("hasTrn" -> "true"),
+            routes.DeterminingIfOrganisationIsTrustController.enterTrn()
+          )
+        }
       }
 
     }
@@ -281,7 +470,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
       "show the register your trust page" when {
 
         "the session data indicates the user is an organisation which is not associated with a registered trust" in {
-          val sessionData = sessionDataWithStatus(DeterminingIfOrganisationIsTrust(None))
+          val sessionData = sessionDataWithStatus(DeterminingIfOrganisationIsTrust(None, None))
 
           inSequence {
             mockAuthWithNoRetrievals()

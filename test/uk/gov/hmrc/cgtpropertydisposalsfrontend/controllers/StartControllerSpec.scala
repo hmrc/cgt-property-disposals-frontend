@@ -106,7 +106,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
       "handling non trust organisations" must {
 
         val determiningIfOrganisationIsTrustSession =
-          SessionData.empty.copy(journeyStatus = Some(SubscriptionStatus.DeterminingIfOrganisationIsTrust(None)))
+          SessionData.empty.copy(journeyStatus = Some(SubscriptionStatus.DeterminingIfOrganisationIsTrust(None, None)))
 
         lazy val needMoreDetailsContinueUrl = routes.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrust().url
 

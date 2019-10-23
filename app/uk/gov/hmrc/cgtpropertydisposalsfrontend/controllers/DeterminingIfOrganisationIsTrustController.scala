@@ -41,6 +41,7 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
   sessionStore: SessionStore,
   doYouWantToReportForATrustPage: views.html.subscription.do_you_want_to_report_for_a_trust,
   reportWithCorporateTaxPage: views.html.subscription.report_with_corporate_tax,
+  doYouHaveATrnPage: views.html.subscription.do_you_have_a_trn,
   registerYourTrustPage: views.html.register_your_trust,
   cc: MessagesControllerComponents
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
@@ -75,7 +76,7 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
           .fold(
             formWithError => BadRequest(doYouWantToReportForATrustPage(formWithError)), { isReportingForTrust =>
               updateSession(sessionStore, request)(
-                _.copy(journeyStatus = Some(DeterminingIfOrganisationIsTrust(Some(isReportingForTrust))))
+                _.copy(journeyStatus = Some(DeterminingIfOrganisationIsTrust(Some(isReportingForTrust), None)))
               ).map {
                 case Left(e) =>
                   logger.warn("Could not update session data with reporting for trust answer", e)
@@ -102,8 +103,48 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
     }
   }
 
-  def doYouHaveATrn(): Action[AnyContent] = Action { implicit request =>
-    Ok("Do you have a TRN?")
+  def doYouHaveATrn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withValidUser(request) { determiningIfOrganisationIsTrust =>
+      if (determiningIfOrganisationIsTrust.isReportingForTrust.contains(true)) {
+        val form =
+          determiningIfOrganisationIsTrust.hasTrn.fold(doYouHaveATrnForm)(doYouHaveATrnForm.fill)
+        Ok(doYouHaveATrnPage(form))
+      } else {
+        Redirect(routes.StartController.start())
+      }
+    }
+  }
+
+  def doYouHaveATrnSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withValidUser(request) { determiningIfOrganisationIsTrust =>
+      if (determiningIfOrganisationIsTrust.isReportingForTrust.contains(true)) {
+        doYouHaveATrnForm
+          .bindFromRequest()
+          .fold(
+            formWithError => BadRequest(doYouHaveATrnPage(formWithError)), { hasTrn =>
+              updateSession(sessionStore, request)(
+                _.copy(journeyStatus = Some(determiningIfOrganisationIsTrust.copy(hasTrn = Some(hasTrn))))
+              ).map {
+                case Left(e) =>
+                  logger.warn("Could not update session data with has TRN answer", e)
+                  errorHandler.errorResult()
+
+                case Right(_) =>
+                  if (hasTrn)
+                    Redirect(routes.DeterminingIfOrganisationIsTrustController.enterTrn())
+                  else
+                    Redirect(routes.DeterminingIfOrganisationIsTrustController.registerYourTrust())
+              }
+            }
+          )
+      } else {
+        Redirect(routes.StartController.start())
+      }
+    }
+  }
+
+  def enterTrn(): Action[AnyContent] = Action { implicit request =>
+    Ok("Enter your TRN and trust name")
   }
 
   def registerYourTrust(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
@@ -120,6 +161,13 @@ object DeterminingIfOrganisationIsTrustController {
     Form(
       mapping(
         "isReportingForATrust" -> of(BooleanFormatter.formatter)
+      )(identity)(Some(_))
+    )
+
+  val doYouHaveATrnForm: Form[Boolean] =
+    Form(
+      mapping(
+        "hasTrn" -> of(BooleanFormatter.formatter)
       )(identity)(Some(_))
     )
 
