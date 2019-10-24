@@ -137,7 +137,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
         "redirect to the register trust page" when {
           "the session already has the relevant journey status in it" in {
-            val journey = DeterminingIfOrganisationIsTrust(Some(true))
+            val journey = DeterminingIfOrganisationIsTrust(Some(true), Some(true))
             val sessionData = SessionData.empty.copy(journeyStatus = Some(journey))
             inSequence {
               mockAuthWithAllRetrievals(
