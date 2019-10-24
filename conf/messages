@@ -282,3 +282,7 @@ account.manageYourDetails.yourName=Your name
 isReportingForATrust.title=Do you want to report the tax for a trust?
 isReportingForATrust.error.required=Select yes if you want to report the tax for a trust
 isReportingForATrust.error.boolean=Select yes if you want to report the tax for a trust
+
+haveATrn.title=Do you have a Trust Registration Number?
+hasTrn.error.required=Select yes if you have a Trust Registration number
+hasTrn.error.boolean=Select yes if you have a Trust Registration number

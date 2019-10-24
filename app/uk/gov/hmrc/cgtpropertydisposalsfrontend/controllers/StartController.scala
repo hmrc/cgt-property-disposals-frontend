@@ -145,7 +145,7 @@ class StartController @Inject()(
     val newSessionData =
       request.sessionData.flatMap(_.journeyStatus) match {
         case Some(d: SubscriptionStatus.DeterminingIfOrganisationIsTrust) => d
-        case _ => SubscriptionStatus.DeterminingIfOrganisationIsTrust(None)
+        case _ => SubscriptionStatus.DeterminingIfOrganisationIsTrust(None, None)
       }
 
     updateSession(sessionStore, request)(_.copy(
