@@ -116,7 +116,13 @@ POST /subscription/enter-non-uk-address  uk.gov.hmrc.cgtpropertydisposalsfronten
 ### Subscribed Journey
 GET /account/manage-your-details         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.HomeController.homepage
 
+### Organisation without trust enrolement
+GET  /are-you-reporting-for-a-trust       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrust()
+POST /are-you-reporting-for-a-trust       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrustSubmit()
+GET  /report-with-corporate-tax           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DeterminingIfOrganisationIsTrustController.reportWithCorporateTax()
+GET  /do-you-have-a-trn                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DeterminingIfOrganisationIsTrustController.doYouHaveATrn()
+
 #### Error pages
-GET  /register-your-trust                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RegisterTrustController.registerYourTrust()
+GET  /register-your-trust                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DeterminingIfOrganisationIsTrustController.registerYourTrust()
 
 GET  /assets/*file                        controllers.Assets.at(path="/public", file)
