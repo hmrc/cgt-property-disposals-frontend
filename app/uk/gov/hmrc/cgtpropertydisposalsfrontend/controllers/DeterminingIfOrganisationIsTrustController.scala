@@ -64,7 +64,7 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
         determiningIfOrganisationIsTrust.isReportingForTrust.fold(doYouWantToReportForATrustForm)(
           doYouWantToReportForATrustForm.fill
         )
-      Ok(doYouWantToReportForATrustPage(form))
+      Ok(doYouWantToReportForATrustPage(form, routes.StartController.weNeedMoreDetails()))
     }
   }
 
@@ -74,20 +74,22 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
         doYouWantToReportForATrustForm
           .bindFromRequest()
           .fold(
-            formWithError => BadRequest(doYouWantToReportForATrustPage(formWithError)), { isReportingForTrust =>
-              updateSession(sessionStore, request)(
-                _.copy(journeyStatus = Some(DeterminingIfOrganisationIsTrust(Some(isReportingForTrust), None)))
-              ).map {
-                case Left(e) =>
-                  logger.warn("Could not update session data with reporting for trust answer", e)
-                  errorHandler.errorResult()
+            formWithError =>
+              BadRequest(doYouWantToReportForATrustPage(formWithError, routes.StartController.weNeedMoreDetails())), {
+              isReportingForTrust =>
+                updateSession(sessionStore, request)(
+                  _.copy(journeyStatus = Some(DeterminingIfOrganisationIsTrust(Some(isReportingForTrust), None)))
+                ).map {
+                  case Left(e) =>
+                    logger.warn("Could not update session data with reporting for trust answer", e)
+                    errorHandler.errorResult()
 
-                case Right(_) =>
-                  if (isReportingForTrust)
-                    Redirect(routes.DeterminingIfOrganisationIsTrustController.doYouHaveATrn())
-                  else
-                    Redirect(routes.DeterminingIfOrganisationIsTrustController.reportWithCorporateTax())
-              }
+                  case Right(_) =>
+                    if (isReportingForTrust)
+                      Redirect(routes.DeterminingIfOrganisationIsTrustController.doYouHaveATrn())
+                    else
+                      Redirect(routes.DeterminingIfOrganisationIsTrustController.reportWithCorporateTax())
+                }
             }
           )
       }
@@ -96,7 +98,7 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
   def reportWithCorporateTax(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidUser(request) { determiningIfOrganisationIsTrust =>
       if (determiningIfOrganisationIsTrust.isReportingForTrust.contains(false)) {
-        Ok(reportWithCorporateTaxPage())
+        Ok(reportWithCorporateTaxPage(routes.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrust()))
       } else {
         Redirect(routes.StartController.start())
       }
@@ -108,7 +110,7 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
       if (determiningIfOrganisationIsTrust.isReportingForTrust.contains(true)) {
         val form =
           determiningIfOrganisationIsTrust.hasTrn.fold(doYouHaveATrnForm)(doYouHaveATrnForm.fill)
-        Ok(doYouHaveATrnPage(form))
+        Ok(doYouHaveATrnPage(form, routes.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrust()))
       } else {
         Redirect(routes.StartController.start())
       }
@@ -121,7 +123,13 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
         doYouHaveATrnForm
           .bindFromRequest()
           .fold(
-            formWithError => BadRequest(doYouHaveATrnPage(formWithError)), { hasTrn =>
+            formWithError =>
+              BadRequest(
+                doYouHaveATrnPage(
+                  formWithError,
+                  routes.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrust()
+                )
+              ), { hasTrn =>
               updateSession(sessionStore, request)(
                 _.copy(journeyStatus = Some(determiningIfOrganisationIsTrust.copy(hasTrn = Some(hasTrn))))
               ).map {
@@ -149,7 +157,7 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
 
   def registerYourTrust(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidUser(request) { _ =>
-      Ok(registerYourTrustPage())
+      Ok(registerYourTrustPage(routes.DeterminingIfOrganisationIsTrustController.doYouHaveATrn()))
     }
   }
 

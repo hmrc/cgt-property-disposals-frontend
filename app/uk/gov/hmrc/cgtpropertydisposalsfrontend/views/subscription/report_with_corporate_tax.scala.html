@@ -19,13 +19,15 @@
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
+        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@()(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(backLink: Call)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
 @title = @{"Go and report your CGT tax with corporate tax"}
 @mainTemplate(title = title) {
+  @backLinkComponent(backLink)
   @pageHeading(title)
   <p>You're not supposed to be here - go and report your tax with corporate tax</p>
 }

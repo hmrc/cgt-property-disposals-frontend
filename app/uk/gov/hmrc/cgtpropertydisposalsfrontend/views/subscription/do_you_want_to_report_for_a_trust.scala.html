@@ -25,16 +25,19 @@
         submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
         errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no
+        yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no,
+        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@(form: Form[Boolean])(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[Boolean], backLink: Call)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"isReportingForATrust"}"
 @title = @{messages("isReportingForATrust.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @mainTemplate(title = title, hasErrors = hasErrors) {
+
+ @backLinkComponent(backLink)
 
  @if(hasErrors) {
   @errorSummary(form)
