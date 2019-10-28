@@ -31,7 +31,7 @@
 
 @(form: Form[Boolean], backLink: Call)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
-@key = @{"isReportingForATrust"}"
+@key = @{"isReportingForATrust"}
 @title = @{messages("isReportingForATrust.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 

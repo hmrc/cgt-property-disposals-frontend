@@ -16,19 +16,47 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr
 
-import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.SAUTR
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+import cats.Eq
+import julienrf.json.derived
+import play.api.libs.json.{Json, OFormat, Reads, Writes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{SAUTR, TRN}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 
-final case class UnsuccessfulNameMatchAttempts(
-  unsuccesfulAttempts: Int,
+final case class UnsuccessfulNameMatchAttempts[+A <: NameMatchDetails](
+  unsuccessfulAttempts: Int,
   maximumAttempts: Int,
-  lastNameTried: IndividualName,
-  lastSAUTRTried: SAUTR
+  lastDetailsTried: A
 )
 
 object UnsuccessfulNameMatchAttempts {
 
-  implicit val format: OFormat[UnsuccessfulNameMatchAttempts] = Json.format
+  sealed trait NameMatchDetails extends Product with Serializable
+
+  object NameMatchDetails {
+
+    final case class IndividualNameMatchDetails(name: IndividualName, sautr: SAUTR) extends NameMatchDetails
+
+    final case class TrustNameMatchDetails(name: TrustName, trn: TRN) extends NameMatchDetails
+
+    implicit val eq: Eq[NameMatchDetails] = Eq.fromUniversalEquals
+
+    implicit val individualNameMatchDetailsFormat: OFormat[IndividualNameMatchDetails] = Json.format[IndividualNameMatchDetails]
+
+    implicit val trustNameMatchDetailsFormat: OFormat[TrustNameMatchDetails] = Json.format[TrustNameMatchDetails]
+
+  }
+
+
+
+//  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
+// implicit def unsuccesfulNameMatchAttemptsFormat[A <: NameMatchDetails : OFormat]: OFormat[UnsuccessfulNameMatchAttempts[A]] =
+//    Json.format[UnsuccessfulNameMatchAttempts[A]]
+
+  implicit def unsuccesfulNameMatchAttemptsReads[A <: NameMatchDetails : Reads]: Reads[UnsuccessfulNameMatchAttempts[A]] =
+    Json.reads[UnsuccessfulNameMatchAttempts[A]]
+
+  implicit def unsuccesfulNameMatchAttemptsWrites[A <: NameMatchDetails : Writes]: Writes[UnsuccessfulNameMatchAttempts[A]] =
+    Json.writes[UnsuccessfulNameMatchAttempts[A]]
 
 }

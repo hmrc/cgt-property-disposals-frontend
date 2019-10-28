@@ -123,6 +123,8 @@ GET  /report-with-corporate-tax           uk.gov.hmrc.cgtpropertydisposalsfronte
 GET  /do-you-have-a-trn                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DeterminingIfOrganisationIsTrustController.doYouHaveATrn()
 POST /do-you-have-a-trn                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DeterminingIfOrganisationIsTrustController.doYouHaveATrnSubmit()
 GET  /enter-trust-registration-number     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DeterminingIfOrganisationIsTrustController.enterTrn()
+POST /enter-trust-registration-number     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DeterminingIfOrganisationIsTrustController.enterTrnSubmit()
+GET  /too-many-trust-registration-number-attempts  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DeterminingIfOrganisationIsTrustController.tooManyAttempts()
 GET  /register-your-trust                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DeterminingIfOrganisationIsTrustController.registerYourTrust()
 
 GET  /assets/*file                        controllers.Assets.at(path="/public", file)

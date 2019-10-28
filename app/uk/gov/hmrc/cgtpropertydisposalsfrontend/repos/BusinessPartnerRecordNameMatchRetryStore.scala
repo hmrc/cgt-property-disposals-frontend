@@ -19,10 +19,12 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import configs.syntax._
 import play.api.Configuration
+import play.api.libs.json.{Reads, Writes}
 import play.modules.reactivemongo.ReactiveMongoComponent
 import uk.gov.hmrc.cache.repository.CacheMongoRepository
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.UnsuccessfulNameMatchAttempts
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 
 import scala.concurrent.duration.FiniteDuration
@@ -31,9 +33,9 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[BusinessPartnerRecordNameMatchRetryStoreImpl])
 trait BusinessPartnerRecordNameMatchRetryStore {
 
-  def get(ggCredId: GGCredId): Future[Either[Error, Option[UnsuccessfulNameMatchAttempts]]]
+  def get[A <: NameMatchDetails : Reads](ggCredId: GGCredId): Future[Either[Error, Option[UnsuccessfulNameMatchAttempts[A]]]]
 
-  def store(ggCredId: GGCredId, unsuccessfulAttempts: UnsuccessfulNameMatchAttempts): Future[Either[Error, Unit]]
+  def store[A <: NameMatchDetails : Writes](ggCredId: GGCredId, unsuccessfulAttempts: UnsuccessfulNameMatchAttempts[A]): Future[Either[Error, Unit]]
 
 }
 
@@ -56,12 +58,12 @@ class BusinessPartnerRecordNameMatchRetryStoreImpl @Inject()(
 
   val sessionKey = "bpr-name-match-retries"
 
-  override def get(ggCredId: GGCredId): Future[Either[Error, Option[UnsuccessfulNameMatchAttempts]]] =
-    get[UnsuccessfulNameMatchAttempts](ggCredId.value)
+  override def get[A <: NameMatchDetails : Reads](ggCredId: GGCredId): Future[Either[Error, Option[UnsuccessfulNameMatchAttempts[A]]]] =
+    get[UnsuccessfulNameMatchAttempts[A]](ggCredId.value)
 
-  override def store(
+  override def store[A <: NameMatchDetails : Writes](
     ggCredId: GGCredId,
-    unsuccessfulAttempts: UnsuccessfulNameMatchAttempts
+    unsuccessfulAttempts: UnsuccessfulNameMatchAttempts[A]
   ): Future[Either[Error, Unit]] =
     store(ggCredId.value, unsuccessfulAttempts)
 

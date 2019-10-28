@@ -88,6 +88,9 @@ class StartController @Inject()(
       case (_, Some(RegistrationStatus.IndividualWantsToRegisterTrust)) =>
         Redirect(routes.RegistrationController.selectEntityType())
 
+      case (_, Some(SubscriptionStatus.DeterminingIfOrganisationIsTrust(ggCredId, _ ,_))) =>
+        handleNonTrustOrganisation(ggCredId)
+
       case (UserType.Subscribed(cgtReference, _), _) =>
         handleSubscribedUser(cgtReference)
 
@@ -107,14 +110,18 @@ class StartController @Inject()(
       case (t: UserType.Trust, Some(SubscriptionStatus.SubscriptionMissingData(bpr))) =>
         handleSubscriptionMissingData(bpr, t.email)
 
+      case (t: UserType.OrganisationUnregisteredTrust, Some(SubscriptionStatus.SubscriptionMissingData(bpr))) =>
+        handleSubscriptionMissingData(bpr, t.email)
+
       case (i: UserType.Individual, None) =>
         buildIndividualSubscriptionData(i)
 
       case (t: UserType.Trust, _) =>
         buildTrustSubscriptionData(t)
 
-      case (UserType.OrganisationUnregisteredTrust, _) | (_, Some(_: SubscriptionStatus.DeterminingIfOrganisationIsTrust)) =>
-        handleNonTrustOrganisation()
+      case (UserType.OrganisationUnregisteredTrust(_, ggCredId), _) =>
+        handleNonTrustOrganisation(ggCredId)
+
     }
   }
 
@@ -139,13 +146,13 @@ class StartController @Inject()(
     }, _ => Redirect(routes.HomeController.homepage()))
   }
 
-  private def handleNonTrustOrganisation()(
+  private def handleNonTrustOrganisation(ggCredId: GGCredId)(
     implicit request: RequestWithSessionDataAndRetrievedData[_]
   ): Future[Result] = {
     val newSessionData =
       request.sessionData.flatMap(_.journeyStatus) match {
         case Some(d: SubscriptionStatus.DeterminingIfOrganisationIsTrust) => d
-        case _ => SubscriptionStatus.DeterminingIfOrganisationIsTrust(None, None)
+        case _ => SubscriptionStatus.DeterminingIfOrganisationIsTrust(ggCredId, None, None)
       }
 
     updateSession(sessionStore, request)(_.copy(
@@ -201,7 +208,7 @@ class StartController @Inject()(
   )(implicit hc: HeaderCarrier, request: RequestWithSessionDataAndRetrievedData[_]): Future[Result] = {
     val result =
       for {
-        bprResponse <- bprService.getBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(trust.sautr))
+        bprResponse <- bprService.getBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(Right(trust.sautr), None))
 
         bprWithTrustName <- EitherT.fromEither[Future](
                              Either
