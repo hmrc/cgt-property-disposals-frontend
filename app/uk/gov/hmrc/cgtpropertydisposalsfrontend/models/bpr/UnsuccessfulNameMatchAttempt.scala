@@ -47,10 +47,10 @@ object UnsuccessfulNameMatchAttempts {
 
   }
 
-  implicit def unsuccesfulNameMatchAttemptsReads[A <: NameMatchDetails : Reads]: Reads[UnsuccessfulNameMatchAttempts[A]] =
+  implicit def unsuccessfulNameMatchAttemptsReads[A <: NameMatchDetails : Reads]: Reads[UnsuccessfulNameMatchAttempts[A]] =
     Json.reads[UnsuccessfulNameMatchAttempts[A]]
 
-  implicit def unsuccesfulNameMatchAttemptsWrites[A <: NameMatchDetails : Writes]: Writes[UnsuccessfulNameMatchAttempts[A]] =
+  implicit def unsuccessfulNameMatchAttemptsWrites[A <: NameMatchDetails : Writes]: Writes[UnsuccessfulNameMatchAttempts[A]] =
     Json.writes[UnsuccessfulNameMatchAttempts[A]]
 
 }

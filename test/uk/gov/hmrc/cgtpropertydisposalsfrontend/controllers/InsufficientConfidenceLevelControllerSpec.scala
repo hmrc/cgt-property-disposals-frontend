@@ -604,7 +604,7 @@ class InsufficientConfidenceLevelControllerSpec
         }
 
         "the user has indicated that they have no NINO but they do have an SA UTR and they have " +
-          "previously made unsuccesful attempts to do a name match" in {
+          "previously made unsuccessful attempts to do a name match" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
