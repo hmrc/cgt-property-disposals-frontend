@@ -47,12 +47,6 @@ object UnsuccessfulNameMatchAttempts {
 
   }
 
-
-
-//  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-// implicit def unsuccesfulNameMatchAttemptsFormat[A <: NameMatchDetails : OFormat]: OFormat[UnsuccessfulNameMatchAttempts[A]] =
-//    Json.format[UnsuccessfulNameMatchAttempts[A]]
-
   implicit def unsuccesfulNameMatchAttemptsReads[A <: NameMatchDetails : Reads]: Reads[UnsuccessfulNameMatchAttempts[A]] =
     Json.reads[UnsuccessfulNameMatchAttempts[A]]
 
