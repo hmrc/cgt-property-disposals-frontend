@@ -286,7 +286,7 @@ class AuthenticatedActionWithRetrievedDataSpec
       "indicate when the organisation does not have a trust enrolment" in {
         val retrievalsResult = Future successful (
           new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation)) and
-            None and None and None and emptyEnrolments and Some(ggCredentials)
+            None and None and Some("email") and emptyEnrolments and Some(ggCredentials)
         )
 
         mockHasSubscription()(Right(None))
@@ -295,7 +295,9 @@ class AuthenticatedActionWithRetrievedDataSpec
         val result = performAction(FakeRequest())
 
         status(result)        shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(UserType.OrganisationUnregisteredTrust)
+        contentAsJson(result) shouldBe Json.toJson(
+          UserType.OrganisationUnregisteredTrust(Some(Email("email")), GGCredId(ggCredentials.providerId))
+        )
       }
 
       "show an error page" when {

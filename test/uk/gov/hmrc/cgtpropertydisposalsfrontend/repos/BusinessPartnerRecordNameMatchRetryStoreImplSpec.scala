@@ -25,6 +25,8 @@ import play.api.libs.json.{JsObject, JsString}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cache.model.{Cache, Id}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.UnsuccessfulNameMatchAttempts
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.IndividualNameMatchDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.sample
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.BusinessPartnerRecordNameMatchRetryStoreSpec._
@@ -46,7 +48,7 @@ object BusinessPartnerRecordNameMatchRetryStoreSpec {
 
   class TestEnvironment {
     val ggCredId             = sample[GGCredId]
-    val unsuccessfulAttempts = sample[UnsuccessfulNameMatchAttempts]
+    val unsuccessfulAttempts = sample[UnsuccessfulNameMatchAttempts[IndividualNameMatchDetails]]
   }
 
 }
@@ -77,7 +79,7 @@ class BusinessPartnerRecordNameMatchRetryStoreImplSpec
     }
 
     "return no retry data if there is no data in mongo" in new TestEnvironment {
-      await(retryStore.get(sample[GGCredId])) should be(Right(None))
+      await(retryStore.get[IndividualNameMatchDetails](sample[GGCredId])) should be(Right(None))
     }
 
     "return an error" when {
@@ -87,7 +89,7 @@ class BusinessPartnerRecordNameMatchRetryStoreImplSpec
         val create: Future[DatabaseUpdate[Cache]] =
           retryStore.cacheRepository.createOrUpdate(Id(ggCredId.value), retryStore.sessionKey, invalidData)
         await(create).writeResult.inError      shouldBe false
-        await(retryStore.get(ggCredId)).isLeft shouldBe true
+        await(retryStore.get[IndividualNameMatchDetails](ggCredId)).isLeft shouldBe true
       }
 
     }
@@ -108,7 +110,7 @@ class BusinessPartnerRecordNameMatchRetryStoreFailureSpec extends WordSpec with 
     "return an error" when mongoIsBrokenAndAttemptingTo {
 
       "insert a record" in new TestEnvironment {
-        await(retryStore.get(ggCredId)).isLeft shouldBe true
+        await(retryStore.get[IndividualNameMatchDetails](ggCredId)).isLeft shouldBe true
       }
 
       "read a record" in new TestEnvironment {

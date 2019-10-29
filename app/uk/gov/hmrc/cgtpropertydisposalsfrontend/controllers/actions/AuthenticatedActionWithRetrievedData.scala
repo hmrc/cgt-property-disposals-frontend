@@ -108,8 +108,10 @@ class AuthenticatedActionWithRetrievedData @Inject()(
                         )
                     }
 
-                  case _ @_ ~ Some(AffinityGroup.Organisation) ~ _ ~ _ ~ maybeEmail ~ enrolments ~ _ =>
-                    handleOrganisation(request, enrolments, maybeEmail)
+                  case _ @_ ~ Some(AffinityGroup.Organisation) ~ _ ~ _ ~ maybeEmail ~ enrolments ~ creds =>
+                    withGGCredentials(creds, request){ gCredId =>
+                      handleOrganisation(request, enrolments, maybeEmail, ggCredId)
+                    }
 
                   case _ @_ ~ otherAffinityGroup ~ _ ~ _ ~ _ ~ _ ~ creds =>
                     logger.warn(s"Got request for unsupported affinity group $otherAffinityGroup")
@@ -158,12 +160,15 @@ class AuthenticatedActionWithRetrievedData @Inject()(
   private def handleOrganisation[A](
     request: MessagesRequest[A],
     enrolments: Enrolments,
-    email: Option[String]
+    email: Option[String],
+    ggCredId: GGCredId
   ): Either[Result, AuthenticatedRequestWithRetrievedData[A]] =
     // work out if it is an organisation or not
     enrolments.getEnrolment("HMRC-TERS-ORG") match {
       case None =>
-        Right(AuthenticatedRequestWithRetrievedData(UserType.OrganisationUnregisteredTrust, request))
+        Right(AuthenticatedRequestWithRetrievedData(
+          UserType.OrganisationUnregisteredTrust(email.map(Email(_)), ggCredId), request
+        ))
 
       case Some(trustEnrolment) =>
         trustEnrolment

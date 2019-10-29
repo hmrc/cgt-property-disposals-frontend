@@ -23,6 +23,7 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
+import play.api.libs.json.{Reads, Writes}
 import play.api.mvc.Result
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
@@ -31,6 +32,8 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.IndividualNameMatchDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.{BusinessPartnerRecord, NameMatchError, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
@@ -68,31 +71,31 @@ class InsufficientConfidenceLevelControllerSpec
 
   def mockGetNumberOfUnsuccessfulAttempts(
     ggCredId: GGCredId
-  )(result: Either[NameMatchError, Option[UnsuccessfulNameMatchAttempts]]) =
+  )(result: Either[NameMatchError[IndividualNameMatchDetails], Option[UnsuccessfulNameMatchAttempts[IndividualNameMatchDetails]]]) =
     (mockBprNameMatchService
-      .getNumberOfUnsuccessfulAttempts(_: GGCredId)(_: ExecutionContext))
-      .expects(ggCredId, *)
+      .getNumberOfUnsuccessfulAttempts[IndividualNameMatchDetails](_: GGCredId)(_: Reads[IndividualNameMatchDetails], _: ExecutionContext))
+      .expects(ggCredId, *, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockAttemptNameMatch(
     sautr: SAUTR,
     name: IndividualName,
     ggCredId: GGCredId,
-    previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts]
-  )(result: Either[NameMatchError, BusinessPartnerRecord]) =
+    previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts[IndividualNameMatchDetails]]
+  )(result: Either[NameMatchError[IndividualNameMatchDetails], BusinessPartnerRecord]) =
     (
       mockBprNameMatchService
-        .attemptBusinessPartnerRecordNameMatch(
-          _: SAUTR,
-          _: IndividualName,
+        .attemptBusinessPartnerRecordNameMatch[IndividualNameMatchDetails](
+          _: IndividualNameMatchDetails,
           _: GGCredId,
-          _: Option[UnsuccessfulNameMatchAttempts]
+          _: Option[UnsuccessfulNameMatchAttempts[IndividualNameMatchDetails]]
         )(
+          _: Writes[IndividualNameMatchDetails],
           _: ExecutionContext,
           _: HeaderCarrier
         )
       )
-      .expects(sautr, name, ggCredId, previousUnsuccessfulNameMatchAttempts, *, *)
+      .expects(IndividualNameMatchDetails(name, sautr), ggCredId, previousUnsuccessfulNameMatchAttempts, *, *, *)
       .returning(EitherT.fromEither[Future](result))
 
   def session(subscriptionStatus: SubscriptionStatus) =
@@ -601,7 +604,7 @@ class InsufficientConfidenceLevelControllerSpec
         }
 
         "the user has indicated that they have no NINO but they do have an SA UTR and they have " +
-          "previously made unsuccesful attempts to do a name match" in {
+          "previously made unsuccessful attempts to do a name match" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -618,7 +621,7 @@ class InsufficientConfidenceLevelControllerSpec
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
               Right(
                 Some(
-                  UnsuccessfulNameMatchAttempts(1, 2, sample[IndividualName], sample[SAUTR])
+                  UnsuccessfulNameMatchAttempts(1, 2, sample[IndividualNameMatchDetails])
                 )
               )
             )
@@ -695,7 +698,7 @@ class InsufficientConfidenceLevelControllerSpec
         session(TryingToGetIndividualsFootprint(Some(false), Some(true), None, ggCredId))
 
       val previousUnsuccessfulNameMatchAttempt =
-        UnsuccessfulNameMatchAttempts(1, 3, sample[IndividualName], sample[SAUTR])
+        UnsuccessfulNameMatchAttempts(1, 3, sample[IndividualNameMatchDetails])
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterSautrAndNameSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
@@ -709,7 +712,7 @@ class InsufficientConfidenceLevelControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(expectedSessionData))))
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
-              Right(Some(UnsuccessfulNameMatchAttempts(1, 2, validName, validSautr)))
+              Right(Some(UnsuccessfulNameMatchAttempts(1, 2, IndividualNameMatchDetails(validName, validSautr))))
             )
           }
       )
@@ -761,7 +764,7 @@ class InsufficientConfidenceLevelControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(expectedSessionData))))
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
-              Right(Some(UnsuccessfulNameMatchAttempts(1, 2, validName, validSautr)))
+              Right(Some(UnsuccessfulNameMatchAttempts(1, 2, IndividualNameMatchDetails(validName, validSautr))))
             )
           }
 
@@ -775,7 +778,7 @@ class InsufficientConfidenceLevelControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(expectedSessionData))))
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
-              Right(Some(UnsuccessfulNameMatchAttempts(1, 2, validName, validSautr)))
+              Right(Some(UnsuccessfulNameMatchAttempts(1, 2, IndividualNameMatchDetails(validName, validSautr))))
             )
           }
 
@@ -793,7 +796,7 @@ class InsufficientConfidenceLevelControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(expectedSessionData))))
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
-              Right(Some(UnsuccessfulNameMatchAttempts(1, 2, validName, validSautr)))
+              Right(Some(UnsuccessfulNameMatchAttempts(1, 2, IndividualNameMatchDetails(validName, validSautr))))
             )
           }
 
@@ -813,7 +816,7 @@ class InsufficientConfidenceLevelControllerSpec
             mockGetSession(Future.successful(Right(Some(expectedSessionData))))
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(Some(previousUnsuccessfulNameMatchAttempt)))
             mockAttemptNameMatch(validSautr, validName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
-              Left(NameMatchError.NameMatchFailed(UnsuccessfulNameMatchAttempts(2, 3, validName, validSautr)))
+              Left(NameMatchError.NameMatchFailed(UnsuccessfulNameMatchAttempts(2, 3, IndividualNameMatchDetails(validName, validSautr))))
             )
           }
 
@@ -963,63 +966,69 @@ class InsufficientConfidenceLevelControllerSpec
 
       }
 
-      "handling requests to display the too many attempts page" must {
+    }
 
-        def performAction() = controller.tooManyAttempts()(FakeRequest())
+    "handling requests to display the too many attempts page" must {
 
-        behave like commonBehaviour(performAction)
+      def performAction() = controller.tooManyAttempts()(FakeRequest())
 
-        "display an error page" when {
+      val ggCredId = sample[GGCredId]
 
-          "there is an error trying to get the number of unsuccessful name match attempts" in {
+      val expectedSessionData =
+        session(TryingToGetIndividualsFootprint(Some(false), Some(true), None, ggCredId))
+
+
+      behave like commonBehaviour(performAction)
+
+      "display an error page" when {
+
+        "there is an error trying to get the number of unsuccessful name match attempts" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(NameMatchError.BackendError(Error(""))))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
+        "display the too many attempts page" when {
+
+          "the user has attempted a name match too many times" in {
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(Future.successful(Right(Some(expectedSessionData))))
-              mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(NameMatchError.BackendError(Error(""))))
+              mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(NameMatchError.TooManyUnsuccessfulAttempts()))
             }
 
-            checkIsTechnicalErrorPage(performAction())
+            val result = performAction()
+            status(result)          shouldBe OK
+            contentAsString(result) should include(message("enterSaUtr.tooManyAttempts.title"))
+          }
+        }
+
+        "redirect to the enter sautr and name page" when {
+
+          "the user has attempted a name match but they still have attempts left" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+              mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
+                Right(Some(UnsuccessfulNameMatchAttempts(1, 2, sample[IndividualNameMatchDetails])))
+              )
+            }
+
+            checkIsRedirect(performAction(), routes.InsufficientConfidenceLevelController.enterSautrAndName())
           }
 
-          "display the too many attempts page" when {
-
-            "the user has attempted a name match too many times" in {
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(Future.successful(Right(Some(expectedSessionData))))
-                mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(NameMatchError.TooManyUnsuccessfulAttempts()))
-              }
-
-              val result = performAction()
-              status(result)          shouldBe OK
-              contentAsString(result) should include(message("enterSaUtr.tooManyAttempts.title"))
-            }
-          }
-
-          "redirect to the enter sautr and name page" when {
-
-            "the user has attempted a name match but they still have attempts left" in {
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(Future.successful(Right(Some(expectedSessionData))))
-                mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
-                  Right(Some(UnsuccessfulNameMatchAttempts(1, 2, sample[IndividualName], sample[SAUTR])))
-                )
-              }
-
-              checkIsRedirect(performAction(), routes.InsufficientConfidenceLevelController.enterSautrAndName())
+          "the user has not attempted a name match" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+              mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(None))
             }
 
-            "the user has not attempted a name match" in {
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(Future.successful(Right(Some(expectedSessionData))))
-                mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(None))
-              }
-
-              checkIsRedirect(performAction(), routes.InsufficientConfidenceLevelController.enterSautrAndName())
-            }
-
+            checkIsRedirect(performAction(), routes.InsufficientConfidenceLevelController.enterSautrAndName())
           }
 
         }

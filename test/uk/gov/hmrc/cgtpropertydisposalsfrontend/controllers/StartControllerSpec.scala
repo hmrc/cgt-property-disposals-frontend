@@ -106,7 +106,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
       "handling non trust organisations" must {
 
         val determiningIfOrganisationIsTrustSession =
-          SessionData.empty.copy(journeyStatus = Some(SubscriptionStatus.DeterminingIfOrganisationIsTrust(None, None)))
+          SessionData.empty.copy(journeyStatus = Some(SubscriptionStatus.DeterminingIfOrganisationIsTrust(ggCredId, None, None)))
 
         lazy val needMoreDetailsContinueUrl = routes.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrust().url
 
@@ -135,9 +135,11 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
         }
 
-        "redirect to the register trust page" when {
+        "redirect to the 'we need more details' page with a continue to the 'are you " +
+          "reporting for a trust' page " when {
+
           "the session already has the relevant journey status in it" in {
-            val journey = DeterminingIfOrganisationIsTrust(Some(true), Some(true))
+            val journey = DeterminingIfOrganisationIsTrust(ggCredId, Some(true), Some(true))
             val sessionData = SessionData.empty.copy(journeyStatus = Some(journey))
             inSequence {
               mockAuthWithAllRetrievals(
@@ -907,7 +909,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 mockAuthWithAllTrustRetrievals(sautr, None)
                 mockHasSubscription()(Right(None))
                 mockGetSession(Future.successful(Right(None)))
-                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(sautr))(Left(Error("")))
+                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(Right(sautr), None))(Left(Error("")))
               }
 
               checkIsTechnicalErrorPage(performAction())
@@ -918,7 +920,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 mockAuthWithAllTrustRetrievals(sautr, None)
                 mockHasSubscription()(Right(None))
                 mockGetSession(Future.successful(Right(None)))
-                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(sautr))(
+                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(Right(sautr), None))(
                   Right(BusinessPartnerRecordResponse(Some(bpr.copy(name = Right(IndividualName("", ""))))))
                 )
               }
@@ -931,7 +933,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 mockAuthWithAllTrustRetrievals(sautr, None)
                 mockHasSubscription()(Right(None))
                 mockGetSession(Future.successful(Right(None)))
-                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(sautr))(
+                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(Right(sautr), None))(
                   Right(BusinessPartnerRecordResponse(Some(bpr)))
                 )
                 mockStoreSession(
@@ -947,7 +949,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 mockAuthWithAllTrustRetrievals(sautr, None)
                 mockHasSubscription()(Right(None))
                 mockGetSession(Future.successful(Right(None)))
-                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(sautr))(
+                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(Right(sautr), None))(
                   Right(BusinessPartnerRecordResponse(None))
                 )
               }
@@ -964,7 +966,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 mockAuthWithAllTrustRetrievals(sautr, None)
                 mockHasSubscription()(Right(None))
                 mockGetSession(Future.successful(Right(None)))
-                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(sautr))(
+                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(Right(sautr), None))(
                   Right(BusinessPartnerRecordResponse(Some(bpr)))
                 )
                 mockStoreSession(
@@ -981,7 +983,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 mockAuthWithAllTrustRetrievals(sautr, Some("email"))
                 mockHasSubscription()(Right(None))
                 mockGetSession(Future.successful(Right(None)))
-                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(sautr))(
+                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(Right(sautr), None))(
                   Right(BusinessPartnerRecordResponse(Some(bpr.copy(emailAddress = None))))
                 )
                 mockStoreSession(
@@ -1019,6 +1021,55 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               }
               checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
             }
+
+            "the session data indicates there is subscription data missing and there is now enough data to proceed " +
+              "for a trust without a trust enrolment" in {
+              val session = SessionData.empty.copy(journeyStatus = Some(SubscriptionMissingData(bpr)))
+              val updatedSession =
+                SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(trustSubscriptionDetails)))
+
+              inSequence {
+                mockAuthWithAllRetrievals(
+                  ConfidenceLevel.L50,
+                  Some(AffinityGroup.Organisation),
+                  None,
+                  None,
+                  Some("email"),
+                  Set.empty,
+                  Some(retrievedGGCredId))
+                mockHasSubscription()(Right(None))
+                mockGetSession(Future.successful(Right(Some(session))))
+                mockStoreSession(updatedSession)(Future.successful(Right(())))
+              }
+
+              checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
+            }
+
+
+          }
+
+          "redirect to the enter email page" when {
+
+            "the session data indicates there is subscription data missing and no email can be found " +
+              "for a trust without a trust enrolment" in {
+              val session = SessionData.empty.copy(journeyStatus = Some(SubscriptionMissingData(bpr.copy(emailAddress = None))))
+
+              inSequence {
+                mockAuthWithAllRetrievals(
+                  ConfidenceLevel.L50,
+                  Some(AffinityGroup.Organisation),
+                  None,
+                  None,
+                  None,
+                  Set.empty,
+                  Some(retrievedGGCredId))
+                mockHasSubscription()(Right(None))
+                mockGetSession(Future.successful(Right(Some(session))))
+              }
+
+              checkIsRedirect(performAction(), email.routes.SubscriptionEnterEmailController.enterEmail())
+            }
+
           }
 
           "redirect to the we need more details page" when {
@@ -1030,7 +1081,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 mockAuthWithAllTrustRetrievals(sautr, None)
                 mockHasSubscription()(Right(None))
                 mockGetSession(Future.successful(Right(None)))
-                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(sautr))(
+                mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(Right(sautr), None))(
                   Right(BusinessPartnerRecordResponse(Some(bprWithNoEmail)))
                 )
                 mockStoreSession(

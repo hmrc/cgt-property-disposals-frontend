@@ -14,31 +14,31 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids
 
 import play.api.data.Forms.nonEmptyText
 import play.api.data.Mapping
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationResult}
 import play.api.libs.json.{Format, Json}
 
-final case class TrustName(value: String) extends AnyVal
+final case class TRN(value: String) extends AnyVal
 
-object TrustName {
+object TRN {
 
-  implicit val format: Format[TrustName] = Json.format[TrustName]
+  implicit val format: Format[TRN] = Json.format[TRN]
 
   val mapping: Mapping[String] = {
-    val regexPredicate = "^[a-zA-Z0-9 &,`\\-\\'\\.^]{1,105}$".r.pattern.asPredicate()
+    val regexPredicate = "^[a-zA-Z0-9]{15}$".r.pattern.asPredicate()
 
-    def validateTrustName(s: String): ValidationResult =
-      if (s.length > 105) Invalid("error.tooLong")
+    def validateTrn(s: String): ValidationResult =
+      if (s.length > 15) Invalid("error.tooLong")
+      else if (s.length < 15) Invalid("error.tooShort")
       else if (!regexPredicate.test(s)) Invalid("error.pattern")
       else Valid
 
     nonEmptyText
       .transform[String](_.trim, identity)
-      .verifying(Constraint[String](validateTrustName(_)))
+      .verifying(Constraint[String](validateTrn(_)))
   }
-
 
 }

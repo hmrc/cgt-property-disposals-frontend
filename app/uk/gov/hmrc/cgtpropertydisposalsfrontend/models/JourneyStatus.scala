@@ -33,6 +33,7 @@ object JourneyStatus {
 
     // user with affinity organisation is trying to subscribe without having a trust enrolment
     final case class DeterminingIfOrganisationIsTrust(
+      ggCredId: GGCredId,
       isReportingForTrust: Option[Boolean],
       hasTrn: Option[Boolean]
     ) extends SubscriptionStatus
