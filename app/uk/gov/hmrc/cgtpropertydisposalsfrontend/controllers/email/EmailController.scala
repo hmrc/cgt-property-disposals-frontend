@@ -162,9 +162,9 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
                 Redirect(emailVerifiedCall)
               } else {
                 val email = Email(emailToBeVerified.email.value)
-                val result: EitherT[Future, Result, Unit] = for {
-                  journey <- updateEmail(journey, email).leftMap(e => errorHandler.errorResult())
-                  _ <- EitherT.liftF(updateSession(sessionStore, request) { s =>
+                val result = for {
+                  journey <- updateEmail(journey, email)
+                  _ <- EitherT[Future, Error, Unit](updateSession(sessionStore, request) { s =>
                         s.copy(
                           journeyStatus     = Some(journey),
                           emailToBeVerified = Some(emailToBeVerified.copy(verified = true))

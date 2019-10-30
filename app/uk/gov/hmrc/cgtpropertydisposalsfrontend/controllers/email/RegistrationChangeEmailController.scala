@@ -34,7 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, models, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import cats.implicits._
+import cats.instances.future._
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton

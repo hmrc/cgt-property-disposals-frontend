@@ -97,6 +97,13 @@ GET  /subscription/amend-details/check-your-inbox       uk.gov.hmrc.cgtpropertyd
 GET  /subscription/amend-details/verify-email           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email.SubscriptionChangeEmailController.verifyEmail(p: java.util.UUID)
 GET  /subscription/amend-details/email-verified         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email.SubscriptionChangeEmailController.emailVerified()
 
+#### Change email after subscription
+GET  /subscribed/amend-details/change-email           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email.SubscribedChangeEmailController.enterEmail()
+POST /subscribed/amend-details/change-email           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email.SubscribedChangeEmailController.enterEmailSubmit()
+GET  /subscribed/amend-details/check-your-inbox       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email.SubscribedChangeEmailController.checkYourInbox()
+GET  /subscribed/amend-details/verify-email           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email.SubscribedChangeEmailController.verifyEmail(p: java.util.UUID)
+GET  /subscribed/amend-details/email-verified         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email.SubscribedChangeEmailController.emailVerified()
+
 ### Change contact name
 GET  /subscription/amend-details/enter-contact-name      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.ContactNameController.enterContactName()
 POST /subscription/amend-details/enter-contact-name      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.ContactNameController.enterContactNameSubmit()

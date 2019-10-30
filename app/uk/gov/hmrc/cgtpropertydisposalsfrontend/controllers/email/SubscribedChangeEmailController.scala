@@ -19,30 +19,32 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email
 import java.util.UUID
 
 import cats.data.EitherT
+import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, RegistrationReady}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{EmailVerificationService, SubscriptionService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import cats.instances.future._
+
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class RegistrationEnterEmailController @Inject()(
+class SubscribedChangeEmailController @Inject()(
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   val sessionStore: SessionStore,
   val emailVerificationService: EmailVerificationService,
+  val subscriptionService: SubscriptionService,
   val uuidGenerator: UUIDGenerator,
   val errorHandler: ErrorHandler,
   cc: MessagesControllerComponents,
@@ -54,36 +56,41 @@ class RegistrationEnterEmailController @Inject()(
     with WithAuthAndSessionDataAction
     with Logging
     with SessionUpdates
-    with EmailController[IndividualMissingEmail, RegistrationReady] {
+    with EmailController[Subscribed, Subscribed] {
 
-  override val isAmendJourney: Boolean = false
+  override val isAmendJourney: Boolean = true
 
-  override def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, IndividualMissingEmail)] =
+  override def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, Subscribed)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((sessionData, i: IndividualMissingEmail)) => Right(sessionData -> i)
-      case _                                              => Left(Redirect(controllers.routes.StartController.start()))
+      case Some((sessionData, s: Subscribed)) => Right(sessionData -> s)
+      case _                                  => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   override def validVerificationCompleteJourney(
     request: RequestWithSessionData[_]
-  ): Either[Result, (SessionData, RegistrationReady)] =
-    request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((sessionData, r: RegistrationReady)) => Right(sessionData -> r)
-      case _                                         => Left(Redirect(controllers.routes.StartController.start()))
-    }
+  ): Either[Result, (SessionData, Subscribed)] =
+    validJourney(request)
 
-  override def updateEmail(journey: IndividualMissingEmail, email: Email)(implicit hc : HeaderCarrier): EitherT[Future, Error, RegistrationReady] =
-    EitherT.rightT[Future, Error](RegistrationReady(RegistrationDetails(journey.name, email, journey.address)))
+  override def updateEmail(journey: Subscribed, email: Email)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, Subscribed] = {
+    val journeyWithUpdatedEmail = journey.subscribedDetails.copy(emailAddress = email)
+    subscriptionService
+      .updateSubscribedDetails(journeyWithUpdatedEmail)
+      .map(_ => journey.copy(journeyWithUpdatedEmail))
+  }
 
-  override def name(journeyStatus: IndividualMissingEmail): ContactName =
-    ContactName(journeyStatus.name.makeSingleName())
-  override lazy protected val backLinkCall: Option[Call]    = None
-  override lazy protected val enterEmailCall: Call          = routes.RegistrationEnterEmailController.enterEmail()
-  override lazy protected val enterEmailSubmitCall: Call    = routes.RegistrationEnterEmailController.enterEmailSubmit()
-  override lazy protected val checkYourInboxCall: Call      = routes.RegistrationEnterEmailController.checkYourInbox()
-  override lazy protected val verifyEmailCall: UUID => Call = routes.RegistrationEnterEmailController.verifyEmail
-  override lazy protected val emailVerifiedCall: Call       = routes.RegistrationEnterEmailController.emailVerified()
+  override def name(journeyStatus: Subscribed): ContactName =
+    journeyStatus.subscribedDetails.contactName
 
-  override lazy protected val emailVerifiedContinueCall: Call =
-    controllers.routes.RegistrationController.checkYourAnswers()
+  override lazy protected val backLinkCall: Option[Call] = Some(
+    controllers.routes.HomeController.homepage()
+  )
+  override lazy protected val enterEmailCall: Call            = routes.SubscribedChangeEmailController.enterEmail()
+  override lazy protected val enterEmailSubmitCall: Call      = routes.SubscribedChangeEmailController.enterEmailSubmit()
+  override lazy protected val checkYourInboxCall: Call        = routes.SubscribedChangeEmailController.checkYourInbox()
+  override lazy protected val verifyEmailCall: UUID => Call   = routes.SubscribedChangeEmailController.verifyEmail
+  override lazy protected val emailVerifiedCall: Call         = routes.SubscribedChangeEmailController.emailVerified()
+  override lazy protected val emailVerifiedContinueCall: Call = controllers.routes.HomeController.homepage()
+
 }

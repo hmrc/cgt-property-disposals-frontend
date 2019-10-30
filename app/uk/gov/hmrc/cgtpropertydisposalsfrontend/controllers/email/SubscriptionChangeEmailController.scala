@@ -22,15 +22,16 @@ import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Call, MessagesControllerComponents, Result}
+import shapeless.{Lens, lens}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, JourneyStatus, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{EmailVerificationService, SubscriptionService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -44,7 +45,6 @@ class SubscriptionChangeEmailController @Inject()(
   val sessionDataAction: SessionDataAction,
   val sessionStore: SessionStore,
   val emailVerificationService: EmailVerificationService,
-  val subscriptionService: SubscriptionService,
   val uuidGenerator: UUIDGenerator,
   val errorHandler: ErrorHandler,
   cc: MessagesControllerComponents,
@@ -56,30 +56,31 @@ class SubscriptionChangeEmailController @Inject()(
     with WithAuthAndSessionDataAction
     with Logging
     with SessionUpdates
-    with EmailController[Subscribed, Subscribed] {
+    with EmailController[SubscriptionReady, SubscriptionReady] {
 
   override val isAmendJourney: Boolean = true
 
-  override def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, Subscribed)] =
+  override def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, SubscriptionReady)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((sessionData, s: Subscribed)) => Right(sessionData -> s)
-      case _                                  => Left(Redirect(controllers.routes.StartController.start()))
+      case Some((sessionData, s: SubscriptionReady)) => Right(sessionData -> s)
+      case _                                         => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   override def validVerificationCompleteJourney(
     request: RequestWithSessionData[_]
-  ): Either[Result, (SessionData, Subscribed)] =
+  ): Either[Result, (SessionData, SubscriptionReady)] =
     validJourney(request)
 
-  override def updateEmail(journey: Subscribed, email: Email)(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, Subscribed] =
-    subscriptionService
-      .updateSubscribedDetails(journey.subscribedDetails)
-      .map(_ => journey)
+  val subscriptionReadyEmailLens: Lens[SubscriptionReady, Email] =
+    lens[SubscriptionReady].subscriptionDetails.emailAddress
 
-  override def name(journeyStatus: Subscribed): ContactName =
-    journeyStatus.subscribedDetails.contactName
+  override def updateEmail(journey: SubscriptionReady, email: Email)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, SubscriptionReady] =
+    EitherT.rightT[Future, Error](subscriptionReadyEmailLens.set(journey)(email))
+
+  override def name(journeyStatus: SubscriptionReady): ContactName =
+    journeyStatus.subscriptionDetails.contactName
 
   override lazy protected val backLinkCall: Option[Call] = Some(
     controllers.routes.SubscriptionController.checkYourDetails()
