@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email
 
 import java.util.UUID
 
+import cats.data.EitherT
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
@@ -31,9 +32,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-
-import scala.concurrent.ExecutionContext
+import cats.implicits._
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class RegistrationEnterEmailController @Inject()(
@@ -70,8 +72,8 @@ class RegistrationEnterEmailController @Inject()(
       case _                                         => Left(Redirect(controllers.routes.StartController.start()))
     }
 
-  override def updateEmail(journey: IndividualMissingEmail, email: Email): RegistrationReady =
-    RegistrationReady(RegistrationDetails(journey.name, email, journey.address))
+  override def updateEmail(journey: IndividualMissingEmail, email: Email)(implicit hc : HeaderCarrier): EitherT[Future, Error, RegistrationReady] =
+    EitherT.rightT[Future, Error](RegistrationReady(RegistrationDetails(journey.name, email, journey.address)))
 
   override def name(journeyStatus: IndividualMissingEmail): ContactName =
     ContactName(journeyStatus.name.makeSingleName())

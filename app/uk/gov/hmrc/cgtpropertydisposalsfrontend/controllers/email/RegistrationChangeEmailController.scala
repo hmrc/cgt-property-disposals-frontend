@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email
 
 import java.util.UUID
 
+import cats.data.EitherT
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
@@ -30,10 +31,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, models, views}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-
-import scala.concurrent.ExecutionContext
+import cats.implicits._
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class RegistrationChangeEmailController @Inject()(
@@ -69,8 +71,8 @@ class RegistrationChangeEmailController @Inject()(
   ): Either[Result, (SessionData, RegistrationReady)] =
     validJourney(request)
 
-  override def updateEmail(journey: RegistrationReady, email: Email): RegistrationReady =
-    journey.copy(registrationDetails = journey.registrationDetails.copy(emailAddress = email))
+  override def updateEmail(journey: RegistrationReady, email: Email)(implicit hc: HeaderCarrier): EitherT[Future, Error, RegistrationReady] =
+    EitherT.rightT[Future, Error](journey.copy(registrationDetails = journey.registrationDetails.copy(emailAddress = email)))
 
   override def name(journeyStatus: RegistrationReady): ContactName =
     ContactName(journeyStatus.registrationDetails.name.makeSingleName())

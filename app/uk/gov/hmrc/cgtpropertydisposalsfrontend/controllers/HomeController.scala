@@ -33,7 +33,7 @@ class HomeController @Inject()(
   val sessionDataAction: SessionDataAction,
   cc: MessagesControllerComponents,
   manageYourDetailsPage: views.html.account.manage_your_details
-                              )(implicit viewConfig: ViewConfig)
+)(implicit viewConfig: ViewConfig)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with SessionUpdates
