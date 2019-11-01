@@ -19,7 +19,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email
 import java.util.UUID
 
 import cats.data.EitherT
-import cats.instances.future._
 import org.scalacheck.ScalacheckShapeless._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
@@ -28,46 +27,40 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, sample}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class SubscriptionChangeEmailControllerSpec
-    extends EmailControllerSpec[SubscriptionReady, SubscriptionReady]
+class SubscribedChangeEmailControllerSpec
+    extends EmailControllerSpec[Subscribed, Subscribed]
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
   override val isAmendJourney: Boolean = true
 
-  override val validJourneyStatus: SubscriptionReady =
-    sample[SubscriptionReady]
+  override val validJourneyStatus: Subscribed = sample[Subscribed]
 
-  override val validVerificationCompleteJourneyStatus: SubscriptionReady =
-    validJourneyStatus
+  override val validVerificationCompleteJourneyStatus: Subscribed = validJourneyStatus
 
-  override def updateEmail(journey: SubscriptionReady, email: Email)(
+  override lazy val controller: SubscribedChangeEmailController = instanceOf[SubscribedChangeEmailController]
+
+  override def updateEmail(journey: Subscribed, email: Email)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, SubscriptionReady] =
-    EitherT.rightT[Future, Error](
-      journey.copy(subscriptionDetails = journey.subscriptionDetails.copy(emailAddress = email))
-    )
-
-  override lazy val controller: SubscriptionChangeEmailController = instanceOf[SubscriptionChangeEmailController]
+  ): EitherT[Future, Error, Subscribed] = controller.updateEmail(journey, email)
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
       performAction, {
-        case _: SubscriptionReady => true
-        case _                    => false
+        case _: Subscribed => true
+        case _             => false
       }
     )
 
-  "SubscriptionChangeEmailController" when {
+  "SubscribedChangeEmailController" when {
 
     "handling requests to display the enter email page" must {
 
@@ -90,9 +83,9 @@ class SubscriptionChangeEmailControllerSpec
       behave like redirectToStartBehaviour(() => performAction("", ""))
       behave like enterEmailSubmit(
         performAction,
-        validJourneyStatus.subscriptionDetails.contactName,
-        routes.SubscriptionChangeEmailController.verifyEmail,
-        routes.SubscriptionChangeEmailController.checkYourInbox()
+        validJourneyStatus.subscribedDetails.contactName,
+        routes.SubscribedChangeEmailController.verifyEmail,
+        routes.SubscribedChangeEmailController.checkYourInbox()
       )
     }
 
@@ -105,8 +98,8 @@ class SubscriptionChangeEmailControllerSpec
 
       behave like checkYourInboxPage(
         performAction,
-        routes.SubscriptionChangeEmailController.enterEmail(),
-        routes.SubscriptionChangeEmailController.enterEmail().url
+        routes.SubscribedChangeEmailController.enterEmail(),
+        routes.SubscribedChangeEmailController.enterEmail().url
       )
     }
 
@@ -119,13 +112,13 @@ class SubscriptionChangeEmailControllerSpec
 
       behave like verifyEmail(
         performAction,
-        routes.SubscriptionChangeEmailController.enterEmail(),
-        routes.SubscriptionChangeEmailController.emailVerified()
+        routes.SubscribedChangeEmailController.enterEmail(),
+        routes.SubscribedChangeEmailController.emailVerified()
       )
 
     }
 
-    "handling requests to display the email verfied page" must {
+    "handling requests to display the email verified page" must {
 
       def performAction(): Future[Result] =
         controller.emailVerified()(FakeRequest())
@@ -134,10 +127,9 @@ class SubscriptionChangeEmailControllerSpec
 
       behave like emailVerifiedPage(
         performAction,
-        controllers.routes.SubscriptionController.checkYourDetails(),
-        routes.SubscriptionChangeEmailController.enterEmail()
+        controllers.routes.HomeController.homepage(),
+        routes.SubscribedChangeEmailController.enterEmail()
       )
     }
   }
-
 }

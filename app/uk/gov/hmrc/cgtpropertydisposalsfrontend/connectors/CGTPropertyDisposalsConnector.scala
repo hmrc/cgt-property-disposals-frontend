@@ -72,7 +72,7 @@ class CGTPropertyDisposalsConnectorImpl @Inject()(http: HttpClient, servicesConf
 
   val subscriptionStatusUrl: String = s"$baseUrl/check-subscription-status"
 
-  def subscriptionUpdateUrl(cgtReference: CgtReference): String = s"$baseUrl/subscription/${cgtReference.value} "
+  val subscriptionUpdateUrl: String = s"$baseUrl/subscription"
 
   def getSubscribedDetailsUrl(cgtReference: CgtReference): String = s"$baseUrl/subscription/${cgtReference.value}"
 
@@ -104,7 +104,7 @@ class CGTPropertyDisposalsConnectorImpl @Inject()(http: HttpClient, servicesConf
   override def updateSubscribedDetails(subscribedDetails: SubscribedDetails)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] =
-    makeCall(_.put(subscriptionUpdateUrl(subscribedDetails.cgtReference), subscribedDetails))
+    makeCall(_.put(subscriptionUpdateUrl, subscribedDetails))
 
   private def makeCall(call: HttpClient => Future[HttpResponse]): EitherT[Future, Error, HttpResponse] =
     EitherT[Future, Error, HttpResponse](

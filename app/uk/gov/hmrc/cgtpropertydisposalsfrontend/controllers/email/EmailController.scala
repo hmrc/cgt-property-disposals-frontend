@@ -173,7 +173,10 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
                 } yield ()
 
                 result.fold(
-                  _ => errorHandler.errorResult(),
+                  error => {
+                    logger.warn(s"Could not update email: $error")
+                    errorHandler.errorResult()
+                  },
                   _ => Redirect(emailVerifiedCall)
                 )
               }

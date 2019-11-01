@@ -76,7 +76,7 @@
   @cyaRow(
     messages("subscription.cyaLabel.email"),
     Html(details.emailAddress.value),
-    Some(cyaChange(messages("subscription.cyaChange.email"), "/cgt-property-disposals/subscribed/amend-details/change-email")))
+    Some(cyaChange(messages("subscription.cyaChange.email"), email.routes.SubscribedChangeEmailController.enterEmail().url))
    )
   @cyaRow(
     messages("account.manageYourDetails.telephone"),

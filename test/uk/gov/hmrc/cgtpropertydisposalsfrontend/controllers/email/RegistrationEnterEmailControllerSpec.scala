@@ -18,6 +18,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email
 
 import java.util.UUID
 
+import cats.data.EitherT
+import cats.instances.future._
 import org.scalacheck.ScalacheckShapeless._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
@@ -28,8 +30,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, RegistrationDetails, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, RegistrationDetails, sample}
+import uk.gov.hmrc.http.HeaderCarrier
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class RegistrationEnterEmailControllerSpec
@@ -45,8 +49,10 @@ class RegistrationEnterEmailControllerSpec
   override val validVerificationCompleteJourneyStatus: RegistrationReady =
     sample[RegistrationReady]
 
-  override def updateEmail(journey: IndividualMissingEmail, email: Email): RegistrationReady =
-    RegistrationReady(RegistrationDetails(journey.name, email, journey.address))
+  override def updateEmail(journey: IndividualMissingEmail, email: Email)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, RegistrationReady] =
+    EitherT.rightT[Future, Error](RegistrationReady(RegistrationDetails(journey.name, email, journey.address)))
 
   override lazy val controller: RegistrationEnterEmailController = instanceOf[RegistrationEnterEmailController]
 

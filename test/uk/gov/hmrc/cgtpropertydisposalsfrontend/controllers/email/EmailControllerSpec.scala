@@ -30,8 +30,8 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, EmailToBeVerified, Error, JourneyStatus, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, EmailToBeVerified, Error, JourneyStatus, SessionData, SubscribedDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse
@@ -50,7 +50,9 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
 
   val validVerificationCompleteJourneyStatus: VerificationCompleteJourney
 
-  def updateEmail(journey: Journey, email: Email): VerificationCompleteJourney
+  def updateEmail(journey: Journey, email: Email)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, VerificationCompleteJourney]
 
   val controller: EmailController[Journey, VerificationCompleteJourney]
 
@@ -69,13 +71,21 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
     )
 
   def mockEmailVerification(
-                             expectedEmail: Email,
-                             expectedName: ContactName,
-                             expectedContinue: Call
+    expectedEmail: Email,
+    expectedName: ContactName,
+    expectedContinue: Call
   )(result: Either[Error, EmailVerificationResponse]) =
     (mockService
       .verifyEmail(_: Email, _: ContactName, _: Call)(_: HeaderCarrier))
       .expects(expectedEmail, expectedName, expectedContinue, *)
+      .returning(EitherT.fromEither[Future](result))
+
+  def mockUpdateSubscription(
+    subscribedDetails: SubscribedDetails
+  )(result: Either[Error, Unit]) =
+    (mockSubscriptionService
+      .updateSubscribedDetails(_: SubscribedDetails)(_: HeaderCarrier))
+      .expects(subscribedDetails, *)
       .returning(EitherT.fromEither[Future](result))
 
   def mockUuidGenerator(uuid: UUID): CallHandler0[UUID] =
@@ -349,15 +359,23 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
       }
 
       "there is an error updating the session" in {
+        implicit val hc: HeaderCarrier = HeaderCarrier()
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionData))))
-          mockStoreSession(
-            sessionData.copy(
-              emailToBeVerified = Some(emailToBeVerified.copy(verified = true)),
-              journeyStatus     = Some(updateEmail(validJourneyStatus, emailToBeVerified.email))
-            )
-          )(Future.successful(Left(Error(""))))
+          mockUpdateSubscription()
+          for {
+            a <- updateEmail(validJourneyStatus, emailToBeVerified.email)
+          } yield {
+
+            mockStoreSession(
+              sessionData.copy(
+                emailToBeVerified = Some(emailToBeVerified.copy(verified = true)),
+                journeyStatus     = Some(a)
+              )
+            )(Future.successful(Left(Error(""))))
+
+          }
         }
 
         checkIsTechnicalErrorPage(performAction(id))
@@ -384,12 +402,12 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionData))))
-          mockStoreSession(
-            sessionData.copy(
-              emailToBeVerified = Some(emailToBeVerified.copy(verified = true)),
-              journeyStatus     = Some(updateEmail(validJourneyStatus, emailToBeVerified.email))
-            )
-          )(Future.successful(Right(())))
+//          mockStoreSession(
+//            sessionData.copy(
+//              emailToBeVerified = Some(emailToBeVerified.copy(verified = true)),
+//              journeyStatus     = Some(updateEmail(validJourneyStatus, emailToBeVerified.email))
+//            )
+//          )(Future.successful(Right(())))
         }
 
         checkIsRedirect(performAction(id), emailVerifiedCall)
