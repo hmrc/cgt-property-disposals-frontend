@@ -40,3 +40,12 @@ input:focus, textarea:focus, select:focus, #global-header input:focus {
 .autocomplete__wrapper input[type="text"] {
     width: 100%;
 }
+
+.govuk-related-items {
+    margin-top: 30px;
+    border-top: 10px solid #1d70b8;
+    padding-top: 5px;
+}
+.govuk-related-items h2 {
+    margin-top: 0.55556em;
+}
