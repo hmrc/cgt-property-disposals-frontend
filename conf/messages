@@ -184,10 +184,10 @@ postcode.error.required=Enter postcode
 postcode.error.noResults=No addresses found for this postcode, check what you entered, if it is correct then enter the address manually
 filter.error.noResults=No addresses found for this property name or number at this postcode, if it is correct then enter the address manually
 
-subscription.isUk.title=Do you live in the UK?
-registration.isUk.title=Do you live in the UK?
+subscription.isUk.title=Is your contact address in the UK?
+registration.isUk.title=Is your contact address in the UK?
 
-isUk.error.required=Select yes if your address is in the UK
+isUk.error.required=Select yes if your contact address is in the UK
 
 nonUkAddress.title=Enter your non-UK address
 nonUkAddress.line1.label=Address line 1
