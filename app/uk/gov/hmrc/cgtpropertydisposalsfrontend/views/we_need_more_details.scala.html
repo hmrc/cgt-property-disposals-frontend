@@ -14,9 +14,8 @@
  * limitations under the License.
  *@
 
-@import play.api.data.Form
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.NeedMoreDetailsDetails
 
 @this(
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -24,18 +23,22 @@
  pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
 )
 
-@(continueUrl: String)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(details: NeedMoreDetailsDetails)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
 @title = @{messages("weNeedMoreDetails.title")}
+@affinity = @{details.affinityGroup match {
+  case NeedMoreDetailsDetails.AffinityGroup.Organisation => "organisation"
+  case _ => "individual"
+}}
 
 @mainTemplate(title = title) {
  @pageHeading(title, Some(messages("weNeedMoreDetails.caption")))
-  <p>
-   @messages("weNeedMoreDetails.p")
-  </p>
-  <ol class="list list-number">
-   <li>@messages("weNeedMoreDetails.1")</li>
-   <li>@messages("weNeedMoreDetails.2")</li>
-  </ol>
- @buttonLink(messages("button.continue"), continueUrl)
+ <p>
+  @messages("weNeedMoreDetails.p")
+ </p>
+ <ol class="list list-number">
+  <li>@messages(s"weNeedMoreDetails.${affinity}.p1")</li>
+  <li>@messages(s"weNeedMoreDetails.${affinity}.p2")</li>
+ </ol>
+ @buttonLink(messages("button.continue"), details.continueUrl)
 }

@@ -19,13 +19,17 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email
 import java.util.UUID
 
 import cats.data.EitherT
+import cats.instances.boolean._
 import cats.instances.future._
 import cats.instances.uuid._
 import cats.syntax.eq._
+import play.api.data.Form
+import play.api.data.Forms.{mapping, of}
 import play.api.mvc.{Action, AnyContent, Call, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{RequestWithSessionData, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email.EmailController.SubmitEmailDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
@@ -84,7 +88,9 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
   def enterEmail(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) {
       case (sessionData, _) =>
-        val form = sessionData.emailToBeVerified.fold(Email.form)(e => Email.form.fill(e.email))
+        val form = sessionData.emailToBeVerified.fold(
+          EmailController.submitEmailForm
+        )(e => EmailController.submitEmailForm.fill(SubmitEmailDetails(e.email, e.hasResentVerificationEmail)))
         Ok(enterEmailPage(form, isAmendJourney, backLinkCall, enterEmailSubmitCall))
     }
   }
@@ -93,38 +99,46 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) {
         case (sessionData, journey) =>
-          Email.form
+          EmailController.submitEmailForm
             .bindFromRequest()
             .fold(
               formWithErrors =>
                 BadRequest(
                   enterEmailPage(formWithErrors, isAmendJourney, backLinkCall, enterEmailSubmitCall)
-                ), { email =>
-                val emailToBeVerified = sessionData.emailToBeVerified match {
-                  case Some(e) if e.email === email => e
-                  case _                            => EmailToBeVerified(email, uuidGenerator.nextId(), verified = false)
-                }
-
-                val result = for {
-                  _ <- EitherT(
-                        updateSession(sessionStore, request)(_.copy(emailToBeVerified = Some(emailToBeVerified)))
+                ), {
+                case SubmitEmailDetails(email, resendVerificationEmail) =>
+                  val emailToBeVerified = sessionData.emailToBeVerified match {
+                    case Some(e) if e.email === email =>
+                      e.copy(hasResentVerificationEmail = resendVerificationEmail)
+                    case _ =>
+                      EmailToBeVerified(
+                        email,
+                        uuidGenerator.nextId(),
+                        verified                   = false,
+                        hasResentVerificationEmail = resendVerificationEmail
                       )
-                  result <- emailVerificationService
-                             .verifyEmail(email, name(journey), verifyEmailCall(emailToBeVerified.id))
-                } yield result
-
-                result.fold(
-                  { e =>
-                    logger.warn("Could not verify email", e)
-                    errorHandler.errorResult()
-                  }, {
-                    case EmailAlreadyVerified =>
-                      Redirect(verifyEmailCall(emailToBeVerified.id))
-
-                    case EmailVerificationRequested =>
-                      Redirect(checkYourInboxCall)
                   }
-                )
+
+                  val result = for {
+                    _ <- EitherT(
+                          updateSession(sessionStore, request)(_.copy(emailToBeVerified = Some(emailToBeVerified)))
+                        )
+                    result <- emailVerificationService
+                               .verifyEmail(email, name(journey), verifyEmailCall(emailToBeVerified.id))
+                  } yield result
+
+                  result.fold(
+                    { e =>
+                      logger.warn("Could not verify email", e)
+                      errorHandler.errorResult()
+                    }, {
+                      case EmailAlreadyVerified =>
+                        Redirect(verifyEmailCall(emailToBeVerified.id))
+
+                      case EmailVerificationRequested =>
+                        Redirect(checkYourInboxCall)
+                    }
+                  )
               }
             )
       }
@@ -139,7 +153,13 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
           )(
             emailToBeVerified =>
               Ok(
-                checkYourInboxPage(emailToBeVerified.email, enterEmailCall, enterEmailCall, enterEmailSubmitCall)
+                checkYourInboxPage(
+                  emailToBeVerified.email,
+                  enterEmailCall,
+                  enterEmailCall,
+                  enterEmailSubmitCall,
+                  emailToBeVerified.hasResentVerificationEmail
+                )
               )
           )
       }
@@ -206,5 +226,19 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
         )
 
     }
+
+}
+
+object EmailController {
+
+  final case class SubmitEmailDetails(email: Email, resendVerificationEmail: Boolean)
+
+  val submitEmailForm: Form[SubmitEmailDetails] =
+    Form(
+      mapping(
+        "email"                   -> Email.mapping,
+        "resendVerificationEmail" -> of(BooleanFormatter.formatter)
+      )(SubmitEmailDetails.apply)(SubmitEmailDetails.unapply)
+    )
 
 }

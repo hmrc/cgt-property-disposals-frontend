@@ -28,7 +28,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.ConfidenceLevel.L50
 import uk.gov.hmrc.auth.core.retrieve.Credentials
-import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, ConfidenceLevel, Enrolment, EnrolmentIdentifier}
+import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
@@ -130,9 +130,12 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
       "handling non trust organisations" must {
 
         val determiningIfOrganisationIsTrustSession =
-          SessionData.empty.copy(journeyStatus = Some(SubscriptionStatus.DeterminingIfOrganisationIsTrust(ggCredId, None, None)))
+          SessionData.empty.copy(
+            journeyStatus = Some(SubscriptionStatus.DeterminingIfOrganisationIsTrust(ggCredId, None, None))
+          )
 
-        lazy val needMoreDetailsContinueUrl = routes.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrust().url
+        lazy val needMoreDetailsContinueUrl =
+          routes.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrust().url
 
         "show an error page" when {
 
@@ -149,9 +152,16 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               )
               mockHasSubscription()(Right(None))
               mockGetSession(Future.successful(Right(Some(SessionData.empty))))
-              mockStoreSession(determiningIfOrganisationIsTrustSession.copy(
-                needMoreDetailsContinueUrl = Some(needMoreDetailsContinueUrl)
-              ))(Future.successful(Left(Error(""))))
+              mockStoreSession(
+                determiningIfOrganisationIsTrustSession.copy(
+                  needMoreDetailsDetails = Some(
+                    NeedMoreDetailsDetails(
+                      needMoreDetailsContinueUrl,
+                      NeedMoreDetailsDetails.AffinityGroup.Organisation
+                    )
+                  )
+                )
+              )(Future.successful(Left(Error(""))))
             }
 
             checkIsTechnicalErrorPage(performAction(FakeRequest()))
@@ -163,7 +173,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           "reporting for a trust' page " when {
 
           "the session already has the relevant journey status in it" in {
-            val journey = DeterminingIfOrganisationIsTrust(ggCredId, Some(true), Some(true))
+            val journey     = DeterminingIfOrganisationIsTrust(ggCredId, Some(true), Some(true))
             val sessionData = SessionData.empty.copy(journeyStatus = Some(journey))
             inSequence {
               mockAuthWithAllRetrievals(
@@ -177,9 +187,15 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               )
               mockHasSubscription()(Right(None))
               mockGetSession(Future.successful(Right(Some(sessionData))))
-                mockStoreSession(sessionData.copy(
-                needMoreDetailsContinueUrl = Some(needMoreDetailsContinueUrl)
-              ))(Future.successful(Right(())))
+              mockStoreSession(
+                sessionData.copy(
+                  needMoreDetailsDetails = Some(
+                    NeedMoreDetailsDetails(
+                      needMoreDetailsContinueUrl,
+                      NeedMoreDetailsDetails.AffinityGroup.Organisation
+                    ))
+                )
+              )(Future.successful(Right(())))
             }
 
             checkIsRedirect(performAction(FakeRequest()), routes.StartController.weNeedMoreDetails())
@@ -198,9 +214,15 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               )
               mockHasSubscription()(Right(None))
               mockGetSession(Future.successful(Right(None)))
-              mockStoreSession(determiningIfOrganisationIsTrustSession.copy(
-                needMoreDetailsContinueUrl = Some(needMoreDetailsContinueUrl)
-              ))(Future.successful(Right(())))
+              mockStoreSession(
+                determiningIfOrganisationIsTrustSession.copy(
+                  needMoreDetailsDetails = Some(
+                    NeedMoreDetailsDetails(
+                      needMoreDetailsContinueUrl,
+                      NeedMoreDetailsDetails.AffinityGroup.Organisation
+                    ))
+                )
+              )(Future.successful(Right(())))
 
             }
 
@@ -231,8 +253,13 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 mockGetSession(Future.successful(Right(Some(SessionData.empty))))
                 mockStoreSession(
                   SessionData.empty.copy(
-                    journeyStatus              = Some(SubscriptionStatus.TryingToGetIndividualsFootprint(None, None, None, ggCredId)),
-                    needMoreDetailsContinueUrl = Some(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url)
+                    journeyStatus = Some(SubscriptionStatus.TryingToGetIndividualsFootprint(None, None, None, ggCredId)),
+                    needMoreDetailsDetails = Some(
+                      NeedMoreDetailsDetails(
+                        routes.InsufficientConfidenceLevelController.doYouHaveNINO().url,
+                        NeedMoreDetailsDetails.AffinityGroup.Individual
+                      )
+                    )
                   )
                 )(Future.successful(Left(Error(""))))
               }
@@ -317,7 +344,12 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                     journeyStatus = Some(
                       SubscriptionStatus.TryingToGetIndividualsFootprint(None, None, None, ggCredId)
                     ),
-                    needMoreDetailsContinueUrl = Some(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url)
+                    needMoreDetailsDetails = Some(
+                      NeedMoreDetailsDetails(
+                        routes.InsufficientConfidenceLevelController.doYouHaveNINO().url,
+                        NeedMoreDetailsDetails.AffinityGroup.Individual
+                      )
+                    )
                   )
                 )(Future.successful(Right(())))
               }
@@ -824,8 +856,12 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               val bprWithNoEmail = bpr.copy(emailAddress = None)
               val updatedSession =
                 SessionData.empty.copy(
-                  journeyStatus              = Some(SubscriptionMissingData(bprWithNoEmail)),
-                  needMoreDetailsContinueUrl = Some(email.routes.SubscriptionEnterEmailController.enterEmail().url)
+                  journeyStatus          = Some(SubscriptionMissingData(bprWithNoEmail)),
+                  needMoreDetailsDetails = Some(
+                    NeedMoreDetailsDetails(
+                      email.routes.SubscriptionEnterEmailController.enterEmail().url,
+                      NeedMoreDetailsDetails.AffinityGroup.Individual
+                    ))
                 )
 
               inSequence {
@@ -845,8 +881,12 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               val bprWithNoEmail = bpr.copy(emailAddress = None)
               val updatedSession =
                 SessionData.empty.copy(
-                  journeyStatus              = Some(SubscriptionMissingData(bprWithNoEmail)),
-                  needMoreDetailsContinueUrl = Some(email.routes.SubscriptionEnterEmailController.enterEmail().url)
+                  journeyStatus          = Some(SubscriptionMissingData(bprWithNoEmail)),
+                  needMoreDetailsDetails = Some(
+                    NeedMoreDetailsDetails(
+                      email.routes.SubscriptionEnterEmailController.enterEmail().url,
+                      NeedMoreDetailsDetails.AffinityGroup.Individual
+                    ))
                 )
 
               inSequence {
@@ -1060,7 +1100,8 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                   None,
                   Some("email"),
                   Set.empty,
-                  Some(retrievedGGCredId))
+                  Some(retrievedGGCredId)
+                )
                 mockHasSubscription()(Right(None))
                 mockGetSession(Future.successful(Right(Some(session))))
                 mockStoreSession(updatedSession)(Future.successful(Right(())))
@@ -1069,14 +1110,14 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               checkIsRedirect(performAction(), routes.SubscriptionController.checkYourDetails())
             }
 
-
           }
 
           "redirect to the enter email page" when {
 
             "the session data indicates there is subscription data missing and no email can be found " +
               "for a trust without a trust enrolment" in {
-              val session = SessionData.empty.copy(journeyStatus = Some(SubscriptionMissingData(bpr.copy(emailAddress = None))))
+              val session =
+                SessionData.empty.copy(journeyStatus = Some(SubscriptionMissingData(bpr.copy(emailAddress = None))))
 
               inSequence {
                 mockAuthWithAllRetrievals(
@@ -1086,7 +1127,8 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                   None,
                   None,
                   Set.empty,
-                  Some(retrievedGGCredId))
+                  Some(retrievedGGCredId)
+                )
                 mockHasSubscription()(Right(None))
                 mockGetSession(Future.successful(Right(Some(session))))
               }
@@ -1110,8 +1152,13 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 )
                 mockStoreSession(
                   SessionData.empty.copy(
-                    journeyStatus              = Some(SubscriptionMissingData(bprWithNoEmail)),
-                    needMoreDetailsContinueUrl = Some(email.routes.SubscriptionEnterEmailController.enterEmail().url)
+                    journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail)),
+                    needMoreDetailsDetails = Some(
+                      NeedMoreDetailsDetails(
+                        email.routes.SubscriptionEnterEmailController.enterEmail().url,
+                        NeedMoreDetailsDetails.AffinityGroup.Organisation
+                      )
+                    )
                   )
                 )(Future.successful(Right(())))
               }
@@ -1142,11 +1189,8 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
       "the user has a CGT enrolment" when {
 
-        val cgtReference = sample[CgtReference]
-        val cgtEnrolment = Enrolment(
-          "HMRC-CGT-PD",
-          Seq(EnrolmentIdentifier("CGTPDRef", cgtReference.value)),
-        "")
+        val cgtReference      = sample[CgtReference]
+        val cgtEnrolment      = Enrolment("HMRC-CGT-PD", Seq(EnrolmentIdentifier("CGTPDRef", cgtReference.value)), "")
         val subscribedDetails = sample[SubscribedDetails].copy(cgtReference = cgtReference)
 
         val sessionWithSubscribed = SessionData.empty.copy(
@@ -1156,7 +1200,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
         "the session data indicates they have subscribed" must {
 
           "redirect to the homepage" in {
-            inSequence{
+            inSequence {
               mockAuthWithAllRetrievals(
                 ConfidenceLevel.L200,
                 Some(AffinityGroup.Individual),
@@ -1179,7 +1223,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
           "show an error page" when {
 
             "the call to get the subscribed details fails" in {
-              inSequence{
+              inSequence {
                 mockAuthWithAllRetrievals(
                   ConfidenceLevel.L200,
                   Some(AffinityGroup.Individual),
@@ -1197,7 +1241,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             }
 
             "the session cannot be updated with the subscribed details" in {
-              inSequence{
+              inSequence {
                 mockAuthWithAllRetrievals(
                   ConfidenceLevel.L200,
                   Some(AffinityGroup.Individual),
@@ -1219,7 +1263,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
           "redirect to the homepage when the subscribed details are obtained and the " +
             "ssion data has been successfully updated" in {
-            inSequence{
+            inSequence {
               mockAuthWithAllRetrievals(
                 ConfidenceLevel.L200,
                 Some(AffinityGroup.Individual),
@@ -1281,8 +1325,12 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 Right(
                   Some(
                     SessionData.empty.copy(
-                      journeyStatus              = Some(sample[JourneyStatus]),
-                      needMoreDetailsContinueUrl = Some(continueUrl)
+                      journeyStatus          = Some(sample[JourneyStatus]),
+                      needMoreDetailsDetails = Some(
+                        NeedMoreDetailsDetails(
+                          continueUrl,
+                          NeedMoreDetailsDetails.AffinityGroup.Individual
+                        ))
                     )
                   )
                 )

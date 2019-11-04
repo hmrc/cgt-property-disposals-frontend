@@ -33,6 +33,19 @@
     <p>
     @messages("enterTrn.tooManyAttempts.p2")
     </p>
+    <h2 class="heading-medium">
+      @messages("enterTrn.whatATrnIs")
+    </h2>
+    <p>
+      @Html(messages("enterTrn.whatATrnIs.p1", appConfig.trusteeResponsibilitiesUrl))
+    </p>
+    <h2 class="heading-medium">
+      @messages("enterTrn.ifYouCannotFind")
+    </h2>
+    <p>
+      @Html(messages("enterTrn.ifYouCannotFind.p1", appConfig.trustHelpUrl))
+    </p>
+
 }
 
 

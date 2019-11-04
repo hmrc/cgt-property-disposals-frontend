@@ -54,7 +54,8 @@
    errorKey = form.error(trnKey).map(e => e.message),
    hasErrors = form.error(trnKey).nonEmpty,
    label = Html(messages("trn.label")),
-   labelClass = Some(" govuk-label--m")
+   labelClass = Some(" govuk-label--m"),
+   helpText = Some(Html(messages("haveATrn.helpText", appConfig.trusteeResponsibilitiesUrl)))
   )
   @textInput(
    fieldId = trustNameKey,

@@ -33,7 +33,7 @@
      @l2.map(l => Html(s"$l<br />"))
      @l3.map(l => Html(s"$l<br />"))
      @l4.map(l => Html(s"$l<br />"))
-     @postcode
+     @postcode.value
     </div>
    }
 
@@ -43,7 +43,7 @@
       @l2.map(l => s"$l, ")
       @l3.map(l => s"$l, ")
       @l4.map(l => s"$l, ")
-      @postcode
+      @postcode.value
      </span>
     }
 

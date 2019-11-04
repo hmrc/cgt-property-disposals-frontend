@@ -52,12 +52,6 @@
   @messages("registration.lede")
  </p>
 
- <div class="panel panel-border-wide">
-  <p>
-   @messages("registration.p")
-  </p>
- </div>
-
  @cyaSection() {
   @cyaRow(
     messages("registration.cyaLabel.firstName"),
@@ -82,9 +76,6 @@
  }
 
  @formWrapper(routes.RegistrationController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
-  <p>
-   @messages("registration.confirm")
-  </p>
-  @submitButton(messages("button.confirmAndContinue"))
+  @submitButton(messages("button.createAccount"))
  }
 }

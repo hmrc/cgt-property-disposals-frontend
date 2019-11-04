@@ -31,11 +31,27 @@
   @backLinkComponent(backLink)
   @pageHeading(title)
   <p>
-   @messages("wrongAccountForTrusts.p")
+    @messages("wrongAccountForTrusts.p1")
   </p>
- <p>
-   <a href="@appConfig.signOutUrl">@messages("service.signOut")</a>
- </p>
+  <h2 class="heading-medium">
+    @messages("wrongAccountForTrusts.whatWentWrong")
+  </h2>
+  <p>
+    @messages("wrongAccountForTrusts.whatWentWrong.p1")
+  </p>
+  <h2 class="heading-medium">
+    @messages("wrongAccountForTrusts.whatNext")
+  </h2>
+  <p>
+    @Html(messages("wrongAccountForTrusts.whatNext.p1", appConfig.signOutUrl + "?continue=/gg/sign-in"))
+  </p>
+
+  <h2 class="heading-medium">
+    @messages("wrongAccountForTrusts.createGGAccount")
+  </h2>
+  <p>
+    @Html(messages("wrongAccountForTrusts.createGGAccount.p1", appConfig.signOutUrl + "?continue=/gg/sign-in", appConfig.trusteeResponsibilitiesUrl))
+  </p>
 }
 
 

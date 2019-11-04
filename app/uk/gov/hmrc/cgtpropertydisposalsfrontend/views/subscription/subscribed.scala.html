@@ -31,8 +31,7 @@
 @title = @{messages("subscribed.title")}
 
 @mainTemplate(title = title) {
-  @pageHeading(title)
-  <p>@messages(s"subscribed.${affinity}.p1")</p>
+  @pageHeading(title, Some(messages("subscription.caption")))
   <p>@Html(messages(s"subscribed.${affinity}.p2", accountDetails.cgtReference.value))</p>
   <p>@messages(s"subscribed.${affinity}.p3")</p>
   <p>@Html(messages(s"subscribed.p4", accountDetails.emailAddress.value))</p>

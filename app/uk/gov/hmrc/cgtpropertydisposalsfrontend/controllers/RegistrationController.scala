@@ -257,9 +257,9 @@ object RegistrationController {
       mapping(
         "entityType" -> number
           .verifying("invalid", a => a === 0 || a === 1)
-          .transform[EntityType](value => if (value === 0) EntityType.Individual else EntityType.Trust, {
-            case EntityType.Individual => 0
-            case EntityType.Trust      => 1
+          .transform[EntityType](value => if (value === 0) EntityType.Trust else EntityType.Individual, {
+            case EntityType.Individual => 1
+            case EntityType.Trust      => 0
           })
       )(identity)(Some(_))
     )
