@@ -25,14 +25,14 @@
 
 @(cgtReference: String)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
+@affinity = @{"individual"}
 @title = @{messages("subscribed.title")}
 
 @mainTemplate(title = title) {
   @pageHeading(title)
-  <p>@messages("subscribed.p1")</p>
-  <p>@Html(messages("subscribed.p2")) <strong class="bold">@cgtReference</strong>.</p>
+  <p>@messages(s"subscribed.${affinity}.p1")</p>
+  <p>@Html(messages(s"subscribed.${affinity}.p2", cgtReference))</p>
+  <p>@messages(s"subscribed.${affinity}.p3")</p>
+  <p>@Html(messages(s"subscribed.p4", "x@example.com"))</p>
   @buttonLink(messages("subscribed.buttonText"), routes.HomeController.homepage().url)
-  <p>
-   <a href="@{routes.HomeController.homepage().url}">@messages("subscribed.linkText")</a>
-  </p>
 }

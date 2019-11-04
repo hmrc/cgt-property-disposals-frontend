@@ -110,7 +110,8 @@ dob.helpText=For example, 31 3 1980
 dob.invalid=Enter a real date of birth
 
 subscription.caption=Create a CGT on UK property account
-subscription.title=Check your contact details and create an account
+subscription.individual.title=Check your contact details and create an account
+subscription.organisation.title=Check the trust or estate’s contact details and create an account
 subscription.lede=We’ll only use these contact details if we need to get in touch about this service.
 subscription.cyaLabel.contactName=Contact name
 subscription.cyaChange.contactName=your contact name
@@ -118,7 +119,6 @@ subscription.cyaLabel.address=Contact address
 subscription.cyaChange.address=your contact address
 subscription.cyaLabel.email=Email address
 subscription.cyaChange.email=your email address
-subscription.confirm=Before you continue you must confirm your details are correct.
 
 registration.caption=Create a CGT on UK property account
 registration.title=Check your contact details
@@ -210,10 +210,14 @@ country-code.error.required=Enter country
 country-code.error.enum=Country must be a valid country, select the matching country from the list as you type
 
 subscribed.title=Account created
-subscribed.p1=Your Capital Gains Tax (CGT) on UK property disposals account has been created.
-subscribed.p2=Your account number is
-subscribed.buttonText=Start a new return
-subscribed.linkText=Go to your CGT on UK property account
+subscribed.individual.p1=You’ve created a Capital Gains Tax on UK property account
+subscribed.organisation.p1=You’ve created a Capital Gains Tax on UK property account for your trust or estate.
+subscribed.organisation.p2=The trust or estate’s account number is <strong class="bold">{0}</strong>.
+subscribed.individual.p2=Your account number is <strong class="bold">{0}</strong>.
+subscribed.organisation.p3=You will need to provide this number to HMRC if you need to discuss the trust or estate’s account.
+subscribed.individual.p3=You will need to provide this number to HMRC if you need to discuss the account.
+subscribed.p4=We have sent a confirmation email to <strong class="bold">{0}</strong>.
+subscribed.buttonText=Go to account
 
 registerTrust.title=Register your trust
 registerTrust.p=To report and pay Capital Gains Tax on UK property disposals you will need to register your trust with HMRC.
