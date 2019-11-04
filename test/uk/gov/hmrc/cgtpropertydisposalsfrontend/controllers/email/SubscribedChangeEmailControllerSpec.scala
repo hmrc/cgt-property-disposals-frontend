@@ -19,6 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email
 import java.util.UUID
 
 import cats.data.EitherT
+import cats.instances.future._
 import org.scalacheck.ScalacheckShapeless._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
@@ -28,9 +29,10 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, SubscribedDetails, sample}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class SubscribedChangeEmailControllerSpec
@@ -46,9 +48,19 @@ class SubscribedChangeEmailControllerSpec
 
   override lazy val controller: SubscribedChangeEmailController = instanceOf[SubscribedChangeEmailController]
 
+  def mockSubscriptionUpdate(subscribedDetails: SubscribedDetails)(result: Either[Error, Unit]) =
+    (mockSubscriptionService
+      .updateSubscribedDetails(_: SubscribedDetails)(_: HeaderCarrier))
+      .expects(subscribedDetails, *)
+      .returning(EitherT.fromEither[Future](result))
+
   override def updateEmail(journey: Subscribed, email: Email)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, Subscribed] = controller.updateEmail(journey, email)
+  ): EitherT[Future, Error, Subscribed] = {
+    val journeyWithUpdatedEmail = journey.copy(subscribedDetails = journey.subscribedDetails.copy(emailAddress = email))
+    mockSubscriptionUpdate(journeyWithUpdatedEmail.subscribedDetails)(Right(Unit))
+    EitherT.rightT[Future, Error](journeyWithUpdatedEmail)
+  }
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 

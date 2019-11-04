@@ -33,9 +33,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, EmailToBeVerified, Error, JourneyStatus, SessionData, SubscribedDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse.{EmailAlreadyVerified, EmailVerificationRequested}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{EmailVerificationService, SubscriptionService}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -363,7 +363,6 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionData))))
-          mockUpdateSubscription()
           for {
             a <- updateEmail(validJourneyStatus, emailToBeVerified.email)
           } yield {
@@ -399,15 +398,20 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
       }
 
       "the session is updated" in {
+        implicit val hc: HeaderCarrier = HeaderCarrier()
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionData))))
-//          mockStoreSession(
-//            sessionData.copy(
-//              emailToBeVerified = Some(emailToBeVerified.copy(verified = true)),
-//              journeyStatus     = Some(updateEmail(validJourneyStatus, emailToBeVerified.email))
-//            )
-//          )(Future.successful(Right(())))
+          for {
+            journey <- updateEmail(validJourneyStatus, emailToBeVerified.email)
+          } yield {
+            mockStoreSession(
+              sessionData.copy(
+                emailToBeVerified = Some(emailToBeVerified.copy(verified = true)),
+                journeyStatus = Some(journey)
+              )
+            )(Future.successful(Right(())))
+          }
         }
 
         checkIsRedirect(performAction(id), emailVerifiedCall)
