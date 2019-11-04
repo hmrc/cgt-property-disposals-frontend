@@ -43,7 +43,7 @@
   @errorSummary(form)
  }
 
- @pageHeading(title)
+ @pageHeading(title, Some(messages("subscription.caption")))
 
  @formWrapper(routes.InsufficientConfidenceLevelController.enterSautrAndNameSubmit(), 'novalidate -> "novalidate") {
   @textInput(

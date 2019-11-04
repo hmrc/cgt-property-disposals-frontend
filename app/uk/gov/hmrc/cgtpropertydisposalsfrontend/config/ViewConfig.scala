@@ -42,4 +42,10 @@ class ViewConfig @Inject()(servicesConfig: ServicesConfig) {
   val trustRegistrationUrl: String = getString("external-url.trust-registration")
   val callChargesUrl: String = getString("external-url.gov-call-charges")
   val additionalNeedsUrl: String = getString("external-url.additional-needs")
+  val taxSellHomeUrl: String = getString("external-url.tax-sell-home")
+  val taxSellPropertyUrl: String = getString("external-url.tax-sell-property")
+  val cgtUrl: String = getString("external-url.capital-gains-tax")
+  val legacyCgtNonResidentUrl: String = getString("external-url.legacy-cgt-non-resident")
+  val agentsSignInUrl: String = getString("external-url.sign-in-to-agents")
+  val createAgentsAccountUrl: String = getString("external-url.create-agents-account")
 }

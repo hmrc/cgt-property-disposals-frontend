@@ -26,9 +26,47 @@
 
 @title = @{messages("landingPage.title")}
 
-@mainTemplate(title = title, withAuth = false) {
+@sidebarContent = {
+ <div class="sidebar">
+  <nav class="govuk-related-items ">
+   <h2 class="heading-medium" id="subsection-title">
+    @messages("landingPage.sidebar.title")
+   </h2>
+   <ul class="section__ul--link-list sidebar__list">
+       <li class="sidebar__list-item">
+         <a href="@{routes.LandingPageController.signInPage().url}">@messages("landingPage.sidebar.1")</a>
+       </li>
+       <li class="sidebar__list-item">
+         <a href="@{appConfig.cgtUrl}">@messages("landingPage.sidebar.2")</a>
+       </li>
+       <li class="sidebar__list-item">
+         <a href="@{appConfig.legacyCgtNonResidentUrl}">@messages("landingPage.sidebar.3")</a>
+       </li>
+        <li>
+        <a href="@{appConfig.taxSellPropertyUrl}">@messages("landingPage.sidebar.4")</a>
+        </li>
+   </ul>
+  </nav>
+ </div>
+}
+
+@mainTemplate(title = title, withAuth = false, sidebar = Some(sidebarContent)) {
 
  <h1 class="heading-xlarge">@title</h1>
+
+ <p>@Html(messages("landingPage.intro.p1", appConfig.cgtUrl))</p>
+
+ <ul class="list-bullet">
+  <li>@messages("landingPage.intro.bullet1")</li>
+  <li>@messages("landingPage.intro.bullet2")</li>
+  <li>@messages("landingPage.intro.bullet3")</li>
+ </ul>
+
+ <p>@Html(messages("landingPage.intro.p2", appConfig.taxSellHomeUrl))</p>
+
+ @warningMessage(messages("landingPage.warning"))
+
+  <h2 class="heading-medium">@messages("landingPage.h2.1")</h2>
 
  <p>@messages("landingPage.p1")</p>
 
@@ -36,23 +74,69 @@
   <li>@messages("landingPage.list1.bullet1")</li>
   <li>@messages("landingPage.list1.bullet2")</li>
   <li>@messages("landingPage.list1.bullet3")</li>
+  <li>@messages("landingPage.list1.bullet4")</li>
+  <li>@messages("landingPage.list1.bullet5")</li>
+  <li>@messages("landingPage.list1.bullet6")</li>
  </ul>
 
- @warningMessage(messages("landingPage.warning"))
-
+ <h2 class="heading-medium">@messages("landingPage.h2.2")</h2>
 
  <p>@messages("landingPage.p2")</p>
 
  <ul class="list-bullet">
   <li>@messages("landingPage.list2.bullet1")</li>
   <li>@messages("landingPage.list2.bullet2")</li>
-  <li>@messages("landingPage.list2.bullet3")</li>
-  <li>@messages("landingPage.list2.bullet4")</li>
  </ul>
 
  <p>@messages("landingPage.p3")</p>
 
+ <ul class="list-bullet">
+   <li>@messages("landingPage.list3.bullet1")</li>
+   <li>@messages("landingPage.list3.bullet2")</li>
+ </ul>
+
  <p>
   <a class="button button-start" href="@{routes.StartController.start()}" role="button">@messages("button.startNow")</a>
  </p>
+
+  <h2 class="heading-medium">@messages("landingPage.signIn")</h2>
+
+  <p>
+    @Html(messages("landingPage.signIn.p1", routes.LandingPageController.signInPage().url))
+  </p>
+
+  <h2 class="heading-medium">@messages("landingPage.beforeYouStart")</h2>
+
+  <p>
+    @Html(messages("landingPage.beforeYouStart.p1", "#"))
+  </p>
+
+  <p>
+    @Html(messages("landingPage.beforeYouStart.p2", appConfig.additionalNeedsUrl))
+  </p>
+
+  <h2 class="heading-medium">@messages("landingPage.whatYoullNeed")</h2>
+
+  <ul class="list-bullet">
+    <li>@messages("landingPage.whatYoullNeed.bullet1")</li>
+    <li>@messages("landingPage.whatYoullNeed.bullet2")</li>
+    <li>@messages("landingPage.whatYoullNeed.bullet3")</li>
+    <li>@messages("landingPage.whatYoullNeed.bullet4")</li>
+    <li>@messages("landingPage.whatYoullNeed.bullet5")</li>
+    <li>@messages("landingPage.whatYoullNeed.bullet6")</li>
+    <li>@messages("landingPage.whatYoullNeed.bullet7")</li>
+    <li>@messages("landingPage.whatYoullNeed.bullet8")</li>
+  </ul>
+
+  <h2 class="heading-medium">@messages("landingPage.ifYoureAnAgent")</h2>
+
+  <p>
+    @Html(messages("landingPage.ifYoureAnAgent.p1", appConfig.agentsSignInUrl, appConfig.createAgentsAccountUrl))
+  </p>
+
+  <h2 class="heading-medium">@messages("landingPage.ifYoureRepresentingATrust")</h2>
+
+  <p>
+    @Html(messages("landingPage.ifYoureRepresentingATrust.p1", appConfig.trustRegistrationUrl))
+  </p>
 }

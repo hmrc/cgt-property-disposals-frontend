@@ -6,10 +6,12 @@ label.beta=Alpha
 button.startNow=Start now
 button.continue=Continue
 button.confirmAndContinue=Confirm and continue
+button.createAccount=Create account
 button.resendEmail=Resend email
 button.findAddress=Find address
 button.tryAgain=Try again
 button.startAgain=Start again
+button.signIn=Sign in
 
 generic.warning=Warning
 generic.day=Day
@@ -25,17 +27,58 @@ cya.add=Add
 error.summary.heading=There’s a problem
 
 landingPage.title=Report and pay Capital Gains Tax on UK property
-landingPage.p1=Use this service to:
-landingPage.list1.bullet1=report and pay Capital Gains Tax on the sale or ‘disposal’ of a residential property that’s not your home
-landingPage.list1.bullet2=find out how much Capital Gains Tax you owe
-landingPage.list1.bullet3=view and amend current and previous returns
-landingPage.warning=You have 30 days after the sale completion date to report and pay your Capital Gains Tax. You risk getting a penalty if your payment is late.
-landingPage.p2=You’ll be asked to check or provide details on the:
-landingPage.list2.bullet1=property, like address and postcode
-landingPage.list2.bullet2=value of the property when you got it and when you sold or disposed of it
-landingPage.list2.bullet3=costs of buying, selling or making enhancements to the property
-landingPage.list2.bullet4=tax reliefs you are entitled to claim
-landingPage.p3=You’ll need a Government Gateway user ID and password to access the service. If you do not have a user ID, you can create one.
+landingPage.intro.p1=You may have to pay <a href="{0}">Capital Gains Tax</a> if you make a profit (‘gain’) when you sell (or ‘<a href="{0}">dispose of</a>’) property that’s not your home, for example:
+landingPage.intro.bullet1=buy-to-let properties
+landingPage.intro.bullet2=land
+landingPage.intro.bullet3=inherited property
+landingPage.intro.p2=In most cases you do not need to the tax when you <a href="{0}">sell your main home</a>.
+landingPage.warning=You have 30 days after the property completion date to report and pay Capital Gains Tax on your UK property disposals.
+landingPage.h2.1=How to report and pay the tax
+landingPage.p1=You can use this service to:
+landingPage.list1.bullet1=work out if you made a gain on the sale or disposal of UK residential property or land
+landingPage.list1.bullet2=get an estimate of the amount of tax due
+landingPage.list1.bullet3=report the disposal by the 30-day deadline
+landingPage.list1.bullet4=pay any tax you might owe for that disposal
+landingPage.list1.bullet5=create a Capital Gains Tax on UK property account
+landingPage.list1.bullet6=view and amend your previous and current returns
+landingPage.h2.2=If you’re a non-resident
+landingPage.p2=You can use this service to report the disposal and pay the tax on:
+landingPage.list2.bullet1=the sale or disposal of residential and non-residential UK property or land
+landingPage.list2.bullet2=indirect disposals
+landingPage.p3=You must report the disposal by the 30-day deadline, even if:
+landingPage.list3.bullet1=you’ve no tax to pay
+landingPage.list3.bullet2=you’ve made a loss
+landingPage.signIn=Sign in
+landingPage.signIn.p1=<a href="{0}">Sign in</a> if you already have an account.
+landingPage.beforeYouStart=Before you start
+landingPage.beforeYouStart.p1=You’ll need a <a href="{0}">Government Gateway</a> user ID and password to use this service. If you do not have a user ID, you can create one.
+landingPage.beforeYouStart.p2=You can <a href="{0}">contact HMRC</a> if you need help accessing the service.
+landingPage.whatYoullNeed=What you’ll need to complete a return
+landingPage.whatYoullNeed.p1=You’ll need to provide the:
+landingPage.whatYoullNeed.bullet1=property’s address and postcode
+landingPage.whatYoullNeed.bullet2=date you got the property
+landingPage.whatYoullNeed.bullet3=date you exchanged contracts when you were selling or disposing of the property
+landingPage.whatYoullNeed.bullet4=date you stopped being the property’s owner (completion date)
+landingPage.whatYoullNeed.bullet5=property’s value when you got it, and when you disposed of it
+landingPage.whatYoullNeed.bullet6=costs of buying, selling or making improvements to the property
+landingPage.whatYoullNeed.bullet7=details of any tax reliefs, allowances or exemptions you’re entitled to claim
+landingPage.whatYoullNeed.bullet8=property type, if you’re a non-resident
+landingPage.ifYoureAnAgent=If you’re an agent
+landingPage.ifYoureAnAgent.p1=Go to your <a href="{0}">agent services account</a> to access this service. If you do not already have one, you can <a href="{1}">apply for an agent services account</a>.
+landingPage.ifYoureRepresentingATrust=If you’re representing a trust
+landingPage.ifYoureRepresentingATrust.p1=The trust will need to be <a href="{0}">registered</a>. You will need the trust's Self Assessment Unique Taxpayer Reference.
+
+landingPage.sidebar.title=Related content
+landingPage.sidebar.1=Sign in to report and pay Capital Gains Tax on UK property
+landingPage.sidebar.2=Capital Gains Tax
+landingPage.sidebar.3=Tell HMRC about Capital Gains Tax on UK property or land if you’re non-resident
+landingPage.sidebar.4=Calculate Capital Gains Tax on UK property
+
+signInPage.title=Sign in to report and pay Capital Gains Tax on UK property
+signInPage.list1.bullet5=view and amend your previous and current Capital Gains Tax on UK property returns
+signInPage.beforeYouStart.p1=If you’re an individual or a trust, you’ll need to use the same Government Gateway user ID and password you used when you created your Capital Gains Tax on UK property account.
+signInPage.beforeYouStart.p2=If you’re an agent, you’ll need to go to your <a href="{0}">agent services account</a> to access this service.
+signInPage.beforeYouStart.p3=You can <a href="{0}">contact HMRC</a> if you need help accessing the service.
 
 nino.title=Enter your National Insurance number
 nino.helpText=It’s on your National Insurance card, benefit letter, payslip or P60.<br>For example, ‘QQ 12 34 56 C’.
@@ -67,16 +110,15 @@ dob.helpText=For example, 31 3 1980
 dob.invalid=Enter a real date of birth
 
 subscription.caption=Create a CGT on UK property account
-subscription.title=Check your contact details
-subscription.lede={0} these are the details we hold for you.
-subscription.p=We’ll only use these if we need to contact you about your Capital Gains Tax. You’ll need to change them if they are wrong.
+subscription.individual.title=Check your contact details and create an account
+subscription.organisation.title=Check the trust or estate’s contact details and create an account
+subscription.lede=We’ll only use these contact details if we need to get in touch about this service.
 subscription.cyaLabel.contactName=Contact name
 subscription.cyaChange.contactName=your contact name
 subscription.cyaLabel.address=Contact address
 subscription.cyaChange.address=your contact address
 subscription.cyaLabel.email=Email address
 subscription.cyaChange.email=your email address
-subscription.confirm=Before you continue you must confirm your details are correct.
 
 registration.caption=Create a CGT on UK property account
 registration.title=Check your contact details
@@ -142,10 +184,10 @@ postcode.error.required=Enter postcode
 postcode.error.noResults=No addresses found for this postcode, check what you entered, if it is correct then enter the address manually
 filter.error.noResults=No addresses found for this property name or number at this postcode, if it is correct then enter the address manually
 
-subscription.isUk.title=Do you live in the UK?
-registration.isUk.title=Do you live in the UK?
+subscription.isUk.title=Is your contact address in the UK?
+registration.isUk.title=Is your contact address in the UK?
 
-isUk.error.required=Select yes if your address is in the UK
+isUk.error.required=Select yes if your contact address is in the UK
 
 nonUkAddress.title=Enter your non-UK address
 nonUkAddress.line1.label=Address line 1
@@ -168,10 +210,14 @@ country-code.error.required=Enter country
 country-code.error.enum=Country must be a valid country, select the matching country from the list as you type
 
 subscribed.title=Account created
-subscribed.p1=Your Capital Gains Tax (CGT) on UK property disposals account has been created.
-subscribed.p2=Your account number is
-subscribed.buttonText=Start a new return
-subscribed.linkText=Go to your CGT on UK property account
+subscribed.individual.p1=You’ve created a Capital Gains Tax on UK property account
+subscribed.organisation.p1=You’ve created a Capital Gains Tax on UK property account for your trust or estate.
+subscribed.organisation.p2=The trust or estate’s account number is <strong class="bold">{0}</strong>.
+subscribed.individual.p2=Your account number is <strong class="bold">{0}</strong>.
+subscribed.organisation.p3=You will need to provide this number to HMRC if you need to discuss the trust or estate’s account.
+subscribed.individual.p3=You will need to provide this number to HMRC if you need to discuss the account.
+subscribed.p4=We have sent a confirmation email to <strong class="bold">{0}</strong>.
+subscribed.buttonText=Go to account
 
 registerTrust.title=Register your trust
 registerTrust.p=To report and pay Capital Gains Tax on UK property disposals you will need to register your trust with HMRC.
@@ -279,17 +325,16 @@ account.manageYourDetails.cyaChange.telephone=your telephone number
 account.manageYourDetails.addTelephone=Add a phone number
 account.manageYourDetails.yourName=Your name
 
-isReportingForATrust.title=Do you want to report the tax for a trust?
-isReportingForATrust.error.required=Select yes if you want to report the tax for a trust
-isReportingForATrust.error.boolean=Select yes if you want to report the tax for a trust
+isReportingForATrust.title=Do you want to report a capital gain for a trust or estate?
+isReportingForATrust.error.required=Select yes if you want to report the tax for a trust or estate
+isReportingForATrust.error.boolean=Select yes if you want to report the tax for a trust or estate
 
-haveATrn.title=Do you have a Trust Registration Number?
+haveATrn.title=Does the trust or estate have a Trust Registration Number?
 hasTrn.error.required=Select yes if you have a Trust Registration number
 hasTrn.error.boolean=Select yes if you have a Trust Registration number
 
-enterTrn.title=Tell us your Trust Registration Number
-trn.label=Enter your Trust Registration Number
-trn.helpText=You can find this somewhere. For example, 123456789012345
+enterTrn.title=Enter details about the trust or estate
+trn.label=Trust Registration Number
 trn.error.required=Enter your Trust Registration Number
 trn.error.pattern=Trust Registration Number must be 15 numbers, for example 123456789012345
 trn.error.tooLong=Trust Registration Number must be 15 numbers, for example 123456789012345
@@ -299,7 +344,7 @@ enterTrn.tooManyAttempts.title=Too many attempts
 enterTrn.tooManyAttempts.p1=You’ve tried to enter your Trust Registration Number and trust name too many times.
 enterTrn.tooManyAttempts.p2=You can try again later.
 
-enterTrustName.label=Trust name
+enterTrustName.label=Name of trust
 trustName.error.required=Enter the name of your trust
 trustName.error.tooLong=The name of your trust must be less than 105 characters
 trustName.error.pattern=Your trust name can only include letters, apostrophes, hyphens, spaces and ampersands
