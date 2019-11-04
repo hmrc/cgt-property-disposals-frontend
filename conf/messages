@@ -91,13 +91,12 @@ hasNino.error.required=Select yes if you have a National Insurance number
 hasNino.error.boolean=Select yes if you have a National Insurance number
 
 haveAnSaUtr.title=Do you have a Self Assessment Unique Taxpayer Reference?
+haveAnSaUtr.helpText=This is 10 numbers, for example 1234567890. It will be on tax returns and other letters about Self Assessment. It may be called ‘reference’, ‘UTR’ or ‘official use’. You can <a href="{0}" target="_blank">find a lost UTR number (opens in a new window)</a>.
 hasSaUtr.error.required=Select yes if you have a Self Assessment Unique Taxpayer Reference
 hasSaUtr.error.boolean=Select yes if you have a Self Assessment Unique Taxpayer Reference
 
-
-enterSaUtr.title=Tell us your Self Assessment Unique Taxpayer Reference and full name
-saUtr.label=Enter your Self Assessment Unique Taxpayer Reference
-saUtr.helpText=You can find this on letters from HMRC about your Self Assessment returns. For example, 9163259195
+enterSaUtr.title=What is your Self Assessment Unique Taxpayer Reference and full name?
+saUtr.label=Self Assessment Unique Taxpayer Reference
 saUtr.error.required=Enter your Self Assessment Unique Taxpayer Reference
 saUtr.error.pattern=Self Assessment Unique Taxpayer References must be 10 numbers, for example 9163259195
 enterSaUtr.error.notFound=We could not find your details using the exact name and reference you have entered. You’ve tried {0} out of a maximum {1} times

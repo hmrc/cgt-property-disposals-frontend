@@ -53,7 +53,8 @@
     selected = form.data.get(key).map(f => f match {
       case "true" => true
       case _ => false
-    })
+    }),
+    helpText = Some(Html(messages("haveAnSaUtr.helpText", appConfig.lostUtrUrl)))
    )
    @submitButton(messages("button.continue"))
   }

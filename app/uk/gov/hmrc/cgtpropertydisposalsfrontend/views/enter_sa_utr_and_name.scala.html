@@ -51,22 +51,24 @@
    value = form.data.getOrElse(saUtrKey, ""),
    errorKey = form.error(saUtrKey).map(e => e.message),
    hasErrors = form.error(saUtrKey).nonEmpty,
-   helpText = Some(Html(messages("saUtr.helpText"))),
-   label = Html(messages("saUtr.label"))
+   label = Html(messages("saUtr.label")),
+   labelClass = Some("govuk-label--m")
   )
   @textInput(
    fieldId = firstNameKey,
    value = form.data.getOrElse(firstNameKey, ""),
    errorKey = form.error(firstNameKey).map(e => e.message),
    hasErrors = form.error(firstNameKey).nonEmpty,
-   label = Html(messages("enterName.firstName.label"))
+   label = Html(messages("enterName.firstName.label")),
+   labelClass = Some("govuk-label--m")
   )
   @textInput(
    fieldId = lastNameKey,
    value = form.data.getOrElse(lastNameKey, ""),
    errorKey = form.error(lastNameKey).map(e => e.message),
    hasErrors = form.error(lastNameKey).nonEmpty,
-   label = Html(messages("enterName.lastName.label"))
+   label = Html(messages("enterName.lastName.label")),
+   labelClass = Some("govuk-label--m")
   )
   @submitButton(messages("button.continue"))
  }
