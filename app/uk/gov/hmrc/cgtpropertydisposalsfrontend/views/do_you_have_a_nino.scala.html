@@ -45,7 +45,8 @@
     labelAsHeading = true,
     errorKey = form.error(key).map(e => e.message),
     hasErrors = hasErrors,
-    selected = form.value
+    selected = form.value,
+    helpText = Some(Html(messages("haveANino.helpText", appConfig.ninoGuidanceUrl)))
    )
    @submitButton(messages("button.continue"))
   }

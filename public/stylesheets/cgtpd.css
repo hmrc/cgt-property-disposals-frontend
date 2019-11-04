@@ -15,6 +15,10 @@ h1 > span.heading-medium {
     margin-top: 0;
 }
 
+fieldset .form-hint {
+    padding-bottom: 10px;
+}
+
 /*
     Assets Frontend does not render focus styles accessibly
  */
