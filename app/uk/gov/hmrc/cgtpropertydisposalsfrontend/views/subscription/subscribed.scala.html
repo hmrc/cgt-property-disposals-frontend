@@ -23,7 +23,7 @@
  buttonLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.button_link
 )
 
-@(cgtReference: String)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(cgtReference: String, emailAddress: String)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
 @affinity = @{"individual"}
 @title = @{messages("subscribed.title")}
@@ -33,6 +33,6 @@
   <p>@messages(s"subscribed.${affinity}.p1")</p>
   <p>@Html(messages(s"subscribed.${affinity}.p2", cgtReference))</p>
   <p>@messages(s"subscribed.${affinity}.p3")</p>
-  <p>@Html(messages(s"subscribed.p4", "x@example.com"))</p>
+  <p>@Html(messages(s"subscribed.p4", emailAddress))</p>
   @buttonLink(messages("subscribed.buttonText"), routes.HomeController.homepage().url)
 }
