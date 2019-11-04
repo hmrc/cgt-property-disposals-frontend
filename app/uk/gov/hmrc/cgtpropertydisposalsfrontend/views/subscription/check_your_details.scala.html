@@ -52,12 +52,6 @@
   @messages("subscription.lede", details.name.fold(_.value, n => n.makeSingleName))
  </p>
 
- <div class="panel panel-border-wide">
-  <p>
-   @messages("subscription.p")
-  </p>
- </div>
-
  @cyaSection() {
   @cyaRow(
    messages("subscription.cyaLabel.contactName"),
@@ -77,9 +71,6 @@
  }
 
  @formWrapper(routes.SubscriptionController.checkYourDetailsSubmit(), 'novalidate -> "novalidate") {
-  <p>
-   @messages("subscription.confirm")
-  </p>
-  @submitButton(messages("button.confirmAndContinue"))
+  @submitButton(messages("button.createAccount"))
  }
 }
