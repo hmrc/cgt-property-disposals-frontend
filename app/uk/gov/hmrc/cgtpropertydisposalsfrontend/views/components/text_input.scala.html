@@ -28,7 +28,8 @@
   hasErrors: Boolean,
   extraContent: Option[Html] = None,
   inputType: Option[String] = Some("text"),
-  inputClass: Option[String] = None
+  inputClass: Option[String] = None,
+  labelClass: Option[String] = None
 )(implicit messages: Messages)
 
 @classes = @{if(hasErrors) "form-group form-group-error" else "form-group" }
@@ -49,7 +50,7 @@
   @if(labelAsHeading) {
     <h1><label for="@{fieldId}" class="heading-xlarge">@{label}</label></h1>
   } else {
-    <label for="@{fieldId}">@{label}</label>
+    <label for="@{fieldId}" class="@{labelClass.getOrElse("")}">@{label}</label>
   }
 }
 

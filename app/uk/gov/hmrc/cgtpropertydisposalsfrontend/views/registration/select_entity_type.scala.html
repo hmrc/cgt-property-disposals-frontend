@@ -51,7 +51,7 @@
   @formWrapper(routes.RegistrationController.selectEntityTypeSubmit(), 'novalidate -> "novalidate") {
     @radioGroup(
       fieldId = key,
-      label = pageHeading(title),
+      label = pageHeading(title, Some(messages("subscription.caption"))),
       options = options,
       labelAsHeading = true,
       errorKey = form.error(key).map(e => e.message),

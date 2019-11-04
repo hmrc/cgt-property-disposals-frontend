@@ -47,7 +47,7 @@
   @formWrapper(routes.InsufficientConfidenceLevelController.doYouHaveSaUtrSubmit(), 'novalidate -> "novalidate") {
    @yesNo(
     fieldId = key,
-    label = pageHeading(title),
+    label = pageHeading(title, Some(messages("subscription.caption"))),
     errorKey = form.error(key).map(e => e.message),
     hasErrors = form.error(key).nonEmpty,
     selected = form.data.get(key).map(f => f match {

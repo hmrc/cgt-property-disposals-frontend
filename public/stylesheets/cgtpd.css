@@ -49,3 +49,20 @@ input:focus, textarea:focus, select:focus, #global-header input:focus {
 .govuk-related-items h2 {
     margin-top: 0.55556em;
 }
+
+.govuk-label--m {
+    font-family: "nta", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-weight: 700;
+    font-size: 18px;
+    line-height: 1.11111;
+    margin-bottom: 10px;
+}
+
+@media (min-width: 40.0625em) {
+    .govuk-label--m {
+        font-size: 24px;
+        line-height: 1.25;
+    }
+}

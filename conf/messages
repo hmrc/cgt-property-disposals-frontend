@@ -333,9 +333,8 @@ haveATrn.title=Does the trust or estate have a Trust Registration Number?
 hasTrn.error.required=Select yes if you have a Trust Registration number
 hasTrn.error.boolean=Select yes if you have a Trust Registration number
 
-enterTrn.title=Tell us your Trust Registration Number
-trn.label=Enter your Trust Registration Number
-trn.helpText=You can find this somewhere. For example, 123456789012345
+enterTrn.title=Enter details about the trust or estate
+trn.label=Trust Registration Number
 trn.error.required=Enter your Trust Registration Number
 trn.error.pattern=Trust Registration Number must be 15 numbers, for example 123456789012345
 trn.error.tooLong=Trust Registration Number must be 15 numbers, for example 123456789012345
@@ -345,7 +344,7 @@ enterTrn.tooManyAttempts.title=Too many attempts
 enterTrn.tooManyAttempts.p1=You’ve tried to enter your Trust Registration Number and trust name too many times.
 enterTrn.tooManyAttempts.p2=You can try again later.
 
-enterTrustName.label=Trust name
+enterTrustName.label=Name of trust
 trustName.error.required=Enter the name of your trust
 trustName.error.tooLong=The name of your trust must be less than 105 characters
 trustName.error.pattern=Your trust name can only include letters, apostrophes, hyphens, spaces and ampersands
