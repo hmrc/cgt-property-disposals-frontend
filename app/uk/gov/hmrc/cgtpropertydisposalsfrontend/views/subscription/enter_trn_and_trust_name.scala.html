@@ -45,7 +45,7 @@
   @errorSummary(form)
  }
 
- @pageHeading(title)
+ @pageHeading(title, Some(messages("subscription.caption")))
 
  @formWrapper(routes.DeterminingIfOrganisationIsTrustController.enterTrnSubmit(), 'novalidate -> "novalidate") {
   @textInput(
@@ -53,15 +53,16 @@
    value = form.data.getOrElse(trnKey, ""),
    errorKey = form.error(trnKey).map(e => e.message),
    hasErrors = form.error(trnKey).nonEmpty,
-   helpText = Some(Html(messages("trn.helpText"))),
-   label = Html(messages("trn.label"))
+   label = Html(messages("trn.label")),
+   labelClass = Some(" govuk-label--m")
   )
   @textInput(
    fieldId = trustNameKey,
    value = form.data.getOrElse(trustNameKey, ""),
    errorKey = form.error(trustNameKey).map(e => e.message),
    hasErrors = form.error(trustNameKey).nonEmpty,
-   label = Html(messages("enterTrustName.label"))
+   label = Html(messages("enterTrustName.label")),
+   labelClass = Some(" govuk-label--m")
   )
   @submitButton(messages("button.continue"))
  }

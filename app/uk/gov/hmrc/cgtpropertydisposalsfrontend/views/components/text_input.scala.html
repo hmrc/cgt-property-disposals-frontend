@@ -28,19 +28,24 @@
   hasErrors: Boolean,
   extraContent: Option[Html] = None,
   inputType: Option[String] = Some("text"),
-  inputClass: Option[String] = None
+  inputClass: Option[String] = None,
+  labelClass: Option[String] = None
 )(implicit messages: Messages)
+
+@classBuilder(s: Option[String]*) = @{s.toList.collect{case Some(s) => s}.mkString(" ")}
 
 @classes = @{if(hasErrors) "form-group form-group-error" else "form-group" }
 @inputClasses = @{if(hasErrors) {
-  s"form-control form-control-error ${inputClass.getOrElse("")}"
+  classBuilder(Some("form-control"), Some("form-control-error"), inputClass)
 } else {
-  s"form-control ${inputClass.getOrElse("")}"
+  classBuilder(Some("form-control"), inputClass)
 }}
+
 @hintTextKey = @{s"${{fieldId}}-form-hint"}
 @extraContentKey = @{s"${{fieldId}}-extra-content"}
 @hintIdWithHintText = @{helpText.map(hintTextKey -> _)}
 @extraContentIdWithContent = @{extraContent.map(extraContentKey -> _)}
+@labelClasses = @{classBuilder(Some("form-label"), labelClass)}
 
 @describedByKeys = @{
   List(hintIdWithHintText.map(_._1), extraContentIdWithContent.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
@@ -49,7 +54,7 @@
   @if(labelAsHeading) {
     <h1><label for="@{fieldId}" class="heading-xlarge">@{label}</label></h1>
   } else {
-    <label for="@{fieldId}">@{label}</label>
+    <label for="@{fieldId}" class="@{labelClasses}">@{label}</label>
   }
 }
 

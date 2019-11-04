@@ -33,7 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -61,15 +61,6 @@ class SubscriptionControllerSpec
   val requestWithCSRFToken = FakeRequest().withCSRFToken
 
   val subscriptionDetails = sample[SubscriptionDetails]
-  val accountDetails = SubscribedDetails(
-    subscriptionDetails.name,
-    subscriptionDetails.emailAddress,
-    subscriptionDetails.address,
-    subscriptionDetails.contactName,
-    CgtReference("number"),
-    None,
-    registeredWithId = true
-  )
 
   val sessionWithSubscriptionDetails =
     SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(subscriptionDetails)))
@@ -79,8 +70,6 @@ class SubscriptionControllerSpec
       .subscribe(_: SubscriptionDetails)(_: HeaderCarrier))
       .expects(expectedSubscriptionDetails, *)
       .returning(EitherT(Future.successful(response)))
-
-  val name = sample[IndividualName]
 
   def redirectToStart(performAction: () => Future[Result]) =
     redirectToStartWhenInvalidJourney(
@@ -99,17 +88,36 @@ class SubscriptionControllerSpec
 
       behave like redirectToStart(performAction)
 
-      "show the check you details page" when {
+      "show the check your details page" when {
 
-        "there are subscription details in session" in {
+        "there are subscription details in session for an individual" in {
+          val individualSessionWithSubscriptionDetails =
+            SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(
+              sample[SubscriptionDetails].copy(name = Right(sample[IndividualName])))
+            ))
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionWithSubscriptionDetails))))
+            mockGetSession(Future.successful(Right(Some(individualSessionWithSubscriptionDetails))))
           }
 
           val result = performAction()
           status(result)          shouldBe OK
-          contentAsString(result) should include(message("subscription.title"))
+          contentAsString(result) should include(message("subscription.individual.title"))
+        }
+
+        "there are subscription details in session for an organisation" in {
+          val organisationSessionWithSubscriptionDetails =
+            SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(
+              sample[SubscriptionDetails].copy(name = Left(sample[TrustName])))
+            ))
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(organisationSessionWithSubscriptionDetails))))
+          }
+
+          val result = performAction()
+          status(result)          shouldBe OK
+          contentAsString(result) should include(message("subscription.organisation.title"))
         }
 
       }
@@ -122,6 +130,15 @@ class SubscriptionControllerSpec
         controller.checkYourDetailsSubmit()(requestWithCSRFToken)
 
       val subscriptionResponse = SubscriptionResponse("number")
+      val accountDetails = SubscribedDetails(
+        subscriptionDetails.name,
+        subscriptionDetails.emailAddress,
+        subscriptionDetails.address,
+        subscriptionDetails.contactName,
+        CgtReference("number"),
+        None,
+        registeredWithId = true
+      )
 
       val sessionWithSubscriptionComplete =
         SessionData.empty.copy(journeyStatus = Some(Subscribed(accountDetails)))
