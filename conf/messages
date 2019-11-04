@@ -325,11 +325,11 @@ account.manageYourDetails.cyaChange.telephone=your telephone number
 account.manageYourDetails.addTelephone=Add a phone number
 account.manageYourDetails.yourName=Your name
 
-isReportingForATrust.title=Do you want to report the tax for a trust?
-isReportingForATrust.error.required=Select yes if you want to report the tax for a trust
-isReportingForATrust.error.boolean=Select yes if you want to report the tax for a trust
+isReportingForATrust.title=Do you want to report a capital gain for a trust or estate?
+isReportingForATrust.error.required=Select yes if you want to report the tax for a trust or estate
+isReportingForATrust.error.boolean=Select yes if you want to report the tax for a trust or estate
 
-haveATrn.title=Do you have a Trust Registration Number?
+haveATrn.title=Does the trust or estate have a Trust Registration Number?
 hasTrn.error.required=Select yes if you have a Trust Registration number
 hasTrn.error.boolean=Select yes if you have a Trust Registration number
 
