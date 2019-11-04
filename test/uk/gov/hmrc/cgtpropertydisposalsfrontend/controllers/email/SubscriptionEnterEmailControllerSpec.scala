@@ -18,8 +18,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email
 
 import java.util.UUID
 
-import cats.data.EitherT
-import cats.instances.future._
 import org.scalacheck.ScalacheckShapeless._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
@@ -32,9 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscriptio
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, sample}
-import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class SubscriptionEnterEmailControllerSpec
@@ -50,12 +46,10 @@ class SubscriptionEnterEmailControllerSpec
   override val validVerificationCompleteJourneyStatus: SubscriptionMissingData =
     SubscriptionMissingData(sample[BusinessPartnerRecord].copy(emailAddress = Some(sample[Email])))
 
-  override def updateEmail(journey: SubscriptionMissingData, email: Email)(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, SubscriptionMissingData] =
-    EitherT.rightT[Future, Error](
-      journey.copy(businessPartnerRecord = journey.businessPartnerRecord.copy(emailAddress = Some(email)))
-    )
+  override def updateEmail(journey: SubscriptionMissingData, email: Email): SubscriptionMissingData =
+    journey.copy(businessPartnerRecord = journey.businessPartnerRecord.copy(emailAddress = Some(email)))
+
+  val mockUpdateEmail: Option[(SubscriptionMissingData, Either[Error, Unit]) => Unit] = None
 
   override lazy val controller: SubscriptionEnterEmailController = instanceOf[SubscriptionEnterEmailController]
 

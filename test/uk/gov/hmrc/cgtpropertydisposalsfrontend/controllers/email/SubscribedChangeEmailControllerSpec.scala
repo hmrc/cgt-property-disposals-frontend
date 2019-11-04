@@ -23,13 +23,19 @@ import cats.instances.future._
 import org.scalacheck.ScalacheckShapeless._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
+import play.api.inject.bind
+import play.api.inject.guice.GuiceableModule
 import play.api.mvc.Result
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, SubscribedDetails, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{EmailVerificationService, SubscriptionService}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -48,19 +54,27 @@ class SubscribedChangeEmailControllerSpec
 
   override lazy val controller: SubscribedChangeEmailController = instanceOf[SubscribedChangeEmailController]
 
+  override val overrideBindings =
+    List[GuiceableModule](
+      bind[AuthConnector].toInstance(mockAuthConnector),
+      bind[SessionStore].toInstance(mockSessionStore),
+      bind[EmailVerificationService].toInstance(mockService),
+      bind[UUIDGenerator].toInstance(mockUuidGenerator),
+      bind[SubscriptionService].toInstance(mockSubscriptionService)
+    )
+
   def mockSubscriptionUpdate(subscribedDetails: SubscribedDetails)(result: Either[Error, Unit]) =
     (mockSubscriptionService
       .updateSubscribedDetails(_: SubscribedDetails)(_: HeaderCarrier))
       .expects(subscribedDetails, *)
       .returning(EitherT.fromEither[Future](result))
 
-  override def updateEmail(journey: Subscribed, email: Email)(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, Subscribed] = {
-    val journeyWithUpdatedEmail = journey.copy(subscribedDetails = journey.subscribedDetails.copy(emailAddress = email))
-    mockSubscriptionUpdate(journeyWithUpdatedEmail.subscribedDetails)(Right(Unit))
-    EitherT.rightT[Future, Error](journeyWithUpdatedEmail)
-  }
+  override def updateEmail(journey: Subscribed, email: Email): Subscribed =
+    journey.copy(subscribedDetails = journey.subscribedDetails.copy(emailAddress = email))
+
+  val mockUpdateEmail: Option[(Subscribed, Either[Error, Unit]) => Unit] = Some({
+    case (s: Subscribed, r: Either[Error, Unit]) => mockSubscriptionUpdate(s.subscribedDetails)(r)
+  })
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
