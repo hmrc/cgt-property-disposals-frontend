@@ -60,6 +60,12 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
       .expects(cgtReference, *)
       .returning(EitherT(Future.successful(response)))
 
+  def mockUpdateSubscriptionDetails(subscribedDetails: SubscribedDetails)(response: Either[Error, HttpResponse]) =
+    (mockConnector
+      .updateSubscribedDetails(_: SubscribedDetails)(_: HeaderCarrier))
+      .expects(subscribedDetails, *)
+      .returning(EitherT(Future.successful(response)))
+
 
   "SubscriptionServiceImpl" when {
 
@@ -216,6 +222,31 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
         mockGetSusbcribedDetails(cgtReference)(Right(HttpResponse(200, Some(Json.toJson(subscribedDetails)))))
 
         await(service.getSubscribedDetails(cgtReference).value) shouldBe Right(subscribedDetails)
+      }
+
+    }
+
+    "handling requests to update subscribed details" must {
+
+      val subscribedDetails = sample[SubscribedDetails]
+
+      "return an error" when {
+
+        "the http call comes back with a status other than 200" in {
+          mockUpdateSubscriptionDetails(subscribedDetails)(Right(HttpResponse(500)))
+
+          await(service.updateSubscribedDetails(subscribedDetails).value).isLeft shouldBe true
+        }
+
+      }
+
+      "return subscribed details if the call comes back with status 200 and the JSON " +
+        "body of the response can be parsed" in {
+        val subscribedDetails = sample[SubscribedDetails]
+
+        mockUpdateSubscriptionDetails(subscribedDetails)(Right(HttpResponse(200, Some(Json.toJson(subscribedDetails)))))
+
+        await(service.updateSubscribedDetails(subscribedDetails).value) shouldBe Right(())
       }
 
     }
