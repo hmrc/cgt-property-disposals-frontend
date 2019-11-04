@@ -26,7 +26,7 @@
 
 @(accountDetails: SubscribedDetails)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
-@affinity = @{accountDetails.name.fold(a => "organisation", b => "individual")}
+@affinity = @{accountDetails.name.fold(_ => "organisation", _ => "individual")}
 
 @title = @{messages("subscribed.title")}
 

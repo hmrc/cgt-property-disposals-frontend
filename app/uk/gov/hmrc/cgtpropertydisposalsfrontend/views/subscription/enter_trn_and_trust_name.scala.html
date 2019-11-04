@@ -54,7 +54,7 @@
    errorKey = form.error(trnKey).map(e => e.message),
    hasErrors = form.error(trnKey).nonEmpty,
    label = Html(messages("trn.label")),
-   labelClass = Some("govuk-label--m")
+   labelClass = Some(" govuk-label--m")
   )
   @textInput(
    fieldId = trustNameKey,
@@ -62,7 +62,7 @@
    errorKey = form.error(trustNameKey).map(e => e.message),
    hasErrors = form.error(trustNameKey).nonEmpty,
    label = Html(messages("enterTrustName.label")),
-   labelClass = Some("govuk-label--m")
+   labelClass = Some(" govuk-label--m")
   )
   @submitButton(messages("button.continue"))
  }

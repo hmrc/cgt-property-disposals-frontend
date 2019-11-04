@@ -38,6 +38,7 @@
 } else {
   s"form-control ${inputClass.getOrElse("")}"
 }}
+
 @hintTextKey = @{s"${{fieldId}}-form-hint"}
 @extraContentKey = @{s"${{fieldId}}-extra-content"}
 @hintIdWithHintText = @{helpText.map(hintTextKey -> _)}
@@ -50,7 +51,7 @@
   @if(labelAsHeading) {
     <h1><label for="@{fieldId}" class="heading-xlarge">@{label}</label></h1>
   } else {
-    <label for="@{fieldId}" class="@{labelClass.getOrElse("")}">@{label}</label>
+    <label for="@{fieldId}" class="form-label@{labelClass.getOrElse("")}">@{label}</label>
   }
 }
 
