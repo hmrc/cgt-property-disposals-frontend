@@ -18,50 +18,75 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email
 
 import java.util.UUID
 
+import cats.data.EitherT
+import cats.instances.future._
 import org.scalacheck.ScalacheckShapeless._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
+import play.api.inject.bind
+import play.api.inject.guice.GuiceableModule
 import play.api.mvc.Result
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
+import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.{SubscriptionMissingData, SubscriptionReady}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, SubscribedDetails, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{EmailVerificationService, SubscriptionService}
+import uk.gov.hmrc.http.HeaderCarrier
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class SubscriptionChangeEmailControllerSpec
-    extends EmailControllerSpec[SubscriptionReady, SubscriptionReady]
+class SubscribedChangeEmailControllerSpec
+    extends EmailControllerSpec[Subscribed, Subscribed]
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
   override val isAmendJourney: Boolean = true
 
-  override val validJourneyStatus: SubscriptionReady =
-    sample[SubscriptionReady]
+  override val validJourneyStatus: Subscribed = sample[Subscribed]
 
-  override val validVerificationCompleteJourneyStatus: SubscriptionReady =
-    validJourneyStatus
+  override val validVerificationCompleteJourneyStatus: Subscribed = validJourneyStatus
 
-  override def updateEmail(journey: SubscriptionReady, email: Email): SubscriptionReady =
-    journey.copy(subscriptionDetails = journey.subscriptionDetails.copy(emailAddress = email))
+  override lazy val controller: SubscribedChangeEmailController = instanceOf[SubscribedChangeEmailController]
 
-  val mockUpdateEmail: Option[(SubscriptionReady, Either[Error, Unit]) => Unit] = None
+  override val overrideBindings =
+    List[GuiceableModule](
+      bind[AuthConnector].toInstance(mockAuthConnector),
+      bind[SessionStore].toInstance(mockSessionStore),
+      bind[EmailVerificationService].toInstance(mockService),
+      bind[UUIDGenerator].toInstance(mockUuidGenerator),
+      bind[SubscriptionService].toInstance(mockSubscriptionService)
+    )
 
-  override lazy val controller: SubscriptionChangeEmailController = instanceOf[SubscriptionChangeEmailController]
+  def mockSubscriptionUpdate(subscribedDetails: SubscribedDetails)(result: Either[Error, Unit]) =
+    (mockSubscriptionService
+      .updateSubscribedDetails(_: SubscribedDetails)(_: HeaderCarrier))
+      .expects(subscribedDetails, *)
+      .returning(EitherT.fromEither[Future](result))
+
+  override def updateEmail(journey: Subscribed, email: Email): Subscribed =
+    journey.copy(subscribedDetails = journey.subscribedDetails.copy(emailAddress = email))
+
+  val mockUpdateEmail: Option[(Subscribed, Either[Error, Unit]) => Unit] = Some({
+    case (s: Subscribed, r: Either[Error, Unit]) => mockSubscriptionUpdate(s.subscribedDetails)(r)
+  })
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
       performAction, {
-        case _: SubscriptionReady => true
-        case _                    => false
+        case _: Subscribed => true
+        case _             => false
       }
     )
 
-  "SubscriptionChangeEmailController" when {
+  "SubscribedChangeEmailController" when {
 
     "handling requests to display the enter email page" must {
 
@@ -84,9 +109,9 @@ class SubscriptionChangeEmailControllerSpec
       behave like redirectToStartBehaviour(() => performAction("", ""))
       behave like enterEmailSubmit(
         performAction,
-        validJourneyStatus.subscriptionDetails.contactName,
-        routes.SubscriptionChangeEmailController.verifyEmail,
-        routes.SubscriptionChangeEmailController.checkYourInbox()
+        validJourneyStatus.subscribedDetails.contactName,
+        routes.SubscribedChangeEmailController.verifyEmail,
+        routes.SubscribedChangeEmailController.checkYourInbox()
       )
     }
 
@@ -99,8 +124,8 @@ class SubscriptionChangeEmailControllerSpec
 
       behave like checkYourInboxPage(
         performAction,
-        routes.SubscriptionChangeEmailController.enterEmail(),
-        routes.SubscriptionChangeEmailController.enterEmail().url
+        routes.SubscribedChangeEmailController.enterEmail(),
+        routes.SubscribedChangeEmailController.enterEmail().url
       )
     }
 
@@ -113,13 +138,13 @@ class SubscriptionChangeEmailControllerSpec
 
       behave like verifyEmail(
         performAction,
-        routes.SubscriptionChangeEmailController.enterEmail(),
-        routes.SubscriptionChangeEmailController.emailVerified()
+        routes.SubscribedChangeEmailController.enterEmail(),
+        routes.SubscribedChangeEmailController.emailVerified()
       )
 
     }
 
-    "handling requests to display the email verfied page" must {
+    "handling requests to display the email verified page" must {
 
       def performAction(): Future[Result] =
         controller.emailVerified()(FakeRequest())
@@ -128,10 +153,9 @@ class SubscriptionChangeEmailControllerSpec
 
       behave like emailVerifiedPage(
         performAction,
-        controllers.routes.SubscriptionController.checkYourDetails(),
-        routes.SubscriptionChangeEmailController.enterEmail()
+        controllers.routes.HomeController.homepage(),
+        routes.SubscribedChangeEmailController.enterEmail()
       )
     }
   }
-
 }

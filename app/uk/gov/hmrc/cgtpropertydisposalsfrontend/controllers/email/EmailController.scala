@@ -35,6 +35,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationServic
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -55,7 +56,9 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
   val checkYourInboxPage: views.html.email.check_your_inbox
   val emailVerifiedPage: views.html.email.email_verified
 
-  def updateEmail(journey: Journey, email: Email): VerificationCompleteJourney
+  def updateEmail(journey: Journey, email: Email)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, VerificationCompleteJourney]
 
   def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, Journey)]
 
@@ -158,21 +161,22 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
               if (emailToBeVerified.verified) {
                 Redirect(emailVerifiedCall)
               } else {
-                updateSession(sessionStore, request) { s =>
-                  val email = Email(emailToBeVerified.email.value)
-                  s.copy(
-                    journeyStatus     = Some(updateEmail(journey, email)),
-                    emailToBeVerified = Some(emailToBeVerified.copy(verified = true))
-                  )
-                }.map(
-                  _.fold(
-                    { e =>
-                      logger.warn("Could not store email verified result", e)
-                      errorHandler.errorResult()
-                    }, { _ =>
-                      Redirect(emailVerifiedCall)
-                    }
-                  )
+                val result = for {
+                  journey <- updateEmail(journey, emailToBeVerified.email)
+                  _ <- EitherT[Future, Error, Unit](updateSession(sessionStore, request) { s =>
+                        s.copy(
+                          journeyStatus     = Some(journey),
+                          emailToBeVerified = Some(emailToBeVerified.copy(verified = true))
+                        )
+                      })
+                } yield ()
+
+                result.fold(
+                  error => {
+                    logger.warn(s"Could not update email: $error")
+                    errorHandler.errorResult()
+                  },
+                  _ => Redirect(emailVerifiedCall)
                 )
               }
             }

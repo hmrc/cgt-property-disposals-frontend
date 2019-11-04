@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email
 
 import java.util.UUID
 
+import cats.data.EitherT
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Call, MessagesControllerComponents, Result}
 import shapeless.{Lens, lens}
@@ -27,14 +28,15 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionMissingData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, SessionData, Error}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-
-import scala.concurrent.ExecutionContext
+import cats.instances.future._
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class SubscriptionEnterEmailController @Inject()(
@@ -73,8 +75,8 @@ class SubscriptionEnterEmailController @Inject()(
   val subscriptionMissingDataEmailLens: Lens[SubscriptionMissingData, Option[Email]] =
     lens[SubscriptionMissingData].businessPartnerRecord.emailAddress
 
-  override def updateEmail(journey: SubscriptionMissingData, email: Email): SubscriptionMissingData =
-    subscriptionMissingDataEmailLens.set(journey)(Some(email))
+  override def updateEmail(journey: SubscriptionMissingData, email: Email)(implicit hc : HeaderCarrier): EitherT[Future, Error, SubscriptionMissingData] =
+    EitherT.rightT[Future, Error](subscriptionMissingDataEmailLens.set(journey)(Some(email)))
 
   override def name(journeyStatus: SubscriptionMissingData): ContactName =
     ContactName(journeyStatus.businessPartnerRecord.name.fold(_.value, n => n.makeSingleName()))

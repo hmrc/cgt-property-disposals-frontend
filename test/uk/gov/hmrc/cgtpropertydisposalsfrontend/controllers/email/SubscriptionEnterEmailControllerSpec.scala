@@ -29,7 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RedirectToStartBehav
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionMissingData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, sample}
 
 import scala.concurrent.Future
 
@@ -48,6 +48,8 @@ class SubscriptionEnterEmailControllerSpec
 
   override def updateEmail(journey: SubscriptionMissingData, email: Email): SubscriptionMissingData =
     journey.copy(businessPartnerRecord = journey.businessPartnerRecord.copy(emailAddress = Some(email)))
+
+  val mockUpdateEmail: Option[(SubscriptionMissingData, Either[Error, Unit]) => Unit] = None
 
   override lazy val controller: SubscriptionEnterEmailController = instanceOf[SubscriptionEnterEmailController]
 

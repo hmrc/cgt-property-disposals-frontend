@@ -20,7 +20,6 @@ import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
-import org.scalacheck.ScalacheckShapeless._
 import org.scalamock.handlers.CallHandler0
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
@@ -30,7 +29,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, EmailToBeVerified, Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
@@ -52,6 +51,8 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
 
   def updateEmail(journey: Journey, email: Email): VerificationCompleteJourney
 
+  val mockUpdateEmail: Option[(VerificationCompleteJourney, Either[Error, Unit]) => Unit]
+
   val controller: EmailController[Journey, VerificationCompleteJourney]
 
   val isAmendJourney: Boolean
@@ -69,9 +70,9 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
     )
 
   def mockEmailVerification(
-                             expectedEmail: Email,
-                             expectedName: ContactName,
-                             expectedContinue: Call
+    expectedEmail: Email,
+    expectedName: ContactName,
+    expectedContinue: Call
   )(result: Either[Error, EmailVerificationResponse]) =
     (mockService
       .verifyEmail(_: Email, _: ContactName, _: Call)(_: HeaderCarrier))
@@ -352,6 +353,9 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionData))))
+          mockUpdateEmail.foreach { f =>
+            f(updateEmail(validJourneyStatus, emailToBeVerified.email), Right(Unit))
+          }
           mockStoreSession(
             sessionData.copy(
               emailToBeVerified = Some(emailToBeVerified.copy(verified = true)),
@@ -359,10 +363,19 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
             )
           )(Future.successful(Left(Error(""))))
         }
-
         checkIsTechnicalErrorPage(performAction(id))
       }
 
+      mockUpdateEmail.foreach { f =>
+        "there is an error updating the email" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData))))
+            f(updateEmail(validJourneyStatus, emailToBeVerified.email), Left(Error("Error updating email")))
+          }
+          checkIsTechnicalErrorPage(performAction(id))
+        }
+      }
     }
 
     "redirect to email verified" when {
@@ -376,7 +389,6 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
             )
           )
         }
-
         checkIsRedirect(performAction(id), emailVerifiedCall)
       }
 
@@ -384,6 +396,9 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionData))))
+          mockUpdateEmail.foreach { f =>
+            f(updateEmail(validJourneyStatus, emailToBeVerified.email), Right(Unit))
+          }
           mockStoreSession(
             sessionData.copy(
               emailToBeVerified = Some(emailToBeVerified.copy(verified = true)),
@@ -391,10 +406,8 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
             )
           )(Future.successful(Right(())))
         }
-
         checkIsRedirect(performAction(id), emailVerifiedCall)
       }
-
     }
   }
 

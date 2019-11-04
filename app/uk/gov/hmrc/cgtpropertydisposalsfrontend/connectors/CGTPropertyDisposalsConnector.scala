@@ -22,7 +22,7 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecordRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, RegistrationDetails, SubscriptionDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, RegistrationDetails, SubscribedDetails, SubscriptionDetails}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
@@ -52,6 +52,9 @@ trait CGTPropertyDisposalsConnector {
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
+  def updateSubscribedDetails(subscribedDetails: SubscribedDetails)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, HttpResponse]
 }
 
 @Singleton
@@ -68,6 +71,8 @@ class CGTPropertyDisposalsConnectorImpl @Inject()(http: HttpClient, servicesConf
   val registerWithoutIdAndSubscribeUrl: String = s"$baseUrl/register-without-id-and-subscribe"
 
   val subscriptionStatusUrl: String = s"$baseUrl/check-subscription-status"
+
+  val subscriptionUpdateUrl: String = s"$baseUrl/subscription"
 
   def getSubscribedDetailsUrl(cgtReference: CgtReference): String = s"$baseUrl/subscription/${cgtReference.value}"
 
@@ -91,10 +96,15 @@ class CGTPropertyDisposalsConnectorImpl @Inject()(http: HttpClient, servicesConf
   ): EitherT[Future, Error, HttpResponse] =
     makeCall(_.get(subscriptionStatusUrl))
 
-  def getSubscribedDetails(cgtReference: CgtReference)(
+  override def getSubscribedDetails(cgtReference: CgtReference)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] =
     makeCall(_.get(getSubscribedDetailsUrl(cgtReference)))
+
+  override def updateSubscribedDetails(subscribedDetails: SubscribedDetails)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, HttpResponse] =
+    makeCall(_.put(subscriptionUpdateUrl, subscribedDetails))
 
   private def makeCall(call: HttpClient => Future[HttpResponse]): EitherT[Future, Error, HttpResponse] =
     EitherT[Future, Error, HttpResponse](

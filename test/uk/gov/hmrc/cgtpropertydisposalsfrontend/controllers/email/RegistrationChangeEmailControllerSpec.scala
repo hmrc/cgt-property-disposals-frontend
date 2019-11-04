@@ -18,7 +18,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email
 
 import java.util.UUID
 
-import org.scalacheck.ScalacheckShapeless._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.mvc.Result
@@ -28,7 +27,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, sample}
+import org.scalacheck.ScalacheckShapeless._
 
 import scala.concurrent.Future
 
@@ -47,6 +47,8 @@ class RegistrationChangeEmailControllerSpec
 
   override def updateEmail(journey: RegistrationReady, email: Email): RegistrationReady =
     journey.copy(registrationDetails = journey.registrationDetails.copy(emailAddress = email))
+
+  val mockUpdateEmail: Option[(RegistrationReady, Either[Error, Unit]) => Unit] = None
 
   override lazy val controller: RegistrationChangeEmailController = instanceOf[RegistrationChangeEmailController]
 

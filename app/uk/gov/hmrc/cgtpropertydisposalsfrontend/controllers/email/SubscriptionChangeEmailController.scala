@@ -18,6 +18,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email
 
 import java.util.UUID
 
+import cats.data.EitherT
+import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Call, MessagesControllerComponents, Result}
 import shapeless.{Lens, lens}
@@ -27,14 +29,15 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class SubscriptionChangeEmailController @Inject()(
@@ -71,8 +74,10 @@ class SubscriptionChangeEmailController @Inject()(
   val subscriptionReadyEmailLens: Lens[SubscriptionReady, Email] =
     lens[SubscriptionReady].subscriptionDetails.emailAddress
 
-  override def updateEmail(journey: SubscriptionReady, email: Email): SubscriptionReady =
-    subscriptionReadyEmailLens.set(journey)(email)
+  override def updateEmail(journey: SubscriptionReady, email: Email)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, SubscriptionReady] =
+    EitherT.rightT[Future, Error](subscriptionReadyEmailLens.set(journey)(email))
 
   override def name(journeyStatus: SubscriptionReady): ContactName =
     journeyStatus.subscriptionDetails.contactName

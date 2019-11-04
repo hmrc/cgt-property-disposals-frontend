@@ -48,6 +48,10 @@ trait SubscriptionService {
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, SubscribedDetails]
 
+  def updateSubscribedDetails(subscribedDetails: SubscribedDetails)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, Unit]
+
 }
 
 @Singleton
@@ -57,13 +61,15 @@ class SubscriptionServiceImpl @Inject()(connector: CGTPropertyDisposalsConnector
   override def subscribe(
     subscriptionDetails: SubscriptionDetails
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, SubscriptionResponse] =
-    connector.subscribe(subscriptionDetails)
+    connector
+      .subscribe(subscriptionDetails)
       .subflatMap(handleSubscriptionResponse(_, "subscribe"))
 
   override def registerWithoutIdAndSubscribe(registrationDetails: RegistrationDetails)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, SubscriptionResponse] =
-    connector.registerWithoutIdAndSubscribe(registrationDetails)
+    connector
+      .registerWithoutIdAndSubscribe(registrationDetails)
       .subflatMap(handleSubscriptionResponse(_, "register without id and subscribe"))
 
   private def handleSubscriptionResponse(
@@ -86,12 +92,22 @@ class SubscriptionServiceImpl @Inject()(connector: CGTPropertyDisposalsConnector
         Left(Error(s"call to get subscription status came back with status ${response.status}"))
     }
 
-  def getSubscribedDetails(cgtReference: CgtReference)(
+  override def getSubscribedDetails(cgtReference: CgtReference)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, SubscribedDetails] =
-    connector.getSubscribedDetails(cgtReference).subflatMap{ response =>
-      if(response.status === 200)
+    connector.getSubscribedDetails(cgtReference).subflatMap { response =>
+      if (response.status === 200)
         response.parseJSON[SubscribedDetails]().leftMap(Error(_))
+      else
+        Left(Error(s"Call to get subscribed details came back with status ${response.status}"))
+    }
+
+  override def updateSubscribedDetails(subscribedDetails: SubscribedDetails)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, Unit] =
+    connector.updateSubscribedDetails(subscribedDetails).subflatMap { response =>
+      if (response.status === 200)
+        Right(())
       else
         Left(Error(s"Call to get subscribed details came back with status ${response.status}"))
     }
