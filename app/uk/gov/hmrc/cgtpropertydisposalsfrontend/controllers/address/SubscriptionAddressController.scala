@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address
 
+import cats.data.EitherT
+import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc._
 import shapeless.{Lens, lens}
@@ -24,14 +26,15 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class SubscriptionAddressController @Inject()(
@@ -65,8 +68,10 @@ class SubscriptionAddressController @Inject()(
       case _                                         => Left(Redirect(controllers.routes.StartController.start()))
     }
 
-  def updateAddress(journey: SubscriptionReady, address: Address): JourneyStatus =
-    subscriptionReadyAddressLens.set(journey)(address)
+  def updateAddress(journey: SubscriptionReady, address: Address)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, JourneyStatus] =
+    EitherT.pure[Future, Error](subscriptionReadyAddressLens.set(journey)(address))
 
   protected lazy val backLinkCall: Call                = controllers.routes.SubscriptionController.checkYourDetails()
   protected lazy val isUkCall: Call                    = routes.SubscriptionAddressController.isUk()

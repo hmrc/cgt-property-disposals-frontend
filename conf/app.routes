@@ -121,6 +121,19 @@ POST /subscription/enter-uk-address      uk.gov.hmrc.cgtpropertydisposalsfronten
 GET  /subscription/enter-non-uk-address  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.SubscriptionAddressController.enterNonUkAddress()
 POST /subscription/enter-non-uk-address  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.SubscriptionAddressController.enterNonUkAddressSubmit()
 
+#### Subscription Change address
+GET  /subscribed/is-address-in-uk      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.SubscribedChangeAddressController.isUk()
+POST /subscribed/is-address-in-uk      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.SubscribedChangeAddressController.isUkSubmit()
+GET  /subscribed/change-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.SubscribedChangeAddressController.enterPostcode()
+POST /subscribed/change-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.SubscribedChangeAddressController.enterPostcodeSubmit()
+GET  /subscribed/select-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.SubscribedChangeAddressController.selectAddress()
+POST /subscribed/select-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.SubscribedChangeAddressController.selectAddressSubmit()
+GET  /subscribed/enter-uk-address      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.SubscribedChangeAddressController.enterUkAddress()
+POST /subscribed/enter-uk-address      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.SubscribedChangeAddressController.enterUkAddressSubmit()
+GET  /subscribed/enter-non-uk-address  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.SubscribedChangeAddressController.enterNonUkAddress()
+POST /subscribed/enter-non-uk-address  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.SubscribedChangeAddressController.enterNonUkAddressSubmit()
+
+
 ### Subscribed Journey
 GET /account/manage-your-details         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.HomeController.homepage
 

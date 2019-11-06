@@ -30,7 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAdd
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressLookupResult, Country, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{SubscriptionService, UKAddressLookupService}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -40,6 +40,8 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
   val validJourneyStatus: J
 
   def updateAddress(journey: J, address: Address): JourneyStatus
+
+  val mockUpdateAddress: Option[(Address, Either[Error, Unit]) => Unit]
 
   val controller: AddressController[J]
 
@@ -57,7 +59,8 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
     List(
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
-      bind[UKAddressLookupService].toInstance(mockService)
+      bind[UKAddressLookupService].toInstance(mockService),
+      bind[SubscriptionService].toInstance(mockSubscriptionService)
     )
 
   val postcode = Postcode("AB1 2CD")
@@ -216,37 +219,47 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
       }
     }
     "display an error page" when {
+
+      mockUpdateAddress.foreach{ mockAddressUpdate =>
+        "the address cannot be updated" in {
+          val newAddress = UkAddress("Test street", None, None, None, "W1A2HR")
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
+            mockAddressUpdate(newAddress, Left(Error("")))
+          }
+          checkIsTechnicalErrorPage(performAction(Seq("address-line1" -> "Test street", "postcode" -> "W1A2HR")))
+        }
+      }
+
       "the address cannot be stored in the session" in {
+        val newAddress = UkAddress("Test street", None, None, None, "W1A2HR")
         val updatedSession = sessionWithValidJourneyStatus.copy(
-          journeyStatus = Some(
-            updateAddress(
-              validJourneyStatus,
-              UkAddress("Test street", None, None, None, "W1A2HR")
-            )
-          )
+          journeyStatus = Some(updateAddress(validJourneyStatus, newAddress))
         )
 
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
+          mockUpdateAddress.foreach(_(newAddress, Right(()) ))
           mockStoreSession(updatedSession)(Future(Left(Error(""))))
         }
         checkIsTechnicalErrorPage(performAction(Seq("address-line1" -> "Test street", "postcode" -> "W1A2HR")))
       }
     }
+
     "redirect to check your details page" when {
       "address has been stored in session" in {
+        val newAddress = UkAddress("Flat 1", Some("The Street"), Some("The Town"), Some("Countyshire"), "W1A2HR")
         val updatedSession = sessionWithValidJourneyStatus.copy(
-          journeyStatus = Some(
-            updateAddress(
-              validJourneyStatus,
-              UkAddress("Flat 1", Some("The Street"), Some("The Town"), Some("Countyshire"), "W1A2HR")
-            )
-          )
+          journeyStatus = Some(updateAddress(validJourneyStatus, newAddress))
         )
+
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
+          mockUpdateAddress.foreach(_(newAddress, Right(()) ))
           mockStoreSession(updatedSession)(Future.successful(Right(())))
         }
         val result = performAction(
@@ -314,10 +327,40 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
       }
     }
 
-    "redirect to check your details page" when {
+    "display an error page" when {
+
+      mockUpdateAddress.foreach{ mockAddressUpdate =>
+        "the address cannot be updated" in {
+          val newAddress = NonUkAddress("House 1", None, None, None, None, Country("NZ", Some("New Zealand")))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
+            mockAddressUpdate(newAddress, Left(Error("")))
+          }
+          checkIsTechnicalErrorPage(performAction(Seq("nonUkAddress-line1" -> "House 1", "countryCode" -> "NZ")))
+        }
+      }
+
+      "the address cannot be stored in the session" in {
+        val newAddress = NonUkAddress("House 1", None, None, None, None, Country("NZ", Some("New Zealand")))
+        val updatedSession = sessionWithValidJourneyStatus.copy(
+          journeyStatus = Some(updateAddress(validJourneyStatus, newAddress))
+        )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
+          mockUpdateAddress.foreach(_(newAddress, Right(()) ))
+          mockStoreSession(updatedSession)(Future(Left(Error(""))))
+        }
+        checkIsTechnicalErrorPage(performAction(Seq("nonUkAddress-line1" -> "House 1", "countryCode" -> "NZ")))
+      }
+    }
+
+    "redirect to the continue page" when {
       "address has been stored in session" in {
-        val updatedJourney = updateAddress(
-          validJourneyStatus,
+        val newAddress =
           NonUkAddress(
             "Flat 1",
             Some("The Street"),
@@ -326,10 +369,14 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
             None,
             Country("NZ", Some("New Zealand"))
           )
-        )
+
+        val updatedJourney = updateAddress(validJourneyStatus, newAddress)
+
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
+          mockUpdateAddress.foreach(_(newAddress, Right(()) ))
+
           mockStoreSession(
             sessionWithValidJourneyStatus.copy(journeyStatus = Some(updatedJourney))
           )(Future.successful(Right(())))
@@ -684,6 +731,18 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
 
     "show an error page" when {
 
+      mockUpdateAddress.foreach{ mockAddressUpdate =>
+        "the address cannot be updated" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatusAndAddressLookupResult))))
+            mockAddressUpdate(lastAddress, Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction(Seq("address-select" -> s"$lastAddressIndex")))
+        }
+      }
+
       "the selected address cannot be stored in session" in {
         val updatedSession = sessionWithValidJourneyStatusAndAddressLookupResult.copy(
           journeyStatus = Some(updateAddress(validJourneyStatus, lastAddress))
@@ -692,6 +751,7 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatusAndAddressLookupResult))))
+          mockUpdateAddress.foreach(_(lastAddress, Right(()) ))
           mockStoreSession(updatedSession)(Future.successful(Left(Error(""))))
         }
 
@@ -700,7 +760,7 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
 
     }
 
-    "redirect to the check your details page" when {
+    "redirect to the continue endpoint" when {
 
       "the selected address is stored in session" in {
         val updatedSession = sessionWithValidJourneyStatusAndAddressLookupResult.copy(
@@ -710,6 +770,7 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatusAndAddressLookupResult))))
+          mockUpdateAddress.foreach(_(lastAddress, Right(())))
           mockStoreSession(updatedSession)(Future.successful(Right(())))
         }
 
