@@ -16,81 +16,75 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name
 
-import com.google.inject.{Inject, Singleton}
-import play.api.data.Form
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{RequestWithSessionData, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
-@Singleton
-class ContactNameController @Inject()(
-  cc: MessagesControllerComponents,
-  errorHandler: ErrorHandler,
-  sessionStore: SessionStore,
-  val authenticatedAction: AuthenticatedAction,
-  val sessionDataAction: SessionDataAction,
-  enterContactNamePage: views.html.contactname.contact_name
-)(implicit viewConfig: ViewConfig, ec: ExecutionContext)
-    extends FrontendController(cc)
-    with WithAuthAndSessionDataAction
-    with SessionUpdates
-    with Logging {
+trait ContactNameController[J <: JourneyStatus] {
+  this: FrontendController with WithAuthAndSessionDataAction with SessionUpdates with Logging =>
 
-  private def withSubscriptionReady(
-    request: RequestWithSessionData[_]
-  )(f: SubscriptionReady => Future[Result]): Future[Result] =
-    request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(s: SubscriptionReady) => f(s)
-      case _                          => Redirect(controllers.routes.StartController.start())
-    }
+  implicit val viewConfig: ViewConfig
+  implicit val ec: ExecutionContext
 
-  private def enterContactNamePageWithForm(form: Form[ContactName])(implicit request: RequestWithSessionData[_]) =
-    enterContactNamePage(
-      form,
-      controllers.routes.SubscriptionController.checkYourDetails(),
-      routes.ContactNameController.enterContactNameSubmit()
-    )
+  val enterContactNamePage: views.html.contactname.contact_name
+
+  val sessionStore: SessionStore
+  val errorHandler: ErrorHandler
+  val isAmendJourney: Boolean
+
+  def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, J)]
+
+  def updateContactName(journey: J, contactName: ContactName): JourneyStatus
+
+  def contactName(journey: J): Option[ContactName]
+
+  protected val backLinkCall: Call
+  protected val enterContactNameSubmitCall: Call
+  protected val continueCall: Call
+
+  private def withValidJourney(request: RequestWithSessionData[_])(
+    f: (SessionData, J) => Future[Result]
+  ): Future[Result] =
+    validJourney(request).fold[Future[Result]](toFuture, f.tupled)
 
   def enterContactName(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withSubscriptionReady(request) { subscriptionReady =>
-      Ok(
-        enterContactNamePageWithForm(
-          ContactName.form.fill(subscriptionReady.subscriptionDetails.contactName)
-        )
-      )
+    withValidJourney(request) {
+      case (_, journey) =>
+        val form = contactName(journey).fold(ContactName.form)(ContactName.form.fill)
+        Ok(enterContactNamePage(form, isAmendJourney, backLinkCall, enterContactNameSubmitCall))
     }
   }
 
+  //TODO: make the call to the subscription update service
   def enterContactNameSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withSubscriptionReady(request) {
-      case SubscriptionReady(subscriptionDetails) =>
+    withValidJourney(request) {
+      case (_, journey) =>
         ContactName.form
           .bindFromRequest()
           .fold(
-            formWithErrors => BadRequest(enterContactNamePageWithForm(formWithErrors)), { contactName =>
+            e => BadRequest(enterContactNamePage(e, isAmendJourney, backLinkCall, enterContactNameSubmitCall)),
+            name =>
               updateSession(sessionStore, request)(
-                _.copy(journeyStatus = Some(SubscriptionReady(subscriptionDetails.copy(contactName = contactName))))
+                _.copy(journeyStatus = Some(updateContactName(journey, name)))
               ).map {
                 case Left(e) =>
-                  logger.warn("Could not update contact name in session", e)
+                  logger.warn("Could not submit contact name", e)
                   errorHandler.errorResult()
 
                 case Right(_) =>
-                  Redirect(controllers.routes.SubscriptionController.checkYourDetails())
+                  Redirect(continueCall)
               }
-            }
           )
     }
   }
-
 }
