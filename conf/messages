@@ -348,3 +348,6 @@ enterTrustName.label=Name of trust
 trustName.error.required=Enter the name of your trust
 trustName.error.tooLong=The name of your trust must be less than 105 characters
 trustName.error.pattern=Your trust name can only include letters, apostrophes, hyphens, spaces and ampersands
+
+alreadySubscribedWithDifferentGGAccount.title=You've already subscribed with a different account
+alreadySubscribedWithDifferentGGAccount.p=Oh no!
