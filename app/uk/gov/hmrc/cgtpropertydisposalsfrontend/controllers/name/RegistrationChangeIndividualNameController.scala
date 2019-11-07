@@ -16,20 +16,23 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name
 
+import cats.data.EitherT
+import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class RegistrationChangeIndividualNameController @Inject()(
@@ -52,8 +55,10 @@ class RegistrationChangeIndividualNameController @Inject()(
       case _                                         => Left(Redirect(controllers.routes.StartController.start()))
     }
 
-  override def updateName(journey: RegistrationReady, name: IndividualName): JourneyStatus =
-    journey.copy(registrationDetails = journey.registrationDetails.copy(name = name))
+  override def updateName(journey: RegistrationReady, name: IndividualName)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, RegistrationReady] =
+    EitherT.rightT[Future, Error](journey.copy(registrationDetails = journey.registrationDetails.copy(name = name)))
 
   override def name(journey: RegistrationReady): Option[IndividualName] = Some(journey.registrationDetails.name)
 

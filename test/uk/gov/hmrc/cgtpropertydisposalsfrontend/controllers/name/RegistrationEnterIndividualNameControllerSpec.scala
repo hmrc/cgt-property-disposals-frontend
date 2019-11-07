@@ -22,9 +22,10 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.IndividualSupplyingInformation
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualSupplyingInformation, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 
 class RegistrationEnterIndividualNameControllerSpec
     extends ControllerSpec
@@ -42,7 +43,9 @@ class RegistrationEnterIndividualNameControllerSpec
     case _ => false
   }
 
-  override def updateName(name: IndividualName, journey: IndividualSupplyingInformation): JourneyStatus =
+  override val mockUpdateName: Option[(IndividualSupplyingInformation, Either[Error, Unit]) => Unit] = None
+
+  override def updateName(name: IndividualName, journey: IndividualSupplyingInformation): IndividualSupplyingInformation =
     journey.copy(name = Some(name))
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
