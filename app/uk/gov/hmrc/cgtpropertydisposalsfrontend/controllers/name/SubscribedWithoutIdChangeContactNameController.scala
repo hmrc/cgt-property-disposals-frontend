@@ -17,8 +17,8 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name
 
 import cats.data.EitherT
-import cats.syntax.eq._
 import cats.instances.future._
+import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
@@ -74,9 +74,9 @@ class SubscribedWithoutIdChangeContactNameController @Inject()(
 
   }
 
-  override def name(journey: Subscribed): Option[IndividualName] = {
-    val Array(first, last) = journey.subscribedDetails.contactName.value.split(" ")
-    Some(IndividualName(first, last))
+  override def name(journey: Subscribed): Option[IndividualName] = journey.subscribedDetails.name match {
+    case Left(_)               => None
+    case Right(individualName) => Some(individualName)
   }
 
   override protected lazy val backLinkCall: Call = controllers.routes.HomeController.homepage()
