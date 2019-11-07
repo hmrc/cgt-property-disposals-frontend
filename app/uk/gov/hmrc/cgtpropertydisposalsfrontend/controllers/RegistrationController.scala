@@ -28,9 +28,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, RegistrationStatus, Subscribed}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{RegistrationDetails, SessionData, SubscribedDetails, SubscriptionResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{RegistrationDetails, SessionData, SubscribedDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
@@ -192,7 +193,7 @@ class RegistrationController @Inject()(
         val result = for {
           subscriptionResponse <- subscriptionService.registerWithoutIdAndSubscribe(registrationDetails)
           _ <- EitherT(subscriptionResponse match {
-                case SubscriptionResponse.SubscriptionSuccessful(cgtReferenceNumber) =>
+                case SubscriptionSuccessful(cgtReferenceNumber) =>
                   updateSession(sessionStore, request)(
                     _ =>
                       SessionData.empty.copy(
@@ -213,7 +214,7 @@ class RegistrationController @Inject()(
                         )
                       )
                   )
-                case SubscriptionResponse.AlreadySubscribed =>
+                case AlreadySubscribed =>
                   updateSession(sessionStore, request)(
                     _.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount))
                   )
@@ -225,11 +226,11 @@ class RegistrationController @Inject()(
             logger.warn("Could not register without id and subscribe", e)
             errorHandler.errorResult()
           }, {
-            case SubscriptionResponse.SubscriptionSuccessful(cgtReferenceNumber) =>
+            case SubscriptionSuccessful(cgtReferenceNumber) =>
               logger.info(s"Successfully subscribed with cgt id $cgtReferenceNumber")
               Redirect(routes.SubscriptionController.subscribed())
 
-            case SubscriptionResponse.AlreadySubscribed =>
+            case AlreadySubscribed =>
               logger.info("Response to subscription request indicated that the user has already subscribed to cgt")
               Redirect(routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
           }

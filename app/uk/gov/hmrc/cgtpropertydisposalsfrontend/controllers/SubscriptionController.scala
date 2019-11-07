@@ -23,8 +23,9 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, Subscribed}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SubscribedDetails, SubscriptionResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -65,7 +66,7 @@ class SubscriptionController @Inject()(
         subscriptionResponse <- subscriptionService.subscribe(details)
         _ <- EitherT(
               subscriptionResponse match {
-                case SubscriptionResponse.SubscriptionSuccessful(cgtReferenceNumber) =>
+                case SubscriptionSuccessful(cgtReferenceNumber) =>
                   updateSession(sessionStore, request)(
                     _.copy(
                       journeyStatus = Some(
@@ -83,7 +84,7 @@ class SubscriptionController @Inject()(
                       )
                     )
                   )
-                case SubscriptionResponse.AlreadySubscribed =>
+                case AlreadySubscribed =>
                   updateSession(sessionStore, request)(
                     _.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount))
                   )
@@ -96,11 +97,11 @@ class SubscriptionController @Inject()(
           logger.warn("Could not subscribe", e)
           errorHandler.errorResult()
         }, {
-          case SubscriptionResponse.SubscriptionSuccessful(cgtReferenceNumber) =>
+          case SubscriptionSuccessful(cgtReferenceNumber) =>
             logger.info(s"Successfully subscribed with cgt id $cgtReferenceNumber")
             Redirect(routes.SubscriptionController.subscribed())
 
-          case SubscriptionResponse.AlreadySubscribed =>
+          case AlreadySubscribed =>
             logger.info("Response to subscription request indicated that the user has already subscribed to cgt")
             Redirect(routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
         }
