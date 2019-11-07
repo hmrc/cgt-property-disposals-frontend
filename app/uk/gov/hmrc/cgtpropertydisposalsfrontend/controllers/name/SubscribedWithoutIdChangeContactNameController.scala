@@ -33,7 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-
+import cats.syntax.either._
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -74,10 +74,7 @@ class SubscribedWithoutIdChangeContactNameController @Inject()(
 
   }
 
-  override def name(journey: Subscribed): Option[IndividualName] = journey.subscribedDetails.name match {
-    case Left(_)               => None
-    case Right(individualName) => Some(individualName)
-  }
+  override def name(journey: Subscribed): Option[IndividualName] = journey.subscribedDetails.name.toOption
 
   override protected lazy val backLinkCall: Call = controllers.routes.HomeController.homepage()
   override protected lazy val enterNameSubmitCall: Call =
