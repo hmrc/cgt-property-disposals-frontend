@@ -42,7 +42,6 @@ trait ContactNameController[J <: JourneyStatus] {
 
   val sessionStore: SessionStore
   val errorHandler: ErrorHandler
-  val isAmendJourney: Boolean
 
   def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, J)]
 
@@ -65,7 +64,7 @@ trait ContactNameController[J <: JourneyStatus] {
     withValidJourney(request) {
       case (_, journey) =>
         val form = contactName(journey).fold(ContactName.form)(ContactName.form.fill)
-        Ok(enterContactNamePage(form, isAmendJourney, backLinkCall, enterContactNameSubmitCall))
+        Ok(enterContactNamePage(form, backLinkCall, enterContactNameSubmitCall))
     }
   }
 
@@ -75,7 +74,7 @@ trait ContactNameController[J <: JourneyStatus] {
         ContactName.form
           .bindFromRequest()
           .fold(
-            e => BadRequest(enterContactNamePage(e, isAmendJourney, backLinkCall, enterContactNameSubmitCall)),
+            e => BadRequest(enterContactNamePage(e, backLinkCall, enterContactNameSubmitCall)),
             contactName => {
               val result = for {
                 journey <- updateContactName(journey, contactName)

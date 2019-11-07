@@ -51,8 +51,6 @@ class SubscribedChangeContactNameController @Inject()(
     with Logging
     with ContactNameController[Subscribed] {
 
-  override val isAmendJourney: Boolean = true
-
   override def validJourney(
     request: RequestWithSessionData[_]
   ): Either[Result, (SessionData, Subscribed)] =
