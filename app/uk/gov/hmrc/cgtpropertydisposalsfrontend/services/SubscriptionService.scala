@@ -22,7 +22,10 @@ import cats.instances.int._
 import cats.syntax.either._
 import cats.syntax.eq._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
+import play.api.http.Status.{CONFLICT, NO_CONTENT, OK}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.AlreadySubscribedWithDifferentGGAccount
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, RegistrationDetails, SubscribedDetails, SubscriptionDetails, SubscriptionResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
@@ -76,18 +79,20 @@ class SubscriptionServiceImpl @Inject()(connector: CGTPropertyDisposalsConnector
     response: HttpResponse,
     description: String
   ): Either[Error, SubscriptionResponse] =
-    if (response.status === 200)
-      response.parseJSON[SubscriptionResponse]().leftMap(Error(_))
+    if (response.status === OK)
+      response.parseJSON[SubscriptionSuccessful]().leftMap(Error(_))
+    else if(response.status === CONFLICT)
+      Right(AlreadySubscribed)
     else
       Left(Error(s"call to $description came back with status ${response.status}"))
 
   override def hasSubscription(
     )(implicit hc: HeaderCarrier): EitherT[Future, Error, Option[CgtReference]] =
     connector.getSubscriptionStatus().subflatMap { response =>
-      if (response.status === 200)
+      if (response.status === OK)
         response.parseJSON[CgtReference]().leftMap(Error(_)).map { cgtReference =>
           Some(cgtReference)
-        } else if (response.status === 204) Right(None)
+        } else if (response.status === NO_CONTENT) Right(None)
       else
         Left(Error(s"call to get subscription status came back with status ${response.status}"))
     }
@@ -96,7 +101,7 @@ class SubscriptionServiceImpl @Inject()(connector: CGTPropertyDisposalsConnector
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, SubscribedDetails] =
     connector.getSubscribedDetails(cgtReference).subflatMap { response =>
-      if (response.status === 200)
+      if (response.status === OK)
         response.parseJSON[SubscribedDetails]().leftMap(Error(_))
       else
         Left(Error(s"Call to get subscribed details came back with status ${response.status}"))
@@ -106,7 +111,7 @@ class SubscriptionServiceImpl @Inject()(connector: CGTPropertyDisposalsConnector
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Unit] =
     connector.updateSubscribedDetails(subscribedDetails).subflatMap { response =>
-      if (response.status === 200)
+      if (response.status === OK)
         Right(())
       else
         Left(Error(s"Call to get subscribed details came back with status ${response.status}"))

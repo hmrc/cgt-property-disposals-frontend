@@ -3,6 +3,7 @@ GET /landing-page                         uk.gov.hmrc.cgtpropertydisposalsfronte
 GET /sign-in                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.LandingPageController.signInPage()
 GET /start                                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.start()
 GET /we-need-more-details                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.weNeedMoreDetails()
+GET /already-subscribed                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SubscriptionController.alreadySubscribedWithDifferentGGAccount()
 
 #### IV
 GET  /iv/success                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.IvController.ivSuccessCallback()

@@ -29,8 +29,9 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
@@ -129,7 +130,7 @@ class SubscriptionControllerSpec
       def performAction(): Future[Result] =
         controller.checkYourDetailsSubmit()(requestWithCSRFToken)
 
-      val subscriptionResponse = SubscriptionResponse("number")
+      val subscriptionSuccessfulResponse = SubscriptionSuccessful("number")
       val accountDetails = SubscribedDetails(
         subscriptionDetails.name,
         subscriptionDetails.emailAddress,
@@ -161,7 +162,7 @@ class SubscriptionControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionWithSubscriptionDetails))))
-            mockSubscribe(subscriptionDetails)(Right(subscriptionResponse))
+            mockSubscribe(subscriptionDetails)(Right(subscriptionSuccessfulResponse))
             mockStoreSession(sessionWithSubscriptionComplete)(Future.successful(Left(Error(""))))
           }
 
@@ -176,7 +177,7 @@ class SubscriptionControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionWithSubscriptionDetails))))
-            mockSubscribe(subscriptionDetails)(Right(subscriptionResponse))
+            mockSubscribe(subscriptionDetails)(Right(subscriptionSuccessfulResponse))
             mockStoreSession(sessionWithSubscriptionComplete)(Future.successful(Right(())))
           }
 
@@ -184,6 +185,25 @@ class SubscriptionControllerSpec
         }
 
       }
+
+      "redirect to the already subscribed with different gg account page" when {
+
+        "the subscription response indicates that the user has already subscribed" in {
+          val sessionWithAlreadySubscribed =
+            SessionData.empty.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionWithSubscriptionDetails))))
+            mockSubscribe(subscriptionDetails)(Right(AlreadySubscribed))
+            mockStoreSession(sessionWithAlreadySubscribed)(Future.successful(Right(())))
+          }
+
+          checkIsRedirect(performAction(), routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
+        }
+
+      }
+
 
     }
 
@@ -230,6 +250,41 @@ class SubscriptionControllerSpec
           contentAsString(result) should include(message("subscribed.title"))
 
         }
+      }
+
+    }
+
+    "handling requests to display the already subscribed with different gg account page" must {
+
+      def performAction(): Future[Result] =
+        controller.alreadySubscribedWithDifferentGGAccount()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        performAction,
+        {
+          case AlreadySubscribedWithDifferentGGAccount => true
+          case _ => false
+        }
+      )
+
+      "display the page" when {
+
+        "the session data indicates that the user has already subscribed with a different gg account" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(
+              Right(Some(
+                SessionData.empty.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount))
+              ))
+            ))
+          }
+
+          val result = performAction()
+          status(result) shouldBe OK
+          contentAsString(result) should include(message("alreadySubscribedWithDifferentGGAccount.title"))
+
+        }
+
       }
 
     }

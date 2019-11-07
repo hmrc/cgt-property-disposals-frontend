@@ -31,8 +31,9 @@ import shapeless.{Lens, lens}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.{routes => nameroutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{RegistrationStatus, Subscribed, SubscriptionStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, RegistrationStatus, Subscribed, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.TryingToGetIndividualsFootprint
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName}
@@ -516,7 +517,7 @@ class RegistrationControllerSpec
 
       val registrationReady = sample[RegistrationReady]
       val sessionData = SessionData.empty.copy(journeyStatus = Some(registrationReady))
-      val subscriptionResponse = sample[SubscriptionResponse]
+      val subscriptionSuccessfulResponse = sample[SubscriptionSuccessful]
       val subscribedDetails = {
         val details = registrationReady.registrationDetails
         SubscribedDetails(
@@ -524,7 +525,7 @@ class RegistrationControllerSpec
           details.emailAddress,
           details.address,
           ContactName(s"${details.name.firstName} ${details.name.lastName}"),
-          CgtReference(subscriptionResponse.cgtReferenceNumber),
+          CgtReference(subscriptionSuccessfulResponse.cgtReferenceNumber),
           None,
           registeredWithId = false
         )
@@ -550,7 +551,7 @@ class RegistrationControllerSpec
             mockGetSession(Future.successful(Right(Some(sessionData))))
             mockRegisterWithoutIdAndSubscribe(
               registrationDetails = registrationReady.registrationDetails
-            )(Right(subscriptionResponse))
+            )(Right(subscriptionSuccessfulResponse))
             mockStoreSession(
               SessionData.empty.copy(journeyStatus =
                 Some(Subscribed(subscribedDetails))
@@ -572,7 +573,7 @@ class RegistrationControllerSpec
             mockGetSession(Future.successful(Right(Some(sessionData))))
             mockRegisterWithoutIdAndSubscribe(
               registrationDetails = registrationReady.registrationDetails
-            )(Right(subscriptionResponse))
+            )(Right(subscriptionSuccessfulResponse))
             mockStoreSession(
               SessionData.empty.copy(journeyStatus =
                 Some(Subscribed(subscribedDetails))
@@ -583,7 +584,25 @@ class RegistrationControllerSpec
           checkIsRedirect(performAction(), routes.SubscriptionController.subscribed())
         }
 
+      }
 
+      "redirect to the already subscribed with different gg account page" when {
+
+        "the subscription response indicates that the user has already subscribed" in {
+          val sessionWithAlreadySubscribed =
+            SessionData.empty.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData))))
+            mockRegisterWithoutIdAndSubscribe(
+              registrationDetails = registrationReady.registrationDetails
+            )(Right(AlreadySubscribed))
+            mockStoreSession(sessionWithAlreadySubscribed)(Future.successful(Right(())))
+          }
+
+          checkIsRedirect(performAction(), routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
+        }
       }
 
 

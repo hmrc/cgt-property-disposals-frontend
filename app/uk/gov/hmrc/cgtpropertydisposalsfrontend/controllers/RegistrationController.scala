@@ -26,8 +26,9 @@ import play.api.data.Forms.{mapping, number}
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{RegistrationStatus, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, RegistrationStatus, Subscribed}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{RegistrationDetails, SessionData, SubscribedDetails}
@@ -191,28 +192,48 @@ class RegistrationController @Inject()(
       case Some(RegistrationStatus.RegistrationReady(registrationDetails)) =>
         val result = for {
           subscriptionResponse <- subscriptionService.registerWithoutIdAndSubscribe(registrationDetails)
-        _   <- EitherT(updateSession(sessionStore,request)(_ =>
-          SessionData.empty.copy(journeyStatus = Some(
-            Subscribed(
-              SubscribedDetails(
-                Right(registrationDetails.name),
-                registrationDetails.emailAddress,
-                registrationDetails.address,
-                ContactName(s"${registrationDetails.name.firstName} ${registrationDetails.name.lastName}"),
-                CgtReference(subscriptionResponse.cgtReferenceNumber),
-                None,
-                registeredWithId = false
-              )
-              )))
-        ))
-        } yield ()
+          _ <- EitherT(subscriptionResponse match {
+                case SubscriptionSuccessful(cgtReferenceNumber) =>
+                  updateSession(sessionStore, request)(
+                    _ =>
+                      SessionData.empty.copy(
+                        journeyStatus = Some(
+                          Subscribed(
+                            SubscribedDetails(
+                              Right(registrationDetails.name),
+                              registrationDetails.emailAddress,
+                              registrationDetails.address,
+                              ContactName(
+                                s"${registrationDetails.name.firstName} ${registrationDetails.name.lastName}"
+                              ),
+                              CgtReference(cgtReferenceNumber),
+                              None,
+                              registeredWithId = false
+                            )
+                          )
+                        )
+                      )
+                  )
+                case AlreadySubscribed =>
+                  updateSession(sessionStore, request)(
+                    _.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount))
+                  )
+              })
+        } yield subscriptionResponse
 
-        result.fold({
-          e =>
-          logger.warn("Could not register without id and subscribe", e)
-          errorHandler.errorResult()
-        },
-          _ => Redirect(routes.SubscriptionController.subscribed())
+        result.fold(
+          { e =>
+            logger.warn("Could not register without id and subscribe", e)
+            errorHandler.errorResult()
+          }, {
+            case SubscriptionSuccessful(cgtReferenceNumber) =>
+              logger.info(s"Successfully subscribed with cgt id $cgtReferenceNumber")
+              Redirect(routes.SubscriptionController.subscribed())
+
+            case AlreadySubscribed =>
+              logger.info("Response to subscription request indicated that the user has already subscribed to cgt")
+              Redirect(routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
+          }
         )
 
       case _ =>

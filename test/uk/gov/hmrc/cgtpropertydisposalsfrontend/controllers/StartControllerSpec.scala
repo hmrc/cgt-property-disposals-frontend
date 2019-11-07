@@ -32,7 +32,7 @@ import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, ConfidenceLevel, Enr
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{RegistrationStatus, Subscribed, SubscriptionStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, RegistrationStatus, Subscribed, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Individual
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
@@ -102,6 +102,30 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
       def performAction(rh: Request[AnyContent] = FakeRequest()): Future[Result] =
         controller.start()(rh)
+
+      "the session data indicates the user has already subscribed with a different gg account" must {
+
+        "redirect to the already subscribed with a different gg account page" in {
+          inSequence {
+            mockAuthWithAllRetrievals(
+              ConfidenceLevel.L50,
+              Some(AffinityGroup.Organisation),
+              None,
+              None,
+              None,
+              Set.empty,
+              Some(retrievedGGCredId)
+            )
+            mockHasSubscription()(Right(None))
+            mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(
+              journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount)
+            )))))
+          }
+
+          checkIsRedirect(performAction(), routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
+        }
+
+      }
 
       "handling non trust organisations" must {
 

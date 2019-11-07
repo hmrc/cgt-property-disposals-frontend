@@ -23,6 +23,7 @@ import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsNumber, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, RegistrationDetails, SubscribedDetails, SubscriptionDetails, SubscriptionResponse, sample}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -142,8 +143,19 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
         )
 
         mockSubscribe(subscriptionDetails)(Right(HttpResponse(200, Some(jsonBody))))
-        await(service.subscribe(subscriptionDetails).value) shouldBe Right(SubscriptionResponse(cgtReferenceNumber))
+        await(service.subscribe(subscriptionDetails).value) shouldBe Right(SubscriptionSuccessful(cgtReferenceNumber))
       }
+
+      "return an already subscribed response" when {
+
+        "the response comes back with status 409 (conflict)" in {
+          mockSubscribe(subscriptionDetails)(Right(HttpResponse(409)))
+
+          await(service.subscribe(subscriptionDetails).value) shouldBe Right(AlreadySubscribed)
+        }
+
+      }
+
     }
 
     "handling requests to register without id and subscribe" must {
@@ -185,7 +197,17 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
 
         mockRegisterWithoutIdAndSubscribe(registrationDetails)(Right(HttpResponse(200, Some(jsonBody))))
 
-        await(service.registerWithoutIdAndSubscribe(registrationDetails).value) shouldBe Right(SubscriptionResponse(cgtReferenceNumber))
+        await(service.registerWithoutIdAndSubscribe(registrationDetails).value) shouldBe Right(SubscriptionSuccessful(cgtReferenceNumber))
+      }
+
+      "return an already subscribed response" when {
+
+        "the response comes back with status 409 (conflict)" in {
+          mockRegisterWithoutIdAndSubscribe(registrationDetails)(Right(HttpResponse(409)))
+
+          await(service.registerWithoutIdAndSubscribe(registrationDetails).value) shouldBe Right(AlreadySubscribed)
+        }
+
       }
     }
 
