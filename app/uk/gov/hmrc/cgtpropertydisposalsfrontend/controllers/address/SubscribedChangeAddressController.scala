@@ -67,7 +67,7 @@ class SubscribedChangeAddressController @Inject()(
 
   def updateAddress(journey: Subscribed, address: Address)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, JourneyStatus] = {
+  ): EitherT[Future, Error, Subscribed] = {
     val updatedSubscribedDetails = journey.subscribedDetails.copy(address = address)
 
     if(journey.subscribedDetails === updatedSubscribedDetails){

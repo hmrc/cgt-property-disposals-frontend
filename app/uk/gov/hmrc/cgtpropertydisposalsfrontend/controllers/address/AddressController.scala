@@ -54,7 +54,7 @@ trait AddressController[J <: JourneyStatus] {
 
   def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, J)]
 
-  def updateAddress(journey: J, address: Address)(implicit hc: HeaderCarrier): EitherT[Future, Error, JourneyStatus]
+  def updateAddress(journey: J, address: Address)(implicit hc: HeaderCarrier): EitherT[Future, Error, J]
 
   protected val backLinkCall: Call
   protected val isUkCall: Call

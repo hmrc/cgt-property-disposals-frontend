@@ -66,7 +66,7 @@ class RegistrationChangeAddressController @Inject()(
 
   def updateAddress(journey: RegistrationReady, address: Address)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, JourneyStatus] =
+  ): EitherT[Future, Error, RegistrationReady] =
     EitherT.pure[Future, Error](journey.copy(registrationDetails = journey.registrationDetails.copy(address = address)))
 
   protected lazy val backLinkCall: Call             = controllers.routes.RegistrationController.checkYourAnswers()

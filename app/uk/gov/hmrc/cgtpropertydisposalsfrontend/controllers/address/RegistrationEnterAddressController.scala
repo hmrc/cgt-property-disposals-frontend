@@ -66,7 +66,7 @@ class RegistrationEnterAddressController @Inject()(
 
   def updateAddress(journey: IndividualSupplyingInformation, address: Address)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, JourneyStatus] =
+  ): EitherT[Future, Error, IndividualSupplyingInformation] =
     EitherT.pure[Future, Error](journey.copy(address = Some(address)))
 
   protected lazy val backLinkCall: Call             = name.routes.RegistrationEnterIndividualNameController.enterIndividualName()

@@ -70,7 +70,7 @@ class SubscriptionAddressController @Inject()(
 
   def updateAddress(journey: SubscriptionReady, address: Address)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, JourneyStatus] =
+  ): EitherT[Future, Error, SubscriptionReady] =
     EitherT.pure[Future, Error](subscriptionReadyAddressLens.set(journey)(address))
 
   protected lazy val backLinkCall: Call                = controllers.routes.SubscriptionController.checkYourDetails()
