@@ -27,7 +27,7 @@ import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubsribedWithDifferentGGAccount, RegistrationStatus, Subscribed}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, RegistrationStatus, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{RegistrationDetails, SessionData, SubscribedDetails, SubscriptionResponse}
@@ -215,7 +215,7 @@ class RegistrationController @Inject()(
                   )
                 case SubscriptionResponse.AlreadySubscribed =>
                   updateSession(sessionStore, request)(
-                    _.copy(journeyStatus = Some(AlreadySubsribedWithDifferentGGAccount))
+                    _.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount))
                   )
               })
         } yield subscriptionResponse

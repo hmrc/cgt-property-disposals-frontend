@@ -32,7 +32,7 @@ import uk.gov.hmrc.auth.core.{AffinityGroup, AuthConnector, ConfidenceLevel, Enr
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubsribedWithDifferentGGAccount, RegistrationStatus, Subscribed, SubscriptionStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, RegistrationStatus, Subscribed, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Individual
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
@@ -118,7 +118,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
             )
             mockHasSubscription()(Right(None))
             mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(
-              journeyStatus = Some(AlreadySubsribedWithDifferentGGAccount)
+              journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount)
             )))))
           }
 

@@ -24,7 +24,7 @@ import play.api.Configuration
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubsribedWithDifferentGGAccount, RegistrationStatus, Subscribed, SubscriptionStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, RegistrationStatus, Subscribed, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionDetails.MissingData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
@@ -69,7 +69,7 @@ class StartController @Inject()(
       case (_, Some(_: Subscribed)) =>
         Redirect(routes.HomeController.homepage())
 
-      case (_, Some(AlreadySubsribedWithDifferentGGAccount)) =>
+      case (_, Some(AlreadySubscribedWithDifferentGGAccount)) =>
         Redirect(routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
 
       case (_, Some(_: SubscriptionStatus.SubscriptionReady)) =>

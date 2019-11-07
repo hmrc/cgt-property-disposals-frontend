@@ -29,7 +29,7 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubsribedWithDifferentGGAccount, Subscribed}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
@@ -190,7 +190,7 @@ class SubscriptionControllerSpec
 
         "the subscription response indicates that the user has already subscribed" in {
           val sessionWithAlreadySubscribed =
-            SessionData.empty.copy(journeyStatus = Some(AlreadySubsribedWithDifferentGGAccount))
+            SessionData.empty.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount))
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -262,7 +262,7 @@ class SubscriptionControllerSpec
       behave like redirectToStartWhenInvalidJourney(
         performAction,
         {
-          case AlreadySubsribedWithDifferentGGAccount => true
+          case AlreadySubscribedWithDifferentGGAccount => true
           case _ => false
         }
       )
@@ -274,7 +274,7 @@ class SubscriptionControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(
               Right(Some(
-                SessionData.empty.copy(journeyStatus = Some(AlreadySubsribedWithDifferentGGAccount))
+                SessionData.empty.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount))
               ))
             ))
           }

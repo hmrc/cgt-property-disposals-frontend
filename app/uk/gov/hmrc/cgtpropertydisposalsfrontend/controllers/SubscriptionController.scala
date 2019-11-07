@@ -22,7 +22,7 @@ import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubsribedWithDifferentGGAccount, Subscribed}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SubscribedDetails, SubscriptionResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -85,7 +85,7 @@ class SubscriptionController @Inject()(
                   )
                 case SubscriptionResponse.AlreadySubscribed =>
                   updateSession(sessionStore, request)(
-                    _.copy(journeyStatus = Some(AlreadySubsribedWithDifferentGGAccount))
+                    _.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount))
                   )
               }
             )
@@ -117,7 +117,7 @@ class SubscriptionController @Inject()(
   def alreadySubscribedWithDifferentGGAccount(): Action[AnyContent] = authenticatedActionWithSessionData {
     implicit request =>
       request.sessionData.flatMap(_.journeyStatus) match {
-        case Some(AlreadySubsribedWithDifferentGGAccount) => Ok(alreadySubscribedWithDifferentGGAccountPage())
+        case Some(AlreadySubscribedWithDifferentGGAccount) => Ok(alreadySubscribedWithDifferentGGAccountPage())
         case _                                            => Redirect(routes.StartController.start())
       }
   }

@@ -31,7 +31,7 @@ import shapeless.{Lens, lens}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.{routes => nameroutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubsribedWithDifferentGGAccount, RegistrationStatus, Subscribed, SubscriptionStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, RegistrationStatus, Subscribed, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.TryingToGetIndividualsFootprint
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
@@ -590,7 +590,7 @@ class RegistrationControllerSpec
 
         "the subscription response indicates that the user has already subscribed" in {
           val sessionWithAlreadySubscribed =
-            SessionData.empty.copy(journeyStatus = Some(AlreadySubsribedWithDifferentGGAccount))
+            SessionData.empty.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount))
 
           inSequence {
             mockAuthWithNoRetrievals()

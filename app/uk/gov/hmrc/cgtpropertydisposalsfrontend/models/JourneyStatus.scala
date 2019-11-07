@@ -56,7 +56,7 @@ object JourneyStatus {
   // subscription has been submitted to ETMP
   final case class Subscribed(subscribedDetails: SubscribedDetails) extends JourneyStatus
 
-  final case object AlreadySubsribedWithDifferentGGAccount extends JourneyStatus
+  final case object AlreadySubscribedWithDifferentGGAccount extends JourneyStatus
 
   sealed trait RegistrationStatus extends JourneyStatus with Product with Serializable
 
