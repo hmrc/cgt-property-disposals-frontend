@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name
 
+import cats.data.EitherT
+import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
@@ -23,13 +25,14 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.IndividualSupplyingInformation
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, Error,SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class RegistrationEnterIndividualNameController @Inject()(
@@ -54,8 +57,10 @@ class RegistrationEnterIndividualNameController @Inject()(
       case _                                                      => Left(Redirect(controllers.routes.StartController.start()))
     }
 
-  override def updateName(journey: IndividualSupplyingInformation, name: IndividualName): JourneyStatus =
-    journey.copy(name = Some(name))
+  override def updateName(journey: IndividualSupplyingInformation, name: IndividualName)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, IndividualSupplyingInformation] =
+    EitherT.rightT[Future, Error](journey.copy(name = Some(name)))
 
   override def name(journey: IndividualSupplyingInformation): Option[IndividualName] = journey.name
 

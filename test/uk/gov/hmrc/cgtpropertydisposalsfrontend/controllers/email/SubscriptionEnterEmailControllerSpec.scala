@@ -49,7 +49,7 @@ class SubscriptionEnterEmailControllerSpec
   override def updateEmail(journey: SubscriptionMissingData, email: Email): SubscriptionMissingData =
     journey.copy(businessPartnerRecord = journey.businessPartnerRecord.copy(emailAddress = Some(email)))
 
-  val mockUpdateEmail: Option[(SubscriptionMissingData, Either[Error, Unit]) => Unit] = None
+  override val mockUpdateEmail: Option[(SubscriptionMissingData, Either[Error, Unit]) => Unit] = None
 
   override lazy val controller: SubscriptionEnterEmailController = instanceOf[SubscriptionEnterEmailController]
 

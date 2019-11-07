@@ -23,9 +23,9 @@ import play.api.mvc.{Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
@@ -35,36 +35,41 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class RegistrationChangeIndividualNameController @Inject()(
+class SubscriptionChangeContactNameController @Inject()(
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   cc: MessagesControllerComponents,
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
-  val enterNamePage: views.html.name.enter_name
+  val enterContactNamePage: views.html.contactname.contact_name
 )(implicit val viewConfig: ViewConfig, val ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with SessionUpdates
     with Logging
-    with IndividualNameController[RegistrationReady] {
+    with ContactNameController[SubscriptionReady] {
 
-  override def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, RegistrationReady)] =
+  override def validJourney(
+    request: RequestWithSessionData[_]
+  ): Either[Result, (SessionData, SubscriptionReady)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((sessionData, r: RegistrationReady)) => Right(sessionData -> r)
+      case Some((sessionData, s: SubscriptionReady)) => Right(sessionData -> s)
       case _                                         => Left(Redirect(controllers.routes.StartController.start()))
     }
 
-  override def updateName(journey: RegistrationReady, name: IndividualName)(
+  override def updateContactName(journey: SubscriptionReady, contactName: ContactName)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, RegistrationReady] =
-    EitherT.rightT[Future, Error](journey.copy(registrationDetails = journey.registrationDetails.copy(name = name)))
+  ): EitherT[Future, Error, SubscriptionReady] =
+    EitherT.rightT[Future, Error](
+      journey.copy(subscriptionDetails = journey.subscriptionDetails.copy(contactName = contactName))
+    )
 
-  override def name(journey: RegistrationReady): Option[IndividualName] = Some(journey.registrationDetails.name)
+  override def contactName(journey: SubscriptionReady): Option[ContactName] =
+    Some(journey.subscriptionDetails.contactName)
 
-  override protected lazy val backLinkCall: Call = controllers.routes.RegistrationController.checkYourAnswers()
-  override protected lazy val enterNameSubmitCall: Call =
-    routes.RegistrationChangeIndividualNameController.enterIndividualNameSubmit()
-  override protected lazy val continueCall: Call = controllers.routes.RegistrationController.checkYourAnswers()
+  override protected lazy val backLinkCall: Call = controllers.routes.SubscriptionController.checkYourDetails()
+  override protected lazy val enterContactNameSubmitCall: Call =
+    routes.SubscriptionChangeContactNameController.enterContactNameSubmit()
+  override protected lazy val continueCall: Call = controllers.routes.SubscriptionController.checkYourDetails()
 
 }

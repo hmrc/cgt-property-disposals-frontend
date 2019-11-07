@@ -28,6 +28,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
 
 import scala.concurrent.Future
 
@@ -40,16 +41,18 @@ trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidatio
 
   lazy val sessionDataWithValidJourney = SessionData.empty.copy(journeyStatus = Some(validJourney))
 
-  def updateName(name: IndividualName, journey: J): JourneyStatus
+  def updateName(name: IndividualName, journey: J): J
+
+  val mockUpdateName: Option[(J, Either[Error, Unit]) => Unit]
 
   def isValidJourney(journey: JourneyStatus): Boolean
 
   override val overrideBindings: List[GuiceableModule] =
     List(
       bind[AuthConnector].toInstance(mockAuthConnector),
-      bind[SessionStore].toInstance(mockSessionStore)
+      bind[SessionStore].toInstance(mockSessionStore),
+      bind[SubscriptionService].toInstance(mockSubscriptionService)
     )
-
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(performAction, isValidJourney)
@@ -116,6 +119,9 @@ trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidatio
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionDataWithValidJourney))))
+          mockUpdateName.foreach { f =>
+            f(updateName(name,validJourney), Right(()))
+          }
           mockStoreSession(updatedSession)(Future.successful(Right(())))
         }
 
@@ -127,6 +133,10 @@ trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidatio
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionDataWithValidJourney))))
+          mockUpdateName.foreach { f =>
+            f(updateName(name,validJourney), Right(()))
+          }
+
           mockStoreSession(updatedSession)(Future.successful(Right(())))
         }
 
@@ -154,6 +164,9 @@ trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidatio
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionDataWithValidJourney))))
+          mockUpdateName.foreach { f =>
+            f(updateName(name,validJourney), Right(()))
+          }
           mockStoreSession(updatedSession)(Future.successful(Left(Error(""))))
         }
 

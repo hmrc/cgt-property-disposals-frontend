@@ -25,7 +25,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, sample}
 
 class RegistrationChangeIndividualNameControllerSpec
     extends ControllerSpec
@@ -39,11 +39,13 @@ class RegistrationChangeIndividualNameControllerSpec
     case _ => false
   }
 
+  override val mockUpdateName: Option[(RegistrationReady, Either[Error, Unit]) => Unit] = None
+
   override lazy val controller: RegistrationChangeIndividualNameController = instanceOf[RegistrationChangeIndividualNameController]
 
   override lazy val validJourney: RegistrationReady = sample[RegistrationReady]
 
-  override def updateName(name: IndividualName, journey: RegistrationReady): JourneyStatus =
+  override def updateName(name: IndividualName, journey: RegistrationReady): RegistrationReady =
     journey.copy(registrationDetails = journey.registrationDetails.copy(name = name))
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi

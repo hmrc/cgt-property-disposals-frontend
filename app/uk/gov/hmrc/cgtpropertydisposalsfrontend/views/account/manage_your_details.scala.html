@@ -67,12 +67,21 @@
   </p>
  </div>
 
+
  @cyaSection() {
-  @cyaRow(
-   messages("subscription.cyaLabel.contactName"),
-   Html(details.contactName.value),
-   Some(cyaChange(messages("subscription.cyaChange.contactName"), "#"))
-  )
+  @if(details.registeredWithId){
+    @cyaRow(
+        messages("subscription.cyaLabel.contactName"),
+        Html(details.contactName.value),
+        Some(cyaChange(messages("subscription.cyaChange.contactName"), name.routes.SubscribedChangeContactNameController.enterContactName().url))
+        )
+    }else{
+        @cyaRow(
+            messages("subscription.cyaLabel.contactName"),
+            Html(details.contactName.value),
+            Some(cyaChange(messages("subscription.cyaChange.contactName"), name.routes.SubscribedWithoutIdChangeContactNameController.enterIndividualName().url))
+        )
+    }
   @cyaRow(
     messages("subscription.cyaLabel.email"),
     Html(details.emailAddress.value),
@@ -90,6 +99,8 @@
   )
 
  }
+
+
 @if(details.registeredWithId){
    <h2 class="heading-medium">
     @messages("account.manageYourDetails.personalDetailsHeading")

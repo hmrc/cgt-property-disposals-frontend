@@ -106,8 +106,16 @@ GET  /subscribed/amend-details/verify-email           uk.gov.hmrc.cgtpropertydis
 GET  /subscribed/amend-details/email-verified         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email.SubscribedChangeEmailController.emailVerified()
 
 ### Change contact name
-GET  /subscription/amend-details/enter-contact-name      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.ContactNameController.enterContactName()
-POST /subscription/amend-details/enter-contact-name      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.ContactNameController.enterContactNameSubmit()
+GET  /subscription/amend-details/enter-contact-name      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.SubscriptionChangeContactNameController.enterContactName()
+POST /subscription/amend-details/enter-contact-name      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.SubscriptionChangeContactNameController.enterContactNameSubmit()
+
+### Change subscribed contact name
+GET  /subscribed/amend-details/enter-contact-name      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.SubscribedChangeContactNameController.enterContactName()
+POST /subscribed/amend-details/enter-contact-name      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.SubscribedChangeContactNameController.enterContactNameSubmit()
+
+GET  /subscribed-without-id/amend-details/enter-contact-name      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.SubscribedWithoutIdChangeContactNameController.enterIndividualName()
+POST /subscribed-without-id/amend-details/enter-contact-name      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.SubscribedWithoutIdChangeContactNameController.enterIndividualNameSubmit()
+
 
 #### Subscription Change address
 GET  /subscription/is-address-in-uk      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address.SubscriptionAddressController.isUk()
