@@ -25,9 +25,11 @@ import play.api.mvc.{Call, Result}
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ContactNameFormValidationTests, ControllerSpec, RedirectToStartBehaviour, SessionSupport}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, SubscribedDetails, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
 
 import scala.concurrent.Future
 
@@ -42,14 +44,17 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
 
   lazy val sessionDataWithValidJourney = SessionData.empty.copy(journeyStatus = Some(validJourney))
 
-  def updateContactName(contactName: ContactName, journey: J): JourneyStatus
+  def updateContactName(journey: J, contactName : ContactName): J
+
+  val mockUpdateContactName: Option[(J, Either[Error, Unit]) => Unit]
 
   def isValidJourney(journey: JourneyStatus): Boolean
 
   override val overrideBindings: List[GuiceableModule] =
     List(
       bind[AuthConnector].toInstance(mockAuthConnector),
-      bind[SessionStore].toInstance(mockSessionStore)
+      bind[SessionStore].toInstance(mockSessionStore),
+      bind[SubscriptionService].toInstance(mockSubscriptionService)
     )
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
@@ -68,13 +73,13 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
         }
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("enterContactName.title"))
+        contentAsString(result) should include(message("contactName.title"))
       }
 
       "the endpoint is requested and the user has previously entered a contact name" in {
         val contactName = sample[ContactName]
         val sessionDataWithName =
-          sessionDataWithValidJourney.copy(journeyStatus = Some(updateContactName(contactName, validJourney)))
+          sessionDataWithValidJourney.copy(journeyStatus = Some(updateContactName(validJourney,contactName)))
 
         inSequence {
           mockAuthWithNoRetrievals()
@@ -84,20 +89,20 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
         status(result) shouldBe OK
 
         val content = contentAsString(result)
-        content should include(message("enterName.title"))
+        content should include(message("contactName.title"))
         content should include(contactName.value)
       }
 
     }
   }
 
-  def enterNameSubmit(
+  def enterContactNameSubmit(
     performAction: Seq[(String, String)] => Future[Result],
     continueCall: Call
   )(implicit messagesApi: MessagesApi): Unit = {
     val contactName = ContactName("Joe Smith")
     val updatedSession =
-      sessionDataWithValidJourney.copy(journeyStatus = Some(updateContactName(contactName, validJourney)))
+      sessionDataWithValidJourney.copy(journeyStatus = Some(updateContactName(validJourney,contactName)))
 
     behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
@@ -116,6 +121,9 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionDataWithValidJourney))))
+          mockUpdateContactName.foreach { f =>
+            f(updateContactName(validJourney,contactName), Right(()))
+          }
           mockStoreSession(updatedSession)(Future.successful(Right(())))
         }
 
@@ -127,6 +135,9 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionDataWithValidJourney))))
+          mockUpdateContactName.foreach { f =>
+            f(updateContactName(validJourney,contactName), Right(()))
+          }
           mockStoreSession(updatedSession)(Future.successful(Right(())))
         }
 
@@ -154,6 +165,9 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionDataWithValidJourney))))
+          mockUpdateContactName.foreach { f =>
+            f(updateContactName(validJourney,contactName), Right(()))
+          }
           mockStoreSession(updatedSession)(Future.successful(Left(Error(""))))
         }
 

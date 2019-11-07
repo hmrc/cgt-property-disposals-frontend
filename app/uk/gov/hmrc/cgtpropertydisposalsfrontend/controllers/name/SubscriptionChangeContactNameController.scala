@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name
 
+import cats.data.EitherT
+import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
@@ -23,15 +25,16 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 @Singleton
-class SubscriptionEnterContactNameController @Inject()(
+class SubscriptionChangeContactNameController @Inject()(
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   cc: MessagesControllerComponents,
@@ -55,15 +58,19 @@ class SubscriptionEnterContactNameController @Inject()(
       case _                                         => Left(Redirect(controllers.routes.StartController.start()))
     }
 
-  override def updateContactName(journey: SubscriptionReady, contactName: ContactName): JourneyStatus =
-    journey.copy(subscriptionDetails = journey.subscriptionDetails.copy(contactName = contactName))
+  override def updateContactName(journey: SubscriptionReady, contactName: ContactName)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, SubscriptionReady] =
+    EitherT.rightT[Future, Error](
+      journey.copy(subscriptionDetails = journey.subscriptionDetails.copy(contactName = contactName))
+    )
 
   override def contactName(journey: SubscriptionReady): Option[ContactName] =
     Some(journey.subscriptionDetails.contactName)
 
   override protected lazy val backLinkCall: Call = controllers.routes.SubscriptionController.checkYourDetails()
   override protected lazy val enterContactNameSubmitCall: Call =
-    routes.SubscriptionEnterContactNameController.enterContactNameSubmit()
+    routes.SubscriptionChangeContactNameController.enterContactNameSubmit()
   override protected lazy val continueCall: Call = controllers.routes.SubscriptionController.checkYourDetails()
 
 }

@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
+import cats.kernel.Eq
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
@@ -34,4 +35,6 @@ final case class SubscribedDetails(
 
 object SubscribedDetails {
   implicit val format: Format[SubscribedDetails] = Json.format
+
+  implicit val eq: Eq[SubscribedDetails] = Eq.fromUniversalEquals
 }

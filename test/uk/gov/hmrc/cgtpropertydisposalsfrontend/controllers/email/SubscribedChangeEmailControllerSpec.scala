@@ -72,7 +72,7 @@ class SubscribedChangeEmailControllerSpec
   override def updateEmail(journey: Subscribed, email: Email): Subscribed =
     journey.copy(subscribedDetails = journey.subscribedDetails.copy(emailAddress = email))
 
-  val mockUpdateEmail: Option[(Subscribed, Either[Error, Unit]) => Unit] = Some({
+  override val mockUpdateEmail: Option[(Subscribed, Either[Error, Unit]) => Unit] = Some({
     case (s: Subscribed, r: Either[Error, Unit]) => mockSubscriptionUpdate(s.subscribedDetails)(r)
   })
 

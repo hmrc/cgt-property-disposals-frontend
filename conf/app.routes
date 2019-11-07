@@ -106,8 +106,8 @@ GET  /subscribed/amend-details/verify-email           uk.gov.hmrc.cgtpropertydis
 GET  /subscribed/amend-details/email-verified         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email.SubscribedChangeEmailController.emailVerified()
 
 ### Change contact name
-GET  /subscription/amend-details/enter-contact-name      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.SubscriptionEnterContactNameController.enterContactName()
-POST /subscription/amend-details/enter-contact-name      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.SubscriptionEnterContactNameController.enterContactNameSubmit()
+GET  /subscription/amend-details/enter-contact-name      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.SubscriptionChangeContactNameController.enterContactName()
+POST /subscription/amend-details/enter-contact-name      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.SubscriptionChangeContactNameController.enterContactNameSubmit()
 
 ### Change subscribed contact name
 GET  /subscribed/amend-details/enter-contact-name      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name.SubscribedChangeContactNameController.enterContactName()

@@ -16,16 +16,18 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name
 
+import cats.data.EitherT
+import cats.instances.future._
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{RequestWithSessionData, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -44,7 +46,9 @@ trait ContactNameController[J <: JourneyStatus] {
 
   def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, J)]
 
-  def updateContactName(journey: J, contactName: ContactName): JourneyStatus
+  def updateContactName(journey: J, contactName: ContactName)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, J]
 
   def contactName(journey: J): Option[ContactName]
 
@@ -65,7 +69,6 @@ trait ContactNameController[J <: JourneyStatus] {
     }
   }
 
-  //TODO: make the call to the subscription update service
   def enterContactNameSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) {
       case (_, journey) =>
@@ -73,17 +76,22 @@ trait ContactNameController[J <: JourneyStatus] {
           .bindFromRequest()
           .fold(
             e => BadRequest(enterContactNamePage(e, isAmendJourney, backLinkCall, enterContactNameSubmitCall)),
-            name =>
-              updateSession(sessionStore, request)(
-                _.copy(journeyStatus = Some(updateContactName(journey, name)))
-              ).map {
-                case Left(e) =>
-                  logger.warn("Could not submit contact name", e)
-                  errorHandler.errorResult()
+            contactName => {
+              val result = for {
+                journey <- updateContactName(journey, contactName)
+                _ <- EitherT[Future, Error, Unit](updateSession(sessionStore, request) { s =>
+                      s.copy(journeyStatus = Some(journey))
+                    })
+              } yield ()
 
-                case Right(_) =>
-                  Redirect(continueCall)
-              }
+              result.fold(
+                { e =>
+                  logger.warn(s"Could not update contact name: $e")
+                  errorHandler.errorResult()
+                },
+                _ => Redirect(continueCall)
+              )
+            }
           )
     }
   }
