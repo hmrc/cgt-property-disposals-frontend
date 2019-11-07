@@ -62,6 +62,7 @@ trait IndividualNameController[J <: JourneyStatus] {
         val form = {
           name(journey).fold(IndividualName.form)(IndividualName.form.fill)
         }
+
         Ok(enterNamePage(form, backLinkCall, enterNameSubmitCall))
     }
   }

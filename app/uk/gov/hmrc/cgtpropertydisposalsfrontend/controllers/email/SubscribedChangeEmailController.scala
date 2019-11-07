@@ -80,7 +80,8 @@ class SubscribedChangeEmailController @Inject()(
       .map(_ => journey.copy(journeyWithUpdatedEmail))
   }
 
-  override def name(journeyStatus: Subscribed): ContactName = journeyStatus.subscribedDetails.contactName
+  override def name(journeyStatus: Subscribed): ContactName =
+    journeyStatus.subscribedDetails.contactName
 
   override lazy protected val backLinkCall: Option[Call] = Some(
     controllers.routes.HomeController.homepage()

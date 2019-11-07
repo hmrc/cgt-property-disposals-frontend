@@ -39,8 +39,7 @@ import cats.instances.future._
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class
-SubscriptionEnterEmailController @Inject()(
+class SubscriptionEnterEmailController @Inject()(
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   val sessionStore: SessionStore,
