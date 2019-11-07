@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address
 
+import cats.data.EitherT
+import cats.instances.future._
 import org.scalacheck.ScalacheckShapeless._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
@@ -24,36 +26,46 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SubscriptionDetails, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SubscribedDetails, sample}
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class SubscriptionAddressControllerSpec
-    extends AddressControllerSpec[SubscriptionReady]
+class SubscribedChangeAddressControllerSpec
+  extends AddressControllerSpec[Subscribed]
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
-  val subscriptionDetails: SubscriptionDetails =
-    sample[SubscriptionDetails].copy(address = address(1))
+  val subscribedDetails: SubscribedDetails =
+    sample[SubscribedDetails].copy(address = address(1))
 
-  val validJourneyStatus = SubscriptionReady(subscriptionDetails)
+  val validJourneyStatus = Subscribed(subscribedDetails)
 
-  lazy val controller = instanceOf[SubscriptionAddressController]
+  lazy val controller = instanceOf[SubscribedChangeAddressController]
 
   lazy implicit val messagesApi: MessagesApi = controller.messagesApi
+  
+  override def updateAddress(journey: Subscribed, address: Address): Subscribed =
+    journey.copy(subscribedDetails = journey.subscribedDetails.copy(address = address))
 
-  override def updateAddress(journey: SubscriptionReady, address: Address): SubscriptionReady =
-    journey.copy(subscriptionDetails = journey.subscriptionDetails.copy(address = address))
+  override val mockUpdateAddress: Option[(Address, Either[Error, Unit]) => Unit] =
+    Some{ case (newAddress, result) =>
+      mockUpdateSubscribedDetails(subscribedDetails.copy(address = newAddress))(result)
+    }
 
-  override val mockUpdateAddress: Option[(Address, Either[Error, Unit]) => Unit] = None
-
+  def mockUpdateSubscribedDetails(subscribedDetails: SubscribedDetails)(result: Either[Error,Unit]) =
+    (mockSubscriptionService.updateSubscribedDetails(_: SubscribedDetails)(_: HeaderCarrier))
+      .expects(subscribedDetails, *)
+      .returning(EitherT.fromEither[Future](result))
+  
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
       performAction, {
-        case _: SubscriptionReady => true
-        case _                    => false
+        case _: Subscribed => true
+        case _             => false
       }
     )
 
@@ -75,8 +87,8 @@ class SubscriptionAddressControllerSpec
 
       behave like submitIsUkBehaviour(
         performAction,
-        routes.SubscriptionAddressController.enterPostcode(),
-        routes.SubscriptionAddressController.enterNonUkAddress()
+        routes.SubscribedChangeAddressController.enterPostcode(),
+        routes.SubscribedChangeAddressController.enterNonUkAddress()
       )
 
     }
@@ -100,7 +112,7 @@ class SubscriptionAddressControllerSpec
 
       behave like submitEnterUkAddress(
         performAction,
-        controllers.routes.SubscriptionController.checkYourDetails()
+        controllers.routes.HomeController.homepage()
       )
 
     }
@@ -121,7 +133,7 @@ class SubscriptionAddressControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction())
 
-      behave like submitEnterNonUkAddress(performAction, controllers.routes.SubscriptionController.checkYourDetails())
+      behave like submitEnterNonUkAddress(performAction, controllers.routes.HomeController.homepage())
     }
 
     "handling requests to display the enter postcode page" must {
@@ -141,7 +153,7 @@ class SubscriptionAddressControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
-      behave like submitEnterPostcode(performAction, routes.SubscriptionAddressController.selectAddress())
+      behave like submitEnterPostcode(performAction, routes.SubscribedChangeAddressController.selectAddress())
 
     }
 
@@ -152,7 +164,7 @@ class SubscriptionAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like displaySelectAddress(performAction, controllers.routes.SubscriptionController.checkYourDetails())
+      behave like displaySelectAddress(performAction, controllers.routes.HomeController.homepage())
 
     }
 
@@ -165,13 +177,13 @@ class SubscriptionAddressControllerSpec
 
       behave like submitSelectAddress(
         performAction,
-        controllers.routes.SubscriptionController.checkYourDetails(),
-        controllers.routes.SubscriptionController.checkYourDetails()
+        controllers.routes.HomeController.homepage(),
+        controllers.routes.HomeController.homepage()
       )
 
       "not update the session" when {
 
-        "the user selects an address which is already in their subscription details" in {
+        "the user selects an address which is already in their subscribed details" in {
           val session = sessionWithValidJourneyStatus.copy(addressLookupResult = Some(addressLookupResult))
 
           inSequence {
@@ -180,7 +192,7 @@ class SubscriptionAddressControllerSpec
           }
 
           val result = performAction(Seq("address-select" -> "0"))
-          checkIsRedirect(result, controllers.routes.SubscriptionController.checkYourDetails())
+          checkIsRedirect(result, controllers.routes.HomeController.homepage())
         }
 
       }

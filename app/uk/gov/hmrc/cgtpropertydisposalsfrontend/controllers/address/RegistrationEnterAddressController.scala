@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address
 
+import cats.data.EitherT
+import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
@@ -23,14 +25,15 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, name}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.IndividualSupplyingInformation
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class RegistrationEnterAddressController @Inject()(
@@ -61,8 +64,10 @@ class RegistrationEnterAddressController @Inject()(
       case _                                                                         => Left(Redirect(controllers.routes.StartController.start()))
     }
 
-  def updateAddress(journey: IndividualSupplyingInformation, address: Address): JourneyStatus =
-    journey.copy(address = Some(address))
+  def updateAddress(journey: IndividualSupplyingInformation, address: Address)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, IndividualSupplyingInformation] =
+    EitherT.pure[Future, Error](journey.copy(address = Some(address)))
 
   protected lazy val backLinkCall: Call             = name.routes.RegistrationEnterIndividualNameController.enterIndividualName()
   protected lazy val isUkCall: Call                 = routes.RegistrationEnterAddressController.isUk()

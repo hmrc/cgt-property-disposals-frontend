@@ -26,7 +26,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.sample
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, sample}
 
 import scala.concurrent.Future
 
@@ -46,6 +46,8 @@ class RegistrationChangeAddressControllerSpec
     address: Address
   ): RegistrationReady =
     journey.copy(registrationDetails = journey.registrationDetails.copy(address = address))
+
+  override val mockUpdateAddress: Option[(Address, Either[Error, Unit]) => Unit] = None
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(

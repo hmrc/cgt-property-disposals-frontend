@@ -86,7 +86,7 @@
   @cyaRow(
    messages("subscription.cyaLabel.address"),
    addressDisplay(details.address, Block),
-   Some(cyaChange(messages("subscription.cyaChange.address"), "#"))
+   Some(cyaChange(messages("subscription.cyaChange.address"), address.routes.SubscribedChangeAddressController.isUk().url))
   )
 
  }

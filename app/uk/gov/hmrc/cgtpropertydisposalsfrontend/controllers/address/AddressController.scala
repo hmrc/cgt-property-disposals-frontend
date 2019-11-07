@@ -26,12 +26,13 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{RequestWithSessionData, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -53,7 +54,7 @@ trait AddressController[J <: JourneyStatus] {
 
   def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, J)]
 
-  def updateAddress(journey: J, address: Address): JourneyStatus
+  def updateAddress(journey: J, address: Address)(implicit hc: HeaderCarrier): EitherT[Future, Error, J]
 
   protected val backLinkCall: Call
   protected val isUkCall: Call
@@ -260,16 +261,22 @@ trait AddressController[J <: JourneyStatus] {
   private def storeAddress(
     continue: Call,
     currentJourneyStatus: J
-  )(address: Address)(implicit request: RequestWithSessionData[_]): Future[Result] =
-    updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updateAddress(currentJourneyStatus, address))))
-      .map(
-        _.fold(
-          { e =>
-            logger.warn("Could not store selected address in session", e)
-            errorHandler.errorResult()
-          },
-          _ => Redirect(continue)
-        )
-      )
+  )(address: Address)(implicit request: RequestWithSessionData[_]): Future[Result] = {
+    val result = for {
+      journeyWithUpdatedAddress <- updateAddress(currentJourneyStatus, address)
+      _ <- EitherT[Future, Error, Unit](
+            updateSession(sessionStore, request)(_.copy(journeyStatus = Some(journeyWithUpdatedAddress)))
+          )
+    } yield ()
+
+    result.fold(
+      { e =>
+        logger.warn("Could not update address", e)
+        errorHandler.errorResult()
+      },
+      _ => Redirect(continue)
+    )
+
+  }
 
 }
