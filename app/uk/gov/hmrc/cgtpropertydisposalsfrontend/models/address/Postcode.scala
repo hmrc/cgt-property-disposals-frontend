@@ -31,13 +31,15 @@ object Postcode {
 
   val mapping: Mapping[Postcode] = {
     val postcodeRegexPredicate =
-      "^[A-Z]{1,2}[0-9][0-9A-Z]?[0-9][A-Z]{2}$|BFPO[0-9]{1,5}$".r.pattern
+      "^[A-Z]{1,2}[0-9][0-9A-Z]?\\s?[0-9][A-Z]{2}$|BFPO\\s?[0-9]{1,3}$".r.pattern
         .asPredicate()
 
-    def validatePostcode(p: Postcode): ValidationResult =
-      if (p.value.length > 10) Invalid("error.tooLong")
-      else if (!postcodeRegexPredicate.test(p.value.toUpperCase.replaceAllLiterally(" ", ""))) Invalid("error.pattern")
+    def validatePostcode(p: Postcode): ValidationResult = {
+      val postcodeWithoutSpaces = p.value.toUpperCase.replaceAllLiterally(" ", "")
+      if (p.value.length > 8) Invalid("error.tooLong")
+      else if (!postcodeRegexPredicate.test(postcodeWithoutSpaces)) Invalid("error.pattern")
       else Valid
+    }
 
     nonEmptyText
       .transform[Postcode](p => Postcode(p.trim), _.value)

@@ -35,7 +35,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscriptio
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, RegistrationStatus, Subscribed, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Individual
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecordRequest._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, BusinessPartnerRecordResponse}
@@ -933,7 +933,7 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
 
           val sautr     = SAUTR("sautr")
           val trustName = TrustName("trustname")
-          val address   = UkAddress("line 1", None, None, None, "postcode")
+          val address   = UkAddress("line 1", None, None, None, Postcode("postcode"))
           val sapNumber = "sap"
           val bpr       = BusinessPartnerRecord(Some(emailAddress), address, sapNumber, Left(trustName))
           val trustSubscriptionDetails =

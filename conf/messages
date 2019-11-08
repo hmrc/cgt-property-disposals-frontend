@@ -167,7 +167,7 @@ contactName.error.tooLong=Contact name must must be 105 characters or fewer
 
 address.postcode.label=Postcode
 address.postcode.helpText=For example, AB2 9WQ
-postcode.invalid=Enter a valid UK postcode
+postcode.invalid=Postcode must only include letters, numbers and spaces
 address.postcodeFilter.label=Enter property name or number (optional)
 address.postcodeFilter.helpText=For example, The Mill, Flat A or 37b
 address.manual.linkText=Enter UK address manually
@@ -188,7 +188,7 @@ address-line2.error.pattern=Building or street line 2 must only include letters,
 address-town.error.pattern=Town or city must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
 address-county.error.pattern=County must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
 
-postcode.error.tooLong=Postcode must be 10 characters or fewer
+postcode.error.tooLong=Postcode must be 8 characters or fewer
 postcode.error.required=Enter a postcode
 postcode.error.pattern=Postcode must only include letters, numbers and spaces
 postcode.error.noResults=No addresses found for this postcode, check what you entered, if it is correct then enter the address manually

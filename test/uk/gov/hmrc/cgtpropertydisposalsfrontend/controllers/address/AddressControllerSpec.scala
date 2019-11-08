@@ -66,7 +66,7 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
   val postcode = Postcode("AB1 2CD")
 
   def address(i: Int) =
-    UkAddress(s"$i the Street", Some("The Town"), None, None, postcode.value)
+    UkAddress(s"$i the Street", Some("The Town"), None, None, postcode)
 
   val (addressHead, lastAddress, lastAddressIndex, addresses) = {
     val head = address(1)
@@ -222,7 +222,7 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
 
       mockUpdateAddress.foreach{ mockAddressUpdate =>
         "the address cannot be updated" in {
-          val newAddress = UkAddress("Test street", None, None, None, "W1A2HR")
+          val newAddress = UkAddress("Test street", None, None, None, Postcode("W1A2HR"))
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -234,7 +234,7 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
       }
 
       "the address cannot be stored in the session" in {
-        val newAddress = UkAddress("Test street", None, None, None, "W1A2HR")
+        val newAddress = UkAddress("Test street", None, None, None, Postcode("W1A2HR"))
         val updatedSession = sessionWithValidJourneyStatus.copy(
           journeyStatus = Some(updateAddress(validJourneyStatus, newAddress))
         )
@@ -251,7 +251,7 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
 
     "redirect to check your details page" when {
       "address has been stored in session" in {
-        val newAddress = UkAddress("Flat 1", Some("The Street"), Some("The Town"), Some("Countyshire"), "W1A2HR")
+        val newAddress = UkAddress("Flat 1", Some("The Street"), Some("The Town"), Some("Countyshire"), Postcode("W1A2HR"))
         val updatedSession = sessionWithValidJourneyStatus.copy(
           journeyStatus = Some(updateAddress(validJourneyStatus, newAddress))
         )
@@ -403,7 +403,7 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
           mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
         }
 
-        contentAsString(performAction()) should include(message("subscription.postcode.title"))
+        contentAsString(performAction()) should include(message("subscription.enterPostcode.title"))
       }
 
       "there is an address lookup result in session" in {
@@ -418,7 +418,7 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
         }
 
         val content = contentAsString(performAction())
-        content should include(message("subscription.postcode.title"))
+        content should include(message("subscription.enterPostcode.title"))
         content should include(s"""value="${postcode.value}"""")
       }
 
@@ -494,13 +494,30 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
       contentAsString(result) should include(message("filter.error.noResults"))
     }
 
+    "show form errors when the postcode is too long" in {
+      List(
+        "BFPO123456",
+        "AA1AB8ABA"
+      ).foreach { invalidPostcode =>
+        withClue(s"For postcode '$invalidPostcode'") {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
+          }
+
+          val result = performAction(Seq("postcode" -> invalidPostcode))
+          status(result)          shouldBe BAD_REQUEST
+          contentAsString(result) should include(message("postcode.error.tooLong"))
+        }
+      }
+    }
+
     "show form errors when the postcode isn't valid" in {
       List(
         "A00A",
         "AA0A0AAA",
         "AA0.0AA",
         "AAA123",
-        "BFPO123456",
         "A11AAA"
       ).foreach { invalidPostcode =>
         withClue(s"For postcode '$invalidPostcode'") {
@@ -571,12 +588,12 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
         "A99 9AA",
         "AA9 9AA",
         "AA99 9AA",
-        "  aA 99 9A a ",
+        "  aA99 9Aa ",
         "BFPO1",
         "BFPO12",
-        "BF PO12 3",
-        " BfpO1234 ",
-        "BFPO  12345"
+        "BFPO12 3",
+        " BfpO123 ",
+        "BFPO 123"
       ).foreach { postcode =>
         withClue(s"For postcode '$postcode': ") {
           val formattedPostcode = Postcode(postcode.trim)
