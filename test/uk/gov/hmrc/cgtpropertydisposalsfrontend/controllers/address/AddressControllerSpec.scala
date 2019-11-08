@@ -208,6 +208,33 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
         status(result)          shouldBe BAD_REQUEST
         contentAsString(result) should include(message("address-line1.error.required"))
       }
+      "address line 1 is too long" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
+        }
+        val result = performAction(Seq("address-line1" -> "1290b StreetWithAVeryLongNameForTestingTheMaxLength", "postcode" -> "W1A2HV"))
+        status(result)          shouldBe BAD_REQUEST
+        contentAsString(result) should include(message("address-line1.error.tooLong"))
+      }
+      "address line 1 is invalid" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
+        }
+        val result = performAction(Seq("address-line1" -> "ContainsIllegal={%}=Characters", "postcode" -> "W1A2HV"))
+        status(result)          shouldBe BAD_REQUEST
+        contentAsString(result) should include(message("address-line1.error.pattern"))
+      }
+      "address line 2 is too long" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
+        }
+        val result = performAction(Seq("address-line1" -> "12 Valid Street", "address-line2" -> "StreetWithAVeryLongNameForTestingTheMaxLength", "postcode" -> "W1A2HV"))
+        status(result)          shouldBe BAD_REQUEST
+        contentAsString(result) should include(message("address-line2.error.tooLong"))
+      }
       "address postcode is empty" in {
         inSequence {
           mockAuthWithNoRetrievals()
@@ -306,6 +333,33 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
         val result = performAction(Seq("countryCode" -> "NZ"))
         status(result)          shouldBe BAD_REQUEST
         contentAsString(result) should include(message("nonUkAddress-line1.error.required"))
+      }
+      "address line 1 is too long" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
+        }
+        val result = performAction(Seq("nonUkAddress-line1" -> "1290b StreetWithAVeryLongNameForTestingTheMaxLength", "countryCode" -> "NZ"))
+        status(result)          shouldBe BAD_REQUEST
+        contentAsString(result) should include(message("nonUkAddress-line1.error.tooLong"))
+      }
+      "address line 1 is invalid" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
+        }
+        val result = performAction(Seq("nonUkAddress-line1" -> "12 ContainsIllegal={%}=Characters", "countryCode" -> "NZ"))
+        status(result)          shouldBe BAD_REQUEST
+        contentAsString(result) should include(message("nonUkAddress-line1.error.pattern"))
+      }
+      "address line 2 is invalid" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
+        }
+        val result = performAction(Seq("nonUkAddress-line1" -> "1290b Valid Street", "nonUkAddress-line2" -> "ContainsIllegal={%}=Characters", "countryCode" -> "NZ"))
+        status(result)          shouldBe BAD_REQUEST
+        contentAsString(result) should include(message("nonUkAddress-line2.error.pattern"))
       }
       "countryCode is empty" in {
         inSequence {
