@@ -91,7 +91,7 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
 
       val subscriptionStatusUrl = "http://host:123/cgt-property-disposals/subscription"
 
-      val subscribedDetails = SubscribedDetails(
+      val subscribedDetails = SubscribedAndVerifierDetails(
         Right(IndividualName("Stephen", "Wood")),
         Email("stephen@abc.co.uk"),
         UkAddress(
@@ -101,6 +101,7 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
           Some("London"),
           "DH14EJ"
         ),
+        None,
         ContactName("Stephen Wood"),
         CgtReference("XFCGT123456789"),
         Some(TelephoneNumber("(+013)32752856")),

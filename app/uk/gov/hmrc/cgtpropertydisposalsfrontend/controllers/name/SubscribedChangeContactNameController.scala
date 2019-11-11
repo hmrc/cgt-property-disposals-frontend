@@ -26,7 +26,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, SubscribedAndVerifierDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -66,7 +66,9 @@ class SubscribedChangeContactNameController @Inject()(
     if (journey.subscribedDetails === journeyWithUpdatedContactName) EitherT.rightT[Future, Error](journey)
     else
       subscriptionService
-        .updateSubscribedDetails(journeyWithUpdatedContactName)
+        .updateSubscribedDetails(
+          SubscribedAndVerifierDetails.fromSubscribedDetails(journeyWithUpdatedContactName, None)
+        )
         .map(_ => journey.copy(journeyWithUpdatedContactName))
   }
 

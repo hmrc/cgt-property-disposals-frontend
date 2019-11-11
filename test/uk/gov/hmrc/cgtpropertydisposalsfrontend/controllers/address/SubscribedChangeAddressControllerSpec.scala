@@ -28,14 +28,14 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SubscribedDetails, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SubscribedAndVerifierDetails, SubscribedDetails, sample}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class SubscribedChangeAddressControllerSpec
-  extends AddressControllerSpec[Subscribed]
+    extends AddressControllerSpec[Subscribed]
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
@@ -47,20 +47,24 @@ class SubscribedChangeAddressControllerSpec
   lazy val controller = instanceOf[SubscribedChangeAddressController]
 
   lazy implicit val messagesApi: MessagesApi = controller.messagesApi
-  
+
   override def updateAddress(journey: Subscribed, address: Address): Subscribed =
     journey.copy(subscribedDetails = journey.subscribedDetails.copy(address = address))
 
-  override val mockUpdateAddress: Option[(Address, Either[Error, Unit]) => Unit] =
-    Some{ case (newAddress, result) =>
-      mockUpdateSubscribedDetails(subscribedDetails.copy(address = newAddress))(result)
+  override val mockUpdateAddress: Option[(Subscribed, Address, Either[Error, Unit]) => Unit] =
+    Some {
+      case (s: Subscribed, a : Address, r: Either[Error, Unit]) =>
+        mockUpdateSubscribedDetails(SubscribedAndVerifierDetails.fromSubscribedDetails(s.subscribedDetails, Some(a)))(r)
     }
 
-  def mockUpdateSubscribedDetails(subscribedDetails: SubscribedDetails)(result: Either[Error,Unit]) =
-    (mockSubscriptionService.updateSubscribedDetails(_: SubscribedDetails)(_: HeaderCarrier))
-      .expects(subscribedDetails, *)
+  def mockUpdateSubscribedDetails(
+    subscribedAndVerifierDetails: SubscribedAndVerifierDetails
+  )(result: Either[Error, Unit]) =
+    (mockSubscriptionService
+      .updateSubscribedDetails(_: SubscribedAndVerifierDetails)(_: HeaderCarrier))
+      .expects(subscribedAndVerifierDetails, *)
       .returning(EitherT.fromEither[Future](result))
-  
+
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
       performAction, {

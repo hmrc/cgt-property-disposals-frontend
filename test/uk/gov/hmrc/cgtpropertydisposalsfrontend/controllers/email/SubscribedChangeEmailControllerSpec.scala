@@ -33,7 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, SubscribedDetails, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, SubscribedAndVerifierDetails, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{EmailVerificationService, SubscriptionService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -63,17 +63,18 @@ class SubscribedChangeEmailControllerSpec
       bind[SubscriptionService].toInstance(mockSubscriptionService)
     )
 
-  def mockSubscriptionUpdate(subscribedDetails: SubscribedDetails)(result: Either[Error, Unit]) =
+  def mockSubscriptionUpdate(subscribedAndVerifierDetails: SubscribedAndVerifierDetails)(result: Either[Error, Unit]) =
     (mockSubscriptionService
-      .updateSubscribedDetails(_: SubscribedDetails)(_: HeaderCarrier))
-      .expects(subscribedDetails, *)
+      .updateSubscribedDetails(_: SubscribedAndVerifierDetails)(_: HeaderCarrier))
+      .expects(subscribedAndVerifierDetails, *)
       .returning(EitherT.fromEither[Future](result))
 
   override def updateEmail(journey: Subscribed, email: Email): Subscribed =
     journey.copy(subscribedDetails = journey.subscribedDetails.copy(emailAddress = email))
 
   override val mockUpdateEmail: Option[(Subscribed, Either[Error, Unit]) => Unit] = Some({
-    case (s: Subscribed, r: Either[Error, Unit]) => mockSubscriptionUpdate(s.subscribedDetails)(r)
+    case (s: Subscribed, r: Either[Error, Unit]) =>
+      mockSubscriptionUpdate(SubscribedAndVerifierDetails.fromSubscribedDetails(s.subscribedDetails, None))(r)
   })
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi

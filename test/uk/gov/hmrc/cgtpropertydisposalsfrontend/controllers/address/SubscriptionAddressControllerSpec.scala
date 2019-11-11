@@ -24,6 +24,7 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RedirectToStartBehaviour
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SubscriptionDetails, sample}
@@ -47,7 +48,7 @@ class SubscriptionAddressControllerSpec
   override def updateAddress(journey: SubscriptionReady, address: Address): SubscriptionReady =
     journey.copy(subscriptionDetails = journey.subscriptionDetails.copy(address = address))
 
-  override val mockUpdateAddress: Option[(Address, Either[Error, Unit]) => Unit] = None
+  override val mockUpdateAddress: Option[(SubscriptionReady, Address, Either[Error, Unit]) => Unit] = None
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(

@@ -48,7 +48,7 @@ class RegistrationEnterAddressControllerSpec
   ): IndividualSupplyingInformation =
     journey.copy(address = Some(address))
 
-  override val mockUpdateAddress: Option[(Address, Either[Error, Unit]) => Unit] = None
+  override val mockUpdateAddress: Option[(IndividualSupplyingInformation, Address, Either[Error, Unit]) => Unit] = None
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
