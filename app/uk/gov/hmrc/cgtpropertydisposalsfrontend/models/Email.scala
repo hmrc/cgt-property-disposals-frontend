@@ -34,7 +34,7 @@ object Email {
   implicit val eq: Eq[Email] = Eq.instance(_.value === _.value)
 
   val mapping: Mapping[Email] = {
-    val emailRegex = "^(?=.{1,132}.$).+@.+".r.pattern.asPredicate()
+    val emailRegex = "^(?=.{3,132}$)[^@]+@[^@]+$".r.pattern.asPredicate()
 
     nonEmptyText
       .transform[Email](s => Email(s.replaceAllLiterally(" ", "")), _.value)
