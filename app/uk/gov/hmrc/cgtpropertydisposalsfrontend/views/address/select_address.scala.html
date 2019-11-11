@@ -27,17 +27,19 @@
  formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
  radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group,
  addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
- backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
+ backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+ accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu
 )
 
 
-@(addresses: List[Address], form: Form[Address], backLink: Call, submit: Call, enterUkAddress: Call)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(addresses: List[Address], form: Form[Address], backLink: Call, submit: Call, enterUkAddress: Call, showAccountMenu: Boolean)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"address-select"}
 @title = @{messages("address-select.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@menu = {@if(showAccountMenu) { @accountMenu(None) }}
 
-@mainTemplate(title = title, hasErrors = hasErrors) {
+@mainTemplate(title = title, hasErrors = hasErrors, withAuth = !showAccountMenu, accountMenu = Some(menu)) {
 
  @backLinkComponent(backLink)
 

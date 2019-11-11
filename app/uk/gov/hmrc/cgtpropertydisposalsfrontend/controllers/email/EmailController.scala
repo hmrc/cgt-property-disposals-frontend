@@ -55,6 +55,7 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
   val emailVerificationService: EmailVerificationService
   val errorHandler: ErrorHandler
   val isAmendJourney: Boolean
+  val isSubscribedJourney: Boolean
 
   val enterEmailPage: views.html.email.enter_email
   val checkYourInboxPage: views.html.email.check_your_inbox
@@ -93,7 +94,7 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
         val form = sessionData.emailToBeVerified.fold(
           EmailController.submitEmailForm
         )(e => EmailController.submitEmailForm.fill(SubmitEmailDetails(e.email, e.hasResentVerificationEmail)))
-        Ok(enterEmailPage(form, isAmendJourney, backLinkCall, enterEmailSubmitCall))
+        Ok(enterEmailPage(form, isAmendJourney, isSubscribedJourney, backLinkCall, enterEmailSubmitCall))
     }
   }
 
@@ -106,7 +107,7 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
             .fold(
               formWithErrors =>
                 BadRequest(
-                  enterEmailPage(formWithErrors, isAmendJourney, backLinkCall, enterEmailSubmitCall)
+                  enterEmailPage(formWithErrors, isAmendJourney, isSubscribedJourney, backLinkCall, enterEmailSubmitCall)
                 ), {
                 case SubmitEmailDetails(email, resendVerificationEmail) =>
                   val emailToBeVerified = sessionData.emailToBeVerified match {
@@ -160,7 +161,8 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
                   enterEmailCall,
                   enterEmailCall,
                   enterEmailSubmitCall,
-                  emailToBeVerified.hasResentVerificationEmail
+                  emailToBeVerified.hasResentVerificationEmail,
+                  isSubscribedJourney
                 )
               )
           )
@@ -217,7 +219,7 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
                 Redirect(enterEmailCall)
               ) { emailToBeVerified =>
                 if (emailToBeVerified.verified) {
-                  Ok(emailVerifiedPage(emailToBeVerified.email, emailVerifiedContinueCall))
+                  Ok(emailVerifiedPage(emailToBeVerified.email, emailVerifiedContinueCall, isSubscribedJourney))
                 } else {
                   logger.warn(
                     "Email verified endpoint called but email was not verified"

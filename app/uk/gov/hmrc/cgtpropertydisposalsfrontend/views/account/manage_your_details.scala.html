@@ -18,7 +18,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{address, email, name}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Block
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SubscribedDetails, SubscriptionDetail}
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionDetail
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.account.AccountMenuItem
 
 @this(
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -30,18 +30,20 @@
  addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
  warningMessage: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning,
- alertBanner: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.alert_banner
+ alertBanner: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.alert_banner,
+  accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu
 )
+
 
 @(details: SubscribedDetails, detailChanged: Option[SubscriptionDetail])(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
 @fullName = @{details.name.fold(_.value, n => s"${n.firstName} ${n.lastName}")}
 @title = @{messages("account.manageYourDetails.title", fullName)}
-@telephone = @{details.telephoneNumber.fold(messages("account.manageYourDetails.addTelephone"))(f => f.value)}
-@telephoneChange = @{
-  details.telephoneNumber match {
-   case None => messages("cya.add")
-   case _ => messages("cya.change")
+@changeContactNameRoute = @{
+  if(details.registeredWithId) {
+    name.routes.SubscribedChangeContactNameController.enterContactName().url
+  } else {
+    name.routes.SubscribedWithoutIdChangeContactNameController.enterIndividualName().url
   }
 }
 @banner = @{detailChanged match {
@@ -51,48 +53,30 @@
   case _ => Html("")
 }}
 
-@mainTemplate(title = title) {
+@mainTemplate(title = title, withAuth = false, accountMenu=Some(accountMenu(Some(AccountMenuItem.ManageYourDetails())))) {
 
  @banner
 
  @pageHeading(title, Some(messages("account.caption")), Some(messages("account.manageYourDetails.subtitle", details.cgtReference.value)))
 
- @warningMessage(messages("account.manageYourDetails.betaNotice"))
-
  <h2 class="heading-medium">
   @messages("account.manageYourDetails.contactHeading")
  </h2>
- <div class="panel panel-border-wide">
-  <p>
-   @messages("account.manageYourDetails.p")
-  </p>
- </div>
-
 
  @cyaSection() {
-  @if(details.registeredWithId){
-    @cyaRow(
-        messages("subscription.cyaLabel.contactName"),
-        Html(details.contactName.value),
-        Some(cyaChange(messages("subscription.cyaChange.contactName"), name.routes.SubscribedChangeContactNameController.enterContactName().url))
-        )
-    }else{
-        @cyaRow(
-            messages("subscription.cyaLabel.contactName"),
-            Html(details.contactName.value),
-            Some(cyaChange(messages("subscription.cyaChange.contactName"), name.routes.SubscribedWithoutIdChangeContactNameController.enterIndividualName().url))
-        )
-    }
+
+  @cyaRow(
+    messages("subscription.cyaLabel.contactName"),
+    Html(details.contactName.value),
+    Some(cyaChange(messages("subscription.cyaChange.contactName"), changeContactNameRoute))
+  )
+
   @cyaRow(
     messages("subscription.cyaLabel.email"),
     Html(details.emailAddress.value),
     Some(cyaChange(messages("subscription.cyaChange.email"), email.routes.SubscribedChangeEmailController.enterEmail().url))
    )
-  @cyaRow(
-    messages("account.manageYourDetails.telephone"),
-    Html(telephone),
-    Some(cyaChange(messages("account.manageYourDetails.cyaChange.telephone"), "#", Some(telephoneChange)))
-   )
+
   @cyaRow(
    messages("subscription.cyaLabel.address"),
    addressDisplay(details.address, Block),
@@ -101,23 +85,13 @@
 
  }
 
+ <div class="panel panel-border-wide">
+  <p>
+   @messages("account.manageYourDetails.personal.p")
+   @if(details.registeredWithId){
+      @Html(messages("account.manageYourDetails.personal.p2", appConfig.tellHmrcChangeDetails))
+  }
+  </p>
+ </div>
 
-@if(details.registeredWithId){
-   <h2 class="heading-medium">
-    @messages("account.manageYourDetails.personalDetailsHeading")
-   </h2>
-   <div class="panel panel-border-wide">
-    <p>
-     @messages("account.manageYourDetails.personal.p")
-     <a href="https://www.gov.uk/tell-hmrc-change-of-details" target="_blank">@messages("account.manageYourDetails.personal.linkText")</a>.
-    </p>
-   </div>
-   @cyaSection() {
-    @cyaRow(
-     messages("account.manageYourDetails.yourName"),
-     Html(fullName),
-     None
-    )
-   }
- }
 }

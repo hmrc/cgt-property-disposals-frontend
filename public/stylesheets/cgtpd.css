@@ -11,12 +11,17 @@ legend>h1.heading-xlarge {
 }
 .form-group-error legend>h1.heading-xlarge,
 .form-group-error h1>label.heading-xlarge,
-h1 > span.heading-medium {
+h1 > span.heading-medium,
+.column-half > .heading-medium {
     margin-top: 0;
 }
 
 fieldset .form-hint {
     padding-bottom: 10px;
+}
+
+.panel-border-wide {
+    margin-bottom: 30px;
 }
 
 /*
@@ -121,4 +126,74 @@ input:focus, textarea:focus, select:focus, #global-header input:focus {
     clip-path: inset(50%) !important;
     border: 0 !important;
     white-space: nowrap !important;
+}
+
+.account-menu {
+    display: flex;
+    justify-content: flex-start;
+    font-size: 16px;
+}
+
+.account-menu+.beta-banner {
+    border-bottom: none;
+}
+
+.account-menu .as-link-home, .account-menu .as-link-active {
+    background-image: url(data:image/svg+xml;base64,PHN2ZyBkYXRhLW5hbWU9IkxheWVyIDEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDI0IDI0IiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaW5ZTWlkIj48dGl0bGU+aWNvbi1ob21lPC90aXRsZT48cGF0aCBkPSJNMTIgMkwxIDEyLjVoMy4xOXY5LjM4aDUuNDR2LTcuMTNoNC41djcuMTNoNS40NFYxMi41SDIzTDEyIDJ6Ii8+PC9zdmc+);
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-size: 19px;
+    text-decoration: none;
+    color: #005ea5;
+    padding: 12px 18px 8px 22px;
+    border-bottom: 4px solid #005ea5;
+}
+
+.account-menu .as-link-home:hover, .account-menu .as-link-active:hover {
+    border-bottom: 4px solid #dee0e2;
+    color: #2b8cc4;
+}
+
+.account-menu .as-link-active {
+    background: none;
+}
+
+.account-menu .as-link {
+    padding: 12px 16px 8px 16px;
+    color: #005ea5;
+    text-decoration: none;
+    border-bottom: 4px solid #fff;
+}
+
+.account-menu .as-link:hover {
+    border-bottom: 4px solid #dee0e2;
+    color: #2b8cc4;
+}
+
+.account-menu .as-link:first-child {
+    padding-left: 22px;
+    background-image: url(data:image/svg+xml;base64,PHN2ZyBkYXRhLW5hbWU9IkxheWVyIDEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDI0IDI0IiB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaW5ZTWlkIj48dGl0bGU+aWNvbi1ob21lPC90aXRsZT48cGF0aCBkPSJNMTIgMkwxIDEyLjVoMy4xOXY5LjM4aDUuNDR2LTcuMTNoNC41djcuMTNoNS40NFYxMi41SDIzTDEyIDJ6Ii8+PC9zdmc+);
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-size: 19px;
+}
+
+.flex-container {
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    -ms-flex-direction: row;
+    flex-direction: row;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    padding: 0 15px 0 0;
+}
+
+.account-menu__link  {
+    color: rgb(29, 112, 184);
+}
+
+.account-icon {
+    color: rgb(29, 112, 184);
 }

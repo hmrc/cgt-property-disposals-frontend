@@ -38,6 +38,7 @@ class ViewConfig @Inject()(servicesConfig: ServicesConfig) {
     s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
   val betaFeedbackUrlNoAuth: String =
     s"$contactHost/contact/beta-feedback-unauthenticated?service=$contactFormServiceIdentifier"
+  val govUkUrl: String = getString("external-url.gov-uk")
   val signOutUrl: String           = s"$companyAuthUrl$signOutUri"
   val trustRegistrationUrl: String = getString("external-url.trust-registration")
   val callChargesUrl: String = getString("external-url.gov-call-charges")
@@ -45,6 +46,7 @@ class ViewConfig @Inject()(servicesConfig: ServicesConfig) {
   val taxSellHomeUrl: String = getString("external-url.tax-sell-home")
   val taxSellPropertyUrl: String = getString("external-url.tax-sell-property")
   val cgtUrl: String = getString("external-url.capital-gains-tax")
+  val cgtLegacyUrl: String = getString("external-url.capital-gains-tax-legacy")
   val legacyCgtNonResidentUrl: String = getString("external-url.legacy-cgt-non-resident")
   val agentsSignInUrl: String = getString("external-url.sign-in-to-agents")
   val createAgentsAccountUrl: String = getString("external-url.create-agents-account")
@@ -53,4 +55,5 @@ class ViewConfig @Inject()(servicesConfig: ServicesConfig) {
   val trusteeResponsibilitiesUrl: String = getString("external-url.trustee-responsibilities")
   val fileCorporationTaxUrl: String = getString("external-url.file-corporation-tax")
   val trustHelpUrl: String = getString("external-url.trust-help")
+  val tellHmrcChangeDetails: String = getString("external-url.tell-hmrc-change-details")
 }

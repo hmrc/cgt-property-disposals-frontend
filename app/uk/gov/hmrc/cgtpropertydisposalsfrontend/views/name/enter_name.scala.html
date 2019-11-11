@@ -25,17 +25,19 @@
         errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
         textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
-        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
+        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+        accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu
 )
 
-@(form: Form[IndividualName], backLink: Call, submit: Call)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[IndividualName], backLink: Call, submit: Call, showAccountMenu: Boolean)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
 @firstNameKey = @{"firstName"}
 @lastNameKey = @{"lastName"}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @title = @{messages("enterName.title")}
+@menu = {@if(showAccountMenu) { @accountMenu(None) }}
 
-@mainTemplate(title = title, hasErrors = hasErrors) {
+@mainTemplate(title = title, hasErrors = hasErrors, withAuth = !showAccountMenu, accountMenu = Some(menu)) {
 
   @backLinkComponent(backLink)
 

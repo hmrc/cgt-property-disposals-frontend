@@ -14,23 +14,21 @@
  * limitations under the License.
  *@
 
-@import play.api.data.Form
-
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Email
-@import views.html.helper.CSRF
 
 @this(
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
- pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
+ pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+ accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu
 )
 
-@(email: Email, continueCall: Call)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(email: Email, continueCall: Call, showAccountMenu: Boolean)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
 @title = @{messages("confirmEmail.verified.title")}
+@menu = {@if(showAccountMenu) { @accountMenu(None) }}
 
-@mainTemplate(title = title) {
+@mainTemplate(title = title, withAuth = !showAccountMenu, accountMenu = Some(menu)) {
  @pageHeading(title)
  <p class="lede">
   @Html(messages("confirmEmail.verified.intro", email.value))

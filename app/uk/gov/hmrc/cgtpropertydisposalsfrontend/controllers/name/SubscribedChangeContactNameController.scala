@@ -51,6 +51,8 @@ class SubscribedChangeContactNameController @Inject()(
     with Logging
     with ContactNameController[Subscribed] {
 
+  override val isSubscribedJourney: Boolean = true
+
   override def validJourney(
     request: RequestWithSessionData[_]
   ): Either[Result, (SessionData, Subscribed)] =
@@ -74,8 +76,8 @@ class SubscribedChangeContactNameController @Inject()(
 
   override val updateSubscriptionDetailChangedFlag: Boolean = true
 
-  override protected lazy val backLinkCall: Call = controllers.routes.HomeController.homepage()
+  override protected lazy val backLinkCall: Call = controllers.routes.HomeController.manageYourDetails()
   override protected lazy val enterContactNameSubmitCall: Call =
     routes.SubscribedChangeContactNameController.enterContactNameSubmit()
-  override protected lazy val continueCall: Call = controllers.routes.HomeController.homepage()
+  override protected lazy val continueCall: Call = controllers.routes.HomeController.manageYourDetails()
 }

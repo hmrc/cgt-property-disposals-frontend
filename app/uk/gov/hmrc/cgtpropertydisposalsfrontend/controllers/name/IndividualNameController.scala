@@ -38,6 +38,7 @@ trait IndividualNameController[J <: JourneyStatus] {
   implicit val ec: ExecutionContext
 
   val enterNamePage: views.html.name.enter_name
+  val isSubscribedJourney: Boolean = false
 
   val sessionStore: SessionStore
   val errorHandler: ErrorHandler
@@ -68,7 +69,7 @@ trait IndividualNameController[J <: JourneyStatus] {
           name(journey).fold(IndividualName.form)(IndividualName.form.fill)
         }
 
-        Ok(enterNamePage(form, backLinkCall, enterNameSubmitCall))
+        Ok(enterNamePage(form, backLinkCall, enterNameSubmitCall, isSubscribedJourney))
     }
   }
 
@@ -78,7 +79,7 @@ trait IndividualNameController[J <: JourneyStatus] {
         IndividualName.form
           .bindFromRequest()
           .fold(
-            e => BadRequest(enterNamePage(e, backLinkCall, enterNameSubmitCall)),
+            e => BadRequest(enterNamePage(e, backLinkCall, enterNameSubmitCall, isSubscribedJourney)),
             contactName => {
               val result = for {
                 journey <- updateName(journey, contactName)

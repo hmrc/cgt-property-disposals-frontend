@@ -59,6 +59,7 @@ class SubscriptionEnterEmailController @Inject()(
     with EmailController[SubscriptionMissingData, SubscriptionMissingData] {
 
   override val isAmendJourney: Boolean = false
+  override val isSubscribedJourney: Boolean = false
 
   override def validJourney(
     request: RequestWithSessionData[_]

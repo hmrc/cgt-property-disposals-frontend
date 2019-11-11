@@ -22,8 +22,6 @@
         govUkWrapper: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.govuk_wrapper
 )
 
-
-
 @(title: String,
         hasErrors: Boolean = false,
         sidebarLinks: Option[Html] = None,
@@ -32,12 +30,12 @@
         mainClass: Option[String] = None,
         scriptElem: Option[Html] = None,
         withAuth: Boolean = true,
-        sidebar: Option[Html] = None)(mainContent: Html)(implicit request : Request[_], messages: Messages, appConfig: ViewConfig)
+        sidebar: Option[Html] = None,
+        accountMenu: Option[Html] = None)(mainContent: Html)(implicit request : Request[_], messages: Messages, appConfig: ViewConfig)
 
-@serviceInfoContent = {}
+@serviceInfoContent = @{accountMenu.fold(Html(""))(s => s)}
 
 @sidebarContent = @{sidebar.fold(Html(""))(s => s)}
-
 
 @govUkWrapper(appConfig = appConfig,
     title = title,
