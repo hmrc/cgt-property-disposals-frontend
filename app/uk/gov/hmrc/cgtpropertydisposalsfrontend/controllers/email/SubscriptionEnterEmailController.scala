@@ -28,7 +28,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionMissingData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, SessionData, Error}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, SessionData, SubscriptionDetail}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -36,6 +36,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import cats.instances.future._
+
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -80,6 +81,9 @@ class SubscriptionEnterEmailController @Inject()(
 
   override def name(journeyStatus: SubscriptionMissingData): ContactName =
     ContactName(journeyStatus.businessPartnerRecord.name.fold(_.value, n => n.makeSingleName()))
+
+  override val updateSubscriptionDetailUpdated: Boolean = false
+
 
   override lazy protected val backLinkCall: Option[Call]      = None
   override lazy protected val enterEmailCall: Call            = routes.SubscriptionEnterEmailController.enterEmail()

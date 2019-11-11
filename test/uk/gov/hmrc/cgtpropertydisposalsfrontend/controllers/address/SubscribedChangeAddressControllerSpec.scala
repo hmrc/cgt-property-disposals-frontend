@@ -56,6 +56,8 @@ class SubscribedChangeAddressControllerSpec
       mockUpdateSubscribedDetails(subscribedDetails.copy(address = newAddress))(result)
     }
 
+  override val updateSubscriptionDetailUpdated: Boolean = true
+
   def mockUpdateSubscribedDetails(subscribedDetails: SubscribedDetails)(result: Either[Error,Unit]) =
     (mockSubscriptionService.updateSubscribedDetails(_: SubscribedDetails)(_: HeaderCarrier))
       .expects(subscribedDetails, *)

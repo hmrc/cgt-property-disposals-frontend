@@ -43,6 +43,8 @@ class RegistrationEnterIndividualNameControllerSpec
     case _ => false
   }
 
+  override val updateSubscriptionDetailUpdated: Boolean = false
+
   override val mockUpdateName: Option[(IndividualSupplyingInformation, Either[Error, Unit]) => Unit] = None
 
   override def updateName(name: IndividualName, journey: IndividualSupplyingInformation): IndividualSupplyingInformation =

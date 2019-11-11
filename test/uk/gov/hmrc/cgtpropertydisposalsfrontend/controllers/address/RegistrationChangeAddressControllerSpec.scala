@@ -49,6 +49,8 @@ class RegistrationChangeAddressControllerSpec
 
   override val mockUpdateAddress: Option[(Address, Either[Error, Unit]) => Unit] = None
 
+  override val updateSubscriptionDetailUpdated: Boolean = false
+
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
       performAction, {
