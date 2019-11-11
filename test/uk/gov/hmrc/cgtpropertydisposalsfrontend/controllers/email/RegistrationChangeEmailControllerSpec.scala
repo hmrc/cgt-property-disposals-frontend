@@ -48,7 +48,7 @@ class RegistrationChangeEmailControllerSpec
   override def updateEmail(journey: RegistrationReady, email: Email): RegistrationReady =
     journey.copy(registrationDetails = journey.registrationDetails.copy(emailAddress = email))
 
-  override val mockUpdateEmail: Option[(RegistrationReady, Either[Error, Unit]) => Unit] = None
+  override val mockUpdateEmail: Option[(RegistrationReady, RegistrationReady, Either[Error, Unit]) => Unit] = None
 
   override lazy val controller: RegistrationChangeEmailController = instanceOf[RegistrationChangeEmailController]
 

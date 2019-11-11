@@ -27,7 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsC
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.AlreadySubscribedWithDifferentGGAccount
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, RegistrationDetails, SubscribedAndVerifierDetails, SubscribedDetails, SubscriptionDetails, SubscriptionResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, RegistrationDetails, SubscribedUpdateDetails, SubscribedDetails, SubscriptionDetails, SubscriptionResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -51,7 +51,7 @@ trait SubscriptionService {
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, SubscribedDetails]
 
-  def updateSubscribedDetails(subscribedAndVerifierDetails: SubscribedAndVerifierDetails)(
+  def updateSubscribedDetails(subscribedAndVerifierDetails: SubscribedUpdateDetails)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Unit]
 
@@ -107,7 +107,7 @@ class SubscriptionServiceImpl @Inject()(connector: CGTPropertyDisposalsConnector
         Left(Error(s"Call to get subscribed details came back with status ${response.status}"))
     }
 
-  override def updateSubscribedDetails(subscribedAndVerifierDetails: SubscribedAndVerifierDetails)(
+  override def updateSubscribedDetails(subscribedAndVerifierDetails: SubscribedUpdateDetails)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Unit] =
     connector.updateSubscribedDetails(subscribedAndVerifierDetails).subflatMap { response =>

@@ -235,6 +235,7 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
 
       "the address cannot be stored in the session" in {
         val newAddress = UkAddress("Test street", None, None, None, "W1A2HR")
+
         val updatedSession = sessionWithValidJourneyStatus.copy(
           journeyStatus = Some(updateAddress(validJourneyStatus, newAddress))
         )

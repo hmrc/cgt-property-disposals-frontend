@@ -27,7 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SubscribedAndVerifierDetails, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SubscribedUpdateDetails, sample}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -40,10 +40,10 @@ class SubscribedChangeContactNameControllerSpec
     with ContactNameControllerSpec[Subscribed]
     with ScalaCheckDrivenPropertyChecks {
 
-  def mockSubscriptionUpdate(subscribedAndVerifierDetails: SubscribedAndVerifierDetails)(result: Either[Error, Unit]) =
+  def mockSubscriptionUpdate(subscribedUpdateDetails: SubscribedUpdateDetails)(result: Either[Error, Unit]) =
     (mockSubscriptionService
-      .updateSubscribedDetails(_: SubscribedAndVerifierDetails)(_: HeaderCarrier))
-      .expects(subscribedAndVerifierDetails, *)
+      .updateSubscribedDetails(_: SubscribedUpdateDetails)(_: HeaderCarrier))
+      .expects(subscribedUpdateDetails, *)
       .returning(EitherT.fromEither[Future](result))
 
   override val controller: SubscribedChangeContactNameController = instanceOf[SubscribedChangeContactNameController]
@@ -52,9 +52,9 @@ class SubscribedChangeContactNameControllerSpec
 
   override val validJourney: Subscribed = sample[Subscribed]
 
-  override val mockUpdateContactName: Option[(Subscribed, Either[Error, Unit]) => Unit] = Some({
-    case (s: Subscribed, r: Either[Error, Unit]) =>
-      mockSubscriptionUpdate(SubscribedAndVerifierDetails.fromSubscribedDetails(s.subscribedDetails, None))(r)
+  override val mockUpdateContactName: Option[(Subscribed, Subscribed, Either[Error, Unit]) => Unit] = Some({
+    case (oldDetails: Subscribed, newDetails : Subscribed, r: Either[Error, Unit]) =>
+      mockSubscriptionUpdate(SubscribedUpdateDetails(newDetails.subscribedDetails, oldDetails.subscribedDetails))(r)
   })
 
   override def updateContactName(journey: Subscribed, contactName: ContactName): Subscribed =

@@ -28,7 +28,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SubscribedAndVerifierDetails, SubscribedDetails, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SubscribedDetails, SubscribedUpdateDetails, sample}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -53,15 +53,17 @@ class SubscribedChangeAddressControllerSpec
 
   override val mockUpdateAddress: Option[(Subscribed, Address, Either[Error, Unit]) => Unit] =
     Some {
-      case (s: Subscribed, a : Address, r: Either[Error, Unit]) =>
-        mockUpdateSubscribedDetails(SubscribedAndVerifierDetails.fromSubscribedDetails(s.subscribedDetails, Some(a)))(r)
+      case (newDetails: Subscribed, a: Address, r: Either[Error, Unit]) =>
+        mockUpdateSubscribedDetails(
+          SubscribedUpdateDetails(newDetails.subscribedDetails.copy(address = a), newDetails.subscribedDetails)
+        )(r)
     }
 
   def mockUpdateSubscribedDetails(
-    subscribedAndVerifierDetails: SubscribedAndVerifierDetails
+    subscribedAndVerifierDetails: SubscribedUpdateDetails
   )(result: Either[Error, Unit]) =
     (mockSubscriptionService
-      .updateSubscribedDetails(_: SubscribedAndVerifierDetails)(_: HeaderCarrier))
+      .updateSubscribedDetails(_: SubscribedUpdateDetails)(_: HeaderCarrier))
       .expects(subscribedAndVerifierDetails, *)
       .returning(EitherT.fromEither[Future](result))
 

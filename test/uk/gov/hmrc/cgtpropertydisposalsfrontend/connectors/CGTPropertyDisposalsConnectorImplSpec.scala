@@ -17,6 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
 import com.typesafe.config.ConfigFactory
+import org.scalacheck.ScalacheckShapeless._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsString, Json}
@@ -29,7 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
-import org.scalacheck.ScalacheckShapeless._
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -91,7 +92,7 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
 
       val subscriptionStatusUrl = "http://host:123/cgt-property-disposals/subscription"
 
-      val subscribedDetails = SubscribedAndVerifierDetails(
+      val newSubscribedDetails = SubscribedDetails(
         Right(IndividualName("Stephen", "Wood")),
         Email("stephen@abc.co.uk"),
         UkAddress(
@@ -101,16 +102,33 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
           Some("London"),
           "DH14EJ"
         ),
-        None,
         ContactName("Stephen Wood"),
         CgtReference("XFCGT123456789"),
         Some(TelephoneNumber("(+013)32752856")),
         true
       )
 
+      val previousSubscribedDetails = SubscribedDetails(
+        Right(IndividualName("Stephen", "Wood")),
+        Email("stephen@abc.co.uk"),
+        UkAddress(
+          "100 Sutton Street",
+          Some("Wokingham"),
+          Some("Surrey"),
+          Some("London"),
+          "DH14EJ"
+        ),
+        ContactName("John Wick"),
+        CgtReference("XFCGT123456789"),
+        Some(TelephoneNumber("(+013)32752856")),
+        true
+      )
+
+      val subscribedUpdateDetails = SubscribedUpdateDetails(newSubscribedDetails, previousSubscribedDetails)
+
       behave like commonBehaviour(
-        () => connector.updateSubscribedDetails(subscribedDetails).value,
-        mockPut(subscriptionStatusUrl, subscribedDetails)(_)
+        () => connector.updateSubscribedDetails(subscribedUpdateDetails).value,
+        mockPut(subscriptionStatusUrl, subscribedUpdateDetails)(_)
       )
     }
 

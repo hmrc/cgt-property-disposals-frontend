@@ -29,7 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, JourneyStatus, SubscribedAndVerifierDetails, SubscribedDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, JourneyStatus, SubscribedUpdateDetails, SubscribedDetails}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -42,9 +42,9 @@ class SubscribedWithoutIdChangeContactNameControllerSpec
     with IndividualNameControllerSpec[Subscribed]
     with ScalaCheckDrivenPropertyChecks {
 
-  def mockSubscriptionUpdate(subscribedAndVerifierDetails: SubscribedAndVerifierDetails)(result: Either[Error, Unit]) =
+  def mockSubscriptionUpdate(subscribedAndVerifierDetails: SubscribedUpdateDetails)(result: Either[Error, Unit]) =
     (mockSubscriptionService
-      .updateSubscribedDetails(_: SubscribedAndVerifierDetails)(_: HeaderCarrier))
+      .updateSubscribedDetails(_: SubscribedUpdateDetails)(_: HeaderCarrier))
       .expects(subscribedAndVerifierDetails, *)
       .returning(EitherT.fromEither[Future](result))
 
@@ -75,9 +75,9 @@ class SubscribedWithoutIdChangeContactNameControllerSpec
     )
   }
 
-  override val mockUpdateName: Option[(Subscribed, Either[Error, Unit]) => Unit] = Some({
-    case (s: Subscribed, r: Either[Error, Unit]) =>
-      mockSubscriptionUpdate(SubscribedAndVerifierDetails.fromSubscribedDetails(s.subscribedDetails, None))(r)
+  override val mockUpdateName: Option[(Subscribed, Subscribed, Either[Error, Unit]) => Unit] = Some({
+    case (oldDetails: Subscribed, newDetails: Subscribed, r: Either[Error, Unit]) =>
+      mockSubscriptionUpdate(SubscribedUpdateDetails(newDetails.subscribedDetails, oldDetails.subscribedDetails))(r)
   })
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi

@@ -43,7 +43,7 @@ trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidatio
 
   def updateName(name: IndividualName, journey: J): J
 
-  val mockUpdateName: Option[(J, Either[Error, Unit]) => Unit]
+  val mockUpdateName: Option[(J, J, Either[Error, Unit]) => Unit]
 
   def isValidJourney(journey: JourneyStatus): Boolean
 
@@ -120,7 +120,7 @@ trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidatio
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionDataWithValidJourney))))
           mockUpdateName.foreach { f =>
-            f(updateName(name,validJourney), Right(()))
+            f(validJourney, updateName(name,validJourney), Right(()))
           }
           mockStoreSession(updatedSession)(Future.successful(Right(())))
         }
@@ -134,7 +134,7 @@ trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidatio
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionDataWithValidJourney))))
           mockUpdateName.foreach { f =>
-            f(updateName(name,validJourney), Right(()))
+            f(validJourney, updateName(name,validJourney), Right(()))
           }
 
           mockStoreSession(updatedSession)(Future.successful(Right(())))
@@ -165,7 +165,7 @@ trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidatio
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionDataWithValidJourney))))
           mockUpdateName.foreach { f =>
-            f(updateName(name,validJourney), Right(()))
+            f(validJourney, updateName(name,validJourney), Right(()))
           }
           mockStoreSession(updatedSession)(Future.successful(Left(Error(""))))
         }

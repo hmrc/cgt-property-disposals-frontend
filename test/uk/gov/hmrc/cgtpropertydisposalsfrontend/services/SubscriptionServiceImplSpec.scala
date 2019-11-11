@@ -25,7 +25,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, RegistrationDetails, SubscribedAndVerifierDetails, SubscribedDetails, SubscriptionDetails, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, RegistrationDetails, SubscribedUpdateDetails, SubscribedDetails, SubscriptionDetails, sample}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -64,10 +64,10 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
       .returning(EitherT(Future.successful(response)))
 
   def mockUpdateSubscriptionDetails(
-    subscribedAndVerifierDetails: SubscribedAndVerifierDetails
+    subscribedAndVerifierDetails: SubscribedUpdateDetails
   )(response: Either[Error, HttpResponse]) =
     (mockConnector
-      .updateSubscribedDetails(_: SubscribedAndVerifierDetails)(_: HeaderCarrier))
+      .updateSubscribedDetails(_: SubscribedUpdateDetails)(_: HeaderCarrier))
       .expects(subscribedAndVerifierDetails, *)
       .returning(EitherT(Future.successful(response)))
 
@@ -254,7 +254,7 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
 
     "handling requests to update subscribed details" must {
 
-      val subscribedDetails = sample[SubscribedAndVerifierDetails]
+      val subscribedDetails = sample[SubscribedUpdateDetails]
 
       "return an error" when {
 
@@ -268,7 +268,7 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
 
       "return subscribed details if the call comes back with status 200 and the JSON " +
         "body of the response can be parsed" in {
-        val subscribedDetails = sample[SubscribedAndVerifierDetails]
+        val subscribedDetails = sample[SubscribedUpdateDetails]
 
         mockUpdateSubscriptionDetails(subscribedDetails)(Right(HttpResponse(200, Some(Json.toJson(subscribedDetails)))))
 
