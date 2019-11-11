@@ -76,13 +76,10 @@ class RegistrationChangeEmailControllerSpec
 
     "handling submitted email addresses" must {
 
-      def requestWithFormData(data: (String, String)*) =
-        FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken
+      def performAction(data: (String, String)*): Future[Result] =
+        controller.enterEmailSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken)
 
-      def performAction(key: String, value: String): Future[Result] =
-        controller.enterEmailSubmit()(requestWithFormData(key -> value))
-
-      behave like redirectToStartBehaviour(() => performAction("", ""))
+      behave like redirectToStartBehaviour(() => performAction())
 
       behave like enterEmailSubmit(
         performAction,

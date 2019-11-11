@@ -19,9 +19,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import cats.Eq
 import cats.syntax.eq._
 import cats.instances.string._
-
-import play.api.data.Form
-import play.api.data.Forms.{mapping, text}
+import play.api.data.{Form, Mapping}
+import play.api.data.Forms.nonEmptyText
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Format
 
@@ -34,17 +33,12 @@ object Email {
 
   implicit val eq: Eq[Email] = Eq.instance(_.value === _.value)
 
-  val form: Form[Email] = {
-    val emailRegex = "^(?=.{1,132}.$).+@.+".r.pattern.asPredicate()
+  val mapping: Mapping[Email] = {
+    val emailRegex = "^(?=.{3,132}$)[^@]+@[^@]+$".r.pattern.asPredicate()
 
-    Form(
-      mapping(
-        "email" ->
-          text
-            .transform[String](_.replaceAllLiterally(" ", ""), identity)
-            .verifying("invalid", emailRegex.test _)
-      )(Email.apply)(Email.unapply)
-    )
+    nonEmptyText
+      .transform[Email](s => Email(s.replaceAllLiterally(" ", "")), _.value)
+      .verifying("invalid", e => emailRegex.test(e.value))
   }
 
 }

@@ -19,9 +19,10 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address
 import cats.Eq
 import cats.syntax.either._
 import julienrf.json.derived
-import play.api.data.Forms.{mapping, nonEmptyText, number, of, optional, text}
+import play.api.data.Forms.{mapping => formMapping, nonEmptyText, number, of, optional, text}
 import play.api.data.format.Formatter
-import play.api.data.{Form, FormError}
+import play.api.data.validation.{Constraint, Invalid, Valid, ValidationResult}
+import play.api.data.{Form, FormError, Mapping}
 import play.api.libs.json.OFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.BooleanFormatter
 
@@ -34,7 +35,7 @@ object Address {
     line2: Option[String],
     town: Option[String],
     county: Option[String],
-    postcode: String
+    postcode: Postcode
   ) extends Address {
     val countryCode: String = "GB"
   }
@@ -58,21 +59,36 @@ object Address {
   // address is selected by the index of the address in the given list
   def addressSelectForm(addresses: List[Address]): Form[Address] =
     Form(
-      mapping(
+      formMapping(
         "address-select" -> number
           .verifying("invalid", i => i >= 0 && i < addresses.size)
           .transform[Address](addresses.apply, addresses.indexOf(_))
       )(identity)(Some(_))
     )
 
+  val addressLineMapping: Mapping[String] = {
+    val addressLineRegex =
+      "^[A-Za-z0-9 \\-,.&'/]{0,35}$".r.pattern
+        .asPredicate()
+
+    def validateName(s: String): ValidationResult =
+      if (s.length > 35) Invalid("error.tooLong")
+      else if (!addressLineRegex.test(s)) Invalid("error.pattern")
+      else Valid
+
+    nonEmptyText
+      .transform[String](_.trim, identity)
+      .verifying(Constraint[String](validateName(_)))
+  }
+
   def ukAddressForm: Form[UkAddress] =
     Form(
-      mapping(
-        "address-line1"  -> nonEmptyText,
-        "address-line2"  -> optional(text),
-        "address-town"   -> optional(text),
-        "address-county" -> optional(text),
-        "postcode"       -> nonEmptyText
+      formMapping(
+        "address-line1"  -> addressLineMapping,
+        "address-line2"  -> optional(addressLineMapping),
+        "address-town"   -> optional(addressLineMapping),
+        "address-county" -> optional(addressLineMapping),
+        "postcode"       -> Postcode.mapping
       )(UkAddress.apply)(UkAddress.unapply)
     )
 
@@ -90,11 +106,11 @@ object Address {
       override def unbind(key: String, value: Country): Map[String, String] = Map(key -> value.code)
     }
     Form(
-      mapping(
-        "nonUkAddress-line1" -> nonEmptyText,
-        "nonUkAddress-line2" -> optional(text),
-        "nonUkAddress-line3" -> optional(text),
-        "nonUkAddress-line4" -> optional(text),
+      formMapping(
+        "nonUkAddress-line1" -> addressLineMapping,
+        "nonUkAddress-line2" -> optional(addressLineMapping),
+        "nonUkAddress-line3" -> optional(addressLineMapping),
+        "nonUkAddress-line4" -> optional(addressLineMapping),
         "postcode"           -> optional(text),
         "countryCode"        -> of(countryFormatter)
       )(NonUkAddress.apply)(NonUkAddress.unapply)
@@ -103,7 +119,7 @@ object Address {
 
   def isUkForm: Form[Boolean] =
     Form(
-      mapping(
+      formMapping(
         "isUk" -> of(BooleanFormatter.formatter)
       )(identity)(Some(_))
     )

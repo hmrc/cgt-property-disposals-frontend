@@ -299,7 +299,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
           val result = performAction()
           status(result) shouldBe 200
-          contentAsString(result) should include("Go and report your CGT tax with corporate tax")
+          contentAsString(result) should include(message("reportCorpTax.title"))
         }
 
       }

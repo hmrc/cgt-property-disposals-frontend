@@ -70,3 +70,55 @@ input:focus, textarea:focus, select:focus, #global-header input:focus {
         line-height: 1.25;
     }
 }
+
+.hmcts-banner {
+    border: 5px solid #1d70b8;
+    color: #1d70b8;
+    font-size: 0;
+    margin-bottom: 30px;
+    padding: 10px;
+}
+
+.hmcts-banner--success {
+    border-color: #00703c;
+    color: #00703c;
+}
+
+.hmcts-banner__icon {
+    fill: currentColor;
+    float: left;
+    margin-right: 10px;
+}
+
+.hmcts-banner__message {
+    font-family: "GDS Transport", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1.25;
+    color: #0b0c0c;
+    display: block;
+    overflow: hidden;
+}
+
+@media (min-width: 40.0625em) {
+    .hmcts-banner__message {
+        font-size: 19px;
+        line-height: 1.31579;
+    }
+}
+
+.hmcts-banner__assistive {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    -webkit-clip-path: inset(50%) !important;
+    clip-path: inset(50%) !important;
+    border: 0 !important;
+    white-space: nowrap !important;
+}

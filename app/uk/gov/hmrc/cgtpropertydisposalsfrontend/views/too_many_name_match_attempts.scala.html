@@ -17,22 +17,32 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
+  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+  pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+  backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@()(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(backLink: Call)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
 @title = @{messages("enterSaUtr.tooManyAttempts.title")}
 
 @mainTemplate(title = title) {
-    @pageHeading(title)
-    <p>
+
+  @backLinkComponent(backLink)
+
+  @pageHeading(title)
+
+  <p>
     @messages("enterSaUtr.tooManyAttempts.p1")
-    </p>
-    <p>
+  </p>
+
+  <p>
     @messages("enterSaUtr.tooManyAttempts.p2")
-    </p>
+  </p>
+
+  <p>
+    <a href="@{appConfig.lostUtrUrl}">@messages("enterSaUtr.lostUtrLink")</a>
+  </p>
 }
 
 

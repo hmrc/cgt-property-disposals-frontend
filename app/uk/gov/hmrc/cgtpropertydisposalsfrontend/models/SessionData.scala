@@ -24,7 +24,7 @@ final case class SessionData(
                               journeyStatus: Option[JourneyStatus],
                               emailToBeVerified: Option[EmailToBeVerified],
                               addressLookupResult: Option[AddressLookupResult],
-                              needMoreDetailsContinueUrl: Option[String]
+                              needMoreDetailsDetails: Option[NeedMoreDetailsDetails]
 )
 
 object SessionData {

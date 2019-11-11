@@ -55,10 +55,11 @@
     @errorSummary(form)
   }
 
-  @pageHeading(title, Some(messages(s"$journey.caption")))
-
   @formWrapper(submit, 'novalidate -> "novalidate") {
     <fieldset id="@key">
+      <legend>
+        @pageHeading(title, Some(messages("subscription.caption")))
+      </legend>
       @textInput(
         fieldId = line1Key,
         label = Html(messages(s"${key}.line1.label")),

@@ -20,6 +20,7 @@ generic.year=Year
 generic.back=Back
 generic.yes=Yes
 generic.no=No
+generic.success=Success
 
 cya.change=Change
 cya.add=Add
@@ -66,7 +67,7 @@ landingPage.whatYoullNeed.bullet8=property type, if you’re a non-resident
 landingPage.ifYoureAnAgent=If you’re an agent
 landingPage.ifYoureAnAgent.p1=Go to your <a href="{0}">agent services account</a> to access this service. If you do not already have one, you can <a href="{1}">apply for an agent services account</a>.
 landingPage.ifYoureRepresentingATrust=If you’re representing a trust
-landingPage.ifYoureRepresentingATrust.p1=The trust will need to be <a href="{0}">registered</a>. You will need the trust's Self Assessment Unique Taxpayer Reference.
+landingPage.ifYoureRepresentingATrust.p1=The trust will need to be <a href="{0}">registered</a>. You will need the trust’s Self Assessment Unique Taxpayer Reference.
 
 landingPage.sidebar.title=Related content
 landingPage.sidebar.1=Sign in to report and pay Capital Gains Tax on UK property
@@ -99,17 +100,18 @@ enterSaUtr.title=What is your Self Assessment Unique Taxpayer Reference and full
 saUtr.label=Self Assessment Unique Taxpayer Reference
 saUtr.error.required=Enter your Self Assessment Unique Taxpayer Reference
 saUtr.error.pattern=Self Assessment Unique Taxpayer References must be 10 numbers, for example 9163259195
-enterSaUtr.error.notFound=We could not find your details using the exact name and reference you have entered. You’ve tried {0} out of a maximum {1} times
-enterSaUtr.tooManyAttempts.title=Too many attempts
-enterSaUtr.tooManyAttempts.p1=You’ve tried to enter your Self Assessment Unique Taxpayer Reference and name too many times.
-enterSaUtr.tooManyAttempts.p2=Please check any correspondence you have relating to your Self Assessment account and ensure you are using the exact names as printed on that correspondence. You can try again later.
+enterSaUtr.error.notFound=We could not find your details using the name and Self Assessment Unique Taxpayer Reference you entered
+enterSaUtr.tooManyAttempts.title=You’ll need to wait and try again
+enterSaUtr.tooManyAttempts.p1=You’ve tried to enter the Self Assessment Unique Taxpayer Reference (UTR) too many times.
+enterSaUtr.tooManyAttempts.p2=You’ll need to wait 2 hours and try again.
+enterSaUtr.lostUtrLink=Find a lost UTR number
 
 
 dob.title=What is your date of birth?
 dob.helpText=For example, 31 3 1980
 dob.invalid=Enter a real date of birth
 
-subscription.caption=Create a CGT on UK property account
+subscription.caption=Create a Capital Gains Tax on UK property account
 subscription.individual.title=Check your contact details and create an account
 subscription.organisation.title=Check the trust or estate’s contact details and create an account
 subscription.lede=We’ll only use these contact details if we need to get in touch about this service.
@@ -120,10 +122,9 @@ subscription.cyaChange.address=your contact address
 subscription.cyaLabel.email=Email address
 subscription.cyaChange.email=your email address
 
-registration.caption=Create a CGT on UK property account
-registration.title=Check your contact details
-registration.lede=These are the details we hold for you. Before you continue, you must confirm they are correct.
-registration.p=We’ll only use these details if we need to contact you about this service.
+registration.caption=Create a Capital Gains Tax on UK property account
+registration.title=Check your contact details and create an account
+registration.lede=We’ll only use these details if we need to contact you about this service.
 registration.cyaLabel.firstName=First name
 registration.cyaChange.firstName=your first name
 registration.cyaLabel.lastName=Last name
@@ -132,29 +133,31 @@ registration.cyaLabel.address=Contact address
 registration.cyaChange.address=your contact address
 registration.cyaLabel.email=Email address
 registration.cyaChange.email=your email address
-registration.confirm=Before you continue you must confirm your details are correct.
 
-subscription.postcode.title=Find the address by postcode
+subscription.enterPostcode.title=Find your UK contact address
+registration.enterPostcode.title=Find your UK contact address
+enterPostcode.label=Enter postcode
 
-email.title=Enter your email address
-email.amend.title=Enter the new email address
+email.title=Enter a contact email address
+email.amend.title=Enter a contact email address
 email.helpText=For example, name@example.com
 email.extraContent=We will only use this email address to contact you about your Capital Gains Tax on UK property disposals.
 email.amend.extraContent=The email addresses you use for other government services will not change.
-email.invalid=Please enter a valid email address
+email.invalid=Enter an email address in the correct format, like name@example.com
+email.error.required=Enter a contact email address
 
 confirmEmail.title=You have 30 minutes to confirm your email address
 confirmEmail.sentEmail=We’ve sent an email to you at {0}.
-confirmEmail.changeAgain=Use a different email address.
+confirmEmail.changeAgain=You can <a href="{0}">use a different email address</a>.
 confirmEmail.whatYouCanDo=What you need to do
 confirmEmail.gotoEmail=Go to that email account and select the link in the email we sent you.
 confirmEmail.ifNoEmail=If the email did not arrive
 confirmEmail.noEmailAction=You can tell us to resend the email to that email account.
-confirmEmail.verified.title=Email address verified
-confirmEmail.verified.intro={0} has been verified.
-confirmEmail.verified.p1=We’ll use this address to contact you about your Capital Gains Tax.
+confirmEmail.verified.title=Email address confirmed
+confirmEmail.verified.intro=The email address <strong class="bold">{0}</strong> has been confirmed.
+confirmEmail.verified.p1=We’ll use this address to contact you about your Capital Gains Tax on UK property sales or disposals.
 confirmEmail.verified.p2=Your email has not been updated in other government services.
-
+confirmEmail.resent=Confirmation email sent to {0}
 
 contactName.title=Change your contact name for this service
 contactName.extraContent=We’ll only use the name on any contact letters or emails we send to you about this service. Your details in other government services will not change.
@@ -162,25 +165,32 @@ contactName.error.pattern=Contact name must only include letters, numbers, hyphe
 contactName.error.required=Enter your contact name
 contactName.error.tooLong=Contact name must must be 105 characters or fewer
 
-address.caption=Property address
 address.postcode.label=Postcode
-address.postcode.helpText=Enter the postcode of the contact address.
-address.postcode.notInUk=The property is not in the UK
-address.postcode.p1=You cannot use this service to report and pay Capital Gains Tax if the property is not in the UK.
-address.postcode.p2=If you have to report and pay Capital Gains Tax on a property outside of the UK, you’ll need to use the 'real time' Capital Gains Tax service <a href="#">or your Self Assessment return</a>.
-postcode.invalid=Please enter a valid UK postcode
-address.postcodeFilter.label=Property name or number (optional)
+address.postcode.helpText=For example, AB2 9WQ
+postcode.invalid=Postcode must only include letters, numbers and spaces
+address.postcodeFilter.label=Enter property name or number (optional)
 address.postcodeFilter.helpText=For example, The Mill, Flat A or 37b
-address.manual.linkText=Enter address manually
-address.lookup.linkText=Lookup address with postcode
+address.manual.linkText=Enter UK address manually
+address.lookup.linkText=Lookup UK address with postcode
 
-address.uk.title=Enter your address
+address.uk.title=Enter your UK contact address
 address.uk.line1.label=Building or street
 address.uk.line2.label=Building or street line 2 (optional)
 address.uk.line3.label=Town or city (optional)
 address.uk.line4.label=County (optional)
-address-line1.error.required=Enter building and street
-postcode.error.required=Enter postcode
+address-line1.error.required=Enter the building or street
+address-line1.error.tooLong=Building or street must be 35 characters or fewer
+address-line2.error.tooLong=Building or street line 2 must be 35 characters or fewer
+address-town.error.tooLong=Town or city must be 35 characters or fewer
+address-county.error.tooLong=County must be 35 characters or fewer
+address-line1.error.pattern=Building or street must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
+address-line2.error.pattern=Building or street line 2 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
+address-town.error.pattern=Town or city must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
+address-county.error.pattern=County must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
+
+postcode.error.tooLong=Postcode must be 8 characters or fewer
+postcode.error.required=Enter a postcode
+postcode.error.pattern=Postcode must only include letters, numbers and spaces
 postcode.error.noResults=No addresses found for this postcode, check what you entered, if it is correct then enter the address manually
 filter.error.noResults=No addresses found for this property name or number at this postcode, if it is correct then enter the address manually
 
@@ -195,15 +205,22 @@ nonUkAddress.line2.label=Address line 2 (optional)
 nonUkAddress.line3.label=Address line 3 (optional)
 nonUkAddress.line4.label=Address line 4 (optional)
 countryCode.label=Country
-nonUkAddress-line1.error.required=Enter the first line of the address
+nonUkAddress-line1.error.required=Enter address line 1
+nonUkAddress-line1.error.tooLong=Address line 1 must be 35 characters or fewer
+nonUkAddress-line2.error.tooLong=Address line 2 must be 35 characters or fewer
+nonUkAddress-line3.error.tooLong=Address line 3 must be 35 characters or fewer
+nonUkAddress-line4.error.tooLong=Address line 4 must be 35 characters or fewer
+nonUkAddress-line1.error.pattern=Address line 1 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes 
+nonUkAddress-line2.error.pattern=Address line 2 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes 
+nonUkAddress-line3.error.pattern=Address line 3 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes 
+nonUkAddress-line4.error.pattern=Address line 4 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
 countryCode.error.required=Enter a country from the options presented as you type
 countryCode.error.notFound=Enter a country from the options presented as you type
 
-address-select.title=Select the address of the property
-address-select.manualOption=None of the above (Enter address manually)
-address-select.error.required=Select an address
-address-select.error.number=Select an address
-address-select.invalid=Select an address
+address-select.title=Select your contact address
+address-select.error.required=Select the contact address or enter it manually if it is not shown
+address-select.error.number=Select the contact address or enter it manually if it is not shown
+address-select.invalid=Select the contact address or enter it manually if it is not shown
 
 country-code.label=Country
 country-code.error.required=Enter country
@@ -213,45 +230,53 @@ subscribed.title=Account created
 subscribed.individual.p1=You’ve created a Capital Gains Tax on UK property account
 subscribed.organisation.p1=You’ve created a Capital Gains Tax on UK property account for your trust or estate.
 subscribed.organisation.p2=The trust or estate’s account number is <strong class="bold">{0}</strong>.
-subscribed.individual.p2=Your account number is <strong class="bold">{0}</strong>.
+subscribed.individual.p2=Your Capital Gains Tax on UK property account number is <strong class="bold">{0}</strong>.
 subscribed.organisation.p3=You will need to provide this number to HMRC if you need to discuss the trust or estate’s account.
-subscribed.individual.p3=You will need to provide this number to HMRC if you need to discuss the account.
+subscribed.individual.p3=You will need to provide this number to HMRC if you need to discuss your account.
 subscribed.p4=We have sent a confirmation email to <strong class="bold">{0}</strong>.
 subscribed.buttonText=Go to account
 
-registerTrust.title=Register your trust
-registerTrust.p=To report and pay Capital Gains Tax on UK property disposals you will need to register your trust with HMRC.
-registerTrust.buttonText=Register your trust
+registerTrust.title=You’ll need to register the trust
+registerTrust.p=To use this service, you’ll need to:
+registerTrust.bullet1=<a href="{0}" target="_blank">Register the trust (opens in new window)</a>.
+registerTrust.bullet2=Sign in to this service using the Government Gateway user ID and password you used to register the trust.
 
-registration.start.title=You need to register with HMRC before starting
-registration.start.p=Because we hold no details about your tax affairs you will need to register to be able to create an account to report and pay Capital Gains Tax on UK property disposals.
-registration.start.buttonText=Start registration
+reportCorpTax.title=You’ve tried to sign in as an organisation
+reportCorpTax.p1=Trusts are the only organisations that can use this service to report Capital Gains Tax on UK property.
+reportCorpTax.p2=You have told us you are not a trust so you’ll need to <a href="{0}">file a Company Tax Return</a> to report any taxable gains on UK property.
 
-entityType.title=Select which type of entity you are registering
-entityType.individual=Individual
-entityType.trust=A trust that I represent
-entityType.error.required=Select whether you are an individual or a trust
-entityType.invalid=Select either individual or trust
+entityType.title=Do you want to report a capital gain for a trust or estate?
+entityType.individual=No
+entityType.trust=Yes
+entityType.error.required=Select yes if you want to report a capital gain for a trust or estate
+entityType.invalid=Select yes if you want to report a capital gain for a trust or estate
 
-wrongAccountForTrusts.title=Wrong type of Government Gateway account for trusts
-wrongAccountForTrusts.p=In order to register to Report and Pay Capital Gains Tax on UK Property Disposals you need to sign in with the Government Gateway account associated with your trust, or if one does not exist then you will need to create a new Government Gateway account, set up as an organisation and not an individual, to use for registering your trust.
+wrongAccountForTrusts.title=Sign in to Government Gateway as a trust
+wrongAccountForTrusts.p1=You’re trying to use this service to report Capital Gains Tax on UK property for a trust.
+wrongAccountForTrusts.whatWentWrong=What went wrong
+wrongAccountForTrusts.whatWentWrong.p1=You’ve signed into Government Gateway as an ‘individual’ person not an ‘organisation’.
+wrongAccountForTrusts.whatNext=What you’ll need to do next
+wrongAccountForTrusts.whatNext.p1=You’ll need to sign in using the <a href="{0}">Government Gateway</a> user ID and password created for the trust. These are the same details you used to register the trust.
+wrongAccountForTrusts.createGGAccount=Create a trust’s Government Gateway account
+wrongAccountForTrusts.createGGAccount.p1=You can a <a href="{0}">create a Government Gateway account</a> for the trust. It will need to be for an ‘organisation’ and not an ‘individual’. The trust will need to be <a href="{1}">registered</a> before you can use this service.
 
 enterName.title=Enter your full name
 enterName.firstName.label=First name
 enterName.lastName.label=Last name
 firstName.error.required=Enter your first name
-firstName.error.tooLong=First name must be less than 36 characters
-firstName.error.pattern=First name can only include letters, apostrophes, hyphens, spaces and ampersands
+firstName.error.tooLong=First name must be 35 characters or fewer
+firstName.error.pattern=First name must only include letters, apostrophes, hyphens, spaces and ampersands
 lastName.error.required=Enter your last name
-lastName.error.tooLong=Last name must be less than 36 characters
-lastName.error.pattern=Last name can only include letters, apostrophes, hyphens, spaces and ampersands
+lastName.error.tooLong=Last name must be 35 characters or fewer
+lastName.error.pattern=Last name must only include letters, apostrophes, hyphens, spaces and ampersands
 
 weNeedMoreDetails.title=We need more details
-weNeedMoreDetails.caption=Create a CGT on UK property account
+weNeedMoreDetails.caption=Create a Capital Gains Tax on UK property account
 weNeedMoreDetails.p=This is so you can:
-weNeedMoreDetails.1=Create a Capital Gains Tax (CGT) on UK property account.
-weNeedMoreDetails.2=Report your CGT on UK property sales or disposals.
-
+weNeedMoreDetails.individual.p1=Create a Capital Gains Tax on UK property account.
+weNeedMoreDetails.organisation.p1=Create a Capital Gains Tax on UK property account for your trust or estate.
+weNeedMoreDetails.individual.p2=Report your CGT on UK property sales or disposals.
+weNeedMoreDetails.organisation.p2=Report your CGT on UK property sales or disposals for a trust or estate.
 
 # IV Locked Out
 iv.lockedOut.title=We were not able to confirm your identity
@@ -330,6 +355,7 @@ isReportingForATrust.error.required=Select yes if you want to report the tax for
 isReportingForATrust.error.boolean=Select yes if you want to report the tax for a trust or estate
 
 haveATrn.title=Does the trust or estate have a Trust Registration Number?
+haveATrn.helpText=This number is sent to the person who <a href="{0}">registers the trust (opens in a new window)</a> with the Trust Registration Service.
 hasTrn.error.required=Select yes if you have a Trust Registration number
 hasTrn.error.boolean=Select yes if you have a Trust Registration number
 
@@ -339,15 +365,19 @@ trn.error.required=Enter your Trust Registration Number
 trn.error.pattern=Trust Registration Number must be 15 numbers, for example 123456789012345
 trn.error.tooLong=Trust Registration Number must be 15 numbers, for example 123456789012345
 trn.error.tooShort=Trust Registration Number must be 15 numbers, for example 123456789012345
-enterTrn.error.notFound=We could not find your details using the exact name and registration number you have entered. You’ve tried {0} out of a maximum {1} times
-enterTrn.tooManyAttempts.title=Too many attempts
+enterTrn.error.notFound=We could not find your details using the name and Trust Registration Number you entered
+enterTrn.tooManyAttempts.title=You’ll need to wait and try again
 enterTrn.tooManyAttempts.p1=You’ve tried to enter your Trust Registration Number and trust name too many times.
-enterTrn.tooManyAttempts.p2=You can try again later.
+enterTrn.tooManyAttempts.p2=You’ll need to wait 2 hours and try again.
+enterTrn.whatATrnIs=What a Trust Registration Number is
+enterTrn.whatATrnIs.p1=HMRC sends this number to the person who <a href="{0}" target="_blank">registers the trust (opens in a new window)</a>.
+enterTrn.ifYouCannotFind=If you cannot find it
+enterTrn.ifYouCannotFind.p1=If you registered the trust and cannot find its Trust Registration Number number, you can <a href="{0}" target="_blank">contact HMRC (opens in a new window)</a>.
 
 enterTrustName.label=Name of trust
 trustName.error.required=Enter the name of your trust
 trustName.error.tooLong=The name of your trust must be less than 105 characters
-trustName.error.pattern=Your trust name can only include letters, apostrophes, hyphens, spaces and ampersands
+trustName.error.pattern=The trust’s name must only include letters, spaces, commas, ampersands, full stops, apostrophes and hyphens
 
-alreadySubscribedWithDifferentGGAccount.title=You've already subscribed with a different account
-alreadySubscribedWithDifferentGGAccount.p=Oh no!
+alreadySubscribedWithDifferentGGAccount.title=You need to sign in with a different Government Gateway account
+alreadySubscribedWithDifferentGGAccount.p=<a href="{0}">Sign in</a> with the same Government Gateway account you used to create your Capital Gains Tax on UK property account.

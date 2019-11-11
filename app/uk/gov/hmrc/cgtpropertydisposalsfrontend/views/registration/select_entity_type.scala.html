@@ -39,7 +39,7 @@
 @key = @{"entityType"}
 @title = @{messages("entityType.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-@options = @{List(EntityType.Individual, EntityType.Trust).map(toMessage)}
+@options = @{List(EntityType.Trust, EntityType.Individual).map(toMessage)}
 
 @mainTemplate(title = title, hasErrors = hasErrors) {
 

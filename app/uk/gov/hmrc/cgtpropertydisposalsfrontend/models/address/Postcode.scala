@@ -16,6 +16,9 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address
 
+import play.api.data.Forms.nonEmptyText
+import play.api.data.Mapping
+import play.api.data.validation.{Constraint, Invalid, Valid, ValidationResult}
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Format
 
@@ -25,5 +28,22 @@ object Postcode {
 
   implicit val format: Format[Postcode] =
     implicitly[Format[String]].inmap(Postcode(_), _.value)
+
+  val mapping: Mapping[Postcode] = {
+    val postcodeRegexPredicate =
+      "^[A-Z]{1,2}[0-9][0-9A-Z]?\\s?[0-9][A-Z]{2}$|BFPO\\s?[0-9]{1,3}$".r.pattern
+        .asPredicate()
+
+    def validatePostcode(p: Postcode): ValidationResult = {
+      val postcodeWithoutSpaces = p.value.toUpperCase.replaceAllLiterally(" ", "")
+      if (p.value.length > 8) Invalid("error.tooLong")
+      else if (!postcodeRegexPredicate.test(postcodeWithoutSpaces)) Invalid("error.pattern")
+      else Valid
+    }
+
+    nonEmptyText
+      .transform[Postcode](p => Postcode(p.trim), _.value)
+      .verifying(Constraint[Postcode](validatePostcode(_)))
+  }
 
 }

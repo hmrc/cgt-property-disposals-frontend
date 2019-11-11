@@ -33,8 +33,10 @@
    <p>
     @messages("registerTrust.p")
    </p>
-   @buttonLink(messages("registerTrust.buttonText"), appConfig.trustRegistrationUrl)
-
+  <ol class="list list-number">
+    <li>@Html(messages("registerTrust.bullet1", appConfig.trustRegistrationUrl))</li>
+    <li>@messages("registerTrust.bullet2")</li>
+  </ol>
  }
 
 

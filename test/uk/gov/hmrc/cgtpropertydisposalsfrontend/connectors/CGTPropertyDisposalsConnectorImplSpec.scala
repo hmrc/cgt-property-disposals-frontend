@@ -25,6 +25,7 @@ import play.api.test.Helpers._
 import play.api.{Configuration, Mode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecordRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName}
@@ -100,7 +101,7 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
           Some("Wokingham"),
           Some("Surrey"),
           Some("London"),
-          "DH14EJ"
+          Postcode("DH14EJ")
         ),
         ContactName("Stephen Wood"),
         CgtReference("XFCGT123456789"),
@@ -116,7 +117,7 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
           Some("Wokingham"),
           Some("Surrey"),
           Some("London"),
-          "DH14EJ"
+          Postcode("DH14EJ")
         ),
         ContactName("John Wick"),
         CgtReference("XFCGT123456789"),

@@ -181,7 +181,7 @@ class RegistrationControllerSpec
             mockGetSession(Future.successful(Right(Some(sessionData))))
             mockStoreSession(updatedSession)(Future.successful(Right(())))
           }
-          val result = performAction("entityType" -> "1")
+          val result = performAction("entityType" -> "0")
           checkIsRedirect(result, routes.RegistrationController.wrongGGAccountForTrusts())
         }
 
@@ -197,7 +197,7 @@ class RegistrationControllerSpec
               mockGetSession(Future.successful(Right(Some(sessionData))))
               mockStoreSession(updatedSession)(Future.successful(Right(())))
             }
-            val result = performAction("entityType" -> "0")
+            val result = performAction("entityType" -> "1")
             checkIsRedirect(result, nameroutes.RegistrationEnterIndividualNameController.enterIndividualName())
           }
 
@@ -207,8 +207,8 @@ class RegistrationControllerSpec
 
           "the session cannot be updated" in {
             List[(String, RegistrationStatus)](
-              "0" -> RegistrationStatus.IndividualSupplyingInformation(None, None, None),
-              "1" -> RegistrationStatus.IndividualWantsToRegisterTrust
+              "1" -> RegistrationStatus.IndividualSupplyingInformation(None, None, None),
+              "0" -> RegistrationStatus.IndividualWantsToRegisterTrust
             ).foreach {
               case (entityType, registrationStatus) =>
                 inSequence {
@@ -236,7 +236,7 @@ class RegistrationControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(Future.successful(Right(Some(session))))
             }
-            val result = performAction("entityType" -> "1")
+            val result = performAction("entityType" -> "0")
             checkIsRedirect(result, routes.RegistrationController.wrongGGAccountForTrusts())
 
           }
@@ -251,7 +251,7 @@ class RegistrationControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(Future.successful(Right(Some(session))))
             }
-            val result = performAction("entityType" -> "0")
+            val result = performAction("entityType" -> "1")
             checkIsRedirect(result, nameroutes.RegistrationEnterIndividualNameController.enterIndividualName())
 
           }

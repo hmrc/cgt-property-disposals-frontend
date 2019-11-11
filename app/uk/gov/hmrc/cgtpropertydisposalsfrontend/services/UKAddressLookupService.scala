@@ -78,7 +78,7 @@ class UKAddressLookupServiceImpl @Inject()(connector: AddressLookupConnector)(im
 
       lines.map {
         case (l1, l2) =>
-          UkAddress(l1, l2, Some(a.town), a.county, a.postcode)
+          UkAddress(l1, l2, Some(a.town), a.county, Postcode(a.postcode))
       }
     }
 
