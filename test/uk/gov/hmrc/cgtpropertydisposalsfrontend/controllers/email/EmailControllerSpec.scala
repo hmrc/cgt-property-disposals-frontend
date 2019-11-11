@@ -104,7 +104,7 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
       "there is a BPR in session and there is an email to be verified in session" in {
         val email = Email("email")
         val session = sessionDataWithValidJourneyStatus.copy(
-          emailToBeVerified = Some(EmailToBeVerified(email, UUID.randomUUID(), false))
+          emailToBeVerified = Some(EmailToBeVerified(email, UUID.randomUUID(), false, false))
         )
 
         inSequence {
@@ -121,26 +121,26 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
   }
 
   def enterEmailSubmit(
-    performAction: (String, String) => Future[Result],
+    performAction: Seq[(String, String)] => Future[Result],
     expectedName: ContactName,
     verifyEmailCall: UUID => Call,
     checkYourInboxCall: Call
   )(implicit messagesApi: MessagesApi): Unit = {
     val email             = Email("test@email.com")
     val id                = UUID.randomUUID()
-    val emailToBeVerified = EmailToBeVerified(email, id, false)
     val titleKey          = if (isAmendJourney) "email.amend.title" else "email.title"
+    def emailToBeVerified(isResend: Boolean) = EmailToBeVerified(email, id, false, isResend)
 
     "show a form error" when {
 
-      def testError(email: String): Unit =
+      def testEmailError(email: String): Unit =
         withClue(s"For email '$email': ") {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionDataWithValidJourneyStatus))))
           }
 
-          val result  = performAction("email", email)
+          val result  = performAction(Seq("email" -> email, "resendVerificationEmail" -> "false"))
           val content = contentAsString(result)
 
           status(result) shouldBe BAD_REQUEST
@@ -151,21 +151,21 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
         }
 
       "the email has no '@' character" in {
-        testError("invalidemail")
+        testEmailError("invalidemail")
       }
 
       "the email has no characters before the '@' character" in {
-        testError("@domain")
+        testEmailError("@domain")
       }
 
       "the email has no characters after the '@' character" in {
-        testError("local@")
+        testEmailError("local@")
       }
 
       "the email has characters before and after the '@' character but " +
         "there are more than 132 characters in it" in {
         val longString = List.fill(100)("a").mkString("")
-        testError(s"$longString@$longString")
+        testEmailError(s"$longString@$longString")
       }
 
     }
@@ -177,12 +177,12 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionDataWithValidJourneyStatus))))
           mockUuidGenerator(id)
-          mockStoreSession(sessionDataWithValidJourneyStatus.copy(emailToBeVerified = Some(emailToBeVerified)))(
+          mockStoreSession(sessionDataWithValidJourneyStatus.copy(emailToBeVerified = Some(emailToBeVerified(false))))(
             Future.successful(Left(Error("")))
           )
         }
 
-        val result = performAction("email", email.value)
+        val result = performAction(Seq("email" -> email.value, "resendVerificationEmail" -> "false"))
         checkIsTechnicalErrorPage(result)
       }
 
@@ -191,13 +191,13 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionDataWithValidJourneyStatus))))
           mockUuidGenerator(id)
-          mockStoreSession(sessionDataWithValidJourneyStatus.copy(emailToBeVerified = Some(emailToBeVerified)))(
+          mockStoreSession(sessionDataWithValidJourneyStatus.copy(emailToBeVerified = Some(emailToBeVerified(false))))(
             Future.successful(Right(()))
           )
           mockEmailVerification(email, expectedName, verifyEmailCall(id))(Left(Error("")))
         }
 
-        val result = performAction("email", email.value)
+        val result = performAction(Seq("email" -> email.value, "resendVerificationEmail" -> "false"))
         checkIsTechnicalErrorPage(result)
       }
 
@@ -208,13 +208,13 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
         mockAuthWithNoRetrievals()
         mockGetSession(Future.successful(Right(Some(sessionDataWithValidJourneyStatus))))
         mockUuidGenerator(id)
-        mockStoreSession(sessionDataWithValidJourneyStatus.copy(emailToBeVerified = Some(emailToBeVerified)))(
+        mockStoreSession(sessionDataWithValidJourneyStatus.copy(emailToBeVerified = Some(emailToBeVerified(false))))(
           Future.successful(Right(()))
         )
         mockEmailVerification(email, expectedName, verifyEmailCall(id))(Right(EmailAlreadyVerified))
       }
 
-      val result: Future[Result] = performAction("email", email.value)
+      val result: Future[Result] = performAction(Seq("email" -> email.value, "resendVerificationEmail" -> "false"))
       checkIsRedirect(result, verifyEmailCall(id))
     }
 
@@ -224,13 +224,13 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
         mockAuthWithNoRetrievals()
         mockGetSession(Future.successful(Right(Some(sessionDataWithValidJourneyStatus))))
         mockUuidGenerator(id)
-        mockStoreSession(sessionDataWithValidJourneyStatus.copy(emailToBeVerified = Some(emailToBeVerified)))(
+        mockStoreSession(sessionDataWithValidJourneyStatus.copy(emailToBeVerified = Some(emailToBeVerified(false))))(
           Future.successful(Right(()))
         )
         mockEmailVerification(email, expectedName, verifyEmailCall(id))(Right(EmailVerificationRequested))
       }
 
-      val result: Future[Result] = performAction("email", email.value)
+      val result: Future[Result] = performAction(Seq("email" -> email.value, "resendVerificationEmail" -> "false"))
       checkIsRedirect(result, checkYourInboxCall)
     }
 
@@ -240,20 +240,20 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
         mockAuthWithNoRetrievals()
         mockGetSession(
           Future.successful(
-            Right(Some(sessionDataWithValidJourneyStatus.copy(emailToBeVerified = Some(emailToBeVerified))))
+            Right(Some(sessionDataWithValidJourneyStatus.copy(emailToBeVerified = Some(emailToBeVerified(false)))))
           )
         )
         mockEmailVerification(email, expectedName, verifyEmailCall(id))(Right(EmailVerificationRequested))
       }
 
-      val result: Future[Result] = performAction("email", email.value)
+      val result: Future[Result] = performAction(Seq("email" -> email.value, "resendVerificationEmail" -> "false"))
       checkIsRedirect(result, checkYourInboxCall)
     }
 
     "strip out spaces in emails" in {
       val emailWithSpaces    = " a @ b  "
       val emailWithoutSpaces = "a@b"
-      val emailToBeVerified  = EmailToBeVerified(Email(emailWithoutSpaces), id, false)
+      val emailToBeVerified  = EmailToBeVerified(Email(emailWithoutSpaces), id, false, true)
 
       inSequence {
         mockAuthWithNoRetrievals()
@@ -267,7 +267,7 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
         )
       }
 
-      val result: Future[Result] = performAction("email", emailWithSpaces)
+      val result: Future[Result] = performAction(Seq("email" -> emailWithSpaces, "resendVerificationEmail" -> "true"))
       checkIsRedirect(result, checkYourInboxCall)
     }
   }
@@ -277,7 +277,7 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
   ): Unit = {
     val email             = Email("test@email.com")
     val id                = UUID.randomUUID()
-    val emailToBeVerified = EmailToBeVerified(email, id, false)
+    val emailToBeVerified = EmailToBeVerified(email, id, false, false)
     val sessionData = SessionData.empty.copy(
       journeyStatus     = Some(validJourneyStatus),
       emailToBeVerified = Some(emailToBeVerified)
@@ -318,7 +318,7 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
   ): Unit = {
     val email             = Email("test@email.com")
     val id                = UUID.randomUUID()
-    val emailToBeVerified = EmailToBeVerified(email, id, false)
+    val emailToBeVerified = EmailToBeVerified(email, id, false, false)
 
     val sessionData = SessionData.empty.copy(
       journeyStatus     = Some(validJourneyStatus),
@@ -416,7 +416,7 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
     expectedContinueCall: Call,
     enterEmailCall: Call
   )(implicit messagesApi: MessagesApi): Unit = {
-    val emailToBeVerified = EmailToBeVerified(Email("verified@email.com"), UUID.randomUUID(), true)
+    val emailToBeVerified = EmailToBeVerified(Email("verified@email.com"), UUID.randomUUID(), true, false)
 
     val sessionData = SessionData.empty.copy(
       journeyStatus     = Some(validVerificationCompleteJourneyStatus),

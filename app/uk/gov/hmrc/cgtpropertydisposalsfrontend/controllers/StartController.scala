@@ -129,9 +129,9 @@ class StartController @Inject()(
   }
 
   def weNeedMoreDetails(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
-    request.sessionData.flatMap(_.needMoreDetailsContinueUrl) match {
+    request.sessionData.flatMap(_.needMoreDetailsDetails) match {
       case None              => Redirect(routes.StartController.start())
-      case Some(continueUrl) => Ok(weNeedMoreDetailsPage(continueUrl))
+      case Some(details) => Ok(weNeedMoreDetailsPage(details))
     }
   }
 
@@ -160,7 +160,11 @@ class StartController @Inject()(
 
     updateSession(sessionStore, request)(_.copy(
       journeyStatus = Some(newSessionData),
-      needMoreDetailsContinueUrl = Some(routes.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrust().url)
+      needMoreDetailsDetails = Some(
+        NeedMoreDetailsDetails(
+        routes.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrust().url,
+          NeedMoreDetailsDetails.AffinityGroup.Organisation
+      ))
     )).map {
       case Left(e) =>
         logger.warn("Could not update session", e)
@@ -190,7 +194,11 @@ class StartController @Inject()(
           updateSession(sessionStore, request)(
             _.copy(
               journeyStatus              = Some(subscriptionStatus),
-              needMoreDetailsContinueUrl = Some(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url)
+              needMoreDetailsDetails = Some(
+                NeedMoreDetailsDetails(
+                routes.InsufficientConfidenceLevelController.doYouHaveNINO().url,
+                NeedMoreDetailsDetails.AffinityGroup.Individual
+              ))
             )
           ).map {
             case Left(e) =>
@@ -252,8 +260,12 @@ class StartController @Inject()(
                   updateSession(sessionStore, request)(
                     _.copy(
                       journeyStatus              = Some(SubscriptionStatus.SubscriptionMissingData(bprWithTrustName._1)),
-                      needMoreDetailsContinueUrl = Some(email.routes.SubscriptionEnterEmailController.enterEmail().url)
-                    )
+                      needMoreDetailsDetails = Some(
+                        NeedMoreDetailsDetails(
+                        email.routes.SubscriptionEnterEmailController.enterEmail().url,
+                          NeedMoreDetailsDetails.AffinityGroup.Organisation
+                        )
+                    ))
                   ),
                 subscriptionDetails =>
                   updateSession(sessionStore, request)(
@@ -309,8 +321,12 @@ class StartController @Inject()(
                 updateSession(sessionStore, request)(
                   _.copy(
                     journeyStatus              = Some(SubscriptionStatus.SubscriptionMissingData(bpr)),
-                    needMoreDetailsContinueUrl = Some(email.routes.SubscriptionEnterEmailController.enterEmail().url)
-                  )
+                    needMoreDetailsDetails = Some(
+                      NeedMoreDetailsDetails(
+                      email.routes.SubscriptionEnterEmailController.enterEmail().url,
+                        NeedMoreDetailsDetails.AffinityGroup.Individual
+                      )
+                  ))
                 ),
               subscriptionDetails =>
                 updateSession(sessionStore, request)(

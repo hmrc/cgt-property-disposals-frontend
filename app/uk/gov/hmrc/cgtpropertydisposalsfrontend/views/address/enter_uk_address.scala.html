@@ -50,10 +50,11 @@
     @errorSummary(form)
   }
 
-  @pageHeading(title, Some(messages("subscription.caption")))
-
   @formWrapper(submit, 'novalidate -> "novalidate") {
     <fieldset id="@key">
+      <legend>
+        @pageHeading(title, Some(messages("subscription.caption")))
+      </legend>
       @textInput(
         fieldId = line1Key,
         label = Html(messages("address.uk.line1.label")),

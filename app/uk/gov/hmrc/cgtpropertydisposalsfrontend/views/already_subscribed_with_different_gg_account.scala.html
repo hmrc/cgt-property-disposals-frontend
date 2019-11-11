@@ -28,7 +28,7 @@
 @mainTemplate(title = title) {
    @pageHeading(title)
    <p>
-    @messages("alreadySubscribedWithDifferentGGAccount.p")
+    @Html(messages("alreadySubscribedWithDifferentGGAccount.p", appConfig.signOutUrl + "?continue=/gg/sign-in"))
    </p>
 
  }

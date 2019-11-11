@@ -164,7 +164,7 @@ class InsufficientConfidenceLevelController @Inject()(
                 )(
                   InsufficientConfidenceLevelController.sautrAndNameForm.withUnsuccessfulAttemptsError
                 )
-                Ok(enterSautrAndNamePage(form))
+                Ok(enterSautrAndNamePage(form,  routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()))
               }
             )
 
@@ -219,7 +219,7 @@ class InsufficientConfidenceLevelController @Inject()(
         )
         .value
         .map {
-          case Left(NameMatchError.TooManyUnsuccessfulAttempts()) => Ok(tooManyUnsuccessfulNameMatchesPage())
+          case Left(NameMatchError.TooManyUnsuccessfulAttempts()) => Ok(tooManyUnsuccessfulNameMatchesPage(routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()))
           case Left(otherNameMatchError)                          => handleNameMatchError(otherNameMatchError)
           case Right(_)                                           => Redirect(routes.InsufficientConfidenceLevelController.enterSautrAndName())
         }
@@ -264,13 +264,13 @@ class InsufficientConfidenceLevelController @Inject()(
       errorHandler.errorResult()
 
     case NameMatchError.ValidationError(formWithErrors) =>
-      BadRequest(enterSautrAndNamePage(formWithErrors))
+      BadRequest(enterSautrAndNamePage(formWithErrors, routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()))
 
     case NameMatchError.NameMatchFailed(unsuccessfulAttempts) =>
       val form = InsufficientConfidenceLevelController.sautrAndNameForm
         .fill(unsuccessfulAttempts.lastDetailsTried)
         .withUnsuccessfulAttemptsError(unsuccessfulAttempts)
-      BadRequest(enterSautrAndNamePage(form))
+      BadRequest(enterSautrAndNamePage(form, routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()))
 
     case NameMatchError.TooManyUnsuccessfulAttempts() =>
       Redirect(routes.InsufficientConfidenceLevelController.tooManyAttempts())

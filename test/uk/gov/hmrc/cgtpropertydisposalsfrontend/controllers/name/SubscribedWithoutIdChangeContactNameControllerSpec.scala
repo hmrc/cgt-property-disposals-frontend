@@ -27,6 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, JourneyStatus, SubscribedDetails}
@@ -60,7 +61,7 @@ class SubscribedWithoutIdChangeContactNameControllerSpec
     SubscribedDetails(
       Right(IndividualName("Joe", "Smith")),
       Email("joe.smith@gmail.com"),
-      UkAddress("21 Joe Streee", None, None, None, "BN112JJ"),
+      UkAddress("21 Joe Streee", None, None, None, Postcode("BN112JJ")),
       ContactName("Bob Smith"),
       CgtReference("XDCGT01234568798"),
       None,

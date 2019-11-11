@@ -37,12 +37,8 @@
 
 @key = @{"postcode"}
 @postcodeFilterKey = @{"filter"}
-@title = @{messages(s"$journey.postcode.title")}
+@title = @{messages(s"$journey.enterPostcode.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-@detailsContent = {
-  <p>@messages("address.postcode.p1")</p>
-  <p>@Html(messages("address.postcode.p2"))</p>
- }
 
 @mainTemplate(title = title, hasErrors = hasErrors) {
 
@@ -65,7 +61,7 @@
    )
    @textInput(
     fieldId = key,
-    label = Html(messages("address.postcode.label")),
+    label = Html(messages("enterPostcode.label")),
     helpText = Some(Html(messages("address.postcode.helpText"))),
     errorKey = form.error(key).map(e => e.message),
     value = form.data.getOrElse(key, ""),

@@ -33,7 +33,7 @@
 @mainTemplate(title = title) {
  @pageHeading(title)
  <p class="lede">
-  @messages("confirmEmail.verified.intro", email.value)
+  @Html(messages("confirmEmail.verified.intro", email.value))
  </p>
  <p>
   @messages("confirmEmail.verified.p1")
