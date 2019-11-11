@@ -153,8 +153,7 @@ class AuthenticatedActionWithRetrievedData @Inject()(
         f(GGCredId(id))
 
       case Some(Credentials(_, otherProvider)) =>
-        logger.warn(s"User logged in with unsupported provider: $otherProvider")
-        Left(errorHandler.errorResult()(request))
+        Right(AuthenticatedRequestWithRetrievedData(UserType.NonGovernmentGatewayUser(otherProvider), request))
     }
 
   private def handleOrganisation[A](

@@ -19,8 +19,9 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 import play.api.Configuration
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{ActionRefiner, MessagesRequest, Result}
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, NoActiveSession}
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, NoActiveSession, UnsupportedAuthProvider}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.http.HeaderCarrier

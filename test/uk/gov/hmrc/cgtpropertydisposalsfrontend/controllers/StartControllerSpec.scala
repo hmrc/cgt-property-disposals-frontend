@@ -20,6 +20,7 @@ import cats.data.EitherT
 import cats.instances.future._
 import org.joda.time.{LocalDate => JodaLocalDate}
 import org.scalacheck.ScalacheckShapeless._
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -27,16 +28,16 @@ import play.api.mvc.{AnyContent, Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.ConfidenceLevel.L50
-import uk.gov.hmrc.auth.core.retrieve.Credentials
 import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.core.retrieve.Credentials
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, RegistrationStatus, Subscribed, SubscriptionStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, NonGovernmentGatewayJourney, RegistrationStatus, Subscribed, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Individual
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecordRequest._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, BusinessPartnerRecordResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
@@ -48,7 +49,13 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSupport with IvBehaviourSupport {
+class StartControllerSpec
+    extends ControllerSpec
+    with AuthSupport
+    with SessionSupport
+    with IvBehaviourSupport
+    with ScalaCheckDrivenPropertyChecks
+    with RedirectToStartBehaviour {
 
   val mockBprService = mock[BusinessPartnerRecordService]
 
@@ -117,9 +124,17 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               Some(retrievedGGCredId)
             )
             mockHasSubscription()(Right(None))
-            mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(
-              journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount)
-            )))))
+            mockGetSession(
+              Future.successful(
+                Right(
+                  Some(
+                    SessionData.empty.copy(
+                      journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount)
+                    )
+                  )
+                )
+              )
+            )
           }
 
           checkIsRedirect(performAction(), routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
@@ -193,7 +208,8 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                     NeedMoreDetailsDetails(
                       needMoreDetailsContinueUrl,
                       NeedMoreDetailsDetails.AffinityGroup.Organisation
-                    ))
+                    )
+                  )
                 )
               )(Future.successful(Right(())))
             }
@@ -220,7 +236,8 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                     NeedMoreDetailsDetails(
                       needMoreDetailsContinueUrl,
                       NeedMoreDetailsDetails.AffinityGroup.Organisation
-                    ))
+                    )
+                  )
                 )
               )(Future.successful(Right(())))
 
@@ -856,12 +873,13 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               val bprWithNoEmail = bpr.copy(emailAddress = None)
               val updatedSession =
                 SessionData.empty.copy(
-                  journeyStatus          = Some(SubscriptionMissingData(bprWithNoEmail)),
+                  journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail)),
                   needMoreDetailsDetails = Some(
                     NeedMoreDetailsDetails(
                       email.routes.SubscriptionEnterEmailController.enterEmail().url,
                       NeedMoreDetailsDetails.AffinityGroup.Individual
-                    ))
+                    )
+                  )
                 )
 
               inSequence {
@@ -881,12 +899,13 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
               val bprWithNoEmail = bpr.copy(emailAddress = None)
               val updatedSession =
                 SessionData.empty.copy(
-                  journeyStatus          = Some(SubscriptionMissingData(bprWithNoEmail)),
+                  journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail)),
                   needMoreDetailsDetails = Some(
                     NeedMoreDetailsDetails(
                       email.routes.SubscriptionEnterEmailController.enterEmail().url,
                       NeedMoreDetailsDetails.AffinityGroup.Individual
-                    ))
+                    )
+                  )
                 )
 
               inSequence {
@@ -1284,6 +1303,91 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
         }
 
       }
+
+      "the user has not logged in with government gateway" must {
+
+        val nonGGCreds = Credentials("id", "provider")
+
+        "show an error page" when {
+
+          "the session cannot be updated" in {
+            inSequence {
+              mockAuthWithAllRetrievals(
+                ConfidenceLevel.L50,
+                Some(AffinityGroup.Individual),
+                None,
+                None,
+                None,
+                Set.empty,
+                Some(nonGGCreds)
+              )
+              mockHasSubscription()(Right(None))
+              mockGetSession(Future.successful(Right(None)))
+              mockStoreSession(SessionData.empty.copy(journeyStatus = Some(NonGovernmentGatewayJourney)))(
+                Future.successful(Left(Error("")))
+              )
+            }
+
+            checkIsTechnicalErrorPage(performAction())
+          }
+
+        }
+
+        "redirect to the 'we only support gg' page" when {
+
+          "the session is updated if the session has not been updated yet" in {
+            inSequence {
+              mockAuthWithAllRetrievals(
+                ConfidenceLevel.L50,
+                Some(AffinityGroup.Individual),
+                None,
+                None,
+                None,
+                Set.empty,
+                Some(nonGGCreds)
+              )
+              mockHasSubscription()(Right(None))
+              mockGetSession(Future.successful(Right(None)))
+              mockStoreSession(SessionData.empty.copy(journeyStatus = Some(NonGovernmentGatewayJourney)))(
+                Future.successful(Right(()))
+              )
+            }
+
+            checkIsRedirect(performAction(), routes.StartController.weOnlySupportGG())
+          }
+
+          "the session data has already been updated" in {
+            inSequence {
+              mockAuthWithAllRetrievals(
+                ConfidenceLevel.L50,
+                Some(AffinityGroup.Individual),
+                None,
+                None,
+                None,
+                Set.empty,
+                Some(nonGGCreds)
+              )
+              mockHasSubscription()(Right(None))
+              mockGetSession(
+                Future.successful(
+                  Right(
+                    Some(
+                      SessionData.empty.copy(
+                        journeyStatus = Some(NonGovernmentGatewayJourney)
+                      )
+                    )
+                  )
+                )
+              )
+            }
+
+            checkIsRedirect(performAction(), routes.StartController.weOnlySupportGG())
+          }
+
+        }
+
+      }
+
     }
 
     "handling requests to display the need more details page" must {
@@ -1325,12 +1429,13 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
                 Right(
                   Some(
                     SessionData.empty.copy(
-                      journeyStatus          = Some(sample[JourneyStatus]),
+                      journeyStatus = Some(sample[JourneyStatus]),
                       needMoreDetailsDetails = Some(
                         NeedMoreDetailsDetails(
                           continueUrl,
                           NeedMoreDetailsDetails.AffinityGroup.Individual
-                        ))
+                        )
+                      )
                     )
                   )
                 )
@@ -1347,6 +1452,38 @@ class StartControllerSpec extends ControllerSpec with AuthSupport with SessionSu
         }
       }
 
+    }
+
+    "handling requests to display the 'we only support gg' page" must {
+
+      def performAction(): Future[Result] = controller.weOnlySupportGG()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        performAction,
+        {
+          case NonGovernmentGatewayJourney => true
+          case _                           => false
+        }
+      )
+
+      "display the page" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            Future.successful(
+              Right(
+                Some(
+                  SessionData.empty.copy(journeyStatus = Some(NonGovernmentGatewayJourney))
+                )
+              )
+            )
+          )
+        }
+
+        val result = performAction()
+        status(result)          shouldBe OK
+        contentAsString(result) should include("gg only")
+      }
     }
 
   }

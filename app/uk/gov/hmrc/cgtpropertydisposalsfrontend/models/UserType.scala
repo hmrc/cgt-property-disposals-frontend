@@ -43,4 +43,6 @@ object UserType {
     credId: GGCredId
   ) extends UserType
 
+  final case class NonGovernmentGatewayUser(authProvider: String) extends UserType
+
 }

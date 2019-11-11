@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
 import play.api.Configuration
-import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthProvider, AuthProviders}
 import uk.gov.hmrc.auth.core.authorise.Predicate
 import uk.gov.hmrc.auth.core.retrieve.Retrieval
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService

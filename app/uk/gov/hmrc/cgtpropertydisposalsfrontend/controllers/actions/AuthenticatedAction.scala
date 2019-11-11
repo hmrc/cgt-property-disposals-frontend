@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.mvc._
-import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
+import uk.gov.hmrc.auth.core.{AuthConnector, AuthProvider, AuthProviders, AuthorisedFunctions}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.http.HeaderCarrier
