@@ -20,6 +20,7 @@ import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
+import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
@@ -75,9 +76,13 @@ class SubscribedChangeEmailController @Inject()(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Subscribed] = {
     val journeyWithUpdatedEmail = journey.subscribedDetails.copy(emailAddress = email)
-    subscriptionService
-      .updateSubscribedDetails(SubscribedUpdateDetails(journeyWithUpdatedEmail, journey.subscribedDetails))
-      .map(_ => journey.copy(journeyWithUpdatedEmail))
+    if (journey.subscribedDetails === journeyWithUpdatedEmail){
+        EitherT.pure[Future, Error](journey)
+    }else {
+      subscriptionService
+        .updateSubscribedDetails(SubscribedUpdateDetails(journeyWithUpdatedEmail, journey.subscribedDetails))
+        .map(_ => journey.copy(journeyWithUpdatedEmail))
+    }
   }
 
   override def name(journeyStatus: Subscribed): ContactName =
