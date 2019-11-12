@@ -764,8 +764,8 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
 
   def submitSelectAddress(
     performAction: Seq[(String, String)] => Future[Result],
-    whenNoAddressLookupResult: Call,
-    continue: Call
+    whenNoAddressLookupResult: => Call,
+    continue: => Call
   )(implicit messagesApi: MessagesApi): Unit = {
     val sessionWithValidJourneyStatusAndAddressLookupResult =
       sessionWithValidJourneyStatus.copy(

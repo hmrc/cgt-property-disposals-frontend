@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address
 
+import cats.data.EitherT
+import cats.instances.future._
 import org.scalacheck.ScalacheckShapeless._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
@@ -30,6 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SubscribedDetails
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class SubscribedChangeAddressControllerSpec
     extends AddressControllerSpec[Subscribed]
@@ -62,6 +65,7 @@ class SubscribedChangeAddressControllerSpec
     (mockSubscriptionService
       .updateSubscribedDetails(_: SubscribedUpdateDetails)(_: HeaderCarrier))
       .expects(subscribedAndVerifierDetails, *)
+    .returning(EitherT.fromEither[Future](result))
 
   override val updateSubscriptionDetailChangedFlag: Boolean = true
 
@@ -120,88 +124,88 @@ class SubscribedChangeAddressControllerSpec
       )
 
     }
-//
-//    "handling requests to display the enter non UK address page" must {
-//
-//      def performAction(): Future[Result] = controller.enterNonUkAddress()(FakeRequest())
-//
-//      behave like redirectToStartBehaviour(performAction)
-//
-//      behave like displayEnterNonUkPage(performAction)
-//
-//    }
-//
-//    "handling requests to submit the enter non UK address page" must {
-//      def performAction(formData: (String, String)*): Future[Result] =
-//        controller.enterNonUkAddressSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
-//
-//      behave like redirectToStartBehaviour(() => performAction())
-//
-//      behave like submitEnterNonUkAddress(performAction, controllers.routes.HomeController.homepage())
-//    }
-//
-//    "handling requests to display the enter postcode page" must {
-//
-//      def performAction(): Future[Result] = controller.enterPostcode()(FakeRequest())
-//
-//      behave like redirectToStartBehaviour(performAction)
-//
-//      behave like enterPostcodePage(performAction)
-//
-//    }
-//
-//    "handling submitted postcodes and filters" must {
-//
-//      def performAction(formData: Seq[(String, String)]): Future[Result] =
-//        controller.enterPostcodeSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
-//
-//      behave like redirectToStartBehaviour(() => performAction(Seq.empty))
-//
-//      behave like submitEnterPostcode(performAction, routes.SubscribedChangeAddressController.selectAddress())
-//
-//    }
-//
-//    "handling requests to display the select address page" must {
-//
-//      def performAction(): Future[Result] =
-//        controller.selectAddress()(FakeRequest())
-//
-//      behave like redirectToStartBehaviour(performAction)
-//
-//      behave like displaySelectAddress(performAction, controllers.routes.HomeController.homepage())
-//
-//    }
-//
-//    "handling submitted selected addresses" must {
-//
-//      def performAction(formData: Seq[(String, String)]): Future[Result] =
-//        controller.selectAddressSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
-//
-//      behave like redirectToStartBehaviour(() => performAction(Seq.empty))
-//
-//      behave like submitSelectAddress(
-//        performAction,
-//        controllers.routes.HomeController.homepage(),
-//        controllers.routes.HomeController.homepage()
-//      )
-//
-//      "not update the session" when {
-//
-//        "the user selects an address which is already in their subscribed details" in {
-//          val session = sessionWithValidJourneyStatus.copy(addressLookupResult = Some(addressLookupResult))
-//
-//          inSequence {
-//            mockAuthWithNoRetrievals()
-//            mockGetSession(Future.successful(Right(Some(session))))
-//          }
-//
-//          val result = performAction(Seq("address-select" -> "0"))
-//          checkIsRedirect(result, controllers.routes.HomeController.homepage())
-//        }
-//
-//      }
-//
-//    }
+
+    "handling requests to display the enter non UK address page" must {
+
+      def performAction(): Future[Result] = controller.enterNonUkAddress()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+      behave like displayEnterNonUkPage(performAction)
+
+    }
+
+    "handling requests to submit the enter non UK address page" must {
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.enterNonUkAddressSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
+
+      behave like redirectToStartBehaviour(() => performAction())
+
+      behave like submitEnterNonUkAddress(performAction, controllers.routes.HomeController.homepage())
+    }
+
+    "handling requests to display the enter postcode page" must {
+
+      def performAction(): Future[Result] = controller.enterPostcode()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+      behave like enterPostcodePage(performAction)
+
+    }
+
+    "handling submitted postcodes and filters" must {
+
+      def performAction(formData: Seq[(String, String)]): Future[Result] =
+        controller.enterPostcodeSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
+
+      behave like redirectToStartBehaviour(() => performAction(Seq.empty))
+
+      behave like submitEnterPostcode(performAction, routes.SubscribedChangeAddressController.selectAddress())
+
+    }
+
+    "handling requests to display the select address page" must {
+
+      def performAction(): Future[Result] =
+        controller.selectAddress()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+      behave like displaySelectAddress(performAction, controllers.routes.HomeController.homepage())
+
+    }
+
+    "handling submitted selected addresses" must {
+
+      def performAction(formData: Seq[(String, String)]): Future[Result] =
+        controller.selectAddressSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
+
+      behave like redirectToStartBehaviour(() => performAction(Seq.empty))
+
+      behave like submitSelectAddress(
+        performAction,
+        controllers.routes.HomeController.homepage(),
+        controllers.routes.HomeController.homepage()
+      )
+
+      "not update the session" when {
+
+        "the user selects an address which is already in their subscribed details" in {
+          val session = sessionWithValidJourneyStatus.copy(addressLookupResult = Some(addressLookupResult))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(session))))
+          }
+
+          val result = performAction(Seq("address-select" -> "0"))
+          checkIsRedirect(result, controllers.routes.HomeController.homepage())
+        }
+
+      }
+
+    }
   }
 
 }
