@@ -49,7 +49,7 @@ class RegistrationEnterEmailControllerSpec
   override def updateEmail(journey: IndividualMissingEmail, email: Email): RegistrationReady =
     RegistrationReady(RegistrationDetails(journey.name, email, journey.address))
 
-  override val mockUpdateEmail: Option[(RegistrationReady, Either[Error, Unit]) => Unit] = None
+  override val mockUpdateEmail: Option[(IndividualMissingEmail, RegistrationReady, Either[Error, Unit]) => Unit] = None
 
   override val updateSubscriptionDetailChangedFlag: Boolean = false
 

@@ -17,6 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
 import com.typesafe.config.ConfigFactory
+import org.scalacheck.ScalacheckShapeless._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsString, Json}
@@ -24,13 +25,12 @@ import play.api.test.Helpers._
 import play.api.{Configuration, Mode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecordRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
-import org.scalacheck.ScalacheckShapeless._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -93,7 +93,7 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
 
       val subscriptionStatusUrl = "http://host:123/cgt-property-disposals/subscription"
 
-      val subscribedDetails = SubscribedDetails(
+      val newSubscribedDetails = SubscribedDetails(
         Right(IndividualName("Stephen", "Wood")),
         Email("stephen@abc.co.uk"),
         UkAddress(
@@ -109,9 +109,27 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
         true
       )
 
+      val previousSubscribedDetails = SubscribedDetails(
+        Right(IndividualName("Stephen", "Wood")),
+        Email("stephen@abc.co.uk"),
+        UkAddress(
+          "100 Sutton Street",
+          Some("Wokingham"),
+          Some("Surrey"),
+          Some("London"),
+          Postcode("DH14EJ")
+        ),
+        ContactName("John Wick"),
+        CgtReference("XFCGT123456789"),
+        Some(TelephoneNumber("(+013)32752856")),
+        true
+      )
+
+      val subscribedUpdateDetails = SubscribedUpdateDetails(newSubscribedDetails, previousSubscribedDetails)
+
       behave like commonBehaviour(
-        () => connector.updateSubscribedDetails(subscribedDetails).value,
-        mockPut(subscriptionStatusUrl, subscribedDetails)(_)
+        () => connector.updateSubscribedDetails(subscribedUpdateDetails).value,
+        mockPut(subscriptionStatusUrl, subscribedUpdateDetails)(_)
       )
     }
 

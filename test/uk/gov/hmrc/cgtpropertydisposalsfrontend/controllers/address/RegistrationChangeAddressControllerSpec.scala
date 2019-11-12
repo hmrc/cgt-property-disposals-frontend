@@ -47,7 +47,7 @@ class RegistrationChangeAddressControllerSpec
   ): RegistrationReady =
     journey.copy(registrationDetails = journey.registrationDetails.copy(address = address))
 
-  override val mockUpdateAddress: Option[(Address, Either[Error, Unit]) => Unit] = None
+  override val mockUpdateAddress: Option[(RegistrationReady, Address, Either[Error, Unit]) => Unit] = None
 
   override val updateSubscriptionDetailChangedFlag: Boolean = false
 

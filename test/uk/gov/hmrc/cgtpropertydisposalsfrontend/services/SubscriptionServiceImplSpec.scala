@@ -24,12 +24,12 @@ import play.api.libs.json.{JsNumber, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, RegistrationDetails, SubscribedDetails, SubscriptionDetails, SubscriptionResponse, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, RegistrationDetails, SubscribedUpdateDetails, SubscribedDetails, SubscriptionDetails, sample}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 
 class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
@@ -49,7 +49,9 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
       .expects(*)
       .returning(EitherT(Future.successful(response)))
 
-  def mockRegisterWithoutIdAndSubscribe(expectedRegistrationDetails: RegistrationDetails)(response: Either[Error, HttpResponse]) =
+  def mockRegisterWithoutIdAndSubscribe(
+    expectedRegistrationDetails: RegistrationDetails
+  )(response: Either[Error, HttpResponse]) =
     (mockConnector
       .registerWithoutIdAndSubscribe(_: RegistrationDetails)(_: HeaderCarrier))
       .expects(expectedRegistrationDetails, *)
@@ -61,12 +63,13 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
       .expects(cgtReference, *)
       .returning(EitherT(Future.successful(response)))
 
-  def mockUpdateSubscriptionDetails(subscribedDetails: SubscribedDetails)(response: Either[Error, HttpResponse]) =
+  def mockUpdateSubscriptionDetails(
+    subscribedAndVerifierDetails: SubscribedUpdateDetails
+  )(response: Either[Error, HttpResponse]) =
     (mockConnector
-      .updateSubscribedDetails(_: SubscribedDetails)(_: HeaderCarrier))
-      .expects(subscribedDetails, *)
+      .updateSubscribedDetails(_: SubscribedUpdateDetails)(_: HeaderCarrier))
+      .expects(subscribedAndVerifierDetails, *)
       .returning(EitherT(Future.successful(response)))
-
 
   "SubscriptionServiceImpl" when {
 
@@ -110,7 +113,7 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
 
     "handling requests to subscribe" must {
 
-      val subscriptionDetails        = sample[SubscriptionDetails]
+      val subscriptionDetails = sample[SubscriptionDetails]
 
       "return an error" when {
 
@@ -160,7 +163,7 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
 
     "handling requests to register without id and subscribe" must {
 
-      val registrationDetails        = sample[RegistrationDetails]
+      val registrationDetails = sample[RegistrationDetails]
 
       "return an error" when {
 
@@ -197,7 +200,9 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
 
         mockRegisterWithoutIdAndSubscribe(registrationDetails)(Right(HttpResponse(200, Some(jsonBody))))
 
-        await(service.registerWithoutIdAndSubscribe(registrationDetails).value) shouldBe Right(SubscriptionSuccessful(cgtReferenceNumber))
+        await(service.registerWithoutIdAndSubscribe(registrationDetails).value) shouldBe Right(
+          SubscriptionSuccessful(cgtReferenceNumber)
+        )
       }
 
       "return an already subscribed response" when {
@@ -210,7 +215,6 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
 
       }
     }
-
 
     "handling requests to get subscribed details" must {
 
@@ -250,7 +254,7 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
 
     "handling requests to update subscribed details" must {
 
-      val subscribedDetails = sample[SubscribedDetails]
+      val subscribedDetails = sample[SubscribedUpdateDetails]
 
       "return an error" when {
 
@@ -264,7 +268,7 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
 
       "return subscribed details if the call comes back with status 200 and the JSON " +
         "body of the response can be parsed" in {
-        val subscribedDetails = sample[SubscribedDetails]
+        val subscribedDetails = sample[SubscribedUpdateDetails]
 
         mockUpdateSubscriptionDetails(subscribedDetails)(Right(HttpResponse(200, Some(Json.toJson(subscribedDetails)))))
 

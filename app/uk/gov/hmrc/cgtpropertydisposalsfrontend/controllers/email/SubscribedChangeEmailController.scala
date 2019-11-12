@@ -20,6 +20,7 @@ import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
+import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
@@ -28,7 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, SessionData, SubscriptionDetail}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, SessionData, SubscribedUpdateDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{EmailVerificationService, SubscriptionService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -75,9 +76,13 @@ class SubscribedChangeEmailController @Inject()(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Subscribed] = {
     val journeyWithUpdatedEmail = journey.subscribedDetails.copy(emailAddress = email)
-    subscriptionService
-      .updateSubscribedDetails(journeyWithUpdatedEmail)
-      .map(_ => journey.copy(journeyWithUpdatedEmail))
+    if (journey.subscribedDetails === journeyWithUpdatedEmail){
+        EitherT.pure[Future, Error](journey)
+    }else {
+      subscriptionService
+        .updateSubscribedDetails(SubscribedUpdateDetails(journeyWithUpdatedEmail, journey.subscribedDetails))
+        .map(_ => journey.copy(journeyWithUpdatedEmail))
+    }
   }
 
   override def name(journeyStatus: Subscribed): ContactName =

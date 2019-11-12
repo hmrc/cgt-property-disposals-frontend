@@ -47,7 +47,7 @@ class SubscriptionChangeEmailControllerSpec
   override def updateEmail(journey: SubscriptionReady, email: Email): SubscriptionReady =
     journey.copy(subscriptionDetails = journey.subscriptionDetails.copy(emailAddress = email))
 
-  override val mockUpdateEmail: Option[(SubscriptionReady, Either[Error, Unit]) => Unit] = None
+  override val mockUpdateEmail: Option[(SubscriptionReady, SubscriptionReady, Either[Error, Unit]) => Unit] = None
 
   override val updateSubscriptionDetailChangedFlag: Boolean = false
 

@@ -37,11 +37,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with AuthSupport with SessionSupport {
+
   val validJourneyStatus: J
 
   def updateAddress(journey: J, address: Address): JourneyStatus
 
-  val mockUpdateAddress: Option[(Address, Either[Error, Unit]) => Unit]
+  val mockUpdateAddress: Option[(J, Address, Either[Error, Unit]) => Unit]
 
   val updateSubscriptionDetailChangedFlag: Boolean
 
@@ -197,7 +198,7 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
       }
     }
 
-  def submitEnterUkAddress(performAction: Seq[(String, String)] => Future[Result], continue: Call)(
+  def   submitEnterUkAddress(performAction: Seq[(String, String)] => Future[Result], continue: Call)(
     implicit messagesApi: MessagesApi
   ): Unit = {
     "return a form error" when {
@@ -256,7 +257,7 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
-            mockAddressUpdate(newAddress, Left(Error("")))
+            mockAddressUpdate(validJourneyStatus, newAddress, Left(Error("")))
           }
           checkIsTechnicalErrorPage(performAction(Seq("address-line1" -> "Test street", "postcode" -> "W1A2HR")))
         }
@@ -272,7 +273,7 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
-          mockUpdateAddress.foreach(_(newAddress, Right(()) ))
+          mockUpdateAddress.foreach(_(validJourneyStatus, newAddress, Right(()) ))
           mockStoreSession(updatedSession)(Future(Left(Error(""))))
         }
         checkIsTechnicalErrorPage(performAction(Seq("address-line1" -> "Test street", "postcode" -> "W1A2HR")))
@@ -290,7 +291,7 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
-          mockUpdateAddress.foreach(_(newAddress, Right(()) ))
+          mockUpdateAddress.foreach(_(validJourneyStatus, newAddress, Right(()) ))
           mockStoreSession(updatedSession)(Future.successful(Right(())))
         }
         val result = performAction(
@@ -394,7 +395,7 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
-            mockAddressUpdate(newAddress, Left(Error("")))
+            mockAddressUpdate(validJourneyStatus, newAddress, Left(Error("")))
           }
           checkIsTechnicalErrorPage(performAction(Seq("nonUkAddress-line1" -> "House 1", "countryCode" -> "NZ")))
         }
@@ -410,7 +411,7 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
-          mockUpdateAddress.foreach(_(newAddress, Right(()) ))
+          mockUpdateAddress.foreach(_(validJourneyStatus, newAddress, Right(()) ))
           mockStoreSession(updatedSession)(Future(Left(Error(""))))
         }
         checkIsTechnicalErrorPage(performAction(Seq("nonUkAddress-line1" -> "House 1", "countryCode" -> "NZ")))
@@ -434,7 +435,7 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
-          mockUpdateAddress.foreach(_(newAddress, Right(()) ))
+          mockUpdateAddress.foreach(_(validJourneyStatus, newAddress, Right(()) ))
 
           mockStoreSession(
             sessionWithValidJourneyStatus.copy(
@@ -763,8 +764,8 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
 
   def submitSelectAddress(
     performAction: Seq[(String, String)] => Future[Result],
-    whenNoAddressLookupResult: Call,
-    continue: Call
+    whenNoAddressLookupResult: => Call,
+    continue: => Call
   )(implicit messagesApi: MessagesApi): Unit = {
     val sessionWithValidJourneyStatusAndAddressLookupResult =
       sessionWithValidJourneyStatus.copy(
@@ -815,7 +816,7 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatusAndAddressLookupResult))))
-            mockAddressUpdate(lastAddress, Left(Error("")))
+            mockAddressUpdate(validJourneyStatus, lastAddress, Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction(Seq("address-select" -> s"$lastAddressIndex")))
@@ -831,7 +832,7 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatusAndAddressLookupResult))))
-          mockUpdateAddress.foreach(_(lastAddress, Right(()) ))
+          mockUpdateAddress.foreach(_(validJourneyStatus, lastAddress, Right(()) ))
           mockStoreSession(updatedSession)(Future.successful(Left(Error(""))))
         }
 
@@ -851,7 +852,7 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatusAndAddressLookupResult))))
-          mockUpdateAddress.foreach(_(lastAddress, Right(())))
+          mockUpdateAddress.foreach(_(validJourneyStatus, lastAddress, Right(())))
           mockStoreSession(updatedSession)(Future.successful(Right(())))
         }
 

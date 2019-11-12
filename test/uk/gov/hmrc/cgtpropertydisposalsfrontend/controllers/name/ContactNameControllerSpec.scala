@@ -45,7 +45,7 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
 
   def updateContactName(journey: J, contactName : ContactName): J
 
-  val mockUpdateContactName: Option[(J, Either[Error, Unit]) => Unit]
+  val mockUpdateContactName: Option[(J, J, Either[Error, Unit]) => Unit]
 
   val updateSubscriptionDetailChangedFlag: Boolean
 
@@ -126,7 +126,7 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionDataWithValidJourney))))
           mockUpdateContactName.foreach { f =>
-            f(updateContactName(validJourney,contactName), Right(()))
+            f(validJourney, updateContactName(validJourney,contactName), Right(()))
           }
           mockStoreSession(updatedSession)(Future.successful(Right(())))
         }
@@ -140,7 +140,7 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionDataWithValidJourney))))
           mockUpdateContactName.foreach { f =>
-            f(updateContactName(validJourney,contactName), Right(()))
+            f(validJourney, updateContactName(validJourney,contactName), Right(()))
           }
           mockStoreSession(updatedSession)(Future.successful(Right(())))
         }
@@ -170,7 +170,7 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionDataWithValidJourney))))
           mockUpdateContactName.foreach { f =>
-            f(updateContactName(validJourney,contactName), Right(()))
+            f(validJourney, updateContactName(validJourney,contactName), Right(()))
           }
           mockStoreSession(updatedSession)(Future.successful(Left(Error(""))))
         }

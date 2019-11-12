@@ -33,7 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, SubscribedDetails, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, SubscribedUpdateDetails, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{EmailVerificationService, SubscriptionService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -65,17 +65,18 @@ class SubscribedChangeEmailControllerSpec
       bind[SubscriptionService].toInstance(mockSubscriptionService)
     )
 
-  def mockSubscriptionUpdate(subscribedDetails: SubscribedDetails)(result: Either[Error, Unit]) =
+  def mockSubscriptionUpdate(subscribedUpdateDetails: SubscribedUpdateDetails)(result: Either[Error, Unit]) =
     (mockSubscriptionService
-      .updateSubscribedDetails(_: SubscribedDetails)(_: HeaderCarrier))
-      .expects(subscribedDetails, *)
+      .updateSubscribedDetails(_: SubscribedUpdateDetails)(_: HeaderCarrier))
+      .expects(subscribedUpdateDetails, *)
       .returning(EitherT.fromEither[Future](result))
 
   override def updateEmail(journey: Subscribed, email: Email): Subscribed =
     journey.copy(subscribedDetails = journey.subscribedDetails.copy(emailAddress = email))
 
-  override val mockUpdateEmail: Option[(Subscribed, Either[Error, Unit]) => Unit] = Some({
-    case (s: Subscribed, r: Either[Error, Unit]) => mockSubscriptionUpdate(s.subscribedDetails)(r)
+  override val mockUpdateEmail: Option[(Subscribed, Subscribed, Either[Error, Unit]) => Unit] = Some({
+    case (oldDetails : Subscribed, newDetails: Subscribed, r: Either[Error, Unit]) =>
+      mockSubscriptionUpdate(SubscribedUpdateDetails(newDetails.subscribedDetails, oldDetails.subscribedDetails))(r)
   })
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi

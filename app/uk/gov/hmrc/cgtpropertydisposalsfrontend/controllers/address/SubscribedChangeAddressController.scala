@@ -26,7 +26,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, SubscriptionDetail}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, SubscribedUpdateDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{SubscriptionService, UKAddressLookupService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -70,11 +70,11 @@ class SubscribedChangeAddressController @Inject()(
   ): EitherT[Future, Error, Subscribed] = {
     val updatedSubscribedDetails = journey.subscribedDetails.copy(address = address)
 
-    if(journey.subscribedDetails === updatedSubscribedDetails){
-      EitherT.pure[Future,Error](journey)
+    if (journey.subscribedDetails === updatedSubscribedDetails) {
+      EitherT.pure[Future, Error](journey)
     } else {
       subscriptionService
-        .updateSubscribedDetails(updatedSubscribedDetails)
+        .updateSubscribedDetails(SubscribedUpdateDetails(updatedSubscribedDetails, journey.subscribedDetails))
         .map(_ => journey.copy(subscribedDetails = updatedSubscribedDetails))
     }
   }

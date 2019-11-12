@@ -22,7 +22,7 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecordRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, RegistrationDetails, SubscribedDetails, SubscriptionDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, RegistrationDetails, SubscribedUpdateDetails, SubscribedDetails, SubscriptionDetails}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
@@ -52,7 +52,7 @@ trait CGTPropertyDisposalsConnector {
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
-  def updateSubscribedDetails(subscribedDetails: SubscribedDetails)(
+  def updateSubscribedDetails(subscribedAndVerifierDetails: SubscribedUpdateDetails)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 }
@@ -101,10 +101,10 @@ class CGTPropertyDisposalsConnectorImpl @Inject()(http: HttpClient, servicesConf
   ): EitherT[Future, Error, HttpResponse] =
     makeCall(_.get(getSubscribedDetailsUrl(cgtReference)))
 
-  override def updateSubscribedDetails(subscribedDetails: SubscribedDetails)(
+  override def updateSubscribedDetails(subscribedUpdateDetails: SubscribedUpdateDetails)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] =
-    makeCall(_.put(subscriptionUpdateUrl, subscribedDetails))
+    makeCall(_.put(subscriptionUpdateUrl, subscribedUpdateDetails))
 
   private def makeCall(call: HttpClient => Future[HttpResponse]): EitherT[Future, Error, HttpResponse] =
     EitherT[Future, Error, HttpResponse](

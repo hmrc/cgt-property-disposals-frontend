@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name
 
 import cats.data.EitherT
 import cats.instances.future._
+import cats.syntax.either._
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Call, MessagesControllerComponents, Result}
@@ -26,14 +27,14 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, SubscribedUpdateDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import cats.syntax.either._
+
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -69,7 +70,7 @@ class SubscribedWithoutIdChangeContactNameController @Inject()(
       EitherT.rightT[Future, Error](journey)
     else
       subscriptionService
-        .updateSubscribedDetails(journeyWithUpdatedName)
+        .updateSubscribedDetails(SubscribedUpdateDetails(journeyWithUpdatedName, journey.subscribedDetails))
         .map(_ => journey.copy(journeyWithUpdatedName))
 
   }

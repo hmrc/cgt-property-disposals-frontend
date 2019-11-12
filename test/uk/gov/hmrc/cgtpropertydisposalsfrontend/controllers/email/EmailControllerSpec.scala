@@ -51,7 +51,7 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
 
   def updateEmail(journey: Journey, email: Email): VerificationCompleteJourney
 
-  val mockUpdateEmail: Option[(VerificationCompleteJourney, Either[Error, Unit]) => Unit]
+  val mockUpdateEmail: Option[(Journey, VerificationCompleteJourney, Either[Error, Unit]) => Unit]
 
   val updateSubscriptionDetailChangedFlag: Boolean
 
@@ -356,7 +356,7 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionData))))
           mockUpdateEmail.foreach { f =>
-            f(updateEmail(validJourneyStatus, emailToBeVerified.email), Right(Unit))
+            f(validJourneyStatus, updateEmail(validJourneyStatus, emailToBeVerified.email), Right(Unit))
           }
           mockStoreSession(
             sessionData.copy(
@@ -374,7 +374,7 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData))))
-            f(updateEmail(validJourneyStatus, emailToBeVerified.email), Left(Error("Error updating email")))
+            f(validJourneyStatus, updateEmail(validJourneyStatus, emailToBeVerified.email), Left(Error("Error updating email")))
           }
           checkIsTechnicalErrorPage(performAction(id))
         }
@@ -400,7 +400,7 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionData))))
           mockUpdateEmail.foreach { f =>
-            f(updateEmail(validJourneyStatus, emailToBeVerified.email), Right(Unit))
+            f(validJourneyStatus, updateEmail(validJourneyStatus, emailToBeVerified.email), Right(Unit))
           }
           mockStoreSession(
             sessionData.copy(
