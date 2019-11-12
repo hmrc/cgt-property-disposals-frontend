@@ -120,7 +120,7 @@ class SubscribedChangeAddressControllerSpec
 
       behave like submitEnterUkAddress(
         performAction,
-        controllers.routes.HomeController.homepage()
+        controllers.routes.HomeController.manageYourDetails()
       )
 
     }
@@ -141,7 +141,7 @@ class SubscribedChangeAddressControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction())
 
-      behave like submitEnterNonUkAddress(performAction, controllers.routes.HomeController.homepage())
+      behave like submitEnterNonUkAddress(performAction, controllers.routes.HomeController.manageYourDetails())
     }
 
     "handling requests to display the enter postcode page" must {
@@ -172,7 +172,7 @@ class SubscribedChangeAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like displaySelectAddress(performAction, controllers.routes.HomeController.homepage())
+      behave like displaySelectAddress(performAction, controllers.routes.HomeController.manageYourDetails())
 
     }
 
@@ -185,8 +185,8 @@ class SubscribedChangeAddressControllerSpec
 
       behave like submitSelectAddress(
         performAction,
-        controllers.routes.HomeController.homepage(),
-        controllers.routes.HomeController.homepage()
+        controllers.routes.HomeController.manageYourDetails(),
+        controllers.routes.HomeController.manageYourDetails()
       )
 
       "not update the session" when {
@@ -200,7 +200,7 @@ class SubscribedChangeAddressControllerSpec
           }
 
           val result = performAction(Seq("address-select" -> "0"))
-          checkIsRedirect(result, controllers.routes.HomeController.homepage())
+          checkIsRedirect(result, controllers.routes.HomeController.manageYourDetails())
         }
 
       }

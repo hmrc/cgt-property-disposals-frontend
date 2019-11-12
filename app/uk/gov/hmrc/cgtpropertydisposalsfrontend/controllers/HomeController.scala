@@ -48,8 +48,8 @@ class HomeController @Inject()(
 
   def homepage(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request: RequestWithSessionData[AnyContent] =>
-      withSubscribedUser(request) { subscribed =>
-        Ok(homePage(subscribed.subscribedDetails))
+      withSubscribedUser(request) { (sessionData, subscribed) =>
+        Future.successful(Ok(homePage(subscribed.subscribedDetails)))
       }
   }
 

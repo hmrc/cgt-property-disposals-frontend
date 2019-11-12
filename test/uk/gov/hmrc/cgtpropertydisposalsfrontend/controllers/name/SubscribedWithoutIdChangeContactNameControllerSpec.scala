@@ -99,7 +99,7 @@ class SubscribedWithoutIdChangeContactNameControllerSpec
 
       behave like enterNameSubmit(
         data => controller.enterIndividualNameSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken),
-        controllers.routes.HomeController.homepage()
+        controllers.routes.HomeController.manageYourDetails()
       )
     }
 
