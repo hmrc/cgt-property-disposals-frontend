@@ -51,6 +51,8 @@ class RegistrationEnterEmailControllerSpec
 
   override val mockUpdateEmail: Option[(IndividualMissingEmail, RegistrationReady, Either[Error, Unit]) => Unit] = None
 
+  override val updateSubscriptionDetailChangedFlag: Boolean = false
+
   override lazy val controller: RegistrationEnterEmailController = instanceOf[RegistrationEnterEmailController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi

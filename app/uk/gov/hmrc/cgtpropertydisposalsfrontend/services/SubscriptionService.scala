@@ -51,7 +51,7 @@ trait SubscriptionService {
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, SubscribedDetails]
 
-  def updateSubscribedDetails(subscribedAndVerifierDetails: SubscribedUpdateDetails)(
+  def updateSubscribedDetails(subscribedUpdateDetails: SubscribedUpdateDetails)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Unit]
 
@@ -107,10 +107,10 @@ class SubscriptionServiceImpl @Inject()(connector: CGTPropertyDisposalsConnector
         Left(Error(s"Call to get subscribed details came back with status ${response.status}"))
     }
 
-  override def updateSubscribedDetails(subscribedAndVerifierDetails: SubscribedUpdateDetails)(
+  override def updateSubscribedDetails(subscribedUpdateDetails: SubscribedUpdateDetails)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Unit] =
-    connector.updateSubscribedDetails(subscribedAndVerifierDetails).subflatMap { response =>
+    connector.updateSubscribedDetails(subscribedUpdateDetails).subflatMap { response =>
       if (response.status === OK)
         Right(())
       else

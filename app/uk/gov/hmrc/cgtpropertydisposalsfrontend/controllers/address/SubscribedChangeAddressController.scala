@@ -79,6 +79,8 @@ class SubscribedChangeAddressController @Inject()(
     }
   }
 
+  override val updateSubscriptionDetailChangedFlag: Boolean = true
+
   protected lazy val backLinkCall: Call             = controllers.routes.HomeController.homepage()
   protected lazy val isUkCall: Call                 = routes.SubscribedChangeAddressController.isUk()
   protected lazy val isUkSubmitCall: Call           = routes.SubscribedChangeAddressController.isUkSubmit()

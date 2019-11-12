@@ -54,6 +54,8 @@ class SubscribedWithoutIdChangeContactNameControllerSpec
     case _             => false
   }
 
+  override val updateSubscriptionDetailChangedFlag: Boolean = true
+
   override lazy val controller: SubscribedWithoutIdChangeContactNameController =
     instanceOf[SubscribedWithoutIdChangeContactNameController]
 

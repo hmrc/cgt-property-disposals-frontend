@@ -349,6 +349,9 @@ account.manageYourDetails.telephone=Telephone
 account.manageYourDetails.cyaChange.telephone=your telephone number
 account.manageYourDetails.addTelephone=Add a phone number
 account.manageYourDetails.yourName=Your name
+account.manageYourDetails.contactNameChanged=Contact name has changed
+account.manageYourDetails.emailChanged=Contact email address has changed
+account.manageYourDetails.addressChanged=Contact address has changed
 
 isReportingForATrust.title=Do you want to report a capital gain for a trust or estate?
 isReportingForATrust.error.required=Select yes if you want to report the tax for a trust or estate

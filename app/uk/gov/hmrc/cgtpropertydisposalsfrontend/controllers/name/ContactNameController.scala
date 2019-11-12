@@ -23,7 +23,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{RequestWithSessionData, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, SubscriptionDetail}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -50,6 +50,8 @@ trait ContactNameController[J <: JourneyStatus] {
   ): EitherT[Future, Error, J]
 
   def contactName(journey: J): Option[ContactName]
+
+  val updateSubscriptionDetailChangedFlag: Boolean
 
   protected val backLinkCall: Call
   protected val enterContactNameSubmitCall: Call
@@ -79,7 +81,10 @@ trait ContactNameController[J <: JourneyStatus] {
               val result = for {
                 journey <- updateContactName(journey, contactName)
                 _ <- EitherT[Future, Error, Unit](updateSession(sessionStore, request) { s =>
-                      s.copy(journeyStatus = Some(journey))
+                      s.copy(
+                        journeyStatus = Some(journey),
+                        subscriptionDetailChanged = if(updateSubscriptionDetailChangedFlag) Some(SubscriptionDetail.Name) else None
+                      )
                     })
               } yield ()
 

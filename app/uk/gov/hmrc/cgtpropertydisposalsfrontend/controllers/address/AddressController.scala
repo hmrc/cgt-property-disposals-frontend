@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address
 
+import cats.Eq
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.option._
@@ -26,7 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{RequestWithSessionData, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, SubscriptionDetail}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
@@ -55,6 +56,8 @@ trait AddressController[J <: JourneyStatus] {
   def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, J)]
 
   def updateAddress(journey: J, address: Address)(implicit hc: HeaderCarrier): EitherT[Future, Error, J]
+
+  val updateSubscriptionDetailChangedFlag: Boolean
 
   protected val backLinkCall: Call
   protected val isUkCall: Call
@@ -264,9 +267,17 @@ trait AddressController[J <: JourneyStatus] {
   )(address: Address)(implicit request: RequestWithSessionData[_]): Future[Result] = {
     val result = for {
       journeyWithUpdatedAddress <- updateAddress(currentJourneyStatus, address)
-      _ <- EitherT[Future, Error, Unit](
-            updateSession(sessionStore, request)(_.copy(journeyStatus = Some(journeyWithUpdatedAddress)))
+      _ <-
+        if(journeyWithUpdatedAddress === currentJourneyStatus){
+          EitherT.pure[Future, Error](())
+        } else {
+          EitherT[Future, Error, Unit](
+            updateSession(sessionStore, request)(_.copy(
+              journeyStatus = Some(journeyWithUpdatedAddress),
+              subscriptionDetailChanged = if(updateSubscriptionDetailChangedFlag) Some(SubscriptionDetail.Address) else None
+            ))
           )
+        }
     } yield ()
 
     result.fold(

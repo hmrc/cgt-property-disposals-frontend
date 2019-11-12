@@ -29,7 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, SessionData, SubscriptionDetail}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -82,9 +82,12 @@ class SubscriptionChangeEmailController @Inject()(
   override def name(journeyStatus: SubscriptionReady): ContactName =
     journeyStatus.subscriptionDetails.contactName
 
+  override val updateSubscriptionDetailChangedFlag: Boolean = false
+
   override lazy protected val backLinkCall: Option[Call] = Some(
     controllers.routes.SubscriptionController.checkYourDetails()
   )
+
   override lazy protected val enterEmailCall: Call          = routes.SubscriptionChangeEmailController.enterEmail()
   override lazy protected val enterEmailSubmitCall: Call    = routes.SubscriptionChangeEmailController.enterEmailSubmit()
   override lazy protected val checkYourInboxCall: Call      = routes.SubscriptionChangeEmailController.checkYourInbox()

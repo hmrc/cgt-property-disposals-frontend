@@ -50,6 +50,8 @@ class SubscribedChangeContactNameControllerSpec
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
+  override val updateSubscriptionDetailChangedFlag: Boolean = true
+
   override val validJourney: Subscribed = sample[Subscribed]
 
   override val mockUpdateContactName: Option[(Subscribed, Subscribed, Either[Error, Unit]) => Unit] = Some({

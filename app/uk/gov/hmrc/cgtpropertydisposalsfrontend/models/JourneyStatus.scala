@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
+import cats.Eq
 import julienrf.json.derived
 import play.api.libs.json.OFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
@@ -81,5 +82,9 @@ object JourneyStatus {
   }
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   implicit val format: OFormat[JourneyStatus] = derived.oformat[JourneyStatus]
+
+  implicit val eq: Eq[JourneyStatus] = Eq.fromUniversalEquals
+
+  implicit def eqJ[J <: JourneyStatus]: Eq[J] = Eq.instance(eq.eqv(_,_))
 
 }

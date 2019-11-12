@@ -30,7 +30,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, EmailToBeVerified, Error, JourneyStatus, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, EmailToBeVerified, Error, JourneyStatus, SessionData, SubscriptionDetail}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse
@@ -52,6 +52,8 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
   def updateEmail(journey: Journey, email: Email): VerificationCompleteJourney
 
   val mockUpdateEmail: Option[(Journey, VerificationCompleteJourney, Either[Error, Unit]) => Unit]
+
+  val updateSubscriptionDetailChangedFlag: Boolean
 
   val controller: EmailController[Journey, VerificationCompleteJourney]
 
@@ -359,7 +361,8 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
           mockStoreSession(
             sessionData.copy(
               emailToBeVerified = Some(emailToBeVerified.copy(verified = true)),
-              journeyStatus     = Some(updateEmail(validJourneyStatus, emailToBeVerified.email))
+              journeyStatus     = Some(updateEmail(validJourneyStatus, emailToBeVerified.email)),
+              subscriptionDetailChanged = if(updateSubscriptionDetailChangedFlag) Some(SubscriptionDetail.Email) else None
             )
           )(Future.successful(Left(Error(""))))
         }
@@ -402,7 +405,8 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
           mockStoreSession(
             sessionData.copy(
               emailToBeVerified = Some(emailToBeVerified.copy(verified = true)),
-              journeyStatus     = Some(updateEmail(validJourneyStatus, emailToBeVerified.email))
+              journeyStatus     = Some(updateEmail(validJourneyStatus, emailToBeVerified.email)),
+              subscriptionDetailChanged = if(updateSubscriptionDetailChangedFlag) Some(SubscriptionDetail.Email) else None
             )
           )(Future.successful(Right(())))
         }
@@ -420,7 +424,8 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
 
     val sessionData = SessionData.empty.copy(
       journeyStatus     = Some(validVerificationCompleteJourneyStatus),
-      emailToBeVerified = Some(emailToBeVerified)
+      emailToBeVerified = Some(emailToBeVerified),
+      subscriptionDetailChanged = if(updateSubscriptionDetailChangedFlag) Some(SubscriptionDetail.Email) else None
     )
 
     "show an error page" when {
