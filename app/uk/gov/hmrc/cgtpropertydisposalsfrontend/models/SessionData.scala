@@ -24,7 +24,8 @@ final case class SessionData(
                               journeyStatus: Option[JourneyStatus],
                               emailToBeVerified: Option[EmailToBeVerified],
                               addressLookupResult: Option[AddressLookupResult],
-                              needMoreDetailsDetails: Option[NeedMoreDetailsDetails]
+                              needMoreDetailsDetails: Option[NeedMoreDetailsDetails],
+                              subscriptionDetailChanged: Option[SubscriptionDetail]
 )
 
 object SessionData {
@@ -33,6 +34,6 @@ object SessionData {
 
   implicit val eq: Eq[SessionData] = Eq.fromUniversalEquals[SessionData]
 
-  val empty: SessionData = SessionData(None, None, None, None)
+  val empty: SessionData = SessionData(None, None, None, None, None)
 
 }

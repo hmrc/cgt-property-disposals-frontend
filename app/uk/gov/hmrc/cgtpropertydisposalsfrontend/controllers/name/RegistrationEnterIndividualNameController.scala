@@ -64,6 +64,8 @@ class RegistrationEnterIndividualNameController @Inject()(
 
   override def name(journey: IndividualSupplyingInformation): Option[IndividualName] = journey.name
 
+  override val updateSubscriptionDetailChangedFlag: Boolean = false
+
   override protected lazy val backLinkCall: Call = controllers.routes.RegistrationController.selectEntityType()
   override protected lazy val enterNameSubmitCall: Call =
     routes.RegistrationEnterIndividualNameController.enterIndividualNameSubmit()

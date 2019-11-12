@@ -26,7 +26,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, SubscriptionDetail, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 
 import scala.concurrent.Future
@@ -64,6 +64,8 @@ class HomeControllerSpec
 
     "handling requests" must {
 
+      behave like redirectToStartBehaviour(performAction)
+
       "display the home page" in {
         val sessionData =
           SessionData.empty.copy(journeyStatus = Some(subscribed))
@@ -72,12 +74,45 @@ class HomeControllerSpec
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionData))))
         }
+
         val result = performAction()
-        status(result)          shouldBe 200
+        status(result)          shouldBe OK
         contentAsString(result) should include(message("account.manageYourDetails.p"))
       }
 
-      behave like redirectToStartBehaviour(performAction)
+      "update the session if the subscriptionDetailsUpdated field is set in the session data" in {
+        val sessionData =
+          SessionData.empty
+            .copy(journeyStatus = Some(subscribed), subscriptionDetailChanged = Some(SubscriptionDetail.Address))
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(Future.successful(Right(Some(sessionData))))
+          mockStoreSession(sessionData.copy(subscriptionDetailChanged = None))(Future.successful(Right(())))
+        }
+
+        val result = performAction()
+        status(result)          shouldBe OK
+        contentAsString(result) should include(message("account.manageYourDetails.p"))
+      }
+
+      "show an error page" when {
+
+        "the update to the session data is unsuccessful" in {
+          val sessionData =
+            SessionData.empty
+              .copy(journeyStatus = Some(subscribed), subscriptionDetailChanged = Some(SubscriptionDetail.Email))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData))))
+            mockStoreSession(sessionData.copy(subscriptionDetailChanged = None))(Future.successful(Left(Error(""))))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
+      }
 
     }
 

@@ -18,22 +18,27 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class HomeController @Inject()(
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
+  errorHandler: ErrorHandler,
+  sessionStore: SessionStore,
   cc: MessagesControllerComponents,
   manageYourDetailsPage: views.html.account.manage_your_details
-)(implicit viewConfig: ViewConfig)
+)(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with SessionUpdates
@@ -41,17 +46,31 @@ class HomeController @Inject()(
 
   def homepage(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request: RequestWithSessionData[AnyContent] =>
-      withSubscribedUser(request) { subscribed =>
-        Ok(manageYourDetailsPage(subscribed.subscribedDetails))
+      withSubscribedUser(request) { (sessionData, subscribed) =>
+        val updateSessionResult =
+          sessionData.subscriptionDetailChanged.fold[Future[Either[Error, Unit]]](
+            Future.successful(Right(()))
+          ) { _ =>
+            updateSession(sessionStore, request)(_.copy(subscriptionDetailChanged = None))
+          }
+
+        updateSessionResult.map {
+          case Left(e) =>
+            logger.warn(s"Could not update session", e)
+            errorHandler.errorResult()
+
+          case Right(_) =>
+            Ok(manageYourDetailsPage(subscribed.subscribedDetails, sessionData.subscriptionDetailChanged))
+        }
       }
   }
 
   private def withSubscribedUser(request: RequestWithSessionData[_])(
-    f: Subscribed => Future[Result]
+    f: (SessionData, Subscribed) => Future[Result]
   ): Future[Result] =
-    request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(r: Subscribed) =>
-        f(r)
+    request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
+      case Some((s: SessionData, r: Subscribed)) =>
+        f(s, r)
       case _ =>
         Future.successful(SeeOther(routes.StartController.start().url))
     }

@@ -26,7 +26,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ContactNameFormValidationTests, ControllerSpec, RedirectToStartBehaviour, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, SubscriptionDetail, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
 
@@ -46,6 +46,8 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
   def updateContactName(journey: J, contactName : ContactName): J
 
   val mockUpdateContactName: Option[(J, Either[Error, Unit]) => Unit]
+
+  val updateSubscriptionDetailChangedFlag: Boolean
 
   def isValidJourney(journey: JourneyStatus): Boolean
 
@@ -101,7 +103,10 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
   )(implicit messagesApi: MessagesApi): Unit = {
     val contactName = ContactName("Joe Smith")
     val updatedSession =
-      sessionDataWithValidJourney.copy(journeyStatus = Some(updateContactName(validJourney,contactName)))
+      sessionDataWithValidJourney.copy(
+        journeyStatus = Some(updateContactName(validJourney,contactName)),
+        subscriptionDetailChanged = if(updateSubscriptionDetailChangedFlag) Some(SubscriptionDetail.Name) else None
+      )
 
     behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
