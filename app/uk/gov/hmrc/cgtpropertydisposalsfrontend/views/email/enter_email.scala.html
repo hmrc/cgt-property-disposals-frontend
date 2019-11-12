@@ -38,10 +38,11 @@
 @key = @{"email"}
 @title = @{messages(if(amendingEmail) "email.amend.title" else "email.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-@labelWithCaption = @{Html(s"""<span class="heading-secondary">${messages("subscription.caption")}</span>$title""")}
 @menu = {@if(showAccountMenu) { @accountMenu(None) }}
 
-@mainTemplate(title = title, hasErrors = hasErrors, withAuth = !showAccountMenu, accountMenu = Some(menu)) {
+@labelWithCaption = @{Html(s"""<span class="heading-secondary">${messages(if (showAccountMenu) "account.caption" else "subscription.caption")}</span>$title""")}
+
+@mainTemplate(title = title, hasErrors = hasErrors, withSignOutLink = !showAccountMenu, accountMenu = Some(menu)) {
 
  @backLink.map(link => backLinkComponent(link))
 

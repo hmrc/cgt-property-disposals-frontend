@@ -53,7 +53,7 @@
   case _ => Html("")
 }}
 
-@mainTemplate(title = title, withAuth = false, accountMenu=Some(accountMenu(Some(AccountMenuItem.ManageYourDetails())))) {
+@mainTemplate(title = title, withSignOutLink = false, accountMenu=Some(accountMenu(Some(AccountMenuItem.ManageYourDetails())))) {
 
  @banner
 

@@ -35,6 +35,7 @@
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @menu = {@if(showAccountMenu) { @accountMenu(None) }}
 
+
 @mainTemplate(title = title, hasErrors = hasErrors, accountMenu = Some(menu)) {
   @backLinkComponent(backLink)
 
@@ -45,7 +46,7 @@
   @formWrapper(submit, 'novalidate -> "novalidate") {
    @yesNo(
     fieldId = key,
-    label = pageHeading(title, Some(messages("subscription.caption"))),
+    label = pageHeading(title, Some(messages(if (showAccountMenu) "account.caption" else "subscription.caption"))),
     labelAsHeading = true,
     errorKey = form.error(key).map(e => e.message),
     hasErrors = hasErrors,

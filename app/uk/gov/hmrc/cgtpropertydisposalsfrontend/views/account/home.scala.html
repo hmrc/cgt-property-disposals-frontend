@@ -34,7 +34,7 @@
 @fullName = @{details.name.fold(_.value, n => s"${n.firstName} ${n.lastName}")}
 @title = @{messages(s"account.home.${affinity}.title", fullName)}
 
-@mainTemplate(title = title, mainClass=Some("full-width"), withAuth = false, accountMenu=Some(accountMenu(Some(AccountMenuItem.Home())))) {
+@mainTemplate(title = title, mainClass=Some("full-width"), withSignOutLink = false, accountMenu=Some(accountMenu(Some(AccountMenuItem.Home())))) {
 
  @pageHeading(title, Some(messages("account.caption")), Some(messages("account.home.subtitle", details.cgtReference.value)))
 

@@ -29,7 +29,7 @@
         bodyClasses: Option[String] = None,
         mainClass: Option[String] = None,
         scriptElem: Option[Html] = None,
-        withAuth: Boolean = true,
+        withSignOutLink: Boolean = true,
         sidebar: Option[Html] = None,
         accountMenu: Option[Html] = None)(mainContent: Html)(implicit request : Request[_], messages: Messages, appConfig: ViewConfig)
 
@@ -47,5 +47,5 @@
     mainContent = uiArticle(mainContent),
     serviceInfoContent = serviceInfoContent,
     scriptElem = scriptElem,
-    withAuth = withAuth
+    withSignOutLink = withSignOutLink
 )

@@ -28,8 +28,9 @@
 @title = @{messages("confirmEmail.verified.title")}
 @menu = {@if(showAccountMenu) { @accountMenu(None) }}
 
-@mainTemplate(title = title, withAuth = !showAccountMenu, accountMenu = Some(menu)) {
- @pageHeading(title)
+
+@mainTemplate(title = title, withSignOutLink = !showAccountMenu, accountMenu = Some(menu)) {
+ @pageHeading(title, Some(messages(if (showAccountMenu) "account.caption" else "subscription.caption")))
  <p class="lede">
   @Html(messages("confirmEmail.verified.intro", email.value))
  </p>

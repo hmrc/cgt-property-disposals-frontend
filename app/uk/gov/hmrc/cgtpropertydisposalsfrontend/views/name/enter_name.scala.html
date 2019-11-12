@@ -37,7 +37,8 @@
 @title = @{messages("enterName.title")}
 @menu = {@if(showAccountMenu) { @accountMenu(None) }}
 
-@mainTemplate(title = title, hasErrors = hasErrors, withAuth = !showAccountMenu, accountMenu = Some(menu)) {
+
+@mainTemplate(title = title, hasErrors = hasErrors, withSignOutLink = !showAccountMenu, accountMenu = Some(menu)) {
 
   @backLinkComponent(backLink)
 
@@ -45,7 +46,7 @@
     @errorSummary(form)
   }
 
-  @pageHeading(title)
+  @pageHeading(title, Some(messages(if (showAccountMenu) "account.caption" else "subscription.caption")))
 
   @formWrapper(submit, 'novalidate -> "novalidate") {
     @textInput(

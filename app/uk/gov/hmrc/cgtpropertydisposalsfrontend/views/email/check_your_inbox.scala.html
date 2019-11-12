@@ -36,7 +36,8 @@
 @title = @{messages("confirmEmail.title")}
 @menu = {@if(showAccountMenu) { @accountMenu(None) }}
 
-@mainTemplate(title = title, withAuth = !showAccountMenu, accountMenu = Some(menu)) {
+
+@mainTemplate(title = title, withSignOutLink = !showAccountMenu, accountMenu = Some(menu)) {
 
  @backLinkComponent(backLink)
 
@@ -44,7 +45,7 @@
    @alertBanner(messages("confirmEmail.resent", email.value))
  }
 
- @pageHeading(title, Some(messages("subscription.caption")))
+ @pageHeading(title, Some(messages(if (showAccountMenu) "account.caption" else "subscription.caption")))
 
  <p>
    @messages("confirmEmail.sentEmail", email.value)

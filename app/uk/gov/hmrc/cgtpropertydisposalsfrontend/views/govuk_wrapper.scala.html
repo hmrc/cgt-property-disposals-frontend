@@ -44,7 +44,7 @@
   mainContent: Html = HtmlFormat.empty,
   serviceInfoContent: Html = HtmlFormat.empty,
   scriptElem: Option[Html] = None,
-  withAuth: Boolean = true)(implicit request: Request[_], messages: Messages)
+  withSignOutLink: Boolean = true)(implicit request: Request[_], messages: Messages)
 
 @head = {
     @uiHead(
@@ -57,7 +57,7 @@
 }
 
 @headerNavLinks = {
-  @if(withAuth) {
+  @if(withSignOutLink) {
     <li><a href="@appConfig.signOutUrl" id="signOut">@messages("service.signOut")</a></li>
   }
 }
