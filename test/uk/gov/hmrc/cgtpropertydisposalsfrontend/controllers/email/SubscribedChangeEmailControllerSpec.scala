@@ -52,7 +52,7 @@ class SubscribedChangeEmailControllerSpec
 
   override val validVerificationCompleteJourneyStatus: Subscribed = validJourneyStatus
 
-  override val updateSubscriptionDetailUpdated: Boolean = true
+  override val updateSubscriptionDetailChangedFlag: Boolean = true
 
   override lazy val controller: SubscribedChangeEmailController = instanceOf[SubscribedChangeEmailController]
 

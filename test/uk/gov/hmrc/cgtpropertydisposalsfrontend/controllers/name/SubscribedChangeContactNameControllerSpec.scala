@@ -50,7 +50,7 @@ class SubscribedChangeContactNameControllerSpec
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
-  override val updateSubscriptionDetailUpdated: Boolean = true
+  override val updateSubscriptionDetailChangedFlag: Boolean = true
 
   override val validJourney: Subscribed = sample[Subscribed]
 

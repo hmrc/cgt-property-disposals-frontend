@@ -47,7 +47,7 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
 
   val mockUpdateContactName: Option[(J, Either[Error, Unit]) => Unit]
 
-  val updateSubscriptionDetailUpdated: Boolean
+  val updateSubscriptionDetailChangedFlag: Boolean
 
   def isValidJourney(journey: JourneyStatus): Boolean
 
@@ -105,7 +105,7 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
     val updatedSession =
       sessionDataWithValidJourney.copy(
         journeyStatus = Some(updateContactName(validJourney,contactName)),
-        subscriptionDetailUpdated = if(updateSubscriptionDetailUpdated) Some(SubscriptionDetail.Name) else None
+        subscriptionDetailChanged = if(updateSubscriptionDetailChangedFlag) Some(SubscriptionDetail.Name) else None
       )
 
     behave like redirectToStartBehaviour(() => performAction(Seq.empty))

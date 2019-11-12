@@ -80,7 +80,7 @@ class RegistrationChangeEmailController @Inject()(
     controllers.routes.RegistrationController.checkYourAnswers()
   )
 
-  override val updateSubscriptionDetailUpdated: Boolean = false
+  override val updateSubscriptionDetailChangedFlag: Boolean = false
 
   override lazy protected val enterEmailCall: Call          = routes.RegistrationChangeEmailController.enterEmail()
   override lazy protected val enterEmailSubmitCall: Call    = routes.RegistrationChangeEmailController.enterEmailSubmit()

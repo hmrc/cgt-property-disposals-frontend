@@ -82,7 +82,7 @@ class SubscriptionEnterEmailController @Inject()(
   override def name(journeyStatus: SubscriptionMissingData): ContactName =
     ContactName(journeyStatus.businessPartnerRecord.name.fold(_.value, n => n.makeSingleName()))
 
-  override val updateSubscriptionDetailUpdated: Boolean = false
+  override val updateSubscriptionDetailChangedFlag: Boolean = false
 
 
   override lazy protected val backLinkCall: Option[Call]      = None

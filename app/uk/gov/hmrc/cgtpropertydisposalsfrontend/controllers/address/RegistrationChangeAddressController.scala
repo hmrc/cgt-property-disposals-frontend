@@ -69,7 +69,7 @@ class RegistrationChangeAddressController @Inject()(
   ): EitherT[Future, Error, RegistrationReady] =
     EitherT.pure[Future, Error](journey.copy(registrationDetails = journey.registrationDetails.copy(address = address)))
 
-  override val updateSubscriptionDetailUpdated: Boolean = false
+  override val updateSubscriptionDetailChangedFlag: Boolean = false
 
   protected lazy val backLinkCall: Call             = controllers.routes.RegistrationController.checkYourAnswers()
   protected lazy val isUkCall: Call                 = routes.RegistrationChangeAddressController.isUk()

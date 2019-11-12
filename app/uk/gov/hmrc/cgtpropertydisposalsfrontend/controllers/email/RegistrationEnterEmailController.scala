@@ -78,7 +78,7 @@ class RegistrationEnterEmailController @Inject()(
   override def name(journeyStatus: IndividualMissingEmail): ContactName =
     ContactName(journeyStatus.name.makeSingleName())
 
-  override val updateSubscriptionDetailUpdated: Boolean = false
+  override val updateSubscriptionDetailChangedFlag: Boolean = false
 
   override lazy protected val backLinkCall: Option[Call]    = None
   override lazy protected val enterEmailCall: Call          = routes.RegistrationEnterEmailController.enterEmail()

@@ -82,7 +82,7 @@ class SubscriptionChangeEmailController @Inject()(
   override def name(journeyStatus: SubscriptionReady): ContactName =
     journeyStatus.subscriptionDetails.contactName
 
-  override val updateSubscriptionDetailUpdated: Boolean = false
+  override val updateSubscriptionDetailChangedFlag: Boolean = false
 
   override lazy protected val backLinkCall: Option[Call] = Some(
     controllers.routes.SubscriptionController.checkYourDetails()

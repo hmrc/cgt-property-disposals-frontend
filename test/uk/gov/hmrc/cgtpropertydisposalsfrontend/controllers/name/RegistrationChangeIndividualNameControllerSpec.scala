@@ -41,7 +41,7 @@ class RegistrationChangeIndividualNameControllerSpec
 
   override val mockUpdateName: Option[(RegistrationReady, Either[Error, Unit]) => Unit] = None
 
-  override val updateSubscriptionDetailUpdated: Boolean = false
+  override val updateSubscriptionDetailChangedFlag: Boolean = false
 
   override lazy val controller: RegistrationChangeIndividualNameController = instanceOf[RegistrationChangeIndividualNameController]
 

@@ -83,12 +83,12 @@ class HomeControllerSpec
       "update the session if the subscriptionDetailsUpdated field is set in the session data" in {
         val sessionData =
           SessionData.empty
-            .copy(journeyStatus = Some(subscribed), subscriptionDetailUpdated = Some(SubscriptionDetail.Address))
+            .copy(journeyStatus = Some(subscribed), subscriptionDetailChanged = Some(SubscriptionDetail.Address))
 
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionData))))
-          mockStoreSession(sessionData.copy(subscriptionDetailUpdated = None))(Future.successful(Right(())))
+          mockStoreSession(sessionData.copy(subscriptionDetailChanged = None))(Future.successful(Right(())))
         }
 
         val result = performAction()
@@ -101,12 +101,12 @@ class HomeControllerSpec
         "the update to the session data is unsuccessful" in {
           val sessionData =
             SessionData.empty
-              .copy(journeyStatus = Some(subscribed), subscriptionDetailUpdated = Some(SubscriptionDetail.Email))
+              .copy(journeyStatus = Some(subscribed), subscriptionDetailChanged = Some(SubscriptionDetail.Email))
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData))))
-            mockStoreSession(sessionData.copy(subscriptionDetailUpdated = None))(Future.successful(Left(Error(""))))
+            mockStoreSession(sessionData.copy(subscriptionDetailChanged = None))(Future.successful(Left(Error(""))))
           }
 
           checkIsTechnicalErrorPage(performAction())

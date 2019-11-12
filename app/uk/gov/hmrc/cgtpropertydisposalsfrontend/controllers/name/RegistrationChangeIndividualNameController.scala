@@ -62,7 +62,7 @@ class RegistrationChangeIndividualNameController @Inject()(
 
   override def name(journey: RegistrationReady): Option[IndividualName] = Some(journey.registrationDetails.name)
 
-  override val updateSubscriptionDetailUpdated: Boolean = false
+  override val updateSubscriptionDetailChangedFlag: Boolean = false
 
   override protected lazy val backLinkCall: Call = controllers.routes.RegistrationController.checkYourAnswers()
   override protected lazy val enterNameSubmitCall: Call =

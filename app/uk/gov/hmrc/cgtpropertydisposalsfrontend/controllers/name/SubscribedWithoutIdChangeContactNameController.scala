@@ -76,7 +76,7 @@ class SubscribedWithoutIdChangeContactNameController @Inject()(
 
   override def name(journey: Subscribed): Option[IndividualName] = journey.subscribedDetails.name.toOption
 
-  override val updateSubscriptionDetailUpdated: Boolean = true
+  override val updateSubscriptionDetailChangedFlag: Boolean = true
 
   override protected lazy val backLinkCall: Call = controllers.routes.HomeController.homepage()
   override protected lazy val enterNameSubmitCall: Call =

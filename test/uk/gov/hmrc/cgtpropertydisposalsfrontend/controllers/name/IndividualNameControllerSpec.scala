@@ -47,7 +47,7 @@ trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidatio
 
   def isValidJourney(journey: JourneyStatus): Boolean
 
-  val updateSubscriptionDetailUpdated: Boolean
+  val updateSubscriptionDetailChangedFlag: Boolean
 
   override val overrideBindings: List[GuiceableModule] =
     List(
@@ -104,7 +104,7 @@ trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidatio
     val updatedSession =
       sessionDataWithValidJourney.copy(
         journeyStatus = Some(updateName(name, validJourney)),
-        subscriptionDetailUpdated = if(updateSubscriptionDetailUpdated) Some(SubscriptionDetail.Name) else None
+        subscriptionDetailChanged = if(updateSubscriptionDetailChangedFlag) Some(SubscriptionDetail.Name) else None
       )
 
     behave like redirectToStartBehaviour(() => performAction(Seq.empty))

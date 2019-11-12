@@ -25,7 +25,7 @@ final case class SessionData(
                               emailToBeVerified: Option[EmailToBeVerified],
                               addressLookupResult: Option[AddressLookupResult],
                               needMoreDetailsDetails: Option[NeedMoreDetailsDetails],
-                              subscriptionDetailUpdated: Option[SubscriptionDetail]
+                              subscriptionDetailChanged: Option[SubscriptionDetail]
 )
 
 object SessionData {

@@ -49,7 +49,7 @@ class SubscriptionChangeEmailControllerSpec
 
   override val mockUpdateEmail: Option[(SubscriptionReady, Either[Error, Unit]) => Unit] = None
 
-  override val updateSubscriptionDetailUpdated: Boolean = false
+  override val updateSubscriptionDetailChangedFlag: Boolean = false
 
   override lazy val controller: SubscriptionChangeEmailController = instanceOf[SubscriptionChangeEmailController]
 

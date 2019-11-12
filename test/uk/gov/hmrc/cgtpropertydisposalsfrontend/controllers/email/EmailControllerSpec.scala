@@ -53,7 +53,7 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
 
   val mockUpdateEmail: Option[(VerificationCompleteJourney, Either[Error, Unit]) => Unit]
 
-  val updateSubscriptionDetailUpdated: Boolean
+  val updateSubscriptionDetailChangedFlag: Boolean
 
   val controller: EmailController[Journey, VerificationCompleteJourney]
 
@@ -362,7 +362,7 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
             sessionData.copy(
               emailToBeVerified = Some(emailToBeVerified.copy(verified = true)),
               journeyStatus     = Some(updateEmail(validJourneyStatus, emailToBeVerified.email)),
-              subscriptionDetailUpdated = if(updateSubscriptionDetailUpdated) Some(SubscriptionDetail.Email) else None
+              subscriptionDetailChanged = if(updateSubscriptionDetailChangedFlag) Some(SubscriptionDetail.Email) else None
             )
           )(Future.successful(Left(Error(""))))
         }
@@ -406,7 +406,7 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
             sessionData.copy(
               emailToBeVerified = Some(emailToBeVerified.copy(verified = true)),
               journeyStatus     = Some(updateEmail(validJourneyStatus, emailToBeVerified.email)),
-              subscriptionDetailUpdated = if(updateSubscriptionDetailUpdated) Some(SubscriptionDetail.Email) else None
+              subscriptionDetailChanged = if(updateSubscriptionDetailChangedFlag) Some(SubscriptionDetail.Email) else None
             )
           )(Future.successful(Right(())))
         }
@@ -425,7 +425,7 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
     val sessionData = SessionData.empty.copy(
       journeyStatus     = Some(validVerificationCompleteJourneyStatus),
       emailToBeVerified = Some(emailToBeVerified),
-      subscriptionDetailUpdated = if(updateSubscriptionDetailUpdated) Some(SubscriptionDetail.Email) else None
+      subscriptionDetailChanged = if(updateSubscriptionDetailChangedFlag) Some(SubscriptionDetail.Email) else None
     )
 
     "show an error page" when {

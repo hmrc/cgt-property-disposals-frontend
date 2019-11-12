@@ -48,10 +48,10 @@ class HomeController @Inject()(
     implicit request: RequestWithSessionData[AnyContent] =>
       withSubscribedUser(request) { (sessionData, subscribed) =>
         val updateSessionResult =
-          sessionData.subscriptionDetailUpdated.fold[Future[Either[Error, Unit]]](
+          sessionData.subscriptionDetailChanged.fold[Future[Either[Error, Unit]]](
             Future.successful(Right(()))
           ) { _ =>
-            updateSession(sessionStore, request)(_.copy(subscriptionDetailUpdated = None))
+            updateSession(sessionStore, request)(_.copy(subscriptionDetailChanged = None))
           }
 
         updateSessionResult.map {
@@ -60,7 +60,7 @@ class HomeController @Inject()(
             errorHandler.errorResult()
 
           case Right(_) =>
-            Ok(manageYourDetailsPage(subscribed.subscribedDetails, sessionData.subscriptionDetailUpdated))
+            Ok(manageYourDetailsPage(subscribed.subscribedDetails, sessionData.subscriptionDetailChanged))
         }
       }
   }
