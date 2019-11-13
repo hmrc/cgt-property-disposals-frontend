@@ -58,7 +58,7 @@
 
 @headerNavLinks = {
   @if(withSignOutLink) {
-    <li><a href="@appConfig.signOutUrl" id="signOut">@messages("service.signOut")</a></li>
+    <li><a href="@{appConfig.signOutUrl}?continue=/cgt-property-disposals/" id="signOut">@messages("service.signOut")</a></li>
   }
 }
 
