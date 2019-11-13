@@ -29,7 +29,7 @@
   <a href="@{routes.HomeController.manageYourDetails().url}" class="as-link@if(activeLink.exists(_.is[AccountMenuItem.ManageYourDetails])){-active }">
     @messages("account.menu.manageYourDetails")
   </a>
-  <a href="@{appConfig.signOutUrl}?continue=/cgt-property-disposals/signed-out" class="as-link">
+  <a href="@{appConfig.signOutUrl}?continue=@{routes.HomeController.signedOut().url}" class="as-link">
     @messages("account.menu.signOut")
   </a>
 </nav>
