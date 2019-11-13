@@ -112,7 +112,7 @@ class HomeControllerSpec
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("account.manageYourDetails.personal.p"))
+        contentAsString(result) should include(message("account.manageYourDetails.p"))
       }
 
       "update the session if the subscriptionDetailsUpdated field is set in the session data" in {
