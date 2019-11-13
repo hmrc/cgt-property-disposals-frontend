@@ -50,7 +50,7 @@ trait AddressController[J <: JourneyStatus] {
   val enterUkAddressPage: views.html.address.enter_uk_address
   val enterNonUkAddressPage: views.html.address.enter_nonUk_address
   val isUkPage: views.html.address.isUk
-  val isSubscribedJourney: Boolean = false
+  val isSubscribedJourney: Boolean
   implicit val viewConfig: ViewConfig
   implicit val ec: ExecutionContext
 

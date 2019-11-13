@@ -39,7 +39,7 @@ trait ContactNameController[J <: JourneyStatus] {
   implicit val ec: ExecutionContext
 
   val enterContactNamePage: views.html.contactname.contact_name
-  val isSubscribedJourney: Boolean = false
+  val isSubscribedJourney: Boolean
 
   val sessionStore: SessionStore
   val errorHandler: ErrorHandler

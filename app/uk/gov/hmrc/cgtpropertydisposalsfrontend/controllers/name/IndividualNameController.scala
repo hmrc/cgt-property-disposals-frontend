@@ -38,7 +38,7 @@ trait IndividualNameController[J <: JourneyStatus] {
   implicit val ec: ExecutionContext
 
   val enterNamePage: views.html.name.enter_name
-  val isSubscribedJourney: Boolean = false
+  val isSubscribedJourney: Boolean
 
   val sessionStore: SessionStore
   val errorHandler: ErrorHandler
