@@ -51,18 +51,16 @@
     @errorSummary(form)
   }
 
-  @pageHeading(title, Some(messages(if (showAccountMenu) "account.caption" else "subscription.caption")))
-
   @formWrapper(submit, 'novalidate -> "novalidate") {
       @textInput(
         fieldId = key,
-        label = Html(""),
+        label = Html(s"""<span class="heading-secondary">${messages(if (showAccountMenu) "account.caption" else "subscription.caption")}</span>$title"""),
+        labelAsHeading = true,
         errorKey = form.error(key).map(e => e.message),
         value = form.data.getOrElse(key, ""),
         hasErrors = form.error(key).nonEmpty,
         inputClass = Some("form-control-3-4"),
-        extraContent = Some(Html(s"""<p class="lede">${messages("contactName.extraContent")}</p>"""))
-
+        helpText = Some(Html(messages("contactName.extraContent")))
       )
 
     @submitButton(messages("button.continue"))

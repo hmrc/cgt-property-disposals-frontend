@@ -159,8 +159,8 @@ confirmEmail.verified.p1=We’ll use this address to contact you about your Capi
 confirmEmail.verified.p2=Your email has not been updated in other government services.
 confirmEmail.resent=Confirmation email sent to {0}
 
-contactName.title=Change your contact name for this service
-contactName.extraContent=We’ll only use the name on any contact letters or emails we send to you about this service. Your details in other government services will not change.
+contactName.title=Change contact name
+contactName.extraContent=The contact name you use for other government services will not change.
 contactName.error.pattern=Contact name must only include letters, numbers, hyphens, apostrophes, commas, ampersands and spaces
 contactName.error.required=Enter your contact name
 contactName.error.tooLong=Contact name must must be 105 characters or fewer
@@ -359,9 +359,9 @@ account.manageYourDetails.contactHeading=Contact details
 account.manageYourDetails.personal.p=We’ll only use these details if we need to get in contact about this service.
 account.manageYourDetails.personal.p2=You can only change the contact name here. If you need to change the account holder’s name, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new window)</a>.
 account.manageYourDetails.yourName=Your name
-account.manageYourDetails.contactNameChanged=Contact name has changed
-account.manageYourDetails.emailChanged=Contact email address has changed
-account.manageYourDetails.addressChanged=Contact address has changed
+account.manageYourDetails.contactNameChanged=Contact name changed
+account.manageYourDetails.emailChanged=Contact email address changed
+account.manageYourDetails.addressChanged=Contact address changed
 
 isReportingForATrust.title=Do you want to report a capital gain for a trust or estate?
 isReportingForATrust.error.required=Select yes if you want to report the tax for a trust or estate
