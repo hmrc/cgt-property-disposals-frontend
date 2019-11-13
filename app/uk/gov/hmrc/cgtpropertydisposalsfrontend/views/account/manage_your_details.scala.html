@@ -52,6 +52,7 @@
   case Some(SubscriptionDetail.Address) => alertBanner(messages("account.manageYourDetails.addressChanged"))
   case _ => Html("")
 }}
+@affinity = @{details.name.fold(_ => "organisation", _ => "individual")}
 
 @mainTemplate(title = title, withSignOutLink = false, accountMenu=Some(accountMenu(Some(AccountMenuItem.ManageYourDetails())))) {
 
@@ -87,9 +88,9 @@
 
  <div class="panel panel-border-wide">
   <p>
-   @messages("account.manageYourDetails.personal.p")
+   @messages("account.manageYourDetails.${affinity}.p")
    @if(details.registeredWithId){
-      @Html(messages("account.manageYourDetails.personal.p2", appConfig.tellHmrcChangeDetails))
+      @Html(messages(s"account.manageYourDetails.${affinity}.p2", appConfig.tellHmrcChangeDetails))
   }
   </p>
  </div>
