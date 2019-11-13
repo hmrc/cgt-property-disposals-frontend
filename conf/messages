@@ -120,7 +120,7 @@ subscription.cyaLabel.contactName=Contact name
 subscription.cyaChange.contactName=your contact name
 subscription.cyaLabel.address=Contact address
 subscription.cyaChange.address=your contact address
-subscription.cyaLabel.email=Email address
+subscription.cyaLabel.email=Contact email address
 subscription.cyaChange.email=your email address
 
 registration.caption=Create a Capital Gains Tax on UK property account
@@ -132,7 +132,7 @@ registration.cyaLabel.lastName=Last name
 registration.cyaChange.lastName=your last name
 registration.cyaLabel.address=Contact address
 registration.cyaChange.address=your contact address
-registration.cyaLabel.email=Email address
+registration.cyaLabel.email=Contact email address
 registration.cyaChange.email=your email address
 
 enterPostcode.title=Find your UK contact address
@@ -361,6 +361,7 @@ account.manageYourDetails.organisation.p=We'll only use these details if we need
 account.manageYourDetails.individual.p2=You can only change the contact name here. If you need to change the account holder’s name, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new window)</a>.
 account.manageYourDetails.organisation.p2= If the lead trustee’s name or address changes, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new window)</a>.
 account.manageYourDetails.yourName=Your name
+
 account.manageYourDetails.contactNameChanged=Contact name changed
 account.manageYourDetails.emailChanged=Contact email address changed
 account.manageYourDetails.addressChanged=Contact address changed
