@@ -37,7 +37,9 @@ class HomeController @Inject()(
   errorHandler: ErrorHandler,
   sessionStore: SessionStore,
   cc: MessagesControllerComponents,
-  manageYourDetailsPage: views.html.account.manage_your_details
+  manageYourDetailsPage: views.html.account.manage_your_details,
+  homePage: views.html.account.home,
+  signedOutPage: views.html.account.signed_out
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -45,6 +47,13 @@ class HomeController @Inject()(
     with Logging {
 
   def homepage(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request: RequestWithSessionData[AnyContent] =>
+      withSubscribedUser(request) { (sessionData, subscribed) =>
+        Future.successful(Ok(homePage(subscribed.subscribedDetails)))
+      }
+  }
+
+  def manageYourDetails(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request: RequestWithSessionData[AnyContent] =>
       withSubscribedUser(request) { (sessionData, subscribed) =>
         val updateSessionResult =
@@ -63,6 +72,10 @@ class HomeController @Inject()(
             Ok(manageYourDetailsPage(subscribed.subscribedDetails, sessionData.subscriptionDetailChanged))
         }
       }
+  }
+
+  def signedOut(): Action[AnyContent] = Action { implicit request =>
+    Ok(signedOutPage())
   }
 
   private def withSubscribedUser(request: RequestWithSessionData[_])(

@@ -60,13 +60,48 @@ class HomeControllerSpec
 
   "The Home Controller" when {
 
-    def performAction(): Future[Result] = controller.homepage()(FakeRequest())
 
-    "handling requests" must {
 
+    "handling requests for account home" must {
+
+      def performAction(): Future[Result] = controller.homepage()(FakeRequest())
       behave like redirectToStartBehaviour(performAction)
 
       "display the home page" in {
+        val sessionData =
+          SessionData.empty.copy(journeyStatus = Some(subscribed))
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(Future.successful(Right(Some(sessionData))))
+        }
+
+        val result = performAction()
+        status(result)          shouldBe OK
+        contentAsString(result) should include(message("account.home.left.title"))
+      }
+
+    }
+
+    "handling requests signed out" must {
+
+      def performAction(): Future[Result] = controller.signedOut()(FakeRequest())
+
+      "display the signed out page" in {
+
+        val result = performAction()
+        status(result)          shouldBe OK
+        contentAsString(result) should include(message("signed-out.title"))
+      }
+
+    }
+
+    "handling requests for manage your details" must {
+
+      def performAction(): Future[Result] = controller.manageYourDetails()(FakeRequest())
+      behave like redirectToStartBehaviour(performAction)
+
+      "display the manage your details page" in {
         val sessionData =
           SessionData.empty.copy(journeyStatus = Some(subscribed))
 
@@ -93,7 +128,7 @@ class HomeControllerSpec
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("account.manageYourDetails.p"))
+        contentAsString(result) should include(message("account.manageYourDetails.addressChanged"))
       }
 
       "show an error page" when {

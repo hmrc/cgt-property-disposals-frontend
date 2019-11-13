@@ -57,6 +57,8 @@ class SubscriptionAddressController @Inject()(
     with SessionUpdates
     with AddressController[SubscriptionReady] {
 
+  override val isSubscribedJourney: Boolean = false
+
   val subscriptionReadyAddressLens: Lens[SubscriptionReady, Address] =
     lens[SubscriptionReady].subscriptionDetails.address
 

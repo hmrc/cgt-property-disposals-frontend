@@ -57,6 +57,7 @@ class RegistrationChangeEmailController @Inject()(
     with EmailController[RegistrationReady, RegistrationReady] {
 
   override val isAmendJourney: Boolean = false
+  override val isSubscribedJourney: Boolean = false
 
   override def validJourney(
     request: RequestWithSessionData[_]

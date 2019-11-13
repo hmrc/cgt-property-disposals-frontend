@@ -53,6 +53,8 @@ class SubscribedWithoutIdChangeContactNameController @Inject()(
     with Logging
     with IndividualNameController[Subscribed] {
 
+  override val isSubscribedJourney: Boolean = true
+
   override def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, Subscribed)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, r: Subscribed)) => Right(sessionData -> r)
@@ -79,9 +81,9 @@ class SubscribedWithoutIdChangeContactNameController @Inject()(
 
   override val updateSubscriptionDetailChangedFlag: Boolean = true
 
-  override protected lazy val backLinkCall: Call = controllers.routes.HomeController.homepage()
+  override protected lazy val backLinkCall: Call = controllers.routes.HomeController.manageYourDetails()
   override protected lazy val enterNameSubmitCall: Call =
     routes.SubscribedWithoutIdChangeContactNameController.enterIndividualNameSubmit()
-  override protected lazy val continueCall: Call = controllers.routes.HomeController.homepage()
+  override protected lazy val continueCall: Call = controllers.routes.HomeController.manageYourDetails()
 
 }

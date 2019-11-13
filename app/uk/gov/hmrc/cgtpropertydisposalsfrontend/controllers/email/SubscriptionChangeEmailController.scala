@@ -59,6 +59,7 @@ class SubscriptionChangeEmailController @Inject()(
     with EmailController[SubscriptionReady, SubscriptionReady] {
 
   override val isAmendJourney: Boolean = true
+  override val isSubscribedJourney: Boolean = false
 
   override def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, SubscriptionReady)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {

@@ -18,6 +18,7 @@
 @import play.twirl.api.HtmlFormat
 @import cats.instances.string._
 @import cats.syntax.eq._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{routes => controllerRoutes}
 
 @this(
     govUkTemplate: views.html.layouts.GovUkTemplate,
@@ -44,7 +45,7 @@
   mainContent: Html = HtmlFormat.empty,
   serviceInfoContent: Html = HtmlFormat.empty,
   scriptElem: Option[Html] = None,
-  withAuth: Boolean = true)(implicit request: Request[_], messages: Messages)
+  withSignOutLink: Boolean = true)(implicit request: Request[_], messages: Messages)
 
 @head = {
     @uiHead(
@@ -57,8 +58,8 @@
 }
 
 @headerNavLinks = {
-  @if(withAuth) {
-    <li><a href="@appConfig.signOutUrl" id="signOut">@messages("service.signOut")</a></li>
+  @if(withSignOutLink) {
+    <li><a href="@{appConfig.signOutUrl}?continue=@{controllerRoutes.StartController.start().url}" id="signOut">@messages("service.signOut")</a></li>
   }
 }
 
@@ -91,10 +92,13 @@
 @footerLinks = {}
 
 @serviceInfo = {
-    @uiServiceInfo(
-      betaBanner = betaBanner(false, appConfig.betaFeedbackUrlNoAuth, appConfig.betaFeedbackUrlNoAuth, true, false),
-      includeGridWrapper = false,
-      serviceInfoContent = Some(serviceInfoContent))
+  <div class="service-info">
+    @serviceInfoContent
+    @betaBanner(false, appConfig.betaFeedbackUrlNoAuth, appConfig.betaFeedbackUrlNoAuth, true, false)
+    <div class="logo">
+      <span class="organisation-logo organisation-logo-medium">@messages("hmrc_branding")</span>
+    </div>
+  </div>
 }
 
 @mainContentHeader = {

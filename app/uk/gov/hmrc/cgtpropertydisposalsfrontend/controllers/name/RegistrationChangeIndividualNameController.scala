@@ -49,6 +49,8 @@ class RegistrationChangeIndividualNameController @Inject()(
     with Logging
     with IndividualNameController[RegistrationReady] {
 
+  override val isSubscribedJourney: Boolean = false
+
   override def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, RegistrationReady)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, r: RegistrationReady)) => Right(sessionData -> r)

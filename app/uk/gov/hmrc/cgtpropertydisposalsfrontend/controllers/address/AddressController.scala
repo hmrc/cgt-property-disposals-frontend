@@ -50,6 +50,7 @@ trait AddressController[J <: JourneyStatus] {
   val enterUkAddressPage: views.html.address.enter_uk_address
   val enterNonUkAddressPage: views.html.address.enter_nonUk_address
   val isUkPage: views.html.address.isUk
+  val isSubscribedJourney: Boolean
   implicit val viewConfig: ViewConfig
   implicit val ec: ExecutionContext
 
@@ -87,10 +88,10 @@ trait AddressController[J <: JourneyStatus] {
                 logger.warn(s"Could not clear addressLookupResult", e)
                 errorHandler.errorResult()
               case Right(_) =>
-                Ok(isUkPage(Address.isUkForm, backLinkCall, isUkSubmitCall))
+                Ok(isUkPage(Address.isUkForm, backLinkCall, isUkSubmitCall, isSubscribedJourney))
             }
           } else {
-            Ok(isUkPage(Address.isUkForm, backLinkCall, isUkSubmitCall))
+            Ok(isUkPage(Address.isUkForm, backLinkCall, isUkSubmitCall, isSubscribedJourney))
           }
       }
     }
@@ -102,7 +103,7 @@ trait AddressController[J <: JourneyStatus] {
           Address.isUkForm
             .bindFromRequest()
             .fold[Future[Result]](
-              formWithErrors => BadRequest(isUkPage(formWithErrors, backLinkCall, isUkSubmitCall)), {
+              formWithErrors => BadRequest(isUkPage(formWithErrors, backLinkCall, isUkSubmitCall, isSubscribedJourney)), {
                 case true  => Redirect(enterPostcodeCall)
                 case false => Redirect(enterNonUkAddressCall)
               }
@@ -114,7 +115,7 @@ trait AddressController[J <: JourneyStatus] {
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) {
         case (_, _) =>
-          Ok(enterUkAddressPage(Address.ukAddressForm, backLinkCall, enterUkAddressSubmitCall, enterPostcodeCall))
+          Ok(enterUkAddressPage(Address.ukAddressForm, backLinkCall, enterUkAddressSubmitCall, enterPostcodeCall, isSubscribedJourney))
       }
     }
 
@@ -127,7 +128,7 @@ trait AddressController[J <: JourneyStatus] {
             .fold[Future[Result]](
               formWithErrors =>
                 BadRequest(
-                  enterUkAddressPage(formWithErrors, backLinkCall, enterUkAddressSubmitCall, enterPostcodeCall)
+                  enterUkAddressPage(formWithErrors, backLinkCall, enterUkAddressSubmitCall, enterPostcodeCall, isSubscribedJourney)
                 ),
               storeAddress(continueCall, journeyStatus)
             )
@@ -138,7 +139,7 @@ trait AddressController[J <: JourneyStatus] {
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) {
         case (_, _) =>
-          Ok(enterNonUkAddressPage(Address.nonUkAddressForm, isUkCall, enterNonUkAddressSubmitCall))
+          Ok(enterNonUkAddressPage(Address.nonUkAddressForm, isUkCall, enterNonUkAddressSubmitCall, isSubscribedJourney))
       }
     }
 
@@ -150,7 +151,7 @@ trait AddressController[J <: JourneyStatus] {
             .bindFromRequest()
             .fold[Future[Result]](
               formWithErrors =>
-                BadRequest(enterNonUkAddressPage(formWithErrors, isUkCall, enterNonUkAddressSubmitCall)),
+                BadRequest(enterNonUkAddressPage(formWithErrors, isUkCall, enterNonUkAddressSubmitCall, isSubscribedJourney)),
               storeAddress(continueCall, journeyStatus)
             )
       }
@@ -164,7 +165,7 @@ trait AddressController[J <: JourneyStatus] {
             .fold(AddressLookupRequest.form)(
               r => AddressLookupRequest.form.fill(AddressLookupRequest(r.postcode, r.filter))
             )
-          Ok(enterPostcodePage(form, isUkCall, enterPostcodeSubmitCall, enterUkAddressCall))
+          Ok(enterPostcodePage(form, isUkCall, enterPostcodeSubmitCall, enterUkAddressCall, isSubscribedJourney))
       }
     }
 
@@ -177,7 +178,7 @@ trait AddressController[J <: JourneyStatus] {
             .fold(
               formWithErrors =>
                 BadRequest(
-                  enterPostcodePage(formWithErrors, isUkCall, enterPostcodeSubmitCall, enterUkAddressCall)
+                  enterPostcodePage(formWithErrors, isUkCall, enterPostcodeSubmitCall, enterUkAddressCall, isSubscribedJourney)
                 ), {
                 case AddressLookupRequest(postcode, filter) =>
                   def handleEmptyAddresses(r: AddressLookupResult) = {
@@ -187,7 +188,8 @@ trait AddressController[J <: JourneyStatus] {
                         AddressLookupRequest.form.bindFromRequest().withError(errorKey, "error.noResults"),
                         isUkCall,
                         enterPostcodeSubmitCall,
-                        enterUkAddressCall
+                        enterUkAddressCall,
+                        isSubscribedJourney
                       )
                     )
                   }
@@ -233,7 +235,7 @@ trait AddressController[J <: JourneyStatus] {
 
             case Some(AddressLookupResult(_, _, addresses)) =>
               val form = Address.addressSelectForm(addresses)
-              Ok(selectAddressPage(addresses, form, enterPostcodeCall, selectAddressSubmitCall, enterUkAddressCall))
+              Ok(selectAddressPage(addresses, form, enterPostcodeCall, selectAddressSubmitCall, enterUkAddressCall, isSubscribedJourney))
           }
       }
     }
@@ -253,7 +255,7 @@ trait AddressController[J <: JourneyStatus] {
                 .fold(
                   e =>
                     BadRequest(
-                      selectAddressPage(addresses, e, enterPostcodeCall, selectAddressSubmitCall, enterUkAddressCall)
+                      selectAddressPage(addresses, e, enterPostcodeCall, selectAddressSubmitCall, enterUkAddressCall, isSubscribedJourney)
                     ),
                   storeAddress(continueCall, journeyStatus)
                 )

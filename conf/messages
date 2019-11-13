@@ -1,5 +1,6 @@
 service.title=Report and pay Capital Gains Tax on UK property
 service.signOut=Sign out
+hmrc_branding=HM Revenue & Customs
 
 label.beta=Alpha
 
@@ -119,7 +120,7 @@ subscription.cyaLabel.contactName=Contact name
 subscription.cyaChange.contactName=your contact name
 subscription.cyaLabel.address=Contact address
 subscription.cyaChange.address=your contact address
-subscription.cyaLabel.email=Email address
+subscription.cyaLabel.email=Contact email address
 subscription.cyaChange.email=your email address
 
 registration.caption=Create a Capital Gains Tax on UK property account
@@ -131,11 +132,10 @@ registration.cyaLabel.lastName=Last name
 registration.cyaChange.lastName=your last name
 registration.cyaLabel.address=Contact address
 registration.cyaChange.address=your contact address
-registration.cyaLabel.email=Email address
+registration.cyaLabel.email=Contact email address
 registration.cyaChange.email=your email address
 
-subscription.enterPostcode.title=Find your UK contact address
-registration.enterPostcode.title=Find your UK contact address
+enterPostcode.title=Find your UK contact address
 enterPostcode.label=Enter postcode
 
 email.title=Enter a contact email address
@@ -159,8 +159,8 @@ confirmEmail.verified.p1=We’ll use this address to contact you about your Capi
 confirmEmail.verified.p2=Your email has not been updated in other government services.
 confirmEmail.resent=Confirmation email sent to {0}
 
-contactName.title=Change your contact name for this service
-contactName.extraContent=We’ll only use the name on any contact letters or emails we send to you about this service. Your details in other government services will not change.
+contactName.title=Change contact name
+contactName.extraContent=The contact name you use for other government services will not change.
 contactName.error.pattern=Contact name must only include letters, numbers, hyphens, apostrophes, commas, ampersands and spaces
 contactName.error.required=Enter your contact name
 contactName.error.tooLong=Contact name must must be 105 characters or fewer
@@ -195,7 +195,6 @@ postcode.error.noResults=No addresses found for this postcode, check what you en
 filter.error.noResults=No addresses found for this property name or number at this postcode, if it is correct then enter the address manually
 
 subscription.isUk.title=Is your contact address in the UK?
-registration.isUk.title=Is your contact address in the UK?
 
 isUk.error.required=Select yes if your contact address is in the UK
 
@@ -336,22 +335,35 @@ iv.technicalIssue.p=You’ll need to try again later.
 iv.preconditionFailed.title=You’re not able to use this service
 iv.preconditionFailed.p1=We’ve checked the details in your Government Gateway account and you do not meet the criteria to use this service.
 
-account.caption=CGT on UK property account
-account.manageYourDetails.title=Welcome, {0}
+account.caption=Capital Gains Tax on UK property account
+
+account.menu.home=Home
+account.menu.manageYourDetails=Manage account
+account.menu.signOut=Sign out
+
+account.home.individual.title=Welcome, {0}
+account.home.agent.title=Your client: {0}
+account.home.organisation.title=Welcome, {0}
+account.home.subtitle=Account number: {0}
+account.home.left.title=Capital Gains Tax liability
+account.home.left.placeholder=Your total Capital Gains Tax liability for UK property disposals from 6 April 2020 to 5 April 2021.
+account.home.right.title=Total amount left to pay
+account.home.right.placeholder=The total amount due for all your Capital Gains Tax on UK property disposals made from 6 April 2020.
+account.home.private-beta.guide=How to report capital gains on disposals made from 6 April 2020
+account.home.private-beta.guide.content=You will be able to use this service from 6 April 2020, to report and pay Capital Gains Tax on UK property disposals made on or after 6 April 2020. Find out how to <a href="{0}">report a capital gain on UK property disposals made before 6 April 2020</a>.
+
+account.manageYourDetails.title={0}
 account.manageYourDetails.subtitle=Account number: {0}
 account.manageYourDetails.betaNotice=This service is in private beta until 6 April 2020. On that date you will be able to come back and send a CGT on UK property disposals return for disposals made on or after 6 April 2020.
-account.manageYourDetails.contactHeading=Contact details
-account.manageYourDetails.p=We’ll only use these details if we need to contact you about this service.
-account.manageYourDetails.personalDetailsHeading=Your personal details
-account.manageYourDetails.personal.p=These are the details we hold about you. If you need to change them, go to GOV.UK and
-account.manageYourDetails.personal.linkText=tell HMRC about changes to your details (opens in a new window)
-account.manageYourDetails.telephone=Telephone
-account.manageYourDetails.cyaChange.telephone=your telephone number
-account.manageYourDetails.addTelephone=Add a phone number
+account.manageYourDetails.contactHeading=Contact person’s details
+account.manageYourDetails.p=We’ll only use these details if we need to get in contact about this service.
+account.manageYourDetails.individual.p2=You can only change the contact name here. If you need to change the account holder’s name, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new window)</a>.
+account.manageYourDetails.organisation.p2= If the lead trustee’s name or address changes, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new window)</a>.
 account.manageYourDetails.yourName=Your name
-account.manageYourDetails.contactNameChanged=Contact name has changed
-account.manageYourDetails.emailChanged=Contact email address has changed
-account.manageYourDetails.addressChanged=Contact address has changed
+
+account.manageYourDetails.contactNameChanged=Contact name changed
+account.manageYourDetails.emailChanged=Contact email address changed
+account.manageYourDetails.addressChanged=Contact address changed
 
 isReportingForATrust.title=Do you want to report a capital gain for a trust or estate?
 isReportingForATrust.error.required=Select yes if you want to report the tax for a trust or estate
@@ -384,3 +396,8 @@ trustName.error.pattern=The trust’s name must only include letters, spaces, co
 
 alreadySubscribedWithDifferentGGAccount.title=You need to sign in with a different Government Gateway account
 alreadySubscribedWithDifferentGGAccount.p=<a href="{0}">Sign in</a> with the same Government Gateway account you used to create your Capital Gains Tax on UK property account.
+
+signed-out.title=You’ve signed out
+signed-out.p1=You’ve signed out of your Capital Gains Tax on UK property account.
+signed-out.p2=You can <a href="{0}">sign in</a> to your account.
+signed-out.button=Go to GOV.UK

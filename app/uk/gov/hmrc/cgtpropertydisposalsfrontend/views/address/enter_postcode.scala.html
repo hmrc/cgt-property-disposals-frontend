@@ -26,21 +26,24 @@
  details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
  errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
  formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
- backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
+ backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+ accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu
 )
 
 @(form: Form[AddressLookupRequest],
         backLink: Call,
         submit: Call,
         enterUkAddress: Call,
-        journey: String = "subscription")(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+        showAccountMenu: Boolean)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"postcode"}
 @postcodeFilterKey = @{"filter"}
-@title = @{messages(s"$journey.enterPostcode.title")}
+@title = @{messages("enterPostcode.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@menu = {@if(showAccountMenu) { @accountMenu(None) }}
 
-@mainTemplate(title = title, hasErrors = hasErrors) {
+
+@mainTemplate(title = title, hasErrors = hasErrors, withSignOutLink = !showAccountMenu, accountMenu = Some(menu)) {
 
  @backLinkComponent(backLink)
 
@@ -48,7 +51,7 @@
   @errorSummary(form)
  }
 
- @pageHeading(title, Some(messages(s"$journey.caption")))
+ @pageHeading(title, Some(messages(if (showAccountMenu) "account.caption" else "subscription.caption")))
 
  @formWrapper(submit, 'novalidate -> "novalidate") {
    @textInput(

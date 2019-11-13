@@ -56,6 +56,8 @@ class RegistrationEnterAddressController @Inject()(
     with SessionUpdates
     with AddressController[IndividualSupplyingInformation] {
 
+  override val isSubscribedJourney: Boolean = false
+
   def validJourney(
     request: RequestWithSessionData[_]
   ): Either[Result, (SessionData, IndividualSupplyingInformation)] =

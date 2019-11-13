@@ -49,6 +49,8 @@ class RegistrationEnterIndividualNameController @Inject()(
     with Logging
     with IndividualNameController[IndividualSupplyingInformation] {
 
+  override val isSubscribedJourney: Boolean = false
+
   override def validJourney(
     request: RequestWithSessionData[_]
   ): Either[Result, (SessionData, IndividualSupplyingInformation)] =

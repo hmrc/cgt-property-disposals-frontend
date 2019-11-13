@@ -60,6 +60,7 @@ class SubscribedChangeEmailController @Inject()(
     with EmailController[Subscribed, Subscribed] {
 
   override val isAmendJourney: Boolean = true
+  override val isSubscribedJourney: Boolean = true
 
   override def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, Subscribed)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
@@ -91,13 +92,13 @@ class SubscribedChangeEmailController @Inject()(
   override val updateSubscriptionDetailChangedFlag: Boolean = true
 
   override lazy protected val backLinkCall: Option[Call] = Some(
-    controllers.routes.HomeController.homepage()
+    controllers.routes.HomeController.manageYourDetails()
   )
   override lazy protected val enterEmailCall: Call            = routes.SubscribedChangeEmailController.enterEmail()
   override lazy protected val enterEmailSubmitCall: Call      = routes.SubscribedChangeEmailController.enterEmailSubmit()
   override lazy protected val checkYourInboxCall: Call        = routes.SubscribedChangeEmailController.checkYourInbox()
   override lazy protected val verifyEmailCall: UUID => Call   = routes.SubscribedChangeEmailController.verifyEmail
   override lazy protected val emailVerifiedCall: Call         = routes.SubscribedChangeEmailController.emailVerified()
-  override lazy protected val emailVerifiedContinueCall: Call = controllers.routes.HomeController.homepage()
+  override lazy protected val emailVerifiedContinueCall: Call = controllers.routes.HomeController.manageYourDetails()
 
 }

@@ -57,6 +57,7 @@ class RegistrationEnterEmailController @Inject()(
     with EmailController[IndividualMissingEmail, RegistrationReady] {
 
   override val isAmendJourney: Boolean = false
+  override val isSubscribedJourney: Boolean = false
 
   override def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, IndividualMissingEmail)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {

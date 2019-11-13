@@ -42,15 +42,12 @@
         <li class="sidebar__list-item">
           <a href="@{appConfig.legacyCgtNonResidentUrl}">@messages("landingPage.sidebar.3")</a>
         </li>
-        <li>
-          <a href="@{appConfig.taxSellPropertyUrl}">@messages("landingPage.sidebar.4")</a>
-        </li>
       </ul>
     </nav>
   </div>
 }
 
-@mainTemplate(title = title, withAuth = false, sidebar = Some(sidebarContent)) {
+@mainTemplate(title = title, withSignOutLink = false, sidebar = Some(sidebarContent)) {
 
   <h1 class="heading-xlarge">@title</h1>
 

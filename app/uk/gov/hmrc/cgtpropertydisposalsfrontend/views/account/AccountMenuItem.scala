@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,17 +12,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@this()
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.views.account
 
-@(alert: String)(implicit messages: Messages)
+import scala.reflect.ClassTag
 
-<div class="hmcts-banner hmcts-banner--success" tabindex="-1" role="alert">
-  <svg class="hmcts-banner__icon" fill="currentColor" role="presentation" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 25 25" height="25" width="25"><path d="M25,6.2L8.7,23.2L0,14.1l4-4.2l4.7,4.9L21,2L25,6.2z"></path></svg>
-  <div class="hmcts-banner__message">
-    <span class="hmcts-banner__assistive">@messages("generic.success")</span>
-    @alert
-  </div>
+sealed trait AccountMenuItem
+object AccountMenuItem {
+  final case class Home() extends AccountMenuItem
+  final case class ManageYourDetails() extends AccountMenuItem
 
-</div>
+  implicit class AccountMenuItemOps(val a: AccountMenuItem) extends AnyVal {
+    def is[A <: AccountMenuItem: ClassTag]: Boolean = a match {
+      case _: A => true
+      case _ => false
+    }
+  }
+
+}
+

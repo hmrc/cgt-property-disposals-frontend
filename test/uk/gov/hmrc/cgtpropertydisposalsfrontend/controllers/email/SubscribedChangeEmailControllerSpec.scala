@@ -154,7 +154,7 @@ class SubscribedChangeEmailControllerSpec
 
       behave like emailVerifiedPage(
         performAction,
-        controllers.routes.HomeController.homepage(),
+        controllers.routes.HomeController.manageYourDetails(),
         routes.SubscribedChangeEmailController.enterEmail()
       )
     }

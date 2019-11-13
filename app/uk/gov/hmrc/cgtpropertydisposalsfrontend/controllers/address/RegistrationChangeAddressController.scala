@@ -56,6 +56,8 @@ class RegistrationChangeAddressController @Inject()(
     with SessionUpdates
     with AddressController[RegistrationReady] {
 
+  override val isSubscribedJourney: Boolean = false
+
   def validJourney(
     request: RequestWithSessionData[_]
   ): Either[Result, (SessionData, RegistrationReady)] =

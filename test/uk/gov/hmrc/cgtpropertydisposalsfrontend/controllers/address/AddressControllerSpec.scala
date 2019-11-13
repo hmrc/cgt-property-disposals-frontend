@@ -466,7 +466,7 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
           mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
         }
 
-        contentAsString(performAction()) should include(message("subscription.enterPostcode.title"))
+        contentAsString(performAction()) should include(message("enterPostcode.title"))
       }
 
       "there is an address lookup result in session" in {
@@ -481,7 +481,7 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
         }
 
         val content = contentAsString(performAction())
-        content should include(message("subscription.enterPostcode.title"))
+        content should include(message("enterPostcode.title"))
         content should include(s"""value="${postcode.value}"""")
       }
 
