@@ -24,7 +24,6 @@ class ViewConfig @Inject()(servicesConfig: ServicesConfig) {
 
   private def getString(key: String): String = servicesConfig.getString(key)
 
-  private val contactHost                  = getString("contact-frontend.host")
   private val companyAuthUrl: String       = getString("company-auth-frontend.url")
   private val signOutUri: String           = getString("sign-out.uri")
   private val contactFormServiceIdentifier = "CGTPD"
@@ -33,11 +32,11 @@ class ViewConfig @Inject()(servicesConfig: ServicesConfig) {
   val analyticsToken: String = getString("google-analytics.token")
   val analyticsHost: String  = getString("google-analytics.host")
   val reportAProblemPartialUrl: String =
-    s"$contactHost/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
+    s"/contact/problem_reports_ajax?service=$contactFormServiceIdentifier"
   val reportAProblemNonJSUrl: String =
-    s"$contactHost/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
+    s"/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
   val betaFeedbackUrlNoAuth: String =
-    s"$contactHost/contact/beta-feedback-unauthenticated?service=$contactFormServiceIdentifier"
+    s"/contact/beta-feedback-unauthenticated?service=$contactFormServiceIdentifier"
   val govUkUrl: String = getString("external-url.gov-uk")
   val signOutUrl: String           = s"$companyAuthUrl$signOutUri"
   val trustRegistrationUrl: String = getString("external-url.trust-registration")
