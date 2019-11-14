@@ -120,6 +120,6 @@
 
 @serviceNameAndHeading = @{if(title === messages("service.title")) title else title + " - " + messages("service.title")}
 @govTitle = @{serviceNameAndHeading + " - GOV.UK"}
-@pageTitle = @{if(hasErrors) { "Error: " + govTitle } else { govTitle }}
+@pageTitle = @{if(hasErrors) { messages("generic.errorPrefix") + " " + govTitle } else { govTitle }}
 
 @govUkTemplate(Some(pageTitle), bodyClasses)(head, bodyEnd, insideHeader, afterHeader, footerTop, Some(uiFooterLinks()), true)(content)

@@ -17,7 +17,7 @@
 @import java.time.LocalDate
 
 @this(
-  errorInline: uk.gov.hmrc.play.views.html.helpers.ErrorInline
+  errorInline: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_inline
 )
 
 @(
@@ -46,7 +46,7 @@
       </span>
     }
     @errorKey.map { e =>
-      @errorInline(fieldId, messages(s"$fieldId.$e"), Seq("error-message"))
+      @errorInline(fieldId, messages(s"$fieldId.$e"))
     }
     <div class="form-date">
       <div class="form-group form-group-day">

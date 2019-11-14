@@ -17,7 +17,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country.{CountryCode, CountryName}
 @this(
-  errorInline: uk.gov.hmrc.play.views.html.helpers.ErrorInline
+  errorInline: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_inline
 )
 
 @(countryCodeToCountryName: Map[CountryCode,CountryName], selected: Option[String], label: String, errorKey: Option[String], hasErrors: Boolean)(implicit messages: Messages)
@@ -29,7 +29,7 @@
 <div class="@classes country-code-wrapper">
  <label class="form-label" for="@key">@label</label>
   @errorKey.map { e =>
-   @errorInline(key, messages(s"$key.$e"), Seq("error-message"))
+   @errorInline(key, messages(s"$key.$e"))
  }
  <select id="@key" name="@key" class="@inputClasses">
     <option value=""></option>

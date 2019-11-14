@@ -22,6 +22,7 @@ generic.back=Back
 generic.yes=Yes
 generic.no=No
 generic.success=Success
+generic.errorPrefix=Error:
 
 cya.change=Change
 cya.add=Add
