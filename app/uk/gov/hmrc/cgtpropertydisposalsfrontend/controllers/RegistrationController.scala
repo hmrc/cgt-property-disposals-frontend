@@ -89,7 +89,7 @@ class RegistrationController @Inject()(
         })
       }
 
-      Ok(selectEntityTypePage(form, routes.InsufficientConfidenceLevelController.enterSautrAndName()))
+      Ok(selectEntityTypePage(form, routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()))
     }
   }
 
