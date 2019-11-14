@@ -122,6 +122,7 @@ subscription.cyaLabel.address=Contact address
 subscription.cyaChange.address=your contact address
 subscription.cyaLabel.email=Contact email address
 subscription.cyaChange.email=your email address
+subscription.changeGGAccount=If these details are not correct
 
 registration.caption=Create a Capital Gains Tax on UK property account
 registration.title=Check your contact details and create an account
@@ -395,7 +396,12 @@ trustName.error.tooLong=The name of your trust must be less than 105 characters
 trustName.error.pattern=The trust’s name must only include letters, spaces, commas, ampersands, full stops, apostrophes and hyphens
 
 alreadySubscribedWithDifferentGGAccount.title=You need to sign in with a different Government Gateway account
-alreadySubscribedWithDifferentGGAccount.p=<a href="{0}">Sign in</a> with the same Government Gateway account you used to create your Capital Gains Tax on UK property account.
+alreadySubscribedWithDifferentGGAccount.p=You’ll need to sign in with same Government Gateway user ID you used to create your Capital Gains Tax on UK property account.
+alreadySubscribedWithDifferentGGAccount.button=Sign in with correct user ID
+
+changeGGAccount.title=If the details were not correct
+changeGGAccount.p=You can try again. You’ll need to sign in with the Government Gateway user ID you want to use to create your Capital Gains Tax on UK property account.
+changeGGAccount.button=Try again
 
 signed-out.title=You’ve signed out
 signed-out.p1=You’ve signed out of your Capital Gains Tax on UK property account.

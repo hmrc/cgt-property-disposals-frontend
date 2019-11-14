@@ -46,7 +46,8 @@ class SubscriptionController @Inject()(
   val subscriptionDetailsAction: SubscriptionReadyAction,
   alreadySubscribedWithDifferentGGAccountPage: views.html.already_subscribed_with_different_gg_account,
   checkYourDetailsPage: views.html.subscription.check_your_details,
-  subscribedPage: views.html.subscription.subscribed
+  subscribedPage: views.html.subscription.subscribed,
+  changeGGAccountPage: views.html.change_gg_account
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithSubscriptionDetailsActions
@@ -121,6 +122,10 @@ class SubscriptionController @Inject()(
         case Some(AlreadySubscribedWithDifferentGGAccount) => Ok(alreadySubscribedWithDifferentGGAccountPage())
         case _                                            => Redirect(routes.StartController.start())
       }
+  }
+
+  def changeGGAccountForSubscription(): Action[AnyContent] = authenticatedActionWithSubscriptionReady {
+    implicit request => Ok(changeGGAccountPage(routes.SubscriptionController.checkYourDetails()))
   }
 
 }

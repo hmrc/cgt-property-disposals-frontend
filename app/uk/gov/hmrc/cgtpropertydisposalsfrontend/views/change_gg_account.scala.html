@@ -19,21 +19,26 @@
 
 @this(
        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-       pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
+       pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+       backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@()(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(backLink: Call)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
-@title = @{messages("alreadySubscribedWithDifferentGGAccount.title")}
+@title = @{messages("changeGGAccount.title")}
 
 @mainTemplate(title = title) {
+
+   @backLinkComponent(backLink)
+
    @pageHeading(title)
+
    <p>
-    @messages("alreadySubscribedWithDifferentGGAccount.p")
+    @messages("changeGGAccount.p")
    </p>
    <p>
     <a href="@{appConfig.signOutUrl}?continue=@{routes.StartController.start().url}" class="button" role="button">
-     @messages("alreadySubscribedWithDifferentGGAccount.button")
+      @messages("changeGGAccount.button")
     </a>
    </p>
 

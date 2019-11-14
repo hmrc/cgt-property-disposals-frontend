@@ -136,7 +136,6 @@
   }
 
   function sendLinkToGA(event) {
-    console.log('link clicked ' + textContent(event.target))
     sendToGA('send', 'event', 'link-click', textContent(document.querySelector('h1')), textContent(event.target))
   }
 

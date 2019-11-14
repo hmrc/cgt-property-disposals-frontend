@@ -72,4 +72,7 @@
  @formWrapper(routes.SubscriptionController.checkYourDetailsSubmit(), 'novalidate -> "novalidate") {
   @submitButton(messages("button.createAccount"))
  }
+  <p>
+   <a href="@{routes.SubscriptionController.changeGGAccountForSubscription().url}">@messages("subscription.changeGGAccount")</a>
+  </p>
 }
