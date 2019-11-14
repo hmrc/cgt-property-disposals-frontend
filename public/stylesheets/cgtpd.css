@@ -36,6 +36,11 @@ fieldset .form-hint {
     margin-bottom: 30px;
 }
 
+.form-group-error .autocomplete__input {
+    border-color: #d4351c;
+    border-width: 4px;
+}
+
 /*
     Assets Frontend does not render focus styles accessibly
  */

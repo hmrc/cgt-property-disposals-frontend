@@ -34,9 +34,16 @@
 
 @classes = @{if(hasErrors) "form-group form-group-error" else "form-group" }
 @inputClasses = @{if(hasErrors) "form-control form-control-error" else "form-control" }
+@hintTextKey = @{s"${{fieldId}}-form-hint"}
+@extraContentKey = @{s"${{fieldId}}-extra-content"}
+@errorId = @{s"${{fieldId}}-inline-error"}
+@hintIdWithHintText = @{helpText.map(hintTextKey -> _)}
+@errorIdWithMessageKey = @{errorKey.map(errorId -> _)}
+@describedByKeys = @{
+  List(hintIdWithHintText.map(_._1), errorIdWithMessageKey.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
 
 <div class="@classes">
-  <fieldset id="@fieldId"@if(helpText.isDefined) { aria-described-by="@{fieldId}-form-hint" }>
+  <fieldset id="@fieldId"@if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
     <legend>
       @label
     </legend>
@@ -45,8 +52,8 @@
         @helpText.map(t => t)
       </span>
     }
-    @errorKey.map { e =>
-      @errorInline(fieldId, messages(s"$fieldId.$e"))
+    @errorIdWithMessageKey.map { case (id, key) =>
+      @errorInline(id, messages(s"$fieldId.$key"))
     }
     <div class="form-date">
       <div class="form-group form-group-day">

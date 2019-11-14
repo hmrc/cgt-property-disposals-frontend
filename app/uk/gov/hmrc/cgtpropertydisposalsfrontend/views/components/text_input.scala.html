@@ -43,12 +43,14 @@
 
 @hintTextKey = @{s"${{fieldId}}-form-hint"}
 @extraContentKey = @{s"${{fieldId}}-extra-content"}
+@errorId = @{s"${{fieldId}}-inline-error"}
 @hintIdWithHintText = @{helpText.map(hintTextKey -> _)}
 @extraContentIdWithContent = @{extraContent.map(extraContentKey -> _)}
+@errorIdWithMessageKey = @{errorKey.map(errorId -> _)}
 @labelClasses = @{classBuilder(Some("form-label"), labelClass)}
 
 @describedByKeys = @{
-  List(hintIdWithHintText.map(_._1), extraContentIdWithContent.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
+  List(hintIdWithHintText.map(_._1), extraContentIdWithContent.map(_._1), errorIdWithMessageKey.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
 
 @fieldLabel = {
   @if(labelAsHeading) {
@@ -72,8 +74,8 @@
       @text
     </span>
   }
-  @errorKey.map { e =>
-    @errorInline(fieldId, messages(s"$fieldId.$e"))
+  @errorIdWithMessageKey.map { case (id, key) =>
+    @errorInline(id, messages(s"$fieldId.$key"))
   }
   <input
    class="@inputClasses"
