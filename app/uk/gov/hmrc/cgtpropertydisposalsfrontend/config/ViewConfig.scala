@@ -50,7 +50,6 @@ class ViewConfig @Inject()(servicesConfig: ServicesConfig) {
   val legacyCgtNonResidentUrl: String = getString("external-url.legacy-cgt-non-resident")
   val agentsSignInUrl: String = getString("external-url.sign-in-to-agents")
   val createAgentsAccountUrl: String = getString("external-url.create-agents-account")
-  val ninoGuidanceUrl: String = getString("external-url.nino-guidance")
   val lostUtrUrl: String = getString("external-url.lost-utr")
   val trusteeResponsibilitiesUrl: String = getString("external-url.trustee-responsibilities")
   val fileCorporationTaxUrl: String = getString("external-url.file-corporation-tax")
