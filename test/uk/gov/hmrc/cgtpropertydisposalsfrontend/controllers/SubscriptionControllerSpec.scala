@@ -289,6 +289,41 @@ class SubscriptionControllerSpec
 
     }
 
+    "handling requests to display the change gg account page" must {
+
+      def performAction(): Future[Result] =
+        controller.changeGGAccountForSubscription()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        performAction,
+        {
+          case _:SubscriptionReady => true
+          case _ => false
+        }
+      )
+
+      "display the page" when {
+
+        "the session data indicates that the user has already subscribed with a different gg account" in {
+          inSequence{
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(
+              Right(Some(
+                SessionData.empty.copy(journeyStatus = Some(sample[SubscriptionReady]))
+              ))
+            ))
+          }
+
+          val result = performAction()
+          status(result) shouldBe OK
+          contentAsString(result) should include(message("changeGGAccount.title"))
+
+        }
+
+      }
+
+    }
+
   }
 
 }
