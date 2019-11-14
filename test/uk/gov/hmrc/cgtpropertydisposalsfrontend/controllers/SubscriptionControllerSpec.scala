@@ -29,8 +29,8 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
@@ -93,9 +93,10 @@ class SubscriptionControllerSpec
 
         "there are subscription details in session for an individual" in {
           val individualSessionWithSubscriptionDetails =
-            SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(
-              sample[SubscriptionDetails].copy(name = Right(sample[IndividualName])))
-            ))
+            SessionData.empty.copy(
+              journeyStatus =
+                Some(SubscriptionReady(sample[SubscriptionDetails].copy(name = Right(sample[IndividualName]))))
+            )
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(individualSessionWithSubscriptionDetails))))
@@ -108,9 +109,9 @@ class SubscriptionControllerSpec
 
         "there are subscription details in session for an organisation" in {
           val organisationSessionWithSubscriptionDetails =
-            SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(
-              sample[SubscriptionDetails].copy(name = Left(sample[TrustName])))
-            ))
+            SessionData.empty.copy(
+              journeyStatus = Some(SubscriptionReady(sample[SubscriptionDetails].copy(name = Left(sample[TrustName]))))
+            )
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(organisationSessionWithSubscriptionDetails))))
@@ -204,7 +205,6 @@ class SubscriptionControllerSpec
 
       }
 
-
     }
 
     "handling requests to display the subscribed page" must {
@@ -260,27 +260,30 @@ class SubscriptionControllerSpec
         controller.alreadySubscribedWithDifferentGGAccount()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction,
-        {
+        performAction, {
           case AlreadySubscribedWithDifferentGGAccount => true
-          case _ => false
+          case _                                       => false
         }
       )
 
       "display the page" when {
 
         "the session data indicates that the user has already subscribed with a different gg account" in {
-          inSequence{
+          inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(
-              Right(Some(
-                SessionData.empty.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount))
-              ))
-            ))
+            mockGetSession(
+              Future.successful(
+                Right(
+                  Some(
+                    SessionData.empty.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount))
+                  )
+                )
+              )
+            )
           }
 
           val result = performAction()
-          status(result) shouldBe OK
+          status(result)          shouldBe OK
           contentAsString(result) should include(message("alreadySubscribedWithDifferentGGAccount.title"))
 
         }
@@ -295,27 +298,30 @@ class SubscriptionControllerSpec
         controller.changeGGAccountForSubscription()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction,
-        {
-          case _:SubscriptionReady => true
-          case _ => false
+        performAction, {
+          case _: SubscriptionReady => true
+          case _                    => false
         }
       )
 
       "display the page" when {
 
         "the session data indicates that the user has already subscribed with a different gg account" in {
-          inSequence{
+          inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(
-              Right(Some(
-                SessionData.empty.copy(journeyStatus = Some(sample[SubscriptionReady]))
-              ))
-            ))
+            mockGetSession(
+              Future.successful(
+                Right(
+                  Some(
+                    SessionData.empty.copy(journeyStatus = Some(sample[SubscriptionReady]))
+                  )
+                )
+              )
+            )
           }
 
           val result = performAction()
-          status(result) shouldBe OK
+          status(result)          shouldBe OK
           contentAsString(result) should include(message("changeGGAccount.title"))
 
         }
