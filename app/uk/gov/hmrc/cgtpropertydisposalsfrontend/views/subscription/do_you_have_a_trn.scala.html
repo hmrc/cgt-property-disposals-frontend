@@ -49,7 +49,7 @@
             errorKey = form.error(key).map(e => e.message),
             hasErrors = hasErrors,
             selected = form.value,
-            helpText = Some(Html(messages("haveATrn.helpText", appConfig.trusteeResponsibilitiesUrl)))
+            helpText = Some(Html(messages("haveATrn.helpText")))
         )
         @submitButton(messages("button.continue"))
     }

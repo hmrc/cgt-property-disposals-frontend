@@ -88,12 +88,12 @@ nino.invalid=Your National Insurance number must be entered as 9 alphanumeric ch
 nino.generic.error=National Insurance number must be entered as 9 alphanumeric characters. For example, ‘QQ 12 34 56 C’
 
 haveANino.title=Do you have a National Insurance number?
-haveANino.helpText=You’ll find it on your National Insurance card, payslip or P60. For example, ‘QQ 12 34 56 C’. Find out about <a href="{0}" target="_blank">National Insurance numbers (opens in a new window)</a>.
+haveANino.helpText=You’ll find it on your National Insurance card, payslip or P60. For example, ‘QQ 12 34 56 C’.
 hasNino.error.required=Select yes if you have a National Insurance number
 hasNino.error.boolean=Select yes if you have a National Insurance number
 
 haveAnSaUtr.title=Do you have a Self Assessment Unique Taxpayer Reference?
-haveAnSaUtr.helpText=This is 10 numbers, for example 1234567890. It will be on tax returns and other letters about Self Assessment. It may be called ‘reference’, ‘UTR’ or ‘official use’. You can <a href="{0}" target="_blank">find a lost UTR number (opens in a new window)</a>.
+haveAnSaUtr.helpText=This is 10 numbers, for example 1234567890. It will be on tax returns and other letters about Self Assessment. It may be called ‘reference’, ‘UTR’ or ‘official use’.
 hasSaUtr.error.required=Select yes if you have a Self Assessment Unique Taxpayer Reference
 hasSaUtr.error.boolean=Select yes if you have a Self Assessment Unique Taxpayer Reference
 
@@ -371,7 +371,7 @@ isReportingForATrust.error.required=Select yes if you want to report the tax for
 isReportingForATrust.error.boolean=Select yes if you want to report the tax for a trust or estate
 
 haveATrn.title=Does the trust or estate have a Trust Registration Number?
-haveATrn.helpText=This number is sent to the person who <a href="{0}">registers the trust (opens in a new window)</a> with the Trust Registration Service.
+haveATrn.helpText=This number is sent to the person who registers the trust with the Trust Registration Service.
 hasTrn.error.required=Select yes if you have a Trust Registration number
 hasTrn.error.boolean=Select yes if you have a Trust Registration number
 
