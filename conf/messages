@@ -396,7 +396,7 @@ trustName.error.tooLong=The name of your trust must be less than 105 characters
 trustName.error.pattern=The trust’s name must only include letters, spaces, commas, ampersands, full stops, apostrophes and hyphens
 
 alreadySubscribedWithDifferentGGAccount.title=You need to sign in with a different Government Gateway account
-alreadySubscribedWithDifferentGGAccount.p=You’ll need to sign in with same Government Gateway user ID, you used to create your Capital Gains Tax on UK property account.
+alreadySubscribedWithDifferentGGAccount.p=You’ll need to sign in with same Government Gateway user ID you used to create your Capital Gains Tax on UK property account.
 alreadySubscribedWithDifferentGGAccount.button=Sign in with correct user ID
 
 changeGGAccount.title=If the details were not correct
