@@ -20,7 +20,8 @@
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
     buttonLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.button_link,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+    exitSurveyLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.exit_survey
 )
 
 @()(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
@@ -38,6 +39,8 @@
   <p>
     @Html(messages("signed-out.p2", routes.StartController.start().url))
   </p>
+
+  @exitSurveyLink()
 
   @buttonLink(messages("signed-out.button"), appConfig.govUkUrl)
 
