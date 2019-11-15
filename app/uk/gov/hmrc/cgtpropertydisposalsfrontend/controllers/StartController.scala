@@ -54,7 +54,8 @@ class StartController @Inject()(
   val sessionDataAction: SessionDataAction,
   val config: Configuration,
   subscriptionService: SubscriptionService,
-  weNeedMoreDetailsPage: views.html.we_need_more_details
+  weNeedMoreDetailsPage: views.html.we_need_more_details,
+  weOnlySupportGGPage: views.html.we_only_support_gg
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthRetrievalsAndSessionDataAction
@@ -142,7 +143,21 @@ class StartController @Inject()(
 
   def weOnlySupportGG(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
     request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(NonGovernmentGatewayJourney) => Ok("gg only")
+      case Some(NonGovernmentGatewayJourney) => Ok(weOnlySupportGGPage())
+      case _                                 => Redirect(routes.StartController.start())
+    }
+  }
+
+  def signOutAndRegisterForGG(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
+    request.sessionData.flatMap(_.journeyStatus) match {
+      case Some(NonGovernmentGatewayJourney) => Redirect(viewConfig.ggCreateAccountUrl).withNewSession
+      case _                                 => Redirect(routes.StartController.start())
+    }
+  }
+
+  def signOutAndSignIn(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
+    request.sessionData.flatMap(_.journeyStatus) match {
+      case Some(NonGovernmentGatewayJourney) => Redirect(routes.StartController.start()).withNewSession
       case _                                 => Redirect(routes.StartController.start())
     }
   }

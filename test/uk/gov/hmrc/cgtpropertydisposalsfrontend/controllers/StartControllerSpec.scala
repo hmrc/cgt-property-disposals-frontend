@@ -1321,7 +1321,6 @@ class StartControllerSpec
                 Set.empty,
                 Some(nonGGCreds)
               )
-              mockHasSubscription()(Right(None))
               mockGetSession(Future.successful(Right(None)))
               mockStoreSession(SessionData.empty.copy(journeyStatus = Some(NonGovernmentGatewayJourney)))(
                 Future.successful(Left(Error("")))
@@ -1346,7 +1345,6 @@ class StartControllerSpec
                 Set.empty,
                 Some(nonGGCreds)
               )
-              mockHasSubscription()(Right(None))
               mockGetSession(Future.successful(Right(None)))
               mockStoreSession(SessionData.empty.copy(journeyStatus = Some(NonGovernmentGatewayJourney)))(
                 Future.successful(Right(()))
@@ -1367,7 +1365,6 @@ class StartControllerSpec
                 Set.empty,
                 Some(nonGGCreds)
               )
-              mockHasSubscription()(Right(None))
               mockGetSession(
                 Future.successful(
                   Right(
@@ -1482,8 +1479,76 @@ class StartControllerSpec
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include("gg only")
+        contentAsString(result) should include(message("weOnlySupportGG.title"))
       }
+    }
+
+    "handling requests to sign out and register for GG" must {
+
+      def performAction(sessionData: Seq[(String,String)]): Future[Result] =
+        controller.signOutAndRegisterForGG()(FakeRequest().withSession(sessionData: _*))
+
+      behave like redirectToStartWhenInvalidJourney(
+        () => performAction(Seq.empty),
+        {
+          case NonGovernmentGatewayJourney => true
+          case _                           => false
+        }
+      )
+
+      "trash the session adn redirect to the gg registration service" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            Future.successful(
+              Right(
+                Some(
+                  SessionData.empty.copy(journeyStatus = Some(NonGovernmentGatewayJourney))
+                )
+              )
+            )
+          )
+        }
+
+        val result = performAction(Seq("key" -> "value"))
+        checkIsRedirect(result, viewConfig.ggCreateAccountUrl)
+        session(result).data shouldBe Map.empty
+      }
+
+    }
+
+    "handling requests to sign out and sign in" must {
+
+      def performAction(sessionData: Seq[(String,String)]): Future[Result] =
+        controller.signOutAndSignIn()(FakeRequest().withSession(sessionData: _*))
+
+      behave like redirectToStartWhenInvalidJourney(
+        () => performAction(Seq.empty),
+        {
+          case NonGovernmentGatewayJourney => true
+          case _                           => false
+        }
+      )
+
+      "trash the session adn redirect to the gg registration service" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            Future.successful(
+              Right(
+                Some(
+                  SessionData.empty.copy(journeyStatus = Some(NonGovernmentGatewayJourney))
+                )
+              )
+            )
+          )
+        }
+
+        val result = performAction(Seq("key" -> "value"))
+        checkIsRedirect(result, routes.StartController.start())
+        session(result).data shouldBe Map.empty
+      }
+
     }
 
   }

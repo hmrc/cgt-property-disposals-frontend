@@ -5,6 +5,10 @@ GET /start                                uk.gov.hmrc.cgtpropertydisposalsfronte
 GET /we-need-more-details                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.weNeedMoreDetails()
 GET /already-subscribed                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SubscriptionController.alreadySubscribedWithDifferentGGAccount()
 GET /unsupported-login                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.weOnlySupportGG()
+GET /sign-out-and-register-for-gg         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.signOutAndRegisterForGG()
+GET /sign-out-and-log-in                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.signOutAndSignIn()
+
+
 GET /change-gg-account                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SubscriptionController.changeGGAccountForSubscription()
 
 #### IV

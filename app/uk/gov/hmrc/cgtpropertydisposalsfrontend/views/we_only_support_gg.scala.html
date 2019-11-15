@@ -42,7 +42,7 @@
   </h2>
 
   <p>
-    @Html(messages("weOnlySupportGG.createAccount.p1", appConfig.ggCreateAccountUrl))
+    @Html(messages("weOnlySupportGG.createAccount.p1", routes.StartController.signOutAndRegisterForGG().url))
   </p>
 
   <h2 class="heading-medium">
@@ -50,6 +50,6 @@
   </h2>
 
   <p>
-    @Html(messages("weOnlySupportGG.signIn.p1", appConfig.signOutUrl + "?continue=" + routes.StartController.start().url))
+    @Html(messages("weOnlySupportGG.signIn.p1", routes.StartController.signOutAndSignIn().url))
   </p>
 }

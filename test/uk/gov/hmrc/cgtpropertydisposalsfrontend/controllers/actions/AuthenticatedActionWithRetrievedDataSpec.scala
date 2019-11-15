@@ -97,10 +97,7 @@ class AuthenticatedActionWithRetrievedDataSpec
             None and None and None and emptyEnrolments and Some(Credentials("id", providerType))
           )
 
-        inSequence{
-          mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
-          mockHasSubscription()(Right(None))
-        }
+        mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
 
         val result = performAction(FakeRequest())
 
@@ -259,7 +256,6 @@ class AuthenticatedActionWithRetrievedDataSpec
             credentials
 
         "no credentials can be retrieved" in {
-          mockHasSubscription()(Right(None))
           mockAuth(EmptyPredicate, retrievals)(Future.successful(retrievalResult(None)))
 
           checkIsTechnicalErrorPage(performAction(FakeRequest()))
