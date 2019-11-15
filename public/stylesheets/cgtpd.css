@@ -41,6 +41,10 @@ fieldset .form-hint {
     border-width: 4px;
 }
 
+.govuk-list>li, .error-summary-list>li {
+    margin-bottom: 5px;
+}
+
 /*
     Assets Frontend does not render focus styles accessibly
  */
