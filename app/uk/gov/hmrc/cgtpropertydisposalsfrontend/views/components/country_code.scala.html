@@ -17,21 +17,23 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country.{CountryCode, CountryName}
 @this(
-  errorInline: uk.gov.hmrc.play.views.html.helpers.ErrorInline
+  errorInline: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_inline
 )
 
 @(countryCodeToCountryName: Map[CountryCode,CountryName], selected: Option[String], label: String, errorKey: Option[String], hasErrors: Boolean)(implicit messages: Messages)
 
-@key = @{"countryCode"}
+@fieldId = @{"countryCode"}
 @classes = @{if(hasErrors) "form-group form-group-error" else "form-group" }
 @inputClasses = @{if(hasErrors) "form-control form-control-error"  else "form-control"}
+@errorId = @{s"${{fieldId}}-inline-error"}
+@errorIdWithMessageKey = @{errorKey.map(errorId -> _)}
 
 <div class="@classes country-code-wrapper">
- <label class="form-label" for="@key">@label</label>
-  @errorKey.map { e =>
-   @errorInline(key, messages(s"$key.$e"), Seq("error-message"))
+ <label class="form-label" for="@fieldId">@label</label>
+ @errorIdWithMessageKey.map { case (id, key) =>
+  @errorInline(id, messages(s"$fieldId.$key"))
  }
- <select id="@key" name="@key" class="@inputClasses">
+ <select id="@fieldId" name="@fieldId" class="@inputClasses"@if(hasErrors) { aria-describedby="@errorId" }>
     <option value=""></option>
     @for(country <- countryCodeToCountryName) {
       <option value="@{country._1}" @{if(selected.contains(country._1)) { s" selected" }}>@{country._2}</option>
