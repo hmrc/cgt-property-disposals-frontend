@@ -1,6 +1,7 @@
 service.title=Report and pay Capital Gains Tax on UK property
 service.signOut=Sign out
 hmrc_branding=HM Revenue & Customs
+exitSurvey.linkText=Tell us how we can improve this service (takes 1 minute)
 
 label.beta=Alpha
 
