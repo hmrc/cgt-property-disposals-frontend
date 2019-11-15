@@ -98,7 +98,7 @@ haveAnSaUtr.helpText=This is 10 numbers, for example 1234567890. It will be on t
 hasSaUtr.error.required=Select yes if you have a Self Assessment Unique Taxpayer Reference
 hasSaUtr.error.boolean=Select yes if you have a Self Assessment Unique Taxpayer Reference
 
-enterSaUtr.title=What is your Self Assessment Unique Taxpayer Reference and full name?
+enterSaUtr.title=Enter your Self Assessment Unique Taxpayer Reference and full name
 saUtr.label=Self Assessment Unique Taxpayer Reference
 saUtr.error.required=Enter your Self Assessment Unique Taxpayer Reference
 saUtr.error.pattern=Self Assessment Unique Taxpayer References must be 10 numbers, for example 9163259195
@@ -193,8 +193,8 @@ address-county.error.pattern=County must only include letters, numbers, spaces, 
 postcode.error.tooLong=Postcode must be 8 characters or fewer
 postcode.error.required=Enter a postcode
 postcode.error.pattern=Postcode must only include letters, numbers and spaces
-postcode.error.noResults=No addresses found for this postcode, check what you entered, if it is correct then enter the address manually
-filter.error.noResults=No addresses found for this property name or number at this postcode, if it is correct then enter the address manually
+postcode.error.noResults=Address not found, you’ll need to follow the link to enter it manually
+filter.error.noResults=Address not found, you’ll need to follow the link to enter it manually
 
 subscription.isUk.title=Is your contact address in the UK?
 
