@@ -29,9 +29,9 @@ import uk.gov.hmrc.auth.core.ConfidenceLevel.{L0, L100, L50}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
+import uk.gov.hmrc.auth.core.retrieve.{Credentials, EmptyRetrieval, ~}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, RetrievalOps, SessionSupport}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, RetrievalOps, SessionSupport, routes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, UserType}
@@ -87,6 +87,25 @@ class AuthenticatedActionWithRetrievedDataSpec
   val ggCredentials = Credentials("id", "GovernmentGateway")
 
   "AuthenticatedActionWithRetrievedData" when {
+
+    "handling a user who has logged in with an auth provider which isn't gg" must {
+
+      "return the auth provider id" in {
+        val providerType = "other provider"
+        val retrievalsResult = Future successful (
+          new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation)) and
+            None and None and None and emptyEnrolments and Some(Credentials("id", providerType))
+          )
+
+        mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+
+        val result = performAction(FakeRequest())
+
+        status(result)        shouldBe OK
+        contentAsJson(result) shouldBe Json.toJson(UserType.NonGovernmentGatewayUser(providerType))
+      }
+
+    }
 
     "handling a logged in user with a cgt enrolment" must {
 
@@ -221,6 +240,7 @@ class AuthenticatedActionWithRetrievedDataSpec
           }
         }
       }
+
     }
 
     "handling cases with incorrect type of credentials" must {
@@ -236,19 +256,7 @@ class AuthenticatedActionWithRetrievedDataSpec
             credentials
 
         "no credentials can be retrieved" in {
-          mockHasSubscription()(Right(None))
           mockAuth(EmptyPredicate, retrievals)(Future.successful(retrievalResult(None)))
-
-          checkIsTechnicalErrorPage(performAction(FakeRequest()))
-        }
-
-        "the retrieved credentials are not GovernmentGateway credentials" in {
-          mockHasSubscription()(Right(None))
-          mockAuth(EmptyPredicate, retrievals)(
-            Future.successful(
-              retrievalResult(Some(Credentials("id", "provider")))
-            )
-          )
 
           checkIsTechnicalErrorPage(performAction(FakeRequest()))
         }
@@ -486,8 +494,8 @@ class AuthenticatedActionWithRetrievedDataSpec
       List[AuthorisationException](
         InsufficientEnrolments(),
         UnsupportedAffinityGroup(),
-        UnsupportedCredentialRole(),
         UnsupportedAuthProvider(),
+        UnsupportedCredentialRole(),
         IncorrectCredentialStrength(),
         InternalError()
       ).foreach { e =>

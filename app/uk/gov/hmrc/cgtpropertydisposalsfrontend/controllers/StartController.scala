@@ -24,7 +24,7 @@ import play.api.Configuration
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, RegistrationStatus, Subscribed, SubscriptionStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, NonGovernmentGatewayJourney, RegistrationStatus, Subscribed, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionDetails.MissingData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
@@ -54,7 +54,8 @@ class StartController @Inject()(
   val sessionDataAction: SessionDataAction,
   val config: Configuration,
   subscriptionService: SubscriptionService,
-  weNeedMoreDetailsPage: views.html.we_need_more_details
+  weNeedMoreDetailsPage: views.html.we_need_more_details,
+  weOnlySupportGGPage: views.html.we_only_support_gg
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthRetrievalsAndSessionDataAction
@@ -91,8 +92,11 @@ class StartController @Inject()(
       case (_, Some(RegistrationStatus.IndividualWantsToRegisterTrust)) =>
         Redirect(routes.RegistrationController.selectEntityType())
 
-      case (_, Some(SubscriptionStatus.DeterminingIfOrganisationIsTrust(ggCredId, _ ,_))) =>
+      case (_, Some(SubscriptionStatus.DeterminingIfOrganisationIsTrust(ggCredId, _, _))) =>
         handleNonTrustOrganisation(ggCredId)
+
+      case (_, Some(NonGovernmentGatewayJourney)) =>
+        Redirect(routes.StartController.weOnlySupportGG())
 
       case (UserType.Subscribed(cgtReference, _), _) =>
         handleSubscribedUser(cgtReference)
@@ -125,14 +129,53 @@ class StartController @Inject()(
       case (UserType.OrganisationUnregisteredTrust(_, ggCredId), _) =>
         handleNonTrustOrganisation(ggCredId)
 
+      case (u: UserType.NonGovernmentGatewayUser, _) =>
+        handleNonGovernmentGatewayUser(u)
     }
   }
 
   def weNeedMoreDetails(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
     request.sessionData.flatMap(_.needMoreDetailsDetails) match {
-      case None              => Redirect(routes.StartController.start())
+      case None          => Redirect(routes.StartController.start())
       case Some(details) => Ok(weNeedMoreDetailsPage(details))
     }
+  }
+
+  def weOnlySupportGG(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
+    request.sessionData.flatMap(_.journeyStatus) match {
+      case Some(NonGovernmentGatewayJourney) => Ok(weOnlySupportGGPage())
+      case _                                 => Redirect(routes.StartController.start())
+    }
+  }
+
+  def signOutAndRegisterForGG(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
+    request.sessionData.flatMap(_.journeyStatus) match {
+      case Some(NonGovernmentGatewayJourney) => Redirect(viewConfig.ggCreateAccountUrl).withNewSession
+      case _                                 => Redirect(routes.StartController.start())
+    }
+  }
+
+  def signOutAndSignIn(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
+    request.sessionData.flatMap(_.journeyStatus) match {
+      case Some(NonGovernmentGatewayJourney) => Redirect(routes.StartController.start()).withNewSession
+      case _                                 => Redirect(routes.StartController.start())
+    }
+  }
+
+  private def handleNonGovernmentGatewayUser(
+    nonGovernmentGatewayUser: NonGovernmentGatewayUser
+  )(implicit request: RequestWithSessionDataAndRetrievedData[_]): Future[Result] = {
+    logger.warn(s"User logged in with unsupported provider: ${nonGovernmentGatewayUser.authProvider}")
+
+    updateSession(sessionStore, request)(_.copy(journeyStatus = Some(NonGovernmentGatewayJourney))).map {
+      case Left(e) =>
+        logger.warn("Could not update session", e)
+        errorHandler.errorResult()
+
+      case Right(_) =>
+        Redirect(routes.StartController.weOnlySupportGG())
+    }
+
   }
 
   private def handleSubscribedUser(cgtReference: CgtReference)(
@@ -155,17 +198,20 @@ class StartController @Inject()(
     val newSessionData =
       request.sessionData.flatMap(_.journeyStatus) match {
         case Some(d: SubscriptionStatus.DeterminingIfOrganisationIsTrust) => d
-        case _ => SubscriptionStatus.DeterminingIfOrganisationIsTrust(ggCredId, None, None)
+        case _                                                            => SubscriptionStatus.DeterminingIfOrganisationIsTrust(ggCredId, None, None)
       }
 
-    updateSession(sessionStore, request)(_.copy(
-      journeyStatus = Some(newSessionData),
-      needMoreDetailsDetails = Some(
-        NeedMoreDetailsDetails(
-        routes.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrust().url,
-          NeedMoreDetailsDetails.AffinityGroup.Organisation
-      ))
-    )).map {
+    updateSession(sessionStore, request)(
+      _.copy(
+        journeyStatus = Some(newSessionData),
+        needMoreDetailsDetails = Some(
+          NeedMoreDetailsDetails(
+            routes.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrust().url,
+            NeedMoreDetailsDetails.AffinityGroup.Organisation
+          )
+        )
+      )
+    ).map {
       case Left(e) =>
         logger.warn("Could not update session", e)
         errorHandler.errorResult()
@@ -193,12 +239,13 @@ class StartController @Inject()(
             SubscriptionStatus.TryingToGetIndividualsFootprint(None, None, maybeEmail, ggCredId)
           updateSession(sessionStore, request)(
             _.copy(
-              journeyStatus              = Some(subscriptionStatus),
+              journeyStatus = Some(subscriptionStatus),
               needMoreDetailsDetails = Some(
                 NeedMoreDetailsDetails(
-                routes.InsufficientConfidenceLevelController.doYouHaveNINO().url,
-                NeedMoreDetailsDetails.AffinityGroup.Individual
-              ))
+                  routes.InsufficientConfidenceLevelController.doYouHaveNINO().url,
+                  NeedMoreDetailsDetails.AffinityGroup.Individual
+                )
+              )
             )
           ).map {
             case Left(e) =>
@@ -259,13 +306,14 @@ class StartController @Inject()(
                 _ =>
                   updateSession(sessionStore, request)(
                     _.copy(
-                      journeyStatus              = Some(SubscriptionStatus.SubscriptionMissingData(bprWithTrustName._1)),
+                      journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bprWithTrustName._1)),
                       needMoreDetailsDetails = Some(
                         NeedMoreDetailsDetails(
-                        email.routes.SubscriptionEnterEmailController.enterEmail().url,
+                          email.routes.SubscriptionEnterEmailController.enterEmail().url,
                           NeedMoreDetailsDetails.AffinityGroup.Organisation
                         )
-                    ))
+                      )
+                    )
                   ),
                 subscriptionDetails =>
                   updateSession(sessionStore, request)(
@@ -320,13 +368,14 @@ class StartController @Inject()(
               _ =>
                 updateSession(sessionStore, request)(
                   _.copy(
-                    journeyStatus              = Some(SubscriptionStatus.SubscriptionMissingData(bpr)),
+                    journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bpr)),
                     needMoreDetailsDetails = Some(
                       NeedMoreDetailsDetails(
-                      email.routes.SubscriptionEnterEmailController.enterEmail().url,
+                        email.routes.SubscriptionEnterEmailController.enterEmail().url,
                         NeedMoreDetailsDetails.AffinityGroup.Individual
                       )
-                  ))
+                    )
+                  )
                 ),
               subscriptionDetails =>
                 updateSession(sessionStore, request)(

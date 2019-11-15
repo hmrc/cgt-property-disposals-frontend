@@ -55,4 +55,9 @@ class ViewConfig @Inject()(servicesConfig: ServicesConfig) {
   val trustHelpUrl: String = getString("external-url.trust-help")
   val tellHmrcChangeDetails: String = getString("external-url.tell-hmrc-change-details")
   val exitSurveyUrl: String = getString("exit-survey.uri")
+  val ggCreateAccountUrl: String =
+    "/bas-gateway?" +
+      "accountType=individual&" +
+      "continueUrl=%2Fcgt-property-disposals%2Fstart&" +
+      "origin=cgt-property-disposals-frontend"
 }

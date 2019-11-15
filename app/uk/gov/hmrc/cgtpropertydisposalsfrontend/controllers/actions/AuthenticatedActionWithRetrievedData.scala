@@ -66,19 +66,18 @@ class AuthenticatedActionWithRetrievedData @Inject()(
           Retrievals.credentials
       ) {
         case retrievedData @ _ ~ _ ~ _ ~ _ ~ _ ~ allEnrolments ~ creds =>
-          hasSubscribed(allEnrolments, request) map {
-            case Left(errorResult) => Left(errorResult)
-            case Right(Some(cgtReference)) =>
-              withGGCredentials(creds, request) { ggCredId =>
+          withGGCredentials(creds, request) { ggCredId =>
+            hasSubscribed(allEnrolments, request) map {
+              case Left(errorResult) => Left(errorResult)
+              case Right(Some(cgtReference)) =>
                 Right(
                   AuthenticatedRequestWithRetrievedData(
                     UserType.Subscribed(CgtReference(cgtReference.value), ggCredId),
                     request
                   )
                 )
-              }
-            case Right(None) =>
-              withGGCredentials(creds, request) { ggCredId =>
+
+              case Right(None) =>
                 val result = retrievedData match {
                   case cl ~ Some(AffinityGroup.Individual) ~ maybeNino ~ maybeSautr ~ maybeEmail ~ _ ~ _
                       if cl < ConfidenceLevel.L200 =>
@@ -109,16 +108,14 @@ class AuthenticatedActionWithRetrievedData @Inject()(
                     }
 
                   case _ @_ ~ Some(AffinityGroup.Organisation) ~ _ ~ _ ~ maybeEmail ~ enrolments ~ creds =>
-                    withGGCredentials(creds, request){ gCredId =>
                       handleOrganisation(request, enrolments, maybeEmail, ggCredId)
-                    }
 
-                  case _ @_ ~ otherAffinityGroup ~ _ ~ _ ~ _ ~ _ ~ creds =>
+                  case _ @_ ~ otherAffinityGroup ~ _ ~ _ ~ _ ~ _ ~ _ =>
                     logger.warn(s"Got request for unsupported affinity group $otherAffinityGroup")
                     Left(errorHandler.errorResult()(request))
                 }
                 result
-              }
+            }
           }
       }
   }
@@ -142,19 +139,20 @@ class AuthenticatedActionWithRetrievedData @Inject()(
     }
 
   private def withGGCredentials[A](credentials: Option[Credentials], request: MessagesRequest[A])(
-    f: GGCredId => Either[Result, AuthenticatedRequestWithRetrievedData[A]]
-  ): Either[Result, AuthenticatedRequestWithRetrievedData[A]] =
+    f: GGCredId => Future[Either[Result, AuthenticatedRequestWithRetrievedData[A]]]
+  ): Future[Either[Result, AuthenticatedRequestWithRetrievedData[A]]] =
     credentials match {
       case None =>
         logger.warn("No credentials were retrieved")
-        Left(errorHandler.errorResult()(request))
+        Future.successful(Left(errorHandler.errorResult()(request)))
 
       case Some(Credentials(id, "GovernmentGateway")) =>
         f(GGCredId(id))
 
       case Some(Credentials(_, otherProvider)) =>
-        logger.warn(s"User logged in with unsupported provider: $otherProvider")
-        Left(errorHandler.errorResult()(request))
+        Future.successful(
+          Right(AuthenticatedRequestWithRetrievedData(UserType.NonGovernmentGatewayUser(otherProvider), request))
+        )
     }
 
   private def handleOrganisation[A](
@@ -166,9 +164,12 @@ class AuthenticatedActionWithRetrievedData @Inject()(
     // work out if it is an organisation or not
     enrolments.getEnrolment("HMRC-TERS-ORG") match {
       case None =>
-        Right(AuthenticatedRequestWithRetrievedData(
-          UserType.OrganisationUnregisteredTrust(email.map(Email(_)), ggCredId), request
-        ))
+        Right(
+          AuthenticatedRequestWithRetrievedData(
+            UserType.OrganisationUnregisteredTrust(email.map(Email(_)), ggCredId),
+            request
+          )
+        )
 
       case Some(trustEnrolment) =>
         trustEnrolment
