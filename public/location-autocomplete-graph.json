@@ -1,4 +1,3 @@
-
 {
   "country:AD": {
     "edges": {
@@ -4158,6 +4157,23 @@
       "en-GB": "As-Sudan"
     }
   },
+  "nym:Ascension Island": {
+    "edges": {
+      "from": [
+        "territory:SH"
+      ]
+    },
+    "meta": {
+      "canonical": false,
+      "canonical-mask": 0,
+      "display-name": true,
+      "stable-name": true
+    },
+    "names": {
+      "cy": false,
+      "en-GB": "Saint Helena, Ascension and Tristan da Cunha"
+    }
+  },
   "nym:Ayiti": {
     "edges": {
       "from": [
@@ -5091,6 +5107,23 @@
     "names": {
       "cy": false,
       "en-GB": "Bolivia"
+    }
+  },
+  "nym:Bonaire, Sint Eustatius and Saba": {
+    "edges": {
+      "from": [
+        "territory:BQ"
+      ]
+    },
+    "meta": {
+      "canonical": false,
+      "canonical-mask": 0,
+      "display-name": true,
+      "stable-name": true
+    },
+    "names": {
+      "cy": false,
+      "en-GB": "Bonaire, Sint Eustatius and Saba"
     }
   },
   "nym:Bosna i Hercegovina": {
@@ -6912,23 +6945,6 @@
       "en-GB": "EH"
     }
   },
-  "nym:ENG": {
-    "edges": {
-      "from": [
-        "uk:ENG"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": false,
-      "stable-name": false
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "ENG"
-    }
-  },
   "nym:ER": {
     "edges": {
       "from": [
@@ -7182,23 +7198,6 @@
     "names": {
       "cy": false,
       "en-GB": "Elmeɣrib"
-    }
-  },
-  "nym:England": {
-    "edges": {
-      "from": [
-        "uk:ENG"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": true,
-      "stable-name": true
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "England"
     }
   },
   "nym:Ertra": {
@@ -7930,23 +7929,6 @@
     "names": {
       "cy": false,
       "en-GB": "GA"
-    }
-  },
-  "nym:GBN": {
-    "edges": {
-      "from": [
-        "uk:GBN"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": false,
-      "stable-name": false
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "GBN"
     }
   },
   "nym:GD": {
@@ -12165,23 +12147,6 @@
       "en-GB": "NI"
     }
   },
-  "nym:NIR": {
-    "edges": {
-      "from": [
-        "uk:NIR"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": false,
-      "stable-name": false
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "NIR"
-    }
-  },
   "nym:NL": {
     "edges": {
       "from": [
@@ -12622,23 +12587,6 @@
     "names": {
       "cy": false,
       "en-GB": "North Korea"
-    }
-  },
-  "nym:Northern Ireland": {
-    "edges": {
-      "from": [
-        "uk:NIR"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": true,
-      "stable-name": true
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "Northern Ireland"
     }
   },
   "nym:Northern Marianas": {
@@ -15820,23 +15768,6 @@
       "en-GB": "SC"
     }
   },
-  "nym:SCT": {
-    "edges": {
-      "from": [
-        "uk:SCT"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": false,
-      "stable-name": false
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "SCT"
-    }
-  },
   "nym:SD": {
     "edges": {
       "from": [
@@ -16143,23 +16074,6 @@
       "en-GB": "SZ"
     }
   },
-  "nym:Bonaire, Sint Eustatius and Saba": {
-    "edges": {
-      "from": [
-        "territory:BQ"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": true,
-      "stable-name": true
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "Bonaire, Sint Eustatius and Saba"
-    }
-  },
   "nym:Saint Barthélemy": {
     "edges": {
       "from": [
@@ -16175,23 +16089,6 @@
     "names": {
       "cy": false,
       "en-GB": "Saint Barthélemy"
-    }
-  },
-  "nym:Saint Helena, Ascension and Tristan da Cunha": {
-    "edges": {
-      "from": [
-        "territory:SH"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": true,
-      "stable-name": true
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "Saint Helena, Ascension and Tristan da Cunha"
     }
   },
   "nym:Saint Lucia": {
@@ -16889,6 +16786,23 @@
     "names": {
       "cy": false,
       "en-GB": "St. Barthelemy"
+    }
+  },
+  "nym:Saint Helena, Ascension and Tristan da Cunha": {
+    "edges": {
+      "from": [
+        "territory:SH"
+      ]
+    },
+    "meta": {
+      "canonical": false,
+      "canonical-mask": 0,
+      "display-name": true,
+      "stable-name": true
+    },
+    "names": {
+      "cy": false,
+      "en-GB": "Saint Helena, Ascension and Tristan da Cunha"
     }
   },
   "nym:St. Kitts and Nevis": {
@@ -21906,23 +21820,6 @@
       "en-GB": "WF"
     }
   },
-  "nym:WLS": {
-    "edges": {
-      "from": [
-        "uk:WLS"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": false,
-      "stable-name": false
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "WLS"
-    }
-  },
   "nym:WS": {
     "edges": {
       "from": [
@@ -21938,23 +21835,6 @@
     "names": {
       "cy": false,
       "en-GB": "WS"
-    }
-  },
-  "nym:Wales": {
-    "edges": {
-      "from": [
-        "uk:WLS"
-      ]
-    },
-    "meta": {
-      "canonical": false,
-      "canonical-mask": 0,
-      "display-name": true,
-      "stable-name": true
-    },
-    "names": {
-      "cy": false,
-      "en-GB": "Wales"
     }
   },
   "nym:Wallis-et-Futuna": {
