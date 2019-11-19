@@ -27,7 +27,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, SubscriptionService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.SubscriptionAuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -44,7 +45,7 @@ class SubscriptionController @Inject()(
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   val subscriptionDetailsAction: SubscriptionReadyAction,
-  val auditService: AuditService,
+  val auditService: SubscriptionAuditService,
   alreadySubscribedWithDifferentGGAccountPage: views.html.already_subscribed_with_different_gg_account,
   checkYourDetailsPage: views.html.subscription.check_your_details,
   subscribedPage: views.html.subscription.subscribed,
@@ -102,7 +103,7 @@ class SubscriptionController @Inject()(
           case SubscriptionSuccessful(cgtReferenceNumber) => {
             logger.info(s"Successfully subscribed with cgt id $cgtReferenceNumber")
             auditService
-              .sendSubscriptionRequestEvent(details, true, routes.SubscriptionController.checkYourDetailsSubmit().url)
+              .sendSubscriptionRequestEvent(details, details.isGGEmail, routes.SubscriptionController.checkYourDetailsSubmit().url)
             Redirect(routes.SubscriptionController.subscribed())
           }
           case AlreadySubscribed =>

@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address
 
-import cats.Eq
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.option._
@@ -29,7 +28,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{RequestWith
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, SubscriptionDetail}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, UKAddressLookupService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.SubscriptionAuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -44,7 +44,7 @@ trait AddressController[J <: JourneyStatus] {
   val errorHandler: ErrorHandler
   val ukAddressLookupService: UKAddressLookupService
   val sessionStore: SessionStore
-  val auditService : AuditService
+  val auditService: SubscriptionAuditService
   val enterPostcodePage: views.html.address.enter_postcode
   val selectAddressPage: views.html.address.select_address
   val addressDisplay: views.html.components.address_display
@@ -57,7 +57,9 @@ trait AddressController[J <: JourneyStatus] {
 
   def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, J)]
 
-  def updateAddress(journey: J, address: Address)(implicit hc: HeaderCarrier): EitherT[Future, Error, J]
+  def updateAddress(journey: J, address: Address, isManuallyEnteredAddress: Boolean)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, J]
 
   val updateSubscriptionDetailChangedFlag: Boolean
 
@@ -104,7 +106,8 @@ trait AddressController[J <: JourneyStatus] {
           Address.isUkForm
             .bindFromRequest()
             .fold[Future[Result]](
-              formWithErrors => BadRequest(isUkPage(formWithErrors, backLinkCall, isUkSubmitCall, isSubscribedJourney)), {
+              formWithErrors =>
+                BadRequest(isUkPage(formWithErrors, backLinkCall, isUkSubmitCall, isSubscribedJourney)), {
                 case true  => Redirect(enterPostcodeCall)
                 case false => Redirect(enterNonUkAddressCall)
               }
@@ -116,7 +119,15 @@ trait AddressController[J <: JourneyStatus] {
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) {
         case (_, _) =>
-          Ok(enterUkAddressPage(Address.ukAddressForm, backLinkCall, enterUkAddressSubmitCall, enterPostcodeCall, isSubscribedJourney))
+          Ok(
+            enterUkAddressPage(
+              Address.ukAddressForm,
+              backLinkCall,
+              enterUkAddressSubmitCall,
+              enterPostcodeCall,
+              isSubscribedJourney
+            )
+          )
       }
     }
 
@@ -129,7 +140,13 @@ trait AddressController[J <: JourneyStatus] {
             .fold[Future[Result]](
               formWithErrors =>
                 BadRequest(
-                  enterUkAddressPage(formWithErrors, backLinkCall, enterUkAddressSubmitCall, enterPostcodeCall, isSubscribedJourney)
+                  enterUkAddressPage(
+                    formWithErrors,
+                    backLinkCall,
+                    enterUkAddressSubmitCall,
+                    enterPostcodeCall,
+                    isSubscribedJourney
+                  )
                 ),
               storeAddress(continueCall, journeyStatus, true)
             )
@@ -140,7 +157,9 @@ trait AddressController[J <: JourneyStatus] {
     authenticatedActionWithSessionData.async { implicit request =>
       withValidJourney(request) {
         case (_, _) =>
-          Ok(enterNonUkAddressPage(Address.nonUkAddressForm, isUkCall, enterNonUkAddressSubmitCall, isSubscribedJourney))
+          Ok(
+            enterNonUkAddressPage(Address.nonUkAddressForm, isUkCall, enterNonUkAddressSubmitCall, isSubscribedJourney)
+          )
       }
     }
 
@@ -152,7 +171,9 @@ trait AddressController[J <: JourneyStatus] {
             .bindFromRequest()
             .fold[Future[Result]](
               formWithErrors =>
-                BadRequest(enterNonUkAddressPage(formWithErrors, isUkCall, enterNonUkAddressSubmitCall, isSubscribedJourney)),
+                BadRequest(
+                  enterNonUkAddressPage(formWithErrors, isUkCall, enterNonUkAddressSubmitCall, isSubscribedJourney)
+                ),
               storeAddress(continueCall, journeyStatus, true)
             )
       }
@@ -179,7 +200,13 @@ trait AddressController[J <: JourneyStatus] {
             .fold(
               formWithErrors =>
                 BadRequest(
-                  enterPostcodePage(formWithErrors, isUkCall, enterPostcodeSubmitCall, enterUkAddressCall, isSubscribedJourney)
+                  enterPostcodePage(
+                    formWithErrors,
+                    isUkCall,
+                    enterPostcodeSubmitCall,
+                    enterUkAddressCall,
+                    isSubscribedJourney
+                  )
                 ), {
                 case AddressLookupRequest(postcode, filter) =>
                   def handleEmptyAddresses(r: AddressLookupResult) = {
@@ -236,7 +263,16 @@ trait AddressController[J <: JourneyStatus] {
 
             case Some(AddressLookupResult(_, _, addresses)) =>
               val form = Address.addressSelectForm(addresses)
-              Ok(selectAddressPage(addresses, form, enterPostcodeCall, selectAddressSubmitCall, enterUkAddressCall, isSubscribedJourney))
+              Ok(
+                selectAddressPage(
+                  addresses,
+                  form,
+                  enterPostcodeCall,
+                  selectAddressSubmitCall,
+                  enterUkAddressCall,
+                  isSubscribedJourney
+                )
+              )
           }
       }
     }
@@ -256,7 +292,14 @@ trait AddressController[J <: JourneyStatus] {
                 .fold(
                   e =>
                     BadRequest(
-                      selectAddressPage(addresses, e, enterPostcodeCall, selectAddressSubmitCall, enterUkAddressCall, isSubscribedJourney)
+                      selectAddressPage(
+                        addresses,
+                        e,
+                        enterPostcodeCall,
+                        selectAddressSubmitCall,
+                        enterUkAddressCall,
+                        isSubscribedJourney
+                      )
                     ),
                   storeAddress(continueCall, journeyStatus, false)
                 )
@@ -267,22 +310,23 @@ trait AddressController[J <: JourneyStatus] {
   private def storeAddress(
     continue: Call,
     currentJourneyStatus: J,
-    isManualAddress : Boolean
+    isManuallyEnteredAddress: Boolean
   )(address: Address)(implicit request: RequestWithSessionData[_]): Future[Result] = {
     val result = for {
-      journeyWithUpdatedAddress <- updateAddress(currentJourneyStatus, address)
-      _ <-
-        if(journeyWithUpdatedAddress === currentJourneyStatus){
-          EitherT.pure[Future, Error](())
-        } else {
-          EitherT[Future, Error, Unit](
-            updateSession(sessionStore, request)(_.copy(
-              journeyStatus = Some(journeyWithUpdatedAddress),
-              subscriptionDetailChanged = if(updateSubscriptionDetailChangedFlag) Some(SubscriptionDetail.Address) else None,
-              isManualAddress = Some(isManualAddress)
-            ))
-          )
-        }
+      journeyWithUpdatedAddress <- updateAddress(currentJourneyStatus, address, isManuallyEnteredAddress)
+      _ <- if (journeyWithUpdatedAddress === currentJourneyStatus) {
+            EitherT.pure[Future, Error](())
+          } else {
+            EitherT[Future, Error, Unit](
+              updateSession(sessionStore, request)(
+                _.copy(
+                  journeyStatus = Some(journeyWithUpdatedAddress),
+                  subscriptionDetailChanged =
+                    if (updateSubscriptionDetailChangedFlag) Some(SubscriptionDetail.Address) else None
+                )
+              )
+            )
+          }
     } yield ()
 
     result.fold(

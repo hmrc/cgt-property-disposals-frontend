@@ -31,7 +31,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, EmailVerificationService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.SubscriptionAuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -48,7 +49,7 @@ class SubscriptionChangeEmailController @Inject()(
   val uuidGenerator: UUIDGenerator,
   val errorHandler: ErrorHandler,
   cc: MessagesControllerComponents,
-  val auditService: AuditService,
+  val auditService: SubscriptionAuditService,
   val enterEmailPage: views.html.email.enter_email,
   val checkYourInboxPage: views.html.email.check_your_inbox,
   val emailVerifiedPage: views.html.email.email_verified
@@ -79,13 +80,20 @@ class SubscriptionChangeEmailController @Inject()(
   override def updateEmail(journey: SubscriptionReady, email: Email)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, SubscriptionReady] = {
-    auditService.sendSubscriptionChangeEmailAddressAttemptedEvent(
+    auditService.sendSubscriptionChangeEmailAddressVerifiedEvent(
       journey.subscriptionDetails.emailAddress.value,
       email.value,
       routes.SubscriptionChangeEmailController.enterEmailSubmit().url
     )
     EitherT.rightT[Future, Error](subscriptionReadyEmailLens.set(journey)(email))
   }
+
+  override def auditEmailChangeAttempt(journey: SubscriptionReady, email: Email)(implicit hc: HeaderCarrier): Unit =
+    auditService.sendSubscriptionChangeEmailAddressAttemptedEvent(
+      journey.subscriptionDetails.emailAddress.value,
+      email.value,
+      routes.SubscriptionChangeEmailController.enterEmailSubmit().url
+    )
 
   override def name(journeyStatus: SubscriptionReady): ContactName =
     journeyStatus.subscriptionDetails.contactName

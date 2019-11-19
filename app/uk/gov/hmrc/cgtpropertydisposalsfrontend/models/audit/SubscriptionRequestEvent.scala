@@ -25,11 +25,11 @@ final case class SubscriptionRequestEvent(
 )
 
 final case class PrePopulatedUserData(
-  regime: String,
-  sapNumber: String,
-  individualDetails: Option[Individual],
-  trustDetails: Option[Trust],
-  emailAddress: EmailEvent
+                                       regime: String,
+                                       sapNumber: String,
+                                       individualDetails: Option[IndividualAuditDetails],
+                                       trustDetails: Option[TrustAuditDetails],
+                                       emailAddress: EmailAuditDetails
 )
 
 object PrePopulatedUserData{

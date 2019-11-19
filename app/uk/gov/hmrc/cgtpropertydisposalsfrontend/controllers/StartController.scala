@@ -33,7 +33,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, BusinessPartnerRecordService, SubscriptionService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.SubscriptionAuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{BusinessPartnerRecordService, SubscriptionService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -52,7 +53,7 @@ class StartController @Inject()(
   val sessionDataActionWithRetrievedData: SessionDataActionWithRetrievedData,
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
-  val auditService: AuditService,
+  val auditService: SubscriptionAuditService,
   val config: Configuration,
   subscriptionService: SubscriptionService,
   weNeedMoreDetailsPage: views.html.we_need_more_details,
@@ -287,23 +288,32 @@ class StartController @Inject()(
                                    )
                                )
                            )
-        maybeSubscriptionDetails <- EitherT.pure(
-                                     bprWithTrustName._1.emailAddress
-                                       .orElse(trust.email)
-                                       .fold[Either[MissingData.Email.type, SubscriptionDetails]](
-                                         Left(SubscriptionDetails.MissingData.Email)
-                                       ) { email =>
-                                         Right(
-                                           SubscriptionDetails(
-                                             Left(bprWithTrustName._2),
-                                             email,
-                                             bprWithTrustName._1.address,
-                                             ContactName(bprWithTrustName._2.value),
-                                             bprWithTrustName._1.sapNumber
-                                           )
-                                         )
-                                       }
-                                   )
+        maybeSubscriptionDetails <- {
+          EitherT.pure(
+            bprWithTrustName._1.emailAddress
+              .orElse(trust.email)
+              .fold[Either[MissingData.Email.type, SubscriptionDetails]](
+                Left(SubscriptionDetails.MissingData.Email)
+              ) { email =>
+                {
+                  Right(
+                    SubscriptionDetails(
+                      Left(bprWithTrustName._2),
+                      email,
+                      bprWithTrustName._1.address,
+                      ContactName(bprWithTrustName._2.value),
+                      bprWithTrustName._1.sapNumber,
+                      (bprWithTrustName._1.emailAddress, trust.email) match {
+                        case (Some(_), _)    => Some(false)
+                        case (None, Some(_)) => Some(true)
+                        case (None, None)    => None
+                      }
+                    )
+                  )
+                }
+              }
+          )
+        }
         _ <- EitherT(
               maybeSubscriptionDetails.fold(
                 _ =>
@@ -336,6 +346,7 @@ class StartController @Inject()(
       }
     )
   }
+
 
   private def handleSubscriptionMissingData(bpr: BusinessPartnerRecord, retrievedEmail: Option[Email])(
     implicit request: RequestWithSessionDataAndRetrievedData[_]

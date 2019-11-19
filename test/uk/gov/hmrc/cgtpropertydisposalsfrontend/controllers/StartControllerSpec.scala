@@ -19,7 +19,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import cats.data.EitherT
 import cats.instances.future._
 import org.joda.time.{LocalDate => JodaLocalDate}
-import org.scalacheck.ScalacheckShapeless._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
@@ -43,11 +42,14 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.{BusinessPartnerRecor
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.SubscriptionAuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{BusinessPartnerRecordService, SubscriptionService}
 import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
+import org.scalacheck.ScalacheckShapeless._
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class StartControllerSpec
     extends ControllerSpec
@@ -57,14 +59,16 @@ class StartControllerSpec
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
-  val mockBprService = mock[BusinessPartnerRecordService]
+  val mockBprService     = mock[BusinessPartnerRecordService]
+  val mockAuditConnector = mock[AuditConnector]
 
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
       bind[BusinessPartnerRecordService].toInstance(mockBprService),
-      bind[SubscriptionService].toInstance(mockSubscriptionService)
+      bind[SubscriptionService].toInstance(mockSubscriptionService),
+      bind[SubscriptionAuditService].toInstance(mockSubscriptionAuditService)
     )
 
   override lazy val additionalConfig = ivConfig(useRelativeUrls = false)
@@ -92,6 +96,12 @@ class StartControllerSpec
       .getSubscribedDetails(_: CgtReference)(_: HeaderCarrier))
       .expects(cgtReference, *)
       .returning(EitherT(Future.successful(response)))
+
+  def mockSendHandOffToIvAuditEvent(ggCredId: GGCredId, ivRedirectUrl: String)(response: Unit) =
+    (mockSubscriptionAuditService
+      .sendHandOffToIvEvent(_: GGCredId, _: String)(_: HeaderCarrier, _: ExecutionContext))
+      .expects(ggCredId, ivRedirectUrl, *, *)
+      .returning(response)
 
   val nino                 = NINO("AB123456C")
   val name                 = IndividualName("forename", "surname")
@@ -303,6 +313,7 @@ class StartControllerSpec
                 )
                 mockHasSubscription()(Right(None))
                 mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+                mockSendHandOffToIvAuditEvent(GGCredId(retrievedGGCredId.providerId), "ivUrl/mdtp/uplift")(())
               }
 
               checkIsRedirectToIv(performAction(request), false)
@@ -453,7 +464,8 @@ class StartControllerSpec
                   emailAddress,
                   bpr.address,
                   ContactName(name.makeSingleName),
-                  bpr.sapNumber
+                  bpr.sapNumber,
+                  Some(false)
                 )
 
               val session = SessionData.empty.copy(journeyStatus = Some(SubscriptionMissingData(bpr)))
@@ -527,7 +539,8 @@ class StartControllerSpec
             emailAddress,
             bpr.address,
             ContactName(name.makeSingleName()),
-            bpr.sapNumber
+            bpr.sapNumber,
+            Some(false)
           )
 
           "redirect to check subscription details" when {
@@ -602,7 +615,7 @@ class StartControllerSpec
               val ggEmail        = Email("email")
               val session = SessionData.empty.copy(
                 journeyStatus = Some(
-                  SubscriptionReady(individualSubscriptionDetails.copy(emailAddress = ggEmail))
+                  SubscriptionReady(individualSubscriptionDetails.copy(emailAddress = ggEmail, isGGEmail = Some(true)))
                 )
               )
 
@@ -624,7 +637,7 @@ class StartControllerSpec
               val ggEmail        = Email("email")
               val session = SessionData.empty.copy(
                 journeyStatus = Some(
-                  SubscriptionReady(individualSubscriptionDetails.copy(emailAddress = ggEmail))
+                  SubscriptionReady(individualSubscriptionDetails.copy(emailAddress = ggEmail, isGGEmail = Some(true)))
                 )
               )
               val sautr = SAUTR("sautr")
@@ -956,7 +969,14 @@ class StartControllerSpec
           val sapNumber = "sap"
           val bpr       = BusinessPartnerRecord(Some(emailAddress), address, sapNumber, Left(trustName))
           val trustSubscriptionDetails =
-            SubscriptionDetails(Left(trustName), emailAddress, bpr.address, ContactName(trustName.value), bpr.sapNumber)
+            SubscriptionDetails(
+              Left(trustName),
+              emailAddress,
+              bpr.address,
+              ContactName(trustName.value),
+              bpr.sapNumber,
+              Some(false)
+            )
 
           "redirect to the subscription confirmation page" when {
 
@@ -1020,7 +1040,7 @@ class StartControllerSpec
                   Right(BusinessPartnerRecordResponse(Some(bpr)))
                 )
                 mockStoreSession(
-                  SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(trustSubscriptionDetails)))
+                  SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(trustSubscriptionDetails.copy(isGGEmail = Some(false)))))
                 )(Future.successful(Left(Error(""))))
               }
 
@@ -1053,7 +1073,7 @@ class StartControllerSpec
                   Right(BusinessPartnerRecordResponse(Some(bpr)))
                 )
                 mockStoreSession(
-                  SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(trustSubscriptionDetails)))
+                  SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(trustSubscriptionDetails.copy(isGGEmail = Some(false)))))
                 )(Future.successful(Right(())))
               }
 
@@ -1072,7 +1092,7 @@ class StartControllerSpec
                 mockStoreSession(
                   SessionData.empty.copy(
                     journeyStatus =
-                      Some(SubscriptionReady(trustSubscriptionDetails.copy(emailAddress = Email("email"))))
+                      Some(SubscriptionReady(trustSubscriptionDetails.copy(emailAddress = Email("email"), isGGEmail = Some(true))))
                   )
                 )(Future.successful(Right(())))
               }
@@ -1456,8 +1476,7 @@ class StartControllerSpec
       def performAction(): Future[Result] = controller.weOnlySupportGG()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction,
-        {
+        performAction, {
           case NonGovernmentGatewayJourney => true
           case _                           => false
         }
@@ -1485,12 +1504,11 @@ class StartControllerSpec
 
     "handling requests to sign out and register for GG" must {
 
-      def performAction(sessionData: Seq[(String,String)]): Future[Result] =
+      def performAction(sessionData: Seq[(String, String)]): Future[Result] =
         controller.signOutAndRegisterForGG()(FakeRequest().withSession(sessionData: _*))
 
       behave like redirectToStartWhenInvalidJourney(
-        () => performAction(Seq.empty),
-        {
+        () => performAction(Seq.empty), {
           case NonGovernmentGatewayJourney => true
           case _                           => false
         }
@@ -1519,12 +1537,11 @@ class StartControllerSpec
 
     "handling requests to sign out and sign in" must {
 
-      def performAction(sessionData: Seq[(String,String)]): Future[Result] =
+      def performAction(sessionData: Seq[(String, String)]): Future[Result] =
         controller.signOutAndSignIn()(FakeRequest().withSession(sessionData: _*))
 
       behave like redirectToStartWhenInvalidJourney(
-        () => performAction(Seq.empty),
-        {
+        () => performAction(Seq.empty), {
           case NonGovernmentGatewayJourney => true
           case _                           => false
         }

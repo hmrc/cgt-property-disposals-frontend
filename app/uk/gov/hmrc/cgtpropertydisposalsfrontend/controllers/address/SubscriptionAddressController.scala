@@ -28,7 +28,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscriptio
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, UKAddressLookupService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.SubscriptionAuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -38,19 +39,19 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class SubscriptionAddressController @Inject()(
-  val errorHandler: ErrorHandler,
-  val ukAddressLookupService: UKAddressLookupService,
-  val sessionStore: SessionStore,
-  val authenticatedAction: AuthenticatedAction,
-  val sessionDataAction: SessionDataAction,
-  cc: MessagesControllerComponents,
-  val auditService: AuditService,
-  val enterPostcodePage: views.html.address.enter_postcode,
-  val selectAddressPage: views.html.address.select_address,
-  val addressDisplay: views.html.components.address_display,
-  val enterUkAddressPage: views.html.address.enter_uk_address,
-  val enterNonUkAddressPage: views.html.address.enter_nonUk_address,
-  val isUkPage: views.html.address.isUk
+                                               val errorHandler: ErrorHandler,
+                                               val ukAddressLookupService: UKAddressLookupService,
+                                               val sessionStore: SessionStore,
+                                               val authenticatedAction: AuthenticatedAction,
+                                               val sessionDataAction: SessionDataAction,
+                                               cc: MessagesControllerComponents,
+                                               val auditService: SubscriptionAuditService,
+                                               val enterPostcodePage: views.html.address.enter_postcode,
+                                               val selectAddressPage: views.html.address.select_address,
+                                               val addressDisplay: views.html.components.address_display,
+                                               val enterUkAddressPage: views.html.address.enter_uk_address,
+                                               val enterNonUkAddressPage: views.html.address.enter_nonUk_address,
+                                               val isUkPage: views.html.address.isUk
 )(implicit val viewConfig: ViewConfig, val ec: ExecutionContext)
     extends FrontendController(cc)
     with Logging
@@ -71,14 +72,13 @@ class SubscriptionAddressController @Inject()(
       case _                                         => Left(Redirect(controllers.routes.StartController.start()))
     }
 
-  //TODO: don't know whether it is manual or prepop
-  def updateAddress(journey: SubscriptionReady, address: Address, isManualAddress: Boolean)(
+  def updateAddress(journey: SubscriptionReady, address: Address, isManuallyEnteredAddress: Boolean)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, SubscriptionReady] = {
     auditService.sendSubscriptionContactAddressChanged(
       journey.subscriptionDetails.address,
       address,
-      isManualAddress,
+      isManuallyEnteredAddress,
       routes.SubscriptionAddressController.selectAddressSubmit().url
     )
     EitherT.pure[Future, Error](subscriptionReadyAddressLens.set(journey)(address))

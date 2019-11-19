@@ -19,7 +19,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email
 import java.util.UUID
 
 import cats.data.EitherT
-import cats.instances.boolean._
 import cats.instances.future._
 import cats.instances.uuid._
 import cats.syntax.eq._
@@ -34,8 +33,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, EmailVerificationService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse.{EmailAlreadyVerified, EmailVerificationRequested}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.SubscriptionAuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -53,7 +53,7 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
   val uuidGenerator: UUIDGenerator
   val sessionStore: SessionStore
   val emailVerificationService: EmailVerificationService
-  val auditService : AuditService
+  val auditService: SubscriptionAuditService
   val errorHandler: ErrorHandler
   val isAmendJourney: Boolean
   val isSubscribedJourney: Boolean
@@ -71,6 +71,10 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
   def validVerificationCompleteJourney(
     request: RequestWithSessionData[_]
   ): Either[Result, (SessionData, VerificationCompleteJourney)]
+
+  def auditEmailChangeAttempt(journey: Journey, email: Email)(
+    implicit hc: HeaderCarrier
+  ): Unit
 
   def name(journeyStatus: Journey): ContactName
 
@@ -108,7 +112,13 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
             .fold(
               formWithErrors =>
                 BadRequest(
-                  enterEmailPage(formWithErrors, isAmendJourney, isSubscribedJourney, backLinkCall, enterEmailSubmitCall)
+                  enterEmailPage(
+                    formWithErrors,
+                    isAmendJourney,
+                    isSubscribedJourney,
+                    backLinkCall,
+                    enterEmailSubmitCall
+                  )
                 ), {
                 case SubmitEmailDetails(email, resendVerificationEmail) =>
                   val emailToBeVerified = sessionData.emailToBeVerified match {
@@ -129,6 +139,7 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
                         )
                     result <- emailVerificationService
                                .verifyEmail(email, name(journey), verifyEmailCall(emailToBeVerified.id))
+                    _ <- EitherT.pure[Future, Error](auditEmailChangeAttempt(journey, emailToBeVerified.email))
                   } yield result
 
                   result.fold(
@@ -187,12 +198,13 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
                 Redirect(emailVerifiedCall)
               } else {
                 val result = for {
-                  journey <- updateEmail(journey, emailToBeVerified.email)
+                  updatedJourney <- updateEmail(journey, emailToBeVerified.email)
                   _ <- EitherT[Future, Error, Unit](updateSession(sessionStore, request) { s =>
                         s.copy(
-                          journeyStatus     = Some(journey),
+                          journeyStatus     = Some(updatedJourney),
                           emailToBeVerified = Some(emailToBeVerified.copy(verified = true)),
-                          subscriptionDetailChanged = if(updateSubscriptionDetailChangedFlag) Some(SubscriptionDetail.Email) else None
+                          subscriptionDetailChanged =
+                            if (updateSubscriptionDetailChangedFlag) Some(SubscriptionDetail.Email) else None
                         )
                       })
                 } yield ()

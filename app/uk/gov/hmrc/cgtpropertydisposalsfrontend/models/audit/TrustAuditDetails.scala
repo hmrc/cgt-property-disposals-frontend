@@ -18,8 +18,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.audit
 
 import play.api.libs.json.{Json, OFormat}
 
-final case class EmailEvent(value: String, origin: String)
+final case class TrustAuditDetails(trustName : String)
 
-object EmailEvent {
-  implicit val format: OFormat[EmailEvent] = Json.format[EmailEvent]
+object TrustAuditDetails{
+  implicit val format: OFormat[TrustAuditDetails] = Json.format[TrustAuditDetails]
 }

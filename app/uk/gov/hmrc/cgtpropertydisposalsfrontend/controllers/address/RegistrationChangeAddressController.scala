@@ -25,9 +25,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, SubscriptionDetail}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.SubscriptionAuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -37,18 +38,19 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class RegistrationChangeAddressController @Inject()(
-  val errorHandler: ErrorHandler,
-  val ukAddressLookupService: UKAddressLookupService,
-  val sessionStore: SessionStore,
-  val authenticatedAction: AuthenticatedAction,
-  val sessionDataAction: SessionDataAction,
-  cc: MessagesControllerComponents,
-  val enterPostcodePage: views.html.address.enter_postcode,
-  val selectAddressPage: views.html.address.select_address,
-  val addressDisplay: views.html.components.address_display,
-  val enterUkAddressPage: views.html.address.enter_uk_address,
-  val enterNonUkAddressPage: views.html.address.enter_nonUk_address,
-  val isUkPage: views.html.address.isUk
+                                                     val errorHandler: ErrorHandler,
+                                                     val ukAddressLookupService: UKAddressLookupService,
+                                                     val sessionStore: SessionStore,
+                                                     val auditService: SubscriptionAuditService,
+                                                     val authenticatedAction: AuthenticatedAction,
+                                                     val sessionDataAction: SessionDataAction,
+                                                     cc: MessagesControllerComponents,
+                                                     val enterPostcodePage: views.html.address.enter_postcode,
+                                                     val selectAddressPage: views.html.address.select_address,
+                                                     val addressDisplay: views.html.components.address_display,
+                                                     val enterUkAddressPage: views.html.address.enter_uk_address,
+                                                     val enterNonUkAddressPage: views.html.address.enter_nonUk_address,
+                                                     val isUkPage: views.html.address.isUk
 )(implicit val viewConfig: ViewConfig, val ec: ExecutionContext)
     extends FrontendController(cc)
     with Logging
@@ -66,7 +68,7 @@ class RegistrationChangeAddressController @Inject()(
       case _                                         => Left(Redirect(controllers.routes.StartController.start()))
     }
 
-  def updateAddress(journey: RegistrationReady, address: Address)(
+  def updateAddress(journey: RegistrationReady, address: Address, isManuallyEnteredAddress: Boolean)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, RegistrationReady] =
     EitherT.pure[Future, Error](journey.copy(registrationDetails = journey.registrationDetails.copy(address = address)))

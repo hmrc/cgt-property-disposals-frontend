@@ -18,8 +18,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.audit
 
 import play.api.libs.json.{Json, OFormat}
 
-final case class Individual (firstName : String, lastName : String)
+final case class TrustNameWithTrnAuditDetails(trustName : String, trn : String)
 
-object Individual{
-  implicit val format: OFormat[Individual] = Json.format[Individual]
+object TrustNameWithTrnAuditDetails{
+  implicit val format: OFormat[TrustNameWithTrnAuditDetails] = Json.format[TrustNameWithTrnAuditDetails]
 }

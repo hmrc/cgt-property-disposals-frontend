@@ -29,7 +29,8 @@ final case class SubscriptionDetails(
   emailAddress: Email,
   address: Address,
   contactName: ContactName,
-  sapNumber: String
+  sapNumber: String,
+  isGGEmail: Option[Boolean] = None
 )
 
 object SubscriptionDetails {
@@ -47,14 +48,20 @@ object SubscriptionDetails {
         NonEmptyList.one(MissingData.Email)
       )
       .map(
-        email =>
-        SubscriptionDetails(
-          bpr.name,
-          email,
-          bpr.address,
-          ContactName(bpr.name.fold(_.value, n => n.makeSingleName())),
-          bpr.sapNumber
-        )
+        email => {
+          SubscriptionDetails(
+            bpr.name,
+            email,
+            bpr.address,
+            ContactName(bpr.name.fold(_.value, n => n.makeSingleName())),
+            bpr.sapNumber,
+            (bpr.emailAddress, maybeEmail) match {
+              case (Some(_), _)    => Some(false)
+              case (None, Some(_)) => Some(true)
+              case (None, None)    => None
+            }
+          )
+        }
       )
 
   sealed trait MissingData extends Product with Serializable

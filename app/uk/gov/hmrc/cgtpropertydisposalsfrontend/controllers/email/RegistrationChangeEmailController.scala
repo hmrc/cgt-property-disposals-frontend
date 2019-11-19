@@ -19,6 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email
 import java.util.UUID
 
 import cats.data.EitherT
+import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
@@ -29,12 +30,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, EmailVerificationService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.SubscriptionAuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, models, views}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import cats.instances.future._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -44,7 +45,7 @@ class RegistrationChangeEmailController @Inject()(
   val sessionDataAction: SessionDataAction,
   val sessionStore: SessionStore,
   val emailVerificationService: EmailVerificationService,
-  val auditService: AuditService,
+  val auditService: SubscriptionAuditService,
   val uuidGenerator: UUIDGenerator,
   val errorHandler: ErrorHandler,
   cc: MessagesControllerComponents,
@@ -58,7 +59,7 @@ class RegistrationChangeEmailController @Inject()(
     with SessionUpdates
     with EmailController[RegistrationReady, RegistrationReady] {
 
-  override val isAmendJourney: Boolean = false
+  override val isAmendJourney: Boolean      = false
   override val isSubscribedJourney: Boolean = false
 
   override def validJourney(
@@ -74,8 +75,14 @@ class RegistrationChangeEmailController @Inject()(
   ): Either[Result, (SessionData, RegistrationReady)] =
     validJourney(request)
 
-  override def updateEmail(journey: RegistrationReady, email: Email)(implicit hc: HeaderCarrier): EitherT[Future, Error, RegistrationReady] =
-    EitherT.rightT[Future, Error](journey.copy(registrationDetails = journey.registrationDetails.copy(emailAddress = email)))
+  override def updateEmail(journey: RegistrationReady, email: Email)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, RegistrationReady] =
+    EitherT.rightT[Future, Error](
+      journey.copy(registrationDetails = journey.registrationDetails.copy(emailAddress = email))
+    )
+
+  override def auditEmailChangeAttempt(journey: RegistrationReady, email: Email)(implicit hc: HeaderCarrier): Unit = ()
 
   override def name(journeyStatus: RegistrationReady): ContactName =
     ContactName(journeyStatus.registrationDetails.name.makeSingleName())

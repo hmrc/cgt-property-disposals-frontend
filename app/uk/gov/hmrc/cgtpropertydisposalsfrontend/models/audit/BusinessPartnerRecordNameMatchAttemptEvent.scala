@@ -20,10 +20,10 @@ import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
 
 final case class BusinessPartnerRecordNameMatchAttemptEvent(
-  attemptsMade: Int,
-  maxAttempts: Int,
-  trustName : Option[TrustNameEvent],
-  individualName: Option[IndividualNameEvent]
+                                                             attemptsMade: Int,
+                                                             maxAttempts: Int,
+                                                             trustName : Option[TrustNameWithTrnAuditDetails],
+                                                             individualName: Option[IndividualNameWithSaUtrAuditDetails]
 )
 
 object BusinessPartnerRecordNameMatchAttemptEvent {

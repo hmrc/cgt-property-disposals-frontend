@@ -33,7 +33,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, TRN}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.TrustName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, BusinessPartnerRecordNameMatchRetryService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordNameMatchRetryService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.SubscriptionAuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -44,19 +45,19 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class DeterminingIfOrganisationIsTrustController @Inject()(
-  val authenticatedAction: AuthenticatedAction,
-  val sessionDataAction: SessionDataAction,
-  val auditService: AuditService,
-  errorHandler: ErrorHandler,
-  sessionStore: SessionStore,
-  bprNameMatchService: BusinessPartnerRecordNameMatchRetryService,
-  doYouWantToReportForATrustPage: views.html.subscription.do_you_want_to_report_for_a_trust,
-  reportWithCorporateTaxPage: views.html.subscription.report_with_corporate_tax,
-  doYouHaveATrnPage: views.html.subscription.do_you_have_a_trn,
-  registerYourTrustPage: views.html.register_your_trust,
-  enterTrnAndNamePage: views.html.subscription.enter_trn_and_trust_name,
-  tooManyAttemptsPage: views.html.subscription.too_many_trn_name_match_attempts,
-  cc: MessagesControllerComponents
+                                                            val authenticatedAction: AuthenticatedAction,
+                                                            val sessionDataAction: SessionDataAction,
+                                                            val auditService: SubscriptionAuditService,
+                                                            errorHandler: ErrorHandler,
+                                                            sessionStore: SessionStore,
+                                                            bprNameMatchService: BusinessPartnerRecordNameMatchRetryService,
+                                                            doYouWantToReportForATrustPage: views.html.subscription.do_you_want_to_report_for_a_trust,
+                                                            reportWithCorporateTaxPage: views.html.subscription.report_with_corporate_tax,
+                                                            doYouHaveATrnPage: views.html.subscription.do_you_have_a_trn,
+                                                            registerYourTrustPage: views.html.register_your_trust,
+                                                            enterTrnAndNamePage: views.html.subscription.enter_trn_and_trust_name,
+                                                            tooManyAttemptsPage: views.html.subscription.too_many_trn_name_match_attempts,
+                                                            cc: MessagesControllerComponents
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction

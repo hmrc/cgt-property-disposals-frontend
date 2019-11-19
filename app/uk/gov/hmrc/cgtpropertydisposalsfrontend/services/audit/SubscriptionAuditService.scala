@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.services
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit
 
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import play.api.libs.json.{Json, Writes}
+import play.api.libs.json.{JsValue, Json, Writes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.audit._
@@ -27,17 +27,17 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions._
-import uk.gov.hmrc.play.audit.http.connector.{AuditConnector, AuditResult}
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
-@ImplementedBy(classOf[AuditServiceImpl])
-trait AuditService {
+@ImplementedBy(classOf[SubscriptionAuditServiceImpl])
+trait SubscriptionAuditService {
   def sendHandOffToIvEvent(ggCredId: GGCredId, redirectUrl: String)(
     implicit hc: HeaderCarrier,
     ec: ExecutionContext
-  ): Future[AuditResult]
+  ): Unit
 
   def sendBusinessPartnerRecordNameMatchAttemptEvent[A <: NameMatchDetails: Writes](
     attemptsMade: Option[UnsuccessfulNameMatchAttempts[A]],
@@ -72,7 +72,7 @@ trait AuditService {
 
   def sendSubscriptionRequestEvent(
     subscriptionDetails: SubscriptionDetails,
-    isGGAuthEmail: Boolean,
+    isGGAuthEmail: Option[Boolean],
     path: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit
 
@@ -85,30 +85,42 @@ trait AuditService {
 }
 
 @Singleton
-class AuditServiceImpl @Inject()(auditConnector: AuditConnector) extends AuditService with Logging {
+class SubscriptionAuditServiceImpl @Inject()(auditConnector: AuditConnector)
+    extends SubscriptionAuditService
+    with Logging {
 
-  override def sendHandOffToIvEvent(
-    ggCredId: GGCredId,
-    redirectUrl: String
-  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[AuditResult] = {
-    val detail = HandOffTIvEvent(ggCredId.value, redirectUrl)
-
+  private def sendEvent(auditSource: String, auditType: String, detail: JsValue, tags: Map[String, String])(
+    implicit ec: ExecutionContext
+  ): Unit = {
     val extendedDataEvent = ExtendedDataEvent(
-      auditSource = "cgt-property-disposals",
-      auditType   = "handOffToIv",
-      detail      = Json.toJson(detail),
-      tags        = hc.toAuditTags("handoff-to-iv", redirectUrl)
+      auditSource = auditSource,
+      auditType   = auditType,
+      detail      = detail,
+      tags        = tags
     )
     auditConnector.sendExtendedEvent(extendedDataEvent)
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
+  override def sendHandOffToIvEvent(
+    ggCredId: GGCredId,
+    redirectUrl: String
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit = {
+    val detail = HandOffTIvEvent(ggCredId.value, redirectUrl)
+
+    sendEvent(
+      "cgt-property-disposals",
+      "handOffToIv",
+      Json.toJson(detail),
+      hc.toAuditTags("handoff-to-iv", redirectUrl)
+    )
+  }
+
   override def sendBusinessPartnerRecordNameMatchAttemptEvent[A <: NameMatchDetails: Writes](
     attemptsMade: Option[UnsuccessfulNameMatchAttempts[A]],
     nameMatchDetails: NameMatchDetails,
     path: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit = {
-    val details = attemptsMade match {
+    val detailOfAttempts = attemptsMade match {
       case Some(attempts) =>
         nameMatchDetails match {
           case NameMatchDetails.IndividualNameMatchDetails(name, sautr) =>
@@ -117,7 +129,7 @@ class AuditServiceImpl @Inject()(auditConnector: AuditConnector) extends AuditSe
                 attempts.unsuccessfulAttempts,
                 attempts.maximumAttempts,
                 None,
-                Some(IndividualNameEvent(name.firstName, name.lastName, sautr.value))
+                Some(IndividualNameWithSaUtrAuditDetails(name.firstName, name.lastName, sautr.value))
               )
             )
           case NameMatchDetails.TrustNameMatchDetails(name, trn) =>
@@ -125,33 +137,28 @@ class AuditServiceImpl @Inject()(auditConnector: AuditConnector) extends AuditSe
               BusinessPartnerRecordNameMatchAttemptEvent(
                 attempts.unsuccessfulAttempts,
                 attempts.maximumAttempts,
-                Some(TrustNameEvent(name.value, trn.value)),
+                Some(TrustNameWithTrnAuditDetails(name.value, trn.value)),
                 None
               )
             )
         }
-      case None =>
-        None
+      case None => None
     }
 
-    details match {
-      case Some(d) => {
-        val extendedDataEvent = ExtendedDataEvent(
-          auditSource = "cgt-property-disposals",
-          auditType   = "businessPartnerRecordNameMatchAttempt",
-          detail      = Json.toJson(d),
-          tags        = hc.toAuditTags("business-partner-record-name-match-attempt", path)
+    detailOfAttempts match {
+      case Some(details) =>
+        sendEvent(
+          "cgt-property-disposals",
+          "businessPartnerRecordNameMatchAttempt",
+          Json.toJson(details),
+          hc.toAuditTags("business-partner-record-name-match-attempt", path)
         )
-        auditConnector.sendExtendedEvent(extendedDataEvent)
-      }
-      case None => {
-        logger.warn("Unable to send audit event for BusinessPartnerRecordNameMatchAttemptEvent")
-      }
+      case None =>
+        logger.warn("Could not send audit event for BusinessPartnerRecordNameMatchAttemptEvent")
     }
 
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
   override def sendSubscriptionChangeEmailAddressAttemptedEvent(
     oldEmailAddress: String,
     newEmailAddress: String,
@@ -166,17 +173,14 @@ class AuditServiceImpl @Inject()(auditConnector: AuditConnector) extends AuditSe
       newEmailAddress
     )
 
-    val extendedDataEvent = ExtendedDataEvent(
-      auditSource = "cgt-property-disposals",
-      auditType   = "subscriptionChangeEmailAddressAttempted",
-      detail      = Json.toJson(detail),
-      tags        = hc.toAuditTags("subscription-change-email-address-attempted", path)
+    sendEvent(
+      "cgt-property-disposals",
+      "subscriptionChangeEmailAddressAttempted",
+      Json.toJson(detail),
+      hc.toAuditTags("subscription-change-email-address-attempted", path)
     )
-
-    auditConnector.sendExtendedEvent(extendedDataEvent)
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
   override def sendSubscriptionChangeEmailAddressVerifiedEvent(
     oldEmailAddress: String,
     newEmailAddress: String,
@@ -187,113 +191,14 @@ class AuditServiceImpl @Inject()(auditConnector: AuditConnector) extends AuditSe
       newEmailAddress
     )
 
-    val extendedDataEvent = ExtendedDataEvent(
-      auditSource = "cgt-property-disposals",
-      auditType   = "subscriptionChangeEmailAddressVerified",
-      detail      = Json.toJson(detail),
-      tags        = hc.toAuditTags("subscription-change-email-address-verified", path)
+    sendEvent(
+      "cgt-property-disposals",
+      "subscriptionChangeEmailAddressVerified",
+      Json.toJson(detail),
+      hc.toAuditTags("subscription-change-email-address-verified", path)
     )
-
-    auditConnector.sendExtendedEvent(extendedDataEvent)
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
-  def sendSubscriptionContactAddressChanged(
-    oldContactAddress: Address,
-    newContactAddress: Address,
-    source: String,
-    path: String
-  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit = {
-
-    val detail = SubscriptionContactAddressChangedEvent(
-      oldContactAddress,
-      newContactAddress,
-      source
-    )
-
-    val extendedDataEvent = ExtendedDataEvent(
-      auditSource = "cgt-property-disposals",
-      auditType   = "subscriptionContactAddressChanged",
-      detail      = Json.toJson(detail),
-      tags        = hc.toAuditTags("subscription-contact-address-changed", path)
-    )
-
-    auditConnector.sendExtendedEvent(extendedDataEvent)
-
-  }
-  @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
-  override def sendSubscriptionRequestEvent(
-    subscriptionDetails: SubscriptionDetails,
-    isGGAuthEmail: Boolean,
-    path: String
-  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit = {
-
-    val origin = if (isGGAuthEmail) "government gateway" else "ETMP business partner record"
-
-    val prepop = subscriptionDetails.name match {
-      case Left(trust) =>
-        PrePopulatedUserData(
-          "CGT",
-          subscriptionDetails.sapNumber,
-          None,
-          Some(Trust(trust.value)),
-          EmailEvent(subscriptionDetails.emailAddress.value, origin)
-        )
-      case Right(individual) =>
-        PrePopulatedUserData(
-          "CGT",
-          subscriptionDetails.sapNumber,
-          Some(Individual(individual.firstName, individual.lastName)),
-          None,
-          EmailEvent(subscriptionDetails.emailAddress.value, origin)
-        )
-    }
-
-    val manual = ManuallyEnteredData(
-      subscriptionDetails.contactName.value,
-      subscriptionDetails.emailAddress.value,
-      subscriptionDetails.address
-    )
-
-    val detail = SubscriptionRequestEvent(
-      prepop,
-      manual
-    )
-
-    val extendedDataEvent = ExtendedDataEvent(
-      auditSource = "cgt-property-disposals",
-      auditType   = "subscriptionRequest",
-      detail      = Json.toJson(detail),
-      tags        = hc.toAuditTags("subscription-request", path)
-    )
-
-    auditConnector.sendExtendedEvent(extendedDataEvent)
-
-  }
-
-  @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
-  override def sendSubscriptionConfirmationEmailSentEvent(
-    emailAddress: String,
-    cgtReference: String,
-    path: String
-  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit = {
-
-    val detail = SubscriptionConfirmationEmailSentEvent(
-      emailAddress,
-      cgtReference
-    )
-
-    val extendedDataEvent = ExtendedDataEvent(
-      auditSource = "cgt-property-disposals",
-      auditType   = "subscriptionConfirmationEmailSent",
-      detail      = Json.toJson(detail),
-      tags        = hc.toAuditTags("subscription-confirmation-email-sent", path)
-    )
-
-    auditConnector.sendExtendedEvent(extendedDataEvent)
-  }
-
-  @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
   override def sendSubscriptionContactNameChangedEvent(
     oldContactName: String,
     newContactName: String,
@@ -305,15 +210,106 @@ class AuditServiceImpl @Inject()(auditConnector: AuditConnector) extends AuditSe
       newContactName
     )
 
-    val extendedDataEvent = ExtendedDataEvent(
-      auditSource = "cgt-property-disposals",
-      auditType   = "subscriptionContactNameChanged",
-      detail      = Json.toJson(detail),
-      tags        = hc.toAuditTags("subscription-contact-name-changed", path)
+    sendEvent(
+      "cgt-property-disposals",
+      "subscriptionContactNameChanged",
+      Json.toJson(detail),
+      hc.toAuditTags("subscription-contact-name-changed", path)
     )
 
-    auditConnector.sendExtendedEvent(extendedDataEvent)
+  }
 
+  def sendSubscriptionContactAddressChanged(
+    oldContactAddress: Address,
+    newContactAddress: Address,
+    isManuallyEnteredAddress: Boolean,
+    path: String
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit = {
+
+    val source = if (isManuallyEnteredAddress) "manual" else "postcode-lookup"
+
+    val detail = SubscriptionContactAddressChangedEvent(
+      oldContactAddress,
+      newContactAddress,
+      source
+    )
+
+    sendEvent(
+      "cgt-property-disposals",
+      "subscriptionContactAddressChanged",
+      Json.toJson(detail),
+      hc.toAuditTags("subscription-contact-address-changed", path)
+    )
+
+  }
+
+  override def sendSubscriptionRequestEvent(
+    subscriptionDetails: SubscriptionDetails,
+    isGGAuthEmail: Option[Boolean],
+    path: String
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit =
+    isGGAuthEmail match {
+      case Some(ggEmail) => {
+        val origin = if (ggEmail) "government gateway" else "ETMP business partner record"
+
+        val prepop = subscriptionDetails.name match {
+          case Left(trust) =>
+            PrePopulatedUserData(
+              "CGT",
+              subscriptionDetails.sapNumber,
+              None,
+              Some(TrustAuditDetails(trust.value)),
+              EmailAuditDetails(subscriptionDetails.emailAddress.value, origin)
+            )
+          case Right(individual) =>
+            PrePopulatedUserData(
+              "CGT",
+              subscriptionDetails.sapNumber,
+              Some(IndividualAuditDetails(individual.firstName, individual.lastName)),
+              None,
+              EmailAuditDetails(subscriptionDetails.emailAddress.value, origin)
+            )
+        }
+
+        val manual = ManuallyEnteredData(
+          subscriptionDetails.contactName.value,
+          subscriptionDetails.emailAddress.value,
+          subscriptionDetails.address
+        )
+
+        val detail = SubscriptionRequestEvent(
+          prepop,
+          manual
+        )
+
+        sendEvent(
+          "cgt-property-disposals",
+          "subscriptionRequest",
+          Json.toJson(detail),
+          hc.toAuditTags("subscription-request", path)
+        )
+
+      }
+      case None => logger.warn("Could not send subscription request event")
+    }
+
+  override def sendSubscriptionConfirmationEmailSentEvent(
+    emailAddress: String,
+    cgtReference: String,
+    path: String
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit = {
+
+    val detail = SubscriptionConfirmationEmailSentEvent(
+      emailAddress,
+      cgtReference
+    )
+
+    sendEvent(
+      "cgt-property-disposals",
+      "subscriptionConfirmationEmailSent",
+      Json.toJson(detail),
+      hc.toAuditTags("subscription-confirmation-email-sent", path)
+    )
   }
 
 }
