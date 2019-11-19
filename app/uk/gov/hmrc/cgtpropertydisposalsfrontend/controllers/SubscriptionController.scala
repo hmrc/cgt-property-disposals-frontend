@@ -23,11 +23,11 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, Subscribed}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, SubscriptionService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -44,6 +44,7 @@ class SubscriptionController @Inject()(
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   val subscriptionDetailsAction: SubscriptionReadyAction,
+  val auditService: AuditService,
   alreadySubscribedWithDifferentGGAccountPage: views.html.already_subscribed_with_different_gg_account,
   checkYourDetailsPage: views.html.subscription.check_your_details,
   subscribedPage: views.html.subscription.subscribed,
@@ -98,10 +99,12 @@ class SubscriptionController @Inject()(
           logger.warn("Could not subscribe", e)
           errorHandler.errorResult()
         }, {
-          case SubscriptionSuccessful(cgtReferenceNumber) =>
+          case SubscriptionSuccessful(cgtReferenceNumber) => {
             logger.info(s"Successfully subscribed with cgt id $cgtReferenceNumber")
+            auditService
+              .sendSubscriptionRequestEvent(details, true, routes.SubscriptionController.checkYourDetailsSubmit().url)
             Redirect(routes.SubscriptionController.subscribed())
-
+          }
           case AlreadySubscribed =>
             logger.info("Response to subscription request indicated that the user has already subscribed to cgt")
             Redirect(routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
@@ -111,8 +114,15 @@ class SubscriptionController @Inject()(
 
   def subscribed(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
     request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(Subscribed(accountDetails)) => Ok(subscribedPage(accountDetails))
-      case _                                => Redirect(routes.StartController.start())
+      case Some(Subscribed(accountDetails)) => {
+        auditService.sendSubscriptionConfirmationEmailSentEvent(
+          accountDetails.emailAddress.value,
+          accountDetails.cgtReference.value,
+          routes.SubscriptionController.subscribed().url
+        )
+        Ok(subscribedPage(accountDetails))
+      }
+      case _ => Redirect(routes.StartController.start())
     }
   }
 
@@ -120,12 +130,13 @@ class SubscriptionController @Inject()(
     implicit request =>
       request.sessionData.flatMap(_.journeyStatus) match {
         case Some(AlreadySubscribedWithDifferentGGAccount) => Ok(alreadySubscribedWithDifferentGGAccountPage())
-        case _                                            => Redirect(routes.StartController.start())
+        case _                                             => Redirect(routes.StartController.start())
       }
   }
 
   def changeGGAccountForSubscription(): Action[AnyContent] = authenticatedActionWithSubscriptionReady {
-    implicit request => Ok(changeGGAccountPage(routes.SubscriptionController.checkYourDetails()))
+    implicit request =>
+      Ok(changeGGAccountPage(routes.SubscriptionController.checkYourDetails()))
   }
 
 }

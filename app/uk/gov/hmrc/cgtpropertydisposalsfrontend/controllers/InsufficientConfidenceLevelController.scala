@@ -27,15 +27,13 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.IndividualNameMatchDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.{IndividualNameMatchDetails, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.{BusinessPartnerRecord, NameMatchError, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.{BusinessPartnerRecordNameMatchRetryStore, SessionStore}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordNameMatchRetryService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, BusinessPartnerRecordNameMatchRetryService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
@@ -52,6 +50,7 @@ class InsufficientConfidenceLevelController @Inject()(
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
   val config: Configuration,
+  val auditService: AuditService,
   bprNameMatchService: BusinessPartnerRecordNameMatchRetryService,
   sautrNameMatchRetryStore: BusinessPartnerRecordNameMatchRetryStore,
   doYouHaveANinoPage: views.html.do_you_have_a_nino,
@@ -164,7 +163,7 @@ class InsufficientConfidenceLevelController @Inject()(
                 )(
                   InsufficientConfidenceLevelController.sautrAndNameForm.withUnsuccessfulAttemptsError
                 )
-                Ok(enterSautrAndNamePage(form,  routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()))
+                Ok(enterSautrAndNamePage(form, routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()))
               }
             )
 
@@ -173,7 +172,7 @@ class InsufficientConfidenceLevelController @Inject()(
       }
     }
   }
-
+  @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
   def enterSautrAndNameSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withInsufficientConfidenceLevelUser { insufficientConfidenceLevel =>
       (insufficientConfidenceLevel.hasNino, insufficientConfidenceLevel.hasSautr) match {
@@ -189,6 +188,11 @@ class InsufficientConfidenceLevelController @Inject()(
                   .fold[EitherT[Future, NameMatchError[IndividualNameMatchDetails], BusinessPartnerRecord]](
                     e => EitherT.fromEither[Future](Left(NameMatchError.ValidationError(e))), {
                       individualNameMatchDetails =>
+                        auditService.sendBusinessPartnerRecordNameMatchAttemptEvent(
+                          unsuccessfulAttempts,
+                          individualNameMatchDetails,
+                          routes.InsufficientConfidenceLevelController.enterSautrAndNameSubmit().url
+                        )
                         attemptNameMatchAndUpdateSession(
                           individualNameMatchDetails,
                           insufficientConfidenceLevel.ggCredId,
@@ -219,17 +223,18 @@ class InsufficientConfidenceLevelController @Inject()(
         )
         .value
         .map {
-          case Left(NameMatchError.TooManyUnsuccessfulAttempts()) => Ok(tooManyUnsuccessfulNameMatchesPage(routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()))
-          case Left(otherNameMatchError)                          => handleNameMatchError(otherNameMatchError)
-          case Right(_)                                           => Redirect(routes.InsufficientConfidenceLevelController.enterSautrAndName())
+          case Left(NameMatchError.TooManyUnsuccessfulAttempts()) =>
+            Ok(tooManyUnsuccessfulNameMatchesPage(routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()))
+          case Left(otherNameMatchError) => handleNameMatchError(otherNameMatchError)
+          case Right(_)                  => Redirect(routes.InsufficientConfidenceLevelController.enterSautrAndName())
         }
     }
   }
 
   private def attemptNameMatchAndUpdateSession(
-                                                individualNameMatchDetails: IndividualNameMatchDetails,
+    individualNameMatchDetails: IndividualNameMatchDetails,
     ggCredId: GGCredId,
-    previousUnsucessfulAttempt: Option[UnsuccessfulNameMatchAttempts[IndividualNameMatchDetails]]
+    previousUnsuccessfulAttempt: Option[UnsuccessfulNameMatchAttempts[IndividualNameMatchDetails]]
   )(
     implicit hc: HeaderCarrier,
     request: RequestWithSessionData[_]
@@ -239,7 +244,7 @@ class InsufficientConfidenceLevelController @Inject()(
               .attemptBusinessPartnerRecordNameMatch(
                 individualNameMatchDetails,
                 ggCredId,
-                previousUnsucessfulAttempt
+                previousUnsuccessfulAttempt
               )
               .subflatMap(
                 bpr =>
@@ -305,12 +310,14 @@ object InsufficientConfidenceLevelController {
       ) {
         case (sautr, firstName, lastName) =>
           IndividualNameMatchDetails(IndividualName(firstName, lastName), SAUTR(sautr))
-      } {
-        individualNameMatchDetails => Some((
-          individualNameMatchDetails.sautr.value,
-          individualNameMatchDetails.name.firstName,
-          individualNameMatchDetails.name.lastName
-        ))
+      } { individualNameMatchDetails =>
+        Some(
+          (
+            individualNameMatchDetails.sautr.value,
+            individualNameMatchDetails.name.firstName,
+            individualNameMatchDetails.name.lastName
+          )
+        )
       }
     )
 

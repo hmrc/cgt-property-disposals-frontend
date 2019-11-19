@@ -26,9 +26,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, SubscriptionDetail}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, UKAddressLookupService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -44,6 +44,7 @@ class SubscriptionAddressController @Inject()(
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   cc: MessagesControllerComponents,
+  val auditService: AuditService,
   val enterPostcodePage: views.html.address.enter_postcode,
   val selectAddressPage: views.html.address.select_address,
   val addressDisplay: views.html.components.address_display,
@@ -70,10 +71,18 @@ class SubscriptionAddressController @Inject()(
       case _                                         => Left(Redirect(controllers.routes.StartController.start()))
     }
 
-  def updateAddress(journey: SubscriptionReady, address: Address)(
+  //TODO: don't know whether it is manual or prepop
+  def updateAddress(journey: SubscriptionReady, address: Address, isManualAddress: Boolean)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, SubscriptionReady] =
+  ): EitherT[Future, Error, SubscriptionReady] = {
+    auditService.sendSubscriptionContactAddressChanged(
+      journey.subscriptionDetails.address,
+      address,
+      isManualAddress,
+      routes.SubscriptionAddressController.selectAddressSubmit().url
+    )
     EitherT.pure[Future, Error](subscriptionReadyAddressLens.set(journey)(address))
+  }
 
   override val updateSubscriptionDetailChangedFlag: Boolean = false
 

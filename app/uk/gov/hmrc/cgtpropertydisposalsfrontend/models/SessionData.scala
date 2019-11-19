@@ -21,11 +21,13 @@ import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.AddressLookupResult
 
 final case class SessionData(
-                              journeyStatus: Option[JourneyStatus],
-                              emailToBeVerified: Option[EmailToBeVerified],
-                              addressLookupResult: Option[AddressLookupResult],
-                              needMoreDetailsDetails: Option[NeedMoreDetailsDetails],
-                              subscriptionDetailChanged: Option[SubscriptionDetail]
+  journeyStatus: Option[JourneyStatus],
+  emailToBeVerified: Option[EmailToBeVerified],
+  addressLookupResult: Option[AddressLookupResult],
+  needMoreDetailsDetails: Option[NeedMoreDetailsDetails],
+  subscriptionDetailChanged: Option[SubscriptionDetail],
+  isManualAddress: Option[Boolean ],
+  emailSource: Option[String]
 )
 
 object SessionData {

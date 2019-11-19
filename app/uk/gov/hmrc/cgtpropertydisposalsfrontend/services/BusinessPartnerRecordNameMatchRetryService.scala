@@ -59,12 +59,12 @@ class BusinessPartnerRecordNameMatchRetryServiceImpl @Inject()(
 
   def getNumberOfUnsuccessfulAttempts[A <: NameMatchDetails : Reads](
     ggCredId: GGCredId
-  )(implicit ec: ExecutionContext): EitherT[Future, NameMatchError[A], Option[UnsuccessfulNameMatchAttempts[A]]] =
+  )(implicit ec: ExecutionContext): EitherT[Future, NameMatchError[A], Option[UnsuccessfulNameMatchAttempts[A]]] = {
     EitherT(bprNameMatchRetryStore.get(ggCredId))
       .leftMap(NameMatchError.BackendError)
       .subflatMap {
         _.fold[Either[NameMatchError[A], Option[UnsuccessfulNameMatchAttempts[A]]]](Right(None))(
-          unsuccessfulAttempts =>
+          (unsuccessfulAttempts: UnsuccessfulNameMatchAttempts[A]) =>
             if (unsuccessfulAttempts.unsuccessfulAttempts >= maxUnsuccessfulAttempts) {
               Left(NameMatchError.TooManyUnsuccessfulAttempts())
             } else {
@@ -72,6 +72,7 @@ class BusinessPartnerRecordNameMatchRetryServiceImpl @Inject()(
             }
         )
       }
+  }
 
   @SuppressWarnings(Array("org.wartremover.warts.Equals"))
   def attemptBusinessPartnerRecordNameMatch[A <: NameMatchDetails : Writes](

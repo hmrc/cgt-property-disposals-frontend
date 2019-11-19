@@ -33,7 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, TRN}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.TrustName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordNameMatchRetryService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, BusinessPartnerRecordNameMatchRetryService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -46,6 +46,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class DeterminingIfOrganisationIsTrustController @Inject()(
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
+  val auditService: AuditService,
   errorHandler: ErrorHandler,
   sessionStore: SessionStore,
   bprNameMatchService: BusinessPartnerRecordNameMatchRetryService,
@@ -193,6 +194,7 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
     }
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
   def enterTrnSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidUser(request) { determiningIfOrganisationIsTrust =>
       determiningIfOrganisationIsTrust.hasTrn match {
@@ -207,6 +209,11 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
                   .bindFromRequest()
                   .fold[EitherT[Future, NameMatchError[TrustNameMatchDetails], BusinessPartnerRecord]](
                     e => EitherT.fromEither[Future](Left(NameMatchError.ValidationError(e))), { trustNameMatchDetails =>
+                      auditService.sendBusinessPartnerRecordNameMatchAttemptEvent(
+                        unsuccessfulAttempts,
+                        trustNameMatchDetails,
+                        routes.DeterminingIfOrganisationIsTrustController.enterTrnSubmit().url
+                      )
                       attemptNameMatchAndUpdateSession(
                         trustNameMatchDetails,
                         determiningIfOrganisationIsTrust.ggCredId,
@@ -233,7 +240,6 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
       Ok(registerYourTrustPage(routes.DeterminingIfOrganisationIsTrustController.doYouHaveATrn()))
     }
   }
-
 
   def tooManyAttempts(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidUser(request) { determiningIfOrganisationIsTrust =>

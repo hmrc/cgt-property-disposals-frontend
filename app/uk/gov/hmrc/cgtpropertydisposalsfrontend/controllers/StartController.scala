@@ -33,7 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{BusinessPartnerRecordService, SubscriptionService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, BusinessPartnerRecordService, SubscriptionService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -52,6 +52,7 @@ class StartController @Inject()(
   val sessionDataActionWithRetrievedData: SessionDataActionWithRetrievedData,
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
+  val auditService: AuditService,
   val config: Configuration,
   subscriptionService: SubscriptionService,
   weNeedMoreDetailsPage: views.html.we_need_more_details,
@@ -221,6 +222,7 @@ class StartController @Inject()(
     }
   }
 
+  @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
   private def handleInsufficientConfidenceLevel(
     maybeNino: Option[NINO],
     maybeSautr: Option[SAUTR],
@@ -258,6 +260,7 @@ class StartController @Inject()(
       }
 
     case Some(_) =>
+      auditService.sendHandOffToIvEvent(ggCredId, redirectToIvUrl)
       redirectToIv
   }
 
