@@ -35,7 +35,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse.{EmailAlreadyVerified, EmailVerificationRequested}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.SubscriptionAuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -53,7 +53,7 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
   val uuidGenerator: UUIDGenerator
   val sessionStore: SessionStore
   val emailVerificationService: EmailVerificationService
-  val auditService: SubscriptionAuditService
+  val auditService: AuditService
   val errorHandler: ErrorHandler
   val isAmendJourney: Boolean
   val isSubscribedJourney: Boolean

@@ -33,7 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.SubscriptionAuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{BusinessPartnerRecordService, SubscriptionService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
@@ -45,19 +45,19 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class StartController @Inject()(
-  bprService: BusinessPartnerRecordService,
-  val sessionStore: SessionStore,
-  val errorHandler: ErrorHandler,
-  cc: MessagesControllerComponents,
-  val authenticatedActionWithRetrievedData: AuthenticatedActionWithRetrievedData,
-  val sessionDataActionWithRetrievedData: SessionDataActionWithRetrievedData,
-  val authenticatedAction: AuthenticatedAction,
-  val sessionDataAction: SessionDataAction,
-  val auditService: SubscriptionAuditService,
-  val config: Configuration,
-  subscriptionService: SubscriptionService,
-  weNeedMoreDetailsPage: views.html.we_need_more_details,
-  weOnlySupportGGPage: views.html.we_only_support_gg
+                                 bprService: BusinessPartnerRecordService,
+                                 val sessionStore: SessionStore,
+                                 val errorHandler: ErrorHandler,
+                                 cc: MessagesControllerComponents,
+                                 val authenticatedActionWithRetrievedData: AuthenticatedActionWithRetrievedData,
+                                 val sessionDataActionWithRetrievedData: SessionDataActionWithRetrievedData,
+                                 val authenticatedAction: AuthenticatedAction,
+                                 val sessionDataAction: SessionDataAction,
+                                 val auditService: AuditService,
+                                 val config: Configuration,
+                                 subscriptionService: SubscriptionService,
+                                 weNeedMoreDetailsPage: views.html.we_need_more_details,
+                                 weOnlySupportGGPage: views.html.we_only_support_gg
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthRetrievalsAndSessionDataAction

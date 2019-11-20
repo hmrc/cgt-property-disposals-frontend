@@ -29,6 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, SubscribedUpdateDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -40,6 +41,7 @@ class SubscribedChangeContactNameController @Inject()(
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   val subscriptionService: SubscriptionService,
+  val auditService: AuditService,
   val cc: MessagesControllerComponents,
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
@@ -66,10 +68,17 @@ class SubscribedChangeContactNameController @Inject()(
   ): EitherT[Future, Error, Subscribed] = {
     val journeyWithUpdatedContactName = journey.subscribedDetails.copy(contactName = contactName)
     if (journey.subscribedDetails === journeyWithUpdatedContactName) EitherT.rightT[Future, Error](journey)
-    else
+    else {
+      auditService.sendSubscribedChangeContactNameEvent(
+        journey.subscribedDetails.contactName.value,
+        contactName.value,
+        journey.subscribedDetails.cgtReference.value,
+        routes.SubscribedChangeContactNameController.enterContactNameSubmit().url
+      )
       subscriptionService
         .updateSubscribedDetails(SubscribedUpdateDetails(journeyWithUpdatedContactName, journey.subscribedDetails))
         .map(_ => journey.copy(journeyWithUpdatedContactName))
+    }
   }
 
   override def contactName(journey: Subscribed): Option[ContactName] = Some(journey.subscribedDetails.contactName)

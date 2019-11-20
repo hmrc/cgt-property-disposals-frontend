@@ -34,7 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.{BusinessPartnerRecordNameMatchRetryStore, SessionStore}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordNameMatchRetryService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.SubscriptionAuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
@@ -51,7 +51,7 @@ class InsufficientConfidenceLevelController @Inject()(
                                                        val sessionStore: SessionStore,
                                                        val errorHandler: ErrorHandler,
                                                        val config: Configuration,
-                                                       val auditService: SubscriptionAuditService,
+                                                       val auditService: AuditService,
                                                        bprNameMatchService: BusinessPartnerRecordNameMatchRetryService,
                                                        sautrNameMatchRetryStore: BusinessPartnerRecordNameMatchRetryStore,
                                                        doYouHaveANinoPage: views.html.do_you_have_a_nino,

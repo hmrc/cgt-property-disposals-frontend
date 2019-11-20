@@ -28,7 +28,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, SubscribedUpdateDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.SubscriptionAuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{SubscriptionService, UKAddressLookupService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
@@ -38,20 +38,20 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import scala.concurrent.{ExecutionContext, Future}
 
 class SubscribedChangeAddressController @Inject()(
-                                                   val errorHandler: ErrorHandler,
-                                                   val ukAddressLookupService: UKAddressLookupService,
-                                                   val sessionStore: SessionStore,
-                                                   val authenticatedAction: AuthenticatedAction,
-                                                   val sessionDataAction: SessionDataAction,
-                                                   val auditService: SubscriptionAuditService,
-                                                   subscriptionService: SubscriptionService,
-                                                   cc: MessagesControllerComponents,
-                                                   val enterPostcodePage: views.html.address.enter_postcode,
-                                                   val selectAddressPage: views.html.address.select_address,
-                                                   val addressDisplay: views.html.components.address_display,
-                                                   val enterUkAddressPage: views.html.address.enter_uk_address,
-                                                   val enterNonUkAddressPage: views.html.address.enter_nonUk_address,
-                                                   val isUkPage: views.html.address.isUk
+  val errorHandler: ErrorHandler,
+  val ukAddressLookupService: UKAddressLookupService,
+  val sessionStore: SessionStore,
+  val authenticatedAction: AuthenticatedAction,
+  val sessionDataAction: SessionDataAction,
+  val auditService: AuditService,
+  subscriptionService: SubscriptionService,
+  cc: MessagesControllerComponents,
+  val enterPostcodePage: views.html.address.enter_postcode,
+  val selectAddressPage: views.html.address.select_address,
+  val addressDisplay: views.html.components.address_display,
+  val enterUkAddressPage: views.html.address.enter_uk_address,
+  val enterNonUkAddressPage: views.html.address.enter_nonUk_address,
+  val isUkPage: views.html.address.isUk
 )(implicit val viewConfig: ViewConfig, val ec: ExecutionContext)
     extends FrontendController(cc)
     with Logging
@@ -69,14 +69,22 @@ class SubscribedChangeAddressController @Inject()(
       case _                                  => Left(Redirect(controllers.routes.StartController.start()))
     }
 
-  def updateAddress(journey: Subscribed, address: Address, isManuallyEnteredAddress : Boolean)(
+  def updateAddress(journey: Subscribed, address: Address, isManuallyEnteredAddress: Boolean)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Subscribed] = {
     val updatedSubscribedDetails = journey.subscribedDetails.copy(address = address)
 
+    //TODO: fix url
     if (journey.subscribedDetails === updatedSubscribedDetails) {
       EitherT.pure[Future, Error](journey)
     } else {
+      auditService.sendSubscribedContactAddressChangedEvent(
+        journey.subscribedDetails.address,
+        address,
+        isManuallyEnteredAddress,
+        journey.subscribedDetails.cgtReference.value,
+        routes.SubscribedChangeAddressController.enterNonUkAddress().url
+      )
       subscriptionService
         .updateSubscribedDetails(SubscribedUpdateDetails(updatedSubscribedDetails, journey.subscribedDetails))
         .map(_ => journey.copy(subscribedDetails = updatedSubscribedDetails))

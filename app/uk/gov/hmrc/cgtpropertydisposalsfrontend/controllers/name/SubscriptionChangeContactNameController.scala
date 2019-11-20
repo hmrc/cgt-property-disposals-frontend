@@ -27,7 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscriptio
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.SubscriptionAuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -40,7 +40,7 @@ class SubscriptionChangeContactNameController @Inject()(
                                                          val authenticatedAction: AuthenticatedAction,
                                                          val sessionDataAction: SessionDataAction,
                                                          cc: MessagesControllerComponents,
-                                                         val auditService: SubscriptionAuditService,
+                                                         val auditService: AuditService,
                                                          val sessionStore: SessionStore,
                                                          val errorHandler: ErrorHandler,
                                                          val enterContactNamePage: views.html.contactname.contact_name

@@ -31,7 +31,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.SubscriptionAuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -45,7 +45,7 @@ class RegistrationChangeEmailController @Inject()(
   val sessionDataAction: SessionDataAction,
   val sessionStore: SessionStore,
   val emailVerificationService: EmailVerificationService,
-  val auditService: SubscriptionAuditService,
+  val auditService: AuditService,
   val uuidGenerator: UUIDGenerator,
   val errorHandler: ErrorHandler,
   cc: MessagesControllerComponents,
@@ -77,12 +77,23 @@ class RegistrationChangeEmailController @Inject()(
 
   override def updateEmail(journey: RegistrationReady, email: Email)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, RegistrationReady] =
+  ): EitherT[Future, Error, RegistrationReady] = {
+    auditService.sendRegistrationChangeEmailVerifiedEvent(
+      journey.registrationDetails.emailAddress.value,
+      email.value,
+      routes.RegistrationChangeEmailController.enterEmailSubmit().url
+    )
     EitherT.rightT[Future, Error](
       journey.copy(registrationDetails = journey.registrationDetails.copy(emailAddress = email))
     )
+  }
 
-  override def auditEmailChangeAttempt(journey: RegistrationReady, email: Email)(implicit hc: HeaderCarrier): Unit = ()
+  override def auditEmailChangeAttempt(journey: RegistrationReady, email: Email)(implicit hc: HeaderCarrier): Unit =
+    auditService.sendRegistrationChangeEmailAddressAttemptedEvent(
+      journey.registrationDetails.emailAddress.value,
+      email.value,
+      routes.RegistrationChangeEmailController.enterEmailSubmit().url
+    )
 
   override def name(journeyStatus: RegistrationReady): ContactName =
     ContactName(journeyStatus.registrationDetails.name.makeSingleName())

@@ -29,7 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.SubscriptionAuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -45,7 +45,7 @@ class SubscriptionAddressController @Inject()(
                                                val authenticatedAction: AuthenticatedAction,
                                                val sessionDataAction: SessionDataAction,
                                                cc: MessagesControllerComponents,
-                                               val auditService: SubscriptionAuditService,
+                                               val auditService: AuditService,
                                                val enterPostcodePage: views.html.address.enter_postcode,
                                                val selectAddressPage: views.html.address.select_address,
                                                val addressDisplay: views.html.components.address_display,

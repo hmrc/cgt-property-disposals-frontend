@@ -34,6 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{RegistrationDetails, SessionData, SubscribedDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -45,6 +46,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class RegistrationController @Inject()(
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
+  val auditService: AuditService,
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
   subscriptionService: SubscriptionService,
@@ -226,10 +228,12 @@ class RegistrationController @Inject()(
             logger.warn("Could not register without id and subscribe", e)
             errorHandler.errorResult()
           }, {
-            case SubscriptionSuccessful(cgtReferenceNumber) =>
+            case SubscriptionSuccessful(cgtReferenceNumber) => {
               logger.info(s"Successfully subscribed with cgt id $cgtReferenceNumber")
+//              auditService
+//                .sendRegistrationRequestEvent(registrationDetails, registrationDetails.isGGEmail, routes.SubscriptionController.checkYourDetailsSubmit().url)
               Redirect(routes.SubscriptionController.subscribed())
-
+            }
             case AlreadySubscribed =>
               logger.info("Response to subscription request indicated that the user has already subscribed to cgt")
               Redirect(routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())

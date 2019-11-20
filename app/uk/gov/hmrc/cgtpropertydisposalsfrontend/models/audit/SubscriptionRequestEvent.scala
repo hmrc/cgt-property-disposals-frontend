@@ -25,14 +25,14 @@ final case class SubscriptionRequestEvent(
 )
 
 final case class PrePopulatedUserData(
-                                       regime: String,
-                                       sapNumber: String,
-                                       individualDetails: Option[IndividualAuditDetails],
-                                       trustDetails: Option[TrustAuditDetails],
-                                       emailAddress: EmailAuditDetails
+  regime: String,
+  sapNumber: String,
+  individualDetails: Option[IndividualAuditDetails],
+  trustDetails: Option[TrustAuditDetails],
+  emailAddress: EmailAuditDetails
 )
 
-object PrePopulatedUserData{
+object PrePopulatedUserData {
   implicit val formatPrepop: OFormat[PrePopulatedUserData] = Json.format[PrePopulatedUserData]
 }
 
@@ -42,7 +42,7 @@ final case class ManuallyEnteredData(
   address: Address
 )
 
-object ManuallyEnteredData{
+object ManuallyEnteredData {
   implicit val formatManual: OFormat[ManuallyEnteredData] = Json.format[ManuallyEnteredData]
 }
 

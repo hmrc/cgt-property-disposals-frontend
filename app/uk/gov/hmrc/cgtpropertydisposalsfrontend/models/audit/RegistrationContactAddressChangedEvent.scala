@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.audit
 
-import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
+import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 
-final case class RegistrationDetails(
-  name: IndividualName,
-  emailAddress: Email,
-  address: Address,
-  isGGEmail: Option[Boolean] = None
+final case class RegistrationContactAddressChangedEvent(
+  oldContactAddress: Address,
+  newContactAddress: Address,
+  source: String
 )
-object RegistrationDetails {
-  implicit val format: Format[RegistrationDetails] = Json.format[RegistrationDetails]
+
+object RegistrationContactAddressChangedEvent {
+  implicit val format: OFormat[RegistrationContactAddressChangedEvent] = Json.format[RegistrationContactAddressChangedEvent]
 }

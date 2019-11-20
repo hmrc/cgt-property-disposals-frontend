@@ -34,7 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.TrustName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordNameMatchRetryService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.SubscriptionAuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -47,7 +47,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class DeterminingIfOrganisationIsTrustController @Inject()(
                                                             val authenticatedAction: AuthenticatedAction,
                                                             val sessionDataAction: SessionDataAction,
-                                                            val auditService: SubscriptionAuditService,
+                                                            val auditService: AuditService,
                                                             errorHandler: ErrorHandler,
                                                             sessionStore: SessionStore,
                                                             bprNameMatchService: BusinessPartnerRecordNameMatchRetryService,

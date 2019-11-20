@@ -31,7 +31,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, SessionData, SubscribedUpdateDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.SubscriptionAuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{EmailVerificationService, SubscriptionService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
@@ -47,7 +47,7 @@ class SubscribedChangeEmailController @Inject()(
   val sessionStore: SessionStore,
   val emailVerificationService: EmailVerificationService,
   val subscriptionService: SubscriptionService,
-  val auditService: SubscriptionAuditService,
+  val auditService: AuditService,
   val uuidGenerator: UUIDGenerator,
   val errorHandler: ErrorHandler,
   cc: MessagesControllerComponents,
@@ -82,13 +82,25 @@ class SubscribedChangeEmailController @Inject()(
     if (journey.subscribedDetails === journeyWithUpdatedEmail) {
       EitherT.pure[Future, Error](journey)
     } else {
+      auditService.sendSubscribedChangeEmailAddressVerifiedEvent(
+        journey.subscribedDetails.emailAddress.value,
+        email.value,
+        journey.subscribedDetails.cgtReference.value,
+        routes.SubscribedChangeEmailController.emailVerified().url
+      )
       subscriptionService
         .updateSubscribedDetails(SubscribedUpdateDetails(journeyWithUpdatedEmail, journey.subscribedDetails))
         .map(_ => journey.copy(journeyWithUpdatedEmail))
     }
   }
 
-  override def auditEmailChangeAttempt(journey: Subscribed, email: Email)(implicit hc: HeaderCarrier): Unit = ()
+  override def auditEmailChangeAttempt(journey: Subscribed, email: Email)(implicit hc: HeaderCarrier): Unit =
+    auditService.sendSubscribedChangeEmailAddressAttemptedEvent(
+      journey.subscribedDetails.emailAddress.value,
+      email.value,
+      journey.subscribedDetails.cgtReference.value,
+      routes.SubscribedChangeEmailController.enterEmailSubmit().url
+    )
 
   override def name(journeyStatus: Subscribed): ContactName =
     journeyStatus.subscribedDetails.contactName

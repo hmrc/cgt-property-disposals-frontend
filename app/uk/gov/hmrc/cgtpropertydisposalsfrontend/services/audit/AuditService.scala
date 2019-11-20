@@ -24,6 +24,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.audit._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.UnsuccessfulNameMatchAttempts
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions._
@@ -32,8 +33,8 @@ import uk.gov.hmrc.play.audit.model.ExtendedDataEvent
 
 import scala.concurrent.ExecutionContext
 
-@ImplementedBy(classOf[SubscriptionAuditServiceImpl])
-trait SubscriptionAuditService {
+@ImplementedBy(classOf[AuditServiceImpl])
+trait AuditService {
   def sendHandOffToIvEvent(ggCredId: GGCredId, redirectUrl: String)(
     implicit hc: HeaderCarrier,
     ec: ExecutionContext
@@ -82,12 +83,75 @@ trait SubscriptionAuditService {
     path: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit
 
+  def sendRegistrationContactNameChangedEvent(
+    oldContactName: IndividualName,
+    newContactName: IndividualName,
+    path: String
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit
+
+  def sendRegistrationContactAddressChangedEvent(
+    oldContactAddress: Address,
+    newContactAddress: Address,
+    isManuallyEnteredAddress: Boolean,
+    path: String
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit
+
+  def sendRegistrationChangeEmailAddressAttemptedEvent(
+    oldEmailAddress: String,
+    newEmailAddress: String,
+    path: String
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit
+
+  def sendRegistrationChangeEmailVerifiedEvent(
+    oldEmailAddress: String,
+    newEmailAddress: String,
+    path: String
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit
+
+//  def sendRegistrationRequestEvent(
+//    registrationDetails: RegistrationDetails,
+//    isGGAuthEmail: Option[Boolean],
+//    path: String
+//  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit
+
+  def sendSubscribedChangeContactNameEvent(
+    oldContactName: String,
+    newContactName: String,
+    cgtReference: String,
+    path: String
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit
+
+  def sendSubscribedChangeEmailAddressAttemptedEvent(
+    oldEmailAddress: String,
+    newEmailAddress: String,
+    cgtReference: String,
+    path: String
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit
+
+  def sendSubscribedChangeEmailAddressVerifiedEvent(
+    oldEmailAddress: String,
+    newEmailAddress: String,
+    cgtReference: String,
+    path: String
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit
+
+  def sendSubscribedContactAddressChangedEvent(
+    oldContactAddress: Address,
+    newContactAddress: Address,
+    isManuallyEntered: Boolean,
+    cgtReference: String,
+    path: String
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit
+
+//  def sendWrongGGAccountEvent(
+//    cgtReferenceId: String,
+//    ggCredId: String
+//  )(implicit hc: HeaderCarrier, executionContext: ExecutionContext): Unit
+
 }
 
 @Singleton
-class SubscriptionAuditServiceImpl @Inject()(auditConnector: AuditConnector)
-    extends SubscriptionAuditService
-    with Logging {
+class AuditServiceImpl @Inject()(auditConnector: AuditConnector) extends AuditService with Logging {
 
   private def sendEvent(auditSource: String, auditType: String, detail: JsValue, tags: Map[String, String])(
     implicit ec: ExecutionContext
@@ -219,7 +283,7 @@ class SubscriptionAuditServiceImpl @Inject()(auditConnector: AuditConnector)
 
   }
 
-  def sendSubscriptionContactAddressChanged(
+  override def sendSubscriptionContactAddressChanged(
     oldContactAddress: Address,
     newContactAddress: Address,
     isManuallyEnteredAddress: Boolean,
@@ -311,5 +375,200 @@ class SubscriptionAuditServiceImpl @Inject()(auditConnector: AuditConnector)
       hc.toAuditTags("subscription-confirmation-email-sent", path)
     )
   }
+
+  override def sendRegistrationContactNameChangedEvent(
+    oldContactName: IndividualName,
+    newContactName: IndividualName,
+    path: String
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit = {
+
+    val detail = RegistrationContactNameChangedEvent(
+      s"${oldContactName.firstName} ${oldContactName.lastName}",
+      s"${newContactName.firstName} ${newContactName.lastName}"
+    )
+
+    sendEvent(
+      "cgt-property-disposals",
+      "registrationContactNameChanged",
+      Json.toJson(detail),
+      hc.toAuditTags("registration-contact-name-changed", path)
+    )
+  }
+
+  override def sendRegistrationContactAddressChangedEvent(
+    oldContactAddress: Address,
+    newContactAddress: Address,
+    isManuallyEnteredAddress: Boolean,
+    path: String
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit = {
+
+    val source = if (isManuallyEnteredAddress) "manual" else "postcode-lookup"
+
+    val details: RegistrationContactAddressChangedEvent = RegistrationContactAddressChangedEvent(
+      oldContactAddress,
+      newContactAddress,
+      source
+    )
+
+    sendEvent(
+      "cgt-property-disposals",
+      "registrationContactNameChanged",
+      Json.toJson(details),
+      hc.toAuditTags("registration-contact-name-changed", path)
+    )
+  }
+
+  override def sendRegistrationChangeEmailAddressAttemptedEvent(
+    oldEmailAddress: String,
+    newEmailAddress: String,
+    path: String
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit = {
+
+    val detail = RegistrationChangeEmailAttemptedEvent(
+      oldEmailAddress,
+      newEmailAddress
+    )
+
+    sendEvent(
+      "cgt-property-disposals",
+      "registrationChangeEmailAddressAttempted",
+      Json.toJson(detail),
+      hc.toAuditTags("registration-change-email-address-attempted", path)
+    )
+  }
+
+  override def sendRegistrationChangeEmailVerifiedEvent(
+    oldEmailAddress: String,
+    newEmailAddress: String,
+    path: String
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit = {
+    val detail = RegistrationChangeEmailAddressVerifiedEvent(
+      oldEmailAddress,
+      newEmailAddress
+    )
+
+    sendEvent(
+      "cgt-property-disposals",
+      "registrationChangeEmailAddressVerified",
+      Json.toJson(detail),
+      hc.toAuditTags("registration-change-email-address-verified", path)
+    )
+  }
+
+//  override def sendRegistrationRequestEvent(
+//    registrationDetails: RegistrationDetails,
+//    isGGAuthEmail: Option[Boolean],
+//    path: String
+//  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit = {
+//
+//    }
+
+  override def sendSubscribedChangeContactNameEvent(
+    oldContactName: String,
+    newContactName: String,
+    cgtReference: String,
+    path: String
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit = {
+    val detail = SubscribedContactNameChangedEvent(
+      oldContactName,
+      newContactName,
+      cgtReference
+    )
+
+    sendEvent(
+      "cgt-property-disposals",
+      "registrationChangeEmailAddressVerified",
+      Json.toJson(detail),
+      hc.toAuditTags("registration-change-email-address-verified", path)
+    )
+
+  }
+
+  override def sendSubscribedChangeEmailAddressAttemptedEvent(
+    oldEmailAddress: String,
+    newEmailAddress: String,
+    cgtReference: String,
+    path: String
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit = {
+    val detail = SubscribedChangeEmailAddressAttemptedEvent(
+      oldEmailAddress,
+      newEmailAddress,
+      cgtReference
+    )
+
+    sendEvent(
+      "cgt-property-disposals",
+      "changeEmailAddressAttempted",
+      Json.toJson(detail),
+      hc.toAuditTags("change-email-address-attempted", path)
+    )
+
+  }
+
+  override def sendSubscribedChangeEmailAddressVerifiedEvent(
+    oldEmailAddress: String,
+    newEmailAddress: String,
+    cgtReference: String,
+    path: String
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit = {
+    val detail = SubscribedChangeEmailAddressVerifiedEvent(
+      oldEmailAddress,
+      newEmailAddress,
+      cgtReference
+    )
+
+    sendEvent(
+      "cgt-property-disposals",
+      "changeEmailAddressVerified",
+      Json.toJson(detail),
+      hc.toAuditTags("change-email-address-verified", path)
+    )
+
+  }
+
+  override def sendSubscribedContactAddressChangedEvent(
+    oldContactAddress: Address,
+    newContactAddress: Address,
+    source: Boolean,
+    cgtReference: String,
+    path: String
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit = {
+    val detail = SubscribedContactAddressChangedEvent(
+      oldContactAddress,
+      newContactAddress,
+      source,
+      cgtReference
+    )
+
+    sendEvent(
+      "cgt-property-disposals",
+      "contactAddressChanged",
+      Json.toJson(detail),
+      hc.toAuditTags("contact-address-changed", path)
+    )
+
+  }
+//
+//  override def sendWrongGGAccountEvent(
+//    cgtReferenceId: String,
+//    ggCredId: String
+//  )(implicit hc: HeaderCarrier, executionContext: ExecutionContext): Unit = {
+//
+//    val detail = SubscribedContactAddressChangedEvent(
+//      oldContactAddress,
+//      newContactAddress,
+//      source,
+//      cgtReference
+//    )
+//
+//    sendEvent(
+//      "cgt-property-disposals",
+//      "contactAddressChanged",
+//      Json.toJson(detail),
+//      hc.toAuditTags("contact-address-changed", path)
+//    )
+//
+//
+//  }
 
 }

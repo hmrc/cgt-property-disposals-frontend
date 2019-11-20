@@ -32,7 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.SubscriptionAuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -42,17 +42,17 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class SubscriptionEnterEmailController @Inject()(
-  val authenticatedAction: AuthenticatedAction,
-  val sessionDataAction: SessionDataAction,
-  val sessionStore: SessionStore,
-  val emailVerificationService: EmailVerificationService,
-  val uuidGenerator: UUIDGenerator,
-  val errorHandler: ErrorHandler,
-  val auditService: SubscriptionAuditService,
-  cc: MessagesControllerComponents,
-  val enterEmailPage: views.html.email.enter_email,
-  val checkYourInboxPage: views.html.email.check_your_inbox,
-  val emailVerifiedPage: views.html.email.email_verified
+                                                  val authenticatedAction: AuthenticatedAction,
+                                                  val sessionDataAction: SessionDataAction,
+                                                  val sessionStore: SessionStore,
+                                                  val emailVerificationService: EmailVerificationService,
+                                                  val uuidGenerator: UUIDGenerator,
+                                                  val errorHandler: ErrorHandler,
+                                                  val auditService: AuditService,
+                                                  cc: MessagesControllerComponents,
+                                                  val enterEmailPage: views.html.email.enter_email,
+                                                  val checkYourInboxPage: views.html.email.check_your_inbox,
+                                                  val emailVerifiedPage: views.html.email.email_verified
 )(implicit val viewConfig: ViewConfig, val ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
