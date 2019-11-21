@@ -19,6 +19,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids
 import cats.Eq
 import cats.instances.string._
 import cats.syntax.eq._
+import play.api.data.Forms.nonEmptyText
+import play.api.data.Mapping
 import play.api.libs.json.{Format, Json}
 
 final case class SAUTR(value: String) extends AnyVal
@@ -28,5 +30,12 @@ object SAUTR {
   implicit val format: Format[SAUTR] = Json.format[SAUTR]
 
   implicit val eq: Eq[SAUTR] = Eq.instance(_.value === _.value)
+
+  val mapping: Mapping[SAUTR] = {
+    val regexPredicate = "^[0-9]{10}$".r.pattern.asPredicate()
+    nonEmptyText
+      .transform[SAUTR](s => SAUTR(s.trim()), _.value)
+      .verifying("error.pattern", s => regexPredicate.test(s.value))
+  }
 
 }
