@@ -33,9 +33,9 @@ import scala.concurrent.{ExecutionContext, Future}
 trait AuthSupport {
   this: ControllerSpec with SessionSupport =>
 
-  val mockAuthConnector: AuthConnector                       = mock[AuthConnector]
-  val mockSubscriptionService: SubscriptionService           = mock[SubscriptionService]
-  val mockSubscriptionAuditService: AuditService = mock[AuditService]
+  val mockAuthConnector: AuthConnector             = mock[AuthConnector]
+  val mockSubscriptionService: SubscriptionService = mock[SubscriptionService]
+  val mockSubscriptionAuditService: AuditService   = mock[AuditService]
 
   lazy val testAuthenticatedAction = new AuthenticatedActionWithRetrievedData(
     mockSubscriptionService,

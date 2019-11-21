@@ -60,7 +60,6 @@ class StartControllerSpec
     with RedirectToStartBehaviour {
 
   val mockBprService     = mock[BusinessPartnerRecordService]
-  val mockAuditConnector = mock[AuditConnector]
 
   override val overrideBindings =
     List[GuiceableModule](
