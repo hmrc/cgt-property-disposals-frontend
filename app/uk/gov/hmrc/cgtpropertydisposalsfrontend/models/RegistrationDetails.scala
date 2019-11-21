@@ -24,8 +24,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 final case class RegistrationDetails(
   name: IndividualName,
   emailAddress: Email,
-  address: Address,
-  isGGEmail: Option[Boolean] = None
+  address: Address
 )
 object RegistrationDetails {
   implicit val format: Format[RegistrationDetails] = Json.format[RegistrationDetails]

@@ -74,16 +74,21 @@ class SubscribedChangeAddressController @Inject()(
   ): EitherT[Future, Error, Subscribed] = {
     val updatedSubscribedDetails = journey.subscribedDetails.copy(address = address)
 
-    //TODO: fix url
     if (journey.subscribedDetails === updatedSubscribedDetails) {
       EitherT.pure[Future, Error](journey)
     } else {
+      val auditUrl = address match {
+        case Address.UkAddress(line1, line2, town, county, postcode) =>
+          routes.SubscribedChangeAddressController.enterUkAddressSubmit().url
+        case Address.NonUkAddress(line1, line2, line3, line4, postcode, country) =>
+          routes.SubscribedChangeAddressController.enterNonUkAddressSubmit().url
+      }
       auditService.sendSubscribedContactAddressChangedEvent(
         journey.subscribedDetails.address,
         address,
         isManuallyEnteredAddress,
         journey.subscribedDetails.cgtReference.value,
-        routes.SubscribedChangeAddressController.enterNonUkAddress().url
+        auditUrl
       )
       subscriptionService
         .updateSubscribedDetails(SubscribedUpdateDetails(updatedSubscribedDetails, journey.subscribedDetails))

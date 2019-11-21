@@ -18,14 +18,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.audit
 
 import play.api.libs.json.{Json, OFormat}
 
-final case class BusinessPartnerRecordNameMatchAttemptEvent(
-  attemptsMade: Int,
-  maxAttempts: Int,
-  trustName: Option[TrustNameWithTrnAuditDetails],
-  individualName: Option[IndividualNameWithSaUtrAuditDetails]
-)
+final case class RegistrationSetupEmailVerifiedEvent(emailAddress: String)
 
-object BusinessPartnerRecordNameMatchAttemptEvent {
-  implicit val format: OFormat[BusinessPartnerRecordNameMatchAttemptEvent] =
-    Json.format[BusinessPartnerRecordNameMatchAttemptEvent]
+object RegistrationSetupEmailVerifiedEvent {
+  implicit val format: OFormat[RegistrationSetupEmailVerifiedEvent] = Json.format[RegistrationSetupEmailVerifiedEvent]
 }

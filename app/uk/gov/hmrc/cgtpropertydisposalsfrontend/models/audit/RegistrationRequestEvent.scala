@@ -17,11 +17,31 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.audit
 
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 
 final case class RegistrationRequestEvent(
-  prePopulatedUserData: PrePopulatedUserData,
-  manuallyEnteredData: ManuallyEnteredData
+  prePopulatedUserData: RegistrationPrePopulatedUserData,
+  manuallyEnteredData: RegistrationManuallyEnteredData
 )
+
+final case class RegistrationPrePopulatedUserData(
+  regime: String,
+  emailAddress: EmailAuditDetails
+)
+
+object RegistrationPrePopulatedUserData {
+  implicit val format: OFormat[RegistrationPrePopulatedUserData] = Json.format[RegistrationPrePopulatedUserData]
+}
+
+final case class RegistrationManuallyEnteredData(
+  contactName: String,
+  emailAddress: String,
+  address: Address
+)
+
+object RegistrationManuallyEnteredData {
+  implicit val formatManual: OFormat[RegistrationManuallyEnteredData] = Json.format[RegistrationManuallyEnteredData]
+}
 
 object RegistrationRequestEvent {
   implicit val format: OFormat[RegistrationRequestEvent] = Json.format[RegistrationRequestEvent]

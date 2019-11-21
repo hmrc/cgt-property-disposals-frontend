@@ -196,6 +196,10 @@ class RegistrationController @Inject()(
           subscriptionResponse <- subscriptionService.registerWithoutIdAndSubscribe(registrationDetails)
           _ <- EitherT(subscriptionResponse match {
                 case SubscriptionSuccessful(cgtReferenceNumber) =>
+                  auditService.sendRegistrationRequestEvent(
+                    registrationDetails,
+                    routes.RegistrationController.checkYourAnswersSubmit().url
+                  )
                   updateSession(sessionStore, request)(
                     _ =>
                       SessionData.empty.copy(
@@ -230,8 +234,6 @@ class RegistrationController @Inject()(
           }, {
             case SubscriptionSuccessful(cgtReferenceNumber) => {
               logger.info(s"Successfully subscribed with cgt id $cgtReferenceNumber")
-//              auditService
-//                .sendRegistrationRequestEvent(registrationDetails, registrationDetails.isGGEmail, routes.SubscriptionController.checkYourDetailsSubmit().url)
               Redirect(routes.SubscriptionController.subscribed())
             }
             case AlreadySubscribed =>

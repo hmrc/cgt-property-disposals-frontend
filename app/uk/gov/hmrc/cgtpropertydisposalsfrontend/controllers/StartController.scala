@@ -45,19 +45,19 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class StartController @Inject()(
-                                 bprService: BusinessPartnerRecordService,
-                                 val sessionStore: SessionStore,
-                                 val errorHandler: ErrorHandler,
-                                 cc: MessagesControllerComponents,
-                                 val authenticatedActionWithRetrievedData: AuthenticatedActionWithRetrievedData,
-                                 val sessionDataActionWithRetrievedData: SessionDataActionWithRetrievedData,
-                                 val authenticatedAction: AuthenticatedAction,
-                                 val sessionDataAction: SessionDataAction,
-                                 val auditService: AuditService,
-                                 val config: Configuration,
-                                 subscriptionService: SubscriptionService,
-                                 weNeedMoreDetailsPage: views.html.we_need_more_details,
-                                 weOnlySupportGGPage: views.html.we_only_support_gg
+  bprService: BusinessPartnerRecordService,
+  val sessionStore: SessionStore,
+  val errorHandler: ErrorHandler,
+  cc: MessagesControllerComponents,
+  val authenticatedActionWithRetrievedData: AuthenticatedActionWithRetrievedData,
+  val sessionDataActionWithRetrievedData: SessionDataActionWithRetrievedData,
+  val authenticatedAction: AuthenticatedAction,
+  val sessionDataAction: SessionDataAction,
+  val auditService: AuditService,
+  val config: Configuration,
+  subscriptionService: SubscriptionService,
+  weNeedMoreDetailsPage: views.html.we_need_more_details,
+  weOnlySupportGGPage: views.html.we_only_support_gg
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthRetrievalsAndSessionDataAction
@@ -346,7 +346,6 @@ class StartController @Inject()(
       }
     )
   }
-
 
   private def handleSubscriptionMissingData(bpr: BusinessPartnerRecord, retrievedEmail: Option[Email])(
     implicit request: RequestWithSessionDataAndRetrievedData[_]

@@ -39,19 +39,19 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class SubscriptionAddressController @Inject()(
-                                               val errorHandler: ErrorHandler,
-                                               val ukAddressLookupService: UKAddressLookupService,
-                                               val sessionStore: SessionStore,
-                                               val authenticatedAction: AuthenticatedAction,
-                                               val sessionDataAction: SessionDataAction,
-                                               cc: MessagesControllerComponents,
-                                               val auditService: AuditService,
-                                               val enterPostcodePage: views.html.address.enter_postcode,
-                                               val selectAddressPage: views.html.address.select_address,
-                                               val addressDisplay: views.html.components.address_display,
-                                               val enterUkAddressPage: views.html.address.enter_uk_address,
-                                               val enterNonUkAddressPage: views.html.address.enter_nonUk_address,
-                                               val isUkPage: views.html.address.isUk
+  val errorHandler: ErrorHandler,
+  val ukAddressLookupService: UKAddressLookupService,
+  val sessionStore: SessionStore,
+  val authenticatedAction: AuthenticatedAction,
+  val sessionDataAction: SessionDataAction,
+  cc: MessagesControllerComponents,
+  val auditService: AuditService,
+  val enterPostcodePage: views.html.address.enter_postcode,
+  val selectAddressPage: views.html.address.select_address,
+  val addressDisplay: views.html.components.address_display,
+  val enterUkAddressPage: views.html.address.enter_uk_address,
+  val enterNonUkAddressPage: views.html.address.enter_nonUk_address,
+  val isUkPage: views.html.address.isUk
 )(implicit val viewConfig: ViewConfig, val ec: ExecutionContext)
     extends FrontendController(cc)
     with Logging
@@ -75,11 +75,17 @@ class SubscriptionAddressController @Inject()(
   def updateAddress(journey: SubscriptionReady, address: Address, isManuallyEnteredAddress: Boolean)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, SubscriptionReady] = {
-    auditService.sendSubscriptionContactAddressChanged(
+    val auditPath = address match {
+      case Address.UkAddress(line1, line2, town, county, postcode) =>
+        routes.SubscriptionAddressController.enterUkAddressSubmit().url
+      case Address.NonUkAddress(line1, line2, line3, line4, postcode, country) =>
+        routes.SubscriptionAddressController.enterNonUkAddressSubmit().url
+    }
+    auditService.sendSubscriptionContactAddressChangedEvent(
       journey.subscriptionDetails.address,
       address,
       isManuallyEnteredAddress,
-      routes.SubscriptionAddressController.selectAddressSubmit().url
+      auditPath
     )
     EitherT.pure[Future, Error](subscriptionReadyAddressLens.set(journey)(address))
   }

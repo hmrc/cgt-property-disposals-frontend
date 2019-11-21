@@ -71,12 +71,19 @@ class RegistrationChangeAddressController @Inject()(
   def updateAddress(journey: RegistrationReady, address: Address, isManuallyEnteredAddress: Boolean)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, RegistrationReady] = {
-    //TODO: fix url
+
+    val auditPath = address match {
+      case Address.UkAddress(line1, line2, town, county, postcode) =>
+        routes.RegistrationChangeAddressController.enterUkAddressSubmit().url
+      case Address.NonUkAddress(line1, line2, line3, line4, postcode, country) =>
+        routes.RegistrationChangeAddressController.enterNonUkAddressSubmit().url
+    }
+
     auditService.sendRegistrationContactAddressChangedEvent(
       journey.registrationDetails.address,
       address,
       isManuallyEnteredAddress,
-      routes.RegistrationChangeAddressController.enterNonUkAddress().url
+      auditPath
     )
     EitherT.pure[Future, Error](journey.copy(registrationDetails = journey.registrationDetails.copy(address = address)))
   }

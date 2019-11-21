@@ -41,17 +41,17 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class RegistrationEnterEmailController @Inject()(
-                                                  val authenticatedAction: AuthenticatedAction,
-                                                  val sessionDataAction: SessionDataAction,
-                                                  val sessionStore: SessionStore,
-                                                  val emailVerificationService: EmailVerificationService,
-                                                  val auditService: AuditService,
-                                                  val uuidGenerator: UUIDGenerator,
-                                                  val errorHandler: ErrorHandler,
-                                                  cc: MessagesControllerComponents,
-                                                  val enterEmailPage: views.html.email.enter_email,
-                                                  val checkYourInboxPage: views.html.email.check_your_inbox,
-                                                  val emailVerifiedPage: views.html.email.email_verified
+  val authenticatedAction: AuthenticatedAction,
+  val sessionDataAction: SessionDataAction,
+  val sessionStore: SessionStore,
+  val emailVerificationService: EmailVerificationService,
+  val auditService: AuditService,
+  val uuidGenerator: UUIDGenerator,
+  val errorHandler: ErrorHandler,
+  cc: MessagesControllerComponents,
+  val enterEmailPage: views.html.email.enter_email,
+  val checkYourInboxPage: views.html.email.check_your_inbox,
+  val emailVerifiedPage: views.html.email.email_verified
 )(implicit val viewConfig: ViewConfig, val ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -78,10 +78,20 @@ class RegistrationEnterEmailController @Inject()(
 
   override def updateEmail(journey: IndividualMissingEmail, email: Email)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, RegistrationReady] =
+  ): EitherT[Future, Error, RegistrationReady] = {
+    auditService
+      .sendRegistrationSetupEmailVerifiedEvent(email.value, routes.RegistrationEnterEmailController.emailVerified().url)
     EitherT.rightT[Future, Error](RegistrationReady(RegistrationDetails(journey.name, email, journey.address)))
+  }
 
-  override def auditEmailChangeAttempt(journey: IndividualMissingEmail, email: Email)(implicit hc: HeaderCarrier): Unit = ()
+  override def auditEmailChangeAttempt(journey: IndividualMissingEmail, email: Email)(
+    implicit hc: HeaderCarrier
+  ): Unit =
+    auditService
+      .sendRegistrationSetupEmailAttemptedEvent(
+        email.value,
+        routes.RegistrationEnterEmailController.enterEmailSubmit().url
+      )
 
   override def name(journeyStatus: IndividualMissingEmail): ContactName =
     ContactName(journeyStatus.name.makeSingleName())
