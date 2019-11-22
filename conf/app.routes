@@ -165,5 +165,7 @@ GET  /too-many-trust-registration-number-attempts  uk.gov.hmrc.cgtpropertydispos
 GET  /register-your-trust                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DeterminingIfOrganisationIsTrustController.registerYourTrust()
 
 GET /signed-out                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.HomeController.signedOut()
+GET /timed-out                            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.timedOut()
+GET /keep-alive                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.keepAlive()
 
 GET  /assets/*file                        controllers.Assets.at(path="/public", file)

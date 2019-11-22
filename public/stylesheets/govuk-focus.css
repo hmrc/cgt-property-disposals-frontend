@@ -162,7 +162,8 @@ select:focus::-ms-value {
 .modal-dialog__content:focus,
 .button:focus,
 details summary:focus,
-.error-summary:focus {
+.error-summary:focus,
+.timeout-dialog:focus {
     outline-color: #ffdd00;
 }
 
