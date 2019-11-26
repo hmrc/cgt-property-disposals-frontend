@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name
 
-import org.scalacheck.ScalacheckShapeless._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.test.CSRFTokenHelper._
@@ -25,7 +24,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 
 class RegistrationChangeIndividualNameControllerSpec
     extends ControllerSpec

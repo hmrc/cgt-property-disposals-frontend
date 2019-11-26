@@ -19,7 +19,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import cats.data.EitherT
 import cats.instances.future._
 import org.joda.time.{LocalDate => JodaLocalDate}
-import org.scalacheck.ScalacheckShapeless._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
@@ -31,6 +30,7 @@ import uk.gov.hmrc.auth.core.ConfidenceLevel.L50
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.Credentials
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, NonGovernmentGatewayJourney, RegistrationStatus, Subscribed, SubscriptionStatus}
@@ -50,6 +50,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
+import scala.reflect.ClassTag
 
 class StartControllerSpec
     extends ControllerSpec
@@ -1489,7 +1490,7 @@ class StartControllerSpec
                 Right(
                   Some(
                     SessionData.empty.copy(
-                      journeyStatus = Some(sample[JourneyStatus])
+                      journeyStatus = Some(sample(implicitly[ClassTag[JourneyStatus]], journeyStatusGen))
                     )
                   )
                 )
@@ -1514,7 +1515,7 @@ class StartControllerSpec
                 Right(
                   Some(
                     SessionData.empty.copy(
-                      journeyStatus = Some(sample[JourneyStatus]),
+                      journeyStatus = Some(sample[JourneyStatus](implicitly[ClassTag[JourneyStatus]], journeyStatusGen)),
                       needMoreDetailsDetails = Some(
                         NeedMoreDetailsDetails(
                           continueUrl,

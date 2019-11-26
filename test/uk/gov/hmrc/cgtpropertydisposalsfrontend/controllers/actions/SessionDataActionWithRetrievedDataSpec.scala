@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
-import org.scalacheck.ScalacheckShapeless._
 import play.api.i18n.MessagesApi
 import play.api.mvc.Results.Ok
 import play.api.mvc.{MessagesRequest, Result}
@@ -27,6 +26,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, Ses
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, NINO}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

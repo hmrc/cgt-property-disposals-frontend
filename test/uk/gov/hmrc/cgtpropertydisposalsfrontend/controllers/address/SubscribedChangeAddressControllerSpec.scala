@@ -18,7 +18,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.address
 
 import cats.data.EitherT
 import cats.instances.future._
-import org.scalacheck.ScalacheckShapeless._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.mvc.Result
@@ -29,7 +28,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RedirectToStartBehav
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SubscribedDetails, SubscribedUpdateDetails, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SubscribedDetails, SubscribedUpdateDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future

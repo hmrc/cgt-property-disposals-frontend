@@ -20,7 +20,6 @@ import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
-import org.scalacheck.ScalacheckShapeless._
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -28,11 +27,12 @@ import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.TryingToGetIndividualsFootprint
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.iv.IvErrorStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.IvService
 import uk.gov.hmrc.http.HeaderCarrier
