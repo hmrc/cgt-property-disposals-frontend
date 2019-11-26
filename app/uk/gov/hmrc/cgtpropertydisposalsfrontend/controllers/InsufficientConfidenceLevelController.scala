@@ -21,7 +21,7 @@ import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.data.Form
-import play.api.data.Forms.{mapping, nonEmptyText, of}
+import play.api.data.Forms.{mapping, of}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
@@ -40,25 +40,24 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import uk.gov.hmrc.referencechecker.SelfAssessmentReferenceChecker
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class InsufficientConfidenceLevelController @Inject()(
-                                                       val authenticatedAction: AuthenticatedAction,
-                                                       val sessionDataAction: SessionDataAction,
-                                                       val sessionStore: SessionStore,
-                                                       val errorHandler: ErrorHandler,
-                                                       val config: Configuration,
-                                                       val auditService: AuditService,
-                                                       bprNameMatchService: BusinessPartnerRecordNameMatchRetryService,
-                                                       sautrNameMatchRetryStore: BusinessPartnerRecordNameMatchRetryStore,
-                                                       doYouHaveANinoPage: views.html.do_you_have_a_nino,
-                                                       doYouHaveAnSaUtrPage: views.html.do_you_have_an_sa_utr,
-                                                       enterSautrAndNamePage: views.html.enter_sa_utr_and_name,
-                                                       tooManyUnsuccessfulNameMatchesPage: views.html.too_many_name_match_attempts,
-                                                       cc: MessagesControllerComponents
+  val authenticatedAction: AuthenticatedAction,
+  val sessionDataAction: SessionDataAction,
+  val sessionStore: SessionStore,
+  val errorHandler: ErrorHandler,
+  val config: Configuration,
+  val auditService: AuditService,
+  bprNameMatchService: BusinessPartnerRecordNameMatchRetryService,
+  sautrNameMatchRetryStore: BusinessPartnerRecordNameMatchRetryStore,
+  doYouHaveANinoPage: views.html.do_you_have_a_nino,
+  doYouHaveAnSaUtrPage: views.html.do_you_have_an_sa_utr,
+  enterSautrAndNamePage: views.html.enter_sa_utr_and_name,
+  tooManyUnsuccessfulNameMatchesPage: views.html.too_many_name_match_attempts,
+  cc: MessagesControllerComponents
 )(
   implicit viewConfig: ViewConfig,
   ec: ExecutionContext
@@ -298,18 +297,16 @@ object InsufficientConfidenceLevelController {
   val sautrAndNameForm: Form[IndividualNameMatchDetails] =
     Form(
       mapping(
-        "saUtr" -> nonEmptyText
-          .transform[String](_.trim, identity)
-          .verifying("error.pattern", SelfAssessmentReferenceChecker.isValid(_)),
+        "saUtr"     -> SAUTR.mapping,
         "firstName" -> IndividualName.mapping,
         "lastName"  -> IndividualName.mapping
       ) {
         case (sautr, firstName, lastName) =>
-          IndividualNameMatchDetails(IndividualName(firstName, lastName), SAUTR(sautr))
+          IndividualNameMatchDetails(IndividualName(firstName, lastName), sautr)
       } { individualNameMatchDetails =>
         Some(
           (
-            individualNameMatchDetails.sautr.value,
+            individualNameMatchDetails.sautr,
             individualNameMatchDetails.name.firstName,
             individualNameMatchDetails.name.lastName
           )
