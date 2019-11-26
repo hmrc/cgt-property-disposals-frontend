@@ -120,14 +120,7 @@ class SubscriptionController @Inject()(
 
   def subscribed(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
     request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(Subscribed(accountDetails)) => {
-        auditService.sendSubscriptionConfirmationEmailSentEvent(
-          accountDetails.emailAddress.value,
-          accountDetails.cgtReference.value,
-          routes.SubscriptionController.subscribed().url
-        )
-        Ok(subscribedPage(accountDetails))
-      }
+      case Some(Subscribed(accountDetails)) => Ok(subscribedPage(accountDetails))
       case _ => Redirect(routes.StartController.start())
     }
   }

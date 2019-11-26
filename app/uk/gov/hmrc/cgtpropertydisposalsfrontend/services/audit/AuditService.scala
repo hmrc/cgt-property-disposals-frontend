@@ -79,12 +79,6 @@ trait AuditService {
     path: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit
 
-  def sendSubscriptionConfirmationEmailSentEvent(
-    emailAddress: String,
-    cgtReference: String,
-    path: String
-  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit
-
   def sendRegistrationContactNameChangedEvent(
     oldContactName: IndividualName,
     newContactName: IndividualName,
@@ -379,24 +373,6 @@ class AuditServiceImpl @Inject()(auditConnector: AuditConnector) extends AuditSe
       hc.toAuditTags("subscription-request", path)
     )
 
-  }
-
-  override def sendSubscriptionConfirmationEmailSentEvent(
-    emailAddress: String,
-    cgtReference: String,
-    path: String
-  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit = {
-
-    val detail = SubscriptionConfirmationEmailSentEvent(
-      emailAddress,
-      cgtReference
-    )
-
-    sendEvent(
-      "subscriptionConfirmationEmailSent",
-      detail,
-      hc.toAuditTags("subscription-confirmation-email-sent", path)
-    )
   }
 
   override def sendRegistrationContactNameChangedEvent(
