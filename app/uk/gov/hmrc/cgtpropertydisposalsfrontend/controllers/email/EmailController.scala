@@ -202,6 +202,8 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
               if (emailToBeVerified.verified) {
                 Redirect(emailVerifiedCall)
               } else {
+                auditEmailVerifiedEvent(journey, emailToBeVerified.email)
+                
                 val result = for {
                   updatedJourney <- updateEmail(journey, emailToBeVerified.email)
                   _ <- EitherT[Future, Error, Unit](updateSession(sessionStore, request) { s =>

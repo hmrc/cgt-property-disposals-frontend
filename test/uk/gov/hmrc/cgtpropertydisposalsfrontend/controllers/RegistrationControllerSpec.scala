@@ -80,7 +80,7 @@ class RegistrationControllerSpec
     (mockSubscriptionService.registerWithoutIdAndSubscribe(_: RegistrationDetails)(_: HeaderCarrier))
     .expects(registrationDetails, *)
     .returning(EitherT(Future.successful(result)))
-  
+
   "RegistrationController" when {
 
     def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
