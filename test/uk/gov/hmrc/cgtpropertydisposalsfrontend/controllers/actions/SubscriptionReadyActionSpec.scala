@@ -26,6 +26,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, SessionSupport, routes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -39,6 +40,8 @@ class SubscriptionReadyActionSpec extends ControllerSpec with SessionSupport {
 
     val subscriptionDetails = sample[SubscriptionDetails]
 
+    val ggCredId = sample[GGCredId]
+
     def performAction(sessionData: SessionData, requestUrl: String = "/"): Future[Result] = {
       val messagesRequest      = new MessagesRequest(FakeRequest("GET", requestUrl), instanceOf[MessagesApi])
       val authenticatedRequest = AuthenticatedRequest(messagesRequest)
@@ -46,7 +49,7 @@ class SubscriptionReadyActionSpec extends ControllerSpec with SessionSupport {
       action.invokeBlock(
         authenticatedRequest, { r: RequestWithSubscriptionReady[_] =>
           r.sessionData       shouldBe sessionData
-          r.subscriptionReady shouldBe SubscriptionReady(subscriptionDetails)
+          r.subscriptionReady shouldBe SubscriptionReady(subscriptionDetails, ggCredId)
           r.messagesApi       shouldBe messagesRequest.messagesApi
           Future.successful(Ok)
         }
@@ -79,7 +82,7 @@ class SubscriptionReadyActionSpec extends ControllerSpec with SessionSupport {
 
       "the session data indicates that subscription is ready" in {
         val sessionData = SessionData.empty.copy(
-          journeyStatus = Some(SubscriptionReady(subscriptionDetails))
+          journeyStatus = Some(SubscriptionReady(subscriptionDetails, ggCredId))
         )
 
         mockGetSession(Future.successful(Right(Some(sessionData))))

@@ -82,15 +82,16 @@ class SubscriptionController @Inject()(
                             CgtReference(cgtReferenceNumber),
                             None,
                             registeredWithId = true
-                          )
+                          ),
+                          request.subscriptionReady.ggCredId
                         )
                       )
                     )
                   )
                 case AlreadySubscribed =>
-                  updateSession(sessionStore, request)(
-                    _.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount))
-                  )
+                  updateSession(sessionStore, request)(_.copy(journeyStatus =
+                    Some(AlreadySubscribedWithDifferentGGAccount(request.subscriptionReady.ggCredId))
+                  ))
               }
             )
       } yield subscriptionResponse
@@ -118,7 +119,7 @@ class SubscriptionController @Inject()(
 
   def subscribed(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
     request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(Subscribed(accountDetails)) => Ok(subscribedPage(accountDetails))
+      case Some(Subscribed(accountDetails, _)) => Ok(subscribedPage(accountDetails))
       case _ => Redirect(routes.StartController.start())
     }
   }
@@ -126,7 +127,7 @@ class SubscriptionController @Inject()(
   def alreadySubscribedWithDifferentGGAccount(): Action[AnyContent] = authenticatedActionWithSessionData {
     implicit request =>
       request.sessionData.flatMap(_.journeyStatus) match {
-        case Some(AlreadySubscribedWithDifferentGGAccount) => Ok(alreadySubscribedWithDifferentGGAccountPage())
+        case Some(AlreadySubscribedWithDifferentGGAccount(_)) => Ok(alreadySubscribedWithDifferentGGAccountPage())
         case _                                             => Redirect(routes.StartController.start())
       }
   }

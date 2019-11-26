@@ -80,7 +80,8 @@ trait AuthSupport {
 
   def mockAuthWithCl200AndWithAllIndividualRetrievals(
     retrievedNino: String,
-    retrievedEmail: Option[String]
+    retrievedEmail: Option[String],
+    retrievedCredentials: Credentials
   ): Unit =
     mockAuthWithAllRetrievals(
       ConfidenceLevel.L200,
@@ -89,10 +90,10 @@ trait AuthSupport {
       None,
       retrievedEmail,
       Set.empty,
-      Some(Credentials("gg-cred-id", "GovernmentGateway"))
+      Some(retrievedCredentials)
     )
 
-  def mockAuthWithAllTrustRetrievals(sautr: SAUTR, email: Option[String]): Unit =
+  def mockAuthWithAllTrustRetrievals(sautr: SAUTR, email: Option[String], retrievedCredentials: Credentials): Unit =
     mockAuthWithAllRetrievals(
       ConfidenceLevel.L50,
       Some(AffinityGroup.Organisation),
@@ -100,7 +101,7 @@ trait AuthSupport {
       None,
       email,
       Set(Enrolment("HMRC-TERS-ORG", Seq(EnrolmentIdentifier("SAUTR", sautr.value)), "")),
-      Some(Credentials("gg-cred-id", "GovernmentGateway"))
+      Some(retrievedCredentials)
     )
 
   def mockAuthWithCgtEnrolmentRetrievals(): Unit =

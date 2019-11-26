@@ -275,7 +275,7 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
               )
       _ <- EitherT(
             updateSession(sessionStore, request)(
-              _.copy(journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bpr, None)))
+              _.copy(journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bpr, None, ggCredId)))
             )
           ).leftMap[NameMatchError[TrustNameMatchDetails]](NameMatchError.BackendError)
     } yield bpr

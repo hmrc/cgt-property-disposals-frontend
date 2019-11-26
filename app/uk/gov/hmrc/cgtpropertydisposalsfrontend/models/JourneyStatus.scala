@@ -51,26 +51,28 @@ object JourneyStatus {
     // entity is missing data in order to continue on with subscription
     final case class SubscriptionMissingData(
       businessPartnerRecord: BusinessPartnerRecord,
-      manuallyEnteredEmail: Option[Email]
+      manuallyEnteredEmail: Option[Email],
+      ggCredId: GGCredId
     ) extends SubscriptionStatus
 
     // subscription details have been gathered and are ready to be used to subscribe
-    final case class SubscriptionReady(subscriptionDetails: SubscriptionDetails) extends SubscriptionStatus
+    final case class SubscriptionReady(subscriptionDetails: SubscriptionDetails, ggCredId: GGCredId) extends SubscriptionStatus
   }
 
   // subscription has been submitted to ETMP
-  final case class Subscribed(subscribedDetails: SubscribedDetails) extends JourneyStatus
+  final case class Subscribed(subscribedDetails: SubscribedDetails, ggCredId: GGCredId) extends JourneyStatus
 
-  final case object AlreadySubscribedWithDifferentGGAccount extends JourneyStatus
+  final case class AlreadySubscribedWithDifferentGGAccount(ggCredId: GGCredId) extends JourneyStatus
 
   sealed trait RegistrationStatus extends JourneyStatus with Product with Serializable {
     val emailSource: Option[EmailSource]
+    val ggCredId: GGCredId
   }
 
   object RegistrationStatus {
 
     // user with individual account has said they want to register a trust
-    final case object IndividualWantsToRegisterTrust extends RegistrationStatus {
+    final case class IndividualWantsToRegisterTrust(ggCredId: GGCredId) extends RegistrationStatus {
       val emailSource: Option[EmailSource] = None
     }
 
@@ -79,16 +81,17 @@ object JourneyStatus {
       name: Option[IndividualName],
       address: Option[Address],
       email: Option[Email],
-      emailSource: Option[EmailSource]
+      emailSource: Option[EmailSource],
+      ggCredId: GGCredId
     ) extends RegistrationStatus
 
     // we are capturing an email for a user who doesn't have one we can retrieve
-    final case class IndividualMissingEmail(name: IndividualName, address: Address) extends RegistrationStatus {
+    final case class IndividualMissingEmail(name: IndividualName, address: Address, ggCredId: GGCredId) extends RegistrationStatus {
       val emailSource: Option[EmailSource] = None
     }
 
     // we have all the details necessary for registration
-    final case class RegistrationReady(registrationDetails: RegistrationDetails) extends RegistrationStatus {
+    final case class RegistrationReady(registrationDetails: RegistrationDetails, ggCredId: GGCredId) extends RegistrationStatus {
       val emailSource: Option[EmailSource] = Some(registrationDetails.emailSource)
     }
 

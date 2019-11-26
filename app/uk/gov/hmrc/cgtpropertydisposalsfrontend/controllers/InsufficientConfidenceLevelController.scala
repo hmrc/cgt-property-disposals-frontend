@@ -250,7 +250,7 @@ class InsufficientConfidenceLevelController @Inject()(
               )
       _ <- EitherT(
             updateSession(sessionStore, request)(
-              _.copy(journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bpr, None)))
+              _.copy(journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bpr, None, ggCredId)))
             )
           ).leftMap[NameMatchError[IndividualNameMatchDetails]](NameMatchError.BackendError)
     } yield bpr

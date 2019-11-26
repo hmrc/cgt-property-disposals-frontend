@@ -101,14 +101,15 @@ class AuthenticatedActionWithRetrievedData @Inject()(
                           AuthenticatedRequestWithRetrievedData(
                             UserType.Individual(
                               Right(NINO(nino)),
-                              maybeEmail.filter(_.nonEmpty).map(Email(_))
+                              maybeEmail.filter(_.nonEmpty).map(Email(_)),
+                              ggCredId
                             ),
                             request
                           )
                         )
                     }
 
-                  case _ @_ ~ Some(AffinityGroup.Organisation) ~ _ ~ _ ~ maybeEmail ~ enrolments ~ creds =>
+                  case _ @_ ~ Some(AffinityGroup.Organisation) ~ _ ~ _ ~ maybeEmail ~ enrolments ~ _ =>
                       handleOrganisation(request, enrolments, maybeEmail, ggCredId)
 
                   case _ @_ ~ otherAffinityGroup ~ _ ~ _ ~ _ ~ _ ~ _ =>
@@ -185,7 +186,11 @@ class AuthenticatedActionWithRetrievedData @Inject()(
             id =>
               Right(
                 AuthenticatedRequestWithRetrievedData(
-                  UserType.Trust(SAUTR(id.value), email.filter(_.nonEmpty).map(Email(_))),
+                  UserType.Trust(
+                    SAUTR(id.value),
+                    email.filter(_.nonEmpty).map(Email(_)),
+                    ggCredId
+                  ),
                   request
                 )
               )

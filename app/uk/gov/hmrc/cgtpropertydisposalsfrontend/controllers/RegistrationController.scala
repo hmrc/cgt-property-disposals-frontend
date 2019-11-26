@@ -84,7 +84,7 @@ class RegistrationController @Inject()(
       val form = {
         val blankForm = RegistrationController.selectEntityTypeForm
         status.fold(_ => blankForm, {
-          case RegistrationStatus.IndividualWantsToRegisterTrust =>
+          case RegistrationStatus.IndividualWantsToRegisterTrust(_) =>
             blankForm.fill(EntityType.Trust)
 
           case _ =>
@@ -103,17 +103,20 @@ class RegistrationController @Inject()(
         .fold(
           e => BadRequest(selectEntityTypePage(e, routes.InsufficientConfidenceLevelController.enterSautrAndName())), {
             entityType =>
+              val ggCredId = status.fold(_.ggCredId, _.ggCredId)
+
               val (newRegistrationStatus, redirectTo): (RegistrationStatus, Call) = entityType match {
                 case EntityType.Individual =>
                   RegistrationStatus.IndividualSupplyingInformation(
                     None,
                     None,
                     status.fold(_.ggEmail, _ => None),
-                    status.fold(_.ggEmail.map(_ => EmailSource.GovernmentGateway),  _.emailSource)
+                    status.fold(_.ggEmail.map(_ => EmailSource.GovernmentGateway), _.emailSource),
+                    ggCredId
                   ) -> name.routes.RegistrationEnterIndividualNameController.enterIndividualName()
                 case EntityType.Trust =>
-                  RegistrationStatus.IndividualWantsToRegisterTrust -> routes.RegistrationController
-                    .wrongGGAccountForTrusts()
+                  RegistrationStatus.IndividualWantsToRegisterTrust(ggCredId) ->
+                    routes.RegistrationController.wrongGGAccountForTrusts
               }
 
               (status, newRegistrationStatus) match {
@@ -121,8 +124,8 @@ class RegistrationController @Inject()(
                       Right(_: RegistrationStatus.IndividualSupplyingInformation),
                       _: RegistrationStatus.IndividualSupplyingInformation
                     ) | (
-                      Right(RegistrationStatus.IndividualWantsToRegisterTrust),
-                      RegistrationStatus.IndividualWantsToRegisterTrust
+                      Right(RegistrationStatus.IndividualWantsToRegisterTrust(_)),
+                      RegistrationStatus.IndividualWantsToRegisterTrust(_)
                     ) =>
                   Redirect(redirectTo)
 
@@ -142,7 +145,7 @@ class RegistrationController @Inject()(
 
   def wrongGGAccountForTrusts(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidUser(request) {
-      case Right(RegistrationStatus.IndividualWantsToRegisterTrust) =>
+      case Right(RegistrationStatus.IndividualWantsToRegisterTrust(_)) =>
         Ok(wrongGGAccountForTrustPage(routes.RegistrationController.selectEntityType()))
 
       case _ =>
@@ -155,15 +158,15 @@ class RegistrationController @Inject()(
       case Some(r: RegistrationStatus.RegistrationReady) =>
         Ok(checkYourDetailsPage(r.registrationDetails))
 
-      case Some(RegistrationStatus.IndividualSupplyingInformation(None, _, _, _)) =>
+      case Some(RegistrationStatus.IndividualSupplyingInformation(None, _, _, _, _)) =>
         Redirect(name.routes.RegistrationEnterIndividualNameController.enterIndividualName())
 
-      case Some(RegistrationStatus.IndividualSupplyingInformation(_, None, _, _)) =>
+      case Some(RegistrationStatus.IndividualSupplyingInformation(_, None, _, _, _)) =>
         Redirect(address.routes.RegistrationEnterAddressController.isUk())
 
-      case Some(RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), None, _)) =>
+      case Some(RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), None, _, ggCredId)) =>
         updateSession(sessionStore, request)(
-          _.copy(journeyStatus = Some(RegistrationStatus.IndividualMissingEmail(name, address)))
+          _.copy(journeyStatus = Some(RegistrationStatus.IndividualMissingEmail(name, address, ggCredId)))
         ).map {
           case Left(error) =>
             logger.warn("Could not update session for enter registration email journey", error)
@@ -173,8 +176,11 @@ class RegistrationController @Inject()(
             Redirect(email.routes.RegistrationEnterEmailController.enterEmail())
         }
 
-      case Some(RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), Some(email), Some(emailSource))) =>
-        val r = RegistrationStatus.RegistrationReady(RegistrationDetails(name, email, address, emailSource))
+      case Some(
+          RegistrationStatus
+            .IndividualSupplyingInformation(Some(name), Some(address), Some(email), Some(emailSource), ggCredId)
+          ) =>
+        val r = RegistrationStatus.RegistrationReady(RegistrationDetails(name, email, address, emailSource), ggCredId)
         updateSession(sessionStore, request)(_.copy(journeyStatus = Some(r))).map {
           case Left(error) =>
             logger.warn("Could not update session for registration ready", error)
@@ -193,7 +199,7 @@ class RegistrationController @Inject()(
 
   def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(RegistrationStatus.RegistrationReady(registrationDetails)) =>
+      case Some(RegistrationStatus.RegistrationReady(registrationDetails, ggCredId)) =>
         val result = for {
           subscriptionResponse <- subscriptionService.registerWithoutIdAndSubscribe(registrationDetails)
           _ <- EitherT(subscriptionResponse match {
@@ -217,14 +223,15 @@ class RegistrationController @Inject()(
                               CgtReference(cgtReferenceNumber),
                               None,
                               registeredWithId = false
-                            )
+                            ),
+                            ggCredId
                           )
                         )
                       )
                   )
                 case AlreadySubscribed =>
                   updateSession(sessionStore, request)(
-                    _.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount))
+                    _.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount(ggCredId)))
                   )
               })
         } yield subscriptionResponse

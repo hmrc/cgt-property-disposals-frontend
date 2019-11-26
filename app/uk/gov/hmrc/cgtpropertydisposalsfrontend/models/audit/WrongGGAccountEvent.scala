@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.audit
 import play.api.libs.json.{Json, OFormat}
 
 final case class WrongGGAccountEvent(
-  cgtReferenceId: String,
+  cgtReferenceId: Option[String],
   credentialId: String
 )
 

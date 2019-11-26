@@ -80,7 +80,10 @@ class RegistrationEnterEmailController @Inject()(
   override def updateEmail(journey: IndividualMissingEmail, email: Email)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, RegistrationReady] =
-    EitherT.rightT[Future, Error](RegistrationReady(RegistrationDetails(journey.name, email, journey.address, EmailSource.ManuallyEntered)))
+    EitherT.rightT[Future, Error](RegistrationReady(
+      RegistrationDetails(journey.name, email, journey.address, EmailSource.ManuallyEntered),
+      journey.ggCredId
+    ))
 
   override def auditEmailVerifiedEvent(journey: IndividualMissingEmail, email: Email)(
     implicit hc: HeaderCarrier

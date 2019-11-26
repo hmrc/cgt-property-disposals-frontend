@@ -29,7 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SubscribedDetails, SubscribedUpdateDetails}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -69,7 +69,8 @@ class SubscribedWithoutIdChangeContactNameControllerSpec
       CgtReference("XDCGT01234568798"),
       None,
       false
-    )
+    ),
+    GGCredId("id")
   )
 
   override def updateName(name: IndividualName, journey: Subscribed): Subscribed = {
