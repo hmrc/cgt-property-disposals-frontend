@@ -1,4 +1,6 @@
 ;(function(window, document) {
+  GOVUK.details.init();
+
   if (window.Element && !Element.prototype.closest) {
     Element.prototype.closest =
       function(s) {
