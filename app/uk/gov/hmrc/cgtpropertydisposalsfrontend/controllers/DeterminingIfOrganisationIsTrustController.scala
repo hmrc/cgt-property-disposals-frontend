@@ -34,6 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.TrustName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordNameMatchRetryService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -234,7 +235,6 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
     }
   }
 
-
   def tooManyAttempts(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidUser(request) { determiningIfOrganisationIsTrust =>
       bprNameMatchService
@@ -275,7 +275,7 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
               )
       _ <- EitherT(
             updateSession(sessionStore, request)(
-              _.copy(journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bpr)))
+              _.copy(journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bpr, None, ggCredId)))
             )
           ).leftMap[NameMatchError[TrustNameMatchDetails]](NameMatchError.BackendError)
     } yield bpr

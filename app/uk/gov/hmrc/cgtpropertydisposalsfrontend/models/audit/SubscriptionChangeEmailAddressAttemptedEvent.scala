@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.audit
 
-import java.util.UUID
+import play.api.libs.json.{Json, OFormat}
 
-import play.api.libs.json.{Format, Json}
+final case class SubscriptionChangeEmailAddressAttemptedEvent(oldEmailAddress: String, newEmailAddress: String)
 
-final case class EmailToBeVerified(email: Email, id: UUID, verified: Boolean, hasResentVerificationEmail: Boolean)
-
-object EmailToBeVerified {
-
-  implicit val format: Format[EmailToBeVerified] = Json.format
-
+object SubscriptionChangeEmailAddressAttemptedEvent {
+  implicit val format: OFormat[SubscriptionChangeEmailAddressAttemptedEvent] =
+    Json.format[SubscriptionChangeEmailAddressAttemptedEvent]
 }

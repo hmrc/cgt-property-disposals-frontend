@@ -28,8 +28,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionMissingData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecord
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, sample}
 
 import scala.concurrent.Future
 
@@ -41,10 +43,10 @@ class SubscriptionEnterEmailControllerSpec
   override val isAmendJourney: Boolean = false
 
   override val validJourneyStatus: SubscriptionMissingData =
-    SubscriptionMissingData(sample[BusinessPartnerRecord].copy(emailAddress = None))
+    SubscriptionMissingData(sample[BusinessPartnerRecord].copy(emailAddress = None), None, sample[GGCredId])
 
   override val validVerificationCompleteJourneyStatus: SubscriptionMissingData =
-    SubscriptionMissingData(sample[BusinessPartnerRecord].copy(emailAddress = Some(sample[Email])))
+    SubscriptionMissingData(sample[BusinessPartnerRecord].copy(emailAddress = None), Some(sample[Email]), sample[GGCredId])
 
   override def updateEmail(journey: SubscriptionMissingData, email: Email): SubscriptionMissingData =
     journey.copy(businessPartnerRecord = journey.businessPartnerRecord.copy(emailAddress = Some(email)))

@@ -27,6 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscriptio
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -36,12 +37,13 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class SubscriptionChangeContactNameController @Inject()(
-  val authenticatedAction: AuthenticatedAction,
-  val sessionDataAction: SessionDataAction,
-  cc: MessagesControllerComponents,
-  val sessionStore: SessionStore,
-  val errorHandler: ErrorHandler,
-  val enterContactNamePage: views.html.contactname.contact_name
+                                                         val authenticatedAction: AuthenticatedAction,
+                                                         val sessionDataAction: SessionDataAction,
+                                                         cc: MessagesControllerComponents,
+                                                         val auditService: AuditService,
+                                                         val sessionStore: SessionStore,
+                                                         val errorHandler: ErrorHandler,
+                                                         val enterContactNamePage: views.html.contactname.contact_name
 )(implicit val viewConfig: ViewConfig, val ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -61,10 +63,16 @@ class SubscriptionChangeContactNameController @Inject()(
 
   override def updateContactName(journey: SubscriptionReady, contactName: ContactName)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, SubscriptionReady] =
+  ): EitherT[Future, Error, SubscriptionReady] = {
+    auditService.sendSubscriptionContactNameChangedEvent(
+      journey.subscriptionDetails.contactName.value,
+      contactName.value,
+      routes.SubscribedChangeContactNameController.enterContactNameSubmit().url
+    )
     EitherT.rightT[Future, Error](
       journey.copy(subscriptionDetails = journey.subscriptionDetails.copy(contactName = contactName))
     )
+  }
 
   override def contactName(journey: SubscriptionReady): Option[ContactName] =
     Some(journey.subscriptionDetails.contactName)

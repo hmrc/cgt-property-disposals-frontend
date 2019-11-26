@@ -17,14 +17,15 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import play.api.Configuration
+import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, EmptyRetrieval, Retrieval, ~}
-import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.AuthenticatedActionWithRetrievedData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.SAUTR
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -34,6 +35,7 @@ trait AuthSupport {
 
   val mockAuthConnector: AuthConnector             = mock[AuthConnector]
   val mockSubscriptionService: SubscriptionService = mock[SubscriptionService]
+  val mockSubscriptionAuditService: AuditService   = mock[AuditService]
 
   lazy val testAuthenticatedAction = new AuthenticatedActionWithRetrievedData(
     mockSubscriptionService,
@@ -78,7 +80,8 @@ trait AuthSupport {
 
   def mockAuthWithCl200AndWithAllIndividualRetrievals(
     retrievedNino: String,
-    retrievedEmail: Option[String]
+    retrievedEmail: Option[String],
+    retrievedCredentials: Credentials
   ): Unit =
     mockAuthWithAllRetrievals(
       ConfidenceLevel.L200,
@@ -87,10 +90,10 @@ trait AuthSupport {
       None,
       retrievedEmail,
       Set.empty,
-      Some(Credentials("gg-cred-id", "GovernmentGateway"))
+      Some(retrievedCredentials)
     )
 
-  def mockAuthWithAllTrustRetrievals(sautr: SAUTR, email: Option[String]): Unit =
+  def mockAuthWithAllTrustRetrievals(sautr: SAUTR, email: Option[String], retrievedCredentials: Credentials): Unit =
     mockAuthWithAllRetrievals(
       ConfidenceLevel.L50,
       Some(AffinityGroup.Organisation),
@@ -98,7 +101,7 @@ trait AuthSupport {
       None,
       email,
       Set(Enrolment("HMRC-TERS-ORG", Seq(EnrolmentIdentifier("SAUTR", sautr.value)), "")),
-      Some(Credentials("gg-cred-id", "GovernmentGateway"))
+      Some(retrievedCredentials)
     )
 
   def mockAuthWithCgtEnrolmentRetrievals(): Unit =

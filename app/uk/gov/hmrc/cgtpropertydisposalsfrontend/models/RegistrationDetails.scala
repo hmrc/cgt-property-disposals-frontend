@@ -17,16 +17,17 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
-
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 
 final case class RegistrationDetails(
-                                      name: IndividualName,
-                                      emailAddress: Email,
-                                      address: Address
-                                    )
+  name: IndividualName,
+  emailAddress: Email,
+  address: Address,
+  emailSource: EmailSource
+)
 object RegistrationDetails {
   implicit val format: Format[RegistrationDetails] = Json.format[RegistrationDetails]
 }

@@ -28,6 +28,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SubscribedDetails, SubscribedUpdateDetails, sample}
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -42,7 +43,7 @@ class SubscribedChangeAddressControllerSpec
   val subscribedDetails: SubscribedDetails =
     sample[SubscribedDetails].copy(address = address(1))
 
-  val validJourneyStatus = Subscribed(subscribedDetails)
+  val validJourneyStatus = Subscribed(subscribedDetails, sample[GGCredId])
 
   lazy val controller = instanceOf[SubscribedChangeAddressController]
 

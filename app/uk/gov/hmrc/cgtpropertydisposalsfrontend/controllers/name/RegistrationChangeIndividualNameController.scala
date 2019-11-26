@@ -24,9 +24,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -38,6 +39,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class RegistrationChangeIndividualNameController @Inject()(
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
+  val auditService: AuditService,
   cc: MessagesControllerComponents,
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
@@ -59,8 +61,14 @@ class RegistrationChangeIndividualNameController @Inject()(
 
   override def updateName(journey: RegistrationReady, name: IndividualName)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, RegistrationReady] =
+  ): EitherT[Future, Error, RegistrationReady] = {
+    auditService.sendRegistrationContactNameChangedEvent(
+      journey.registrationDetails.name,
+      name,
+      routes.RegistrationChangeIndividualNameController.enterIndividualNameSubmit().url
+    )
     EitherT.rightT[Future, Error](journey.copy(registrationDetails = journey.registrationDetails.copy(name = name)))
+  }
 
   override def name(journey: RegistrationReady): Option[IndividualName] = Some(journey.registrationDetails.name)
 

@@ -28,6 +28,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, SubscribedUpdateDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{SubscriptionService, UKAddressLookupService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
@@ -42,6 +43,7 @@ class SubscribedChangeAddressController @Inject()(
   val sessionStore: SessionStore,
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
+  val auditService: AuditService,
   subscriptionService: SubscriptionService,
   cc: MessagesControllerComponents,
   val enterPostcodePage: views.html.address.enter_postcode,
@@ -67,7 +69,7 @@ class SubscribedChangeAddressController @Inject()(
       case _                                  => Left(Redirect(controllers.routes.StartController.start()))
     }
 
-  def updateAddress(journey: Subscribed, address: Address)(
+  def updateAddress(journey: Subscribed, address: Address, isManuallyEnteredAddress: Boolean)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Subscribed] = {
     val updatedSubscribedDetails = journey.subscribedDetails.copy(address = address)
@@ -75,6 +77,19 @@ class SubscribedChangeAddressController @Inject()(
     if (journey.subscribedDetails === updatedSubscribedDetails) {
       EitherT.pure[Future, Error](journey)
     } else {
+      val auditUrl = address match {
+        case Address.UkAddress(line1, line2, town, county, postcode) =>
+          routes.SubscribedChangeAddressController.enterUkAddressSubmit().url
+        case Address.NonUkAddress(line1, line2, line3, line4, postcode, country) =>
+          routes.SubscribedChangeAddressController.enterNonUkAddressSubmit().url
+      }
+      auditService.sendSubscribedContactAddressChangedEvent(
+        journey.subscribedDetails.address,
+        address,
+        isManuallyEnteredAddress,
+        journey.subscribedDetails.cgtReference.value,
+        auditUrl
+      )
       subscriptionService
         .updateSubscribedDetails(SubscribedUpdateDetails(updatedSubscribedDetails, journey.subscribedDetails))
         .map(_ => journey.copy(subscribedDetails = updatedSubscribedDetails))

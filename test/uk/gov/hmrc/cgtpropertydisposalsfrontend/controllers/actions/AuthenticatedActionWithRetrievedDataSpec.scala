@@ -33,8 +33,9 @@ import uk.gov.hmrc.auth.core.retrieve.{Credentials, EmptyRetrieval, ~}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, RetrievalOps, SessionSupport, routes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, UserType}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -84,7 +85,8 @@ class AuthenticatedActionWithRetrievedDataSpec
     Set(Enrolment("HMRC-CGT-PD", Seq(EnrolmentIdentifier("CGTPDRef", "XCGT123456789")), "Activated", None))
   )
 
-  val ggCredentials = Credentials("id", "GovernmentGateway")
+  val (ggCredentials, ggCredId) = Credentials("id", "GovernmentGateway") -> GGCredId("id")
+
 
   "AuthenticatedActionWithRetrievedData" when {
 
@@ -179,7 +181,7 @@ class AuthenticatedActionWithRetrievedDataSpec
         )
 
         val expectedRetrieval =
-          UserType.Individual(Right(NINO("nino")), None)
+          UserType.Individual(Right(NINO("nino")), None, ggCredId)
 
         inSequence {
           mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
@@ -347,7 +349,7 @@ class AuthenticatedActionWithRetrievedDataSpec
 
           val result = performAction(FakeRequest())
           status(result)        shouldBe OK
-          contentAsJson(result) shouldBe Json.toJson(UserType.Trust(sautr, Some(Email("email"))))
+          contentAsJson(result) shouldBe Json.toJson(UserType.Trust(sautr, Some(Email("email")), ggCredId))
         }
 
       }
@@ -371,7 +373,7 @@ class AuthenticatedActionWithRetrievedDataSpec
 
         val result = performAction(FakeRequest())
         status(result)        shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(UserType.Trust(sautr, None))
+        contentAsJson(result) shouldBe Json.toJson(UserType.Trust(sautr, None, ggCredId))
       }
 
     }
@@ -390,7 +392,7 @@ class AuthenticatedActionWithRetrievedDataSpec
       )
 
       val expectedRetrieval =
-        UserType.Individual(Right(NINO("nino")), Some(Email("email")))
+        UserType.Individual(Right(NINO("nino")), Some(Email("email")), ggCredId)
 
       "effect the requested action" in {
         mockHasSubscription()(Right(None))
@@ -413,7 +415,7 @@ class AuthenticatedActionWithRetrievedDataSpec
       )
 
       val expectedRetrieval =
-        UserType.Individual(Right(NINO("nino")), None)
+        UserType.Individual(Right(NINO("nino")), None, ggCredId)
 
       "effect the requested action" in {
         mockHasSubscription()(Right(None))

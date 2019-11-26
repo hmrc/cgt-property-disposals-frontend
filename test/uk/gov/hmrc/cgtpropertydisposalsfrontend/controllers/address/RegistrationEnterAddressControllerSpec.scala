@@ -26,8 +26,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.IndividualSupplyingInformation
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, sample}
 
 import scala.concurrent.Future
 
@@ -36,7 +38,9 @@ class RegistrationEnterAddressControllerSpec
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
-  val validJourneyStatus = IndividualSupplyingInformation(Some(sample[IndividualName]), None, Some(sample[Email]))
+  val validJourneyStatus = IndividualSupplyingInformation(
+    Some(sample[IndividualName]), None, Some(sample[Email]), Some(sample[EmailSource]), sample[GGCredId]
+  )
 
   lazy val controller = instanceOf[RegistrationEnterAddressController]
 

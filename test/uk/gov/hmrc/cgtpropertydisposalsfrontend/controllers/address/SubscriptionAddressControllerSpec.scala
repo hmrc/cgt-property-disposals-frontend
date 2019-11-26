@@ -27,6 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RedirectToStartBehav
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SubscriptionDetails, sample}
 
 import scala.concurrent.Future
@@ -39,7 +40,7 @@ class SubscriptionAddressControllerSpec
   val subscriptionDetails: SubscriptionDetails =
     sample[SubscriptionDetails].copy(address = address(1))
 
-  val validJourneyStatus = SubscriptionReady(subscriptionDetails)
+  val validJourneyStatus = SubscriptionReady(subscriptionDetails, sample[GGCredId])
 
   lazy val controller = instanceOf[SubscriptionAddressController]
 

@@ -19,6 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email
 import java.util.UUID
 
 import cats.data.EitherT
+import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Call, MessagesControllerComponents, Result}
 import shapeless.{Lens, lens}
@@ -26,16 +27,17 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionMissingData
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, SessionData, SubscriptionDetail}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import cats.instances.future._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -47,6 +49,7 @@ class SubscriptionEnterEmailController @Inject()(
   val emailVerificationService: EmailVerificationService,
   val uuidGenerator: UUIDGenerator,
   val errorHandler: ErrorHandler,
+  val auditService: AuditService,
   cc: MessagesControllerComponents,
   val enterEmailPage: views.html.email.enter_email,
   val checkYourInboxPage: views.html.email.check_your_inbox,
@@ -58,7 +61,7 @@ class SubscriptionEnterEmailController @Inject()(
     with SessionUpdates
     with EmailController[SubscriptionMissingData, SubscriptionMissingData] {
 
-  override val isAmendJourney: Boolean = false
+  override val isAmendJourney: Boolean      = false
   override val isSubscribedJourney: Boolean = false
 
   override def validJourney(
@@ -77,14 +80,21 @@ class SubscriptionEnterEmailController @Inject()(
   val subscriptionMissingDataEmailLens: Lens[SubscriptionMissingData, Option[Email]] =
     lens[SubscriptionMissingData].businessPartnerRecord.emailAddress
 
-  override def updateEmail(journey: SubscriptionMissingData, email: Email)(implicit hc : HeaderCarrier): EitherT[Future, Error, SubscriptionMissingData] =
+  override def updateEmail(journey: SubscriptionMissingData, email: Email)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, SubscriptionMissingData] =
     EitherT.rightT[Future, Error](subscriptionMissingDataEmailLens.set(journey)(Some(email)))
+
+  override def auditEmailVerifiedEvent(journey: SubscriptionMissingData, email: Email)(implicit hc: HeaderCarrier): Unit = ()
+
+  override def auditEmailChangeAttempt(journey: SubscriptionMissingData, email: Email)(
+    implicit hc: HeaderCarrier
+  ): Unit = ()
 
   override def name(journeyStatus: SubscriptionMissingData): ContactName =
     ContactName(journeyStatus.businessPartnerRecord.name.fold(_.value, n => n.makeSingleName()))
 
   override val updateSubscriptionDetailChangedFlag: Boolean = false
-
 
   override lazy protected val backLinkCall: Option[Call]      = None
   override lazy protected val enterEmailCall: Call            = routes.SubscriptionEnterEmailController.enterEmail()

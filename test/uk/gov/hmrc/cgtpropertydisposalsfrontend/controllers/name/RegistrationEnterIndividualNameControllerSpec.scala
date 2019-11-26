@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.name
 
+import org.scalacheck.ScalacheckShapeless._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.test.CSRFTokenHelper._
@@ -24,8 +25,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualSupplyingInformation, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 
 class RegistrationEnterIndividualNameControllerSpec
     extends ControllerSpec
@@ -36,7 +38,8 @@ class RegistrationEnterIndividualNameControllerSpec
 
   override lazy val controller: RegistrationEnterIndividualNameController = instanceOf[RegistrationEnterIndividualNameController]
 
-  override lazy val validJourney: IndividualSupplyingInformation = IndividualSupplyingInformation(None, None, None)
+  override lazy val validJourney: IndividualSupplyingInformation =
+    IndividualSupplyingInformation(None, None, None, None, sample[GGCredId])
 
   def isValidJourney(journey: JourneyStatus): Boolean = journey match {
     case _: IndividualSupplyingInformation => true

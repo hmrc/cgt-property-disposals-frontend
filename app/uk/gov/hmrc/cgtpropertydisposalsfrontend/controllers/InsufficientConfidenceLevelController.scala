@@ -27,14 +27,14 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.IndividualNameMatchDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.{IndividualNameMatchDetails, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.{BusinessPartnerRecord, NameMatchError, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.{BusinessPartnerRecordNameMatchRetryStore, SessionStore}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.BusinessPartnerRecordNameMatchRetryService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
@@ -162,7 +162,7 @@ class InsufficientConfidenceLevelController @Inject()(
                 )(
                   InsufficientConfidenceLevelController.sautrAndNameForm.withUnsuccessfulAttemptsError
                 )
-                Ok(enterSautrAndNamePage(form,  routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()))
+                Ok(enterSautrAndNamePage(form, routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()))
               }
             )
 
@@ -171,7 +171,7 @@ class InsufficientConfidenceLevelController @Inject()(
       }
     }
   }
-
+  @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
   def enterSautrAndNameSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withInsufficientConfidenceLevelUser { insufficientConfidenceLevel =>
       (insufficientConfidenceLevel.hasNino, insufficientConfidenceLevel.hasSautr) match {
@@ -217,17 +217,18 @@ class InsufficientConfidenceLevelController @Inject()(
         )
         .value
         .map {
-          case Left(NameMatchError.TooManyUnsuccessfulAttempts()) => Ok(tooManyUnsuccessfulNameMatchesPage(routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()))
-          case Left(otherNameMatchError)                          => handleNameMatchError(otherNameMatchError)
-          case Right(_)                                           => Redirect(routes.InsufficientConfidenceLevelController.enterSautrAndName())
+          case Left(NameMatchError.TooManyUnsuccessfulAttempts()) =>
+            Ok(tooManyUnsuccessfulNameMatchesPage(routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()))
+          case Left(otherNameMatchError) => handleNameMatchError(otherNameMatchError)
+          case Right(_)                  => Redirect(routes.InsufficientConfidenceLevelController.enterSautrAndName())
         }
     }
   }
 
   private def attemptNameMatchAndUpdateSession(
-                                                individualNameMatchDetails: IndividualNameMatchDetails,
+    individualNameMatchDetails: IndividualNameMatchDetails,
     ggCredId: GGCredId,
-    previousUnsucessfulAttempt: Option[UnsuccessfulNameMatchAttempts[IndividualNameMatchDetails]]
+    previousUnsuccessfulAttempt: Option[UnsuccessfulNameMatchAttempts[IndividualNameMatchDetails]]
   )(
     implicit hc: HeaderCarrier,
     request: RequestWithSessionData[_]
@@ -237,7 +238,7 @@ class InsufficientConfidenceLevelController @Inject()(
               .attemptBusinessPartnerRecordNameMatch(
                 individualNameMatchDetails,
                 ggCredId,
-                previousUnsucessfulAttempt
+                previousUnsuccessfulAttempt
               )
               .subflatMap(
                 bpr =>
@@ -249,7 +250,7 @@ class InsufficientConfidenceLevelController @Inject()(
               )
       _ <- EitherT(
             updateSession(sessionStore, request)(
-              _.copy(journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bpr)))
+              _.copy(journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bpr, None, ggCredId)))
             )
           ).leftMap[NameMatchError[IndividualNameMatchDetails]](NameMatchError.BackendError)
     } yield bpr
@@ -295,18 +296,20 @@ object InsufficientConfidenceLevelController {
   val sautrAndNameForm: Form[IndividualNameMatchDetails] =
     Form(
       mapping(
-        "saUtr" -> SAUTR.mapping,
+        "saUtr"     -> SAUTR.mapping,
         "firstName" -> IndividualName.mapping,
         "lastName"  -> IndividualName.mapping
       ) {
         case (sautr, firstName, lastName) =>
           IndividualNameMatchDetails(IndividualName(firstName, lastName), sautr)
-      } {
-        individualNameMatchDetails => Some((
-          individualNameMatchDetails.sautr,
-          individualNameMatchDetails.name.firstName,
-          individualNameMatchDetails.name.lastName
-        ))
+      } { individualNameMatchDetails =>
+        Some(
+          (
+            individualNameMatchDetails.sautr,
+            individualNameMatchDetails.name.firstName,
+            individualNameMatchDetails.name.lastName
+          )
+        )
       }
     )
 

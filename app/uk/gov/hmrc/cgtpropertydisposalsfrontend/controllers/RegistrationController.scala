@@ -29,11 +29,13 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, RegistrationStatus, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailSource
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{RegistrationDetails, SessionData, SubscribedDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -45,6 +47,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class RegistrationController @Inject()(
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
+  val auditService: AuditService,
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
   subscriptionService: SubscriptionService,
@@ -81,7 +84,7 @@ class RegistrationController @Inject()(
       val form = {
         val blankForm = RegistrationController.selectEntityTypeForm
         status.fold(_ => blankForm, {
-          case RegistrationStatus.IndividualWantsToRegisterTrust =>
+          case RegistrationStatus.IndividualWantsToRegisterTrust(_) =>
             blankForm.fill(EntityType.Trust)
 
           case _ =>
@@ -100,16 +103,20 @@ class RegistrationController @Inject()(
         .fold(
           e => BadRequest(selectEntityTypePage(e, routes.InsufficientConfidenceLevelController.enterSautrAndName())), {
             entityType =>
+              val ggCredId = status.fold(_.ggCredId, _.ggCredId)
+
               val (newRegistrationStatus, redirectTo): (RegistrationStatus, Call) = entityType match {
                 case EntityType.Individual =>
                   RegistrationStatus.IndividualSupplyingInformation(
                     None,
                     None,
-                    status.fold(_.email, _ => None)
+                    status.fold(_.ggEmail, _ => None),
+                    status.fold(_.ggEmail.map(_ => EmailSource.GovernmentGateway), _.emailSource),
+                    ggCredId
                   ) -> name.routes.RegistrationEnterIndividualNameController.enterIndividualName()
                 case EntityType.Trust =>
-                  RegistrationStatus.IndividualWantsToRegisterTrust -> routes.RegistrationController
-                    .wrongGGAccountForTrusts()
+                  RegistrationStatus.IndividualWantsToRegisterTrust(ggCredId) ->
+                    routes.RegistrationController.wrongGGAccountForTrusts
               }
 
               (status, newRegistrationStatus) match {
@@ -117,8 +124,8 @@ class RegistrationController @Inject()(
                       Right(_: RegistrationStatus.IndividualSupplyingInformation),
                       _: RegistrationStatus.IndividualSupplyingInformation
                     ) | (
-                      Right(RegistrationStatus.IndividualWantsToRegisterTrust),
-                      RegistrationStatus.IndividualWantsToRegisterTrust
+                      Right(RegistrationStatus.IndividualWantsToRegisterTrust(_)),
+                      RegistrationStatus.IndividualWantsToRegisterTrust(_)
                     ) =>
                   Redirect(redirectTo)
 
@@ -138,7 +145,7 @@ class RegistrationController @Inject()(
 
   def wrongGGAccountForTrusts(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidUser(request) {
-      case Right(RegistrationStatus.IndividualWantsToRegisterTrust) =>
+      case Right(RegistrationStatus.IndividualWantsToRegisterTrust(_)) =>
         Ok(wrongGGAccountForTrustPage(routes.RegistrationController.selectEntityType()))
 
       case _ =>
@@ -151,15 +158,15 @@ class RegistrationController @Inject()(
       case Some(r: RegistrationStatus.RegistrationReady) =>
         Ok(checkYourDetailsPage(r.registrationDetails))
 
-      case Some(RegistrationStatus.IndividualSupplyingInformation(None, _, _)) =>
+      case Some(RegistrationStatus.IndividualSupplyingInformation(None, _, _, _, _)) =>
         Redirect(name.routes.RegistrationEnterIndividualNameController.enterIndividualName())
 
-      case Some(RegistrationStatus.IndividualSupplyingInformation(_, None, _)) =>
+      case Some(RegistrationStatus.IndividualSupplyingInformation(_, None, _, _, _)) =>
         Redirect(address.routes.RegistrationEnterAddressController.isUk())
 
-      case Some(RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), None)) =>
+      case Some(RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), None, _, ggCredId)) =>
         updateSession(sessionStore, request)(
-          _.copy(journeyStatus = Some(RegistrationStatus.IndividualMissingEmail(name, address)))
+          _.copy(journeyStatus = Some(RegistrationStatus.IndividualMissingEmail(name, address, ggCredId)))
         ).map {
           case Left(error) =>
             logger.warn("Could not update session for enter registration email journey", error)
@@ -169,8 +176,11 @@ class RegistrationController @Inject()(
             Redirect(email.routes.RegistrationEnterEmailController.enterEmail())
         }
 
-      case Some(RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), Some(email))) =>
-        val r = RegistrationStatus.RegistrationReady(RegistrationDetails(name, email, address))
+      case Some(
+          RegistrationStatus
+            .IndividualSupplyingInformation(Some(name), Some(address), Some(email), Some(emailSource), ggCredId)
+          ) =>
+        val r = RegistrationStatus.RegistrationReady(RegistrationDetails(name, email, address, emailSource), ggCredId)
         updateSession(sessionStore, request)(_.copy(journeyStatus = Some(r))).map {
           case Left(error) =>
             logger.warn("Could not update session for registration ready", error)
@@ -189,11 +199,15 @@ class RegistrationController @Inject()(
 
   def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(RegistrationStatus.RegistrationReady(registrationDetails)) =>
+      case Some(RegistrationStatus.RegistrationReady(registrationDetails, ggCredId)) =>
         val result = for {
           subscriptionResponse <- subscriptionService.registerWithoutIdAndSubscribe(registrationDetails)
           _ <- EitherT(subscriptionResponse match {
                 case SubscriptionSuccessful(cgtReferenceNumber) =>
+                  auditService.sendRegistrationRequestEvent(
+                    registrationDetails,
+                    routes.RegistrationController.checkYourAnswersSubmit().url
+                  )
                   updateSession(sessionStore, request)(
                     _ =>
                       SessionData.empty.copy(
@@ -209,14 +223,15 @@ class RegistrationController @Inject()(
                               CgtReference(cgtReferenceNumber),
                               None,
                               registeredWithId = false
-                            )
+                            ),
+                            ggCredId
                           )
                         )
                       )
                   )
                 case AlreadySubscribed =>
                   updateSession(sessionStore, request)(
-                    _.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount))
+                    _.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount(ggCredId)))
                   )
               })
         } yield subscriptionResponse
@@ -226,12 +241,13 @@ class RegistrationController @Inject()(
             logger.warn("Could not register without id and subscribe", e)
             errorHandler.errorResult()
           }, {
-            case SubscriptionSuccessful(cgtReferenceNumber) =>
+            case SubscriptionSuccessful(cgtReferenceNumber) => {
               logger.info(s"Successfully subscribed with cgt id $cgtReferenceNumber")
               Redirect(routes.SubscriptionController.subscribed())
-
+            }
             case AlreadySubscribed =>
               logger.info("Response to subscription request indicated that the user has already subscribed to cgt")
+              auditService.sendAccessWithWrongGGAccountEvent(ggCredId, routes.RegistrationController.checkYourAnswersSubmit().url)
               Redirect(routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
           }
         )

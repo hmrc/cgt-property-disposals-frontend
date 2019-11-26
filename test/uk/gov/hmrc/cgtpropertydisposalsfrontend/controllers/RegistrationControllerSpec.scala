@@ -38,11 +38,13 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class RegistrationControllerSpec
     extends ControllerSpec
@@ -67,8 +69,10 @@ class RegistrationControllerSpec
 
   val name = sample[IndividualName]
 
+  val ggCredId = sample[GGCredId]
+
   val individualWithInsufficentCLSubscriptionStatus =
-    TryingToGetIndividualsFootprint(Some(false), Some(false), None, GGCredId("id"))
+    TryingToGetIndividualsFootprint(Some(false), Some(false), None, ggCredId)
 
   val journeyStatusLens: Lens[SessionData, Option[JourneyStatus]] = lens[SessionData].journeyStatus
 
@@ -115,8 +119,8 @@ class RegistrationControllerSpec
 
       "prepopulate the form if the user has previously answered the question" in {
         List(
-          RegistrationStatus.IndividualWantsToRegisterTrust,
-          RegistrationStatus.IndividualSupplyingInformation(None, None, None)
+          RegistrationStatus.IndividualWantsToRegisterTrust(ggCredId),
+          RegistrationStatus.IndividualSupplyingInformation(None, None, None, None, ggCredId)
         ).foreach { journeyStatus =>
           val sessionData =
             SessionData.empty.copy(
@@ -174,7 +178,7 @@ class RegistrationControllerSpec
       "redirect to the wrong gg account page" when {
         "the request selects trust" in {
           val updatedSession =
-            sessionData.copy(journeyStatus = Some(RegistrationStatus.IndividualWantsToRegisterTrust))
+            sessionData.copy(journeyStatus = Some(RegistrationStatus.IndividualWantsToRegisterTrust(ggCredId)))
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -189,7 +193,7 @@ class RegistrationControllerSpec
           "the request selects individual" in {
             val updatedSession =
               sessionData.copy(
-                journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None, None, None))
+                journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None, None, None, None, ggCredId))
               )
 
             inSequence {
@@ -207,8 +211,8 @@ class RegistrationControllerSpec
 
           "the session cannot be updated" in {
             List[(String, RegistrationStatus)](
-              "1" -> RegistrationStatus.IndividualSupplyingInformation(None, None, None),
-              "0" -> RegistrationStatus.IndividualWantsToRegisterTrust
+              "1" -> RegistrationStatus.IndividualSupplyingInformation(None, None, None, None, ggCredId),
+              "0" -> RegistrationStatus.IndividualWantsToRegisterTrust(ggCredId)
             ).foreach {
               case (entityType, registrationStatus) =>
                 inSequence {
@@ -229,8 +233,9 @@ class RegistrationControllerSpec
         "not update the session" when {
 
           "the user selects trust and has previously indicated that they wish to register a trust" in {
-            val session =
-              sessionData.copy(journeyStatus = Some(RegistrationStatus.IndividualWantsToRegisterTrust))
+            val session = sessionData.copy(journeyStatus =
+              Some(RegistrationStatus.IndividualWantsToRegisterTrust(ggCredId))
+            )
 
             inSequence {
               mockAuthWithNoRetrievals()
@@ -244,7 +249,7 @@ class RegistrationControllerSpec
           "the user selects individual and has previously indicated that they wish to register as an individual" in {
             val session =
               sessionData.copy(
-                journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None, None, None))
+                journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None, None, None, None, ggCredId))
               )
 
             inSequence {
@@ -269,7 +274,7 @@ class RegistrationControllerSpec
 
       val sessionData =
         SessionData.empty.copy(
-          journeyStatus = Some(RegistrationStatus.IndividualWantsToRegisterTrust)
+          journeyStatus = Some(RegistrationStatus.IndividualWantsToRegisterTrust(ggCredId))
         )
 
       behave like redirectToStartBehaviour(performAction)
@@ -296,7 +301,9 @@ class RegistrationControllerSpec
                 Right(
                   Some(
                     sessionData
-                      .copy(journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None, None, None)))
+                      .copy(journeyStatus =
+                        Some(RegistrationStatus.IndividualSupplyingInformation(None, None, None, None, ggCredId))
+                      )
                   )
                 )
               )
@@ -331,7 +338,7 @@ class RegistrationControllerSpec
                   Some(
                     SessionData.empty.copy(
                       journeyStatus = Some(
-                        RegistrationStatus.IndividualSupplyingInformation(None, None, None)
+                        RegistrationStatus.IndividualSupplyingInformation(None, None, None, None, ggCredId)
                       )
                     )
                   )
@@ -356,7 +363,9 @@ class RegistrationControllerSpec
                   Some(
                     SessionData.empty.copy(
                       journeyStatus = Some(
-                        RegistrationStatus.IndividualSupplyingInformation(Some(sample[IndividualName]), None, None)
+                        RegistrationStatus.IndividualSupplyingInformation(
+                          Some(sample[IndividualName]), None, None, None, ggCredId
+                        )
                       )
                     )
                   )
@@ -384,7 +393,9 @@ class RegistrationControllerSpec
                   Some(
                     SessionData.empty.copy(
                       journeyStatus = Some(
-                        RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), None)
+                        RegistrationStatus.IndividualSupplyingInformation(
+                          Some(name), Some(address), None, None, ggCredId
+                        )
                       )
                     )
                   )
@@ -394,7 +405,7 @@ class RegistrationControllerSpec
             mockStoreSession(
               SessionData.empty.copy(
                 journeyStatus = Some(
-                  RegistrationStatus.IndividualMissingEmail(name, address)
+                  RegistrationStatus.IndividualMissingEmail(name, address, ggCredId)
                 )
               )
             )(Future.successful(Right(())))
@@ -419,7 +430,9 @@ class RegistrationControllerSpec
                   Some(
                     SessionData.empty.copy(
                       journeyStatus = Some(
-                        RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), None)
+                        RegistrationStatus.IndividualSupplyingInformation(
+                          Some(name), Some(address), None, None, ggCredId
+                        )
                       )
                     )
                   )
@@ -429,7 +442,7 @@ class RegistrationControllerSpec
             mockStoreSession(
               SessionData.empty.copy(
                 journeyStatus = Some(
-                  RegistrationStatus.IndividualMissingEmail(name, address)
+                  RegistrationStatus.IndividualMissingEmail(name, address, ggCredId)
                 )
               )
             )(Future.successful(Left(Error(""))))
@@ -442,16 +455,19 @@ class RegistrationControllerSpec
           val name    = sample[IndividualName]
           val address = sample[Address]
           val email   = sample[Email]
+          val emailSource = sample[EmailSource]
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(
               SessionData.empty.copy(journeyStatus = Some(
-                RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), Some(email))
+                RegistrationStatus.IndividualSupplyingInformation(
+                  Some(name), Some(address), Some(email), Some(emailSource), ggCredId
+                )
               ))
             ))))
             mockStoreSession(SessionData.empty.copy(journeyStatus = Some(
-              RegistrationStatus.RegistrationReady(RegistrationDetails(name, email, address))
+              RegistrationStatus.RegistrationReady(RegistrationDetails(name, email, address, emailSource), ggCredId)
             )))(Future.successful(Left(Error(""))))
           }
 
@@ -468,7 +484,8 @@ class RegistrationControllerSpec
             mockGetSession(Future.successful(Right(Some(
               SessionData.empty.copy(journeyStatus = Some(
                 RegistrationStatus.RegistrationReady(
-                  RegistrationDetails(sample[IndividualName], sample[Email], sample[Address])
+                  RegistrationDetails(sample[IndividualName], sample[Email], sample[Address], sample[EmailSource]),
+                  ggCredId
                 )
               ))
             ))))
@@ -482,16 +499,22 @@ class RegistrationControllerSpec
           val name    = sample[IndividualName]
           val address = sample[Address]
           val email   = sample[Email]
+          val emailSource = sample[EmailSource]
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(
               SessionData.empty.copy(journeyStatus = Some(
-                RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), Some(email))
+                RegistrationStatus.IndividualSupplyingInformation(
+                  Some(name), Some(address), Some(email), Some(emailSource), ggCredId
+                )
               ))
             ))))
             mockStoreSession(SessionData.empty.copy(journeyStatus = Some(
-              RegistrationStatus.RegistrationReady(RegistrationDetails(name, email, address))
+              RegistrationStatus.RegistrationReady(
+                RegistrationDetails(name, email, address, emailSource),
+                ggCredId
+              )
             )))(Future.successful(Right(())))
           }
 
@@ -510,7 +533,7 @@ class RegistrationControllerSpec
       behave like redirectToStartWhenInvalidJourney(
         performAction,
         {
-          case RegistrationReady(_) => true
+          case RegistrationReady(_, _) => true
           case _ => false
         }
       )
@@ -554,7 +577,7 @@ class RegistrationControllerSpec
             )(Right(subscriptionSuccessfulResponse))
             mockStoreSession(
               SessionData.empty.copy(journeyStatus =
-                Some(Subscribed(subscribedDetails))
+                Some(Subscribed(subscribedDetails, registrationReady.ggCredId))
               )
             )(Future.successful(Left(Error(""))))
           }
@@ -576,7 +599,7 @@ class RegistrationControllerSpec
             )(Right(subscriptionSuccessfulResponse))
             mockStoreSession(
               SessionData.empty.copy(journeyStatus =
-                Some(Subscribed(subscribedDetails))
+                Some(Subscribed(subscribedDetails, registrationReady.ggCredId))
               )
             )(Future.successful(Right(())))
           }
@@ -590,7 +613,9 @@ class RegistrationControllerSpec
 
         "the subscription response indicates that the user has already subscribed" in {
           val sessionWithAlreadySubscribed =
-            SessionData.empty.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount))
+            SessionData.empty.copy(journeyStatus =
+              Some(AlreadySubscribedWithDifferentGGAccount(registrationReady.ggCredId))
+            )
 
           inSequence {
             mockAuthWithNoRetrievals()

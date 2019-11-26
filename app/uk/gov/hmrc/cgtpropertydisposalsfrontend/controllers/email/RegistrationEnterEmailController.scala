@@ -19,6 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email
 import java.util.UUID
 
 import cats.data.EitherT
+import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
@@ -26,15 +27,17 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import cats.instances.future._
+
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -43,6 +46,7 @@ class RegistrationEnterEmailController @Inject()(
   val sessionDataAction: SessionDataAction,
   val sessionStore: SessionStore,
   val emailVerificationService: EmailVerificationService,
+  val auditService: AuditService,
   val uuidGenerator: UUIDGenerator,
   val errorHandler: ErrorHandler,
   cc: MessagesControllerComponents,
@@ -56,7 +60,7 @@ class RegistrationEnterEmailController @Inject()(
     with SessionUpdates
     with EmailController[IndividualMissingEmail, RegistrationReady] {
 
-  override val isAmendJourney: Boolean = false
+  override val isAmendJourney: Boolean      = false
   override val isSubscribedJourney: Boolean = false
 
   override def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, IndividualMissingEmail)] =
@@ -73,8 +77,28 @@ class RegistrationEnterEmailController @Inject()(
       case _                                         => Left(Redirect(controllers.routes.StartController.start()))
     }
 
-  override def updateEmail(journey: IndividualMissingEmail, email: Email)(implicit hc : HeaderCarrier): EitherT[Future, Error, RegistrationReady] =
-    EitherT.rightT[Future, Error](RegistrationReady(RegistrationDetails(journey.name, email, journey.address)))
+  override def updateEmail(journey: IndividualMissingEmail, email: Email)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, RegistrationReady] =
+    EitherT.rightT[Future, Error](RegistrationReady(
+      RegistrationDetails(journey.name, email, journey.address, EmailSource.ManuallyEntered),
+      journey.ggCredId
+    ))
+
+  override def auditEmailVerifiedEvent(journey: IndividualMissingEmail, email: Email)(
+    implicit hc: HeaderCarrier
+  ): Unit =
+    auditService
+      .sendRegistrationSetupEmailVerifiedEvent(email.value, routes.RegistrationEnterEmailController.emailVerified().url)
+
+  override def auditEmailChangeAttempt(journey: IndividualMissingEmail, email: Email)(
+    implicit hc: HeaderCarrier
+  ): Unit =
+    auditService
+      .sendRegistrationSetupEmailAttemptedEvent(
+        email.value,
+        routes.RegistrationEnterEmailController.enterEmailSubmit().url
+      )
 
   override def name(journeyStatus: IndividualMissingEmail): ContactName =
     ContactName(journeyStatus.name.makeSingleName())

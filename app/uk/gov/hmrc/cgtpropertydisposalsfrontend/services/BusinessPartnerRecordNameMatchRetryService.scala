@@ -29,6 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.UnsuccessfulNameMatch
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, BusinessPartnerRecordResponse, NameMatchError, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.BusinessPartnerRecordNameMatchRetryStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -52,6 +53,7 @@ trait BusinessPartnerRecordNameMatchRetryService {
 class BusinessPartnerRecordNameMatchRetryServiceImpl @Inject()(
   bprService: BusinessPartnerRecordService,
   bprNameMatchRetryStore: BusinessPartnerRecordNameMatchRetryStore,
+  auditService: AuditService,
   config: Configuration
 ) extends BusinessPartnerRecordNameMatchRetryService {
 
@@ -59,12 +61,12 @@ class BusinessPartnerRecordNameMatchRetryServiceImpl @Inject()(
 
   def getNumberOfUnsuccessfulAttempts[A <: NameMatchDetails : Reads](
     ggCredId: GGCredId
-  )(implicit ec: ExecutionContext): EitherT[Future, NameMatchError[A], Option[UnsuccessfulNameMatchAttempts[A]]] =
+  )(implicit ec: ExecutionContext): EitherT[Future, NameMatchError[A], Option[UnsuccessfulNameMatchAttempts[A]]] = {
     EitherT(bprNameMatchRetryStore.get(ggCredId))
       .leftMap(NameMatchError.BackendError)
       .subflatMap {
         _.fold[Either[NameMatchError[A], Option[UnsuccessfulNameMatchAttempts[A]]]](Right(None))(
-          unsuccessfulAttempts =>
+          (unsuccessfulAttempts: UnsuccessfulNameMatchAttempts[A]) =>
             if (unsuccessfulAttempts.unsuccessfulAttempts >= maxUnsuccessfulAttempts) {
               Left(NameMatchError.TooManyUnsuccessfulAttempts())
             } else {
@@ -72,6 +74,7 @@ class BusinessPartnerRecordNameMatchRetryServiceImpl @Inject()(
             }
         )
       }
+  }
 
   @SuppressWarnings(Array("org.wartremover.warts.Equals"))
   def attemptBusinessPartnerRecordNameMatch[A <: NameMatchDetails : Writes](
@@ -84,8 +87,10 @@ class BusinessPartnerRecordNameMatchRetryServiceImpl @Inject()(
         if previousAttempts >= maxUnsuccessfulAttempts =>
         EitherT.fromEither[Future](Left(NameMatchError.TooManyUnsuccessfulAttempts()))
 
-      case Some(u @ UnsuccessfulNameMatchAttempts(_, _, `nameMatchDetails`)) =>
+      case Some(u @ UnsuccessfulNameMatchAttempts(_, _, `nameMatchDetails`)) => {
+        auditService.sendBusinessPartnerRecordNameMatchAttemptEvent(1,maxUnsuccessfulAttempts, nameMatchDetails)
         EitherT.fromEither[Future](Left(NameMatchError.NameMatchFailed(u)))
+      }
 
       case _ =>
         for {

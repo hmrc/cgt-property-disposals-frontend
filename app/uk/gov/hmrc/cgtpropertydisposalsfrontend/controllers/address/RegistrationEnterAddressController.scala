@@ -25,9 +25,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, name}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.IndividualSupplyingInformation
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, SubscriptionDetail}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -42,6 +43,7 @@ class RegistrationEnterAddressController @Inject()(
   val sessionStore: SessionStore,
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
+  val auditService: AuditService,
   cc: MessagesControllerComponents,
   val enterPostcodePage: views.html.address.enter_postcode,
   val selectAddressPage: views.html.address.select_address,
@@ -62,11 +64,13 @@ class RegistrationEnterAddressController @Inject()(
     request: RequestWithSessionData[_]
   ): Either[Result, (SessionData, IndividualSupplyingInformation)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((sessionData, r @ IndividualSupplyingInformation(Some(_), None, _))) => Right(sessionData -> r)
-      case _                                                                         => Left(Redirect(controllers.routes.StartController.start()))
+      case Some((sessionData, r @ IndividualSupplyingInformation(Some(_), None, _, _, _))) =>
+        Right(sessionData -> r)
+      case _ =>
+        Left(Redirect(controllers.routes.StartController.start()))
     }
 
-  def updateAddress(journey: IndividualSupplyingInformation, address: Address)(
+  def updateAddress(journey: IndividualSupplyingInformation, address: Address, isManuallyEnteredAddress: Boolean)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, IndividualSupplyingInformation] =
     EitherT.pure[Future, Error](journey.copy(address = Some(address)))

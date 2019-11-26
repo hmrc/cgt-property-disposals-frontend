@@ -33,13 +33,14 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscriptio
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class SubscriptionControllerSpec
     extends ControllerSpec
@@ -63,8 +64,10 @@ class SubscriptionControllerSpec
 
   val subscriptionDetails = sample[SubscriptionDetails]
 
+  val ggCredId = sample[GGCredId]
+
   val sessionWithSubscriptionDetails =
-    SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(subscriptionDetails)))
+    SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(subscriptionDetails, ggCredId)))
 
   def mockSubscribe(expectedSubscriptionDetails: SubscriptionDetails)(response: Either[Error, SubscriptionResponse]) =
     (mockSubscriptionService
@@ -95,7 +98,7 @@ class SubscriptionControllerSpec
           val individualSessionWithSubscriptionDetails =
             SessionData.empty.copy(
               journeyStatus =
-                Some(SubscriptionReady(sample[SubscriptionDetails].copy(name = Right(sample[IndividualName]))))
+                Some(SubscriptionReady(sample[SubscriptionDetails].copy(name = Right(sample[IndividualName])), ggCredId))
             )
           inSequence {
             mockAuthWithNoRetrievals()
@@ -110,7 +113,7 @@ class SubscriptionControllerSpec
         "there are subscription details in session for an organisation" in {
           val organisationSessionWithSubscriptionDetails =
             SessionData.empty.copy(
-              journeyStatus = Some(SubscriptionReady(sample[SubscriptionDetails].copy(name = Left(sample[TrustName]))))
+              journeyStatus = Some(SubscriptionReady(sample[SubscriptionDetails].copy(name = Left(sample[TrustName])), ggCredId))
             )
           inSequence {
             mockAuthWithNoRetrievals()
@@ -143,7 +146,7 @@ class SubscriptionControllerSpec
       )
 
       val sessionWithSubscriptionComplete =
-        SessionData.empty.copy(journeyStatus = Some(Subscribed(accountDetails)))
+        SessionData.empty.copy(journeyStatus = Some(Subscribed(accountDetails, ggCredId)))
 
       behave like redirectToStart(performAction)
 
@@ -191,7 +194,7 @@ class SubscriptionControllerSpec
 
         "the subscription response indicates that the user has already subscribed" in {
           val sessionWithAlreadySubscribed =
-            SessionData.empty.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount))
+            SessionData.empty.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount(ggCredId)))
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -234,7 +237,8 @@ class SubscriptionControllerSpec
                   CgtReference(cgtReferenceNumber),
                   None,
                   registeredWithId = true
-                )
+                ),
+                ggCredId
               )
             )
           )
@@ -261,8 +265,8 @@ class SubscriptionControllerSpec
 
       behave like redirectToStartWhenInvalidJourney(
         performAction, {
-          case AlreadySubscribedWithDifferentGGAccount => true
-          case _                                       => false
+          case AlreadySubscribedWithDifferentGGAccount(_) => true
+          case _                                          => false
         }
       )
 
@@ -275,7 +279,9 @@ class SubscriptionControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    SessionData.empty.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount))
+                    SessionData.empty.copy(journeyStatus =
+                      Some(AlreadySubscribedWithDifferentGGAccount(ggCredId))
+                    )
                   )
                 )
               )
