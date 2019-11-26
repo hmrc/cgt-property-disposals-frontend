@@ -29,6 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, RegistrationStatus, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailSource
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{RegistrationDetails, SessionData, SubscribedDetails}
@@ -107,7 +108,8 @@ class RegistrationController @Inject()(
                   RegistrationStatus.IndividualSupplyingInformation(
                     None,
                     None,
-                    status.fold(_.email, _ => None)
+                    status.fold(_.ggEmail, _ => None),
+                    status.fold(_.ggEmail.map(_ => EmailSource.GovernmentGateway),  _.emailSource)
                   ) -> name.routes.RegistrationEnterIndividualNameController.enterIndividualName()
                 case EntityType.Trust =>
                   RegistrationStatus.IndividualWantsToRegisterTrust -> routes.RegistrationController
@@ -153,13 +155,13 @@ class RegistrationController @Inject()(
       case Some(r: RegistrationStatus.RegistrationReady) =>
         Ok(checkYourDetailsPage(r.registrationDetails))
 
-      case Some(RegistrationStatus.IndividualSupplyingInformation(None, _, _)) =>
+      case Some(RegistrationStatus.IndividualSupplyingInformation(None, _, _, _)) =>
         Redirect(name.routes.RegistrationEnterIndividualNameController.enterIndividualName())
 
-      case Some(RegistrationStatus.IndividualSupplyingInformation(_, None, _)) =>
+      case Some(RegistrationStatus.IndividualSupplyingInformation(_, None, _, _)) =>
         Redirect(address.routes.RegistrationEnterAddressController.isUk())
 
-      case Some(RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), None)) =>
+      case Some(RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), None, _)) =>
         updateSession(sessionStore, request)(
           _.copy(journeyStatus = Some(RegistrationStatus.IndividualMissingEmail(name, address)))
         ).map {
@@ -171,8 +173,8 @@ class RegistrationController @Inject()(
             Redirect(email.routes.RegistrationEnterEmailController.enterEmail())
         }
 
-      case Some(RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), Some(email))) =>
-        val r = RegistrationStatus.RegistrationReady(RegistrationDetails(name, email, address))
+      case Some(RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), Some(email), Some(emailSource))) =>
+        val r = RegistrationStatus.RegistrationReady(RegistrationDetails(name, email, address, emailSource))
         updateSession(sessionStore, request)(_.copy(journeyStatus = Some(r))).map {
           case Left(error) =>
             logger.warn("Could not update session for registration ready", error)
@@ -190,9 +192,7 @@ class RegistrationController @Inject()(
   }
 
   def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    val Some((journey, ggEmail)) = request.sessionData.map(data => (data.journeyStatus, data.ggEmail))
-
-    journey match {
+    request.sessionData.flatMap(_.journeyStatus) match {
       case Some(RegistrationStatus.RegistrationReady(registrationDetails)) =>
         val result = for {
           subscriptionResponse <- subscriptionService.registerWithoutIdAndSubscribe(registrationDetails)
@@ -200,7 +200,6 @@ class RegistrationController @Inject()(
                 case SubscriptionSuccessful(cgtReferenceNumber) =>
                   auditService.sendRegistrationRequestEvent(
                     registrationDetails,
-                    ggEmail,
                     routes.RegistrationController.checkYourAnswersSubmit().url
                   )
                   updateSession(sessionStore, request)(

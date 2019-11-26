@@ -19,17 +19,19 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import cats.data.NonEmptyList
 import cats.syntax.either._
 import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecord
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
 
 final case class SubscriptionDetails(
   name: Either[TrustName, IndividualName],
   emailAddress: Email,
   address: Address,
   contactName: ContactName,
-  sapNumber: String
+  sapNumber: String,
+  emailSource: EmailSource
 )
 
 object SubscriptionDetails {
@@ -39,21 +41,26 @@ object SubscriptionDetails {
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   def apply(
     bpr: BusinessPartnerRecord,
-    maybeEmail: Option[Email]
+    ggEmail: Option[Email],
+    enteredEmail: Option[Email]
   ): Either[NonEmptyList[MissingData], SubscriptionDetails] =
     Either
       .fromOption(
-        bpr.emailAddress.orElse(maybeEmail),
+        enteredEmail
+          .map(_ -> EmailSource.ManuallyEntered)
+          .orElse(bpr.emailAddress.map(_ -> EmailSource.BusinessPartnerRecord))
+          .orElse(ggEmail.map(_ -> EmailSource.GovernmentGateway)),
         NonEmptyList.one(MissingData.Email)
       )
       .map(
-        email => {
+        emailWithSource => {
           SubscriptionDetails(
             bpr.name,
-            email,
+            emailWithSource._1,
             bpr.address,
             ContactName(bpr.name.fold(_.value, n => n.makeSingleName())),
-            bpr.sapNumber
+            bpr.sapNumber,
+            emailWithSource._2
           )
         }
       )

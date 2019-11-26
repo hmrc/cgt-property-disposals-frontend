@@ -867,7 +867,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               mockAttemptNameMatch(validTrn, validTrustName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
                 Right(bpr)
               )
-              mockStoreSession(sessionDataWithStatus(SubscriptionMissingData(bpr)))(Future.successful(Left(Error(""))))
+              mockStoreSession(sessionDataWithStatus(SubscriptionMissingData(bpr, None)))(Future.successful(Left(Error(""))))
             }
 
             val result = performAction("trustName" -> validTrustName.value, "trn" -> validTrn.value)
@@ -901,7 +901,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               mockAttemptNameMatch(validTrn, validTrustName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
                 Right(bpr)
               )
-              mockStoreSession(sessionDataWithStatus(SubscriptionMissingData(bpr)))(Future.successful(Right(())))
+              mockStoreSession(sessionDataWithStatus(SubscriptionMissingData(bpr, None)))(Future.successful(Right(())))
             }
 
             val result = performAction("trustName" -> validTrustName.value, "trn" -> validTrn.value)

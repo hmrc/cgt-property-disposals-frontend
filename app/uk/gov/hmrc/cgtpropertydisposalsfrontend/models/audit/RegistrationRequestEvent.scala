@@ -20,13 +20,13 @@ import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 
 final case class RegistrationRequestEvent(
-  prePopulatedUserData: Option[RegistrationPrePopulatedUserData],
-  manuallyEnteredData: Option[RegistrationManuallyEnteredData]
+  prePopulatedUserData: RegistrationPrePopulatedUserData,
+  manuallyEnteredData: RegistrationManuallyEnteredData
 )
 
 final case class RegistrationPrePopulatedUserData(
   regime: String,
-  emailAddress: EmailAuditDetails
+  emailAddress: Option[EmailAuditDetails]
 )
 
 object RegistrationPrePopulatedUserData {
@@ -35,7 +35,7 @@ object RegistrationPrePopulatedUserData {
 
 final case class RegistrationManuallyEnteredData(
   contactName: String,
-  emailAddress: String,
+  emailAddress: Option[String],
   address: Address
 )
 

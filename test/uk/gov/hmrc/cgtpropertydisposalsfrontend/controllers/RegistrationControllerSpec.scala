@@ -38,6 +38,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -116,7 +117,7 @@ class RegistrationControllerSpec
       "prepopulate the form if the user has previously answered the question" in {
         List(
           RegistrationStatus.IndividualWantsToRegisterTrust,
-          RegistrationStatus.IndividualSupplyingInformation(None, None, None)
+          RegistrationStatus.IndividualSupplyingInformation(None, None, None, None)
         ).foreach { journeyStatus =>
           val sessionData =
             SessionData.empty.copy(
@@ -189,7 +190,7 @@ class RegistrationControllerSpec
           "the request selects individual" in {
             val updatedSession =
               sessionData.copy(
-                journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None, None, None))
+                journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None, None, None, None))
               )
 
             inSequence {
@@ -207,7 +208,7 @@ class RegistrationControllerSpec
 
           "the session cannot be updated" in {
             List[(String, RegistrationStatus)](
-              "1" -> RegistrationStatus.IndividualSupplyingInformation(None, None, None),
+              "1" -> RegistrationStatus.IndividualSupplyingInformation(None, None, None, None),
               "0" -> RegistrationStatus.IndividualWantsToRegisterTrust
             ).foreach {
               case (entityType, registrationStatus) =>
@@ -244,7 +245,7 @@ class RegistrationControllerSpec
           "the user selects individual and has previously indicated that they wish to register as an individual" in {
             val session =
               sessionData.copy(
-                journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None, None, None))
+                journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None, None, None, None))
               )
 
             inSequence {
@@ -296,7 +297,7 @@ class RegistrationControllerSpec
                 Right(
                   Some(
                     sessionData
-                      .copy(journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None, None, None)))
+                      .copy(journeyStatus = Some(RegistrationStatus.IndividualSupplyingInformation(None, None, None, None)))
                   )
                 )
               )
@@ -331,7 +332,7 @@ class RegistrationControllerSpec
                   Some(
                     SessionData.empty.copy(
                       journeyStatus = Some(
-                        RegistrationStatus.IndividualSupplyingInformation(None, None, None)
+                        RegistrationStatus.IndividualSupplyingInformation(None, None, None, None)
                       )
                     )
                   )
@@ -356,7 +357,7 @@ class RegistrationControllerSpec
                   Some(
                     SessionData.empty.copy(
                       journeyStatus = Some(
-                        RegistrationStatus.IndividualSupplyingInformation(Some(sample[IndividualName]), None, None)
+                        RegistrationStatus.IndividualSupplyingInformation(Some(sample[IndividualName]), None, None, None)
                       )
                     )
                   )
@@ -384,7 +385,7 @@ class RegistrationControllerSpec
                   Some(
                     SessionData.empty.copy(
                       journeyStatus = Some(
-                        RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), None)
+                        RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), None, None)
                       )
                     )
                   )
@@ -419,7 +420,7 @@ class RegistrationControllerSpec
                   Some(
                     SessionData.empty.copy(
                       journeyStatus = Some(
-                        RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), None)
+                        RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), None, None)
                       )
                     )
                   )
@@ -442,16 +443,19 @@ class RegistrationControllerSpec
           val name    = sample[IndividualName]
           val address = sample[Address]
           val email   = sample[Email]
+          val emailSource = sample[EmailSource]
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(
               SessionData.empty.copy(journeyStatus = Some(
-                RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), Some(email))
+                RegistrationStatus.IndividualSupplyingInformation(
+                  Some(name), Some(address), Some(email), Some(emailSource)
+                )
               ))
             ))))
             mockStoreSession(SessionData.empty.copy(journeyStatus = Some(
-              RegistrationStatus.RegistrationReady(RegistrationDetails(name, email, address))
+              RegistrationStatus.RegistrationReady(RegistrationDetails(name, email, address, emailSource))
             )))(Future.successful(Left(Error(""))))
           }
 
@@ -468,7 +472,7 @@ class RegistrationControllerSpec
             mockGetSession(Future.successful(Right(Some(
               SessionData.empty.copy(journeyStatus = Some(
                 RegistrationStatus.RegistrationReady(
-                  RegistrationDetails(sample[IndividualName], sample[Email], sample[Address])
+                  RegistrationDetails(sample[IndividualName], sample[Email], sample[Address], sample[EmailSource])
                 )
               ))
             ))))
@@ -482,16 +486,17 @@ class RegistrationControllerSpec
           val name    = sample[IndividualName]
           val address = sample[Address]
           val email   = sample[Email]
+          val emailSource = sample[EmailSource]
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(
               SessionData.empty.copy(journeyStatus = Some(
-                RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), Some(email))
+                RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), Some(email), Some(emailSource))
               ))
             ))))
             mockStoreSession(SessionData.empty.copy(journeyStatus = Some(
-              RegistrationStatus.RegistrationReady(RegistrationDetails(name, email, address))
+              RegistrationStatus.RegistrationReady(RegistrationDetails(name, email, address, emailSource))
             )))(Future.successful(Right(())))
           }
 

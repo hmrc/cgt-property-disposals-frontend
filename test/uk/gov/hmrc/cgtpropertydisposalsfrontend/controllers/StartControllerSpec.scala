@@ -47,6 +47,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{BusinessPartnerRecordS
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import org.scalacheck.ScalacheckShapeless._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -446,8 +447,8 @@ class StartControllerSpec
 
         "the session data indicates that some subscription details are missing" must {
 
-          val bpr = models.bpr.BusinessPartnerRecord(
-            Some(emailAddress),
+          val bprWithNoEmail = models.bpr.BusinessPartnerRecord(
+            None,
             sample[Address],
             "sap",
             Right(name)
@@ -461,12 +462,13 @@ class StartControllerSpec
                 SubscriptionDetails(
                   Right(name),
                   emailAddress,
-                  bpr.address,
+                  bprWithNoEmail.address,
                   ContactName(name.makeSingleName),
-                  bpr.sapNumber
+                  bprWithNoEmail.sapNumber,
+                  EmailSource.ManuallyEntered
                 )
 
-              val session = SessionData.empty.copy(journeyStatus = Some(SubscriptionMissingData(bpr)))
+              val session = SessionData.empty.copy(journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail, Some(emailAddress))))
 
               val updatedSession =
                 SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(individualSubscriptionDetails)))
@@ -492,9 +494,8 @@ class StartControllerSpec
           "redirect to enter email" when {
 
             "the email address is still missing" in {
-              val bprWithNoEmail = bpr.copy(emailAddress = None)
               val sessionData =
-                SessionData.empty.copy(journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail)))
+                SessionData.empty.copy(journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail, None)))
 
               inSequence {
                 mockAuthWithAllRetrievals(
@@ -537,7 +538,8 @@ class StartControllerSpec
             emailAddress,
             bpr.address,
             ContactName(name.makeSingleName()),
-            bpr.sapNumber
+            bpr.sapNumber,
+            EmailSource.BusinessPartnerRecord
           )
 
           "redirect to check subscription details" when {
@@ -560,7 +562,7 @@ class StartControllerSpec
                 None
               ).foreach { maybeSession =>
                 val session =
-                  SessionData.empty.copy(bprEmail = Some(Email("email")), journeyStatus = Some(SubscriptionReady(individualSubscriptionDetails)))
+                  SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(individualSubscriptionDetails)))
 
                 inSequence {
                   mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, None)
@@ -583,7 +585,7 @@ class StartControllerSpec
                 None
               ).foreach { maybeSession =>
                 val session =
-                  SessionData.empty.copy(bprEmail = Some(Email("email")), journeyStatus = Some(SubscriptionReady(individualSubscriptionDetails)))
+                  SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(individualSubscriptionDetails)))
 
                 inSequence {
                   mockAuthWithAllRetrievals(
@@ -611,9 +613,11 @@ class StartControllerSpec
               val bprWithNoEmail = bpr.copy(emailAddress = None)
               val ggEmail        = Email("email")
               val session = SessionData.empty.copy(
-                ggEmail = Some(ggEmail),
                 journeyStatus = Some(
-                  SubscriptionReady(individualSubscriptionDetails.copy(emailAddress = ggEmail))
+                  SubscriptionReady(individualSubscriptionDetails.copy(
+                    emailAddress = ggEmail,
+                    emailSource = EmailSource.GovernmentGateway
+                  ))
                 )
               )
 
@@ -634,9 +638,11 @@ class StartControllerSpec
               val bprWithNoEmail = bpr.copy(emailAddress = None)
               val ggEmail        = Email("email")
               val session = SessionData.empty.copy(
-                ggEmail = Some(ggEmail),
                 journeyStatus = Some(
-                  SubscriptionReady(individualSubscriptionDetails.copy(emailAddress = ggEmail))
+                  SubscriptionReady(individualSubscriptionDetails.copy(
+                    emailAddress = ggEmail,
+                    emailSource = EmailSource.GovernmentGateway
+                  ))
                 )
               )
               val sautr = SAUTR("sautr")
@@ -663,9 +669,11 @@ class StartControllerSpec
             }
 
             "the session data indicates there is subscription data missing and there is now enough data to proceed" in {
-              val session = SessionData.empty.copy(journeyStatus = Some(SubscriptionMissingData(bpr)))
+              val session = SessionData.empty.copy(journeyStatus = Some(SubscriptionMissingData(bpr, Some(emailAddress))))
               val updatedSession =
-                SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(individualSubscriptionDetails)))
+                SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(
+                  individualSubscriptionDetails.copy(emailSource = EmailSource.ManuallyEntered)
+                )))
 
               inSequence {
                 mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, None)
@@ -815,7 +823,7 @@ class StartControllerSpec
 
             "the user has CL200 and the call to get BPR succeeds but it cannot be written to session" in {
               val session =
-                SessionData.empty.copy(bprEmail = Some(Email("email")), journeyStatus = Some(SubscriptionReady(individualSubscriptionDetails)))
+                SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(individualSubscriptionDetails)))
 
               inSequence {
                 mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, None)
@@ -854,7 +862,7 @@ class StartControllerSpec
 
             "the user has CL<200 and the call to get BPR succeeds but it cannot be written to session" in {
               val session =
-                SessionData.empty.copy(bprEmail = Some(Email("email")), journeyStatus = Some(SubscriptionReady(individualSubscriptionDetails)))
+                SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(individualSubscriptionDetails)))
 
               inSequence {
                 mockAuthWithAllRetrievals(
@@ -885,7 +893,7 @@ class StartControllerSpec
               val bprWithNoEmail = bpr.copy(emailAddress = None)
               val updatedSession =
                 SessionData.empty.copy(
-                  journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail)),
+                  journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail, None)),
                   needMoreDetailsDetails = Some(
                     NeedMoreDetailsDetails(
                       email.routes.SubscriptionEnterEmailController.enterEmail().url,
@@ -911,7 +919,7 @@ class StartControllerSpec
               val bprWithNoEmail = bpr.copy(emailAddress = None)
               val updatedSession =
                 SessionData.empty.copy(
-                  journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail)),
+                  journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail, None)),
                   needMoreDetailsDetails = Some(
                     NeedMoreDetailsDetails(
                       email.routes.SubscriptionEnterEmailController.enterEmail().url,
@@ -945,7 +953,7 @@ class StartControllerSpec
               "is still missing" in {
               val bprWithNoEmail = bpr.copy(emailAddress = None)
               val sessionData =
-                SessionData.empty.copy(journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail)))
+                SessionData.empty.copy(journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail, None)))
 
               inSequence {
                 mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, None)
@@ -973,7 +981,8 @@ class StartControllerSpec
               emailAddress,
               bpr.address,
               ContactName(trustName.value),
-              bpr.sapNumber
+              bpr.sapNumber,
+              EmailSource.BusinessPartnerRecord
             )
 
           "redirect to the subscription confirmation page" when {
@@ -1038,7 +1047,7 @@ class StartControllerSpec
                   Right(BusinessPartnerRecordResponse(Some(bpr)))
                 )
                 mockStoreSession(
-                  SessionData.empty.copy(bprEmail = Some(Email("email")), journeyStatus = Some(SubscriptionReady(trustSubscriptionDetails)))
+                  SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(trustSubscriptionDetails)))
                 )(Future.successful(Left(Error(""))))
               }
 
@@ -1071,7 +1080,7 @@ class StartControllerSpec
                   Right(BusinessPartnerRecordResponse(Some(bpr)))
                 )
                 mockStoreSession(
-                  SessionData.empty.copy(bprEmail = Some(Email("email")), journeyStatus = Some(SubscriptionReady(trustSubscriptionDetails)))
+                  SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(trustSubscriptionDetails)))
                 )(Future.successful(Right(())))
               }
 
@@ -1089,9 +1098,10 @@ class StartControllerSpec
                 )
                 mockStoreSession(
                   SessionData.empty.copy(
-                    ggEmail = Some(Email("email")),
                     journeyStatus =
-                      Some(SubscriptionReady(trustSubscriptionDetails.copy(emailAddress = Email("email"))))
+                      Some(SubscriptionReady(trustSubscriptionDetails.copy(
+                        emailAddress = Email("email"), emailSource = EmailSource.GovernmentGateway
+                      )))
                   )
                 )(Future.successful(Right(())))
               }
@@ -1111,9 +1121,14 @@ class StartControllerSpec
             }
 
             "the session data indicates there is subscription data missing and there is now enough data to proceed" in {
-              val session = SessionData.empty.copy(ggEmail = Some(Email("email")), journeyStatus = Some(SubscriptionMissingData(bpr)))
+              val session = SessionData.empty.copy(
+                journeyStatus = Some(SubscriptionMissingData(bpr.copy(emailAddress = None), Some(emailAddress) ))
+              )
+
               val updatedSession =
-                SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(trustSubscriptionDetails)))
+                SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(
+                  trustSubscriptionDetails.copy(emailSource = EmailSource.ManuallyEntered)
+                )))
 
               inSequence {
                 mockAuthWithAllTrustRetrievals(sautr, None)
@@ -1126,9 +1141,13 @@ class StartControllerSpec
 
             "the session data indicates there is subscription data missing and there is now enough data to proceed " +
               "for a trust without a trust enrolment" in {
-              val session = SessionData.empty.copy(ggEmail = Some(Email("email")), journeyStatus = Some(SubscriptionMissingData(bpr)))
+              val session = SessionData.empty.copy(
+                journeyStatus = Some(SubscriptionMissingData(bpr.copy(emailAddress = None), Some(emailAddress)))
+              )
               val updatedSession =
-                SessionData.empty.copy(ggEmail = Some(Email("email")), journeyStatus = Some(SubscriptionReady(trustSubscriptionDetails)))
+                SessionData.empty.copy(journeyStatus = Some(SubscriptionReady(
+                  trustSubscriptionDetails.copy(emailSource = EmailSource.ManuallyEntered)
+                )))
 
               inSequence {
                 mockAuthWithAllRetrievals(
@@ -1155,7 +1174,7 @@ class StartControllerSpec
             "the session data indicates there is subscription data missing and no email can be found " +
               "for a trust without a trust enrolment" in {
               val session =
-                SessionData.empty.copy(ggEmail = Some(Email("email")), journeyStatus = Some(SubscriptionMissingData(bpr.copy(emailAddress = None))))
+                SessionData.empty.copy(journeyStatus = Some(SubscriptionMissingData(bpr.copy(emailAddress = None), None)))
 
               inSequence {
                 mockAuthWithAllRetrievals(
@@ -1190,7 +1209,7 @@ class StartControllerSpec
                 )
                 mockStoreSession(
                   SessionData.empty.copy(
-                    journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail)),
+                    journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail, None)),
                     needMoreDetailsDetails = Some(
                       NeedMoreDetailsDetails(
                         email.routes.SubscriptionEnterEmailController.enterEmail().url,
@@ -1208,7 +1227,7 @@ class StartControllerSpec
               "is still missing" in {
               val bprWithNoEmail = bpr.copy(emailAddress = None)
               val sessionData =
-                SessionData.empty.copy(journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail)))
+                SessionData.empty.copy(journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail, None)))
 
               inSequence {
                 mockAuthWithAllTrustRetrievals(sautr, None)

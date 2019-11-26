@@ -30,6 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.BusinessPartnerRecordRequest.{IndividualBusinessPartnerRecordRequest, TrustBusinessPartnerRecordRequest}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -106,24 +107,24 @@ class StartController @Inject()(
       case (UserType.Subscribed(cgtReference, _), _) =>
         handleSubscribedUser(cgtReference)
 
-      case (UserType.IndividualWithInsufficientConfidenceLevel(maybeNino, maybeSautr, maybeEmail, ggCredId), None) =>
+      case (UserType.IndividualWithInsufficientConfidenceLevel(maybeNino, maybeSautr, ggEmail, ggCredId), None) =>
         // this is the first time a person with individual insufficient confidence level has come to start
-        handleInsufficientConfidenceLevel(maybeNino, maybeSautr, maybeEmail, ggCredId)
+        handleInsufficientConfidenceLevel(maybeNino, maybeSautr, ggEmail, ggCredId)
 
-      case (i: UserType.Individual, Some(SubscriptionStatus.SubscriptionMissingData(bpr))) =>
-        handleSubscriptionMissingData(bpr, i.email)
+      case (i: UserType.Individual, Some(SubscriptionStatus.SubscriptionMissingData(bpr, enteredEmail))) =>
+        handleSubscriptionMissingData(bpr, i.email, enteredEmail)
 
       case (
           i: UserType.IndividualWithInsufficientConfidenceLevel,
-          Some(SubscriptionStatus.SubscriptionMissingData(bpr))
+          Some(SubscriptionStatus.SubscriptionMissingData(bpr, enteredEmail))
           ) =>
-        handleSubscriptionMissingData(bpr, i.email)
+        handleSubscriptionMissingData(bpr, i.email, enteredEmail)
 
-      case (t: UserType.Trust, Some(SubscriptionStatus.SubscriptionMissingData(bpr))) =>
-        handleSubscriptionMissingData(bpr, t.email)
+      case (t: UserType.Trust, Some(SubscriptionStatus.SubscriptionMissingData(bpr, enteredEmail))) =>
+        handleSubscriptionMissingData(bpr, t.email, enteredEmail)
 
-      case (t: UserType.OrganisationUnregisteredTrust, Some(SubscriptionStatus.SubscriptionMissingData(bpr))) =>
-        handleSubscriptionMissingData(bpr, t.email)
+      case (t: UserType.OrganisationUnregisteredTrust, Some(SubscriptionStatus.SubscriptionMissingData(bpr, enteredEmail))) =>
+        handleSubscriptionMissingData(bpr, t.email, enteredEmail)
 
       case (i: UserType.Individual, None) =>
         buildIndividualSubscriptionData(i, i.email)
@@ -208,7 +209,6 @@ class StartController @Inject()(
 
     updateSession(sessionStore, request)(
       _.copy(
-        ggEmail       = ggEmail,
         journeyStatus = Some(newSessionData),
         needMoreDetailsDetails = Some(
           NeedMoreDetailsDetails(
@@ -231,7 +231,7 @@ class StartController @Inject()(
   private def handleInsufficientConfidenceLevel(
     maybeNino: Option[NINO],
     maybeSautr: Option[SAUTR],
-    maybeEmail: Option[Email],
+    ggEmail: Option[Email],
     ggCredId: GGCredId
   )(
     implicit request: RequestWithSessionDataAndRetrievedData[AnyContent]
@@ -239,14 +239,13 @@ class StartController @Inject()(
     case None =>
       maybeSautr match {
         case Some(sautr) =>
-          buildIndividualSubscriptionData(Individual(Left(sautr), maybeEmail), maybeEmail)
+          buildIndividualSubscriptionData(Individual(Left(sautr), ggEmail), ggEmail)
 
         case None =>
           val subscriptionStatus =
-            SubscriptionStatus.TryingToGetIndividualsFootprint(None, None, maybeEmail, ggCredId)
+            SubscriptionStatus.TryingToGetIndividualsFootprint(None, None, ggEmail, ggCredId)
           updateSession(sessionStore, request)(
             _.copy(
-              ggEmail       = maybeEmail,
               journeyStatus = Some(subscriptionStatus),
               needMoreDetailsDetails = Some(
                 NeedMoreDetailsDetails(
@@ -296,19 +295,20 @@ class StartController @Inject()(
                            )
         maybeSubscriptionDetails <- {
           EitherT.pure(
-            bprWithTrustName._1.emailAddress
-              .orElse(trust.email)
+            bprWithTrustName._1.emailAddress.map(_ -> EmailSource.BusinessPartnerRecord)
+              .orElse(trust.email.map(_ -> EmailSource.GovernmentGateway))
               .fold[Either[MissingData.Email.type, SubscriptionDetails]](
                 Left(SubscriptionDetails.MissingData.Email)
-              ) { email =>
+              ) { emailWithSource =>
                 {
                   Right(
                     SubscriptionDetails(
                       Left(bprWithTrustName._2),
-                      email,
+                      emailWithSource._1,
                       bprWithTrustName._1.address,
                       ContactName(bprWithTrustName._2.value),
-                      bprWithTrustName._1.sapNumber
+                      bprWithTrustName._1.sapNumber,
+                      emailWithSource._2
                     )
                   )
                 }
@@ -320,9 +320,7 @@ class StartController @Inject()(
                 _ =>
                   updateSession(sessionStore, request)(
                     _.copy(
-                      bprEmail      = bprWithTrustName._1.emailAddress,
-                      ggEmail       = ggEmail,
-                      journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bprWithTrustName._1)),
+                      journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bprWithTrustName._1, None)),
                       needMoreDetailsDetails = Some(
                         NeedMoreDetailsDetails(
                           email.routes.SubscriptionEnterEmailController.enterEmail().url,
@@ -334,8 +332,6 @@ class StartController @Inject()(
                 subscriptionDetails =>
                   updateSession(sessionStore, request)(
                     _.copy(
-                      bprEmail      = bprWithTrustName._1.emailAddress,
-                      ggEmail       = ggEmail,
                       journeyStatus = Some(SubscriptionStatus.SubscriptionReady(subscriptionDetails))
                     )
                   )
@@ -354,10 +350,12 @@ class StartController @Inject()(
     )
   }
 
-  private def handleSubscriptionMissingData(bpr: BusinessPartnerRecord, retrievedEmail: Option[Email])(
+  private def handleSubscriptionMissingData(bpr: BusinessPartnerRecord,
+                                            ggEmail: Option[Email],
+                                            enteredEmail: Option[Email])(
     implicit request: RequestWithSessionDataAndRetrievedData[_]
   ): Future[Result] =
-    SubscriptionDetails(bpr, retrievedEmail).fold(
+    SubscriptionDetails(bpr, ggEmail, enteredEmail).fold(
       { missingData =>
         logger.info(s"Could not find the following data for subscription details: ${missingData.toList.mkString(",")}")
         missingData.head match {
@@ -367,7 +365,6 @@ class StartController @Inject()(
       subscriptionDetails =>
         updateSession(sessionStore, request)(
           _.copy(
-            ggEmail       = retrievedEmail,
             journeyStatus = Some(SubscriptionStatus.SubscriptionReady(subscriptionDetails))
           )
         ).map { _ =>
@@ -385,15 +382,13 @@ class StartController @Inject()(
       bpr <- EitherT.fromEither[Future](
               Either.fromOption(bprResponse.businessPartnerRecord, Error("Could not find BPR for individual"))
             )
-      maybeSubscriptionDetails <- EitherT.pure(SubscriptionDetails(bpr, individual.email))
+      maybeSubscriptionDetails <- EitherT.pure(SubscriptionDetails(bpr, individual.email, None))
       _ <- EitherT(
             maybeSubscriptionDetails.fold[Future[Either[Error, Unit]]](
               _ =>
                 updateSession(sessionStore, request)(
                   _.copy(
-                    bprEmail      = bpr.emailAddress,
-                    ggEmail       = ggEmail,
-                    journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bpr)),
+                    journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bpr, None)),
                     needMoreDetailsDetails = Some(
                       NeedMoreDetailsDetails(
                         email.routes.SubscriptionEnterEmailController.enterEmail().url,
@@ -405,8 +400,6 @@ class StartController @Inject()(
               subscriptionDetails =>
                 updateSession(sessionStore, request)(
                   _.copy(
-                    bprEmail      = bpr.emailAddress,
-                    ggEmail       = ggEmail,
                     journeyStatus = Some(SubscriptionStatus.SubscriptionReady(subscriptionDetails))
                   )
                 )

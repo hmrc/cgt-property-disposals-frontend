@@ -36,7 +36,7 @@ class RegistrationEnterIndividualNameControllerSpec
 
   override lazy val controller: RegistrationEnterIndividualNameController = instanceOf[RegistrationEnterIndividualNameController]
 
-  override lazy val validJourney: IndividualSupplyingInformation = IndividualSupplyingInformation(None, None, None)
+  override lazy val validJourney: IndividualSupplyingInformation = IndividualSupplyingInformation(None, None, None, None)
 
   def isValidJourney(journey: JourneyStatus): Boolean = journey match {
     case _: IndividualSupplyingInformation => true

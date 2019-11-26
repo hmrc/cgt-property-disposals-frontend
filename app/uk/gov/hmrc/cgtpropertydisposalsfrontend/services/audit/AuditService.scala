@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit
 
+import cats.syntax.either._
 import cats.syntax.eq._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json.{Json, Writes}
@@ -23,9 +24,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.audit._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, RegistrationDetails, SubscriptionDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{RegistrationDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions._
@@ -74,8 +76,6 @@ trait AuditService {
 
   def sendSubscriptionRequestEvent(
     subscriptionDetails: SubscriptionDetails,
-    ggEmail: Option[Email],
-    bprEmail: Option[Email],
     path: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit
 
@@ -144,9 +144,8 @@ trait AuditService {
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit
 
   def sendRegistrationRequestEvent(
-    registrationDetails: RegistrationDetails,
-    ggEmail: Option[Email],
-    path: String
+                                    registrationDetails: RegistrationDetails,
+                                    path: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit
 
 }
@@ -265,7 +264,6 @@ class AuditServiceImpl @Inject()(auditConnector: AuditConnector) extends AuditSe
     newContactName: String,
     path: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit = {
-
     val detail = SubscriptionContactNameChangedEvent(
       oldContactName,
       newContactName
@@ -285,7 +283,6 @@ class AuditServiceImpl @Inject()(auditConnector: AuditConnector) extends AuditSe
     isManuallyEnteredAddress: Boolean,
     path: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit = {
-
     val source = if (isManuallyEnteredAddress) "manual" else "postcode-lookup"
 
     val detail = SubscriptionContactAddressChangedEvent(
@@ -304,72 +301,38 @@ class AuditServiceImpl @Inject()(auditConnector: AuditConnector) extends AuditSe
 
   override def sendSubscriptionRequestEvent(
     subscriptionDetails: SubscriptionDetails,
-    ggEmail: Option[Email],
-    bprEmail: Option[Email],
     path: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit = {
+    val prepopulatedEmailSource =
+      if (subscriptionDetails.emailSource === EmailSource.BusinessPartnerRecord)
+        Some("ETMP business partner record")
+      else if (subscriptionDetails.emailSource === EmailSource.GovernmentGateway)
+        Some("government-gateway")
+      else
+        None
 
-    def isPrepop(ggEmail: Option[Email], bprEmail: Option[Email], email: Email): (Boolean, String) =
-      bprEmail match {
-        case Some(be) =>
-          if (be === email) (true, "ETMP business partner record")
-          else {
-            ggEmail match {
-              case Some(ge) => if (ge === email) (true, "government-gateway") else (false, "")
-              case None     => (false, "")
-            }
-          }
-        case None =>
-          ggEmail match {
-            case Some(ge) => if (ge === email) (true, "government-gateway") else (false, "")
-            case None     => (false, "")
-          }
-      }
-
-    val (prepop, origin) = isPrepop(ggEmail, bprEmail, subscriptionDetails.emailAddress)
-
-    val detail: Either[PrePopulatedUserData, ManuallyEnteredData] = if (prepop) {
-      subscriptionDetails.name match {
-        case Left(trust) =>
-          Left(
-            PrePopulatedUserData(
-              "CGT",
-              subscriptionDetails.sapNumber,
-              None,
-              Some(TrustAuditDetails(trust.value)),
-              EmailAuditDetails(subscriptionDetails.emailAddress.value, origin)
-            )
-          )
-
-        case Right(individual) =>
-          Left(
-            PrePopulatedUserData(
-              "CGT",
-              subscriptionDetails.sapNumber,
-              Some(IndividualAuditDetails(individual.firstName, individual.lastName)),
-              None,
-              EmailAuditDetails(subscriptionDetails.emailAddress.value, origin)
-            )
-          )
-      }
-    } else {
-      Right(
-        ManuallyEnteredData(
-          subscriptionDetails.contactName.value,
-          subscriptionDetails.emailAddress.value,
-          subscriptionDetails.address
-        )
+    val prePopulatedUserData = {
+      PrePopulatedUserData(
+        "CGT",
+        subscriptionDetails.sapNumber,
+        subscriptionDetails.name.toOption.map(i => IndividualAuditDetails(i.firstName, i.lastName)),
+        subscriptionDetails.name.swap.toOption.map(t => TrustAuditDetails(t.value)),
+        prepopulatedEmailSource.map(source => EmailAuditDetails(subscriptionDetails.emailAddress.value, source))
       )
     }
 
-    val result = detail match {
-      case Left(prePopulatedUserData) => SubscriptionRequestEvent(Some(prePopulatedUserData), None)
-      case Right(manuallyEnteredData) => SubscriptionRequestEvent(None, Some(manuallyEnteredData))
-    }
+    val manuallyEnteredData =
+      ManuallyEnteredData(
+        subscriptionDetails.contactName.value,
+        if (prepopulatedEmailSource.isDefined) None else Some(subscriptionDetails.emailAddress.value),
+        subscriptionDetails.address
+      )
+
+    val event = SubscriptionRequestEvent(prePopulatedUserData, manuallyEnteredData)
 
     sendEvent(
       "subscriptionRequest",
-      result,
+      event,
       hc.toAuditTags("subscription-request", path)
     )
 
@@ -380,7 +343,6 @@ class AuditServiceImpl @Inject()(auditConnector: AuditConnector) extends AuditSe
     newContactName: IndividualName,
     path: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit = {
-
     val detail = RegistrationContactNameChangedEvent(
       s"${oldContactName.firstName} ${oldContactName.lastName}",
       s"${newContactName.firstName} ${newContactName.lastName}"
@@ -482,51 +444,34 @@ class AuditServiceImpl @Inject()(auditConnector: AuditConnector) extends AuditSe
 
   override def sendRegistrationRequestEvent(
     registrationDetails: RegistrationDetails,
-    ggEmail: Option[Email],
     path: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit = {
+    val prepopulatedEmailSource =
+      if (registrationDetails.emailSource === EmailSource.BusinessPartnerRecord)
+        Some("ETMP business partner record")
+      else if (registrationDetails.emailSource === EmailSource.GovernmentGateway)
+        Some("government-gateway")
+      else
+        None
 
-    def isPrepop(ggEmail: Option[Email], email: Email): (Boolean, String) =
-      ggEmail match {
-        case Some(ge) =>
-          if (ge === email) (true, "government-gateway")
-          else {
-            (false, "")
-          }
-        case None =>
-          (false, "")
-      }
-
-    val (prepop, origin) = isPrepop(ggEmail, registrationDetails.emailAddress)
-
-    val detail: Either[RegistrationPrePopulatedUserData, RegistrationManuallyEnteredData] = if (prepop) {
-      Left(
-        RegistrationPrePopulatedUserData(
-          "CGT",
-          EmailAuditDetails(
-            registrationDetails.emailAddress.value,
-            origin
-          )
-        )
+    val prePopulatedUserData =
+      RegistrationPrePopulatedUserData(
+        "CGT",
+        prepopulatedEmailSource.map(source => EmailAuditDetails(registrationDetails.emailAddress.value, source))
       )
-    } else {
-      Right(
-        RegistrationManuallyEnteredData(
-          s"${registrationDetails.name.firstName} ${registrationDetails.name.lastName}",
-          registrationDetails.emailAddress.value,
-          registrationDetails.address
-        )
-      )
-    }
 
-    val result = detail match {
-      case Left(prePopulatedUserData) => RegistrationRequestEvent(Some(prePopulatedUserData), None)
-      case Right(manuallyEnteredData) => RegistrationRequestEvent(None, Some(manuallyEnteredData))
-    }
+    val manuallyEnteredData =
+      RegistrationManuallyEnteredData(
+        s"${registrationDetails.name.firstName} ${registrationDetails.name.lastName}",
+        if (prepopulatedEmailSource.isEmpty) Some(registrationDetails.emailAddress.value) else None,
+        registrationDetails.address
+      )
+
+    val event = RegistrationRequestEvent(prePopulatedUserData, manuallyEnteredData)
 
     sendEvent(
       "registrationRequest",
-      result,
+      event,
       hc.toAuditTags("registration-request", path)
     )
   }

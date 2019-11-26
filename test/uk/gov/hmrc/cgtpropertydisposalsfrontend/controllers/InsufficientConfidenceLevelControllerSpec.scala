@@ -870,7 +870,7 @@ class InsufficientConfidenceLevelControllerSpec
             mockAttemptNameMatch(validSautr, validName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
               Right(bpr)
             )
-            mockStoreSession(session(SubscriptionMissingData(bpr)))(Future.successful(Left(Error(""))))
+            mockStoreSession(session(SubscriptionMissingData(bpr, None)))(Future.successful(Left(Error(""))))
           }
 
           val result = performAction(
@@ -914,7 +914,7 @@ class InsufficientConfidenceLevelControllerSpec
             mockAttemptNameMatch(validSautr, validName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
               Right(bpr)
             )
-            mockStoreSession(session(SubscriptionMissingData(bpr)))(Future.successful(Right(())))
+            mockStoreSession(session(SubscriptionMissingData(bpr, None)))(Future.successful(Right(())))
           }
 
           val result = performAction(

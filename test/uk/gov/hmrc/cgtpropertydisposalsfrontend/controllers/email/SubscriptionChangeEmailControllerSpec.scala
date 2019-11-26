@@ -27,7 +27,8 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.{SubscriptionMissingData, SubscriptionReady}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, sample}
 
 import scala.concurrent.Future
 
@@ -45,7 +46,9 @@ class SubscriptionChangeEmailControllerSpec
     validJourneyStatus
 
   override def updateEmail(journey: SubscriptionReady, email: Email): SubscriptionReady =
-    journey.copy(subscriptionDetails = journey.subscriptionDetails.copy(emailAddress = email))
+    journey.copy(subscriptionDetails = journey.subscriptionDetails.copy(
+      emailAddress = email, emailSource = EmailSource.ManuallyEntered
+    ))
 
   override val mockUpdateEmail: Option[(SubscriptionReady, SubscriptionReady, Either[Error, Unit]) => Unit] = None
 

@@ -27,8 +27,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, sample}
 import org.scalacheck.ScalacheckShapeless._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
 
 import scala.concurrent.Future
 
@@ -46,7 +47,9 @@ class RegistrationChangeEmailControllerSpec
     validJourneyStatus
 
   override def updateEmail(journey: RegistrationReady, email: Email): RegistrationReady =
-    journey.copy(registrationDetails = journey.registrationDetails.copy(emailAddress = email))
+    journey.copy(registrationDetails = journey.registrationDetails.copy(
+      emailAddress = email, emailSource = EmailSource.ManuallyEntered
+    ))
 
   override val mockUpdateEmail: Option[(RegistrationReady, RegistrationReady, Either[Error, Unit]) => Unit] = None
 

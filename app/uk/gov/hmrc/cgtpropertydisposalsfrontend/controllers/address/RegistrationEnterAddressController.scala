@@ -64,7 +64,7 @@ class RegistrationEnterAddressController @Inject()(
     request: RequestWithSessionData[_]
   ): Either[Result, (SessionData, IndividualSupplyingInformation)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((sessionData, r @ IndividualSupplyingInformation(Some(_), None, _))) => Right(sessionData -> r)
+      case Some((sessionData, r @ IndividualSupplyingInformation(Some(_), None, _, _))) => Right(sessionData -> r)
       case _                                                                         => Left(Redirect(controllers.routes.StartController.start()))
     }
 

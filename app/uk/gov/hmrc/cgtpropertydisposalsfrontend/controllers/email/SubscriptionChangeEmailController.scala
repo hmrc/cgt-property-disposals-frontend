@@ -27,9 +27,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.AuditService
@@ -77,6 +78,9 @@ class SubscriptionChangeEmailController @Inject()(
   val subscriptionReadyEmailLens: Lens[SubscriptionReady, Email] =
     lens[SubscriptionReady].subscriptionDetails.emailAddress
 
+  val subscriptionReadyEmailSourceLens: Lens[SubscriptionReady, EmailSource] =
+    lens[SubscriptionReady].subscriptionDetails.emailSource
+
   override def updateEmail(journey: SubscriptionReady, email: Email)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, SubscriptionReady] = {
@@ -85,7 +89,9 @@ class SubscriptionChangeEmailController @Inject()(
       email.value,
       routes.SubscriptionChangeEmailController.enterEmailSubmit().url
     )
-    EitherT.rightT[Future, Error](subscriptionReadyEmailLens.set(journey)(email))
+    EitherT.rightT[Future, Error](
+      (subscriptionReadyEmailLens ~ subscriptionReadyEmailSourceLens)
+        .set(journey)(email -> EmailSource.ManuallyEntered))
   }
 
   override def auditEmailVerifiedEvent(journey: SubscriptionReady, email: Email)(implicit hc: HeaderCarrier): Unit =

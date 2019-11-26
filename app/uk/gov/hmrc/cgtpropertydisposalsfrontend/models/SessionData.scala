@@ -19,15 +19,14 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import cats.Eq
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.AddressLookupResult
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailToBeVerified}
 
 final case class SessionData(
   journeyStatus: Option[JourneyStatus],
   emailToBeVerified: Option[EmailToBeVerified],
   addressLookupResult: Option[AddressLookupResult],
   needMoreDetailsDetails: Option[NeedMoreDetailsDetails],
-  subscriptionDetailChanged: Option[SubscriptionDetail],
-  ggEmail : Option[Email],
-  bprEmail : Option[Email]
+  subscriptionDetailChanged: Option[SubscriptionDetail]
 )
 
 object SessionData {
@@ -36,6 +35,6 @@ object SessionData {
 
   implicit val eq: Eq[SessionData] = Eq.fromUniversalEquals[SessionData]
 
-  val empty: SessionData = SessionData(None, None, None, None, None, None, None)
+  val empty: SessionData = SessionData(None, None, None, None, None)
 
 }

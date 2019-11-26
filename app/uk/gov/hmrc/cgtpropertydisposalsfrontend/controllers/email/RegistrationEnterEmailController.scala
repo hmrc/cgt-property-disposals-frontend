@@ -27,6 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -79,7 +80,7 @@ class RegistrationEnterEmailController @Inject()(
   override def updateEmail(journey: IndividualMissingEmail, email: Email)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, RegistrationReady] =
-    EitherT.rightT[Future, Error](RegistrationReady(RegistrationDetails(journey.name, email, journey.address)))
+    EitherT.rightT[Future, Error](RegistrationReady(RegistrationDetails(journey.name, email, journey.address, EmailSource.ManuallyEntered)))
 
   override def auditEmailVerifiedEvent(journey: IndividualMissingEmail, email: Email)(
     implicit hc: HeaderCarrier

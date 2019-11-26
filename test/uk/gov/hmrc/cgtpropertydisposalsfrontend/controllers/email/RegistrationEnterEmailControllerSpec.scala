@@ -27,9 +27,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Email, Error, RegistrationDetails, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, RegistrationDetails, sample}
 import org.scalacheck.ScalacheckShapeless._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionMissingData
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
 
 import scala.concurrent.Future
 
@@ -47,7 +48,7 @@ class RegistrationEnterEmailControllerSpec
     sample[RegistrationReady]
 
   override def updateEmail(journey: IndividualMissingEmail, email: Email): RegistrationReady =
-    RegistrationReady(RegistrationDetails(journey.name, email, journey.address))
+    RegistrationReady(RegistrationDetails(journey.name, email, journey.address, EmailSource.ManuallyEntered))
 
   override val mockUpdateEmail: Option[(IndividualMissingEmail, RegistrationReady, Either[Error, Unit]) => Unit] = None
 

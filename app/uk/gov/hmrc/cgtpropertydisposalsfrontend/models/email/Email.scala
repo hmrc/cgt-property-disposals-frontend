@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email
 
 import cats.Eq
-import cats.syntax.eq._
 import cats.instances.string._
-import play.api.data.{Form, Mapping}
+import cats.syntax.eq._
 import play.api.data.Forms.nonEmptyText
+import play.api.data.Mapping
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Format
 
