@@ -112,6 +112,10 @@ class SubscriptionController @Inject()(
           }
           case AlreadySubscribed =>
             logger.info("Response to subscription request indicated that the user has already subscribed to cgt")
+            auditService.sendAccessWithWrongGGAccountEvent(
+              request.subscriptionReady.ggCredId,
+              routes.SubscriptionController.checkYourDetailsSubmit().url
+            )
             Redirect(routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
         }
       )
@@ -128,7 +132,7 @@ class SubscriptionController @Inject()(
     implicit request =>
       request.sessionData.flatMap(_.journeyStatus) match {
         case Some(AlreadySubscribedWithDifferentGGAccount(_)) => Ok(alreadySubscribedWithDifferentGGAccountPage())
-        case _                                             => Redirect(routes.StartController.start())
+        case _                                                => Redirect(routes.StartController.start())
       }
   }
 

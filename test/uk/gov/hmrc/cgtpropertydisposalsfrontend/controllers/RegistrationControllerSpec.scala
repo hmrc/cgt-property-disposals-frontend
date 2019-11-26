@@ -41,9 +41,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class RegistrationControllerSpec
     extends ControllerSpec
@@ -79,7 +80,7 @@ class RegistrationControllerSpec
     (mockSubscriptionService.registerWithoutIdAndSubscribe(_: RegistrationDetails)(_: HeaderCarrier))
     .expects(registrationDetails, *)
     .returning(EitherT(Future.successful(result)))
-
+  
   "RegistrationController" when {
 
     def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =

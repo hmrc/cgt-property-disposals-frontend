@@ -247,6 +247,7 @@ class RegistrationController @Inject()(
             }
             case AlreadySubscribed =>
               logger.info("Response to subscription request indicated that the user has already subscribed to cgt")
+              auditService.sendAccessWithWrongGGAccountEvent(ggCredId, routes.RegistrationController.checkYourAnswersSubmit().url)
               Redirect(routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
           }
         )

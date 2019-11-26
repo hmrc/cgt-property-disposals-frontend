@@ -24,7 +24,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.audit._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailSource
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{RegistrationDetails, SubscriptionDetails}
@@ -144,8 +144,13 @@ trait AuditService {
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit
 
   def sendRegistrationRequestEvent(
-                                    registrationDetails: RegistrationDetails,
-                                    path: String
+    registrationDetails: RegistrationDetails,
+    path: String
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit
+
+  def sendAccessWithWrongGGAccountEvent(
+    ggCredId: GGCredId,
+    path: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit
 
 }
@@ -560,4 +565,16 @@ class AuditServiceImpl @Inject()(auditConnector: AuditConnector) extends AuditSe
     )
   }
 
+  override def sendAccessWithWrongGGAccountEvent(
+    ggCredId: GGCredId,
+    path: String
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit = {
+    val detail = WrongGGAccountEvent(None, ggCredId.value)
+
+    sendEvent(
+      "accessWithWrongGGAccount",
+      detail,
+      hc.toAuditTags("access-with-wrong-gg-account", path)
+    )
+  }
 }
