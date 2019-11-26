@@ -163,7 +163,7 @@ class AuditServiceImpl @Inject()(auditConnector: AuditConnector) extends AuditSe
     writes: Writes[A]
   ): Unit = {
     val extendedDataEvent = ExtendedDataEvent(
-      auditSource = "cgy-property-disposals",
+      auditSource = "cgt-property-disposals",
       auditType   = auditType,
       detail      = Json.toJson(detail),
       tags        = tags
