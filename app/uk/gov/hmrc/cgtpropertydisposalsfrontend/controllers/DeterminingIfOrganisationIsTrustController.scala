@@ -45,19 +45,18 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class DeterminingIfOrganisationIsTrustController @Inject()(
-                                                            val authenticatedAction: AuthenticatedAction,
-                                                            val sessionDataAction: SessionDataAction,
-                                                            val auditService: AuditService,
-                                                            errorHandler: ErrorHandler,
-                                                            sessionStore: SessionStore,
-                                                            bprNameMatchService: BusinessPartnerRecordNameMatchRetryService,
-                                                            doYouWantToReportForATrustPage: views.html.subscription.do_you_want_to_report_for_a_trust,
-                                                            reportWithCorporateTaxPage: views.html.subscription.report_with_corporate_tax,
-                                                            doYouHaveATrnPage: views.html.subscription.do_you_have_a_trn,
-                                                            registerYourTrustPage: views.html.register_your_trust,
-                                                            enterTrnAndNamePage: views.html.subscription.enter_trn_and_trust_name,
-                                                            tooManyAttemptsPage: views.html.subscription.too_many_trn_name_match_attempts,
-                                                            cc: MessagesControllerComponents
+  val authenticatedAction: AuthenticatedAction,
+  val sessionDataAction: SessionDataAction,
+  errorHandler: ErrorHandler,
+  sessionStore: SessionStore,
+  bprNameMatchService: BusinessPartnerRecordNameMatchRetryService,
+  doYouWantToReportForATrustPage: views.html.subscription.do_you_want_to_report_for_a_trust,
+  reportWithCorporateTaxPage: views.html.subscription.report_with_corporate_tax,
+  doYouHaveATrnPage: views.html.subscription.do_you_have_a_trn,
+  registerYourTrustPage: views.html.register_your_trust,
+  enterTrnAndNamePage: views.html.subscription.enter_trn_and_trust_name,
+  tooManyAttemptsPage: views.html.subscription.too_many_trn_name_match_attempts,
+  cc: MessagesControllerComponents
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -195,7 +194,6 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
     }
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
   def enterTrnSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidUser(request) { determiningIfOrganisationIsTrust =>
       determiningIfOrganisationIsTrust.hasTrn match {

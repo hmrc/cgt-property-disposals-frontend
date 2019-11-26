@@ -22,7 +22,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 final case class SubscribedContactAddressChangedEvent(
   oldContactAddress: Address,
   newContactAddress: Address,
-  isManuallyEntered: Boolean,
+  source: String,
   cgtReferenceId: String
 )
 

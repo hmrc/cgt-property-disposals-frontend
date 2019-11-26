@@ -50,7 +50,6 @@ class InsufficientConfidenceLevelController @Inject()(
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
   val config: Configuration,
-  val auditService: AuditService,
   bprNameMatchService: BusinessPartnerRecordNameMatchRetryService,
   sautrNameMatchRetryStore: BusinessPartnerRecordNameMatchRetryStore,
   doYouHaveANinoPage: views.html.do_you_have_a_nino,

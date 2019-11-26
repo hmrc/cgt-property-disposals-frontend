@@ -594,10 +594,13 @@ class AuditServiceImpl @Inject()(auditConnector: AuditConnector) extends AuditSe
   override def sendSubscribedContactAddressChangedEvent(
     oldContactAddress: Address,
     newContactAddress: Address,
-    source: Boolean,
+    isManuallyEnteredAddress: Boolean,
     cgtReference: String,
     path: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit = {
+
+    val source = if (isManuallyEnteredAddress) "manual-entry" else "postcode-lookup"
+
     val detail = SubscribedContactAddressChangedEvent(
       oldContactAddress,
       newContactAddress,
