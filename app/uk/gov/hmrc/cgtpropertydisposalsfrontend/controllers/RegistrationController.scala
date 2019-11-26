@@ -190,7 +190,9 @@ class RegistrationController @Inject()(
   }
 
   def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    request.sessionData.flatMap(_.journeyStatus) match {
+    val Some((journey, ggEmail)) = request.sessionData.map(data => (data.journeyStatus, data.ggEmail))
+
+    journey match {
       case Some(RegistrationStatus.RegistrationReady(registrationDetails)) =>
         val result = for {
           subscriptionResponse <- subscriptionService.registerWithoutIdAndSubscribe(registrationDetails)
@@ -198,6 +200,7 @@ class RegistrationController @Inject()(
                 case SubscriptionSuccessful(cgtReferenceNumber) =>
                   auditService.sendRegistrationRequestEvent(
                     registrationDetails,
+                    ggEmail,
                     routes.RegistrationController.checkYourAnswersSubmit().url
                   )
                   updateSession(sessionStore, request)(

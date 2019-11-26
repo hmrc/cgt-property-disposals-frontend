@@ -29,8 +29,7 @@ final case class SubscriptionDetails(
   emailAddress: Email,
   address: Address,
   contactName: ContactName,
-  sapNumber: String,
-  isGGEmail: Option[Boolean] = None
+  sapNumber: String
 )
 
 object SubscriptionDetails {
@@ -54,12 +53,7 @@ object SubscriptionDetails {
             email,
             bpr.address,
             ContactName(bpr.name.fold(_.value, n => n.makeSingleName())),
-            bpr.sapNumber,
-            (bpr.emailAddress, maybeEmail) match {
-              case (Some(_), _)    => Some(false)
-              case (None, Some(_)) => Some(true)
-              case (None, None)    => None
-            }
+            bpr.sapNumber
           )
         }
       )

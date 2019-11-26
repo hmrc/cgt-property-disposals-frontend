@@ -42,17 +42,17 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class SubscriptionEnterEmailController @Inject()(
-                                                  val authenticatedAction: AuthenticatedAction,
-                                                  val sessionDataAction: SessionDataAction,
-                                                  val sessionStore: SessionStore,
-                                                  val emailVerificationService: EmailVerificationService,
-                                                  val uuidGenerator: UUIDGenerator,
-                                                  val errorHandler: ErrorHandler,
-                                                  val auditService: AuditService,
-                                                  cc: MessagesControllerComponents,
-                                                  val enterEmailPage: views.html.email.enter_email,
-                                                  val checkYourInboxPage: views.html.email.check_your_inbox,
-                                                  val emailVerifiedPage: views.html.email.email_verified
+  val authenticatedAction: AuthenticatedAction,
+  val sessionDataAction: SessionDataAction,
+  val sessionStore: SessionStore,
+  val emailVerificationService: EmailVerificationService,
+  val uuidGenerator: UUIDGenerator,
+  val errorHandler: ErrorHandler,
+  val auditService: AuditService,
+  cc: MessagesControllerComponents,
+  val enterEmailPage: views.html.email.enter_email,
+  val checkYourInboxPage: views.html.email.check_your_inbox,
+  val emailVerifiedPage: views.html.email.email_verified
 )(implicit val viewConfig: ViewConfig, val ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -84,7 +84,11 @@ class SubscriptionEnterEmailController @Inject()(
   ): EitherT[Future, Error, SubscriptionMissingData] =
     EitherT.rightT[Future, Error](subscriptionMissingDataEmailLens.set(journey)(Some(email)))
 
-  override def auditEmailChangeAttempt(journey: SubscriptionMissingData, email: Email)(implicit hc: HeaderCarrier): Unit = ()
+  override def auditEmailVerifiedEvent(journey: SubscriptionMissingData, email: Email)(implicit hc: HeaderCarrier): Unit = ()
+
+  override def auditEmailChangeAttempt(journey: SubscriptionMissingData, email: Email)(
+    implicit hc: HeaderCarrier
+  ): Unit = ()
 
   override def name(journeyStatus: SubscriptionMissingData): ContactName =
     ContactName(journeyStatus.businessPartnerRecord.name.fold(_.value, n => n.makeSingleName()))

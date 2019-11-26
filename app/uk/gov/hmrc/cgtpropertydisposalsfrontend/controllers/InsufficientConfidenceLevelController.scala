@@ -189,11 +189,6 @@ class InsufficientConfidenceLevelController @Inject()(
                   .fold[EitherT[Future, NameMatchError[IndividualNameMatchDetails], BusinessPartnerRecord]](
                     e => EitherT.fromEither[Future](Left(NameMatchError.ValidationError(e))), {
                       individualNameMatchDetails =>
-                        auditService.sendBusinessPartnerRecordNameMatchAttemptEvent(
-                          unsuccessfulAttempts,
-                          individualNameMatchDetails,
-                          routes.InsufficientConfidenceLevelController.enterSautrAndNameSubmit().url
-                        )
                         attemptNameMatchAndUpdateSession(
                           individualNameMatchDetails,
                           insufficientConfidenceLevel.ggCredId,

@@ -72,6 +72,10 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
     request: RequestWithSessionData[_]
   ): Either[Result, (SessionData, VerificationCompleteJourney)]
 
+  def auditEmailVerifiedEvent(journey: Journey, email: Email)(
+    implicit hc: HeaderCarrier
+  ): Unit
+
   def auditEmailChangeAttempt(journey: Journey, email: Email)(
     implicit hc: HeaderCarrier
   ): Unit

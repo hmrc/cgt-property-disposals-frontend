@@ -78,15 +78,20 @@ class RegistrationChangeEmailController @Inject()(
   override def updateEmail(journey: RegistrationReady, email: Email)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, RegistrationReady] = {
+    EitherT.rightT[Future, Error](
+      journey.copy(registrationDetails = journey.registrationDetails.copy(emailAddress = email))
+    )
+  }
+
+  override def auditEmailVerifiedEvent(journey: RegistrationReady, email: Email)(implicit hc: HeaderCarrier): Unit = {
     auditService.sendRegistrationChangeEmailVerifiedEvent(
       journey.registrationDetails.emailAddress.value,
       email.value,
       routes.RegistrationChangeEmailController.enterEmailSubmit().url
     )
-    EitherT.rightT[Future, Error](
-      journey.copy(registrationDetails = journey.registrationDetails.copy(emailAddress = email))
-    )
   }
+
+
 
   override def auditEmailChangeAttempt(journey: RegistrationReady, email: Email)(implicit hc: HeaderCarrier): Unit =
     auditService.sendRegistrationChangeEmailAddressAttemptedEvent(

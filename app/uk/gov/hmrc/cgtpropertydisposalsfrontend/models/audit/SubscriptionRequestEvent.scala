@@ -20,8 +20,8 @@ import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 
 final case class SubscriptionRequestEvent(
-  prePopulatedUserData: PrePopulatedUserData,
-  manuallyEnteredData: ManuallyEnteredData
+  prePopulatedUserData: Option[PrePopulatedUserData],
+  manuallyEnteredData: Option[ManuallyEnteredData]
 )
 
 final case class PrePopulatedUserData(

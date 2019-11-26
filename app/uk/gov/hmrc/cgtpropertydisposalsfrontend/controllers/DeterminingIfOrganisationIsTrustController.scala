@@ -210,11 +210,6 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
                   .bindFromRequest()
                   .fold[EitherT[Future, NameMatchError[TrustNameMatchDetails], BusinessPartnerRecord]](
                     e => EitherT.fromEither[Future](Left(NameMatchError.ValidationError(e))), { trustNameMatchDetails =>
-                      auditService.sendBusinessPartnerRecordNameMatchAttemptEvent(
-                        unsuccessfulAttempts,
-                        trustNameMatchDetails,
-                        routes.DeterminingIfOrganisationIsTrustController.enterTrnSubmit().url
-                      )
                       attemptNameMatchAndUpdateSession(
                         trustNameMatchDetails,
                         determiningIfOrganisationIsTrust.ggCredId,

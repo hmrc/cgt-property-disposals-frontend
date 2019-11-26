@@ -67,7 +67,10 @@ class StartController @Inject()(
     with IvBehaviour {
 
   def start(): Action[AnyContent] = authenticatedActionWithRetrievedDataAndSessionData.async { implicit request =>
-    (request.authenticatedRequest.userType, request.sessionData.flatMap(_.journeyStatus)) match {
+    (
+      request.authenticatedRequest.userType,
+      request.sessionData.flatMap(_.journeyStatus)
+    ) match {
 
       case (_, Some(_: Subscribed)) =>
         Redirect(routes.HomeController.homepage())
@@ -95,7 +98,7 @@ class StartController @Inject()(
         Redirect(routes.RegistrationController.selectEntityType())
 
       case (_, Some(SubscriptionStatus.DeterminingIfOrganisationIsTrust(ggCredId, _, _))) =>
-        handleNonTrustOrganisation(ggCredId)
+        handleNonTrustOrganisation(ggCredId, None)
 
       case (_, Some(NonGovernmentGatewayJourney)) =>
         Redirect(routes.StartController.weOnlySupportGG())
@@ -123,13 +126,13 @@ class StartController @Inject()(
         handleSubscriptionMissingData(bpr, t.email)
 
       case (i: UserType.Individual, None) =>
-        buildIndividualSubscriptionData(i)
+        buildIndividualSubscriptionData(i, i.email)
 
       case (t: UserType.Trust, _) =>
-        buildTrustSubscriptionData(t)
+        buildTrustSubscriptionData(t, t.email)
 
       case (UserType.OrganisationUnregisteredTrust(_, ggCredId), _) =>
-        handleNonTrustOrganisation(ggCredId)
+        handleNonTrustOrganisation(ggCredId, None)
 
       case (u: UserType.NonGovernmentGatewayUser, _) =>
         handleNonGovernmentGatewayUser(u)
@@ -194,7 +197,7 @@ class StartController @Inject()(
     }, _ => Redirect(routes.HomeController.homepage()))
   }
 
-  private def handleNonTrustOrganisation(ggCredId: GGCredId)(
+  private def handleNonTrustOrganisation(ggCredId: GGCredId, ggEmail: Option[Email])(
     implicit request: RequestWithSessionDataAndRetrievedData[_]
   ): Future[Result] = {
     val newSessionData =
@@ -205,6 +208,7 @@ class StartController @Inject()(
 
     updateSession(sessionStore, request)(
       _.copy(
+        ggEmail       = ggEmail,
         journeyStatus = Some(newSessionData),
         needMoreDetailsDetails = Some(
           NeedMoreDetailsDetails(
@@ -235,13 +239,14 @@ class StartController @Inject()(
     case None =>
       maybeSautr match {
         case Some(sautr) =>
-          buildIndividualSubscriptionData(Individual(Left(sautr), maybeEmail))
+          buildIndividualSubscriptionData(Individual(Left(sautr), maybeEmail), maybeEmail)
 
         case None =>
           val subscriptionStatus =
             SubscriptionStatus.TryingToGetIndividualsFootprint(None, None, maybeEmail, ggCredId)
           updateSession(sessionStore, request)(
             _.copy(
+              ggEmail       = maybeEmail,
               journeyStatus = Some(subscriptionStatus),
               needMoreDetailsDetails = Some(
                 NeedMoreDetailsDetails(
@@ -261,12 +266,13 @@ class StartController @Inject()(
       }
 
     case Some(_) =>
-      auditService.sendHandOffToIvEvent(ggCredId, redirectToIvUrl)
+      auditService.sendHandOffToIvEvent(ggCredId, request.uri)
       redirectToIv
   }
 
   private def buildTrustSubscriptionData(
-    trust: Trust
+    trust: Trust,
+    ggEmail: Option[Email]
   )(implicit hc: HeaderCarrier, request: RequestWithSessionDataAndRetrievedData[_]): Future[Result] = {
     val result =
       for {
@@ -302,12 +308,7 @@ class StartController @Inject()(
                       email,
                       bprWithTrustName._1.address,
                       ContactName(bprWithTrustName._2.value),
-                      bprWithTrustName._1.sapNumber,
-                      (bprWithTrustName._1.emailAddress, trust.email) match {
-                        case (Some(_), _)    => Some(false)
-                        case (None, Some(_)) => Some(true)
-                        case (None, None)    => None
-                      }
+                      bprWithTrustName._1.sapNumber
                     )
                   )
                 }
@@ -319,6 +320,8 @@ class StartController @Inject()(
                 _ =>
                   updateSession(sessionStore, request)(
                     _.copy(
+                      bprEmail      = bprWithTrustName._1.emailAddress,
+                      ggEmail       = ggEmail,
                       journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bprWithTrustName._1)),
                       needMoreDetailsDetails = Some(
                         NeedMoreDetailsDetails(
@@ -330,7 +333,11 @@ class StartController @Inject()(
                   ),
                 subscriptionDetails =>
                   updateSession(sessionStore, request)(
-                    _.copy(journeyStatus = Some(SubscriptionStatus.SubscriptionReady(subscriptionDetails)))
+                    _.copy(
+                      bprEmail      = bprWithTrustName._1.emailAddress,
+                      ggEmail       = ggEmail,
+                      journeyStatus = Some(SubscriptionStatus.SubscriptionReady(subscriptionDetails))
+                    )
                   )
               )
             )
@@ -359,13 +366,16 @@ class StartController @Inject()(
       },
       subscriptionDetails =>
         updateSession(sessionStore, request)(
-          _.copy(journeyStatus = Some(SubscriptionStatus.SubscriptionReady(subscriptionDetails)))
+          _.copy(
+            ggEmail       = retrievedEmail,
+            journeyStatus = Some(SubscriptionStatus.SubscriptionReady(subscriptionDetails))
+          )
         ).map { _ =>
           Redirect(routes.SubscriptionController.checkYourDetails())
         }
     )
 
-  private def buildIndividualSubscriptionData(individual: Individual)(
+  private def buildIndividualSubscriptionData(individual: Individual, ggEmail: Option[Email])(
     implicit
     hc: HeaderCarrier,
     request: RequestWithSessionDataAndRetrievedData[_]
@@ -381,6 +391,8 @@ class StartController @Inject()(
               _ =>
                 updateSession(sessionStore, request)(
                   _.copy(
+                    bprEmail      = bpr.emailAddress,
+                    ggEmail       = ggEmail,
                     journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bpr)),
                     needMoreDetailsDetails = Some(
                       NeedMoreDetailsDetails(
@@ -392,7 +404,11 @@ class StartController @Inject()(
                 ),
               subscriptionDetails =>
                 updateSession(sessionStore, request)(
-                  _.copy(journeyStatus = Some(SubscriptionStatus.SubscriptionReady(subscriptionDetails)))
+                  _.copy(
+                    bprEmail      = bpr.emailAddress,
+                    ggEmail       = ggEmail,
+                    journeyStatus = Some(SubscriptionStatus.SubscriptionReady(subscriptionDetails))
+                  )
                 )
             )
           )

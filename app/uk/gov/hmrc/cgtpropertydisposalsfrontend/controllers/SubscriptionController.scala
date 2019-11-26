@@ -105,7 +105,8 @@ class SubscriptionController @Inject()(
             auditService
               .sendSubscriptionRequestEvent(
                 details,
-                details.isGGEmail,
+                request.sessionData.ggEmail,
+                request.sessionData.bprEmail,
                 routes.SubscriptionController.checkYourDetailsSubmit().url
               )
             Redirect(routes.SubscriptionController.subscribed())

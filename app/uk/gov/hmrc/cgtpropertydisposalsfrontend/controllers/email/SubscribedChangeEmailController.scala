@@ -82,17 +82,23 @@ class SubscribedChangeEmailController @Inject()(
     if (journey.subscribedDetails === journeyWithUpdatedEmail) {
       EitherT.pure[Future, Error](journey)
     } else {
+      subscriptionService
+        .updateSubscribedDetails(SubscribedUpdateDetails(journeyWithUpdatedEmail, journey.subscribedDetails))
+        .map(_ => journey.copy(journeyWithUpdatedEmail))
+    }
+  }
+
+  override def auditEmailVerifiedEvent(journey: Subscribed, email: Email)(implicit hc: HeaderCarrier): Unit =
+    if (journey.subscribedDetails.emailAddress === email) {
+      ()
+    } else {
       auditService.sendSubscribedChangeEmailAddressVerifiedEvent(
         journey.subscribedDetails.emailAddress.value,
         email.value,
         journey.subscribedDetails.cgtReference.value,
         routes.SubscribedChangeEmailController.emailVerified().url
       )
-      subscriptionService
-        .updateSubscribedDetails(SubscribedUpdateDetails(journeyWithUpdatedEmail, journey.subscribedDetails))
-        .map(_ => journey.copy(journeyWithUpdatedEmail))
     }
-  }
 
   override def auditEmailChangeAttempt(journey: Subscribed, email: Email)(implicit hc: HeaderCarrier): Unit =
     auditService.sendSubscribedChangeEmailAddressAttemptedEvent(

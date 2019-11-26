@@ -42,17 +42,17 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class SubscriptionChangeEmailController @Inject()(
-                                                   val authenticatedAction: AuthenticatedAction,
-                                                   val sessionDataAction: SessionDataAction,
-                                                   val sessionStore: SessionStore,
-                                                   val emailVerificationService: EmailVerificationService,
-                                                   val uuidGenerator: UUIDGenerator,
-                                                   val errorHandler: ErrorHandler,
-                                                   cc: MessagesControllerComponents,
-                                                   val auditService: AuditService,
-                                                   val enterEmailPage: views.html.email.enter_email,
-                                                   val checkYourInboxPage: views.html.email.check_your_inbox,
-                                                   val emailVerifiedPage: views.html.email.email_verified
+  val authenticatedAction: AuthenticatedAction,
+  val sessionDataAction: SessionDataAction,
+  val sessionStore: SessionStore,
+  val emailVerificationService: EmailVerificationService,
+  val uuidGenerator: UUIDGenerator,
+  val errorHandler: ErrorHandler,
+  cc: MessagesControllerComponents,
+  val auditService: AuditService,
+  val enterEmailPage: views.html.email.enter_email,
+  val checkYourInboxPage: views.html.email.check_your_inbox,
+  val emailVerifiedPage: views.html.email.email_verified
 )(implicit val viewConfig: ViewConfig, val ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -87,6 +87,14 @@ class SubscriptionChangeEmailController @Inject()(
     )
     EitherT.rightT[Future, Error](subscriptionReadyEmailLens.set(journey)(email))
   }
+
+  override def auditEmailVerifiedEvent(journey: SubscriptionReady, email: Email)(implicit hc: HeaderCarrier): Unit =
+    auditService.sendSubscriptionChangeEmailAddressAttemptedEvent(
+      journey.subscriptionDetails.emailAddress.value,
+      email.value,
+      routes.SubscriptionChangeEmailController.enterEmailSubmit().url
+    )
+
 
   override def auditEmailChangeAttempt(journey: SubscriptionReady, email: Email)(implicit hc: HeaderCarrier): Unit =
     auditService.sendSubscriptionChangeEmailAddressAttemptedEvent(

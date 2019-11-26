@@ -21,8 +21,8 @@ import play.api.libs.json.{Json, OFormat}
 final case class BusinessPartnerRecordNameMatchAttemptEvent(
   attemptsMade: Int,
   maxAttempts: Int,
-  trustName: Option[TrustNameWithTrnAuditDetails],
-  individualName: Option[IndividualNameWithSaUtrAuditDetails]
+  trustNameDetails: Option[TrustNameWithTrnAuditDetails],
+  individualNameDetails: Option[IndividualNameWithSaUtrAuditDetails]
 )
 
 object BusinessPartnerRecordNameMatchAttemptEvent {
