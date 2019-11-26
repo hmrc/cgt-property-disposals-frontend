@@ -1,4 +1,4 @@
-;(function(window, document) {
+;(function(window, document, GOVUK) {
   GOVUK.details.init();
 
   if (window.Element && !Element.prototype.closest) {
@@ -180,4 +180,4 @@
     wrapper.addEventListener('change', resetSelectIfEmpty);
   }
 
-})(window, document);
+})(window, document, GOVUK);
