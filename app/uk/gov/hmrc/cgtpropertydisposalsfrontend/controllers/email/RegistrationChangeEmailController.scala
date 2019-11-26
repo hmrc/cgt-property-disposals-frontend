@@ -27,7 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -80,7 +80,9 @@ class RegistrationChangeEmailController @Inject()(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, RegistrationReady] = {
     EitherT.rightT[Future, Error](
-      journey.copy(registrationDetails = journey.registrationDetails.copy(emailAddress = email))
+      journey.copy(registrationDetails = journey.registrationDetails.copy(
+        emailAddress = email, emailSource = EmailSource.ManuallyEntered
+      ))
     )
   }
 
