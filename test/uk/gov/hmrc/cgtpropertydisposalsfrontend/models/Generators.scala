@@ -34,7 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, Indivi
 import scala.reflect.{ClassTag, classTag}
 
 object Generators
-    extends WithGenGenerator
+    extends GenUtils
     with SessionDataGen
     with BusinessPartnerRecordGen
     with IdGen
@@ -50,22 +50,24 @@ object Generators
 
   implicit def arb[A](implicit g: Gen[A]): Arbitrary[A] = Arbitrary(g)
 
-
 }
 
-sealed trait WithGenGenerator {
+sealed trait GenUtils {
 
   def gen[A](implicit arb: Arbitrary[A]): Gen[A] = arb.arbitrary
 
+  // define our own Arbitrary instance for String to generate more legible strings
+  implicit val stringArb: Arbitrary[String] = Arbitrary(Gen.alphaNumStr)
+
 }
 
-trait SessionDataGen { this: WithGenGenerator =>
+trait SessionDataGen { this: GenUtils =>
 
   implicit val sessionDataGen: Gen[SessionData] = gen[SessionData]
 
 }
 
-trait BusinessPartnerRecordGen { this: WithGenGenerator =>
+trait BusinessPartnerRecordGen { this: GenUtils =>
 
   implicit val bprArb: Gen[BusinessPartnerRecord] = gen[BusinessPartnerRecord]
 
@@ -73,7 +75,7 @@ trait BusinessPartnerRecordGen { this: WithGenGenerator =>
 
 }
 
-trait IdGen { this: WithGenGenerator =>
+trait IdGen { this: GenUtils =>
 
   implicit val cgtReferenceArb: Gen[CgtReference] = gen[CgtReference]
 
@@ -81,7 +83,7 @@ trait IdGen { this: WithGenGenerator =>
 
 }
 
-trait NameGen { this: WithGenGenerator =>
+trait NameGen { this: GenUtils =>
 
   implicit val contactNameGen: Gen[ContactName] = gen[ContactName]
 
@@ -91,11 +93,14 @@ trait NameGen { this: WithGenGenerator =>
 
 }
 
-trait JourneyStatusGen { this: WithGenGenerator =>
+trait JourneyStatusGen { this: GenUtils =>
 
   implicit val journeyStatusGen: Gen[JourneyStatus] = gen[JourneyStatus]
 
-  implicit val registrationReadyGen: Gen[RegistrationReady] = gen[RegistrationReady]
+  implicit val registrationReadyGen: Gen[RegistrationReady] = {
+
+    gen[RegistrationReady]
+  }
 
   implicit val subscriptionReadyGen: Gen[SubscriptionReady] = gen[SubscriptionReady]
 
@@ -110,7 +115,7 @@ trait JourneyStatusGen { this: WithGenGenerator =>
 
 }
 
-trait AddressGen { this: WithGenGenerator =>
+trait AddressGen { this: GenUtils =>
 
   implicit val addressGen: Gen[Address] = gen[Address]
 
@@ -118,7 +123,7 @@ trait AddressGen { this: WithGenGenerator =>
 
 }
 
-trait NameMatchGen { this: WithGenGenerator =>
+trait NameMatchGen { this: GenUtils =>
 
   implicit val trustNameMatchDetailsGen: Gen[TrustNameMatchDetails] = gen[TrustNameMatchDetails]
 
@@ -130,7 +135,7 @@ trait NameMatchGen { this: WithGenGenerator =>
 
 }
 
-trait OnboardingDetailsGen { this: WithGenGenerator =>
+trait OnboardingDetailsGen { this: GenUtils =>
 
   implicit val registrationDetailsArb: Gen[RegistrationDetails] = gen[RegistrationDetails]
 
@@ -142,7 +147,7 @@ trait OnboardingDetailsGen { this: WithGenGenerator =>
 
 }
 
-trait EmailGen { this: WithGenGenerator =>
+trait EmailGen { this: GenUtils =>
 
   implicit val emailGen: Gen[Email] = gen[Email]
 
