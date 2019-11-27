@@ -30,6 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, Indivi
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, SubscribedUpdateDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -45,7 +46,8 @@ class SubscribedWithoutIdChangeContactNameController @Inject()(
   cc: MessagesControllerComponents,
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
-  val enterNamePage: views.html.name.enter_name
+  val enterNamePage: views.html.name.enter_name,
+  auditService: AuditService
 )(implicit val viewConfig: ViewConfig, val ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -70,10 +72,18 @@ class SubscribedWithoutIdChangeContactNameController @Inject()(
 
     if (journey.subscribedDetails === journeyWithUpdatedName)
       EitherT.rightT[Future, Error](journey)
-    else
+    else {
+      auditService.sendSubscribedChangeContactNameEvent(
+        journey.subscribedDetails.contactName.value,
+        contactName,
+        journey.subscribedDetails.cgtReference.value,
+        routes.SubscribedWithoutIdChangeContactNameController.enterIndividualNameSubmit().url
+      )
+
       subscriptionService
         .updateSubscribedDetails(SubscribedUpdateDetails(journeyWithUpdatedName, journey.subscribedDetails))
         .map(_ => journey.copy(journeyWithUpdatedName))
+    }
 
   }
 
