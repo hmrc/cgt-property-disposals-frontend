@@ -24,15 +24,15 @@
   fieldId: String,
   label: Html,
   value: String,
+  hasErrors: Boolean,
+  autoComplete: AutoCompleteType,
   helpText: Option[Html] = None,
   labelAsHeading: Boolean = false,
   errorKey: Option[String],
-  hasErrors: Boolean,
   extraContent: Option[Html] = None,
   inputType: Option[String] = Some("text"),
   inputClass: Option[String] = None,
-  labelClass: Option[String] = None,
-  autoComplete: AutoCompleteType
+  labelClass: Option[String] = None
 )(implicit messages: Messages)
 
 @classBuilder(s: Option[String]*) = @{s.toList.collect{case Some(s) => s}.mkString(" ")}
