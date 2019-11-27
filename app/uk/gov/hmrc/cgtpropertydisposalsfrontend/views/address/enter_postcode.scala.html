@@ -15,7 +15,7 @@
  *@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.AddressLookupRequest
 
 @this(
@@ -60,7 +60,8 @@
     helpText = Some(Html(messages("address.postcodeFilter.helpText"))),
     errorKey = form.error(postcodeFilterKey).map(e => e.message),
     value = form.data.getOrElse(postcodeFilterKey, ""),
-    hasErrors = form.error(postcodeFilterKey).nonEmpty
+    hasErrors = form.error(postcodeFilterKey).nonEmpty,
+    autoComplete = AutoCompleteType.StreetAddress
    )
    @textInput(
     fieldId = key,
@@ -69,7 +70,8 @@
     errorKey = form.error(key).map(e => e.message),
     value = form.data.getOrElse(key, ""),
     hasErrors = form.error(key).nonEmpty,
-    inputClass = Some("form-control-1-4")
+    inputClass = Some("form-control-1-4"),
+    autoComplete = AutoCompleteType.Postcode
    )
 
    <p>

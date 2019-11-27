@@ -14,13 +14,14 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country.{CountryCode, CountryName}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+
 @this(
   errorInline: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_inline
 )
 
-@(countryCodeToCountryName: Map[CountryCode,CountryName], selected: Option[String], label: String, errorKey: Option[String], hasErrors: Boolean)(implicit messages: Messages)
+@(countryCodeToCountryName: Map[CountryCode,CountryName], selected: Option[String], label: String, errorKey: Option[String], hasErrors: Boolean, autoComplete: AutoCompleteType)(implicit messages: Messages)
 
 @fieldId = @{"countryCode"}
 @classes = @{if(hasErrors) "form-group form-group-error" else "form-group" }
@@ -33,7 +34,7 @@
  @errorIdWithMessageKey.map { case (id, key) =>
   @errorInline(id, messages(s"$fieldId.$key"))
  }
- <select id="@fieldId" name="@fieldId" class="@inputClasses"@if(hasErrors) { aria-describedby="@errorId" }>
+ <select id="@fieldId" name="@fieldId" class="@inputClasses" autocomplete="@{autoComplete.value}"@if(hasErrors) { aria-describedby="@errorId" }>
     <option value=""></option>
     @for(country <- countryCodeToCountryName) {
       <option value="@{country._1}" @{if(selected.contains(country._1)) { s" selected" }}>@{country._2}</option>

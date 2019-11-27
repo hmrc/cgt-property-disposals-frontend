@@ -18,6 +18,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.NonUkAddress
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -69,7 +70,8 @@
         errorKey = form.error(line1Key).map(e => e.message),
         value = form.data.getOrElse(line1Key, ""),
         hasErrors = form.error(line1Key).nonEmpty,
-        inputClass = Some("form-control-3-4")
+        inputClass = Some("form-control-3-4"),
+        autoComplete = AutoCompleteType.AddressLine1
       )
       @textInput(
         fieldId = line2Key,
@@ -77,7 +79,8 @@
         errorKey = form.error(line2Key).map(e => e.message),
         value = form.data.getOrElse(line2Key, ""),
         hasErrors = form.error(line2Key).nonEmpty,
-        inputClass = Some("form-control-3-4")
+        inputClass = Some("form-control-3-4"),
+        autoComplete = AutoCompleteType.AddressLine2
       )
       @textInput(
         fieldId = line3Key,
@@ -85,7 +88,8 @@
         errorKey = form.error(line3Key).map(e => e.message),
         value = form.data.getOrElse(line3Key, ""),
         hasErrors = form.error(line3Key).nonEmpty,
-        inputClass = Some("form-control-3-4")
+        inputClass = Some("form-control-3-4"),
+        autoComplete = AutoCompleteType.AddressLevel2
       )
       @textInput(
         fieldId = line4Key,
@@ -93,7 +97,8 @@
         errorKey = form.error(line4Key).map(e => e.message),
         value = form.data.getOrElse(line4Key, ""),
         hasErrors = form.error(line4Key).nonEmpty,
-        inputClass = Some("form-control-3-4")
+        inputClass = Some("form-control-3-4"),
+        autoComplete = AutoCompleteType.AddressLevel1
       )
 
       @countryCode(
@@ -101,7 +106,8 @@
         selected = form.data.get(countryCodeKey),
         label = messages(s"${countryCodeKey}.label"),
         hasErrors = form.error(countryCodeKey).nonEmpty,
-        errorKey = form.error(countryCodeKey).map(e => e.message)
+        errorKey = form.error(countryCodeKey).map(e => e.message),
+        autoComplete = AutoCompleteType.Country
       )
     </fieldset>
 

@@ -18,7 +18,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.IndividualNameMatchDetails
-
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 
 @this(
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -55,7 +55,8 @@
    errorKey = form.error(saUtrKey).map(e => e.message),
    hasErrors = form.error(saUtrKey).nonEmpty,
    label = Html(messages("saUtr.label")),
-   labelClass = Some("govuk-label--m")
+   labelClass = Some("govuk-label--m"),
+   autoComplete= AutoCompleteType.On
   )
   @textInput(
    fieldId = firstNameKey,
@@ -63,7 +64,8 @@
    errorKey = form.error(firstNameKey).map(e => e.message),
    hasErrors = form.error(firstNameKey).nonEmpty,
    label = Html(messages("enterName.firstName.label")),
-   labelClass = Some("govuk-label--m")
+   labelClass = Some("govuk-label--m"),
+   autoComplete = AutoCompleteType.FirstName
   )
   @textInput(
    fieldId = lastNameKey,
@@ -71,7 +73,8 @@
    errorKey = form.error(lastNameKey).map(e => e.message),
    hasErrors = form.error(lastNameKey).nonEmpty,
    label = Html(messages("enterName.lastName.label")),
-   labelClass = Some("govuk-label--m")
+   labelClass = Some("govuk-label--m"),
+   autoComplete = AutoCompleteType.LastName
   )
   @submitButton(messages("button.continue"))
  }

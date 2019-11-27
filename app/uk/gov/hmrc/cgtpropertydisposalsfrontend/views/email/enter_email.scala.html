@@ -16,7 +16,7 @@
 
 @import play.api.data.Form
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.email.EmailController.SubmitEmailDetails
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 @import views.html.helper.CSRF
@@ -59,7 +59,8 @@
    value = form.data.getOrElse(key, ""),
    hasErrors = hasErrors,
    extraContent = Some(Html(s"""<p class="lede">${messages(if(amendingEmail) "email.amend.extraContent" else "email.extraContent")}</p>""")),
-   inputType = Some("email")
+   inputType = Some("email"),
+   autoComplete = AutoCompleteType.Email
   )
   <input type="hidden" name="resendVerificationEmail" value="false" />
 

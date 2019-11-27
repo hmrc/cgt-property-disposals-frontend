@@ -15,7 +15,7 @@
  *@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 
 @this(
@@ -60,7 +60,8 @@
         value = form.data.getOrElse(key, ""),
         hasErrors = form.error(key).nonEmpty,
         inputClass = Some("form-control-3-4"),
-        helpText = Some(Html(messages("contactName.extraContent")))
+        helpText = Some(Html(messages("contactName.extraContent"))),
+        autoComplete = AutoCompleteType.ContactName
       )
 
     @submitButton(messages("button.continue"))
