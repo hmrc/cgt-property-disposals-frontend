@@ -15,7 +15,7 @@
  *@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 
 @this(
@@ -55,7 +55,8 @@
       errorKey = form.error(firstNameKey).map(e => e.message),
       hasErrors = form.error(firstNameKey).nonEmpty,
       label = Html(messages("enterName.firstName.label")),
-      labelClass = Some("govuk-label--m")
+      labelClass = Some("govuk-label--m"),
+      autoComplete = AutoCompleteType.FirstName
     )
     @textInput(
       fieldId = lastNameKey,
@@ -63,7 +64,8 @@
       errorKey = form.error(lastNameKey).map(e => e.message),
       hasErrors = form.error(lastNameKey).nonEmpty,
       label = Html(messages("enterName.lastName.label")),
-      labelClass = Some("govuk-label--m")
+      labelClass = Some("govuk-label--m"),
+      autoComplete = AutoCompleteType.LastName
     )
     @submitButton(messages("button.continue"))
   }

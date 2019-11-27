@@ -15,7 +15,7 @@
  *@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 
 @this(
@@ -29,7 +29,6 @@
   backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
   accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu
 )
-
 
 @(form: Form[UkAddress], backLink: Call, submit: Call, enterPostcode: Call, showAccountMenu: Boolean)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
@@ -64,7 +63,8 @@
         errorKey = form.error(line1Key).map(e => e.message),
         value = form.data.getOrElse(line1Key, ""),
         hasErrors = form.error(line1Key).nonEmpty,
-        inputClass = Some("form-control-3-4")
+        inputClass = Some("form-control-3-4"),
+        autoComplete = AutoCompleteType.AddressLine1
       )
       @textInput(
         fieldId = line2Key,
@@ -72,21 +72,24 @@
         errorKey = form.error(line2Key).map(e => e.message),
         value = form.data.getOrElse(line2Key, ""),
         hasErrors = form.error(line2Key).nonEmpty,
-        inputClass = Some("form-control-3-4")
+        inputClass = Some("form-control-3-4"),
+        autoComplete = AutoCompleteType.AddressLine2
       )
       @textInput(
         fieldId = line3Key,
         label = Html(messages("address.uk.line3.label")),
         errorKey = form.error(line3Key).map(e => e.message),
         value = form.data.getOrElse(line3Key, ""),
-        hasErrors = form.error(line3Key).nonEmpty
+        hasErrors = form.error(line3Key).nonEmpty,
+        autoComplete = AutoCompleteType.AddressLevel2
       )
       @textInput(
         fieldId = line4Key,
         label = Html(messages("address.uk.line4.label")),
         errorKey = form.error(line4Key).map(e => e.message),
         value = form.data.getOrElse(line4Key, ""),
-        hasErrors = form.error(line4Key).nonEmpty
+        hasErrors = form.error(line4Key).nonEmpty,
+        autoComplete = AutoCompleteType.AddressLevel1
       )
       @textInput(
         fieldId = postcodeKey,
@@ -94,7 +97,8 @@
         errorKey = form.error(postcodeKey).map(e => e.message),
         value = form.data.getOrElse(postcodeKey, ""),
         hasErrors = form.error(postcodeKey).nonEmpty,
-        inputClass = Some("form-control-1-4")
+        inputClass = Some("form-control-1-4"),
+        autoComplete = AutoCompleteType.Postcode
       )
     </fieldset>
 
