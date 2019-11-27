@@ -19,7 +19,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos
 import java.util.UUID
 
 import com.typesafe.config.ConfigFactory
-import org.scalacheck.ScalacheckShapeless._
 import org.scalatest.concurrent.Eventually
 import org.scalatest.{Matchers, WordSpec}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -27,7 +26,8 @@ import play.api.Configuration
 import play.api.libs.json.{JsNumber, JsObject}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cache.model.{Cache, Id}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, _}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStoreSpec.{TestEnvironment, _}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.SessionId
