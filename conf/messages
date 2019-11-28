@@ -373,16 +373,16 @@ isReportingForATrust.error.required=Select yes if you want to report the tax for
 isReportingForATrust.error.boolean=Select yes if you want to report the tax for a trust or estate
 
 haveATrn.title=Does the trust or estate have a Trust Registration Number?
-haveATrn.helpText=This number is sent to the person who registers the trust with the Trust Registration Service.
+haveATrn.helpText=It is sent to the person who registers the trust with the Trust Registration Service and is 15 characters. For example, ‘XC TVN 999 000 0000’.
 hasTrn.error.required=Select yes if you have a Trust Registration number
 hasTrn.error.boolean=Select yes if you have a Trust Registration number
 
 enterTrn.title=Enter details about the trust or estate
 trn.label=Trust Registration Number
 trn.error.required=Enter your Trust Registration Number
-trn.error.pattern=Trust Registration Number must be 15 numbers, for example 123456789012345
-trn.error.tooLong=Trust Registration Number must be 15 numbers, for example 123456789012345
-trn.error.tooShort=Trust Registration Number must be 15 numbers, for example 123456789012345
+trn.error.pattern=Trust Registration Number must only include letters, numbers and spaces
+trn.error.tooLong=Trust Registration Number must be 15 characters
+trn.error.tooShort=Trust Registration Number must be 15 characters
 enterTrn.error.notFound=We could not find your details using the name and Trust Registration Number you entered
 enterTrn.tooManyAttempts.title=You’ll need to wait and try again
 enterTrn.tooManyAttempts.p1=You’ve tried to enter your Trust Registration Number and trust name too many times.
