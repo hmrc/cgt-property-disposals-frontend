@@ -61,8 +61,8 @@
         <script>
             window.jsConfig = Object.assign({}, window.jsConfig, {
               timeoutEnabled: true,
-              timeout: @{appConfig.ggTimeout},
-              countdown: @{appConfig.ggCountdown},
+              timeout: @{appConfig.ggTimeoutSeconds},
+              countdown: @{appConfig.ggCountdownSeconds},
               keep_alive_url: "@{appConfig.ggKeepAliveUrl}",
               timed_out_url: "@{appConfig.ggTimedOutUrl}",
               logout_url: "@{if(withAccount) appConfig.accountSignOutUrl else appConfig.ggSignOut}"

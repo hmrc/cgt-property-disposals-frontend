@@ -774,7 +774,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           "the TRN contains invalid characters" in {
             mockActions()
 
-            val result = performAction("trustName" -> validTrustName.value, "trn" -> "???")
+            val result = performAction("trustName" -> validTrustName.value, "trn" -> ("?" * 15))
             status(result) shouldBe BAD_REQUEST
             contentAsString(result) should include(message("trn.error.pattern"))
           }
