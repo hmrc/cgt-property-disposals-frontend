@@ -24,9 +24,8 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{UserType, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, NINO}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.UserType
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 
 import scala.concurrent.ExecutionContext.Implicits.global

@@ -15,7 +15,7 @@
  *@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{address, email, name}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Block
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{SubscribedDetails, SubscriptionDetail}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.account.AccountMenuItem
@@ -41,9 +41,9 @@
 @title = @{messages("account.manageYourDetails.title", fullName)}
 @changeContactNameRoute = @{
   if(details.registeredWithId) {
-    name.routes.SubscribedChangeContactNameController.enterContactName().url
+    routes.SubscribedChangeContactNameController.enterContactName().url
   } else {
-    name.routes.SubscribedWithoutIdChangeContactNameController.enterIndividualName().url
+    routes.SubscribedWithoutIdChangeContactNameController.enterIndividualName().url
   }
 }
 @banner = @{detailChanged match {
@@ -75,13 +75,13 @@
   @cyaRow(
     messages("subscription.cyaLabel.email"),
     Html(details.emailAddress.value),
-    Some(cyaChange(messages("subscription.cyaChange.email"), email.routes.SubscribedChangeEmailController.enterEmail().url))
+    Some(cyaChange(messages("subscription.cyaChange.email"), routes.SubscribedChangeEmailController.enterEmail().url))
    )
 
   @cyaRow(
    messages("subscription.cyaLabel.address"),
    addressDisplay(details.address, Block),
-   Some(cyaChange(messages("subscription.cyaChange.address"), address.routes.SubscribedChangeAddressController.isUk().url))
+   Some(cyaChange(messages("subscription.cyaChange.address"), routes.SubscribedChangeAddressController.isUk().url))
   )
 
  }

@@ -25,11 +25,12 @@ import play.api.mvc.Result
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.SubscribedChangeAddressController
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.{routes => addressRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{SubscribedDetails, SubscribedUpdateDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, sample}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -98,8 +99,8 @@ class SubscribedChangeAddressControllerSpec
 
       behave like submitIsUkBehaviour(
         performAction,
-        addressRoutes.SubscribedChangeAddressController.enterPostcode(),
-        addressRoutes.SubscribedChangeAddressController.enterNonUkAddress()
+        accounts.routes.SubscribedChangeAddressController.enterPostcode(),
+        accounts.routes.SubscribedChangeAddressController.enterNonUkAddress()
       )
 
     }
@@ -164,7 +165,7 @@ class SubscribedChangeAddressControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
-      behave like submitEnterPostcode(performAction, addressRoutes.SubscribedChangeAddressController.selectAddress())
+      behave like submitEnterPostcode(performAction, accounts.routes.SubscribedChangeAddressController.selectAddress())
 
     }
 

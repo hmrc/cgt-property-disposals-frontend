@@ -19,9 +19,9 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.mvc.Result
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.JourneyStatus
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, SessionData}
 import org.scalacheck.ScalacheckShapeless._
+
 import scala.concurrent.Future
 
 trait RedirectToStartBehaviour {

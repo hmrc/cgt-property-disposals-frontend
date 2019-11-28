@@ -30,15 +30,17 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.SubscribedChangeEmailController
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.{routes => emailRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.JourneyStatus.Subscribed
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedUpdateDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{EmailVerificationService, SubscriptionService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -114,8 +116,8 @@ class SubscribedChangeEmailControllerSpec
       behave like enterEmailSubmit(
         performAction,
         validJourneyStatus.subscribedDetails.contactName,
-        emailRoutes.SubscribedChangeEmailController.verifyEmail,
-        emailRoutes.SubscribedChangeEmailController.checkYourInbox()
+        accounts.routes.SubscribedChangeEmailController.verifyEmail,
+        accounts.routes.SubscribedChangeEmailController.checkYourInbox()
       )
     }
 
@@ -128,8 +130,8 @@ class SubscribedChangeEmailControllerSpec
 
       behave like checkYourInboxPage(
         performAction,
-        emailRoutes.SubscribedChangeEmailController.enterEmail(),
-        emailRoutes.SubscribedChangeEmailController.enterEmail().url
+        accounts.routes.SubscribedChangeEmailController.enterEmail(),
+        accounts.routes.SubscribedChangeEmailController.enterEmail().url
       )
     }
 
@@ -142,8 +144,8 @@ class SubscribedChangeEmailControllerSpec
 
       behave like verifyEmail(
         performAction,
-        emailRoutes.SubscribedChangeEmailController.enterEmail(),
-        emailRoutes.SubscribedChangeEmailController.emailVerified()
+        accounts.routes.SubscribedChangeEmailController.enterEmail(),
+        accounts.routes.SubscribedChangeEmailController.emailVerified()
       )
 
     }
@@ -158,7 +160,7 @@ class SubscribedChangeEmailControllerSpec
       behave like emailVerifiedPage(
         performAction,
         controllers.routes.HomeController.manageYourDetails(),
-        emailRoutes.SubscribedChangeEmailController.enterEmail()
+        accounts.routes.SubscribedChangeEmailController.enterEmail()
       )
     }
   }

@@ -24,7 +24,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.JourneyStatus.SubscriptionStatus.SubscriptionReady
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.OnboardingAuditService
@@ -32,7 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.{routes => nameRoutes}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -67,7 +67,7 @@ class SubscriptionChangeContactNameController @Inject()(
     auditService.sendSubscriptionContactNameChangedEvent(
       journey.subscriptionDetails.contactName.value,
       contactName.value,
-      routes.SubscribedChangeContactNameController.enterContactNameSubmit().url
+      nameRoutes.SubscribedChangeContactNameController.enterContactNameSubmit().url
     )
     EitherT.rightT[Future, Error](
       journey.copy(subscriptionDetails = journey.subscriptionDetails.copy(contactName = contactName))
