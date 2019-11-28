@@ -61,8 +61,6 @@ trait AddressController[J <: JourneyStatus] {
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, J]
 
-  val updateSubscriptionDetailChangedFlag: Boolean
-
   protected val backLinkCall: Call
   protected val isUkCall: Call
   protected val isUkSubmitCall: Call
@@ -319,10 +317,7 @@ trait AddressController[J <: JourneyStatus] {
           } else {
             EitherT[Future, Error, Unit](
               updateSession(sessionStore, request)(
-                _.copy(
-                  journeyStatus = Some(journeyWithUpdatedAddress),
-                  subscriptionDetailChanged =
-                    if (updateSubscriptionDetailChangedFlag) Some(SubscriptionDetail.Address) else None
+                _.copy(journeyStatus = Some(journeyWithUpdatedAddress)
                 )
               )
             )

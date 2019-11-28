@@ -30,12 +30,11 @@
  addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
  warningMessage: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning,
- alertBanner: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.alert_banner,
   accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu
 )
 
 
-@(details: SubscribedDetails, detailChanged: Option[SubscriptionDetail])(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(details: SubscribedDetails)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
 @fullName = @{details.name.fold(_.value, n => s"${n.firstName} ${n.lastName}")}
 @title = @{messages("account.manageYourDetails.title", fullName)}
@@ -46,17 +45,10 @@
     name.routes.SubscribedWithoutIdChangeContactNameController.enterIndividualName().url
   }
 }
-@banner = @{detailChanged match {
-  case Some(SubscriptionDetail.Name) => alertBanner(messages("account.manageYourDetails.contactNameChanged"))
-  case Some(SubscriptionDetail.Email) => alertBanner(messages("account.manageYourDetails.emailChanged"))
-  case Some(SubscriptionDetail.Address) => alertBanner(messages("account.manageYourDetails.addressChanged"))
-  case _ => Html("")
-}}
+
 @affinity = @{details.name.fold(_ => "organisation", _ => "individual")}
 
 @mainTemplate(title = title, withSignOutLink = false, accountMenu=Some(accountMenu(Some(AccountMenuItem.ManageYourDetails())))) {
-
- @banner
 
  @pageHeading(title, Some(messages("account.caption")), Some(messages("account.manageYourDetails.subtitle", details.cgtReference.value)))
 

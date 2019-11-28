@@ -50,8 +50,6 @@ class SubscribedChangeContactNameControllerSpec
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
-  override val updateSubscriptionDetailChangedFlag: Boolean = true
-
   override val validJourney: Subscribed = sample[Subscribed]
 
   override val mockUpdateContactName: Option[(Subscribed, Subscribed, Either[Error, Unit]) => Unit] = Some({
@@ -78,7 +76,7 @@ class SubscribedChangeContactNameControllerSpec
     "handling submitted contact name" must {
       behave like enterContactNameSubmit(
         data => controller.enterContactNameSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken),
-        controllers.routes.HomeController.manageYourDetails()
+        controllers.routes.HomeController.contactNameUpdated()
       )
     }
 

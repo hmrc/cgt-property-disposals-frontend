@@ -364,10 +364,6 @@ account.manageYourDetails.individual.p2=You can only change the contact name her
 account.manageYourDetails.organisation.p2= If the lead trustee’s name or address changes, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new window)</a>.
 account.manageYourDetails.yourName=Your name
 
-account.manageYourDetails.contactNameChanged=Contact name changed
-account.manageYourDetails.emailChanged=Contact email address changed
-account.manageYourDetails.addressChanged=Contact address changed
-
 isReportingForATrust.title=Do you want to report a capital gain for a trust or estate?
 isReportingForATrust.error.required=Select yes if you want to report the tax for a trust or estate
 isReportingForATrust.error.boolean=Select yes if you want to report the tax for a trust or estate

@@ -52,8 +52,6 @@ trait ContactNameController[J <: JourneyStatus] {
 
   def contactName(journey: J): Option[ContactName]
 
-  val updateSubscriptionDetailChangedFlag: Boolean
-
   protected val backLinkCall: Call
   protected val enterContactNameSubmitCall: Call
   protected val continueCall: Call
@@ -82,10 +80,7 @@ trait ContactNameController[J <: JourneyStatus] {
               val result = for {
                 journey <- updateContactName(journey, contactName)
                 _ <- EitherT[Future, Error, Unit](updateSession(sessionStore, request) { s =>
-                      s.copy(
-                        journeyStatus = Some(journey),
-                        subscriptionDetailChanged = if(updateSubscriptionDetailChangedFlag) Some(SubscriptionDetail.Name) else None
-                      )
+                      s.copy(journeyStatus = Some(journey))
                     })
               } yield ()
 

@@ -53,8 +53,6 @@ class SubscriptionEnterEmailControllerSpec
 
   override val mockUpdateEmail: Option[(SubscriptionMissingData, SubscriptionMissingData, Either[Error, Unit]) => Unit] = None
 
-  override val updateSubscriptionDetailChangedFlag: Boolean = false
-
   override lazy val controller: SubscriptionEnterEmailController = instanceOf[SubscriptionEnterEmailController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi

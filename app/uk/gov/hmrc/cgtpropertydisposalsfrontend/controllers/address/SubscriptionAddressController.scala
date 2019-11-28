@@ -90,8 +90,6 @@ class SubscriptionAddressController @Inject()(
     EitherT.pure[Future, Error](subscriptionReadyAddressLens.set(journey)(address))
   }
 
-  override val updateSubscriptionDetailChangedFlag: Boolean = false
-
   protected lazy val backLinkCall: Call                = controllers.routes.SubscriptionController.checkYourDetails()
   protected lazy val isUkCall: Call                    = routes.SubscriptionAddressController.isUk()
   protected lazy val isUkSubmitCall: Call              = routes.SubscriptionAddressController.isUkSubmit()
