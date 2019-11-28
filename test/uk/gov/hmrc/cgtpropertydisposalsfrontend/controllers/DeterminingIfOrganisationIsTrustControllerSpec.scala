@@ -755,11 +755,14 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           }
 
           "the TRN is non empty but less than 15 characters" in {
+            val trn = "1" + (" " * 15) + "23"
             mockActions()
 
-            val result = performAction("trustName" -> validTrustName.value, "trn" -> "123")
+            val result = performAction("trustName" -> validTrustName.value, "trn" -> trn)
             status(result) shouldBe BAD_REQUEST
             contentAsString(result) should include(message("trn.error.tooShort"))
+            // make sure trn is displayed as submitted by the user
+            contentAsString(result) should include(trn)
           }
 
           "the TRN is more than 15 characters" in {
@@ -774,7 +777,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           "the TRN contains invalid characters" in {
             mockActions()
 
-            val result = performAction("trustName" -> validTrustName.value, "trn" -> "???")
+            val result = performAction("trustName" -> validTrustName.value, "trn" -> ("?" * 15))
             status(result) shouldBe BAD_REQUEST
             contentAsString(result) should include(message("trn.error.pattern"))
           }
@@ -938,6 +941,24 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               routes.DeterminingIfOrganisationIsTrustController.tooManyAttempts()
             )
           }
+
+        }
+
+        "be able to handle submitted TRN's with spaces" in {
+          val validTrnWithSpaces = TRN("1234567890     12 345" )
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(Some(previousUnsuccessfulNameMatchAttempt)))
+            mockAttemptNameMatch(validTrnWithSpaces, validTrustName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
+              Right(bpr)
+            )
+            mockStoreSession(sessionDataWithStatus(SubscriptionMissingData(bpr, None, ggCredId)))(Future.successful(Right(())))
+          }
+
+          val result = performAction("trustName" -> validTrustName.value, "trn" -> validTrnWithSpaces.value)
+          checkIsRedirect(result, routes.StartController.start())
+
 
         }
 
