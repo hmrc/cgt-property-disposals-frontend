@@ -3,7 +3,7 @@ service.signOut=Sign out
 hmrc_branding=HM Revenue & Customs
 exitSurvey.linkText=Tell us how we can improve this service (takes 1 minute)
 
-label.beta=Alpha
+label.beta=Private Beta
 
 button.startNow=Start now
 button.continue=Continue
