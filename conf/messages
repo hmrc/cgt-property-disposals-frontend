@@ -416,3 +416,8 @@ signed-out.title=You’ve signed out
 signed-out.p1=You’ve signed out of your Capital Gains Tax on UK property account.
 signed-out.p2=You can <a href="{0}">sign in</a> to your account.
 signed-out.button=Go to GOV.UK
+
+timed-out.title=You’ve been signed out
+timed-out.p1=We’ve signed you out due to a period of inactivity.
+timed-out.p2=You can <a href="{0}">sign back in</a>.
+timed-out.button=Go to GOV.UK

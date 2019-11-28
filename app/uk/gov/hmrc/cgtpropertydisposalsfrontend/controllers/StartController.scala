@@ -58,7 +58,8 @@ class StartController @Inject()(
   val config: Configuration,
   subscriptionService: SubscriptionService,
   weNeedMoreDetailsPage: views.html.we_need_more_details,
-  weOnlySupportGGPage: views.html.we_only_support_gg
+  weOnlySupportGGPage: views.html.we_only_support_gg,
+  timedOutPage: views.html.timed_out
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthRetrievalsAndSessionDataAction
@@ -166,6 +167,14 @@ class StartController @Inject()(
       case Some(NonGovernmentGatewayJourney) => Redirect(routes.StartController.start()).withNewSession
       case _                                 => Redirect(routes.StartController.start())
     }
+  }
+
+  def keepAlive(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
+    Ok("")
+  }
+
+  def timedOut():  Action[AnyContent] = Action { implicit request =>
+    Ok(timedOutPage())
   }
 
   private def handleNonGovernmentGatewayUser(

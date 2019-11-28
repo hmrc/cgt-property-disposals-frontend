@@ -45,9 +45,30 @@
   mainContent: Html = HtmlFormat.empty,
   serviceInfoContent: Html = HtmlFormat.empty,
   scriptElem: Option[Html] = None,
-  withSignOutLink: Boolean = true)(implicit request: Request[_], messages: Messages)
+  withSignOutLink: Boolean = true,
+  withAccount: Boolean)(implicit request: Request[_], messages: Messages)
 
 @head = {
+    <script>
+      window.getCookie = function (name) {
+        var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        if (match) return match[2];
+      };
+      window.jsConfig = window.jsConfig || {};
+      window.jsConfig.lang = window.getCookie("PLAY_LANG") || "en";
+    </script>
+    @if(withSignOutLink || withAccount) {
+        <script>
+            window.jsConfig = Object.assign({}, window.jsConfig, {
+              timeoutEnabled: true,
+              timeout: @{appConfig.ggTimeoutSeconds},
+              countdown: @{appConfig.ggCountdownSeconds},
+              keep_alive_url: "@{appConfig.ggKeepAliveUrl}",
+              timed_out_url: "@{appConfig.ggTimedOutUrl}",
+              logout_url: "@{if(withAccount) appConfig.accountSignOutUrl else appConfig.ggSignOut}"
+            })
+        </script>
+    }
     @uiHead(
       linkElem = None,
       headScripts = None)
@@ -76,6 +97,7 @@
 @withCustomJS = {
   @scriptElem
   <script src='@routes.Assets.at("javascript/location-autocomplete.min.js")'></script>
+  <script src='@routes.Assets.at("javascript/session-timeout.js")'></script>
   <script src='@routes.Assets.at("javascript/cgtpd.js")'></script>
 }
 
