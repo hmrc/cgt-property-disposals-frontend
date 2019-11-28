@@ -29,13 +29,14 @@ import uk.gov.hmrc.auth.core.ConfidenceLevel.{L0, L100, L50}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
-import uk.gov.hmrc.auth.core.retrieve.{Credentials, EmptyRetrieval, ~}
+import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, RetrievalOps, SessionSupport, routes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, RetrievalOps, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.UserType
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -87,7 +88,6 @@ class AuthenticatedActionWithRetrievedDataSpec
 
   val (ggCredentials, ggCredId) = Credentials("id", "GovernmentGateway") -> GGCredId("id")
 
-
   "AuthenticatedActionWithRetrievedData" when {
 
     "handling a user who has logged in with an auth provider which isn't gg" must {
@@ -97,7 +97,7 @@ class AuthenticatedActionWithRetrievedDataSpec
         val retrievalsResult = Future successful (
           new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation)) and
             None and None and None and emptyEnrolments and Some(Credentials("id", providerType))
-          )
+        )
 
         mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
 
@@ -304,7 +304,7 @@ class AuthenticatedActionWithRetrievedDataSpec
 
         val result = performAction(FakeRequest())
 
-        status(result)        shouldBe OK
+        status(result) shouldBe OK
         contentAsJson(result) shouldBe Json.toJson(
           UserType.OrganisationUnregisteredTrust(Some(Email("email")), GGCredId(ggCredentials.providerId))
         )

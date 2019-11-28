@@ -15,6 +15,7 @@
  *@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{routes => onboardingRoutes}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 
 @this(
@@ -80,7 +81,7 @@
   </ul>
 
   <p>
-    <a class="button button-start" href="@{routes.StartController.start()}" role="button">@messages("button.signIn")</a>
+    <a class="button button-start" href="@{onboardingRoutes.StartController.start()}" role="button">@messages("button.signIn")</a>
   </p>
 
   <h2 class="heading-medium">@messages("landingPage.beforeYouStart")</h2>

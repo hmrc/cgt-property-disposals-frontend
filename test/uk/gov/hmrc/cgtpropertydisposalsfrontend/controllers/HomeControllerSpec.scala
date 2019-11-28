@@ -25,8 +25,10 @@ import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, SubscriptionDetail, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.JourneyStatus.Subscribed
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionDetail
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 
 import scala.concurrent.Future
@@ -59,8 +61,6 @@ class HomeControllerSpec
     )
 
   "The Home Controller" when {
-
-
 
     "handling requests for account home" must {
 
