@@ -24,7 +24,8 @@
  pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
  detailsElement: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
- accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu
+ accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu,
+ insetPanel: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.inset_panel
 )
 
 
@@ -38,38 +39,12 @@
 
  @pageHeading(title, Some(messages("account.caption")), Some(messages("account.home.subtitle", details.cgtReference.value)))
 
- <div class="grid-row">
-
-  <div class="column-half">
-   <h2 class="heading-medium">
-    @messages("account.home.left.title")
-   </h2>
-   <div class="panel panel-border-wide">
-     <p>
-      @messages("account.home.left.placeholder")
-     </p>
-   </div>
-  </div>
-
-  <div class="column-half">
-   <h2 class="heading-medium">
-    @messages("account.home.right.title")
-   </h2>
-   <div class="panel panel-border-wide">
-     <p>
-      @messages("account.home.right.placeholder")
-     </p>
-   </div>
-  </div>
-
+<div class="grid-row">
+ <div class="column-two-thirds">
+  @insetPanel(Html(messages("account.home.private-beta.guide.content", appConfig.cgtLegacyUrl)))
  </div>
+</div>
 
- <div class="grid-row">
 
-  <div class="column-two-thirds">
-   @detailsElement(messages("account.home.private-beta.guide"), Html(messages("account.home.private-beta.guide.content", appConfig.cgtLegacyUrl)))
-  </div>
-
- </div>
 
 }

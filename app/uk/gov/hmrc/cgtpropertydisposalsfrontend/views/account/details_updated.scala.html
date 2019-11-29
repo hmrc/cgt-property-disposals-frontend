@@ -26,14 +26,18 @@
 
 @(detailChanged: SubscriptionDetail)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
-@title = @{s"You've changed your $detailChanged"}
+@title = @{messages(s"account.manageYourDetails.$detailChanged.changed")}
 
 @mainTemplate(title = title, withSignOutLink = false) {
 
-  @pageHeading(title)
+  <div class="govuk-box-highlight">
+    @pageHeading(title)
+  </div>
 
-  <p>Well done, you've changed your @detailChanged<\p>
+  <p>
+   @messages("account.manageYourDetails.changed.p")
+  </p>
 
-  @buttonLink("Continue", routes.HomeController.manageYourDetails().url)
+  @buttonLink(messages("button.manageAccount"), routes.HomeController.manageYourDetails().url)
 
 }

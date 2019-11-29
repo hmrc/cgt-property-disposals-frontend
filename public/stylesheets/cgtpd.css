@@ -12,12 +12,20 @@ legend>h1.heading-xlarge {
 .form-group-error legend>h1.heading-xlarge,
 .form-group-error h1>label.heading-xlarge,
 h1 > span.heading-medium,
-.column-half > .heading-medium {
+.column-half > .heading-medium,
+.govuk-box-highlight > h1 {
     margin-top: 0;
+}
+.govuk-box-highlight > h1 {
+    margin-bottom: 0;
 }
 
 .govuk-label-wrapper {
     margin: 0;
+}
+
+.govuk-check-your-answers.no-border>*>* {
+    border-bottom: none;
 }
 
 .form-hint {

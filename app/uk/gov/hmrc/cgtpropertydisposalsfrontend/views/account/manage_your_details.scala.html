@@ -30,7 +30,7 @@
  addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
  warningMessage: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning,
-  accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu
+ accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu
 )
 
 
@@ -50,13 +50,25 @@
 
 @mainTemplate(title = title, withSignOutLink = false, accountMenu=Some(accountMenu(Some(AccountMenuItem.ManageYourDetails())))) {
 
- @pageHeading(title, Some(messages("account.caption")), Some(messages("account.manageYourDetails.subtitle", details.cgtReference.value)))
+ @pageHeading(title, Some(messages("account.caption")))
+  @cyaSection(None, Some("no-border")) {
+    @cyaRow(
+      messages("account.manageYourDetails.subtitle"),
+      Html(details.cgtReference.value),
+      None
+    )
+    @cyaRow(
+      messages("account.manageYourDetails.accountName"),
+      Html(fullName),
+      None
+    )
+  }
 
  <h2 class="heading-medium">
   @messages("account.manageYourDetails.contactHeading")
  </h2>
 
- @cyaSection() {
+  @cyaSection() {
 
   @cyaRow(
     messages("subscription.cyaLabel.contactName"),

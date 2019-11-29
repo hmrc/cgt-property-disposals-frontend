@@ -175,7 +175,7 @@ class HomeControllerSpec
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include("changed your Name")
+        contentAsString(result) should include("Contact name changed")
       }
 
     }

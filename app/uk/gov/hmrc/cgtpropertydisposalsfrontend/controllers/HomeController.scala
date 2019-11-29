@@ -67,7 +67,7 @@ class HomeController @Inject()(
 
   def contactNameUpdated(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withSubscribedUser(request) { case _ =>
-      Ok(detailUpdatedPage(SubscriptionDetail.Name))
+      Ok(detailUpdatedPage(SubscriptionDetail.ContactName))
     }
   }
 
