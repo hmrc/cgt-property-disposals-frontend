@@ -133,7 +133,7 @@ class HomeControllerSpec
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include("changed your Address")
+        contentAsString(result) should include(message("account.manageYourDetails.Address.changed"))
       }
 
     }
@@ -154,7 +154,7 @@ class HomeControllerSpec
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include("changed your Email")
+        contentAsString(result) should include(message("account.manageYourDetails.Email.changed"))
       }
 
     }
@@ -175,7 +175,7 @@ class HomeControllerSpec
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include("Contact name changed")
+        contentAsString(result) should include(message("account.manageYourDetails.ContactName.changed"))
       }
 
     }
