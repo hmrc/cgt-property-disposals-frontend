@@ -21,18 +21,17 @@
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
     buttonLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.button_link,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+    accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu
 )
 
 @(detailChanged: SubscriptionDetail)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
 @title = @{messages(s"account.manageYourDetails.$detailChanged.changed")}
 
-@mainTemplate(title = title, withSignOutLink = false) {
+@mainTemplate(title = title, withSignOutLink = false, accountMenu = Some(accountMenu(None))) {
 
-  <div class="govuk-box-highlight">
-    @pageHeading(title)
-  </div>
+  @pageHeading(title)
 
   <p>
    @messages("account.manageYourDetails.changed.p")
