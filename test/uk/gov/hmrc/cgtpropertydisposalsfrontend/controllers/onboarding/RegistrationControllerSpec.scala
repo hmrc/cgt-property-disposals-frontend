@@ -18,7 +18,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding
 
 import cats.Eq
 import cats.data.EitherT
-import org.scalacheck.ScalacheckShapeless._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
@@ -29,18 +28,20 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import shapeless.{Lens, lens}
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.{routes => addressRoutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.{routes => emailRoutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.name.{routes => nameRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{routes => onboardingRoutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, onboarding}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.{routes => emailRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.{routes => addressRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.name.{routes => nameRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{onboarding => _, _}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.TryingToGetIndividualsFootprint
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, RegistrationStatus, Subscribed, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.TryingToGetIndividualsFootprint
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, RegistrationStatus, Subscribed, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscriptionResponse}
@@ -49,7 +50,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.Subscription
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
-
 class RegistrationControllerSpec
     extends ControllerSpec
     with AuthSupport
@@ -193,7 +193,7 @@ class RegistrationControllerSpec
             mockStoreSession(updatedSession)(Future.successful(Right(())))
           }
           val result = performAction("entityType" -> "0")
-          checkIsRedirect(result, onboarding.routes.RegistrationController.wrongGGAccountForTrusts())
+          checkIsRedirect(result, onboardingRoutes.RegistrationController.wrongGGAccountForTrusts())
         }
 
         "continue the registration journey" when {
@@ -212,7 +212,7 @@ class RegistrationControllerSpec
             val result = performAction("entityType" -> "1")
             checkIsRedirect(
               result,
-              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.name.routes.RegistrationEnterIndividualNameController
+              controllers.onboarding.name.routes.RegistrationEnterIndividualNameController
                 .enterIndividualName()
             )
           }
@@ -669,7 +669,7 @@ class RegistrationControllerSpec
             )(Future.successful(Right(())))
           }
 
-          checkIsRedirect(performAction(), onboardingRoutes.SubscriptionController.subscribed())
+          checkIsRedirect(performAction(), controllers.onboarding.routes.SubscriptionController.subscribed())
         }
 
       }
@@ -693,7 +693,7 @@ class RegistrationControllerSpec
 
           checkIsRedirect(
             performAction(),
-            onboardingRoutes.SubscriptionController.alreadySubscribedWithDifferentGGAccount()
+            controllers.onboarding.routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount()
           )
         }
       }

@@ -56,7 +56,7 @@ class RegistrationEnterIndividualNameController @Inject()(
   ): Either[Result, (SessionData, IndividualSupplyingInformation)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, i: IndividualSupplyingInformation)) => Right(sessionData -> i)
-      case _                                                      => Left(Redirect(controllers.onboarding.routes.StartController.start()))
+      case _                                                      => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   override def updateName(journey: IndividualSupplyingInformation, name: IndividualName)(

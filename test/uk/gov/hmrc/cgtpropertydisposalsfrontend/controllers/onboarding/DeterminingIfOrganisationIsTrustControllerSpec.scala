@@ -18,7 +18,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding
 
 import cats.data.EitherT
 import cats.instances.future._
-import org.scalacheck.ScalacheckShapeless._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
@@ -29,22 +28,23 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{routes => onboardingRoutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, TRN}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.{DeterminingIfOrganisationIsTrust, SubscriptionMissingData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.NameMatchError.TooManyUnsuccessfulAttempts
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.TrustNameMatchDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, NameMatchError, UnsuccessfulNameMatchAttempts}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, sample}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.BusinessPartnerRecordNameMatchRetryService
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
-
 class DeterminingIfOrganisationIsTrustControllerSpec
     extends ControllerSpec
     with AuthSupport
@@ -265,7 +265,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
           checkIsRedirect(
             performAction("isReportingForATrust" -> "false"),
-            onboardingRoutes.DeterminingIfOrganisationIsTrustController.reportWithCorporateTax()
+            routes.DeterminingIfOrganisationIsTrustController.reportWithCorporateTax()
           )
         }
 
@@ -324,7 +324,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
             )
           }
 
-          checkIsRedirect(performAction(), onboardingRoutes.StartController.start())
+          checkIsRedirect(performAction(), cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
         }
 
         "the user has said that they're reporting for a trust" in {
@@ -341,7 +341,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
             )
           }
 
-          checkIsRedirect(performAction(), onboardingRoutes.StartController.start())
+          checkIsRedirect(performAction(), cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
         }
 
       }
@@ -394,7 +394,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
             )
           }
 
-          checkIsRedirect(performAction(), onboardingRoutes.StartController.start())
+          checkIsRedirect(performAction(), cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
         }
 
         "the user has indicated that they are not reporting for a trust" in {
@@ -411,7 +411,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
             )
           }
 
-          checkIsRedirect(performAction(), onboardingRoutes.StartController.start())
+          checkIsRedirect(performAction(), cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
         }
 
       }
@@ -486,7 +486,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
             )
           }
 
-          checkIsRedirect(performAction(), onboardingRoutes.StartController.start())
+          checkIsRedirect(performAction(), cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
         }
 
         "the user has indicated that they are not reporting for a trust" in {
@@ -503,7 +503,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
             )
           }
 
-          checkIsRedirect(performAction(), onboardingRoutes.StartController.start())
+          checkIsRedirect(performAction(), cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
         }
 
       }
@@ -683,7 +683,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           }
 
           val result = performAction()
-          checkIsRedirect(result, onboardingRoutes.StartController.start())
+          checkIsRedirect(result, cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
         }
 
         "the user has not answered the do you have a TRN question" in {
@@ -842,7 +842,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
             }
 
             val result = performAction()
-            checkIsRedirect(result, onboardingRoutes.StartController.start())
+            checkIsRedirect(result, cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
           }
 
           "the user has not answered the do you have a TRN question" in {
@@ -883,11 +883,14 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           }
 
           "the TRN is non empty but less than 15 characters" in {
+            val trn = "1" + (" " * 15) + "23"
             mockActions()
 
-            val result = performAction("trustName" -> validTrustName.value, "trn" -> "123")
+            val result = performAction("trustName" -> validTrustName.value, "trn" -> trn)
             status(result)          shouldBe BAD_REQUEST
             contentAsString(result) should include(message("trn.error.tooShort"))
+            // make sure trn is displayed as submitted by the user
+            contentAsString(result) should include(trn)
           }
 
           "the TRN is more than 15 characters" in {
@@ -901,7 +904,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           "the TRN contains invalid characters" in {
             mockActions()
 
-            val result = performAction("trustName" -> validTrustName.value, "trn" -> "???")
+            val result = performAction("trustName" -> validTrustName.value, "trn" -> ("?" * 15))
             status(result)          shouldBe BAD_REQUEST
             contentAsString(result) should include(message("trn.error.pattern"))
           }
@@ -1038,7 +1041,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
             }
 
             val result = performAction("trustName" -> validTrustName.value, "trn" -> validTrn.value)
-            checkIsRedirect(result, onboardingRoutes.StartController.start())
+            checkIsRedirect(result, cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
           }
 
         }
@@ -1074,6 +1077,30 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               onboardingRoutes.DeterminingIfOrganisationIsTrustController.tooManyAttempts()
             )
           }
+
+        }
+
+        "be able to handle submitted TRN's with spaces" in {
+          val validTrnWithSpaces = TRN("1234567890     12 345")
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(Some(previousUnsuccessfulNameMatchAttempt)))
+            mockAttemptNameMatch(
+              validTrnWithSpaces,
+              validTrustName,
+              ggCredId,
+              Some(previousUnsuccessfulNameMatchAttempt)
+            )(
+              Right(bpr)
+            )
+            mockStoreSession(sessionDataWithStatus(SubscriptionMissingData(bpr, None, ggCredId)))(
+              Future.successful(Right(()))
+            )
+          }
+
+          val result = performAction("trustName" -> validTrustName.value, "trn" -> validTrnWithSpaces.value)
+          checkIsRedirect(result, cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
 
         }
 

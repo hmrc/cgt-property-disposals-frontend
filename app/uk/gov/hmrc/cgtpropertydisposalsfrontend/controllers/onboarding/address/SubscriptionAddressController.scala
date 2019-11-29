@@ -22,7 +22,7 @@ import com.google.inject.{Inject, Singleton}
 import play.api.mvc._
 import shapeless.{Lens, lens}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, SessionUpdates}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
@@ -69,7 +69,7 @@ class SubscriptionAddressController @Inject()(
   ): Either[Result, (SessionData, SubscriptionReady)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, s: SubscriptionReady)) => Right(sessionData -> s)
-      case _                                         => Left(Redirect(controllers.onboarding.routes.StartController.start()))
+      case _                                         => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   def updateAddress(journey: SubscriptionReady, address: Address, isManuallyEnteredAddress: Boolean)(

@@ -23,7 +23,7 @@ import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{EmailController, SessionUpdates}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
@@ -67,7 +67,7 @@ class RegistrationEnterEmailController @Inject()(
   override def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, IndividualMissingEmail)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, i: IndividualMissingEmail)) => Right(sessionData -> i)
-      case _                                              => Left(Redirect(controllers.onboarding.routes.StartController.start()))
+      case _                                              => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   override def validVerificationCompleteJourney(
@@ -75,7 +75,7 @@ class RegistrationEnterEmailController @Inject()(
   ): Either[Result, (SessionData, RegistrationReady)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, r: RegistrationReady)) => Right(sessionData -> r)
-      case _                                         => Left(Redirect(controllers.onboarding.routes.StartController.start()))
+      case _                                         => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   override def updateEmail(journey: IndividualMissingEmail, email: Email)(

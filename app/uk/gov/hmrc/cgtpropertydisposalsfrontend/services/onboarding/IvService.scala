@@ -26,7 +26,7 @@ import cats.syntax.eq._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json.{Json, Reads}
 import play.mvc.Http.Status.OK
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.IvConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.onboarding.IvConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.iv.IvErrorStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.IvServiceImpl.IvStatusResponse

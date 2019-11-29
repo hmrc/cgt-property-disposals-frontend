@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts
 
 import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
-import org.scalacheck.ScalacheckShapeless._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
@@ -30,14 +29,14 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.SubscribedChangeEmailController
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailControllerSpec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedUpdateDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
@@ -45,7 +44,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-
 class SubscribedChangeEmailControllerSpec
     extends EmailControllerSpec[Subscribed, Subscribed]
     with ScalaCheckDrivenPropertyChecks
@@ -116,8 +114,8 @@ class SubscribedChangeEmailControllerSpec
       behave like enterEmailSubmit(
         performAction,
         validJourneyStatus.subscribedDetails.contactName,
-        accounts.routes.SubscribedChangeEmailController.verifyEmail,
-        accounts.routes.SubscribedChangeEmailController.checkYourInbox()
+        controllers.accounts.routes.SubscribedChangeEmailController.verifyEmail,
+        controllers.accounts.routes.SubscribedChangeEmailController.checkYourInbox()
       )
     }
 
@@ -130,8 +128,8 @@ class SubscribedChangeEmailControllerSpec
 
       behave like checkYourInboxPage(
         performAction,
-        accounts.routes.SubscribedChangeEmailController.enterEmail(),
-        accounts.routes.SubscribedChangeEmailController.enterEmail().url
+        controllers.accounts.routes.SubscribedChangeEmailController.enterEmail(),
+        controllers.accounts.routes.SubscribedChangeEmailController.enterEmail().url
       )
     }
 
@@ -144,8 +142,8 @@ class SubscribedChangeEmailControllerSpec
 
       behave like verifyEmail(
         performAction,
-        accounts.routes.SubscribedChangeEmailController.enterEmail(),
-        accounts.routes.SubscribedChangeEmailController.emailVerified()
+        controllers.accounts.routes.SubscribedChangeEmailController.enterEmail(),
+        controllers.accounts.routes.SubscribedChangeEmailController.emailVerified()
       )
 
     }
@@ -159,8 +157,8 @@ class SubscribedChangeEmailControllerSpec
 
       behave like emailVerifiedPage(
         performAction,
-        controllers.routes.HomeController.manageYourDetails(),
-        accounts.routes.SubscribedChangeEmailController.enterEmail()
+        controllers.accounts.routes.HomeController.manageYourDetails(),
+        controllers.accounts.routes.SubscribedChangeEmailController.enterEmail()
       )
     }
   }

@@ -17,7 +17,9 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.config
 
 import javax.inject.{Inject, Singleton}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts._
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{accounts, routes}
 
 @Singleton
 class ViewConfig @Inject()(servicesConfig: ServicesConfig) {
@@ -60,4 +62,10 @@ class ViewConfig @Inject()(servicesConfig: ServicesConfig) {
       "accountType=individual&" +
       "continueUrl=%2Fcgt-property-disposals%2Fstart&" +
       "origin=cgt-property-disposals-frontend"
+  val ggTimeoutSeconds: Long = servicesConfig.getDuration("gg.timeout").toSeconds
+  val ggCountdownSeconds: Long = servicesConfig.getDuration("gg.countdown").toSeconds
+  val ggKeepAliveUrl: String = routes.StartController.keepAlive().url
+  val ggTimedOutUrl: String = signOutUrl + "?continue=" + routes.StartController.timedOut().url
+  val ggSignOut: String = signOutUrl + "?continue=" + routes.StartController.start().url
+  val accountSignOutUrl: String = signOutUri + "?continue=" + accounts.routes.HomeController.signedOut().url
 }

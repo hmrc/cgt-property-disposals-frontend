@@ -25,7 +25,7 @@ import play.api.data.Form
 import play.api.data.Forms.{mapping, number}
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.TryingToGetIndividualsFootprint
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, RegistrationStatus, Subscribed}
@@ -39,7 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{OnboardingAuditService, SubscriptionService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -77,7 +77,7 @@ class RegistrationController @Inject()(
         f(Right(r))
 
       case _ =>
-        SeeOther(routes.StartController.start().url)
+        SeeOther(controllers.routes.StartController.start().url)
     }
 
   def selectEntityType(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
@@ -192,7 +192,7 @@ class RegistrationController @Inject()(
         }
 
       case _ =>
-        Redirect(routes.StartController.start())
+        Redirect(controllers.routes.StartController.start())
 
     }
 
@@ -255,7 +255,7 @@ class RegistrationController @Inject()(
         )
 
       case _ =>
-        Redirect(routes.StartController.start())
+        Redirect(controllers.routes.StartController.start())
     }
   }
 

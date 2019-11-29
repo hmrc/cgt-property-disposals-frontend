@@ -74,7 +74,7 @@ class InsufficientConfidenceLevelController @Inject()(
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
       case Some(i: TryingToGetIndividualsFootprint) => f(i)
-      case _                                        => Redirect(controllers.onboarding.routes.StartController.start())
+      case _                                        => Redirect(controllers.routes.StartController.start())
     }
 
   def doYouHaveNINO(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
@@ -201,7 +201,7 @@ class InsufficientConfidenceLevelController @Inject()(
           result
             .fold(
               handleNameMatchError,
-              _ => Redirect(routes.StartController.start())
+              _ => Redirect(controllers.routes.StartController.start())
             )
 
         case _ =>

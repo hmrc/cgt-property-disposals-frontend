@@ -22,9 +22,8 @@ import cats.syntax.eq._
 import com.google.inject.Inject
 import play.api.mvc.{Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, SessionUpdates}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.AddressController
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedUpdateDetails
@@ -68,7 +67,7 @@ class SubscribedChangeAddressController @Inject()(
   ): Either[Result, (SessionData, Subscribed)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, s: Subscribed)) => Right(sessionData -> s)
-      case _                                  => Left(Redirect(controllers.onboarding.routes.StartController.start()))
+      case _                                  => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   def updateAddress(journey: Subscribed, address: Address, isManuallyEnteredAddress: Boolean)(
@@ -100,7 +99,7 @@ class SubscribedChangeAddressController @Inject()(
 
   override val updateSubscriptionDetailChangedFlag: Boolean = true
 
-  protected lazy val backLinkCall: Call             = controllers.routes.HomeController.manageYourDetails()
+  protected lazy val backLinkCall: Call             = controllers.accounts.routes.HomeController.manageYourDetails()
   protected lazy val isUkCall: Call                 = routes.SubscribedChangeAddressController.isUk()
   protected lazy val isUkSubmitCall: Call           = routes.SubscribedChangeAddressController.isUkSubmit()
   protected lazy val enterUkAddressCall: Call       = routes.SubscribedChangeAddressController.enterUkAddress()
@@ -112,5 +111,5 @@ class SubscribedChangeAddressController @Inject()(
   protected lazy val enterPostcodeSubmitCall: Call = routes.SubscribedChangeAddressController.enterPostcodeSubmit()
   protected lazy val selectAddressCall: Call       = routes.SubscribedChangeAddressController.selectAddress()
   protected lazy val selectAddressSubmitCall: Call = routes.SubscribedChangeAddressController.selectAddressSubmit()
-  protected lazy val continueCall: Call            = controllers.routes.HomeController.manageYourDetails()
+  protected lazy val continueCall: Call            = controllers.accounts.routes.HomeController.manageYourDetails()
 }

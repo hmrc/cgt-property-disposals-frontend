@@ -62,7 +62,7 @@ class SubscribedWithoutIdChangeContactNameController @Inject()(
   override def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, Subscribed)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, r: Subscribed)) => Right(sessionData -> r)
-      case _                                  => Left(Redirect(controllers.onboarding.routes.StartController.start()))
+      case _                                  => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   override def updateName(journey: Subscribed, name: IndividualName)(
@@ -93,9 +93,9 @@ class SubscribedWithoutIdChangeContactNameController @Inject()(
 
   override val updateSubscriptionDetailChangedFlag: Boolean = true
 
-  override protected lazy val backLinkCall: Call = controllers.routes.HomeController.manageYourDetails()
+  override protected lazy val backLinkCall: Call = controllers.accounts.routes.HomeController.manageYourDetails()
   override protected lazy val enterNameSubmitCall: Call =
     routes.SubscribedWithoutIdChangeContactNameController.enterIndividualNameSubmit()
-  override protected lazy val continueCall: Call = controllers.routes.HomeController.manageYourDetails()
+  override protected lazy val continueCall: Call = controllers.accounts.routes.HomeController.manageYourDetails()
 
 }

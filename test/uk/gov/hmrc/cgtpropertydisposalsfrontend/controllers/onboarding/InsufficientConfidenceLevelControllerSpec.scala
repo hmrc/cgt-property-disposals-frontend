@@ -18,7 +18,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding
 
 import cats.data.EitherT
 import cats.instances.future._
-import org.scalacheck.ScalacheckShapeless._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
@@ -29,13 +28,13 @@ import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{routes => onBoarding}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.{SubscriptionMissingData, TryingToGetIndividualsFootprint}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.IndividualNameMatchDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, NameMatchError, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -305,7 +304,7 @@ class InsufficientConfidenceLevelControllerSpec
           }
 
           val result = performAction("hasNino" -> "false")
-          checkIsRedirect(result, onBoarding.InsufficientConfidenceLevelController.doYouHaveAnSaUtr())
+          checkIsRedirect(result, routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr())
         }
 
       }
@@ -343,7 +342,7 @@ class InsufficientConfidenceLevelControllerSpec
           }
 
           val result = performAction("hasNino" -> "false")
-          checkIsRedirect(result, onBoarding.InsufficientConfidenceLevelController.doYouHaveAnSaUtr())
+          checkIsRedirect(result, routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr())
         }
       }
 
@@ -372,7 +371,7 @@ class InsufficientConfidenceLevelControllerSpec
             )
           }
 
-          checkIsRedirect(performAction(), onBoarding.InsufficientConfidenceLevelController.doYouHaveNINO())
+          checkIsRedirect(performAction(), routes.InsufficientConfidenceLevelController.doYouHaveNINO())
         }
 
       }
@@ -473,7 +472,7 @@ class InsufficientConfidenceLevelControllerSpec
             )
           }
 
-          checkIsRedirect(performAction(), onBoarding.InsufficientConfidenceLevelController.doYouHaveNINO())
+          checkIsRedirect(performAction(), routes.InsufficientConfidenceLevelController.doYouHaveNINO())
         }
 
       }
@@ -514,7 +513,7 @@ class InsufficientConfidenceLevelControllerSpec
           }
 
           val result = performAction("hasSaUtr" -> "true")
-          checkIsRedirect(result, onBoarding.InsufficientConfidenceLevelController.enterSautrAndName())
+          checkIsRedirect(result, routes.InsufficientConfidenceLevelController.enterSautrAndName())
         }
 
       }
@@ -532,7 +531,7 @@ class InsufficientConfidenceLevelControllerSpec
           }
 
           val result = performAction("hasSaUtr" -> "false")
-          checkIsRedirect(result, onBoarding.RegistrationController.selectEntityType())
+          checkIsRedirect(result, routes.RegistrationController.selectEntityType())
         }
 
       }
@@ -567,7 +566,7 @@ class InsufficientConfidenceLevelControllerSpec
           }
 
           val result = performAction()
-          checkIsRedirect(result, onBoarding.InsufficientConfidenceLevelController.doYouHaveNINO())
+          checkIsRedirect(result, routes.InsufficientConfidenceLevelController.doYouHaveNINO())
         }
 
         "the user has not answered the do you have a NINO question" in {
@@ -662,7 +661,7 @@ class InsufficientConfidenceLevelControllerSpec
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(NameMatchError.TooManyUnsuccessfulAttempts()))
           }
 
-          checkIsRedirect(performAction(), onBoarding.InsufficientConfidenceLevelController.tooManyAttempts())
+          checkIsRedirect(performAction(), routes.InsufficientConfidenceLevelController.tooManyAttempts())
         }
 
       }
@@ -745,7 +744,7 @@ class InsufficientConfidenceLevelControllerSpec
           }
 
           val result = performAction()
-          checkIsRedirect(result, onBoarding.InsufficientConfidenceLevelController.doYouHaveNINO())
+          checkIsRedirect(result, routes.InsufficientConfidenceLevelController.doYouHaveNINO())
         }
 
         "the user has not answered the do you have a NINO question" in {
@@ -938,7 +937,7 @@ class InsufficientConfidenceLevelControllerSpec
             "saUtr"     -> validSautr.value
           )
 
-          checkIsRedirect(result, onBoarding.StartController.start())
+          checkIsRedirect(result, uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
         }
 
       }
@@ -953,7 +952,7 @@ class InsufficientConfidenceLevelControllerSpec
           }
 
           val result = performAction()
-          checkIsRedirect(result, onBoarding.InsufficientConfidenceLevelController.tooManyAttempts())
+          checkIsRedirect(result, routes.InsufficientConfidenceLevelController.tooManyAttempts())
 
         }
 
@@ -974,7 +973,7 @@ class InsufficientConfidenceLevelControllerSpec
             "saUtr"     -> validSautr.value
           )
 
-          checkIsRedirect(result, onBoarding.InsufficientConfidenceLevelController.tooManyAttempts())
+          checkIsRedirect(result, routes.InsufficientConfidenceLevelController.tooManyAttempts())
         }
 
       }
@@ -1030,7 +1029,7 @@ class InsufficientConfidenceLevelControllerSpec
               )
             }
 
-            checkIsRedirect(performAction(), onBoarding.InsufficientConfidenceLevelController.enterSautrAndName())
+            checkIsRedirect(performAction(), routes.InsufficientConfidenceLevelController.enterSautrAndName())
           }
 
           "the user has not attempted a name match" in {
@@ -1040,7 +1039,7 @@ class InsufficientConfidenceLevelControllerSpec
               mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(None))
             }
 
-            checkIsRedirect(performAction(), onBoarding.InsufficientConfidenceLevelController.enterSautrAndName())
+            checkIsRedirect(performAction(), routes.InsufficientConfidenceLevelController.enterSautrAndName())
           }
 
         }

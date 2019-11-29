@@ -24,7 +24,7 @@ import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.iv.IvErrorStatus
@@ -32,7 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.IvService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.ExecutionContext
@@ -63,7 +63,7 @@ class IvController @Inject()(
 
   def ivSuccessCallback(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     if (request.sessionData.forall(_ === SessionData.empty)) {
-      SeeOther(routes.StartController.start().url)
+      SeeOther(controllers.routes.StartController.start().url)
     } else {
       updateSession(sessionStore, request)(_ => SessionData.empty).map {
         case Left(e) =>
@@ -71,7 +71,7 @@ class IvController @Inject()(
           errorHandler.errorResult()
 
         case Right(_) =>
-          SeeOther(routes.StartController.start().url)
+          SeeOther(controllers.routes.StartController.start().url)
       }
     }
   }

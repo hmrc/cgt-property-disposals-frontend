@@ -56,7 +56,7 @@ class RegistrationChangeIndividualNameController @Inject()(
   override def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, RegistrationReady)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, r: RegistrationReady)) => Right(sessionData -> r)
-      case _                                         => Left(Redirect(controllers.onboarding.routes.StartController.start()))
+      case _                                         => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   override def updateName(journey: RegistrationReady, name: IndividualName)(

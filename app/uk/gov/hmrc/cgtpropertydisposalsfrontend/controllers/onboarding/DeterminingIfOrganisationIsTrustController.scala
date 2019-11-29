@@ -15,6 +15,7 @@
  */
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding
+
 import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
@@ -22,7 +23,7 @@ import play.api.data.Form
 import play.api.data.Forms.{mapping, of}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus
@@ -36,7 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.BusinessPartnerRecordNameMatchRetryService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
@@ -67,7 +68,7 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
   )(f: DeterminingIfOrganisationIsTrust => Future[Result]): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
       case Some(d: DeterminingIfOrganisationIsTrust) => f(d)
-      case _                                         => Redirect(routes.StartController.start())
+      case _                                         => Redirect(controllers.routes.StartController.start())
     }
 
   def doYouWantToReportForATrust(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
@@ -76,7 +77,7 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
         determiningIfOrganisationIsTrust.isReportingForTrust.fold(doYouWantToReportForATrustForm)(
           doYouWantToReportForATrustForm.fill
         )
-      Ok(doYouWantToReportForATrustPage(form, routes.StartController.weNeedMoreDetails()))
+      Ok(doYouWantToReportForATrustPage(form, controllers.routes.StartController.weNeedMoreDetails()))
     }
   }
 
@@ -87,7 +88,7 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
           .bindFromRequest()
           .fold(
             formWithError =>
-              BadRequest(doYouWantToReportForATrustPage(formWithError, routes.StartController.weNeedMoreDetails())), {
+              BadRequest(doYouWantToReportForATrustPage(formWithError, controllers.routes.StartController.weNeedMoreDetails())), {
               isReportingForTrust =>
                 updateSession(sessionStore, request)(
                   _.copy(
@@ -120,7 +121,7 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
       if (determiningIfOrganisationIsTrust.isReportingForTrust.contains(false)) {
         Ok(reportWithCorporateTaxPage(routes.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrust()))
       } else {
-        Redirect(routes.StartController.start())
+        Redirect(controllers.routes.StartController.start())
       }
     }
   }
@@ -132,7 +133,7 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
           determiningIfOrganisationIsTrust.hasTrn.fold(doYouHaveATrnForm)(doYouHaveATrnForm.fill)
         Ok(doYouHaveATrnPage(form, routes.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrust()))
       } else {
-        Redirect(routes.StartController.start())
+        Redirect(controllers.routes.StartController.start())
       }
     }
   }
@@ -166,7 +167,7 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
             }
           )
       } else {
-        Redirect(routes.StartController.start())
+        Redirect(controllers.routes.StartController.start())
       }
 
     }
@@ -188,7 +189,7 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
                 Ok(enterTrnAndNamePage(form, routes.DeterminingIfOrganisationIsTrustController.doYouHaveATrn()))
               }
             )
-        case _ => Redirect(routes.StartController.start())
+        case _ => Redirect(controllers.routes.StartController.start())
       }
     }
   }
@@ -220,10 +221,10 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
           result
             .fold(
               handleNameMatchError,
-              _ => Redirect(routes.StartController.start())
+              _ => Redirect(controllers.routes.StartController.start())
             )
 
-        case _ => Redirect(routes.StartController.start())
+        case _ => Redirect(controllers.routes.StartController.start())
       }
     }
   }

@@ -70,7 +70,7 @@ class SubscriptionReadyAction @Inject()(sessionStore: SessionStore, errorHandler
               Right(RequestWithSubscriptionReady(ready, sessionData, request))
 
             case (_, _) =>
-              Left(Redirect(controllers.onboarding.routes.StartController.start()))
+              Left(Redirect(controllers.routes.StartController.start()))
           }
         }
       )

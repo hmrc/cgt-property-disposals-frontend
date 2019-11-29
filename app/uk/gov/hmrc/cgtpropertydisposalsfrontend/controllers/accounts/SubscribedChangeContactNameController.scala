@@ -22,9 +22,8 @@ import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ContactNameController, SessionUpdates}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.name.ContactNameController
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedUpdateDetails
@@ -61,7 +60,7 @@ class SubscribedChangeContactNameController @Inject()(
   ): Either[Result, (SessionData, Subscribed)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, s: Subscribed)) => Right(sessionData -> s)
-      case _                                  => Left(Redirect(controllers.onboarding.routes.StartController.start()))
+      case _                                  => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   override def updateContactName(journey: Subscribed, contactName: ContactName)(
@@ -86,8 +85,8 @@ class SubscribedChangeContactNameController @Inject()(
 
   override val updateSubscriptionDetailChangedFlag: Boolean = true
 
-  override protected lazy val backLinkCall: Call = controllers.routes.HomeController.manageYourDetails()
+  override protected lazy val backLinkCall: Call = controllers.accounts.routes.HomeController.manageYourDetails()
   override protected lazy val enterContactNameSubmitCall: Call =
     routes.SubscribedChangeContactNameController.enterContactNameSubmit()
-  override protected lazy val continueCall: Call = controllers.routes.HomeController.manageYourDetails()
+  override protected lazy val continueCall: Call = controllers.accounts.routes.HomeController.manageYourDetails()
 }

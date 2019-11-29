@@ -21,7 +21,7 @@ import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, SessionUpdates}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.IndividualSupplyingInformation
@@ -67,7 +67,7 @@ class RegistrationEnterAddressController @Inject()(
       case Some((sessionData, r @ IndividualSupplyingInformation(Some(_), None, _, _, _))) =>
         Right(sessionData -> r)
       case _ =>
-        Left(Redirect(controllers.onboarding.routes.StartController.start()))
+        Left(Redirect(controllers.routes.StartController.start()))
     }
 
   def updateAddress(journey: IndividualSupplyingInformation, address: Address, isManuallyEnteredAddress: Boolean)(

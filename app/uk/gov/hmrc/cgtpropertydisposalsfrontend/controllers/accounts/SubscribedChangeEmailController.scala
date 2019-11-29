@@ -24,9 +24,8 @@ import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{EmailController, SessionUpdates}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.EmailController
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
@@ -70,7 +69,7 @@ class SubscribedChangeEmailController @Inject()(
   override def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, Subscribed)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, s: Subscribed)) => Right(sessionData -> s)
-      case _                                  => Left(Redirect(controllers.onboarding.routes.StartController.start()))
+      case _                                  => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   override def validVerificationCompleteJourney(
@@ -117,13 +116,13 @@ class SubscribedChangeEmailController @Inject()(
   override val updateSubscriptionDetailChangedFlag: Boolean = true
 
   override lazy protected val backLinkCall: Option[Call] = Some(
-    controllers.routes.HomeController.manageYourDetails()
+    controllers.accounts.routes.HomeController.manageYourDetails()
   )
   override lazy protected val enterEmailCall: Call            = routes.SubscribedChangeEmailController.enterEmail()
   override lazy protected val enterEmailSubmitCall: Call      = routes.SubscribedChangeEmailController.enterEmailSubmit()
   override lazy protected val checkYourInboxCall: Call        = routes.SubscribedChangeEmailController.checkYourInbox()
   override lazy protected val verifyEmailCall: UUID => Call   = routes.SubscribedChangeEmailController.verifyEmail
   override lazy protected val emailVerifiedCall: Call         = routes.SubscribedChangeEmailController.emailVerified()
-  override lazy protected val emailVerifiedContinueCall: Call = controllers.routes.HomeController.manageYourDetails()
+  override lazy protected val emailVerifiedContinueCall: Call = controllers.accounts.routes.HomeController.manageYourDetails()
 
 }

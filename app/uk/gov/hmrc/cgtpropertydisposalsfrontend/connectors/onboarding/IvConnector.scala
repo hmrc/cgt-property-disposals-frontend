@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.onboarding
 
 import java.util.UUID
 

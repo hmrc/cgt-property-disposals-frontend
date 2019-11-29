@@ -16,11 +16,13 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding
 
+
+import org.scalacheck.Arbitrary
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.mvc.Result
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, SessionData}
-import org.scalacheck.ScalacheckShapeless._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 
 import scala.concurrent.Future
 
@@ -46,6 +48,8 @@ trait RedirectToStartBehaviour {
       }
 
       "the journey status in session is not valid" in {
+        implicit val journeyStatusArb: Arbitrary[JourneyStatus] = arb(journeyStatusGen)
+
         forAll { j: JourneyStatus =>
           whenever(!isValidJourneyStatus(j)) {
             inSequence {

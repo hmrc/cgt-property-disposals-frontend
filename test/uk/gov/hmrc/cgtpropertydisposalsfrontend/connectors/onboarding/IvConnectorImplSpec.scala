@@ -24,7 +24,7 @@ import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.JsString
 import play.api.test.Helpers._
 import play.api.{Configuration, Mode}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.{HttpSupport, IvConnectorImpl}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.HttpSupport
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 

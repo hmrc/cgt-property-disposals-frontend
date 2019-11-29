@@ -14,25 +14,24 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts
 
 import cats.data.EitherT
 import cats.instances.future._
-import org.scalacheck.ScalacheckShapeless._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.SubscribedChangeAddressController
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressControllerSpec, accounts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{SubscribedDetails, SubscribedUpdateDetails}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, sample}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -124,7 +123,7 @@ class SubscribedChangeAddressControllerSpec
 
       behave like submitEnterUkAddress(
         performAction,
-        controllers.routes.HomeController.manageYourDetails()
+        controllers.accounts.routes.HomeController.manageYourDetails()
       )
 
     }
@@ -145,7 +144,7 @@ class SubscribedChangeAddressControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction())
 
-      behave like submitEnterNonUkAddress(performAction, controllers.routes.HomeController.manageYourDetails())
+      behave like submitEnterNonUkAddress(performAction, controllers.accounts.routes.HomeController.manageYourDetails())
     }
 
     "handling requests to display the enter postcode page" must {
@@ -176,7 +175,7 @@ class SubscribedChangeAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like displaySelectAddress(performAction, controllers.routes.HomeController.manageYourDetails())
+      behave like displaySelectAddress(performAction, controllers.accounts.routes.HomeController.manageYourDetails())
 
     }
 
@@ -189,8 +188,8 @@ class SubscribedChangeAddressControllerSpec
 
       behave like submitSelectAddress(
         performAction,
-        controllers.routes.HomeController.manageYourDetails(),
-        controllers.routes.HomeController.manageYourDetails()
+        controllers.accounts.routes.HomeController.manageYourDetails(),
+        controllers.accounts.routes.HomeController.manageYourDetails()
       )
 
       "not update the session" when {
@@ -204,7 +203,7 @@ class SubscribedChangeAddressControllerSpec
           }
 
           val result = performAction(Seq("address-select" -> "0"))
-          checkIsRedirect(result, controllers.routes.HomeController.manageYourDetails())
+          checkIsRedirect(result, controllers.accounts.routes.HomeController.manageYourDetails())
         }
 
       }

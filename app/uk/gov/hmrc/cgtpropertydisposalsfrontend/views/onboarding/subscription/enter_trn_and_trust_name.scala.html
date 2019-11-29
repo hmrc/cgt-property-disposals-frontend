@@ -18,6 +18,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.TrustNameMatchDetails
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 
 @this(
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -55,7 +56,8 @@
    hasErrors = form.error(trnKey).nonEmpty,
    label = Html(messages("trn.label")),
    labelClass = Some(" govuk-label--m"),
-   helpText = Some(Html(messages("haveATrn.helpText", appConfig.trusteeResponsibilitiesUrl)))
+   helpText = Some(Html(messages("haveATrn.helpText", appConfig.trusteeResponsibilitiesUrl))),
+   autoComplete = AutoCompleteType.On
   )
   @textInput(
    fieldId = trustNameKey,
@@ -63,7 +65,8 @@
    errorKey = form.error(trustNameKey).map(e => e.message),
    hasErrors = form.error(trustNameKey).nonEmpty,
    label = Html(messages("enterTrustName.label")),
-   labelClass = Some(" govuk-label--m")
+   labelClass = Some(" govuk-label--m"),
+   autoComplete = AutoCompleteType.TrustName
   )
   @submitButton(messages("button.continue"))
  }

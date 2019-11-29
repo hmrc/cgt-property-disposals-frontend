@@ -21,7 +21,7 @@ import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, Subscribed}
@@ -31,7 +31,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{OnboardingAuditService, SubscriptionService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.ExecutionContext
@@ -126,7 +126,7 @@ class SubscriptionController @Inject()(
   def subscribed(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
     request.sessionData.flatMap(_.journeyStatus) match {
       case Some(Subscribed(accountDetails, _)) => Ok(subscribedPage(accountDetails))
-      case _                                   => Redirect(routes.StartController.start())
+      case _                                   => Redirect(controllers.routes.StartController.start())
     }
   }
 
@@ -134,7 +134,7 @@ class SubscriptionController @Inject()(
     implicit request =>
       request.sessionData.flatMap(_.journeyStatus) match {
         case Some(AlreadySubscribedWithDifferentGGAccount(_)) => Ok(alreadySubscribedWithDifferentGGAccountPage())
-        case _                                                => Redirect(routes.StartController.start())
+        case _                                                => Redirect(controllers.routes.StartController.start())
       }
   }
 

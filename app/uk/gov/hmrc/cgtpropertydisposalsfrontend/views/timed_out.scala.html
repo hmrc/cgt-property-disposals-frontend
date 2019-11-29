@@ -26,22 +26,22 @@
 
 @()(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
-@title = @{messages("signed-out.title")}
+@title = @{messages("timed-out.title")}
 
 @mainTemplate(title = title, withSignOutLink = false) {
 
   @pageHeading(title)
 
   <p>
-    @messages("signed-out.p1")
+    @messages("timed-out.p1")
   </p>
 
   <p>
-    @Html(messages("signed-out.p2", routes.StartController.start().url))
+    @Html(messages("timed-out.p2", routes.StartController.start().url))
   </p>
 
   @exitSurveyLink()
 
-  @buttonLink(messages("signed-out.button"), appConfig.govUkUrl)
+  @buttonLink(messages("timed-out.button"), appConfig.govUkUrl)
 
 }

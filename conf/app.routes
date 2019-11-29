@@ -1,12 +1,12 @@
 GET /                                     controllers.Default.redirect(to = "/cgt-property-disposals/landing-page")
 GET /landing-page                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.LandingPageController.landingPage()
 GET /sign-in                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.LandingPageController.signInPage()
-GET /start                                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.StartController.start()
-GET /we-need-more-details                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.StartController.weNeedMoreDetails()
+GET /start                                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.start()
+GET /we-need-more-details                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.weNeedMoreDetails()
 GET /already-subscribed                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.SubscriptionController.alreadySubscribedWithDifferentGGAccount()
-GET /unsupported-login                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.StartController.weOnlySupportGG()
-GET /sign-out-and-register-for-gg         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.StartController.signOutAndRegisterForGG()
-GET /sign-out-and-log-in                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.StartController.signOutAndSignIn()
+GET /unsupported-login                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.weOnlySupportGG()
+GET /sign-out-and-register-for-gg         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.signOutAndRegisterForGG()
+GET /sign-out-and-log-in                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.signOutAndSignIn()
 
 
 GET /change-gg-account                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.SubscriptionController.changeGGAccountForSubscription()
@@ -150,8 +150,8 @@ POST /subscribed/enter-non-uk-address  uk.gov.hmrc.cgtpropertydisposalsfrontend.
 
 
 ### Subscribed Journey
-GET /account/home                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.HomeController.homepage
-GET /account/manage-your-details         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.HomeController.manageYourDetails
+GET /account/home                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.HomeController.homepage
+GET /account/manage-your-details         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.HomeController.manageYourDetails
 
 ### Organisation without trust enrolement
 GET  /are-you-reporting-for-a-trust       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrust()
@@ -164,6 +164,8 @@ POST /enter-trust-registration-number     uk.gov.hmrc.cgtpropertydisposalsfronte
 GET  /too-many-trust-registration-number-attempts  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController.tooManyAttempts()
 GET  /register-your-trust                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController.registerYourTrust()
 
-GET /signed-out                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.HomeController.signedOut()
+GET /signed-out                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.HomeController.signedOut()
+GET /timed-out                            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.timedOut()
+GET /keep-alive                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.keepAlive()
 
 GET  /assets/*file                        controllers.Assets.at(path="/public", file)

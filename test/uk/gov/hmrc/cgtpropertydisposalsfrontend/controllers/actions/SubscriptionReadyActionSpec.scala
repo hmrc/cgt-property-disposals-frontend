@@ -16,18 +16,17 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
-import org.scalacheck.ScalacheckShapeless._
 import play.api.i18n.MessagesApi
 import play.api.mvc.Results.Ok
 import play.api.mvc.{MessagesRequest, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{routes => onboardingRoutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, SessionSupport}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, SessionSupport, routes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionDetails
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -69,13 +68,13 @@ class SubscriptionReadyActionSpec extends ControllerSpec with SessionSupport {
       "there is no session data in store" in {
         mockGetSession(Future.successful(Right(None)))
 
-        checkIsRedirect(performAction(sample[SessionData]), onboardingRoutes.StartController.start())
+        checkIsRedirect(performAction(sample[SessionData]), routes.StartController.start())
       }
 
       "there is no subscription details in the session data" in {
         mockGetSession(Future.successful(Right(Some(SessionData.empty))))
 
-        checkIsRedirect(performAction(sample[SessionData]), onboardingRoutes.StartController.start())
+        checkIsRedirect(performAction(sample[SessionData]), routes.StartController.start())
       }
 
     }

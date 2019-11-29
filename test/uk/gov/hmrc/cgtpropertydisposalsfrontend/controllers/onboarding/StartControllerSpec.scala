@@ -19,7 +19,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding
 import cats.data.EitherT
 import cats.instances.future._
 import org.joda.time.{LocalDate => JodaLocalDate}
-import org.scalacheck.ScalacheckShapeless._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
@@ -30,29 +29,31 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.ConfidenceLevel.L50
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.Credentials
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.{routes => emailRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{routes => onboardingRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, StartController}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, RegistrationReady}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, NonGovernmentGatewayJourney, RegistrationStatus, Subscribed, SubscriptionStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Individual
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, RegistrationReady}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.{DeterminingIfOrganisationIsTrust, SubscriptionMissingData, SubscriptionReady, TryingToGetIndividualsFootprint}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, NonGovernmentGatewayJourney, RegistrationStatus, Subscribed, SubscriptionStatus}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Individual
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, BusinessPartnerRecordResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{NeedMoreDetailsDetails, SubscribedDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPartnerRecordService, OnboardingAuditService, SubscriptionService}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
+import scala.reflect.ClassTag
 
 class StartControllerSpec
     extends ControllerSpec
@@ -229,7 +230,7 @@ class StartControllerSpec
               )(Future.successful(Right(())))
             }
 
-            checkIsRedirect(performAction(FakeRequest()), onboardingRoutes.StartController.weNeedMoreDetails())
+            checkIsRedirect(performAction(FakeRequest()), controllers.routes.StartController.weNeedMoreDetails())
           }
 
           "the session data is updated when there is no relevant journey status in it" in {
@@ -258,7 +259,7 @@ class StartControllerSpec
 
             }
 
-            checkIsRedirect(performAction(FakeRequest()), onboardingRoutes.StartController.weNeedMoreDetails())
+            checkIsRedirect(performAction(FakeRequest()), controllers.routes.StartController.weNeedMoreDetails())
           }
         }
 
@@ -387,7 +388,7 @@ class StartControllerSpec
                 )(Future.successful(Right(())))
               }
 
-              checkIsRedirect(performAction(), onboardingRoutes.StartController.weNeedMoreDetails())
+              checkIsRedirect(performAction(), controllers.routes.StartController.weNeedMoreDetails())
             }
 
             "the session data indicates they do not have sufficient confidence level" in {
@@ -531,7 +532,7 @@ class StartControllerSpec
 
         val name = sample[IndividualName]
 
-        val bpr = uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecord(
+        val bpr = models.onboarding.bpr.BusinessPartnerRecord(
           Some(emailAddress),
           sample[UkAddress],
           "sap",
@@ -732,7 +733,7 @@ class StartControllerSpec
                 mockGetSession(Future.successful(Right(Some(session))))
               }
 
-              checkIsRedirect(performAction(), controllers.routes.HomeController.homepage())
+              checkIsRedirect(performAction(), controllers.accounts.routes.HomeController.homepage())
             }
 
           }
@@ -937,7 +938,7 @@ class StartControllerSpec
                 mockStoreSession(updatedSession)(Future.successful(Right(())))
               }
 
-              checkIsRedirect(performAction(), onboardingRoutes.StartController.weNeedMoreDetails())
+              checkIsRedirect(performAction(), controllers.routes.StartController.weNeedMoreDetails())
             }
 
             "there is no email in the BPR or the auth record for a user with CL < 200" in {
@@ -971,7 +972,7 @@ class StartControllerSpec
                 mockStoreSession(updatedSession)(Future.successful(Right(())))
               }
 
-              checkIsRedirect(performAction(), onboardingRoutes.StartController.weNeedMoreDetails())
+              checkIsRedirect(performAction(), controllers.routes.StartController.weNeedMoreDetails())
             }
 
             "the session data indicates there is data missing for subscription and the email address " +
@@ -1033,7 +1034,7 @@ class StartControllerSpec
                 mockGetSession(Future.successful(Right(Some(session))))
               }
 
-              checkIsRedirect(performAction(), controllers.routes.HomeController.homepage())
+              checkIsRedirect(performAction(), controllers.accounts.routes.HomeController.homepage())
             }
 
           }
@@ -1271,7 +1272,7 @@ class StartControllerSpec
                 )(Future.successful(Right(())))
               }
 
-              checkIsRedirect(performAction(), onboardingRoutes.StartController.weNeedMoreDetails())
+              checkIsRedirect(performAction(), controllers.routes.StartController.weNeedMoreDetails())
             }
 
             "the session data indicates there is data missing for subscription and the email address " +
@@ -1321,7 +1322,7 @@ class StartControllerSpec
               mockGetSession(Future.successful(Right(Some(sessionWithSubscribed))))
             }
 
-            checkIsRedirect(performAction(), controllers.routes.HomeController.homepage())
+            checkIsRedirect(performAction(), controllers.accounts.routes.HomeController.homepage())
           }
 
         }
@@ -1386,7 +1387,7 @@ class StartControllerSpec
               mockStoreSession(sessionWithSubscribed)(Future.successful(Right(())))
             }
 
-            checkIsRedirect(performAction(), controllers.routes.HomeController.homepage())
+            checkIsRedirect(performAction(), controllers.accounts.routes.HomeController.homepage())
           }
 
         }
@@ -1440,7 +1441,7 @@ class StartControllerSpec
               )
             }
 
-            checkIsRedirect(performAction(), onboardingRoutes.StartController.weOnlySupportGG())
+            checkIsRedirect(performAction(), controllers.routes.StartController.weOnlySupportGG())
           }
 
           "the session data has already been updated" in {
@@ -1467,7 +1468,7 @@ class StartControllerSpec
               )
             }
 
-            checkIsRedirect(performAction(), onboardingRoutes.StartController.weOnlySupportGG())
+            checkIsRedirect(performAction(), controllers.routes.StartController.weOnlySupportGG())
           }
 
         }
@@ -1490,7 +1491,7 @@ class StartControllerSpec
                 Right(
                   Some(
                     SessionData.empty.copy(
-                      journeyStatus = Some(sample[JourneyStatus])
+                      journeyStatus = Some(sample(implicitly[ClassTag[JourneyStatus]], journeyStatusGen))
                     )
                   )
                 )
@@ -1498,7 +1499,7 @@ class StartControllerSpec
             )
           }
 
-          checkIsRedirect(performAction(), onboardingRoutes.StartController.start())
+          checkIsRedirect(performAction(), controllers.routes.StartController.start())
         }
 
       }
@@ -1515,7 +1516,7 @@ class StartControllerSpec
                 Right(
                   Some(
                     SessionData.empty.copy(
-                      journeyStatus = Some(sample[JourneyStatus]),
+                      journeyStatus = Some(sample[JourneyStatus](implicitly[ClassTag[JourneyStatus]], journeyStatusGen)),
                       needMoreDetailsDetails = Some(
                         NeedMoreDetailsDetails(
                           continueUrl,
@@ -1631,7 +1632,7 @@ class StartControllerSpec
         }
 
         val result = performAction(Seq("key" -> "value"))
-        checkIsRedirect(result, onboardingRoutes.StartController.start())
+        checkIsRedirect(result, controllers.routes.StartController.start())
         session(result).data shouldBe Map.empty
       }
 
