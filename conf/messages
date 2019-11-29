@@ -360,7 +360,7 @@ account.manageYourDetails.accountName=Account name
 account.manageYourDetails.betaNotice=This service is in private beta until 6 April 2020. On that date you will be able to come back and send a CGT on UK property disposals return for disposals made on or after 6 April 2020.
 account.manageYourDetails.contactHeading=Contact person’s details
 account.manageYourDetails.p=We’ll only use these details if we need to get in contact about this service.
-account.manageYourDetails.individual.p2=You can only change the contact name here.  If the 'Account name' needs to change, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new window)</a>.
+account.manageYourDetails.individual.p2=You can only change the contact name here.  If the ‘Account name’ needs to change, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new window)</a>.
 account.manageYourDetails.organisation.p2= If the lead trustee’s name or address changes, you’ll need to <a href="{0}" target="_blank">tell HMRC (opens in a new window)</a>.
 account.manageYourDetails.yourName=Your name
 account.manageYourDetails.ContactName.changed=Contact name changed
