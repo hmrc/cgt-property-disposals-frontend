@@ -78,7 +78,7 @@ class HomeControllerSpec
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("account.home.left.title"))
+        contentAsString(result) should include(message("account.home.title"))
       }
 
     }

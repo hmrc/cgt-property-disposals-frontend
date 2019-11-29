@@ -31,9 +31,7 @@
 
 @(details: SubscribedDetails)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
-@affinity = @{details.name.fold(_ => "organisation", _ => "individual")}
-@fullName = @{details.name.fold(_.value, n => s"${n.firstName} ${n.lastName}")}
-@title = @{messages(s"account.home.${affinity}.title", fullName)}
+@title = @{messages(s"account.home.title")}
 
 @mainTemplate(title = title, mainClass=Some("full-width"), withSignOutLink = false, accountMenu=Some(accountMenu(Some(AccountMenuItem.Home())))) {
 
