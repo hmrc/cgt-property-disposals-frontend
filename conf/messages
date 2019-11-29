@@ -161,7 +161,7 @@ confirmEmail.verified.title=Email address confirmed
 confirmEmail.verified.intro=The email address <strong class="bold">{0}</strong> has been confirmed.
 confirmEmail.verified.p1=We’ll use this address to contact you about your Capital Gains Tax on UK property sales or disposals.
 confirmEmail.verified.p2=Your email has not been updated in other government services.
-confirmEmail.resent=Confirmation email sent to {0}
+confirmEmail.resent=Confirmation email sent:
 
 contactName.title=Change contact name
 contactName.extraContent=The contact name you use for other government services will not change.
