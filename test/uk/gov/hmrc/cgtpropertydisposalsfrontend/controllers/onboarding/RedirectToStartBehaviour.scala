@@ -20,7 +20,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding
 import org.scalacheck.Arbitrary
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.mvc.Result
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 
@@ -43,7 +44,7 @@ trait RedirectToStartBehaviour {
 
         checkIsRedirect(
           performAction(),
-          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.routes.StartController.start()
+          controllers.routes.StartController.start()
         )
       }
 
@@ -59,7 +60,7 @@ trait RedirectToStartBehaviour {
 
             checkIsRedirect(
               performAction(),
-              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.routes.StartController.start()
+              controllers.routes.StartController.start()
             )
           }
         }

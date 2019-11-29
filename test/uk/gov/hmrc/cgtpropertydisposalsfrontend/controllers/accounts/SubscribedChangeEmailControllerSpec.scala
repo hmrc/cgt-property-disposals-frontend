@@ -55,8 +55,6 @@ class SubscribedChangeEmailControllerSpec
 
   override val validVerificationCompleteJourneyStatus: Subscribed = validJourneyStatus
 
-  override val updateSubscriptionDetailChangedFlag: Boolean = true
-
   override lazy val controller: SubscribedChangeEmailController = instanceOf[SubscribedChangeEmailController]
 
   override val overrideBindings =
@@ -157,8 +155,8 @@ class SubscribedChangeEmailControllerSpec
 
       behave like emailVerifiedPage(
         performAction,
-        controllers.accounts.routes.HomeController.manageYourDetails(),
-        controllers.accounts.routes.SubscribedChangeEmailController.enterEmail()
+        controllers.accounts.routes.HomeController.contactEmailUpdated(),
+        routes.SubscribedChangeEmailController.enterEmail()
       )
     }
   }

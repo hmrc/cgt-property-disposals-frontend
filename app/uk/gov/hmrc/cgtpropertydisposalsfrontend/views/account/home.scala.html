@@ -24,52 +24,25 @@
  pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
  detailsElement: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
- accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu
+ accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu,
+ insetPanel: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.inset_panel
 )
 
 
 @(details: SubscribedDetails)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
-@affinity = @{details.name.fold(_ => "organisation", _ => "individual")}
-@fullName = @{details.name.fold(_.value, n => s"${n.firstName} ${n.lastName}")}
-@title = @{messages(s"account.home.${affinity}.title", fullName)}
+@title = @{messages(s"account.home.title")}
 
 @mainTemplate(title = title, mainClass=Some("full-width"), withSignOutLink = false, accountMenu=Some(accountMenu(Some(AccountMenuItem.Home())))) {
 
  @pageHeading(title, Some(messages("account.caption")), Some(messages("account.home.subtitle", details.cgtReference.value)))
 
- <div class="grid-row">
-
-  <div class="column-half">
-   <h2 class="heading-medium">
-    @messages("account.home.left.title")
-   </h2>
-   <div class="panel panel-border-wide">
-     <p>
-      @messages("account.home.left.placeholder")
-     </p>
-   </div>
-  </div>
-
-  <div class="column-half">
-   <h2 class="heading-medium">
-    @messages("account.home.right.title")
-   </h2>
-   <div class="panel panel-border-wide">
-     <p>
-      @messages("account.home.right.placeholder")
-     </p>
-   </div>
-  </div>
-
+<div class="grid-row">
+ <div class="column-two-thirds">
+  @insetPanel(Html(messages("account.home.private-beta.guide.content", appConfig.cgtLegacyUrl)))
  </div>
+</div>
 
- <div class="grid-row">
 
-  <div class="column-two-thirds">
-   @detailsElement(messages("account.home.private-beta.guide"), Html(messages("account.home.private-beta.guide.content", appConfig.cgtLegacyUrl)))
-  </div>
-
- </div>
 
 }

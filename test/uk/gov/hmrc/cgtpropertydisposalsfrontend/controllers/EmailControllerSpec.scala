@@ -54,8 +54,6 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
 
   val mockUpdateEmail: Option[(Journey, VerificationCompleteJourney, Either[Error, Unit]) => Unit]
 
-  val updateSubscriptionDetailChangedFlag: Boolean
-
   val controller: EmailController[Journey, VerificationCompleteJourney]
 
   val isAmendJourney: Boolean
@@ -362,9 +360,7 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
           mockStoreSession(
             sessionData.copy(
               emailToBeVerified = Some(emailToBeVerified.copy(verified = true)),
-              journeyStatus     = Some(updateEmail(validJourneyStatus, emailToBeVerified.email)),
-              subscriptionDetailChanged =
-                if (updateSubscriptionDetailChangedFlag) Some(SubscriptionDetail.Email) else None
+              journeyStatus     = Some(updateEmail(validJourneyStatus, emailToBeVerified.email))
             )
           )(Future.successful(Left(Error(""))))
         }
@@ -411,9 +407,7 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
           mockStoreSession(
             sessionData.copy(
               emailToBeVerified = Some(emailToBeVerified.copy(verified = true)),
-              journeyStatus     = Some(updateEmail(validJourneyStatus, emailToBeVerified.email)),
-              subscriptionDetailChanged =
-                if (updateSubscriptionDetailChangedFlag) Some(SubscriptionDetail.Email) else None
+              journeyStatus     = Some(updateEmail(validJourneyStatus, emailToBeVerified.email))
             )
           )(Future.successful(Right(())))
         }
@@ -430,9 +424,8 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
     val emailToBeVerified = EmailToBeVerified(Email("verified@email.com"), UUID.randomUUID(), true, false)
 
     val sessionData = SessionData.empty.copy(
-      journeyStatus             = Some(validVerificationCompleteJourneyStatus),
-      emailToBeVerified         = Some(emailToBeVerified),
-      subscriptionDetailChanged = if (updateSubscriptionDetailChangedFlag) Some(SubscriptionDetail.Email) else None
+      journeyStatus     = Some(validVerificationCompleteJourneyStatus),
+      emailToBeVerified = Some(emailToBeVerified)
     )
 
     "show an error page" when {

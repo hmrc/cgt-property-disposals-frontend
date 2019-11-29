@@ -50,12 +50,7 @@ class RegistrationEnterIndividualNameControllerSpec
   override val mockUpdateName
     : Option[(IndividualSupplyingInformation, IndividualSupplyingInformation, Either[Error, Unit]) => Unit] = None
 
-  override val updateSubscriptionDetailChangedFlag: Boolean = false
-
-  override def updateName(
-    name: IndividualName,
-    journey: IndividualSupplyingInformation
-  ): IndividualSupplyingInformation =
+  override def updateName(name: IndividualName, journey: IndividualSupplyingInformation): IndividualSupplyingInformation =
     journey.copy(name = Some(name))
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi

@@ -48,8 +48,6 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
 
   val mockUpdateContactName: Option[(J, J, Either[Error, Unit]) => Unit]
 
-  val updateSubscriptionDetailChangedFlag: Boolean
-
   def isValidJourney(journey: JourneyStatus): Boolean
 
   override val overrideBindings: List[GuiceableModule] =
@@ -105,8 +103,7 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
     val contactName = ContactName("Joe Smith")
     val updatedSession =
       sessionDataWithValidJourney.copy(
-        journeyStatus             = Some(updateContactName(validJourney, contactName)),
-        subscriptionDetailChanged = if (updateSubscriptionDetailChangedFlag) Some(SubscriptionDetail.Name) else None
+        journeyStatus = Some(updateContactName(validJourney,contactName))
       )
 
     behave like redirectToStartBehaviour(() => performAction(Seq.empty))

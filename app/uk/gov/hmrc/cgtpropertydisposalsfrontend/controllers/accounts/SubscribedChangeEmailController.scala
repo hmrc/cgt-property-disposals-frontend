@@ -113,8 +113,6 @@ class SubscribedChangeEmailController @Inject()(
   override def name(journeyStatus: Subscribed): ContactName =
     journeyStatus.subscribedDetails.contactName
 
-  override val updateSubscriptionDetailChangedFlag: Boolean = true
-
   override lazy protected val backLinkCall: Option[Call] = Some(
     controllers.accounts.routes.HomeController.manageYourDetails()
   )
@@ -123,6 +121,6 @@ class SubscribedChangeEmailController @Inject()(
   override lazy protected val checkYourInboxCall: Call        = routes.SubscribedChangeEmailController.checkYourInbox()
   override lazy protected val verifyEmailCall: UUID => Call   = routes.SubscribedChangeEmailController.verifyEmail
   override lazy protected val emailVerifiedCall: Call         = routes.SubscribedChangeEmailController.emailVerified()
-  override lazy protected val emailVerifiedContinueCall: Call = controllers.accounts.routes.HomeController.manageYourDetails()
+  override lazy protected val emailVerifiedContinueCall: Call = controllers.accounts.routes.HomeController.contactEmailUpdated()
 
 }

@@ -45,8 +45,6 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
 
   val mockUpdateAddress: Option[(J, Address, Either[Error, Unit]) => Unit]
 
-  val updateSubscriptionDetailChangedFlag: Boolean
-
   val controller: AddressController[J]
 
   val mockService = mock[UKAddressLookupService]
@@ -275,9 +273,7 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
       "the address cannot be stored in the session" in {
         val newAddress = UkAddress("Test street", None, None, None, Postcode("W1A2HR"))
         val updatedSession = sessionWithValidJourneyStatus.copy(
-          journeyStatus = Some(updateAddress(validJourneyStatus, newAddress)),
-          subscriptionDetailChanged =
-            if (updateSubscriptionDetailChangedFlag) Some(SubscriptionDetail.Address) else None
+          journeyStatus = Some(updateAddress(validJourneyStatus, newAddress))
         )
 
         inSequence {
@@ -295,9 +291,7 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
         val newAddress =
           UkAddress("Flat 1", Some("The Street"), Some("The Town"), Some("Countyshire"), Postcode("W1A2HR"))
         val updatedSession = sessionWithValidJourneyStatus.copy(
-          journeyStatus = Some(updateAddress(validJourneyStatus, newAddress)),
-          subscriptionDetailChanged =
-            if (updateSubscriptionDetailChangedFlag) Some(SubscriptionDetail.Address) else None
+          journeyStatus = Some(updateAddress(validJourneyStatus, newAddress))
         )
 
         inSequence {
@@ -425,9 +419,7 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
       "the address cannot be stored in the session" in {
         val newAddress = NonUkAddress("House 1", None, None, None, None, Country("NZ", Some("New Zealand")))
         val updatedSession = sessionWithValidJourneyStatus.copy(
-          journeyStatus = Some(updateAddress(validJourneyStatus, newAddress)),
-          subscriptionDetailChanged =
-            if (updateSubscriptionDetailChangedFlag) Some(SubscriptionDetail.Address) else None
+          journeyStatus = Some(updateAddress(validJourneyStatus, newAddress))
         )
 
         inSequence {
@@ -461,9 +453,7 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
 
           mockStoreSession(
             sessionWithValidJourneyStatus.copy(
-              journeyStatus = Some(updatedJourney),
-              subscriptionDetailChanged =
-                if (updateSubscriptionDetailChangedFlag) Some(SubscriptionDetail.Address) else None
+              journeyStatus = Some(updatedJourney)
             )
           )(Future.successful(Right(())))
         }
@@ -848,9 +838,7 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
 
       "the selected address cannot be stored in session" in {
         val updatedSession = sessionWithValidJourneyStatusAndAddressLookupResult.copy(
-          journeyStatus = Some(updateAddress(validJourneyStatus, lastAddress)),
-          subscriptionDetailChanged =
-            if (updateSubscriptionDetailChangedFlag) Some(SubscriptionDetail.Address) else None
+          journeyStatus = Some(updateAddress(validJourneyStatus, lastAddress))
         )
 
         inSequence {
@@ -869,9 +857,7 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
 
       "the selected address is stored in session" in {
         val updatedSession = sessionWithValidJourneyStatusAndAddressLookupResult.copy(
-          journeyStatus = Some(updateAddress(validJourneyStatus, lastAddress)),
-          subscriptionDetailChanged =
-            if (updateSubscriptionDetailChangedFlag) Some(SubscriptionDetail.Address) else None
+          journeyStatus = Some(updateAddress(validJourneyStatus, lastAddress))
         )
 
         inSequence {

@@ -83,8 +83,6 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
 
   def name(journeyStatus: Journey): ContactName
 
-  val updateSubscriptionDetailChangedFlag: Boolean
-
   private def withValidJourney(request: RequestWithSessionData[_])(
     f: (SessionData, Journey) => Future[Result]
   ): Future[Result] =
@@ -209,9 +207,7 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
                   _ <- EitherT[Future, Error, Unit](updateSession(sessionStore, request) { s =>
                         s.copy(
                           journeyStatus     = Some(updatedJourney),
-                          emailToBeVerified = Some(emailToBeVerified.copy(verified = true)),
-                          subscriptionDetailChanged =
-                            if (updateSubscriptionDetailChangedFlag) Some(SubscriptionDetail.Email) else None
+                          emailToBeVerified = Some(emailToBeVerified.copy(verified = true))
                         )
                       })
                 } yield ()

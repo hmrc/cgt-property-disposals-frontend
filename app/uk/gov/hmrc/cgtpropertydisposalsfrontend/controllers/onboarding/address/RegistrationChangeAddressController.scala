@@ -88,8 +88,6 @@ class RegistrationChangeAddressController @Inject()(
     EitherT.pure[Future, Error](journey.copy(registrationDetails = journey.registrationDetails.copy(address = address)))
   }
 
-  override val updateSubscriptionDetailChangedFlag: Boolean = false
-
   protected lazy val backLinkCall: Call             = controllers.onboarding.routes.RegistrationController.checkYourAnswers()
   protected lazy val isUkCall: Call                 = routes.RegistrationChangeAddressController.isUk()
   protected lazy val isUkSubmitCall: Call           = routes.RegistrationChangeAddressController.isUkSubmit()
@@ -103,5 +101,4 @@ class RegistrationChangeAddressController @Inject()(
   protected lazy val selectAddressCall: Call       = routes.RegistrationChangeAddressController.selectAddress()
   protected lazy val selectAddressSubmitCall: Call = routes.RegistrationChangeAddressController.selectAddressSubmit()
   protected lazy val continueCall: Call            = controllers.onboarding.routes.RegistrationController.checkYourAnswers()
-
 }

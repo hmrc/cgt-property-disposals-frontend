@@ -43,9 +43,7 @@ class SubscriptionChangeContactNameControllerSpec
   override val mockUpdateContactName
     : Option[(SubscriptionReady, SubscriptionReady, Either[models.Error, Unit]) => Unit] = None
 
-  override val updateSubscriptionDetailChangedFlag: Boolean = false
-
-  override def updateContactName(journey: SubscriptionReady, contactName: ContactName): SubscriptionReady =
+  override def updateContactName(journey : SubscriptionReady, contactName: ContactName): SubscriptionReady =
     journey.copy(subscriptionDetails = journey.subscriptionDetails.copy(contactName = contactName))
 
   def isValidJourney(journey: JourneyStatus): Boolean = journey match {

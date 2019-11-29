@@ -112,8 +112,6 @@ class SubscriptionChangeEmailController @Inject()(
   override def name(journeyStatus: SubscriptionReady): ContactName =
     journeyStatus.subscriptionDetails.contactName
 
-  override val updateSubscriptionDetailChangedFlag: Boolean = false
-
   override lazy protected val backLinkCall: Option[Call] = Some(
     controllers.onboarding.routes.SubscriptionController.checkYourDetails()
   )

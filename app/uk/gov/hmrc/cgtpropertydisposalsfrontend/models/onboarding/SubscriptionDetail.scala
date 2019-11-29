@@ -23,7 +23,7 @@ sealed trait SubscriptionDetail extends Product with Serializable
 
 object SubscriptionDetail {
 
-  case object Name extends SubscriptionDetail
+  case object ContactName extends SubscriptionDetail
 
   case object Address extends SubscriptionDetail
 

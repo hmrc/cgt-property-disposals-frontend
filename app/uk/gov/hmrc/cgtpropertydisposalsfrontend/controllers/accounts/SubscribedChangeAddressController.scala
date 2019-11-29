@@ -79,9 +79,9 @@ class SubscribedChangeAddressController @Inject()(
       EitherT.pure[Future, Error](journey)
     } else {
       val auditUrl = address match {
-        case Address.UkAddress(line1, line2, town, county, postcode) =>
+        case _: Address.UkAddress =>
           routes.SubscribedChangeAddressController.enterUkAddressSubmit().url
-        case Address.NonUkAddress(line1, line2, line3, line4, postcode, country) =>
+        case _: Address.NonUkAddress =>
           routes.SubscribedChangeAddressController.enterNonUkAddressSubmit().url
       }
       auditService.sendSubscribedContactAddressChangedEvent(
@@ -97,8 +97,6 @@ class SubscribedChangeAddressController @Inject()(
     }
   }
 
-  override val updateSubscriptionDetailChangedFlag: Boolean = true
-
   protected lazy val backLinkCall: Call             = controllers.accounts.routes.HomeController.manageYourDetails()
   protected lazy val isUkCall: Call                 = routes.SubscribedChangeAddressController.isUk()
   protected lazy val isUkSubmitCall: Call           = routes.SubscribedChangeAddressController.isUkSubmit()
@@ -111,5 +109,5 @@ class SubscribedChangeAddressController @Inject()(
   protected lazy val enterPostcodeSubmitCall: Call = routes.SubscribedChangeAddressController.enterPostcodeSubmit()
   protected lazy val selectAddressCall: Call       = routes.SubscribedChangeAddressController.selectAddress()
   protected lazy val selectAddressSubmitCall: Call = routes.SubscribedChangeAddressController.selectAddressSubmit()
-  protected lazy val continueCall: Call            = controllers.accounts.routes.HomeController.manageYourDetails()
+  protected lazy val continueCall: Call            = controllers.accounts.routes.HomeController.contactAddressUpdated()
 }

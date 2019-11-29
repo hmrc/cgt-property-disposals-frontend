@@ -27,6 +27,7 @@ import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.TryingToGetIndividualsFootprint
@@ -82,7 +83,7 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
           mockStoreSession(SessionData.empty)(Future.successful(Right(())))
         }
 
-        checkIsRedirect(performAction(), onboarding.routes.StartController.start())
+        checkIsRedirect(performAction(), controllers.routes.StartController.start())
       }
 
       "show an error page if there is an error clearing the session" in {
@@ -103,7 +104,7 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
             mockGetSession(Future.successful(Right(None)))
           }
 
-          checkIsRedirect(performAction(), onboarding.routes.StartController.start())
+          checkIsRedirect(performAction(), controllers.routes.StartController.start())
         }
 
         "the session data is empty" in {
@@ -112,7 +113,7 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
             mockGetSession(Future.successful(Right(Some(SessionData.empty))))
           }
 
-          checkIsRedirect(performAction(), onBoarding.StartController.start())
+          checkIsRedirect(performAction(), controllers.routes.StartController.start())
         }
 
       }
@@ -135,22 +136,22 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
             mockGetFailedJourneyStatus(journeyId)(Left(Error("")))
           }
 
-          checkIsRedirect(performAction(), onBoarding.IvController.getTechnicalIssue())
+          checkIsRedirect(performAction(), controllers.onboarding.routes.IvController.getTechnicalIssue())
         }
 
       }
 
       List(
-        IvErrorStatus.Incomplete           -> (() => onBoarding.IvController.getTechnicalIssue()),
-        IvErrorStatus.FailedMatching       -> (() => onBoarding.IvController.getFailedMatching()),
-        IvErrorStatus.FailedIV             -> (() => onBoarding.IvController.getFailedIV()),
-        IvErrorStatus.InsufficientEvidence -> (() => onBoarding.IvController.getInsufficientEvidence()),
-        IvErrorStatus.LockedOut            -> (() => onBoarding.IvController.getLockedOut()),
-        IvErrorStatus.UserAborted          -> (() => onBoarding.IvController.getUserAborted()),
-        IvErrorStatus.Timeout              -> (() => onBoarding.IvController.getTimedOut()),
-        IvErrorStatus.TechnicalIssue       -> (() => onBoarding.IvController.getTechnicalIssue()),
-        IvErrorStatus.PreconditionFailed   -> (() => onBoarding.IvController.getPreconditionFailed()),
-        IvErrorStatus.Unknown("")          -> (() => onBoarding.IvController.getTechnicalIssue())
+        IvErrorStatus.Incomplete           -> (() => controllers.onboarding.routes.IvController.getTechnicalIssue()),
+        IvErrorStatus.FailedMatching       -> (() => controllers.onboarding.routes.IvController.getFailedMatching()),
+        IvErrorStatus.FailedIV             -> (() => controllers.onboarding.routes.IvController.getFailedIV()),
+        IvErrorStatus.InsufficientEvidence -> (() => controllers.onboarding.routes.IvController.getInsufficientEvidence()),
+        IvErrorStatus.LockedOut            -> (() => controllers.onboarding.routes.IvController.getLockedOut()),
+        IvErrorStatus.UserAborted          -> (() => controllers.onboarding.routes.IvController.getUserAborted()),
+        IvErrorStatus.Timeout              -> (() => controllers.onboarding.routes.IvController.getTimedOut()),
+        IvErrorStatus.TechnicalIssue       -> (() => controllers.onboarding.routes.IvController.getTechnicalIssue()),
+        IvErrorStatus.PreconditionFailed   -> (() => controllers.onboarding.routes.IvController.getPreconditionFailed()),
+        IvErrorStatus.Unknown("")          -> (() => controllers.onboarding.routes.IvController.getTechnicalIssue())
       ).foreach {
         case (status, redirectTo) =>
           s"redirect to ${redirectTo().url}" when {

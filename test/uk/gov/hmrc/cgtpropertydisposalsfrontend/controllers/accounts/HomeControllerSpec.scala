@@ -78,7 +78,7 @@ class HomeControllerSpec
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("account.home.left.title"))
+        contentAsString(result) should include(message("account.home.title"))
       }
 
     }
@@ -115,38 +115,67 @@ class HomeControllerSpec
         contentAsString(result) should include(message("account.manageYourDetails.p"))
       }
 
-      "update the session if the subscriptionDetailsUpdated field is set in the session data" in {
+    }
+
+    "handling requests for the address changed page" must {
+      def performAction(): Future[Result] = controller.contactAddressUpdated()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+      "display the page" in {
         val sessionData =
-          SessionData.empty
-            .copy(journeyStatus = Some(subscribed), subscriptionDetailChanged = Some(SubscriptionDetail.Address))
+          SessionData.empty.copy(journeyStatus = Some(subscribed))
 
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionData))))
-          mockStoreSession(sessionData.copy(subscriptionDetailChanged = None))(Future.successful(Right(())))
         }
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("account.manageYourDetails.addressChanged"))
+        contentAsString(result) should include(message("account.manageYourDetails.Address.changed"))
       }
 
-      "show an error page" when {
+    }
 
-        "the update to the session data is unsuccessful" in {
-          val sessionData =
-            SessionData.empty
-              .copy(journeyStatus = Some(subscribed), subscriptionDetailChanged = Some(SubscriptionDetail.Email))
+    "handling requests for the email changed page" must {
+      def performAction(): Future[Result] = controller.contactEmailUpdated()(FakeRequest())
 
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData))))
-            mockStoreSession(sessionData.copy(subscriptionDetailChanged = None))(Future.successful(Left(Error(""))))
-          }
+      behave like redirectToStartBehaviour(performAction)
 
-          checkIsTechnicalErrorPage(performAction())
+      "display the page" in {
+        val sessionData =
+          SessionData.empty.copy(journeyStatus = Some(subscribed))
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(Future.successful(Right(Some(sessionData))))
         }
 
+        val result = performAction()
+        status(result)          shouldBe OK
+        contentAsString(result) should include(message("account.manageYourDetails.Email.changed"))
+      }
+
+    }
+
+    "handling requests for the name changed page" must {
+      def performAction(): Future[Result] = controller.contactNameUpdated()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+      "display the page" in {
+        val sessionData =
+          SessionData.empty.copy(journeyStatus = Some(subscribed))
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(Future.successful(Right(Some(sessionData))))
+        }
+
+        val result = performAction()
+        status(result)          shouldBe OK
+        contentAsString(result) should include(message("account.manageYourDetails.ContactName.changed"))
       }
 
     }
