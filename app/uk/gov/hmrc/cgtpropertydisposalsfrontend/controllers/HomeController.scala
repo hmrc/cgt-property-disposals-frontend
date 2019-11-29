@@ -21,9 +21,9 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, SubscriptionDetail, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
@@ -39,6 +39,7 @@ class HomeController @Inject()(
   cc: MessagesControllerComponents,
   manageYourDetailsPage: views.html.account.manage_your_details,
   homePage: views.html.account.home,
+  detailUpdatedPage: views.html.account.details_updated,
   signedOutPage: views.html.account.signed_out
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
@@ -48,35 +49,40 @@ class HomeController @Inject()(
 
   def homepage(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request: RequestWithSessionData[AnyContent] =>
-      withSubscribedUser(request) { (sessionData, subscribed) =>
+      withSubscribedUser(request) { (_, subscribed) =>
         Future.successful(Ok(homePage(subscribed.subscribedDetails)))
       }
   }
 
   def manageYourDetails(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request: RequestWithSessionData[AnyContent] =>
-      withSubscribedUser(request) { (sessionData, subscribed) =>
-        val updateSessionResult =
-          sessionData.subscriptionDetailChanged.fold[Future[Either[Error, Unit]]](
-            Future.successful(Right(()))
-          ) { _ =>
-            updateSession(sessionStore, request)(_.copy(subscriptionDetailChanged = None))
-          }
-
-        updateSessionResult.map {
-          case Left(e) =>
-            logger.warn(s"Could not update session", e)
-            errorHandler.errorResult()
-
-          case Right(_) =>
-            Ok(manageYourDetailsPage(subscribed.subscribedDetails, sessionData.subscriptionDetailChanged))
-        }
+      withSubscribedUser(request) { (_, subscribed) =>
+        Ok(manageYourDetailsPage(subscribed.subscribedDetails))
       }
   }
 
   def signedOut(): Action[AnyContent] = Action { implicit request =>
     Ok(signedOutPage())
   }
+
+  def contactNameUpdated(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withSubscribedUser(request) { case _ =>
+      Ok(detailUpdatedPage(SubscriptionDetail.ContactName))
+    }
+  }
+
+  def contactEmailUpdated(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withSubscribedUser(request) { case _ =>
+      Ok(detailUpdatedPage(SubscriptionDetail.Email))
+    }
+  }
+
+  def contactAddressUpdated(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withSubscribedUser(request) { case _ =>
+      Ok(detailUpdatedPage(SubscriptionDetail.Address))
+    }
+  }
+
 
   private def withSubscribedUser(request: RequestWithSessionData[_])(
     f: (SessionData, Subscribed) => Future[Result]

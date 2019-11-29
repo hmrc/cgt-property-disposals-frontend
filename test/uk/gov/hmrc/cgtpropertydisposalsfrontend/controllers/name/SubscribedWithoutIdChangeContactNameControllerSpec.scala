@@ -54,8 +54,6 @@ class SubscribedWithoutIdChangeContactNameControllerSpec
     case _             => false
   }
 
-  override val updateSubscriptionDetailChangedFlag: Boolean = true
-
   override lazy val controller: SubscribedWithoutIdChangeContactNameController =
     instanceOf[SubscribedWithoutIdChangeContactNameController]
 
@@ -100,7 +98,7 @@ class SubscribedWithoutIdChangeContactNameControllerSpec
 
       behave like enterNameSubmit(
         data => controller.enterIndividualNameSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken),
-        controllers.routes.HomeController.manageYourDetails()
+        controllers.routes.HomeController.contactNameUpdated()
       )
     }
 

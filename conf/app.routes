@@ -150,8 +150,11 @@ POST /subscribed/enter-non-uk-address  uk.gov.hmrc.cgtpropertydisposalsfrontend.
 
 
 ### Subscribed Journey
-GET /account/home                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.HomeController.homepage
-GET /account/manage-your-details         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.HomeController.manageYourDetails
+GET /account/home                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.HomeController.homepage
+GET /account/manage-your-details            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.HomeController.manageYourDetails
+GET /account/contact-address-updated        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.HomeController.contactAddressUpdated()
+GET /account/contact-email-address-updated  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.HomeController.contactEmailUpdated()
+GET /account/contact-name-updated           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.HomeController.contactNameUpdated()
 
 ### Organisation without trust enrolement
 GET  /are-you-reporting-for-a-trust       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrust()

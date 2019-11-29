@@ -15,11 +15,8 @@
  *@
 
 @this()
+@(content: Html)
 
-@(heading: Option[String] = None, classes: Option[String] = None)(rows: => Html)(implicit request: Request[_], messages: Messages)
-
-@heading.map(h => Html(s"""<h2 class="heading-medium">$h</h2>"""))
-
-<dl class="govuk-check-your-answers cya-questions-short@{classes.map(c => s" $c")}">
-  @rows
-</dl>
+<div class="panel panel-border-wide">
+@content
+</div>

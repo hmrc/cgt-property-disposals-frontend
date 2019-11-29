@@ -68,8 +68,6 @@ class SubscribedChangeAddressControllerSpec
       .expects(subscribedAndVerifierDetails, *)
     .returning(EitherT.fromEither[Future](result))
 
-  override val updateSubscriptionDetailChangedFlag: Boolean = true
-
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
       performAction, {
@@ -121,7 +119,7 @@ class SubscribedChangeAddressControllerSpec
 
       behave like submitEnterUkAddress(
         performAction,
-        controllers.routes.HomeController.manageYourDetails()
+        controllers.routes.HomeController.contactAddressUpdated()
       )
 
     }
@@ -142,7 +140,7 @@ class SubscribedChangeAddressControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction())
 
-      behave like submitEnterNonUkAddress(performAction, controllers.routes.HomeController.manageYourDetails())
+      behave like submitEnterNonUkAddress(performAction, controllers.routes.HomeController.contactAddressUpdated())
     }
 
     "handling requests to display the enter postcode page" must {
@@ -187,7 +185,7 @@ class SubscribedChangeAddressControllerSpec
       behave like submitSelectAddress(
         performAction,
         controllers.routes.HomeController.manageYourDetails(),
-        controllers.routes.HomeController.manageYourDetails()
+        controllers.routes.HomeController.contactAddressUpdated()
       )
 
       "not update the session" when {
@@ -201,7 +199,7 @@ class SubscribedChangeAddressControllerSpec
           }
 
           val result = performAction(Seq("address-select" -> "0"))
-          checkIsRedirect(result, controllers.routes.HomeController.manageYourDetails())
+          checkIsRedirect(result, controllers.routes.HomeController.contactAddressUpdated())
         }
 
       }

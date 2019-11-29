@@ -94,8 +94,6 @@ class SubscriptionEnterEmailController @Inject()(
   override def name(journeyStatus: SubscriptionMissingData): ContactName =
     ContactName(journeyStatus.businessPartnerRecord.name.fold(_.value, n => n.makeSingleName()))
 
-  override val updateSubscriptionDetailChangedFlag: Boolean = false
-
   override lazy protected val backLinkCall: Option[Call]      = None
   override lazy protected val enterEmailCall: Call            = routes.SubscriptionEnterEmailController.enterEmail()
   override lazy protected val enterEmailSubmitCall: Call      = routes.SubscriptionEnterEmailController.enterEmailSubmit()
