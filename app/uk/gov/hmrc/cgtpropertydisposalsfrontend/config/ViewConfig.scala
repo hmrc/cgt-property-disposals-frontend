@@ -67,4 +67,5 @@ class ViewConfig @Inject()(servicesConfig: ServicesConfig) {
   val ggTimedOutUrl: String = signOutUrl + "?continue=/cgt-property-disposals" + routes.StartController.timedOut().url
   val ggSignOut: String = signOutUrl + "?continue=/cgt-property-disposals" + routes.StartController.start().url
   val accountSignOutUrl: String = signOutUri + "?continue=/cgt-property-disposals" + accounts.routes.HomeController.signedOut().url
+
 }
