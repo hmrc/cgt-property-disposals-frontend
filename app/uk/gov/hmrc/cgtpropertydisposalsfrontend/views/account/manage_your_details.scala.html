@@ -46,7 +46,7 @@
   }
 }
 
-@changeAccountName = @{details.name.fold(_ => "", _ => messages(s"account.manageYourDetails.individual.p2", appConfig.tellHmrcChangeDetails))}
+@changeAccountName = @{details.name.fold(_ => Html(""), _ => Html(messages(s"account.manageYourDetails.individual.p2", appConfig.tellHmrcChangeDetails)))}
 
 @mainTemplate(title = title, withSignOutLink = false, accountMenu=Some(accountMenu(Some(AccountMenuItem.ManageYourDetails())))) {
 
@@ -94,7 +94,7 @@
   <p>
    @messages(s"account.manageYourDetails.p")
    @if(details.registeredWithId){
-      @Html(changeAccountName)
+      @changeAccountName
   }
   </p>
  </div>
