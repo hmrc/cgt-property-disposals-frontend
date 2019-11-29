@@ -37,11 +37,11 @@
   </p>
 
   <p>
-    @Html(messages("timed-out.p2", routes.StartController.start().url))
+    @Html(messages("timed-out.p2"))
   </p>
 
   @exitSurveyLink()
 
-  @buttonLink(messages("timed-out.button"), appConfig.govUkUrl)
+  @buttonLink(messages("timed-out.button"), routes.StartController.start().url)
 
 }
