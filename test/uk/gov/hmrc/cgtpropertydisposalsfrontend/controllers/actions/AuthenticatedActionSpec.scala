@@ -26,7 +26,7 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, SessionSupport, routes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, SessionSupport}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -53,7 +53,7 @@ class AuthenticatedActionSpec extends ControllerSpec with MockFactory with Sessi
         val requestUri = "/abc"
 
         List[NoActiveSession](
-        BearerTokenExpired(),
+          BearerTokenExpired(),
           MissingBearerToken(),
           InvalidBearerToken(),
           SessionRecordNotFound()

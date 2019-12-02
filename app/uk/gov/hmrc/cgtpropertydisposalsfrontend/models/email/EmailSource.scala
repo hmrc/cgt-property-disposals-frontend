@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email
 
 import cats.Eq
 import julienrf.json.derived

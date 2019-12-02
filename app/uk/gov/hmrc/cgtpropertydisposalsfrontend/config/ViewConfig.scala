@@ -17,8 +17,8 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.config
 
 import javax.inject.{Inject, Singleton}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{routes, _}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 
 @Singleton
 class ViewConfig @Inject()(servicesConfig: ServicesConfig) {
@@ -66,5 +66,6 @@ class ViewConfig @Inject()(servicesConfig: ServicesConfig) {
   val ggKeepAliveUrl: String = "/cgt-property-disposals" + routes.StartController.keepAlive().url
   val ggTimedOutUrl: String = signOutUrl + "?continue=/cgt-property-disposals" + routes.StartController.timedOut().url
   val ggSignOut: String = signOutUrl + "?continue=/cgt-property-disposals" + routes.StartController.start().url
-  val accountSignOutUrl: String = signOutUri + "?continue=/cgt-property-disposals" + routes.HomeController.signedOut().url
+  val accountSignOutUrl: String = signOutUri + "?continue=/cgt-property-disposals" + accounts.routes.HomeController.signedOut().url
+
 }

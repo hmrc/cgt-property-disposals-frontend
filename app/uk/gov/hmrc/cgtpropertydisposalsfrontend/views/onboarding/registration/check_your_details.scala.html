@@ -1,0 +1,81 @@
+@*
+ * Copyright 2019 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import play.api.data.Form
+
+@import cats.syntax.either._
+
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.name
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.RegistrationDetails
+@import scala.util.Try
+@import views.html.helper.CSRF
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Block
+
+@this(
+ mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+ formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+ pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+ cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+ cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
+ addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
+ submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button
+)
+
+@(details: RegistrationDetails)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+
+@title = @{messages("registration.title")}
+@label = @{Html(s"""<span class="form-label-bold">${messages("registration.confirmLabel")}</span>""")}
+
+@mainTemplate(title = title) {
+
+ @pageHeading(title, Some(messages("registration.caption")))
+
+ <p class="lede">
+  @messages("registration.lede")
+ </p>
+
+ @cyaSection() {
+  @cyaRow(
+    messages("registration.cyaLabel.firstName"),
+    Html(details.name.firstName),
+    Some(cyaChange(messages("registration.cyaChange.firstName"), name.routes.RegistrationChangeIndividualNameController.enterIndividualName().url))
+  )
+    @cyaRow(
+    messages("registration.cyaLabel.lastName"),
+    Html(details.name.lastName),
+    Some(cyaChange(messages("registration.cyaChange.lastName"), name.routes.RegistrationChangeIndividualNameController.enterIndividualName().url))
+  )
+  @cyaRow(
+   messages("registration.cyaLabel.address"),
+   addressDisplay(details.address, Block),
+   Some(cyaChange(messages("registration.cyaChange.address"), address.routes.RegistrationChangeAddressController.isUk().url))
+  )
+  @cyaRow(
+    messages("registration.cyaLabel.email"),
+    Html(details.emailAddress.value),
+    Some(cyaChange(messages("registration.cyaChange.email"), email.routes.RegistrationChangeEmailController.enterEmail().url))
+   )
+ }
+
+ @formWrapper(routes.RegistrationController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
+  @submitButton(messages("button.createAccount"))
+ }
+}

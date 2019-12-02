@@ -24,8 +24,7 @@ import uk.gov.hmrc.auth.core.retrieve.{Credentials, EmptyRetrieval, Retrieval, ~
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.AuthenticatedActionWithRetrievedData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.SAUTR
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.SubscriptionService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.audit.AuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{OnboardingAuditService, SubscriptionService}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -33,9 +32,9 @@ import scala.concurrent.{ExecutionContext, Future}
 trait AuthSupport {
   this: ControllerSpec with SessionSupport =>
 
-  val mockAuthConnector: AuthConnector             = mock[AuthConnector]
-  val mockSubscriptionService: SubscriptionService = mock[SubscriptionService]
-  val mockSubscriptionAuditService: AuditService   = mock[AuditService]
+  val mockAuthConnector: AuthConnector                     = mock[AuthConnector]
+  val mockSubscriptionService: SubscriptionService         = mock[SubscriptionService]
+  val mockSubscriptionAuditService: OnboardingAuditService = mock[OnboardingAuditService]
 
   lazy val testAuthenticatedAction = new AuthenticatedActionWithRetrievedData(
     mockSubscriptionService,
