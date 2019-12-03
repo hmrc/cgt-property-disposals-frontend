@@ -1,0 +1,137 @@
+# Registration
+
+GET  /create-account/do-want-to-report-capital-gain                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RegistrationController.selectEntityType()
+POST /create-account/do-want-to-report-capital-gain                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RegistrationController.selectEntityTypeSubmit()
+GET  /exit/sign-in-as-trust                                                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RegistrationController.wrongGGAccountForTrusts()
+GET  /registration/create-account/check-contact-details-create-account          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RegistrationController.checkYourAnswers()
+POST /registration/create-account/check-contact-details-create-account          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RegistrationController.checkYourAnswersSubmit()
+
+## Name
+GET  /registration/create-account/enter-name                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.name.RegistrationEnterIndividualNameController.enterIndividualName()
+POST /registration/create-account/enter-name                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.name.RegistrationEnterIndividualNameController.enterIndividualNameSubmit()
+GET  /registration/create-account/change-contact-name                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.name.RegistrationChangeIndividualNameController.enterIndividualName()
+POST /registration/create-account/change-contact-name                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.name.RegistrationChangeIndividualNameController.enterIndividualNameSubmit()
+
+## Email
+GET  /registration/create-account/enter-email                                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.RegistrationEnterEmailController.enterEmail()
+POST /registration/create-account/enter-email                                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.RegistrationEnterEmailController.enterEmailSubmit()
+GET  /registration/create-account/confirm-email                                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.RegistrationEnterEmailController.checkYourInbox()
+GET  /registration/verify-email                                                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.RegistrationEnterEmailController.verifyEmail(p: java.util.UUID)
+GET  /registration/amend-details/verify-email                                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.RegistrationChangeEmailController.verifyEmail(p: java.util.UUID)
+GET  /registration/create-account/email-confirmed                               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.RegistrationEnterEmailController.emailVerified()
+GET  /registration/create-account/enter-different-email                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.RegistrationChangeEmailController.enterEmail()
+POST /registration/create-account/enter-different-email                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.RegistrationChangeEmailController.enterEmailSubmit()
+GET  /registration/create-account/confirm-different-email                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.RegistrationChangeEmailController.checkYourInbox()
+GET  /registration/create-account/different-email-confirmed                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.RegistrationChangeEmailController.emailVerified()
+
+## Address
+GET  /registration/create-account/is-uk-contact-address                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationEnterAddressController.isUk()
+POST /registration/create-account/is-uk-contact-address                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationEnterAddressController.isUkSubmit()
+GET  /registration/create-account/find-uk-contact-address                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationEnterAddressController.enterPostcode()
+POST /registration/create-account/find-uk-contact-address                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationEnterAddressController.enterPostcodeSubmit()
+GET  /registration/create-account/select-contact-address                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationEnterAddressController.selectAddress()
+POST /registration/create-account/select-contact-address                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationEnterAddressController.selectAddressSubmit()
+GET  /registration/create-account/enter-uk-contact-address                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationEnterAddressController.enterUkAddress()
+POST /registration/create-account/enter-uk-contact-address                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationEnterAddressController.enterUkAddressSubmit()
+GET  /registration/create-account/enter-non-UK-contact-address                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationEnterAddressController.enterNonUkAddress()
+POST /registration/create-account/enter-non-UK-contact-address                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationEnterAddressController.enterNonUkAddressSubmit()
+GET  /registration/create-account/change-contact-address                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationChangeAddressController.isUk()
+POST /registration/create-account/change-contact-address                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationChangeAddressController.isUkSubmit()
+GET  /registration/create-account/find-different-contact-address                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationChangeAddressController.enterPostcode()
+POST /registration/create-account/find-different-contact-address                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationChangeAddressController.enterPostcodeSubmit()
+GET  /registration/create-account/select-different-contact-address              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationChangeAddressController.selectAddress()
+POST /registration/create-account/select-different-contact-address              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationChangeAddressController.selectAddressSubmit()
+GET  /registration/create-account/enter-different-uk-contact-address            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationChangeAddressController.enterUkAddress()
+POST /registration/create-account/enter-different-uk-contact-address            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationChangeAddressController.enterUkAddressSubmit()
+GET  /registration/create-account/enter-different-non-UK-contact-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationChangeAddressController.enterNonUkAddress()
+POST /registration/create-account/enter-different-non-UK-contact-address        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.RegistrationChangeAddressController.enterNonUkAddressSubmit()
+
+
+# Subscription
+GET  /exit/sign-in-with-correct-user-id                                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.SubscriptionController.alreadySubscribedWithDifferentGGAccount()
+GET  /subscription/create-account/check-contact-details-create-account          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.SubscriptionController.checkYourDetails()
+POST /subscription/create-account/check-contact-details-create-account          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.SubscriptionController.checkYourDetailsSubmit()
+GET  /subscription/create-account/account-created                               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.SubscriptionController.subscribed()
+
+## Email
+GET  /capital-gains-tax-uk-property/subscription/create-account/enter-email     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.SubscriptionEnterEmailController.enterEmail()
+POST /capital-gains-tax-uk-property/subscription/create-account/enter-email     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.SubscriptionEnterEmailController.enterEmailSubmit()
+GET  /subscription/create-account/enter-different-email                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.SubscriptionChangeEmailController.enterEmail()
+POST /subscription/create-account/enter-different-email                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.SubscriptionChangeEmailController.enterEmailSubmit()
+GET  /subscription/create-account/confirm-different-email                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.SubscriptionChangeEmailController.checkYourInbox()
+GET  /subscription/amend-details/verify-email                                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.SubscriptionChangeEmailController.verifyEmail(p: java.util.UUID)
+GET  /subscription/create-account/different-email-confirmed                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.SubscriptionChangeEmailController.emailVerified()
+GET  /subscription/verify-email                                                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.SubscriptionEnterEmailController.verifyEmail(p: java.util.UUID)
+GET  /subscription/create-account/email-confirmed                               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.SubscriptionEnterEmailController.emailVerified()
+GET  /subscription/create-account/confirm-email                                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.SubscriptionEnterEmailController.checkYourInbox()
+
+## Address
+GET  /subscription/create-account/is-uk-contact-address                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionAddressController.isUk()
+POST /subscription/create-account/is-uk-contact-address                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionAddressController.isUkSubmit()
+GET  /subscription/create-account/find-uk-contact-address                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionAddressController.enterPostcode()
+POST /subscription/create-account/find-uk-contact-address                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionAddressController.enterPostcodeSubmit()
+GET  /subscription/create-account/select-contact-address                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionAddressController.selectAddress()
+POST /subscription/create-account/select-contact-address                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionAddressController.selectAddressSubmit()
+GET  /subscription/create-account/enter-uk-contact-address                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionAddressController.enterUkAddress()
+POST /subscription/create-account/enter-uk-contact-address                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionAddressController.enterUkAddressSubmit()
+GET  /subscription/create-account/enter-non-uk-contact-address                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionAddressController.enterNonUkAddress()
+POST /subscription/create-account/enter-non-uk-contact-address                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address.SubscriptionAddressController.enterNonUkAddressSubmit()
+
+# Name
+GET  /subscription/create-account/enter-different-contact-name                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.name.SubscriptionChangeContactNameController.enterContactName()
+POST /subscription/create-account/enter-different-contact-name                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.name.SubscriptionChangeContactNameController.enterContactNameSubmit()
+GET  /exit/details-not-correct                                                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.SubscriptionController.changeGGAccountForSubscription()
+
+# IV
+GET  /iv/success                                                                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.IvController.ivSuccessCallback()
+GET  /iv/failure                                                                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.IvController.ivFailureCallback(journeyId: java.util.UUID)
+GET  /failed-iv/failed-matching                                                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.IvController.getFailedMatching()
+GET  /failed-iv                                                                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.IvController.getFailedIV()
+GET  /failed-iv/insufficient-evidence                                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.IvController.getInsufficientEvidence()
+GET  /failed-iv/locked-ou                                                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.IvController.getLockedOut()
+GET  /failed-iv/user-aborted                                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.IvController.getUserAborted()
+GET  /failed-iv/time-out                                                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.IvController.getTimedOut()
+GET  /failed-iv/technical-issue                                                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.IvController.getTechnicalIssue()
+GET  /failed-iv/precondition-failed                                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.IvController.getPreconditionFailed()
+POST /iv/retry                                                                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.IvController.retry()
+
+# Insufficient CL
+GET  /create-account/do-have-national-insurance-number                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.InsufficientConfidenceLevelController.doYouHaveNINO()
+POST /create-account/do-have-national-insurance-number                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.InsufficientConfidenceLevelController.doYouHaveNINOSubmit()
+GET  /create-account/do-have-self-assessment-unique-taxpayer-reference          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()
+POST /create-account/do-have-self-assessment-unique-taxpayer-reference          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.InsufficientConfidenceLevelController.doYouHaveSaUtrSubmit()
+GET  /create-account/enter-self-assessment-unique-taxpayer-reference            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.InsufficientConfidenceLevelController.enterSautrAndName()
+POST /create-account/enter-self-assessment-unique-taxpayer-reference            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.InsufficientConfidenceLevelController.enterSautrAndNameSubmit()
+GET  /create-account/try-again-self-assessment-unique-taxpayer-reference        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.InsufficientConfidenceLevelController.tooManyAttempts()
+
+
+# Organisation without trust enrollment
+GET  /exit/tried-to-sign-in-as-organisation                                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController.reportWithCorporateTax()
+GET  /create-account/do-want-to-report-capital-gain                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrust()
+POST /create-account/do-want-to-report-capital-gain                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrustSubmit()
+GET  /create-account/do-have-trust-registration-number                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController.doYouHaveATrn()
+POST /create-account/do-have-trust-registration-number                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController.doYouHaveATrnSubmit()
+GET  /create-account/enter-trust-or-estate-details                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController.enterTrn()
+POST /create-account/enter-trust-or-estate-details                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController.enterTrnSubmit()
+GET  /create-account/try-again-trust-registration-number                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController.tooManyAttempts()
+GET  /exit/register-trust                                                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController.registerYourTrust()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

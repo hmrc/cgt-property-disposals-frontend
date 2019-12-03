@@ -1,6 +1,9 @@
 # Add all the application routes to the app.routes file
-->         /cgt-property-disposals    app.Routes
-->         /                          health.Routes
-->     	   /template                  template.Routes
+->         /capital-gains-tax-uk-property   app.Routes
+->         /capital-gains-tax-uk-property   accounts.Routes
+->         /capital-gains-tax-uk-property   onboarding.Routes
+->         /capital-gains-tax-uk-property   returns.Routes
+->         /                                health.Routes
+->     	   /template                        template.Routes
 
-GET        /admin/metrics             com.kenshoo.play.metrics.MetricsController.metrics
+GET        /admin/metrics                   com.kenshoo.play.metrics.MetricsController.metrics
