@@ -1,3 +1,5 @@
+GET /create-account/need-more-details                                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.weNeedMoreDetails()
+
 # Registration
 
 GET  /create-account/do-want-to-report-capital-gain                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RegistrationController.selectEntityType()
