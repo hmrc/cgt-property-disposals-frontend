@@ -152,7 +152,7 @@
   if (countryEl) {
     openregisterLocationPicker({
       selectElement: countryEl,
-      url: '/cgt-property-disposals/assets/location-autocomplete-graph.json',
+      url: '/capital-gains-tax-uk-property/assets/location-autocomplete-graph.json',
       defaultValue: ''
     });
     // patch to ensure clearing the pseudo input also clears the select element

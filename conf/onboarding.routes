@@ -81,7 +81,7 @@ POST /subscription/create-account/enter-different-non-uk-contact-address        
 
 # Name
 GET  /subscription/create-account/enter-different-contact-name                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.name.SubscriptionChangeContactNameController.enterContactName()
-POST /subscription/create-account/enter-different-contact-name                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.name.SubscriptionChangeContactNameController.enterContactNameSubmit()
+
 GET  /exit/details-not-correct                                                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.SubscriptionController.changeGGAccountForSubscription()
 
 # IV
