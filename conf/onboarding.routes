@@ -1,4 +1,4 @@
-GET /create-account/need-more-details                                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.weNeedMoreDetails()
+
 
 # Registration
 
