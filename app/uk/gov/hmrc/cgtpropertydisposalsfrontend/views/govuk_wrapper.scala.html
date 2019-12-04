@@ -59,14 +59,12 @@
     </script>
     @if(withSignOutLink || withAccount) {
         <script>
-            window.jsConfig = Object.assign({}, window.jsConfig, {
-              timeoutEnabled: true,
-              timeout: @{appConfig.ggTimeoutSeconds},
-              countdown: @{appConfig.ggCountdownSeconds},
-              keep_alive_url: "@{appConfig.ggKeepAliveUrl}",
-              timed_out_url: "@{appConfig.ggTimedOutUrl}",
-              logout_url: "@{if(withAccount) appConfig.accountSignOutUrl else appConfig.ggSignOut}"
-            })
+              window.jsConfig.timeoutEnabled = true;
+              window.jsConfig.timeout = @{appConfig.ggTimeoutSeconds};
+              window.jsConfig.countdown = @{appConfig.ggCountdownSeconds};
+              window.jsConfig.keep_alive_url = "@{appConfig.ggKeepAliveUrl}";
+              window.jsConfig.timed_out_url = "@{appConfig.ggTimedOutUrl}";
+              window.jsConfig.logout_url = "@{if(withAccount) appConfig.accountSignOutUrl else appConfig.ggSignOut}";
         </script>
     }
     @uiHead(
