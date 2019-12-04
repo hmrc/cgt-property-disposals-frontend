@@ -1,4 +1,3 @@
-POST /subscription/create-account/enter-different-contact-name                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.name.SubscriptionChangeContactNameController.enterContactNameSubmit()
 
 GET /create-account/need-more-details                                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.weNeedMoreDetails()
 GET /start/report-pay-capital-gains-tax-uk-property                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.LandingPageController.landingPage()
