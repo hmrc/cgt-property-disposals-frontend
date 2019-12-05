@@ -21,7 +21,7 @@ import cats.syntax.eq._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.routes
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit._
@@ -377,7 +377,7 @@ class OnboardingAuditServiceImpl @Inject()(auditConnector: AuditConnector) exten
           town,
           county,
           Some(postcode.value),
-          RegistrationContactAddressChangedEvent.Country("GB", Some("United Kingdom"))
+          Country("GB", Some("United Kingdom"))
         )
       case Address.NonUkAddress(line1, line2, line3, line4, postcode, country) =>
         RegistrationContactAddressChangedEvent.Address(
@@ -386,7 +386,7 @@ class OnboardingAuditServiceImpl @Inject()(auditConnector: AuditConnector) exten
           line3,
           line4,
           postcode,
-          RegistrationContactAddressChangedEvent.Country(country.code, country.name)
+          country
         )
     }
 
@@ -398,7 +398,7 @@ class OnboardingAuditServiceImpl @Inject()(auditConnector: AuditConnector) exten
           town,
           county,
           Some(postcode.value),
-          RegistrationContactAddressChangedEvent.Country("GB", Some("United Kingdom"))
+          Country("GB", Some("United Kingdom"))
         )
       case Address.NonUkAddress(line1, line2, line3, line4, postcode, country) =>
         RegistrationContactAddressChangedEvent.Address(
@@ -407,7 +407,7 @@ class OnboardingAuditServiceImpl @Inject()(auditConnector: AuditConnector) exten
           line3,
           line4,
           postcode,
-          RegistrationContactAddressChangedEvent.Country(country.code, country.name)
+          Country(country.code, country.name)
         )
     }
 
