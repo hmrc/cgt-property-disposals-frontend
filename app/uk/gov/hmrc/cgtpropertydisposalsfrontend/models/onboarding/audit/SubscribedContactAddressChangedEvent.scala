@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 
 final case class SubscribedContactAddressChangedEvent(
   oldContactAddress: Address,

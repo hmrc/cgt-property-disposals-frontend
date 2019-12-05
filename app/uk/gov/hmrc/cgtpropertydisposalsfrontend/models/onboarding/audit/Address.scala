@@ -17,14 +17,17 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit
 
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 
-final case class SubscriptionContactAddressChangedEvent(
-  oldContactAddress: Address,
-  newContactAddress: Address,
-  source: String
+final case class Address(
+  line1: String,
+  line2: Option[String],
+  line3: Option[String],
+  line4: Option[String],
+  postcode: Option[String],
+  country: Country
 )
 
-object SubscriptionContactAddressChangedEvent {
-  implicit val format: OFormat[SubscriptionContactAddressChangedEvent] =
-    Json.format[SubscriptionContactAddressChangedEvent]
+object Address {
+  implicit val formatAddress: OFormat[Address] = Json.format[Address]
 }
