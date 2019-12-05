@@ -377,11 +377,7 @@ class OnboardingAuditServiceImpl @Inject()(auditConnector: AuditConnector) exten
           town,
           county,
           Some(postcode.value),
-<<<<<<< HEAD
-          RegistrationContactAddressChangedEvent.Country("GB", Some("United Kingdom"))
-=======
           Country("GB", Some("United Kingdom"))
->>>>>>> 832b01851d38cf8d191ab4179b2f9b6c9692de3d
         )
       case Address.NonUkAddress(line1, line2, line3, line4, postcode, country) =>
         RegistrationContactAddressChangedEvent.Address(
@@ -390,11 +386,7 @@ class OnboardingAuditServiceImpl @Inject()(auditConnector: AuditConnector) exten
           line3,
           line4,
           postcode,
-<<<<<<< HEAD
-          RegistrationContactAddressChangedEvent.Country(country.code, country.name)
-=======
           country
->>>>>>> 832b01851d38cf8d191ab4179b2f9b6c9692de3d
         )
     }
 
@@ -406,11 +398,7 @@ class OnboardingAuditServiceImpl @Inject()(auditConnector: AuditConnector) exten
           town,
           county,
           Some(postcode.value),
-<<<<<<< HEAD
-          RegistrationContactAddressChangedEvent.Country("GB", Some("United Kingdom"))
-=======
           Country("GB", Some("United Kingdom"))
->>>>>>> 832b01851d38cf8d191ab4179b2f9b6c9692de3d
         )
       case Address.NonUkAddress(line1, line2, line3, line4, postcode, country) =>
         RegistrationContactAddressChangedEvent.Address(
@@ -419,11 +407,7 @@ class OnboardingAuditServiceImpl @Inject()(auditConnector: AuditConnector) exten
           line3,
           line4,
           postcode,
-<<<<<<< HEAD
-          RegistrationContactAddressChangedEvent.Country(country.code, country.name)
-=======
           Country(country.code, country.name)
->>>>>>> 832b01851d38cf8d191ab4179b2f9b6c9692de3d
         )
     }
 
