@@ -19,8 +19,7 @@
 
 @this(
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
- pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
- exitSurveyLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.exit_survey
+ pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
 )
 
 @()(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
@@ -50,7 +49,5 @@
   <p>
     @Html(messages("weOnlySupportGG.signIn.p1", routes.StartController.signOutAndSignIn().url))
   </p>
-
-  @exitSurveyLink()
 
 }
