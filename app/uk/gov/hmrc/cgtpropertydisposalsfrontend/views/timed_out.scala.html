@@ -20,8 +20,7 @@
 @this(
     mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
     buttonLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.button_link,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    exitSurveyLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.exit_survey
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
 )
 
 @()(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
@@ -39,8 +38,6 @@
   <p>
     @Html(messages("timed-out.p2"))
   </p>
-
-  @exitSurveyLink()
 
   @buttonLink(messages("timed-out.button"), routes.StartController.start().url)
 

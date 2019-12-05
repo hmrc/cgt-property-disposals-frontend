@@ -20,8 +20,7 @@
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
         pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-        exitSurveyLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.exit_survey
+        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
 @(backLink: Call)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
@@ -36,7 +35,4 @@
   <p>
    @Html(messages("reportCorpTax.p2", appConfig.fileCorporationTaxUrl))
   </p>
-
-  @exitSurveyLink()
-
 }

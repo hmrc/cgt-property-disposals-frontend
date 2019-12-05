@@ -18,8 +18,8 @@
 
 @this()
 
-@()(implicit messages: Messages, appConfig: ViewConfig)
+@(exitSurveyUrl: String)(implicit messages: Messages, appConfig: ViewConfig)
 
 <p>
-  <a href="@{appConfig.signOutUrl}?continue=@{appConfig.exitSurveyUrl}">@messages("exitSurvey.linkText")</a>
+  <a href="@{appConfig.signOutUrl}?continue=@{exitSurveyUrl}">@messages("exitSurvey.linkText")</a>
 </p>
