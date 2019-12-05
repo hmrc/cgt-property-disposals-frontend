@@ -24,7 +24,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.routes
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{Address => AuditAddress, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.EmailSource
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscriptionDetails}
@@ -288,11 +288,53 @@ class OnboardingAuditServiceImpl @Inject()(auditConnector: AuditConnector) exten
     isManuallyEnteredAddress: Boolean,
     path: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit = {
-    val source = if (isManuallyEnteredAddress) "manual" else "postcode-lookup"
 
+    val source = if (isManuallyEnteredAddress) "manual-entry" else "postcode-lookup"
+
+    val oa = oldContactAddress match {
+      case Address.UkAddress(line1, line2, town, county, postcode) =>
+        AuditAddress(
+          line1,
+          line2,
+          town,
+          county,
+          Some(postcode.value),
+          Country("GB", Some("United Kingdom"))
+        )
+      case Address.NonUkAddress(line1, line2, line3, line4, postcode, country) =>
+        AuditAddress(
+          line1,
+          line2,
+          line3,
+          line4,
+          postcode,
+          country
+        )
+    }
+
+    val na = newContactAddress match {
+      case Address.UkAddress(line1, line2, town, county, postcode) =>
+        AuditAddress(
+          line1,
+          line2,
+          town,
+          county,
+          Some(postcode.value),
+          Country("GB", Some("United Kingdom"))
+        )
+      case Address.NonUkAddress(line1, line2, line3, line4, postcode, country) =>
+        AuditAddress(
+          line1,
+          line2,
+          line3,
+          line4,
+          postcode,
+          Country(country.code, country.name)
+        )
+    }
     val detail = SubscriptionContactAddressChangedEvent(
-      oldContactAddress,
-      newContactAddress,
+      oa,
+      na,
       source
     )
 
@@ -301,7 +343,6 @@ class OnboardingAuditServiceImpl @Inject()(auditConnector: AuditConnector) exten
       detail,
       hc.toAuditTags("subscription-contact-address-changed", path)
     )
-
   }
 
   override def sendSubscriptionRequestEvent(
@@ -329,8 +370,16 @@ class OnboardingAuditServiceImpl @Inject()(auditConnector: AuditConnector) exten
     val manuallyEnteredData =
       ManuallyEnteredData(
         subscriptionDetails.contactName.value,
-        if (prepopulatedEmailSource.isDefined) None else Some(subscriptionDetails.emailAddress.value),
-        subscriptionDetails.address
+        if (prepopulatedEmailSource.isDefined)
+          None
+        else
+          Some(subscriptionDetails.emailAddress.value),
+        subscriptionDetails.address match {
+          case Address.UkAddress(line1, line2, town, county, postcode) =>
+            AuditAddress(line1, line2, town, county, Some(postcode.value), Country("GB", Some("United Kingdom")))
+          case Address.NonUkAddress(line1, line2, line3, line4, postcode, country) =>
+            AuditAddress(line1, line2, line3, line4, postcode, country)
+        }
       )
 
     val event = SubscriptionRequestEvent(prePopulatedUserData, manuallyEnteredData)
@@ -371,7 +420,7 @@ class OnboardingAuditServiceImpl @Inject()(auditConnector: AuditConnector) exten
 
     val oa = oldContactAddress match {
       case Address.UkAddress(line1, line2, town, county, postcode) =>
-        RegistrationContactAddressChangedEvent.Address(
+        AuditAddress(
           line1,
           line2,
           town,
@@ -380,7 +429,7 @@ class OnboardingAuditServiceImpl @Inject()(auditConnector: AuditConnector) exten
           Country("GB", Some("United Kingdom"))
         )
       case Address.NonUkAddress(line1, line2, line3, line4, postcode, country) =>
-        RegistrationContactAddressChangedEvent.Address(
+        AuditAddress(
           line1,
           line2,
           line3,
@@ -392,7 +441,7 @@ class OnboardingAuditServiceImpl @Inject()(auditConnector: AuditConnector) exten
 
     val na = newContactAddress match {
       case Address.UkAddress(line1, line2, town, county, postcode) =>
-        RegistrationContactAddressChangedEvent.Address(
+        AuditAddress(
           line1,
           line2,
           town,
@@ -401,7 +450,7 @@ class OnboardingAuditServiceImpl @Inject()(auditConnector: AuditConnector) exten
           Country("GB", Some("United Kingdom"))
         )
       case Address.NonUkAddress(line1, line2, line3, line4, postcode, country) =>
-        RegistrationContactAddressChangedEvent.Address(
+        AuditAddress(
           line1,
           line2,
           line3,
@@ -511,7 +560,12 @@ class OnboardingAuditServiceImpl @Inject()(auditConnector: AuditConnector) exten
       RegistrationManuallyEnteredData(
         s"${registrationDetails.name.firstName} ${registrationDetails.name.lastName}",
         if (prepopulatedEmailSource.isEmpty) Some(registrationDetails.emailAddress.value) else None,
-        registrationDetails.address
+        registrationDetails.address match {
+          case Address.UkAddress(line1, line2, town, county, postcode) =>
+            AuditAddress(line1, line2, town, county, Some(postcode.value), Country("GB", Some("United Kingdom")))
+          case Address.NonUkAddress(line1, line2, line3, line4, postcode, country) =>
+            AuditAddress(line1, line2, line3, line4, postcode, country)
+        }
       )
 
     val event = RegistrationRequestEvent(prePopulatedUserData, manuallyEnteredData)
