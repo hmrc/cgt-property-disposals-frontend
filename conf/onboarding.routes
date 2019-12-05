@@ -1,7 +1,7 @@
 # Registration
 
-GET  /create-account/do-want to-report-capital-gain-for-trust                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RegistrationController.selectEntityType()
-POST create-account/do-want to-report-capital-gain-for-trust                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RegistrationController.selectEntityTypeSubmit()
+GET  /create-account/do-want-to-report-capital-gain-for-trust                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RegistrationController.selectEntityType()
+POST /create-account/do-want-to-report-capital-gain-for-trust                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RegistrationController.selectEntityTypeSubmit()
 GET  /exit/sign-in-as-trust                                                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RegistrationController.wrongGGAccountForTrusts()
 GET  /registration/create-account/check-contact-details-create-account          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RegistrationController.checkYourAnswers()
 POST /registration/create-account/check-contact-details-create-account          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RegistrationController.checkYourAnswersSubmit()
@@ -107,8 +107,8 @@ GET  /create-account/try-again-self-assessment-unique-taxpayer-reference        
 
 # Organisation without trust enrollment
 GET  /exit/tried-to-sign-in-as-organisation                                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController.reportWithCorporateTax()
-GET  /create-account/do-want to-report-capital-gain-as-trust                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrust()
-POST create-account/do-want to-report-capital-gain-as-trust                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrustSubmit()
+GET  /create-account/do-want-to-report-capital-gain-as-trust                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrust()
+POST /create-account/do-want-to-report-capital-gain-as-trust                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController.doYouWantToReportForATrustSubmit()
 GET  /create-account/do-have-trust-registration-number                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController.doYouHaveATrn()
 POST /create-account/do-have-trust-registration-number                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController.doYouHaveATrnSubmit()
 GET  /create-account/enter-trust-or-estate-details                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController.enterTrn()
