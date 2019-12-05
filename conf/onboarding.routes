@@ -88,7 +88,7 @@ GET  /iv/failure                                                                
 GET  /failed-iv/failed-matching                                                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.IvController.getFailedMatching()
 GET  /failed-iv                                                                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.IvController.getFailedIV()
 GET  /failed-iv/insufficient-evidence                                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.IvController.getInsufficientEvidence()
-GET  /failed-iv/locked-ou                                                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.IvController.getLockedOut()
+GET  /failed-iv/locked-out                                                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.IvController.getLockedOut()
 GET  /failed-iv/user-aborted                                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.IvController.getUserAborted()
 GET  /failed-iv/time-out                                                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.IvController.getTimedOut()
 GET  /failed-iv/technical-issue                                                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.IvController.getTechnicalIssue()
