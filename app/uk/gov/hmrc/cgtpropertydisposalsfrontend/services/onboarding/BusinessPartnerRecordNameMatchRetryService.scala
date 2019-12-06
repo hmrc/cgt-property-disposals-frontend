@@ -86,26 +86,13 @@ class BusinessPartnerRecordNameMatchRetryServiceImpl @Inject()(
 
     previousUnsuccessfulNameMatchAttempts match {
       case Some(UnsuccessfulNameMatchAttempts(attempts, _, _)) => {
-        auditService.sendBusinessPartnerRecordNameMatchAttemptEvent(
+        auditService. sendBusinessPartnerRecordNameMatchAttemptEvent(
           attempts,
           maxUnsuccessfulAttempts,
           nameMatchDetailsToAuditEvent(nameMatchDetails)
         )
       }
-    }
-
-    nameMatchDetailsToBprRequest(nameMatchDetails) match {
-      case IndividualBusinessPartnerRecordRequest(id, nameMatch) => {
-        (id, nameMatch, previousUnsuccessfulNameMatchAttempts) match {
-          case (Left(SAUTR(value)), Some(name), u @ Some(UnsuccessfulNameMatchAttempts(previousAttempts, _, _))) =>
-            Json.toJson(IndividualNameWithSaUtrAuditDetails(name.firstName, name.lastName, value))
-        }
-      }
-      case TrustBusinessPartnerRecordRequest(id, nameMatch) =>
-        (id, nameMatch, previousUnsuccessfulNameMatchAttempts) match {
-          case (Left(TRN(value)), Some(name), u @ Some(UnsuccessfulNameMatchAttempts(previousAttempts, _, _))) =>
-            Json.toJson(TrustNameWithTrnAuditDetails(name.value, value))
-        }
+      case None => ()
     }
 
     previousUnsuccessfulNameMatchAttempts match {
