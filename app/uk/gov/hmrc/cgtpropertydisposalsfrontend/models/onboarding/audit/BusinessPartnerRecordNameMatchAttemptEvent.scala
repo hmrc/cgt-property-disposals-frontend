@@ -21,11 +21,9 @@ import play.api.libs.json.{Json, OFormat}
 final case class BusinessPartnerRecordNameMatchAttemptEvent(
   attemptsMade: Int,
   maxAttempts: Int,
-  trustNameDetails: Option[TrustNameWithTrnAuditDetails],
-  individualNameDetails: Option[IndividualNameWithSaUtrAuditDetails]
+  nameMatchDetails: BusinessPartnerRecordNameMatchDetails
 )
 
 object BusinessPartnerRecordNameMatchAttemptEvent {
-  implicit val format: OFormat[BusinessPartnerRecordNameMatchAttemptEvent] =
-    Json.format[BusinessPartnerRecordNameMatchAttemptEvent]
+  implicit val format: OFormat[BusinessPartnerRecordNameMatchAttemptEvent] = Json.format[BusinessPartnerRecordNameMatchAttemptEvent]
 }
