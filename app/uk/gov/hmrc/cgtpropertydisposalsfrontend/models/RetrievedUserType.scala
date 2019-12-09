@@ -19,32 +19,32 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 
-sealed trait JourneyUserType extends Product with Serializable
+sealed trait RetrievedUserType extends Product with Serializable
 
-object JourneyUserType {
+object RetrievedUserType {
 
   final case class Individual(
     id: Either[SAUTR, NINO],
     email: Option[Email],
     ggCredId: GGCredId
-  ) extends JourneyUserType
+  ) extends RetrievedUserType
 
-  final case class Trust(sautr: SAUTR, email: Option[Email], ggCredId: GGCredId) extends JourneyUserType
+  final case class Trust(sautr: SAUTR, email: Option[Email], ggCredId: GGCredId) extends RetrievedUserType
 
-  final case class OrganisationUnregisteredTrust(email: Option[Email], ggCredId: GGCredId) extends JourneyUserType
+  final case class OrganisationUnregisteredTrust(email: Option[Email], ggCredId: GGCredId) extends RetrievedUserType
 
   final case class IndividualWithInsufficientConfidenceLevel(
     nino: Option[NINO],
     sautr: Option[SAUTR],
     email: Option[Email],
     ggCredId: GGCredId
-  ) extends JourneyUserType
+  ) extends RetrievedUserType
 
   final case class Subscribed(
     cgtReference: CgtReference,
     ggCredId: GGCredId
-  ) extends JourneyUserType
+  ) extends RetrievedUserType
 
-  final case class NonGovernmentGatewayJourneyUser(authProvider: String) extends JourneyUserType
+  final case class NonGovernmentGatewayRetrievedUser(authProvider: String) extends RetrievedUserType
 
 }

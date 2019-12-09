@@ -27,7 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Individual, NonGovernmentGatewayUser, Organisation}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyUserType, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{RetrievedUserType, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -36,9 +36,9 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 import scala.concurrent.{ExecutionContext, Future}
 
 final case class AuthenticatedRequestWithRetrievedData[A](
-  journeyUserType: JourneyUserType,
-  userType: Option[UserType],
-  request: MessagesRequest[A]
+                                                           journeyUserType: RetrievedUserType,
+                                                           userType: Option[UserType],
+                                                           request: MessagesRequest[A]
 ) extends WrappedRequest[A](request)
 
 @Singleton
@@ -77,7 +77,7 @@ class AuthenticatedActionWithRetrievedData @Inject()(
               case Right(Some(cgtReference)) =>
                 Right(
                   AuthenticatedRequestWithRetrievedData(
-                    JourneyUserType.Subscribed(CgtReference(cgtReference.value), ggCredId),
+                    RetrievedUserType.Subscribed(CgtReference(cgtReference.value), ggCredId),
                     None,
                     request
                   )
@@ -89,7 +89,7 @@ class AuthenticatedActionWithRetrievedData @Inject()(
                       if cl < ConfidenceLevel.L200 =>
                     Right(
                       AuthenticatedRequestWithRetrievedData(
-                        JourneyUserType.IndividualWithInsufficientConfidenceLevel(
+                        RetrievedUserType.IndividualWithInsufficientConfidenceLevel(
                           maybeNino.map(NINO(_)),
                           maybeSautr.map(SAUTR(_)),
                           maybeEmail.filter(_.nonEmpty).map(Email(_)),
@@ -105,7 +105,7 @@ class AuthenticatedActionWithRetrievedData @Inject()(
                       case _ ~ _ ~ Some(nino) ~ _ ~ maybeEmail ~ _ ~ _ =>
                         Right(
                           AuthenticatedRequestWithRetrievedData(
-                            JourneyUserType.Individual(
+                            RetrievedUserType.Individual(
                               Right(NINO(nino)),
                               maybeEmail.filter(_.nonEmpty).map(Email(_)),
                               ggCredId
@@ -162,7 +162,7 @@ class AuthenticatedActionWithRetrievedData @Inject()(
         Future.successful(
           Right(
             AuthenticatedRequestWithRetrievedData(
-              JourneyUserType.NonGovernmentGatewayJourneyUser(otherProvider),
+              RetrievedUserType.NonGovernmentGatewayRetrievedUser(otherProvider),
               Some(NonGovernmentGatewayUser),
               request
             )
@@ -181,7 +181,7 @@ class AuthenticatedActionWithRetrievedData @Inject()(
       case None =>
         Right(
           AuthenticatedRequestWithRetrievedData(
-            JourneyUserType.OrganisationUnregisteredTrust(email.map(Email(_)), ggCredId),
+            RetrievedUserType.OrganisationUnregisteredTrust(email.map(Email(_)), ggCredId),
             Some(Organisation),
             request
           )
@@ -200,7 +200,7 @@ class AuthenticatedActionWithRetrievedData @Inject()(
             id =>
               Right(
                 AuthenticatedRequestWithRetrievedData(
-                  JourneyUserType.Trust(
+                  RetrievedUserType.Trust(
                     SAUTR(id.value),
                     email.filter(_.nonEmpty).map(Email(_)),
                     ggCredId

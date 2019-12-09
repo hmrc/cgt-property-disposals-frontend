@@ -26,7 +26,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.IvBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyUserType.{Individual, NonGovernmentGatewayJourneyUser, Trust}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.RetrievedUserType.{Individual, NonGovernmentGatewayRetrievedUser, Trust}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, TrustName}
@@ -113,47 +113,47 @@ class StartController @Inject()(
           case (_, Some(NonGovernmentGatewayJourney)) =>
             Redirect(routes.StartController.weOnlySupportGG())
 
-          case (JourneyUserType.Subscribed(cgtReference, ggCredId), _) =>
+          case (RetrievedUserType.Subscribed(cgtReference, ggCredId), _) =>
             handleSubscribedUser(cgtReference, ggCredId)
 
           case (
-              JourneyUserType.IndividualWithInsufficientConfidenceLevel(maybeNino, maybeSautr, ggEmail, ggCredId),
+              RetrievedUserType.IndividualWithInsufficientConfidenceLevel(maybeNino, maybeSautr, ggEmail, ggCredId),
               None
               ) =>
             // this is the first time a person with individual insufficient confidence level has come to start
             handleInsufficientConfidenceLevel(maybeNino, maybeSautr, ggEmail, ggCredId)
 
           case (
-              i: JourneyUserType.Individual,
+              i: RetrievedUserType.Individual,
               Some(SubscriptionStatus.SubscriptionMissingData(bpr, enteredEmail, _))
               ) =>
             handleSubscriptionMissingData(bpr, i.email, enteredEmail, i.ggCredId)
 
           case (
-              i: JourneyUserType.IndividualWithInsufficientConfidenceLevel,
+              i: RetrievedUserType.IndividualWithInsufficientConfidenceLevel,
               Some(SubscriptionStatus.SubscriptionMissingData(bpr, enteredEmail, _))
               ) =>
             handleSubscriptionMissingData(bpr, i.email, enteredEmail, i.ggCredId)
 
-          case (t: JourneyUserType.Trust, Some(SubscriptionStatus.SubscriptionMissingData(bpr, enteredEmail, _))) =>
+          case (t: RetrievedUserType.Trust, Some(SubscriptionStatus.SubscriptionMissingData(bpr, enteredEmail, _))) =>
             handleSubscriptionMissingData(bpr, t.email, enteredEmail, t.ggCredId)
 
           case (
-              t: JourneyUserType.OrganisationUnregisteredTrust,
+              t: RetrievedUserType.OrganisationUnregisteredTrust,
               Some(SubscriptionStatus.SubscriptionMissingData(bpr, enteredEmail, _))
               ) =>
             handleSubscriptionMissingData(bpr, t.email, enteredEmail, t.ggCredId)
 
-          case (i: JourneyUserType.Individual, None) =>
+          case (i: RetrievedUserType.Individual, None) =>
             buildIndividualSubscriptionData(i, i.email, i.ggCredId)
 
-          case (t: JourneyUserType.Trust, _) =>
+          case (t: RetrievedUserType.Trust, _) =>
             buildTrustSubscriptionData(t, t.email, t.ggCredId)
 
-          case (JourneyUserType.OrganisationUnregisteredTrust(_, ggCredId), _) =>
+          case (RetrievedUserType.OrganisationUnregisteredTrust(_, ggCredId), _) =>
             handleNonTrustOrganisation(ggCredId, None)
 
-          case (u: JourneyUserType.NonGovernmentGatewayJourneyUser, _) =>
+          case (u: RetrievedUserType.NonGovernmentGatewayRetrievedUser, _) =>
             handleNonGovernmentGatewayUser(u)
         }
     }
@@ -197,7 +197,7 @@ class StartController @Inject()(
   }
 
   private def handleNonGovernmentGatewayUser(
-    nonGovernmentGatewayUser: NonGovernmentGatewayJourneyUser
+    nonGovernmentGatewayUser: NonGovernmentGatewayRetrievedUser
   )(implicit request: RequestWithSessionDataAndRetrievedData[_]): Future[Result] = {
     logger.warn(s"User logged in with unsupported provider: ${nonGovernmentGatewayUser.authProvider}")
 
