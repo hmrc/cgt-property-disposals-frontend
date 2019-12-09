@@ -38,36 +38,34 @@ class ViewConfig @Inject()(servicesConfig: ServicesConfig) {
     s"/contact/problem_reports_nonjs?service=$contactFormServiceIdentifier"
   val betaFeedbackUrlNoAuth: String =
     s"/contact/beta-feedback-unauthenticated?service=$contactFormServiceIdentifier"
-  val govUkUrl: String                   = getString("external-url.gov-uk")
-  val signOutUrl: String                 = s"$companyAuthUrl$signOutUri"
-  val trustRegistrationUrl: String       = getString("external-url.trust-registration")
-  val callChargesUrl: String             = getString("external-url.gov-call-charges")
-  val additionalNeedsUrl: String         = getString("external-url.additional-needs")
-  val taxSellHomeUrl: String             = getString("external-url.tax-sell-home")
-  val taxSellPropertyUrl: String         = getString("external-url.tax-sell-property")
-  val cgtUrl: String                     = getString("external-url.capital-gains-tax")
-  val cgtLegacyUrl: String               = getString("external-url.capital-gains-tax-legacy")
-  val legacyCgtNonResidentUrl: String    = getString("external-url.legacy-cgt-non-resident")
-  val agentsSignInUrl: String            = getString("external-url.sign-in-to-agents")
-  val createAgentsAccountUrl: String     = getString("external-url.create-agents-account")
-  val lostUtrUrl: String                 = getString("external-url.lost-utr")
+  val govUkUrl: String = getString("external-url.gov-uk")
+  val signOutUrl: String           = s"$companyAuthUrl$signOutUri"
+  val trustRegistrationUrl: String = getString("external-url.trust-registration")
+  val callChargesUrl: String = getString("external-url.gov-call-charges")
+  val additionalNeedsUrl: String = getString("external-url.additional-needs")
+  val taxSellHomeUrl: String = getString("external-url.tax-sell-home")
+  val taxSellPropertyUrl: String = getString("external-url.tax-sell-property")
+  val cgtUrl: String = getString("external-url.capital-gains-tax")
+  val cgtLegacyUrl: String = getString("external-url.capital-gains-tax-legacy")
+  val legacyCgtNonResidentUrl: String = getString("external-url.legacy-cgt-non-resident")
+  val agentsSignInUrl: String = getString("external-url.sign-in-to-agents")
+  val createAgentsAccountUrl: String = getString("external-url.create-agents-account")
+  val lostUtrUrl: String = getString("external-url.lost-utr")
   val trusteeResponsibilitiesUrl: String = getString("external-url.trustee-responsibilities")
-  val fileCorporationTaxUrl: String      = getString("external-url.file-corporation-tax")
-  val trustHelpUrl: String               = getString("external-url.trust-help")
-  val tellHmrcChangeDetails: String      = getString("external-url.tell-hmrc-change-details")
-  val exitSurveyUrl: String              = getString("exit-survey.uri")
+  val fileCorporationTaxUrl: String = getString("external-url.file-corporation-tax")
+  val trustHelpUrl: String = getString("external-url.trust-help")
+  val tellHmrcChangeDetails: String = getString("external-url.tell-hmrc-change-details")
+  val onboardingExitSurveyUrl: String ="/feedback/CGTPD-REG"
   val ggCreateAccountUrl: String =
     "/bas-gateway?" +
       "accountType=individual&" +
       "continueUrl=%2Fcapital-gains-tax-uk-property%2Fstart&" +
-      "origin=cgt-property-disposals-frontend"
-  val ggTimeoutSeconds: Long   = servicesConfig.getDuration("gg.timeout").toSeconds
+      "origin=capital-gains-tax-uk-property-frontend"
+  val ggTimeoutSeconds: Long = servicesConfig.getDuration("gg.timeout").toSeconds
   val ggCountdownSeconds: Long = servicesConfig.getDuration("gg.countdown").toSeconds
-  val ggKeepAliveUrl: String   = "/capital-gains-tax-uk-property" + routes.StartController.keepAlive().url
-  val ggTimedOutUrl: String    = signOutUrl + "?continue=/capital-gains-tax-uk-property" + routes.StartController.timedOut().url
-  val ggSignOut: String        = signOutUrl + "?continue=/capital-gains-tax-uk-property" + routes.StartController.start().url
-  val accountSignOutUrl: String = signOutUri + "?continue=/capital-gains-tax-uk-property" + accounts.routes.HomeController
-    .signedOut()
-    .url
+  val ggKeepAliveUrl: String = "/capital-gains-tax-uk-property" + routes.StartController.keepAlive().url
+  val ggTimedOutUrl: String = signOutUrl + "?continue=/capital-gains-tax-uk-property" + routes.StartController.timedOut().url
+  val ggSignOut: String = signOutUrl + "?continue=/capital-gains-tax-uk-property" + routes.StartController.start().url
+  val accountSignOutUrl: String = signOutUri + "?continue=/capital-gains-tax-uk-property" + accounts.routes.HomeController.signedOut().url
 
 }
