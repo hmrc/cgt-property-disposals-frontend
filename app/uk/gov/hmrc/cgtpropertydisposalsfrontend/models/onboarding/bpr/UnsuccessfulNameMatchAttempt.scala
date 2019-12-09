@@ -35,7 +35,7 @@ object UnsuccessfulNameMatchAttempts {
 
   object NameMatchDetails {
 
-    final case class IndividualNameMatchDetails(name: IndividualName, sautr: SAUTR) extends NameMatchDetails
+    final case class  IndividualNameMatchDetails(name: IndividualName, sautr: SAUTR) extends NameMatchDetails
 
     final case class TrustNameMatchDetails(name: TrustName, trn: TRN) extends NameMatchDetails
 
