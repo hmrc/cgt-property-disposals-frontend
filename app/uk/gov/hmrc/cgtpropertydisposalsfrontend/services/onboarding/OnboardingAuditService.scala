@@ -163,7 +163,7 @@ class OnboardingAuditServiceImpl @Inject()(auditConnector: AuditConnector) exten
     writes: Writes[A]
   ): Unit = {
     val extendedDataEvent = ExtendedDataEvent(
-      auditSource = "capital-gains-tax-uk-property",
+      auditSource = "capital-property-disposals",
       auditType   = auditType,
       detail      = Json.toJson(detail),
       tags        = tags
