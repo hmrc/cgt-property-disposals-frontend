@@ -16,13 +16,14 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
 )
 
-@()(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@()(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @title = @{messages("alreadySubscribedWithDifferentGGAccount.title")}
 

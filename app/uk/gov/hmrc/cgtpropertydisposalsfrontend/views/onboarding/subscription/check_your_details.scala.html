@@ -27,6 +27,7 @@
 @import scala.util.Try
 @import views.html.helper.CSRF
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Block
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSubscriptionReady
 
 @this(
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -39,7 +40,7 @@
  submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button
 )
 
-@(details: SubscriptionDetails)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(details: SubscriptionDetails)(implicit request:RequestWithSubscriptionReady[_], messages:Messages, appConfig: ViewConfig)
 @affinity = @{details.name.fold(_ => "organisation", _ => "individual")}
 @title = @{messages(s"subscription.${affinity}.title")}
 

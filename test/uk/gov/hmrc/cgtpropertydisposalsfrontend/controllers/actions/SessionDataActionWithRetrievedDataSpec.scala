@@ -48,6 +48,7 @@ class SessionDataActionWithRetrievedDataSpec extends ControllerSpec with Session
           Some(Email("email")),
           GGCredId("id")
         ),
+        Some(UserType.Individual),
         messagesRequest
       )
 

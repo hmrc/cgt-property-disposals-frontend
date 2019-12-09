@@ -58,7 +58,7 @@ class SubscriptionController @Inject()(
     with SessionUpdates {
 
   def checkYourDetails(): Action[AnyContent] =
-    authenticatedActionWithSubscriptionReady { implicit request =>
+    authenticatedActionWithSubscriptionReady { implicit request: RequestWithSubscriptionReady[AnyContent] =>
       Ok(checkYourDetailsPage(request.subscriptionReady.subscriptionDetails))
     }
 

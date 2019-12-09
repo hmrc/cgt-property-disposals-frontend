@@ -201,7 +201,9 @@ class StartController @Inject()(
   )(implicit request: RequestWithSessionDataAndRetrievedData[_]): Future[Result] = {
     logger.warn(s"User logged in with unsupported provider: ${nonGovernmentGatewayUser.authProvider}")
 
-    updateSession(sessionStore, request)(_.copy(journeyStatus = Some(NonGovernmentGatewayJourney))).map {
+    updateSession(sessionStore, request)(
+      _.copy(userType = request.authenticatedRequest.userType, journeyStatus = Some(NonGovernmentGatewayJourney))
+    ).map {
       case Left(e) =>
         logger.warn("Could not update session", e)
         errorHandler.errorResult()
@@ -218,7 +220,9 @@ class StartController @Inject()(
     val result = for {
       subscribedDetails <- subscriptionService.getSubscribedDetails(cgtReference)
       _ <- EitherT(
-            updateSession(sessionStore, request)(_.copy(journeyStatus = Some(Subscribed(subscribedDetails, ggCredId))))
+            updateSession(sessionStore, request)(_.copy(
+              userType      = request.authenticatedRequest.userType,
+              journeyStatus = Some(Subscribed(subscribedDetails, ggCredId))))
           )
     } yield ()
 
@@ -242,6 +246,7 @@ class StartController @Inject()(
 
     updateSession(sessionStore, request)(
       _.copy(
+        userType      = request.authenticatedRequest.userType,
         journeyStatus = Some(newSessionData),
         needMoreDetailsDetails = Some(
           NeedMoreDetailsDetails(
@@ -260,8 +265,6 @@ class StartController @Inject()(
     }
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
-  @SuppressWarnings(Array("org.wartremover:warts.StringPlusAny"))
   private def handleInsufficientConfidenceLevel(
     maybeNino: Option[NINO],
     maybeSautr: Option[SAUTR],
@@ -269,8 +272,7 @@ class StartController @Inject()(
     ggCredId: GGCredId
   )(
     implicit request: RequestWithSessionDataAndRetrievedData[AnyContent]
-  ): Future[Result] = {
-
+  ): Future[Result] =
     maybeNino match {
       case None =>
         maybeSautr match {
@@ -284,6 +286,7 @@ class StartController @Inject()(
             updateSession(sessionStore, request)(
               s =>
                 s.copy(
+                  userType      = request.authenticatedRequest.userType,
                   journeyStatus = Some(subscriptionStatus),
                   needMoreDetailsDetails = Some(
                     NeedMoreDetailsDetails(
@@ -306,7 +309,6 @@ class StartController @Inject()(
         auditService.sendHandOffToIvEvent(ggCredId, request.uri)
         redirectToIv
     }
-  }
 
   private def buildTrustSubscriptionData(
     trust: Trust,
@@ -361,6 +363,7 @@ class StartController @Inject()(
                 _ =>
                   updateSession(sessionStore, request)(
                     _.copy(
+                      userType      = request.authenticatedRequest.userType,
                       journeyStatus =
                         Some(SubscriptionStatus.SubscriptionMissingData(bprWithTrustName._1, None, ggCredId)),
                       needMoreDetailsDetails = Some(
@@ -410,6 +413,7 @@ class StartController @Inject()(
       subscriptionDetails =>
         updateSession(sessionStore, request)(
           _.copy(
+            userType      = request.authenticatedRequest.userType,
             journeyStatus = Some(SubscriptionStatus.SubscriptionReady(subscriptionDetails, ggCredId))
           )
         ).map { _ =>
@@ -433,6 +437,7 @@ class StartController @Inject()(
               _ =>
                 updateSession(sessionStore, request)(
                   _.copy(
+                    userType      = request.authenticatedRequest.userType,
                     journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bpr, None, ggCredId)),
                     needMoreDetailsDetails = Some(
                       NeedMoreDetailsDetails(
@@ -445,6 +450,7 @@ class StartController @Inject()(
               subscriptionDetails =>
                 updateSession(sessionStore, request)(
                   _.copy(
+                    userType      = request.authenticatedRequest.userType,
                     journeyStatus = Some(SubscriptionStatus.SubscriptionReady(subscriptionDetails, ggCredId))
                   )
                 )

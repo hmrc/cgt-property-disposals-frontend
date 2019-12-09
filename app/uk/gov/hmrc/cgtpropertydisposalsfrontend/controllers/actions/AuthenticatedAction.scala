@@ -15,22 +15,19 @@
  */
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
-import cats.syntax.either._
+
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.mvc._
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Organisation
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 
-final case class AuthenticatedRequest[A](userType: Option[UserType], request: MessagesRequest[A])
-    extends WrappedRequest[A](request)
+final case class AuthenticatedRequest[A](request: MessagesRequest[A]) extends WrappedRequest[A](request)
 
 @Singleton
 class AuthenticatedAction @Inject()(
@@ -48,25 +45,7 @@ class AuthenticatedAction @Inject()(
     implicit val hc: HeaderCarrier =
       HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
-    val authenticatedRequestWithUserType: Future[Either[Result, AuthenticatedRequest[A]]] = sessionStore
-      .get()
-      .map(
-        _.bimap(
-          { e =>
-            logger.warn(s"Could not get session data: $e")
-            errorHandler.errorResult()(request)
-          }, {
-            case Some(sessionData) =>
-              AuthenticatedRequest(sessionData.userType, request)
-            case None              => {
-              AuthenticatedRequest(None, request)
-            }
-          }
-        )
-      )
-
-    auth.authorised()(authenticatedRequestWithUserType)
-
+    auth.authorised()(Future.successful(Right(AuthenticatedRequest(request))))
   }
 
 }

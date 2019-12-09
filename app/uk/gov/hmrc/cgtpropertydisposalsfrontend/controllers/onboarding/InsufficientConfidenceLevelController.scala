@@ -81,7 +81,6 @@ class InsufficientConfidenceLevelController @Inject()(
     withInsufficientConfidenceLevelUser {
       case TryingToGetIndividualsFootprint(hasNino, _, _, _) =>
         val form                         = hasNino.fold(haveANinoForm)(haveANinoForm.fill)
-        implicit val s: Option[UserType] = request.authenticatedRequest.userType
         Ok(doYouHaveANinoPage(form))
     }
   }
@@ -92,7 +91,6 @@ class InsufficientConfidenceLevelController @Inject()(
         .bindFromRequest()
         .fold(
           e => {
-            implicit val s: Option[UserType] = request.authenticatedRequest.userType
             BadRequest(doYouHaveANinoPage(e))
           },
           hasNino =>
@@ -122,8 +120,6 @@ class InsufficientConfidenceLevelController @Inject()(
           SeeOther(routes.InsufficientConfidenceLevelController.doYouHaveNINO().url)
         ) { _ =>
           val form = hasSaUtr.fold(hasSaUtrForm)(hasSaUtrForm.fill)
-
-          implicit val s: Option[UserType] = request.authenticatedRequest.userType
           Ok(doYouHaveAnSaUtrPage(form, routes.InsufficientConfidenceLevelController.doYouHaveNINO()))
         }
     }
@@ -138,7 +134,6 @@ class InsufficientConfidenceLevelController @Inject()(
           .bindFromRequest()
           .fold(
             e => {
-              implicit val s: Option[UserType] = request.authenticatedRequest.userType
               BadRequest(doYouHaveAnSaUtrPage(e, routes.InsufficientConfidenceLevelController.doYouHaveNINO()))
             },
             hasSautr =>
@@ -173,7 +168,6 @@ class InsufficientConfidenceLevelController @Inject()(
                 )(
                   InsufficientConfidenceLevelController.sautrAndNameForm.withUnsuccessfulAttemptsError
                 )
-                implicit val s: Option[UserType] = request.authenticatedRequest.userType
                 Ok(enterSautrAndNamePage(form, routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()))
               }
             )
@@ -276,14 +270,12 @@ class InsufficientConfidenceLevelController @Inject()(
       errorHandler.errorResult()
 
     case NameMatchError.ValidationError(formWithErrors) =>
-      implicit val rr: Option[UserType] = request.authenticatedRequest.userType
       BadRequest(enterSautrAndNamePage(formWithErrors, routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()))
 
     case NameMatchError.NameMatchFailed(unsuccessfulAttempts) =>
       val form = InsufficientConfidenceLevelController.sautrAndNameForm
         .fill(unsuccessfulAttempts.lastDetailsTried)
         .withUnsuccessfulAttemptsError(unsuccessfulAttempts)
-      implicit val rr: Option[UserType] = request.authenticatedRequest.userType
       BadRequest(enterSautrAndNamePage(form, routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()))
 
     case NameMatchError.TooManyUnsuccessfulAttempts() =>

@@ -17,6 +17,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.account.AccountMenuItem
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -29,7 +30,7 @@
 )
 
 
-@(details: SubscribedDetails)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(details: SubscribedDetails)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @title = @{messages(s"account.home.title")}
 

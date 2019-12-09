@@ -16,6 +16,7 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -23,7 +24,7 @@
  accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu
 )
 
-@(email: Email, continueCall: Call, showAccountMenu: Boolean)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(email: Email, continueCall: Call, showAccountMenu: Boolean)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @title = @{messages("confirmEmail.verified.title")}
 @menu = {@if(showAccountMenu) { @accountMenu(None) }}

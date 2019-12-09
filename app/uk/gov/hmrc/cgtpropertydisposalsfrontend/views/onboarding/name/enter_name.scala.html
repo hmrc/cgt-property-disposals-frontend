@@ -17,6 +17,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -29,7 +30,7 @@
         accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu
 )
 
-@(form: Form[IndividualName], backLink: Call, submit: Call, showAccountMenu: Boolean)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[IndividualName], backLink: Call, submit: Call, showAccountMenu: Boolean)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @firstNameKey = @{"firstName"}
 @lastNameKey = @{"lastName"}

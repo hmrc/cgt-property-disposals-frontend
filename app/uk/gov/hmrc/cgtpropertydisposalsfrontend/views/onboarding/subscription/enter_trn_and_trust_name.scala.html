@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.TrustNameMatchDetails
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -31,7 +32,7 @@
 
 )
 
-@(form: Form[TrustNameMatchDetails], backLink: Call)(implicit request: Request[_], messages: Messages, appConfig: ViewConfig)
+@(form: Form[TrustNameMatchDetails], backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 
 @title = @{messages("enterTrn.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
