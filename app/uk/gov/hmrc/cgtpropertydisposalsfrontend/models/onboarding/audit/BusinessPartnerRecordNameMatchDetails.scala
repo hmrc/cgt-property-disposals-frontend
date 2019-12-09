@@ -28,7 +28,6 @@ object BusinessPartnerRecordNameMatchDetails {
   final case class TrustNameWithTrnAuditDetails(trustName: String, trn: String)
       extends BusinessPartnerRecordNameMatchDetails
 
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   implicit val format: OFormat[BusinessPartnerRecordNameMatchDetails] = {
     val individualFormat: OFormat[IndividualNameWithSaUtrAuditDetails] =
       Json.format[IndividualNameWithSaUtrAuditDetails]
