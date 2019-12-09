@@ -33,7 +33,7 @@ import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, RetrievalOps, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyUserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import uk.gov.hmrc.http.HeaderCarrier
@@ -64,14 +64,14 @@ class AuthenticatedActionWithRetrievedDataSpec
 
   implicit val ninoFormat: OFormat[NINO]         = Json.format[NINO]
   implicit val sautrFormat: OFormat[SAUTR]       = Json.format[SAUTR]
-  implicit val userTypeFormat: OFormat[UserType] = derived.oformat[UserType]
+  implicit val userTypeFormat: OFormat[JourneyUserType] = derived.oformat[JourneyUserType]
 
   def performAction[A](r: FakeRequest[A]): Future[Result] = {
     @SuppressWarnings(Array("org.wartremover.warts.Any"))
     val request = new MessagesRequest[A](r, stub[MessagesApi])
     authenticatedAction.invokeBlock(request, { a: AuthenticatedRequestWithRetrievedData[A] =>
       a.request.messagesApi shouldBe request.messagesApi
-      Future.successful(Ok(Json.toJson(a.userType)))
+      Future.successful(Ok(Json.toJson(a.journeyUserType)))
     })
   }
 
@@ -103,7 +103,7 @@ class AuthenticatedActionWithRetrievedDataSpec
         val result = performAction(FakeRequest())
 
         status(result)        shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(UserType.NonGovernmentGatewayUser(providerType))
+        contentAsJson(result) shouldBe Json.toJson(JourneyUserType.NonGovernmentGatewayJourneyUser(providerType))
       }
 
     }
@@ -121,7 +121,7 @@ class AuthenticatedActionWithRetrievedDataSpec
         val result = performAction(FakeRequest())
 
         status(result)        shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(UserType.Subscribed(CgtReference("XCGT123456789"), GGCredId("id")))
+        contentAsJson(result) shouldBe Json.toJson(JourneyUserType.Subscribed(CgtReference("XCGT123456789"), GGCredId("id")))
 
       }
     }
@@ -162,7 +162,7 @@ class AuthenticatedActionWithRetrievedDataSpec
         val result = performAction(FakeRequest())
 
         status(result)        shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(UserType.Subscribed(CgtReference("XCGT123456789"), GGCredId("id")))
+        contentAsJson(result) shouldBe Json.toJson(JourneyUserType.Subscribed(CgtReference("XCGT123456789"), GGCredId("id")))
 
       }
     }
@@ -180,7 +180,7 @@ class AuthenticatedActionWithRetrievedDataSpec
         )
 
         val expectedRetrieval =
-          UserType.Individual(Right(NINO("nino")), None, ggCredId)
+          JourneyUserType.Individual(Right(NINO("nino")), None, ggCredId)
 
         inSequence {
           mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
@@ -305,7 +305,7 @@ class AuthenticatedActionWithRetrievedDataSpec
 
         status(result) shouldBe OK
         contentAsJson(result) shouldBe Json.toJson(
-          UserType.OrganisationUnregisteredTrust(Some(Email("email")), GGCredId(ggCredentials.providerId))
+          JourneyUserType.OrganisationUnregisteredTrust(Some(Email("email")), GGCredId(ggCredentials.providerId))
         )
       }
 
@@ -348,7 +348,7 @@ class AuthenticatedActionWithRetrievedDataSpec
 
           val result = performAction(FakeRequest())
           status(result)        shouldBe OK
-          contentAsJson(result) shouldBe Json.toJson(UserType.Trust(sautr, Some(Email("email")), ggCredId))
+          contentAsJson(result) shouldBe Json.toJson(JourneyUserType.Trust(sautr, Some(Email("email")), ggCredId))
         }
 
       }
@@ -372,7 +372,7 @@ class AuthenticatedActionWithRetrievedDataSpec
 
         val result = performAction(FakeRequest())
         status(result)        shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(UserType.Trust(sautr, None, ggCredId))
+        contentAsJson(result) shouldBe Json.toJson(JourneyUserType.Trust(sautr, None, ggCredId))
       }
 
     }
@@ -391,7 +391,7 @@ class AuthenticatedActionWithRetrievedDataSpec
       )
 
       val expectedRetrieval =
-        UserType.Individual(Right(NINO("nino")), Some(Email("email")), ggCredId)
+        JourneyUserType.Individual(Right(NINO("nino")), Some(Email("email")), ggCredId)
 
       "effect the requested action" in {
         mockHasSubscription()(Right(None))
@@ -414,7 +414,7 @@ class AuthenticatedActionWithRetrievedDataSpec
       )
 
       val expectedRetrieval =
-        UserType.Individual(Right(NINO("nino")), None, ggCredId)
+        JourneyUserType.Individual(Right(NINO("nino")), None, ggCredId)
 
       "effect the requested action" in {
         mockHasSubscription()(Right(None))
@@ -451,7 +451,7 @@ class AuthenticatedActionWithRetrievedDataSpec
               val result = performAction(FakeRequest())
               status(result) shouldBe OK
               contentAsJson(result) shouldBe Json.toJson(
-                UserType.IndividualWithInsufficientConfidenceLevel(
+                JourneyUserType.IndividualWithInsufficientConfidenceLevel(
                   mayBeNino,
                   None,
                   Some(Email("email")),
@@ -475,7 +475,7 @@ class AuthenticatedActionWithRetrievedDataSpec
           val result = performAction(FakeRequest())
           status(result) shouldBe OK
           contentAsJson(result) shouldBe Json.toJson(
-            UserType.IndividualWithInsufficientConfidenceLevel(
+            JourneyUserType.IndividualWithInsufficientConfidenceLevel(
               None,
               None,
               None,

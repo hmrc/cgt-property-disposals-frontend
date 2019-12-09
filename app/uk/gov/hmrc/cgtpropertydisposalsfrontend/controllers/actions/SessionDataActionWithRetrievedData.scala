@@ -41,7 +41,9 @@ class SessionDataActionWithRetrievedData @Inject()(val sessionStore: SessionStor
   def sessionDataAction[A](
     sessionData: Option[SessionData],
     request: AuthenticatedRequestWithRetrievedData[A]
-  ): RequestWithSessionDataAndRetrievedData[A] =
-    RequestWithSessionDataAndRetrievedData(sessionData, request)
+  ): RequestWithSessionDataAndRetrievedData[A] = {
+    val data: SessionData = sessionData.getOrElse(SessionData.empty).copy(userType = request.userType)
+    RequestWithSessionDataAndRetrievedData(Some(data), request)
+  }
 
 }
