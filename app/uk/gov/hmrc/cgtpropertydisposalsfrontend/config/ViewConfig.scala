@@ -59,13 +59,13 @@ class ViewConfig @Inject()(servicesConfig: ServicesConfig) {
   val ggCreateAccountUrl: String =
     "/bas-gateway?" +
       "accountType=individual&" +
-      "continueUrl=%2Fcgt-property-disposals%2Fstart&" +
-      "origin=cgt-property-disposals-frontend"
+      "continueUrl=%2Fcapital-gains-tax-uk-property%2Fstart&" +
+      "origin=capital-gains-tax-uk-property-frontend"
   val ggTimeoutSeconds: Long = servicesConfig.getDuration("gg.timeout").toSeconds
   val ggCountdownSeconds: Long = servicesConfig.getDuration("gg.countdown").toSeconds
-  val ggKeepAliveUrl: String = "/cgt-property-disposals" + routes.StartController.keepAlive().url
-  val ggTimedOutUrl: String = signOutUrl + "?continue=/cgt-property-disposals" + routes.StartController.timedOut().url
-  val ggSignOut: String = signOutUrl + "?continue=/cgt-property-disposals" + routes.StartController.start().url
-  val accountSignOutUrl: String = signOutUri + "?continue=/cgt-property-disposals" + accounts.routes.HomeController.signedOut().url
+  val ggKeepAliveUrl: String = "/capital-gains-tax-uk-property" + routes.StartController.keepAlive().url
+  val ggTimedOutUrl: String = signOutUrl + "?continue=/capital-gains-tax-uk-property" + routes.StartController.timedOut().url
+  val ggSignOut: String = signOutUrl + "?continue=/capital-gains-tax-uk-property" + routes.StartController.start().url
+  val accountSignOutUrl: String = signOutUri + "?continue=/capital-gains-tax-uk-property" + accounts.routes.HomeController.signedOut().url
 
 }

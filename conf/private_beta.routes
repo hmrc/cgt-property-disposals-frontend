@@ -3,7 +3,6 @@
 ->         /capital-gains-tax-uk-property   accounts.Routes
 ->         /capital-gains-tax-uk-property   onboarding.Routes
 ->         /capital-gains-tax-uk-property   returns.Routes
-
 ->         /                                health.Routes
 ->     	   /template                        template.Routes
 
