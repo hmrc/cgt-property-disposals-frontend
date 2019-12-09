@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit
 
-import julienrf.json.derived
-import play.api.libs.json.OFormat
+import play.api.libs.json.{Json, OFormat, OWrites, Reads}
 
 sealed trait BusinessPartnerRecordNameMatchDetails extends Product with Serializable
 
@@ -30,6 +29,21 @@ object BusinessPartnerRecordNameMatchDetails {
       extends BusinessPartnerRecordNameMatchDetails
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[BusinessPartnerRecordNameMatchDetails] =
-    derived.oformat[BusinessPartnerRecordNameMatchDetails]
+  implicit val format: OFormat[BusinessPartnerRecordNameMatchDetails] = {
+    val individualFormat: OFormat[IndividualNameWithSaUtrAuditDetails] =
+      Json.format[IndividualNameWithSaUtrAuditDetails]
+
+    val trustFormat: OFormat[TrustNameWithTrnAuditDetails] =
+      Json.format[TrustNameWithTrnAuditDetails]
+
+    OFormat(
+      Reads { json =>
+        individualFormat.reads(json).orElse(trustFormat.reads(json))
+      },
+      OWrites[BusinessPartnerRecordNameMatchDetails] {
+        case i: IndividualNameWithSaUtrAuditDetails => individualFormat.writes(i)
+        case t: TrustNameWithTrnAuditDetails        => trustFormat.writes(t)
+      }
+    )
+  }
 }
