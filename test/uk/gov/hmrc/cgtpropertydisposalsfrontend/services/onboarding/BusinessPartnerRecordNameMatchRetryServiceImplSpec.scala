@@ -28,6 +28,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, SAUTR, TRN}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.BusinessPartnerRecordNameMatchDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.BusinessPartnerRecordNameMatchDetails.{IndividualNameWithSaUtrAuditDetails, TrustNameWithTrnAuditDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest.{IndividualBusinessPartnerRecordRequest, TrustBusinessPartnerRecordRequest}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.{IndividualNameMatchDetails, TrustNameMatchDetails}
@@ -59,16 +61,18 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
 
   val service = new BusinessPartnerRecordNameMatchRetryServiceImpl(bprService, retryStore, mockAuditService, config)
 
-  def mockSendBprNameMatchAttemptEvent[A <: NameMatchDetails](
+  def mockSendBprNameMatchAttemptEvent(
     attemptsMade: Int,
     maxAttemptsMade: Int,
-    nameMatchDetails: A
+    nameMatchDetails: BusinessPartnerRecordNameMatchDetails
   )(result: Unit) =
-    (mockAuditService
-      .sendBusinessPartnerRecordNameMatchAttemptEvent(_: Int, _: Int, _: A)(
-        _: HeaderCarrier,
-        _: ExecutionContext
-      ))
+    (
+      mockAuditService
+        .sendBusinessPartnerRecordNameMatchAttemptEvent(_: Int, _: Int, _: BusinessPartnerRecordNameMatchDetails)(
+          _: HeaderCarrier,
+          _: ExecutionContext
+        )
+      )
       .expects(attemptsMade, maxAttemptsMade, nameMatchDetails, *, *)
       .returning(result)
 
@@ -204,6 +208,17 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
       "return TooManyUnsuccessfulAttempts" when {
 
         "the number of previous attempts passed in equals the configured maximum" in {
+          inSequence {
+            mockSendBprNameMatchAttemptEvent(
+              maxRetries,
+              maxRetries,
+              IndividualNameWithSaUtrAuditDetails(
+                individualNameMatchDetails.name.firstName,
+                individualNameMatchDetails.name.lastName,
+                individualNameMatchDetails.sautr.value
+              )
+            )(())
+          }
           testIsErrorOfType[IndividualNameMatchDetails, NameMatchError.TooManyUnsuccessfulAttempts](
             service.attemptBusinessPartnerRecordNameMatch(
               individualNameMatchDetails,
@@ -214,11 +229,23 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
         }
 
         "the number of previous attempts passed in exceeds the configured maximum" in {
+          inSequence {
+            mockSendBprNameMatchAttemptEvent(
+              maxRetries,
+              maxRetries,
+              IndividualNameWithSaUtrAuditDetails(
+                individualNameMatchDetails.name.firstName,
+                individualNameMatchDetails.name.lastName,
+                individualNameMatchDetails.sautr.value
+              )
+            )(())
+          }
+
           testIsErrorOfType[IndividualNameMatchDetails, NameMatchError.TooManyUnsuccessfulAttempts](
             service.attemptBusinessPartnerRecordNameMatch(
               individualNameMatchDetails,
               ggCredId,
-              Some(UnsuccessfulNameMatchAttempts(maxRetries + 1, maxRetries, sample[IndividualNameMatchDetails]))
+              Some(UnsuccessfulNameMatchAttempts(maxRetries, maxRetries, sample[IndividualNameMatchDetails]))
             )
           )
         }
@@ -226,9 +253,20 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
         "a BPR was not found and the user has now exceeded the configured maximum number of " +
           "unsuccessful attempts" in {
           inSequence {
+            mockSendBprNameMatchAttemptEvent(
+              maxRetries,
+              maxRetries,
+              IndividualNameWithSaUtrAuditDetails(
+                individualNameMatchDetails.name.firstName,
+                individualNameMatchDetails.name.lastName,
+                individualNameMatchDetails.sautr.value
+              )
+            )(())
+
             mockGetBpr(individualNameMatchDetails.sautr, individualNameMatchDetails.name)(
               Right(BusinessPartnerRecordResponse(None))
             )
+
             mockStoreNumberOfUnsccessfulAttempts(
               ggCredId,
               UnsuccessfulNameMatchAttempts(maxRetries, maxRetries, individualNameMatchDetails)
@@ -252,6 +290,11 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
           val trustNameMatchDetails = sample[TrustNameMatchDetails]
 
           inSequence {
+            mockSendBprNameMatchAttemptEvent(
+              1,
+              maxRetries,
+              TrustNameWithTrnAuditDetails(trustNameMatchDetails.name.value, trustNameMatchDetails.trn.value)
+            )(())
             mockGetBpr(trustNameMatchDetails.trn, trustNameMatchDetails.name)(Left(Error("")))
           }
 
@@ -266,6 +309,15 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
 
         "there is an error updating the number of unsuccessful attempts in the retry store" in {
           inSequence {
+            mockSendBprNameMatchAttemptEvent(
+              1,
+              maxRetries,
+              IndividualNameWithSaUtrAuditDetails(
+                individualNameMatchDetails.name.firstName,
+                individualNameMatchDetails.name.lastName,
+                individualNameMatchDetails.sautr.value
+              )
+            )(())
             mockGetBpr(individualNameMatchDetails.sautr, individualNameMatchDetails.name)(
               Right(BusinessPartnerRecordResponse(None))
             )
@@ -293,12 +345,23 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
         "a BPR was not found and the user has not exceeded the configured maximum number of " +
           "unsuccessful attempts" in {
           inSequence {
+            mockSendBprNameMatchAttemptEvent(
+              2,
+              maxRetries,
+              IndividualNameWithSaUtrAuditDetails(
+                individualNameMatchDetails.name.firstName,
+                individualNameMatchDetails.name.lastName,
+                individualNameMatchDetails.sautr.value
+              )
+            )(())
+
             mockGetBpr(individualNameMatchDetails.sautr, individualNameMatchDetails.name)(
               Right(BusinessPartnerRecordResponse(None))
             )
+
             mockStoreNumberOfUnsccessfulAttempts(
               ggCredId,
-              UnsuccessfulNameMatchAttempts(1, maxRetries, individualNameMatchDetails)
+              UnsuccessfulNameMatchAttempts(2, maxRetries, individualNameMatchDetails)
             )(
               Right(())
             )
@@ -308,13 +371,27 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
             service.attemptBusinessPartnerRecordNameMatch(
               individualNameMatchDetails,
               ggCredId,
-              None
+              Some(
+                UnsuccessfulNameMatchAttempts(
+                  1,
+                  maxRetries,
+                  IndividualNameMatchDetails(sample[IndividualName], sample[SAUTR])
+                )
+              )
             )
           )
         }
 
         "the name and sautr passed in are the same as the previous attempt" in {
-          mockSendBprNameMatchAttemptEvent(1, maxRetries, individualNameMatchDetails)(())
+
+          val details = IndividualNameWithSaUtrAuditDetails(
+            individualNameMatchDetails.name.firstName,
+            individualNameMatchDetails.name.lastName,
+            individualNameMatchDetails.sautr.value
+          )
+
+          mockSendBprNameMatchAttemptEvent(1, maxRetries, details)(())
+
           testIsErrorOfType[IndividualNameMatchDetails, NameMatchError.NameMatchFailed[IndividualNameMatchDetails]](
             service.attemptBusinessPartnerRecordNameMatch(
               individualNameMatchDetails,
@@ -332,9 +409,20 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
         "the name match succeeded and a BPR was found for an individual" in {
           val bpr = sample[BusinessPartnerRecord]
 
-          mockGetBpr(individualNameMatchDetails.sautr, individualNameMatchDetails.name)(
-            Right(BusinessPartnerRecordResponse(Some(bpr)))
-          )
+          inSequence {
+            mockSendBprNameMatchAttemptEvent(
+              1,
+              maxRetries,
+              IndividualNameWithSaUtrAuditDetails(
+                individualNameMatchDetails.name.firstName,
+                individualNameMatchDetails.name.lastName,
+                individualNameMatchDetails.sautr.value
+              )
+            )(())
+            mockGetBpr(individualNameMatchDetails.sautr, individualNameMatchDetails.name)(
+              Right(BusinessPartnerRecordResponse(Some(bpr)))
+            )
+          }
 
           val result = service.attemptBusinessPartnerRecordNameMatch(
             individualNameMatchDetails,
@@ -349,9 +437,19 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
           val bpr                   = sample[BusinessPartnerRecord]
           val trustNameMatchDetails = sample[TrustNameMatchDetails]
 
-          mockGetBpr(trustNameMatchDetails.trn, trustNameMatchDetails.name)(
-            Right(BusinessPartnerRecordResponse(Some(bpr)))
-          )
+          inSequence {
+            mockSendBprNameMatchAttemptEvent(
+              1,
+              maxRetries,
+              TrustNameWithTrnAuditDetails(
+                trustNameMatchDetails.name.value,
+                trustNameMatchDetails.trn.value
+              )
+            )(())
+            mockGetBpr(trustNameMatchDetails.trn, trustNameMatchDetails.name)(
+              Right(BusinessPartnerRecordResponse(Some(bpr)))
+            )
+          }
 
           val result = service.attemptBusinessPartnerRecordNameMatch(
             trustNameMatchDetails,

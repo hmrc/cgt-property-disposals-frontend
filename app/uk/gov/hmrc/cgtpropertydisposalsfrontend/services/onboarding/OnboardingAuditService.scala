@@ -24,8 +24,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.routes
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.BusinessPartnerRecordNameMatchDetails.{IndividualNameWithSaUtrAuditDetails, TrustNameWithTrnAuditDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{Address => AuditAddress, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.EmailSource
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -46,7 +46,7 @@ trait OnboardingAuditService {
   def sendBusinessPartnerRecordNameMatchAttemptEvent(
     attemptsMade: Int,
     maxAttemptsMade: Int,
-    nameMatchDetails: NameMatchDetails
+    nameMatchDetails: BusinessPartnerRecordNameMatchDetails
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit
 
   def sendSubscriptionChangeEmailAddressAttemptedEvent(
@@ -171,26 +171,26 @@ class OnboardingAuditServiceImpl @Inject()(auditConnector: AuditConnector) exten
     auditConnector.sendExtendedEvent(extendedDataEvent)
   }
 
-  private def toAuditAddress(address: Address) : AuditAddress = address match {
-      case Address.UkAddress(line1, line2, town, county, postcode) =>
-        AuditAddress(
-          line1,
-          line2,
-          town,
-          county,
-          Some(postcode.value),
-          Country("GB", Some("United Kingdom"))
-        )
-      case Address.NonUkAddress(line1, line2, line3, line4, postcode, country) =>
-        AuditAddress(
-          line1,
-          line2,
-          line3,
-          line4,
-          postcode,
-          Country(country.code, country.name)
-        )
-    }
+  private def toAuditAddress(address: Address): AuditAddress = address match {
+    case Address.UkAddress(line1, line2, town, county, postcode) =>
+      AuditAddress(
+        line1,
+        line2,
+        town,
+        county,
+        Some(postcode.value),
+        Country("GB", Some("United Kingdom"))
+      )
+    case Address.NonUkAddress(line1, line2, line3, line4, postcode, country) =>
+      AuditAddress(
+        line1,
+        line2,
+        line3,
+        line4,
+        postcode,
+        Country(country.code, country.name)
+      )
+  }
 
   override def sendHandOffToIvEvent(
     ggCredId: GGCredId,
@@ -208,36 +208,21 @@ class OnboardingAuditServiceImpl @Inject()(auditConnector: AuditConnector) exten
   override def sendBusinessPartnerRecordNameMatchAttemptEvent(
     attemptsMade: Int,
     maxAttempts: Int,
-    nameMatchDetails: NameMatchDetails
+    nameMatchDetails: BusinessPartnerRecordNameMatchDetails
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit = {
 
     val path = nameMatchDetails match {
-      case NameMatchDetails.IndividualNameMatchDetails(name, sautr) =>
+      case IndividualNameWithSaUtrAuditDetails(firstName, lastName, sautr) =>
         routes.InsufficientConfidenceLevelController.enterSautrAndNameSubmit().url
-      case NameMatchDetails.TrustNameMatchDetails(name, trn) =>
+      case TrustNameWithTrnAuditDetails(trustName, trn) =>
         routes.DeterminingIfOrganisationIsTrustController.enterTrnSubmit().url
     }
 
-    val detail = nameMatchDetails match {
-      case NameMatchDetails.IndividualNameMatchDetails(name, sautr) =>
-        Some(
-          BusinessPartnerRecordNameMatchAttemptEvent(
-            attemptsMade,
-            maxAttempts,
-            None,
-            Some(IndividualNameWithSaUtrAuditDetails(name.firstName, name.lastName, sautr.value))
-          )
-        )
-      case NameMatchDetails.TrustNameMatchDetails(name, trn) =>
-        Some(
-          BusinessPartnerRecordNameMatchAttemptEvent(
-            attemptsMade,
-            maxAttempts,
-            Some(TrustNameWithTrnAuditDetails(name.value, trn.value)),
-            None
-          )
-        )
-    }
+    val detail = BusinessPartnerRecordNameMatchAttemptEvent(
+      attemptsMade,
+      maxAttempts,
+      nameMatchDetails
+    )
 
     sendEvent(
       "businessPartnerRecordNameMatchAttempt",
