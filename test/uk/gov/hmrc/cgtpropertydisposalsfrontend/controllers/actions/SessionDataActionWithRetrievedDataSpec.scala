@@ -27,6 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, NINO}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Individual
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -58,7 +59,7 @@ class SessionDataActionWithRetrievedDataSpec extends ControllerSpec with Session
       action.invokeBlock(
         authenticatedRequest, { r: RequestWithSessionDataAndRetrievedData[_] =>
           r.messagesApi shouldBe messagesRequest.messagesApi
-          r.sessionData shouldBe Some(sessionData)
+          r.sessionData shouldBe Some(sessionData.copy(userType = Some(Individual)))
           Future.successful(Ok)
         }
       )
