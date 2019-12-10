@@ -69,93 +69,85 @@ class StartController @Inject()(
     with SessionUpdates
     with IvBehaviour {
 
-  @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
   def start(): Action[AnyContent] = authenticatedActionWithRetrievedDataAndSessionData.async { implicit request =>
-    updateSession(sessionStore, request)(_.copy(userType = request.authenticatedRequest.userType)).flatMap {
-      case Left(e) =>
-        logger.warn("Could not update session", e)
-        errorHandler.errorResult()
+    (
+      request.authenticatedRequest.journeyUserType,
+      request.sessionData.journeyStatus
+    ) match {
 
-      case Right(_) =>
-        (
-          request.authenticatedRequest.journeyUserType,
-          request.sessionData.flatMap(_.journeyStatus)
-        ) match {
+      case (_, Some(_: Subscribed)) =>
+        Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.routes.HomeController.homepage())
 
-          case (_, Some(_: Subscribed)) =>
-            Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.routes.HomeController.homepage())
+      case (_, Some(AlreadySubscribedWithDifferentGGAccount(_))) =>
+        Redirect(onboarding.routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
 
-          case (_, Some(AlreadySubscribedWithDifferentGGAccount(_))) =>
-            Redirect(onboarding.routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
+      case (_, Some(_: SubscriptionStatus.SubscriptionReady)) =>
+        Redirect(onboarding.routes.SubscriptionController.checkYourDetails())
 
-          case (_, Some(_: SubscriptionStatus.SubscriptionReady)) =>
-            Redirect(onboarding.routes.SubscriptionController.checkYourDetails())
+      case (_, Some(i: SubscriptionStatus.TryingToGetIndividualsFootprint)) =>
+        // this is not the first time a person with individual insufficient confidence level has come to start
+        Redirect(onboarding.routes.InsufficientConfidenceLevelController.doYouHaveNINO())
 
-          case (_, Some(i: SubscriptionStatus.TryingToGetIndividualsFootprint)) =>
-            // this is not the first time a person with individual insufficient confidence level has come to start
-            Redirect(onboarding.routes.InsufficientConfidenceLevelController.doYouHaveNINO())
+      case (_, Some(_: RegistrationStatus.RegistrationReady)) =>
+        Redirect(onboarding.routes.RegistrationController.checkYourAnswers())
 
-          case (_, Some(_: RegistrationStatus.RegistrationReady)) =>
-            Redirect(onboarding.routes.RegistrationController.checkYourAnswers())
+      case (_, Some(_: RegistrationStatus.IndividualSupplyingInformation)) =>
+        Redirect(onboarding.routes.RegistrationController.selectEntityType())
 
-          case (_, Some(_: RegistrationStatus.IndividualSupplyingInformation)) =>
-            Redirect(onboarding.routes.RegistrationController.selectEntityType())
+      case (_, Some(_: RegistrationStatus.IndividualMissingEmail)) =>
+        Redirect(onboarding.email.routes.RegistrationEnterEmailController.enterEmail())
 
-          case (_, Some(_: RegistrationStatus.IndividualMissingEmail)) =>
-            Redirect(onboarding.email.routes.RegistrationEnterEmailController.enterEmail())
+      case (_, Some(RegistrationStatus.IndividualWantsToRegisterTrust(_))) =>
+        Redirect(onboarding.routes.RegistrationController.selectEntityType())
 
-          case (_, Some(RegistrationStatus.IndividualWantsToRegisterTrust(_))) =>
-            Redirect(onboarding.routes.RegistrationController.selectEntityType())
+      case (_, Some(SubscriptionStatus.DeterminingIfOrganisationIsTrust(ggCredId, _, _))) =>
+        handleNonTrustOrganisation(ggCredId, None)
 
-          case (_, Some(SubscriptionStatus.DeterminingIfOrganisationIsTrust(ggCredId, _, _))) =>
-            handleNonTrustOrganisation(ggCredId, None)
+      case (_, Some(NonGovernmentGatewayJourney)) =>
+        Redirect(routes.StartController.weOnlySupportGG())
 
-          case (_, Some(NonGovernmentGatewayJourney)) =>
-            Redirect(routes.StartController.weOnlySupportGG())
+      case (RetrievedUserType.Subscribed(cgtReference, ggCredId), _) =>
+        handleSubscribedUser(cgtReference, ggCredId)
 
-          case (RetrievedUserType.Subscribed(cgtReference, ggCredId), _) =>
-            handleSubscribedUser(cgtReference, ggCredId)
+      case (
+          RetrievedUserType.IndividualWithInsufficientConfidenceLevel(maybeNino, maybeSautr, ggEmail, ggCredId),
+          None
+          ) =>
+        // this is the first time a person with individual insufficient confidence level has come to start
+        handleInsufficientConfidenceLevel(maybeNino, maybeSautr, ggEmail, ggCredId)
 
-          case (
-              RetrievedUserType.IndividualWithInsufficientConfidenceLevel(maybeNino, maybeSautr, ggEmail, ggCredId),
-              None
-              ) =>
-            // this is the first time a person with individual insufficient confidence level has come to start
-            handleInsufficientConfidenceLevel(maybeNino, maybeSautr, ggEmail, ggCredId)
+      case (
+          i: RetrievedUserType.Individual,
+          Some(SubscriptionStatus.SubscriptionMissingData(bpr, enteredEmail, _))
+          ) =>
+        handleSubscriptionMissingData(bpr, i.email, enteredEmail, i.ggCredId)
 
-          case (
-              i: RetrievedUserType.Individual,
-              Some(SubscriptionStatus.SubscriptionMissingData(bpr, enteredEmail, _))
-              ) =>
-            handleSubscriptionMissingData(bpr, i.email, enteredEmail, i.ggCredId)
+      case (
+          i: RetrievedUserType.IndividualWithInsufficientConfidenceLevel,
+          Some(SubscriptionStatus.SubscriptionMissingData(bpr, enteredEmail, _))
+          ) =>
+        handleSubscriptionMissingData(bpr, i.email, enteredEmail, i.ggCredId)
 
-          case (
-              i: RetrievedUserType.IndividualWithInsufficientConfidenceLevel,
-              Some(SubscriptionStatus.SubscriptionMissingData(bpr, enteredEmail, _))
-              ) =>
-            handleSubscriptionMissingData(bpr, i.email, enteredEmail, i.ggCredId)
+      case (t: RetrievedUserType.Trust, Some(SubscriptionStatus.SubscriptionMissingData(bpr, enteredEmail, _))) =>
+        handleSubscriptionMissingData(bpr, t.email, enteredEmail, t.ggCredId)
 
-          case (t: RetrievedUserType.Trust, Some(SubscriptionStatus.SubscriptionMissingData(bpr, enteredEmail, _))) =>
-            handleSubscriptionMissingData(bpr, t.email, enteredEmail, t.ggCredId)
+      case (
+          t: RetrievedUserType.OrganisationUnregisteredTrust,
+          Some(SubscriptionStatus.SubscriptionMissingData(bpr, enteredEmail, _))
+          ) =>
+        handleSubscriptionMissingData(bpr, t.email, enteredEmail, t.ggCredId)
 
-          case (
-              t: RetrievedUserType.OrganisationUnregisteredTrust,
-              Some(SubscriptionStatus.SubscriptionMissingData(bpr, enteredEmail, _))
-              ) =>
-            handleSubscriptionMissingData(bpr, t.email, enteredEmail, t.ggCredId)
+      case (i: RetrievedUserType.Individual, None) =>
+        buildIndividualSubscriptionData(i, i.email, i.ggCredId)
 
-          case (i: RetrievedUserType.Individual, None) =>
-            buildIndividualSubscriptionData(i, i.email, i.ggCredId)
+      case (t: RetrievedUserType.Trust, _) =>
+        buildTrustSubscriptionData(t, t.email, t.ggCredId)
 
-          case (t: RetrievedUserType.Trust, _) =>
-            buildTrustSubscriptionData(t, t.email, t.ggCredId)
+      case (RetrievedUserType.OrganisationUnregisteredTrust(_, ggCredId), _) =>
+        handleNonTrustOrganisation(ggCredId, None)
 
-          case (RetrievedUserType.OrganisationUnregisteredTrust(_, ggCredId), _) =>
-            handleNonTrustOrganisation(ggCredId, None)
-
-          case (u: RetrievedUserType.NonGovernmentGatewayRetrievedUser, _) =>
-            handleNonGovernmentGatewayUser(u)
-        }
+      case (u: RetrievedUserType.NonGovernmentGatewayRetrievedUser, _) =>
+        handleNonGovernmentGatewayUser(u)
     }
 
   }
@@ -220,9 +212,12 @@ class StartController @Inject()(
     val result = for {
       subscribedDetails <- subscriptionService.getSubscribedDetails(cgtReference)
       _ <- EitherT(
-            updateSession(sessionStore, request)(_.copy(
-              userType      = request.authenticatedRequest.userType,
-              journeyStatus = Some(Subscribed(subscribedDetails, ggCredId))))
+            updateSession(sessionStore, request)(
+              _.copy(
+                userType      = request.authenticatedRequest.userType,
+                journeyStatus = Some(Subscribed(subscribedDetails, ggCredId))
+              )
+            )
           )
     } yield ()
 
@@ -239,7 +234,7 @@ class StartController @Inject()(
     implicit request: RequestWithSessionDataAndRetrievedData[_]
   ): Future[Result] = {
     val newSessionData =
-      request.sessionData.flatMap(_.journeyStatus) match {
+      request.sessionData.journeyStatus match {
         case Some(d: SubscriptionStatus.DeterminingIfOrganisationIsTrust) => d
         case _                                                            => SubscriptionStatus.DeterminingIfOrganisationIsTrust(ggCredId, None, None)
       }
@@ -363,7 +358,7 @@ class StartController @Inject()(
                 _ =>
                   updateSession(sessionStore, request)(
                     _.copy(
-                      userType      = request.authenticatedRequest.userType,
+                      userType = request.authenticatedRequest.userType,
                       journeyStatus =
                         Some(SubscriptionStatus.SubscriptionMissingData(bprWithTrustName._1, None, ggCredId)),
                       needMoreDetailsDetails = Some(

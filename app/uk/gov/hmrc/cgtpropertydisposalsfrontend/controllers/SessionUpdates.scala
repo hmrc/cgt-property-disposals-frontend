@@ -64,7 +64,7 @@ object SessionUpdates {
 
     implicit def requestWithSessionDataAndRetrievedDataInstance[A]
       : SessionProvider[RequestWithSessionDataAndRetrievedData[A]] =
-      instance(_.sessionData.getOrElse(SessionData.empty))
+      instance(_.sessionData)
 
     implicit def requestWithSubscriptionDetails[A]: SessionProvider[RequestWithSubscriptionReady[A]] =
       instance(_.sessionData)
