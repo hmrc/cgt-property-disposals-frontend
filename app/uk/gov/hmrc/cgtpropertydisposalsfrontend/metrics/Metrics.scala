@@ -60,4 +60,12 @@ class Metrics @Inject() (metrics: com.kenshoo.play.metrics.Metrics) {
 
   val ivGetFailedJourneyStatusErrorCounter: Counter = counter("iv.get-failed-journey-status.errors.count")
 
+  val accessWithWrongGGAccountCounter: Counter = counter("access-with-wrong-gg-account.count")
+
+  val individualWantingToRegisterTrustCounter: Counter = counter("individual-wanting-to-register-trust.count")
+
+  val unregisteredTrustCounter: Counter = counter("unregistered-trust.count")
+
+  val nonTrustOrganisationCounter: Counter = counter("non-trust-organisation.count")
+
 }
