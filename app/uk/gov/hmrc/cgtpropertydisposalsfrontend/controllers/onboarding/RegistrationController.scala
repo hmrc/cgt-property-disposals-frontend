@@ -27,6 +27,7 @@ import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.TryingToGetIndividualsFootprint
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, RegistrationStatus, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
@@ -52,6 +53,7 @@ class RegistrationController @Inject()(
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
   subscriptionService: SubscriptionService,
+  metrics: Metrics,
   selectEntityTypePage: views.html.onboarding.registration.select_entity_type,
   wrongGGAccountForTrustPage: views.html.onboarding.wrong_gg_account_for_trust,
   enterNamePage: views.html.onboarding.name.enter_name,
@@ -116,6 +118,7 @@ class RegistrationController @Inject()(
                     ggCredId
                   ) -> name.routes.RegistrationEnterIndividualNameController.enterIndividualName()
                 case EntityType.Trust =>
+                  metrics.individualWantingToRegisterTrustCounter.inc()
                   RegistrationStatus.IndividualWantsToRegisterTrust(ggCredId) ->
                     routes.RegistrationController.wrongGGAccountForTrusts
               }

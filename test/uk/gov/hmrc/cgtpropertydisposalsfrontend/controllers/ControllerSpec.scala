@@ -22,6 +22,7 @@ import akka.stream.Materializer
 import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
+import play.api.inject.{Binding, bind}
 import play.api.i18n.{Lang, MessagesApi}
 import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
 import play.api.mvc.{Call, Result}
@@ -29,6 +30,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import play.api.{Application, Configuration, Play}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.{Metrics, MockMetrics}
 
 import scala.concurrent.Future
 import scala.reflect.ClassTag
@@ -39,20 +41,24 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
 
   lazy val additionalConfig = Configuration()
 
-  def buildFakeApplication(): Application =
+  def buildFakeApplication(): Application = {
+    val metricsBinding: GuiceableModule = bind[Metrics].toInstance(MockMetrics.metrics)
+
     new GuiceApplicationBuilder()
       .configure(
         Configuration(
           ConfigFactory.parseString(
             """
-              | metrics.enabled = false
+              | metrics.jvm = false
+              | metrics.logback = false
           """.stripMargin
           )
         ) ++ additionalConfig
       )
       .disable[uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore]
-      .overrides(overrideBindings: _*)
+      .overrides(metricsBinding :: overrideBindings: _*)
       .build()
+  }
 
   lazy val fakeApplication: Application = buildFakeApplication()
 

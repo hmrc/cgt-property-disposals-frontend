@@ -26,6 +26,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.iv.IvErrorStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -45,6 +46,7 @@ class IvController @Inject()(
   val errorHandler: ErrorHandler,
   val config: Configuration,
   ivService: IvService,
+  metrics: Metrics,
   cc: MessagesControllerComponents,
   failedIvPage: views.html.onboarding.iv.failed_iv,
   failedMatchingPage: views.html.onboarding.iv.failed_matching,
@@ -89,16 +91,35 @@ class IvController @Inject()(
             logger.warn("Could not check IV journey error status", e)
             Redirect(routes.IvController.getTechnicalIssue())
           }, {
-            case IvErrorStatus.Incomplete           => Redirect(routes.IvController.getTechnicalIssue())
-            case IvErrorStatus.FailedMatching       => Redirect(routes.IvController.getFailedMatching())
-            case IvErrorStatus.FailedIV             => Redirect(routes.IvController.getFailedIV())
-            case IvErrorStatus.InsufficientEvidence => Redirect(routes.IvController.getInsufficientEvidence())
-            case IvErrorStatus.LockedOut            => Redirect(routes.IvController.getLockedOut())
-            case IvErrorStatus.UserAborted          => Redirect(routes.IvController.getUserAborted())
-            case IvErrorStatus.Timeout              => Redirect(routes.IvController.getTimedOut())
-            case IvErrorStatus.TechnicalIssue       => Redirect(routes.IvController.getTechnicalIssue())
-            case IvErrorStatus.PreconditionFailed   => Redirect(routes.IvController.getPreconditionFailed())
+            case IvErrorStatus.Incomplete =>
+              metrics.ivIncompleteCounter.inc()
+              Redirect(routes.IvController.getTechnicalIssue())
+            case IvErrorStatus.FailedMatching =>
+              metrics.ivFailedMatchingCounter.inc()
+              Redirect(routes.IvController.getFailedMatching())
+            case IvErrorStatus.FailedIV =>
+              metrics.ivFailedIVCounter.inc()
+              Redirect(routes.IvController.getFailedIV())
+            case IvErrorStatus.InsufficientEvidence =>
+              metrics.ivInsufficientEvidenceCounter.inc()
+              Redirect(routes.IvController.getInsufficientEvidence())
+            case IvErrorStatus.LockedOut =>
+              metrics.ivLockedOutCounter.inc()
+              Redirect(routes.IvController.getLockedOut())
+            case IvErrorStatus.UserAborted =>
+              metrics.ivUserAbortedCounter.inc()
+              Redirect(routes.IvController.getUserAborted())
+            case IvErrorStatus.Timeout =>
+              metrics.ivTimeoutCounter.inc()
+              Redirect(routes.IvController.getTimedOut())
+            case IvErrorStatus.TechnicalIssue =>
+              metrics.ivTechnicalIssueCounter.inc()
+              Redirect(routes.IvController.getTechnicalIssue())
+            case IvErrorStatus.PreconditionFailed =>
+              metrics.ivPreconditionFailedCounter.inc()
+              Redirect(routes.IvController.getPreconditionFailed())
             case IvErrorStatus.Unknown(value) =>
+              metrics.ivUnknownErrorCounter.inc()
               logger.warn(s"Received unknown error response status from IV: $value")
               Redirect(routes.IvController.getTechnicalIssue())
           }
