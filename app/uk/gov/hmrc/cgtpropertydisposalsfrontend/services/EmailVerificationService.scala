@@ -22,6 +22,7 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.{CONFLICT, CREATED}
 import play.api.mvc.Call
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.EmailVerificationConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
@@ -55,13 +56,16 @@ object EmailVerificationService {
 }
 
 @Singleton
-class EmailVerificationServiceImpl @Inject()(connector: EmailVerificationConnector)(implicit ec: ExecutionContext)
+class EmailVerificationServiceImpl @Inject()(connector: EmailVerificationConnector, metrics: Metrics)(implicit ec: ExecutionContext)
     extends EmailVerificationService {
 
   def verifyEmail(email: Email, name: ContactName, continueCall: Call)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, EmailVerificationResponse] =
+  ): EitherT[Future, Error, EmailVerificationResponse] = {
+    val timer = metrics.emailVerificationTimer.time()
+
     connector.verifyEmail(email, name, continueCall).subflatMap { response =>
+    timer.close()
       response.status match {
         case CREATED =>
           Right(EmailVerificationRequested)
@@ -70,8 +74,10 @@ class EmailVerificationServiceImpl @Inject()(connector: EmailVerificationConnect
           Right(EmailAlreadyVerified)
 
         case other =>
+          metrics.emailVerificationErrorCounter.inc()
           Left(Error(s"Call to verify email came back with status $other"))
       }
     }
+  }
 
 }

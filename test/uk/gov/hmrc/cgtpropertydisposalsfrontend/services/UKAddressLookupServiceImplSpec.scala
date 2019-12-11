@@ -23,6 +23,7 @@ import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsNumber, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.AddressLookupConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.MockMetrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{AddressLookupResult, Postcode}
@@ -43,7 +44,7 @@ class UKAddressLookupServiceImplSpec extends WordSpec with Matchers with MockFac
       .expects(expectedPostcode, filter, *)
       .returning(EitherT.fromEither[Future](result))
 
-  val service = new UKAddressLookupServiceImpl(mockConnector)
+  val service = new UKAddressLookupServiceImpl(mockConnector, MockMetrics.metrics)
 
   "AddressLookupServiceImpl" when {
 
