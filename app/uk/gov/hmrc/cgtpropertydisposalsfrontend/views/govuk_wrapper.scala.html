@@ -19,6 +19,7 @@
 @import cats.instances.string._
 @import cats.syntax.eq._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{routes => controllerRoutes}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
     govUkTemplate: views.html.layouts.GovUkTemplate,
@@ -36,6 +37,7 @@
 
 @(appConfig: ViewConfig,
   title: String,
+  userType: Option[UserType],
   hasErrors: Boolean = false,
   mainClass: Option[String] = None,
   mainDataAttributes: Option[Html] = None,
@@ -56,7 +58,21 @@
       };
       window.jsConfig = window.jsConfig || {};
       window.jsConfig.lang = window.getCookie("PLAY_LANG") || "en";
+      window.jsConfig.gaCustomDimensions = [];
     </script>
+
+    @if(appConfig.gaUserTypeDimension.nonEmpty) {
+      <script>
+        window.jsConfig.gaCustomDimensions.push({
+          name: "@{appConfig.gaUserTypeDimension}",
+          value: "@{userType match {
+            case Some(UserType.Individual) => "indvidual"
+            case Some(UserType.Organisation) => "organisation"
+            case _ => "anonymous"
+          }}"
+        })
+      </script>
+    }
     @if(withSignOutLink || withAccount) {
         <script>
               window.jsConfig.timeoutEnabled = true;

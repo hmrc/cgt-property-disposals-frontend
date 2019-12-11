@@ -32,7 +32,7 @@
 
 @title = @{messages("subscribed.title")}
 
-@mainTemplate(title = title) {
+@mainTemplate(title = title, userType = request.sessionData.flatMap(_.userType)) {
   @pageHeading(title, Some(messages("subscription.caption")))
   <p>@Html(messages(s"subscribed.${affinity}.p2", accountDetails.cgtReference.value))</p>
   <p>@messages(s"subscribed.${affinity}.p3")</p>

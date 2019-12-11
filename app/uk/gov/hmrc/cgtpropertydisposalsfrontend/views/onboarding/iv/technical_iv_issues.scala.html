@@ -29,7 +29,7 @@
 
 @title = @{messages("iv.technicalIssue.title")}
 
-@mainTemplate(title = title) {
+@mainTemplate(title = title, userType = request.sessionData.flatMap(_.userType)) {
 
  @pageHeading(title)
  <p>@messages("iv.technicalIssue.p")</p>

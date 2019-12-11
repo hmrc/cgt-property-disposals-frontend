@@ -26,7 +26,7 @@
 
 @title = @{messages("iv.preconditionFailed.title")}
 
-@mainTemplate(title = title) {
+@mainTemplate(title = title, userType = request.sessionData.flatMap(_.userType)) {
 
   @pageHeading(title)
   <p>@messages("iv.preconditionFailed.p1")</p>

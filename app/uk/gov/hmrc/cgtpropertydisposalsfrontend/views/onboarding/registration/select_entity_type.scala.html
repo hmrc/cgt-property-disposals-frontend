@@ -41,7 +41,7 @@
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @options = @{List(EntityType.Trust, EntityType.Individual).map(toMessage)}
 
-@mainTemplate(title = title, hasErrors = hasErrors) {
+@mainTemplate(title = title, userType = request.sessionData.flatMap(_.userType), hasErrors = hasErrors) {
 
   @backLinkComponent(backLink)
   @if(hasErrors) {

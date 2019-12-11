@@ -27,7 +27,7 @@
 
 @title = @{messages("weOnlySupportGG.title")}
 
-@mainTemplate(title = title) {
+@mainTemplate(title = title, userType = request.sessionData.flatMap(_.userType)) {
 
   @pageHeading(title)
 

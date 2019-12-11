@@ -27,7 +27,7 @@
 
 @title = @{messages("alreadySubscribedWithDifferentGGAccount.title")}
 
-@mainTemplate(title = title) {
+@mainTemplate(title = title, userType = request.sessionData.flatMap(_.userType)) {
    @pageHeading(title)
    <p>
     @messages("alreadySubscribedWithDifferentGGAccount.p")

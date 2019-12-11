@@ -43,7 +43,7 @@
 
 @labelWithCaption = @{Html(s"""<span class="heading-secondary">${messages(if (showAccountMenu) "account.caption" else "subscription.caption")}</span>$title""")}
 
-@mainTemplate(title = title, hasErrors = hasErrors, withSignOutLink = !showAccountMenu, accountMenu = Some(menu)) {
+@mainTemplate(title = title, userType = request.sessionData.flatMap(_.userType), hasErrors = hasErrors, withSignOutLink = !showAccountMenu, accountMenu = Some(menu)) {
 
  @backLink.map(link => backLinkComponent(link))
 

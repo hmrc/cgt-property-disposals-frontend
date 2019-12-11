@@ -27,7 +27,7 @@
 @(backLink: Call)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @title = @{messages("reportCorpTax.title")}
-@mainTemplate(title = title) {
+@mainTemplate(title = title, userType = request.sessionData.flatMap(_.userType)) {
   @backLinkComponent(backLink)
   @pageHeading(title)
   <p>

@@ -39,7 +39,7 @@
 @trnKey = @{"trn"}
 @trustNameKey = @{"trustName"}
 
-@mainTemplate(title = title, hasErrors = hasErrors) {
+@mainTemplate(title = title, userType = request.sessionData.flatMap(_.userType), hasErrors = hasErrors) {
 
  @backLinkComponent(backLink)
 

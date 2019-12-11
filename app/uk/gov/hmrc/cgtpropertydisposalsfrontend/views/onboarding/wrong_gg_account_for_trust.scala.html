@@ -28,7 +28,7 @@
 
 @title = @{messages("wrongAccountForTrusts.title")}
 
-@mainTemplate(title = title) {
+@mainTemplate(title = title, userType = request.sessionData.flatMap(_.userType)) {
   @backLinkComponent(backLink)
   @pageHeading(title)
   <p>

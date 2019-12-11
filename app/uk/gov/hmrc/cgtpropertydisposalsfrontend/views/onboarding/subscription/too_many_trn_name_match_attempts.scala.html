@@ -26,7 +26,7 @@
 
 @title = @{messages("enterTrn.tooManyAttempts.title")}
 
-@mainTemplate(title = title) {
+@mainTemplate(title = title, userType = request.sessionData.flatMap(_.userType)) {
     @pageHeading(title)
     <p>
     @messages("enterTrn.tooManyAttempts.p1")
