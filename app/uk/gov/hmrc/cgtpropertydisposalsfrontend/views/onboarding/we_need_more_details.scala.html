@@ -32,7 +32,7 @@
   case _ => "individual"
 }}
 
-@mainTemplate(title = title, userType = request.sessionData.flatMap(_.userType)) {
+@mainTemplate(title = title, userType = request.userType) {
  @pageHeading(title, Some(messages("weNeedMoreDetails.caption")))
  <p>
   @messages("weNeedMoreDetails.p")

@@ -99,7 +99,7 @@ class InsufficientConfidenceLevelController @Inject()(
             ).map {
               case Left(e) =>
                 logger.warn("Could not update session after has NINO page submit", e)
-                errorHandler.errorResult(request.sessionData.flatMap(_.userType))
+                errorHandler.errorResult(request.userType)
 
               case Right(_) =>
                 if (hasNino) {
@@ -142,7 +142,7 @@ class InsufficientConfidenceLevelController @Inject()(
               ).map {
                 case Left(e) =>
                   logger.warn("Could not update session after has SAUTR page submit", e)
-                  errorHandler.errorResult(request.sessionData.flatMap(_.userType))
+                  errorHandler.errorResult(request.userType)
 
                 case Right(_) =>
                   if (hasSautr)
@@ -267,7 +267,7 @@ class InsufficientConfidenceLevelController @Inject()(
   )(implicit request: RequestWithSessionData[_]): Result = nameMatchError match {
     case NameMatchError.BackendError(error) =>
       logger.warn("Could not get BPR with entered SA UTR", error)
-      errorHandler.errorResult(request.sessionData.flatMap(_.userType))
+      errorHandler.errorResult(request.userType)
 
     case NameMatchError.ValidationError(formWithErrors) =>
       BadRequest(enterSautrAndNamePage(formWithErrors, routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()))

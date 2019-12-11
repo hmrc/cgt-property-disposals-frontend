@@ -16,9 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding
 
-import julienrf.json.derived
-import play.api.libs.json.OFormat
-
 sealed trait SubscriptionDetail extends Product with Serializable
 
 object SubscriptionDetail {
@@ -28,8 +25,5 @@ object SubscriptionDetail {
   case object Address extends SubscriptionDetail
 
   case object Email extends SubscriptionDetail
-
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[SubscriptionDetail] = derived.oformat[SubscriptionDetail]
 
 }

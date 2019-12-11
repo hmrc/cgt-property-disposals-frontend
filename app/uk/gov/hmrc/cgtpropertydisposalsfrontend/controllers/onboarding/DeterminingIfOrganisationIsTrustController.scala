@@ -106,7 +106,7 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
                 ).map {
                   case Left(e) =>
                     logger.warn("Could not update session data with reporting for trust answer", e)
-                    errorHandler.errorResult(request.sessionData.flatMap(_.userType))
+                    errorHandler.errorResult(request.userType)
 
                 case Right(_) =>
                   if (isReportingForTrust)
@@ -161,7 +161,7 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
               ).map {
                 case Left(e) =>
                   logger.warn("Could not update session data with has TRN answer", e)
-                  errorHandler.errorResult(request.sessionData.flatMap(_.userType))
+                  errorHandler.errorResult(request.userType)
 
                 case Right(_) =>
                   if (hasTrn)
@@ -292,7 +292,7 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
   )(implicit request: RequestWithSessionData[_]): Result = nameMatchError match {
     case NameMatchError.BackendError(error) =>
       logger.warn("Could not get BPR with entered TRN", error)
-      errorHandler.errorResult(request.sessionData.flatMap(_.userType))
+      errorHandler.errorResult(request.userType)
 
     case NameMatchError.ValidationError(formWithErrors) =>
       BadRequest(enterTrnAndNamePage(formWithErrors, routes.DeterminingIfOrganisationIsTrustController.doYouHaveATrn()))

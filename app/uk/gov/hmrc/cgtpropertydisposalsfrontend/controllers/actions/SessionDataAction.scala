@@ -20,7 +20,7 @@ import com.google.inject.{Inject, Singleton}
 import play.api.i18n.MessagesApi
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 
 import scala.concurrent.ExecutionContext
@@ -31,6 +31,7 @@ final case class RequestWithSessionData[A](
 ) extends WrappedRequest[A](authenticatedRequest)
     with PreferredMessagesProvider {
   override def messagesApi: MessagesApi = authenticatedRequest.request.messagesApi
+  val userType: Option[UserType] = sessionData.flatMap(_.userType)
 }
 
 @Singleton

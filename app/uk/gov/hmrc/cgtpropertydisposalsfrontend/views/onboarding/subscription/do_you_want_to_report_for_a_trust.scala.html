@@ -36,7 +36,7 @@
 @title = @{messages("isReportingForATrust.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title, userType = request.sessionData.flatMap(_.userType), hasErrors = hasErrors) {
+@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
 
  @backLinkComponent(backLink)
 

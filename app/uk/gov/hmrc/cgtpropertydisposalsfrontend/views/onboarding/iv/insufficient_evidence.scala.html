@@ -26,7 +26,7 @@
 
 @title = @{messages("iv.insufficientEvidence.title")}
 
-@mainTemplate(title = title, userType = request.sessionData.flatMap(_.userType)) {
+@mainTemplate(title = title, userType = request.userType) {
 
    @pageHeading(title)
   <p>@messages("iv.insufficientEvidence.p1"))</p>

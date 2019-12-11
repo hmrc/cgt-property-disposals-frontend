@@ -39,7 +39,7 @@
 @firstNameKey = @{"firstName"}
 @lastNameKey = @{"lastName"}
 
-@mainTemplate(title = title, userType = request.sessionData.flatMap(_.userType), hasErrors = hasErrors) {
+@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
 
  @backLinkComponent(backLink)
 

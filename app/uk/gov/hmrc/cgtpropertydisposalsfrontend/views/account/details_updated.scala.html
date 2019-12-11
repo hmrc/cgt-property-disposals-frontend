@@ -32,7 +32,7 @@
 
 @title = @{messages(s"account.manageYourDetails.$detailChanged.changed")}
 
-@mainTemplate(title = title, userType = request.sessionData.flatMap(_.userType), withSignOutLink = false, accountMenu = Some(accountMenu(None))) {
+@mainTemplate(title = title, userType = request.userType, withSignOutLink = false, accountMenu = Some(accountMenu(None))) {
 
   @pageHeading(title)
 

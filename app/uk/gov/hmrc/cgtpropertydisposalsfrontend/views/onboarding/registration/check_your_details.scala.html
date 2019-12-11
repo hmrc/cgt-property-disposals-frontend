@@ -45,7 +45,7 @@
 @title = @{messages("registration.title")}
 @label = @{Html(s"""<span class="form-label-bold">${messages("registration.confirmLabel")}</span>""")}
 
-@mainTemplate(title = title, userType = request.sessionData.flatMap(_.userType)) {
+@mainTemplate(title = title, userType = request.userType) {
 
  @pageHeading(title, Some(messages("registration.caption")))
 

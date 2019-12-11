@@ -34,7 +34,7 @@
 
 @title = @{messages(s"account.home.title")}
 
-@mainTemplate(title = title, userType = request.sessionData.flatMap(_.userType), mainClass=Some("full-width"), withSignOutLink = false, accountMenu=Some(accountMenu(Some(AccountMenuItem.Home())))) {
+@mainTemplate(title = title, userType = request.userType, mainClass=Some("full-width"), withSignOutLink = false, accountMenu=Some(accountMenu(Some(AccountMenuItem.Home())))) {
 
  @pageHeading(title, Some(messages("account.caption")), Some(messages("account.home.subtitle", details.cgtReference.value)))
 
