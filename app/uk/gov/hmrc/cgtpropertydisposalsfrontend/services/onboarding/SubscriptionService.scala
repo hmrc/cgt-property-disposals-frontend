@@ -24,6 +24,7 @@ import cats.syntax.eq._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.{CONFLICT, NO_CONTENT, OK}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.onboarding.CGTPropertyDisposalsConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
@@ -58,7 +59,8 @@ trait SubscriptionService {
 }
 
 @Singleton
-class SubscriptionServiceImpl @Inject()(connector: CGTPropertyDisposalsConnector)(implicit ec: ExecutionContext)
+class SubscriptionServiceImpl @Inject()(connector: CGTPropertyDisposalsConnector,
+                                        metrics: Metrics)(implicit ec: ExecutionContext)
     extends SubscriptionService {
 
   override def subscribe(
@@ -81,8 +83,10 @@ class SubscriptionServiceImpl @Inject()(connector: CGTPropertyDisposalsConnector
   ): Either[Error, SubscriptionResponse] =
     if (response.status === OK)
       response.parseJSON[SubscriptionSuccessful]().leftMap(Error(_))
-    else if (response.status === CONFLICT)
+    else if (response.status === CONFLICT) {
+      metrics.accessWithWrongGGAccountCounter.inc()
       Right(AlreadySubscribed)
+    }
     else
       Left(Error(s"call to $description came back with status ${response.status}"))
 

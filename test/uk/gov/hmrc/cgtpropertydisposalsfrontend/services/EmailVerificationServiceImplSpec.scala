@@ -23,6 +23,7 @@ import org.scalatest.{Matchers, WordSpec}
 import play.api.mvc.Call
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.EmailVerificationConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.MockMetrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
@@ -48,7 +49,7 @@ class EmailVerificationServiceImplSpec extends WordSpec with Matchers with MockF
       .expects(expectedEmail, expectedName, expectedContinueCall, *)
       .returning(EitherT.fromEither[Future](result))
 
-  val service = new EmailVerificationServiceImpl(mockConnector)
+  val service = new EmailVerificationServiceImpl(mockConnector, MockMetrics.metrics)
   "EmailVerificationServiceImpl" when {
 
     "verifying emails" must {

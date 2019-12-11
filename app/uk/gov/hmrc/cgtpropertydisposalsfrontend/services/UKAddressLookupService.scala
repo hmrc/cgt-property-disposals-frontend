@@ -28,6 +28,7 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.OK
 import play.api.libs.json.{JsResult, JsValue, Json, Reads}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.AddressLookupConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressLookupResult, Postcode}
@@ -47,22 +48,32 @@ trait UKAddressLookupService {
 }
 
 @Singleton
-class UKAddressLookupServiceImpl @Inject()(connector: AddressLookupConnector)(implicit ec: ExecutionContext)
-    extends UKAddressLookupService {
+class UKAddressLookupServiceImpl @Inject()(connector: AddressLookupConnector, metrics: Metrics)(
+  implicit ec: ExecutionContext
+) extends UKAddressLookupService {
 
   override def lookupAddress(
     postcode: Postcode,
     filter: Option[String]
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, AddressLookupResult] =
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, AddressLookupResult] = {
+    val timer = metrics.postcodeLookupTimer.time()
+
     connector.lookupAddress(postcode, filter).subflatMap { response =>
-      if (response.status === OK)
+      timer.close()
+      if (response.status === OK) {
         response
           .parseJSON[AddressLookupResponse]()
           .flatMap(toAddressLookupResult(_, postcode, filter))
-          .leftMap(Error(_))
-      else
+          .leftMap { e =>
+            metrics.postcodeLookupErrorCounter.inc()
+            Error(e)
+          }
+      } else {
+        metrics.postcodeLookupErrorCounter.inc()
         Left(Error(s"Response to address lookup came back with status ${response.status}"))
+      }
     }
+  }
 
   def toAddressLookupResult(
     r: AddressLookupResponse,

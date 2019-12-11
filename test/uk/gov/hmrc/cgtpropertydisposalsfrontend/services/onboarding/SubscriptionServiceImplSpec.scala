@@ -22,6 +22,7 @@ import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsNumber, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.onboarding.CGTPropertyDisposalsConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.MockMetrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscribedUpdateDetails, SubscriptionDetails}
@@ -36,7 +37,7 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
 
   val mockConnector = mock[CGTPropertyDisposalsConnector]
 
-  val service = new SubscriptionServiceImpl(mockConnector)
+  val service = new SubscriptionServiceImpl(mockConnector, MockMetrics.metrics)
 
   def mockSubscribe(expectedSubscriptionDetails: SubscriptionDetails)(response: Either[Error, HttpResponse]) =
     (mockConnector

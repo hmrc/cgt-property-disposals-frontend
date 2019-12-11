@@ -26,6 +26,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.DeterminingIfOrganisationIsTrust
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, TRN}
@@ -50,6 +51,7 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
   errorHandler: ErrorHandler,
   sessionStore: SessionStore,
   bprNameMatchService: BusinessPartnerRecordNameMatchRetryService,
+  metrics: Metrics,
   doYouWantToReportForATrustPage: views.html.onboarding.subscription.do_you_want_to_report_for_a_trust,
   reportWithCorporateTaxPage: views.html.onboarding.subscription.report_with_corporate_tax,
   doYouHaveATrnPage: views.html.onboarding.subscription.do_you_have_a_trn,
@@ -88,29 +90,32 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
           .bindFromRequest()
           .fold(
             formWithError =>
-              BadRequest(doYouWantToReportForATrustPage(formWithError, controllers.routes.StartController.weNeedMoreDetails())), {
-              isReportingForTrust =>
-                updateSession(sessionStore, request)(
-                  _.copy(
-                    journeyStatus = Some(
-                      DeterminingIfOrganisationIsTrust(
-                        determiningIfOrganisationIsTrust.ggCredId,
-                        Some(isReportingForTrust),
-                        None
-                      )
+              BadRequest(
+                doYouWantToReportForATrustPage(formWithError, controllers.routes.StartController.weNeedMoreDetails())
+              ), { isReportingForTrust =>
+              updateSession(sessionStore, request)(
+                _.copy(
+                  journeyStatus = Some(
+                    DeterminingIfOrganisationIsTrust(
+                      determiningIfOrganisationIsTrust.ggCredId,
+                      Some(isReportingForTrust),
+                      None
                     )
                   )
-                ).map {
-                  case Left(e) =>
-                    logger.warn("Could not update session data with reporting for trust answer", e)
-                    errorHandler.errorResult()
+                )
+              ).map {
+                case Left(e) =>
+                  logger.warn("Could not update session data with reporting for trust answer", e)
+                  errorHandler.errorResult()
 
-                  case Right(_) =>
-                    if (isReportingForTrust)
-                      Redirect(routes.DeterminingIfOrganisationIsTrustController.doYouHaveATrn())
-                    else
-                      Redirect(routes.DeterminingIfOrganisationIsTrustController.reportWithCorporateTax())
-                }
+                case Right(_) =>
+                  if (isReportingForTrust)
+                    Redirect(routes.DeterminingIfOrganisationIsTrustController.doYouHaveATrn())
+                  else {
+                    metrics.nonTrustOrganisationCounter.inc()
+                    Redirect(routes.DeterminingIfOrganisationIsTrustController.reportWithCorporateTax())
+                  }
+              }
             }
           )
       }
@@ -161,8 +166,10 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
                 case Right(_) =>
                   if (hasTrn)
                     Redirect(routes.DeterminingIfOrganisationIsTrustController.enterTrn())
-                  else
+                  else {
+                    metrics.unregisteredTrustCounter.inc()
                     Redirect(routes.DeterminingIfOrganisationIsTrustController.registerYourTrust())
+                  }
               }
             }
           )
