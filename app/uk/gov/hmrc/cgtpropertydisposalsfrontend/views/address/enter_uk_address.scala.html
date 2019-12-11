@@ -17,6 +17,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
   mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -30,7 +31,7 @@
   accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu
 )
 
-@(form: Form[UkAddress], backLink: Call, submit: Call, enterPostcode: Call, showAccountMenu: Boolean)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[UkAddress], backLink: Call, submit: Call, enterPostcode: Call, showAccountMenu: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"address"}
 @line1Key = @{s"${key}-line1"}
@@ -44,7 +45,7 @@
 @menu = {@if(showAccountMenu) { @accountMenu(None) }}
 
 
-@mainTemplate(title = title, hasErrors = hasErrors, withSignOutLink = !showAccountMenu, accountMenu = Some(menu)) {
+@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = !showAccountMenu, accountMenu = Some(menu)) {
 
   @backLinkComponent(backLink)
 

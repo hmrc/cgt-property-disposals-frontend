@@ -23,10 +23,10 @@ sealed trait BusinessPartnerRecordNameMatchDetails extends Product with Serializ
 object BusinessPartnerRecordNameMatchDetails {
 
   final case class IndividualNameWithSaUtrAuditDetails(firstName: String, lastName: String, sautr: String)
-      extends BusinessPartnerRecordNameMatchDetails
+    extends BusinessPartnerRecordNameMatchDetails
 
   final case class TrustNameWithTrnAuditDetails(trustName: String, trn: String)
-      extends BusinessPartnerRecordNameMatchDetails
+    extends BusinessPartnerRecordNameMatchDetails
 
   implicit val format: OFormat[BusinessPartnerRecordNameMatchDetails] = {
     val individualFormat: OFormat[IndividualNameWithSaUtrAuditDetails] =

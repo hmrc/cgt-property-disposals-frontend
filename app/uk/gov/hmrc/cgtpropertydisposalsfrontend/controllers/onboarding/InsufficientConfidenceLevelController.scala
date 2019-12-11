@@ -22,22 +22,23 @@ import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms.{mapping, of}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.InsufficientConfidenceLevelController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.TryingToGetIndividualsFootprint
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.{IndividualNameMatchDetails, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, NameMatchError, UnsuccessfulNameMatchAttempts}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.onboarding.BusinessPartnerRecordNameMatchRetryStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPartnerRecordNameMatchRetryService, OnboardingAuditService}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
@@ -67,8 +68,6 @@ class InsufficientConfidenceLevelController @Inject()(
     with Logging
     with WithAuthAndSessionDataAction
     with SessionUpdates {
-  import InsufficientConfidenceLevelController._
-  import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.toFuture
 
   private def withInsufficientConfidenceLevelUser(
     f: TryingToGetIndividualsFootprint => Future[Result]
@@ -78,10 +77,10 @@ class InsufficientConfidenceLevelController @Inject()(
       case _                                        => Redirect(controllers.routes.StartController.start())
     }
 
-  def doYouHaveNINO(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+  def doYouHaveNINO(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request: RequestWithSessionData[AnyContent] =>
     withInsufficientConfidenceLevelUser {
       case TryingToGetIndividualsFootprint(hasNino, _, _, _) =>
-        val form = hasNino.fold(haveANinoForm)(haveANinoForm.fill)
+        val form                         = hasNino.fold(haveANinoForm)(haveANinoForm.fill)
         Ok(doYouHaveANinoPage(form))
     }
   }
@@ -91,14 +90,16 @@ class InsufficientConfidenceLevelController @Inject()(
       InsufficientConfidenceLevelController.haveANinoForm
         .bindFromRequest()
         .fold(
-          e => BadRequest(doYouHaveANinoPage(e)),
+          e => {
+            BadRequest(doYouHaveANinoPage(e))
+          },
           hasNino =>
             updateSession(sessionStore, request)(
               _.copy(journeyStatus = Some(insufficientConfidenceLevel.copy(hasNino = Some(hasNino))))
             ).map {
               case Left(e) =>
                 logger.warn("Could not update session after has NINO page submit", e)
-                errorHandler.errorResult()
+                errorHandler.errorResult(request.userType)
 
               case Right(_) =>
                 if (hasNino) {
@@ -132,14 +133,16 @@ class InsufficientConfidenceLevelController @Inject()(
         hasSaUtrForm
           .bindFromRequest()
           .fold(
-            e => BadRequest(doYouHaveAnSaUtrPage(e, routes.InsufficientConfidenceLevelController.doYouHaveNINO())),
+            e => {
+              BadRequest(doYouHaveAnSaUtrPage(e, routes.InsufficientConfidenceLevelController.doYouHaveNINO()))
+            },
             hasSautr =>
               updateSession(sessionStore, request)(
                 _.copy(journeyStatus = Some(insufficientConfidenceLevel.copy(hasSautr = Some(hasSautr))))
               ).map {
                 case Left(e) =>
                   logger.warn("Could not update session after has SAUTR page submit", e)
-                  errorHandler.errorResult()
+                  errorHandler.errorResult(request.userType)
 
                 case Right(_) =>
                   if (hasSautr)
@@ -174,7 +177,7 @@ class InsufficientConfidenceLevelController @Inject()(
       }
     }
   }
-  @SuppressWarnings(Array("org.wartremover.warts.NonUnitStatements"))
+
   def enterSautrAndNameSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withInsufficientConfidenceLevelUser { insufficientConfidenceLevel =>
       (insufficientConfidenceLevel.hasNino, insufficientConfidenceLevel.hasSautr) match {
@@ -212,20 +215,21 @@ class InsufficientConfidenceLevelController @Inject()(
     }
   }
 
-  def tooManyAttempts(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withInsufficientConfidenceLevelUser { insufficientConfidenceLevel =>
-      bprNameMatchService
-        .getNumberOfUnsuccessfulAttempts[IndividualNameMatchDetails](
-          insufficientConfidenceLevel.ggCredId
-        )
-        .value
-        .map {
-          case Left(NameMatchError.TooManyUnsuccessfulAttempts()) =>
-            Ok(tooManyUnsuccessfulNameMatchesPage(routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()))
-          case Left(otherNameMatchError) => handleNameMatchError(otherNameMatchError)
-          case Right(_)                  => Redirect(routes.InsufficientConfidenceLevelController.enterSautrAndName())
-        }
-    }
+  def tooManyAttempts(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request: RequestWithSessionData[AnyContent] =>
+      withInsufficientConfidenceLevelUser { insufficientConfidenceLevel =>
+        bprNameMatchService
+          .getNumberOfUnsuccessfulAttempts[IndividualNameMatchDetails](
+            insufficientConfidenceLevel.ggCredId
+          )
+          .value
+          .map {
+            case Left(NameMatchError.TooManyUnsuccessfulAttempts()) =>
+              Ok(tooManyUnsuccessfulNameMatchesPage(routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()))
+            case Left(otherNameMatchError) => handleNameMatchError(otherNameMatchError)
+            case Right(_)                  => Redirect(routes.InsufficientConfidenceLevelController.enterSautrAndName())
+          }
+      }
   }
 
   private def attemptNameMatchAndUpdateSession(
@@ -263,7 +267,7 @@ class InsufficientConfidenceLevelController @Inject()(
   )(implicit request: RequestWithSessionData[_]): Result = nameMatchError match {
     case NameMatchError.BackendError(error) =>
       logger.warn("Could not get BPR with entered SA UTR", error)
-      errorHandler.errorResult()
+      errorHandler.errorResult(request.userType)
 
     case NameMatchError.ValidationError(formWithErrors) =>
       BadRequest(enterSautrAndNamePage(formWithErrors, routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()))
@@ -327,7 +331,6 @@ object InsufficientConfidenceLevelController {
           numberOfUnsuccessfulNameMatchAttempts.unsuccessfulAttempts,
           numberOfUnsuccessfulNameMatchAttempts.maximumAttempts
         )
-
   }
 
 }

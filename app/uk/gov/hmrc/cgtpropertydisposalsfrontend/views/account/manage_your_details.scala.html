@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat.Block
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{SubscribedDetails, SubscriptionDetail}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.account.AccountMenuItem
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -34,7 +35,7 @@
 )
 
 
-@(details: SubscribedDetails)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(details: SubscribedDetails)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @fullName = @{details.name.fold(_.value, n => s"${n.firstName} ${n.lastName}")}
 @title = @{messages("account.manageYourDetails.title", fullName)}
@@ -48,7 +49,7 @@
 
 @changeAccountName = @{details.name.fold(_ => Html(""), _ => Html(messages(s"account.manageYourDetails.individual.p2", appConfig.tellHmrcChangeDetails)))}
 
-@mainTemplate(title = title, withSignOutLink = false, accountMenu=Some(accountMenu(Some(AccountMenuItem.ManageYourDetails())))) {
+@mainTemplate(title = title, userType = request.userType, withSignOutLink = false, accountMenu=Some(accountMenu(Some(AccountMenuItem.ManageYourDetails())))) {
 
  @pageHeading(title, Some(messages("account.caption")))
   @cyaSection(None, Some("no-border")) {

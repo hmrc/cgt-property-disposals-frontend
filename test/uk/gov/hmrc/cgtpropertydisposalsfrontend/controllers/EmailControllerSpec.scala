@@ -55,6 +55,7 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
   val mockUpdateEmail: Option[(Journey, VerificationCompleteJourney, Either[Error, Unit]) => Unit]
 
   val controller: EmailController[Journey, VerificationCompleteJourney]
+  implicit val messagesApi: MessagesApi
 
   val isAmendJourney: Boolean
 

@@ -24,9 +24,10 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Individual, NonGovernmentGatewayUser, Organisation}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{RetrievedUserType, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -34,8 +35,11 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 
-final case class AuthenticatedRequestWithRetrievedData[A](userType: UserType, request: MessagesRequest[A])
-    extends WrappedRequest[A](request)
+final case class AuthenticatedRequestWithRetrievedData[A](
+                                                           journeyUserType: RetrievedUserType,
+                                                           userType: Option[UserType],
+                                                           request: MessagesRequest[A]
+) extends WrappedRequest[A](request)
 
 @Singleton
 class AuthenticatedActionWithRetrievedData @Inject()(
@@ -73,7 +77,8 @@ class AuthenticatedActionWithRetrievedData @Inject()(
               case Right(Some(cgtReference)) =>
                 Right(
                   AuthenticatedRequestWithRetrievedData(
-                    UserType.Subscribed(CgtReference(cgtReference.value), ggCredId),
+                    RetrievedUserType.Subscribed(CgtReference(cgtReference.value), ggCredId),
+                    None,
                     request
                   )
                 )
@@ -84,12 +89,13 @@ class AuthenticatedActionWithRetrievedData @Inject()(
                       if cl < ConfidenceLevel.L200 =>
                     Right(
                       AuthenticatedRequestWithRetrievedData(
-                        UserType.IndividualWithInsufficientConfidenceLevel(
+                        RetrievedUserType.IndividualWithInsufficientConfidenceLevel(
                           maybeNino.map(NINO(_)),
                           maybeSautr.map(SAUTR(_)),
                           maybeEmail.filter(_.nonEmpty).map(Email(_)),
                           ggCredId
                         ),
+                        Some(Individual),
                         request
                       )
                     )
@@ -99,22 +105,23 @@ class AuthenticatedActionWithRetrievedData @Inject()(
                       case _ ~ _ ~ Some(nino) ~ _ ~ maybeEmail ~ _ ~ _ =>
                         Right(
                           AuthenticatedRequestWithRetrievedData(
-                            UserType.Individual(
+                            RetrievedUserType.Individual(
                               Right(NINO(nino)),
                               maybeEmail.filter(_.nonEmpty).map(Email(_)),
                               ggCredId
                             ),
+                            Some(Individual),
                             request
                           )
                         )
                     }
 
                   case _ @_ ~ Some(AffinityGroup.Organisation) ~ _ ~ _ ~ maybeEmail ~ enrolments ~ _ =>
-                      handleOrganisation(request, enrolments, maybeEmail, ggCredId)
+                    handleOrganisation(request, enrolments, maybeEmail, ggCredId)
 
                   case _ @_ ~ otherAffinityGroup ~ _ ~ _ ~ _ ~ _ ~ _ =>
                     logger.warn(s"Got request for unsupported affinity group $otherAffinityGroup")
-                    Left(errorHandler.errorResult()(request))
+                    Left(errorHandler.errorResult(None)(request))
                 }
                 result
             }
@@ -131,12 +138,12 @@ class AuthenticatedActionWithRetrievedData @Inject()(
           case Some(cgtReference) => Future.successful(Right(Some(CgtReference(cgtReference.value))))
           case None =>
             logger.warn(s"CGT identifier value is missing from the enrolment")
-            Future.successful(Left(errorHandler.errorResult()(request)))
+            Future.successful(Left(errorHandler.errorResult(None)(request)))
         }
       case None =>
         subscriptionService
           .hasSubscription()
-          .leftMap(_ => errorHandler.errorResult()(request))
+          .leftMap(_ => errorHandler.errorResult(None)(request))
           .value
     }
 
@@ -146,14 +153,20 @@ class AuthenticatedActionWithRetrievedData @Inject()(
     credentials match {
       case None =>
         logger.warn("No credentials were retrieved")
-        Future.successful(Left(errorHandler.errorResult()(request)))
+        Future.successful(Left(errorHandler.errorResult(None)(request)))
 
       case Some(Credentials(id, "GovernmentGateway")) =>
         f(GGCredId(id))
 
       case Some(Credentials(_, otherProvider)) =>
         Future.successful(
-          Right(AuthenticatedRequestWithRetrievedData(UserType.NonGovernmentGatewayUser(otherProvider), request))
+          Right(
+            AuthenticatedRequestWithRetrievedData(
+              RetrievedUserType.NonGovernmentGatewayRetrievedUser(otherProvider),
+              Some(NonGovernmentGatewayUser),
+              request
+            )
+          )
         )
     }
 
@@ -168,7 +181,8 @@ class AuthenticatedActionWithRetrievedData @Inject()(
       case None =>
         Right(
           AuthenticatedRequestWithRetrievedData(
-            UserType.OrganisationUnregisteredTrust(email.map(Email(_)), ggCredId),
+            RetrievedUserType.OrganisationUnregisteredTrust(email.map(Email(_)), ggCredId),
+            Some(Organisation),
             request
           )
         )
@@ -181,16 +195,17 @@ class AuthenticatedActionWithRetrievedData @Inject()(
               s"Could not find SAUTR identifier for user with trust enrolment $trustEnrolment. " +
                 s"Found identifier keys [${trustEnrolment.identifiers.map(_.key).mkString(",")}]"
             )
-            Left(errorHandler.errorResult()(request))
+            Left(errorHandler.errorResult(Some(Organisation))(request))
           }(
             id =>
               Right(
                 AuthenticatedRequestWithRetrievedData(
-                  UserType.Trust(
+                  RetrievedUserType.Trust(
                     SAUTR(id.value),
                     email.filter(_.nonEmpty).map(Email(_)),
                     ggCredId
                   ),
+                  Some(Organisation),
                   request
                 )
               )

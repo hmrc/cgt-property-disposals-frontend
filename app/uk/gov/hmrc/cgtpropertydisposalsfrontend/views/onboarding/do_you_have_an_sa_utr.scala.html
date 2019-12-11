@@ -17,6 +17,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.SAUTR
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -29,14 +30,14 @@
  backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@(form: Form[Boolean], backLink: Call)(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[Boolean], backLink: Call)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"hasSaUtr"}
 @saUtrKey = @{"saUtr"}
 @title = @{messages("haveAnSaUtr.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title, hasErrors = hasErrors) {
+@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
 
  @backLinkComponent(backLink)
 

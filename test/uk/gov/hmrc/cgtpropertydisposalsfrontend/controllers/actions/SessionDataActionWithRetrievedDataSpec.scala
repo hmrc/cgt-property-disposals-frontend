@@ -27,6 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, NINO}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Individual
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -36,18 +37,21 @@ class SessionDataActionWithRetrievedDataSpec extends ControllerSpec with Session
   lazy val action: SessionDataActionWithRetrievedData =
     new SessionDataActionWithRetrievedData(mockSessionStore, instanceOf[ErrorHandler])
 
+  implicit lazy val messagesApi: MessagesApi = instanceOf[MessagesApi]
+
   "SessionDataActionWithRetrievedData" must {
 
     lazy val messagesRequest =
-      new MessagesRequest(FakeRequest(), instanceOf[MessagesApi])
+      new MessagesRequest(FakeRequest(), messagesApi)
 
     lazy val authenticatedRequest =
       AuthenticatedRequestWithRetrievedData(
-        UserType.Individual(
+        RetrievedUserType.Individual(
           Right(NINO("nino")),
           Some(Email("email")),
           GGCredId("id")
         ),
+        Some(UserType.Individual),
         messagesRequest
       )
 
@@ -57,7 +61,7 @@ class SessionDataActionWithRetrievedDataSpec extends ControllerSpec with Session
       action.invokeBlock(
         authenticatedRequest, { r: RequestWithSessionDataAndRetrievedData[_] =>
           r.messagesApi shouldBe messagesRequest.messagesApi
-          r.sessionData shouldBe Some(sessionData)
+          r.sessionData shouldBe sessionData.copy(userType = Some(Individual))
           Future.successful(Ok)
         }
       )

@@ -58,7 +58,7 @@ class SubscriptionController @Inject()(
     with SessionUpdates {
 
   def checkYourDetails(): Action[AnyContent] =
-    authenticatedActionWithSubscriptionReady { implicit request =>
+    authenticatedActionWithSubscriptionReady { implicit request: RequestWithSubscriptionReady[AnyContent] =>
       Ok(checkYourDetailsPage(request.subscriptionReady.subscriptionDetails))
     }
 
@@ -101,7 +101,7 @@ class SubscriptionController @Inject()(
       result.fold(
         { e =>
           logger.warn("Could not subscribe", e)
-          errorHandler.errorResult()
+          errorHandler.errorResult(request.sessionData.userType)
         }, {
           case SubscriptionSuccessful(cgtReferenceNumber) => {
             logger.info(s"Successfully subscribed with cgt id $cgtReferenceNumber")

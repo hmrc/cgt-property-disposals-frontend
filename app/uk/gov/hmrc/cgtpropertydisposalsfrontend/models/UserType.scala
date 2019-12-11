@@ -16,35 +16,18 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
+import julienrf.json.derived
+import play.api.libs.json.OFormat
 
-sealed trait UserType extends Product with Serializable
+sealed trait UserType
 
 object UserType {
 
-  final case class Individual(
-    id: Either[SAUTR, NINO],
-    email: Option[Email],
-    ggCredId: GGCredId
-  ) extends UserType
+  final case object Individual extends UserType
+  final case object Organisation extends UserType
+  final case object NonGovernmentGatewayUser extends UserType
 
-  final case class Trust(sautr: SAUTR, email: Option[Email], ggCredId: GGCredId) extends UserType
-
-  final case class OrganisationUnregisteredTrust(email: Option[Email], ggCredId: GGCredId) extends UserType
-
-  final case class IndividualWithInsufficientConfidenceLevel(
-    nino: Option[NINO],
-    sautr: Option[SAUTR],
-    email: Option[Email],
-    ggCredId: GGCredId
-  ) extends UserType
-
-  final case class Subscribed(
-    cgtReference: CgtReference,
-    ggCredId: GGCredId
-  ) extends UserType
-
-  final case class NonGovernmentGatewayUser(authProvider: String) extends UserType
+  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
+  implicit val format: OFormat[UserType] = derived.oformat[UserType]
 
 }

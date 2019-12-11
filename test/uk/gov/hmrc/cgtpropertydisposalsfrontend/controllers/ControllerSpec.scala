@@ -80,12 +80,9 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
   def message(messageKey: String, args: Any*)(implicit messagesApi: MessagesApi): String =
     messagesApi(messageKey, args: _*)(Lang.defaultLang)
 
-  private lazy val technicalErrorPageContent: String =
-    instanceOf[ErrorHandler].internalServerErrorTemplate(FakeRequest()).body
-
-  def checkIsTechnicalErrorPage(result: Future[Result]): Unit = {
+  def checkIsTechnicalErrorPage(result: Future[Result])(implicit messagesApi: MessagesApi): Unit = {
     status(result)          shouldBe INTERNAL_SERVER_ERROR
-    contentAsString(result) shouldBe technicalErrorPageContent
+    contentAsString(result) should include(message("global.error.InternalServerError500.title"))
   }
 
   def checkIsRedirect(result: Future[Result], expectedRedirectUrl: String): Unit = {

@@ -33,7 +33,7 @@ import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, RetrievalOps, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, RetrievedUserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import uk.gov.hmrc.http.HeaderCarrier
@@ -64,14 +64,14 @@ class AuthenticatedActionWithRetrievedDataSpec
 
   implicit val ninoFormat: OFormat[NINO]         = Json.format[NINO]
   implicit val sautrFormat: OFormat[SAUTR]       = Json.format[SAUTR]
-  implicit val userTypeFormat: OFormat[UserType] = derived.oformat[UserType]
+  implicit val userTypeFormat: OFormat[RetrievedUserType] = derived.oformat[RetrievedUserType]
 
   def performAction[A](r: FakeRequest[A]): Future[Result] = {
     @SuppressWarnings(Array("org.wartremover.warts.Any"))
     val request = new MessagesRequest[A](r, stub[MessagesApi])
     authenticatedAction.invokeBlock(request, { a: AuthenticatedRequestWithRetrievedData[A] =>
       a.request.messagesApi shouldBe request.messagesApi
-      Future.successful(Ok(Json.toJson(a.userType)))
+      Future.successful(Ok(Json.toJson(a.journeyUserType)))
     })
   }
 
@@ -84,6 +84,8 @@ class AuthenticatedActionWithRetrievedDataSpec
   val cgtEnrolment = Enrolments(
     Set(Enrolment("HMRC-CGT-PD", Seq(EnrolmentIdentifier("CGTPDRef", "XCGT123456789")), "Activated", None))
   )
+
+  implicit lazy val messagesApi: MessagesApi = instanceOf[MessagesApi]
 
   val (ggCredentials, ggCredId) = Credentials("id", "GovernmentGateway") -> GGCredId("id")
 
@@ -103,7 +105,7 @@ class AuthenticatedActionWithRetrievedDataSpec
         val result = performAction(FakeRequest())
 
         status(result)        shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(UserType.NonGovernmentGatewayUser(providerType))
+        contentAsJson(result) shouldBe Json.toJson(RetrievedUserType.NonGovernmentGatewayRetrievedUser(providerType))
       }
 
     }
@@ -121,7 +123,7 @@ class AuthenticatedActionWithRetrievedDataSpec
         val result = performAction(FakeRequest())
 
         status(result)        shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(UserType.Subscribed(CgtReference("XCGT123456789"), GGCredId("id")))
+        contentAsJson(result) shouldBe Json.toJson(RetrievedUserType.Subscribed(CgtReference("XCGT123456789"), GGCredId("id")))
 
       }
     }
@@ -162,7 +164,7 @@ class AuthenticatedActionWithRetrievedDataSpec
         val result = performAction(FakeRequest())
 
         status(result)        shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(UserType.Subscribed(CgtReference("XCGT123456789"), GGCredId("id")))
+        contentAsJson(result) shouldBe Json.toJson(RetrievedUserType.Subscribed(CgtReference("XCGT123456789"), GGCredId("id")))
 
       }
     }
@@ -180,7 +182,7 @@ class AuthenticatedActionWithRetrievedDataSpec
         )
 
         val expectedRetrieval =
-          UserType.Individual(Right(NINO("nino")), None, ggCredId)
+          RetrievedUserType.Individual(Right(NINO("nino")), None, ggCredId)
 
         inSequence {
           mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
@@ -305,7 +307,7 @@ class AuthenticatedActionWithRetrievedDataSpec
 
         status(result) shouldBe OK
         contentAsJson(result) shouldBe Json.toJson(
-          UserType.OrganisationUnregisteredTrust(Some(Email("email")), GGCredId(ggCredentials.providerId))
+          RetrievedUserType.OrganisationUnregisteredTrust(Some(Email("email")), GGCredId(ggCredentials.providerId))
         )
       }
 
@@ -348,7 +350,7 @@ class AuthenticatedActionWithRetrievedDataSpec
 
           val result = performAction(FakeRequest())
           status(result)        shouldBe OK
-          contentAsJson(result) shouldBe Json.toJson(UserType.Trust(sautr, Some(Email("email")), ggCredId))
+          contentAsJson(result) shouldBe Json.toJson(RetrievedUserType.Trust(sautr, Some(Email("email")), ggCredId))
         }
 
       }
@@ -372,7 +374,7 @@ class AuthenticatedActionWithRetrievedDataSpec
 
         val result = performAction(FakeRequest())
         status(result)        shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(UserType.Trust(sautr, None, ggCredId))
+        contentAsJson(result) shouldBe Json.toJson(RetrievedUserType.Trust(sautr, None, ggCredId))
       }
 
     }
@@ -391,7 +393,7 @@ class AuthenticatedActionWithRetrievedDataSpec
       )
 
       val expectedRetrieval =
-        UserType.Individual(Right(NINO("nino")), Some(Email("email")), ggCredId)
+        RetrievedUserType.Individual(Right(NINO("nino")), Some(Email("email")), ggCredId)
 
       "effect the requested action" in {
         mockHasSubscription()(Right(None))
@@ -414,7 +416,7 @@ class AuthenticatedActionWithRetrievedDataSpec
       )
 
       val expectedRetrieval =
-        UserType.Individual(Right(NINO("nino")), None, ggCredId)
+        RetrievedUserType.Individual(Right(NINO("nino")), None, ggCredId)
 
       "effect the requested action" in {
         mockHasSubscription()(Right(None))
@@ -451,7 +453,7 @@ class AuthenticatedActionWithRetrievedDataSpec
               val result = performAction(FakeRequest())
               status(result) shouldBe OK
               contentAsJson(result) shouldBe Json.toJson(
-                UserType.IndividualWithInsufficientConfidenceLevel(
+                RetrievedUserType.IndividualWithInsufficientConfidenceLevel(
                   mayBeNino,
                   None,
                   Some(Email("email")),
@@ -475,7 +477,7 @@ class AuthenticatedActionWithRetrievedDataSpec
           val result = performAction(FakeRequest())
           status(result) shouldBe OK
           contentAsJson(result) shouldBe Json.toJson(
-            UserType.IndividualWithInsufficientConfidenceLevel(
+            RetrievedUserType.IndividualWithInsufficientConfidenceLevel(
               None,
               None,
               None,

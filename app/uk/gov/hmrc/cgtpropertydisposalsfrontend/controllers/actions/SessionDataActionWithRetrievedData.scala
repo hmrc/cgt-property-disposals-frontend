@@ -26,7 +26,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import scala.concurrent.ExecutionContext
 
 final case class RequestWithSessionDataAndRetrievedData[A](
-  sessionData: Option[SessionData],
+  sessionData: SessionData,
   authenticatedRequest: AuthenticatedRequestWithRetrievedData[A]
 ) extends WrappedRequest[A](authenticatedRequest)
     with PreferredMessagesProvider {
@@ -41,7 +41,9 @@ class SessionDataActionWithRetrievedData @Inject()(val sessionStore: SessionStor
   def sessionDataAction[A](
     sessionData: Option[SessionData],
     request: AuthenticatedRequestWithRetrievedData[A]
-  ): RequestWithSessionDataAndRetrievedData[A] =
-    RequestWithSessionDataAndRetrievedData(sessionData, request)
+  ): RequestWithSessionDataAndRetrievedData[A] = {
+    val data: SessionData = sessionData.getOrElse(SessionData.empty).copy(userType = request.userType)
+    RequestWithSessionDataAndRetrievedData(data, request)
+  }
 
 }

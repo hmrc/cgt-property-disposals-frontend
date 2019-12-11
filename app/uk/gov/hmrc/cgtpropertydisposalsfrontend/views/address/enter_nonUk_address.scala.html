@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.NonUkAddress
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -38,7 +39,7 @@
         backLink: Call,
         submit: Call,
         showAccountMenu: Boolean
-        )(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+        )(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"nonUkAddress"}
 @line1Key = @{s"${key}-line1"}
@@ -51,7 +52,7 @@
 @menu = {@if(showAccountMenu) { @accountMenu(None) }}
 
 
-@mainTemplate(title = title, hasErrors = hasErrors, withSignOutLink = !showAccountMenu, accountMenu = Some(menu)) {
+@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = !showAccountMenu, accountMenu = Some(menu)) {
 
   @backLinkComponent(backLink)
 

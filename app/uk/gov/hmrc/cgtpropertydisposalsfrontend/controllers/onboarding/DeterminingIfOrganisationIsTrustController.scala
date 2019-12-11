@@ -29,6 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.Determini
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.DeterminingIfOrganisationIsTrust
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Organisation
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, TRN}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.TrustName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.TrustNameMatchDetails
@@ -90,23 +91,22 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
           .bindFromRequest()
           .fold(
             formWithError =>
-              BadRequest(
-                doYouWantToReportForATrustPage(formWithError, controllers.routes.StartController.weNeedMoreDetails())
-              ), { isReportingForTrust =>
-              updateSession(sessionStore, request)(
-                _.copy(
-                  journeyStatus = Some(
-                    DeterminingIfOrganisationIsTrust(
-                      determiningIfOrganisationIsTrust.ggCredId,
-                      Some(isReportingForTrust),
-                      None
+              BadRequest(doYouWantToReportForATrustPage(formWithError, controllers.routes.StartController.weNeedMoreDetails())), {
+              isReportingForTrust =>
+                updateSession(sessionStore, request)(
+                  _.copy(
+                    journeyStatus = Some(
+                      DeterminingIfOrganisationIsTrust(
+                        determiningIfOrganisationIsTrust.ggCredId,
+                        Some(isReportingForTrust),
+                        None
+                      )
                     )
                   )
-                )
-              ).map {
-                case Left(e) =>
-                  logger.warn("Could not update session data with reporting for trust answer", e)
-                  errorHandler.errorResult()
+                ).map {
+                  case Left(e) =>
+                    logger.warn("Could not update session data with reporting for trust answer", e)
+                    errorHandler.errorResult(request.userType)
 
                 case Right(_) =>
                   if (isReportingForTrust)
@@ -161,7 +161,7 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
               ).map {
                 case Left(e) =>
                   logger.warn("Could not update session data with has TRN answer", e)
-                  errorHandler.errorResult()
+                  errorHandler.errorResult(request.userType)
 
                 case Right(_) =>
                   if (hasTrn)
@@ -292,7 +292,7 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
   )(implicit request: RequestWithSessionData[_]): Result = nameMatchError match {
     case NameMatchError.BackendError(error) =>
       logger.warn("Could not get BPR with entered TRN", error)
-      errorHandler.errorResult()
+      errorHandler.errorResult(request.userType)
 
     case NameMatchError.ValidationError(formWithErrors) =>
       BadRequest(enterTrnAndNamePage(formWithErrors, routes.DeterminingIfOrganisationIsTrustController.doYouHaveATrn()))

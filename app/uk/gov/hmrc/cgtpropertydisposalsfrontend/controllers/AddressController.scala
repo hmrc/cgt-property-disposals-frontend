@@ -25,7 +25,6 @@ import play.api.mvc.{Action, AnyContent, Call, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{RequestWithSessionData, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionDetail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
@@ -87,7 +86,7 @@ trait AddressController[J <: JourneyStatus] {
             updateSession(sessionStore, request)(_.copy(addressLookupResult = None)).map {
               case Left(e) =>
                 logger.warn(s"Could not clear addressLookupResult", e)
-                errorHandler.errorResult()
+                errorHandler.errorResult(request.userType)
               case Right(_) =>
                 Ok(isUkPage(Address.isUkForm, backLinkCall, isUkSubmitCall, isSubscribedJourney))
             }
@@ -237,7 +236,7 @@ trait AddressController[J <: JourneyStatus] {
                       result.fold(
                         { e =>
                           logger.warn(s"Could not do address lookup for postcode", e)
-                          errorHandler.errorResult()
+                          errorHandler.errorResult(request.userType)
                         },
                         r =>
                           if (r.addresses.isEmpty) {
@@ -327,7 +326,7 @@ trait AddressController[J <: JourneyStatus] {
     result.fold(
       { e =>
         logger.warn("Could not update address", e)
-        errorHandler.errorResult()
+        errorHandler.errorResult(request.userType)
       },
       _ => Redirect(continue)
     )

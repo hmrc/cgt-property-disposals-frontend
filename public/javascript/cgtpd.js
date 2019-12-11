@@ -25,6 +25,13 @@
     }
   }
 
+  if (window.jsConfig.gaCustomDimensions.length) {
+    for(var i = 0; i < window.jsConfig.gaCustomDimensions.length; i++) {
+      var dimension = window.jsConfig.gaCustomDimensions[i];
+      sendToGA('set', dimension.name, dimension.value)
+    }
+  }
+
   function textContent(el) {
     return el.textContent.trim().replace(/\r?\n|\r/g, ' - ')
   }
