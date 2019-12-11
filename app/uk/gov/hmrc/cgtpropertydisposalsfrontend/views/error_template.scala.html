@@ -15,11 +15,12 @@
  *@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(govUkWrapper: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.govuk_wrapper)
 
 
-@(pageTitle: String, heading: String, message: String)(implicit request: Request[_], messages: Messages, appConfig: ViewConfig)
+@(userType: Option[UserType], pageTitle: String, heading: String, message: String)(implicit request: Request[_], messages: Messages, appConfig: ViewConfig)
 
 @contentHeader = {
   <h1>@heading</h1>
@@ -29,4 +30,4 @@
   <p>@message</p>
 }
 
-@govUkWrapper(appConfig = appConfig, title = pageTitle, contentHeader = Some(contentHeader), mainContent = mainContent, withAccount = false, userType = None)
+@govUkWrapper(appConfig = appConfig, title = pageTitle, contentHeader = Some(contentHeader), mainContent = mainContent, withAccount = false, userType = userType)

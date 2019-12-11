@@ -28,6 +28,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.DeterminingIfOrganisationIsTrust
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Organisation
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, TRN}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.TrustName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.TrustNameMatchDetails
@@ -103,7 +104,7 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
                 ).map {
                   case Left(e) =>
                     logger.warn("Could not update session data with reporting for trust answer", e)
-                    errorHandler.errorResult()
+                    errorHandler.errorResult(request.sessionData.flatMap(_.userType))
 
                   case Right(_) =>
                     if (isReportingForTrust)
@@ -156,7 +157,7 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
               ).map {
                 case Left(e) =>
                   logger.warn("Could not update session data with has TRN answer", e)
-                  errorHandler.errorResult()
+                  errorHandler.errorResult(request.sessionData.flatMap(_.userType))
 
                 case Right(_) =>
                   if (hasTrn)
@@ -285,7 +286,7 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
   )(implicit request: RequestWithSessionData[_]): Result = nameMatchError match {
     case NameMatchError.BackendError(error) =>
       logger.warn("Could not get BPR with entered TRN", error)
-      errorHandler.errorResult()
+      errorHandler.errorResult(request.sessionData.flatMap(_.userType))
 
     case NameMatchError.ValidationError(formWithErrors) =>
       BadRequest(enterTrnAndNamePage(formWithErrors, routes.DeterminingIfOrganisationIsTrustController.doYouHaveATrn()))

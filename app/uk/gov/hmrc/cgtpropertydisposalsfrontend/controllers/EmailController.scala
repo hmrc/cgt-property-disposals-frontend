@@ -148,7 +148,7 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
                   result.fold(
                     { e =>
                       logger.warn("Could not verify email", e)
-                      errorHandler.errorResult()
+                      errorHandler.errorResult(request.sessionData.flatMap(_.userType))
                     }, {
                       case EmailAlreadyVerified =>
                         Redirect(verifyEmailCall(emailToBeVerified.id))
@@ -195,7 +195,7 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
               logger.warn(
                 s"Received verify email request where id sent ($p) did not match the id in session (${emailToBeVerified.id})"
               )
-              errorHandler.errorResult()
+              errorHandler.errorResult(request.sessionData.flatMap(_.userType))
             } else {
               if (emailToBeVerified.verified) {
                 Redirect(emailVerifiedCall)
@@ -215,7 +215,7 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
                 result.fold(
                   error => {
                     logger.warn(s"Could not update email: $error")
-                    errorHandler.errorResult()
+                    errorHandler.errorResult(request.sessionData.flatMap(_.userType))
                   },
                   _ => Redirect(emailVerifiedCall)
                 )
@@ -240,7 +240,7 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
                   logger.warn(
                     "Email verified endpoint called but email was not verified"
                   )
-                  errorHandler.errorResult()
+                  errorHandler.errorResult(request.sessionData.flatMap(_.userType))
                 }
               }
           }

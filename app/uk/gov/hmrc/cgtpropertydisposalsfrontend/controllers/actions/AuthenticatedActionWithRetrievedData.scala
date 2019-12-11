@@ -121,7 +121,7 @@ class AuthenticatedActionWithRetrievedData @Inject()(
 
                   case _ @_ ~ otherAffinityGroup ~ _ ~ _ ~ _ ~ _ ~ _ =>
                     logger.warn(s"Got request for unsupported affinity group $otherAffinityGroup")
-                    Left(errorHandler.errorResult()(request))
+                    Left(errorHandler.errorResult(None)(request))
                 }
                 result
             }
@@ -138,12 +138,12 @@ class AuthenticatedActionWithRetrievedData @Inject()(
           case Some(cgtReference) => Future.successful(Right(Some(CgtReference(cgtReference.value))))
           case None =>
             logger.warn(s"CGT identifier value is missing from the enrolment")
-            Future.successful(Left(errorHandler.errorResult()(request)))
+            Future.successful(Left(errorHandler.errorResult(None)(request)))
         }
       case None =>
         subscriptionService
           .hasSubscription()
-          .leftMap(_ => errorHandler.errorResult()(request))
+          .leftMap(_ => errorHandler.errorResult(None)(request))
           .value
     }
 
@@ -153,7 +153,7 @@ class AuthenticatedActionWithRetrievedData @Inject()(
     credentials match {
       case None =>
         logger.warn("No credentials were retrieved")
-        Future.successful(Left(errorHandler.errorResult()(request)))
+        Future.successful(Left(errorHandler.errorResult(None)(request)))
 
       case Some(Credentials(id, "GovernmentGateway")) =>
         f(GGCredId(id))
@@ -195,7 +195,7 @@ class AuthenticatedActionWithRetrievedData @Inject()(
               s"Could not find SAUTR identifier for user with trust enrolment $trustEnrolment. " +
                 s"Found identifier keys [${trustEnrolment.identifiers.map(_.key).mkString(",")}]"
             )
-            Left(errorHandler.errorResult()(request))
+            Left(errorHandler.errorResult(Some(Organisation))(request))
           }(
             id =>
               Right(

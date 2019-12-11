@@ -86,7 +86,7 @@ trait AddressController[J <: JourneyStatus] {
             updateSession(sessionStore, request)(_.copy(addressLookupResult = None)).map {
               case Left(e) =>
                 logger.warn(s"Could not clear addressLookupResult", e)
-                errorHandler.errorResult()
+                errorHandler.errorResult(request.sessionData.flatMap(_.userType))
               case Right(_) =>
                 Ok(isUkPage(Address.isUkForm, backLinkCall, isUkSubmitCall, isSubscribedJourney))
             }
@@ -236,7 +236,7 @@ trait AddressController[J <: JourneyStatus] {
                       result.fold(
                         { e =>
                           logger.warn(s"Could not do address lookup for postcode", e)
-                          errorHandler.errorResult()
+                          errorHandler.errorResult(request.sessionData.flatMap(_.userType))
                         },
                         r =>
                           if (r.addresses.isEmpty) {
@@ -326,7 +326,7 @@ trait AddressController[J <: JourneyStatus] {
     result.fold(
       { e =>
         logger.warn("Could not update address", e)
-        errorHandler.errorResult()
+        errorHandler.errorResult(request.sessionData.flatMap(_.userType))
       },
       _ => Redirect(continue)
     )

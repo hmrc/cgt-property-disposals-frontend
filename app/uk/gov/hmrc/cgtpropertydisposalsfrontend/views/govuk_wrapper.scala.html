@@ -66,7 +66,7 @@
         window.jsConfig.gaCustomDimensions.push({
           name: "@{appConfig.gaUserTypeDimension}",
           value: "@{userType match {
-            case Some(UserType.Individual) => "indvidual"
+            case Some(UserType.Individual) => "individual"
             case Some(UserType.Organisation) => "organisation"
             case _ => "anonymous"
           }}"

@@ -17,10 +17,11 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.config
 
 import javax.inject.{Inject, Singleton}
-import play.api.i18n.MessagesApi
+import play.api.i18n.{Messages, MessagesApi}
 import play.api.mvc.Results.InternalServerError
 import play.api.mvc.{Request, Result}
 import play.twirl.api.Html
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.http.FrontendErrorHandler
 
@@ -32,9 +33,14 @@ class ErrorHandler @Inject()(val messagesApi: MessagesApi, error_template: views
   override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(
     implicit request: Request[_]
   ): Html =
-    error_template(pageTitle, heading, message)
+    error_template(None, pageTitle, heading, message)
 
-  def errorResult[R <: Request[_]]()(implicit request: R): Result =
-    InternalServerError(internalServerErrorTemplate)
+  def errorResult[R <: Request[_]](userType: Option[UserType])(implicit request: R): Result =
+    InternalServerError(error_template(
+      userType,
+      Messages("global.error.InternalServerError500.title"),
+      Messages("global.error.InternalServerError500.heading"),
+      Messages("global.error.InternalServerError500.message")
+    ))
 
 }

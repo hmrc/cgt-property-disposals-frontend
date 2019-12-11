@@ -63,7 +63,7 @@ class SubscriptionReadyAction @Inject()(sessionStore: SessionStore, errorHandler
       .map(
         _.leftMap { e =>
           logger.warn("Could not get session data", e)
-          errorHandler.errorResult()(request)
+          errorHandler.errorResult(None)(request)
         }.flatMap { maybeSessionData =>
           (maybeSessionData, maybeSessionData.flatMap(_.journeyStatus)) match {
             case (Some(sessionData), Some(ready: SubscriptionStatus.SubscriptionReady)) =>

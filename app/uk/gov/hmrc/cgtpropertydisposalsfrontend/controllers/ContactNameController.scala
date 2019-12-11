@@ -87,7 +87,7 @@ trait ContactNameController[J <: JourneyStatus] {
               result.fold(
                 { e =>
                   logger.warn(s"Could not update contact name: $e")
-                  errorHandler.errorResult()
+                  errorHandler.errorResult(request.sessionData.flatMap(_.userType))
                 },
                 _ => Redirect(continueCall)
               )

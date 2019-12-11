@@ -134,7 +134,7 @@ class RegistrationController @Inject()(
                   updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newRegistrationStatus))).map {
                     case Left(e) =>
                       logger.warn("Could not update registration status", e)
-                      errorHandler.errorResult()
+                      errorHandler.errorResult(request.sessionData.flatMap(_.userType))
                     case Right(_) =>
                       Redirect(redirectTo)
                   }
@@ -171,7 +171,7 @@ class RegistrationController @Inject()(
         ).map {
           case Left(error) =>
             logger.warn("Could not update session for enter registration email journey", error)
-            errorHandler.errorResult()
+            errorHandler.errorResult(request.sessionData.flatMap(_.userType))
 
           case Right(_) =>
             Redirect(email.routes.RegistrationEnterEmailController.enterEmail())
@@ -185,7 +185,7 @@ class RegistrationController @Inject()(
         updateSession(sessionStore, request)(_.copy(journeyStatus = Some(r))).map {
           case Left(error) =>
             logger.warn("Could not update session for registration ready", error)
-            errorHandler.errorResult()
+            errorHandler.errorResult(request.sessionData.flatMap(_.userType))
 
           case Right(_) =>
             Ok(checkYourDetailsPage(r.registrationDetails))
@@ -240,7 +240,7 @@ class RegistrationController @Inject()(
         result.fold(
           { e =>
             logger.warn("Could not register without id and subscribe", e)
-            errorHandler.errorResult()
+            errorHandler.errorResult(request.sessionData.flatMap(_.userType))
           }, {
             case SubscriptionSuccessful(cgtReferenceNumber) => {
               logger.info(s"Successfully subscribed with cgt id $cgtReferenceNumber")

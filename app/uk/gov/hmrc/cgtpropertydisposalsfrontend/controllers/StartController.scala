@@ -198,7 +198,7 @@ class StartController @Inject()(
     ).map {
       case Left(e) =>
         logger.warn("Could not update session", e)
-        errorHandler.errorResult()
+        errorHandler.errorResult(request.authenticatedRequest.userType)
 
       case Right(_) =>
         Redirect(routes.StartController.weOnlySupportGG())
@@ -224,7 +224,7 @@ class StartController @Inject()(
     result.fold(
       { e =>
         logger.warn("Could not get subscribed details", e)
-        errorHandler.errorResult()
+        errorHandler.errorResult(request.authenticatedRequest.userType)
       },
       _ => Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.routes.HomeController.homepage())
     )
@@ -253,7 +253,7 @@ class StartController @Inject()(
     ).map {
       case Left(e) =>
         logger.warn("Could not update session", e)
-        errorHandler.errorResult()
+        errorHandler.errorResult(request.authenticatedRequest.userType)
 
       case Right(_) =>
         Redirect(routes.StartController.weNeedMoreDetails())
@@ -293,7 +293,7 @@ class StartController @Inject()(
             ).map {
               case Left(e) =>
                 logger.warn("Could not update session with insufficient confidence level", e)
-                errorHandler.errorResult()
+                errorHandler.errorResult(request.authenticatedRequest.userType)
 
               case Right(_) =>
                 Redirect(routes.StartController.weNeedMoreDetails())
@@ -382,7 +382,7 @@ class StartController @Inject()(
     result.fold(
       { e =>
         logger.warn(s"Could not build subscription data for trust with SAUTR ${trust.sautr}", e)
-        errorHandler.errorResult()
+        errorHandler.errorResult(request.authenticatedRequest.userType)
       }, {
         case Left(MissingData.Email) => Redirect(routes.StartController.weNeedMoreDetails())
         case Right(_)                => Redirect(onboarding.routes.SubscriptionController.checkYourDetails())
@@ -456,7 +456,7 @@ class StartController @Inject()(
     result.fold(
       { e =>
         logger.warn("Error while getting subscription details", e)
-        errorHandler.errorResult()
+        errorHandler.errorResult(request.authenticatedRequest.userType)
       }, {
         case Left(missingData) =>
           logger.info(
