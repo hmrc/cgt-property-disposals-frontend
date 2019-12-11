@@ -85,6 +85,8 @@ class AuthenticatedActionWithRetrievedDataSpec
     Set(Enrolment("HMRC-CGT-PD", Seq(EnrolmentIdentifier("CGTPDRef", "XCGT123456789")), "Activated", None))
   )
 
+  implicit lazy val messagesApi: MessagesApi = instanceOf[MessagesApi]
+
   val (ggCredentials, ggCredId) = Credentials("id", "GovernmentGateway") -> GGCredId("id")
 
   "AuthenticatedActionWithRetrievedData" when {

@@ -37,6 +37,8 @@ class SubscriptionReadyActionSpec extends ControllerSpec with SessionSupport {
   lazy val action =
     new SubscriptionReadyAction(mockSessionStore, instanceOf[ErrorHandler])
 
+  implicit lazy val messagesApi: MessagesApi = instanceOf[MessagesApi]
+
   "SubscriptionDetailsAction" must {
 
     val subscriptionDetails = sample[SubscriptionDetails]
@@ -44,7 +46,7 @@ class SubscriptionReadyActionSpec extends ControllerSpec with SessionSupport {
     val ggCredId = sample[GGCredId]
 
     def performAction(sessionData: SessionData, requestUrl: String = "/"): Future[Result] = {
-      val messagesRequest      = new MessagesRequest(FakeRequest("GET", requestUrl), instanceOf[MessagesApi])
+      val messagesRequest      = new MessagesRequest(FakeRequest("GET", requestUrl), messagesApi)
       val authenticatedRequest = AuthenticatedRequest(messagesRequest)
 
       action.invokeBlock(

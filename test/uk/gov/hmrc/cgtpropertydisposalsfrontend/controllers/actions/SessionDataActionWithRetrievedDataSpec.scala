@@ -37,10 +37,12 @@ class SessionDataActionWithRetrievedDataSpec extends ControllerSpec with Session
   lazy val action: SessionDataActionWithRetrievedData =
     new SessionDataActionWithRetrievedData(mockSessionStore, instanceOf[ErrorHandler])
 
+  implicit lazy val messagesApi: MessagesApi = instanceOf[MessagesApi]
+
   "SessionDataActionWithRetrievedData" must {
 
     lazy val messagesRequest =
-      new MessagesRequest(FakeRequest(), instanceOf[MessagesApi])
+      new MessagesRequest(FakeRequest(), messagesApi)
 
     lazy val authenticatedRequest =
       AuthenticatedRequestWithRetrievedData(
