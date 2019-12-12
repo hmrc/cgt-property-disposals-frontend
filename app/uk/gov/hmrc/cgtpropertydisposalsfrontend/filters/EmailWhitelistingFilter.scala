@@ -20,7 +20,7 @@ import akka.stream.Materializer
 import com.google.inject.Inject
 import play.api.Configuration
 import play.api.mvc.Results.Redirect
-import play.api.mvc.{Filter, Request, RequestHeader, Result}
+import play.api.mvc.{Call, Filter, Request, RequestHeader, Result}
 import uk.gov.hmrc.auth.otac.{OtacAuthConnector, OtacAuthorisationFunctions}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
@@ -47,8 +47,12 @@ class EmailWhitelistingFilter @Inject()(
 
   val selfBaseUrl: String = config.underlying.getString("self.url")
 
+  val excludedPaths: Seq[Call] = Seq(
+    Call("GET", uk.gov.hmrc.play.health.routes.HealthController.ping().url)
+  )
+
   override def apply(f: RequestHeader => Future[Result])(rh: RequestHeader): Future[Result] =
-    if (whitelistingEnabled) {
+    if (whitelistingEnabled && !excludedPaths.contains(Call(rh.method, rh.uri))) {
       rh.session
         .get(SessionKeys.otacToken)
         .orElse(rh.queryString.get("p").flatMap(_.headOption))
