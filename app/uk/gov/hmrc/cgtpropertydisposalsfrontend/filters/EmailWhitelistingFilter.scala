@@ -20,7 +20,7 @@ import akka.stream.Materializer
 import com.google.inject.Inject
 import play.api.Configuration
 import play.api.mvc.Results.Redirect
-import play.api.mvc.{Call, Filter, Request, RequestHeader, Result}
+import play.api.mvc.{Call, Filter, RequestHeader, Result}
 import uk.gov.hmrc.auth.otac.{OtacAuthConnector, OtacAuthorisationFunctions}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
@@ -47,8 +47,12 @@ class EmailWhitelistingFilter @Inject()(
 
   val selfBaseUrl: String = config.underlying.getString("self.url")
 
-  val excludedPaths: Seq[Call] = Seq(
-    Call("GET", uk.gov.hmrc.play.health.routes.HealthController.ping().url)
+  lazy val thereIsAProblemCall: Call =
+    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.EmailWhitelistingController.thereIsAProblem()
+
+  lazy val excludedPaths: Seq[Call] = Seq(
+    Call("GET", uk.gov.hmrc.play.health.routes.HealthController.ping().url),
+    Call("GET", thereIsAProblemCall.url)
   )
 
   override def apply(f: RequestHeader => Future[Result])(rh: RequestHeader): Future[Result] =
@@ -74,7 +78,7 @@ class EmailWhitelistingFilter @Inject()(
         }
         .getOrElse {
           logger.warn("Could not find OTAC token for email whitelisting in request")
-          Future.successful(errorHandler.errorResult(None)(Request(rh, "")))
+          Future.successful(Redirect(thereIsAProblemCall))
         }
     } else {
       f(rh)

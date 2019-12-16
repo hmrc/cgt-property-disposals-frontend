@@ -421,3 +421,14 @@ timed-out.title=For your security, we signed you out
 timed-out.p1=This was because you were inactive for too long.
 timed-out.p2=To access your Capital Gains on UK property account, you’ll need to sign in.
 timed-out.button=Sign in
+
+email-whitelisting.problem.title=Sorry, there is a problem
+email-whitelisting.problem.p1=You cannot access the Report and pay Capital Gains Tax trial service at the moment. 
+email-whitelisting.problem.p2=This might be because:
+email-whitelisting.problem.bullet1=there is a technical problem
+email-whitelisting.problem.bullet2=you tried to use the link we emailed to you more than 5 times
+email-whitelisting.problem.bullet3=you typed the URL directly into the browser instead of using the link we emailed to you
+email-whitelisting.problem.bullet4=the trial has ended
+email-whitelisting.problem.p3=You’ll need to email HMRC at <strong class="bold">ddcw-info-cgtpd-g@digital.hmrc.gov.uk</strong> to request access to the service.
+email-whitelisting.problem.p4=You should include your name.
+
