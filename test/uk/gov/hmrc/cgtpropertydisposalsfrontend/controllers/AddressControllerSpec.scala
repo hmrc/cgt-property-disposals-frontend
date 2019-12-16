@@ -254,6 +254,27 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
         status(result)          shouldBe BAD_REQUEST
         contentAsString(result) should include(message("postcode.error.required"))
       }
+
+      "the address postcode contains invalid characters" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
+        }
+        val result = performAction(Seq("address-line1" -> "Some street", "postcode" -> "W1A,2HV"))
+        status(result)          shouldBe BAD_REQUEST
+        contentAsString(result) should include(message("postcode.error.invalidCharacters"))
+      }
+
+      "the address postcode does not have a valid format" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
+        }
+        val result = performAction(Seq("address-line1" -> "Some street", "postcode" -> "ABC123"))
+        status(result)          shouldBe BAD_REQUEST
+        contentAsString(result) should include(message("postcode.error.pattern"))
+      }
+
     }
     "display an error page" when {
 
@@ -590,12 +611,12 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
 
     "show form errors when the postcode isn't valid" in {
       List(
-        "A00A",
-        "AA0A0AAA",
-        "AA0.0AA",
-        "AAA123",
-        "A11AAA"
-      ).foreach { invalidPostcode =>
+        "A00A" -> "postcode.error.pattern",
+        "AA0A0AAA" -> "postcode.error.pattern",
+        "AA0.0AA" -> "postcode.error.invalidCharacters",
+        "AAA123" -> "postcode.error.pattern",
+        "A11AAA" -> "postcode.error.pattern"
+      ).foreach { case (invalidPostcode, errorMessageKey) =>
         withClue(s"For postcode '$invalidPostcode'") {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -604,7 +625,7 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
 
           val result = performAction(Seq("postcode" -> invalidPostcode))
           status(result)          shouldBe BAD_REQUEST
-          contentAsString(result) should include(message("postcode.invalid"))
+          contentAsString(result) should include(message(errorMessageKey))
         }
       }
 
