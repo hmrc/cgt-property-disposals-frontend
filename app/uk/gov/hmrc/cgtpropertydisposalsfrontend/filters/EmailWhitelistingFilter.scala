@@ -17,10 +17,14 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.filters
 
 import akka.stream.Materializer
+import cats.Eq
+import cats.instances.boolean._
+import cats.instances.string._
+import cats.syntax.eq._
 import com.google.inject.Inject
 import play.api.Configuration
 import play.api.mvc.Results.Redirect
-import play.api.mvc.{Call, Filter, Request, RequestHeader, Result}
+import play.api.mvc.{Call, Filter, RequestHeader, Result}
 import uk.gov.hmrc.auth.otac.{OtacAuthConnector, OtacAuthorisationFunctions}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
@@ -41,18 +45,30 @@ class EmailWhitelistingFilter @Inject()(
     with OtacAuthorisationFunctions
     with Logging {
 
+  implicit val callEq: Eq[Call] = Eq.fromUniversalEquals[Call]
+
+  def toCall(rh: RequestHeader): Call = Call(rh.method, rh.uri)
+
   val whitelistingEnabled: Boolean = config.underlying.getBoolean("passcodeAuthentication.enabled")
 
   val otacUrl: String = config.underlying.getString("otac.url")
 
   val selfBaseUrl: String = config.underlying.getString("self.url")
 
-  val excludedPaths: Seq[Call] = Seq(
-    Call("GET", uk.gov.hmrc.play.health.routes.HealthController.ping().url)
+  lazy val thereIsAProblemCall: Call =
+    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.EmailWhitelistingController.thereIsAProblem()
+
+  lazy val whitelistExclusionRules: Seq[RequestHeader => Boolean] = Seq(
+    toCall(_) === Call("GET", uk.gov.hmrc.play.health.routes.HealthController.ping().url),
+    toCall(_) === Call("GET", thereIsAProblemCall.url),
+    rh => rh.method === "GET" && rh.uri.contains(controllers.template.routes.Template.at("").url),
+    rh => rh.method === "GET" && rh.uri.contains(controllers.routes.Assets.at("").url)
   )
 
+  def excludeRequestFromWhitelist(rh: RequestHeader): Boolean = whitelistExclusionRules.exists(_(rh) === true)
+
   override def apply(f: RequestHeader => Future[Result])(rh: RequestHeader): Future[Result] =
-    if (whitelistingEnabled && !excludedPaths.contains(Call(rh.method, rh.uri))) {
+    if (whitelistingEnabled && !excludeRequestFromWhitelist(rh)) {
       rh.session
         .get(SessionKeys.otacToken)
         .orElse(rh.queryString.get("p").flatMap(_.headOption))
@@ -74,7 +90,7 @@ class EmailWhitelistingFilter @Inject()(
         }
         .getOrElse {
           logger.warn("Could not find OTAC token for email whitelisting in request")
-          Future.successful(errorHandler.errorResult(None)(Request(rh, "")))
+          Future.successful(Redirect(thereIsAProblemCall))
         }
     } else {
       f(rh)

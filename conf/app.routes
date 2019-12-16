@@ -4,8 +4,8 @@ GET /start/report-pay-capital-gains-tax-uk-property                         uk.g
 GET /start/report-pay-capital-gains-tax-uk-property/sign-in                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.LandingPageController.signInPage()
 
 GET /exit/cannot-check-details                                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.weOnlySupportGG()
+GET /problem-with-service                                                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailWhitelistingController.thereIsAProblem()
 
-# No mapping in XLS
 GET /start                                                                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.start()
 GET /sign-out-and-register-for-gg                                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.signOutAndRegisterForGG()
 GET /sign-out-and-log-in                                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.signOutAndSignIn()
