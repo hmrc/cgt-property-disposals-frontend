@@ -194,7 +194,8 @@ address-county.error.pattern=County must only include letters, numbers, spaces, 
 
 postcode.error.tooLong=Postcode must be 8 characters or fewer
 postcode.error.required=Enter a postcode
-postcode.error.pattern=Postcode must only include letters, numbers and spaces
+postcode.error.invalidCharacters=Postcode must only include letters, numbers and spaces
+postcode.error.pattern=Enter a real postcode
 postcode.error.noResults=Address not found, you’ll need to follow the link to enter it manually
 filter.error.noResults=Address not found, you’ll need to follow the link to enter it manually
 
