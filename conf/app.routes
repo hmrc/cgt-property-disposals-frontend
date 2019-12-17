@@ -9,7 +9,7 @@ GET /problem-with-service                                                   uk.g
 GET /start                                                                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.start()
 GET /sign-out-and-register-for-gg                                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.signOutAndRegisterForGG()
 GET /sign-out-and-log-in                                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.signOutAndSignIn()
-GET /timed-out                                                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.timedOut()
+GET /exit/we-signed-you-out                                                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.timedOut()
 GET /keep-alive                                                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.keepAlive()
 
 GET  /assets/*file                                                          controllers.Assets.at(path="/public", file)
