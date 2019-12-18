@@ -21,7 +21,7 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, EmptyRetrieval, Retrieval, ~}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{CgtEnrolment, ErrorHandler}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.AuthenticatedActionWithRetrievedData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.SAUTR
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{OnboardingAuditService, SubscriptionService}
@@ -110,7 +110,7 @@ trait AuthSupport {
       None,
       None,
       None,
-      Set(Enrolment("HMRC-CGT-PD", Seq(EnrolmentIdentifier("CGTPDRef", "XCGTP123456789")), "")),
+      Set(Enrolment(CgtEnrolment.enrolmentKey, Seq(EnrolmentIdentifier(CgtEnrolment.enrolmentIdentifier, "XCGTP123456789")), "")),
       Some(Credentials("gg-cred-id", "GovernmentGateway"))
     )
 

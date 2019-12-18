@@ -30,12 +30,12 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{CgtEnrolment, ErrorHandler}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, RetrievalOps, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, RetrievedUserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, RetrievedUserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -62,17 +62,19 @@ class AuthenticatedActionWithRetrievedDataSpec
       .expects(*)
       .returning(EitherT(Future.successful(response)))
 
-  implicit val ninoFormat: OFormat[NINO]         = Json.format[NINO]
-  implicit val sautrFormat: OFormat[SAUTR]       = Json.format[SAUTR]
+  implicit val ninoFormat: OFormat[NINO]                  = Json.format[NINO]
+  implicit val sautrFormat: OFormat[SAUTR]                = Json.format[SAUTR]
   implicit val userTypeFormat: OFormat[RetrievedUserType] = derived.oformat[RetrievedUserType]
 
   def performAction[A](r: FakeRequest[A]): Future[Result] = {
     @SuppressWarnings(Array("org.wartremover.warts.Any"))
     val request = new MessagesRequest[A](r, stub[MessagesApi])
-    authenticatedAction.invokeBlock(request, { a: AuthenticatedRequestWithRetrievedData[A] =>
-      a.request.messagesApi shouldBe request.messagesApi
-      Future.successful(Ok(Json.toJson(a.journeyUserType)))
-    })
+    authenticatedAction.invokeBlock(
+      request, { a: AuthenticatedRequestWithRetrievedData[A] =>
+        a.request.messagesApi shouldBe request.messagesApi
+        Future.successful(Ok(Json.toJson(a.journeyUserType)))
+      }
+    )
   }
 
   val retrievals =
@@ -82,7 +84,7 @@ class AuthenticatedActionWithRetrievedDataSpec
   val emptyEnrolments = Enrolments(Set.empty)
 
   val cgtEnrolment = Enrolments(
-    Set(Enrolment("HMRC-CGT-PD", Seq(EnrolmentIdentifier("CGTPDRef", "XCGT123456789")), "Activated", None))
+    Set(Enrolment(CgtEnrolment.enrolmentKey, Seq(EnrolmentIdentifier(CgtEnrolment.enrolmentIdentifier, "XCGT123456789")), "Activated", None))
   )
 
   implicit lazy val messagesApi: MessagesApi = instanceOf[MessagesApi]
@@ -122,8 +124,10 @@ class AuthenticatedActionWithRetrievedDataSpec
 
         val result = performAction(FakeRequest())
 
-        status(result)        shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(RetrievedUserType.Subscribed(CgtReference("XCGT123456789"), GGCredId("id")))
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe Json.toJson(
+          RetrievedUserType.Subscribed(CgtReference("XCGT123456789"), GGCredId("id"))
+        )
 
       }
     }
@@ -133,7 +137,7 @@ class AuthenticatedActionWithRetrievedDataSpec
       "return an error" in {
 
         val badCgtEnrolment = Enrolments(
-          Set(Enrolment("HMRC-CGT-PD", Seq(EnrolmentIdentifier("XXXX-XXXX", "XCGT123456789")), "Activated", None))
+          Set(Enrolment(CgtEnrolment.enrolmentKey, Seq(EnrolmentIdentifier("XXXX-XXXX", "XCGT123456789")), "Activated", None))
         )
 
         val retrievalsResult = Future successful (
@@ -163,8 +167,10 @@ class AuthenticatedActionWithRetrievedDataSpec
 
         val result = performAction(FakeRequest())
 
-        status(result)        shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(RetrievedUserType.Subscribed(CgtReference("XCGT123456789"), GGCredId("id")))
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe Json.toJson(
+          RetrievedUserType.Subscribed(CgtReference("XCGT123456789"), GGCredId("id"))
+        )
 
       }
     }
@@ -268,26 +274,59 @@ class AuthenticatedActionWithRetrievedDataSpec
 
     }
 
-    "handling agents or unknown affinity groups" must {
+    "handling agents" must {
 
-      "show an error page" in {
-        List(
-          Some(AffinityGroup.Agent),
-          None
-        ).foreach { affinityGroup =>
-          withClue(s"For affinity group $affinityGroup: ") {
-            val retrievalsResult = Future successful (
-              new ~(ConfidenceLevel.L50, affinityGroup) and
-                None and None and None and emptyEnrolments and Some(ggCredentials)
-            )
+      "show an error page" when {
 
-            mockHasSubscription()(Right(None))
-            mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+        "no gg cred id can be found" in {
+          val retrievalsResult = Future successful (
+            new ~(ConfidenceLevel.L50, Some(AffinityGroup.Agent)) and
+              None and None and None and emptyEnrolments and None
+          )
 
-            checkIsTechnicalErrorPage(performAction(FakeRequest()))
-          }
+          mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+
+          checkIsTechnicalErrorPage(performAction(FakeRequest()))
         }
 
+      }
+
+      "allow the request through" when {
+
+        "a gg cred id can be found" in {
+          val retrievalsResult = Future successful (
+            new ~(ConfidenceLevel.L50, Some(AffinityGroup.Agent)) and
+              None and None and None and emptyEnrolments and Some(ggCredentials)
+          )
+
+          val expectedRetrieval = RetrievedUserType.Agent(ggCredId)
+
+          mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+
+          val result = performAction(FakeRequest())
+
+          status(result)        shouldBe OK
+          contentAsJson(result) shouldBe Json.toJson(expectedRetrieval)
+        }
+
+      }
+
+    }
+
+    "handling no affinity group" must {
+
+      "show an error page" in {
+        val retrievalsResult = Future successful (
+          new ~(ConfidenceLevel.L50, None) and
+            None and None and None and emptyEnrolments and Some(ggCredentials)
+        )
+
+        inSequence {
+          mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+          mockHasSubscription()(Right(None))
+        }
+
+        checkIsTechnicalErrorPage(performAction(FakeRequest()))
       }
 
     }
@@ -300,8 +339,10 @@ class AuthenticatedActionWithRetrievedDataSpec
             None and None and Some("email") and emptyEnrolments and Some(ggCredentials)
         )
 
-        mockHasSubscription()(Right(None))
-        mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+        inSequence {
+          mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+          mockHasSubscription()(Right(None))
+        }
 
         val result = performAction(FakeRequest())
 
@@ -320,8 +361,10 @@ class AuthenticatedActionWithRetrievedDataSpec
               and None and None and None and Enrolments(Set(trustEnrolment)) and Some(ggCredentials)
           )
 
-          mockHasSubscription()(Right(None))
-          mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+          inSequence {
+            mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+            mockHasSubscription()(Right(None))
+          }
 
           val result = performAction(FakeRequest())
           checkIsTechnicalErrorPage(result)
@@ -345,8 +388,10 @@ class AuthenticatedActionWithRetrievedDataSpec
               and None and None and Some("email") and Enrolments(Set(trustEnrolment)) and Some(ggCredentials)
           )
 
-          mockHasSubscription()(Right(None))
-          mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+          inSequence {
+            mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+            mockHasSubscription()(Right(None))
+          }
 
           val result = performAction(FakeRequest())
           status(result)        shouldBe OK
@@ -369,8 +414,10 @@ class AuthenticatedActionWithRetrievedDataSpec
             and None and None and Some("") and Enrolments(Set(trustEnrolment)) and Some(ggCredentials)
         )
 
-        mockHasSubscription()(Right(None))
-        mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+        inSequence {
+          mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+          mockHasSubscription()(Right(None))
+        }
 
         val result = performAction(FakeRequest())
         status(result)        shouldBe OK
@@ -396,8 +443,10 @@ class AuthenticatedActionWithRetrievedDataSpec
         RetrievedUserType.Individual(Right(NINO("nino")), Some(Email("email")), ggCredId)
 
       "effect the requested action" in {
-        mockHasSubscription()(Right(None))
-        mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+        inSequence {
+          mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+          mockHasSubscription()(Right(None))
+        }
 
         val result = performAction(FakeRequest())
         status(result)        shouldBe OK
@@ -419,8 +468,10 @@ class AuthenticatedActionWithRetrievedDataSpec
         RetrievedUserType.Individual(Right(NINO("nino")), None, ggCredId)
 
       "effect the requested action" in {
-        mockHasSubscription()(Right(None))
-        mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+        inSequence {
+          mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+          mockHasSubscription()(Right(None))
+        }
 
         val result = performAction(FakeRequest())
         status(result)        shouldBe OK
@@ -447,8 +498,10 @@ class AuthenticatedActionWithRetrievedDataSpec
                   Some(ggCredentials)
               )
 
-              mockHasSubscription()(Right(None))
-              mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+              inSequence {
+                mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+                mockHasSubscription()(Right(None))
+              }
 
               val result = performAction(FakeRequest())
               status(result) shouldBe OK
@@ -471,8 +524,10 @@ class AuthenticatedActionWithRetrievedDataSpec
               None and None and Some("") and emptyEnrolments and Some(ggCredentials)
           )
 
-          mockHasSubscription()(Right(None))
-          mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+          inSequence {
+            mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+            mockHasSubscription()(Right(None))
+          }
 
           val result = performAction(FakeRequest())
           status(result) shouldBe OK

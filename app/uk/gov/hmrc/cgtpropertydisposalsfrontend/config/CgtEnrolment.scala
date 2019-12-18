@@ -14,21 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.config
 
-import julienrf.json.derived
-import play.api.libs.json.OFormat
+object CgtEnrolment {
 
-sealed trait UserType
+  val enrolmentKey = "HMRC-CGT-PD"
 
-object UserType {
+  val enrolmentIdentifier = "CGTPDRef"
 
-  final case object Individual extends UserType
-  final case object Organisation extends UserType
-  final case object NonGovernmentGatewayUser extends UserType
-  final case object Agent extends UserType
-
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[UserType] = derived.oformat[UserType]
+  val delegateAuthRule = "cgt-auth"
 
 }

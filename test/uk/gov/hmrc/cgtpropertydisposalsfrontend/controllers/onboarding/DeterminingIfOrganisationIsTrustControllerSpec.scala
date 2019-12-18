@@ -129,7 +129,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None))
+                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None, None))
                   )
                 )
               )
@@ -148,7 +148,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, Some(true), None))
+                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), None))
                   )
                 )
               )
@@ -183,7 +183,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None))
+                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None, None))
                   )
                 )
               )
@@ -202,7 +202,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None))
+                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None, None))
                   )
                 )
               )
@@ -225,14 +225,14 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None))
+                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None, None))
                   )
                 )
               )
             )
             mockStoreSession(
               SessionData.empty.copy(
-                journeyStatus = Some(DeterminingIfOrganisationIsTrust(ggCredId, Some(true), None))
+                journeyStatus = Some(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), None))
               )
             )(Future.successful(Left(Error(""))))
           }
@@ -251,14 +251,14 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None))
+                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None, None))
                   )
                 )
               )
             )
             mockStoreSession(
               SessionData.empty.copy(
-                journeyStatus = Some(DeterminingIfOrganisationIsTrust(ggCredId, Some(false), None))
+                journeyStatus = Some(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(false), None))
               )
             )(Future.successful(Right(())))
           }
@@ -280,14 +280,14 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None))
+                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None, None))
                   )
                 )
               )
             )
             mockStoreSession(
               SessionData.empty.copy(
-                journeyStatus = Some(DeterminingIfOrganisationIsTrust(ggCredId, Some(true), None))
+                journeyStatus = Some(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), None))
               )
             )(Future.successful(Right(())))
           }
@@ -317,7 +317,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None))
+                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None, None))
                   )
                 )
               )
@@ -334,7 +334,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, Some(true), None))
+                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), None))
                   )
                 )
               )
@@ -355,7 +355,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, Some(false), None))
+                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(false), None))
                   )
                 )
               )
@@ -387,7 +387,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None))
+                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None, None))
                   )
                 )
               )
@@ -404,7 +404,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, Some(false), None))
+                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(false), None))
                   )
                 )
               )
@@ -425,7 +425,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, Some(true), None))
+                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), None))
                   )
                 )
               )
@@ -444,7 +444,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, Some(true), Some(true)))
+                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), Some(true)))
                   )
                 )
               )
@@ -479,7 +479,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None))
+                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None, None))
                   )
                 )
               )
@@ -496,7 +496,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, Some(false), None))
+                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(false), None))
                   )
                 )
               )
@@ -517,7 +517,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, Some(true), None))
+                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), None))
                   )
                 )
               )
@@ -536,7 +536,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, Some(true), None))
+                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), None))
                   )
                 )
               )
@@ -559,14 +559,14 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, Some(true), None))
+                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), None))
                   )
                 )
               )
             )
             mockStoreSession(
               SessionData.empty.copy(
-                journeyStatus = Some(DeterminingIfOrganisationIsTrust(ggCredId, Some(true), Some(true)))
+                journeyStatus = Some(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), Some(true)))
               )
             )(Future.successful(Left(Error(""))))
           }
@@ -585,14 +585,14 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, Some(true), None))
+                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), None))
                   )
                 )
               )
             )
             mockStoreSession(
               SessionData.empty.copy(
-                journeyStatus = Some(DeterminingIfOrganisationIsTrust(ggCredId, Some(true), Some(false)))
+                journeyStatus = Some(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), Some(false)))
               )
             )(Future.successful(Right(())))
           }
@@ -614,14 +614,14 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, Some(true), None))
+                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), None))
                   )
                 )
               )
             )
             mockStoreSession(
               SessionData.empty.copy(
-                journeyStatus = Some(DeterminingIfOrganisationIsTrust(ggCredId, Some(true), Some(true)))
+                journeyStatus = Some(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), Some(true)))
               )
             )(Future.successful(Right(())))
           }
@@ -644,7 +644,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
       "show the register your trust page" when {
 
         "the session data indicates the user is an organisation which is not associated with a registered trust" in {
-          val sessionData = sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None))
+          val sessionData = sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None, None))
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -676,7 +676,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
             mockGetSession(
               Future.successful(
                 Right(
-                  Some(sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, Some(true), hasTrn)))
+                  Some(sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), hasTrn)))
                 )
               )
             )
@@ -706,7 +706,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
                 Right(
                   Some(
                     sessionDataWithStatus(
-                      DeterminingIfOrganisationIsTrust(ggCredId, Some(true), Some(true))
+                      DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), Some(true))
                     )
                   )
                 )
@@ -729,7 +729,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
                 Right(
                   Some(
                     sessionDataWithStatus(
-                      DeterminingIfOrganisationIsTrust(ggCredId, Some(true), Some(true))
+                      DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), Some(true))
                     )
                   )
                 )
@@ -761,7 +761,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
                 Right(
                   Some(
                     sessionDataWithStatus(
-                      DeterminingIfOrganisationIsTrust(ggCredId, Some(true), Some(true))
+                      DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), Some(true))
                     )
                   )
                 )
@@ -788,7 +788,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
                 Right(
                   Some(
                     sessionDataWithStatus(
-                      DeterminingIfOrganisationIsTrust(ggCredId, Some(true), Some(true))
+                      DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), Some(true))
                     )
                   )
                 )
@@ -815,7 +815,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
       val ggCredId = sample[GGCredId]
 
       val expectedSessionData =
-        sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, Some(true), Some(true)))
+        sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), Some(true)))
 
       val previousUnsuccessfulNameMatchAttempt =
         UnsuccessfulNameMatchAttempts(1, 3, sample[TrustNameMatchDetails])
@@ -835,7 +835,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               mockGetSession(
                 Future.successful(
                   Right(
-                    Some(sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, Some(true), hasTrn)))
+                    Some(sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), hasTrn)))
                   )
                 )
               )
@@ -999,7 +999,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               mockAttemptNameMatch(validTrn, validTrustName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
                 Right(bpr)
               )
-              mockStoreSession(sessionDataWithStatus(SubscriptionMissingData(bpr, None, ggCredId)))(
+              mockStoreSession(sessionDataWithStatus(SubscriptionMissingData(bpr, None, ggCredId, None)))(
                 Future.successful(Left(Error("")))
               )
             }
@@ -1035,7 +1035,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               mockAttemptNameMatch(validTrn, validTrustName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
                 Right(bpr)
               )
-              mockStoreSession(sessionDataWithStatus(SubscriptionMissingData(bpr, None, ggCredId)))(
+              mockStoreSession(sessionDataWithStatus(SubscriptionMissingData(bpr, None, ggCredId, None)))(
                 Future.successful(Right(()))
               )
             }
@@ -1094,7 +1094,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
             )(
               Right(bpr)
             )
-            mockStoreSession(sessionDataWithStatus(SubscriptionMissingData(bpr, None, ggCredId)))(
+            mockStoreSession(sessionDataWithStatus(SubscriptionMissingData(bpr, None, ggCredId, None)))(
               Future.successful(Right(()))
             )
           }
@@ -1114,7 +1114,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
       behave like redirectToStartBehaviour(performAction)
 
       val expectedSessionData =
-        sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, Some(true), Some(true)))
+        sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), Some(true)))
 
       "display an error page" when {
 

@@ -34,6 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, TRN}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.TrustName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.TrustNameMatchDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, NameMatchError, UnsuccessfulNameMatchAttempts}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.BusinessPartnerRecordNameMatchRetryService
@@ -98,6 +99,7 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
                     journeyStatus = Some(
                       DeterminingIfOrganisationIsTrust(
                         determiningIfOrganisationIsTrust.ggCredId,
+                        determiningIfOrganisationIsTrust.ggEmail,
                         Some(isReportingForTrust),
                         None
                       )
@@ -218,6 +220,7 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
                       attemptNameMatchAndUpdateSession(
                         trustNameMatchDetails,
                         determiningIfOrganisationIsTrust.ggCredId,
+                        determiningIfOrganisationIsTrust.ggEmail,
                         unsuccessfulAttempts
                       )
                     }
@@ -260,6 +263,7 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
   private def attemptNameMatchAndUpdateSession(
     trustNameMatchDetails: TrustNameMatchDetails,
     ggCredId: GGCredId,
+    ggEmail: Option[Email],
     previousUnsuccessfulAttempt: Option[UnsuccessfulNameMatchAttempts[TrustNameMatchDetails]]
   )(
     implicit hc: HeaderCarrier,
@@ -282,7 +286,7 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
               )
       _ <- EitherT(
             updateSession(sessionStore, request)(
-              _.copy(journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bpr, None, ggCredId)))
+              _.copy(journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bpr, None, ggCredId, ggEmail)))
             )
           ).leftMap[NameMatchError[TrustNameMatchDetails]](NameMatchError.BackendError)
     } yield bpr

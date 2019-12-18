@@ -33,6 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.{IndividualNameMatchDetails, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, NameMatchError, UnsuccessfulNameMatchAttempts}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.onboarding.BusinessPartnerRecordNameMatchRetryStore
@@ -196,6 +197,7 @@ class InsufficientConfidenceLevelController @Inject()(
                         attemptNameMatchAndUpdateSession(
                           individualNameMatchDetails,
                           insufficientConfidenceLevel.ggCredId,
+                          insufficientConfidenceLevel.ggEmail,
                           unsuccessfulAttempts
                         )
                     }
@@ -235,6 +237,7 @@ class InsufficientConfidenceLevelController @Inject()(
   private def attemptNameMatchAndUpdateSession(
     individualNameMatchDetails: IndividualNameMatchDetails,
     ggCredId: GGCredId,
+    ggEmail: Option[Email],
     previousUnsuccessfulAttempt: Option[UnsuccessfulNameMatchAttempts[IndividualNameMatchDetails]]
   )(
     implicit hc: HeaderCarrier,
@@ -257,7 +260,7 @@ class InsufficientConfidenceLevelController @Inject()(
               )
       _ <- EitherT(
             updateSession(sessionStore, request)(
-              _.copy(journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bpr, None, ggCredId)))
+              _.copy(journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bpr, None, ggCredId, ggEmail)))
             )
           ).leftMap[NameMatchError[IndividualNameMatchDetails]](NameMatchError.BackendError)
     } yield bpr
