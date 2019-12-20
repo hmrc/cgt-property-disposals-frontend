@@ -1,4 +1,3 @@
-
 GET /create-account/need-more-details                                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.weNeedMoreDetails()
 GET /start/report-pay-capital-gains-tax-uk-property                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.LandingPageController.landingPage()
 GET /start/report-pay-capital-gains-tax-uk-property/sign-in                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.LandingPageController.signInPage()
@@ -11,5 +10,10 @@ GET /sign-out-and-register-for-gg                                           uk.g
 GET /sign-out-and-log-in                                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.signOutAndSignIn()
 GET /timed-out                                                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.timedOut()
 GET /keep-alive                                                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.keepAlive()
+
+
+POST /upscan                                                                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.UpscanController.callBack()
+POST /upscan-success                                                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.UpscanController.successCallBack()
+POST /upscan-error                                                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.UpscanController.errorCallBack()
 
 GET  /assets/*file                                                          controllers.Assets.at(path="/public", file)
