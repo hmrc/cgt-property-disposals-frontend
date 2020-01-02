@@ -38,8 +38,7 @@ import scala.util.control.NonFatal
 class EmailWhitelistingFilter @Inject()(
   val mat: Materializer,
   val authConnector: OtacAuthConnector,
-  config: Configuration,
-  errorHandler: ErrorHandler
+  config: Configuration
 )(implicit ec: ExecutionContext)
     extends Filter
     with OtacAuthorisationFunctions
@@ -85,7 +84,6 @@ class EmailWhitelistingFilter @Inject()(
                   SessionKeys.redirect  -> s"$selfBaseUrl${routes.StartController.start()}?p=$token",
                   SessionKeys.otacToken -> token
                 )(rh)
-
           }
         }
         .getOrElse {
