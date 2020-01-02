@@ -27,7 +27,6 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressLookupResult, Country, Postcode}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionDetail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
@@ -37,7 +36,11 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with AuthSupport with SessionSupport {
+trait AddressControllerSpec[J <: JourneyStatus]
+    extends ControllerSpec
+    with AuthSupport
+    with SessionSupport
+    with PostcodeFormValidationTests {
 
   val validJourneyStatus: J
 
@@ -525,6 +528,15 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
     implicit messagesApi: MessagesApi
   ): Unit = {
 
+    behave like commonPostcodeFormValidationTests(
+      performAction,
+      () =>
+        inSequence {
+        mockAuthWithNoRetrievals()
+        mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
+      }
+    )
+
     "show form errors when no results are found for a postcode" in {
       val p                   = Postcode("NW19AX")
       val addressLookupResult = AddressLookupResult(p, None, List())
@@ -589,46 +601,6 @@ trait AddressControllerSpec[J <: JourneyStatus] extends ControllerSpec with Auth
       val result = performAction(Seq("postcode" -> p.value, "filter" -> filter))
       status(result)          shouldBe BAD_REQUEST
       contentAsString(result) should include(message("filter.error.noResults"))
-    }
-
-    "show form errors when the postcode is too long" in {
-      List(
-        "BFPO123456",
-        "AA1AB8ABA"
-      ).foreach { invalidPostcode =>
-        withClue(s"For postcode '$invalidPostcode'") {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
-          }
-
-          val result = performAction(Seq("postcode" -> invalidPostcode))
-          status(result)          shouldBe BAD_REQUEST
-          contentAsString(result) should include(message("postcode.error.tooLong"))
-        }
-      }
-    }
-
-    "show form errors when the postcode isn't valid" in {
-      List(
-        "A00A" -> "postcode.error.pattern",
-        "AA0A0AAA" -> "postcode.error.pattern",
-        "AA0.0AA" -> "postcode.error.invalidCharacters",
-        "AAA123" -> "postcode.error.pattern",
-        "A11AAA" -> "postcode.error.pattern"
-      ).foreach { case (invalidPostcode, errorMessageKey) =>
-        withClue(s"For postcode '$invalidPostcode'") {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
-          }
-
-          val result = performAction(Seq("postcode" -> invalidPostcode))
-          status(result)          shouldBe BAD_REQUEST
-          contentAsString(result) should include(message(errorMessageKey))
-        }
-      }
-
     }
 
     "show an error page" when {

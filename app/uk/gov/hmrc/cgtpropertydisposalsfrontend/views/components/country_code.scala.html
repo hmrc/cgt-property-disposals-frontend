@@ -21,23 +21,45 @@
   errorInline: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_inline
 )
 
-@(countryCodeToCountryName: Map[CountryCode,CountryName], selected: Option[String], label: String, errorKey: Option[String], hasErrors: Boolean, autoComplete: AutoCompleteType)(implicit messages: Messages)
+@(
+  countryCodeToCountryName: Map[CountryCode,CountryName],
+  selected: Option[String],
+  label: String,
+  errorKey: Option[String],
+  hasErrors: Boolean,
+  autoComplete: AutoCompleteType,
+  extraContent: Option[Html] = None
+)(implicit messages: Messages)
 
 @fieldId = @{"countryCode"}
 @classes = @{if(hasErrors) "form-group form-group-error" else "form-group" }
 @inputClasses = @{if(hasErrors) "form-control form-control-error"  else "form-control"}
 @errorId = @{s"${{fieldId}}-inline-error"}
 @errorIdWithMessageKey = @{errorKey.map(errorId -> _)}
+@extraContentId = @{s"${{fieldId}}-extra-content"}
+@extraContentIdWithContent = @{extraContent.map(extraContentId -> _)}
+
+@describedByKeys = @{List(extraContentIdWithContent.map(_._1), errorIdWithMessageKey.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
 
 <div class="@classes country-code-wrapper">
  <label class="form-label" for="@fieldId">@label</label>
+ @extraContent.map { text =>
+   <div id="@extraContentId">
+     @text
+   </div>
+ }
  @errorIdWithMessageKey.map { case (id, key) =>
   @errorInline(id, messages(s"$fieldId.$key"))
  }
- <select id="@fieldId" name="@fieldId" class="@inputClasses" autocomplete="@{autoComplete.value}"@if(hasErrors) { aria-describedby="@errorId" }>
+ <select
+   id="@fieldId"
+   name="@fieldId"
+   class="@inputClasses"
+   autocomplete="@{autoComplete.value}"
+   @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
     <option value=""></option>
-    @for(country <- countryCodeToCountryName) {
-      <option value="@{country._1}" @{if(selected.contains(country._1)) { s" selected" }}>@{country._2}</option>
-    }
+      @for(country <- countryCodeToCountryName) {
+        <option value="@{country._1}" @{if(selected.contains(country._1))"selected"}>@{country._2}</option>
+      }
  </select>
 </div>
