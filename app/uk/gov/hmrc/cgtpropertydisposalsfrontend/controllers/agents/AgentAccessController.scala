@@ -35,6 +35,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.AgentStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Country, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
@@ -56,7 +57,8 @@ class AgentAccessController @Inject()(
   cc: MessagesControllerComponents,
   enterClientsCgtRefPage: views.html.agents.enter_client_cgt_ref,
   enterClientsPostcodePage: views.html.agents.enter_postcode,
-  enterClientsCountryPage: views.html.agents.enter_country
+  enterClientsCountryPage: views.html.agents.enter_country,
+  confirmClientPage: views.html.agents.confirm_client
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -156,6 +158,35 @@ class AgentAccessController @Inject()(
         }
     }
   }
+
+  def confirmClient(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withVerifierMatchingDetails {
+      case (_, verifierMatchingDetails) =>
+        val backLink = enterVerifierCall(verifierMatchingDetails.clientDetails)
+
+        if (verifierMatchingDetails.correctVerifierSupplied)
+          Ok(confirmClientPage(verifierMatchingDetails.clientDetails, backLink))
+        else
+          Redirect(backLink)
+    }
+  }
+
+  def confirmClientSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withVerifierMatchingDetails {
+      case (_, verifierMatchingDetails) =>
+        if (verifierMatchingDetails.correctVerifierSupplied)
+          Ok("confirmed")
+        else
+          Redirect(enterVerifierCall(verifierMatchingDetails.clientDetails))
+    }
+  }
+
+  private def enterVerifierCall(clientDetails: SubscribedDetails) =
+    clientDetails.address match {
+    case _: UkAddress    => routes.AgentAccessController.enterClientsPostcode()
+    case _: NonUkAddress => routes.AgentAccessController.enterClientsCountry()
+  }
+
   private def toUpperWithNoSpaces(s: String): String = s.toUpperCase.replaceAllLiterally(" ", "")
 
   private def handleSubmittedCgtReferenceNumber(
@@ -185,12 +216,7 @@ class AgentAccessController @Inject()(
             logger.warn("Could not handle submitted cgt reference", e)
             errorHandler.errorResult(request.userType)
           }, { clientDetails =>
-            val redirectTo = clientDetails.address match {
-              case _: UkAddress    => routes.AgentAccessController.enterClientsPostcode()
-              case _: NonUkAddress => routes.AgentAccessController.enterClientsCountry()
-            }
-
-            Redirect(redirectTo)
+            Redirect(enterVerifierCall(clientDetails))
           }
         )
       }
@@ -243,7 +269,7 @@ class AgentAccessController @Inject()(
                 errorHandler.errorResult(request.userType)
 
               case Right(_) =>
-                Ok("verifier matched")
+                Redirect(routes.AgentAccessController.confirmClient())
             }
           } else
             BadRequest(page(form.fill(submittedVerifier).withError(formKey, "error.noMatch")))

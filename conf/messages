@@ -450,3 +450,8 @@ agent.enter-client-country.extraContent=This must match the country your client 
 
 postcode.error.noMatch=Postcode cannot be found
 countryCode.error.noMatch=Country cannot be found
+
+agent.confirm-client.title=Check and confirm your client’s details
+agent.confirm-client.name=Name
+agent.confirm-client.cgt-reference=Capital Gains Tax on UK property account number
+agent.confirm-client.change-client=Change client
