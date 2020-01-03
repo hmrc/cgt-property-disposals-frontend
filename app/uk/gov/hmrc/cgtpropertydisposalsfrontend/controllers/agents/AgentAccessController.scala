@@ -58,10 +58,8 @@ class AgentAccessController @Inject()(
   }
 
   def enterClientsCgtRef(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withAgentSupplyingClientDetails {
-      case AgentSupplyingClientDetails(_, maybeCgtReference) =>
-        val form = maybeCgtReference.fold(cgtReferenceForm)(cgtReferenceForm.fill)
-        Ok(enterClientsCgtRefPage(form))
+    withAgentSupplyingClientDetails { _ =>
+      Ok(enterClientsCgtRefPage(cgtReferenceForm))
     }
   }
 

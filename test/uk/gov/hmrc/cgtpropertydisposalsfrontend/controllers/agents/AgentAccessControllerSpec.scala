@@ -86,7 +86,7 @@ class AgentAccessControllerSpec
 
       "display the page" when {
 
-        "the session data is valid and the agent has not already supplied a cgt reference" in {
+        "the session data is valid" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(initialAgentSessionData))))
@@ -97,17 +97,6 @@ class AgentAccessControllerSpec
           contentAsString(result) should include(message("agent.enter-client-cgt-ref.title"))
         }
 
-        "the session data is valid and the agent has already supplied a cgt reference" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(initialAgentSessionData))))
-          }
-
-          val result = performAction()
-          status(result)          shouldBe OK
-          contentAsString(result) should include(message("agent.enter-client-cgt-ref.title"))
-          contentAsString(result) should include(validCgtReference.value)
-        }
       }
     }
 
