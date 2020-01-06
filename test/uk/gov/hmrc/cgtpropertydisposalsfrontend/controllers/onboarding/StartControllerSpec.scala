@@ -1689,6 +1689,31 @@ class StartControllerSpec
 
     }
 
+    "handling requests to keep alive" must {
+
+      "return an ok response with an empty body" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(Future.successful(Right(None)))
+        }
+
+        val result = controller.keepAlive()(FakeRequest())
+        status(result) shouldBe OK
+        contentAsString(result) shouldBe ""
+      }
+
+    }
+
+    "handling requests to display the timed out page" must {
+
+      "display the page" in {
+        val result = controller.timedOut()(FakeRequest())
+        status(result) shouldBe OK
+        contentAsString(result) should include(message("timed-out.title"))
+      }
+
+    }
+
   }
 
 }
