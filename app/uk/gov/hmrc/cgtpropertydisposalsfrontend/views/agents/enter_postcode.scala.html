@@ -53,7 +53,8 @@
    extraContent = Some(Html(s"""<p class="lede">${messages("agent.enter-client-postcode.extraContent")}</p>""")),
    value = form.data.getOrElse(key, ""),
    hasErrors = hasErrors,
-   autoComplete = AutoCompleteType.On
+   inputClass = Some("form-control-1-4"),
+   autoComplete = AutoCompleteType.Postcode
   )
 
   @submitButton(messages("button.continue"))
