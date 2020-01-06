@@ -22,7 +22,6 @@
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
         textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
         submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
@@ -44,14 +43,12 @@
   @errorSummary(form)
  }
 
- @pageHeading(title)
-
  @formWrapper(routes.AgentAccessController.enterClientsPostcodeSubmit(), 'novalidate -> "novalidate") {
   @textInput(
    fieldId = key,
-   label = Html(""),
+   label = Html(title),
+   labelAsHeading = true,
    helpText = Some(Html(messages("agent.enter-client-postcode.helpText"))),
-   labelAsHeading = false,
    errorKey = form.error(key).map(e => e.message),
    extraContent = Some(Html(s"""<p class="lede">${messages("agent.enter-client-postcode.extraContent")}</p>""")),
    value = form.data.getOrElse(key, ""),

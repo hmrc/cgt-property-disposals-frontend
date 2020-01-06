@@ -22,7 +22,6 @@
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
         countryCode: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.country_code,
         submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
@@ -44,14 +43,12 @@
   @errorSummary(form)
  }
 
- @pageHeading(title)
-
  @formWrapper(routes.AgentAccessController.enterClientsCountrySubmit(), 'novalidate -> "novalidate") {
 
   @countryCode(
     countryCodeToCountryName = Country.countryCodeToCountryName,
     selected = form.data.get(key),
-    label = "",
+    label = title,
     hasErrors = form.error(key).nonEmpty,
     errorKey = form.error(key).map(e => e.message),
     autoComplete = AutoCompleteType.Country,
