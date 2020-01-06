@@ -28,7 +28,8 @@
   errorKey: Option[String],
   hasErrors: Boolean,
   autoComplete: AutoCompleteType,
-  extraContent: Option[Html] = None
+  extraContent: Option[Html] = None,
+  labelAsHeading: Boolean = false
 )(implicit messages: Messages)
 
 @fieldId = @{"countryCode"}
@@ -38,11 +39,20 @@
 @errorIdWithMessageKey = @{errorKey.map(errorId -> _)}
 @extraContentId = @{s"${{fieldId}}-extra-content"}
 @extraContentIdWithContent = @{extraContent.map(extraContentId -> _)}
+@fieldLabel = {
+  @if(labelAsHeading) {
+    <h1 class="govuk-label-wrapper">
+      <label for="@{fieldId}" class="heading-xlarge">@{label}</label>
+    </h1>
+  } else {
+    <label for="@{fieldId}" class="form-label">@{label}</label>
+  }
+}
 
 @describedByKeys = @{List(extraContentIdWithContent.map(_._1), errorIdWithMessageKey.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
 
 <div class="@classes country-code-wrapper">
- <label class="form-label" for="@fieldId">@label</label>
+ @fieldLabel
  @extraContent.map { text =>
    <div id="@extraContentId">
      @text
