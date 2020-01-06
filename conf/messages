@@ -433,3 +433,13 @@ email-whitelisting.problem.bullet4=the trial has ended
 email-whitelisting.problem.p3=You’ll need to email HMRC at <strong class="bold">ddcw-info-cgtpd-g@digital.hmrc.gov.uk</strong> to request access to the service.
 email-whitelisting.problem.p4=You should include your name.
 
+
+agent.enter-client-cgt-ref.title=Enter your client’s Capital Gains Tax on UK property account number
+agent.enter-client-cgt-ref.helpText=It is 15 characters and can include letters and numbers. For example, XYCGTP123456789.
+
+cgtReference.error.required=Enter a Capital Gains Tax on UK property account number
+cgtReference.error.tooShort=Enter a Capital Gains Tax on UK property account number that is 15 characters
+cgtReference.error.tooLong=Enter a Capital Gains Tax on UK property account number that is 15 characters
+cgtReference.error.invalidCharacters=Capital Gains Tax on UK property account number must only include letters and numbers
+cgtReference.error.pattern=Enter a real Capital Gains Tax on UK property account number
+cgtReference.error.notPermitted=Enter the account number of a client who has authorised you to manage their account

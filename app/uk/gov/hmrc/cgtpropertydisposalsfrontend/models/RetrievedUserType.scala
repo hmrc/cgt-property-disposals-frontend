@@ -45,6 +45,10 @@ object RetrievedUserType {
     ggCredId: GGCredId
   ) extends RetrievedUserType
 
+  final case class Agent(
+    GGCredId: GGCredId
+  ) extends RetrievedUserType
+
   final case class NonGovernmentGatewayRetrievedUser(authProvider: String) extends RetrievedUserType
 
 }

@@ -1,0 +1,2 @@
+GET   /agent/enter-client-account-number        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents.AgentAccessController.enterClientsCgtRef()
+POST  /agent/enter-client-account-number        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents.AgentAccessController.enterClientsCgtRefSubmit()

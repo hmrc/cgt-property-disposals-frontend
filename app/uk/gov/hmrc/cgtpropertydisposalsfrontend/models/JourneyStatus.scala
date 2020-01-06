@@ -20,7 +20,7 @@ import cats.Eq
 import julienrf.json.derived
 import play.api.libs.json.OFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
@@ -37,6 +37,7 @@ object JourneyStatus {
     // user with affinity organisation is trying to subscribe without having a trust enrolment
     final case class DeterminingIfOrganisationIsTrust(
       ggCredId: GGCredId,
+      ggEmail: Option[Email],
       isReportingForTrust: Option[Boolean],
       hasTrn: Option[Boolean]
     ) extends SubscriptionStatus
@@ -53,11 +54,13 @@ object JourneyStatus {
     final case class SubscriptionMissingData(
       businessPartnerRecord: BusinessPartnerRecord,
       manuallyEnteredEmail: Option[Email],
-      ggCredId: GGCredId
+      ggCredId: GGCredId,
+      ggEmail: Option[Email]
     ) extends SubscriptionStatus
 
     // subscription details have been gathered and are ready to be used to subscribe
-    final case class SubscriptionReady(subscriptionDetails: SubscriptionDetails, ggCredId: GGCredId) extends SubscriptionStatus
+    final case class SubscriptionReady(subscriptionDetails: SubscriptionDetails, ggCredId: GGCredId)
+        extends SubscriptionStatus
   }
 
   // subscription has been submitted to ETMP
@@ -87,14 +90,23 @@ object JourneyStatus {
     ) extends RegistrationStatus
 
     // we are capturing an email for a user who doesn't have one we can retrieve
-    final case class IndividualMissingEmail(name: IndividualName, address: Address, ggCredId: GGCredId) extends RegistrationStatus {
+    final case class IndividualMissingEmail(name: IndividualName, address: Address, ggCredId: GGCredId)
+        extends RegistrationStatus {
       val emailSource: Option[EmailSource] = None
     }
 
     // we have all the details necessary for registration
-    final case class RegistrationReady(registrationDetails: RegistrationDetails, ggCredId: GGCredId) extends RegistrationStatus {
+    final case class RegistrationReady(registrationDetails: RegistrationDetails, ggCredId: GGCredId)
+        extends RegistrationStatus {
       val emailSource: Option[EmailSource] = Some(registrationDetails.emailSource)
     }
+
+  }
+
+  object AgentStatus {
+
+    final case class AgentSupplyingClientDetails(agentGGCredId: GGCredId, clientCgtRef: Option[CgtReference])
+        extends JourneyStatus
 
   }
 
