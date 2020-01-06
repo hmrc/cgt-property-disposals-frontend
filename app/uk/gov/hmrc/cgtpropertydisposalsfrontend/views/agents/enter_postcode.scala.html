@@ -1,0 +1,63 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+
+@this(
+        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+        textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
+        submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
+)
+
+@(form: Form[Postcode])(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+
+@key = @{"postcode"}
+@title = @{messages("agent.enter-client-postcode.title")}
+@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+
+@mainTemplate(title = title, userType = request.userType, withSignOutLink = true) {
+
+ @backLinkComponent(routes.AgentAccessController.enterClientsCgtRef())
+
+ @if(hasErrors) {
+  @errorSummary(form)
+ }
+
+ @formWrapper(routes.AgentAccessController.enterClientsPostcodeSubmit(), 'novalidate -> "novalidate") {
+  @textInput(
+   fieldId = key,
+   label = Html(title),
+   labelAsHeading = true,
+   helpText = Some(Html(messages("agent.enter-client-postcode.helpText"))),
+   errorKey = form.error(key).map(e => e.message),
+   extraContent = Some(Html(s"""<p class="lede">${messages("agent.enter-client-postcode.extraContent")}</p>""")),
+   value = form.data.getOrElse(key, ""),
+   hasErrors = hasErrors,
+   inputClass = Some("form-control-1-4"),
+   autoComplete = AutoCompleteType.Postcode
+  )
+
+  @submitButton(messages("button.continue"))
+ }
+
+}

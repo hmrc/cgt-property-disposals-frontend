@@ -18,9 +18,9 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import cats.Eq
 import julienrf.json.derived
-import play.api.libs.json.OFormat
+import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
@@ -105,8 +105,17 @@ object JourneyStatus {
 
   object AgentStatus {
 
-    final case class AgentSupplyingClientDetails(agentGGCredId: GGCredId, clientCgtRef: Option[CgtReference])
-        extends JourneyStatus
+    final case class AgentSupplyingClientDetails(
+      agentGGCredId: GGCredId,
+      verifierMatchingDetails: Option[VerifierMatchingDetails]
+    ) extends JourneyStatus
+
+    final case class VerifierMatchingDetails(
+      clientDetails: SubscribedDetails,
+      correctVerifierSupplied: Boolean
+    )
+
+    implicit val verifierMatchingDetailsFormat: OFormat[VerifierMatchingDetails] = Json.format
 
   }
 

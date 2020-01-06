@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents
 
+import cats.data.EitherT
+import cats.instances.future._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
@@ -28,13 +30,19 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.CgtEnrolment
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, PostcodeFormValidationTests, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.AgentStatus.AgentSupplyingClientDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.AgentStatus.{AgentSupplyingClientDetails, VerifierMatchingDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
+import uk.gov.hmrc.http.HeaderCarrier
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class AgentAccessControllerSpec
@@ -42,12 +50,14 @@ class AgentAccessControllerSpec
     with AuthSupport
     with SessionSupport
     with RedirectToStartBehaviour
-    with ScalaCheckDrivenPropertyChecks {
+    with ScalaCheckDrivenPropertyChecks
+    with PostcodeFormValidationTests {
 
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
-      bind[SessionStore].toInstance(mockSessionStore)
+      bind[SessionStore].toInstance(mockSessionStore),
+      bind[SubscriptionService].toInstance(mockSubscriptionService)
     )
 
   lazy val controller = instanceOf[AgentAccessController]
@@ -58,6 +68,25 @@ class AgentAccessControllerSpec
 
   val validCgtReference = CgtReference("XYCGTP123456789")
 
+  val (nonUkCountryCode, nonUkCountryName) =
+    Country.countryCodeToCountryName.headOption.getOrElse(sys.error("Could not find country"))
+
+  val nonUkAddress  = sample[NonUkAddress].copy(country = Country(nonUkCountryCode, Some(nonUkCountryName)))
+
+  val ukAddress     = sample[UkAddress].copy(postcode = Postcode("ZZ011ZZ"))
+
+  def newClientDetails(cgtReference: CgtReference, address: Address): SubscribedDetails =
+    sample[SubscribedDetails].copy(cgtReference = validCgtReference, address = address)
+
+  def sessionData(clientDetails: SubscribedDetails, correctVerifierSupplied: Boolean) = SessionData.empty.copy(
+    journeyStatus = Some(
+      AgentSupplyingClientDetails(
+        ggCredId,
+        Some(VerifierMatchingDetails(clientDetails, correctVerifierSupplied))
+      )
+    )
+  )
+
   def mockDelegatedAuthCheck(cgtReference: CgtReference)(result: Future[Unit]): Unit =
     mockAuth(
       Enrolment(CgtEnrolment.enrolmentKey)
@@ -66,14 +95,20 @@ class AgentAccessControllerSpec
       EmptyRetrieval
     )(result)
 
+  def mockGetSubscriptionDetails(cgtReference: CgtReference)(result: Either[Error, SubscribedDetails]) =
+    (mockSubscriptionService
+      .getSubscribedDetails(_: CgtReference)(_: HeaderCarrier))
+      .expects(cgtReference, *)
+      .returning(EitherT.fromEither[Future](result))
+
   "AgentAccessController" when {
 
-    val initialAgentSessionData =
-      SessionData.empty.copy(
-        journeyStatus = Some(AgentSupplyingClientDetails(ggCredId, None))
-      )
-
     "handling requests to display the enter client's cgt reference page" must {
+
+      val initialAgentSessionData =
+        SessionData.empty.copy(
+          journeyStatus = Some(AgentSupplyingClientDetails(ggCredId, None))
+        )
 
       def performAction(): Future[Result] = controller.enterClientsCgtRef()(FakeRequest())
 
@@ -101,6 +136,11 @@ class AgentAccessControllerSpec
     }
 
     "handling submitted client's cgt references" must {
+
+      val initialAgentSessionData =
+        SessionData.empty.copy(
+          journeyStatus = Some(AgentSupplyingClientDetails(ggCredId, None))
+        )
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterClientsCgtRefSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
@@ -170,15 +210,32 @@ class AgentAccessControllerSpec
 
         "the cgt reference is valid and the agent has permission to access the client " +
           "but the session data cannot be updated" in {
+          val clientDetails = newClientDetails(validCgtReference, sample[Address](addressGen))
+
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(initialAgentSessionData))))
             mockDelegatedAuthCheck(validCgtReference)(Future.successful(()))
+            mockGetSubscriptionDetails(validCgtReference)(Right(clientDetails))
             mockStoreSession(
               SessionData.empty.copy(
-                journeyStatus = Some(AgentSupplyingClientDetails(ggCredId, Some(validCgtReference)))
+                journeyStatus =
+                  Some(AgentSupplyingClientDetails(ggCredId, Some(VerifierMatchingDetails(clientDetails, false))))
               )
             )(Future.successful(Left(Error(""))))
+          }
+
+          val result = performAction("cgtReference" -> validCgtReference.value)
+          checkIsTechnicalErrorPage(result)
+        }
+
+        "the cgt reference is valid and the agent has permission to access to the client " +
+          "but no details can be found for the cgt reference" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(initialAgentSessionData))))
+            mockDelegatedAuthCheck(validCgtReference)(Future.successful(()))
+            mockGetSubscriptionDetails(validCgtReference)(Left(Error("")))
           }
 
           val result = performAction("cgtReference" -> validCgtReference.value)
@@ -216,27 +273,410 @@ class AgentAccessControllerSpec
 
       }
 
-      "show a dummy ok page" when {
+      "redirect to the enter postcode page" when {
 
-        "the value submitted is valid and the agent has permission for the client" in {
+        "the value submitted is valid and the agent has permission for the client and the client's " +
+          "address is in the uk" in {
+          val ukClientDetails = newClientDetails(validCgtReference, sample[UkAddress])
+
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(initialAgentSessionData))))
             mockDelegatedAuthCheck(validCgtReference)(Future.successful(()))
+            mockGetSubscriptionDetails(validCgtReference)(Right(ukClientDetails))
             mockStoreSession(
               SessionData.empty.copy(
-                journeyStatus = Some(AgentSupplyingClientDetails(ggCredId, Some(validCgtReference)))
+                journeyStatus =
+                  Some(AgentSupplyingClientDetails(ggCredId, Some(VerifierMatchingDetails(ukClientDetails, false))))
               )
             )(Future.successful(Right(())))
           }
 
           val result = performAction("cgtReference" -> validCgtReference.value)
-          status(result) shouldBe OK
-          contentAsString(result) shouldBe s"Got $validCgtReference"
+          checkIsRedirect(result, routes.AgentAccessController.enterClientsPostcode())
         }
 
       }
 
+      "redirect to the enter country page" when {
+
+        "the value submitted is valid and the agent has permission for the client and the client's " +
+          "address is not in the uk" in {
+          val nonUkClientDetails = newClientDetails(validCgtReference, sample[NonUkAddress])
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(initialAgentSessionData))))
+            mockDelegatedAuthCheck(validCgtReference)(Future.successful(()))
+            mockGetSubscriptionDetails(validCgtReference)(Right(nonUkClientDetails))
+            mockStoreSession(
+              SessionData.empty.copy(
+                journeyStatus =
+                  Some(AgentSupplyingClientDetails(ggCredId, Some(VerifierMatchingDetails(nonUkClientDetails, false))))
+              )
+            )(Future.successful(Right(())))
+          }
+
+          val result = performAction("cgtReference" -> validCgtReference.value)
+          checkIsRedirect(result, routes.AgentAccessController.enterClientsCountry())
+        }
+
+      }
+
+    }
+
+    "handling requests to display the enter client's postcode page" must {
+
+      val ukClientDetails = newClientDetails(validCgtReference, ukAddress)
+
+      def performAction(): Future[Result] = controller.enterClientsPostcode()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        performAction, {
+          case AgentSupplyingClientDetails(_, Some(_)) => true
+          case _                                       => false
+        }
+      )
+
+      "redirect to the enter country page" when {
+
+        "the client's contact address is not in the uk" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(
+                Right(
+                  Some(
+                    SessionData.empty.copy(
+                      journeyStatus = Some(
+                        AgentSupplyingClientDetails(
+                          ggCredId,
+                          Some(VerifierMatchingDetails(ukClientDetails.copy(address = sample[NonUkAddress]), false))
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.AgentAccessController.enterClientsCountry())
+        }
+
+      }
+
+      "display the page" when {
+
+        "the session data is valid and the agent has not yet supplied the correct postcode" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false)))))
+          }
+
+          val result = performAction()
+          status(result) shouldBe OK
+          val content = contentAsString(result)
+          content should include(message("agent.enter-client-postcode.title"))
+          content should not include (ukAddress.postcode.value)
+        }
+
+        "the session data is valid and the agent has already supplied the correct postcode" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = true)))))
+          }
+
+          val result = performAction()
+          status(result) shouldBe OK
+          val content = contentAsString(result)
+          content should include(message("agent.enter-client-postcode.title"))
+          content should include(ukAddress.postcode.value)
+        }
+      }
+    }
+
+    "handling submitted postcodes" must {
+
+      val ukClientDetails = newClientDetails(validCgtReference, ukAddress)
+
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.enterClientsPostcodeSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
+
+      behave like redirectToStartWhenInvalidJourney(
+        () => performAction("postcode" -> ukAddress.postcode.value), {
+          case AgentSupplyingClientDetails(_, Some(_)) => true
+          case _                                       => false
+        }
+      )
+
+      behave like commonPostcodeFormValidationTests(
+        performAction,
+        () =>
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false)))))
+          }
+      )
+
+      "show a form error" when {
+
+        "the submitted postcode is valid but it doesn't match the client's one" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false)))))
+          }
+
+          val result = performAction("postcode" -> "AB12CD")
+          status(result) shouldBe BAD_REQUEST
+          val content = contentAsString(result)
+          content should include(message("agent.enter-client-postcode.title"))
+          content should include(message("postcode.error.noMatch"))
+        }
+
+      }
+
+      "redirect to the enter country page" when {
+
+        "the client's contact address is not in the uk" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(
+                Right(
+                  Some(
+                    SessionData.empty.copy(
+                      journeyStatus = Some(
+                        AgentSupplyingClientDetails(
+                          ggCredId,
+                          Some(VerifierMatchingDetails(ukClientDetails.copy(address = sample[NonUkAddress]), false))
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.AgentAccessController.enterClientsCountry())
+        }
+
+      }
+
+      "show an error page" when {
+
+        "the submitted postcode is valid and matches the client's one but there is a problem updating the session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false)))))
+            mockStoreSession(sessionData(ukClientDetails, correctVerifierSupplied = true))(Future.successful(Left(Error(""))))
+          }
+
+          val result = performAction("postcode" -> ukAddress.postcode.value)
+          checkIsTechnicalErrorPage(result)
+        }
+
+      }
+
+      "show a dummy page" when {
+
+        "the submitted postcode is valid and matches the client's one and the session is updated" in {
+          List(
+            ukAddress.postcode.value,
+            ukAddress.postcode.value.toLowerCase,
+            " " + ukAddress.postcode.value + " "
+          ).foreach { postcode =>
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false)))))
+              mockStoreSession(sessionData(ukClientDetails, correctVerifierSupplied = true))(Future.successful(Right(())))
+            }
+
+            val result = performAction("postcode" -> postcode)
+            status(result)          shouldBe OK
+            contentAsString(result) shouldBe "verifier matched"
+
+          }
+
+        }
+
+      }
+
+    }
+
+    "handling requests to display the enter client's country page" must {
+
+      val nonUkClientDetails = newClientDetails(validCgtReference, nonUkAddress)
+
+      def performAction(): Future[Result] = controller.enterClientsCountry()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        performAction, {
+          case AgentSupplyingClientDetails(_, Some(_)) => true
+          case _                                       => false
+        }
+      )
+
+      "redirect to the enter postcode page" when {
+
+        "the client's contact address is in the uk" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(
+                Right(
+                  Some(
+                    SessionData.empty.copy(
+                      journeyStatus = Some(
+                        AgentSupplyingClientDetails(
+                          ggCredId,
+                          Some(VerifierMatchingDetails(nonUkClientDetails.copy(address = sample[UkAddress]), false))
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.AgentAccessController.enterClientsPostcode())
+        }
+
+      }
+
+      "display the page" when {
+
+        "the session data is valid and the agent has not yet supplied the correct country" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = false)))))
+          }
+
+          val result = performAction()
+          status(result) shouldBe OK
+          val content = contentAsString(result)
+          content should include(message("agent.enter-client-country.title"))
+          content should not include (s""""$nonUkCountryCode" selected""")
+        }
+
+        "the session data is valid and the agent has already supplied the correct country" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = true)))))
+          }
+
+          val result = performAction()
+          status(result) shouldBe OK
+          val content = contentAsString(result)
+          content should include(message("agent.enter-client-country.title"))
+          content should include(s""""$nonUkCountryCode" selected""")
+        }
+      }
+    }
+
+    "handling submitted countries" must {
+
+      val nonUkClientDetails = newClientDetails(validCgtReference, nonUkAddress)
+
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.enterClientsCountrySubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
+
+      behave like redirectToStartWhenInvalidJourney(
+        () => performAction("countryCode" -> nonUkCountryCode), {
+          case AgentSupplyingClientDetails(_, Some(_)) => true
+          case _                                       => false
+        }
+      )
+
+      "show a form error" when {
+
+        def testFormValidationError(formData: (String, String)*)(errorKey: String): Unit = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = false)))))
+          }
+
+          val result = performAction(formData: _*)
+          status(result) shouldBe BAD_REQUEST
+          val content = contentAsString(result)
+          content should include(message("agent.enter-client-country.title"))
+          content should include(message(errorKey))
+        }
+
+        "no country is submitted" in {
+          testFormValidationError()("countryCode.error.required")
+        }
+
+        "the country submitted doesn't exist" in {
+          testFormValidationError("countryCode" -> "XY")("countryCode.error.notFound")
+        }
+
+        "the submitted country is valid but it doesn't match the client's one" in {
+          testFormValidationError("countryCode" -> "HK")("countryCode.error.noMatch")
+        }
+
+      }
+
+      "redirect to the enter postcode page" when {
+
+        "the client's contact address is in the uk" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(
+                Right(
+                  Some(
+                    SessionData.empty.copy(
+                      journeyStatus = Some(
+                        AgentSupplyingClientDetails(
+                          ggCredId,
+                          Some(VerifierMatchingDetails(nonUkClientDetails.copy(address = sample[UkAddress]), false))
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.AgentAccessController.enterClientsPostcode())
+        }
+
+      }
+
+      "show an error page" when {
+
+        "the submitted country is valid and matches the client's one but there is a problem updating the session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = false)))))
+            mockStoreSession(sessionData(nonUkClientDetails, correctVerifierSupplied = true))(Future.successful(Left(Error(""))))
+          }
+
+          val result = performAction("countryCode" -> nonUkCountryCode)
+          checkIsTechnicalErrorPage(result)
+        }
+
+      }
+
+      "show a dummy page" when {
+
+        "the submitted postcode is valid and matches the client's one and the session is updated" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = false)))))
+            mockStoreSession(sessionData(nonUkClientDetails, correctVerifierSupplied = true))(Future.successful(Right(())))
+          }
+
+          val result = performAction("countryCode" -> nonUkCountryCode)
+          status(result)          shouldBe OK
+          contentAsString(result) shouldBe "verifier matched"
+        }
+
+      }
 
     }
 
