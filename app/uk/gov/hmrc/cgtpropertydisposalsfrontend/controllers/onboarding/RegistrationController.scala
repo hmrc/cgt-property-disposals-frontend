@@ -31,11 +31,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.TryingToGetIndividualsFootprint
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, RegistrationStatus, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.AddressSource
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, SapNumber}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.EmailSource
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{OnboardingAuditService, SubscriptionService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
@@ -205,13 +206,17 @@ class RegistrationController @Inject()(
     request.sessionData.flatMap(_.journeyStatus) match {
       case Some(RegistrationStatus.RegistrationReady(registrationDetails, ggCredId)) =>
         val result = for {
-          subscriptionResponse <- subscriptionService.registerWithoutIdAndSubscribe(registrationDetails)
+        registrationResponse <- {
+          auditService.sendRegistrationRequestEvent(registrationDetails, routes.RegistrationController.checkYourAnswersSubmit().url)
+          subscriptionService.registerWithoutId(registrationDetails)
+        }
+          subscriptionResponse <- {
+            val subscriptionDetails = toSubscriptionDetails(registrationDetails, registrationResponse.sapNumber)
+            auditService.sendSubscriptionRequestEvent(subscriptionDetails, routes.RegistrationController.checkYourAnswersSubmit().url)
+            subscriptionService.subscribe(subscriptionDetails)
+          }
           _ <- EitherT(subscriptionResponse match {
                 case SubscriptionSuccessful(cgtReferenceNumber) =>
-                  auditService.sendRegistrationRequestEvent(
-                    registrationDetails,
-                    routes.RegistrationController.checkYourAnswersSubmit().url
-                  )
                   updateSession(sessionStore, request)(
                     _ =>
                       SessionData.empty.copy(
@@ -261,6 +266,17 @@ class RegistrationController @Inject()(
         Redirect(controllers.routes.StartController.start())
     }
   }
+
+  private def toSubscriptionDetails(registrationDetails: RegistrationDetails, sapNumber: SapNumber): SubscriptionDetails =
+    SubscriptionDetails(
+      Right(registrationDetails.name),
+      registrationDetails.emailAddress,
+      registrationDetails.address,
+      ContactName(s"${registrationDetails.name.firstName} ${registrationDetails.name.lastName}"),
+      sapNumber,
+      registrationDetails.emailSource,
+      AddressSource.ManuallyEntered
+    )
 
 }
 

@@ -19,13 +19,14 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.SapNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 
 final case class BusinessPartnerRecord(
   emailAddress: Option[Email],
   address: Address,
-  sapNumber: String,
+  sapNumber: SapNumber,
   name: Either[TrustName, IndividualName]
 )
 

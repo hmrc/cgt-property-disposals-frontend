@@ -39,12 +39,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Registratio
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.TryingToGetIndividualsFootprint
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, RegistrationStatus, Subscribed, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressSource}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, SapNumber}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscriptionResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegisteredWithoutId, RegistrationDetails, SubscribedDetails, SubscriptionDetails, SubscriptionResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -80,12 +80,20 @@ class RegistrationControllerSpec
 
   val journeyStatusLens: Lens[SessionData, Option[JourneyStatus]] = lens[SessionData].journeyStatus
 
-  def mockRegisterWithoutIdAndSubscribe(
+  def mockRegisterWithoutId(
     registrationDetails: RegistrationDetails
-  )(result: Either[Error, SubscriptionResponse]) =
+  )(result: Either[Error, RegisteredWithoutId]) =
     (mockSubscriptionService
-      .registerWithoutIdAndSubscribe(_: RegistrationDetails)(_: HeaderCarrier))
+      .registerWithoutId(_: RegistrationDetails)(_: HeaderCarrier))
       .expects(registrationDetails, *)
+      .returning(EitherT(Future.successful(result)))
+
+  def mockSubscribe(
+                        subscriptionDetails: SubscriptionDetails
+                      )(result: Either[Error, SubscriptionResponse]) =
+    (mockSubscriptionService
+      .subscribe(_: SubscriptionDetails)(_: HeaderCarrier))
+      .expects(subscriptionDetails, *)
       .returning(EitherT(Future.successful(result)))
 
   "RegistrationController" when {
@@ -610,28 +618,49 @@ class RegistrationControllerSpec
       val registrationReady              = sample[RegistrationReady]
       val sessionData                    = SessionData.empty.copy(journeyStatus = Some(registrationReady))
       val subscriptionSuccessfulResponse = sample[SubscriptionSuccessful]
-      val subscribedDetails = {
+      val sapNumber                      = sample[SapNumber]
+      val subscriptionDetails = {
         val details = registrationReady.registrationDetails
-        SubscribedDetails(
+        SubscriptionDetails(
           Right(details.name),
           details.emailAddress,
           details.address,
           ContactName(s"${details.name.firstName} ${details.name.lastName}"),
+          sapNumber,
+          details.emailSource,
+          AddressSource.ManuallyEntered
+        )
+      }
+
+      val subscribedDetails =
+        SubscribedDetails(
+          subscriptionDetails.name,
+          subscriptionDetails.emailAddress,
+          subscriptionDetails.address,
+          subscriptionDetails.contactName,
           CgtReference(subscriptionSuccessfulResponse.cgtReferenceNumber),
           None,
           registeredWithId = false
         )
-      }
 
       "show an error page" when {
 
-        "the call to register without id and subscribe fails" in {
+        "the call to register without id fails" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData))))
-            mockRegisterWithoutIdAndSubscribe(
-              registrationDetails = registrationReady.registrationDetails
-            )(Left(Error("")))
+            mockRegisterWithoutId(registrationReady.registrationDetails)(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
+        "the call to subscribe fails" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData))))
+            mockRegisterWithoutId(registrationReady.registrationDetails)(Right(RegisteredWithoutId(sapNumber)))
+            mockSubscribe(subscriptionDetails)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -641,9 +670,8 @@ class RegistrationControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData))))
-            mockRegisterWithoutIdAndSubscribe(
-              registrationDetails = registrationReady.registrationDetails
-            )(Right(subscriptionSuccessfulResponse))
+            mockRegisterWithoutId(registrationReady.registrationDetails)(Right(RegisteredWithoutId(sapNumber)))
+            mockSubscribe(subscriptionDetails)(Right(subscriptionSuccessfulResponse))
             mockStoreSession(
               SessionData.empty.copy(journeyStatus = Some(Subscribed(subscribedDetails, registrationReady.ggCredId)))
             )(Future.successful(Left(Error(""))))
@@ -661,9 +689,8 @@ class RegistrationControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData))))
-            mockRegisterWithoutIdAndSubscribe(
-              registrationDetails = registrationReady.registrationDetails
-            )(Right(subscriptionSuccessfulResponse))
+            mockRegisterWithoutId(registrationReady.registrationDetails)(Right(RegisteredWithoutId(sapNumber)))
+            mockSubscribe(subscriptionDetails)(Right(subscriptionSuccessfulResponse))
             mockStoreSession(
               SessionData.empty.copy(journeyStatus = Some(Subscribed(subscribedDetails, registrationReady.ggCredId)))
             )(Future.successful(Right(())))
@@ -685,9 +712,8 @@ class RegistrationControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData))))
-            mockRegisterWithoutIdAndSubscribe(
-              registrationDetails = registrationReady.registrationDetails
-            )(Right(AlreadySubscribed))
+            mockRegisterWithoutId(registrationReady.registrationDetails)(Right(RegisteredWithoutId(sapNumber)))
+            mockSubscribe(subscriptionDetails)(Right(AlreadySubscribed))
             mockStoreSession(sessionWithAlreadySubscribed)(Future.successful(Right(())))
           }
 

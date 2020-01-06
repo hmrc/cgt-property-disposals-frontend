@@ -19,19 +19,21 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding
 import cats.data.NonEmptyList
 import cats.syntax.either._
 import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.SapNumber
 
 final case class SubscriptionDetails(
   name: Either[TrustName, IndividualName],
   emailAddress: Email,
   address: Address,
   contactName: ContactName,
-  sapNumber: String,
-  emailSource: EmailSource
+  sapNumber: SapNumber,
+  emailSource: EmailSource,
+  addressSource: AddressSource
 )
 
 object SubscriptionDetails {
@@ -60,7 +62,8 @@ object SubscriptionDetails {
             bpr.address,
             ContactName(bpr.name.fold(_.value, n => n.makeSingleName())),
             bpr.sapNumber,
-            emailWithSource._2
+            emailWithSource._2,
+            AddressSource.BusinessPartnerRecord
           )
         }
       )
