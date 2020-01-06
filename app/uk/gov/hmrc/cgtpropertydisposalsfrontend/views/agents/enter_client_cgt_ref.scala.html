@@ -22,11 +22,10 @@
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
         textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
         submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-         errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary
+        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary
 )
 
 @(form: Form[CgtReference])(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
@@ -44,7 +43,7 @@
  @formWrapper(routes.AgentAccessController.enterClientsCgtRefSubmit(), 'novalidate -> "novalidate") {
   @textInput(
    fieldId = key,
-   label = pageHeading(title),
+   label = Html(title),
    helpText = Some(Html(messages("agent.enter-client-cgt-ref.helpText"))),
    labelAsHeading = true,
    errorKey = form.error(key).map(e => e.message),
