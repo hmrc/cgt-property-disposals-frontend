@@ -26,8 +26,6 @@
         pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
         submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
-        cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
         backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
@@ -41,22 +39,28 @@
 
  @pageHeading(title)
 
- @cyaSection(None, Some("no-border")) {
-    @cyaRow(
-      messages("agent.confirm-client.name"),
-      Html(clientDetails.contactName.value),
-      None
-    )
-    @cyaRow(
-      messages("agent.confirm-client.cgt-reference"),
-      Html(clientDetails.cgtReference.value),
-      None
-    )
+  <h2 class="heading-medium">
+    @messages("agent.confirm-client.name")
+  </h2>
+
+  <p class="lede">
+    @clientDetails.contactName.value
+  </p>
+
+  <h2 class="heading-medium">
+    @messages("agent.confirm-client.cgt-reference")
+  </h2>
+
+  <p class="lede">
+    @clientDetails.cgtReference.value
+  </p>
+
+  <br>
+
+  @formWrapper(routes.AgentAccessController.confirmClientSubmit(), 'novalidate -> "novalidate") {
+   @submitButton(messages("button.continue"))
   }
 
- @formWrapper(routes.AgentAccessController.confirmClientSubmit(), 'novalidate -> "novalidate") {
-  @submitButton(messages("button.continue"))
- }
   <p>
    <a href="@{routes.AgentAccessController.enterClientsCgtRef()}">@messages("agent.confirm-client.change-client")</a>
   </p>
