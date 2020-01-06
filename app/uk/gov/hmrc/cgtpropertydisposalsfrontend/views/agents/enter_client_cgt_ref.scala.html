@@ -41,14 +41,12 @@
   @errorSummary(form)
  }
 
- @pageHeading(title)
-
  @formWrapper(routes.AgentAccessController.enterClientsCgtRefSubmit(), 'novalidate -> "novalidate") {
   @textInput(
    fieldId = key,
-   label = Html(""),
+   label = pageHeading(title),
    helpText = Some(Html(messages("agent.enter-client-cgt-ref.helpText"))),
-   labelAsHeading = false,
+   labelAsHeading = true,
    errorKey = form.error(key).map(e => e.message),
    value = form.data.getOrElse(key, ""),
    hasErrors = hasErrors,
