@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -82,9 +82,10 @@ class EmailWhitelistingFilter @Inject()(
             case NonFatal(_) =>
               Redirect(s"$otacUrl?p=$token")
                 .addingToSession(
-                  SessionKeys.redirect  -> s"$selfBaseUrl${routes.StartController.start()}?p=$token",
+                  SessionKeys.redirect  -> s"$selfBaseUrl${routes.LandingPageController.landingPage()}?p=$token",
                   SessionKeys.otacToken -> token
                 )(rh)
+
 
           }
         }
