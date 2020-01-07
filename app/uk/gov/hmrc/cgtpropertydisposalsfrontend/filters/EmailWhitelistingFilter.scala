@@ -81,7 +81,7 @@ class EmailWhitelistingFilter @Inject()(
             case NonFatal(_) =>
               Redirect(s"$otacUrl?p=$token")
                 .addingToSession(
-                  SessionKeys.redirect  -> s"$selfBaseUrl${routes.StartController.start()}?p=$token",
+                  SessionKeys.redirect  -> s"$selfBaseUrl${routes.LandingPageController.landingPage()}?p=$token",
                   SessionKeys.otacToken -> token
                 )(rh)
           }

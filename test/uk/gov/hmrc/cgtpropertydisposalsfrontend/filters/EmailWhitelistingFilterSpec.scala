@@ -163,7 +163,7 @@ class EmailWhitelistingFilterSpec extends WordSpec with Matchers with MockFactor
             status(result)           shouldBe SEE_OTHER
             redirectLocation(result) shouldBe Some(s"$otacUrl?p=$otacToken")
             session(result).data shouldBe Map(
-              SessionKeys.redirect -> s"$selfUrl${routes.StartController.start()}?p=$otacToken",
+              SessionKeys.redirect -> s"$selfUrl${routes.LandingPageController.landingPage().url}?p=$otacToken",
               SessionKeys.otacToken -> otacToken
             )
           }
