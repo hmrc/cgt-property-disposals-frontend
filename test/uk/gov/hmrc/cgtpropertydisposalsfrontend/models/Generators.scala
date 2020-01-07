@@ -43,6 +43,7 @@ object Generators
     with NameMatchGen
     with OnboardingDetailsGen
     with EmailGen
+    with UserTypeGen
     with VerifierMatchGen {
 
   def sample[A](implicit gen: Gen[A]): A =
@@ -173,3 +174,10 @@ trait VerifierMatchGen { this: GenUtils =>
     gen[UnsuccessfulVerifierAttempts]
 
 }
+
+trait UserTypeGen { this: GenUtils =>
+
+  implicit val userTypeGen: Gen[UserType] = gen[UserType]
+
+}
+

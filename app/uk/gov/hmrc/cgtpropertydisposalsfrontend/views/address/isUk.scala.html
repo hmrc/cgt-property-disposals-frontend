@@ -15,7 +15,6 @@
  *@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
@@ -35,7 +34,6 @@
 @title = @{messages("subscription.isUk.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @menu = {@if(showAccountMenu) { @accountMenu(None) }}
-
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = !showAccountMenu, accountMenu = Some(menu)) {
   @backLinkComponent(backLink)

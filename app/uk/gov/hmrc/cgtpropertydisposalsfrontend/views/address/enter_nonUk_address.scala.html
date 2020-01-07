@@ -15,11 +15,11 @@
  *@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.NonUkAddress
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -33,7 +33,6 @@
         countryCode: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.country_code,
         accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu
 )
-
 
 @(form: Form[NonUkAddress],
         backLink: Call,

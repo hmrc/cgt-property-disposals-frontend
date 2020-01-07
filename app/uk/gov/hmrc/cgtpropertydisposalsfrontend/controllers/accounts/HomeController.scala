@@ -22,8 +22,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionDetail
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -51,7 +51,7 @@ class HomeController @Inject()(
   def homepage(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request: RequestWithSessionData[AnyContent] =>
       withSubscribedUser(request) { (_, subscribed) =>
-        Future.successful(Ok(homePage(subscribed.subscribedDetails)))
+        Ok(homePage(subscribed.subscribedDetails))
       }
   }
 
@@ -67,23 +67,25 @@ class HomeController @Inject()(
   }
 
   def contactNameUpdated(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withSubscribedUser(request) { case _ =>
-      Ok(detailUpdatedPage(SubscriptionDetail.ContactName))
+    withSubscribedUser(request) {
+      case _ =>
+        Ok(detailUpdatedPage(SubscriptionDetail.ContactName))
     }
   }
 
   def contactEmailUpdated(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withSubscribedUser(request) { case _ =>
-      Ok(detailUpdatedPage(SubscriptionDetail.Email))
+    withSubscribedUser(request) {
+      case _ =>
+        Ok(detailUpdatedPage(SubscriptionDetail.Email))
     }
   }
 
   def contactAddressUpdated(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withSubscribedUser(request) { case _ =>
-      Ok(detailUpdatedPage(SubscriptionDetail.Address))
+    withSubscribedUser(request) {
+      case _ =>
+        Ok(detailUpdatedPage(SubscriptionDetail.Address))
     }
   }
-
 
   private def withSubscribedUser(request: RequestWithSessionData[_])(
     f: (SessionData, Subscribed) => Future[Result]
@@ -92,6 +94,8 @@ class HomeController @Inject()(
       case Some((s: SessionData, r: Subscribed)) =>
         f(s, r)
       case _ =>
-        Future.successful(SeeOther(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController.start().url))
+        Future.successful(
+          SeeOther(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController.start().url)
+        )
     }
 }
