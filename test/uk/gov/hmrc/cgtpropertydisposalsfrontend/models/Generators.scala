@@ -21,8 +21,9 @@ import org.scalacheck.{Arbitrary, Gen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, IndividualSupplyingInformation, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifierAttempts
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.SubscriptionSuccessful
@@ -41,7 +42,8 @@ object Generators
     with AddressGen
     with NameMatchGen
     with OnboardingDetailsGen
-    with EmailGen {
+    with EmailGen
+    with VerifierMatchGen {
 
   def sample[A](implicit gen: Gen[A]): A =
     gen.sample.getOrElse(sys.error(s"Could not generate instance with $gen"))
@@ -122,6 +124,8 @@ trait AddressGen extends AddressLowerPriorityGen { this: GenUtils =>
 
   implicit val nonUkAddressGen: Gen[NonUkAddress] = gen[NonUkAddress]
 
+  implicit val postcodeGen: Gen[Postcode] = gen[Postcode]
+
 }
 
 trait AddressLowerPriorityGen { this: GenUtils =>
@@ -129,7 +133,6 @@ trait AddressLowerPriorityGen { this: GenUtils =>
   implicit val ukAddressGen: Gen[UkAddress] = gen[UkAddress]
 
 }
-
 
 trait NameMatchGen { this: GenUtils =>
 
@@ -160,4 +163,11 @@ trait EmailGen { this: GenUtils =>
   implicit val emailGen: Gen[Email] = gen[Email]
 
   implicit val emailSourceGen: Gen[EmailSource] = gen[EmailSource]
+}
+
+trait VerifierMatchGen { this: GenUtils =>
+
+  implicit val unsuccessfulVerifierMatchAttemptsGen: Gen[UnsuccessfulVerifierAttempts] =
+    gen[UnsuccessfulVerifierAttempts]
+
 }
