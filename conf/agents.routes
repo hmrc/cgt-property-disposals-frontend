@@ -4,5 +4,7 @@ POST  /agent/enter-client-account-number             uk.gov.hmrc.cgtpropertydisp
 GET  /access-client-account/enter-client-postcode    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents.AgentAccessController.enterClientsPostcode()
 POST /access-client-account/enter-client-postcode    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents.AgentAccessController.enterClientsPostcodeSubmit()
 
-GET  /access-client-account/enter-client-country    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents.AgentAccessController.enterClientsCountry()
-POST /access-client-account/enter-client-country    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents.AgentAccessController.enterClientsCountrySubmit()
+GET  /access-client-account/enter-client-country     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents.AgentAccessController.enterClientsCountry()
+POST /access-client-account/enter-client-country     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents.AgentAccessController.enterClientsCountrySubmit()
+
+GET /access-client-account/too-many-attempts         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents.AgentAccessController.tooManyVerifierMatchAttempts()
