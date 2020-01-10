@@ -27,7 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionDetails
 
@@ -39,7 +39,7 @@ class SubscriptionAddressControllerSpec
     with RedirectToStartBehaviour {
 
   val subscriptionDetails: SubscriptionDetails =
-    sample[SubscriptionDetails].copy(address = address(1))
+    sample[SubscriptionDetails].copy(address = address(1), addressSource = AddressSource.BusinessPartnerRecord)
 
   val validJourneyStatus = SubscriptionReady(subscriptionDetails, sample[GGCredId])
 
@@ -48,7 +48,7 @@ class SubscriptionAddressControllerSpec
   lazy implicit val messagesApi: MessagesApi = controller.messagesApi
 
   override def updateAddress(journey: SubscriptionReady, address: Address): SubscriptionReady =
-    journey.copy(subscriptionDetails = journey.subscriptionDetails.copy(address = address))
+    journey.copy(subscriptionDetails = journey.subscriptionDetails.copy(address = address, addressSource = AddressSource.ManuallyEntered))
 
   override val mockUpdateAddress: Option[(SubscriptionReady, Address, Either[Error, Unit]) => Unit] = None
 

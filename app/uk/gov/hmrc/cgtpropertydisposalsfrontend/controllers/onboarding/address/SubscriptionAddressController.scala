@@ -18,14 +18,15 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address
 
 import cats.data.EitherT
 import cats.instances.future._
+import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc._
 import shapeless.{Lens, lens}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, SessionUpdates}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, SessionUpdates}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
@@ -64,6 +65,9 @@ class SubscriptionAddressController @Inject()(
   val subscriptionReadyAddressLens: Lens[SubscriptionReady, Address] =
     lens[SubscriptionReady].subscriptionDetails.address
 
+  val subscriptionReadyAddressSourceLens: Lens[SubscriptionReady, AddressSource] =
+    lens[SubscriptionReady].subscriptionDetails.addressSource
+
   def validJourney(
     request: RequestWithSessionData[_]
   ): Either[Result, (SessionData, SubscriptionReady)] =
@@ -76,9 +80,9 @@ class SubscriptionAddressController @Inject()(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, SubscriptionReady] = {
     val auditPath = address match {
-      case Address.UkAddress(line1, line2, town, county, postcode) =>
+      case _: Address.UkAddress =>
         routes.SubscriptionAddressController.enterUkAddressSubmit().url
-      case Address.NonUkAddress(line1, line2, line3, line4, postcode, country) =>
+      case _: Address.NonUkAddress =>
         routes.SubscriptionAddressController.enterNonUkAddressSubmit().url
     }
     auditService.sendSubscriptionContactAddressChangedEvent(
@@ -87,7 +91,15 @@ class SubscriptionAddressController @Inject()(
       isManuallyEnteredAddress,
       auditPath
     )
-    EitherT.pure[Future, Error](subscriptionReadyAddressLens.set(journey)(address))
+
+    val addressSource =
+      if (address === journey.subscriptionDetails.address) journey.subscriptionDetails.addressSource
+      else AddressSource.ManuallyEntered
+
+    EitherT.pure[Future, Error](
+      (subscriptionReadyAddressLens ~ subscriptionReadyAddressSourceLens)
+        .set(journey)(address -> addressSource)
+    )
   }
 
   protected lazy val backLinkCall: Call                = controllers.onboarding.routes.SubscriptionController.checkYourDetails()

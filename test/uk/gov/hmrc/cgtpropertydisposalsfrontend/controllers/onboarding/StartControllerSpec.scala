@@ -41,8 +41,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AgentStatu
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.RetrievedUserType.Individual
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressSource, Postcode}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR, SapNumber}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, BusinessPartnerRecordResponse}
@@ -466,7 +466,7 @@ class StartControllerSpec
           val bprWithNoEmail = BusinessPartnerRecord(
             None,
             sample[Address],
-            "sap",
+            sample[SapNumber],
             Right(name)
           )
 
@@ -481,7 +481,8 @@ class StartControllerSpec
                   bprWithNoEmail.address,
                   ContactName(name.makeSingleName),
                   bprWithNoEmail.sapNumber,
-                  EmailSource.ManuallyEntered
+                  EmailSource.ManuallyEntered,
+                  AddressSource.BusinessPartnerRecord
                 )
 
               val session = SessionData.empty.copy(
@@ -549,7 +550,7 @@ class StartControllerSpec
         val bpr = models.onboarding.bpr.BusinessPartnerRecord(
           Some(emailAddress),
           sample[UkAddress],
-          "sap",
+          sample[SapNumber],
           Right(name)
         )
 
@@ -561,7 +562,8 @@ class StartControllerSpec
             bpr.address,
             ContactName(name.makeSingleName()),
             bpr.sapNumber,
-            EmailSource.BusinessPartnerRecord
+            EmailSource.BusinessPartnerRecord,
+            AddressSource.BusinessPartnerRecord
           )
 
           "redirect to check subscription details" when {
@@ -1029,7 +1031,7 @@ class StartControllerSpec
           val sautr     = SAUTR("sautr")
           val trustName = TrustName("trustname")
           val address   = UkAddress("line 1", None, None, None, Postcode("postcode"))
-          val sapNumber = "sap"
+          val sapNumber = SapNumber("sap")
           val bpr       = BusinessPartnerRecord(Some(emailAddress), address, sapNumber, Left(trustName))
           val trustSubscriptionDetails =
             SubscriptionDetails(
@@ -1038,7 +1040,8 @@ class StartControllerSpec
               bpr.address,
               ContactName(trustName.value),
               bpr.sapNumber,
-              EmailSource.BusinessPartnerRecord
+              EmailSource.BusinessPartnerRecord,
+              AddressSource.BusinessPartnerRecord
             )
 
           "redirect to the subscription confirmation page" when {

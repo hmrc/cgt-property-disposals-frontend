@@ -41,9 +41,9 @@ trait SubscriptionService {
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, SubscriptionResponse]
 
-  def registerWithoutIdAndSubscribe(registrationDetails: RegistrationDetails)(
+  def registerWithoutId(registrationDetails: RegistrationDetails)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, SubscriptionResponse]
+  ): EitherT[Future, Error, RegisteredWithoutId]
 
   def hasSubscription(
     )(implicit hc: HeaderCarrier): EitherT[Future, Error, Option[CgtReference]]
@@ -68,27 +68,29 @@ class SubscriptionServiceImpl @Inject()(connector: CGTPropertyDisposalsConnector
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, SubscriptionResponse] =
     connector
       .subscribe(subscriptionDetails)
-      .subflatMap(handleSubscriptionResponse(_, "subscribe"))
+      .subflatMap{  response =>
+        if (response.status === OK)
+        response.parseJSON[SubscriptionSuccessful]().leftMap(Error(_))
+      else if (response.status === CONFLICT) {
+        metrics.accessWithWrongGGAccountCounter.inc()
+        Right(AlreadySubscribed)
+      }
+      else
+        Left(Error(s"call to subscribe came back with status ${response.status}"))
 
-  override def registerWithoutIdAndSubscribe(registrationDetails: RegistrationDetails)(
+      }
+
+  override def registerWithoutId(registrationDetails: RegistrationDetails)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, SubscriptionResponse] =
+  ): EitherT[Future, Error, RegisteredWithoutId] =
     connector
-      .registerWithoutIdAndSubscribe(registrationDetails)
-      .subflatMap(handleSubscriptionResponse(_, "register without id and subscribe"))
-
-  private def handleSubscriptionResponse(
-    response: HttpResponse,
-    description: String
-  ): Either[Error, SubscriptionResponse] =
-    if (response.status === OK)
-      response.parseJSON[SubscriptionSuccessful]().leftMap(Error(_))
-    else if (response.status === CONFLICT) {
-      metrics.accessWithWrongGGAccountCounter.inc()
-      Right(AlreadySubscribed)
-    }
-    else
-      Left(Error(s"call to $description came back with status ${response.status}"))
+      .registerWithoutId(registrationDetails)
+      .subflatMap{ response =>
+        if(response.status === OK)
+          response.parseJSON[RegisteredWithoutId]().leftMap(Error(_))
+        else
+          Left(Error(s"Call to register without id came back with status ${response.status}"))
+      }
 
   override def hasSubscription(
     )(implicit hc: HeaderCarrier): EitherT[Future, Error, Option[CgtReference]] =

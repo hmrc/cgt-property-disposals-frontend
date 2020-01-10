@@ -21,7 +21,7 @@ import cats.syntax.eq._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.routes
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressSource, Country}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.BusinessPartnerRecordNameMatchDetails.{IndividualNameWithSaUtrAuditDetails, TrustNameWithTrnAuditDetails}
@@ -322,13 +322,16 @@ class OnboardingAuditServiceImpl @Inject()(auditConnector: AuditConnector) exten
       else
         None
 
+    val auditAddress = toAuditAddress(subscriptionDetails.address)
+
     val prePopulatedUserData = {
       PrePopulatedUserData(
         "CGT",
-        subscriptionDetails.sapNumber,
+        subscriptionDetails.sapNumber.value,
         subscriptionDetails.name.toOption.map(i => IndividualAuditDetails(i.firstName, i.lastName)),
         subscriptionDetails.name.swap.toOption.map(t => TrustAuditDetails(t.value)),
-        prepopulatedEmailSource.map(source => EmailAuditDetails(subscriptionDetails.emailAddress.value, source))
+        prepopulatedEmailSource.map(source => EmailAuditDetails(subscriptionDetails.emailAddress.value, source)),
+        if (subscriptionDetails.addressSource === AddressSource.BusinessPartnerRecord) Some(auditAddress) else None
       )
     }
 
@@ -339,12 +342,7 @@ class OnboardingAuditServiceImpl @Inject()(auditConnector: AuditConnector) exten
           None
         else
           Some(subscriptionDetails.emailAddress.value),
-        subscriptionDetails.address match {
-          case Address.UkAddress(line1, line2, town, county, postcode) =>
-            AuditAddress(line1, line2, town, county, Some(postcode.value), Country("GB", Some("United Kingdom")))
-          case Address.NonUkAddress(line1, line2, line3, line4, postcode, country) =>
-            AuditAddress(line1, line2, line3, line4, postcode, country)
-        }
+        if (subscriptionDetails.addressSource === AddressSource.ManuallyEntered) Some(auditAddress) else None
       )
 
     val event = SubscriptionRequestEvent(prePopulatedUserData, manuallyEnteredData)
@@ -483,12 +481,7 @@ class OnboardingAuditServiceImpl @Inject()(auditConnector: AuditConnector) exten
       RegistrationManuallyEnteredData(
         s"${registrationDetails.name.firstName} ${registrationDetails.name.lastName}",
         if (prepopulatedEmailSource.isEmpty) Some(registrationDetails.emailAddress.value) else None,
-        registrationDetails.address match {
-          case Address.UkAddress(line1, line2, town, county, postcode) =>
-            AuditAddress(line1, line2, town, county, Some(postcode.value), Country("GB", Some("United Kingdom")))
-          case Address.NonUkAddress(line1, line2, line3, line4, postcode, country) =>
-            AuditAddress(line1, line2, line3, line4, postcode, country)
-        }
+        toAuditAddress(registrationDetails.address)
       )
 
     val event = RegistrationRequestEvent(prePopulatedUserData, manuallyEnteredData)
