@@ -17,7 +17,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 
 @this(
@@ -25,31 +25,36 @@
         textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
         submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary
+        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@(form: Form[CgtReference])(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[Postcode])(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
-@key = @{"cgtReference"}
-@title = @{messages("agent.enter-client-cgt-ref.title")}
+@key = @{"postcode"}
+@title = @{messages("agent.enter-client-postcode.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @mainTemplate(title = title, hasErrors = hasErrors, userType = request.userType, withSignOutLink = true) {
+
+ @backLinkComponent(routes.AgentAccessController.enterClientsCgtRef())
 
  @if(hasErrors) {
   @errorSummary(form)
  }
 
- @formWrapper(routes.AgentAccessController.enterClientsCgtRefSubmit(), 'novalidate -> "novalidate") {
+ @formWrapper(routes.AgentAccessController.enterClientsPostcodeSubmit(), 'novalidate -> "novalidate") {
   @textInput(
    fieldId = key,
    label = Html(title),
-   helpText = Some(Html(messages("agent.enter-client-cgt-ref.helpText"))),
    labelAsHeading = true,
+   helpText = Some(Html(messages("agent.enter-client-postcode.helpText"))),
    errorKey = form.error(key).map(e => e.message),
+   extraContent = Some(Html(s"""<p class="lede">${messages("agent.enter-client-postcode.extraContent")}</p>""")),
    value = form.data.getOrElse(key, ""),
    hasErrors = hasErrors,
-   autoComplete = AutoCompleteType.On
+   inputClass = Some("form-control-1-4"),
+   autoComplete = AutoCompleteType.Postcode
   )
 
   @submitButton(messages("button.continue"))

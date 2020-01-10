@@ -219,16 +219,12 @@ nonUkAddress-line2.error.pattern=Address line 2 must only include letters, numbe
 nonUkAddress-line3.error.pattern=Address line 3 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes 
 nonUkAddress-line4.error.pattern=Address line 4 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
 countryCode.error.required=Enter a country from the options presented as you type
-countryCode.error.notFound=Enter a country from the options presented as you type
+countryCode.error.notFound=Enter a real country
 
 address-select.title=Select your contact address
 address-select.error.required=Select the contact address or enter it manually if it is not shown
 address-select.error.number=Select the contact address or enter it manually if it is not shown
 address-select.invalid=Select the contact address or enter it manually if it is not shown
-
-country-code.label=Country
-country-code.error.required=Enter country
-country-code.error.enum=Country must be a valid country, select the matching country from the list as you type
 
 subscribed.title=Account created
 subscribed.individual.p1=You’ve created a Capital Gains Tax on UK property account
@@ -443,3 +439,24 @@ cgtReference.error.tooLong=Enter a Capital Gains Tax on UK property account numb
 cgtReference.error.invalidCharacters=Capital Gains Tax on UK property account number must only include letters and numbers
 cgtReference.error.pattern=Enter a real Capital Gains Tax on UK property account number
 cgtReference.error.notPermitted=Enter the account number of a client who has authorised you to manage their account
+
+
+agent.enter-client-postcode.title=Enter your client’s postcode
+agent.enter-client-postcode.extraContent=This must match the postcode your client used in their Capital Gains Tax on UK property account contact address.
+agent.enter-client-postcode.helpText=For example, AB2 9WQ
+
+agent.enter-client-country.title=Enter your client’s country
+agent.enter-client-country.extraContent=This must match the country your client used in their Capital Gains Tax on UK property account contact address.
+
+postcode.error.noMatch=Postcode cannot be found
+countryCode.error.noMatch=Country cannot be found
+
+agent.too-many-attempts.title=You’ll need to wait and try again
+agent.too-many-attempts.p1=You’ve entered incorrect details for your client too many times.
+agent.too-many-attempts.p2=You’ll need to wait 2 hours and try again.
+agent.too-many-attempts.p3=You can <a href="{0}">change to a different client’s Capital Gains Tax on UK property account</a>.
+
+agent.confirm-client.title=Check and confirm your client’s details
+agent.confirm-client.name=Name
+agent.confirm-client.cgt-reference=Capital Gains Tax on UK property account number
+agent.confirm-client.change-client=Change client

@@ -52,8 +52,6 @@ class EmailWhitelistingFilter @Inject()(
 
   val otacUrl: String = config.underlying.getString("otac.url")
 
-  val selfBaseUrl: String = config.underlying.getString("self.url")
-
   lazy val thereIsAProblemCall: Call =
     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.EmailWhitelistingController.thereIsAProblem()
 
@@ -81,7 +79,7 @@ class EmailWhitelistingFilter @Inject()(
             case NonFatal(_) =>
               Redirect(s"$otacUrl?p=$token")
                 .addingToSession(
-                  SessionKeys.redirect  -> s"$selfBaseUrl${routes.StartController.start()}?p=$token",
+                  SessionKeys.redirect  -> rh.uri,
                   SessionKeys.otacToken -> token
                 )(rh)
           }

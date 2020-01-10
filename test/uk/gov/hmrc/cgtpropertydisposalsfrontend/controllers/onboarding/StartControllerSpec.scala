@@ -1637,9 +1637,7 @@ class StartControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    SessionData.empty.copy(
-                      journeyStatus = Some(sample(implicitly[ClassTag[JourneyStatus]], journeyStatusGen))
-                    )
+                    SessionData.empty.copy(journeyStatus = Some(sample[JourneyStatus]))
                   )
                 )
               )
@@ -1664,7 +1662,7 @@ class StartControllerSpec
                   Some(
                     SessionData.empty.copy(
                       userType      = Some(UserType.Individual),
-                      journeyStatus = Some(sample[JourneyStatus](implicitly[ClassTag[JourneyStatus]], journeyStatusGen)),
+                      journeyStatus = Some(sample[JourneyStatus]),
                       needMoreDetailsDetails = Some(
                         NeedMoreDetailsDetails(
                           continueUrl,
