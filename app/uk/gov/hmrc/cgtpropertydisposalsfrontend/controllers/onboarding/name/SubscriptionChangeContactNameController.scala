@@ -18,13 +18,15 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.name
 
 import cats.data.EitherT
 import cats.instances.future._
+import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ContactNameController, SessionUpdates}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.{routes => nameRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ContactNameController, SessionUpdates}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, ContactNameSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.OnboardingAuditService
@@ -32,7 +34,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.{routes => nameRoutes}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -70,17 +71,26 @@ class SubscriptionChangeContactNameController @Inject()(
       contactName.value,
       nameRoutes.SubscribedChangeContactNameController.enterContactNameSubmit().url
     )
+
+    val source =
+      if (journey.subscriptionDetails.contactName === contactName) journey.subscriptionDetails.contactNameSource
+      else ContactNameSource.ManuallyEntered
+
     EitherT.rightT[Future, Error](
-      journey.copy(subscriptionDetails = journey.subscriptionDetails.copy(contactName = contactName))
+      journey.copy(
+        subscriptionDetails = journey.subscriptionDetails.copy(contactName = contactName, contactNameSource = source)
+      )
     )
   }
 
   override def contactName(journey: SubscriptionReady): Option[ContactName] =
     Some(journey.subscriptionDetails.contactName)
 
-  override protected lazy val backLinkCall: Call = controllers.onboarding.routes.SubscriptionController.checkYourDetails()
+  override protected lazy val backLinkCall: Call =
+    controllers.onboarding.routes.SubscriptionController.checkYourDetails()
   override protected lazy val enterContactNameSubmitCall: Call =
     routes.SubscriptionChangeContactNameController.enterContactNameSubmit()
-  override protected lazy val continueCall: Call = controllers.onboarding.routes.SubscriptionController.checkYourDetails()
+  override protected lazy val continueCall: Call =
+    controllers.onboarding.routes.SubscriptionController.checkYourDetails()
 
 }

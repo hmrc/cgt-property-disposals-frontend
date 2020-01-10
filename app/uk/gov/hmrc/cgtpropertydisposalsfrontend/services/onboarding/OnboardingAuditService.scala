@@ -23,7 +23,7 @@ import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.routes
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressSource, Country}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactNameSource, IndividualName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.BusinessPartnerRecordNameMatchDetails.{IndividualNameWithSaUtrAuditDetails, TrustNameWithTrnAuditDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{Address => AuditAddress, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.EmailSource
@@ -331,13 +331,18 @@ class OnboardingAuditServiceImpl @Inject()(auditConnector: AuditConnector) exten
         subscriptionDetails.name.toOption.map(i => IndividualAuditDetails(i.firstName, i.lastName)),
         subscriptionDetails.name.swap.toOption.map(t => TrustAuditDetails(t.value)),
         prepopulatedEmailSource.map(source => EmailAuditDetails(subscriptionDetails.emailAddress.value, source)),
-        if (subscriptionDetails.addressSource === AddressSource.BusinessPartnerRecord) Some(auditAddress) else None
+        if (subscriptionDetails.addressSource =!= AddressSource.ManuallyEntered) Some(auditAddress) else None,
+        if (subscriptionDetails.contactNameSource =!= ContactNameSource.ManuallyEntered)
+          Some(subscriptionDetails.contactName.value)
+        else None
       )
     }
 
     val manuallyEnteredData =
       ManuallyEnteredData(
-        subscriptionDetails.contactName.value,
+        if (subscriptionDetails.contactNameSource === ContactNameSource.ManuallyEntered)
+          Some(subscriptionDetails.contactName.value)
+        else None,
         if (prepopulatedEmailSource.isDefined)
           None
         else
