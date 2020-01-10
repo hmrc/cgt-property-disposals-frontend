@@ -456,3 +456,7 @@ agent.too-many-attempts.p1=You’ve entered incorrect details for your client to
 agent.too-many-attempts.p2=You’ll need to wait 2 hours and try again.
 agent.too-many-attempts.p3=You can <a href="{0}">change to a different client’s Capital Gains Tax on UK property account</a>.
 
+agent.confirm-client.title=Check and confirm your client’s details
+agent.confirm-client.name=Name
+agent.confirm-client.cgt-reference=Capital Gains Tax on UK property account number
+agent.confirm-client.change-client=Change client
