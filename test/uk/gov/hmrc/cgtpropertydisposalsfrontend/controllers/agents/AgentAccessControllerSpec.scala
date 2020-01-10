@@ -19,6 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents
 import cats.data.EitherT
 import cats.instances.future._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -36,10 +37,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.AgentStatus.{AgentSupplyingClientDetails, VerifierMatchingDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country, Postcode}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifierAttempts
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.agents.AgentVerifierMatchRetryStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -54,11 +57,21 @@ class AgentAccessControllerSpec
     with ScalaCheckDrivenPropertyChecks
     with PostcodeFormValidationTests {
 
+  val mockAgentVerifierMatchRetryStore: AgentVerifierMatchRetryStore =
+    mock[AgentVerifierMatchRetryStore]
+
+  val maxVerifierMatchAttempts = 5
+
+  override lazy val additionalConfig: Configuration = Configuration(
+    "agent-verifier-match.max-retries" -> maxVerifierMatchAttempts
+  )
+
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
-      bind[SubscriptionService].toInstance(mockSubscriptionService)
+      bind[SubscriptionService].toInstance(mockSubscriptionService),
+      bind[AgentVerifierMatchRetryStore].toInstance(mockAgentVerifierMatchRetryStore)
     )
 
   lazy val controller = instanceOf[AgentAccessController]
@@ -72,9 +85,9 @@ class AgentAccessControllerSpec
   val (nonUkCountryCode, nonUkCountryName) =
     Country.countryCodeToCountryName.headOption.getOrElse(sys.error("Could not find country"))
 
-  val nonUkAddress  = sample[NonUkAddress].copy(country = Country(nonUkCountryCode, Some(nonUkCountryName)))
+  val nonUkAddress = sample[NonUkAddress].copy(country = Country(nonUkCountryCode, Some(nonUkCountryName)))
 
-  val ukAddress     = sample[UkAddress].copy(postcode = Postcode("ZZ011ZZ"))
+  val ukAddress = sample[UkAddress].copy(postcode = Postcode("ZZ011ZZ"))
 
   val ukClientDetails = newClientDetails(validCgtReference, ukAddress)
 
@@ -105,6 +118,27 @@ class AgentAccessControllerSpec
       .getSubscribedDetails(_: CgtReference)(_: HeaderCarrier))
       .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](result))
+
+  def mockGetUnsuccessfulVerifierAttempts(
+    agentGGCredId: GGCredId,
+    clientCgtReference: CgtReference
+  )(result: Either[Error, Option[UnsuccessfulVerifierAttempts]]) =
+    (mockAgentVerifierMatchRetryStore
+      .get(_: GGCredId, _: CgtReference))
+      .expects(agentGGCredId, clientCgtReference)
+      .returning(Future.successful(result))
+
+  def mockStoreUnsuccessfulVerifierAttempts(
+    agentGGCredId: GGCredId,
+    clientCgtReference: CgtReference,
+    unsuccessfulVerifierAttempts: UnsuccessfulVerifierAttempts
+  )(
+    result: Either[Error, Unit]
+  ) =
+    (mockAgentVerifierMatchRetryStore
+      .store(_: GGCredId, _: CgtReference, _: UnsuccessfulVerifierAttempts))
+      .expects(agentGGCredId, clientCgtReference, unsuccessfulVerifierAttempts)
+      .returning(Future.successful(result))
 
   "AgentAccessController" when {
 
@@ -341,6 +375,8 @@ class AgentAccessControllerSpec
         }
       )
 
+      behave like commonRedirectToTooManyAttemptsBehaviour(performAction)
+
       "redirect to the enter country page" when {
 
         "the client's contact address is not in the uk" in {
@@ -362,6 +398,7 @@ class AgentAccessControllerSpec
                 )
               )
             )
+            mockGetUnsuccessfulVerifierAttempts(ggCredId, ukClientDetails.cgtReference)(Right(None))
           }
 
           checkIsRedirect(performAction(), routes.AgentAccessController.enterClientsCountry())
@@ -374,7 +411,10 @@ class AgentAccessControllerSpec
         "the session data is valid and the agent has not yet supplied the correct postcode" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false)))))
+            mockGetSession(
+              Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false))))
+            )
+            mockGetUnsuccessfulVerifierAttempts(ggCredId, ukClientDetails.cgtReference)(Right(None))
           }
 
           val result = performAction()
@@ -388,6 +428,7 @@ class AgentAccessControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = true)))))
+            mockGetUnsuccessfulVerifierAttempts(ggCredId, ukClientDetails.cgtReference)(Right(None))
           }
 
           val result = performAction()
@@ -400,6 +441,10 @@ class AgentAccessControllerSpec
     }
 
     "handling submitted postcodes" must {
+
+      val incorrectPostcode = Postcode("AB12CD")
+
+      val otherIncorrectPostcode = Postcode("AB12CD")
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterClientsPostcodeSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
@@ -416,19 +461,57 @@ class AgentAccessControllerSpec
         () =>
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false)))))
+            mockGetSession(
+              Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false))))
+            )
+            mockGetUnsuccessfulVerifierAttempts(ggCredId, ukClientDetails.cgtReference)(Right(None))
           }
       )
 
+      behave like commonRedirectToTooManyAttemptsBehaviour(() => performAction("postcode" -> ukAddress.postcode.value))
+
       "show a form error" when {
 
-        "the submitted postcode is valid but it doesn't match the client's one" in {
+        "the submitted postcode is valid but it doesn't match the client's one and " +
+          "the agent has not previously made an attempt" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false)))))
+            mockGetSession(
+              Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false))))
+            )
+            mockGetUnsuccessfulVerifierAttempts(ggCredId, ukClientDetails.cgtReference)(Right(None))
+            mockStoreUnsuccessfulVerifierAttempts(
+              ggCredId,
+              ukClientDetails.cgtReference,
+              UnsuccessfulVerifierAttempts(1, Right(incorrectPostcode))
+            )(Right(()))
           }
 
-          val result = performAction("postcode" -> "AB12CD")
+          val result = performAction("postcode" -> incorrectPostcode.value)
+          status(result) shouldBe BAD_REQUEST
+          val content = contentAsString(result)
+          content should include(message("agent.enter-client-postcode.title"))
+          content should include(message("postcode.error.noMatch"))
+        }
+
+        "the submitted postcode is valid but it doesn't match the client's one and " +
+          "the agent has previously made an attempt" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false))))
+            )
+            mockGetUnsuccessfulVerifierAttempts(ggCredId, ukClientDetails.cgtReference)(
+              Right(Some(UnsuccessfulVerifierAttempts(1, Right(otherIncorrectPostcode))))
+            )
+            mockStoreUnsuccessfulVerifierAttempts(
+              ggCredId,
+              ukClientDetails.cgtReference,
+              UnsuccessfulVerifierAttempts(2, Right(incorrectPostcode))
+            )(Right(()))
+          }
+
+          val result = performAction("postcode" -> incorrectPostcode.value)
           status(result) shouldBe BAD_REQUEST
           val content = contentAsString(result)
           content should include(message("agent.enter-client-postcode.title"))
@@ -458,6 +541,7 @@ class AgentAccessControllerSpec
                 )
               )
             )
+            mockGetUnsuccessfulVerifierAttempts(ggCredId, ukClientDetails.cgtReference)(Right(None))
           }
 
           checkIsRedirect(performAction(), routes.AgentAccessController.enterClientsCountry())
@@ -470,12 +554,61 @@ class AgentAccessControllerSpec
         "the submitted postcode is valid and matches the client's one but there is a problem updating the session" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false)))))
-            mockStoreSession(sessionData(ukClientDetails, correctVerifierSupplied = true))(Future.successful(Left(Error(""))))
+            mockGetSession(
+              Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false))))
+            )
+            mockGetUnsuccessfulVerifierAttempts(ggCredId, ukClientDetails.cgtReference)(Right(None))
+            mockStoreSession(sessionData(ukClientDetails, correctVerifierSupplied = true))(
+              Future.successful(Left(Error("")))
+            )
           }
 
           val result = performAction("postcode" -> ukAddress.postcode.value)
           checkIsTechnicalErrorPage(result)
+        }
+
+        "the submitted postcode does not match and there is a problem updating the store" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false))))
+            )
+            mockGetUnsuccessfulVerifierAttempts(ggCredId, ukClientDetails.cgtReference)(Right(None))
+            mockStoreUnsuccessfulVerifierAttempts(
+              ggCredId,
+              ukClientDetails.cgtReference,
+              UnsuccessfulVerifierAttempts(1, Right(incorrectPostcode))
+            )(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction("postcode" -> incorrectPostcode.value))
+        }
+
+      }
+
+      "redirect to the too many attempts page" when {
+
+        "the agent has not previously made too many attempts but they submit an incorrect postcode and " +
+          "they have now made too many attempts" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false))))
+            )
+            mockGetUnsuccessfulVerifierAttempts(ggCredId, ukClientDetails.cgtReference)(
+              Right(Some(UnsuccessfulVerifierAttempts(maxVerifierMatchAttempts - 1, Right(otherIncorrectPostcode))))
+            )
+            mockStoreUnsuccessfulVerifierAttempts(
+              ggCredId,
+              ukClientDetails.cgtReference,
+              UnsuccessfulVerifierAttempts(maxVerifierMatchAttempts, Right(incorrectPostcode))
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction("postcode" -> incorrectPostcode.value),
+            routes.AgentAccessController.tooManyVerifierMatchAttempts()
+          )
         }
 
       }
@@ -490,8 +623,13 @@ class AgentAccessControllerSpec
           ).foreach { postcode =>
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false)))))
-              mockStoreSession(sessionData(ukClientDetails, correctVerifierSupplied = true))(Future.successful(Right(())))
+              mockGetSession(
+                Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false))))
+              )
+              mockGetUnsuccessfulVerifierAttempts(ggCredId, ukClientDetails.cgtReference)(Right(None))
+              mockStoreSession(sessionData(ukClientDetails, correctVerifierSupplied = true))(
+                Future.successful(Right(()))
+              )
             }
 
             val result = performAction("postcode" -> postcode)
@@ -515,6 +653,8 @@ class AgentAccessControllerSpec
         }
       )
 
+      behave like commonRedirectToTooManyAttemptsBehaviour(performAction)
+
       "redirect to the enter postcode page" when {
 
         "the client's contact address is in the uk" in {
@@ -536,6 +676,7 @@ class AgentAccessControllerSpec
                 )
               )
             )
+            mockGetUnsuccessfulVerifierAttempts(ggCredId, nonUkClientDetails.cgtReference)(Right(None))
           }
 
           checkIsRedirect(performAction(), routes.AgentAccessController.enterClientsPostcode())
@@ -548,7 +689,10 @@ class AgentAccessControllerSpec
         "the session data is valid and the agent has not yet supplied the correct country" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = false)))))
+            mockGetSession(
+              Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = false))))
+            )
+            mockGetUnsuccessfulVerifierAttempts(ggCredId, nonUkClientDetails.cgtReference)(Right(None))
           }
 
           val result = performAction()
@@ -561,7 +705,10 @@ class AgentAccessControllerSpec
         "the session data is valid and the agent has already supplied the correct country" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = true)))))
+            mockGetSession(
+              Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = true))))
+            )
+            mockGetUnsuccessfulVerifierAttempts(ggCredId, nonUkClientDetails.cgtReference)(Right(None))
           }
 
           val result = performAction()
@@ -575,6 +722,10 @@ class AgentAccessControllerSpec
 
     "handling submitted countries" must {
 
+      val incorrectCountry = Country("HK", Some("Hong Kong"))
+
+      val otherIncorrectCountry = Country("FI", Some("Finland"))
+
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterClientsCountrySubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
 
@@ -585,12 +736,28 @@ class AgentAccessControllerSpec
         }
       )
 
+      behave like commonRedirectToTooManyAttemptsBehaviour(
+        () => performAction("countryCode" -> nonUkCountryCode)
+      )
+
       "show a form error" when {
 
-        def testFormValidationError(formData: (String, String)*)(errorKey: String): Unit = {
+        def testFormValidationError(formData: (String, String)*)(
+          errorKey: String,
+          currentUnsuccessfulAttempt: Option[UnsuccessfulVerifierAttempts],
+          updatedUnsucessfulAttempt: Option[UnsuccessfulVerifierAttempts]
+        ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = false)))))
+            mockGetSession(
+              Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = false))))
+            )
+            mockGetUnsuccessfulVerifierAttempts(ggCredId, nonUkClientDetails.cgtReference)(
+              Right(currentUnsuccessfulAttempt)
+            )
+            updatedUnsucessfulAttempt.foreach(
+              mockStoreUnsuccessfulVerifierAttempts(ggCredId, nonUkClientDetails.cgtReference, _)(Right(()))
+            )
           }
 
           val result = performAction(formData: _*)
@@ -601,15 +768,29 @@ class AgentAccessControllerSpec
         }
 
         "no country is submitted" in {
-          testFormValidationError()("countryCode.error.required")
+          testFormValidationError()("countryCode.error.required", None, None)
         }
 
         "the country submitted doesn't exist" in {
-          testFormValidationError("countryCode" -> "XY")("countryCode.error.notFound")
+          testFormValidationError("countryCode" -> "XY")("countryCode.error.notFound", None, None)
         }
 
-        "the submitted country is valid but it doesn't match the client's one" in {
-          testFormValidationError("countryCode" -> "HK")("countryCode.error.noMatch")
+        "the submitted country is valid but it doesn't match the client's one and" +
+          "the agent has not previously made an attempt" in {
+          testFormValidationError("countryCode" -> incorrectCountry.code)(
+            "countryCode.error.noMatch",
+            None,
+            Some(UnsuccessfulVerifierAttempts(1, Left(incorrectCountry)))
+          )
+        }
+
+        "the submitted country is valid but it doesn't match the client's one and" +
+          "the agent has previously made an attempt" in {
+          testFormValidationError("countryCode" -> incorrectCountry.code)(
+            "countryCode.error.noMatch",
+            Some(UnsuccessfulVerifierAttempts(1, Left(otherIncorrectCountry))),
+            Some(UnsuccessfulVerifierAttempts(2, Left(incorrectCountry)))
+          )
         }
 
       }
@@ -635,6 +816,7 @@ class AgentAccessControllerSpec
                 )
               )
             )
+            mockGetUnsuccessfulVerifierAttempts(ggCredId, nonUkClientDetails.cgtReference)(Right(None))
           }
 
           checkIsRedirect(performAction(), routes.AgentAccessController.enterClientsPostcode())
@@ -647,12 +829,61 @@ class AgentAccessControllerSpec
         "the submitted country is valid and matches the client's one but there is a problem updating the session" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = false)))))
-            mockStoreSession(sessionData(nonUkClientDetails, correctVerifierSupplied = true))(Future.successful(Left(Error(""))))
+            mockGetSession(
+              Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = false))))
+            )
+            mockGetUnsuccessfulVerifierAttempts(ggCredId, nonUkClientDetails.cgtReference)(Right(None))
+            mockStoreSession(sessionData(nonUkClientDetails, correctVerifierSupplied = true))(
+              Future.successful(Left(Error("")))
+            )
           }
 
           val result = performAction("countryCode" -> nonUkCountryCode)
           checkIsTechnicalErrorPage(result)
+        }
+
+        "the submitted postcode does not match and there is a problem updating the store" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = false))))
+            )
+            mockGetUnsuccessfulVerifierAttempts(ggCredId, nonUkClientDetails.cgtReference)(Right(None))
+            mockStoreUnsuccessfulVerifierAttempts(
+              ggCredId,
+              nonUkClientDetails.cgtReference,
+              UnsuccessfulVerifierAttempts(1, Left(incorrectCountry))
+            )(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction("countryCode" -> incorrectCountry.code))
+        }
+
+      }
+
+      "redirect to the too many attempts page" when {
+
+        "the agent has not previously made too many attempts but they submit an incorrect postcode and " +
+          "they have now made too many attempts" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = false))))
+            )
+            mockGetUnsuccessfulVerifierAttempts(ggCredId, nonUkClientDetails.cgtReference)(
+              Right(Some(UnsuccessfulVerifierAttempts(maxVerifierMatchAttempts - 1, Left(otherIncorrectCountry))))
+            )
+            mockStoreUnsuccessfulVerifierAttempts(
+              ggCredId,
+              nonUkClientDetails.cgtReference,
+              UnsuccessfulVerifierAttempts(maxVerifierMatchAttempts, Left(incorrectCountry))
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction("countryCode" -> incorrectCountry.code),
+            routes.AgentAccessController.tooManyVerifierMatchAttempts()
+          )
         }
 
       }
@@ -662,8 +893,13 @@ class AgentAccessControllerSpec
         "the submitted postcode is valid and matches the client's one and the session is updated" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = false)))))
-            mockStoreSession(sessionData(nonUkClientDetails, correctVerifierSupplied = true))(Future.successful(Right(())))
+            mockGetSession(
+              Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = false))))
+            )
+            mockGetUnsuccessfulVerifierAttempts(ggCredId, nonUkClientDetails.cgtReference)(Right(None))
+            mockStoreSession(sessionData(nonUkClientDetails, correctVerifierSupplied = true))(
+              Future.successful(Right(()))
+            )
           }
 
           val result = performAction("countryCode" -> nonUkCountryCode)
@@ -691,6 +927,7 @@ class AgentAccessControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false)))))
+            mockGetUnsuccessfulVerifierAttempts(ggCredId, ukClientDetails.cgtReference)(Right(None))
           }
 
           checkIsRedirect(performAction(), routes.AgentAccessController.enterClientsPostcode())
@@ -703,6 +940,7 @@ class AgentAccessControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = false)))))
+            mockGetUnsuccessfulVerifierAttempts(ggCredId, nonUkClientDetails.cgtReference)(Right(None))
           }
 
           checkIsRedirect(performAction(), routes.AgentAccessController.enterClientsCountry())
@@ -715,6 +953,7 @@ class AgentAccessControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData(clientDetails, correctVerifierSupplied = true)))))
+            mockGetUnsuccessfulVerifierAttempts(ggCredId, clientDetails.cgtReference)(Right(None))
           }
 
           val result = performAction()
@@ -722,7 +961,7 @@ class AgentAccessControllerSpec
 
           val content = contentAsString(result)
           content should include(message("agent.confirm-client.title"))
-          content should include(clientDetails.contactName.value)
+          content should include(clientDetails.makeAccountName())
           content should include(clientDetails.cgtReference.value)
         }
 
@@ -750,12 +989,15 @@ class AgentAccessControllerSpec
         }
       )
 
+      behave like commonRedirectToTooManyAttemptsBehaviour(performAction)
+
       "redirect to the enter postcode page" when {
 
         "the client's address is in the uk but the agent has not yet submitted it" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false)))))
+            mockGetUnsuccessfulVerifierAttempts(ggCredId, ukClientDetails.cgtReference)(Right(None))
           }
 
           checkIsRedirect(performAction(), routes.AgentAccessController.enterClientsPostcode())
@@ -768,6 +1010,7 @@ class AgentAccessControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = false)))))
+            mockGetUnsuccessfulVerifierAttempts(ggCredId, nonUkClientDetails.cgtReference)(Right(None))
           }
 
           checkIsRedirect(performAction(), routes.AgentAccessController.enterClientsCountry())
@@ -780,6 +1023,7 @@ class AgentAccessControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData(clientDetails, correctVerifierSupplied = true)))))
+            mockGetUnsuccessfulVerifierAttempts(ggCredId, clientDetails.cgtReference)(Right(None))
           }
 
           val result = performAction()
@@ -798,6 +1042,79 @@ class AgentAccessControllerSpec
       }
 
     }
+
+    "handling requests to display the too many attempts page" must {
+
+      def performAction(): Future[Result] =
+        controller.tooManyVerifierMatchAttempts()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        performAction,
+        {
+          case _: AgentSupplyingClientDetails => true
+          case _ => false
+        }
+      )
+
+      "display the page" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            Future.successful(Right(Some(sessionData(sample[SubscribedDetails], correctVerifierSupplied = true))))
+          )
+        }
+
+        val result = performAction()
+        status(result) shouldBe OK
+        contentAsString(result) should include(message("agent.too-many-attempts.title"))
+
+      }
+
+    }
+
+
+  }
+
+  def commonRedirectToTooManyAttemptsBehaviour(performAction: () => Future[Result]): Unit = {
+    val clientDetails = sample[SubscribedDetails]
+
+    "redirect to the too many attempts page" when {
+
+      "the stored data indicates the agent has already tried to enter in the client's verifier too many times" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            Future.successful(Right(Some(sessionData(clientDetails, correctVerifierSupplied = false))))
+          )
+          mockGetUnsuccessfulVerifierAttempts(ggCredId, clientDetails.cgtReference)(
+            Right(Some(UnsuccessfulVerifierAttempts(maxVerifierMatchAttempts, Right(sample[Postcode]))))
+          )
+        }
+
+        checkIsRedirect(performAction(), routes.AgentAccessController.tooManyVerifierMatchAttempts())
+      }
+
+    }
+
+    "show an error page" when {
+
+      "there is an error checking the number of attempts already made" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            Future.successful(Right(Some(sessionData(clientDetails, correctVerifierSupplied = false))))
+          )
+          mockGetUnsuccessfulVerifierAttempts(ggCredId, clientDetails.cgtReference)(Left(Error(""))
+          )
+        }
+
+        checkIsTechnicalErrorPage(performAction())
+      }
+
+
+    }
+
+
 
   }
 

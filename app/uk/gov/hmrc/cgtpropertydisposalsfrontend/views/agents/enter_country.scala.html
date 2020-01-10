@@ -35,7 +35,7 @@
 @title = @{messages("agent.enter-client-country.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title, userType = request.userType, withSignOutLink = true) {
+@mainTemplate(title = title, hasErrors = hasErrors, userType = request.userType, withSignOutLink = true) {
 
  @backLinkComponent(routes.AgentAccessController.enterClientsCgtRef())
 
