@@ -59,14 +59,6 @@ class UpscanServiceImplSpec extends WordSpec with Matchers with MockFactory {
   val mockStore: UpscanStore         = mock[UpscanStore]
 
   val service = new UpscanServiceImpl(mockConnector, mockStore, config)
-//
-//  def mockInsert(cgtReference: CgtReference, upscanNotifyResponse: UpscanNotifyResponse)(
-//    response: Either[Error, Unit]
-//  ) =
-//    (mockStore
-//      .insert(_: UpscanNotifyEvent)(_: HeaderCarrier))
-//      .expects(cgtReference, *)
-//      .returning(EitherT(Future.successful(response)))
 
   def mockUpscanInitiate(cgtReference: CgtReference)(response: Either[Error, HttpResponse]) =
     (mockConnector
