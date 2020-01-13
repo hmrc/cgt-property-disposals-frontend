@@ -33,7 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySub
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.AddressSource
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, SapNumber}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, ContactNameSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.EmailSource
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscriptionDetails}
@@ -275,7 +275,8 @@ class RegistrationController @Inject()(
       ContactName(s"${registrationDetails.name.firstName} ${registrationDetails.name.lastName}"),
       sapNumber,
       registrationDetails.emailSource,
-      AddressSource.ManuallyEntered
+      AddressSource.ManuallyEntered,
+      ContactNameSource.ManuallyEntered
     )
 
 }

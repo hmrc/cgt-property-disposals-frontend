@@ -41,7 +41,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySub
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, SapNumber}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, ContactNameSource, IndividualName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegisteredWithoutId, RegistrationDetails, SubscribedDetails, SubscriptionDetails, SubscriptionResponse}
@@ -628,7 +628,8 @@ class RegistrationControllerSpec
           ContactName(s"${details.name.firstName} ${details.name.lastName}"),
           sapNumber,
           details.emailSource,
-          AddressSource.ManuallyEntered
+          AddressSource.ManuallyEntered,
+          ContactNameSource.ManuallyEntered
         )
       }
 

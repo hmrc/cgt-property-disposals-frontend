@@ -43,7 +43,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressSource, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR, SapNumber}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, ContactNameSource, IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, BusinessPartnerRecordResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
@@ -482,7 +482,8 @@ class StartControllerSpec
                   ContactName(name.makeSingleName),
                   bprWithNoEmail.sapNumber,
                   EmailSource.ManuallyEntered,
-                  AddressSource.BusinessPartnerRecord
+                  AddressSource.BusinessPartnerRecord,
+                  ContactNameSource.DerivedFromBusinessPartnerRecord
                 )
 
               val session = SessionData.empty.copy(
@@ -563,7 +564,8 @@ class StartControllerSpec
             ContactName(name.makeSingleName()),
             bpr.sapNumber,
             EmailSource.BusinessPartnerRecord,
-            AddressSource.BusinessPartnerRecord
+            AddressSource.BusinessPartnerRecord,
+            ContactNameSource.DerivedFromBusinessPartnerRecord
           )
 
           "redirect to check subscription details" when {
@@ -1041,7 +1043,8 @@ class StartControllerSpec
               ContactName(trustName.value),
               bpr.sapNumber,
               EmailSource.BusinessPartnerRecord,
-              AddressSource.BusinessPartnerRecord
+              AddressSource.BusinessPartnerRecord,
+              ContactNameSource.DerivedFromBusinessPartnerRecord
             )
 
           "redirect to the subscription confirmation page" when {

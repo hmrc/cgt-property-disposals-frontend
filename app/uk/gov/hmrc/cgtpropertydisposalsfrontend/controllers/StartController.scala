@@ -31,7 +31,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.RetrievedUserType.{Indivi
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.AddressSource
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, ContactNameSource, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionDetails.MissingData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest.{IndividualBusinessPartnerRecordRequest, TrustBusinessPartnerRecordRequest}
@@ -353,7 +353,8 @@ class StartController @Inject()(
                       ContactName(bprWithTrustName._2.value),
                       bprWithTrustName._1.sapNumber,
                       emailWithSource._2,
-                      AddressSource.BusinessPartnerRecord
+                      AddressSource.BusinessPartnerRecord,
+                      ContactNameSource.DerivedFromBusinessPartnerRecord
                     )
                   )
                 }
