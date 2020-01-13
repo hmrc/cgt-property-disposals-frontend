@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,6 +51,7 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
             """
               | metrics.jvm = false
               | metrics.logback = false
+              | microservice.upscan-initiate.upscan-store.expiry-time = 1
           """.stripMargin
           )
         ) ++ additionalConfig

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.Unsuccessf
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscribedUpdateDetails, SubscriptionDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanNotifyResponse
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanServiceResponse.{UpscanNotifyEvent, UpscanResponse}
 
 import scala.reflect.{ClassTag, classTag}
 
@@ -44,7 +46,8 @@ object Generators
     with AddressGen
     with NameMatchGen
     with OnboardingDetailsGen
-    with EmailGen {
+    with EmailGen
+    with UpscanGen {
 
   def sample[A: ClassTag](implicit gen: Gen[A]): A =
     gen.sample.getOrElse(sys.error(s"Could not generate instance of ${classTag[A].runtimeClass.getSimpleName}"))
@@ -155,4 +158,14 @@ trait EmailGen { this: GenUtils =>
   implicit val emailGen: Gen[Email] = gen[Email]
 
   implicit val emailSourceGen: Gen[EmailSource] = gen[EmailSource]
+}
+
+trait UpscanGen { this: GenUtils =>
+
+  implicit val upscanGen: Gen[UpscanNotifyEvent] = gen[UpscanNotifyEvent]
+
+  implicit val upscanNotifyResponse : Gen[UpscanNotifyResponse] = gen[UpscanNotifyResponse]
+
+  implicit val upscanResponse : Gen[UpscanResponse] = gen[UpscanResponse]
+
 }

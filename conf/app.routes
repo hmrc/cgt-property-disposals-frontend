@@ -11,9 +11,11 @@ GET /sign-out-and-log-in                                                    uk.g
 GET /timed-out                                                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.timedOut()
 GET /keep-alive                                                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.keepAlive()
 
-
-POST /upscan                                                                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.UpscanController.callBack()
-POST /upscan-success                                                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.UpscanController.successCallBack()
-POST /upscan-error                                                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.UpscanController.errorCallBack()
+# UPSCAN
+GET  /upscan-initiate                                                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.UpscanController.upscan()
+POST /upload                                                                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.UpscanController.upload()
+POST /upscan-success/cgt-reference/:id                                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.UpscanController.successRedirect(id : String)
+POST /upscan-error/cgt-reference/:id                                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.UpscanController.errorRedirect(id : String)
+POST /upscan-call-back/cgt-reference/:id                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.UpscanController.callBack(id : String)
 
 GET  /assets/*file                                                          controllers.Assets.at(path="/public", file)
