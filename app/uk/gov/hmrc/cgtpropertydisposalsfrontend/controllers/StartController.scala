@@ -25,11 +25,13 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.IvBehaviour
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionMissingData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.RetrievedUserType.{Individual, NonGovernmentGatewayRetrievedUser, Trust}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.AddressSource
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, ContactNameSource, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionDetails.MissingData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest.{IndividualBusinessPartnerRecordRequest, TrustBusinessPartnerRecordRequest}
@@ -74,82 +76,9 @@ class StartController @Inject()(
       request.authenticatedRequest.journeyUserType,
       request.sessionData.journeyStatus
     ) match {
-
-      case (_, Some(_: Subscribed)) =>
-        Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.routes.HomeController.homepage())
-
-      case (_, Some(AlreadySubscribedWithDifferentGGAccount(_))) =>
-        Redirect(onboarding.routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
-
-      case (_, Some(_: SubscriptionStatus.SubscriptionReady)) =>
-        Redirect(onboarding.routes.SubscriptionController.checkYourDetails())
-
-      case (_, Some(i: SubscriptionStatus.TryingToGetIndividualsFootprint)) =>
-        // this is not the first time a person with individual insufficient confidence level has come to start
-        Redirect(onboarding.routes.InsufficientConfidenceLevelController.doYouHaveNINO())
-
-      case (_, Some(_: RegistrationStatus.RegistrationReady)) =>
-        Redirect(onboarding.routes.RegistrationController.checkYourAnswers())
-
-      case (_, Some(_: RegistrationStatus.IndividualSupplyingInformation)) =>
-        Redirect(onboarding.routes.RegistrationController.selectEntityType())
-
-      case (_, Some(_: RegistrationStatus.IndividualMissingEmail)) =>
-        Redirect(onboarding.email.routes.RegistrationEnterEmailController.enterEmail())
-
-      case (_, Some(RegistrationStatus.IndividualWantsToRegisterTrust(_))) =>
-        Redirect(onboarding.routes.RegistrationController.selectEntityType())
-
-      case (_, Some(SubscriptionStatus.DeterminingIfOrganisationIsTrust(ggCredId, _, _))) =>
-        handleNonTrustOrganisation(ggCredId, None)
-
-      case (_, Some(NonGovernmentGatewayJourney)) =>
-        Redirect(routes.StartController.weOnlySupportGG())
-
-      case (RetrievedUserType.Subscribed(cgtReference, ggCredId), _) =>
-        handleSubscribedUser(cgtReference, ggCredId)
-
-      case (
-          RetrievedUserType.IndividualWithInsufficientConfidenceLevel(maybeNino, maybeSautr, ggEmail, ggCredId),
-          None
-          ) =>
-        // this is the first time a person with individual insufficient confidence level has come to start
-        handleInsufficientConfidenceLevel(maybeNino, maybeSautr, ggEmail, ggCredId)
-
-      case (
-          i: RetrievedUserType.Individual,
-          Some(SubscriptionStatus.SubscriptionMissingData(bpr, enteredEmail, _))
-          ) =>
-        handleSubscriptionMissingData(bpr, i.email, enteredEmail, i.ggCredId)
-
-      case (
-          i: RetrievedUserType.IndividualWithInsufficientConfidenceLevel,
-          Some(SubscriptionStatus.SubscriptionMissingData(bpr, enteredEmail, _))
-          ) =>
-        handleSubscriptionMissingData(bpr, i.email, enteredEmail, i.ggCredId)
-
-      case (t: RetrievedUserType.Trust, Some(SubscriptionStatus.SubscriptionMissingData(bpr, enteredEmail, _))) =>
-        handleSubscriptionMissingData(bpr, t.email, enteredEmail, t.ggCredId)
-
-      case (
-          t: RetrievedUserType.OrganisationUnregisteredTrust,
-          Some(SubscriptionStatus.SubscriptionMissingData(bpr, enteredEmail, _))
-          ) =>
-        handleSubscriptionMissingData(bpr, t.email, enteredEmail, t.ggCredId)
-
-      case (i: RetrievedUserType.Individual, None) =>
-        buildIndividualSubscriptionData(i, i.email, i.ggCredId)
-
-      case (t: RetrievedUserType.Trust, _) =>
-        buildTrustSubscriptionData(t, t.email, t.ggCredId)
-
-      case (RetrievedUserType.OrganisationUnregisteredTrust(_, ggCredId), _) =>
-        handleNonTrustOrganisation(ggCredId, None)
-
-      case (u: RetrievedUserType.NonGovernmentGatewayRetrievedUser, _) =>
-        handleNonGovernmentGatewayUser(u)
+      case (_, Some(journeyStatus))                  => handleSessionJourneyStatus(journeyStatus)
+      case (retrievedUserType: RetrievedUserType, _) => handleRetrievedUserType(retrievedUserType)
     }
-
   }
 
   def weNeedMoreDetails(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
@@ -187,6 +116,83 @@ class StartController @Inject()(
   def timedOut(): Action[AnyContent] = Action { implicit request =>
     Ok(timedOutPage())
   }
+
+
+  private def handleSessionJourneyStatus(journeyStatus: JourneyStatus)(implicit request: RequestWithSessionDataAndRetrievedData[AnyContent]): Future[Result] = journeyStatus match {
+    case _: Subscribed =>
+      Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.routes.HomeController.homepage())
+
+    case AlreadySubscribedWithDifferentGGAccount(_) =>
+      Redirect(onboarding.routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
+
+    case _: SubscriptionStatus.SubscriptionReady =>
+      Redirect(onboarding.routes.SubscriptionController.checkYourDetails())
+
+    case i: SubscriptionStatus.TryingToGetIndividualsFootprint =>
+      // this is not the first time a person with individual insufficient confidence level has come to start
+      Redirect(onboarding.routes.InsufficientConfidenceLevelController.doYouHaveNINO())
+
+    case _: RegistrationStatus.RegistrationReady =>
+      Redirect(onboarding.routes.RegistrationController.checkYourAnswers())
+
+    case _: RegistrationStatus.IndividualSupplyingInformation =>
+      Redirect(onboarding.routes.RegistrationController.selectEntityType())
+
+    case _: RegistrationStatus.IndividualMissingEmail =>
+      Redirect(onboarding.email.routes.RegistrationEnterEmailController.enterEmail())
+
+    case RegistrationStatus.IndividualWantsToRegisterTrust(_) =>
+      Redirect(onboarding.routes.RegistrationController.selectEntityType())
+
+    case SubscriptionStatus.DeterminingIfOrganisationIsTrust(ggCredId, ggEmail, _, _) =>
+      handleNonTrustOrganisation(ggCredId, ggEmail)
+
+    case NonGovernmentGatewayJourney =>
+      Redirect(routes.StartController.weOnlySupportGG())
+
+    case s: SubscriptionStatus.SubscriptionMissingData =>
+      handleSubscriptionMissingData(s)
+
+    case _: AgentStatus.AgentSupplyingClientDetails =>
+      Redirect(agents.routes.AgentAccessController.enterClientsCgtRef())
+  }
+
+
+  private def handleRetrievedUserType(retrievedUserType: RetrievedUserType)(implicit request: RequestWithSessionDataAndRetrievedData[AnyContent]): Future[Result] = retrievedUserType match {
+    case RetrievedUserType.Agent(ggCredId) =>
+      updateSession(sessionStore, request)(_.copy(
+        journeyStatus = Some(AgentStatus.AgentSupplyingClientDetails(ggCredId, None)),
+        userType = Some(UserType.Agent)
+      )).map{
+        case Left(e) =>
+          logger.warn("Could not update session", e)
+          errorHandler.errorResult(Some(UserType.Agent))
+
+        case Right(_) =>
+          Redirect(agents.routes.AgentAccessController.enterClientsCgtRef())
+      }
+
+    case RetrievedUserType.Subscribed(cgtReference, ggCredId) =>
+      handleSubscribedUser(cgtReference, ggCredId)
+
+    case RetrievedUserType.IndividualWithInsufficientConfidenceLevel(maybeNino, maybeSautr, ggEmail, ggCredId) =>
+      // this is the first time a person with individual insufficient confidence level has come to start
+      handleInsufficientConfidenceLevel(maybeNino, maybeSautr, ggEmail, ggCredId)
+
+    case i: RetrievedUserType.Individual =>
+      buildIndividualSubscriptionData(i, i.email, i.ggCredId)
+
+    case t: RetrievedUserType.Trust =>
+      buildTrustSubscriptionData(t, t.email, t.ggCredId)
+
+    case RetrievedUserType.OrganisationUnregisteredTrust(_, ggCredId) =>
+      handleNonTrustOrganisation(ggCredId, None)
+
+    case u: RetrievedUserType.NonGovernmentGatewayRetrievedUser =>
+      handleNonGovernmentGatewayUser(u)
+  }
+
+
 
   private def handleNonGovernmentGatewayUser(
     nonGovernmentGatewayUser: NonGovernmentGatewayRetrievedUser
@@ -236,7 +242,7 @@ class StartController @Inject()(
     val newSessionData =
       request.sessionData.journeyStatus match {
         case Some(d: SubscriptionStatus.DeterminingIfOrganisationIsTrust) => d
-        case _                                                            => SubscriptionStatus.DeterminingIfOrganisationIsTrust(ggCredId, None, None)
+        case _                                                            => SubscriptionStatus.DeterminingIfOrganisationIsTrust(ggCredId, ggEmail, None, None)
       }
 
     updateSession(sessionStore, request)(
@@ -346,7 +352,9 @@ class StartController @Inject()(
                       bprWithTrustName._1.address,
                       ContactName(bprWithTrustName._2.value),
                       bprWithTrustName._1.sapNumber,
-                      emailWithSource._2
+                      emailWithSource._2,
+                      AddressSource.BusinessPartnerRecord,
+                      ContactNameSource.DerivedFromBusinessPartnerRecord
                     )
                   )
                 }
@@ -360,7 +368,7 @@ class StartController @Inject()(
                     _.copy(
                       userType = request.authenticatedRequest.userType,
                       journeyStatus =
-                        Some(SubscriptionStatus.SubscriptionMissingData(bprWithTrustName._1, None, ggCredId)),
+                        Some(SubscriptionStatus.SubscriptionMissingData(bprWithTrustName._1, None, ggCredId, ggEmail)),
                       needMoreDetailsDetails = Some(
                         NeedMoreDetailsDetails(
                           onboarding.email.routes.SubscriptionEnterEmailController.enterEmail().url,
@@ -390,15 +398,10 @@ class StartController @Inject()(
     )
   }
 
-  private def handleSubscriptionMissingData(
-    bpr: BusinessPartnerRecord,
-    ggEmail: Option[Email],
-    enteredEmail: Option[Email],
-    ggCredId: GGCredId
-  )(
+  private def handleSubscriptionMissingData(s: SubscriptionMissingData)(
     implicit request: RequestWithSessionDataAndRetrievedData[_]
   ): Future[Result] =
-    SubscriptionDetails(bpr, ggEmail, enteredEmail).fold(
+    SubscriptionDetails(s.businessPartnerRecord, s.ggEmail, s.manuallyEnteredEmail).fold(
       { missingData =>
         logger.info(s"Could not find the following data for subscription details: ${missingData.toList.mkString(",")}")
         missingData.head match {
@@ -409,7 +412,7 @@ class StartController @Inject()(
         updateSession(sessionStore, request)(
           _.copy(
             userType      = request.authenticatedRequest.userType,
-            journeyStatus = Some(SubscriptionStatus.SubscriptionReady(subscriptionDetails, ggCredId))
+            journeyStatus = Some(SubscriptionStatus.SubscriptionReady(subscriptionDetails, s.ggCredId))
           )
         ).map { _ =>
           Redirect(onboarding.routes.SubscriptionController.checkYourDetails())
@@ -433,7 +436,7 @@ class StartController @Inject()(
                 updateSession(sessionStore, request)(
                   _.copy(
                     userType      = request.authenticatedRequest.userType,
-                    journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bpr, None, ggCredId)),
+                    journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bpr, None, ggCredId, ggEmail)),
                     needMoreDetailsDetails = Some(
                       NeedMoreDetailsDetails(
                         onboarding.email.routes.SubscriptionEnterEmailController.enterEmail().url,

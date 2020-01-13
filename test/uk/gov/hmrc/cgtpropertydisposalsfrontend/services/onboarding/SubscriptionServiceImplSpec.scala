@@ -24,8 +24,8 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.onboarding.CGTPropertyDisposalsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.MockMetrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscribedUpdateDetails, SubscriptionDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, SapNumber}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegisteredWithoutId, RegistrationDetails, SubscribedDetails, SubscribedUpdateDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -51,11 +51,11 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
       .expects(*)
       .returning(EitherT(Future.successful(response)))
 
-  def mockRegisterWithoutIdAndSubscribe(
+  def mockRegisterWithoutId(
     expectedRegistrationDetails: RegistrationDetails
   )(response: Either[Error, HttpResponse]) =
     (mockConnector
-      .registerWithoutIdAndSubscribe(_: RegistrationDetails)(_: HeaderCarrier))
+      .registerWithoutId(_: RegistrationDetails)(_: HeaderCarrier))
       .expects(expectedRegistrationDetails, *)
       .returning(EitherT(Future.successful(response)))
 
@@ -163,59 +163,50 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
 
     }
 
-    "handling requests to register without id and subscribe" must {
+    "handling requests to register without id" must {
 
       val registrationDetails = sample[RegistrationDetails]
 
       "return an error" when {
 
         "the http call comes back with a status other than 200" in {
-          mockRegisterWithoutIdAndSubscribe(registrationDetails)(Right(HttpResponse(500)))
+          mockRegisterWithoutId(registrationDetails)(Right(HttpResponse(500)))
 
-          await(service.registerWithoutIdAndSubscribe(registrationDetails).value).isLeft shouldBe true
+          await(service.registerWithoutId(registrationDetails).value).isLeft shouldBe true
         }
 
         "there is no JSON in the body of the http response" in {
-          mockRegisterWithoutIdAndSubscribe(registrationDetails)(Right(HttpResponse(200)))
+          mockRegisterWithoutId(registrationDetails)(Right(HttpResponse(200)))
 
-          await(service.registerWithoutIdAndSubscribe(registrationDetails).value).isLeft shouldBe true
+          await(service.registerWithoutId(registrationDetails).value).isLeft shouldBe true
         }
 
         "the JSON body of the response cannot be parsed" in {
-          mockRegisterWithoutIdAndSubscribe(registrationDetails)(Right(HttpResponse(200, Some(JsNumber(1)))))
+          mockRegisterWithoutId(registrationDetails)(Right(HttpResponse(200, Some(JsNumber(1)))))
 
-          await(service.registerWithoutIdAndSubscribe(registrationDetails).value).isLeft shouldBe true
+          await(service.registerWithoutId(registrationDetails).value).isLeft shouldBe true
         }
 
       }
 
-      "return the subscription response if the call comes back with a " +
+      "return the response if the call comes back with a " +
         "200 status and the JSON body can be parsed" in {
-        val cgtReferenceNumber = "number"
+        val sapNumber = "number"
         val jsonBody = Json.parse(
           s"""
              |{
-             |  "cgtReferenceNumber" : "$cgtReferenceNumber"
+             |  "sapNumber" : "$sapNumber"
              |}
              |""".stripMargin
         )
 
-        mockRegisterWithoutIdAndSubscribe(registrationDetails)(Right(HttpResponse(200, Some(jsonBody))))
+        mockRegisterWithoutId(registrationDetails)(Right(HttpResponse(200, Some(jsonBody))))
 
-        await(service.registerWithoutIdAndSubscribe(registrationDetails).value) shouldBe Right(
-          SubscriptionSuccessful(cgtReferenceNumber)
+        await(service.registerWithoutId(registrationDetails).value) shouldBe Right(
+          RegisteredWithoutId(SapNumber(sapNumber))
         )
       }
 
-      "return an already subscribed response" when {
-
-        "the response comes back with status 409 (conflict)" in {
-          mockRegisterWithoutIdAndSubscribe(registrationDetails)(Right(HttpResponse(409)))
-
-          await(service.registerWithoutIdAndSubscribe(registrationDetails).value) shouldBe Right(AlreadySubscribed)
-        }
-
-      }
     }
 
     "handling requests to get subscribed details" must {

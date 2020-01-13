@@ -81,7 +81,7 @@ object Address {
       .verifying(Constraint[String](validateName(_)))
   }
 
-  def ukAddressForm: Form[UkAddress] =
+  val ukAddressForm: Form[UkAddress] =
     Form(
       formMapping(
         "address-line1"  -> addressLineMapping,
@@ -92,19 +92,7 @@ object Address {
       )(UkAddress.apply)(UkAddress.unapply)
     )
 
-  def nonUkAddressForm: Form[NonUkAddress] = {
-    val countryFormatter = new Formatter[Country] {
-      override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Country] = data.get(key) match {
-        case Some(c) =>
-          Either.fromOption(
-            Country.countryCodeToCountryName.get(c).map(name => Country(c, Some(name))),
-            Seq(FormError(key, "error.notFound"))
-          )
-        case None => Left(Seq(FormError(key, "error.required")))
-      }
-
-      override def unbind(key: String, value: Country): Map[String, String] = Map(key -> value.code)
-    }
+  val nonUkAddressForm: Form[NonUkAddress] = {
     Form(
       formMapping(
         "nonUkAddress-line1" -> addressLineMapping,
@@ -112,12 +100,12 @@ object Address {
         "nonUkAddress-line3" -> optional(addressLineMapping),
         "nonUkAddress-line4" -> optional(addressLineMapping),
         "postcode"           -> optional(text),
-        "countryCode"        -> of(countryFormatter)
+        "countryCode"        -> of(Country.formatter)
       )(NonUkAddress.apply)(NonUkAddress.unapply)
     )
   }
 
-  def isUkForm: Form[Boolean] =
+  val isUkForm: Form[Boolean] =
     Form(
       formMapping(
         "isUk" -> of(BooleanFormatter.formatter)

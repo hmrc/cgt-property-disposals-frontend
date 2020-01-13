@@ -47,13 +47,14 @@ class SubscriptionEnterEmailControllerSpec
   override val isAmendJourney: Boolean = false
 
   override val validJourneyStatus: SubscriptionMissingData =
-    SubscriptionMissingData(sample[BusinessPartnerRecord].copy(emailAddress = None), None, sample[GGCredId])
+    SubscriptionMissingData(sample[BusinessPartnerRecord].copy(emailAddress = None), None, sample[GGCredId], None)
 
   override val validVerificationCompleteJourneyStatus: SubscriptionMissingData =
     SubscriptionMissingData(
       sample[BusinessPartnerRecord].copy(emailAddress = None),
       Some(sample[Email]),
-      sample[GGCredId]
+      sample[GGCredId],
+      None
     )
 
   override def updateEmail(journey: SubscriptionMissingData, email: Email): SubscriptionMissingData =

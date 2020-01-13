@@ -38,4 +38,8 @@ final case class SubscribedDetails(
 object SubscribedDetails {
   implicit val format: Format[SubscribedDetails] = Json.format
   implicit val eq: Eq[SubscribedDetails] = Eq.fromUniversalEquals
+
+  implicit class SubscribedDetailsOps(val details: SubscribedDetails) extends AnyVal {
+    def makeAccountName(): String = details.name.fold(n => n.value, n => n.makeSingleName())
+  }
 }

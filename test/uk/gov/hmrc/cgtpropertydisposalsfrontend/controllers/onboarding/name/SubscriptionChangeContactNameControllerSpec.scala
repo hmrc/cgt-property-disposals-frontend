@@ -24,8 +24,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contac
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, ContactNameSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, models}
+
+import shapeless.{Lens, lens}
 
 class SubscriptionChangeContactNameControllerSpec
     extends ControllerSpec
@@ -38,13 +40,19 @@ class SubscriptionChangeContactNameControllerSpec
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
-  override val validJourney: SubscriptionReady = sample[SubscriptionReady]
+  override val validJourney: SubscriptionReady = {
+    val contactNameSourceLens: Lens[SubscriptionReady,ContactNameSource] = lens[SubscriptionReady].subscriptionDetails.contactNameSource
+    contactNameSourceLens.set(sample[SubscriptionReady])(ContactNameSource.DerivedFromBusinessPartnerRecord)
+  }
 
   override val mockUpdateContactName
     : Option[(SubscriptionReady, SubscriptionReady, Either[models.Error, Unit]) => Unit] = None
 
-  override def updateContactName(journey : SubscriptionReady, contactName: ContactName): SubscriptionReady =
-    journey.copy(subscriptionDetails = journey.subscriptionDetails.copy(contactName = contactName))
+  override def updateContactName(journey: SubscriptionReady, contactName: ContactName): SubscriptionReady =
+    journey.copy(
+      subscriptionDetails = journey.subscriptionDetails
+        .copy(contactName = contactName, contactNameSource = ContactNameSource.ManuallyEntered)
+    )
 
   def isValidJourney(journey: JourneyStatus): Boolean = journey match {
     case _: SubscriptionReady => true

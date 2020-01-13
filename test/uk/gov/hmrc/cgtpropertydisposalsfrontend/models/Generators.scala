@@ -18,13 +18,13 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import org.scalacheck.ScalacheckShapeless._
 import org.scalacheck.{Arbitrary, Gen}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.gen
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, IndividualSupplyingInformation, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, SAUTR}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifierAttempts
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, SAUTR, SapNumber}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.SubscriptionSuccessful
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.{IndividualNameMatchDetails, TrustNameMatchDetails}
@@ -33,8 +33,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, 
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscribedUpdateDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanNotifyResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanServiceResponse.{UpscanNotifyEvent, UpscanResponse}
-
-import scala.reflect.{ClassTag, classTag}
 
 object Generators
     extends GenUtils
@@ -47,10 +45,12 @@ object Generators
     with NameMatchGen
     with OnboardingDetailsGen
     with EmailGen
-    with UpscanGen {
+    with UpscanGen
+    with UserTypeGen
+    with VerifierMatchGen {
 
-  def sample[A: ClassTag](implicit gen: Gen[A]): A =
-    gen.sample.getOrElse(sys.error(s"Could not generate instance of ${classTag[A].runtimeClass.getSimpleName}"))
+  def sample[A](implicit gen: Gen[A]): A =
+    gen.sample.getOrElse(sys.error(s"Could not generate instance with $gen"))
 
   implicit def arb[A](implicit g: Gen[A]): Arbitrary[A] = Arbitrary(g)
 
@@ -87,6 +87,8 @@ trait IdGen { this: GenUtils =>
 
   implicit val sautrGen: Gen[SAUTR] = gen[SAUTR]
 
+  implicit val sapNumberGen: Gen[SapNumber] = gen[SapNumber]
+
 }
 
 trait NameGen { this: GenUtils =>
@@ -99,31 +101,40 @@ trait NameGen { this: GenUtils =>
 
 }
 
-trait JourneyStatusGen { this: GenUtils =>
+trait JourneyStatusGen extends JourneyStatusLowerPriorityGen { this: GenUtils =>
 
   implicit val journeyStatusGen: Gen[JourneyStatus] = gen[JourneyStatus]
 
-  implicit val registrationReadyGen: Gen[RegistrationReady] = {
-
-    gen[RegistrationReady]
-  }
-
   implicit val subscriptionReadyGen: Gen[SubscriptionReady] = gen[SubscriptionReady]
 
-  implicit val subscriptionSuccessfulGen: Gen[SubscriptionSuccessful] = gen[SubscriptionSuccessful]
+}
 
-  implicit val subscribedGen: Gen[Subscribed] = gen[Subscribed]
+trait JourneyStatusLowerPriorityGen { this: GenUtils =>
+
+  implicit val subscriptionSuccessfulGen: Gen[SubscriptionSuccessful] = gen[SubscriptionSuccessful]
 
   implicit val individualSupplyingInformationGen: Gen[IndividualSupplyingInformation] =
     gen[IndividualSupplyingInformation]
 
+  implicit val subscribedGen: Gen[Subscribed] = gen[Subscribed]
+
   implicit val individualMissingEmailGen: Gen[IndividualMissingEmail] = gen[IndividualMissingEmail]
+
+  implicit val registrationReadyGen: Gen[RegistrationReady] = gen[RegistrationReady]
 
 }
 
-trait AddressGen { this: GenUtils =>
+trait AddressGen extends AddressLowerPriorityGen { this: GenUtils =>
 
   implicit val addressGen: Gen[Address] = gen[Address]
+
+  implicit val nonUkAddressGen: Gen[NonUkAddress] = gen[NonUkAddress]
+
+  implicit val postcodeGen: Gen[Postcode] = gen[Postcode]
+
+}
+
+trait AddressLowerPriorityGen { this: GenUtils =>
 
   implicit val ukAddressGen: Gen[UkAddress] = gen[UkAddress]
 
@@ -164,8 +175,21 @@ trait UpscanGen { this: GenUtils =>
 
   implicit val upscanGen: Gen[UpscanNotifyEvent] = gen[UpscanNotifyEvent]
 
-  implicit val upscanNotifyResponse : Gen[UpscanNotifyResponse] = gen[UpscanNotifyResponse]
+  implicit val upscanNotifyResponse: Gen[UpscanNotifyResponse] = gen[UpscanNotifyResponse]
 
-  implicit val upscanResponse : Gen[UpscanResponse] = gen[UpscanResponse]
+  implicit val upscanResponse: Gen[UpscanResponse] = gen[UpscanResponse]
+
+}
+
+trait VerifierMatchGen { this: GenUtils =>
+
+  implicit val unsuccessfulVerifierMatchAttemptsGen: Gen[UnsuccessfulVerifierAttempts] =
+    gen[UnsuccessfulVerifierAttempts]
+
+}
+
+trait UserTypeGen { this: GenUtils =>
+
+  implicit val userTypeGen: Gen[UserType] = gen[UserType]
 
 }

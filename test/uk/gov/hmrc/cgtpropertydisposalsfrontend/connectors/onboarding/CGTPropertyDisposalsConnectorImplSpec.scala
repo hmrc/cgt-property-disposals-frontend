@@ -167,13 +167,13 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
       )
     }
 
-    "handling request to register without id and subscribe" must {
+    "handling request to register without id" must {
       val registrationDetails = sample[RegistrationDetails]
 
       behave like commonBehaviour(
-        () => connector.registerWithoutIdAndSubscribe(registrationDetails).value,
+        () => connector.registerWithoutId(registrationDetails).value,
         mockPost(
-          "http://host:123/cgt-property-disposals/register-without-id-and-subscribe",
+          "http://host:123/cgt-property-disposals/register-without-id",
           Map.empty,
           Json.toJson(registrationDetails)
         )(_)

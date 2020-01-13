@@ -23,7 +23,7 @@ import play.api.mvc._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{CgtEnrolment, ErrorHandler}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Individual, NonGovernmentGatewayUser, Organisation}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
@@ -70,43 +70,36 @@ class AuthenticatedActionWithRetrievedData @Inject()(
           Retrievals.allEnrolments and
           Retrievals.credentials
       ) {
-        case retrievedData @ _ ~ _ ~ _ ~ _ ~ _ ~ allEnrolments ~ creds =>
+        case retrievedData @ _ ~ affinityGroup ~ _ ~ _ ~ _ ~ allEnrolments ~ creds =>
           withGGCredentials(creds, request) { ggCredId =>
-            hasSubscribed(allEnrolments, request) map {
-              case Left(errorResult) => Left(errorResult)
-              case Right(Some(cgtReference)) =>
-                Right(
-                  AuthenticatedRequestWithRetrievedData(
-                    RetrievedUserType.Subscribed(CgtReference(cgtReference.value), ggCredId),
-                    None,
-                    request
-                  )
+
+            affinityGroup match {
+              case Some(AffinityGroup.Agent) =>
+                Future.successful(
+                  Right(AuthenticatedRequestWithRetrievedData(RetrievedUserType.Agent(ggCredId), Some(UserType.Agent), request))
                 )
 
-              case Right(None) =>
-                val result = retrievedData match {
-                  case cl ~ Some(AffinityGroup.Individual) ~ maybeNino ~ maybeSautr ~ maybeEmail ~ _ ~ _
-                      if cl < ConfidenceLevel.L200 =>
+              case _ =>
+                hasSubscribed(allEnrolments, request) map {
+                  case Left(errorResult) => Left(errorResult)
+                  case Right(Some(cgtReference)) =>
                     Right(
                       AuthenticatedRequestWithRetrievedData(
-                        RetrievedUserType.IndividualWithInsufficientConfidenceLevel(
-                          maybeNino.map(NINO(_)),
-                          maybeSautr.map(SAUTR(_)),
-                          maybeEmail.filter(_.nonEmpty).map(Email(_)),
-                          ggCredId
-                        ),
-                        Some(Individual),
+                        RetrievedUserType.Subscribed(CgtReference(cgtReference.value), ggCredId),
+                        None,
                         request
                       )
                     )
 
-                  case individual @ _ ~ Some(AffinityGroup.Individual) ~ _ ~ _ ~ _ ~ _ ~ _ =>
-                    individual match {
-                      case _ ~ _ ~ Some(nino) ~ _ ~ maybeEmail ~ _ ~ _ =>
+                  case Right(None) =>
+                    val result = retrievedData match {
+                      case cl ~ Some(AffinityGroup.Individual) ~ maybeNino ~ maybeSautr ~ maybeEmail ~ _ ~ _
+                        if cl < ConfidenceLevel.L200 =>
                         Right(
                           AuthenticatedRequestWithRetrievedData(
-                            RetrievedUserType.Individual(
-                              Right(NINO(nino)),
+                            RetrievedUserType.IndividualWithInsufficientConfidenceLevel(
+                              maybeNino.map(NINO(_)),
+                              maybeSautr.map(SAUTR(_)),
                               maybeEmail.filter(_.nonEmpty).map(Email(_)),
                               ggCredId
                             ),
@@ -114,17 +107,36 @@ class AuthenticatedActionWithRetrievedData @Inject()(
                             request
                           )
                         )
+
+                      case individual @ _ ~ Some(AffinityGroup.Individual) ~ _ ~ _ ~ _ ~ _ ~ _ =>
+                        individual match {
+                          case _ ~ _ ~ Some(nino) ~ _ ~ maybeEmail ~ _ ~ _ =>
+                            Right(
+                              AuthenticatedRequestWithRetrievedData(
+                                RetrievedUserType.Individual(
+                                  Right(NINO(nino)),
+                                  maybeEmail.filter(_.nonEmpty).map(Email(_)),
+                                  ggCredId
+                                ),
+                                Some(Individual),
+                                request
+                              )
+                            )
+                        }
+
+                      case _ @_ ~ Some(AffinityGroup.Organisation) ~ _ ~ _ ~ maybeEmail ~ enrolments ~ _ =>
+                        handleOrganisation(request, enrolments, maybeEmail, ggCredId)
+
+                      case _ @_ ~ otherAffinityGroup ~ _ ~ _ ~ _ ~ _ ~ _ =>
+                        logger.warn(s"Got request for unsupported affinity group $otherAffinityGroup")
+                        Left(errorHandler.errorResult(None)(request))
                     }
-
-                  case _ @_ ~ Some(AffinityGroup.Organisation) ~ _ ~ _ ~ maybeEmail ~ enrolments ~ _ =>
-                    handleOrganisation(request, enrolments, maybeEmail, ggCredId)
-
-                  case _ @_ ~ otherAffinityGroup ~ _ ~ _ ~ _ ~ _ ~ _ =>
-                    logger.warn(s"Got request for unsupported affinity group $otherAffinityGroup")
-                    Left(errorHandler.errorResult(None)(request))
+                    result
                 }
-                result
+
+
             }
+
           }
       }
   }
@@ -132,9 +144,9 @@ class AuthenticatedActionWithRetrievedData @Inject()(
   private def hasSubscribed[A](enrolments: Enrolments, request: MessagesRequest[A])(
     implicit hc: HeaderCarrier
   ): Future[Either[Result, Option[CgtReference]]] =
-    enrolments.getEnrolment("HMRC-CGT-PD") match {
+    enrolments.getEnrolment(CgtEnrolment.enrolmentKey) match {
       case Some(cgtEnrolment) =>
-        cgtEnrolment.getIdentifier("CGTPDRef") match {
+        cgtEnrolment.getIdentifier(CgtEnrolment.enrolmentIdentifier) match {
           case Some(cgtReference) => Future.successful(Right(Some(CgtReference(cgtReference.value))))
           case None =>
             logger.warn(s"CGT identifier value is missing from the enrolment")

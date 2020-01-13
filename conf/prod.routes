@@ -1,8 +1,12 @@
 # Add all the application routes to the app.routes file
+
 ->         /capital-gains-tax-uk-property   app.Routes
 ->         /capital-gains-tax-uk-property   accounts.Routes
 ->         /capital-gains-tax-uk-property   onboarding.Routes
 ->         /capital-gains-tax-uk-property   returns.Routes
+
+## TODO copy into private_beta.routes once whole agent access journey is ready
+->         /capital-gains-tax-uk-property   agents.Routes
 
 ->         /                                health.Routes
 ->     	   /template                        template.Routes

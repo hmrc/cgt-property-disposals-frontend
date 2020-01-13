@@ -41,7 +41,7 @@ trait CGTPropertyDisposalsConnector {
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
-  def registerWithoutIdAndSubscribe(registrationDetails: RegistrationDetails)(
+  def registerWithoutId(registrationDetails: RegistrationDetails)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
@@ -69,7 +69,7 @@ class CGTPropertyDisposalsConnectorImpl @Inject()(http: HttpClient, servicesConf
 
   val subscribeUrl: String = s"$baseUrl/subscription"
 
-  val registerWithoutIdAndSubscribeUrl: String = s"$baseUrl/register-without-id-and-subscribe"
+  val registerWithoutIdAndSubscribeUrl: String = s"$baseUrl/register-without-id"
 
   val subscriptionStatusUrl: String = s"$baseUrl/check-subscription-status"
 
@@ -87,7 +87,7 @@ class CGTPropertyDisposalsConnectorImpl @Inject()(http: HttpClient, servicesConf
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
     makeCall(_.post(subscribeUrl, Json.toJson(subscriptionDetails)))
 
-  override def registerWithoutIdAndSubscribe(registrationDetails: RegistrationDetails)(
+  override def registerWithoutId(registrationDetails: RegistrationDetails)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] =
     makeCall(_.post(registerWithoutIdAndSubscribeUrl, Json.toJson(registrationDetails)))

@@ -194,7 +194,8 @@ address-county.error.pattern=County must only include letters, numbers, spaces, 
 
 postcode.error.tooLong=Postcode must be 8 characters or fewer
 postcode.error.required=Enter a postcode
-postcode.error.pattern=Postcode must only include letters, numbers and spaces
+postcode.error.invalidCharacters=Postcode must only include letters, numbers and spaces
+postcode.error.pattern=Enter a real postcode
 postcode.error.noResults=Address not found, you’ll need to follow the link to enter it manually
 filter.error.noResults=Address not found, you’ll need to follow the link to enter it manually
 
@@ -218,16 +219,12 @@ nonUkAddress-line2.error.pattern=Address line 2 must only include letters, numbe
 nonUkAddress-line3.error.pattern=Address line 3 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes 
 nonUkAddress-line4.error.pattern=Address line 4 must only include letters, numbers, spaces, hyphens, commas, full stops, ampersands, apostrophes and forward slashes
 countryCode.error.required=Enter a country from the options presented as you type
-countryCode.error.notFound=Enter a country from the options presented as you type
+countryCode.error.notFound=Enter a real country
 
 address-select.title=Select your contact address
 address-select.error.required=Select the contact address or enter it manually if it is not shown
 address-select.error.number=Select the contact address or enter it manually if it is not shown
 address-select.invalid=Select the contact address or enter it manually if it is not shown
-
-country-code.label=Country
-country-code.error.required=Enter country
-country-code.error.enum=Country must be a valid country, select the matching country from the list as you type
 
 subscribed.title=Account created
 subscribed.individual.p1=You’ve created a Capital Gains Tax on UK property account
@@ -344,9 +341,11 @@ account.caption=Capital Gains Tax on UK property account
 account.menu.home=Home
 account.menu.manageYourDetails=Manage account
 account.menu.signOut=Sign out
+account.menu.changeClient=Change client
 
 account.home.title=Account home
 account.home.subtitle=Account number: {0}
+account.home.subtitle.agent=Your client: {0} | Account number: {1}
 account.home.left.title=Capital Gains Tax liability
 account.home.left.placeholder=Your total Capital Gains Tax liability for UK property disposals from 6 April 2020 to 5 April 2021.
 account.home.right.title=Total amount left to pay
@@ -421,3 +420,45 @@ timed-out.title=For your security, we signed you out
 timed-out.p1=This was because you were inactive for too long.
 timed-out.p2=To access your Capital Gains on UK property account, you’ll need to sign in.
 timed-out.button=Sign in
+
+email-whitelisting.problem.title=Sorry, there is a problem
+email-whitelisting.problem.p1=You cannot access the Report and pay Capital Gains Tax trial service at the moment. 
+email-whitelisting.problem.p2=This might be because:
+email-whitelisting.problem.bullet1=there is a technical problem
+email-whitelisting.problem.bullet2=you tried to use the link we emailed to you more than 5 times
+email-whitelisting.problem.bullet3=you typed the URL directly into the browser instead of using the link we emailed to you
+email-whitelisting.problem.bullet4=the trial has ended
+email-whitelisting.problem.p3=You’ll need to email HMRC at <strong class="bold">ddcw-info-cgtpd-g@digital.hmrc.gov.uk</strong> to request access to the service.
+email-whitelisting.problem.p4=You should include your name.
+
+
+agent.enter-client-cgt-ref.title=Enter your client’s Capital Gains Tax on UK property account number
+agent.enter-client-cgt-ref.helpText=It is 15 characters and can include letters and numbers. For example, XYCGTP123456789.
+
+cgtReference.error.required=Enter a Capital Gains Tax on UK property account number
+cgtReference.error.tooShort=Enter a Capital Gains Tax on UK property account number that is 15 characters
+cgtReference.error.tooLong=Enter a Capital Gains Tax on UK property account number that is 15 characters
+cgtReference.error.invalidCharacters=Capital Gains Tax on UK property account number must only include letters and numbers
+cgtReference.error.pattern=Enter a real Capital Gains Tax on UK property account number
+cgtReference.error.notPermitted=Enter the account number of a client who has authorised you to manage their account
+
+
+agent.enter-client-postcode.title=Enter your client’s postcode
+agent.enter-client-postcode.extraContent=This must match the postcode your client used in their Capital Gains Tax on UK property account contact address.
+agent.enter-client-postcode.helpText=For example, AB2 9WQ
+
+agent.enter-client-country.title=Enter your client’s country
+agent.enter-client-country.extraContent=This must match the country your client used in their Capital Gains Tax on UK property account contact address.
+
+postcode.error.noMatch=Postcode cannot be found
+countryCode.error.noMatch=Country cannot be found
+
+agent.too-many-attempts.title=You’ll need to wait and try again
+agent.too-many-attempts.p1=You’ve entered incorrect details for your client too many times.
+agent.too-many-attempts.p2=You’ll need to wait 2 hours and try again.
+agent.too-many-attempts.p3=You can <a href="{0}">change to a different client’s Capital Gains Tax on UK property account</a>.
+
+agent.confirm-client.title=Check and confirm your client’s details
+agent.confirm-client.name=Name
+agent.confirm-client.cgt-reference=Capital Gains Tax on UK property account number
+agent.confirm-client.change-client=Change client

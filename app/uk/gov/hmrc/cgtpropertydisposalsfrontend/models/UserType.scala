@@ -26,6 +26,7 @@ object UserType {
   final case object Individual extends UserType
   final case object Organisation extends UserType
   final case object NonGovernmentGatewayUser extends UserType
+  final case object Agent extends UserType
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   implicit val format: OFormat[UserType] = derived.oformat[UserType]

@@ -14,11 +14,8 @@
  * limitations under the License.
  *@
 
-@import play.api.data.Form
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
-@import views.html.helper.CSRF
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
@@ -35,7 +32,6 @@
 
 @title = @{if (resent) messages("confirmEmail.resent") + " " + messages("confirmEmail.title") else messages("confirmEmail.title")}
 @menu = {@if(showAccountMenu) { @accountMenu(None) }}
-
 
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = !showAccountMenu, accountMenu = Some(menu)) {
 

@@ -28,7 +28,9 @@ final case class PrePopulatedUserData(
   sapNumber: String,
   individualDetails: Option[IndividualAuditDetails],
   trustDetails: Option[TrustAuditDetails],
-  emailAddress: Option[EmailAuditDetails]
+  emailAddress: Option[EmailAuditDetails],
+  address: Option[Address],
+  contactName: Option[String]
 )
 
 object PrePopulatedUserData {
@@ -36,9 +38,9 @@ object PrePopulatedUserData {
 }
 
 final case class ManuallyEnteredData(
-  contactName: String,
+  contactName: Option[String],
   emailAddress: Option[String],
-  address: Address
+  address: Option[Address]
 )
 
 object ManuallyEnteredData {
