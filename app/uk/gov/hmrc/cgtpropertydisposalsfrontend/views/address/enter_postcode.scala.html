@@ -43,7 +43,6 @@
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @menu = {@if(showAccountMenu) { @accountMenu(None) }}
 
-
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = !showAccountMenu, accountMenu = Some(menu)) {
 
  @backLinkComponent(backLink)

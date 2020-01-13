@@ -31,7 +31,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{CgtEnrolment, ErrorHandl
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents.AgentAccessController._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.AgentStatus
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AgentStatus, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.AgentStatus.{AgentSupplyingClientDetails, VerifierMatchingDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Country, Postcode}
@@ -191,9 +191,17 @@ class AgentAccessController @Inject()(
 
   def confirmClientSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withVerifierMatchingDetails {
-      case (_, verifierMatchingDetails, _) =>
+      case (agentSupplyingClientDetails, verifierMatchingDetails, _) =>
         if (verifierMatchingDetails.correctVerifierSupplied)
-          Ok("confirmed")
+          updateSession(sessionStore, request)(_.copy(journeyStatus = Some(
+            Subscribed(verifierMatchingDetails.clientDetails, agentSupplyingClientDetails.agentGGCredId)
+          ))).map{
+            case Left(e) =>
+            logger.warn("Could not update session", e)
+            errorHandler.errorResult(request.userType)
+            case Right(_) =>
+            Redirect(controllers.accounts.routes.HomeController.homepage())
+          }
         else
           Redirect(enterVerifierCall(verifierMatchingDetails.clientDetails))
     }

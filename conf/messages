@@ -341,9 +341,11 @@ account.caption=Capital Gains Tax on UK property account
 account.menu.home=Home
 account.menu.manageYourDetails=Manage account
 account.menu.signOut=Sign out
+account.menu.changeClient=Change client
 
 account.home.title=Account home
 account.home.subtitle=Account number: {0}
+account.home.subtitle.agent=Your client: {0} | Account number: {1}
 account.home.left.title=Capital Gains Tax liability
 account.home.left.placeholder=Your total Capital Gains Tax liability for UK property disposals from 6 April 2020 to 5 April 2021.
 account.home.right.title=Total amount left to pay
