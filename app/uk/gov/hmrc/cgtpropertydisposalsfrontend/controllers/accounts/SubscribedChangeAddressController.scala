@@ -97,7 +97,7 @@ class SubscribedChangeAddressController @Inject()(
     }
   }
 
-  protected lazy val backLinkCall: Call             = controllers.accounts.routes.HomeController.manageYourDetails()
+  protected lazy val backLinkCall: Call             = controllers.accounts.routes.AccountController.manageYourDetails()
   protected lazy val isUkCall: Call                 = routes.SubscribedChangeAddressController.isUk()
   protected lazy val isUkSubmitCall: Call           = routes.SubscribedChangeAddressController.isUkSubmit()
   protected lazy val enterUkAddressCall: Call       = routes.SubscribedChangeAddressController.enterUkAddress()
@@ -109,5 +109,5 @@ class SubscribedChangeAddressController @Inject()(
   protected lazy val enterPostcodeSubmitCall: Call = routes.SubscribedChangeAddressController.enterPostcodeSubmit()
   protected lazy val selectAddressCall: Call       = routes.SubscribedChangeAddressController.selectAddress()
   protected lazy val selectAddressSubmitCall: Call = routes.SubscribedChangeAddressController.selectAddressSubmit()
-  protected lazy val continueCall: Call            = controllers.accounts.routes.HomeController.contactAddressUpdated()
+  protected lazy val continueCall: Call            = controllers.accounts.routes.AccountController.contactAddressUpdated()
 }

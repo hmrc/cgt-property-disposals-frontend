@@ -69,7 +69,8 @@ class SubscribedWithoutIdChangeContactNameControllerSpec
       None,
       false
     ),
-    GGCredId("id")
+    GGCredId("id"),
+    None
   )
 
   override def updateName(name: IndividualName, journey: Subscribed): Subscribed = {
@@ -100,7 +101,7 @@ class SubscribedWithoutIdChangeContactNameControllerSpec
 
       behave like enterNameSubmit(
         data => controller.enterIndividualNameSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken),
-        controllers.accounts.routes.HomeController.contactNameUpdated()
+        controllers.accounts.routes.AccountController.contactNameUpdated()
       )
     }
 

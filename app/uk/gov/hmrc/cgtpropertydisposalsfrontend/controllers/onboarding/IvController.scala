@@ -70,7 +70,7 @@ class IvController @Inject()(
       updateSession(sessionStore, request)(_ => SessionData.empty).map {
         case Left(e) =>
           logger.warn("Could not clear session after IV success", e)
-          errorHandler.errorResult(request.userType)
+          errorHandler.errorResult()
 
         case Right(_) =>
           SeeOther(controllers.routes.StartController.start().url)

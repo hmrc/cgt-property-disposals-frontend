@@ -674,7 +674,7 @@ class RegistrationControllerSpec
             mockRegisterWithoutId(registrationReady.registrationDetails)(Right(RegisteredWithoutId(sapNumber)))
             mockSubscribe(subscriptionDetails)(Right(subscriptionSuccessfulResponse))
             mockStoreSession(
-              SessionData.empty.copy(journeyStatus = Some(Subscribed(subscribedDetails, registrationReady.ggCredId)))
+              SessionData.empty.copy(journeyStatus = Some(Subscribed(subscribedDetails, registrationReady.ggCredId, None)))
             )(Future.successful(Left(Error(""))))
           }
 
@@ -693,7 +693,7 @@ class RegistrationControllerSpec
             mockRegisterWithoutId(registrationReady.registrationDetails)(Right(RegisteredWithoutId(sapNumber)))
             mockSubscribe(subscriptionDetails)(Right(subscriptionSuccessfulResponse))
             mockStoreSession(
-              SessionData.empty.copy(journeyStatus = Some(Subscribed(subscribedDetails, registrationReady.ggCredId)))
+              SessionData.empty.copy(journeyStatus = Some(Subscribed(subscribedDetails, registrationReady.ggCredId, None)))
             )(Future.successful(Right(())))
           }
 

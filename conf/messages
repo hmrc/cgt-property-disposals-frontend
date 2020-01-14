@@ -352,6 +352,7 @@ account.home.right.title=Total amount left to pay
 account.home.right.placeholder=The total amount due for all your Capital Gains Tax on UK property disposals made from 6 April 2020.
 account.home.private-beta.guide=How to report capital gains on disposals made from 6 April 2020
 account.home.private-beta.guide.content=You will be able to use this service from 6 April 2020, to report and pay Capital Gains Tax on UK property disposals made on or after 6 April 2020. Find out how to <a href="{0}">report a capital gain on UK property disposals made before 6 April 2020</a>.
+account.home.button.start-a-new-return=Start new return
 
 account.manageYourDetails.title=Manage account
 account.manageYourDetails.subtitle=Account number
@@ -462,3 +463,14 @@ agent.confirm-client.title=Check and confirm your client’s details
 agent.confirm-client.name=Name
 agent.confirm-client.cgt-reference=Capital Gains Tax on UK property account number
 agent.confirm-client.change-client=Change client
+
+
+triage.caption=Before you start
+
+who-are-you-reporting-for.title=Who are you reporting the tax for?
+
+individualUserType.self=Yourself
+individualUserType.capacitor=Someone else
+individualUserType.personal-representative=Someone who has died
+individualUserType.error.required=Select who are you reporting the tax for
+individualUserType.error.invalid=Select who are you reporting the tax for

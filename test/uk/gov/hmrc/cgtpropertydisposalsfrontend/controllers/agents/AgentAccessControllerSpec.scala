@@ -1023,7 +1023,7 @@ class AgentAccessControllerSpec
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = true)))))
           mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(Right(None))
-          mockStoreSession(SessionData.empty.copy(journeyStatus = Some(Subscribed(ukClientDetails, agentGGCredId))))(Future.successful(Left(Error(""))))
+          mockStoreSession(SessionData.empty.copy(journeyStatus = Some(Subscribed(ukClientDetails, agentGGCredId, None))))(Future.successful(Left(Error(""))))
         }
 
         checkIsTechnicalErrorPage(performAction())
@@ -1036,10 +1036,10 @@ class AgentAccessControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData(clientDetails, correctVerifierSupplied = true)))))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, clientDetails.cgtReference)(Right(None))
-            mockStoreSession(SessionData.empty.copy(journeyStatus = Some(Subscribed(clientDetails, agentGGCredId))))(Future.successful(Right(())))
+            mockStoreSession(SessionData.empty.copy(journeyStatus = Some(Subscribed(clientDetails, agentGGCredId, None))))(Future.successful(Right(())))
           }
 
-          checkIsRedirect(performAction(), controllers.accounts.routes.HomeController.homepage())
+          checkIsRedirect(performAction(), controllers.accounts.homepage.routes.HomePageController.homepage())
         }
 
         "the agent has submitted the correct verifier for a uk client" in {

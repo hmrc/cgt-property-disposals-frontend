@@ -32,7 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 
 import scala.concurrent.Future
-class HomeControllerSpec
+class AccountControllerSpec
     extends ControllerSpec
     with AuthSupport
     with SessionSupport
@@ -45,7 +45,7 @@ class HomeControllerSpec
       bind[SessionStore].toInstance(mockSessionStore)
     )
 
-  val controller = instanceOf[HomeController]
+  val controller = instanceOf[AccountController]
 
   implicit val messagesApi: MessagesApi = controller.messagesApi
 
@@ -59,66 +59,7 @@ class HomeControllerSpec
       }
     )
 
-  "The Home Controller" when {
-
-    "handling requests for account home" must {
-
-      def performAction(): Future[Result] = controller.homepage()(FakeRequest())
-      behave like redirectToStartBehaviour(performAction)
-
-      "display the home page" in {
-        forAll { userType: Option[UserType] =>
-          whenever(!userType.contains(UserType.Agent)) {
-            val sessionData =
-              SessionData.empty.copy(journeyStatus = Some(subscribed))
-
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(sessionData))))
-            }
-
-            val result = performAction()
-            status(result)          shouldBe OK
-            contentAsString(result) should include(message("account.home.title"))
-            contentAsString(result) shouldNot include(
-              message(
-                "account.home.subtitle.agent",
-                subscribed.subscribedDetails.makeAccountName(),
-                subscribed.subscribedDetails.cgtReference.value
-              )
-            )
-            contentAsString(result) should include(
-              message(
-                "account.home.subtitle",
-                subscribed.subscribedDetails.cgtReference.value
-              )
-            )
-          }
-        }
-      }
-
-      "display the home page for agents" in {
-        val sessionData =
-          SessionData.empty.copy(journeyStatus = Some(subscribed), userType = Some(UserType.Agent))
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionData))))
-        }
-
-        val result = performAction()
-        status(result)          shouldBe OK
-        contentAsString(result) should include(message("account.home.title"))
-        contentAsString(result) should include(
-          message(
-            "account.home.subtitle.agent",
-            subscribed.subscribedDetails.makeAccountName(),
-            subscribed.subscribedDetails.cgtReference.value
-          )
-        )
-      }
-
-    }
+  "The Account Controller" when {
 
     "handling requests signed out" must {
 

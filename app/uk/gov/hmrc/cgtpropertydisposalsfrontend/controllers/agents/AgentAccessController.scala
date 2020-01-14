@@ -194,13 +194,13 @@ class AgentAccessController @Inject()(
       case (agentSupplyingClientDetails, verifierMatchingDetails, _) =>
         if (verifierMatchingDetails.correctVerifierSupplied)
           updateSession(sessionStore, request)(_.copy(journeyStatus = Some(
-            Subscribed(verifierMatchingDetails.clientDetails, agentSupplyingClientDetails.agentGGCredId)
+            Subscribed(verifierMatchingDetails.clientDetails, agentSupplyingClientDetails.agentGGCredId, None)
           ))).map{
             case Left(e) =>
             logger.warn("Could not update session", e)
             errorHandler.errorResult(request.userType)
             case Right(_) =>
-            Redirect(controllers.accounts.routes.HomeController.homepage())
+            Redirect(controllers.accounts.homepage.routes.HomePageController.homepage())
           }
         else
           Redirect(enterVerifierCall(verifierMatchingDetails.clientDetails))
@@ -240,7 +240,7 @@ class AgentAccessController @Inject()(
         result.fold(
           { e =>
             logger.warn("Could not handle submitted cgt reference", e)
-            errorHandler.errorResult(request.userType)
+            errorHandler.errorResult()
           }, { clientDetails =>
             Redirect(enterVerifierCall(clientDetails))
           }
@@ -258,7 +258,7 @@ class AgentAccessController @Inject()(
 
         case NonFatal(error) =>
           logger.warn(s"Could not do delegated auth rule check for agent: ${error.getMessage}")
-          errorHandler.errorResult(request.userType)
+          errorHandler.errorResult()
       }
 
   private def handleSubmittedVerifier[V, P: Writeable](
@@ -292,7 +292,7 @@ class AgentAccessController @Inject()(
       ).map {
         case Left(e) =>
           logger.warn("Could not update session", e)
-          errorHandler.errorResult(request.userType)
+          errorHandler.errorResult()
 
         case Right(_) =>
           Redirect(routes.AgentAccessController.confirmClient())
@@ -312,7 +312,7 @@ class AgentAccessController @Inject()(
         .map {
           case Left(e) =>
             logger.warn("Could not update agent verifier match retry store ", e)
-            errorHandler.errorResult(request.userType)
+            errorHandler.errorResult()
 
           case Right(_) =>
             if (updatedUnsuccessfulAttempts >= maxVerifierNameMatchAttempts)
@@ -350,7 +350,7 @@ class AgentAccessController @Inject()(
           .flatMap {
             case Left(e) =>
               logger.warn("Could not get agent verifier match details", e)
-              errorHandler.errorResult(request.userType)
+              errorHandler.errorResult()
 
             case Right(Some(unsuccessfulVerifierAttempts))
                 if unsuccessfulVerifierAttempts.unsuccessfulAttempts >= maxVerifierNameMatchAttempts =>
