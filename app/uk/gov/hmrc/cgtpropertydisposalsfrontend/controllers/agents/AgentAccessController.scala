@@ -31,8 +31,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{CgtEnrolment, ErrorHandl
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents.AgentAccessController._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AgentStatus, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.AgentStatus.{AgentSupplyingClientDetails, VerifierMatchingDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AgentStatus, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Country, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifierAttempts
@@ -65,7 +65,7 @@ class AgentAccessController @Inject()(
   enterClientsCountryPage: views.html.agents.enter_country,
   confirmClientPage: views.html.agents.confirm_client,
   tooManyAttemptsPage: views.html.agents.too_many_attempts
-                                     )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
+)(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with SessionUpdates
@@ -171,10 +171,11 @@ class AgentAccessController @Inject()(
     }
   }
 
-  def tooManyVerifierMatchAttempts(): Action[AnyContent] = authenticatedActionWithSessionData.async{ implicit request =>
-    withAgentSupplyingClientDetails{ _ =>
-      Ok(tooManyAttemptsPage())
-    }
+  def tooManyVerifierMatchAttempts(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request =>
+      withAgentSupplyingClientDetails { _ =>
+        Ok(tooManyAttemptsPage())
+      }
   }
 
   def confirmClient(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
@@ -197,8 +198,8 @@ class AgentAccessController @Inject()(
             Subscribed(verifierMatchingDetails.clientDetails, agentSupplyingClientDetails.agentGGCredId, None)
           ))).map{
             case Left(e) =>
-            logger.warn("Could not update session", e)
-            errorHandler.errorResult(request.userType)
+              logger.warn("Could not update session", e)
+              errorHandler.errorResult(request.userType)
             case Right(_) =>
             Redirect(controllers.accounts.homepage.routes.HomePageController.homepage())
           }
@@ -209,9 +210,9 @@ class AgentAccessController @Inject()(
 
   private def enterVerifierCall(clientDetails: SubscribedDetails) =
     clientDetails.address match {
-    case _: UkAddress    => routes.AgentAccessController.enterClientsPostcode()
-    case _: NonUkAddress => routes.AgentAccessController.enterClientsCountry()
-  }
+      case _: UkAddress    => routes.AgentAccessController.enterClientsPostcode()
+      case _: NonUkAddress => routes.AgentAccessController.enterClientsCountry()
+    }
 
   private def toUpperWithNoSpaces(s: String): String = s.toUpperCase.replaceAllLiterally(" ", "")
 
@@ -298,10 +299,12 @@ class AgentAccessController @Inject()(
           Redirect(routes.AgentAccessController.confirmClient())
       }
 
-    def handleUnmatchedVerifier(submittedVerifier: V): Future[Result] = {
+    def noMatchResult(submittedVerifier: V): Result =
+      BadRequest(page(form.fill(submittedVerifier).withError(formKey, "error.noMatch")))
+
+    def handleNewUnmatchedVerifier(submittedVerifier: V): Future[Result] = {
       val updatedUnsuccessfulAttempts =
         currentUnsuccessfulVerifierMatchAttempts.map(_.unsuccessfulAttempts + 1).getOrElse(1)
-
 
       agentVerifierMatchRetryStore
         .store(
@@ -318,7 +321,7 @@ class AgentAccessController @Inject()(
             if (updatedUnsuccessfulAttempts >= maxVerifierNameMatchAttempts)
               Redirect(routes.AgentAccessController.tooManyVerifierMatchAttempts())
             else
-              BadRequest(page(form.fill(submittedVerifier).withError(formKey, "error.noMatch")))
+              noMatchResult(submittedVerifier)
         }
     }
 
@@ -328,7 +331,11 @@ class AgentAccessController @Inject()(
         formWithErrors => BadRequest(page(formWithErrors)),
         submittedVerifier =>
           if (matches(submittedVerifier, actualVerifier)) handleMatchedVerifier
-          else handleUnmatchedVerifier(submittedVerifier)
+          // don't increase the unsuccessful attempt count if the same incorrect value has been submitted
+          else if (currentUnsuccessfulVerifierMatchAttempts
+            .map(_.lastDetailsTried)
+            .contains(toEither(submittedVerifier))) noMatchResult(submittedVerifier)
+          else handleNewUnmatchedVerifier(submittedVerifier)
       )
   }
 
