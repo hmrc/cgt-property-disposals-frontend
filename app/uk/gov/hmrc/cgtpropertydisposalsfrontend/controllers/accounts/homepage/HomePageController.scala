@@ -19,31 +19,31 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
 import com.google.inject.Inject
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
 class HomePageController @Inject()(
-                                val authenticatedAction: AuthenticatedAction,
-                                val sessionDataAction: SessionDataAction,
-                                errorHandler: ErrorHandler,
-                                sessionStore: SessionStore,
-                                cc: MessagesControllerComponents,
-                                manageYourDetailsPage: views.html.account.manage_your_details,
-                                homePage: views.html.account.home,
-                                privateBetaHomePage: views.html.account.home_private_beta,
-                                detailUpdatedPage: views.html.account.details_updated,
-                                signedOutPage: views.html.account.signed_out
-                              )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
-  extends FrontendController(cc)
+  val authenticatedAction: AuthenticatedAction,
+  val sessionDataAction: SessionDataAction,
+  errorHandler: ErrorHandler,
+  sessionStore: SessionStore,
+  cc: MessagesControllerComponents,
+  manageYourDetailsPage: views.html.account.manage_your_details,
+  homePage: views.html.account.home,
+  privateBetaHomePage: views.html.account.home_private_beta,
+  detailUpdatedPage: views.html.account.details_updated,
+  signedOutPage: views.html.account.signed_out
+)(implicit viewConfig: ViewConfig, ec: ExecutionContext)
+    extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with SessionUpdates
     with Logging {
@@ -52,7 +52,7 @@ class HomePageController @Inject()(
   def homepage(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request: RequestWithSessionData[AnyContent] =>
       withSubscribedUser(request) { (_, subscribed) =>
-        Future.successful(Ok(homePage(subscribed.subscribedDetails)))
+        Ok(homePage(subscribed.subscribedDetails))
       }
   }
 
@@ -61,20 +61,20 @@ class HomePageController @Inject()(
   def privateBetaHomepage(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request: RequestWithSessionData[AnyContent] =>
       withSubscribedUser(request) { (_, subscribed) =>
-        Future.successful(Ok(privateBetaHomePage(subscribed.subscribedDetails)))
+        Ok(privateBetaHomePage(subscribed.subscribedDetails))
       }
   }
 
   def startNewReturn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withSubscribedUser(request) { (_, _) =>
-    request.userType match  {
-      case Some(UserType.Individual) =>
-        Future.successful(Redirect(controllers.returns.triage.routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting()))
+      request.userType match {
+        case Some(UserType.Individual) =>
+          Redirect(triage.routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting())
 
-      case other =>
-        logger.warn(s"Start a new return for user type: $other is not supported")
-        errorHandler.errorResult()
-    }
+        case other =>
+          logger.warn(s"Start a new return for user type: $other is not supported")
+          errorHandler.errorResult()
+      }
     }
   }
 
@@ -85,7 +85,7 @@ class HomePageController @Inject()(
       case Some((s: SessionData, r: Subscribed)) =>
         f(s, r)
       case _ =>
-        Future.successful(SeeOther(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController.start().url))
+        Redirect(controllers.routes.StartController.start().url)
     }
 
 }
