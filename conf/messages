@@ -450,8 +450,8 @@ agent.enter-client-postcode.helpText=For example, AB2 9WQ
 agent.enter-client-country.title=Enter your client’s country
 agent.enter-client-country.extraContent=This must match the country your client used in their Capital Gains Tax on UK property account contact address.
 
-postcode.error.noMatch=Postcode cannot be found
-countryCode.error.noMatch=Country cannot be found
+postcode.error.noMatch=The postcode must match the postcode used in your client’s contact address
+countryCode.error.noMatch=The country must match the country used in your client’s contact address
 
 agent.too-many-attempts.title=You’ll need to wait and try again
 agent.too-many-attempts.p1=You’ve entered incorrect details for your client too many times.
