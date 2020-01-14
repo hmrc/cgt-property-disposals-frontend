@@ -51,22 +51,22 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
 class AgentAccessController @Inject()(
-  config: Configuration,
-  val authenticatedAction: AuthenticatedAction,
-  val sessionDataAction: SessionDataAction,
-  authConnector: AuthConnector,
-  sessionStore: SessionStore,
-  errorHandler: ErrorHandler,
-  subscriptionService: SubscriptionService,
-  agentVerifierMatchRetryStore: AgentVerifierMatchRetryStore,
-  cc: MessagesControllerComponents,
-  enterClientsCgtRefPage: views.html.agents.enter_client_cgt_ref,
-  enterClientsPostcodePage: views.html.agents.enter_postcode,
-  enterClientsCountryPage: views.html.agents.enter_country,
-  confirmClientPage: views.html.agents.confirm_client,
-  tooManyAttemptsPage: views.html.agents.too_many_attempts
-)(implicit viewConfig: ViewConfig, ec: ExecutionContext)
-    extends FrontendController(cc)
+                                       config: Configuration,
+                                       val authenticatedAction: AuthenticatedAction,
+                                       val sessionDataAction: SessionDataAction,
+                                       authConnector: AuthConnector,
+                                       sessionStore: SessionStore,
+                                       errorHandler: ErrorHandler,
+                                       subscriptionService: SubscriptionService,
+                                       agentVerifierMatchRetryStore: AgentVerifierMatchRetryStore,
+                                       cc: MessagesControllerComponents,
+                                       enterClientsCgtRefPage: views.html.agents.enter_client_cgt_ref,
+                                       enterClientsPostcodePage: views.html.agents.enter_postcode,
+                                       enterClientsCountryPage: views.html.agents.enter_country,
+                                       confirmClientPage: views.html.agents.confirm_client,
+                                       tooManyAttemptsPage: views.html.agents.too_many_attempts
+                                     )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
+  extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with SessionUpdates
     with Logging { self =>
@@ -194,16 +194,19 @@ class AgentAccessController @Inject()(
     withVerifierMatchingDetails {
       case (agentSupplyingClientDetails, verifierMatchingDetails, _) =>
         if (verifierMatchingDetails.correctVerifierSupplied)
-          updateSession(sessionStore, request)(_.copy(journeyStatus = Some(
-            Subscribed(verifierMatchingDetails.clientDetails, agentSupplyingClientDetails.agentGGCredId, None)
-          ))).map{
+          updateSession(sessionStore, request)(
+            _.copy(
+              journeyStatus = Some(
+                Subscribed(verifierMatchingDetails.clientDetails, agentSupplyingClientDetails.agentGGCredId, None)
+              )
+            )
+          ).map {
             case Left(e) =>
               logger.warn("Could not update session", e)
-              errorHandler.errorResult(request.userType)
+              errorHandler.errorResult()
             case Right(_) =>
-            Redirect(controllers.accounts.homepage.routes.HomePageController.homepage())
-          }
-        else
+              Redirect(controllers.accounts.homepage.routes.HomePageController.homepage())
+          } else
           Redirect(enterVerifierCall(verifierMatchingDetails.clientDetails))
     }
   }
@@ -217,9 +220,9 @@ class AgentAccessController @Inject()(
   private def toUpperWithNoSpaces(s: String): String = s.toUpperCase.replaceAllLiterally(" ", "")
 
   private def handleSubmittedCgtReferenceNumber(
-    cgtReference: CgtReference,
-    ggCredId: GGCredId
-  )(implicit hc: HeaderCarrier, request: RequestWithSessionData[_]): Future[Result] =
+                                                 cgtReference: CgtReference,
+                                                 ggCredId: GGCredId
+                                               )(implicit hc: HeaderCarrier, request: RequestWithSessionData[_]): Future[Result] =
     authorisedFunctions
       .authorised(
         Enrolment(CgtEnrolment.enrolmentKey)
@@ -229,13 +232,13 @@ class AgentAccessController @Inject()(
         val result = for {
           details <- subscriptionService.getSubscribedDetails(cgtReference)
           _ <- EitherT(
-                updateSession(sessionStore, request)(
-                  _.copy(
-                    journeyStatus =
-                      Some(AgentSupplyingClientDetails(ggCredId, Some(VerifierMatchingDetails(details, false))))
-                  )
-                )
+            updateSession(sessionStore, request)(
+              _.copy(
+                journeyStatus =
+                  Some(AgentSupplyingClientDetails(ggCredId, Some(VerifierMatchingDetails(details, false))))
               )
+            )
+          )
         } yield details
 
         result.fold(
@@ -263,20 +266,20 @@ class AgentAccessController @Inject()(
       }
 
   private def handleSubmittedVerifier[V, P: Writeable](
-    actualVerifier: V
-  )(
-    matches: (V, V) => Boolean,
-    form: Form[V],
-    formKey: String,
-    page: Form[V] => P,
-    currentAgentSupplyingClientDetails: AgentSupplyingClientDetails,
-    currentVerifierMatchingDetails: VerifierMatchingDetails,
-    currentUnsuccessfulVerifierMatchAttempts: Option[UnsuccessfulVerifierAttempts]
-  )(
-    implicit
-    request: RequestWithSessionData[_],
-    toEither: V => Either[Country, Postcode]
-  ): Future[Result] = {
+                                                        actualVerifier: V
+                                                      )(
+                                                        matches: (V, V) => Boolean,
+                                                        form: Form[V],
+                                                        formKey: String,
+                                                        page: Form[V] => P,
+                                                        currentAgentSupplyingClientDetails: AgentSupplyingClientDetails,
+                                                        currentVerifierMatchingDetails: VerifierMatchingDetails,
+                                                        currentUnsuccessfulVerifierMatchAttempts: Option[UnsuccessfulVerifierAttempts]
+                                                      )(
+                                                        implicit
+                                                        request: RequestWithSessionData[_],
+                                                        toEither: V => Either[Country, Postcode]
+                                                      ): Future[Result] = {
     lazy val handleMatchedVerifier: Future[Result] =
       updateSession(sessionStore, request)(
         _.copy(
@@ -340,16 +343,16 @@ class AgentAccessController @Inject()(
   }
 
   private def withAgentSupplyingClientDetails(
-    f: AgentSupplyingClientDetails => Future[Result]
-  )(implicit request: RequestWithSessionData[_]): Future[Result] =
+                                               f: AgentSupplyingClientDetails => Future[Result]
+                                             )(implicit request: RequestWithSessionData[_]): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
       case Some(a: AgentStatus.AgentSupplyingClientDetails) => f(a)
       case _                                                => Redirect(controllers.routes.StartController.start())
     }
 
   private def withVerifierMatchingDetails(
-    f: (AgentSupplyingClientDetails, VerifierMatchingDetails, Option[UnsuccessfulVerifierAttempts]) => Future[Result]
-  )(implicit request: RequestWithSessionData[_]): Future[Result] =
+                                           f: (AgentSupplyingClientDetails, VerifierMatchingDetails, Option[UnsuccessfulVerifierAttempts]) => Future[Result]
+                                         )(implicit request: RequestWithSessionData[_]): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
       case Some(a @ AgentStatus.AgentSupplyingClientDetails(_, Some(v))) =>
         agentVerifierMatchRetryStore
@@ -360,7 +363,7 @@ class AgentAccessController @Inject()(
               errorHandler.errorResult()
 
             case Right(Some(unsuccessfulVerifierAttempts))
-                if unsuccessfulVerifierAttempts.unsuccessfulAttempts >= maxVerifierNameMatchAttempts =>
+              if unsuccessfulVerifierAttempts.unsuccessfulAttempts >= maxVerifierNameMatchAttempts =>
               Redirect(routes.AgentAccessController.tooManyVerifierMatchAttempts())
 
             case Right(maybeUnsuccessfulVerifierAttempts) =>
