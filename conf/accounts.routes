@@ -1,6 +1,6 @@
 # Account Home
-GET /account-home                                                               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.HomeController.homepage
-GET /signed-out                                                                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.HomeController.signedOut()
+#GET /account-home                                                               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.AccountController.homepage
+GET /signed-out                                                                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.AccountController.signedOut()
 
 # Change address
 GET  /account-home/manage-account/is-uk-contact-address                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.SubscribedChangeAddressController.isUk()
@@ -16,7 +16,7 @@ POST /account-home/manage-account/enter-non-uk-contact-address                  
 
 # Change email
 GET /subscribed/amend-details/verify-email                                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.SubscribedChangeEmailController.verifyEmail(p: java.util.UUID)
-GET /account-home/manage-account/contact-email-changed                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.HomeController.contactEmailUpdated()
+GET /account-home/manage-account/contact-email-changed                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.AccountController.contactEmailUpdated()
 
 GET  /account-home/manage-account/enter-different-email                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.SubscribedChangeEmailController.enterEmail()
 POST /account-home/manage-account/enter-different-email                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.SubscribedChangeEmailController.enterEmailSubmit()
@@ -28,12 +28,12 @@ GET  /account-home/manage-account/with-id/change-name                           
 POST /account-home/manage-account/with-id/change-name                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.SubscribedChangeContactNameController.enterContactNameSubmit()
 GET  /account-home/manage-account/without-id/change-name                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.SubscribedWithoutIdChangeContactNameController.enterIndividualName()
 POST /account-home/manage-account/without-id/change-name                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.SubscribedWithoutIdChangeContactNameController.enterIndividualNameSubmit()
-GET  /account-home/manage-account                                               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.HomeController.manageYourDetails
-GET  /account-home/manage-account/contact-name-changed                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.HomeController.contactNameUpdated()
+GET  /account-home/manage-account                                               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.AccountController.manageYourDetails
+GET  /account-home/manage-account/contact-name-changed                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.AccountController.contactNameUpdated()
 
 
 # Change address
-GET  /account-home/manage-account/contact-address-changed                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.HomeController.contactAddressUpdated()
+GET  /account-home/manage-account/contact-address-changed                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.AccountController.contactAddressUpdated()
 
 
 

@@ -15,7 +15,7 @@
  *@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.account.AccountMenuItem
 
 @this()
@@ -23,13 +23,13 @@
 @(activeLink: Option[AccountMenuItem])(implicit messages: Messages, appConfig: ViewConfig)
 
 <nav class="account-menu is-smaller" role="navigation">
-  <a href="@{routes.HomeController.homepage().url}" class="as-link@if(activeLink.exists(_.is[AccountMenuItem.Home])){-home }">
+  <a href="@{accounts.homepage.routes.HomePageController.homepage().url}" class="as-link@if(activeLink.exists(_.is[AccountMenuItem.Home])){-home }">
     @messages("account.menu.home")
   </a>
-  <a href="@{routes.HomeController.manageYourDetails().url}" class="as-link@if(activeLink.exists(_.is[AccountMenuItem.ManageYourDetails])){-active }">
+  <a href="@{accounts.routes.AccountController.manageYourDetails().url}" class="as-link@if(activeLink.exists(_.is[AccountMenuItem.ManageYourDetails])){-active }">
     @messages("account.menu.manageYourDetails")
   </a>
-  <a href="@{appConfig.signOutUrl}?continue=@{routes.HomeController.signedOut().url}" class="as-link">
+  <a href="@{appConfig.signOutUrl}?continue=@{accounts.routes.AccountController.signedOut().url}" class="as-link">
     @messages("account.menu.signOut")
   </a>
 

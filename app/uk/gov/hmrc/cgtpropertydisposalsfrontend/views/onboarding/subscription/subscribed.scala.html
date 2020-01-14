@@ -15,7 +15,7 @@
  *@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
@@ -40,5 +40,5 @@
 
   @exitSurveyLink(appConfig.onboardingExitSurveyUrl)
 
-  @buttonLink(messages("subscribed.buttonText"), routes.HomeController.homepage().url)
+  @buttonLink(messages("subscribed.buttonText"), routes.HomePageController.homepage().url)
 }

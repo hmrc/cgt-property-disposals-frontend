@@ -120,7 +120,7 @@ class StartController @Inject()(
 
   private def handleSessionJourneyStatus(journeyStatus: JourneyStatus)(implicit request: RequestWithSessionDataAndRetrievedData[AnyContent]): Future[Result] = journeyStatus match {
     case _: Subscribed =>
-      Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.routes.HomeController.homepage())
+      Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.routes.HomePageController.homepage())
 
     case AlreadySubscribedWithDifferentGGAccount(_) =>
       Redirect(onboarding.routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
@@ -221,7 +221,7 @@ class StartController @Inject()(
             updateSession(sessionStore, request)(
               _.copy(
                 userType      = request.authenticatedRequest.userType,
-                journeyStatus = Some(Subscribed(subscribedDetails, ggCredId))
+                journeyStatus = Some(Subscribed(subscribedDetails, ggCredId, None))
               )
             )
           )
@@ -232,7 +232,7 @@ class StartController @Inject()(
         logger.warn("Could not get subscribed details", e)
         errorHandler.errorResult(request.authenticatedRequest.userType)
       },
-      _ => Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.routes.HomeController.homepage())
+      _ => Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.routes.HomePageController.homepage())
     )
   }
 

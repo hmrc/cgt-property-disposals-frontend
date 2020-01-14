@@ -77,7 +77,7 @@ class SubscribedChangeContactNameControllerSpec
     "handling submitted contact name" must {
       behave like enterContactNameSubmit(
         data => controller.enterContactNameSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken),
-        controllers.accounts.routes.HomeController.contactNameUpdated()
+        controllers.accounts.routes.AccountController.contactNameUpdated()
       )
     }
 
