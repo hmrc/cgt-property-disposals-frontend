@@ -23,6 +23,7 @@ import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.IvBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionMissingData
@@ -120,7 +121,7 @@ class StartController @Inject()(
 
   private def handleSessionJourneyStatus(journeyStatus: JourneyStatus)(implicit request: RequestWithSessionDataAndRetrievedData[AnyContent]): Future[Result] = journeyStatus match {
     case _: Subscribed =>
-      Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.routes.HomePageController.homepage())
+      Redirect(controllers.accounts.homepage.routes.HomePageController.homepage())
 
     case AlreadySubscribedWithDifferentGGAccount(_) =>
       Redirect(onboarding.routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
@@ -232,7 +233,7 @@ class StartController @Inject()(
         logger.warn("Could not get subscribed details", e)
         errorHandler.errorResult(request.authenticatedRequest.userType)
       },
-      _ => Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.routes.HomePageController.homepage())
+      _ => Redirect(controllers.accounts.homepage.routes.HomePageController.homepage())
     )
   }
 

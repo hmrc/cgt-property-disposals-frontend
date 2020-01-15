@@ -26,6 +26,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.privatebeta.PrivateBetaHomePageController
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
@@ -52,10 +53,6 @@ trait HomePageControllerSpec
       bind[SessionStore].toInstance(mockSessionStore)
     )
 
-  lazy val controller = instanceOf[HomePageController]
-
-  implicit val messagesApi: MessagesApi = controller.messagesApi
-
   val subscribed = sample[Subscribed]
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
@@ -70,9 +67,14 @@ trait HomePageControllerSpec
 
 class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
 
+
   override lazy val additionalConfig: Configuration = Configuration(
-    "application.router" -> "prod.Routes"
+  "application.router" -> "prod.Routes"
   )
+
+  lazy val controller = instanceOf[HomePageController]
+
+  implicit val messagesApi: MessagesApi = controller.messagesApi
 
   val subscribedSessionData = SessionData.empty.copy(journeyStatus = Some(subscribed))
 
@@ -200,6 +202,10 @@ class PrivateBetaHomePageControllerSpec extends HomePageControllerSpec {
   override lazy val additionalConfig: Configuration = Configuration(
     "application.router" -> "private_beta.Routes"
   )
+
+  lazy val controller = instanceOf[PrivateBetaHomePageController]
+
+  implicit val messagesApi: MessagesApi = controller.messagesApi
 
   "The HomePage Controller" when {
 
