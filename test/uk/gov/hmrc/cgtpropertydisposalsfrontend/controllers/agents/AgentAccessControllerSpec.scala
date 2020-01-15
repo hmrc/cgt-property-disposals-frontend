@@ -445,7 +445,7 @@ class AgentAccessControllerSpec
 
       val incorrectPostcode = Postcode("AB12CD")
 
-      val otherIncorrectPostcode = Postcode("AB12CD")
+      val otherIncorrectPostcode = Postcode("BC12DE")
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterClientsPostcodeSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
@@ -510,6 +510,26 @@ class AgentAccessControllerSpec
               ukClientDetails.cgtReference,
               UnsuccessfulVerifierAttempts(2, Right(incorrectPostcode))
             )(Right(()))
+          }
+
+          val result = performAction("postcode" -> incorrectPostcode.value)
+          status(result) shouldBe BAD_REQUEST
+          val content = contentAsString(result)
+          content should include(message("agent.enter-client-postcode.title"))
+          content should include(message("postcode.error.noMatch"))
+        }
+
+        "the submitted postcode is valid but it doesn't match the client's one and" +
+          "the agent has previously made an attempt and the submitted postcode is the same " +
+          "as the one in the previous attempt" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false))))
+            )
+            mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(
+              Right(Some(UnsuccessfulVerifierAttempts(1, Right(incorrectPostcode))))
+            )
           }
 
           val result = performAction("postcode" -> incorrectPostcode.value)
@@ -791,6 +811,16 @@ class AgentAccessControllerSpec
             "countryCode.error.noMatch",
             Some(UnsuccessfulVerifierAttempts(1, Left(otherIncorrectCountry))),
             Some(UnsuccessfulVerifierAttempts(2, Left(incorrectCountry)))
+          )
+        }
+
+        "the submitted country is valid but it doesn't match the client's one and" +
+          "the agent has previously made an attempt and the submitted country is the same " +
+          "as the one in the previous attempt" in {
+          testFormValidationError("countryCode" -> incorrectCountry.code)(
+            "countryCode.error.noMatch",
+            Some(UnsuccessfulVerifierAttempts(1, Left(incorrectCountry))),
+            None
           )
         }
 
