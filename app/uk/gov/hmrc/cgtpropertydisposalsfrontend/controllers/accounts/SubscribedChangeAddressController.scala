@@ -89,6 +89,7 @@ class SubscribedChangeAddressController @Inject()(
         address,
         isManuallyEnteredAddress,
         journey.subscribedDetails.cgtReference.value,
+        journey.agentReferenceNumber,
         auditUrl
       )
       subscriptionService

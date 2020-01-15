@@ -73,6 +73,7 @@ class SubscribedChangeContactNameController @Inject()(
         journey.subscribedDetails.contactName.value,
         contactName.value,
         journey.subscribedDetails.cgtReference.value,
+        journey.agentReferenceNumber,
         routes.SubscribedChangeContactNameController.enterContactNameSubmit().url
       )
       subscriptionService

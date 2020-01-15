@@ -30,7 +30,7 @@ import uk.gov.hmrc.auth.core.ConfidenceLevel.L50
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.Credentials
 import uk.gov.hmrc.cgtpropertydisposalsfrontend._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.CgtEnrolment
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.EnrolmentConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.{routes => emailRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{routes => onboardingRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, StartController, agents}
@@ -42,7 +42,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.RetrievedUserType.Individ
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressSource, Postcode}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR, SapNumber}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, GGCredId, NINO, SAUTR, SapNumber}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, ContactNameSource, IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, BusinessPartnerRecordResponse}
@@ -748,6 +748,7 @@ class StartControllerSpec
                   registeredWithId = true
                 ),
                 ggCredId,
+                None,
                 None
               )
               val session =
@@ -1062,6 +1063,7 @@ class StartControllerSpec
                   registeredWithId = false
                 ),
                 ggCredId,
+                None,
                 None
               )
               val session = SessionData.empty.copy(                  userType      = Some(UserType.Organisation),journeyStatus = Some(subscriptionStatus))
@@ -1347,12 +1349,12 @@ class StartControllerSpec
       "the user has a CGT enrolment" when {
 
         val cgtReference      = sample[CgtReference]
-        val cgtEnrolment      = Enrolment(CgtEnrolment.enrolmentKey, Seq(EnrolmentIdentifier(CgtEnrolment.enrolmentIdentifier, cgtReference.value)), "")
+        val cgtEnrolment      = Enrolment(EnrolmentConfig.Cgt.key, Seq(EnrolmentIdentifier(EnrolmentConfig.Cgt.cgtReferenceIdentifier, cgtReference.value)), "")
         val subscribedDetails = sample[SubscribedDetails].copy(cgtReference = cgtReference)
 
         val sessionWithSubscribed = SessionData.empty.copy(
           userType      = Some(UserType.Individual),
-          journeyStatus = Some(Subscribed(subscribedDetails, ggCredId, None))
+          journeyStatus = Some(Subscribed(subscribedDetails, ggCredId, None, None))
         )
 
         "the session data indicates they have subscribed" must {
@@ -1537,6 +1539,14 @@ class StartControllerSpec
 
       "handling agents" must {
 
+        val arn = sample[AgentReferenceNumber]
+
+        val agentsEnrolment = Enrolment(
+          EnrolmentConfig.Agents.key,
+          Seq(EnrolmentIdentifier(EnrolmentConfig.Agents.agentReferenceNumberIdentifier, arn.value)),
+          ""
+        )
+
         "redirect to the enter client's cgt reference page" when {
 
           "the session indicates that they are entering a client's details" in {
@@ -1547,7 +1557,7 @@ class StartControllerSpec
                 None,
                 None,
                 None,
-                Set.empty,
+                Set(agentsEnrolment),
                 Some(retrievedGGCredId)
               )
               mockGetSession(
@@ -1556,7 +1566,7 @@ class StartControllerSpec
                     Some(
                       SessionData.empty.copy(
                         userType      = Some(UserType.Agent),
-                        journeyStatus = Some(AgentStatus.AgentSupplyingClientDetails(ggCredId, None))
+                        journeyStatus = Some(AgentStatus.AgentSupplyingClientDetails(arn, ggCredId, None))
                       )
                     )
                   )
@@ -1578,14 +1588,14 @@ class StartControllerSpec
                 None,
                 None,
                 None,
-                Set.empty,
+                Set(agentsEnrolment),
                 Some(retrievedGGCredId)
               )
               mockGetSession(Future.successful(Right(None)))
               mockStoreSession(
                 SessionData.empty.copy(
                   userType      = Some(UserType.Agent),
-                  journeyStatus = Some(AgentStatus.AgentSupplyingClientDetails(ggCredId, None))
+                  journeyStatus = Some(AgentStatus.AgentSupplyingClientDetails(arn, ggCredId, None))
                 )
               )(Future.successful(Right(())))
             }
@@ -1600,7 +1610,7 @@ class StartControllerSpec
 
         "show an error page" when {
 
-          "there is initially no session data and the journey status cannot be upadted successfully" in {
+          "there is initially no session data and the journey status cannot be updated successfully" in {
             inSequence {
               mockAuthWithAllRetrievals(
                 ConfidenceLevel.L50,
@@ -1608,14 +1618,14 @@ class StartControllerSpec
                 None,
                 None,
                 None,
-                Set.empty,
+                Set(agentsEnrolment),
                 Some(retrievedGGCredId)
               )
               mockGetSession(Future.successful(Right(None)))
               mockStoreSession(
                 SessionData.empty.copy(
                   userType      = Some(UserType.Agent),
-                  journeyStatus = Some(AgentStatus.AgentSupplyingClientDetails(ggCredId, None))
+                  journeyStatus = Some(AgentStatus.AgentSupplyingClientDetails(arn, ggCredId, None))
                 )
               )(Future.successful(Left(Error(""))))
             }

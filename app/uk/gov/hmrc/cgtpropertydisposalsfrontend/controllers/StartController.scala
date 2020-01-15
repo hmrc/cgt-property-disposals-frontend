@@ -160,9 +160,9 @@ class StartController @Inject()(
 
 
   private def handleRetrievedUserType(retrievedUserType: RetrievedUserType)(implicit request: RequestWithSessionDataAndRetrievedData[AnyContent]): Future[Result] = retrievedUserType match {
-    case RetrievedUserType.Agent(ggCredId) =>
+    case RetrievedUserType.Agent(ggCredId, arn) =>
       updateSession(sessionStore, request)(_.copy(
-        journeyStatus = Some(AgentStatus.AgentSupplyingClientDetails(ggCredId, None)),
+        journeyStatus = Some(AgentStatus.AgentSupplyingClientDetails(arn, ggCredId, None)),
         userType = Some(UserType.Agent)
       )).map{
         case Left(e) =>
@@ -222,7 +222,7 @@ class StartController @Inject()(
             updateSession(sessionStore, request)(
               _.copy(
                 userType      = request.authenticatedRequest.userType,
-                journeyStatus = Some(Subscribed(subscribedDetails, ggCredId, None))
+                journeyStatus = Some(Subscribed(subscribedDetails, ggCredId, None, None))
               )
             )
           )

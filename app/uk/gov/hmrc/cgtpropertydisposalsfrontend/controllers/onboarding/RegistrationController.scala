@@ -234,6 +234,7 @@ class RegistrationController @Inject()(
                               registeredWithId = false
                             ),
                             ggCredId,
+                            None,
                             None
                           )
                         )

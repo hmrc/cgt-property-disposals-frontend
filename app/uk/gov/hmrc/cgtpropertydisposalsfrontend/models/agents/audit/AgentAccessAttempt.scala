@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.audit
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{Json, Writes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
 
-final case class SubscribedContactAddressChangedEvent(
-  oldContactAddress: Address,
-  newContactAddress: Address,
-  source: String,
-  cgtReferenceId: String,
-  isAnAgent: Boolean,
-  agentReferenceNumber: Option[String]
+final case class AgentAccessAttempt(
+  agentReferenceNumber: AgentReferenceNumber,
+  cgtReference: CgtReference,
+  success: Boolean
 )
 
-object SubscribedContactAddressChangedEvent{
-  implicit val format: OFormat[SubscribedContactAddressChangedEvent] = Json.format[SubscribedContactAddressChangedEvent]
+object AgentAccessAttempt {
+
+  implicit val writes: Writes[AgentAccessAttempt] = Json.writes[AgentAccessAttempt]
+
 }

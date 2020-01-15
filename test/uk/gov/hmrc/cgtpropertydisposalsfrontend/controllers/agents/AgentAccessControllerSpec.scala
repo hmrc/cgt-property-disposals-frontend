@@ -29,7 +29,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.CgtEnrolment
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.EnrolmentConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, PostcodeFormValidationTests, SessionSupport}
@@ -39,7 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifierAttempts
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -81,6 +81,8 @@ class AgentAccessControllerSpec
 
   val agentGGCredId = sample[GGCredId]
 
+  val agentReferenceNumber = sample[AgentReferenceNumber]
+
   val validCgtReference = CgtReference("XYCGTP123456789")
 
   val (nonUkCountryCode, nonUkCountryName) =
@@ -100,6 +102,7 @@ class AgentAccessControllerSpec
   def sessionData(clientDetails: SubscribedDetails, correctVerifierSupplied: Boolean) = SessionData.empty.copy(
     journeyStatus = Some(
       AgentSupplyingClientDetails(
+        agentReferenceNumber,
         agentGGCredId,
         Some(VerifierMatchingDetails(clientDetails, correctVerifierSupplied))
       )
@@ -108,9 +111,9 @@ class AgentAccessControllerSpec
 
   def mockDelegatedAuthCheck(cgtReference: CgtReference)(result: Future[Unit]): Unit =
     mockAuth(
-      Enrolment(CgtEnrolment.enrolmentKey)
-        .withIdentifier(CgtEnrolment.enrolmentIdentifier, cgtReference.value)
-        .withDelegatedAuthRule(CgtEnrolment.delegateAuthRule),
+      Enrolment(EnrolmentConfig.Cgt.key)
+        .withIdentifier(EnrolmentConfig.Cgt.cgtReferenceIdentifier, cgtReference.value)
+        .withDelegatedAuthRule(EnrolmentConfig.Cgt.delegateAuthRule),
       EmptyRetrieval
     )(result)
 
@@ -147,7 +150,7 @@ class AgentAccessControllerSpec
 
       val initialAgentSessionData =
         SessionData.empty.copy(
-          journeyStatus = Some(AgentSupplyingClientDetails(agentGGCredId, None))
+          journeyStatus = Some(AgentSupplyingClientDetails(agentReferenceNumber, agentGGCredId, None))
         )
 
       def performAction(): Future[Result] = controller.enterClientsCgtRef()(FakeRequest())
@@ -179,7 +182,7 @@ class AgentAccessControllerSpec
 
       val initialAgentSessionData =
         SessionData.empty.copy(
-          journeyStatus = Some(AgentSupplyingClientDetails(agentGGCredId, None))
+          journeyStatus = Some(AgentSupplyingClientDetails(agentReferenceNumber, agentGGCredId, None))
         )
 
       def performAction(formData: (String, String)*): Future[Result] =
@@ -259,8 +262,13 @@ class AgentAccessControllerSpec
             mockGetSubscriptionDetails(validCgtReference)(Right(clientDetails))
             mockStoreSession(
               SessionData.empty.copy(
-                journeyStatus =
-                  Some(AgentSupplyingClientDetails(agentGGCredId, Some(VerifierMatchingDetails(clientDetails, false))))
+                journeyStatus = Some(
+                  AgentSupplyingClientDetails(
+                    agentReferenceNumber,
+                    agentGGCredId,
+                    Some(VerifierMatchingDetails(clientDetails, false))
+                  )
+                )
               )
             )(Future.successful(Left(Error(""))))
           }
@@ -326,8 +334,13 @@ class AgentAccessControllerSpec
             mockGetSubscriptionDetails(validCgtReference)(Right(ukClientDetails))
             mockStoreSession(
               SessionData.empty.copy(
-                journeyStatus =
-                  Some(AgentSupplyingClientDetails(agentGGCredId, Some(VerifierMatchingDetails(ukClientDetails, false))))
+                journeyStatus = Some(
+                  AgentSupplyingClientDetails(
+                    agentReferenceNumber,
+                    agentGGCredId,
+                    Some(VerifierMatchingDetails(ukClientDetails, false))
+                  )
+                )
               )
             )(Future.successful(Right(())))
           }
@@ -351,8 +364,13 @@ class AgentAccessControllerSpec
             mockGetSubscriptionDetails(validCgtReference)(Right(nonUkClientDetails))
             mockStoreSession(
               SessionData.empty.copy(
-                journeyStatus =
-                  Some(AgentSupplyingClientDetails(agentGGCredId, Some(VerifierMatchingDetails(nonUkClientDetails, false))))
+                journeyStatus = Some(
+                  AgentSupplyingClientDetails(
+                    agentReferenceNumber,
+                    agentGGCredId,
+                    Some(VerifierMatchingDetails(nonUkClientDetails, false))
+                  )
+                )
               )
             )(Future.successful(Right(())))
           }
@@ -371,8 +389,8 @@ class AgentAccessControllerSpec
 
       behave like redirectToStartWhenInvalidJourney(
         performAction, {
-          case AgentSupplyingClientDetails(_, Some(_)) => true
-          case _                                       => false
+          case AgentSupplyingClientDetails(_, _, Some(_)) => true
+          case _                                          => false
         }
       )
 
@@ -390,6 +408,7 @@ class AgentAccessControllerSpec
                     SessionData.empty.copy(
                       journeyStatus = Some(
                         AgentSupplyingClientDetails(
+                          agentReferenceNumber,
                           agentGGCredId,
                           Some(VerifierMatchingDetails(ukClientDetails.copy(address = sample[NonUkAddress]), false))
                         )
@@ -452,8 +471,8 @@ class AgentAccessControllerSpec
 
       behave like redirectToStartWhenInvalidJourney(
         () => performAction("postcode" -> ukAddress.postcode.value), {
-          case AgentSupplyingClientDetails(_, Some(_)) => true
-          case _                                       => false
+          case AgentSupplyingClientDetails(_, _, Some(_)) => true
+          case _                                          => false
         }
       )
 
@@ -553,6 +572,7 @@ class AgentAccessControllerSpec
                     SessionData.empty.copy(
                       journeyStatus = Some(
                         AgentSupplyingClientDetails(
+                          agentReferenceNumber,
                           agentGGCredId,
                           Some(VerifierMatchingDetails(ukClientDetails.copy(address = sample[NonUkAddress]), false))
                         )
@@ -669,8 +689,8 @@ class AgentAccessControllerSpec
 
       behave like redirectToStartWhenInvalidJourney(
         performAction, {
-          case AgentSupplyingClientDetails(_, Some(_)) => true
-          case _                                       => false
+          case AgentSupplyingClientDetails(_, _, Some(_)) => true
+          case _                                          => false
         }
       )
 
@@ -688,6 +708,7 @@ class AgentAccessControllerSpec
                     SessionData.empty.copy(
                       journeyStatus = Some(
                         AgentSupplyingClientDetails(
+                          agentReferenceNumber,
                           agentGGCredId,
                           Some(VerifierMatchingDetails(nonUkClientDetails.copy(address = sample[UkAddress]), false))
                         )
@@ -752,8 +773,8 @@ class AgentAccessControllerSpec
 
       behave like redirectToStartWhenInvalidJourney(
         () => performAction("countryCode" -> nonUkCountryCode), {
-          case AgentSupplyingClientDetails(_, Some(_)) => true
-          case _                                       => false
+          case AgentSupplyingClientDetails(_, _, Some(_)) => true
+          case _                                          => false
         }
       )
 
@@ -838,6 +859,7 @@ class AgentAccessControllerSpec
                     SessionData.empty.copy(
                       journeyStatus = Some(
                         AgentSupplyingClientDetails(
+                          agentReferenceNumber,
                           agentGGCredId,
                           Some(VerifierMatchingDetails(nonUkClientDetails.copy(address = sample[UkAddress]), false))
                         )
@@ -947,8 +969,8 @@ class AgentAccessControllerSpec
 
       behave like redirectToStartWhenInvalidJourney(
         performAction, {
-          case AgentSupplyingClientDetails(_, Some(_)) => true
-          case _                                       => false
+          case AgentSupplyingClientDetails(_, _, Some(_)) => true
+          case _                                          => false
         }
       )
 
@@ -957,7 +979,9 @@ class AgentAccessControllerSpec
         "the client's address is in the uk but the agent has not yet submitted it" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false)))))
+            mockGetSession(
+              Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false))))
+            )
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(Right(None))
           }
 
@@ -970,7 +994,9 @@ class AgentAccessControllerSpec
         "the client's address is in the not uk but the agent has not yet submitted it" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = false)))))
+            mockGetSession(
+              Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = false))))
+            )
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, nonUkClientDetails.cgtReference)(Right(None))
           }
 
@@ -1015,8 +1041,8 @@ class AgentAccessControllerSpec
 
       behave like redirectToStartWhenInvalidJourney(
         performAction, {
-          case AgentSupplyingClientDetails(_, Some(_)) => true
-          case _                                       => false
+          case AgentSupplyingClientDetails(_, _, Some(_)) => true
+          case _                                          => false
         }
       )
 
@@ -1027,7 +1053,9 @@ class AgentAccessControllerSpec
         "the client's address is in the uk but the agent has not yet submitted it" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false)))))
+            mockGetSession(
+              Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false))))
+            )
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(Right(None))
           }
 
@@ -1040,7 +1068,9 @@ class AgentAccessControllerSpec
         "the client's address is in the not uk but the agent has not yet submitted it" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = false)))))
+            mockGetSession(
+              Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = false))))
+            )
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, nonUkClientDetails.cgtReference)(Right(None))
           }
 
@@ -1053,7 +1083,10 @@ class AgentAccessControllerSpec
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = true)))))
           mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(Right(None))
-          mockStoreSession(SessionData.empty.copy(journeyStatus = Some(Subscribed(ukClientDetails, agentGGCredId, None))))(Future.successful(Left(Error(""))))
+          mockStoreSession(
+            SessionData.empty
+              .copy(journeyStatus = Some(Subscribed(ukClientDetails, agentGGCredId, Some(agentReferenceNumber), None)))
+          )(Future.successful(Left(Error(""))))
         }
 
         checkIsTechnicalErrorPage(performAction())
@@ -1066,7 +1099,11 @@ class AgentAccessControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData(clientDetails, correctVerifierSupplied = true)))))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, clientDetails.cgtReference)(Right(None))
-            mockStoreSession(SessionData.empty.copy(journeyStatus = Some(Subscribed(clientDetails, agentGGCredId, None))))(Future.successful(Right(())))
+            mockStoreSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(Subscribed(clientDetails, agentGGCredId, Some(agentReferenceNumber), None))
+              )
+            )(Future.successful(Right(())))
           }
 
           checkIsRedirect(performAction(), controllers.accounts.homepage.routes.HomePageController.homepage())
@@ -1090,10 +1127,9 @@ class AgentAccessControllerSpec
         controller.tooManyVerifierMatchAttempts()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(
-        performAction,
-        {
+        performAction, {
           case _: AgentSupplyingClientDetails => true
-          case _ => false
+          case _                              => false
         }
       )
 
@@ -1106,13 +1142,12 @@ class AgentAccessControllerSpec
         }
 
         val result = performAction()
-        status(result) shouldBe OK
+        status(result)          shouldBe OK
         contentAsString(result) should include(message("agent.too-many-attempts.title"))
 
       }
 
     }
-
 
   }
 
@@ -1145,17 +1180,13 @@ class AgentAccessControllerSpec
           mockGetSession(
             Future.successful(Right(Some(sessionData(clientDetails, correctVerifierSupplied = false))))
           )
-          mockGetUnsuccessfulVerifierAttempts(agentGGCredId, clientDetails.cgtReference)(Left(Error(""))
-          )
+          mockGetUnsuccessfulVerifierAttempts(agentGGCredId, clientDetails.cgtReference)(Left(Error("")))
         }
 
         checkIsTechnicalErrorPage(performAction())
       }
 
-
     }
-
-
 
   }
 

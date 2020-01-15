@@ -98,6 +98,7 @@ class SubscribedChangeEmailController @Inject()(
         journey.subscribedDetails.emailAddress.value,
         email.value,
         journey.subscribedDetails.cgtReference.value,
+        journey.agentReferenceNumber,
         routes.SubscribedChangeEmailController.emailVerified().url
       )
     }
@@ -107,6 +108,7 @@ class SubscribedChangeEmailController @Inject()(
       journey.subscribedDetails.emailAddress.value,
       email.value,
       journey.subscribedDetails.cgtReference.value,
+      journey.agentReferenceNumber,
       routes.SubscribedChangeEmailController.enterEmailSubmit().url
     )
 

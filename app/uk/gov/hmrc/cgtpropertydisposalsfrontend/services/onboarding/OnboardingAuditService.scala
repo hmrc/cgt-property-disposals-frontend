@@ -22,7 +22,7 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.libs.json.{Json, Writes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.routes
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressSource, Country}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactNameSource, IndividualName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.BusinessPartnerRecordNameMatchDetails.{IndividualNameWithSaUtrAuditDetails, TrustNameWithTrnAuditDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{Address => AuditAddress, _}
@@ -108,6 +108,7 @@ trait OnboardingAuditService {
     oldContactName: String,
     newContactName: String,
     cgtReference: String,
+    agentReferenceNumber: Option[AgentReferenceNumber],
     path: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit
 
@@ -115,6 +116,7 @@ trait OnboardingAuditService {
     oldEmailAddress: String,
     newEmailAddress: String,
     cgtReference: String,
+    agentReferenceNumber: Option[AgentReferenceNumber],
     path: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit
 
@@ -122,6 +124,7 @@ trait OnboardingAuditService {
     oldEmailAddress: String,
     newEmailAddress: String,
     cgtReference: String,
+    agentReferenceNumber: Option[AgentReferenceNumber],
     path: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit
 
@@ -130,6 +133,7 @@ trait OnboardingAuditService {
     newContactAddress: Address,
     isManuallyEntered: Boolean,
     cgtReference: String,
+    agentReferenceNumber: Option[AgentReferenceNumber],
     path: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit
 
@@ -502,12 +506,15 @@ class OnboardingAuditServiceImpl @Inject()(auditConnector: AuditConnector) exten
     oldContactName: String,
     newContactName: String,
     cgtReference: String,
+    agentReferenceNumber: Option[AgentReferenceNumber],
     path: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit = {
     val detail = SubscribedContactNameChangedEvent(
       oldContactName,
       newContactName,
-      cgtReference
+      cgtReference,
+      agentReferenceNumber.isDefined,
+      agentReferenceNumber.map(_.value)
     )
 
     sendEvent(
@@ -522,12 +529,15 @@ class OnboardingAuditServiceImpl @Inject()(auditConnector: AuditConnector) exten
     oldEmailAddress: String,
     newEmailAddress: String,
     cgtReference: String,
+    agentReferenceNumber: Option[AgentReferenceNumber],
     path: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit = {
     val detail = SubscribedChangeEmailAddressAttemptedEvent(
       oldEmailAddress,
       newEmailAddress,
-      cgtReference
+      cgtReference,
+      agentReferenceNumber.isDefined,
+      agentReferenceNumber.map(_.value)
     )
 
     sendEvent(
@@ -542,12 +552,15 @@ class OnboardingAuditServiceImpl @Inject()(auditConnector: AuditConnector) exten
     oldEmailAddress: String,
     newEmailAddress: String,
     cgtReference: String,
+    agentReferenceNumber: Option[AgentReferenceNumber],
     path: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit = {
     val detail = SubscribedChangeEmailAddressVerifiedEvent(
       oldEmailAddress,
       newEmailAddress,
-      cgtReference
+      cgtReference,
+      agentReferenceNumber.isDefined,
+      agentReferenceNumber.map(_.value)
     )
 
     sendEvent(
@@ -563,6 +576,7 @@ class OnboardingAuditServiceImpl @Inject()(auditConnector: AuditConnector) exten
     newContactAddress: Address,
     isManuallyEnteredAddress: Boolean,
     cgtReference: String,
+    agentReferenceNumber: Option[AgentReferenceNumber],
     path: String
   )(implicit hc: HeaderCarrier, ec: ExecutionContext): Unit = {
 
@@ -572,7 +586,9 @@ class OnboardingAuditServiceImpl @Inject()(auditConnector: AuditConnector) exten
       toAuditAddress(oldContactAddress),
       toAuditAddress(newContactAddress),
       source,
-      cgtReference
+      cgtReference,
+      agentReferenceNumber.isDefined,
+      agentReferenceNumber.map(_.value)
     )
     sendEvent(
       "contactAddressChanged",

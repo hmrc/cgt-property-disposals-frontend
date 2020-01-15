@@ -27,7 +27,7 @@ import play.api.data.Forms.{mapping, of}
 import play.api.http.Writeable
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, Enrolment, InsufficientEnrolments}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{CgtEnrolment, ErrorHandler, ViewConfig}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{EnrolmentConfig, ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents.AgentAccessController._
@@ -36,10 +36,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AgentStatu
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Country, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifierAttempts
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.agents.AgentVerifierMatchRetryStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.agents.AgentAccessAuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
@@ -57,6 +58,7 @@ class AgentAccessController @Inject()(
   authConnector: AuthConnector,
   sessionStore: SessionStore,
   errorHandler: ErrorHandler,
+  agentAccessAuditService: AgentAccessAuditService,
   subscriptionService: SubscriptionService,
   agentVerifierMatchRetryStore: AgentVerifierMatchRetryStore,
   cc: MessagesControllerComponents,
@@ -86,12 +88,12 @@ class AgentAccessController @Inject()(
 
   def enterClientsCgtRefSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withAgentSupplyingClientDetails {
-      case AgentSupplyingClientDetails(ggCredId, _) =>
+      case AgentSupplyingClientDetails(arn, ggCredId, _) =>
         cgtReferenceForm
           .bindFromRequest()
           .fold(
             formWithErrors => BadRequest(enterClientsCgtRefPage(formWithErrors)),
-            cgtReference => handleSubmittedCgtReferenceNumber(cgtReference, ggCredId)
+            cgtReference => handleSubmittedCgtReferenceNumber(cgtReference, arn, ggCredId)
           )
     }
   }
@@ -197,7 +199,12 @@ class AgentAccessController @Inject()(
           updateSession(sessionStore, request)(
             _.copy(
               journeyStatus = Some(
-                Subscribed(verifierMatchingDetails.clientDetails, agentSupplyingClientDetails.agentGGCredId, None)
+                Subscribed(
+                  verifierMatchingDetails.clientDetails,
+                  agentSupplyingClientDetails.agentGGCredId,
+                  Some(agentSupplyingClientDetails.agentReferenceNumber),
+                  None
+                )
               )
             )
           ).map {
@@ -221,21 +228,29 @@ class AgentAccessController @Inject()(
 
   private def handleSubmittedCgtReferenceNumber(
     cgtReference: CgtReference,
+    agentReferenceNumber: AgentReferenceNumber,
     ggCredId: GGCredId
   )(implicit hc: HeaderCarrier, request: RequestWithSessionData[_]): Future[Result] =
     authorisedFunctions
       .authorised(
-        Enrolment(CgtEnrolment.enrolmentKey)
-          .withIdentifier(CgtEnrolment.enrolmentIdentifier, cgtReference.value)
-          .withDelegatedAuthRule(CgtEnrolment.delegateAuthRule)
+        Enrolment(EnrolmentConfig.Cgt.key)
+          .withIdentifier(EnrolmentConfig.Cgt.cgtReferenceIdentifier, cgtReference.value)
+          .withDelegatedAuthRule(EnrolmentConfig.Cgt.delegateAuthRule)
       ) {
+        agentAccessAuditService.sendAgentAccessAttemptEvent(agentReferenceNumber, cgtReference, true)
+
         val result = for {
           details <- subscriptionService.getSubscribedDetails(cgtReference)
           _ <- EitherT(
                 updateSession(sessionStore, request)(
                   _.copy(
-                    journeyStatus =
-                      Some(AgentSupplyingClientDetails(ggCredId, Some(VerifierMatchingDetails(details, false))))
+                    journeyStatus = Some(
+                      AgentSupplyingClientDetails(
+                        agentReferenceNumber,
+                        ggCredId,
+                        Some(VerifierMatchingDetails(details, false))
+                      )
+                    )
                   )
                 )
               )
@@ -252,6 +267,7 @@ class AgentAccessController @Inject()(
       }
       .recover {
         case _: InsufficientEnrolments =>
+          agentAccessAuditService.sendAgentAccessAttemptEvent(agentReferenceNumber, cgtReference, false)
           BadRequest(
             enterClientsCgtRefPage(
               cgtReferenceForm
@@ -305,10 +321,7 @@ class AgentAccessController @Inject()(
     def noMatchResult(submittedVerifier: V): Result =
       BadRequest(page(form.fill(submittedVerifier).withError(formKey, "error.noMatch")))
 
-    def handleNewUnmatchedVerifier(submittedVerifier: V): Future[Result] = {
-      val updatedUnsuccessfulAttempts =
-        currentUnsuccessfulVerifierMatchAttempts.map(_.unsuccessfulAttempts + 1).getOrElse(1)
-
+    def handleNewUnmatchedVerifier(submittedVerifier: V, updatedUnsuccessfulAttempts: Int): Future[Result] = {
       agentVerifierMatchRetryStore
         .store(
           currentAgentSupplyingClientDetails.agentGGCredId,
@@ -328,18 +341,42 @@ class AgentAccessController @Inject()(
         }
     }
 
+    def sendAuditEvent(submittedVerifier: V, success: Boolean, numberOfUnsuccessfulAttempts: Int): Unit =
+      agentAccessAuditService.sendAgentVerifierMatchAttemptEvent(
+        currentAgentSupplyingClientDetails.agentReferenceNumber,
+        currentVerifierMatchingDetails.clientDetails.cgtReference,
+        numberOfUnsuccessfulAttempts,
+        maxVerifierNameMatchAttempts,
+        toEither(submittedVerifier),
+        success
+      )
+
     form
       .bindFromRequest()
       .fold(
         formWithErrors => BadRequest(page(formWithErrors)),
-        submittedVerifier =>
-          if (matches(submittedVerifier, actualVerifier)) handleMatchedVerifier
+        submittedVerifier => {
+          val currentNumberOfUnsuccessfulAttempts =
+            currentUnsuccessfulVerifierMatchAttempts.map(_.unsuccessfulAttempts).getOrElse(0)
+
+          if (matches(submittedVerifier, actualVerifier)) {
+            sendAuditEvent(submittedVerifier, success = true, currentNumberOfUnsuccessfulAttempts)
+            handleMatchedVerifier
+          }
           // don't increase the unsuccessful attempt count if the same incorrect value has been submitted
           else if (currentUnsuccessfulVerifierMatchAttempts
                      .map(_.lastDetailsTried)
-                     .contains(toEither(submittedVerifier))) noMatchResult(submittedVerifier)
-          else handleNewUnmatchedVerifier(submittedVerifier)
+                     .contains(toEither(submittedVerifier))) {
+            sendAuditEvent(submittedVerifier, success = false, currentNumberOfUnsuccessfulAttempts)
+            noMatchResult(submittedVerifier)
+          } else {
+            val updatedNumberOfUnsuccessfulAttempts = currentNumberOfUnsuccessfulAttempts + 1
+            sendAuditEvent(submittedVerifier, success = false, updatedNumberOfUnsuccessfulAttempts)
+            handleNewUnmatchedVerifier(submittedVerifier, updatedNumberOfUnsuccessfulAttempts)
+          }
+        }
       )
+
   }
 
   private def withAgentSupplyingClientDetails(
@@ -354,7 +391,7 @@ class AgentAccessController @Inject()(
     f: (AgentSupplyingClientDetails, VerifierMatchingDetails, Option[UnsuccessfulVerifierAttempts]) => Future[Result]
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(a @ AgentStatus.AgentSupplyingClientDetails(_, Some(v))) =>
+      case Some(a @ AgentStatus.AgentSupplyingClientDetails(_, _, Some(v))) =>
         agentVerifierMatchRetryStore
           .get(a.agentGGCredId, v.clientDetails.cgtReference)
           .flatMap {

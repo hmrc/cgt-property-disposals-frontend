@@ -79,6 +79,7 @@ class SubscribedWithoutIdChangeContactNameController @Inject()(
         journey.subscribedDetails.contactName.value,
         contactName,
         journey.subscribedDetails.cgtReference.value,
+        journey.agentReferenceNumber,
         routes.SubscribedWithoutIdChangeContactNameController.enterIndividualNameSubmit().url
       )
 

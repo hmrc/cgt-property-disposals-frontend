@@ -14,19 +14,33 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.config
 
-import play.api.libs.json.{Json, OFormat}
+object EnrolmentConfig {
 
-final case class SubscribedContactAddressChangedEvent(
-  oldContactAddress: Address,
-  newContactAddress: Address,
-  source: String,
-  cgtReferenceId: String,
-  isAnAgent: Boolean,
-  agentReferenceNumber: Option[String]
-)
+  object Cgt {
 
-object SubscribedContactAddressChangedEvent{
-  implicit val format: OFormat[SubscribedContactAddressChangedEvent] = Json.format[SubscribedContactAddressChangedEvent]
+    val key = "HMRC-CGT-PD"
+
+    val cgtReferenceIdentifier = "CGTPDRef"
+
+    val delegateAuthRule = "cgt-auth"
+  }
+
+  object Trusts {
+
+    val key = "HMRC-TERS-ORG"
+
+    val sautrIdentifier = "SAUTR"
+
+  }
+
+  object Agents {
+
+    val key = "HMRC-AS-AGENT"
+
+    val agentReferenceNumberIdentifier = "AGENTREFERENCENUMBER"
+
+  }
+
 }

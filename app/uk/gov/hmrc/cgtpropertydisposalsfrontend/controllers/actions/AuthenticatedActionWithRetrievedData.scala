@@ -23,9 +23,9 @@ import play.api.mvc._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{CgtEnrolment, ErrorHandler}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{EnrolmentConfig, ErrorHandler}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Individual, NonGovernmentGatewayUser, Organisation}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{RetrievedUserType, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -36,9 +36,9 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 import scala.concurrent.{ExecutionContext, Future}
 
 final case class AuthenticatedRequestWithRetrievedData[A](
-                                                           journeyUserType: RetrievedUserType,
-                                                           userType: Option[UserType],
-                                                           request: MessagesRequest[A]
+  journeyUserType: RetrievedUserType,
+  userType: Option[UserType],
+  request: MessagesRequest[A]
 ) extends WrappedRequest[A](request)
 
 @Singleton
@@ -72,12 +72,9 @@ class AuthenticatedActionWithRetrievedData @Inject()(
       ) {
         case retrievedData @ _ ~ affinityGroup ~ _ ~ _ ~ _ ~ allEnrolments ~ creds =>
           withGGCredentials(creds, request) { ggCredId =>
-
             affinityGroup match {
               case Some(AffinityGroup.Agent) =>
-                Future.successful(
-                  Right(AuthenticatedRequestWithRetrievedData(RetrievedUserType.Agent(ggCredId), Some(UserType.Agent), request))
-                )
+                Future.successful(handleAgent(request, ggCredId, allEnrolments))
 
               case _ =>
                 hasSubscribed(allEnrolments, request) map {
@@ -94,7 +91,7 @@ class AuthenticatedActionWithRetrievedData @Inject()(
                   case Right(None) =>
                     val result = retrievedData match {
                       case cl ~ Some(AffinityGroup.Individual) ~ maybeNino ~ maybeSautr ~ maybeEmail ~ _ ~ _
-                        if cl < ConfidenceLevel.L200 =>
+                          if cl < ConfidenceLevel.L200 =>
                         Right(
                           AuthenticatedRequestWithRetrievedData(
                             RetrievedUserType.IndividualWithInsufficientConfidenceLevel(
@@ -134,7 +131,6 @@ class AuthenticatedActionWithRetrievedData @Inject()(
                     result
                 }
 
-
             }
 
           }
@@ -144,9 +140,9 @@ class AuthenticatedActionWithRetrievedData @Inject()(
   private def hasSubscribed[A](enrolments: Enrolments, request: MessagesRequest[A])(
     implicit hc: HeaderCarrier
   ): Future[Either[Result, Option[CgtReference]]] =
-    enrolments.getEnrolment(CgtEnrolment.enrolmentKey) match {
+    enrolments.getEnrolment(EnrolmentConfig.Cgt.key) match {
       case Some(cgtEnrolment) =>
-        cgtEnrolment.getIdentifier(CgtEnrolment.enrolmentIdentifier) match {
+        cgtEnrolment.getIdentifier(EnrolmentConfig.Cgt.cgtReferenceIdentifier) match {
           case Some(cgtReference) => Future.successful(Right(Some(CgtReference(cgtReference.value))))
           case None =>
             logger.warn(s"CGT identifier value is missing from the enrolment")
@@ -182,6 +178,37 @@ class AuthenticatedActionWithRetrievedData @Inject()(
         )
     }
 
+  private def handleAgent[A](
+    request: MessagesRequest[A],
+    ggCredId: GGCredId,
+    allEnrolments: Enrolments
+  ): Either[Result, AuthenticatedRequestWithRetrievedData[A]] = {
+    import cats.syntax.either._
+    val maybeArn = for {
+      agentEnrolment <- Either.fromOption(
+                         allEnrolments.getEnrolment(EnrolmentConfig.Agents.key),
+                         s"Agent has no ${EnrolmentConfig.Agents.key} enrolment"
+                       )
+      arn <- Either.fromOption(
+              agentEnrolment
+                .getIdentifier(EnrolmentConfig.Agents.agentReferenceNumberIdentifier)
+                .map(id => AgentReferenceNumber(id.value)),
+              s"Agent has ${EnrolmentConfig.Agents.key} enrolment but does not have ${EnrolmentConfig.Agents.agentReferenceNumberIdentifier} identifier"
+            )
+    } yield arn
+
+    maybeArn.fold[Either[Result, AuthenticatedRequestWithRetrievedData[A]]](
+      { e =>
+        logger.warn(e)
+        Left(errorHandler.errorResult(Some(UserType.Agent))(request))
+      },
+      arn =>
+        Right(
+          AuthenticatedRequestWithRetrievedData(RetrievedUserType.Agent(ggCredId, arn), Some(UserType.Agent), request)
+        )
+    )
+  }
+
   private def handleOrganisation[A](
     request: MessagesRequest[A],
     enrolments: Enrolments,
@@ -189,7 +216,7 @@ class AuthenticatedActionWithRetrievedData @Inject()(
     ggCredId: GGCredId
   ): Either[Result, AuthenticatedRequestWithRetrievedData[A]] =
     // work out if it is an organisation or not
-    enrolments.getEnrolment("HMRC-TERS-ORG") match {
+    enrolments.getEnrolment(EnrolmentConfig.Trusts.key) match {
       case None =>
         Right(
           AuthenticatedRequestWithRetrievedData(
@@ -201,7 +228,7 @@ class AuthenticatedActionWithRetrievedData @Inject()(
 
       case Some(trustEnrolment) =>
         trustEnrolment
-          .getIdentifier("SAUTR")
+          .getIdentifier(EnrolmentConfig.Trusts.sautrIdentifier)
           .fold[Either[Result, AuthenticatedRequestWithRetrievedData[A]]] {
             logger.warn(
               s"Could not find SAUTR identifier for user with trust enrolment $trustEnrolment. " +
