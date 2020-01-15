@@ -56,15 +56,6 @@ class HomePageController @Inject()(
       }
   }
 
-  // homepage for private beta: does not include any functionality to do with returns. This will
-  // eventually be removed when we move out of private beta
-  def privateBetaHomepage(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request: RequestWithSessionData[AnyContent] =>
-      withSubscribedUser(request) { (_, subscribed) =>
-        Ok(privateBetaHomePage(subscribed.subscribedDetails))
-      }
-  }
-
   def startNewReturn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withSubscribedUser(request) { (_, _) =>
       request.userType match {
