@@ -21,18 +21,19 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionDetail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class HomeController @Inject()(
+class AccountController @Inject()(
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   errorHandler: ErrorHandler,
@@ -40,6 +41,7 @@ class HomeController @Inject()(
   cc: MessagesControllerComponents,
   manageYourDetailsPage: views.html.account.manage_your_details,
   homePage: views.html.account.home,
+  privateBetaHomePage: views.html.account.home_private_beta,
   detailUpdatedPage: views.html.account.details_updated,
   signedOutPage: views.html.account.signed_out
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
@@ -48,12 +50,6 @@ class HomeController @Inject()(
     with SessionUpdates
     with Logging {
 
-  def homepage(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request: RequestWithSessionData[AnyContent] =>
-      withSubscribedUser(request) { (_, subscribed) =>
-        Ok(homePage(subscribed.subscribedDetails))
-      }
-  }
 
   def manageYourDetails(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request: RequestWithSessionData[AnyContent] =>

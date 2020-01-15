@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.upscan
 
 import akka.stream.scaladsl.{FileIO, Source}
 import akka.util.ByteString
@@ -27,6 +27,7 @@ import play.api.libs.json.JsValue
 import play.api.mvc.{Action, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.UpscanConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
@@ -37,10 +38,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanNot
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanServiceResponse._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views._
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -96,7 +97,7 @@ class UpscanController @Inject()(
           val prepared = multipart.copy(files = withSource, dataParts = data)
           upscanConnector.upload(href, prepared).value.map {
             case Left(error) =>
-              logger.warn(s"Could not upload file to S3 due to $error")
+              logger.warn(s"Could not upload file to S3", error)
               errorHandler.errorResult(None)
             case Right(_) => Ok
           }
@@ -121,7 +122,7 @@ class UpscanController @Inject()(
         notifyEvent =>
           upscanService.storeNotifyEvent(CgtReference(cgtReference), notifyEvent).value.map {
             case Left(error) =>
-              logger.warn(s"upscan notifier call back handler failed due to $error")
+              logger.warn("upscan notifier call back handler failed", error)
               errorHandler.errorResult(None)
             case Right(_) =>
               logger.info("upscan notifier call back succeeded")

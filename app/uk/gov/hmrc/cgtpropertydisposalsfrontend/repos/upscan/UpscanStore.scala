@@ -59,7 +59,7 @@ class UpscanStoreImpl @Inject()(mongo: ReactiveMongoComponent, configuration: Co
 
   val cacheRepository: CacheMongoRepository = {
     val expireAfter: FiniteDuration = configuration.underlying
-      .get[FiniteDuration]("microservice.upscan-initiate.upscan-store.expiry-time")
+      .get[FiniteDuration]("microservice.services.upscan-initiate.upscan-store.expiry-time")
       .value
 
     new CacheMongoRepository("upscan-event", expireAfter.toSeconds)(mongo.mongoConnector.db, ec)

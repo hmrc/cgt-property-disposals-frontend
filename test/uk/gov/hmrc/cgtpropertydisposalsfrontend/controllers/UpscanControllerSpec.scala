@@ -36,6 +36,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanSer
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.{UpscanNotifyResponse, UpscanServiceResponse}
 import uk.gov.hmrc.http.HeaderCarrier
 import play.api.test.CSRFTokenHelper._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.upscan.UpscanController
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 
 import scala.concurrent.Future

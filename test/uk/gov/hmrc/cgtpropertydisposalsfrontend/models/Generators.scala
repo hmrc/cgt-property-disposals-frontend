@@ -33,6 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, 
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscribedUpdateDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanNotifyResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanServiceResponse.{UpscanNotifyEvent, UpscanResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualTriageAnswers, IndividualUserType}
 
 object Generators
     extends GenUtils
@@ -46,8 +47,9 @@ object Generators
     with OnboardingDetailsGen
     with EmailGen
     with UpscanGen
+    with VerifierMatchGen
     with UserTypeGen
-    with VerifierMatchGen {
+    with TriageQuestionsGen {
 
   def sample[A](implicit gen: Gen[A]): A =
     gen.sample.getOrElse(sys.error(s"Could not generate instance with $gen"))
@@ -191,5 +193,13 @@ trait VerifierMatchGen { this: GenUtils =>
 trait UserTypeGen { this: GenUtils =>
 
   implicit val userTypeGen: Gen[UserType] = gen[UserType]
+
+}
+
+trait TriageQuestionsGen { this: GenUtils =>
+
+  implicit val individualTriageAnswersGen: Gen[IndividualTriageAnswers] = gen[IndividualTriageAnswers]
+
+  implicit val individualUserTypeGen: Gen[IndividualUserType] = gen[IndividualUserType]
 
 }

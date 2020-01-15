@@ -747,7 +747,8 @@ class StartControllerSpec
                   None,
                   registeredWithId = true
                 ),
-                ggCredId
+                ggCredId,
+                None
               )
               val session =
                 SessionData.empty.copy(userType = Some(UserType.Individual), journeyStatus = Some(subscriptionStatus))
@@ -757,7 +758,7 @@ class StartControllerSpec
                 mockGetSession(Future.successful(Right(Some(session))))
               }
 
-              checkIsRedirect(performAction(), controllers.accounts.routes.HomeController.homepage())
+              checkIsRedirect(performAction(), controllers.accounts.homepage.routes.HomePageController.homepage())
             }
 
           }
@@ -1060,7 +1061,8 @@ class StartControllerSpec
                   None,
                   registeredWithId = false
                 ),
-                ggCredId
+                ggCredId,
+                None
               )
               val session = SessionData.empty.copy(                  userType      = Some(UserType.Organisation),journeyStatus = Some(subscriptionStatus))
 
@@ -1070,7 +1072,7 @@ class StartControllerSpec
                 mockGetSession(Future.successful(Right(Some(session))))
               }
 
-              checkIsRedirect(performAction(), controllers.accounts.routes.HomeController.homepage())
+              checkIsRedirect(performAction(), controllers.accounts.homepage.routes.HomePageController.homepage())
             }
 
           }
@@ -1350,7 +1352,7 @@ class StartControllerSpec
 
         val sessionWithSubscribed = SessionData.empty.copy(
           userType      = Some(UserType.Individual),
-          journeyStatus = Some(Subscribed(subscribedDetails, ggCredId))
+          journeyStatus = Some(Subscribed(subscribedDetails, ggCredId, None))
         )
 
         "the session data indicates they have subscribed" must {
@@ -1369,7 +1371,7 @@ class StartControllerSpec
               mockGetSession(Future.successful(Right(Some(sessionWithSubscribed))))
             }
 
-            checkIsRedirect(performAction(), controllers.accounts.routes.HomeController.homepage())
+            checkIsRedirect(performAction(), controllers.accounts.homepage.routes.HomePageController.homepage())
           }
 
         }
@@ -1434,7 +1436,7 @@ class StartControllerSpec
               mockStoreSession(sessionWithSubscribed.copy(userType = None))(Future.successful(Right(())))
             }
 
-            checkIsRedirect(performAction(), controllers.accounts.routes.HomeController.homepage())
+            checkIsRedirect(performAction(), controllers.accounts.homepage.routes.HomePageController.homepage())
           }
 
         }

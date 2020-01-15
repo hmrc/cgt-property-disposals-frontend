@@ -45,7 +45,7 @@ class SubscribedChangeAddressControllerSpec
   val subscribedDetails: SubscribedDetails =
     sample[SubscribedDetails].copy(address = address(1))
 
-  val validJourneyStatus = Subscribed(subscribedDetails, sample[GGCredId])
+  val validJourneyStatus = Subscribed(subscribedDetails, sample[GGCredId], None)
 
   lazy val controller = instanceOf[SubscribedChangeAddressController]
 
@@ -121,7 +121,7 @@ class SubscribedChangeAddressControllerSpec
 
       behave like submitEnterUkAddress(
         performAction,
-        controllers.accounts.routes.HomeController.contactAddressUpdated()
+        controllers.accounts.routes.AccountController.contactAddressUpdated()
       )
 
     }
@@ -142,7 +142,7 @@ class SubscribedChangeAddressControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction())
 
-      behave like submitEnterNonUkAddress(performAction, controllers.accounts.routes.HomeController.contactAddressUpdated())
+      behave like submitEnterNonUkAddress(performAction, controllers.accounts.routes.AccountController.contactAddressUpdated())
 
     }
 
@@ -174,7 +174,7 @@ class SubscribedChangeAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like displaySelectAddress(performAction, controllers.accounts.routes.HomeController.manageYourDetails())
+      behave like displaySelectAddress(performAction, controllers.accounts.routes.AccountController.manageYourDetails())
 
     }
 
@@ -187,8 +187,8 @@ class SubscribedChangeAddressControllerSpec
 
       behave like submitSelectAddress(
         performAction,
-        controllers.accounts.routes.HomeController.manageYourDetails(),
-        controllers.accounts.routes.HomeController.contactAddressUpdated()
+        controllers.accounts.routes.AccountController.manageYourDetails(),
+        controllers.accounts.routes.AccountController.contactAddressUpdated()
       )
 
       "not update the session" when {
@@ -202,7 +202,7 @@ class SubscribedChangeAddressControllerSpec
           }
 
           val result = performAction(Seq("address-select" -> "0"))
-          checkIsRedirect(result, controllers.accounts.routes.HomeController.contactAddressUpdated())
+          checkIsRedirect(result, controllers.accounts.routes.AccountController.contactAddressUpdated())
         }
 
       }

@@ -8,14 +8,7 @@ GET /problem-with-service                                                   uk.g
 GET /start                                                                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.start()
 GET /sign-out-and-register-for-gg                                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.signOutAndRegisterForGG()
 GET /sign-out-and-log-in                                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.signOutAndSignIn()
-GET /exit/we-signed-you-out                                                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.timedOut()
+GET /exit/we-signed-you-out                                                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.timedOut()
 GET /keep-alive                                                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.keepAlive()
-
-# UPSCAN
-GET  /upscan-initiate                                                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.UpscanController.upscan()
-POST /upload                                                                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.UpscanController.upload()
-POST /upscan-success/cgt-reference/:id                                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.UpscanController.successRedirect(id : String)
-POST /upscan-error/cgt-reference/:id                                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.UpscanController.errorRedirect(id : String)
-POST /upscan-call-back/cgt-reference/:id                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.UpscanController.callBack(id : String)
 
 GET  /assets/*file                                                          controllers.Assets.at(path="/public", file)

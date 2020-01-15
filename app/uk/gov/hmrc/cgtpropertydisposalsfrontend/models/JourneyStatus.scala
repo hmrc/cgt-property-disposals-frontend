@@ -25,6 +25,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscriptionDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers
 
 sealed trait JourneyStatus extends Product with Serializable
 
@@ -64,7 +65,11 @@ object JourneyStatus {
   }
 
   // subscription has been submitted to ETMP
-  final case class Subscribed(subscribedDetails: SubscribedDetails, ggCredId: GGCredId) extends JourneyStatus
+  final case class Subscribed(
+    subscribedDetails: SubscribedDetails,
+    ggCredId: GGCredId,
+    individualTriageAnswers: Option[IndividualTriageAnswers]
+  ) extends JourneyStatus
 
   final case class AlreadySubscribedWithDifferentGGAccount(ggCredId: GGCredId) extends JourneyStatus
 

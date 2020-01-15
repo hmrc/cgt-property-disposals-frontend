@@ -27,7 +27,7 @@ import play.api.libs.json.{Json, OFormat}
 import play.api.libs.ws.WSClient
 import play.api.mvc.MultipartFormData
 import play.mvc.Http.Status
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
@@ -35,8 +35,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 final case class UpscanInitiateRequest(
   callbackUrl: String,
@@ -64,8 +63,9 @@ trait UpscanConnector {
 }
 
 @Singleton
-class UpscanConnectorImpl @Inject()(http: HttpClient, wsClient: WSClient, config: Configuration)
-    extends UpscanConnector
+class UpscanConnectorImpl @Inject()(http: HttpClient, wsClient: WSClient, config: Configuration)(
+  implicit ec: ExecutionContext
+) extends UpscanConnector
     with Logging {
 
   private def getUpscanInitiateConfig[A: Configs](key: String): A =
@@ -90,9 +90,9 @@ class UpscanConnectorImpl @Inject()(http: HttpClient, wsClient: WSClient, config
   ): EitherT[Future, Error, HttpResponse] = {
 
     val payload = UpscanInitiateRequest(
-      selfBaseUrl + routes.UpscanController.callBack(cgtReference.value).url,
-      selfBaseUrl + routes.UpscanController.successRedirect(cgtReference.value).url,
-      selfBaseUrl + routes.UpscanController.errorRedirect(cgtReference.value).url,
+      selfBaseUrl + upscan.routes.UpscanController.callBack(cgtReference.value).url,
+      selfBaseUrl + upscan.routes.UpscanController.successRedirect(cgtReference.value).url,
+      selfBaseUrl + upscan.routes.UpscanController.errorRedirect(cgtReference.value).url,
       minFileSize,
       maxFileSize
     )

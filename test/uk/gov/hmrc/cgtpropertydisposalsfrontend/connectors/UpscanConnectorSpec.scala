@@ -34,6 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
 class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with HttpSupport {
@@ -120,9 +121,9 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
 
     val s3Url        = s"https://bucketname.s3.eu-west-2.amazonaws.com"
     val cgtReference = sample[CgtReference]
-    val callBackUrl  = s"http://localhost:7020/upscan-call-back/cgt-reference/${cgtReference.value}"
-    val successUrl   = s"http://localhost:7020/upscan-success/cgt-reference/${cgtReference.value}"
-    val errorUrl     = s"http://localhost:7020/upscan-error/cgt-reference/${cgtReference.value}"
+    val callBackUrl  = s"http://localhost:7020/capital-gains-tax-uk-property/upscan-call-back/cgt-reference/${cgtReference.value}"
+    val successUrl   = s"http://localhost:7020/capital-gains-tax-uk-property/upscan-success/cgt-reference/${cgtReference.value}"
+    val errorUrl     = s"http://localhost:7020/capital-gains-tax-uk-property/upscan-error/cgt-reference/${cgtReference.value}"
 
     val parts: Source[MultipartFormData.Part[Source[ByteString, _]], _] =
       Source.apply(Map("key" -> List("V1")).flatMap {
