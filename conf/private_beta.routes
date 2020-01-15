@@ -1,5 +1,5 @@
 # Add all the application routes to the app.routes file
-GET /account-home                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.privatebeta.PrivateBetaHomePageController.privateBetaHomepage()
+GET /capital-gains-tax-uk-property/account-home                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.privatebeta.PrivateBetaHomePageController.privateBetaHomepage()
 
 ->         /capital-gains-tax-uk-property   app.Routes
 ->         /capital-gains-tax-uk-property   accounts.Routes
