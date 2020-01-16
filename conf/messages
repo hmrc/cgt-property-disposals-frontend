@@ -478,3 +478,5 @@ individualUserType.error.invalid=Select who are you reporting the tax for
 triage.number-of-properties.title=How many properties with the same completion date are you reporting the tax for?
 numberOfProperties.one=One
 numberOfProperties.more-than-one=2 or more
+numberOfProperties.error.invalid=Select how many properties you want to include in this return
+numberOfProperties.error.required=Select how many properties you want to include in this return
