@@ -29,7 +29,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualTriageAnswers, IndividualUserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualTriageAnswers, IndividualUserType, NumberOfProperties}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
@@ -45,7 +46,8 @@ class CanTheyUseOurServiceController @Inject()(
   val errorHandler: ErrorHandler,
   cc: MessagesControllerComponents,
   val config: Configuration,
-  whoAreYouReportingForPage: views.html.returns.triage.who_are_you_reporting_for
+  whoAreYouReportingForPage: views.html.returns.triage.who_are_you_reporting_for,
+  howManyPropertiesPage: views.html.returns.triage.how_many_properties
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -77,7 +79,7 @@ class CanTheyUseOurServiceController @Inject()(
                   individualTriageAnswers = Some(
                     subscribed.individualTriageAnswers
                       .map(_.copy(individualUserType = Some(userType)))
-                      .getOrElse(IndividualTriageAnswers(Some(userType)))
+                      .getOrElse(IndividualTriageAnswers.empty.copy(individualUserType = Some(userType)))
                   )
                 )
 
@@ -88,11 +90,65 @@ class CanTheyUseOurServiceController @Inject()(
                       errorHandler.errorResult()
 
                     case Right(_) =>
-                      Ok(s"Got user type $userType")
+                      userType match {
+                        case IndividualUserType.Self =>
+                          Redirect(routes.CanTheyUseOurServiceController.howManyProperties())
+
+                        case other => Ok(s"$other not handled yet")
+                      }
+
                   }
 
               }
             )
+      }
+  }
+
+  def howManyProperties(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withIndividualTriageAnswers(request) {
+      case (_, subscribed, individualTriageAnswers) =>
+        if(individualTriageAnswers.individualUserType.isEmpty){
+          Redirect(routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting())
+        } else {
+          val form = subscribed.individualTriageAnswers
+            .flatMap(_.numberOfProperties)
+            .fold(numberOfPropertiesForm)(numberOfPropertiesForm.fill)
+
+          Ok(howManyPropertiesPage(form))
+        }
+
+    }
+  }
+
+  def howManyPropertiesSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request =>
+      withIndividualTriageAnswers(request) {
+        case (_, subscribed, individualTriageAnswers) =>
+          if (individualTriageAnswers.individualUserType.isEmpty) {
+            Redirect(routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting())
+          } else {
+            numberOfPropertiesForm
+              .bindFromRequest()
+              .fold(
+                formWithErrors => BadRequest(howManyPropertiesPage(formWithErrors)), { numberOfProperties =>
+                  val newSubscribed = subscribed.copy(
+                    individualTriageAnswers = Some(
+                      individualTriageAnswers.copy(numberOfProperties = Some(numberOfProperties)))
+                    )
+
+                  updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newSubscribed)))
+                    .map {
+                      case Left(e) =>
+                        logger.warn("Could not update session", e)
+                        errorHandler.errorResult()
+
+                      case Right(_) =>
+                        Ok(s"Got number of properties $numberOfProperties")
+                    }
+
+                }
+              )
+          }
       }
   }
 
@@ -105,6 +161,17 @@ class CanTheyUseOurServiceController @Inject()(
       case _ =>
         Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
     }
+
+  private def withIndividualTriageAnswers(request: RequestWithSessionData[_])(
+    f: (SessionData, Subscribed, IndividualTriageAnswers) => Future[Result]
+  ): Future[Result] =
+    request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
+      case Some((s: SessionData, r @ Subscribed(_, _, Some(i)))) =>
+        f(s, r, i)
+      case _ =>
+        Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
+    }
+
 
 }
 
@@ -123,5 +190,21 @@ object CanTheyUseOurServiceController {
         )
     )(identity)(Some(_))
   )
+
+  val numberOfPropertiesForm: Form[NumberOfProperties] = Form(
+    mapping(
+      "numberOfProperties" -> number
+        .verifying("error.invalid", a => a === 0 || a === 1)
+        .transform[NumberOfProperties](
+          value => if (value === 0) One else MoreThanOne, {
+            case One                   => 0
+            case MoreThanOne           => 1
+          }
+        )
+    )(identity)(Some(_))
+  )
+
+
+
 
 }

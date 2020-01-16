@@ -28,7 +28,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualTriageAnswers, IndividualUserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualTriageAnswers, IndividualUserType, NumberOfProperties}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 
@@ -82,7 +82,7 @@ class CanTheyUseOurServiceControllerSpec
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("who-are-you-reporting-for.title"))
+        contentAsString(result) should include(message("triage.who-are-you-reporting-for.title"))
         contentAsString(result) should not include ("checked=\"checked\"")
       }
 
@@ -108,13 +108,13 @@ class CanTheyUseOurServiceControllerSpec
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("who-are-you-reporting-for.title"))
+        contentAsString(result) should include(message("triage.who-are-you-reporting-for.title"))
         contentAsString(result) should include("checked=\"checked\"")
       }
 
     }
 
-    "handling submitted answers to the who is the individual repesenting page" must {
+    "handling submitted answers to the who is the individual representing page" must {
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.whoIsIndividualRepresentingSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
@@ -136,7 +136,7 @@ class CanTheyUseOurServiceControllerSpec
           val content = contentAsString(result)
 
           status(result)          shouldBe BAD_REQUEST
-          contentAsString(result) should include(message("who-are-you-reporting-for.title"))
+          contentAsString(result) should include(message("triage.who-are-you-reporting-for.title"))
           content                 should include(message(expectedErrorKey))
         }
 
@@ -162,7 +162,8 @@ class CanTheyUseOurServiceControllerSpec
                   subscribedWithNoAnswers.copy(
                     individualTriageAnswers = Some(
                       IndividualTriageAnswers(
-                        Some(IndividualUserType.Self)
+                        Some(IndividualUserType.Self),
+                        None
                       )
                     )
                   )
@@ -179,9 +180,8 @@ class CanTheyUseOurServiceControllerSpec
 
       "show a dummy page" when {
 
-        "the submitted value is valid and the session is updated" in {
+        "the submitted value is not 'self' and the session is updated" in {
           List(
-            0 -> IndividualUserType.Self,
             1 -> IndividualUserType.Capacitor,
             2 -> IndividualUserType.PersonalRepresentative
           ).foreach {
@@ -196,7 +196,8 @@ class CanTheyUseOurServiceControllerSpec
                         subscribedWithNoAnswers.copy(
                           individualTriageAnswers = Some(
                             IndividualTriageAnswers(
-                              Some(userType)
+                              Some(userType),
+                              None
                             )
                           )
                         )
@@ -207,11 +208,40 @@ class CanTheyUseOurServiceControllerSpec
 
                 val result = performAction("individualUserType" -> value.toString)
                 status(result)          shouldBe OK
-                contentAsString(result) shouldBe (s"Got user type $userType")
+                contentAsString(result) shouldBe s"$userType not handled yet"
               }
-
           }
 
+        }
+
+      }
+
+      "redirect to the how many properties page" when {
+
+        "the submitted value is self and the session is updated" in {
+          val (userType, userTypeValue) = IndividualUserType.Self -> 0
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionDataWithNoAnswers))))
+            mockStoreSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  subscribedWithNoAnswers.copy(
+                    individualTriageAnswers = Some(
+                      IndividualTriageAnswers(
+                        Some(userType),
+                        None
+                      )
+                    )
+                  )
+                )
+              )
+            )(Future.successful(Right(())))
+          }
+
+          val result = performAction("individualUserType" -> userTypeValue.toString)
+          checkIsRedirect(result, routes.CanTheyUseOurServiceController.howManyProperties())
         }
 
       }
@@ -225,7 +255,8 @@ class CanTheyUseOurServiceControllerSpec
                 subscribedWithNoAnswers.copy(
                   individualTriageAnswers = Some(
                     IndividualTriageAnswers(
-                      Some(IndividualUserType.Self)
+                      Some(IndividualUserType.Self),
+                      None
                     )
                   )
                 )
@@ -238,8 +269,226 @@ class CanTheyUseOurServiceControllerSpec
           }
 
           val result = performAction("individualUserType" -> "0")
-          status(result)          shouldBe OK
-          contentAsString(result) shouldBe (s"Got user type ${IndividualUserType.Self}")
+          checkIsRedirect(result, routes.CanTheyUseOurServiceController.howManyProperties())
+        }
+
+      }
+
+    }
+
+    "handling requests to display the how many properties page" must {
+
+      val requiredPreviousAnswers =
+        IndividualTriageAnswers.empty.copy(individualUserType = Some(sample[IndividualUserType]))
+
+      val subscribedWithRequiredPreviousAnswers =
+        sample[Subscribed].copy(individualTriageAnswers = Some(requiredPreviousAnswers))
+
+      def performAction(): Future[Result] = controller.howManyProperties()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(performAction, isSubscribedJourney)
+
+      "redirect to the who is individual representing page" when {
+
+        "that question has not already answered" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(
+                Right(
+                  Some(
+                    SessionData.empty.copy(
+                      journeyStatus =
+                        Some(sample[Subscribed].copy(individualTriageAnswers = Some(IndividualTriageAnswers.empty)))
+                    )
+                  )
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting())
+        }
+
+      }
+
+      "display the page when no option has been selected before" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            Future.successful(
+              Right(
+                Some(
+                  SessionData.empty.copy(
+                    journeyStatus = Some(subscribedWithRequiredPreviousAnswers)
+                  )
+                )
+              )
+            )
+          )
+        }
+
+        val result = performAction()
+        status(result)          shouldBe OK
+        contentAsString(result) should include(message("triage.number-of-properties.title"))
+        contentAsString(result) should not include ("checked=\"checked\"")
+      }
+
+      "display the page when an option has been selected before" in {
+        val individualTriageAnswers =
+          requiredPreviousAnswers.copy(numberOfProperties = Some(NumberOfProperties.One))
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            Future.successful(
+              Right(
+                Some(
+                  SessionData.empty.copy(
+                    journeyStatus =
+                      Some(sample[Subscribed].copy(individualTriageAnswers = Some(individualTriageAnswers)))
+                  )
+                )
+              )
+            )
+          )
+        }
+
+        val result = performAction()
+        status(result)          shouldBe OK
+        contentAsString(result) should include(message("triage.number-of-properties.title"))
+        contentAsString(result) should include("checked=\"checked\"")
+      }
+
+    }
+
+    "handling submitted answers to the how many properties page" must {
+
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.howManyPropertiesSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
+
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isSubscribedJourney)
+
+      val requiredPreviousAnswers =
+        IndividualTriageAnswers.empty.copy(individualUserType = Some(sample[IndividualUserType]))
+
+      val subscribedWithRequiredPreviousAnswers =
+        sample[Subscribed].copy(individualTriageAnswers = Some(requiredPreviousAnswers))
+
+      val sessionDataWithRequiredPreviousAnswers =
+        SessionData.empty.copy(journeyStatus = Some(subscribedWithRequiredPreviousAnswers))
+
+      "show a form error" when {
+
+        def testFormError(submittedData: (String, String)*)(expectedErrorKey: String): Unit = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionDataWithRequiredPreviousAnswers))))
+          }
+
+          val result  = performAction(submittedData: _*)
+          val content = contentAsString(result)
+
+          status(result)          shouldBe BAD_REQUEST
+          contentAsString(result) should include(message("triage.number-of-properties.title"))
+          content                 should include(message(expectedErrorKey))
+        }
+
+        "no option has been selected" in {
+          testFormError()("numberOfProperties.error.required")
+        }
+
+        "the option submitted is not valid" in {
+          testFormError("numberOfProperties" -> "2")("numberOfProperties.error.invalid")
+        }
+
+      }
+
+      "show an error" when {
+
+        "the submitted value is valid but there is an error updating the session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionDataWithRequiredPreviousAnswers))))
+            mockStoreSession(
+              sessionDataWithRequiredPreviousAnswers.copy(
+                journeyStatus = Some(
+                  subscribedWithRequiredPreviousAnswers.copy(
+                    individualTriageAnswers = Some(
+                      requiredPreviousAnswers.copy(numberOfProperties = Some(NumberOfProperties.One))
+                    )
+                  )
+                )
+              )
+            )(Future.successful(Left(Error(""))))
+          }
+
+          val result = performAction("numberOfProperties" -> "0")
+          checkIsTechnicalErrorPage(result)
+        }
+
+      }
+
+      "show a dummy page" when {
+
+        "the submitted value is valid and the session is updated" in {
+          List(
+            0 -> NumberOfProperties.One,
+            1 -> NumberOfProperties.MoreThanOne
+          ).foreach {
+            case (value, numberOfProperties) =>
+              withClue(s"For user type '$numberOfProperties' and value '$value': ") {
+                inSequence {
+                  mockAuthWithNoRetrievals()
+                  mockGetSession(Future.successful(Right(Some(sessionDataWithRequiredPreviousAnswers))))
+                  mockStoreSession(
+                    sessionDataWithRequiredPreviousAnswers.copy(
+                      journeyStatus = Some(
+                        subscribedWithRequiredPreviousAnswers.copy(
+                          individualTriageAnswers = Some(
+                            requiredPreviousAnswers.copy(numberOfProperties = Some(numberOfProperties))
+                          )
+                        )
+                      )
+                    )
+                  )(Future.successful(Right(())))
+                }
+
+                val result = performAction("numberOfProperties" -> value.toString)
+                status(result) shouldBe OK
+                contentAsString(result) shouldBe s"Got number of properties $numberOfProperties"
+              }
+
+          }
+
+        }
+
+      }
+
+      "not update the session" when {
+
+        "the answer submitted is the same as the one already stored in session" in {
+          val sessionData =
+            sessionDataWithRequiredPreviousAnswers.copy(
+              journeyStatus = Some(
+                subscribedWithRequiredPreviousAnswers.copy(
+                  individualTriageAnswers = Some(
+                    requiredPreviousAnswers.copy(numberOfProperties = Some(NumberOfProperties.One))
+                  )
+                )
+              )
+            )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionDataWithRequiredPreviousAnswers))))
+            mockStoreSession(sessionData)(Future.successful(Right(())))
+          }
+
+
+          val result = performAction("numberOfProperties" -> "0")
+          status(result) shouldBe OK
+          contentAsString(result) shouldBe s"Got number of properties ${NumberOfProperties.One}"
         }
 
       }
