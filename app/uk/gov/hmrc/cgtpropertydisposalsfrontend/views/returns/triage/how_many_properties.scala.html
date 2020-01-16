@@ -16,49 +16,47 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
-mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group,
-backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
+        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+        radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group,
+        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@(form: Form[IndividualUserType])(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[NumberOfProperties])(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
-@key = @{"individualUserType"}
-@title = @{messages("triage.who-are-you-reporting-for.title")}
+@key = @{"numberOfProperties"}
+@title = @{messages("triage.number-of-properties.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@optionIndex(value: IndividualUserType) = @{
+@optionIndex(value: NumberOfProperties) = @{
     value match {
-        case IndividualUserType.Self => 0
-        case IndividualUserType.Capacitor => 1
-        case IndividualUserType.PersonalRepresentative => 2
+        case NumberOfProperties.One => 0
+        case NumberOfProperties.MoreThanOne => 1
     }}
 
 @options = @{
     List(
-        s"$key.self",
-        s"$key.capacitor",
-        s"$key.personal-representative"
+        s"$key.one",
+        s"$key.more-than-one"
     ).map(messageKey =>Html(messages(messageKey)))
 }
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
 
-    @backLinkComponent(controllers.accounts.homepage.routes.HomePageController.homepage())
+    @backLinkComponent(controllers.returns.triage.routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting())
 
     @if(hasErrors) {
         @errorSummary(form)
     }
 
-    @formWrapper(controllers.returns.triage.routes.CanTheyUseOurServiceController.whoIsIndividualRepresentingSubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(controllers.returns.triage.routes.CanTheyUseOurServiceController.howManyPropertiesSubmit(), 'novalidate -> "novalidate") {
         @radioGroup(
             fieldId = key,
             options = options,

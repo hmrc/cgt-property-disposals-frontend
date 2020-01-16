@@ -1,2 +1,6 @@
 GET  /before-start/who-reporting-tax-for    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CanTheyUseOurServiceController.whoIsIndividualRepresenting()
 POST /before-start/who-reporting-tax-for    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CanTheyUseOurServiceController.whoIsIndividualRepresentingSubmit()
+
+
+GET  /before-start/properties-in-return       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CanTheyUseOurServiceController.howManyProperties()
+POST /before-start/properties-in-return       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CanTheyUseOurServiceController.howManyPropertiesSubmit()
