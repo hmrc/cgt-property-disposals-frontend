@@ -147,7 +147,7 @@ class CanTheyUseOurServiceController @Inject()(
                       errorHandler.errorResult()
 
                     case Right(_) =>
-                      Ok(s"Got number of properties $numberOfProperties")
+                      Redirect(routes.CanTheyUseOurServiceController.whenWasDisposalDate())
                   }
 
               }
