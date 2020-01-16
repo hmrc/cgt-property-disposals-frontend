@@ -131,7 +131,7 @@ class CanTheyUseOurServiceController @Inject()(
         if (individualTriageAnswers.individualUserType.isEmpty) {
           Redirect(routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting())
         } else {
-          disposalDateForm()
+          numberOfPropertiesForm
             .bindFromRequest()
             .fold(
               formWithErrors => BadRequest(howManyPropertiesPage(formWithErrors)), { numberOfProperties =>
