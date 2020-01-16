@@ -59,7 +59,7 @@ class CanTheyUseOurServiceController @Inject()(
 
   import CanTheyUseOurServiceController._
 
-  val clock = Clock.systemUTC()
+  val clock: Clock = Clock.systemUTC()
 
   def whoIsIndividualRepresenting(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withSubscribedUser(request) {
