@@ -17,6 +17,8 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions
 
 import cats.instances.future._
+import cats.syntax.either._
+
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.mvc._
@@ -183,7 +185,6 @@ class AuthenticatedActionWithRetrievedData @Inject()(
     ggCredId: GGCredId,
     allEnrolments: Enrolments
   ): Either[Result, AuthenticatedRequestWithRetrievedData[A]] = {
-    import cats.syntax.either._
     val maybeArn = for {
       agentEnrolment <- Either.fromOption(
                          allEnrolments.getEnrolment(EnrolmentConfig.Agents.key),
