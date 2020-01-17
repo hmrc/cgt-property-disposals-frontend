@@ -18,6 +18,7 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -25,8 +26,37 @@
         submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
         errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group,
+        dateInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.date_input,
         backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
 @(form: Form[LocalDate])(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+
+@key = @{"disposalDate"}
+@hasErrors = @{form.hasErrors}
+@title = @{messages("disposalDate.title")}
+
+@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
+
+ @backLinkComponent(controllers.returns.triage.routes.CanTheyUseOurServiceController.howManyProperties())
+
+ @if(hasErrors) {
+  @errorSummary(form)
+ }
+
+ @formWrapper(controllers.returns.triage.routes.CanTheyUseOurServiceController.whenWasDisposalDateSubmit(), 'novalidate -> "novalidate") {
+  @dateInput(
+   fieldId = key,
+   label = pageHeading(title, Some(messages("triage.caption"))),
+   dayValue = form.data.get("day"),
+   monthValue = form.data.get("month"),
+   yearValue = form.data.get("year"),
+   helpText = Some(Html(messages("disposalDate.helpText"))),
+   labelAsHeading = true,
+   errorKey = form.error("date").map(e => e.message),
+   hasErrors = hasErrors
+  )
+  @submitButton(messages("button.continue"))
+ }
+}
+

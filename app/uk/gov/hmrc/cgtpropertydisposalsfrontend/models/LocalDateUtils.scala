@@ -35,6 +35,7 @@ object LocalDateUtils {
       override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Int] =
         data
           .get(key)
+          .filter(_.nonEmpty)
           .fold[Either[Seq[FormError], Int]](
             Left(errorResult(key, "error.required"))
           ) { stringValue =>
