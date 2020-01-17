@@ -492,3 +492,6 @@ disposalDate-year.error.required=Contract exchange date must include a year
 disposalDate-day.error.invalid=Enter a real contract exchange date
 disposalDate-month.error.invalid=Enter a real contract exchange date
 disposalDate-year.error.invalid=Enter a real contract exchange date
+disposalDate-month.error.monthAndYearRequired=Contract exchange date must include a month and a year
+disposalDate-day.error.dayAndYearRequired=Contract exchange date must include a day and a year
+disposalDate-day.error.dayAndMonthRequired=Contract exchange date must include a day and a month

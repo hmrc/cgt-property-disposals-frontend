@@ -39,7 +39,7 @@ object LocalDateUtils {
           Right((dayString, monthString, yearString))
         case None :: Some(_) :: Some(_) :: Nil => Left(FormError(dayKey, "error.required"))
         case Some(_) :: None :: Some(_) :: Nil => Left(FormError(monthKey, "error.required"))
-        case Some(_) :: Some(_) :: None :: Nil => Left(FormError(yearKey, "error.yearMissing"))
+        case Some(_) :: Some(_) :: None :: Nil => Left(FormError(yearKey, "error.required"))
         case Some(_) :: None :: None :: Nil    => Left(FormError(monthKey, "error.monthAndYearRequired"))
         case None :: Some(_) :: None :: Nil    => Left(FormError(dayKey, "error.dayAndYearRequired"))
         case None :: None :: Some(_) :: Nil    => Left(FormError(dayKey, "error.dayAndMonthRequired"))
