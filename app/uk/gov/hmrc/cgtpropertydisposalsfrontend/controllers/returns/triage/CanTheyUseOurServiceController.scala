@@ -236,7 +236,7 @@ object CanTheyUseOurServiceController {
 
   def disposalDateForm(maximumDateInclusive: LocalDate): Form[LocalDate] = Form(
     mapping(
-      "date"  -> of(LocalDateUtils.dateFormatter(maximumDateInclusive, "day", "month", "year", "date"))
+      "date"  -> of(LocalDateUtils.dateFormatter(maximumDateInclusive, "disposalDate-day", "disposalDate-month", "disposalDate-year", "disposalDate"))
     ) (identity)(Some(_))
   )
 

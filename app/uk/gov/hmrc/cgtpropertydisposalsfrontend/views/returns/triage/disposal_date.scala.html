@@ -35,6 +35,7 @@
 @key = @{"disposalDate"}
 @hasErrors = @{form.hasErrors}
 @title = @{messages("disposalDate.title")}
+@errorKey = @{List("disposalDate-day", "disposalDate-month", "disposalDate-year", "disposalDate").map(form.error).find(_.isDefined).flatten}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
 
@@ -48,12 +49,12 @@
   @dateInput(
    fieldId = key,
    label = pageHeading(title, Some(messages("triage.caption"))),
-   dayValue = form.data.get("day"),
-   monthValue = form.data.get("month"),
-   yearValue = form.data.get("year"),
+   dayValue = form.data.get("disposalDate-day"),
+   monthValue = form.data.get("disposalDate-month"),
+   yearValue = form.data.get("disposalDate-year"),
    helpText = Some(Html(messages("disposalDate.helpText"))),
    labelAsHeading = true,
-   errorKey = form.error("date").map(e => e.message),
+   errorKey = errorKey.map(e => s"${e.key}.${e.message}"),
    hasErrors = hasErrors
   )
   @submitButton(messages("button.continue"))

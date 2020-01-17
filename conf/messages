@@ -483,3 +483,12 @@ numberOfProperties.error.required=Select how many properties you want to include
 
 disposalDate.title=What date did you exchange contracts when selling or transferring the property?
 disposalDate.helpText=This is when the buyer and seller swap signed contracts. It’s the date the buyer pays a deposit and called the ‘disposal’ date, for example, 25 4 2020
+disposalDate.error.required=Enter a contract exchange date
+disposalDate.error.invalid=Enter a real contract exchange date
+disposalDate.error.tooFarInFuture=Contract exchange date must be today or in the past
+disposalDate-day.error.required=Contract exchange date must include a day
+disposalDate-month.error.required=Contract exchange date must include a month
+disposalDate-year.error.required=Contract exchange date must include a year
+disposalDate-day.error.invalid=Enter a real contract exchange date day of the month
+disposalDate-month.error.invalid=Contract exchange date month must be between 1 and 12
+disposalDate-year.error.invalid=Contract exchange date year must be less than 9999

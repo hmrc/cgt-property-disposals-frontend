@@ -56,8 +56,8 @@ object LocalDateUtils {
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], LocalDate] = {
       for {
         day ← getDateField(dayKey, data, Some(31))
-        month ← getDateField(dayKey, data, Some(12))
-        year ← getDateField(dayKey, data, None)
+        month ← getDateField(monthKey, data, Some(12))
+        year ← getDateField(yearKey, data, None)
         date ← Either.fromTry(Try(LocalDate.of(year, month, day)))
           .leftMap(_ => errorResult(dateKey, "error.invalid"))
           .flatMap( date =>
