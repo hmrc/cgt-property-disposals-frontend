@@ -17,14 +17,21 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 import cats.syntax.either._
+import configs.Configs
 import play.api.data.FormError
 import play.api.data.format.Formatter
 
 import scala.util.Try
 
 object LocalDateUtils {
+
+  implicit val configs: Configs[LocalDate] = Configs.fromTry {
+    case (config, key) =>
+       LocalDate.parse(config.getString(key), DateTimeFormatter.ISO_DATE)
+  }
 
   def dateFormatter(
     maximumDateInclusive: LocalDate,
@@ -34,7 +41,8 @@ object LocalDateUtils {
     dateKey: String
   ): Formatter[LocalDate] = new Formatter[LocalDate] {
     def dateFieldStringValues(data: Map[String, String]): Either[FormError, (String, String, String)] =
-      List(dayKey, monthKey, yearKey).map(data.get(_).map(_.trim).filter(_.nonEmpty)) match {
+      List(dayKey, monthKey, yearKey)
+        .map(data.get(_).map(_.trim).filter(_.nonEmpty)) match {
         case Some(dayString) :: Some(monthString) :: Some(yearString) :: Nil =>
           Right((dayString, monthString, yearString))
         case None :: Some(_) :: Some(_) :: Nil => Left(FormError(dayKey, "error.required"))
@@ -43,7 +51,7 @@ object LocalDateUtils {
         case Some(_) :: None :: None :: Nil    => Left(FormError(monthKey, "error.monthAndYearRequired"))
         case None :: Some(_) :: None :: Nil    => Left(FormError(dayKey, "error.dayAndYearRequired"))
         case None :: None :: Some(_) :: Nil    => Left(FormError(dayKey, "error.dayAndMonthRequired"))
-        case None :: None :: None :: Nil       => Left(FormError(dateKey, "error.required"))
+        case _                                 => Left(FormError(dateKey, "error.required"))
       }
 
     def toValidInt(key: String, stringValue: String, maxValue: Option[Int]): Either[FormError, Int] =
@@ -73,7 +81,13 @@ object LocalDateUtils {
       result.leftMap(Seq(_))
     }
 
-    override def unbind(key: String, value: LocalDate): Map[String, String] = Map.empty[String, String]
+    override def unbind(key: String, value: LocalDate): Map[String, String] =
+      Map(
+        dayKey -> value.getDayOfMonth.toString,
+        monthKey -> value.getMonthValue.toString,
+        yearKey -> value.getYear.toString
+      )
+
   }
 
 }

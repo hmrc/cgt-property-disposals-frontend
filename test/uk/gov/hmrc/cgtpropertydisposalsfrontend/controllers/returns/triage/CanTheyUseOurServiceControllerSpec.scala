@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
+import java.time.LocalDate
+
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
@@ -28,7 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualTriageAnswers, IndividualUserType, NumberOfProperties}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, IndividualTriageAnswers, IndividualUserType, NumberOfProperties}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 
@@ -161,9 +163,8 @@ class CanTheyUseOurServiceControllerSpec
                 journeyStatus = Some(
                   subscribedWithNoAnswers.copy(
                     individualTriageAnswers = Some(
-                      IndividualTriageAnswers(
-                        Some(IndividualUserType.Self),
-                        None
+                      IndividualTriageAnswers.empty.copy(
+                        individualUserType = Some(IndividualUserType.Self)
                       )
                     )
                   )
@@ -195,9 +196,8 @@ class CanTheyUseOurServiceControllerSpec
                       journeyStatus = Some(
                         subscribedWithNoAnswers.copy(
                           individualTriageAnswers = Some(
-                            IndividualTriageAnswers(
-                              Some(userType),
-                              None
+                            IndividualTriageAnswers.empty.copy(
+                              individualUserType = Some(userType)
                             )
                           )
                         )
@@ -229,9 +229,8 @@ class CanTheyUseOurServiceControllerSpec
                 journeyStatus = Some(
                   subscribedWithNoAnswers.copy(
                     individualTriageAnswers = Some(
-                      IndividualTriageAnswers(
-                        Some(userType),
-                        None
+                      IndividualTriageAnswers.empty.copy(
+                        individualUserType = Some(userType)
                       )
                     )
                   )
@@ -254,9 +253,8 @@ class CanTheyUseOurServiceControllerSpec
               journeyStatus = Some(
                 subscribedWithNoAnswers.copy(
                   individualTriageAnswers = Some(
-                    IndividualTriageAnswers(
-                      Some(IndividualUserType.Self),
-                      None
+                    IndividualTriageAnswers.empty.copy(
+                      individualUserType = Some(IndividualUserType.Self)
                     )
                   )
                 )
@@ -431,36 +429,51 @@ class CanTheyUseOurServiceControllerSpec
 
       "show a dummy page" when {
 
-        "the submitted value is valid and the session is updated" in {
-          List(
-            0 -> NumberOfProperties.One,
-            1 -> NumberOfProperties.MoreThanOne
-          ).foreach {
-            case (value, numberOfProperties) =>
-              withClue(s"For user type '$numberOfProperties' and value '$value': ") {
-                inSequence {
-                  mockAuthWithNoRetrievals()
-                  mockGetSession(Future.successful(Right(Some(sessionDataWithRequiredPreviousAnswers))))
-                  mockStoreSession(
-                    sessionDataWithRequiredPreviousAnswers.copy(
-                      journeyStatus = Some(
-                        subscribedWithRequiredPreviousAnswers.copy(
-                          individualTriageAnswers = Some(
-                            requiredPreviousAnswers.copy(numberOfProperties = Some(numberOfProperties))
-                          )
-                        )
-                      )
+        "the submitted value is more than one and the session is updated" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionDataWithRequiredPreviousAnswers))))
+            mockStoreSession(
+              sessionDataWithRequiredPreviousAnswers.copy(
+                journeyStatus = Some(
+                  subscribedWithRequiredPreviousAnswers.copy(
+                    individualTriageAnswers = Some(
+                      requiredPreviousAnswers.copy(numberOfProperties = Some(NumberOfProperties.MoreThanOne))
                     )
-                  )(Future.successful(Right(())))
-                }
-
-                val result = performAction("numberOfProperties" -> value.toString)
-                status(result) shouldBe OK
-                contentAsString(result) shouldBe s"Got number of properties $numberOfProperties"
-              }
-
+                  )
+                )
+              )
+            )(Future.successful(Right(())))
           }
 
+          val result = performAction("numberOfProperties" -> "1")
+          status(result)          shouldBe OK
+          contentAsString(result) shouldBe "multiple disposals not handled yet"
+        }
+
+      }
+
+      "redirect to the disposal date page" when {
+
+        "the submitted value is one and the session is updated" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionDataWithRequiredPreviousAnswers))))
+            mockStoreSession(
+              sessionDataWithRequiredPreviousAnswers.copy(
+                journeyStatus = Some(
+                  subscribedWithRequiredPreviousAnswers.copy(
+                    individualTriageAnswers = Some(
+                      requiredPreviousAnswers.copy(numberOfProperties = Some(NumberOfProperties.One))
+                    )
+                  )
+                )
+              )
+            )(Future.successful(Right(())))
+          }
+
+          val result = performAction("numberOfProperties" -> "0")
+          checkIsRedirect(result, routes.CanTheyUseOurServiceController.whenWasDisposalDate())
         }
 
       }
@@ -485,12 +498,106 @@ class CanTheyUseOurServiceControllerSpec
             mockStoreSession(sessionData)(Future.successful(Right(())))
           }
 
-
           val result = performAction("numberOfProperties" -> "0")
-          status(result) shouldBe OK
-          contentAsString(result) shouldBe s"Got number of properties ${NumberOfProperties.One}"
+          checkIsRedirect(result, routes.CanTheyUseOurServiceController.whenWasDisposalDate())
         }
 
+      }
+
+    }
+
+    "handling requests to display the when was disposal date page" must {
+
+      val requiredPreviousAnswers =
+        IndividualTriageAnswers.empty.copy(
+          individualUserType = Some(sample[IndividualUserType]),
+          numberOfProperties = Some(NumberOfProperties.One)
+        )
+
+      val subscribedWithRequiredPreviousAnswers =
+        sample[Subscribed].copy(individualTriageAnswers = Some(requiredPreviousAnswers))
+
+      def performAction(): Future[Result] = controller.whenWasDisposalDate()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(performAction, isSubscribedJourney)
+
+      "redirect to the number of properties page" when {
+
+        "that question has not already answered" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(
+                Right(
+                  Some(
+                    SessionData.empty.copy(
+                      journeyStatus = Some(
+                        subscribedWithRequiredPreviousAnswers.copy(
+                          individualTriageAnswers = Some(
+                            requiredPreviousAnswers.copy(numberOfProperties = None)
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.CanTheyUseOurServiceController.howManyProperties())
+        }
+
+      }
+
+      "display the page when no option has been selected before" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            Future.successful(
+              Right(
+                Some(
+                  SessionData.empty.copy(
+                    journeyStatus = Some(subscribedWithRequiredPreviousAnswers)
+                  )
+                )
+              )
+            )
+          )
+        }
+
+        val result = performAction()
+        status(result)          shouldBe OK
+        contentAsString(result) should include(message("disposalDate.title"))
+      }
+
+      "display the page when an option has been selected before" in {
+        val disposalDate = LocalDate.of(2020, 1, 2)
+        val individualTriageAnswers =
+          requiredPreviousAnswers.copy(disposalDate = Some(DisposalDate(disposalDate)))
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            Future.successful(
+              Right(
+                Some(
+                  SessionData.empty.copy(
+                    journeyStatus =
+                      Some(sample[Subscribed].copy(individualTriageAnswers = Some(individualTriageAnswers)))
+                  )
+                )
+              )
+            )
+          )
+        }
+
+        val result = performAction()
+        status(result)          shouldBe OK
+        contentAsString(result) should include(message("disposalDate.title"))
+        contentAsString(result) should include(s"""value="${disposalDate.getDayOfMonth()}"""")
+        contentAsString(result) should include(s"""value="${disposalDate.getMonthValue()}"""")
+        contentAsString(result) should include(s"""value="${disposalDate.getYear()}"""")
       }
 
     }

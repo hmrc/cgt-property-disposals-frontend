@@ -21,6 +21,7 @@ import java.time.{Clock, LocalDate}
 import cats.instances.int._
 import cats.syntax.eq._
 import com.google.inject.Inject
+import configs.syntax._
 import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms.{mapping, number, of}
@@ -29,9 +30,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.configs
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualTriageAnswers, IndividualUserType, NumberOfProperties}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, IndividualTriageAnswers, IndividualUserType, NumberOfProperties}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{LocalDateUtils, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
@@ -58,6 +60,9 @@ class CanTheyUseOurServiceController @Inject()(
     with SessionUpdates {
 
   import CanTheyUseOurServiceController._
+
+  val earliestDisposalDateInclusive: LocalDate =
+    config.underlying.get[LocalDate]("returns.earliest-disposal-date-inclusive").value
 
   val clock: Clock = Clock.systemUTC()
 
@@ -147,7 +152,13 @@ class CanTheyUseOurServiceController @Inject()(
                       errorHandler.errorResult()
 
                     case Right(_) =>
-                      Redirect(routes.CanTheyUseOurServiceController.whenWasDisposalDate())
+                      numberOfProperties match {
+                        case NumberOfProperties.One =>
+                        Redirect(routes.CanTheyUseOurServiceController.whenWasDisposalDate())
+
+                        case NumberOfProperties.MoreThanOne =>
+                          Ok("multiple disposals not handled yet")
+                      }
                   }
 
               }
@@ -162,7 +173,13 @@ class CanTheyUseOurServiceController @Inject()(
         if (individualTriageAnswers.numberOfProperties.isEmpty) {
           Redirect(routes.CanTheyUseOurServiceController.howManyProperties())
         } else {
-          Ok(disposalDatePage(disposalDateForm(LocalDate.now(clock))))
+          val today = LocalDate.now(clock)
+          val form = subscribed.individualTriageAnswers
+            .flatMap(_.disposalDate)
+            .fold(disposalDateForm(today))(disposalDateForm(today).fill)
+
+
+          Ok(disposalDatePage(form))
         }
     }
   }
@@ -175,11 +192,28 @@ class CanTheyUseOurServiceController @Inject()(
         } else {
           disposalDateForm(LocalDate.now(clock))
             .bindFromRequest()
-            .fold(formWithErrors => BadRequest(disposalDatePage(formWithErrors)), { d =>
-              Ok(s"Got $d")
-            })
-        }
+            .fold(
+              formWithErrors => BadRequest(disposalDatePage(formWithErrors)), { d =>
+                val newSubscribed = subscribed.copy(
+                  individualTriageAnswers = Some(individualTriageAnswers.copy(disposalDate = Some(d)))
+                )
 
+                updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newSubscribed))).map({
+                  case Left(e) =>
+                    logger.warn("Could not update session", e)
+                    errorHandler.errorResult()
+
+                  case Right(_) =>
+                    if (d.value.isBefore(earliestDisposalDateInclusive)) {
+                      Ok(s"disposal date was before $earliestDisposalDateInclusive")
+                    } else {
+                      Ok(s"disposal date was on or after $earliestDisposalDateInclusive")
+                    }
+
+                })
+              }
+            )
+        }
     }
   }
 
@@ -234,7 +268,7 @@ object CanTheyUseOurServiceController {
     )(identity)(Some(_))
   )
 
-  def disposalDateForm(maximumDateInclusive: LocalDate): Form[LocalDate] = Form(
+  def disposalDateForm(maximumDateInclusive: LocalDate): Form[DisposalDate] = Form(
     mapping(
       "date" -> of(
         LocalDateUtils.dateFormatter(
@@ -245,7 +279,7 @@ object CanTheyUseOurServiceController {
           "disposalDate"
         )
       )
-    )(identity)(Some(_))
+    )(DisposalDate(_))(d => Some(d.value))
   )
 
 }
