@@ -54,7 +54,11 @@ object LocalDateUtils {
         }
 
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], LocalDate] = {
+      import cats.syntax.traverse._
+      import cats.instances.list._
+      import cats.instances.option._
       for {
+        _   <- Either.fromOption(List(dayKey, monthKey, yearKey).map(data.get(_).filter(_.nonEmpty)).sequence[Option,String], errorResult(dateKey, "error.required"))
         day ← getDateField(dayKey, data, Some(31))
         month ← getDateField(monthKey, data, Some(12))
         year ← getDateField(yearKey, data, None)
