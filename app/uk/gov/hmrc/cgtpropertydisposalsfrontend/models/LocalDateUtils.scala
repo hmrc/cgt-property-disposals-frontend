@@ -26,49 +26,51 @@ import scala.util.Try
 
 object LocalDateUtils {
 
-  private def errorResult(key: String, errorMessage: String): Seq[FormError] =
-    Seq(FormError(key, errorMessage))
+  def dateFormatter(
+    maximumDateInclusive: LocalDate,
+    dayKey: String,
+    monthKey: String,
+    yearKey: String,
+    dateKey: String
+  ): Formatter[LocalDate] = new Formatter[LocalDate] {
+    def dateFieldStringValues(data: Map[String, String]): Either[FormError, (String, String, String)] =
+      List(dayKey, monthKey, yearKey).map(data.get(_).map(_.trim).filter(_.nonEmpty)) match {
+        case Some(dayString) :: Some(monthString) :: Some(yearString) :: Nil =>
+          Right((dayString, monthString, yearString))
+        case None :: Some(_) :: Some(_) :: Nil => Left(FormError(dayKey, "error.required"))
+        case Some(_) :: None :: Some(_) :: Nil => Left(FormError(monthKey, "error.required"))
+        case Some(_) :: Some(_) :: None :: Nil => Left(FormError(yearKey, "error.yearMissing"))
+        case Some(_) :: None :: None :: Nil    => Left(FormError(monthKey, "error.monthAndYearRequired"))
+        case None :: Some(_) :: None :: Nil    => Left(FormError(dayKey, "error.dayAndYearRequired"))
+        case None :: None :: Some(_) :: Nil    => Left(FormError(dayKey, "error.dayAndMonthRequired"))
+        case None :: None :: None :: Nil       => Left(FormError(dateKey, "error.required"))
+      }
 
-  def dateFormatter(maximumDateInclusive: LocalDate,
-                    dayKey: String,
-                    monthKey:String,
-                    yearKey: String,
-                    dateKey: String
-                          ): Formatter[LocalDate] = new Formatter[LocalDate] {
-
-
-    def getDateField(key: String, data: Map[String,String], maxValue: Option[Int]): Either[Seq[FormError], Int] =
-      data
-        .get(key)
-        .map(_.trim())
-        .filter(_.nonEmpty)
-        .fold[Either[Seq[FormError], Int]](
-          Left(errorResult(key, "error.required"))
-        ) { stringValue =>
-          Either.fromOption(
-            Try(BigDecimal(stringValue).toIntExact).toOption.filter(
-              i => i > 0 && maxValue.forall(i <= _)
-            ),
-            errorResult(key, "error.invalid")
-          )
-        }
+    def toValidInt(key: String, stringValue: String, maxValue: Option[Int]): Either[FormError, Int] =
+      Either.fromOption(
+        Try(BigDecimal(stringValue).toIntExact).toOption.filter(
+          i => i > 0 && maxValue.forall(i <= _)
+        ),
+        FormError(key, "error.invalid")
+      )
 
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], LocalDate] = {
-      import cats.syntax.traverse._
-      import cats.instances.list._
-      import cats.instances.option._
-      for {
-        _   <- Either.fromOption(List(dayKey, monthKey, yearKey).map(data.get(_).filter(_.nonEmpty)).sequence[Option,String], errorResult(dateKey, "error.required"))
-        day ← getDateField(dayKey, data, Some(31))
-        month ← getDateField(monthKey, data, Some(12))
-        year ← getDateField(yearKey, data, None)
-        date ← Either.fromTry(Try(LocalDate.of(year, month, day)))
-          .leftMap(_ => errorResult(dateKey, "error.invalid"))
-          .flatMap( date =>
-            if(date.isAfter(maximumDateInclusive)) Left(errorResult(dateKey, "error.tooFarInFuture"))
-            else Right(date)
-          )
-      } yield  date
+      val result = for {
+        dateFieldStrings <- dateFieldStringValues(data)
+        day ← toValidInt(dayKey, dateFieldStrings._1, Some(31))
+        month ← toValidInt(monthKey, dateFieldStrings._2, Some(12))
+        year ← toValidInt(yearKey, dateFieldStrings._3, None)
+        date ← Either
+                .fromTry(Try(LocalDate.of(year, month, day)))
+                .leftMap(_ => FormError(dateKey, "error.invalid"))
+                .flatMap(
+                  date =>
+                    if (date.isAfter(maximumDateInclusive)) Left(FormError(dateKey, "error.tooFarInFuture"))
+                    else Right(date)
+                )
+      } yield date
+
+      result.leftMap(Seq(_))
     }
 
     override def unbind(key: String, value: LocalDate): Map[String, String] = Map.empty[String, String]
