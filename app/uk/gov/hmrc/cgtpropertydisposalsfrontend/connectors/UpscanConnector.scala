@@ -39,8 +39,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 final case class UpscanInitiateRequest(
   callbackUrl: String,
-  successRedirect: String,
-  errorRedirect: String,
   minimumFileSize: Int,
   maximumFileSize: Long
 )
@@ -77,7 +75,7 @@ class UpscanConnectorImpl @Inject()(http: HttpClient, wsClient: WSClient, config
     val protocol = getUpscanInitiateConfig[String]("protocol")
     val host     = getUpscanInitiateConfig[String]("host")
     val port     = getUpscanInitiateConfig[String]("port")
-    s"$protocol://$host:$port/upscan/v2/initiate"
+    s"$protocol://$host:$port/upscan/initiate"
   }
 
   val selfBaseUrl: String = config.underlying.get[String]("self.url").value
@@ -91,8 +89,6 @@ class UpscanConnectorImpl @Inject()(http: HttpClient, wsClient: WSClient, config
 
     val payload = UpscanInitiateRequest(
       selfBaseUrl + upscan.routes.UpscanController.callBack(cgtReference.value).url,
-      selfBaseUrl + upscan.routes.UpscanController.successRedirect(cgtReference.value).url,
-      selfBaseUrl + upscan.routes.UpscanController.errorRedirect(cgtReference.value).url,
       minFileSize,
       maxFileSize
     )

@@ -98,7 +98,7 @@ object UpscanStoreImplSpec {
   val config = Configuration(
     ConfigFactory.parseString(
       """
-        | microservice.upscan-initiate.upscan-store.expiry-time = 7 days
+        | microservice.services.upscan-initiate.upscan-store.expiry-time = 7 days
         |""".stripMargin
     )
   )

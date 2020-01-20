@@ -82,12 +82,10 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
 
       implicit val hc: HeaderCarrier = HeaderCarrier()
 
-      val expectedUrl       = s"http://host:123/upscan/v2/initiate"
+      val expectedUrl       = s"http://host:123/upscan/initiate"
       val cgtReference      = sample[CgtReference]
       val callBackUrl       = s"http://localhost:7020/capital-gains-tax-uk-property/upscan-call-back/cgt-reference/${cgtReference.value}"
-      val successUrl        = s"http://localhost:7020/capital-gains-tax-uk-property/upscan-success/cgt-reference/${cgtReference.value}"
-      val errorUrl          = s"http://localhost:7020/capital-gains-tax-uk-property/upscan-error/cgt-reference/${cgtReference.value}"
-      val expectedInitiated = UpscanInitiateRequest(callBackUrl, successUrl, errorUrl, 0, 5242880)
+      val expectedInitiated = UpscanInitiateRequest(callBackUrl, 0, 5242880)
 
       "process unsuccessful post calls from S3" in {
         List(
@@ -122,8 +120,6 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
     val s3Url        = s"https://bucketname.s3.eu-west-2.amazonaws.com"
     val cgtReference = sample[CgtReference]
     val callBackUrl  = s"http://localhost:7020/capital-gains-tax-uk-property/upscan-call-back/cgt-reference/${cgtReference.value}"
-    val successUrl   = s"http://localhost:7020/capital-gains-tax-uk-property/upscan-success/cgt-reference/${cgtReference.value}"
-    val errorUrl     = s"http://localhost:7020/capital-gains-tax-uk-property/upscan-error/cgt-reference/${cgtReference.value}"
 
     val parts: Source[MultipartFormData.Part[Source[ByteString, _]], _] =
       Source.apply(Map("key" -> List("V1")).flatMap {
