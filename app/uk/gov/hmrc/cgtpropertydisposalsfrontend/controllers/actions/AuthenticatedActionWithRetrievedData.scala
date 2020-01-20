@@ -36,9 +36,9 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 import scala.concurrent.{ExecutionContext, Future}
 
 final case class AuthenticatedRequestWithRetrievedData[A](
-                                                           journeyUserType: RetrievedUserType,
-                                                           userType: Option[UserType],
-                                                           request: MessagesRequest[A]
+  journeyUserType: RetrievedUserType,
+  userType: Option[UserType],
+  request: MessagesRequest[A]
 ) extends WrappedRequest[A](request)
 
 @Singleton
@@ -70,76 +70,102 @@ class AuthenticatedActionWithRetrievedData @Inject()(
           Retrievals.allEnrolments and
           Retrievals.credentials
       ) {
-        case retrievedData @ _ ~ affinityGroup ~ _ ~ _ ~ _ ~ allEnrolments ~ creds =>
+        case cl ~ affinityGroup ~ maybeNino ~ maybeSautr ~ maybeEmail ~ enrolments ~ creds =>
           withGGCredentials(creds, request) { ggCredId =>
-
             affinityGroup match {
               case Some(AffinityGroup.Agent) =>
                 Future.successful(
-                  Right(AuthenticatedRequestWithRetrievedData(RetrievedUserType.Agent(ggCredId), Some(UserType.Agent), request))
+                  Right(
+                    AuthenticatedRequestWithRetrievedData(
+                      RetrievedUserType.Agent(ggCredId),
+                      Some(UserType.Agent),
+                      request
+                    )
+                  )
                 )
 
-              case _ =>
-                hasSubscribed(allEnrolments, request) map {
-                  case Left(errorResult) => Left(errorResult)
-                  case Right(Some(cgtReference)) =>
-                    Right(
-                      AuthenticatedRequestWithRetrievedData(
-                        RetrievedUserType.Subscribed(CgtReference(cgtReference.value), ggCredId),
-                        None,
-                        request
-                      )
-                    )
+              case Some(AffinityGroup.Individual) =>
+                handleIndividualOrOrganisation(
+                  Right(AffinityGroup.Individual),
+                  cl,
+                  maybeNino,
+                  maybeSautr,
+                  maybeEmail,
+                  enrolments,
+                  ggCredId,
+                  request
+                )
 
-                  case Right(None) =>
-                    val result = retrievedData match {
-                      case cl ~ Some(AffinityGroup.Individual) ~ maybeNino ~ maybeSautr ~ maybeEmail ~ _ ~ _
-                        if cl < ConfidenceLevel.L200 =>
-                        Right(
-                          AuthenticatedRequestWithRetrievedData(
-                            RetrievedUserType.IndividualWithInsufficientConfidenceLevel(
-                              maybeNino.map(NINO(_)),
-                              maybeSautr.map(SAUTR(_)),
-                              maybeEmail.filter(_.nonEmpty).map(Email(_)),
-                              ggCredId
-                            ),
-                            Some(Individual),
-                            request
-                          )
-                        )
+              case Some(AffinityGroup.Organisation) =>
+                handleIndividualOrOrganisation(
+                  Left(AffinityGroup.Organisation),
+                  cl,
+                  maybeNino,
+                  maybeSautr,
+                  maybeEmail,
+                  enrolments,
+                  ggCredId,
+                  request
+                )
 
-                      case individual @ _ ~ Some(AffinityGroup.Individual) ~ _ ~ _ ~ _ ~ _ ~ _ =>
-                        individual match {
-                          case _ ~ _ ~ Some(nino) ~ _ ~ maybeEmail ~ _ ~ _ =>
-                            Right(
-                              AuthenticatedRequestWithRetrievedData(
-                                RetrievedUserType.Individual(
-                                  Right(NINO(nino)),
-                                  maybeEmail.filter(_.nonEmpty).map(Email(_)),
-                                  ggCredId
-                                ),
-                                Some(Individual),
-                                request
-                              )
-                            )
-                        }
-
-                      case _ @_ ~ Some(AffinityGroup.Organisation) ~ _ ~ _ ~ maybeEmail ~ enrolments ~ _ =>
-                        handleOrganisation(request, enrolments, maybeEmail, ggCredId)
-
-                      case _ @_ ~ otherAffinityGroup ~ _ ~ _ ~ _ ~ _ ~ _ =>
-                        logger.warn(s"Got request for unsupported affinity group $otherAffinityGroup")
-                        Left(errorHandler.errorResult(None)(request))
-                    }
-                    result
-                }
-
-
+              case other =>
+                logger.warn(s"User has usupported affinity group type $other")
+                Future.successful(Left(errorHandler.errorResult(None)(request)))
             }
-
           }
       }
   }
+
+  private def handleIndividualOrOrganisation[A](
+    affinityGroup: Either[AffinityGroup.Organisation.type, AffinityGroup.Individual.type],
+    confidenceLevel: ConfidenceLevel,
+    maybeNino: Option[String],
+    maybeSautr: Option[String],
+    maybeEmail: Option[String],
+    enrolments: Enrolments,
+    ggCredId: GGCredId,
+    request: MessagesRequest[A]
+  )(implicit hc: HeaderCarrier): Future[Either[Result, AuthenticatedRequestWithRetrievedData[A]]] =
+    hasSubscribed(enrolments, request) map {
+      case Left(errorResult) => Left(errorResult)
+
+      case Right(Some(cgtReference)) =>
+        handleSubscribedUser(cgtReference, ggCredId, affinityGroup, request)
+
+      case Right(None) =>
+        (affinityGroup, confidenceLevel, maybeNino) match {
+          case (Right(AffinityGroup.Individual), cl, _) if cl < ConfidenceLevel.L200 =>
+            Right(
+              AuthenticatedRequestWithRetrievedData(
+                RetrievedUserType.IndividualWithInsufficientConfidenceLevel(
+                  maybeNino.map(NINO(_)),
+                  maybeSautr.map(SAUTR(_)),
+                  maybeEmail.filter(_.nonEmpty).map(Email(_)),
+                  ggCredId
+                ),
+                Some(Individual),
+                request
+              )
+            )
+
+          case (Right(AffinityGroup.Individual), cl, Some(nino)) if cl >= ConfidenceLevel.L200 =>
+            Right(
+              AuthenticatedRequestWithRetrievedData(
+                RetrievedUserType.Individual(
+                  Right(NINO(nino)),
+                  maybeEmail.filter(_.nonEmpty).map(Email(_)),
+                  ggCredId
+                ),
+                Some(Individual),
+                request
+              )
+            )
+
+          case (Left(AffinityGroup.Organisation), _, _) =>
+            handleOrganisation(request, enrolments, maybeEmail, ggCredId)
+
+        }
+    }
 
   private def hasSubscribed[A](enrolments: Enrolments, request: MessagesRequest[A])(
     implicit hc: HeaderCarrier
@@ -158,6 +184,29 @@ class AuthenticatedActionWithRetrievedData @Inject()(
           .leftMap(_ => errorHandler.errorResult(None)(request))
           .value
     }
+
+  private def handleSubscribedUser[A](
+    cgtReference: CgtReference,
+    ggCredId: GGCredId,
+    affinityGroup: Either[AffinityGroup.Organisation.type, AffinityGroup.Individual.type],
+    request: MessagesRequest[A]
+  ): Either[Result, AuthenticatedRequestWithRetrievedData[A]] = {
+    def authenticatedRequest(userType: UserType) =
+      AuthenticatedRequestWithRetrievedData(
+        RetrievedUserType.Subscribed(CgtReference(cgtReference.value), ggCredId),
+        Some(userType),
+        request
+      )
+
+    affinityGroup match {
+      case Right(AffinityGroup.Individual) =>
+        Right(authenticatedRequest(UserType.Individual))
+
+      case Left(AffinityGroup.Organisation) =>
+        Right(authenticatedRequest(UserType.Organisation))
+
+    }
+  }
 
   private def withGGCredentials[A](credentials: Option[Credentials], request: MessagesRequest[A])(
     f: GGCredId => Future[Either[Result, AuthenticatedRequestWithRetrievedData[A]]]

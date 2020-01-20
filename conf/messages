@@ -467,7 +467,7 @@ agent.confirm-client.change-client=Change client
 
 triage.caption=Before you start
 
-triage.who-are-you-reporting-for.title=Who are you reporting the tax for?
+who-are-you-reporting-for.title=Who are you reporting the tax for?
 
 individualUserType.self=Yourself
 individualUserType.capacitor=Someone else
@@ -475,8 +475,23 @@ individualUserType.personal-representative=Someone who has died
 individualUserType.error.required=Select who are you reporting the tax for
 individualUserType.error.invalid=Select who are you reporting the tax for
 
-triage.number-of-properties.title=How many properties with the same completion date are you reporting the tax for?
+numberOfProperties.title=How many properties with the same completion date are you reporting the tax for?
 numberOfProperties.one=One
 numberOfProperties.more-than-one=2 or more
 numberOfProperties.error.invalid=Select how many properties you want to include in this return
 numberOfProperties.error.required=Select how many properties you want to include in this return
+
+disposalDate.title=What date did you exchange contracts when selling or transferring the property?
+disposalDate.helpText=This is when the buyer and seller swap signed contracts. It’s the date the buyer pays a deposit and called the ‘disposal’ date, for example, 25 4 2020
+disposalDate.error.required=Enter a contract exchange date
+disposalDate.error.invalid=Enter a real contract exchange date
+disposalDate.error.tooFarInFuture=Contract exchange date must be today or in the past
+disposalDate-day.error.required=Contract exchange date must include a day
+disposalDate-month.error.required=Contract exchange date must include a month
+disposalDate-year.error.required=Contract exchange date must include a year
+disposalDate-day.error.invalid=Enter a real contract exchange date
+disposalDate-month.error.invalid=Enter a real contract exchange date
+disposalDate-year.error.invalid=Enter a real contract exchange date
+disposalDate-month.error.monthAndYearRequired=Contract exchange date must include a month and a year
+disposalDate-day.error.dayAndYearRequired=Contract exchange date must include a day and a year
+disposalDate-day.error.dayAndMonthRequired=Contract exchange date must include a day and a month

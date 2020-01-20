@@ -16,21 +16,25 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
+import java.time.{Clock, LocalDate, ZoneId}
+
 import cats.instances.int._
 import cats.syntax.eq._
 import com.google.inject.Inject
+import configs.syntax._
 import play.api.Configuration
 import play.api.data.Form
-import play.api.data.Forms.{mapping, number}
+import play.api.data.Forms.{mapping, number, of}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.configs
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualTriageAnswers, IndividualUserType, NumberOfProperties}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, IndividualTriageAnswers, IndividualUserType, NumberOfProperties}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{LocalDateUtils, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
@@ -47,7 +51,8 @@ class CanTheyUseOurServiceController @Inject()(
   cc: MessagesControllerComponents,
   val config: Configuration,
   whoAreYouReportingForPage: views.html.returns.triage.who_are_you_reporting_for,
-  howManyPropertiesPage: views.html.returns.triage.how_many_properties
+  howManyPropertiesPage: views.html.returns.triage.how_many_properties,
+  disposalDatePage: views.html.returns.triage.disposal_date
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -55,6 +60,11 @@ class CanTheyUseOurServiceController @Inject()(
     with SessionUpdates {
 
   import CanTheyUseOurServiceController._
+
+  val earliestDisposalDateInclusive: LocalDate =
+    config.underlying.get[LocalDate]("returns.earliest-disposal-date-inclusive").value
+
+  val clock: Clock = Clock.systemUTC()
 
   def whoIsIndividualRepresenting(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withSubscribedUser(request) {
@@ -107,7 +117,7 @@ class CanTheyUseOurServiceController @Inject()(
   def howManyProperties(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withIndividualTriageAnswers(request) {
       case (_, subscribed, individualTriageAnswers) =>
-        if(individualTriageAnswers.individualUserType.isEmpty){
+        if (individualTriageAnswers.individualUserType.isEmpty) {
           Redirect(routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting())
         } else {
           val form = subscribed.individualTriageAnswers
@@ -120,36 +130,91 @@ class CanTheyUseOurServiceController @Inject()(
     }
   }
 
-  def howManyPropertiesSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request =>
-      withIndividualTriageAnswers(request) {
-        case (_, subscribed, individualTriageAnswers) =>
-          if (individualTriageAnswers.individualUserType.isEmpty) {
-            Redirect(routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting())
-          } else {
-            numberOfPropertiesForm
-              .bindFromRequest()
-              .fold(
-                formWithErrors => BadRequest(howManyPropertiesPage(formWithErrors)), { numberOfProperties =>
-                  val newSubscribed = subscribed.copy(
-                    individualTriageAnswers = Some(
-                      individualTriageAnswers.copy(numberOfProperties = Some(numberOfProperties)))
-                    )
+  def howManyPropertiesSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withIndividualTriageAnswers(request) {
+      case (_, subscribed, individualTriageAnswers) =>
+        if (individualTriageAnswers.individualUserType.isEmpty) {
+          Redirect(routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting())
+        } else {
+          numberOfPropertiesForm
+            .bindFromRequest()
+            .fold(
+              formWithErrors => BadRequest(howManyPropertiesPage(formWithErrors)), { numberOfProperties =>
+                val newSubscribed = subscribed.copy(
+                  individualTriageAnswers =
+                    Some(individualTriageAnswers.copy(numberOfProperties = Some(numberOfProperties)))
+                )
 
-                  updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newSubscribed)))
-                    .map {
-                      case Left(e) =>
-                        logger.warn("Could not update session", e)
-                        errorHandler.errorResult()
+                updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newSubscribed)))
+                  .map {
+                    case Left(e) =>
+                      logger.warn("Could not update session", e)
+                      errorHandler.errorResult()
 
-                      case Right(_) =>
-                        Ok(s"Got number of properties $numberOfProperties")
+                    case Right(_) =>
+                      numberOfProperties match {
+                        case NumberOfProperties.One =>
+                        Redirect(routes.CanTheyUseOurServiceController.whenWasDisposalDate())
+
+                        case NumberOfProperties.MoreThanOne =>
+                          Ok("multiple disposals not handled yet")
+                      }
+                  }
+
+              }
+            )
+        }
+    }
+  }
+
+  def whenWasDisposalDate(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withIndividualTriageAnswers(request) {
+      case (_, subscribed, individualTriageAnswers) =>
+        if (individualTriageAnswers.numberOfProperties.isEmpty) {
+          Redirect(routes.CanTheyUseOurServiceController.howManyProperties())
+        } else {
+          val today = LocalDate.now(clock)
+          val form = subscribed.individualTriageAnswers
+            .flatMap(_.disposalDate)
+            .fold(disposalDateForm(today))(disposalDateForm(today).fill)
+
+
+          Ok(disposalDatePage(form))
+        }
+    }
+  }
+
+  def whenWasDisposalDateSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withIndividualTriageAnswers(request) {
+      case (_, subscribed, individualTriageAnswers) =>
+        if (individualTriageAnswers.numberOfProperties.isEmpty) {
+          Redirect(routes.CanTheyUseOurServiceController.howManyProperties())
+        } else {
+          disposalDateForm(LocalDate.now(clock))
+            .bindFromRequest()
+            .fold(
+              formWithErrors => BadRequest(disposalDatePage(formWithErrors)), { d =>
+                val newSubscribed = subscribed.copy(
+                  individualTriageAnswers = Some(individualTriageAnswers.copy(disposalDate = Some(d)))
+                )
+
+                updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newSubscribed))).map({
+                  case Left(e) =>
+                    logger.warn("Could not update session", e)
+                    errorHandler.errorResult()
+
+                  case Right(_) =>
+                    if (d.value.isBefore(earliestDisposalDateInclusive)) {
+                      Ok(s"disposal date was strictly before $earliestDisposalDateInclusive")
+                    } else {
+                      Ok(s"disposal date was on or after $earliestDisposalDateInclusive")
                     }
 
-                }
-              )
-          }
-      }
+                })
+              }
+            )
+        }
+    }
   }
 
   private def withSubscribedUser(request: RequestWithSessionData[_])(
@@ -171,7 +236,6 @@ class CanTheyUseOurServiceController @Inject()(
       case _ =>
         Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
     }
-
 
 }
 
@@ -197,14 +261,25 @@ object CanTheyUseOurServiceController {
         .verifying("error.invalid", a => a === 0 || a === 1)
         .transform[NumberOfProperties](
           value => if (value === 0) One else MoreThanOne, {
-            case One                   => 0
-            case MoreThanOne           => 1
+            case One         => 0
+            case MoreThanOne => 1
           }
         )
     )(identity)(Some(_))
   )
 
-
-
+  def disposalDateForm(maximumDateInclusive: LocalDate): Form[DisposalDate] = Form(
+    mapping(
+      "date" -> of(
+        LocalDateUtils.dateFormatter(
+          maximumDateInclusive,
+          "disposalDate-day",
+          "disposalDate-month",
+          "disposalDate-year",
+          "disposalDate"
+        )
+      )
+    )(DisposalDate(_))(d => Some(d.value))
+  )
 
 }

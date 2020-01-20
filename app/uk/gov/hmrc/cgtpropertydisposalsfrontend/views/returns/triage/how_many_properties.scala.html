@@ -32,7 +32,7 @@
 @(form: Form[NumberOfProperties])(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"numberOfProperties"}
-@title = @{messages("triage.number-of-properties.title")}
+@title = @{messages("numberOfProperties.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @optionIndex(value: NumberOfProperties) = @{
