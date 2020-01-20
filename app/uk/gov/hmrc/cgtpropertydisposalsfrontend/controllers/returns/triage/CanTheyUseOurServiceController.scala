@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
-import java.time.{Clock, LocalDate}
+import java.time.{Clock, LocalDate, ZoneId}
 
 import cats.instances.int._
 import cats.syntax.eq._
@@ -64,7 +64,7 @@ class CanTheyUseOurServiceController @Inject()(
   val earliestDisposalDateInclusive: LocalDate =
     config.underlying.get[LocalDate]("returns.earliest-disposal-date-inclusive").value
 
-  val clock: Clock = Clock.systemUTC()
+  val clock: Clock = Clock.system(ZoneId.of("Europe/London"))
 
   def whoIsIndividualRepresenting(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withSubscribedUser(request) {

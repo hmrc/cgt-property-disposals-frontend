@@ -17,7 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 import java.time.format.DateTimeFormatter
-import java.time.{Clock, LocalDate}
+import java.time.{Clock, LocalDate, ZoneId}
 
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.Configuration
@@ -51,7 +51,7 @@ class CanTheyUseOurServiceControllerSpec
       bind[SessionStore].toInstance(mockSessionStore)
     )
 
-  val today = LocalDate.now(Clock.systemUTC())
+  val today = LocalDate.now(Clock.system(ZoneId.of("Europe/London")))
 
   val earliestDisposalDate = today.minusDays(10L)
 
