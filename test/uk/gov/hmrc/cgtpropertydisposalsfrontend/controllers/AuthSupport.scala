@@ -24,7 +24,8 @@ import uk.gov.hmrc.auth.core.retrieve.{Credentials, EmptyRetrieval, Retrieval, ~
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{EnrolmentConfig, ErrorHandler}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.AuthenticatedActionWithRetrievedData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.SAUTR
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{OnboardingAuditService, SubscriptionService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -32,9 +33,8 @@ import scala.concurrent.{ExecutionContext, Future}
 trait AuthSupport {
   this: ControllerSpec with SessionSupport =>
 
-  val mockAuthConnector: AuthConnector                     = mock[AuthConnector]
-  val mockSubscriptionService: SubscriptionService         = mock[SubscriptionService]
-  val mockSubscriptionAuditService: OnboardingAuditService = mock[OnboardingAuditService]
+  val mockAuthConnector: AuthConnector             = mock[AuthConnector]
+  val mockSubscriptionService: SubscriptionService = mock[SubscriptionService]
 
   lazy val testAuthenticatedAction = new AuthenticatedActionWithRetrievedData(
     mockSubscriptionService,
@@ -99,7 +99,13 @@ trait AuthSupport {
       None,
       None,
       email,
-      Set(Enrolment(EnrolmentConfig.Trusts.key, Seq(EnrolmentIdentifier(EnrolmentConfig.Trusts.sautrIdentifier, sautr.value)), "")),
+      Set(
+        Enrolment(
+          EnrolmentConfig.Trusts.key,
+          Seq(EnrolmentIdentifier(EnrolmentConfig.Trusts.sautrIdentifier, sautr.value)),
+          ""
+        )
+      ),
       Some(retrievedCredentials)
     )
 
@@ -110,7 +116,13 @@ trait AuthSupport {
       None,
       None,
       None,
-      Set(Enrolment(EnrolmentConfig.Cgt.key, Seq(EnrolmentIdentifier(EnrolmentConfig.Cgt.cgtReferenceIdentifier, "XCGTP123456789")), "")),
+      Set(
+        Enrolment(
+          EnrolmentConfig.Cgt.key,
+          Seq(EnrolmentIdentifier(EnrolmentConfig.Cgt.cgtReferenceIdentifier, "XCGTP123456789")),
+          ""
+        )
+      ),
       Some(Credentials("gg-cred-id", "GovernmentGateway"))
     )
 

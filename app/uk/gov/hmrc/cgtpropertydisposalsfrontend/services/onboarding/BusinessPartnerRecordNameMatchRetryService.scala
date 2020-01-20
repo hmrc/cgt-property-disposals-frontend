@@ -22,15 +22,17 @@ import cats.syntax.either._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.Configuration
 import play.api.libs.json.{Reads, Writes}
+import play.api.mvc.Request
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.EitherOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.BusinessPartnerRecordNameMatchDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{BusinessPartnerRecordNameMatchAttemptEvent, BusinessPartnerRecordNameMatchDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.BusinessPartnerRecordNameMatchDetails.{IndividualNameWithSaUtrAuditDetails, TrustNameWithTrnAuditDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest.{IndividualBusinessPartnerRecordRequest, TrustBusinessPartnerRecordRequest}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.IndividualNameMatchDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.onboarding.BusinessPartnerRecordNameMatchRetryStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -46,7 +48,7 @@ trait BusinessPartnerRecordNameMatchRetryService {
     nameMatchDetails: A,
     ggCredId: GGCredId,
     previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts[A]]
-  )(implicit ec: ExecutionContext, hc: HeaderCarrier): EitherT[Future, NameMatchError[A], BusinessPartnerRecord]
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier, request: Request[_]): EitherT[Future, NameMatchError[A], BusinessPartnerRecord]
 
 }
 
@@ -54,7 +56,7 @@ trait BusinessPartnerRecordNameMatchRetryService {
 class BusinessPartnerRecordNameMatchRetryServiceImpl @Inject()(
   bprService: BusinessPartnerRecordService,
   bprNameMatchRetryStore: BusinessPartnerRecordNameMatchRetryStore,
-  auditService: OnboardingAuditService,
+  auditService: AuditService,
   config: Configuration
 ) extends BusinessPartnerRecordNameMatchRetryService {
 
@@ -80,12 +82,16 @@ class BusinessPartnerRecordNameMatchRetryServiceImpl @Inject()(
     nameMatchDetails: A,
     ggCredId: GGCredId,
     previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts[A]]
-  )(implicit ec: ExecutionContext, hc: HeaderCarrier): EitherT[Future, NameMatchError[A], BusinessPartnerRecord] = {
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier, request: Request[_]): EitherT[Future, NameMatchError[A], BusinessPartnerRecord] = {
     def auditNameMatchEvent(numberOfAttempts: Int): Unit =
-      auditService.sendBusinessPartnerRecordNameMatchAttemptEvent(
-        numberOfAttempts,
-        maxUnsuccessfulAttempts,
-        nameMatchDetailsToAuditEvent(nameMatchDetails)
+      auditService.sendEvent(
+        "businessPartnerRecordNameMatchAttempt",
+        BusinessPartnerRecordNameMatchAttemptEvent(
+          numberOfAttempts,
+          maxUnsuccessfulAttempts,
+          BusinessPartnerRecordNameMatchDetails.fromNameMatchDetails(nameMatchDetails)
+        ),
+        "business-partner-record-name-match-attempt"
       )
 
     previousUnsuccessfulNameMatchAttempts match {
@@ -108,16 +114,7 @@ class BusinessPartnerRecordNameMatchRetryServiceImpl @Inject()(
     }
   }
 
-  private def nameMatchDetailsToAuditEvent(
-    nameMatchDetails: NameMatchDetails
-  ): BusinessPartnerRecordNameMatchDetails =
-    nameMatchDetails match {
-      case IndividualNameMatchDetails(name, sautr) =>
-        IndividualNameWithSaUtrAuditDetails(name.firstName, name.lastName, sautr.value)
-      case NameMatchDetails.TrustNameMatchDetails(name, trn) => TrustNameWithTrnAuditDetails(name.value, trn.value)
-    }
-
-  private def nameMatchDetailsToBprRequest(nameMatchDetails: NameMatchDetails): BusinessPartnerRecordRequest =
+ private def nameMatchDetailsToBprRequest(nameMatchDetails: NameMatchDetails): BusinessPartnerRecordRequest =
     nameMatchDetails match {
       case IndividualNameMatchDetails(name, sautr)           => IndividualBusinessPartnerRecordRequest(Left(sautr), Some(name))
       case NameMatchDetails.TrustNameMatchDetails(name, trn) => TrustBusinessPartnerRecordRequest(Left(trn), Some(name))

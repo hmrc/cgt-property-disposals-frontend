@@ -20,16 +20,18 @@ import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
-import play.api.mvc.{Call, MessagesControllerComponents, Result}
+import play.api.mvc.{Call, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ContactNameController, SessionUpdates}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedUpdateDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.SubscribedContactNameChangedEvent
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{OnboardingAuditService, SubscriptionService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -41,7 +43,7 @@ class SubscribedChangeContactNameController @Inject()(
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   val subscriptionService: SubscriptionService,
-  val auditService: OnboardingAuditService,
+  val auditService: AuditService,
   val cc: MessagesControllerComponents,
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
@@ -64,18 +66,23 @@ class SubscribedChangeContactNameController @Inject()(
     }
 
   override def updateContactName(journey: Subscribed, contactName: ContactName)(
-    implicit hc: HeaderCarrier
+    implicit hc: HeaderCarrier, request: Request[_]
   ): EitherT[Future, Error, Subscribed] = {
     val journeyWithUpdatedContactName = journey.subscribedDetails.copy(contactName = contactName)
     if (journey.subscribedDetails === journeyWithUpdatedContactName) EitherT.rightT[Future, Error](journey)
     else {
-      auditService.sendSubscribedChangeContactNameEvent(
-        journey.subscribedDetails.contactName.value,
-        contactName.value,
-        journey.subscribedDetails.cgtReference.value,
-        journey.agentReferenceNumber,
-        routes.SubscribedChangeContactNameController.enterContactNameSubmit().url
+      auditService.sendEvent(
+        "contactNameChanged",
+        SubscribedContactNameChangedEvent(
+          journey.subscribedDetails.contactName.value,
+          contactName.value,
+          journey.subscribedDetails.cgtReference.value,
+          journey.agentReferenceNumber.isDefined,
+          journey.agentReferenceNumber.map(_.value)
+        ),
+        "contact-name-changed"
       )
+
       subscriptionService
         .updateSubscribedDetails(SubscribedUpdateDetails(journeyWithUpdatedContactName, journey.subscribedDetails))
         .map(_ => journey.copy(journeyWithUpdatedContactName))

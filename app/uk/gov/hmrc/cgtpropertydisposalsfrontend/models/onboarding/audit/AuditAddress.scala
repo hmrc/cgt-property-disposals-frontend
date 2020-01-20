@@ -17,9 +17,9 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country}
 
-final case class Address(
+final case class AuditAddress(
   line1: String,
   line2: Option[String],
   line3: Option[String],
@@ -28,6 +28,29 @@ final case class Address(
   country: Country
 )
 
-object Address {
-  implicit val formatAddress: OFormat[Address] = Json.format[Address]
+object AuditAddress {
+
+  implicit val formatAddress: OFormat[AuditAddress] = Json.format[AuditAddress]
+
+  def fromAddress(address: Address): AuditAddress = address match {
+    case Address.UkAddress(line1, line2, town, county, postcode) =>
+      AuditAddress(
+        line1,
+        line2,
+        town,
+        county,
+        Some(postcode.value),
+        Country("GB", Some("United Kingdom"))
+      )
+    case Address.NonUkAddress(line1, line2, line3, line4, postcode, country) =>
+      AuditAddress(
+        line1,
+        line2,
+        line3,
+        line4,
+        postcode,
+        Country(country.code, country.name)
+      )
+  }
+
 }

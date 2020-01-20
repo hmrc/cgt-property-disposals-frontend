@@ -21,18 +21,19 @@ import cats.instances.future._
 import cats.syntax.either._
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
-import play.api.mvc.{Call, MessagesControllerComponents, Result}
+import play.api.mvc.{Call, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.name.IndividualNameController
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedUpdateDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.SubscribedContactNameChangedEvent
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{OnboardingAuditService, SubscriptionService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -49,7 +50,7 @@ class SubscribedWithoutIdChangeContactNameController @Inject()(
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
   val enterNamePage: views.html.onboarding.name.enter_name,
-  auditService: OnboardingAuditService
+  auditService: AuditService
 )(implicit val viewConfig: ViewConfig, val ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -66,7 +67,8 @@ class SubscribedWithoutIdChangeContactNameController @Inject()(
     }
 
   override def updateName(journey: Subscribed, name: IndividualName)(
-    implicit hc: HeaderCarrier
+    implicit hc: HeaderCarrier,
+    request: Request[_]
   ): EitherT[Future, Error, Subscribed] = {
     val contactName = s"${name.firstName} ${name.lastName}"
     val journeyWithUpdatedName =
@@ -75,12 +77,16 @@ class SubscribedWithoutIdChangeContactNameController @Inject()(
     if (journey.subscribedDetails === journeyWithUpdatedName)
       EitherT.rightT[Future, Error](journey)
     else {
-      auditService.sendSubscribedChangeContactNameEvent(
-        journey.subscribedDetails.contactName.value,
-        contactName,
-        journey.subscribedDetails.cgtReference.value,
-        journey.agentReferenceNumber,
-        routes.SubscribedWithoutIdChangeContactNameController.enterIndividualNameSubmit().url
+      auditService.sendEvent(
+        "contactNameChanged",
+        SubscribedContactNameChangedEvent(
+          journey.subscribedDetails.contactName.value,
+          contactName,
+          journey.subscribedDetails.cgtReference.value,
+          journey.agentReferenceNumber.isDefined,
+          journey.agentReferenceNumber.map(_.value)
+        ),
+        "contact-name-changed"
       )
 
       subscriptionService

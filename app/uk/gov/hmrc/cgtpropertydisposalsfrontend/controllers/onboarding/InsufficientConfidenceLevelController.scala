@@ -31,13 +31,15 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscriptio
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.TryingToGetIndividualsFootprint
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.HandOffTIvEvent
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.{IndividualNameMatchDetails, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, NameMatchError, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.onboarding.BusinessPartnerRecordNameMatchRetryStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPartnerRecordNameMatchRetryService, OnboardingAuditService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.BusinessPartnerRecordNameMatchRetryService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
@@ -53,7 +55,7 @@ class InsufficientConfidenceLevelController @Inject()(
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
   val config: Configuration,
-  auditService: OnboardingAuditService,
+  auditService: AuditService,
   bprNameMatchService: BusinessPartnerRecordNameMatchRetryService,
   sautrNameMatchRetryStore: BusinessPartnerRecordNameMatchRetryStore,
   doYouHaveANinoPage: views.html.onboarding.do_you_have_a_nino,
@@ -78,12 +80,13 @@ class InsufficientConfidenceLevelController @Inject()(
       case _                                        => Redirect(controllers.routes.StartController.start())
     }
 
-  def doYouHaveNINO(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request: RequestWithSessionData[AnyContent] =>
-    withInsufficientConfidenceLevelUser {
-      case TryingToGetIndividualsFootprint(hasNino, _, _, _) =>
-        val form                         = hasNino.fold(haveANinoForm)(haveANinoForm.fill)
-        Ok(doYouHaveANinoPage(form))
-    }
+  def doYouHaveNINO(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request: RequestWithSessionData[AnyContent] =>
+      withInsufficientConfidenceLevelUser {
+        case TryingToGetIndividualsFootprint(hasNino, _, _, _) =>
+          val form = hasNino.fold(haveANinoForm)(haveANinoForm.fill)
+          Ok(doYouHaveANinoPage(form))
+      }
   }
 
   def doYouHaveNINOSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
@@ -104,7 +107,11 @@ class InsufficientConfidenceLevelController @Inject()(
 
               case Right(_) =>
                 if (hasNino) {
-                  auditService.sendHandOffToIvEvent(insufficientConfidenceLevel.ggCredId, redirectToIvUrl)
+                  auditService.sendEvent(
+                    "handOffToIv",
+                    HandOffTIvEvent(insufficientConfidenceLevel.ggCredId.value, request.uri),
+                    "handoff-to-iv"
+                  )
                   redirectToIv
                 } else {
                   Redirect(routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr())

@@ -20,17 +20,18 @@ import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.eq._
 import com.google.inject.Inject
-import play.api.mvc.{Call, MessagesControllerComponents, Result}
+import play.api.mvc.{Call, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, SessionUpdates}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, SessionUpdates}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedUpdateDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{AuditAddress, SubscribedContactAddressChangedEvent}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{OnboardingAuditService, SubscriptionService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, UKAddressLookupService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -44,7 +45,7 @@ class SubscribedChangeAddressController @Inject()(
   val sessionStore: SessionStore,
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
-  val auditService: OnboardingAuditService,
+  val auditService: AuditService,
   subscriptionService: SubscriptionService,
   cc: MessagesControllerComponents,
   val enterPostcodePage: views.html.address.enter_postcode,
@@ -71,26 +72,25 @@ class SubscribedChangeAddressController @Inject()(
     }
 
   def updateAddress(journey: Subscribed, address: Address, isManuallyEnteredAddress: Boolean)(
-    implicit hc: HeaderCarrier
+    implicit hc: HeaderCarrier,
+    request: Request[_]
   ): EitherT[Future, Error, Subscribed] = {
     val updatedSubscribedDetails = journey.subscribedDetails.copy(address = address)
 
     if (journey.subscribedDetails === updatedSubscribedDetails) {
       EitherT.pure[Future, Error](journey)
     } else {
-      val auditUrl = address match {
-        case _: Address.UkAddress =>
-          routes.SubscribedChangeAddressController.enterUkAddressSubmit().url
-        case _: Address.NonUkAddress =>
-          routes.SubscribedChangeAddressController.enterNonUkAddressSubmit().url
-      }
-      auditService.sendSubscribedContactAddressChangedEvent(
-        journey.subscribedDetails.address,
-        address,
-        isManuallyEnteredAddress,
-        journey.subscribedDetails.cgtReference.value,
-        journey.agentReferenceNumber,
-        auditUrl
+      auditService.sendEvent(
+        "contactAddressChanged",
+        SubscribedContactAddressChangedEvent(
+          AuditAddress.fromAddress(journey.subscribedDetails.address),
+          AuditAddress.fromAddress(address),
+          if (isManuallyEnteredAddress) "manual-entry" else "postcode-lookup",
+          journey.subscribedDetails.cgtReference.value,
+          journey.agentReferenceNumber.isDefined,
+          journey.agentReferenceNumber.map(_.value)
+        ),
+        "contact-address-changed"
       )
       subscriptionService
         .updateSubscribedDetails(SubscribedUpdateDetails(updatedSubscribedDetails, journey.subscribedDetails))

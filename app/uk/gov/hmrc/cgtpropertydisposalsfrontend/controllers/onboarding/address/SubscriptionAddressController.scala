@@ -27,10 +27,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, SessionUpdates}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressSource}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{AuditAddress, RegistrationContactAddressChangedEvent, SubscriptionContactAddressChangedEvent}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.OnboardingAuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, UKAddressLookupService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -46,7 +46,7 @@ class SubscriptionAddressController @Inject()(
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   cc: MessagesControllerComponents,
-  val auditService: OnboardingAuditService,
+  val auditService: AuditService,
   val enterPostcodePage: views.html.address.enter_postcode,
   val selectAddressPage: views.html.address.select_address,
   val addressDisplay: views.html.components.address_display,
@@ -77,19 +77,16 @@ class SubscriptionAddressController @Inject()(
     }
 
   def updateAddress(journey: SubscriptionReady, address: Address, isManuallyEnteredAddress: Boolean)(
-    implicit hc: HeaderCarrier
+    implicit hc: HeaderCarrier, request: Request[_]
   ): EitherT[Future, Error, SubscriptionReady] = {
-    val auditPath = address match {
-      case _: Address.UkAddress =>
-        routes.SubscriptionAddressController.enterUkAddressSubmit().url
-      case _: Address.NonUkAddress =>
-        routes.SubscriptionAddressController.enterNonUkAddressSubmit().url
-    }
-    auditService.sendSubscriptionContactAddressChangedEvent(
-      journey.subscriptionDetails.address,
-      address,
-      isManuallyEnteredAddress,
-      auditPath
+    auditService.sendEvent(
+      "subscriptionContactAddressChanged",
+      SubscriptionContactAddressChangedEvent(
+        AuditAddress.fromAddress(journey.subscriptionDetails.address),
+        AuditAddress.fromAddress(address),
+        if (isManuallyEnteredAddress) "manual-entry" else "postcode-lookup"
+      ),
+      "subscription-contact-address-changed"
     )
 
     val addressSource =

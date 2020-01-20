@@ -22,19 +22,20 @@ import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
-import play.api.mvc.{Call, MessagesControllerComponents, Result}
+import play.api.mvc.{Call, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{EmailController, SessionUpdates}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{EmailController, SessionUpdates}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedUpdateDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{SubscribedChangeEmailAddressAttemptedEvent, SubscribedChangeEmailAddressVerifiedEvent}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{OnboardingAuditService, SubscriptionService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, EmailVerificationService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -49,7 +50,7 @@ class SubscribedChangeEmailController @Inject()(
   val sessionStore: SessionStore,
   val emailVerificationService: EmailVerificationService,
   val subscriptionService: SubscriptionService,
-  val auditService: OnboardingAuditService,
+  val auditService: AuditService,
   val uuidGenerator: UUIDGenerator,
   val errorHandler: ErrorHandler,
   cc: MessagesControllerComponents,
@@ -90,26 +91,36 @@ class SubscribedChangeEmailController @Inject()(
     }
   }
 
-  override def auditEmailVerifiedEvent(journey: Subscribed, email: Email)(implicit hc: HeaderCarrier): Unit =
-    if (journey.subscribedDetails.emailAddress === email) {
-      ()
-    } else {
-      auditService.sendSubscribedChangeEmailAddressVerifiedEvent(
+  override def auditEmailVerifiedEvent(
+    journey: Subscribed,
+    email: Email
+  )(implicit hc: HeaderCarrier, request: Request[_]): Unit =
+    auditService.sendEvent(
+      "changeEmailAddressVerified",
+      SubscribedChangeEmailAddressVerifiedEvent(
         journey.subscribedDetails.emailAddress.value,
         email.value,
         journey.subscribedDetails.cgtReference.value,
-        journey.agentReferenceNumber,
-        routes.SubscribedChangeEmailController.emailVerified().url
-      )
-    }
+        journey.agentReferenceNumber.isDefined,
+        journey.agentReferenceNumber.map(_.value)
+      ),
+      "change-email-address-verified"
+    )
 
-  override def auditEmailChangeAttempt(journey: Subscribed, email: Email)(implicit hc: HeaderCarrier): Unit =
-    auditService.sendSubscribedChangeEmailAddressAttemptedEvent(
-      journey.subscribedDetails.emailAddress.value,
-      email.value,
-      journey.subscribedDetails.cgtReference.value,
-      journey.agentReferenceNumber,
-      routes.SubscribedChangeEmailController.enterEmailSubmit().url
+  override def auditEmailChangeAttempt(
+    journey: Subscribed,
+    email: Email
+  )(implicit hc: HeaderCarrier, request: Request[_]): Unit =
+    auditService.sendEvent(
+      "changeEmailAddressAttempted",
+      SubscribedChangeEmailAddressAttemptedEvent(
+        journey.subscribedDetails.emailAddress.value,
+        email.value,
+        journey.subscribedDetails.cgtReference.value,
+        journey.agentReferenceNumber.isDefined,
+        journey.agentReferenceNumber.map(_.value)
+      ),
+      "change-email-address-attempted"
     )
 
   override def name(journeyStatus: Subscribed): ContactName =
@@ -118,11 +129,12 @@ class SubscribedChangeEmailController @Inject()(
   override lazy protected val backLinkCall: Option[Call] = Some(
     controllers.accounts.routes.AccountController.manageYourDetails()
   )
-  override lazy protected val enterEmailCall: Call            = routes.SubscribedChangeEmailController.enterEmail()
-  override lazy protected val enterEmailSubmitCall: Call      = routes.SubscribedChangeEmailController.enterEmailSubmit()
-  override lazy protected val checkYourInboxCall: Call        = routes.SubscribedChangeEmailController.checkYourInbox()
-  override lazy protected val verifyEmailCall: UUID => Call   = routes.SubscribedChangeEmailController.verifyEmail
-  override lazy protected val emailVerifiedCall: Call         = routes.SubscribedChangeEmailController.emailVerified()
-  override lazy protected val emailVerifiedContinueCall: Call = controllers.accounts.routes.AccountController.contactEmailUpdated()
+  override lazy protected val enterEmailCall: Call          = routes.SubscribedChangeEmailController.enterEmail()
+  override lazy protected val enterEmailSubmitCall: Call    = routes.SubscribedChangeEmailController.enterEmailSubmit()
+  override lazy protected val checkYourInboxCall: Call      = routes.SubscribedChangeEmailController.checkYourInbox()
+  override lazy protected val verifyEmailCall: UUID => Call = routes.SubscribedChangeEmailController.verifyEmail
+  override lazy protected val emailVerifiedCall: Call       = routes.SubscribedChangeEmailController.emailVerified()
+  override lazy protected val emailVerifiedContinueCall: Call =
+    controllers.accounts.routes.AccountController.contactEmailUpdated()
 
 }

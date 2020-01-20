@@ -36,11 +36,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AgentStatu
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Country, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifierAttempts
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.audit.{AgentAccessAttempt, AgentVerifierMatchAttempt}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.agents.AgentVerifierMatchRetryStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.agents.AgentAccessAuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
@@ -58,7 +59,7 @@ class AgentAccessController @Inject()(
   authConnector: AuthConnector,
   sessionStore: SessionStore,
   errorHandler: ErrorHandler,
-  agentAccessAuditService: AgentAccessAuditService,
+  agentAccessAuditService: AuditService,
   subscriptionService: SubscriptionService,
   agentVerifierMatchRetryStore: AgentVerifierMatchRetryStore,
   cc: MessagesControllerComponents,
@@ -237,7 +238,11 @@ class AgentAccessController @Inject()(
           .withIdentifier(EnrolmentConfig.Cgt.cgtReferenceIdentifier, cgtReference.value)
           .withDelegatedAuthRule(EnrolmentConfig.Cgt.delegateAuthRule)
       ) {
-        agentAccessAuditService.sendAgentAccessAttemptEvent(agentReferenceNumber, cgtReference, true)
+        agentAccessAuditService.sendEvent(
+          "agentAccessAttempt",
+          AgentAccessAttempt(agentReferenceNumber, cgtReference, success = true),
+          "agent-access-attempt"
+        )
 
         val result = for {
           details <- subscriptionService.getSubscribedDetails(cgtReference)
@@ -267,7 +272,11 @@ class AgentAccessController @Inject()(
       }
       .recover {
         case _: InsufficientEnrolments =>
-          agentAccessAuditService.sendAgentAccessAttemptEvent(agentReferenceNumber, cgtReference, false)
+          agentAccessAuditService.sendEvent(
+            "agentAccessAttempt",
+            AgentAccessAttempt(agentReferenceNumber, cgtReference, success = false),
+            "agent-access-attempt"
+          )
           BadRequest(
             enterClientsCgtRefPage(
               cgtReferenceForm
@@ -321,7 +330,7 @@ class AgentAccessController @Inject()(
     def noMatchResult(submittedVerifier: V): Result =
       BadRequest(page(form.fill(submittedVerifier).withError(formKey, "error.noMatch")))
 
-    def handleNewUnmatchedVerifier(submittedVerifier: V, updatedUnsuccessfulAttempts: Int): Future[Result] = {
+    def handleNewUnmatchedVerifier(submittedVerifier: V, updatedUnsuccessfulAttempts: Int): Future[Result] =
       agentVerifierMatchRetryStore
         .store(
           currentAgentSupplyingClientDetails.agentGGCredId,
@@ -339,16 +348,19 @@ class AgentAccessController @Inject()(
             else
               noMatchResult(submittedVerifier)
         }
-    }
 
     def sendAuditEvent(submittedVerifier: V, success: Boolean, numberOfUnsuccessfulAttempts: Int): Unit =
-      agentAccessAuditService.sendAgentVerifierMatchAttemptEvent(
-        currentAgentSupplyingClientDetails.agentReferenceNumber,
-        currentVerifierMatchingDetails.clientDetails.cgtReference,
-        numberOfUnsuccessfulAttempts,
-        maxVerifierNameMatchAttempts,
-        toEither(submittedVerifier),
-        success
+      agentAccessAuditService.sendEvent(
+        "agentVerifierMatchAttempt",
+        AgentVerifierMatchAttempt(
+          currentAgentSupplyingClientDetails.agentReferenceNumber,
+          currentVerifierMatchingDetails.clientDetails.cgtReference,
+          numberOfUnsuccessfulAttempts,
+          maxVerifierNameMatchAttempts,
+          toEither(submittedVerifier),
+          success
+        ),
+        "agent-verifier-match-attempt"
       )
 
     form
