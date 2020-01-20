@@ -16,18 +16,18 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import play.api.libs.json.{Json, OFormat}
+import julienrf.json.derived
+import play.api.libs.json.OFormat
 
-final case class IndividualTriageAnswers(
-  individualUserType: Option[IndividualUserType],
-  numberOfProperties: Option[NumberOfProperties],
-  disposalDate: Option[DisposalDate]
-)
+sealed trait NumberOfProperties extends Product with Serializable
 
-object IndividualTriageAnswers {
+object NumberOfProperties {
 
-  val empty: IndividualTriageAnswers = IndividualTriageAnswers(None, None, None)
+  case object One extends NumberOfProperties
 
-  implicit val format: OFormat[IndividualTriageAnswers] = Json.format
+  case object MoreThanOne extends NumberOfProperties
+
+  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
+  implicit val format: OFormat[NumberOfProperties] = derived.oformat[NumberOfProperties]
 
 }

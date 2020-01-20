@@ -47,7 +47,7 @@ lazy val microservice = Project(appName, file("."))
     majorVersion := 1,
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test
   )
-  .settings(scalacOptions += "-Ypartial-unification")
+  .settings(scalacOptions ++= Seq("-Ypartial-unification"))
   .settings(publishingSettings: _*)
   .configs(IntegrationTest)
   .settings(integrationTestSettings(): _*)

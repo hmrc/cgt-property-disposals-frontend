@@ -1439,7 +1439,7 @@ class StartControllerSpec
                 )
                 mockGetSession(Future.successful(Right(Some(SessionData.empty))))
                 mockGetSubscribedDetails(cgtReference)(Right(subscribedDetails))
-                mockStoreSession(sessionWithSubscribed.copy(userType = None))(Future.successful(Left(Error(""))))
+                mockStoreSession(sessionWithSubscribed.copy(userType = Some(UserType.Individual)))(Future.successful(Left(Error(""))))
               }
 
               checkIsTechnicalErrorPage(performAction())
@@ -1461,7 +1461,7 @@ class StartControllerSpec
               )
               mockGetSession(Future.successful(Right(Some(SessionData.empty))))
               mockGetSubscribedDetails(cgtReference)(Right(subscribedDetails))
-              mockStoreSession(sessionWithSubscribed.copy(userType = None))(Future.successful(Right(())))
+              mockStoreSession(sessionWithSubscribed.copy(userType = Some(UserType.Individual)))(Future.successful(Right(())))
             }
 
             checkIsRedirect(performAction(), controllers.accounts.homepage.routes.HomePageController.homepage())

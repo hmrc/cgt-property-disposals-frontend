@@ -16,13 +16,15 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
+import java.time.LocalDate
+
 import org.scalacheck.ScalacheckShapeless._
 import org.scalacheck.{Arbitrary, Gen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, IndividualSupplyingInformation, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifierAttempts
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, GGCredId, SAUTR, SapNumber}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
@@ -31,21 +33,21 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.Unsuccessf
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscribedUpdateDetails, SubscriptionDetails}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualTriageAnswers, IndividualUserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, IndividualTriageAnswers, IndividualUserType, NumberOfProperties}
 
 object Generators
     extends GenUtils
-    with SessionDataGen
-    with BusinessPartnerRecordGen
-    with IdGen
-    with NameGen
-    with JourneyStatusGen
-    with AddressGen
-    with NameMatchGen
-    with OnboardingDetailsGen
-    with EmailGen
-    with VerifierMatchGen
-    with UserTypeGen
+      with SessionDataGen
+      with BusinessPartnerRecordGen
+      with IdGen
+      with NameGen
+      with JourneyStatusGen
+      with AddressGen
+      with NameMatchGen
+      with OnboardingDetailsGen
+      with EmailGen
+      with VerifierMatchGen
+      with UserTypeGen
     with TriageQuestionsGen {
 
   def sample[A](implicit gen: Gen[A]): A =
@@ -61,6 +63,8 @@ sealed trait GenUtils {
 
   // define our own Arbitrary instance for String to generate more legible strings
   implicit val stringArb: Arbitrary[String] = Arbitrary(Gen.alphaNumStr)
+
+  implicit val localDateArb: Arbitrary[LocalDate] = Arbitrary(Gen.chooseNum(0, Int.MaxValue).map(LocalDate.ofEpochDay(_)))
 
 }
 
@@ -191,4 +195,10 @@ trait TriageQuestionsGen { this: GenUtils =>
 
   implicit val individualUserTypeGen: Gen[IndividualUserType] = gen[IndividualUserType]
 
+  implicit val numberOfPropertiesGen: Gen[NumberOfProperties] = gen[NumberOfProperties]
+
+ // implicit val disposalDateGen: Gen[Option[DisposalDate]] = Gen.option(localDateGen.map(DisposalDate(_)))
+
 }
+
+
