@@ -64,7 +64,7 @@ class CanTheyUseOurServiceController @Inject()(
   val earliestDisposalDateInclusive: LocalDate =
     config.underlying.get[LocalDate]("returns.earliest-disposal-date-inclusive").value
 
-  val clock: Clock = Clock.system(ZoneId.of("Europe/London"))
+  val clock: Clock = Clock.systemUTC()
 
   def whoIsIndividualRepresenting(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withSubscribedUser(request) {

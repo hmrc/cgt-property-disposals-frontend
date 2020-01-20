@@ -51,7 +51,7 @@ class CanTheyUseOurServiceControllerSpec
       bind[SessionStore].toInstance(mockSessionStore)
     )
 
-  val today = LocalDate.now(Clock.system(ZoneId.of("Europe/London")))
+  val today = LocalDate.now(Clock.systemUTC())
 
   val earliestDisposalDate = today.minusDays(10L)
 
