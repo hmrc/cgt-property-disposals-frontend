@@ -32,7 +32,7 @@ backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.component
 @(form: Form[IndividualUserType])(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"individualUserType"}
-@title = @{messages("triage.who-are-you-reporting-for.title")}
+@title = @{messages("who-are-you-reporting-for.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @optionIndex(value: IndividualUserType) = @{

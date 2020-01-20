@@ -205,7 +205,7 @@ class CanTheyUseOurServiceController @Inject()(
 
                   case Right(_) =>
                     if (d.value.isBefore(earliestDisposalDateInclusive)) {
-                      Ok(s"disposal date was before $earliestDisposalDateInclusive")
+                      Ok(s"disposal date was strictly before $earliestDisposalDateInclusive")
                     } else {
                       Ok(s"disposal date was on or after $earliestDisposalDateInclusive")
                     }

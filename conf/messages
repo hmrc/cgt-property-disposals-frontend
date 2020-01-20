@@ -467,7 +467,7 @@ agent.confirm-client.change-client=Change client
 
 triage.caption=Before you start
 
-triage.who-are-you-reporting-for.title=Who are you reporting the tax for?
+who-are-you-reporting-for.title=Who are you reporting the tax for?
 
 individualUserType.self=Yourself
 individualUserType.capacitor=Someone else
@@ -475,7 +475,7 @@ individualUserType.personal-representative=Someone who has died
 individualUserType.error.required=Select who are you reporting the tax for
 individualUserType.error.invalid=Select who are you reporting the tax for
 
-triage.number-of-properties.title=How many properties with the same completion date are you reporting the tax for?
+numberOfProperties.title=How many properties with the same completion date are you reporting the tax for?
 numberOfProperties.one=One
 numberOfProperties.more-than-one=2 or more
 numberOfProperties.error.invalid=Select how many properties you want to include in this return

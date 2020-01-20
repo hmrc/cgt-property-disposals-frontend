@@ -16,9 +16,11 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
-import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.{Clock, LocalDate}
 
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -48,6 +50,14 @@ class CanTheyUseOurServiceControllerSpec
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore)
     )
+
+  val today = LocalDate.now(Clock.systemUTC())
+
+  val earliestDisposalDate = today.minusDays(10L)
+
+  override lazy val additionalConfig: Configuration = Configuration(
+    "returns.earliest-disposal-date-inclusive" -> earliestDisposalDate.format(DateTimeFormatter.ISO_DATE)
+  )
 
   lazy val controller = instanceOf[CanTheyUseOurServiceController]
 
@@ -84,7 +94,7 @@ class CanTheyUseOurServiceControllerSpec
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("triage.who-are-you-reporting-for.title"))
+        contentAsString(result) should include(message("who-are-you-reporting-for.title"))
         contentAsString(result) should not include ("checked=\"checked\"")
       }
 
@@ -110,7 +120,7 @@ class CanTheyUseOurServiceControllerSpec
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("triage.who-are-you-reporting-for.title"))
+        contentAsString(result) should include(message("who-are-you-reporting-for.title"))
         contentAsString(result) should include("checked=\"checked\"")
       }
 
@@ -138,7 +148,7 @@ class CanTheyUseOurServiceControllerSpec
           val content = contentAsString(result)
 
           status(result)          shouldBe BAD_REQUEST
-          contentAsString(result) should include(message("triage.who-are-you-reporting-for.title"))
+          contentAsString(result) should include(message("who-are-you-reporting-for.title"))
           content                 should include(message(expectedErrorKey))
         }
 
@@ -328,7 +338,7 @@ class CanTheyUseOurServiceControllerSpec
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("triage.number-of-properties.title"))
+        contentAsString(result) should include(message("numberOfProperties.title"))
         contentAsString(result) should not include ("checked=\"checked\"")
       }
 
@@ -354,7 +364,7 @@ class CanTheyUseOurServiceControllerSpec
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("triage.number-of-properties.title"))
+        contentAsString(result) should include(message("numberOfProperties.title"))
         contentAsString(result) should include("checked=\"checked\"")
       }
 
@@ -388,7 +398,7 @@ class CanTheyUseOurServiceControllerSpec
           val content = contentAsString(result)
 
           status(result)          shouldBe BAD_REQUEST
-          contentAsString(result) should include(message("triage.number-of-properties.title"))
+          contentAsString(result) should include(message("numberOfProperties.title"))
           content                 should include(message(expectedErrorKey))
         }
 
@@ -598,6 +608,218 @@ class CanTheyUseOurServiceControllerSpec
         contentAsString(result) should include(s"""value="${disposalDate.getDayOfMonth()}"""")
         contentAsString(result) should include(s"""value="${disposalDate.getMonthValue()}"""")
         contentAsString(result) should include(s"""value="${disposalDate.getYear()}"""")
+      }
+
+    }
+
+    "handling submitted disposal dates" must {
+
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.whenWasDisposalDateSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
+
+      def performActionWithDate(date: LocalDate): Future[Result] =
+        performAction(
+          "disposalDate-day"   -> date.getDayOfMonth.toString,
+          "disposalDate-month" -> date.getMonthValue.toString,
+          "disposalDate-year"  -> date.getYear.toString
+        )
+
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isSubscribedJourney)
+
+      val requiredPreviousAnswers =
+        IndividualTriageAnswers.empty.copy(
+          individualUserType = Some(IndividualUserType.Self),
+          numberOfProperties = Some(NumberOfProperties.One)
+        )
+
+      val subscribedWithRequiredPreviousAnswers =
+        sample[Subscribed].copy(individualTriageAnswers = Some(requiredPreviousAnswers))
+
+      val sessionDataWithRequiredPreviousAnswers =
+        SessionData.empty.copy(journeyStatus = Some(subscribedWithRequiredPreviousAnswers))
+
+      val tomorrow = today.plusDays(1L)
+
+      "show a form error" when {
+
+        def testFormError(submittedData: (String, String)*)(expectedErrorKey: String): Unit = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionDataWithRequiredPreviousAnswers))))
+          }
+
+          val result  = performAction(submittedData: _*)
+          val content = contentAsString(result)
+
+          status(result)          shouldBe BAD_REQUEST
+          contentAsString(result) should include(message("disposalDate.title"))
+          content                 should include(message(expectedErrorKey))
+        }
+
+        "the data submitted was not valid" in {
+          List(
+            // empty data
+            (None, None, None, "disposalDate.error.required"),
+            (Some(""), None, None, "disposalDate.error.required"),
+            (None, Some(""), None, "disposalDate.error.required"),
+            (None, None, Some(""), "disposalDate.error.required"),
+            (Some(""), Some(""), None, "disposalDate.error.required"),
+            (Some(""), None, Some(""), "disposalDate.error.required"),
+            (None, Some(""), Some(""), "disposalDate.error.required"),
+            (Some(""), Some(""), Some(""), "disposalDate.error.required"),
+            // single field empty
+            (None, Some("12"), Some("2020"), "disposalDate-day.error.required"),
+            (None, Some("100"), Some("-1000"), "disposalDate-day.error.required"),
+            (Some("1"), None, Some("2020"), "disposalDate-month.error.required"),
+            (Some("-1"), None, Some("1.2"), "disposalDate-month.error.required"),
+            (Some("1"), Some("12"), None, "disposalDate-year.error.required"),
+            (Some("0"), Some("-1"), None, "disposalDate-year.error.required"),
+            // two fields mossing
+            (Some("1"), None, None, "disposalDate-month.error.monthAndYearRequired"),
+            (Some("0"), None, None, "disposalDate-month.error.monthAndYearRequired"),
+            (None, Some("12"), None, "disposalDate-day.error.dayAndYearRequired"),
+            (None, Some("-1"), None, "disposalDate-day.error.dayAndYearRequired"),
+            (None, None, Some("2020"), "disposalDate-day.error.dayAndMonthRequired"),
+            (None, None, Some("-1"), "disposalDate-day.error.dayAndMonthRequired"),
+            // day invalid and takes precedence over month and year
+            (Some("0"), Some("12"), Some("2020"), "disposalDate-day.error.invalid"),
+            (Some("32"), Some("12"), Some("2020"), "disposalDate-day.error.invalid"),
+            (Some("-1"), Some("-1"), Some("-2020"), "disposalDate-day.error.invalid"),
+            (Some("1.2"), Some("3.4"), Some("4.5"), "disposalDate-day.error.invalid"),
+            // month invalid and takes precedence over year
+            (Some("1"), Some("13"), Some("2020"), "disposalDate-month.error.invalid"),
+            (Some("1"), Some("0"), Some("0"), "disposalDate-month.error.invalid"),
+            (Some("1"), Some("-1"), Some("-6"), "disposalDate-month.error.invalid"),
+            (Some("1"), Some("1.2"), Some("3.4"), "disposalDate-month.error.invalid"),
+            // year invalid
+            (Some("1"), Some("12"), Some("0"), "disposalDate-year.error.invalid"),
+            (Some("1"), Some("12"), Some("-1"), "disposalDate-year.error.invalid"),
+            (Some("1"), Some("12"), Some("1.2"), "disposalDate-year.error.invalid"),
+            // date in the future
+            (
+              Some(tomorrow.getDayOfMonth.toString),
+              Some(tomorrow.getMonthValue.toString),
+              Some(tomorrow.getYear.toString),
+              "disposalDate.error.tooFarInFuture"
+            ),
+            // date does not exist
+            (Some("31"), Some("2"), Some("2019"), "disposalDate.error.invalid")
+          ).foreach {
+            case (dayString, monthString, yearString, expectedErrorKey) =>
+              withClue(
+                s"For (day, month, year) = ($dayString, $monthString, $yearString) and expectedErrorKey '$expectedErrorKey': "
+              ) {
+                val formInput =
+                  List(
+                    "disposalDate-day"   -> dayString,
+                    "disposalDate-month" -> monthString,
+                    "disposalDate-year"  -> yearString
+                  ).collect { case (id, Some(input)) => id -> input }
+
+                testFormError(formInput: _*)(expectedErrorKey)
+              }
+          }
+        }
+
+      }
+
+      "show an error" when {
+
+        "the submitted value is valid but there is an error updating the session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionDataWithRequiredPreviousAnswers))))
+            mockStoreSession(
+              sessionDataWithRequiredPreviousAnswers.copy(
+                journeyStatus = Some(
+                  subscribedWithRequiredPreviousAnswers.copy(
+                    individualTriageAnswers = Some(
+                      requiredPreviousAnswers.copy(disposalDate = Some(DisposalDate(today)))
+                    )
+                  )
+                )
+              )
+            )(Future.successful(Left(Error(""))))
+          }
+
+          val result = performActionWithDate(today)
+          checkIsTechnicalErrorPage(result)
+        }
+
+      }
+
+      "show a dummy page" when {
+
+        def test(disposalDate: LocalDate, expectedContent: String): Unit = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionDataWithRequiredPreviousAnswers))))
+            mockStoreSession(
+              sessionDataWithRequiredPreviousAnswers.copy(
+                journeyStatus = Some(
+                  subscribedWithRequiredPreviousAnswers.copy(
+                    individualTriageAnswers = Some(
+                      requiredPreviousAnswers.copy(disposalDate = Some(DisposalDate(disposalDate)))
+                    )
+                  )
+                )
+              )
+            )(Future.successful(Right(())))
+          }
+
+          val result = performActionWithDate(disposalDate)
+          status(result)          shouldBe OK
+          contentAsString(result) shouldBe expectedContent
+        }
+
+        "the submitted value is strictly before the configured earliest disposal date and the session is updated" in {
+          test(
+            earliestDisposalDate.minusDays(1L),
+            s"disposal date was strictly before $earliestDisposalDate"
+          )
+        }
+
+        "the submitted value is on the configured earliest disposal date and the session is updated" in {
+          test(
+            earliestDisposalDate,
+            s"disposal date was on or after $earliestDisposalDate"
+          )
+        }
+
+        "the submitted value is after the configured earliest disposal date and the session is updated" in {
+          test(
+            earliestDisposalDate.plusDays(1L),
+            s"disposal date was on or after $earliestDisposalDate"
+          )
+        }
+
+      }
+
+      "not update the session" when {
+
+        "the answer submitted is the same as the one already stored in session" in {
+          val sessionData =
+            sessionDataWithRequiredPreviousAnswers.copy(
+              journeyStatus = Some(
+                subscribedWithRequiredPreviousAnswers.copy(
+                  individualTriageAnswers = Some(
+                    requiredPreviousAnswers.copy(disposalDate = Some(DisposalDate(today)))
+                  )
+                )
+              )
+            )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionDataWithRequiredPreviousAnswers))))
+            mockStoreSession(sessionData)(Future.successful(Right(())))
+          }
+
+          val result = performActionWithDate(today)
+          status(result)          shouldBe OK
+          contentAsString(result) shouldBe s"disposal date was on or after $earliestDisposalDate"
+        }
+
       }
 
     }
