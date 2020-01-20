@@ -116,21 +116,6 @@ class UpscanControllerSpec
 
     }
 
-    "a success redirect is received" should {
-      "redirect to the upscan success page" in {
-        def performAction(): Future[Result] = controller.successRedirect(cgtReference.value)(FakeRequest())
-        val result = performAction()
-        status(result) shouldBe OK
-      }
-    }
-
-    "an error redirect is received" should {
-      "redirect to the technical error page" in {
-        def performAction(): Future[Result] = controller.errorRedirect(cgtReference.value)(FakeRequest())
-        checkIsTechnicalErrorPage(performAction())
-      }
-    }
-
     "an upscan request is received" should {
       "return the upscan file descriptor information on a successful call" in {
         val subscribed = sample[Subscribed]
