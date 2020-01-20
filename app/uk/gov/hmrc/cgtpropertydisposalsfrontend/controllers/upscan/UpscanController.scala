@@ -104,16 +104,6 @@ class UpscanController @Inject()(
       }
   }
 
-  def errorRedirect(cgtReference: String): Action[AnyContent] = Action {
-    implicit request: MessagesRequest[AnyContent] =>
-      errorHandler.errorResult(None)
-  }
-
-  def successRedirect(cgtReference: String): Action[AnyContent] = Action {
-    implicit request: MessagesRequest[AnyContent] =>
-      Ok(upscanSuccessPage())
-  }
-
   def callBack(cgtReference: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     request.body
       .validate[UpscanNotifyResponse]
