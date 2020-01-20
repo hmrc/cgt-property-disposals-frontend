@@ -16,24 +16,24 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.audit
 
-import play.api.libs.json.{JsObject, JsString, JsValue, Json, Writes}
+import play.api.libs.json.{JsObject, JsString, Json, Writes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Country, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
 
-final case class AgentVerifierMatchAttempt (
-                                             agentReferenceNumber: AgentReferenceNumber,
-                                             cgtReference: CgtReference,
-                                             attemptsMade: Int,
-                                             maxAttempts: Int,
-                                             attemptedVerifier: Either[Country, Postcode],
-                                             success: Boolean
-                                           )
+final case class AgentVerifierMatchAttempt(
+  agentReferenceNumber: AgentReferenceNumber,
+  cgtReference: CgtReference,
+  attemptsMade: Int,
+  maxAttempts: Int,
+  attemptedVerifier: Either[Country, Postcode],
+  success: Boolean
+)
 
 object AgentVerifierMatchAttempt {
 
-  implicit val verifierWrites: Writes[Either[Country,Postcode]] = Writes(
+  implicit val verifierWrites: Writes[Either[Country, Postcode]] = Writes(
     _.fold(
-      country => JsObject(Map("country" -> Json.toJson(country))),
+      country => JsObject(Map("country"   -> Json.toJson(country))),
       postcode => JsObject(Map("postcode" -> JsString(postcode.value)))
     )
   )
