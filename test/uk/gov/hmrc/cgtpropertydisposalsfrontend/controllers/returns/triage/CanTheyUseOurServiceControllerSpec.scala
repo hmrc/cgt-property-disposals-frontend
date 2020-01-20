@@ -386,6 +386,30 @@ class CanTheyUseOurServiceControllerSpec
       val sessionDataWithRequiredPreviousAnswers =
         SessionData.empty.copy(journeyStatus = Some(subscribedWithRequiredPreviousAnswers))
 
+      "redirect to the who is individual representing page" when {
+
+        "that question has not already answered" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(
+                Right(
+                  Some(
+                    SessionData.empty.copy(
+                      journeyStatus =
+                        Some(sample[Subscribed].copy(individualTriageAnswers = Some(IndividualTriageAnswers.empty)))
+                    )
+                  )
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting())
+        }
+
+      }
+
       "show a form error" when {
 
         def testFormError(submittedData: (String, String)*)(expectedErrorKey: String): Unit = {
@@ -639,6 +663,35 @@ class CanTheyUseOurServiceControllerSpec
         SessionData.empty.copy(journeyStatus = Some(subscribedWithRequiredPreviousAnswers))
 
       val tomorrow = today.plusDays(1L)
+
+      "redirect to the number of properties page" when {
+
+        "that question has not already answered" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(
+                Right(
+                  Some(
+                    SessionData.empty.copy(
+                      journeyStatus = Some(
+                        subscribedWithRequiredPreviousAnswers.copy(
+                          individualTriageAnswers = Some(
+                            requiredPreviousAnswers.copy(numberOfProperties = None)
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.CanTheyUseOurServiceController.howManyProperties())
+        }
+
+      }
 
       "show a form error" when {
 
