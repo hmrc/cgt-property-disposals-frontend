@@ -10,6 +10,6 @@
 # Failing to follow this rule may result in test routes deployed in production.
 
 # Add all the application routes to the prod.routes file
-->         /                          prod.Routes
+->         /                          private_beta.Routes
 GET  /set-return-state      uk.gov.hmrc.cgtpropertydisposalsfrontend.testonly.JourneyStatusController.setReturnState()
 POST /set-return-state      uk.gov.hmrc.cgtpropertydisposalsfrontend.testonly.JourneyStatusController.setReturnStateSubmit()
