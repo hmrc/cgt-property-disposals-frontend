@@ -30,7 +30,8 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{EnrolmentConfig, ErrorHandler}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.EnrolmentConfig._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, RetrievalOps, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, RetrievedUserType}
@@ -86,8 +87,8 @@ class AuthenticatedActionWithRetrievedDataSpec
   val cgtEnrolment = Enrolments(
     Set(
       Enrolment(
-        EnrolmentConfig.Cgt.key,
-        Seq(EnrolmentIdentifier(EnrolmentConfig.Cgt.cgtReferenceIdentifier, "XCGT123456789")),
+        CgtEnrolment.key,
+        Seq(EnrolmentIdentifier(CgtEnrolment.cgtReferenceIdentifier, "XCGT123456789")),
         "Activated",
         None
       )
@@ -146,7 +147,7 @@ class AuthenticatedActionWithRetrievedDataSpec
         val badCgtEnrolment = Enrolments(
           Set(
             Enrolment(
-              EnrolmentConfig.Cgt.key,
+              CgtEnrolment.key,
               Seq(EnrolmentIdentifier("XXXX-XXXX", "XCGT123456789")),
               "Activated",
               None
@@ -315,7 +316,7 @@ class AuthenticatedActionWithRetrievedDataSpec
         }
 
         "a gg cred id and an agent enrolment can be found but no agent reference nubmer can be found" in {
-          val enrolments = Enrolments(Set(Enrolment(EnrolmentConfig.Agents.key)))
+          val enrolments = Enrolments(Set(Enrolment(AgentsEnrolment.key)))
 
           val retrievalsResult = Future successful (
             new ~(ConfidenceLevel.L50, Some(AffinityGroup.Agent)) and
@@ -335,8 +336,8 @@ class AuthenticatedActionWithRetrievedDataSpec
           val enrolments = Enrolments(
             Set(
               Enrolment(
-                EnrolmentConfig.Agents.key,
-                Seq(EnrolmentIdentifier(EnrolmentConfig.Agents.agentReferenceNumberIdentifier, arn.value)),
+                AgentsEnrolment.key,
+                Seq(EnrolmentIdentifier(AgentsEnrolment.agentReferenceNumberIdentifier, arn.value)),
                 ""
               )
             )
@@ -402,7 +403,7 @@ class AuthenticatedActionWithRetrievedDataSpec
       "show an error page" when {
 
         "the organisation has a trust enrolment but a SAUTR cannot be found" in {
-          val trustEnrolment = Enrolment(EnrolmentConfig.Trusts.key)
+          val trustEnrolment = Enrolment(TrustsEnrolment.key)
           val retrievalsResult = Future successful (
             new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation))
               and None and None and None and Enrolments(Set(trustEnrolment)) and Some(ggCredentials)
@@ -425,8 +426,8 @@ class AuthenticatedActionWithRetrievedDataSpec
           val sautr = SAUTR("123456")
           val trustEnrolment =
             Enrolment(
-              EnrolmentConfig.Trusts.key,
-              Seq(EnrolmentIdentifier(EnrolmentConfig.Trusts.sautrIdentifier, sautr.value)),
+              TrustsEnrolment.key,
+              Seq(EnrolmentIdentifier(TrustsEnrolment.sautrIdentifier, sautr.value)),
               "state"
             )
 
@@ -451,8 +452,8 @@ class AuthenticatedActionWithRetrievedDataSpec
         val sautr = SAUTR("123456")
         val trustEnrolment =
           Enrolment(
-            EnrolmentConfig.Trusts.key,
-            Seq(EnrolmentIdentifier(EnrolmentConfig.Trusts.sautrIdentifier, sautr.value)),
+            TrustsEnrolment.key,
+            Seq(EnrolmentIdentifier(TrustsEnrolment.sautrIdentifier, sautr.value)),
             "state"
           )
 

@@ -16,9 +16,13 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors
 
+import akka.stream.scaladsl.Source
+import akka.util.ByteString
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.Matchers
 import play.api.libs.json.Writes
+import play.api.libs.ws.{WSClient, WSRequest, WSResponse}
+import play.api.mvc.MultipartFormData
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
@@ -29,7 +33,26 @@ trait HttpSupport { this: MockFactory with Matchers ⇒
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val mockHttp: HttpClient = mock[HttpClient]
 
+  val mockWsClient: WSClient     = mock[WSClient]
+  @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
+  val mockWsRequest: WSRequest   = mock[WSRequest]
+  @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
+  val mockWsResponse: WSResponse = mock[WSResponse]
+
   private val emptyMap = Map.empty[String, String]
+
+  @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
+  def mockPostMultiPartForm[A](url: String, parts: Source[MultipartFormData.Part[Source[ByteString, _]], _])(
+    response: Option[WSResponse]
+  ): Unit = {
+    (mockWsClient.url(_: String)).expects(url).returning(mockWsRequest)
+    (mockWsRequest
+      .post(_: Source[MultipartFormData.Part[Source[ByteString, _]], _]))
+      .expects(*)
+      .returning(
+        response.fold[Future[WSResponse]](Future.failed(new Exception("Test exception message")))(Future.successful)
+      )
+  }
 
   def mockGet[A](url: String, queryParams: Map[String, String] = emptyMap, headers: Map[String, String] = emptyMap)(
     response: Option[A]

@@ -29,7 +29,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.EnrolmentConfig
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.EnrolmentConfig._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, PostcodeFormValidationTests, SessionSupport}
@@ -111,9 +111,9 @@ class AgentAccessControllerSpec
 
   def mockDelegatedAuthCheck(cgtReference: CgtReference)(result: Future[Unit]): Unit =
     mockAuth(
-      Enrolment(EnrolmentConfig.Cgt.key)
-        .withIdentifier(EnrolmentConfig.Cgt.cgtReferenceIdentifier, cgtReference.value)
-        .withDelegatedAuthRule(EnrolmentConfig.Cgt.delegateAuthRule),
+      Enrolment(CgtEnrolment.key)
+        .withIdentifier(CgtEnrolment.cgtReferenceIdentifier, cgtReference.value)
+        .withDelegatedAuthRule(CgtEnrolment.delegateAuthRule),
       EmptyRetrieval
     )(result)
 

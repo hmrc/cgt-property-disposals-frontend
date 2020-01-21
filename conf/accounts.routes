@@ -1,5 +1,5 @@
 # Account Home
-#GET /account-home                                                               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.AccountController.homepage
+
 GET /signed-out                                                                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.AccountController.signedOut()
 
 # Change address
