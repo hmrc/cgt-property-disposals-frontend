@@ -38,7 +38,8 @@ lazy val microservice = Project(appName, file("."))
     SbtGitVersioning,
     SbtDistributablesPlugin,
     SbtArtifactory,
-    ScalafmtCorePlugin)
+    ScalafmtCorePlugin
+  )
   .settings(addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"))
   .settings(scalaVersion := "2.11.12")
   .settings(
@@ -46,7 +47,7 @@ lazy val microservice = Project(appName, file("."))
     majorVersion := 1,
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test
   )
-  .settings(scalacOptions += "-Ypartial-unification")
+  .settings(scalacOptions ++= Seq("-Ypartial-unification"))
   .settings(publishingSettings: _*)
   .configs(IntegrationTest)
   .settings(integrationTestSettings(): _*)

@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.upscan
 
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import cats.instances.future._
 import com.typesafe.config.ConfigFactory
 import org.scalatest.concurrent.Eventually

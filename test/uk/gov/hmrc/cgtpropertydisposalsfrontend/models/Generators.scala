@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
+import java.time.LocalDate
+
 import org.scalacheck.ScalacheckShapeless._
 import org.scalacheck.{Arbitrary, Gen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, IndividualSupplyingInformation, RegistrationReady}
@@ -31,9 +33,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.Unsuccessf
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscribedUpdateDetails, SubscriptionDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualTriageAnswers, IndividualUserType, NumberOfProperties}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanNotifyResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanServiceResponse.{UpscanNotifyEvent, UpscanResponse}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualTriageAnswers, IndividualUserType}
 
 object Generators
     extends GenUtils
@@ -46,9 +48,9 @@ object Generators
     with NameMatchGen
     with OnboardingDetailsGen
     with EmailGen
-    with UpscanGen
     with VerifierMatchGen
     with UserTypeGen
+    with UpscanGen
     with TriageQuestionsGen {
 
   def sample[A](implicit gen: Gen[A]): A =
@@ -64,6 +66,10 @@ sealed trait GenUtils {
 
   // define our own Arbitrary instance for String to generate more legible strings
   implicit val stringArb: Arbitrary[String] = Arbitrary(Gen.alphaNumStr)
+
+  implicit val localDateArb: Arbitrary[LocalDate] = Arbitrary(
+    Gen.chooseNum(0, Int.MaxValue).map(LocalDate.ofEpochDay(_))
+  )
 
 }
 
@@ -201,5 +207,7 @@ trait TriageQuestionsGen { this: GenUtils =>
   implicit val individualTriageAnswersGen: Gen[IndividualTriageAnswers] = gen[IndividualTriageAnswers]
 
   implicit val individualUserTypeGen: Gen[IndividualUserType] = gen[IndividualUserType]
+
+  implicit val numberOfPropertiesGen: Gen[NumberOfProperties] = gen[NumberOfProperties]
 
 }

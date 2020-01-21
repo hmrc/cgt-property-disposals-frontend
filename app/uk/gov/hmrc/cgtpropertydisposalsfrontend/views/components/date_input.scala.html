@@ -23,9 +23,9 @@
 @(
   fieldId: String,
   label: Html,
-  dayValue: Option[Int],
-  monthValue: Option[Int],
-  yearValue: Option[Int],
+  dayValue: Option[String],
+  monthValue: Option[String],
+  yearValue: Option[String],
   helpText: Option[Html],
   labelAsHeading: Boolean,
   errorKey: Option[String],
@@ -53,7 +53,7 @@
       </span>
     }
     @errorIdWithMessageKey.map { case (id, key) =>
-      @errorInline(id, messages(s"$fieldId.$key"))
+      @errorInline(id, messages(key))
     }
     <div class="form-date">
       <div class="form-group form-group-day">

@@ -16,18 +16,14 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
+import java.time.LocalDate
+
 import play.api.libs.json.{Json, OFormat}
 
-final case class IndividualTriageAnswers(
-  individualUserType: Option[IndividualUserType],
-  numberOfProperties: Option[NumberOfProperties],
-  disposalDate: Option[DisposalDate]
-)
+final case class DisposalDate(value: LocalDate) extends AnyVal
 
-object IndividualTriageAnswers {
+object DisposalDate {
 
-  val empty: IndividualTriageAnswers = IndividualTriageAnswers(None, None, None)
-
-  implicit val format: OFormat[IndividualTriageAnswers] = Json.format
+  implicit val format: OFormat[DisposalDate] = Json.format
 
 }

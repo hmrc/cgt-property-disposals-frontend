@@ -323,7 +323,6 @@ class AuthenticatedActionWithRetrievedDataSpec
 
         inSequence {
           mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
-          mockHasSubscription()(Right(None))
         }
 
         checkIsTechnicalErrorPage(performAction(FakeRequest()))
