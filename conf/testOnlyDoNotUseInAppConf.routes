@@ -11,3 +11,5 @@
 
 # Add all the application routes to the prod.routes file
 ->         /                          prod.Routes
+GET       /capital-gains-tax-uk-property/test-only/set-return-state      uk.gov.hmrc.cgtpropertydisposalsfrontend.testonly.JourneyStatusController.setReturnState()
+POST      /capital-gains-tax-uk-property/test-only/set-return-state      uk.gov.hmrc.cgtpropertydisposalsfrontend.testonly.JourneyStatusController.setReturnStateSubmit()
