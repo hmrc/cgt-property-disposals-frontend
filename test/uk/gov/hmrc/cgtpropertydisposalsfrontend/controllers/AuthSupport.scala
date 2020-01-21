@@ -21,10 +21,10 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, EmptyRetrieval, Retrieval, ~}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{EnrolmentConfig, ErrorHandler}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.EnrolmentConfig._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.AuthenticatedActionWithRetrievedData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.SAUTR
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -101,8 +101,8 @@ trait AuthSupport {
       email,
       Set(
         Enrolment(
-          EnrolmentConfig.Trusts.key,
-          Seq(EnrolmentIdentifier(EnrolmentConfig.Trusts.sautrIdentifier, sautr.value)),
+          TrustsEnrolment.key,
+          Seq(EnrolmentIdentifier(TrustsEnrolment.sautrIdentifier, sautr.value)),
           ""
         )
       ),
@@ -118,8 +118,8 @@ trait AuthSupport {
       None,
       Set(
         Enrolment(
-          EnrolmentConfig.Cgt.key,
-          Seq(EnrolmentIdentifier(EnrolmentConfig.Cgt.cgtReferenceIdentifier, "XCGTP123456789")),
+          CgtEnrolment.key,
+          Seq(EnrolmentIdentifier(CgtEnrolment.cgtReferenceIdentifier, "XCGTP123456789")),
           ""
         )
       ),

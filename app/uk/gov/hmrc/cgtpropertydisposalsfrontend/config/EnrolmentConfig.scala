@@ -18,7 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.config
 
 object EnrolmentConfig {
 
-  object Cgt {
+  object CgtEnrolment {
 
     val key = "HMRC-CGT-PD"
 
@@ -27,7 +27,7 @@ object EnrolmentConfig {
     val delegateAuthRule = "cgt-auth"
   }
 
-  object Trusts {
+  object TrustsEnrolment {
 
     val key = "HMRC-TERS-ORG"
 
@@ -35,7 +35,7 @@ object EnrolmentConfig {
 
   }
 
-  object Agents {
+  object AgentsEnrolment {
 
     val key = "HMRC-AS-AGENT"
 

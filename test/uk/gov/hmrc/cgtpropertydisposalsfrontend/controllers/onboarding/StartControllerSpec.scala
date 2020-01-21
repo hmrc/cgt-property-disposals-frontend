@@ -31,7 +31,7 @@ import uk.gov.hmrc.auth.core.ConfidenceLevel.L50
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.Credentials
 import uk.gov.hmrc.cgtpropertydisposalsfrontend._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.EnrolmentConfig
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.EnrolmentConfig._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.{routes => emailRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{routes => onboardingRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, StartController, agents}
@@ -1372,8 +1372,8 @@ class StartControllerSpec
 
         val cgtReference = sample[CgtReference]
         val cgtEnrolment = Enrolment(
-          EnrolmentConfig.Cgt.key,
-          Seq(EnrolmentIdentifier(EnrolmentConfig.Cgt.cgtReferenceIdentifier, cgtReference.value)),
+          CgtEnrolment.key,
+          Seq(EnrolmentIdentifier(CgtEnrolment.cgtReferenceIdentifier, cgtReference.value)),
           ""
         )
         val subscribedDetails = sample[SubscribedDetails].copy(cgtReference = cgtReference)
@@ -1568,8 +1568,8 @@ class StartControllerSpec
         val arn = sample[AgentReferenceNumber]
 
         val agentsEnrolment = Enrolment(
-          EnrolmentConfig.Agents.key,
-          Seq(EnrolmentIdentifier(EnrolmentConfig.Agents.agentReferenceNumberIdentifier, arn.value)),
+          AgentsEnrolment.key,
+          Seq(EnrolmentIdentifier(AgentsEnrolment.agentReferenceNumberIdentifier, arn.value)),
           ""
         )
 

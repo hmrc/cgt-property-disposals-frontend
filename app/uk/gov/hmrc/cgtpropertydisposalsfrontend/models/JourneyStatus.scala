@@ -69,7 +69,8 @@ object JourneyStatus {
     subscribedDetails: SubscribedDetails,
     ggCredId: GGCredId,
     agentReferenceNumber: Option[AgentReferenceNumber],
-    individualTriageAnswers: Option[IndividualTriageAnswers]) extends JourneyStatus
+    individualTriageAnswers: Option[IndividualTriageAnswers])
+      extends JourneyStatus
 
   final case class AlreadySubscribedWithDifferentGGAccount(ggCredId: GGCredId) extends JourneyStatus
 

@@ -43,7 +43,6 @@ lazy val microservice = Project(appName, file("."))
   .settings(addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"))
   .settings(scalaVersion := "2.11.12")
   .settings(
-    scalafmtOnCompile := true,
     majorVersion := 1,
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test
   )
@@ -55,3 +54,4 @@ lazy val microservice = Project(appName, file("."))
   .settings(wartremoverSettings: _*)
   .settings(scoverageSettings: _*)
   .settings(PlayKeys.playDefaultPort := 7020)
+  .settings(scalafmtOnCompile := true)

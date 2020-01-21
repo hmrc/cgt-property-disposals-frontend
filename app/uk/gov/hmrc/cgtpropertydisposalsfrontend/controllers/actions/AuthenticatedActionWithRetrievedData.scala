@@ -25,7 +25,8 @@ import play.api.mvc._
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{EnrolmentConfig, ErrorHandler}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.EnrolmentConfig._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Individual, NonGovernmentGatewayUser, Organisation}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
@@ -164,9 +165,9 @@ class AuthenticatedActionWithRetrievedData @Inject()(
   private def hasSubscribed[A](enrolments: Enrolments, request: MessagesRequest[A])(
     implicit hc: HeaderCarrier
   ): Future[Either[Result, Option[CgtReference]]] =
-    enrolments.getEnrolment(EnrolmentConfig.Cgt.key) match {
+    enrolments.getEnrolment(CgtEnrolment.key) match {
       case Some(cgtEnrolment) =>
-        cgtEnrolment.getIdentifier(EnrolmentConfig.Cgt.cgtReferenceIdentifier) match {
+        cgtEnrolment.getIdentifier(CgtEnrolment.cgtReferenceIdentifier) match {
           case Some(cgtReference) => Future.successful(Right(Some(CgtReference(cgtReference.value))))
           case None =>
             logger.warn(s"CGT identifier value is missing from the enrolment")
@@ -232,14 +233,14 @@ class AuthenticatedActionWithRetrievedData @Inject()(
   ): Either[Result, AuthenticatedRequestWithRetrievedData[A]] = {
     val maybeArn = for {
       agentEnrolment <- Either.fromOption(
-                         allEnrolments.getEnrolment(EnrolmentConfig.Agents.key),
-                         s"Agent has no ${EnrolmentConfig.Agents.key} enrolment"
+                         allEnrolments.getEnrolment(AgentsEnrolment.key),
+                         s"Agent has no ${AgentsEnrolment.key} enrolment"
                        )
       arn <- Either.fromOption(
               agentEnrolment
-                .getIdentifier(EnrolmentConfig.Agents.agentReferenceNumberIdentifier)
+                .getIdentifier(AgentsEnrolment.agentReferenceNumberIdentifier)
                 .map(id => AgentReferenceNumber(id.value)),
-              s"Agent has ${EnrolmentConfig.Agents.key} enrolment but does not have ${EnrolmentConfig.Agents.agentReferenceNumberIdentifier} identifier"
+              s"Agent has ${AgentsEnrolment.key} enrolment but does not have ${AgentsEnrolment.agentReferenceNumberIdentifier} identifier"
             )
     } yield arn
 
@@ -262,7 +263,7 @@ class AuthenticatedActionWithRetrievedData @Inject()(
     ggCredId: GGCredId
   ): Either[Result, AuthenticatedRequestWithRetrievedData[A]] =
     // work out if it is an organisation or not
-    enrolments.getEnrolment(EnrolmentConfig.Trusts.key) match {
+    enrolments.getEnrolment(TrustsEnrolment.key) match {
       case None =>
         Right(
           AuthenticatedRequestWithRetrievedData(
@@ -274,7 +275,7 @@ class AuthenticatedActionWithRetrievedData @Inject()(
 
       case Some(trustEnrolment) =>
         trustEnrolment
-          .getIdentifier(EnrolmentConfig.Trusts.sautrIdentifier)
+          .getIdentifier(TrustsEnrolment.sautrIdentifier)
           .fold[Either[Result, AuthenticatedRequestWithRetrievedData[A]]] {
             logger.warn(
               s"Could not find SAUTR identifier for user with trust enrolment $trustEnrolment. " +

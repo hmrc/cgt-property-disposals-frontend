@@ -27,7 +27,8 @@ import play.api.data.Forms.{mapping, of}
 import play.api.http.Writeable
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, Enrolment, InsufficientEnrolments}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{EnrolmentConfig, ErrorHandler, ViewConfig}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.EnrolmentConfig._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents.AgentAccessController._
@@ -234,9 +235,9 @@ class AgentAccessController @Inject()(
   )(implicit hc: HeaderCarrier, request: RequestWithSessionData[_]): Future[Result] =
     authorisedFunctions
       .authorised(
-        Enrolment(EnrolmentConfig.Cgt.key)
-          .withIdentifier(EnrolmentConfig.Cgt.cgtReferenceIdentifier, cgtReference.value)
-          .withDelegatedAuthRule(EnrolmentConfig.Cgt.delegateAuthRule)
+        Enrolment(CgtEnrolment.key)
+          .withIdentifier(CgtEnrolment.cgtReferenceIdentifier, cgtReference.value)
+          .withDelegatedAuthRule(CgtEnrolment.delegateAuthRule)
       ) {
         agentAccessAuditService.sendEvent(
           "agentAccessAttempt",
