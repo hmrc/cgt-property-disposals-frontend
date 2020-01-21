@@ -19,15 +19,16 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.name
 import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
-import play.api.mvc.{Call, MessagesControllerComponents, Result}
+import play.api.mvc.{Call, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.RegistrationContactNameChangedEvent
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.OnboardingAuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -39,7 +40,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class RegistrationChangeIndividualNameController @Inject()(
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
-  val auditService: OnboardingAuditService,
+  val auditService: AuditService,
   cc: MessagesControllerComponents,
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
@@ -60,21 +61,27 @@ class RegistrationChangeIndividualNameController @Inject()(
     }
 
   override def updateName(journey: RegistrationReady, name: IndividualName)(
-    implicit hc: HeaderCarrier
+    implicit hc: HeaderCarrier,
+    request: Request[_]
   ): EitherT[Future, Error, RegistrationReady] = {
-    auditService.sendRegistrationContactNameChangedEvent(
-      journey.registrationDetails.name,
-      name,
-      routes.RegistrationChangeIndividualNameController.enterIndividualNameSubmit().url
+    auditService.sendEvent(
+      "registrationContactNameChanged",
+      RegistrationContactNameChangedEvent(
+        s"${journey.registrationDetails.name.firstName} ${journey.registrationDetails.name.lastName}",
+        s"${name.firstName} ${name.lastName}"
+      ),
+      "registration-contact-name-changed"
     )
     EitherT.rightT[Future, Error](journey.copy(registrationDetails = journey.registrationDetails.copy(name = name)))
   }
 
   override def name(journey: RegistrationReady): Option[IndividualName] = Some(journey.registrationDetails.name)
 
-  override protected lazy val backLinkCall: Call = controllers.onboarding.routes.RegistrationController.checkYourAnswers()
+  override protected lazy val backLinkCall: Call =
+    controllers.onboarding.routes.RegistrationController.checkYourAnswers()
   override protected lazy val enterNameSubmitCall: Call =
     routes.RegistrationChangeIndividualNameController.enterIndividualNameSubmit()
-  override protected lazy val continueCall: Call = controllers.onboarding.routes.RegistrationController.checkYourAnswers()
+  override protected lazy val continueCall: Call =
+    controllers.onboarding.routes.RegistrationController.checkYourAnswers()
 
 }

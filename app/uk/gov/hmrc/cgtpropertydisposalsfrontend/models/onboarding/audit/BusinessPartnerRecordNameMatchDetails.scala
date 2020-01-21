@@ -17,16 +17,25 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit
 
 import play.api.libs.json.{Json, OFormat, OWrites, Reads}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.IndividualNameMatchDetails
 
 sealed trait BusinessPartnerRecordNameMatchDetails extends Product with Serializable
 
 object BusinessPartnerRecordNameMatchDetails {
 
   final case class IndividualNameWithSaUtrAuditDetails(firstName: String, lastName: String, sautr: String)
-    extends BusinessPartnerRecordNameMatchDetails
+      extends BusinessPartnerRecordNameMatchDetails
 
   final case class TrustNameWithTrnAuditDetails(trustName: String, trn: String)
-    extends BusinessPartnerRecordNameMatchDetails
+      extends BusinessPartnerRecordNameMatchDetails
+
+  def fromNameMatchDetails(nameMatchDetails: NameMatchDetails): BusinessPartnerRecordNameMatchDetails =
+    nameMatchDetails match {
+      case IndividualNameMatchDetails(name, sautr) =>
+        IndividualNameWithSaUtrAuditDetails(name.firstName, name.lastName, sautr.value)
+      case NameMatchDetails.TrustNameMatchDetails(name, trn) => TrustNameWithTrnAuditDetails(name.value, trn.value)
+    }
 
   implicit val format: OFormat[BusinessPartnerRecordNameMatchDetails] = {
     val individualFormat: OFormat[IndividualNameWithSaUtrAuditDetails] =

@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.audit
 
-import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Country, Postcode}
+import play.api.libs.json.{Json, Writes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
 
-final case class UnsuccessfulVerifierAttempts(
-  unsuccessfulAttempts: Int,
-  lastDetailsTried: Either[Country, Postcode]
+final case class AgentAccessAttempt(
+  agentReferenceNumber: AgentReferenceNumber,
+  cgtReference: CgtReference,
+  success: Boolean
 )
 
-object UnsuccessfulVerifierAttempts {
+object AgentAccessAttempt {
 
-  implicit val format: OFormat[UnsuccessfulVerifierAttempts] = Json.format
+  implicit val writes: Writes[AgentAccessAttempt] = Json.writes[AgentAccessAttempt]
 
 }

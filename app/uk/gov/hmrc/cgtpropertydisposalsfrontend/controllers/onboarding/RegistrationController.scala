@@ -35,10 +35,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.AddressSource
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, SapNumber}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, ContactNameSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{RegistrationRequestEvent, SubscriptionRequestEvent, WrongGGAccountEvent}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.EmailSource
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{OnboardingAuditService, SubscriptionService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
@@ -50,7 +52,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class RegistrationController @Inject()(
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
-  val auditService: OnboardingAuditService,
+  val auditService: AuditService,
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
   subscriptionService: SubscriptionService,
@@ -206,13 +208,23 @@ class RegistrationController @Inject()(
     request.sessionData.flatMap(_.journeyStatus) match {
       case Some(RegistrationStatus.RegistrationReady(registrationDetails, ggCredId)) =>
         val result = for {
-        registrationResponse <- {
-          auditService.sendRegistrationRequestEvent(registrationDetails, routes.RegistrationController.checkYourAnswersSubmit().url)
-          subscriptionService.registerWithoutId(registrationDetails)
-        }
+          registrationResponse <- {
+            auditService.sendEvent(
+              "registrationRequest",
+              RegistrationRequestEvent.fromRegistrationDetails(registrationDetails),
+              "registration-request"
+            )
+            subscriptionService.registerWithoutId(registrationDetails)
+          }
           subscriptionResponse <- {
             val subscriptionDetails = toSubscriptionDetails(registrationDetails, registrationResponse.sapNumber)
-            auditService.sendSubscriptionRequestEvent(subscriptionDetails, routes.RegistrationController.checkYourAnswersSubmit().url)
+
+            auditService
+              .sendEvent(
+                "subscriptionRequest",
+                SubscriptionRequestEvent.fromSubscriptionDetails(subscriptionDetails),
+                "subscription-request"
+              )
             subscriptionService.subscribe(subscriptionDetails)
           }
           _ <- EitherT(subscriptionResponse match {
@@ -234,6 +246,7 @@ class RegistrationController @Inject()(
                               registeredWithId = false
                             ),
                             ggCredId,
+                            None,
                             None
                           )
                         )
@@ -257,8 +270,11 @@ class RegistrationController @Inject()(
             }
             case AlreadySubscribed =>
               logger.info("Response to subscription request indicated that the user has already subscribed to cgt")
-              auditService
-                .sendAccessWithWrongGGAccountEvent(ggCredId, routes.RegistrationController.checkYourAnswersSubmit().url)
+              auditService.sendEvent(
+                "accessWithWrongGGAccount",
+                WrongGGAccountEvent(None, ggCredId.value),
+                "access-with-wrong-gg-account"
+              )
               Redirect(routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
           }
         )
@@ -268,7 +284,10 @@ class RegistrationController @Inject()(
     }
   }
 
-  private def toSubscriptionDetails(registrationDetails: RegistrationDetails, sapNumber: SapNumber): SubscriptionDetails =
+  private def toSubscriptionDetails(
+    registrationDetails: RegistrationDetails,
+    sapNumber: SapNumber
+  ): SubscriptionDetails =
     SubscriptionDetails(
       Right(registrationDetails.name),
       registrationDetails.emailAddress,

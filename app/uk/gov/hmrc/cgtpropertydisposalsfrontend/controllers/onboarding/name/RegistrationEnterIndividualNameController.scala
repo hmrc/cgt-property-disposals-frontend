@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.name
 import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
-import play.api.mvc.{Call, MessagesControllerComponents, Result}
+import play.api.mvc.{Call, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
@@ -60,7 +60,8 @@ class RegistrationEnterIndividualNameController @Inject()(
     }
 
   override def updateName(journey: IndividualSupplyingInformation, name: IndividualName)(
-    implicit hc: HeaderCarrier
+    implicit hc: HeaderCarrier,
+    request: Request[_]
   ): EitherT[Future, Error, IndividualSupplyingInformation] =
     EitherT.rightT[Future, Error](journey.copy(name = Some(name)))
 

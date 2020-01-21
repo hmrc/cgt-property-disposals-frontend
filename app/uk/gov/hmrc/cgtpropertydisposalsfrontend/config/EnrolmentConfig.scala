@@ -14,20 +14,33 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.config
 
-import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
+object EnrolmentConfig {
 
-final case class Address(
-  line1: String,
-  line2: Option[String],
-  line3: Option[String],
-  line4: Option[String],
-  postcode: Option[String],
-  country: Country
-)
+  object CgtEnrolment {
 
-object Address {
-  implicit val formatAddress: OFormat[Address] = Json.format[Address]
+    val key = "HMRC-CGT-PD"
+
+    val cgtReferenceIdentifier = "CGTPDRef"
+
+    val delegateAuthRule = "cgt-auth"
+  }
+
+  object TrustsEnrolment {
+
+    val key = "HMRC-TERS-ORG"
+
+    val sautrIdentifier = "SAUTR"
+
+  }
+
+  object AgentsEnrolment {
+
+    val key = "HMRC-AS-AGENT"
+
+    val agentReferenceNumberIdentifier = "AGENTREFERENCENUMBER"
+
+  }
+
 }

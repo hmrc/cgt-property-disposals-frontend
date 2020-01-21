@@ -27,8 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.IndividualSupplyingInformation
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.OnboardingAuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, UKAddressLookupService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -43,7 +42,7 @@ class RegistrationEnterAddressController @Inject()(
   val sessionStore: SessionStore,
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
-  val auditService: OnboardingAuditService,
+  val auditService: AuditService,
   cc: MessagesControllerComponents,
   val enterPostcodePage: views.html.address.enter_postcode,
   val selectAddressPage: views.html.address.select_address,
@@ -71,7 +70,7 @@ class RegistrationEnterAddressController @Inject()(
     }
 
   def updateAddress(journey: IndividualSupplyingInformation, address: Address, isManuallyEnteredAddress: Boolean)(
-    implicit hc: HeaderCarrier
+    implicit hc: HeaderCarrier, request: Request[_]
   ): EitherT[Future, Error, IndividualSupplyingInformation] =
     EitherT.pure[Future, Error](journey.copy(address = Some(address)))
 

@@ -21,19 +21,18 @@ import java.util.UUID
 import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
-import play.api.mvc.{Call, MessagesControllerComponents, Result}
+import play.api.mvc.{Call, MessagesControllerComponents, Request, Result}
 import shapeless.{Lens, lens}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{EmailController, SessionUpdates}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{EmailController, SessionUpdates}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionMissingData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionMissingData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.OnboardingAuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, EmailVerificationService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -49,7 +48,7 @@ class SubscriptionEnterEmailController @Inject()(
   val emailVerificationService: EmailVerificationService,
   val uuidGenerator: UUIDGenerator,
   val errorHandler: ErrorHandler,
-  val auditService: OnboardingAuditService,
+  val auditService: AuditService,
   cc: MessagesControllerComponents,
   val enterEmailPage: views.html.onboarding.email.enter_email,
   val checkYourInboxPage: views.html.onboarding.email.check_your_inbox,
@@ -86,11 +85,13 @@ class SubscriptionEnterEmailController @Inject()(
     EitherT.rightT[Future, Error](subscriptionMissingDataEmailLens.set(journey)(Some(email)))
 
   override def auditEmailVerifiedEvent(journey: SubscriptionMissingData, email: Email)(
-    implicit hc: HeaderCarrier
+    implicit hc: HeaderCarrier,
+    request: Request[_]
   ): Unit = ()
 
   override def auditEmailChangeAttempt(journey: SubscriptionMissingData, email: Email)(
-    implicit hc: HeaderCarrier
+    implicit hc: HeaderCarrier,
+    request: Request[_]
   ): Unit = ()
 
   override def name(journeyStatus: SubscriptionMissingData): ContactName =

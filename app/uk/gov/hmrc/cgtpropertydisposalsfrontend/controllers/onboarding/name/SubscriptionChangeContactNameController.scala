@@ -20,16 +20,16 @@ import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
-import play.api.mvc.{Call, MessagesControllerComponents, Result}
+import play.api.mvc.{Call, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.{routes => nameRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ContactNameController, SessionUpdates}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, ContactNameSource}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.SubscriptionContactNameChangedEvent
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.OnboardingAuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -42,7 +42,7 @@ class SubscriptionChangeContactNameController @Inject()(
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   cc: MessagesControllerComponents,
-  val auditService: OnboardingAuditService,
+  auditService: AuditService,
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
   val enterContactNamePage: views.html.onboarding.contactname.contact_name
@@ -64,14 +64,17 @@ class SubscriptionChangeContactNameController @Inject()(
     }
 
   override def updateContactName(journey: SubscriptionReady, contactName: ContactName)(
-    implicit hc: HeaderCarrier
+    implicit hc: HeaderCarrier,
+    request: Request[_]
   ): EitherT[Future, Error, SubscriptionReady] = {
-    auditService.sendSubscriptionContactNameChangedEvent(
-      journey.subscriptionDetails.contactName.value,
-      contactName.value,
-      nameRoutes.SubscribedChangeContactNameController.enterContactNameSubmit().url
+    auditService.sendEvent(
+      "subscriptionContactNameChanged",
+      SubscriptionContactNameChangedEvent(
+        journey.subscriptionDetails.contactName.value,
+        contactName.value
+      ),
+      "subscription-contact-name-changed"
     )
-
     val source =
       if (journey.subscriptionDetails.contactName === contactName) journey.subscriptionDetails.contactNameSource
       else ContactNameSource.ManuallyEntered

@@ -21,14 +21,13 @@ import cats.instances.future._
 import cats.instances.option._
 import cats.instances.string._
 import cats.syntax.eq._
-import play.api.mvc.{Action, AnyContent, Call, Result}
+import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{RequestWithSessionData, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.OnboardingAuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, UKAddressLookupService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -43,7 +42,7 @@ trait AddressController[J <: JourneyStatus] {
   val errorHandler: ErrorHandler
   val ukAddressLookupService: UKAddressLookupService
   val sessionStore: SessionStore
-  val auditService: OnboardingAuditService
+  val auditService: AuditService
   val enterPostcodePage: views.html.address.enter_postcode
   val selectAddressPage: views.html.address.select_address
   val addressDisplay: views.html.components.address_display
@@ -57,7 +56,8 @@ trait AddressController[J <: JourneyStatus] {
   def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, J)]
 
   def updateAddress(journey: J, address: Address, isManuallyEnteredAddress: Boolean)(
-    implicit hc: HeaderCarrier
+    implicit hc: HeaderCarrier,
+    request: Request[_]
   ): EitherT[Future, Error, J]
 
   protected val backLinkCall: Call
@@ -316,8 +316,7 @@ trait AddressController[J <: JourneyStatus] {
           } else {
             EitherT[Future, Error, Unit](
               updateSession(sessionStore, request)(
-                _.copy(journeyStatus = Some(journeyWithUpdatedAddress)
-                )
+                _.copy(journeyStatus = Some(journeyWithUpdatedAddress))
               )
             )
           }

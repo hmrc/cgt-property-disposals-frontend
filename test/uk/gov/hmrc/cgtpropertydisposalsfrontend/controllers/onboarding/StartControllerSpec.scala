@@ -23,6 +23,7 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
+import play.api.libs.json.Writes
 import play.api.mvc.{AnyContent, Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -30,7 +31,7 @@ import uk.gov.hmrc.auth.core.ConfidenceLevel.L50
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.Credentials
 import uk.gov.hmrc.cgtpropertydisposalsfrontend._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.CgtEnrolment
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.EnrolmentConfig._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email.{routes => emailRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{routes => onboardingRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, StartController, agents}
@@ -42,19 +43,20 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.RetrievedUserType.Individ
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, AddressSource, Postcode}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR, SapNumber}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, ContactNameSource, IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.HandOffTIvEvent
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, BusinessPartnerRecordResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{NeedMoreDetailsDetails, SubscribedDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPartnerRecordService, OnboardingAuditService, SubscriptionService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPartnerRecordService, SubscriptionService}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
-import scala.reflect.ClassTag
 
 class StartControllerSpec
     extends ControllerSpec
@@ -66,13 +68,15 @@ class StartControllerSpec
 
   val mockBprService = mock[BusinessPartnerRecordService]
 
+  val mockAuditService = mock[AuditService]
+
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
       bind[BusinessPartnerRecordService].toInstance(mockBprService),
       bind[SubscriptionService].toInstance(mockSubscriptionService),
-      bind[OnboardingAuditService].toInstance(mockSubscriptionAuditService)
+      bind[AuditService].toInstance(mockAuditService)
     )
 
   override lazy val additionalConfig = ivConfig(useRelativeUrls = false)
@@ -102,9 +106,14 @@ class StartControllerSpec
       .returning(EitherT(Future.successful(response)))
 
   def mockSendHandOffToIvAuditEvent(ggCredId: GGCredId, ivRedirectUrl: String)(response: Unit) =
-    (mockSubscriptionAuditService
-      .sendHandOffToIvEvent(_: GGCredId, _: String)(_: HeaderCarrier, _: ExecutionContext))
-      .expects(ggCredId, ivRedirectUrl, *, *)
+    (mockAuditService
+      .sendEvent(_: String, _: HandOffTIvEvent, _: String)(
+        _: ExecutionContext,
+        _: HeaderCarrier,
+        _: Writes[HandOffTIvEvent],
+        _: Request[_]
+      ))
+      .expects("handOffToIv", HandOffTIvEvent(ggCredId.value, ivRedirectUrl), "handoff-to-iv", *, *, *, *)
       .returning(response)
 
   val nino                 = NINO("AB123456C")
@@ -519,7 +528,9 @@ class StartControllerSpec
 
             "the email address is still missing" in {
               val sessionData =
-                SessionData.empty.copy(journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail, None, ggCredId, None)))
+                SessionData.empty.copy(
+                  journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail, None, ggCredId, None))
+                )
 
               inSequence {
                 mockAuthWithAllRetrievals(
@@ -710,7 +721,9 @@ class StartControllerSpec
 
             "the session data indicates there is subscription data missing and there is now enough data to proceed" in {
               val session =
-                SessionData.empty.copy(journeyStatus = Some(SubscriptionMissingData(bpr, Some(emailAddress), ggCredId, None)))
+                SessionData.empty.copy(
+                  journeyStatus = Some(SubscriptionMissingData(bpr, Some(emailAddress), ggCredId, None))
+                )
 
               val updatedSession =
                 SessionData.empty.copy(
@@ -748,6 +761,7 @@ class StartControllerSpec
                   registeredWithId = true
                 ),
                 ggCredId,
+                None,
                 None
               )
               val session =
@@ -919,7 +933,10 @@ class StartControllerSpec
 
             "the user has CL<200 and the call to get BPR succeeds but it cannot be written to session" in {
               val session =
-                SessionData.empty.copy(                  userType      = Some(UserType.Individual),journeyStatus = Some(SubscriptionReady(individualSubscriptionDetails, ggCredId)))
+                SessionData.empty.copy(
+                  userType      = Some(UserType.Individual),
+                  journeyStatus = Some(SubscriptionReady(individualSubscriptionDetails, ggCredId))
+                )
 
               inSequence {
                 mockAuthWithAllRetrievals(
@@ -1013,8 +1030,9 @@ class StartControllerSpec
               val bprWithNoEmail = bpr.copy(emailAddress = None)
               val sessionData =
                 SessionData.empty.copy(
-                  userType = Some(UserType.Individual),
-                  journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail, None, ggCredId, None)))
+                  userType      = Some(UserType.Individual),
+                  journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail, None, ggCredId, None))
+                )
 
               inSequence {
                 mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, None, retrievedGGCredId)
@@ -1062,9 +1080,11 @@ class StartControllerSpec
                   registeredWithId = false
                 ),
                 ggCredId,
+                None,
                 None
               )
-              val session = SessionData.empty.copy(                  userType      = Some(UserType.Organisation),journeyStatus = Some(subscriptionStatus))
+              val session =
+                SessionData.empty.copy(userType = Some(UserType.Organisation), journeyStatus = Some(subscriptionStatus))
 
               inSequence {
                 mockAuthWithAllTrustRetrievals(sautr, None, retrievedGGCredId)
@@ -1113,7 +1133,7 @@ class StartControllerSpec
                 )
                 mockStoreSession(
                   SessionData.empty.copy(
-                    userType = Some(UserType.Organisation),
+                    userType      = Some(UserType.Organisation),
                     journeyStatus = Some(SubscriptionReady(trustSubscriptionDetails, ggCredId))
                   )
                 )(Future.successful(Left(Error(""))))
@@ -1149,7 +1169,7 @@ class StartControllerSpec
                 )
                 mockStoreSession(
                   SessionData.empty.copy(
-                    userType = Some(UserType.Organisation),
+                    userType      = Some(UserType.Organisation),
                     journeyStatus = Some(SubscriptionReady(trustSubscriptionDetails, ggCredId))
                   )
                 )(Future.successful(Right(())))
@@ -1188,8 +1208,10 @@ class StartControllerSpec
 
             "there are subscription details in session" in {
               val session =
-                SessionData.empty.copy(                    userType = Some(UserType.Organisation),
-                  journeyStatus = Some(SubscriptionReady(trustSubscriptionDetails, ggCredId)))
+                SessionData.empty.copy(
+                  userType      = Some(UserType.Organisation),
+                  journeyStatus = Some(SubscriptionReady(trustSubscriptionDetails, ggCredId))
+                )
 
               inSequence {
                 mockAuthWithAllTrustRetrievals(sautr, None, retrievedGGCredId)
@@ -1327,7 +1349,9 @@ class StartControllerSpec
               "is still missing" in {
               val bprWithNoEmail = bpr.copy(emailAddress = None)
               val sessionData =
-                SessionData.empty.copy(journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail, None, ggCredId, None)))
+                SessionData.empty.copy(
+                  journeyStatus = Some(SubscriptionMissingData(bprWithNoEmail, None, ggCredId, None))
+                )
 
               inSequence {
                 mockAuthWithAllTrustRetrievals(sautr, None, retrievedGGCredId)
@@ -1346,13 +1370,17 @@ class StartControllerSpec
 
       "the user has a CGT enrolment" when {
 
-        val cgtReference      = sample[CgtReference]
-        val cgtEnrolment      = Enrolment(CgtEnrolment.enrolmentKey, Seq(EnrolmentIdentifier(CgtEnrolment.enrolmentIdentifier, cgtReference.value)), "")
+        val cgtReference = sample[CgtReference]
+        val cgtEnrolment = Enrolment(
+          CgtEnrolment.key,
+          Seq(EnrolmentIdentifier(CgtEnrolment.cgtReferenceIdentifier, cgtReference.value)),
+          ""
+        )
         val subscribedDetails = sample[SubscribedDetails].copy(cgtReference = cgtReference)
 
         val sessionWithSubscribed = SessionData.empty.copy(
           userType      = Some(UserType.Individual),
-          journeyStatus = Some(Subscribed(subscribedDetails, ggCredId, None))
+          journeyStatus = Some(Subscribed(subscribedDetails, ggCredId, None, None))
         )
 
         "the session data indicates they have subscribed" must {
@@ -1537,6 +1565,14 @@ class StartControllerSpec
 
       "handling agents" must {
 
+        val arn = sample[AgentReferenceNumber]
+
+        val agentsEnrolment = Enrolment(
+          AgentsEnrolment.key,
+          Seq(EnrolmentIdentifier(AgentsEnrolment.agentReferenceNumberIdentifier, arn.value)),
+          ""
+        )
+
         "redirect to the enter client's cgt reference page" when {
 
           "the session indicates that they are entering a client's details" in {
@@ -1547,7 +1583,7 @@ class StartControllerSpec
                 None,
                 None,
                 None,
-                Set.empty,
+                Set(agentsEnrolment),
                 Some(retrievedGGCredId)
               )
               mockGetSession(
@@ -1556,7 +1592,7 @@ class StartControllerSpec
                     Some(
                       SessionData.empty.copy(
                         userType      = Some(UserType.Agent),
-                        journeyStatus = Some(AgentStatus.AgentSupplyingClientDetails(ggCredId, None))
+                        journeyStatus = Some(AgentStatus.AgentSupplyingClientDetails(arn, ggCredId, None))
                       )
                     )
                   )
@@ -1578,14 +1614,14 @@ class StartControllerSpec
                 None,
                 None,
                 None,
-                Set.empty,
+                Set(agentsEnrolment),
                 Some(retrievedGGCredId)
               )
               mockGetSession(Future.successful(Right(None)))
               mockStoreSession(
                 SessionData.empty.copy(
                   userType      = Some(UserType.Agent),
-                  journeyStatus = Some(AgentStatus.AgentSupplyingClientDetails(ggCredId, None))
+                  journeyStatus = Some(AgentStatus.AgentSupplyingClientDetails(arn, ggCredId, None))
                 )
               )(Future.successful(Right(())))
             }
@@ -1600,7 +1636,7 @@ class StartControllerSpec
 
         "show an error page" when {
 
-          "there is initially no session data and the journey status cannot be upadted successfully" in {
+          "there is initially no session data and the journey status cannot be updated successfully" in {
             inSequence {
               mockAuthWithAllRetrievals(
                 ConfidenceLevel.L50,
@@ -1608,14 +1644,14 @@ class StartControllerSpec
                 None,
                 None,
                 None,
-                Set.empty,
+                Set(agentsEnrolment),
                 Some(retrievedGGCredId)
               )
               mockGetSession(Future.successful(Right(None)))
               mockStoreSession(
                 SessionData.empty.copy(
                   userType      = Some(UserType.Agent),
-                  journeyStatus = Some(AgentStatus.AgentSupplyingClientDetails(ggCredId, None))
+                  journeyStatus = Some(AgentStatus.AgentSupplyingClientDetails(arn, ggCredId, None))
                 )
               )(Future.successful(Left(Error(""))))
             }
@@ -1799,7 +1835,7 @@ class StartControllerSpec
         }
 
         val result = controller.keepAlive()(FakeRequest())
-        status(result) shouldBe OK
+        status(result)          shouldBe OK
         contentAsString(result) shouldBe ""
       }
 
@@ -1809,7 +1845,7 @@ class StartControllerSpec
 
       "display the page" in {
         val result = controller.timedOut()(FakeRequest())
-        status(result) shouldBe OK
+        status(result)          shouldBe OK
         contentAsString(result) should include(message("timed-out.title"))
       }
 

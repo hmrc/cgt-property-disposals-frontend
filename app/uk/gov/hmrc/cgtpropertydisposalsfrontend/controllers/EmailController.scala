@@ -24,19 +24,17 @@ import cats.instances.uuid._
 import cats.syntax.eq._
 import play.api.data.Form
 import play.api.data.Forms.{mapping, of}
-import play.api.mvc.{Action, AnyContent, Call, Result}
+import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.EmailController.SubmitEmailDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{RequestWithSessionData, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionDetail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailToBeVerified}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService.EmailVerificationResponse.{EmailAlreadyVerified, EmailVerificationRequested}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.OnboardingAuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, EmailVerificationService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -54,7 +52,7 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
   val uuidGenerator: UUIDGenerator
   val sessionStore: SessionStore
   val emailVerificationService: EmailVerificationService
-  val auditService: OnboardingAuditService
+  val auditService: AuditService
   val errorHandler: ErrorHandler
   val isAmendJourney: Boolean
   val isSubscribedJourney: Boolean
@@ -74,11 +72,13 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
   ): Either[Result, (SessionData, VerificationCompleteJourney)]
 
   def auditEmailVerifiedEvent(journey: Journey, email: Email)(
-    implicit hc: HeaderCarrier
+    implicit hc: HeaderCarrier,
+    request: Request[_]
   ): Unit
 
   def auditEmailChangeAttempt(journey: Journey, email: Email)(
-    implicit hc: HeaderCarrier
+    implicit hc: HeaderCarrier,
+    request: Request[_]
   ): Unit
 
   def name(journeyStatus: Journey): ContactName

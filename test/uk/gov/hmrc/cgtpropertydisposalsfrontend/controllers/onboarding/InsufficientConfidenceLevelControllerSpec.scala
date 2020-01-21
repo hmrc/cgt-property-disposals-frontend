@@ -23,7 +23,7 @@ import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.libs.json.{Reads, Writes}
-import play.api.mvc.Result
+import play.api.mvc.{Request, Result}
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -100,10 +100,11 @@ class InsufficientConfidenceLevelControllerSpec
         )(
           _: Writes[IndividualNameMatchDetails],
           _: ExecutionContext,
-          _: HeaderCarrier
+          _: HeaderCarrier,
+          _: Request[_]
         )
       )
-      .expects(IndividualNameMatchDetails(name, sautr), ggCredId, previousUnsuccessfulNameMatchAttempts, *, *, *)
+      .expects(IndividualNameMatchDetails(name, sautr), ggCredId, previousUnsuccessfulNameMatchAttempts, *, *, *, *)
       .returning(EitherT.fromEither[Future](result))
 
   def session(subscriptionStatus: SubscriptionStatus) =

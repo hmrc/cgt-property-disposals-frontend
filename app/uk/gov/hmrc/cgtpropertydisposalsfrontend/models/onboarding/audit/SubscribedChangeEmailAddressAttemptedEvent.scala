@@ -21,7 +21,9 @@ import play.api.libs.json.{Json, OFormat}
 final case class SubscribedChangeEmailAddressAttemptedEvent(
   oldEmailAdddress: String,
   newEmailAddress: String,
-  cgtReferenceId: String
+  cgtReferenceId: String,
+  isAnAgent: Boolean,
+  agentReferenceNumber: Option[String]
 )
 
 object SubscribedChangeEmailAddressAttemptedEvent{

@@ -231,7 +231,7 @@ class CanTheyUseOurServiceController @Inject()(
     f: (SessionData, Subscribed, IndividualTriageAnswers) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((s: SessionData, r @ Subscribed(_, _, Some(i)))) =>
+      case Some((s: SessionData, r @ Subscribed(_, _, _, Some(i)))) =>
         f(s, r, i)
       case _ =>
         Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController.start())

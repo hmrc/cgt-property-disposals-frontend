@@ -34,12 +34,14 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.AddressSource
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, ContactNameSource, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionDetails.MissingData
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.HandOffTIvEvent
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest.{IndividualBusinessPartnerRecordRequest, TrustBusinessPartnerRecordRequest}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{NeedMoreDetailsDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPartnerRecordService, OnboardingAuditService, SubscriptionService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPartnerRecordService, SubscriptionService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -58,7 +60,7 @@ class StartController @Inject()(
   val sessionDataActionWithRetrievedData: SessionDataActionWithRetrievedData,
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
-  val auditService: OnboardingAuditService,
+  val auditService: AuditService,
   val config: Configuration,
   subscriptionService: SubscriptionService,
   weNeedMoreDetailsPage: views.html.onboarding.we_need_more_details,
@@ -160,9 +162,9 @@ class StartController @Inject()(
 
 
   private def handleRetrievedUserType(retrievedUserType: RetrievedUserType)(implicit request: RequestWithSessionDataAndRetrievedData[AnyContent]): Future[Result] = retrievedUserType match {
-    case RetrievedUserType.Agent(ggCredId) =>
+    case RetrievedUserType.Agent(ggCredId, arn) =>
       updateSession(sessionStore, request)(_.copy(
-        journeyStatus = Some(AgentStatus.AgentSupplyingClientDetails(ggCredId, None)),
+        journeyStatus = Some(AgentStatus.AgentSupplyingClientDetails(arn, ggCredId, None)),
         userType = Some(UserType.Agent)
       )).map{
         case Left(e) =>
@@ -222,7 +224,7 @@ class StartController @Inject()(
             updateSession(sessionStore, request)(
               _.copy(
                 userType      = request.authenticatedRequest.userType,
-                journeyStatus = Some(Subscribed(subscribedDetails, ggCredId, None))
+                journeyStatus = Some(Subscribed(subscribedDetails, ggCredId, None, None))
               )
             )
           )
@@ -308,7 +310,7 @@ class StartController @Inject()(
         }
 
       case Some(_) =>
-        auditService.sendHandOffToIvEvent(ggCredId, request.uri)
+        auditService.sendEvent("handOffToIv", HandOffTIvEvent(ggCredId.value, request.uri), "handoff-to-iv")
         redirectToIv
     }
 
