@@ -33,21 +33,24 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.Unsuccessf
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscribedUpdateDetails, SubscriptionDetails}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, IndividualTriageAnswers, IndividualUserType, NumberOfProperties}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualTriageAnswers, IndividualUserType, NumberOfProperties}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanNotifyResponse
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanServiceResponse.{UpscanNotifyEvent, UpscanResponse}
 
 object Generators
     extends GenUtils
-      with SessionDataGen
-      with BusinessPartnerRecordGen
-      with IdGen
-      with NameGen
-      with JourneyStatusGen
-      with AddressGen
-      with NameMatchGen
-      with OnboardingDetailsGen
-      with EmailGen
-      with VerifierMatchGen
-      with UserTypeGen
+    with SessionDataGen
+    with BusinessPartnerRecordGen
+    with IdGen
+    with NameGen
+    with JourneyStatusGen
+    with AddressGen
+    with NameMatchGen
+    with OnboardingDetailsGen
+    with EmailGen
+    with VerifierMatchGen
+    with UserTypeGen
+    with UpscanGen
     with TriageQuestionsGen {
 
   def sample[A](implicit gen: Gen[A]): A =
@@ -64,7 +67,9 @@ sealed trait GenUtils {
   // define our own Arbitrary instance for String to generate more legible strings
   implicit val stringArb: Arbitrary[String] = Arbitrary(Gen.alphaNumStr)
 
-  implicit val localDateArb: Arbitrary[LocalDate] = Arbitrary(Gen.chooseNum(0, Int.MaxValue).map(LocalDate.ofEpochDay(_)))
+  implicit val localDateArb: Arbitrary[LocalDate] = Arbitrary(
+    Gen.chooseNum(0, Int.MaxValue).map(LocalDate.ofEpochDay(_))
+  )
 
 }
 
@@ -176,6 +181,16 @@ trait EmailGen { this: GenUtils =>
   implicit val emailSourceGen: Gen[EmailSource] = gen[EmailSource]
 }
 
+trait UpscanGen { this: GenUtils =>
+
+  implicit val upscanGen: Gen[UpscanNotifyEvent] = gen[UpscanNotifyEvent]
+
+  implicit val upscanNotifyResponse: Gen[UpscanNotifyResponse] = gen[UpscanNotifyResponse]
+
+  implicit val upscanResponse: Gen[UpscanResponse] = gen[UpscanResponse]
+
+}
+
 trait VerifierMatchGen { this: GenUtils =>
 
   implicit val unsuccessfulVerifierMatchAttemptsGen: Gen[UnsuccessfulVerifierAttempts] =
@@ -197,8 +212,4 @@ trait TriageQuestionsGen { this: GenUtils =>
 
   implicit val numberOfPropertiesGen: Gen[NumberOfProperties] = gen[NumberOfProperties]
 
- // implicit val disposalDateGen: Gen[Option[DisposalDate]] = Gen.option(localDateGen.map(DisposalDate(_)))
-
 }
-
-

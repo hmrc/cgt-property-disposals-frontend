@@ -121,7 +121,8 @@ object SessionStoreSpec {
   val config = Configuration(
     ConfigFactory.parseString(
       """
-        |session-store.expiry-time = 30minutes
+        | upscan-store.expiry-time = 2 days,
+        | session-store.expiry-time = 7 days
         |""".stripMargin
     )
   )

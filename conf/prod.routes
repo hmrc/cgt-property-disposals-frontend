@@ -2,15 +2,20 @@
 GET /capital-gains-tax-uk-property/account-home                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.HomePageController.homepage()
 GET /capital-gains-tax-uk-property/start-new-return                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.HomePageController.startNewReturn()
 
-->         /capital-gains-tax-uk-property   app.Routes
-->         /capital-gains-tax-uk-property   accounts.Routes
-->         /capital-gains-tax-uk-property   onboarding.Routes
-->         /capital-gains-tax-uk-property   returns.Routes
+# UPSCAN
+GET  /capital-gains-tax-uk-property/upscan-initiate                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.upscan.UpscanController.upscan()
+POST /capital-gains-tax-uk-property/upload                                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.upscan.UpscanController.upload()
+POST /capital-gains-tax-uk-property/upscan-call-back/cgt-reference/:id      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.upscan.UpscanController.callBack(id : String)
+
+->   /capital-gains-tax-uk-property                                         app.Routes
+->   /capital-gains-tax-uk-property                                         accounts.Routes
+->   /capital-gains-tax-uk-property                                         onboarding.Routes
+->   /capital-gains-tax-uk-property                                         returns.Routes
 
 ## TODO copy into private_beta.routes once whole agent access journey is ready
-->         /capital-gains-tax-uk-property   agents.Routes
+->   /capital-gains-tax-uk-property                                         agents.Routes
 
-->         /                                health.Routes
-->     	   /template                        template.Routes
+->   /                                                                      health.Routes
+->   /template                                                              template.Routes
 
-GET        /admin/metrics                   com.kenshoo.play.metrics.MetricsController.metrics
+GET  /admin/metrics                                                         com.kenshoo.play.metrics.MetricsController.metrics
