@@ -59,7 +59,7 @@ class AuthenticatedActionWithRetrievedDataSpec
 
   def mockHasSubscription()(response: Either[Error, Option[CgtReference]]) =
     (mockSubscriptionService
-      .hasSubscription()(_: HeaderCarrier))
+      .hasFailedCgtEnrolment()(_: HeaderCarrier))
       .expects(*)
       .returning(EitherT(Future.successful(response)))
 

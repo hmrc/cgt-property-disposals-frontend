@@ -254,7 +254,7 @@ class RegistrationController @Inject()(
                   )
                 case AlreadySubscribed =>
                   updateSession(sessionStore, request)(
-                    _.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount(ggCredId)))
+                    _.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount(ggCredId, None)))
                   )
               })
         } yield subscriptionResponse

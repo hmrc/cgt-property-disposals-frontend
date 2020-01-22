@@ -707,7 +707,7 @@ class RegistrationControllerSpec
         "the subscription response indicates that the user has already subscribed" in {
           val sessionWithAlreadySubscribed =
             SessionData.empty.copy(
-              journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount(registrationReady.ggCredId))
+              journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount(registrationReady.ggCredId, None))
             )
 
           inSequence {

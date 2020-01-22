@@ -23,7 +23,7 @@ import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.BuildSubscriptionDataError
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.IvBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionMissingData
@@ -33,8 +33,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.AddressSource
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, ContactNameSource, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.NeedMoreDetailsDetails.AffinityGroup
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionDetails.MissingData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.HandOffTIvEvent
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{HandOffTIvEvent, WrongGGAccountEvent}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest.{IndividualBusinessPartnerRecordRequest, TrustBusinessPartnerRecordRequest}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
@@ -44,14 +45,14 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPartnerRecordService, SubscriptionService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class StartController @Inject()(
+class StartController @Inject() (
   bprService: BusinessPartnerRecordService,
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
@@ -120,12 +121,13 @@ class StartController @Inject()(
     Ok(timedOutPage())
   }
 
-
-  private def handleSessionJourneyStatus(journeyStatus: JourneyStatus)(implicit request: RequestWithSessionDataAndRetrievedData[AnyContent]): Future[Result] = journeyStatus match {
+  private def handleSessionJourneyStatus(
+    journeyStatus: JourneyStatus
+  )(implicit request: RequestWithSessionDataAndRetrievedData[AnyContent]): Future[Result] = journeyStatus match {
     case _: Subscribed =>
       Redirect(controllers.accounts.homepage.routes.HomePageController.homepage())
 
-    case AlreadySubscribedWithDifferentGGAccount(_) =>
+    case AlreadySubscribedWithDifferentGGAccount(_, _) =>
       Redirect(onboarding.routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
 
     case _: SubscriptionStatus.SubscriptionReady =>
@@ -160,13 +162,16 @@ class StartController @Inject()(
       Redirect(agents.routes.AgentAccessController.enterClientsCgtRef())
   }
 
-
-  private def handleRetrievedUserType(retrievedUserType: RetrievedUserType)(implicit request: RequestWithSessionDataAndRetrievedData[AnyContent]): Future[Result] = retrievedUserType match {
+  private def handleRetrievedUserType(
+    retrievedUserType: RetrievedUserType
+  )(implicit request: RequestWithSessionDataAndRetrievedData[AnyContent]): Future[Result] = retrievedUserType match {
     case RetrievedUserType.Agent(ggCredId, arn) =>
-      updateSession(sessionStore, request)(_.copy(
-        journeyStatus = Some(AgentStatus.AgentSupplyingClientDetails(arn, ggCredId, None)),
-        userType = Some(UserType.Agent)
-      )).map{
+      updateSession(sessionStore, request)(
+        _.copy(
+          journeyStatus = Some(AgentStatus.AgentSupplyingClientDetails(arn, ggCredId, None)),
+          userType      = Some(UserType.Agent)
+        )
+      ).map {
         case Left(e) =>
           logger.warn("Could not update session", e)
           errorHandler.errorResult(Some(UserType.Agent))
@@ -183,10 +188,10 @@ class StartController @Inject()(
       handleInsufficientConfidenceLevel(maybeNino, maybeSautr, ggEmail, ggCredId)
 
     case i: RetrievedUserType.Individual =>
-      buildIndividualSubscriptionData(i, i.email, i.ggCredId)
+      buildIndividualSubscriptionData(i)
 
     case t: RetrievedUserType.Trust =>
-      buildTrustSubscriptionData(t, t.email, t.ggCredId)
+      buildTrustSubscriptionData(t)
 
     case RetrievedUserType.OrganisationUnregisteredTrust(_, ggCredId) =>
       handleNonTrustOrganisation(ggCredId, None)
@@ -194,8 +199,6 @@ class StartController @Inject()(
     case u: RetrievedUserType.NonGovernmentGatewayRetrievedUser =>
       handleNonGovernmentGatewayUser(u)
   }
-
-
 
   private def handleNonGovernmentGatewayUser(
     nonGovernmentGatewayUser: NonGovernmentGatewayRetrievedUser
@@ -281,24 +284,23 @@ class StartController @Inject()(
       case None =>
         maybeSautr match {
           case Some(sautr) =>
-            buildIndividualSubscriptionData(Individual(Left(sautr), ggEmail, ggCredId), ggEmail, ggCredId)
+            buildIndividualSubscriptionData(Individual(Left(sautr), ggEmail, ggCredId))
 
           case None =>
             val subscriptionStatus =
               SubscriptionStatus.TryingToGetIndividualsFootprint(None, None, ggEmail, ggCredId)
 
-            updateSession(sessionStore, request)(
-              s =>
-                s.copy(
-                  userType      = request.authenticatedRequest.userType,
-                  journeyStatus = Some(subscriptionStatus),
-                  needMoreDetailsDetails = Some(
-                    NeedMoreDetailsDetails(
-                      onboarding.routes.InsufficientConfidenceLevelController.doYouHaveNINO().url,
-                      NeedMoreDetailsDetails.AffinityGroup.Individual
-                    )
+            updateSession(sessionStore, request)(s =>
+              s.copy(
+                userType      = request.authenticatedRequest.userType,
+                journeyStatus = Some(subscriptionStatus),
+                needMoreDetailsDetails = Some(
+                  NeedMoreDetailsDetails(
+                    onboarding.routes.InsufficientConfidenceLevelController.doYouHaveNINO().url,
+                    NeedMoreDetailsDetails.AffinityGroup.Individual
                   )
                 )
+              )
             ).map {
               case Left(e) =>
                 logger.warn("Could not update session with insufficient confidence level", e)
@@ -315,9 +317,7 @@ class StartController @Inject()(
     }
 
   private def buildTrustSubscriptionData(
-    trust: Trust,
-    ggEmail: Option[Email],
-    ggCredId: GGCredId
+    trust: Trust
   )(implicit hc: HeaderCarrier, request: RequestWithSessionDataAndRetrievedData[_]): Future[Result] = {
     val result =
       for {
@@ -326,17 +326,16 @@ class StartController @Inject()(
         bprWithTrustName <- EitherT.fromEither[Future](
                              Either
                                .fromOption(bprResponse.businessPartnerRecord, Error("Could not find BPR for trust"))
-                               .flatMap(
-                                 bpr =>
-                                   bpr.name.fold[Either[Error, (BusinessPartnerRecord, TrustName)]](
-                                     trustName => Right((bpr, trustName)),
-                                     _ =>
-                                       Left(
-                                         Error(
-                                           "Found individual name but expected trust name in business partner record"
-                                         )
+                               .flatMap(bpr =>
+                                 bpr.name.fold[Either[Error, (BusinessPartnerRecord, TrustName)]](
+                                   trustName => Right((bpr, trustName)),
+                                   _ =>
+                                     Left(
+                                       Error(
+                                         "Found individual name but expected trust name in business partner record"
                                        )
-                                   )
+                                     )
+                                 )
                                )
                            )
         maybeSubscriptionDetails <- {
@@ -344,10 +343,10 @@ class StartController @Inject()(
             bprWithTrustName._1.emailAddress
               .map(_ -> EmailSource.BusinessPartnerRecord)
               .orElse(trust.email.map(_ -> EmailSource.GovernmentGateway))
-              .fold[Either[MissingData.Email.type, SubscriptionDetails]](
-                Left(SubscriptionDetails.MissingData.Email)
+              .fold[Either[BuildSubscriptionDataError, SubscriptionDetails]](
+                Left(BuildSubscriptionDataError.DataMissing(bprWithTrustName._1))
               ) { emailWithSource =>
-                {
+                bprResponse.cgtReference.fold[Either[BuildSubscriptionDataError, SubscriptionDetails]](
                   Right(
                     SubscriptionDetails(
                       Left(bprWithTrustName._2),
@@ -360,34 +359,11 @@ class StartController @Inject()(
                       ContactNameSource.DerivedFromBusinessPartnerRecord
                     )
                   )
-                }
+                )(cgtReference => Left(BuildSubscriptionDataError.AlreadySubscribedToCGT(cgtReference)))
               }
           )
         }
-        _ <- EitherT(
-              maybeSubscriptionDetails.fold(
-                _ =>
-                  updateSession(sessionStore, request)(
-                    _.copy(
-                      userType = request.authenticatedRequest.userType,
-                      journeyStatus =
-                        Some(SubscriptionStatus.SubscriptionMissingData(bprWithTrustName._1, None, ggCredId, ggEmail)),
-                      needMoreDetailsDetails = Some(
-                        NeedMoreDetailsDetails(
-                          onboarding.email.routes.SubscriptionEnterEmailController.enterEmail().url,
-                          NeedMoreDetailsDetails.AffinityGroup.Organisation
-                        )
-                      )
-                    )
-                  ),
-                subscriptionDetails =>
-                  updateSession(sessionStore, request)(
-                    _.copy(
-                      journeyStatus = Some(SubscriptionStatus.SubscriptionReady(subscriptionDetails, ggCredId))
-                    )
-                  )
-              )
-            )
+        _ <- updateSession(maybeSubscriptionDetails, trust.email, trust.ggCredId, AffinityGroup.Organisation)
       } yield maybeSubscriptionDetails
 
     result.fold(
@@ -395,7 +371,17 @@ class StartController @Inject()(
         logger.warn(s"Could not build subscription data for trust with SAUTR ${trust.sautr}", e)
         errorHandler.errorResult(request.authenticatedRequest.userType)
       }, {
-        case Left(MissingData.Email) => Redirect(routes.StartController.weNeedMoreDetails())
+        case Left(BuildSubscriptionDataError.DataMissing(_)) =>
+          Redirect(routes.StartController.weNeedMoreDetails())
+
+        case Left(BuildSubscriptionDataError.AlreadySubscribedToCGT(cgtReference)) =>
+          auditService.sendEvent(
+            "accessWithWrongGGAccount",
+            WrongGGAccountEvent(Some(cgtReference.value), trust.ggCredId.value),
+            "access-with-wrong-gg-account"
+          )
+          Redirect(onboarding.routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
+
         case Right(_)                => Redirect(onboarding.routes.SubscriptionController.checkYourDetails())
       }
     )
@@ -422,7 +408,7 @@ class StartController @Inject()(
         }
     )
 
-  private def buildIndividualSubscriptionData(individual: Individual, ggEmail: Option[Email], ggCredId: GGCredId)(
+  private def buildIndividualSubscriptionData(individual: Individual)(
     implicit
     hc: HeaderCarrier,
     request: RequestWithSessionDataAndRetrievedData[_]
@@ -432,31 +418,17 @@ class StartController @Inject()(
       bpr <- EitherT.fromEither[Future](
               Either.fromOption(bprResponse.businessPartnerRecord, Error("Could not find BPR for individual"))
             )
-      maybeSubscriptionDetails <- EitherT.pure(SubscriptionDetails(bpr, individual.email, None))
-      _ <- EitherT(
-            maybeSubscriptionDetails.fold[Future[Either[Error, Unit]]](
-              _ =>
-                updateSession(sessionStore, request)(
-                  _.copy(
-                    userType      = request.authenticatedRequest.userType,
-                    journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bpr, None, ggCredId, ggEmail)),
-                    needMoreDetailsDetails = Some(
-                      NeedMoreDetailsDetails(
-                        onboarding.email.routes.SubscriptionEnterEmailController.enterEmail().url,
-                        NeedMoreDetailsDetails.AffinityGroup.Individual
-                      )
-                    )
-                  )
-                ),
-              subscriptionDetails =>
-                updateSession(sessionStore, request)(
-                  _.copy(
-                    userType      = request.authenticatedRequest.userType,
-                    journeyStatus = Some(SubscriptionStatus.SubscriptionReady(subscriptionDetails, ggCredId))
-                  )
-                )
-            )
+      maybeSubscriptionDetails <- EitherT.pure(
+        bprResponse.cgtReference
+          .fold[Either[BuildSubscriptionDataError, SubscriptionDetails]](
+            SubscriptionDetails(bpr, individual.email, None)
+              .leftMap(_ => BuildSubscriptionDataError.DataMissing(bpr))
+          )(
+            cgtReference =>
+              Left(BuildSubscriptionDataError.AlreadySubscribedToCGT(cgtReference))
           )
+      )
+      _ <- updateSession(maybeSubscriptionDetails, individual.email, individual.ggCredId, AffinityGroup.Individual)
     } yield maybeSubscriptionDetails
 
     result.fold(
@@ -464,18 +436,63 @@ class StartController @Inject()(
         logger.warn("Error while getting subscription details", e)
         errorHandler.errorResult(request.authenticatedRequest.userType)
       }, {
-        case Left(missingData) =>
-          logger.info(
-            s"Could not find the following data for subscription details: ${missingData.toList.mkString(",")}"
+        case Left(BuildSubscriptionDataError.DataMissing(_)) =>
+          Redirect(routes.StartController.weNeedMoreDetails())
+
+        case Left(BuildSubscriptionDataError.AlreadySubscribedToCGT(cgtReference)) =>
+          auditService.sendEvent(
+            "accessWithWrongGGAccount",
+            WrongGGAccountEvent(Some(cgtReference.value), individual.ggCredId.value),
+            "access-with-wrong-gg-account"
           )
-          missingData.head match {
-            case MissingData.Email => Redirect(routes.StartController.weNeedMoreDetails())
-          }
+          Redirect(onboarding.routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
 
         case Right(_) =>
           Redirect(onboarding.routes.SubscriptionController.checkYourDetails())
       }
     )
+  }
+
+  private def updateSession(
+    x: Either[BuildSubscriptionDataError, SubscriptionDetails],
+    ggEmail: Option[Email],
+    ggCredId: GGCredId,
+    affinityGroup: AffinityGroup
+  )(implicit request: RequestWithSessionDataAndRetrievedData[_]): EitherT[Future, Error, Unit] =
+    EitherT[Future, Error, Unit](
+      x.fold(
+        {
+          case BuildSubscriptionDataError.DataMissing(bpr) =>
+            updateSession(sessionStore, request)(
+              _.copy(
+                journeyStatus          = Some(SubscriptionStatus.SubscriptionMissingData(bpr, None, ggCredId, ggEmail)),
+                needMoreDetailsDetails = Some(NeedMoreDetailsDetails(routes.StartController.start().url, affinityGroup))
+              )
+            )
+          case BuildSubscriptionDataError.AlreadySubscribedToCGT(cgtReference) =>
+            updateSession(sessionStore, request)(
+              _.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount(ggCredId, Some(cgtReference))))
+            )
+        },
+        subscriptionDetails =>
+          updateSession(sessionStore, request)(
+            _.copy(journeyStatus = Some(SubscriptionStatus.SubscriptionReady(subscriptionDetails, ggCredId)))
+          )
+      )
+    )
+
+}
+
+object StartController {
+
+  sealed trait BuildSubscriptionDataError extends Product with Serializable
+
+  object BuildSubscriptionDataError {
+
+    final case class AlreadySubscribedToCGT(cgtReference: CgtReference) extends BuildSubscriptionDataError
+
+    final case class DataMissing(bpr: BusinessPartnerRecord) extends BuildSubscriptionDataError
+
   }
 
 }
