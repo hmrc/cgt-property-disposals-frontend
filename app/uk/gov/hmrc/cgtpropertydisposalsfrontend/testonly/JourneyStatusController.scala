@@ -142,7 +142,8 @@ object JourneyStatusController {
       "disposal-date"        -> of(optionalDateFormatter)
     ) {
       case (individualUserType, numberOfProperties, disposalDate) =>
-        IndividualTriageAnswers(individualUserType, numberOfProperties, disposalDate.map(DisposalDate(_)))
+        // TODO: fix
+        IndividualTriageAnswers(individualUserType, numberOfProperties, None, None, None, disposalDate.map(DisposalDate(_)))
     } { i =>
       Some((i.individualUserType, i.numberOfProperties, i.disposalDate.map(_.value)))
     }

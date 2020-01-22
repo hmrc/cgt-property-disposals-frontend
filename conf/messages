@@ -481,6 +481,30 @@ numberOfProperties.more-than-one=2 or more
 numberOfProperties.error.invalid=Select how many properties you want to include in this return
 numberOfProperties.error.required=Select how many properties you want to include in this return
 
+disposalMethod.title=How did you sell or dispose of the property?
+disposalMethod.sold=Sold it
+disposalMethod.gifted=Gave it away
+disposalMethod.error.required=Select if you sold it or gave it away 
+disposalMethod.error.invalid=Select if you sold it or gave it away 
+
+wereYouAUKResident.title=Were you a UK resident when you ‘exchanged’ contracts when selling the property?
+wereYouAUKResident.helpText=You ‘exchanged’ contracts when you swapped signed contracts with the buyer. It’s when the buyer paid the deposit
+wereYouAUKResident.link=<a href="{0}">Work out your residence status (opens in a new window)</a>.
+wereYouAUKResident.error.required=Select yes if you were a UK resident when you ‘exchanged’ contracts
+wereYouAUKResident.error.boolean=Select yes if you were a UK resident when you ‘exchanged’ contracts
+
+didYouDisposeOfResidentialProperty.title=Did you sell or dispose of a ‘residential’ property?
+didYouDisposeOfResidentialProperty.helpText=‘Residential’ property includes houses, flats, or other dwellings, including their gardens and grounds
+didYouDisposeOfResidentialProperty.details.summary=How to work out if a property is residential
+didYouDisposeOfResidentialProperty.details.p1=Residential property is:
+didYouDisposeOfResidentialProperty.details.l1=a building where someone lives or could live, like a house, flat or other type of dwelling
+didYouDisposeOfResidentialProperty.details.l2=a building that is being built or changed so it can be used as a place where someone could live
+didYouDisposeOfResidentialProperty.details.l3=land that’s part of a garden or grounds of a building that’s used as a place where someone lives, or could live
+didYouDisposeOfResidentialProperty.details.link=<a href="{0}">Read a definition of residential property (opens in a new window)</a>.
+
+didYouDisposeOfResidentialProperty.error.required=Select yes if you sold or disposed of a ‘residential’ property
+didYouDisposeOfResidentialProperty.error.boolean=Select yes if you sold or disposed of a ‘residential’ property
+
 disposalDate.title=What date did you exchange contracts when selling or transferring the property?
 disposalDate.helpText=This is when the buyer and seller swap signed contracts. It’s the date the buyer pays a deposit and called the ‘disposal’ date, for example, 25 4 2020
 disposalDate.error.required=Enter a contract exchange date
@@ -495,3 +519,4 @@ disposalDate-year.error.invalid=Enter a real contract exchange date
 disposalDate-month.error.monthAndYearRequired=Contract exchange date must include a month and a year
 disposalDate-day.error.dayAndYearRequired=Contract exchange date must include a day and a year
 disposalDate-day.error.dayAndMonthRequired=Contract exchange date must include a day and a month
+

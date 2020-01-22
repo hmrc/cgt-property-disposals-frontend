@@ -1,0 +1,77 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+
+@this(
+        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+        radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group,
+        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+        yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no,
+        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
+)
+
+
+@(form: Form[Boolean])(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+
+@key = @{"didYouDisposeOfResidentialProperty"}
+@title = @{messages("didYouDisposeOfResidentialProperty.title")}
+@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+
+
+@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
+
+    @backLinkComponent(controllers.returns.triage.routes.CanTheyUseOurServiceController.wereYouAUKResident())
+
+    @if(hasErrors) {
+        @errorSummary(form)
+    }
+
+    @formWrapper(controllers.returns.triage.routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialPropertySubmit(), 'novalidate -> "novalidate") {
+        @yesNo(
+            fieldId = key,
+            label = pageHeading(title, Some(messages("triage.caption"))),
+            labelAsHeading = true,
+            errorKey = form.error(key).map(e => e.message),
+            hasErrors = hasErrors,
+            selected = form.value,
+            helpText = Some(Html(messages("didYouDisposeOfResidentialProperty.helpText")))
+        )
+
+        @details(messages("didYouDisposeOfResidentialProperty.details.summary"),
+          Html(s"""|
+                   |<p>${messages("didYouDisposeOfResidentialProperty.details.p1")}</p>
+                   |  <ul class="list-bullet">
+                   |     <li>${messages("didYouDisposeOfResidentialProperty.details.l1")}</li>
+                   |     <li>${messages("didYouDisposeOfResidentialProperty.details.l2")}</li>
+                   |     <li>${messages("didYouDisposeOfResidentialProperty.details.l3")}</li>
+                   |   </ul>
+                   |<p>${messages("didYouDisposeOfResidentialProperty.details.link", viewConfig.residentialPropertyDefinitionUrl)}</p>
+                   |""".stripMargin
+          )
+        )
+
+        @submitButton(messages("button.continue"))
+    }
+
+}
+
