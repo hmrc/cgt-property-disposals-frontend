@@ -28,7 +28,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, SAUTR, TRN}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, SAUTR, TRN}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.BusinessPartnerRecordNameMatchDetails.{IndividualNameWithSaUtrAuditDetails, TrustNameWithTrnAuditDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{BusinessPartnerRecordNameMatchAttemptEvent, BusinessPartnerRecordNameMatchDetails}
@@ -283,7 +283,7 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
             )(())
 
             mockGetBpr(individualNameMatchDetails.sautr, individualNameMatchDetails.name)(
-              Right(BusinessPartnerRecordResponse(None))
+              Right(BusinessPartnerRecordResponse(None, None))
             )
 
             mockStoreNumberOfUnsccessfulAttempts(
@@ -338,7 +338,7 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
               )
             )(())
             mockGetBpr(individualNameMatchDetails.sautr, individualNameMatchDetails.name)(
-              Right(BusinessPartnerRecordResponse(None))
+              Right(BusinessPartnerRecordResponse(None, None))
             )
             mockStoreNumberOfUnsccessfulAttempts(
               ggCredId,
@@ -375,7 +375,7 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
             )(())
 
             mockGetBpr(individualNameMatchDetails.sautr, individualNameMatchDetails.name)(
-              Right(BusinessPartnerRecordResponse(None))
+              Right(BusinessPartnerRecordResponse(None, None))
             )
 
             mockStoreNumberOfUnsccessfulAttempts(
@@ -439,7 +439,7 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
               )
             )(())
             mockGetBpr(individualNameMatchDetails.sautr, individualNameMatchDetails.name)(
-              Right(BusinessPartnerRecordResponse(Some(bpr)))
+              Right(BusinessPartnerRecordResponse(Some(bpr), None))
             )
           }
 
@@ -449,12 +449,13 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
             None
           )
 
-          await(result.value) shouldBe Right(bpr)
+          await(result.value) shouldBe Right(bpr -> None)
         }
 
         "the name match succeeded and a BPR was found for a trust" in {
           val bpr                   = sample[BusinessPartnerRecord]
           val trustNameMatchDetails = sample[TrustNameMatchDetails]
+          val cgtReference          = sample[CgtReference]
 
           inSequence {
             mockSendBprNameMatchAttemptEvent(
@@ -466,7 +467,7 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
               )
             )(())
             mockGetBpr(trustNameMatchDetails.trn, trustNameMatchDetails.name)(
-              Right(BusinessPartnerRecordResponse(Some(bpr)))
+              Right(BusinessPartnerRecordResponse(Some(bpr), Some(cgtReference)))
             )
           }
 
@@ -476,7 +477,7 @@ class BusinessPartnerRecordNameMatchRetryServiceImplSpec extends WordSpec with M
             None
           )
 
-          await(result.value) shouldBe Right(bpr)
+          await(result.value) shouldBe Right(bpr -> Some(cgtReference))
         }
 
       }

@@ -27,16 +27,17 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.DeterminingIfOrganisationIsTrust
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Organisation
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, TRN}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, SubscriptionStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, TRN}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.TrustName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.WrongGGAccountEvent
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.TrustNameMatchDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, NameMatchError, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, JourneyStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.BusinessPartnerRecordNameMatchRetryService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
@@ -47,11 +48,12 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class DeterminingIfOrganisationIsTrustController @Inject()(
+class DeterminingIfOrganisationIsTrustController @Inject() (
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   errorHandler: ErrorHandler,
   sessionStore: SessionStore,
+  auditService: AuditService,
   bprNameMatchService: BusinessPartnerRecordNameMatchRetryService,
   metrics: Metrics,
   doYouWantToReportForATrustPage: views.html.onboarding.subscription.do_you_want_to_report_for_a_trust,
@@ -92,23 +94,24 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
           .bindFromRequest()
           .fold(
             formWithError =>
-              BadRequest(doYouWantToReportForATrustPage(formWithError, controllers.routes.StartController.weNeedMoreDetails())), {
-              isReportingForTrust =>
-                updateSession(sessionStore, request)(
-                  _.copy(
-                    journeyStatus = Some(
-                      DeterminingIfOrganisationIsTrust(
-                        determiningIfOrganisationIsTrust.ggCredId,
-                        determiningIfOrganisationIsTrust.ggEmail,
-                        Some(isReportingForTrust),
-                        None
-                      )
+              BadRequest(
+                doYouWantToReportForATrustPage(formWithError, controllers.routes.StartController.weNeedMoreDetails())
+              ), { isReportingForTrust =>
+              updateSession(sessionStore, request)(
+                _.copy(
+                  journeyStatus = Some(
+                    DeterminingIfOrganisationIsTrust(
+                      determiningIfOrganisationIsTrust.ggCredId,
+                      determiningIfOrganisationIsTrust.ggEmail,
+                      Some(isReportingForTrust),
+                      None
                     )
                   )
-                ).map {
-                  case Left(e) =>
-                    logger.warn("Could not update session data with reporting for trust answer", e)
-                    errorHandler.errorResult()
+                )
+              ).map {
+                case Left(e) =>
+                  logger.warn("Could not update session data with reporting for trust answer", e)
+                  errorHandler.errorResult()
 
                 case Right(_) =>
                   if (isReportingForTrust)
@@ -212,10 +215,14 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
               unsuccessfulAttempts <- bprNameMatchService.getNumberOfUnsuccessfulAttempts[TrustNameMatchDetails](
                                        determiningIfOrganisationIsTrust.ggCredId
                                      )
-              bpr <- {
+              bprWithCgtReference <- {
                 enterTrnAndNameForm
                   .bindFromRequest()
-                  .fold[EitherT[Future, NameMatchError[TrustNameMatchDetails], BusinessPartnerRecord]](
+                  .fold[EitherT[
+                    Future,
+                    NameMatchError[TrustNameMatchDetails],
+                    (BusinessPartnerRecord, Option[CgtReference])
+                  ]](
                     e => EitherT.fromEither[Future](Left(NameMatchError.ValidationError(e))), { trustNameMatchDetails =>
                       attemptNameMatchAndUpdateSession(
                         trustNameMatchDetails,
@@ -226,12 +233,23 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
                     }
                   )
               }
-            } yield bpr
+            } yield bprWithCgtReference
 
           result
             .fold(
-              handleNameMatchError,
-              _ => Redirect(controllers.routes.StartController.start())
+              handleNameMatchError, {
+                case (_, maybeCgtReference) =>
+                  Redirect(
+                    maybeCgtReference.fold(controllers.routes.StartController.start()) { cgtReference =>
+                      auditService.sendEvent(
+                        "accessWithWrongGGAccount",
+                        WrongGGAccountEvent(Some(cgtReference.value), determiningIfOrganisationIsTrust.ggCredId.value),
+                        "access-with-wrong-gg-account"
+                      )
+                      onboarding.routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount()
+                    }
+                  )
+              }
             )
 
         case _ => Redirect(controllers.routes.StartController.start())
@@ -268,28 +286,38 @@ class DeterminingIfOrganisationIsTrustController @Inject()(
   )(
     implicit hc: HeaderCarrier,
     request: RequestWithSessionData[_]
-  ): EitherT[Future, NameMatchError[TrustNameMatchDetails], BusinessPartnerRecord] =
+  ): EitherT[Future, NameMatchError[TrustNameMatchDetails], (BusinessPartnerRecord, Option[CgtReference])] =
     for {
-      bpr <- bprNameMatchService
-              .attemptBusinessPartnerRecordNameMatch(
-                trustNameMatchDetails,
-                ggCredId,
-                previousUnsuccessfulAttempt
-              )
-              .subflatMap(
-                bpr =>
-                  if (bpr.name.isRight) {
-                    Left(NameMatchError.BackendError(Error("Found BPR for individual but expected one for a trust")))
-                  } else {
-                    Right(bpr)
-                  }
-              )
+      bprWithCgtReference <- bprNameMatchService
+                              .attemptBusinessPartnerRecordNameMatch(
+                                trustNameMatchDetails,
+                                ggCredId,
+                                previousUnsuccessfulAttempt
+                              )
+                              .subflatMap {
+                                case (bpr, cgtReference) =>
+                                  if (bpr.name.isRight) {
+                                    Left(
+                                      NameMatchError
+                                        .BackendError(Error("Found BPR for individual but expected one for a trust"))
+                                    )
+                                  } else {
+                                    Right(bpr -> cgtReference)
+                                  }
+                              }
       _ <- EitherT(
             updateSession(sessionStore, request)(
-              _.copy(journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bpr, None, ggCredId, ggEmail)))
+              _.copy(journeyStatus = Some(
+                bprWithCgtReference._2.fold[JourneyStatus](
+                  SubscriptionStatus.SubscriptionMissingData(bprWithCgtReference._1, None, ggCredId, ggEmail)
+                ) { cgtRef =>
+                  AlreadySubscribedWithDifferentGGAccount(ggCredId, Some(cgtRef))
+                }
+              )
+              )
             )
           ).leftMap[NameMatchError[TrustNameMatchDetails]](NameMatchError.BackendError)
-    } yield bpr
+    } yield bprWithCgtReference
 
   private def handleNameMatchError(
     nameMatchError: NameMatchError[TrustNameMatchDetails]

@@ -95,7 +95,7 @@ class SubscriptionController @Inject()(
                 case AlreadySubscribed =>
                   updateSession(sessionStore, request)(
                     _.copy(
-                      journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount(request.subscriptionReady.ggCredId))
+                      journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount(request.subscriptionReady.ggCredId, None))
                     )
                   )
               }
@@ -139,8 +139,8 @@ class SubscriptionController @Inject()(
   def alreadySubscribedWithDifferentGGAccount(): Action[AnyContent] = authenticatedActionWithSessionData {
     implicit request =>
       request.sessionData.flatMap(_.journeyStatus) match {
-        case Some(AlreadySubscribedWithDifferentGGAccount(_)) => Ok(alreadySubscribedWithDifferentGGAccountPage())
-        case _                                                => Redirect(controllers.routes.StartController.start())
+        case Some(AlreadySubscribedWithDifferentGGAccount(_,_)) => Ok(alreadySubscribedWithDifferentGGAccountPage())
+        case _                                                  => Redirect(controllers.routes.StartController.start())
       }
   }
 

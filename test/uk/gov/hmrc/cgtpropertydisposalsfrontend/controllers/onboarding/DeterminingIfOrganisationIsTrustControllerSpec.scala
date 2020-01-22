@@ -32,8 +32,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{routes => onboardingRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.AlreadySubscribedWithDifferentGGAccount
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, TRN}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, TRN}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.NameMatchError.TooManyUnsuccessfulAttempts
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.TrustNameMatchDetails
@@ -93,7 +94,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
     name: TrustName,
     ggCredId: GGCredId,
     previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts[TrustNameMatchDetails]]
-  )(result: Either[NameMatchError[TrustNameMatchDetails], BusinessPartnerRecord]) =
+  )(result: Either[NameMatchError[TrustNameMatchDetails], (BusinessPartnerRecord, Option[CgtReference])]) =
     (
       mockBprNameMatchService
         .attemptBusinessPartnerRecordNameMatch[TrustNameMatchDetails](
@@ -998,7 +999,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               mockGetSession(Future.successful(Right(Some(expectedSessionData))))
               mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(Some(previousUnsuccessfulNameMatchAttempt)))
               mockAttemptNameMatch(validTrn, validTrustName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
-                Right(bpr)
+                Right(bpr -> None)
               )
               mockStoreSession(sessionDataWithStatus(SubscriptionMissingData(bpr, None, ggCredId, None)))(
                 Future.successful(Left(Error("")))
@@ -1015,7 +1016,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               mockGetSession(Future.successful(Right(Some(expectedSessionData))))
               mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(Some(previousUnsuccessfulNameMatchAttempt)))
               mockAttemptNameMatch(validTrn, validTrustName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
-                Right(bpr.copy(name = Right(IndividualName("Name", "Wame"))))
+                Right(bpr.copy(name = Right(IndividualName("Name", "Wame"))) -> None)
               )
             }
 
@@ -1028,13 +1029,13 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
         "update the session and redirect to the start endpoint" when {
 
-          "the user submits a valid TRN and trust name and a BPR can be retrieved" in {
+          "the user submits a valid TRN and trust name and a BPR can be retrieved and the user does not already have a cgt reference" in {
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(Future.successful(Right(Some(expectedSessionData))))
               mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(Some(previousUnsuccessfulNameMatchAttempt)))
               mockAttemptNameMatch(validTrn, validTrustName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
-                Right(bpr)
+                Right(bpr -> None)
               )
               mockStoreSession(sessionDataWithStatus(SubscriptionMissingData(bpr, None, ggCredId, None)))(
                 Future.successful(Right(()))
@@ -1043,6 +1044,29 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
             val result = performAction("trustName" -> validTrustName.value, "trn" -> validTrn.value)
             checkIsRedirect(result, cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
+          }
+
+        }
+
+        "update the session and redirect to the already subscribed page" when {
+
+          "the user submits a valid TRN and trust name and a BPR can be retrieved and the user already has a cgt reference" in {
+            val cgtReference = sample[CgtReference]
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+              mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(Some(previousUnsuccessfulNameMatchAttempt)))
+              mockAttemptNameMatch(validTrn, validTrustName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
+                Right(bpr -> Some(cgtReference))
+              )
+              mockStoreSession(sessionDataWithStatus(AlreadySubscribedWithDifferentGGAccount(ggCredId, Some(cgtReference))))(
+                Future.successful(Right(()))
+              )
+            }
+
+            val result = performAction("trustName" -> validTrustName.value, "trn" -> validTrn.value)
+            checkIsRedirect(result, routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
           }
 
         }
@@ -1093,7 +1117,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               ggCredId,
               Some(previousUnsuccessfulNameMatchAttempt)
             )(
-              Right(bpr)
+              Right(bpr -> None)
             )
             mockStoreSession(sessionDataWithStatus(SubscriptionMissingData(bpr, None, ggCredId, None)))(
               Future.successful(Right(()))

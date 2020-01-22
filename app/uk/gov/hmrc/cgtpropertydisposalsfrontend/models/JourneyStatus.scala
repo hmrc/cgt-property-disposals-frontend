@@ -20,7 +20,7 @@ import cats.Eq
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, GGCredId}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
@@ -72,7 +72,7 @@ object JourneyStatus {
     individualTriageAnswers: Option[IndividualTriageAnswers])
       extends JourneyStatus
 
-  final case class AlreadySubscribedWithDifferentGGAccount(ggCredId: GGCredId) extends JourneyStatus
+  final case class AlreadySubscribedWithDifferentGGAccount(ggCredId: GGCredId, cgtReference: Option[CgtReference]) extends JourneyStatus
 
   sealed trait RegistrationStatus extends JourneyStatus with Product with Serializable {
     val emailSource: Option[EmailSource]

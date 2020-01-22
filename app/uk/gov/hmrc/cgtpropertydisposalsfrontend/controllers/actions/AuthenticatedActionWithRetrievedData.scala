@@ -175,7 +175,7 @@ class AuthenticatedActionWithRetrievedData @Inject()(
         }
       case None =>
         subscriptionService
-          .hasSubscription()
+          .hasFailedCgtEnrolment()
           .leftMap(_ => errorHandler.errorResult(None)(request))
           .value
     }
