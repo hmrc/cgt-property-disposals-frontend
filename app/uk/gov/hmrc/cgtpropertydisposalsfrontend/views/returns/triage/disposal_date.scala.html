@@ -31,7 +31,7 @@ dateInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.date_i
 backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@(form: Form[DisposalDate])(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[DisposalDate])(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"disposalDate"}
 @hasErrors = @{form.hasErrors}
@@ -58,6 +58,7 @@ backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.component
    errorKey = errorKey.map(e => s"${e.key}.${e.message}"),
    hasErrors = hasErrors
   )
+  <p>@Html(messages("disposalDate.link", viewConfig.exchangeDateHelp))</p>
   @submitButton(messages("button.continue"))
  }
 }

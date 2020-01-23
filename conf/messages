@@ -505,8 +505,9 @@ didYouDisposeOfResidentialProperty.details.link=<a href="{0}">Read a definition 
 didYouDisposeOfResidentialProperty.error.required=Select yes if you sold or disposed of a ‘residential’ property
 didYouDisposeOfResidentialProperty.error.boolean=Select yes if you sold or disposed of a ‘residential’ property
 
-disposalDate.title=What date did you exchange contracts when selling or transferring the property?
-disposalDate.helpText=This is when the buyer and seller swap signed contracts. It’s the date the buyer pays a deposit and called the ‘disposal’ date, for example, 25 4 2020
+disposalDate.title=What date did you ‘exchange’ contracts when selling the property?
+disposalDate.helpText=This is when you and the buyer swapped signed contracts. It’s when the buyer paid a deposit. For example, 25 4 2020
+disposalDate.link=<a href="{0}">Find out what happens on the ‘exchange’ date (opens in a new window)</a>.
 disposalDate.error.required=Enter a contract exchange date
 disposalDate.error.invalid=Enter a real contract exchange date
 disposalDate.error.tooFarInFuture=Contract exchange date must be today or in the past
