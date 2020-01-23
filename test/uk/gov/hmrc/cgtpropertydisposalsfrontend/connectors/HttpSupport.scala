@@ -33,9 +33,9 @@ trait HttpSupport { this: MockFactory with Matchers ⇒
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val mockHttp: HttpClient = mock[HttpClient]
 
-  val mockWsClient: WSClient     = mock[WSClient]
+  val mockWsClient: WSClient = mock[WSClient]
   @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
-  val mockWsRequest: WSRequest   = mock[WSRequest]
+  val mockWsRequest: WSRequest = mock[WSRequest]
   @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
   val mockWsResponse: WSResponse = mock[WSResponse]
 
@@ -78,6 +78,20 @@ trait HttpSupport { this: MockFactory with Matchers ⇒
         _: ExecutionContext
       ))
       .expects(url, body, headers.toSeq, *, *, *, *)
+      .returning(
+        result.fold[Future[HttpResponse]](Future.failed(new Exception("Test exception message")))(Future.successful)
+      )
+
+  def mockPostForm[A](url: String, body: Map[String, Seq[String]], headers: Map[String, String])(
+    result: Option[HttpResponse]
+  ): Unit =
+    (mockHttp
+      .POSTForm(_: String, _: Map[String, Seq[String]], _: Seq[(String, String)])(
+        _: HttpReads[HttpResponse],
+        _: HeaderCarrier,
+        _: ExecutionContext
+      ))
+      .expects(url, body, headers.toSeq, *, *, *)
       .returning(
         result.fold[Future[HttpResponse]](Future.failed(new Exception("Test exception message")))(Future.successful)
       )
