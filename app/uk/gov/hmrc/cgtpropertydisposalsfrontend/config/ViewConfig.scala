@@ -57,6 +57,7 @@ class ViewConfig @Inject()(servicesConfig: ServicesConfig) {
   val tellHmrcChangeDetails: String = getString("external-url.tell-hmrc-change-details")
   val workOurYouResidenceStatusUrl: String = getString("external-url.work-out-your-residence-status")
   val residentialPropertyDefinitionUrl: String = getString("external-url.residential-property-definition")
+  val exchangeDateHelp: String = getString("external-url.exchange-date-help")
 
   val onboardingExitSurveyUrl: String ="/feedback/CGTPD-REG"
   val ggCreateAccountUrl: String =
