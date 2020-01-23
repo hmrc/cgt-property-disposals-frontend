@@ -16,3 +16,6 @@ POST /before-start/did-sell-dispose-residential-property    uk.gov.hmrc.cgtprope
 GET  /before-start/date-exchanged-contracts                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CanTheyUseOurServiceController.whenWasDisposalDate()
 POST /before-start/date-exchanged-contracts                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CanTheyUseOurServiceController.whenWasDisposalDateSubmit()
 
+GET  /before-start/date-of-completion                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CanTheyUseOurServiceController.whenWasCompletionDate()
+POST /before-start/date-of-completion                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CanTheyUseOurServiceController.whenWasCompletionDateSubmit()
+

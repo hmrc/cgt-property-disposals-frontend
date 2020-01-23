@@ -371,7 +371,7 @@ class CanTheyUseOurServiceControllerSpec
         controller.howDidYouDisposeOfPropertySubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
 
       val requiredPreviousAnswers =
-      IndividualTriageAnswers.empty.copy(numberOfProperties = Some(NumberOfProperties.One))
+        IndividualTriageAnswers.empty.copy(numberOfProperties = Some(NumberOfProperties.One))
 
       behave like redirectToStartWhenInvalidJourney(() => performAction(), isSubscribedJourney)
 
@@ -475,7 +475,7 @@ class CanTheyUseOurServiceControllerSpec
       behave like displayIndividualTriagePageBehavior[Boolean, Boolean](
         performAction
       )(requiredPreviousAnswers, routes.CanTheyUseOurServiceController.wereYouAUKResident())(
-        { case (i, w) => i.copy(wasAUKResident = w) },
+        { case (i, w) => i.copy(wasAUKResident         = w) },
         { case (i, w) => i.copy(wasResidentialProperty = w) }
       )(true)(
         "didYouDisposeOfResidentialProperty.title",
@@ -500,7 +500,7 @@ class CanTheyUseOurServiceControllerSpec
         requiredPreviousAnswers,
         routes.CanTheyUseOurServiceController.wereYouAUKResident()
       )(
-        { case (i, w) => i.copy(wasAUKResident = w) },
+        { case (i, w) => i.copy(wasAUKResident         = w) },
         { case (i, w) => i.copy(wasResidentialProperty = w) }
       )(
         "didYouDisposeOfResidentialProperty.title"
@@ -573,74 +573,39 @@ class CanTheyUseOurServiceControllerSpec
           wasResidentialProperty = Some(true)
         )
 
-      val formErrorScenarios = List(
-        // empty data
-        (None, None, None, "disposalDate.error.required"),
-        (Some(""), None, None, "disposalDate.error.required"),
-        (None, Some(""), None, "disposalDate.error.required"),
-        (None, None, Some(""), "disposalDate.error.required"),
-        (Some(""), Some(""), None, "disposalDate.error.required"),
-        (Some(""), None, Some(""), "disposalDate.error.required"),
-        (None, Some(""), Some(""), "disposalDate.error.required"),
-        (Some(""), Some(""), Some(""), "disposalDate.error.required"),
-        // single field empty
-        (None, Some("12"), Some("2020"), "disposalDate-day.error.required"),
-        (None, Some("100"), Some("-1000"), "disposalDate-day.error.required"),
-        (Some("1"), None, Some("2020"), "disposalDate-month.error.required"),
-        (Some("-1"), None, Some("1.2"), "disposalDate-month.error.required"),
-        (Some("1"), Some("12"), None, "disposalDate-year.error.required"),
-        (Some("0"), Some("-1"), None, "disposalDate-year.error.required"),
-        // two fields mossing
-        (Some("1"), None, None, "disposalDate-month.error.monthAndYearRequired"),
-        (Some("0"), None, None, "disposalDate-month.error.monthAndYearRequired"),
-        (None, Some("12"), None, "disposalDate-day.error.dayAndYearRequired"),
-        (None, Some("-1"), None, "disposalDate-day.error.dayAndYearRequired"),
-        (None, None, Some("2020"), "disposalDate-day.error.dayAndMonthRequired"),
-        (None, None, Some("-1"), "disposalDate-day.error.dayAndMonthRequired"),
-        // day invalid and takes precedence over month and year
-        (Some("0"), Some("12"), Some("2020"), "disposalDate-day.error.invalid"),
-        (Some("32"), Some("12"), Some("2020"), "disposalDate-day.error.invalid"),
-        (Some("-1"), Some("-1"), Some("-2020"), "disposalDate-day.error.invalid"),
-        (Some("1.2"), Some("3.4"), Some("4.5"), "disposalDate-day.error.invalid"),
-        // month invalid and takes precedence over year
-        (Some("1"), Some("13"), Some("2020"), "disposalDate-month.error.invalid"),
-        (Some("1"), Some("0"), Some("0"), "disposalDate-month.error.invalid"),
-        (Some("1"), Some("-1"), Some("-6"), "disposalDate-month.error.invalid"),
-        (Some("1"), Some("1.2"), Some("3.4"), "disposalDate-month.error.invalid"),
-        // year invalid
-        (Some("1"), Some("12"), Some("0"), "disposalDate-year.error.invalid"),
-        (Some("1"), Some("12"), Some("-1"), "disposalDate-year.error.invalid"),
-        (Some("1"), Some("12"), Some("1.2"), "disposalDate-year.error.invalid"),
-        // date in the future
-        (
-          Some(tomorrow.getDayOfMonth.toString),
-          Some(tomorrow.getMonthValue.toString),
-          Some(tomorrow.getYear.toString),
-          "disposalDate.error.tooFarInFuture"
-        ),
-        // date does not exist
-        (Some("31"), Some("2"), Some("2019"), "disposalDate.error.invalid")
-      ).map {
-        case (dayString, monthString, yearString, expectedErrorKey) =>
-          val formData = List(
-            "disposalDate-day"   -> dayString,
-            "disposalDate-month" -> monthString,
-            "disposalDate-year"  -> yearString
-          ).collect { case (id, Some(input)) => id -> input }
+      val formErrorScenarios =
+        (commonDateErrorScenarios("disposalDate") ::: List(
+          // date in the future
+          (
+            Some(tomorrow.getDayOfMonth.toString),
+            Some(tomorrow.getMonthValue.toString),
+            Some(tomorrow.getYear.toString),
+            "disposalDate.error.tooFarInFuture"
+          ),
+          // date does not exist
+          (Some("31"), Some("2"), Some("2019"), "disposalDate.error.invalid")
+        )).map {
+          case (dayString, monthString, yearString, expectedErrorKey) =>
+            val formData = List(
+              "disposalDate-day"   -> dayString,
+              "disposalDate-month" -> monthString,
+              "disposalDate-year"  -> yearString
+            ).collect { case (id, Some(input)) => id -> input }
 
-          formData -> expectedErrorKey
-      }
+            formData -> expectedErrorKey
+        }
 
       val validValueScenarios =
         List[(LocalDate, Future[Result] => Unit)](
           earliestDisposalDate.minusDays(1L) -> { result =>
+            status(result)          shouldBe OK
             contentAsString(result) shouldBe s"disposal date was strictly before $earliestDisposalDate"
           },
           earliestDisposalDate -> { result =>
-            contentAsString(result) shouldBe s"disposal date was on or after $earliestDisposalDate"
+            checkIsRedirect(result, routes.CanTheyUseOurServiceController.whenWasCompletionDate())
           },
           earliestDisposalDate.plusDays(1L) -> { result =>
-            contentAsString(result) shouldBe s"disposal date was on or after $earliestDisposalDate"
+            checkIsRedirect(result, routes.CanTheyUseOurServiceController.whenWasCompletionDate())
           }
         ).map {
           case (date, checks) =>
@@ -671,6 +636,119 @@ class CanTheyUseOurServiceControllerSpec
       )
 
     }
+
+    "handling requests to display the when was completion date page" must {
+
+      val disposalDate = DisposalDate(today)
+
+      val requiredPreviousAnswers =
+        IndividualTriageAnswers.empty.copy(
+          individualUserType     = Some(sample[IndividualUserType]),
+          numberOfProperties     = Some(NumberOfProperties.One),
+          disposalMethod         = Some(DisposalMethod.Gifted),
+          wasAUKResident         = Some(true),
+          wasResidentialProperty = Some(true),
+          disposalDate           = Some(disposalDate)
+        )
+
+      def performAction(): Future[Result] = controller.whenWasCompletionDate()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(performAction, isSubscribedJourney)
+
+      behave like displayIndividualTriagePageBehavior[DisposalDate, CompletionDate](
+        performAction
+      )(requiredPreviousAnswers, routes.CanTheyUseOurServiceController.whenWasDisposalDate())(
+        { case (i, d) => i.copy(disposalDate   = d) },
+        { case (i, d) => i.copy(completionDate = d) }
+      )(CompletionDate(disposalDate.value))(
+        "completionDate.title",
+        d =>
+          List(
+            s"""value="${d.value.getDayOfMonth()}"""",
+            s"""value="${d.value.getMonthValue()}"""",
+            s"""value="${d.value.getYear()}""""
+          )
+      )
+
+    }
+
+    "handling submitted completion dates" must {
+
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.whenWasCompletionDateSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
+
+      val disposalDate = DisposalDate(today)
+
+      val dayBeforeDisposalDate = disposalDate.value.minusDays(1L)
+
+      val requiredPreviousAnswers =
+        IndividualTriageAnswers.empty.copy(
+          individualUserType     = Some(sample[IndividualUserType]),
+          numberOfProperties     = Some(NumberOfProperties.One),
+          disposalMethod         = Some(DisposalMethod.Gifted),
+          wasAUKResident         = Some(true),
+          wasResidentialProperty = Some(true),
+          disposalDate           = Some(disposalDate)
+        )
+
+      val formErrorScenarios =
+        (commonDateErrorScenarios("completionDate") ::: List(
+          // date before disposal date
+          (
+            Some(dayBeforeDisposalDate.getDayOfMonth.toString),
+            Some(dayBeforeDisposalDate.getMonthValue.toString),
+            Some(dayBeforeDisposalDate.getYear.toString),
+            "completionDate.error.tooFarInPast"
+          )
+        )).map {
+          case (dayString, monthString, yearString, expectedErrorKey) =>
+            val formData = List(
+              "completionDate-day"   -> dayString,
+              "completionDate-month" -> monthString,
+              "completionDate-year"  -> yearString
+            ).collect { case (id, Some(input)) => id -> input }
+
+            formData -> expectedErrorKey
+        }
+
+      val validValueScenarios =
+        List[(LocalDate, Future[Result] => Unit)](
+          disposalDate.value -> { result =>
+            contentAsString(result) shouldBe "Got completion date"
+          },
+          disposalDate.value.plusDays(1L) -> { result =>
+            contentAsString(result) shouldBe "Got completion date"
+          }
+        ).map {
+          case (date, checks) =>
+            val formData = List(
+              "completionDate-day"   -> date.getDayOfMonth().toString,
+              "completionDate-month" -> date.getMonthValue().toString,
+              "completionDate-year"  -> date.getYear().toString
+            )
+            (formData, CompletionDate(date), checks)
+        }
+
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isSubscribedJourney)
+
+      behave like submitIndividualTriagePageBehavior[DisposalDate, CompletionDate](
+        performAction
+      )(
+        requiredPreviousAnswers,
+        routes.CanTheyUseOurServiceController.whenWasDisposalDate()
+      )(
+        { case (i, d) => i.copy(disposalDate   = d) },
+        { case (i, d) => i.copy(completionDate = d) }
+      )(
+        "completionDate.title"
+      )(
+        formErrorScenarios
+      )(
+        validValueScenarios
+      )
+
+    }
+
   }
 
   def submitIndividualTriagePageBehavior[A, B](performAction: Seq[(String, String)] => Future[Result])(
@@ -919,5 +997,47 @@ class CanTheyUseOurServiceControllerSpec
     }
 
   }
+
+  def commonDateErrorScenarios(dateKey: String) =
+    List(
+      (None, None, None, s"$dateKey.error.required"),
+      (Some(""), None, None, s"$dateKey.error.required"),
+      (None, Some(""), None, s"$dateKey.error.required"),
+      (None, None, Some(""), s"$dateKey.error.required"),
+      (Some(""), Some(""), None, s"$dateKey.error.required"),
+      (Some(""), None, Some(""), s"$dateKey.error.required"),
+      (None, Some(""), Some(""), s"$dateKey.error.required"),
+      (Some(""), Some(""), Some(""), s"$dateKey.error.required"),
+      // single field empty
+      (None, Some("12"), Some("2020"), s"$dateKey-day.error.required"),
+      (None, Some("100"), Some("-1000"), s"$dateKey-day.error.required"),
+      (Some("1"), None, Some("2020"), s"$dateKey-month.error.required"),
+      (Some("-1"), None, Some("1.2"), s"$dateKey-month.error.required"),
+      (Some("1"), Some("12"), None, s"$dateKey-year.error.required"),
+      (Some("0"), Some("-1"), None, s"$dateKey-year.error.required"),
+      // two fields mossing
+      (Some("1"), None, None, s"$dateKey-month.error.monthAndYearRequired"),
+      (Some("0"), None, None, s"$dateKey-month.error.monthAndYearRequired"),
+      (None, Some("12"), None, s"$dateKey-day.error.dayAndYearRequired"),
+      (None, Some("-1"), None, s"$dateKey-day.error.dayAndYearRequired"),
+      (None, None, Some("2020"), s"$dateKey-day.error.dayAndMonthRequired"),
+      (None, None, Some("-1"), s"$dateKey-day.error.dayAndMonthRequired"),
+      // day invalid and takes precedence over month and year
+      (Some("0"), Some("12"), Some("2020"), s"$dateKey-day.error.invalid"),
+      (Some("32"), Some("12"), Some("2020"), s"$dateKey-day.error.invalid"),
+      (Some("-1"), Some("-1"), Some("-2020"), s"$dateKey-day.error.invalid"),
+      (Some("1.2"), Some("3.4"), Some("4.5"), s"$dateKey-day.error.invalid"),
+      // month invalid and takes precedence over year
+      (Some("1"), Some("13"), Some("2020"), s"$dateKey-month.error.invalid"),
+      (Some("1"), Some("0"), Some("0"), s"$dateKey-month.error.invalid"),
+      (Some("1"), Some("-1"), Some("-6"), s"$dateKey-month.error.invalid"),
+      (Some("1"), Some("1.2"), Some("3.4"), s"$dateKey-month.error.invalid"),
+      // year invalid
+      (Some("1"), Some("12"), Some("0"), s"$dateKey-year.error.invalid"),
+      (Some("1"), Some("12"), Some("-1"), s"$dateKey-year.error.invalid"),
+      (Some("1"), Some("12"), Some("1.2"), s"$dateKey-year.error.invalid"),
+      // date does not exist
+      (Some("31"), Some("2"), Some("2019"), s"$dateKey.error.invalid")
+    )
 
 }

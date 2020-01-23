@@ -34,7 +34,8 @@ object LocalDateUtils {
   }
 
   def dateFormatter(
-    maximumDateInclusive: LocalDate,
+    maximumDateInclusive: Option[LocalDate],
+    minimumDateInclusive: Option[LocalDate],
     dayKey: String,
     monthKey: String,
     yearKey: String,
@@ -73,7 +74,8 @@ object LocalDateUtils {
                 .leftMap(_ => FormError(dateKey, "error.invalid"))
                 .flatMap(
                   date =>
-                    if (date.isAfter(maximumDateInclusive)) Left(FormError(dateKey, "error.tooFarInFuture"))
+                    if (maximumDateInclusive.exists(_.isBefore(date))) Left(FormError(dateKey, "error.tooFarInFuture"))
+                    else if(minimumDateInclusive.exists(_.isAfter(date))) Left(FormError(dateKey, "error.tooFarInPast"))
                     else Right(date)
                 )
       } yield date

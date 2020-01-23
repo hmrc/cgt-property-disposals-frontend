@@ -61,7 +61,8 @@ class CanTheyUseOurServiceController @Inject() (
   disposalMethodPage: triagePages.how_did_you_dispose,
   wereYouAUKResidentPage: triagePages.were_you_a_uk_resident,
   didYouDisposeOfResidentialPropertyPage: triagePages.did_you_dispose_of_residential_property,
-  disposalDatePage: triagePages.disposal_date
+  disposalDatePage: triagePages.disposal_date,
+  completionDatePage: triagePages.completion_date
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -124,17 +125,17 @@ class CanTheyUseOurServiceController @Inject() (
   }
 
   def howManyProperties(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    displayIndividualTriagePage(numberOfPropertiesForm)(
-      _.individualUserType.isDefined,
+    displayIndividualTriagePage(
+      _.individualUserType,
       routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting()
-    )(_.numberOfProperties, howManyPropertiesPage(_))
+    )(_ => numberOfPropertiesForm)(_.numberOfProperties, howManyPropertiesPage(_))
   }
 
   def howManyPropertiesSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    handleIndividualTriagePageSubmit(numberOfPropertiesForm)(
-      _.individualUserType.isDefined,
+    handleIndividualTriagePageSubmit(
+      _.individualUserType,
       routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting()
-    )(
+    )(_ => numberOfPropertiesForm)(
       howManyPropertiesPage(_),
       updateState = { case (numberOfProperties, i) => i.copy(numberOfProperties = Some(numberOfProperties)) },
       nextResult = {
@@ -148,17 +149,15 @@ class CanTheyUseOurServiceController @Inject() (
   }
 
   def howDidYouDisposeOfProperty(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    displayIndividualTriagePage(disposalMethodForm)(
-      _.numberOfProperties.isDefined,
-      routes.CanTheyUseOurServiceController.howManyProperties()
+    displayIndividualTriagePage(_.numberOfProperties, routes.CanTheyUseOurServiceController.howManyProperties())(_ =>
+      disposalMethodForm
     )(_.disposalMethod, disposalMethodPage(_))
   }
 
   def howDidYouDisposeOfPropertySubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
-      handleIndividualTriagePageSubmit(disposalMethodForm)(
-        _.numberOfProperties.isDefined,
-        routes.CanTheyUseOurServiceController.howManyProperties()
+      handleIndividualTriagePageSubmit(_.numberOfProperties, routes.CanTheyUseOurServiceController.howManyProperties())(
+        _ => disposalMethodForm
       )(
         disposalMethodPage(_),
         updateState = { case (disposalMethod, i) => i.copy(disposalMethod = Some(disposalMethod)) },
@@ -167,17 +166,17 @@ class CanTheyUseOurServiceController @Inject() (
   }
 
   def wereYouAUKResident(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    displayIndividualTriagePage(wasAUkResidentForm)(
-      _.disposalMethod.isDefined,
+    displayIndividualTriagePage(
+      _.disposalMethod,
       routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty()
-    )(_.wasAUKResident, wereYouAUKResidentPage(_))
+    )(_ => wasAUkResidentForm)(_.wasAUKResident, wereYouAUKResidentPage(_))
   }
 
   def wereYouAUKResidentSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    handleIndividualTriagePageSubmit(wasAUkResidentForm)(
-      _.disposalMethod.isDefined,
+    handleIndividualTriagePageSubmit(
+      _.disposalMethod,
       routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty()
-    )(
+    )(_ => wasAUkResidentForm)(
       wereYouAUKResidentPage(_),
       updateState = { case (wasAUKResident, i) => i.copy(wasAUKResident = Some(wasAUKResident)) },
       nextResult = { wasAUKResident =>
@@ -192,17 +191,15 @@ class CanTheyUseOurServiceController @Inject() (
 
   def didYouDisposeOfAResidentialProperty(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
-      displayIndividualTriagePage(wasResidentialPropertyForm)(
-        _.wasAUKResident.isDefined,
-        routes.CanTheyUseOurServiceController.wereYouAUKResident()
+      displayIndividualTriagePage(_.wasAUKResident, routes.CanTheyUseOurServiceController.wereYouAUKResident())(_ =>
+        wasResidentialPropertyForm
       )(_.wasResidentialProperty, didYouDisposeOfResidentialPropertyPage(_))
   }
 
   def didYouDisposeOfAResidentialPropertySubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
-      handleIndividualTriagePageSubmit(wasResidentialPropertyForm)(
-        _.wasAUKResident.isDefined,
-        routes.CanTheyUseOurServiceController.wereYouAUKResident()
+      handleIndividualTriagePageSubmit(_.wasAUKResident, routes.CanTheyUseOurServiceController.wereYouAUKResident())(
+        _ => wasResidentialPropertyForm
       )(
         didYouDisposeOfResidentialPropertyPage(_),
         updateState = {
@@ -220,33 +217,55 @@ class CanTheyUseOurServiceController @Inject() (
 
   def whenWasDisposalDate(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     val today = LocalDate.now(clock)
-
-    displayIndividualTriagePage(disposalDateForm(today))(
-      _.wasResidentialProperty.isDefined,
+    displayIndividualTriagePage(
+      _.wasResidentialProperty,
       routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty()
-    )(_.disposalDate, disposalDatePage(_))
+    )(_ => disposalDateForm(LocalDate.now(clock)))(_.disposalDate, disposalDatePage(_))
   }
 
   def whenWasDisposalDateSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    handleIndividualTriagePageSubmit(disposalDateForm(LocalDate.now(clock)))(
-      _.wasResidentialProperty.isDefined,
+    handleIndividualTriagePageSubmit(
+      _.wasResidentialProperty,
       routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty()
-    )(
+    )(_ => disposalDateForm(LocalDate.now(clock)))(
       disposalDatePage(_),
       updateState = { case (d, i) => i.copy(disposalDate = Some(d)) },
       nextResult = { d =>
         if (d.value.isBefore(earliestDisposalDateInclusive)) {
           Ok(s"disposal date was strictly before $earliestDisposalDateInclusive")
         } else {
-          Ok(s"disposal date was on or after $earliestDisposalDateInclusive")
+          Redirect(routes.CanTheyUseOurServiceController.whenWasCompletionDate())
         }
       }
     )
   }
 
-  private def handleIndividualTriagePageSubmit[A, Page: Writeable](
-    form: Form[A]
-  )(isValidJourney: IndividualTriageAnswers => Boolean, redirectToIfNotValidJourney: => Call)(
+  def whenWasCompletionDate(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    displayIndividualTriagePage(
+      _.disposalDate,
+      routes.CanTheyUseOurServiceController.whenWasDisposalDate()
+    )(disposalDate => completionDateForm(disposalDate))(_.completionDate, completionDatePage(_))
+  }
+
+  def whenWasCompletionDateSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    handleIndividualTriagePageSubmit(
+      _.disposalDate,
+      routes.CanTheyUseOurServiceController.whenWasDisposalDate()
+    )(disposalDate => completionDateForm(disposalDate))(
+      completionDatePage(_),
+      updateState = { case (d, i) => i.copy(completionDate = Some(d)) },
+      nextResult = { _ =>
+        Ok("Got completion date")
+      }
+    )
+  }
+
+  private def handleIndividualTriagePageSubmit[R, A, Page: Writeable](
+    requiredField: IndividualTriageAnswers => Option[R],
+    redirectToIfNotValidJourney: => Call
+  )(
+    form: R => Form[A]
+  )(
     page: Form[A] => Page,
     updateState: (A, IndividualTriageAnswers) => IndividualTriageAnswers,
     nextResult: A => Result
@@ -255,45 +274,47 @@ class CanTheyUseOurServiceController @Inject() (
   ): Future[Result] =
     withIndividualTriageAnswers(request) {
       case (_, subscribed, individualTriageAnswers) =>
-        if (!isValidJourney(individualTriageAnswers)) {
-          Redirect(redirectToIfNotValidJourney)
-        } else {
-          form
-            .bindFromRequest()
-            .fold(
-              formWithErrors => BadRequest(page(formWithErrors)), { value =>
-                val newSubscribed = subscribed.copy(
-                  individualTriageAnswers = Some(updateState(value, individualTriageAnswers))
-                )
+        requiredField(individualTriageAnswers) match {
+          case None => Redirect(redirectToIfNotValidJourney)
+          case Some(r) =>
+            form(r)
+              .bindFromRequest()
+              .fold(
+                formWithErrors => BadRequest(page(formWithErrors)), { value =>
+                  val newSubscribed = subscribed.copy(
+                    individualTriageAnswers = Some(updateState(value, individualTriageAnswers))
+                  )
 
-                updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newSubscribed))).map({
-                  case Left(e) =>
-                    logger.warn("Could not update session", e)
-                    errorHandler.errorResult()
+                  updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newSubscribed))).map({
+                    case Left(e) =>
+                      logger.warn("Could not update session", e)
+                      errorHandler.errorResult()
 
-                  case Right(_) =>
-                    nextResult(value)
-                })
-              }
-            )
+                    case Right(_) =>
+                      nextResult(value)
+                  })
+                }
+              )
+
         }
     }
 
-  private def displayIndividualTriagePage[A, Page: Writeable](form: Form[A])(
-    isValidJourney: IndividualTriageAnswers => Boolean,
-    redirectToIfNotValidJourney: Call
-  )(extractField: IndividualTriageAnswers => Option[A], page: Form[A] => Page)(
+  private def displayIndividualTriagePage[R, A, Page: Writeable](
+    requiredField: IndividualTriageAnswers => Option[R],
+    redirectToIfNotValidJourney: => Call
+  )(form: R => Form[A])(extractField: IndividualTriageAnswers => Option[A], page: Form[A] => Page)(
     implicit request: RequestWithSessionData[_]
   ): Future[Result] =
     withIndividualTriageAnswers(request) {
       case (_, _, individualTriageAnswers) =>
-        if (!isValidJourney(individualTriageAnswers)) {
-          Redirect(redirectToIfNotValidJourney)
-        } else {
-          val f = extractField(individualTriageAnswers)
-            .fold(form)(form.fill)
+        requiredField(individualTriageAnswers) match {
+          case None => Redirect(redirectToIfNotValidJourney)
+          case Some(r) =>
+            val f = extractField(individualTriageAnswers)
+              .fold(form(r))(form(r).fill)
 
-          Ok(page(f))
+            Ok(page(f))
+
         }
     }
 
@@ -378,9 +399,10 @@ object CanTheyUseOurServiceController {
 
   def disposalDateForm(maximumDateInclusive: LocalDate): Form[DisposalDate] = Form(
     mapping(
-      "date" -> of(
+      "" -> of(
         LocalDateUtils.dateFormatter(
-          maximumDateInclusive,
+          Some(maximumDateInclusive),
+          None,
           "disposalDate-day",
           "disposalDate-month",
           "disposalDate-year",
@@ -390,4 +412,18 @@ object CanTheyUseOurServiceController {
     )(DisposalDate(_))(d => Some(d.value))
   )
 
+  def completionDateForm(disposalDate: DisposalDate): Form[CompletionDate] = Form(
+    mapping(
+      "" -> of(
+        LocalDateUtils.dateFormatter(
+          None,
+          Some(disposalDate.value),
+          "completionDate-day",
+          "completionDate-month",
+          "completionDate-year",
+          "completionDate"
+        )
+      )
+    )(CompletionDate(_))(d => Some(d.value))
+  )
 }
