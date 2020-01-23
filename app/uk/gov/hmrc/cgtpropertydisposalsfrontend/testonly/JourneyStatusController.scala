@@ -180,7 +180,6 @@ object JourneyStatusController {
           disposedOfResidentialProperty,
           disposalDate
           ) =>
-        // TODO: fix
         IndividualTriageAnswers(
           individualUserType,
           numberOfProperties,
