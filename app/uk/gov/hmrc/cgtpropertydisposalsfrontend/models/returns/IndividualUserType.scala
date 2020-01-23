@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
+import cats.Eq
 import julienrf.json.derived
 import play.api.libs.json.OFormat
 
@@ -28,6 +29,8 @@ object IndividualUserType {
   case object Capacitor extends IndividualUserType
 
   case object PersonalRepresentative extends IndividualUserType
+
+  implicit val eq: Eq[IndividualUserType] = Eq.fromUniversalEquals
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   implicit val format: OFormat[IndividualUserType] = derived.oformat

@@ -237,3 +237,7 @@ input:focus, textarea:focus, select:focus, #global-header input:focus {
 .account-icon {
     color: rgb(29, 112, 184);
 }
+
+details {
+    margin-bottom: 20px;
+}
