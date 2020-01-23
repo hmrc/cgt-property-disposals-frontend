@@ -33,7 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, IndividualTriageAnswers, IndividualUserType, NumberOfProperties}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.testonly.JourneyStatusController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
@@ -114,6 +114,34 @@ object JourneyStatusController {
     )
   )
 
+  val disposalMethodFormatter: Formatter[Option[DisposalMethod]] = optionFormatter[DisposalMethod](
+    Map(
+      DisposalMethod.Sold   -> "sold",
+      DisposalMethod.Gifted -> "gifted"
+    )
+  )
+
+  val optionalBooleanFormatter: Formatter[Option[Boolean]] = new Formatter[Option[Boolean]] {
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Option[Boolean]] =
+      data
+        .get(key)
+        .filter(_.nonEmpty)
+        .fold[Either[Seq[FormError], Option[Boolean]]](
+          Right(None)
+        )(s =>
+          Either
+            .fromTry(Try(s.toBoolean))
+            .bimap(
+              _ => Seq(FormError(key, "error.invalid")),
+              Some(_)
+            )
+        )
+
+    override def unbind(key: String, value: Option[Boolean]): Map[String, String] =
+      value.fold(Map.empty[String, String])(b => Map(key -> b.toString))
+
+  }
+
   val optionalDateFormatter: Formatter[Option[LocalDate]] = new Formatter[Option[LocalDate]] {
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Option[LocalDate]] =
       data
@@ -137,15 +165,41 @@ object JourneyStatusController {
 
   val returnStateForm: Form[IndividualTriageAnswers] = Form(
     mapping(
-      "individual-user-type" -> of(individualUserTypeFormatter),
-      "number-of-properties" -> of(numberOfPropertiesFormatter),
-      "disposal-date"        -> of(optionalDateFormatter)
+      "individual-user-type"             -> of(individualUserTypeFormatter),
+      "number-of-properties"             -> of(numberOfPropertiesFormatter),
+      "disposal-method"                  -> of(disposalMethodFormatter),
+      "was-a-uk-resident"                -> of(optionalBooleanFormatter),
+      "disposed-of-residential-property" -> of(optionalBooleanFormatter),
+      "disposal-date"                    -> of(optionalDateFormatter)
     ) {
-      case (individualUserType, numberOfProperties, disposalDate) =>
+      case (
+          individualUserType,
+          numberOfProperties,
+          disposalMethod,
+          wasAUKResident,
+          disposedOfResidentialProperty,
+          disposalDate
+          ) =>
         // TODO: fix
-        IndividualTriageAnswers(individualUserType, numberOfProperties, None, None, None, disposalDate.map(DisposalDate(_)))
+        IndividualTriageAnswers(
+          individualUserType,
+          numberOfProperties,
+          disposalMethod,
+          wasAUKResident,
+          disposedOfResidentialProperty,
+          disposalDate.map(DisposalDate(_))
+        )
     } { i =>
-      Some((i.individualUserType, i.numberOfProperties, i.disposalDate.map(_.value)))
+      Some(
+        (
+          i.individualUserType,
+          i.numberOfProperties,
+          i.disposalMethod,
+          i.wasAUKResident,
+          i.wasResidentialProperty,
+          i.disposalDate.map(_.value)
+        )
+      )
     }
   )
 
@@ -169,7 +223,5 @@ object JourneyStatusController {
     override def unbind(key: String, value: Option[A]): Map[String, String] =
       value.map(aToString).fold(Map.empty[String, String])(s => Map(key -> s))
   }
-
-
 
 }

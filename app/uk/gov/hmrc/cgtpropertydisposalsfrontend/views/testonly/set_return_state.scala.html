@@ -52,6 +52,9 @@ submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.su
  @formWrapper(routes.JourneyStatusController.setReturnStateSubmit(), 'novalidate -> "novalidate") {
   @askForText("individual-user-type")
   @askForText("number-of-properties")
+  @askForText("disposal-method")
+  @askForText("was-a-uk-resident")
+  @askForText("disposed-of-residential-property")
   @askForText("disposal-date")
 
   @submitButton(messages("button.continue"))
