@@ -151,7 +151,7 @@ class SubscriptionControllerSpec
       )
 
       val sessionWithSubscriptionComplete =
-        SessionData.empty.copy(journeyStatus = Some(Subscribed(accountDetails, ggCredId, None)))
+        SessionData.empty.copy(journeyStatus = Some(Subscribed(accountDetails, ggCredId, None, None)))
 
       behave like redirectToStart(performAction)
 
@@ -199,7 +199,7 @@ class SubscriptionControllerSpec
 
         "the subscription response indicates that the user has already subscribed" in {
           val sessionWithAlreadySubscribed =
-            SessionData.empty.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount(ggCredId)))
+            SessionData.empty.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount(ggCredId, None)))
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -244,6 +244,7 @@ class SubscriptionControllerSpec
                   registeredWithId = true
                 ),
                 ggCredId,
+                None,
                 None
               )
             )
@@ -271,8 +272,8 @@ class SubscriptionControllerSpec
 
       behave like redirectToStartWhenInvalidJourney(
         performAction, {
-          case AlreadySubscribedWithDifferentGGAccount(_) => true
-          case _                                          => false
+          case AlreadySubscribedWithDifferentGGAccount(_,_) => true
+          case _                                            => false
         }
       )
 
@@ -285,7 +286,7 @@ class SubscriptionControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    SessionData.empty.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount(ggCredId)))
+                    SessionData.empty.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount(ggCredId, None)))
                   )
                 )
               )

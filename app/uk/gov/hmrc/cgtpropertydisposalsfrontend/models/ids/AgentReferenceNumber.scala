@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.config
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids
 
-object CgtEnrolment {
+import play.api.libs.json.{Json, OFormat}
 
-  val enrolmentKey = "HMRC-CGT-PD"
+final case class AgentReferenceNumber(value: String) extends AnyVal
 
-  val enrolmentIdentifier = "CGTPDRef"
+object AgentReferenceNumber {
 
-  val delegateAuthRule = "cgt-auth"
+  implicit val format: OFormat[AgentReferenceNumber] = Json.format
 
 }

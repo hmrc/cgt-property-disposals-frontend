@@ -47,7 +47,7 @@ trait ContactNameController[J <: JourneyStatus] {
   def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, J)]
 
   def updateContactName(journey: J, contactName: ContactName)(
-    implicit hc: HeaderCarrier
+    implicit hc: HeaderCarrier, request: Request[_]
   ): EitherT[Future, Error, J]
 
   def contactName(journey: J): Option[ContactName]

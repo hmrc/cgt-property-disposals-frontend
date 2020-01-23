@@ -19,8 +19,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit
 import play.api.libs.json.{Json, OFormat}
 
 final case class RegistrationContactAddressChangedEvent(
-  oldContactAddress: Address,
-  newContactAddress: Address,
+  oldContactAddress: AuditAddress,
+  newContactAddress: AuditAddress,
   source: String
 )
 

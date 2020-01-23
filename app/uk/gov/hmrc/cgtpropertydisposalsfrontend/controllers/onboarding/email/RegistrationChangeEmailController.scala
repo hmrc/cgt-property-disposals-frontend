@@ -21,7 +21,7 @@ import java.util.UUID
 import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
-import play.api.mvc.{Call, MessagesControllerComponents, Result}
+import play.api.mvc.{Call, MessagesControllerComponents, Request, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{EmailController, SessionUpdates}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
@@ -29,10 +29,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{RegistrationChangeEmailAddressVerifiedEvent, RegistrationChangeEmailAttemptedEvent}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.EmailVerificationService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.OnboardingAuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, EmailVerificationService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -46,7 +46,7 @@ class RegistrationChangeEmailController @Inject()(
   val sessionDataAction: SessionDataAction,
   val sessionStore: SessionStore,
   val emailVerificationService: EmailVerificationService,
-  val auditService: OnboardingAuditService,
+  val auditService: AuditService,
   val uuidGenerator: UUIDGenerator,
   val errorHandler: ErrorHandler,
   cc: MessagesControllerComponents,
@@ -88,22 +88,35 @@ class RegistrationChangeEmailController @Inject()(
       )
     )
 
-  override def auditEmailVerifiedEvent(journey: RegistrationReady, email: Email)(implicit hc: HeaderCarrier): Unit =
-    auditService.sendRegistrationChangeEmailVerifiedEvent(
-      journey.registrationDetails.emailAddress.value,
-      email.value,
-      routes.RegistrationChangeEmailController.enterEmailSubmit().url
+  override def auditEmailVerifiedEvent(
+                                        journey: RegistrationReady,
+                                        email: Email
+                                      )(implicit hc: HeaderCarrier, request: Request[_]): Unit =
+    auditService.sendEvent(
+      "registrationChangeEmailAddressVerified",
+      RegistrationChangeEmailAddressVerifiedEvent(
+        journey.registrationDetails.emailAddress.value,
+        email.value
+      ),
+      "registration-change-email-address-verified"
     )
 
-  override def auditEmailChangeAttempt(journey: RegistrationReady, email: Email)(implicit hc: HeaderCarrier): Unit =
-    auditService.sendRegistrationChangeEmailAddressAttemptedEvent(
-      journey.registrationDetails.emailAddress.value,
-      email.value,
-      routes.RegistrationChangeEmailController.enterEmailSubmit().url
+  override def auditEmailChangeAttempt(
+                                        journey: RegistrationReady,
+                                        email: Email
+                                      )(implicit hc: HeaderCarrier, request: Request[_]): Unit =
+    auditService.sendEvent(
+      "registrationChangeEmailAddressAttempted",
+      RegistrationChangeEmailAttemptedEvent(
+        journey.registrationDetails.emailAddress.value,
+        email.value
+      ),
+      "registration-change-email-address-attempted"
     )
 
   override def name(journeyStatus: RegistrationReady): ContactName =
     ContactName(journeyStatus.registrationDetails.name.makeSingleName())
+
   override lazy protected val backLinkCall: Option[Call] = Some(
     controllers.onboarding.routes.RegistrationController.checkYourAnswers()
   )

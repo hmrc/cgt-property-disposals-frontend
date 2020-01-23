@@ -30,12 +30,13 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, ~}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{CgtEnrolment, ErrorHandler}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.EnrolmentConfig._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{ControllerSpec, RetrievalOps, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, RetrievedUserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, RetrievedUserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -58,7 +59,7 @@ class AuthenticatedActionWithRetrievedDataSpec
 
   def mockHasSubscription()(response: Either[Error, Option[CgtReference]]) =
     (mockSubscriptionService
-      .hasSubscription()(_: HeaderCarrier))
+      .hasFailedCgtEnrolment()(_: HeaderCarrier))
       .expects(*)
       .returning(EitherT(Future.successful(response)))
 
@@ -84,7 +85,14 @@ class AuthenticatedActionWithRetrievedDataSpec
   val emptyEnrolments = Enrolments(Set.empty)
 
   val cgtEnrolment = Enrolments(
-    Set(Enrolment(CgtEnrolment.enrolmentKey, Seq(EnrolmentIdentifier(CgtEnrolment.enrolmentIdentifier, "XCGT123456789")), "Activated", None))
+    Set(
+      Enrolment(
+        CgtEnrolment.key,
+        Seq(EnrolmentIdentifier(CgtEnrolment.cgtReferenceIdentifier, "XCGT123456789")),
+        "Activated",
+        None
+      )
+    )
   )
 
   implicit lazy val messagesApi: MessagesApi = instanceOf[MessagesApi]
@@ -137,7 +145,14 @@ class AuthenticatedActionWithRetrievedDataSpec
       "return an error" in {
 
         val badCgtEnrolment = Enrolments(
-          Set(Enrolment(CgtEnrolment.enrolmentKey, Seq(EnrolmentIdentifier("XXXX-XXXX", "XCGT123456789")), "Activated", None))
+          Set(
+            Enrolment(
+              CgtEnrolment.key,
+              Seq(EnrolmentIdentifier("XXXX-XXXX", "XCGT123456789")),
+              "Activated",
+              None
+            )
+          )
         )
 
         val retrievalsResult = Future successful (
@@ -289,17 +304,51 @@ class AuthenticatedActionWithRetrievedDataSpec
           checkIsTechnicalErrorPage(performAction(FakeRequest()))
         }
 
-      }
-
-      "allow the request through" when {
-
-        "a gg cred id can be found" in {
+        "a gg cred id can be found but no agent enrolment can be found" in {
           val retrievalsResult = Future successful (
             new ~(ConfidenceLevel.L50, Some(AffinityGroup.Agent)) and
               None and None and None and emptyEnrolments and Some(ggCredentials)
           )
 
-          val expectedRetrieval = RetrievedUserType.Agent(ggCredId)
+          mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+
+          checkIsTechnicalErrorPage(performAction(FakeRequest()))
+        }
+
+        "a gg cred id and an agent enrolment can be found but no agent reference nubmer can be found" in {
+          val enrolments = Enrolments(Set(Enrolment(AgentsEnrolment.key)))
+
+          val retrievalsResult = Future successful (
+            new ~(ConfidenceLevel.L50, Some(AffinityGroup.Agent)) and
+              None and None and None and enrolments and Some(ggCredentials)
+          )
+
+          mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
+
+          checkIsTechnicalErrorPage(performAction(FakeRequest()))
+        }
+      }
+
+      "allow the request through" when {
+
+        "a gg cred id and agent reference number can be found" in {
+          val arn = AgentReferenceNumber("arn")
+          val enrolments = Enrolments(
+            Set(
+              Enrolment(
+                AgentsEnrolment.key,
+                Seq(EnrolmentIdentifier(AgentsEnrolment.agentReferenceNumberIdentifier, arn.value)),
+                ""
+              )
+            )
+          )
+
+          val retrievalsResult = Future successful (
+            new ~(ConfidenceLevel.L50, Some(AffinityGroup.Agent)) and
+              None and None and None and enrolments and Some(ggCredentials)
+          )
+
+          val expectedRetrieval = RetrievedUserType.Agent(ggCredId, arn)
 
           mockAuth(EmptyPredicate, retrievals)(retrievalsResult)
 
@@ -354,7 +403,7 @@ class AuthenticatedActionWithRetrievedDataSpec
       "show an error page" when {
 
         "the organisation has a trust enrolment but a SAUTR cannot be found" in {
-          val trustEnrolment = Enrolment("HMRC-TERS-ORG")
+          val trustEnrolment = Enrolment(TrustsEnrolment.key)
           val retrievalsResult = Future successful (
             new ~(ConfidenceLevel.L50, Some(AffinityGroup.Organisation))
               and None and None and None and Enrolments(Set(trustEnrolment)) and Some(ggCredentials)
@@ -377,8 +426,8 @@ class AuthenticatedActionWithRetrievedDataSpec
           val sautr = SAUTR("123456")
           val trustEnrolment =
             Enrolment(
-              "HMRC-TERS-ORG",
-              Seq(EnrolmentIdentifier("SAUTR", sautr.value)),
+              TrustsEnrolment.key,
+              Seq(EnrolmentIdentifier(TrustsEnrolment.sautrIdentifier, sautr.value)),
               "state"
             )
 
@@ -403,8 +452,8 @@ class AuthenticatedActionWithRetrievedDataSpec
         val sautr = SAUTR("123456")
         val trustEnrolment =
           Enrolment(
-            "HMRC-TERS-ORG",
-            Seq(EnrolmentIdentifier("SAUTR", sautr.value)),
+            TrustsEnrolment.key,
+            Seq(EnrolmentIdentifier(TrustsEnrolment.sautrIdentifier, sautr.value)),
             "state"
           )
 

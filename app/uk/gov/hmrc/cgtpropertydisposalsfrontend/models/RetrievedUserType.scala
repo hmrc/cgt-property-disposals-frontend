@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, GGCredId, NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 
 sealed trait RetrievedUserType extends Product with Serializable
@@ -46,7 +46,8 @@ object RetrievedUserType {
   ) extends RetrievedUserType
 
   final case class Agent(
-    GGCredId: GGCredId
+    GGCredId: GGCredId,
+    agentReferenceNumber: AgentReferenceNumber
   ) extends RetrievedUserType
 
   final case class NonGovernmentGatewayRetrievedUser(authProvider: String) extends RetrievedUserType

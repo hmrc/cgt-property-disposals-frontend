@@ -70,6 +70,7 @@ class SubscribedWithoutIdChangeContactNameControllerSpec
       false
     ),
     GGCredId("id"),
+    None,
     None
   )
 

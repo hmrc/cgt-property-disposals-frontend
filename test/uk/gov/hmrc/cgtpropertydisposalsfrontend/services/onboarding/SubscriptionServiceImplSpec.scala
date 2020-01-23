@@ -83,12 +83,12 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
 
         "the http call comes back with a status other than 200 or 204" in {
           mockHasSubscription()(Right(HttpResponse(400)))
-          await(service.hasSubscription().value).isLeft shouldBe true
+          await(service.hasFailedCgtEnrolment().value).isLeft shouldBe true
         }
 
         "there is no JSON in the body of the http response" in {
           mockHasSubscription()(Right(HttpResponse(200)))
-          await(service.hasSubscription().value).isLeft shouldBe true
+          await(service.hasFailedCgtEnrolment().value).isLeft shouldBe true
         }
 
       }
@@ -104,12 +104,12 @@ class SubscriptionServiceImplSpec extends WordSpec with Matchers with MockFactor
         )
 
         mockHasSubscription()(Right(HttpResponse(200, Some(jsonBody))))
-        await(service.hasSubscription().value) shouldBe Right(Some(CgtReference(cgtReferenceNumber)))
+        await(service.hasFailedCgtEnrolment().value) shouldBe Right(Some(CgtReference(cgtReferenceNumber)))
       }
 
       "return None if the call comes back with a 204" in {
         mockHasSubscription()(Right(HttpResponse(204)))
-        await(service.hasSubscription().value) shouldBe Right(None)
+        await(service.hasFailedCgtEnrolment().value) shouldBe Right(None)
       }
     }
 

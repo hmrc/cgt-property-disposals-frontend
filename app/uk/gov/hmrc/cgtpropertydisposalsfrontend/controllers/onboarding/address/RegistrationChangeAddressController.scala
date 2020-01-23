@@ -21,14 +21,14 @@ import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, SessionUpdates}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, SessionUpdates}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{AuditAddress, RegistrationContactAddressChangedEvent}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.OnboardingAuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, UKAddressLookupService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -41,7 +41,7 @@ class RegistrationChangeAddressController @Inject()(
   val errorHandler: ErrorHandler,
   val ukAddressLookupService: UKAddressLookupService,
   val sessionStore: SessionStore,
-  val auditService: OnboardingAuditService,
+  val auditService: AuditService,
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   cc: MessagesControllerComponents,
@@ -69,22 +69,19 @@ class RegistrationChangeAddressController @Inject()(
     }
 
   def updateAddress(journey: RegistrationReady, address: Address, isManuallyEnteredAddress: Boolean)(
-    implicit hc: HeaderCarrier
+    implicit hc: HeaderCarrier,
+    request: Request[_]
   ): EitherT[Future, Error, RegistrationReady] = {
-
-    val auditPath = address match {
-      case Address.UkAddress(line1, line2, town, county, postcode) =>
-        routes.RegistrationChangeAddressController.enterUkAddressSubmit().url
-      case Address.NonUkAddress(line1, line2, line3, line4, postcode, country) =>
-        routes.RegistrationChangeAddressController.enterNonUkAddressSubmit().url
-    }
-
-    auditService.sendRegistrationContactAddressChangedEvent(
-      journey.registrationDetails.address,
-      address,
-      isManuallyEnteredAddress,
-      auditPath
+    auditService.sendEvent(
+      "registrationContactAddressChanged",
+      RegistrationContactAddressChangedEvent(
+        AuditAddress.fromAddress(journey.registrationDetails.address),
+        AuditAddress.fromAddress(address),
+        if (isManuallyEnteredAddress) "manual-entry" else "postcode-lookup"
+      ),
+      "registration-contact-address-changed"
     )
+
     EitherT.pure[Future, Error](journey.copy(registrationDetails = journey.registrationDetails.copy(address = address)))
   }
 

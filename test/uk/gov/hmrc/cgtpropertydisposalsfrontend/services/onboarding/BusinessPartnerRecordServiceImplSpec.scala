@@ -25,6 +25,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.onboarding.CGTPropertyDisposalsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, BusinessPartnerRecordResponse}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -81,7 +82,7 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
 
       "return the bpr when the http response comes back with status 200 and " +
         "the json body returns a bpr" in {
-        val response = BusinessPartnerRecordResponse(Some(bpr))
+        val response = BusinessPartnerRecordResponse(Some(bpr), None)
 
         mockGetBPR(bprRequest)(Right(HttpResponse(200, Some(Json.toJson(response)))))
 
@@ -90,7 +91,7 @@ class BusinessPartnerRecordServiceImplSpec extends WordSpec with Matchers with M
 
       "return nothing when the http response comes back with status 200 and " +
         "the json body does not contain a bpr" in {
-        val response = BusinessPartnerRecordResponse(Some(bpr))
+        val response = BusinessPartnerRecordResponse(Some(bpr), Some(sample[CgtReference]))
 
         mockGetBPR(bprRequest)(Right(HttpResponse(200, Some(Json.toJson(response)))))
 

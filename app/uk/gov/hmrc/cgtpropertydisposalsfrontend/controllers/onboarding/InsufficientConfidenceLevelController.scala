@@ -27,17 +27,19 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.InsufficientConfidenceLevelController._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.TryingToGetIndividualsFootprint
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, SAUTR}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, SubscriptionStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{HandOffTIvEvent, WrongGGAccountEvent}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.{IndividualNameMatchDetails, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, NameMatchError, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, JourneyStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.onboarding.BusinessPartnerRecordNameMatchRetryStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPartnerRecordNameMatchRetryService, OnboardingAuditService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.BusinessPartnerRecordNameMatchRetryService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
@@ -47,13 +49,13 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class InsufficientConfidenceLevelController @Inject()(
+class InsufficientConfidenceLevelController @Inject() (
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
   val config: Configuration,
-  auditService: OnboardingAuditService,
+  auditService: AuditService,
   bprNameMatchService: BusinessPartnerRecordNameMatchRetryService,
   sautrNameMatchRetryStore: BusinessPartnerRecordNameMatchRetryStore,
   doYouHaveANinoPage: views.html.onboarding.do_you_have_a_nino,
@@ -78,12 +80,13 @@ class InsufficientConfidenceLevelController @Inject()(
       case _                                        => Redirect(controllers.routes.StartController.start())
     }
 
-  def doYouHaveNINO(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request: RequestWithSessionData[AnyContent] =>
-    withInsufficientConfidenceLevelUser {
-      case TryingToGetIndividualsFootprint(hasNino, _, _, _) =>
-        val form                         = hasNino.fold(haveANinoForm)(haveANinoForm.fill)
-        Ok(doYouHaveANinoPage(form))
-    }
+  def doYouHaveNINO(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request: RequestWithSessionData[AnyContent] =>
+      withInsufficientConfidenceLevelUser {
+        case TryingToGetIndividualsFootprint(hasNino, _, _, _) =>
+          val form = hasNino.fold(haveANinoForm)(haveANinoForm.fill)
+          Ok(doYouHaveANinoPage(form))
+      }
   }
 
   def doYouHaveNINOSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
@@ -91,9 +94,7 @@ class InsufficientConfidenceLevelController @Inject()(
       InsufficientConfidenceLevelController.haveANinoForm
         .bindFromRequest()
         .fold(
-          e => {
-            BadRequest(doYouHaveANinoPage(e))
-          },
+          e => BadRequest(doYouHaveANinoPage(e)),
           hasNino =>
             updateSession(sessionStore, request)(
               _.copy(journeyStatus = Some(insufficientConfidenceLevel.copy(hasNino = Some(hasNino))))
@@ -104,7 +105,11 @@ class InsufficientConfidenceLevelController @Inject()(
 
               case Right(_) =>
                 if (hasNino) {
-                  auditService.sendHandOffToIvEvent(insufficientConfidenceLevel.ggCredId, redirectToIvUrl)
+                  auditService.sendEvent(
+                    "handOffToIv",
+                    HandOffTIvEvent(insufficientConfidenceLevel.ggCredId.value, request.uri),
+                    "handoff-to-iv"
+                  )
                   redirectToIv
                 } else {
                   Redirect(routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr())
@@ -134,9 +139,7 @@ class InsufficientConfidenceLevelController @Inject()(
         hasSaUtrForm
           .bindFromRequest()
           .fold(
-            e => {
-              BadRequest(doYouHaveAnSaUtrPage(e, routes.InsufficientConfidenceLevelController.doYouHaveNINO()))
-            },
+            e => BadRequest(doYouHaveAnSaUtrPage(e, routes.InsufficientConfidenceLevelController.doYouHaveNINO())),
             hasSautr =>
               updateSession(sessionStore, request)(
                 _.copy(journeyStatus = Some(insufficientConfidenceLevel.copy(hasSautr = Some(hasSautr))))
@@ -188,10 +191,14 @@ class InsufficientConfidenceLevelController @Inject()(
               unsuccessfulAttempts <- bprNameMatchService.getNumberOfUnsuccessfulAttempts[IndividualNameMatchDetails](
                                        insufficientConfidenceLevel.ggCredId
                                      )
-              bpr <- {
+              bprWithCgtReference <- {
                 InsufficientConfidenceLevelController.sautrAndNameForm
                   .bindFromRequest()
-                  .fold[EitherT[Future, NameMatchError[IndividualNameMatchDetails], BusinessPartnerRecord]](
+                  .fold[EitherT[
+                    Future,
+                    NameMatchError[IndividualNameMatchDetails],
+                    (BusinessPartnerRecord, Option[CgtReference])
+                  ]](
                     e => EitherT.fromEither[Future](Left(NameMatchError.ValidationError(e))), {
                       individualNameMatchDetails =>
                         attemptNameMatchAndUpdateSession(
@@ -203,12 +210,23 @@ class InsufficientConfidenceLevelController @Inject()(
                     }
                   )
               }
-            } yield bpr
+            } yield bprWithCgtReference
 
           result
             .fold(
-              handleNameMatchError,
-              _ => Redirect(controllers.routes.StartController.start())
+              handleNameMatchError, {
+                case (_, maybeCgtReference) =>
+                  Redirect(
+                    maybeCgtReference.fold(controllers.routes.StartController.start()){ cgtReference =>
+                      auditService.sendEvent(
+                        "accessWithWrongGGAccount",
+                        WrongGGAccountEvent(Some(cgtReference.value), insufficientConfidenceLevel.ggCredId.value),
+                        "access-with-wrong-gg-account"
+                      )
+                      routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount()
+                    }
+                  )
+              }
             )
 
         case _ =>
@@ -242,28 +260,36 @@ class InsufficientConfidenceLevelController @Inject()(
   )(
     implicit hc: HeaderCarrier,
     request: RequestWithSessionData[_]
-  ): EitherT[Future, NameMatchError[IndividualNameMatchDetails], BusinessPartnerRecord] =
+  ): EitherT[Future, NameMatchError[IndividualNameMatchDetails], (BusinessPartnerRecord, Option[CgtReference])] =
     for {
-      bpr <- bprNameMatchService
-              .attemptBusinessPartnerRecordNameMatch(
-                individualNameMatchDetails,
-                ggCredId,
-                previousUnsuccessfulAttempt
-              )
-              .subflatMap(
-                bpr =>
-                  if (bpr.name.isLeft) {
-                    Left(NameMatchError.BackendError(Error("Found BPR for trust but expected one for an individual")))
-                  } else {
-                    Right(bpr)
-                  }
-              )
+      bprWithCgtReference <- bprNameMatchService
+                              .attemptBusinessPartnerRecordNameMatch(
+                                individualNameMatchDetails,
+                                ggCredId,
+                                previousUnsuccessfulAttempt
+                              )
+                              .subflatMap {
+                                case (bpr, cgtReference) =>
+                                  if (bpr.name.isLeft) {
+                                    Left(
+                                      NameMatchError
+                                        .BackendError(Error("Found BPR for trust but expected one for an individual"))
+                                    )
+                                  } else {
+                                    Right(bpr -> cgtReference)
+                                  }
+                              }
       _ <- EitherT(
             updateSession(sessionStore, request)(
-              _.copy(journeyStatus = Some(SubscriptionStatus.SubscriptionMissingData(bpr, None, ggCredId, ggEmail)))
+              _.copy(journeyStatus = Some(
+                bprWithCgtReference._2.fold[JourneyStatus](
+                  SubscriptionStatus.SubscriptionMissingData(bprWithCgtReference._1, None, ggCredId, ggEmail)
+                )(cgtReference => AlreadySubscribedWithDifferentGGAccount(ggCredId, Some(cgtReference)))
+              )
+              )
             )
           ).leftMap[NameMatchError[IndividualNameMatchDetails]](NameMatchError.BackendError)
-    } yield bpr
+    } yield bprWithCgtReference
 
   private def handleNameMatchError(
     nameMatchError: NameMatchError[IndividualNameMatchDetails]

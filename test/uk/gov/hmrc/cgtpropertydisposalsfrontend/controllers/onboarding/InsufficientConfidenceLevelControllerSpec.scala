@@ -23,17 +23,17 @@ import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.libs.json.{Reads, Writes}
-import play.api.mvc.Result
+import play.api.mvc.{Request, Result}
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, SAUTR}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.IndividualNameMatchDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, NameMatchError, UnsuccessfulNameMatchAttempts}
@@ -90,7 +90,7 @@ class InsufficientConfidenceLevelControllerSpec
     name: IndividualName,
     ggCredId: GGCredId,
     previousUnsuccessfulNameMatchAttempts: Option[UnsuccessfulNameMatchAttempts[IndividualNameMatchDetails]]
-  )(result: Either[NameMatchError[IndividualNameMatchDetails], BusinessPartnerRecord]) =
+  )(result: Either[NameMatchError[IndividualNameMatchDetails], (BusinessPartnerRecord, Option[CgtReference])]) =
     (
       mockBprNameMatchService
         .attemptBusinessPartnerRecordNameMatch[IndividualNameMatchDetails](
@@ -100,13 +100,14 @@ class InsufficientConfidenceLevelControllerSpec
         )(
           _: Writes[IndividualNameMatchDetails],
           _: ExecutionContext,
-          _: HeaderCarrier
+          _: HeaderCarrier,
+          _: Request[_]
         )
       )
-      .expects(IndividualNameMatchDetails(name, sautr), ggCredId, previousUnsuccessfulNameMatchAttempts, *, *, *)
+      .expects(IndividualNameMatchDetails(name, sautr), ggCredId, previousUnsuccessfulNameMatchAttempts, *, *, *, *)
       .returning(EitherT.fromEither[Future](result))
 
-  def session(subscriptionStatus: SubscriptionStatus) =
+  def session(subscriptionStatus: JourneyStatus): SessionData =
     SessionData.empty.copy(journeyStatus = Some(subscriptionStatus))
 
   val name = IndividualName("name", "surname")
@@ -882,7 +883,7 @@ class InsufficientConfidenceLevelControllerSpec
             mockGetSession(Future.successful(Right(Some(expectedSessionData))))
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(Some(previousUnsuccessfulNameMatchAttempt)))
             mockAttemptNameMatch(validSautr, validName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
-              Right(bpr)
+              Right(bpr -> None)
             )
             mockStoreSession(session(SubscriptionMissingData(bpr, None, ggCredId, None)))(Future.successful(Left(Error(""))))
           }
@@ -902,7 +903,7 @@ class InsufficientConfidenceLevelControllerSpec
             mockGetSession(Future.successful(Right(Some(expectedSessionData))))
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(Some(previousUnsuccessfulNameMatchAttempt)))
             mockAttemptNameMatch(validSautr, validName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
-              Right(bpr.copy(name = Left(TrustName(""))))
+              Right(bpr.copy(name = Left(TrustName(""))) -> None)
             )
           }
 
@@ -920,13 +921,13 @@ class InsufficientConfidenceLevelControllerSpec
 
       "update the session and redirect to the start endpoint" when {
 
-        "the user submits a valid SA UTR and name and a BPR can be retrieved" in {
+        "the user submits a valid SA UTR and name and a BPR can be retrieved and the user does not already have a cgt reference" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(expectedSessionData))))
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(Some(previousUnsuccessfulNameMatchAttempt)))
             mockAttemptNameMatch(validSautr, validName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
-              Right(bpr)
+              Right(bpr -> None)
             )
             mockStoreSession(session(SubscriptionMissingData(bpr, None, ggCredId, None)))(Future.successful(Right(())))
           }
@@ -938,6 +939,32 @@ class InsufficientConfidenceLevelControllerSpec
           )
 
           checkIsRedirect(result, uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
+        }
+
+      }
+
+      "update the session and redirect to the already subscribed page" when {
+
+        "the user submits a valid SA UTR and name and a BPR can be retrieved and the user already has a cgt reference" in {
+          val cgtReference = sample[CgtReference]
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+            mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(Some(previousUnsuccessfulNameMatchAttempt)))
+            mockAttemptNameMatch(validSautr, validName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
+              Right(bpr -> Some(cgtReference))
+            )
+            mockStoreSession(session(AlreadySubscribedWithDifferentGGAccount(ggCredId, Some(cgtReference))))(Future.successful(Right(())))
+          }
+
+          val result = performAction(
+            "firstName" -> validName.firstName,
+            "lastName"  -> validName.lastName,
+            "saUtr"     -> validSautr.value
+          )
+
+          checkIsRedirect(result, routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
         }
 
       }

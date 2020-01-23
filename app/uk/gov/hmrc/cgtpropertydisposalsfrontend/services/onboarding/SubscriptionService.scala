@@ -45,7 +45,7 @@ trait SubscriptionService {
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, RegisteredWithoutId]
 
-  def hasSubscription(
+  def hasFailedCgtEnrolment(
     )(implicit hc: HeaderCarrier): EitherT[Future, Error, Option[CgtReference]]
 
   def getSubscribedDetails(cgtReference: CgtReference)(
@@ -92,7 +92,7 @@ class SubscriptionServiceImpl @Inject()(connector: CGTPropertyDisposalsConnector
           Left(Error(s"Call to register without id came back with status ${response.status}"))
       }
 
-  override def hasSubscription(
+  override def hasFailedCgtEnrolment(
     )(implicit hc: HeaderCarrier): EitherT[Future, Error, Option[CgtReference]] =
     connector.getSubscriptionStatus().subflatMap { response =>
       if (response.status === OK)

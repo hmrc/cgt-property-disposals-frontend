@@ -23,12 +23,14 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, Subscribed}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{SubscriptionRequestEvent, WrongGGAccountEvent}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{OnboardingAuditService, SubscriptionService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
@@ -45,7 +47,7 @@ class SubscriptionController @Inject()(
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   val subscriptionDetailsAction: SubscriptionReadyAction,
-  val auditService: OnboardingAuditService,
+  val auditService: AuditService,
   alreadySubscribedWithDifferentGGAccountPage: views.html.onboarding.already_subscribed_with_different_gg_account,
   checkYourDetailsPage: views.html.onboarding.subscription.check_your_details,
   subscribedPage: views.html.onboarding.subscription.subscribed,
@@ -84,6 +86,7 @@ class SubscriptionController @Inject()(
                             registeredWithId = true
                           ),
                           request.subscriptionReady.ggCredId,
+                          None,
                           None
                         )
                       )
@@ -92,7 +95,7 @@ class SubscriptionController @Inject()(
                 case AlreadySubscribed =>
                   updateSession(sessionStore, request)(
                     _.copy(
-                      journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount(request.subscriptionReady.ggCredId))
+                      journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount(request.subscriptionReady.ggCredId, None))
                     )
                   )
               }
@@ -107,17 +110,19 @@ class SubscriptionController @Inject()(
           case SubscriptionSuccessful(cgtReferenceNumber) => {
             logger.info(s"Successfully subscribed with cgt id $cgtReferenceNumber")
             auditService
-              .sendSubscriptionRequestEvent(
-                details,
-                routes.SubscriptionController.checkYourDetailsSubmit().url
+              .sendEvent(
+                "subscriptionRequest",
+                SubscriptionRequestEvent.fromSubscriptionDetails(details),
+                "subscription-request"
               )
             Redirect(routes.SubscriptionController.subscribed())
           }
           case AlreadySubscribed =>
             logger.info("Response to subscription request indicated that the user has already subscribed to cgt")
-            auditService.sendAccessWithWrongGGAccountEvent(
-              request.subscriptionReady.ggCredId,
-              routes.SubscriptionController.checkYourDetailsSubmit().url
+            auditService.sendEvent(
+              "accessWithWrongGGAccount",
+              WrongGGAccountEvent(None, request.subscriptionReady.ggCredId.value),
+              "access-with-wrong-gg-account"
             )
             Redirect(routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
         }
@@ -126,16 +131,16 @@ class SubscriptionController @Inject()(
 
   def subscribed(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
     request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(Subscribed(accountDetails, _, _)) => Ok(subscribedPage(accountDetails))
-      case _                                      => Redirect(controllers.routes.StartController.start())
+      case Some(Subscribed(accountDetails, _, _, _)) => Ok(subscribedPage(accountDetails))
+      case _                                         => Redirect(controllers.routes.StartController.start())
     }
   }
 
   def alreadySubscribedWithDifferentGGAccount(): Action[AnyContent] = authenticatedActionWithSessionData {
     implicit request =>
       request.sessionData.flatMap(_.journeyStatus) match {
-        case Some(AlreadySubscribedWithDifferentGGAccount(_)) => Ok(alreadySubscribedWithDifferentGGAccountPage())
-        case _                                                => Redirect(controllers.routes.StartController.start())
+        case Some(AlreadySubscribedWithDifferentGGAccount(_,_)) => Ok(alreadySubscribedWithDifferentGGAccountPage())
+        case _                                                  => Redirect(controllers.routes.StartController.start())
       }
   }
 
