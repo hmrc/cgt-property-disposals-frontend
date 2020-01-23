@@ -40,7 +40,7 @@ backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.component
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
 
- @backLinkComponent(controllers.returns.triage.routes.CanTheyUseOurServiceController.howManyProperties())
+ @backLinkComponent(controllers.returns.triage.routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty())
 
  @if(hasErrors) {
   @errorSummary(form)
