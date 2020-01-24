@@ -31,7 +31,7 @@ dateInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.date_i
 backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@(form: Form[DisposalDate])(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(form: Form[DisposalDate], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"disposalDate"}
 @hasErrors = @{form.hasErrors}
@@ -40,7 +40,7 @@ backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.component
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
 
- @backLinkComponent(controllers.returns.triage.routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty())
+ @backLinkComponent(backLink)
 
  @if(hasErrors) {
   @errorSummary(form)

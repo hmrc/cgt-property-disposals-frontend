@@ -29,7 +29,7 @@
 
 )
 
-@(form: Form[Boolean])(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(form: Form[Boolean], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"wereYouAUKResident"}
 @title = @{messages("wereYouAUKResident.title")}
@@ -38,7 +38,7 @@
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
 
-    @backLinkComponent(controllers.returns.triage.routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty())
+    @backLinkComponent(backLink)
 
     @if(hasErrors) {
         @errorSummary(form)

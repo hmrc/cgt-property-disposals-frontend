@@ -29,7 +29,7 @@ radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio
 backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@(form: Form[IndividualUserType])(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[IndividualUserType], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"individualUserType"}
 @title = @{messages("who-are-you-reporting-for.title")}
@@ -52,7 +52,7 @@ backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.component
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
 
-    @backLinkComponent(controllers.accounts.homepage.routes.HomePageController.homepage())
+    @backLinkComponent(backLink)
 
     @if(hasErrors) {
         @errorSummary(form)
