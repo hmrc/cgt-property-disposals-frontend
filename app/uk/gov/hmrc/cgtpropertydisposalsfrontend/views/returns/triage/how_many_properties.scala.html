@@ -64,7 +64,8 @@
             label = pageHeading(title, Some(messages("triage.caption"))),
             labelAsHeading = true,
             errorKey = form.error(key).map(e => e.message),
-            hasErrors = hasErrors
+            hasErrors = hasErrors,
+            helpText = Some(Html(messages("numberOfProperties.helpText")))
         )
 
         @submitButton(messages("button.continue"))

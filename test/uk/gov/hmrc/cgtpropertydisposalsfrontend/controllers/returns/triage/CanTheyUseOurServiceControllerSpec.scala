@@ -337,7 +337,7 @@ class CanTheyUseOurServiceControllerSpec
             contentAsString(result) shouldBe "multiple disposals not handled yet"
           }),
           (List("numberOfProperties" -> "0"), NumberOfProperties.One, { result: Future[Result] =>
-            checkIsRedirect(result, routes.CanTheyUseOurServiceController.whenWasDisposalDate())
+            checkIsRedirect(result, routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty())
           })
         )
       )
