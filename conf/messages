@@ -522,3 +522,18 @@ disposalDate-month.error.monthAndYearRequired=Contract exchange date must includ
 disposalDate-day.error.dayAndYearRequired=Contract exchange date must include a day and a year
 disposalDate-day.error.dayAndMonthRequired=Contract exchange date must include a day and a month
 
+completionDate.title=What was the ‘completion’ date when you sold the property?
+completionDate.helpText=This is when the keys are handed over and the buyer can move in. It’s when you received the money from the property sale. For example, 25 4 2020
+completionDate.link=<a href="{0}" target="_blank">Find out what happens on the ‘completion’ date (opens in a new window)</a>.
+completionDate.error.required=Enter a completion date
+completionDate.error.invalid=Enter a real completion date
+completionDate.error.tooFarInPast=The completion date must be the same as or after the contract exchange date
+completionDate-day.error.required=Completion date must include a day
+completionDate-month.error.required=Completion date must include a month
+completionDate-year.error.required=Completion date must include a year
+completionDate-day.error.invalid=Enter a real completion date
+completionDate-month.error.invalid=Enter a real completion date
+completionDate-year.error.invalid=Enter a real completion date
+completionDate-month.error.monthAndYearRequired=Completion date must include a month and a year
+completionDate-day.error.dayAndYearRequired=Completion date must include a day and a year
+completionDate-day.error.dayAndMonthRequired=Completion date must include a day and a month

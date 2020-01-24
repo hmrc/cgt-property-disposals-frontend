@@ -186,7 +186,8 @@ object JourneyStatusController {
           disposalMethod,
           wasAUKResident,
           disposedOfResidentialProperty,
-          disposalDate.map(DisposalDate(_))
+          disposalDate.map(DisposalDate(_)),
+          None
         )
     } { i =>
       Some(
