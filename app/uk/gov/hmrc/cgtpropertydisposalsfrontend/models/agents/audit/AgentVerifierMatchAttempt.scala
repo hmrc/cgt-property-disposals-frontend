@@ -22,7 +22,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber
 
 final case class AgentVerifierMatchAttempt(
   agentReferenceNumber: AgentReferenceNumber,
-  cgtReference: CgtReference,
+  clientCgtReference: CgtReference,
   attemptsMade: Int,
   maxAttempts: Int,
   attemptedVerifier: Either[Country, Postcode],
