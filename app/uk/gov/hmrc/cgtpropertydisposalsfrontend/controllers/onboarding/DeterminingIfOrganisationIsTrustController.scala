@@ -369,7 +369,7 @@ object DeterminingIfOrganisationIsTrustController {
       }
     )
 
-  implicit class TRNAndTrustNameFormOps(val form: Form[TrustNameMatchDetails]) extends AnyVal {
+  implicit class TRNAndTrustNameFormOps(private val form: Form[TrustNameMatchDetails]) extends AnyVal {
 
     def withUnsuccessfulAttemptsError(
       numberOfUnsuccessfulNameMatchAttempts: UnsuccessfulNameMatchAttempts[TrustNameMatchDetails]

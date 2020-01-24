@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services
 
-import java.time.LocalDateTime
 
 import cats.data.EitherT
 import cats.instances.future._

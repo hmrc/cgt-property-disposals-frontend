@@ -31,6 +31,6 @@ object DisposalMethod {
   implicit val eq: Eq[DisposalMethod] = Eq.fromUniversalEquals
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[DisposalMethod] = derived.oformat[DisposalMethod]
+  implicit val format: OFormat[DisposalMethod] = derived.oformat()
 
 }

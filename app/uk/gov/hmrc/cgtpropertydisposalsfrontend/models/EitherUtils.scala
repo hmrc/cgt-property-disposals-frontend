@@ -37,7 +37,7 @@ object EitherUtils {
     }
 
 
-  implicit class EitherOps[A,B](val e: Either[A,B]) extends AnyVal {
+  implicit class EitherOps[A,B](private val e: Either[A,B]) extends AnyVal {
 
     @SuppressWarnings(Array("org.wartremover.warts.Any"))
     // go from Either[F[C],B] to F[Either[C,B]]

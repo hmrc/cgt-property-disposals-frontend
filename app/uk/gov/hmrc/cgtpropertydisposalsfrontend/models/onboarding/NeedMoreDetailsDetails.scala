@@ -33,7 +33,7 @@ object NeedMoreDetailsDetails {
     case object Organisation extends AffinityGroup
 
     @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-    implicit val format: OFormat[AffinityGroup] = derived.oformat[AffinityGroup]
+    implicit val format: OFormat[AffinityGroup] = derived.oformat()
 
   }
 

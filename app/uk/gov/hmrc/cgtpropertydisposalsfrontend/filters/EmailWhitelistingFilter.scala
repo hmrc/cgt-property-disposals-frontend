@@ -26,8 +26,6 @@ import play.api.Configuration
 import play.api.mvc.Results.Redirect
 import play.api.mvc.{Call, Filter, RequestHeader, Result}
 import uk.gov.hmrc.auth.otac.{OtacAuthConnector, OtacAuthorisationFunctions}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.http.{HeaderCarrier, SessionKeys}
 import uk.gov.hmrc.play.HeaderCarrierConverter

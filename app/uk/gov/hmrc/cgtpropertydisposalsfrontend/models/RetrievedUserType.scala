@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, GGCredId, NINO, SAUTR}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 
 sealed trait RetrievedUserType extends Product with Serializable
@@ -29,9 +29,11 @@ object RetrievedUserType {
     ggCredId: GGCredId
   ) extends RetrievedUserType
 
+
   final case class Trust(sautr: SAUTR, email: Option[Email], ggCredId: GGCredId) extends RetrievedUserType
 
   final case class OrganisationUnregisteredTrust(email: Option[Email], ggCredId: GGCredId) extends RetrievedUserType
+
 
   final case class IndividualWithInsufficientConfidenceLevel(
     nino: Option[NINO],
@@ -40,16 +42,20 @@ object RetrievedUserType {
     ggCredId: GGCredId
   ) extends RetrievedUserType
 
+
   final case class Subscribed(
     cgtReference: CgtReference,
     ggCredId: GGCredId
   ) extends RetrievedUserType
+
 
   final case class Agent(
     GGCredId: GGCredId,
     agentReferenceNumber: AgentReferenceNumber
   ) extends RetrievedUserType
 
+
   final case class NonGovernmentGatewayRetrievedUser(authProvider: String) extends RetrievedUserType
+
 
 }

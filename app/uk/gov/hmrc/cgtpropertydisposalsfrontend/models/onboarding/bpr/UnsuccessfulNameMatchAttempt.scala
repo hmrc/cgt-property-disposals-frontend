@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr
 
 import cats.Eq
-import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat, Reads, Writes}
 import UnsuccessfulNameMatchAttempts.NameMatchDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{SAUTR, TRN}

@@ -26,7 +26,7 @@ import cats.syntax.eq._
 import cats.syntax.traverse._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.OK
-import play.api.libs.json.{JsResult, JsValue, Json, Reads}
+import play.api.libs.json.{JsResult, JsValue, Json, OFormat, Reads}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.AddressLookupConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
@@ -112,15 +112,20 @@ object UKAddressLookupServiceImpl {
     postcode: String
   )
 
+  object RawAddress{
+    implicit val format: OFormat[RawAddress] = Json.format[RawAddress]
+  }
+
   final case class AddressLookupResponse(addresses: List[RawAddress])
 
   implicit val addressLookupResponseReads: Reads[AddressLookupResponse] =
     new Reads[AddressLookupResponse] {
-      case class Inner(address: RawAddress)
 
-      implicit val rawAddressReads: Reads[RawAddress] = Json.reads
+      final case class Inner(address: RawAddress)
 
-      implicit val innerReads: Reads[Inner] = Json.reads[Inner]
+      object Inner{
+        implicit val format: OFormat[Inner] = Json.format[Inner]
+      }
 
       override def reads(json: JsValue): JsResult[AddressLookupResponse] =
         json

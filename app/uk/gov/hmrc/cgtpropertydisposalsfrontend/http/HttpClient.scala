@@ -31,7 +31,7 @@ object HttpClient {
 
   private val rawHttpReads = new RawHttpReads
 
-  implicit class HttpClientOps(val http: uk.gov.hmrc.play.bootstrap.http.HttpClient) extends AnyVal {
+  implicit class HttpClientOps(private val http: uk.gov.hmrc.play.bootstrap.http.HttpClient) extends AnyVal {
     def get(
       url: String,
       queryParams: Map[String, String] = Map.empty[String, String],

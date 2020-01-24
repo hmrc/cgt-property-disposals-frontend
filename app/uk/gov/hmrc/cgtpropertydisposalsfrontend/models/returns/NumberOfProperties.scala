@@ -31,6 +31,6 @@ object NumberOfProperties {
   implicit val eq: Eq[NumberOfProperties] = Eq.fromUniversalEquals
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[NumberOfProperties] = derived.oformat[NumberOfProperties]
+  implicit val format: OFormat[NumberOfProperties] = derived.oformat()
 
 }

@@ -203,7 +203,7 @@ object JourneyStatusController {
     }
   )
 
-  implicit class MapOps[A, B](val m: Map[A, B]) extends AnyVal {
+  implicit class MapOps[A, B](private val m: Map[A, B]) extends AnyVal {
 
     def getKey(b: B)(implicit eq: Eq[B]): Option[A] = m.find(_._2 === b).map(_._1)
 

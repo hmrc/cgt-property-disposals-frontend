@@ -34,7 +34,7 @@ object IndividualName {
     case (n1, n2) => n1.firstName === n2.firstName && n1.lastName === n2.lastName
   }
 
-  implicit class IndividualNameOps(val name: IndividualName) extends AnyVal {
+  implicit class IndividualNameOps(private val name: IndividualName) extends AnyVal {
     def makeSingleName(): String = name.firstName + " " + name.lastName
   }
 

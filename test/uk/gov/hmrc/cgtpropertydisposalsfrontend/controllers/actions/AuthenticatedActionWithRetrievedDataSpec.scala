@@ -20,7 +20,7 @@ import cats.data.EitherT
 import julienrf.json.derived
 import org.scalamock.scalatest.MockFactory
 import play.api.i18n.MessagesApi
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{Json, Writes}
 import play.api.mvc.Results.Ok
 import play.api.mvc.{MessagesRequest, Result}
 import play.api.test.FakeRequest
@@ -63,9 +63,9 @@ class AuthenticatedActionWithRetrievedDataSpec
       .expects(*)
       .returning(EitherT(Future.successful(response)))
 
-  implicit val ninoFormat: OFormat[NINO]                  = Json.format[NINO]
-  implicit val sautrFormat: OFormat[SAUTR]                = Json.format[SAUTR]
-  implicit val userTypeFormat: OFormat[RetrievedUserType] = derived.oformat[RetrievedUserType]
+  implicit val userTypeFormat: Writes[RetrievedUserType] = derived.owrites()
+
+  def toJson(retrievedUserType: RetrievedUserType) = userTypeFormat.writes(retrievedUserType)
 
   def performAction[A](r: FakeRequest[A]): Future[Result] = {
     @SuppressWarnings(Array("org.wartremover.warts.Any"))
@@ -115,7 +115,7 @@ class AuthenticatedActionWithRetrievedDataSpec
         val result = performAction(FakeRequest())
 
         status(result)        shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(RetrievedUserType.NonGovernmentGatewayRetrievedUser(providerType))
+        contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](RetrievedUserType.NonGovernmentGatewayRetrievedUser(providerType))
       }
 
     }
@@ -133,10 +133,9 @@ class AuthenticatedActionWithRetrievedDataSpec
         val result = performAction(FakeRequest())
 
         status(result) shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(
+        contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](
           RetrievedUserType.Subscribed(CgtReference("XCGT123456789"), GGCredId("id"))
         )
-
       }
     }
 
@@ -183,10 +182,9 @@ class AuthenticatedActionWithRetrievedDataSpec
         val result = performAction(FakeRequest())
 
         status(result) shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(
+        contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](
           RetrievedUserType.Subscribed(CgtReference("XCGT123456789"), GGCredId("id"))
         )
-
       }
     }
 
@@ -213,8 +211,7 @@ class AuthenticatedActionWithRetrievedDataSpec
         val result = performAction(FakeRequest())
 
         status(result)        shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(expectedRetrieval)
-
+        contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](expectedRetrieval)
       }
     }
 
@@ -355,7 +352,7 @@ class AuthenticatedActionWithRetrievedDataSpec
           val result = performAction(FakeRequest())
 
           status(result)        shouldBe OK
-          contentAsJson(result) shouldBe Json.toJson(expectedRetrieval)
+          contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](expectedRetrieval)
         }
 
       }
@@ -395,7 +392,7 @@ class AuthenticatedActionWithRetrievedDataSpec
         val result = performAction(FakeRequest())
 
         status(result) shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(
+        contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](
           RetrievedUserType.OrganisationUnregisteredTrust(Some(Email("email")), GGCredId(ggCredentials.providerId))
         )
       }
@@ -443,7 +440,7 @@ class AuthenticatedActionWithRetrievedDataSpec
 
           val result = performAction(FakeRequest())
           status(result)        shouldBe OK
-          contentAsJson(result) shouldBe Json.toJson(RetrievedUserType.Trust(sautr, Some(Email("email")), ggCredId))
+          contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](RetrievedUserType.Trust(sautr, Some(Email("email")), ggCredId))
         }
 
       }
@@ -469,7 +466,7 @@ class AuthenticatedActionWithRetrievedDataSpec
 
         val result = performAction(FakeRequest())
         status(result)        shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(RetrievedUserType.Trust(sautr, None, ggCredId))
+        contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](RetrievedUserType.Trust(sautr, None, ggCredId))
       }
 
     }
@@ -498,7 +495,7 @@ class AuthenticatedActionWithRetrievedDataSpec
 
         val result = performAction(FakeRequest())
         status(result)        shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(expectedRetrieval)
+        contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](expectedRetrieval)
       }
     }
 
@@ -523,7 +520,7 @@ class AuthenticatedActionWithRetrievedDataSpec
 
         val result = performAction(FakeRequest())
         status(result)        shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(expectedRetrieval)
+        contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](expectedRetrieval)
       }
     }
 
@@ -551,9 +548,7 @@ class AuthenticatedActionWithRetrievedDataSpec
                 mockHasSubscription()(Right(None))
               }
 
-              val result = performAction(FakeRequest())
-              status(result) shouldBe OK
-              contentAsJson(result) shouldBe Json.toJson(
+              val json = Json.toJson[RetrievedUserType](
                 RetrievedUserType.IndividualWithInsufficientConfidenceLevel(
                   mayBeNino,
                   None,
@@ -561,6 +556,10 @@ class AuthenticatedActionWithRetrievedDataSpec
                   GGCredId(ggCredentials.providerId)
                 )
               )
+
+              val result = performAction(FakeRequest())
+              status(result) shouldBe OK
+              contentAsJson(result) shouldBe json
             }
           }
 
@@ -579,7 +578,7 @@ class AuthenticatedActionWithRetrievedDataSpec
 
           val result = performAction(FakeRequest())
           status(result) shouldBe OK
-          contentAsJson(result) shouldBe Json.toJson(
+          contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](
             RetrievedUserType.IndividualWithInsufficientConfidenceLevel(
               None,
               None,
@@ -587,7 +586,6 @@ class AuthenticatedActionWithRetrievedDataSpec
               GGCredId(ggCredentials.providerId)
             )
           )
-
         }
 
       }

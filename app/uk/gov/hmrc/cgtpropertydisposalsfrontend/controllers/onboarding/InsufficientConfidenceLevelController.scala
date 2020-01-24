@@ -349,7 +349,7 @@ object InsufficientConfidenceLevelController {
       }
     )
 
-  implicit class SAUTRAndNameFormOps(val form: Form[IndividualNameMatchDetails]) extends AnyVal {
+  implicit class SAUTRAndNameFormOps(private val form: Form[IndividualNameMatchDetails]) extends AnyVal {
 
     def withUnsuccessfulAttemptsError(
       numberOfUnsuccessfulNameMatchAttempts: UnsuccessfulNameMatchAttempts[IndividualNameMatchDetails]

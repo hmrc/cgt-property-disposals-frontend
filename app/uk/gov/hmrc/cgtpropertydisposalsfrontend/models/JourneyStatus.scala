@@ -129,7 +129,7 @@ object JourneyStatus {
   final case object NonGovernmentGatewayJourney extends JourneyStatus
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[JourneyStatus] = derived.oformat[JourneyStatus]
+  implicit val format: OFormat[JourneyStatus] = derived.oformat()
 
   implicit val eq: Eq[JourneyStatus] = Eq.fromUniversalEquals
 

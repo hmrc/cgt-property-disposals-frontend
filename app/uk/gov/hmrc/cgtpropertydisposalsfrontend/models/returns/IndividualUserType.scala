@@ -33,6 +33,6 @@ object IndividualUserType {
   implicit val eq: Eq[IndividualUserType] = Eq.fromUniversalEquals
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[IndividualUserType] = derived.oformat
+  implicit val format: OFormat[IndividualUserType] = derived.oformat()
 
 }

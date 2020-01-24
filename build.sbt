@@ -6,6 +6,9 @@ import wartremover.{Wart, wartremoverErrors, wartremoverExcluded}
 
 val appName = "cgt-property-disposals-frontend"
 
+addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt")
+addCommandAlias("check", "all scalafmtSbtCheck scalafmtCheck test:scalafmtCheck")
+
 lazy val wartremoverSettings =
   Seq(
     wartremoverErrors in (Compile, compile) ++= Warts.allBut(
@@ -37,16 +40,16 @@ lazy val microservice = Project(appName, file("."))
     SbtAutoBuildPlugin,
     SbtGitVersioning,
     SbtDistributablesPlugin,
-    SbtArtifactory,
-    ScalafmtCorePlugin
+    SbtArtifactory
   )
   .settings(addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"))
-  .settings(scalaVersion := "2.11.12")
+  .settings(scalaVersion := "2.12.10")
   .settings(
     majorVersion := 1,
+    addCompilerPlugin(scalafixSemanticdb),
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test
   )
-  .settings(scalacOptions ++= Seq("-Ypartial-unification"))
+  .settings(scalacOptions ++= Seq("-Ypartial-unification", "-Yrangepos", "-Ywarn-unused:imports"))
   .settings(publishingSettings: _*)
   .configs(IntegrationTest)
   .settings(integrationTestSettings(): _*)
@@ -55,3 +58,12 @@ lazy val microservice = Project(appName, file("."))
   .settings(scoverageSettings: _*)
   .settings(PlayKeys.playDefaultPort := 7020)
   .settings(scalafmtOnCompile := true)
+
+val akkaVersion     = "2.5.23"
+val akkaHttpVersion = "10.0.15"
+
+dependencyOverrides += "com.typesafe.akka" %% "akka-stream"    % akkaVersion
+dependencyOverrides += "com.typesafe.akka" %% "akka-protobuf"  % akkaVersion
+dependencyOverrides += "com.typesafe.akka" %% "akka-slf4j"     % akkaVersion
+dependencyOverrides += "com.typesafe.akka" %% "akka-actor"     % akkaVersion
+dependencyOverrides += "com.typesafe.akka" %% "akka-http-core" % akkaHttpVersion
