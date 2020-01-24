@@ -21,7 +21,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber
 
 final case class AgentAccessAttempt(
   agentReferenceNumber: AgentReferenceNumber,
-  cgtReference: CgtReference,
+  clientCgtReference: CgtReference,
   success: Boolean
 )
 
