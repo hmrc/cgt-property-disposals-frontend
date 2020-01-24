@@ -17,8 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email
 
 import java.util.UUID
-
-import org.scalacheck.ScalacheckShapeless._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.mvc.Result

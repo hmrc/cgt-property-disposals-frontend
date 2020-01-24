@@ -118,38 +118,12 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val s3Url        = s"https://bucketname.s3.eu-west-2.amazonaws.com"
-    val cgtReference = sample[CgtReference]
-    val callBackUrl  = s"http://localhost:7020/capital-gains-tax-uk-property/upscan-call-back/cgt-reference/${cgtReference.value}"
 
     val parts: Source[MultipartFormData.Part[Source[ByteString, _]], _] =
       Source.apply(Map("key" -> List("V1")).flatMap {
         case (key, values) =>
           values.map(value => MultipartFormData.DataPart(key, value): MultipartFormData.Part[Source[ByteString, _]])
       })
-
-    val S3_4xx = new AhcWSResponse(
-      new Response.ResponseBuilder()
-        .accumulate(new CacheableHttpResponseStatus(Uri.create(callBackUrl), 400, "status text", "protocols!"))
-        .accumulate(new CacheableHttpResponseHeaders(false, new DefaultHttpHeaders().add("My-Header", "value")))
-        .accumulate(new CacheableHttpResponseBodyPart("error body".getBytes(), true))
-        .build()
-    )
-
-    val S3_5xx = new AhcWSResponse(
-      new Response.ResponseBuilder()
-        .accumulate(new CacheableHttpResponseStatus(Uri.create(callBackUrl), 500, "status text", "protocols!"))
-        .accumulate(new CacheableHttpResponseHeaders(false, new DefaultHttpHeaders().add("My-Header", "value")))
-        .accumulate(new CacheableHttpResponseBodyPart("error body".getBytes(), true))
-        .build()
-    )
-
-    val S3_204 = new AhcWSResponse(
-      new Response.ResponseBuilder()
-        .accumulate(new CacheableHttpResponseStatus(Uri.create(callBackUrl), 204, "status text", "protocols!"))
-        .accumulate(new CacheableHttpResponseHeaders(false, new DefaultHttpHeaders().add("My-Header", "value")))
-        .accumulate(new CacheableHttpResponseBodyPart("error body".getBytes(), true))
-        .build()
-    )
 
     "process unsuccessful responses from S3" in {
       List(

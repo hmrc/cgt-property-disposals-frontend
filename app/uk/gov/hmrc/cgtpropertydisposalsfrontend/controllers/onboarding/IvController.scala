@@ -78,7 +78,7 @@ class IvController @Inject()(
     }
   }
 
-  def retry(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+  def retry(): Action[AnyContent] = authenticatedActionWithSessionData.async { _ =>
     redirectToIv
   }
 

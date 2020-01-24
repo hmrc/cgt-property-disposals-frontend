@@ -113,7 +113,7 @@ class StartController @Inject() (
     }
   }
 
-  def keepAlive(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
+  def keepAlive(): Action[AnyContent] = authenticatedActionWithSessionData { _ =>
     Ok("")
   }
 

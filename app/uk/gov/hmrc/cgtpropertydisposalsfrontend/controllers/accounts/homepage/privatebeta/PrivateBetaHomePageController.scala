@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.privatebeta
 
-
 import com.google.inject.Inject
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
@@ -29,21 +28,21 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
-class PrivateBetaHomePageController @Inject()(
-                                    val authenticatedAction: AuthenticatedAction,
-                                    val sessionDataAction: SessionDataAction,
-                                    errorHandler: ErrorHandler,
-                                    sessionStore: SessionStore,
-                                    cc: MessagesControllerComponents,
-                                    manageYourDetailsPage: views.html.account.manage_your_details,
-                                    homePage: views.html.account.home,
-                                    privateBetaHomePage: views.html.account.home_private_beta,
-                                    detailUpdatedPage: views.html.account.details_updated,
-                                    signedOutPage: views.html.account.signed_out
-                                  )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
-  extends FrontendController(cc)
+class PrivateBetaHomePageController @Inject() (
+  val authenticatedAction: AuthenticatedAction,
+  val sessionDataAction: SessionDataAction,
+  errorHandler: ErrorHandler,
+  sessionStore: SessionStore,
+  cc: MessagesControllerComponents,
+  manageYourDetailsPage: views.html.account.manage_your_details,
+  homePage: views.html.account.home,
+  privateBetaHomePage: views.html.account.home_private_beta,
+  detailUpdatedPage: views.html.account.details_updated,
+  signedOutPage: views.html.account.signed_out
+)(implicit viewConfig: ViewConfig)
+    extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with SessionUpdates
     with Logging {

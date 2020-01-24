@@ -18,9 +18,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils._
-import julienrf.json.derived
-import play.api.libs.json.OFormat
 
 sealed trait RetrievedUserType extends Product with Serializable
 
@@ -32,21 +29,11 @@ object RetrievedUserType {
     ggCredId: GGCredId
   ) extends RetrievedUserType
 
-  object Individual{
-    implicit val format: OFormat[Individual] = derived.oformat()
-  }
 
   final case class Trust(sautr: SAUTR, email: Option[Email], ggCredId: GGCredId) extends RetrievedUserType
 
-  object Trust{
-    implicit val format: OFormat[Trust] = derived.oformat()
-  }
-
   final case class OrganisationUnregisteredTrust(email: Option[Email], ggCredId: GGCredId) extends RetrievedUserType
 
-  object OrganisationUnregisteredTrust{
-    implicit val format: OFormat[OrganisationUnregisteredTrust] = derived.oformat()
-  }
 
   final case class IndividualWithInsufficientConfidenceLevel(
     nino: Option[NINO],
@@ -55,32 +42,20 @@ object RetrievedUserType {
     ggCredId: GGCredId
   ) extends RetrievedUserType
 
-  object IndividualWithInsufficientConfidenceLevel {
-    implicit val format: OFormat[IndividualWithInsufficientConfidenceLevel] = derived.oformat()
-  }
 
   final case class Subscribed(
     cgtReference: CgtReference,
     ggCredId: GGCredId
   ) extends RetrievedUserType
 
-  object Subscribed{
-    implicit val format: OFormat[Subscribed] = derived.oformat()
-  }
 
   final case class Agent(
     GGCredId: GGCredId,
     agentReferenceNumber: AgentReferenceNumber
   ) extends RetrievedUserType
 
-  object Agent{
-    implicit val format: OFormat[Agent] = derived.oformat()
-  }
 
   final case class NonGovernmentGatewayRetrievedUser(authProvider: String) extends RetrievedUserType
 
-  object NonGovernmentGatewayRetrievedUser {
-    implicit val format: OFormat[NonGovernmentGatewayRetrievedUser] = derived.oformat()
-  }
 
 }
