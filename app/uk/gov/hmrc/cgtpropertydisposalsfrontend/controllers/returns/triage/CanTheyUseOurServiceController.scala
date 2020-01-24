@@ -139,7 +139,7 @@ class CanTheyUseOurServiceController @Inject() (
       updateState = { case (numberOfProperties, i) => i.copy(numberOfProperties = Some(numberOfProperties)) },
       nextResult = {
         case NumberOfProperties.One =>
-          Redirect(routes.CanTheyUseOurServiceController.whenWasDisposalDate())
+          Redirect(routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty())
 
         case NumberOfProperties.MoreThanOne =>
           Ok("multiple disposals not handled yet")
