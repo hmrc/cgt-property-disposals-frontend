@@ -31,6 +31,6 @@ object AddressSource {
   implicit val eq: Eq[AddressSource] = Eq.fromUniversalEquals[AddressSource]
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[AddressSource] = derived.oformat[AddressSource]
+  implicit val format: OFormat[AddressSource] = derived.oformat()
 
 }

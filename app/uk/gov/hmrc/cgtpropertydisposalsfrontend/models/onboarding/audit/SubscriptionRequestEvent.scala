@@ -16,10 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit
 
-import cats.syntax.either._
 import cats.syntax.eq._
 import play.api.libs.json.{Json, OFormat}
-import play.api.mvc.Request
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.AddressSource
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactNameSource
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionDetails

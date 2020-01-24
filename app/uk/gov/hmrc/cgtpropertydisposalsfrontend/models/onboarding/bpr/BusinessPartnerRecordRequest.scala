@@ -37,6 +37,6 @@ object BusinessPartnerRecordRequest {
   ) extends BusinessPartnerRecordRequest
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[BusinessPartnerRecordRequest] = derived.oformat[BusinessPartnerRecordRequest]
+  implicit val format: OFormat[BusinessPartnerRecordRequest] = derived.oformat()
 
 }

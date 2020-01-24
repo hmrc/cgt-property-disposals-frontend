@@ -17,12 +17,10 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address
 
 import cats.Eq
-import cats.syntax.either._
 import julienrf.json.derived
 import play.api.data.Forms.{mapping => formMapping, nonEmptyText, number, of, optional, text}
-import play.api.data.format.Formatter
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationResult}
-import play.api.data.{Form, FormError, Mapping}
+import play.api.data.{Form, Mapping}
 import play.api.libs.json.OFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.BooleanFormatter
 
@@ -52,7 +50,7 @@ object Address {
   // the format instance using the play-json-derived-codecs library wraps
   // the case class inside a JsObject with case class type name as the key
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[Address] = derived.oformat
+  implicit val format: OFormat[Address] = derived.oformat()
 
   implicit val eq: Eq[Address] = Eq.fromUniversalEquals
 

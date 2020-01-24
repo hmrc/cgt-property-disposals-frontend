@@ -24,7 +24,7 @@ import scala.util.{Failure, Success, Try}
 
 object HttpResponseOps {
 
-  implicit class HttpResponseOps(val response: HttpResponse) extends AnyVal {
+  implicit class HttpResponseOps(private val response: HttpResponse) extends AnyVal {
 
     def parseJSON[A](path: Option[String] = None)(implicit reads: Reads[A]): Either[String, A] =
       Try(path.fold[JsLookupResult](JsDefined(response.json))(response.json \ _)) match {

@@ -65,7 +65,7 @@ class AuthenticatedActionWithRetrievedDataSpec
 
   implicit val ninoFormat: OFormat[NINO]                  = Json.format[NINO]
   implicit val sautrFormat: OFormat[SAUTR]                = Json.format[SAUTR]
-  implicit val userTypeFormat: OFormat[RetrievedUserType] = derived.oformat[RetrievedUserType]
+  implicit val userTypeFormat: OFormat[RetrievedUserType] = derived.oformat()
 
   def performAction[A](r: FakeRequest[A]): Future[Result] = {
     @SuppressWarnings(Array("org.wartremover.warts.Any"))
@@ -115,7 +115,7 @@ class AuthenticatedActionWithRetrievedDataSpec
         val result = performAction(FakeRequest())
 
         status(result)        shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(RetrievedUserType.NonGovernmentGatewayRetrievedUser(providerType))
+        contentAsJson(result) shouldBe Json.parse("""{"NonGovernmentGatewayRetrievedUser":{"authProvider":"other provider"}}""")
       }
 
     }
@@ -133,9 +133,7 @@ class AuthenticatedActionWithRetrievedDataSpec
         val result = performAction(FakeRequest())
 
         status(result) shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(
-          RetrievedUserType.Subscribed(CgtReference("XCGT123456789"), GGCredId("id"))
-        )
+        contentAsJson(result) shouldBe Json.parse("""{"Subscribed":{"cgtReference":{"value":"XCGT123456789"},"ggCredId":{"value":"id"}}}""")
 
       }
     }
@@ -183,9 +181,7 @@ class AuthenticatedActionWithRetrievedDataSpec
         val result = performAction(FakeRequest())
 
         status(result) shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(
-          RetrievedUserType.Subscribed(CgtReference("XCGT123456789"), GGCredId("id"))
-        )
+        contentAsJson(result) shouldBe Json.parse("""{"Subscribed":{"cgtReference":{"value":"XCGT123456789"},"ggCredId":{"value":"id"}}}""")
 
       }
     }
@@ -213,7 +209,7 @@ class AuthenticatedActionWithRetrievedDataSpec
         val result = performAction(FakeRequest())
 
         status(result)        shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(expectedRetrieval)
+        contentAsJson(result) shouldBe Json.parse("""{"Individual":{"id":{"r":{"value":"nino"}},"ggCredId":{"value":"id"}}}""")
 
       }
     }
@@ -355,7 +351,7 @@ class AuthenticatedActionWithRetrievedDataSpec
           val result = performAction(FakeRequest())
 
           status(result)        shouldBe OK
-          contentAsJson(result) shouldBe Json.toJson(expectedRetrieval)
+          contentAsJson(result) shouldBe Json.parse("""{"Agent":{"GGCredId":{"value":"id"},"agentReferenceNumber":{"value":"arn"}}}""")
         }
 
       }
@@ -395,9 +391,7 @@ class AuthenticatedActionWithRetrievedDataSpec
         val result = performAction(FakeRequest())
 
         status(result) shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(
-          RetrievedUserType.OrganisationUnregisteredTrust(Some(Email("email")), GGCredId(ggCredentials.providerId))
-        )
+        contentAsJson(result) shouldBe Json.parse("""{"OrganisationUnregisteredTrust":{"email":"email","ggCredId":{"value":"id"}}}""")
       }
 
       "show an error page" when {
@@ -443,7 +437,7 @@ class AuthenticatedActionWithRetrievedDataSpec
 
           val result = performAction(FakeRequest())
           status(result)        shouldBe OK
-          contentAsJson(result) shouldBe Json.toJson(RetrievedUserType.Trust(sautr, Some(Email("email")), ggCredId))
+          contentAsJson(result) shouldBe Json.parse("""{"Trust":{"sautr":{"value":"123456"},"email":"email","ggCredId":{"value":"id"}}}""")
         }
 
       }
@@ -469,7 +463,7 @@ class AuthenticatedActionWithRetrievedDataSpec
 
         val result = performAction(FakeRequest())
         status(result)        shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(RetrievedUserType.Trust(sautr, None, ggCredId))
+        contentAsJson(result) shouldBe Json.parse("""{"Trust":{"sautr":{"value":"123456"},"ggCredId":{"value":"id"}}}""")
       }
 
     }
@@ -498,7 +492,7 @@ class AuthenticatedActionWithRetrievedDataSpec
 
         val result = performAction(FakeRequest())
         status(result)        shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(expectedRetrieval)
+        contentAsJson(result) shouldBe Json.parse("""{"Individual":{"id":{"r":{"value":"nino"}},"email":"email","ggCredId":{"value":"id"}}}""")
       }
     }
 
@@ -523,7 +517,7 @@ class AuthenticatedActionWithRetrievedDataSpec
 
         val result = performAction(FakeRequest())
         status(result)        shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(expectedRetrieval)
+        contentAsJson(result) shouldBe Json.parse("""{"Individual":{"id":{"r":{"value":"nino"}},"ggCredId":{"value":"id"}}}""")
       }
     }
 
@@ -551,9 +545,7 @@ class AuthenticatedActionWithRetrievedDataSpec
                 mockHasSubscription()(Right(None))
               }
 
-              val result = performAction(FakeRequest())
-              status(result) shouldBe OK
-              contentAsJson(result) shouldBe Json.toJson(
+              val json = Json.toJson(
                 RetrievedUserType.IndividualWithInsufficientConfidenceLevel(
                   mayBeNino,
                   None,
@@ -561,6 +553,10 @@ class AuthenticatedActionWithRetrievedDataSpec
                   GGCredId(ggCredentials.providerId)
                 )
               )
+
+              val result = performAction(FakeRequest())
+              status(result) shouldBe OK
+              contentAsJson(result) shouldBe Json.parse(s"""{"IndividualWithInsufficientConfidenceLevel": ${json}}""")
             }
           }
 
@@ -579,15 +575,7 @@ class AuthenticatedActionWithRetrievedDataSpec
 
           val result = performAction(FakeRequest())
           status(result) shouldBe OK
-          contentAsJson(result) shouldBe Json.toJson(
-            RetrievedUserType.IndividualWithInsufficientConfidenceLevel(
-              None,
-              None,
-              None,
-              GGCredId(ggCredentials.providerId)
-            )
-          )
-
+          contentAsJson(result) shouldBe Json.parse(""" {"IndividualWithInsufficientConfidenceLevel":{"ggCredId":{"value":"id"}}}""")
         }
 
       }

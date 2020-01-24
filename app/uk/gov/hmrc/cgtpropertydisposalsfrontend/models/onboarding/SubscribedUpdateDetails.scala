@@ -18,7 +18,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding
 
 import cats.Eq
 import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
 
 final case class SubscribedUpdateDetails(
   newDetails: SubscribedDetails,

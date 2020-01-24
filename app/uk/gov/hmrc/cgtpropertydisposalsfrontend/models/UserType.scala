@@ -29,6 +29,6 @@ object UserType {
   final case object Agent extends UserType
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[UserType] = derived.oformat[UserType]
+  implicit val format: OFormat[UserType] = derived.oformat()
 
 }

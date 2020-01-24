@@ -33,6 +33,6 @@ object EmailSource {
   implicit val eq: Eq[EmailSource] = Eq.fromUniversalEquals[EmailSource]
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[EmailSource] = derived.oformat[EmailSource]
+  implicit val format: OFormat[EmailSource] = derived.oformat()
 
 }

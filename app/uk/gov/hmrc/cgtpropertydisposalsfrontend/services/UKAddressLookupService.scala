@@ -112,15 +112,20 @@ object UKAddressLookupServiceImpl {
     postcode: String
   )
 
+  object RawAddress{
+    implicit val format = Json.format[RawAddress]
+  }
+
   final case class AddressLookupResponse(addresses: List[RawAddress])
 
   implicit val addressLookupResponseReads: Reads[AddressLookupResponse] =
     new Reads[AddressLookupResponse] {
-      case class Inner(address: RawAddress)
 
-      implicit val rawAddressReads: Reads[RawAddress] = Json.reads
+      final case class Inner(address: RawAddress)
 
-      implicit val innerReads: Reads[Inner] = Json.reads[Inner]
+      object Inner{
+        implicit val format = Json.format[Inner]
+      }
 
       override def reads(json: JsValue): JsResult[AddressLookupResponse] =
         json
