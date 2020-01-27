@@ -677,7 +677,9 @@ class CanTheyUseOurServiceControllerSpec
       def performAction(formData: (String, String)*): Future[Result] =
         controller.whenWasCompletionDateSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
 
-      val disposalDate = DisposalDate(today)
+      val disposalDate = DisposalDate(today.minusDays(5L))
+
+      val tomorrow = today.plusDays(1L)
 
       val dayBeforeDisposalDate = disposalDate.value.minusDays(1L)
 
@@ -699,6 +701,13 @@ class CanTheyUseOurServiceControllerSpec
             Some(dayBeforeDisposalDate.getMonthValue.toString),
             Some(dayBeforeDisposalDate.getYear.toString),
             "completionDate.error.tooFarInPast"
+          ),
+          // date in future
+          (
+            Some(tomorrow.getDayOfMonth.toString),
+            Some(tomorrow.getMonthValue.toString),
+            Some(tomorrow.getYear.toString),
+            "completionDate.error.tooFarInFuture"
           )
         )).map {
           case (dayString, monthString, yearString, expectedErrorKey) =>
