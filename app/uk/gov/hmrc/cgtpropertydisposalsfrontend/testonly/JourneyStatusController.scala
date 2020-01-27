@@ -170,7 +170,8 @@ object JourneyStatusController {
       "disposal-method"                  -> of(disposalMethodFormatter),
       "was-a-uk-resident"                -> of(optionalBooleanFormatter),
       "disposed-of-residential-property" -> of(optionalBooleanFormatter),
-      "disposal-date"                    -> of(optionalDateFormatter)
+      "disposal-date"                    -> of(optionalDateFormatter),
+      "completion-date"                  -> of(optionalDateFormatter)
     ) {
       case (
           individualUserType,
@@ -178,7 +179,8 @@ object JourneyStatusController {
           disposalMethod,
           wasAUKResident,
           disposedOfResidentialProperty,
-          disposalDate
+          disposalDate,
+          completionDate
           ) =>
         IndividualTriageAnswers(
           individualUserType,
@@ -187,7 +189,7 @@ object JourneyStatusController {
           wasAUKResident,
           disposedOfResidentialProperty,
           disposalDate.map(DisposalDate(_)),
-          None
+          completionDate.map(CompletionDate(_))
         )
     } { i =>
       Some(
@@ -197,7 +199,8 @@ object JourneyStatusController {
           i.disposalMethod,
           i.wasAUKResident,
           i.wasResidentialProperty,
-          i.disposalDate.map(_.value)
+          i.disposalDate.map(_.value),
+          i.completionDate.map(_.value)
         )
       )
     }

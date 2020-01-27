@@ -76,6 +76,8 @@ class CanTheyUseOurServiceController @Inject() (
 
   val clock: Clock = Clock.systemUTC()
 
+  def today(): LocalDate = LocalDate.now(clock)
+
   def whoIsIndividualRepresenting(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withSubscribedUser(request) {
       case (_, subscribed) =>
@@ -216,18 +218,17 @@ class CanTheyUseOurServiceController @Inject() (
   }
 
   def whenWasDisposalDate(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    val today = LocalDate.now(clock)
     displayIndividualTriagePage(
       _.wasResidentialProperty,
       routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty()
-    )(_ => disposalDateForm(LocalDate.now(clock)))(_.disposalDate, disposalDatePage(_))
+    )(_ => disposalDateForm(today()))(_.disposalDate, disposalDatePage(_))
   }
 
   def whenWasDisposalDateSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     handleIndividualTriagePageSubmit(
       _.wasResidentialProperty,
       routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty()
-    )(_ => disposalDateForm(LocalDate.now(clock)))(
+    )(_ => disposalDateForm(today()))(
       disposalDatePage(_),
       updateState = { case (d, i) => i.copy(disposalDate = Some(d)) },
       nextResult = { d =>
@@ -244,14 +245,14 @@ class CanTheyUseOurServiceController @Inject() (
     displayIndividualTriagePage(
       _.disposalDate,
       routes.CanTheyUseOurServiceController.whenWasDisposalDate()
-    )(disposalDate => completionDateForm(disposalDate))(_.completionDate, completionDatePage(_))
+    )(disposalDate => completionDateForm(disposalDate, today()))(_.completionDate, completionDatePage(_))
   }
 
   def whenWasCompletionDateSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     handleIndividualTriagePageSubmit(
       _.disposalDate,
       routes.CanTheyUseOurServiceController.whenWasDisposalDate()
-    )(disposalDate => completionDateForm(disposalDate))(
+    )(disposalDate => completionDateForm(disposalDate, today()))(
       completionDatePage(_),
       updateState = { case (d, i) => i.copy(completionDate = Some(d)) },
       nextResult = { _ =>
@@ -412,11 +413,11 @@ object CanTheyUseOurServiceController {
     )(DisposalDate(_))(d => Some(d.value))
   )
 
-  def completionDateForm(disposalDate: DisposalDate): Form[CompletionDate] = Form(
+  def completionDateForm(disposalDate: DisposalDate, maximumDateInclusive: LocalDate): Form[CompletionDate] = Form(
     mapping(
       "" -> of(
         LocalDateUtils.dateFormatter(
-          None,
+          Some(maximumDateInclusive),
           Some(disposalDate.value),
           "completionDate-day",
           "completionDate-month",
