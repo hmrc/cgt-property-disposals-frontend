@@ -32,7 +32,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import scala.concurrent.Future
 
 @Singleton
-class AccountController @Inject()(
+class AccountController @Inject() (
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   errorHandler: ErrorHandler,
@@ -48,7 +48,6 @@ class AccountController @Inject()(
     with WithAuthAndSessionDataAction
     with SessionUpdates
     with Logging {
-
 
   def manageYourDetails(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request: RequestWithSessionData[AnyContent] =>

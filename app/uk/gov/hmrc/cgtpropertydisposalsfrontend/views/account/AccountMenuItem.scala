@@ -26,9 +26,8 @@ object AccountMenuItem {
   implicit class AccountMenuItemOps(private val a: AccountMenuItem) extends AnyVal {
     def is[A <: AccountMenuItem: ClassTag]: Boolean = a match {
       case _: A => true
-      case _ => false
+      case _    => false
     }
   }
 
 }
-

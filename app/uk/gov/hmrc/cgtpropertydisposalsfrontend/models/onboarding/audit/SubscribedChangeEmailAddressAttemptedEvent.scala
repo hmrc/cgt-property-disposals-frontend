@@ -26,6 +26,7 @@ final case class SubscribedChangeEmailAddressAttemptedEvent(
   agentReferenceNumber: Option[String]
 )
 
-object SubscribedChangeEmailAddressAttemptedEvent{
-  implicit val format: OFormat[SubscribedChangeEmailAddressAttemptedEvent] = Json.format[SubscribedChangeEmailAddressAttemptedEvent]
+object SubscribedChangeEmailAddressAttemptedEvent {
+  implicit val format: OFormat[SubscribedChangeEmailAddressAttemptedEvent] =
+    Json.format[SubscribedChangeEmailAddressAttemptedEvent]
 }

@@ -89,8 +89,8 @@ class RegistrationControllerSpec
       .returning(EitherT(Future.successful(result)))
 
   def mockSubscribe(
-                        subscriptionDetails: SubscriptionDetails
-                      )(result: Either[Error, SubscriptionResponse]) =
+    subscriptionDetails: SubscriptionDetails
+  )(result: Either[Error, SubscriptionResponse]) =
     (mockSubscriptionService
       .subscribe(_: SubscriptionDetails)(_: HeaderCarrier))
       .expects(subscriptionDetails, *)
@@ -674,7 +674,8 @@ class RegistrationControllerSpec
             mockRegisterWithoutId(registrationReady.registrationDetails)(Right(RegisteredWithoutId(sapNumber)))
             mockSubscribe(subscriptionDetails)(Right(subscriptionSuccessfulResponse))
             mockStoreSession(
-              SessionData.empty.copy(journeyStatus = Some(Subscribed(subscribedDetails, registrationReady.ggCredId, None, None)))
+              SessionData.empty
+                .copy(journeyStatus = Some(Subscribed(subscribedDetails, registrationReady.ggCredId, None, None)))
             )(Future.successful(Left(Error(""))))
           }
 
@@ -693,7 +694,8 @@ class RegistrationControllerSpec
             mockRegisterWithoutId(registrationReady.registrationDetails)(Right(RegisteredWithoutId(sapNumber)))
             mockSubscribe(subscriptionDetails)(Right(subscriptionSuccessfulResponse))
             mockStoreSession(
-              SessionData.empty.copy(journeyStatus = Some(Subscribed(subscribedDetails, registrationReady.ggCredId, None, None)))
+              SessionData.empty
+                .copy(journeyStatus = Some(Subscribed(subscribedDetails, registrationReady.ggCredId, None, None)))
             )(Future.successful(Right(())))
           }
 

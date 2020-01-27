@@ -168,18 +168,17 @@ trait EmailController[Journey <: JourneyStatus, VerificationCompleteJourney <: J
         case (sessionData, _) =>
           sessionData.emailToBeVerified.fold(
             Redirect(enterEmailCall)
-          )(
-            emailToBeVerified =>
-              Ok(
-                checkYourInboxPage(
-                  emailToBeVerified.email,
-                  enterEmailCall,
-                  enterEmailCall,
-                  enterEmailSubmitCall,
-                  emailToBeVerified.hasResentVerificationEmail,
-                  isSubscribedJourney
-                )
+          )(emailToBeVerified =>
+            Ok(
+              checkYourInboxPage(
+                emailToBeVerified.email,
+                enterEmailCall,
+                enterEmailCall,
+                enterEmailSubmitCall,
+                emailToBeVerified.hasResentVerificationEmail,
+                isSubscribedJourney
               )
+            )
           )
       }
     }

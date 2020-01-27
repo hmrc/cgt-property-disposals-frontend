@@ -31,7 +31,7 @@ import scala.concurrent.Future
 
 class SessionDataActionSpec extends ControllerSpec with SessionSupport {
 
-  lazy val action: SessionDataAction = new SessionDataAction(mockSessionStore, instanceOf[ErrorHandler])
+  lazy val action: SessionDataAction         = new SessionDataAction(mockSessionStore, instanceOf[ErrorHandler])
   implicit lazy val messagesApi: MessagesApi = instanceOf[MessagesApi]
 
   "SessionDataActionWithRetrievedData" must {

@@ -39,7 +39,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SubscriptionAddressController @Inject()(
+class SubscriptionAddressController @Inject() (
   val errorHandler: ErrorHandler,
   val ukAddressLookupService: UKAddressLookupService,
   val sessionStore: SessionStore,
@@ -77,7 +77,8 @@ class SubscriptionAddressController @Inject()(
     }
 
   def updateAddress(journey: SubscriptionReady, address: Address, isManuallyEnteredAddress: Boolean)(
-    implicit hc: HeaderCarrier, request: Request[_]
+    implicit hc: HeaderCarrier,
+    request: Request[_]
   ): EitherT[Future, Error, SubscriptionReady] = {
     auditService.sendEvent(
       "subscriptionContactAddressChanged",

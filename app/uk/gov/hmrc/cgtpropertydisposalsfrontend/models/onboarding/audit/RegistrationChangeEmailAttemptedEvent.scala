@@ -23,6 +23,7 @@ final case class RegistrationChangeEmailAttemptedEvent(
   newEmailAddress: String
 )
 
-object RegistrationChangeEmailAttemptedEvent{
-  implicit val format: OFormat[RegistrationChangeEmailAttemptedEvent] = Json.format[RegistrationChangeEmailAttemptedEvent]
+object RegistrationChangeEmailAttemptedEvent {
+  implicit val format: OFormat[RegistrationChangeEmailAttemptedEvent] =
+    Json.format[RegistrationChangeEmailAttemptedEvent]
 }

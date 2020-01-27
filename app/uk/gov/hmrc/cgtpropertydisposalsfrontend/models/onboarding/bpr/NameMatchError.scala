@@ -28,7 +28,9 @@ object NameMatchError {
 
   final case class TooManyUnsuccessfulAttempts() extends NameMatchError[Nothing]
 
-  final case class NameMatchFailed[A <: NameMatchDetails](unsuccessfulNameMatchAttempts: UnsuccessfulNameMatchAttempts[A]) extends NameMatchError[A]
+  final case class NameMatchFailed[A <: NameMatchDetails](
+    unsuccessfulNameMatchAttempts: UnsuccessfulNameMatchAttempts[A]
+  ) extends NameMatchError[A]
 
   final case class ValidationError[A <: NameMatchDetails](formWithErrors: Form[A]) extends NameMatchError[A]
 

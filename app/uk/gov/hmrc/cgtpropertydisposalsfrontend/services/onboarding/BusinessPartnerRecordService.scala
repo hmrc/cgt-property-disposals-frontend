@@ -39,7 +39,7 @@ trait BusinessPartnerRecordService {
 }
 
 @Singleton
-class BusinessPartnerRecordServiceImpl @Inject()(connector: CGTPropertyDisposalsConnector)(
+class BusinessPartnerRecordServiceImpl @Inject() (connector: CGTPropertyDisposalsConnector)(
   implicit ec: ExecutionContext
 ) extends BusinessPartnerRecordService {
 

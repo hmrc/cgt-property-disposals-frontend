@@ -40,7 +40,7 @@ trait AddressLookupConnector {
 }
 
 @Singleton
-class AddressLookupConnectorImpl @Inject()(http: HttpClient, servicesConfig: ServicesConfig)(
+class AddressLookupConnectorImpl @Inject() (http: HttpClient, servicesConfig: ServicesConfig)(
   implicit ec: ExecutionContext
 ) extends AddressLookupConnector {
 

@@ -50,7 +50,10 @@ class RegistrationEnterIndividualNameControllerSpec
   override val mockUpdateName
     : Option[(IndividualSupplyingInformation, IndividualSupplyingInformation, Either[Error, Unit]) => Unit] = None
 
-  override def updateName(name: IndividualName, journey: IndividualSupplyingInformation): IndividualSupplyingInformation =
+  override def updateName(
+    name: IndividualName,
+    journey: IndividualSupplyingInformation
+  ): IndividualSupplyingInformation =
     journey.copy(name = Some(name))
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
@@ -59,9 +62,7 @@ class RegistrationEnterIndividualNameControllerSpec
 
     "handling requests to display the enter name page" must {
 
-      behave like enterNamePage(
-        () => controller.enterIndividualName()(FakeRequest())
-      )
+      behave like enterNamePage(() => controller.enterIndividualName()(FakeRequest()))
 
     }
 

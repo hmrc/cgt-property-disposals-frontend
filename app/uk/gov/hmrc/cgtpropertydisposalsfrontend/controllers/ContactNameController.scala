@@ -46,7 +46,8 @@ trait ContactNameController[J <: JourneyStatus] {
   def validJourney(request: RequestWithSessionData[_]): Either[Result, (SessionData, J)]
 
   def updateContactName(journey: J, contactName: ContactName)(
-    implicit hc: HeaderCarrier, request: Request[_]
+    implicit hc: HeaderCarrier,
+    request: Request[_]
   ): EitherT[Future, Error, J]
 
   def contactName(journey: J): Option[ContactName]
@@ -79,8 +80,8 @@ trait ContactNameController[J <: JourneyStatus] {
               val result = for {
                 journey <- updateContactName(journey, contactName)
                 _ <- EitherT[Future, Error, Unit](updateSession(sessionStore, request) { s =>
-                  s.copy(journeyStatus = Some(journey))
-                })
+                      s.copy(journeyStatus = Some(journey))
+                    })
               } yield ()
 
               result.fold(

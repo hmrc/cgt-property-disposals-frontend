@@ -33,9 +33,9 @@ trait HttpSupport { this: MockFactory with Matchers ⇒
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val mockHttp: HttpClient = mock[HttpClient]
 
-  val mockWsClient: WSClient     = mock[WSClient]
+  val mockWsClient: WSClient = mock[WSClient]
   @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
-  val mockWsRequest: WSRequest   = mock[WSRequest]
+  val mockWsRequest: WSRequest = mock[WSRequest]
   @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
   val mockWsResponse: WSResponse = mock[WSResponse]
 

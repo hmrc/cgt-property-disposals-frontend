@@ -46,7 +46,7 @@ trait BusinessPartnerRecordNameMatchRetryStore {
 }
 
 @Singleton
-class BusinessPartnerRecordNameMatchRetryStoreImpl @Inject()(
+class BusinessPartnerRecordNameMatchRetryStoreImpl @Inject() (
   mongo: ReactiveMongoComponent,
   configuration: Configuration
 )(

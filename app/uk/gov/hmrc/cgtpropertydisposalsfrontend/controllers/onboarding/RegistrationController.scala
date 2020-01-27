@@ -49,7 +49,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class RegistrationController @Inject()(
+class RegistrationController @Inject() (
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   val auditService: AuditService,
@@ -229,28 +229,27 @@ class RegistrationController @Inject()(
           }
           _ <- EitherT(subscriptionResponse match {
                 case SubscriptionSuccessful(cgtReferenceNumber) =>
-                  updateSession(sessionStore, request)(
-                    _ =>
-                      SessionData.empty.copy(
-                        journeyStatus = Some(
-                          Subscribed(
-                            SubscribedDetails(
-                              Right(registrationDetails.name),
-                              registrationDetails.emailAddress,
-                              registrationDetails.address,
-                              ContactName(
-                                s"${registrationDetails.name.firstName} ${registrationDetails.name.lastName}"
-                              ),
-                              CgtReference(cgtReferenceNumber),
-                              None,
-                              registeredWithId = false
+                  updateSession(sessionStore, request)(_ =>
+                    SessionData.empty.copy(
+                      journeyStatus = Some(
+                        Subscribed(
+                          SubscribedDetails(
+                            Right(registrationDetails.name),
+                            registrationDetails.emailAddress,
+                            registrationDetails.address,
+                            ContactName(
+                              s"${registrationDetails.name.firstName} ${registrationDetails.name.lastName}"
                             ),
-                            ggCredId,
+                            CgtReference(cgtReferenceNumber),
                             None,
-                            None
-                          )
+                            registeredWithId = false
+                          ),
+                          ggCredId,
+                          None,
+                          None
                         )
                       )
+                    )
                   )
                 case AlreadySubscribed =>
                   updateSession(sessionStore, request)(

@@ -30,7 +30,7 @@ object LocalDateUtils {
 
   implicit val configs: Configs[LocalDate] = Configs.fromTry {
     case (config, key) =>
-       LocalDate.parse(config.getString(key), DateTimeFormatter.ISO_DATE)
+      LocalDate.parse(config.getString(key), DateTimeFormatter.ISO_DATE)
   }
 
   def dateFormatter(
@@ -57,9 +57,7 @@ object LocalDateUtils {
 
     def toValidInt(key: String, stringValue: String, maxValue: Option[Int]): Either[FormError, Int] =
       Either.fromOption(
-        Try(BigDecimal(stringValue).toIntExact).toOption.filter(
-          i => i > 0 && maxValue.forall(i <= _)
-        ),
+        Try(BigDecimal(stringValue).toIntExact).toOption.filter(i => i > 0 && maxValue.forall(i <= _)),
         FormError(key, "error.invalid")
       )
 
@@ -72,11 +70,10 @@ object LocalDateUtils {
         date ← Either
                 .fromTry(Try(LocalDate.of(year, month, day)))
                 .leftMap(_ => FormError(dateKey, "error.invalid"))
-                .flatMap(
-                  date =>
-                    if (maximumDateInclusive.exists(_.isBefore(date))) Left(FormError(dateKey, "error.tooFarInFuture"))
-                    else if(minimumDateInclusive.exists(_.isAfter(date))) Left(FormError(dateKey, "error.tooFarInPast"))
-                    else Right(date)
+                .flatMap(date =>
+                  if (maximumDateInclusive.exists(_.isBefore(date))) Left(FormError(dateKey, "error.tooFarInFuture"))
+                  else if (minimumDateInclusive.exists(_.isAfter(date))) Left(FormError(dateKey, "error.tooFarInPast"))
+                  else Right(date)
                 )
       } yield date
 
@@ -85,9 +82,9 @@ object LocalDateUtils {
 
     override def unbind(key: String, value: LocalDate): Map[String, String] =
       Map(
-        dayKey -> value.getDayOfMonth.toString,
+        dayKey   -> value.getDayOfMonth.toString,
         monthKey -> value.getMonthValue.toString,
-        yearKey -> value.getYear.toString
+        yearKey  -> value.getYear.toString
       )
 
   }

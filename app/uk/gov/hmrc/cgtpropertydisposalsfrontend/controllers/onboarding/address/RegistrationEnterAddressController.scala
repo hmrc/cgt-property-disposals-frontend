@@ -36,7 +36,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class RegistrationEnterAddressController @Inject()(
+class RegistrationEnterAddressController @Inject() (
   val errorHandler: ErrorHandler,
   val ukAddressLookupService: UKAddressLookupService,
   val sessionStore: SessionStore,
@@ -70,11 +70,13 @@ class RegistrationEnterAddressController @Inject()(
     }
 
   def updateAddress(journey: IndividualSupplyingInformation, address: Address, isManuallyEnteredAddress: Boolean)(
-    implicit hc: HeaderCarrier, request: Request[_]
+    implicit hc: HeaderCarrier,
+    request: Request[_]
   ): EitherT[Future, Error, IndividualSupplyingInformation] =
     EitherT.pure[Future, Error](journey.copy(address = Some(address)))
 
-  protected lazy val backLinkCall: Call             = controllers.onboarding.name.routes.RegistrationEnterIndividualNameController.enterIndividualName()
+  protected lazy val backLinkCall: Call =
+    controllers.onboarding.name.routes.RegistrationEnterIndividualNameController.enterIndividualName()
   protected lazy val isUkCall: Call                 = routes.RegistrationEnterAddressController.isUk()
   protected lazy val isUkSubmitCall: Call           = routes.RegistrationEnterAddressController.isUkSubmit()
   protected lazy val enterUkAddressCall: Call       = routes.RegistrationEnterAddressController.enterUkAddress()

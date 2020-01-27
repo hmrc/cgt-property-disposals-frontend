@@ -26,7 +26,9 @@ object EitherUtils {
   implicit def eitherFormat[A, B](implicit aFormat: Format[A], bFormat: Format[B]): Format[Either[A, B]] =
     new Format[Either[A, B]] {
       override def reads(json: JsValue): JsResult[Either[A, B]] =
-        (json \ "l").validate[A].map[Either[A, B]](Left(_))
+        (json \ "l")
+          .validate[A]
+          .map[Either[A, B]](Left(_))
           .orElse((json \ "r").validate[B].map(Right(_)))
 
       override def writes(o: Either[A, B]): JsValue =
@@ -36,14 +38,12 @@ object EitherUtils {
         )
     }
 
-
-  implicit class EitherOps[A,B](private val e: Either[A,B]) extends AnyVal {
+  implicit class EitherOps[A, B](private val e: Either[A, B]) extends AnyVal {
 
     @SuppressWarnings(Array("org.wartremover.warts.Any"))
     // go from Either[F[C],B] to F[Either[C,B]]
-    def leftSequence[F[_],C](implicit ap: Applicative[F], ev: A <:< F[C]): F[Either[C,B]] = {
-      ap.map(e.swap.sequence[F,C])(_.swap)
-    }
+    def leftSequence[F[_], C](implicit ap: Applicative[F], ev: A <:< F[C]): F[Either[C, B]] =
+      ap.map(e.swap.sequence[F, C])(_.swap)
 
   }
 

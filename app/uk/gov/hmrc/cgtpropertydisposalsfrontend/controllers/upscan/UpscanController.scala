@@ -45,7 +45,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class UpscanController @Inject()(
+class UpscanController @Inject() (
   subscriptionService: SubscriptionService,
   upscanService: UpscanService,
   upscanConnector: UpscanConnector,
@@ -108,16 +108,15 @@ class UpscanController @Inject()(
     request.body
       .validate[UpscanNotifyResponse]
       .asOpt
-      .fold(Future.successful(BadRequest("Invalid call back response received from upscan notify")))(
-        notifyEvent =>
-          upscanService.storeNotifyEvent(CgtReference(cgtReference), notifyEvent).value.map {
-            case Left(error) =>
-              logger.warn("upscan notifier call back handler failed", error)
-              errorHandler.errorResult(None)
-            case Right(_) =>
-              logger.info("upscan notifier call back succeeded")
-              NoContent
-          }
+      .fold(Future.successful(BadRequest("Invalid call back response received from upscan notify")))(notifyEvent =>
+        upscanService.storeNotifyEvent(CgtReference(cgtReference), notifyEvent).value.map {
+          case Left(error) =>
+            logger.warn("upscan notifier call back handler failed", error)
+            errorHandler.errorResult(None)
+          case Right(_) =>
+            logger.info("upscan notifier call back succeeded")
+            NoContent
+        }
       )
   }
 

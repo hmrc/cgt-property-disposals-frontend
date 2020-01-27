@@ -23,7 +23,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 @Singleton
-class LandingPageController @Inject()(
+class LandingPageController @Inject() (
   cc: MessagesControllerComponents,
   landing_page: views.html.landing_page,
   sign_in_page: views.html.sign_in

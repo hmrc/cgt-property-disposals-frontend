@@ -40,5 +40,4 @@ object TrustName {
       .verifying(Constraint[String](validateTrustName(_)))
   }
 
-
 }

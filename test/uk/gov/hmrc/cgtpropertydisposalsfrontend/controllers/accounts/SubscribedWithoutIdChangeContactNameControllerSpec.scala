@@ -92,9 +92,7 @@ class SubscribedWithoutIdChangeContactNameControllerSpec
 
     "handling requests to display the enter name page" must {
 
-      behave like enterNamePage(
-        () => controller.enterIndividualName()(FakeRequest())
-      )
+      behave like enterNamePage(() => controller.enterIndividualName()(FakeRequest()))
 
     }
 

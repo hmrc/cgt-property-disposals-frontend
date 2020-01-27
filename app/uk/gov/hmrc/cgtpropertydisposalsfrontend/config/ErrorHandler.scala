@@ -27,7 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.http.FrontendErrorHandler
 
 @Singleton
-class ErrorHandler @Inject()(val messagesApi: MessagesApi, error_template: views.html.error_template)(
+class ErrorHandler @Inject() (val messagesApi: MessagesApi, error_template: views.html.error_template)(
   implicit val appConfig: ViewConfig
 ) extends FrontendErrorHandler {
 
@@ -37,12 +37,14 @@ class ErrorHandler @Inject()(val messagesApi: MessagesApi, error_template: views
     error_template(None, pageTitle, heading, message)
 
   def errorResult[R <: Request[_]](userType: Option[UserType])(implicit request: R): Result =
-    InternalServerError(error_template(
-      userType,
-      Messages("global.error.InternalServerError500.title"),
-      Messages("global.error.InternalServerError500.heading"),
-      Messages("global.error.InternalServerError500.message")
-    ))
+    InternalServerError(
+      error_template(
+        userType,
+        Messages("global.error.InternalServerError500.title"),
+        Messages("global.error.InternalServerError500.heading"),
+        Messages("global.error.InternalServerError500.message")
+      )
+    )
 
   def errorResult()(implicit request: RequestWithSessionData[_]): Result =
     errorResult(request.userType)

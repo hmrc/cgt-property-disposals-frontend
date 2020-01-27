@@ -30,7 +30,7 @@ import scala.concurrent.{ExecutionContext, Future}
 final case class AuthenticatedRequest[A](request: MessagesRequest[A]) extends WrappedRequest[A](request)
 
 @Singleton
-class AuthenticatedAction @Inject()(
+class AuthenticatedAction @Inject() (
   val authConnector: AuthConnector,
   val config: Configuration,
   val errorHandler: ErrorHandler,

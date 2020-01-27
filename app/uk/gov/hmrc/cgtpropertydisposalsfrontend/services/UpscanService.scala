@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services
 
-
 import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.{ImplementedBy, Singleton}
@@ -49,7 +48,7 @@ trait UpscanService {
 }
 
 @Singleton
-class UpscanServiceImpl @Inject()(
+class UpscanServiceImpl @Inject() (
   upscanConnector: UpscanConnector,
   upscanStore: UpscanStore,
   configuration: Configuration

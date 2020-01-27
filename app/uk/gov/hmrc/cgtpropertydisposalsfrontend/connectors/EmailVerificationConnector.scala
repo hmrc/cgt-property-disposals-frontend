@@ -44,7 +44,7 @@ trait EmailVerificationConnector {
 }
 
 @Singleton
-class EmailVerificationConnectorImpl @Inject()(http: HttpClient, config: Configuration)(implicit ec: ExecutionContext)
+class EmailVerificationConnectorImpl @Inject() (http: HttpClient, config: Configuration)(implicit ec: ExecutionContext)
     extends EmailVerificationConnector {
 
   def getEmailVerificationConfig[A: Configs](key: String): A =

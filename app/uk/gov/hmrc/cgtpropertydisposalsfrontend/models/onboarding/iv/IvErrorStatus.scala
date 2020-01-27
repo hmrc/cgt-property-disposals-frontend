@@ -40,7 +40,7 @@ object IvErrorStatus {
 
   final case class Unknown(value: String) extends IvErrorStatus
 
-  def fromString(s: String): IvErrorStatus = {
+  def fromString(s: String): IvErrorStatus =
     s match {
       case "Incomplete"           => Incomplete
       case "FailedMatching"       => FailedMatching
@@ -53,6 +53,5 @@ object IvErrorStatus {
       case "PreconditionFailed"   => PreconditionFailed
       case other                  => Unknown(other)
     }
-  }
 
 }

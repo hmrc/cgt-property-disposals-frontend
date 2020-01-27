@@ -53,7 +53,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
-class AgentAccessController @Inject()(
+class AgentAccessController @Inject() (
   config: Configuration,
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
@@ -215,7 +215,8 @@ class AgentAccessController @Inject()(
               errorHandler.errorResult()
             case Right(_) =>
               Redirect(controllers.accounts.homepage.routes.HomePageController.homepage())
-          } else
+          }
+        else
           Redirect(enterVerifierCall(verifierMatchingDetails.clientDetails))
     }
   }

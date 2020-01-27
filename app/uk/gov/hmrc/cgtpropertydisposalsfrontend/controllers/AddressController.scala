@@ -181,8 +181,8 @@ trait AddressController[J <: JourneyStatus] {
       withValidJourney(request) {
         case (sessionData, _) =>
           val form = sessionData.addressLookupResult
-            .fold(AddressLookupRequest.form)(
-              r => AddressLookupRequest.form.fill(AddressLookupRequest(r.postcode, r.filter))
+            .fold(AddressLookupRequest.form)(r =>
+              AddressLookupRequest.form.fill(AddressLookupRequest(r.postcode, r.filter))
             )
           Ok(enterPostcodePage(form, isUkCall, enterPostcodeSubmitCall, enterUkAddressCall, isSubscribedJourney))
       }

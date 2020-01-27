@@ -37,7 +37,7 @@ trait SessionStore {
 }
 
 @Singleton
-class SessionStoreImpl @Inject()(mongo: ReactiveMongoComponent, configuration: Configuration)(
+class SessionStoreImpl @Inject() (mongo: ReactiveMongoComponent, configuration: Configuration)(
   implicit ec: ExecutionContext
 ) extends SessionStore
     with Repo {

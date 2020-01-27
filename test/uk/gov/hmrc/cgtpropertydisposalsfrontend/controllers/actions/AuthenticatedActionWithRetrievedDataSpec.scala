@@ -114,8 +114,10 @@ class AuthenticatedActionWithRetrievedDataSpec
 
         val result = performAction(FakeRequest())
 
-        status(result)        shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](RetrievedUserType.NonGovernmentGatewayRetrievedUser(providerType))
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](
+          RetrievedUserType.NonGovernmentGatewayRetrievedUser(providerType)
+        )
       }
 
     }
@@ -439,8 +441,10 @@ class AuthenticatedActionWithRetrievedDataSpec
           }
 
           val result = performAction(FakeRequest())
-          status(result)        shouldBe OK
-          contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](RetrievedUserType.Trust(sautr, Some(Email("email")), ggCredId))
+          status(result) shouldBe OK
+          contentAsJson(result) shouldBe Json.toJson[RetrievedUserType](
+            RetrievedUserType.Trust(sautr, Some(Email("email")), ggCredId)
+          )
         }
 
       }
@@ -558,7 +562,7 @@ class AuthenticatedActionWithRetrievedDataSpec
               )
 
               val result = performAction(FakeRequest())
-              status(result) shouldBe OK
+              status(result)        shouldBe OK
               contentAsJson(result) shouldBe json
             }
           }

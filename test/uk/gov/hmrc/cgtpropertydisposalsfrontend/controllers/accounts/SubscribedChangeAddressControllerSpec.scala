@@ -142,7 +142,10 @@ class SubscribedChangeAddressControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction())
 
-      behave like submitEnterNonUkAddress(performAction, controllers.accounts.routes.AccountController.contactAddressUpdated())
+      behave like submitEnterNonUkAddress(
+        performAction,
+        controllers.accounts.routes.AccountController.contactAddressUpdated()
+      )
 
     }
 

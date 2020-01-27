@@ -208,7 +208,10 @@ class SubscriptionControllerSpec
             mockStoreSession(sessionWithAlreadySubscribed)(Future.successful(Right(())))
           }
 
-          checkIsRedirect(performAction(), onboardingRoutes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
+          checkIsRedirect(
+            performAction(),
+            onboardingRoutes.SubscriptionController.alreadySubscribedWithDifferentGGAccount()
+          )
         }
 
       }
@@ -272,8 +275,8 @@ class SubscriptionControllerSpec
 
       behave like redirectToStartWhenInvalidJourney(
         performAction, {
-          case AlreadySubscribedWithDifferentGGAccount(_,_) => true
-          case _                                            => false
+          case AlreadySubscribedWithDifferentGGAccount(_, _) => true
+          case _                                             => false
         }
       )
 
@@ -286,7 +289,8 @@ class SubscriptionControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    SessionData.empty.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount(ggCredId, None)))
+                    SessionData.empty.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount(ggCredId, None))
+                    )
                   )
                 )
               )

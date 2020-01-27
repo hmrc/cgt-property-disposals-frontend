@@ -82,9 +82,10 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
 
       implicit val hc: HeaderCarrier = HeaderCarrier()
 
-      val expectedUrl       = s"http://host:123/upscan/initiate"
-      val cgtReference      = sample[CgtReference]
-      val callBackUrl       = s"http://localhost:7020/capital-gains-tax-uk-property/upscan-call-back/cgt-reference/${cgtReference.value}"
+      val expectedUrl  = s"http://host:123/upscan/initiate"
+      val cgtReference = sample[CgtReference]
+      val callBackUrl =
+        s"http://localhost:7020/capital-gains-tax-uk-property/upscan-call-back/cgt-reference/${cgtReference.value}"
       val expectedInitiated = UpscanInitiateRequest(callBackUrl, 0, 5242880)
 
       "process unsuccessful post calls from S3" in {
@@ -117,7 +118,7 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val s3Url        = s"https://bucketname.s3.eu-west-2.amazonaws.com"
+    val s3Url = s"https://bucketname.s3.eu-west-2.amazonaws.com"
 
     val parts: Source[MultipartFormData.Part[Source[ByteString, _]], _] =
       Source.apply(Map("key" -> List("V1")).flatMap {

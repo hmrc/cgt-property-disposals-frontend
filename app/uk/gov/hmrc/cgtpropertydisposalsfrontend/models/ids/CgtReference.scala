@@ -25,7 +25,6 @@ final case class CgtReference(value: String) extends AnyVal
 
 object CgtReference {
 
-
   implicit val format: OFormat[CgtReference] = Json.format
 
   val mapping: Mapping[CgtReference] = {
@@ -33,16 +32,17 @@ object CgtReference {
 
     def validateCgtReference(s: String): ValidationResult =
       if (s.length > 15) Invalid("error.tooLong")
-      else if(s.isEmpty) Invalid("error.required")
+      else if (s.isEmpty) Invalid("error.required")
       else if (s.length < 15) Invalid("error.tooShort")
       else if (s.exists(!_.isLetterOrDigit)) Invalid("error.invalidCharacters")
       else if (!regexPredicate.test(s)) Invalid("error.pattern")
       else Valid
 
     text
-      .verifying(Constraint{s: String => validateCgtReference(s.replaceAllLiterally(" ", ""))})
+      .verifying(Constraint { s: String =>
+        validateCgtReference(s.replaceAllLiterally(" ", ""))
+      })
       .transform[CgtReference](CgtReference(_), _.value)
   }
-
 
 }

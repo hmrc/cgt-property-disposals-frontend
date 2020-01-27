@@ -29,11 +29,9 @@ object RetrievedUserType {
     ggCredId: GGCredId
   ) extends RetrievedUserType
 
-
   final case class Trust(sautr: SAUTR, email: Option[Email], ggCredId: GGCredId) extends RetrievedUserType
 
   final case class OrganisationUnregisteredTrust(email: Option[Email], ggCredId: GGCredId) extends RetrievedUserType
-
 
   final case class IndividualWithInsufficientConfidenceLevel(
     nino: Option[NINO],
@@ -42,20 +40,16 @@ object RetrievedUserType {
     ggCredId: GGCredId
   ) extends RetrievedUserType
 
-
   final case class Subscribed(
     cgtReference: CgtReference,
     ggCredId: GGCredId
   ) extends RetrievedUserType
-
 
   final case class Agent(
     GGCredId: GGCredId,
     agentReferenceNumber: AgentReferenceNumber
   ) extends RetrievedUserType
 
-
   final case class NonGovernmentGatewayRetrievedUser(authProvider: String) extends RetrievedUserType
-
 
 }

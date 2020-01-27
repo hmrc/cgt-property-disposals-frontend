@@ -44,7 +44,7 @@ trait IvService {
 }
 
 @Singleton
-class IvServiceImpl @Inject()(connector: IvConnector, metrics: Metrics)(implicit ec: ExecutionContext)
+class IvServiceImpl @Inject() (connector: IvConnector, metrics: Metrics)(implicit ec: ExecutionContext)
     extends IvService {
 
   override def getFailedJourneyStatus(

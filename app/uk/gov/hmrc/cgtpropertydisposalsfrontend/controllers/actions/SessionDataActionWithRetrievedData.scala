@@ -34,7 +34,7 @@ final case class RequestWithSessionDataAndRetrievedData[A](
 }
 
 @Singleton
-class SessionDataActionWithRetrievedData @Inject()(val sessionStore: SessionStore, val errorHandler: ErrorHandler)(
+class SessionDataActionWithRetrievedData @Inject() (val sessionStore: SessionStore, val errorHandler: ErrorHandler)(
   implicit val executionContext: ExecutionContext
 ) extends SessionDataActionBase[AuthenticatedRequestWithRetrievedData, RequestWithSessionDataAndRetrievedData] {
 

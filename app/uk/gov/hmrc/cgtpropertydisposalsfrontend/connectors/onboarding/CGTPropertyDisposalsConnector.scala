@@ -59,7 +59,7 @@ trait CGTPropertyDisposalsConnector {
 }
 
 @Singleton
-class CGTPropertyDisposalsConnectorImpl @Inject()(http: HttpClient, servicesConfig: ServicesConfig)(
+class CGTPropertyDisposalsConnectorImpl @Inject() (http: HttpClient, servicesConfig: ServicesConfig)(
   implicit ec: ExecutionContext
 ) extends CGTPropertyDisposalsConnector {
 

@@ -56,8 +56,9 @@ object EmailVerificationService {
 }
 
 @Singleton
-class EmailVerificationServiceImpl @Inject()(connector: EmailVerificationConnector, metrics: Metrics)(implicit ec: ExecutionContext)
-    extends EmailVerificationService {
+class EmailVerificationServiceImpl @Inject() (connector: EmailVerificationConnector, metrics: Metrics)(
+  implicit ec: ExecutionContext
+) extends EmailVerificationService {
 
   def verifyEmail(email: Email, name: ContactName, continueCall: Call)(
     implicit hc: HeaderCarrier
@@ -65,7 +66,7 @@ class EmailVerificationServiceImpl @Inject()(connector: EmailVerificationConnect
     val timer = metrics.emailVerificationTimer.time()
 
     connector.verifyEmail(email, name, continueCall).subflatMap { response =>
-    timer.close()
+      timer.close()
       response.status match {
         case CREATED =>
           Right(EmailVerificationRequested)

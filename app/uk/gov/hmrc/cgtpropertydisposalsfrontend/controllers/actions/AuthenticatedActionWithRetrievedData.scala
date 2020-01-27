@@ -45,7 +45,7 @@ final case class AuthenticatedRequestWithRetrievedData[A](
 ) extends WrappedRequest[A](request)
 
 @Singleton
-class AuthenticatedActionWithRetrievedData @Inject()(
+class AuthenticatedActionWithRetrievedData @Inject() (
   val subscriptionService: SubscriptionService,
   val authConnector: AuthConnector,
   val config: Configuration,
@@ -282,19 +282,18 @@ class AuthenticatedActionWithRetrievedData @Inject()(
                 s"Found identifier keys [${trustEnrolment.identifiers.map(_.key).mkString(",")}]"
             )
             Left(errorHandler.errorResult(Some(Organisation))(request))
-          }(
-            id =>
-              Right(
-                AuthenticatedRequestWithRetrievedData(
-                  RetrievedUserType.Trust(
-                    SAUTR(id.value),
-                    email.filter(_.nonEmpty).map(Email(_)),
-                    ggCredId
-                  ),
-                  Some(Organisation),
-                  request
-                )
+          }(id =>
+            Right(
+              AuthenticatedRequestWithRetrievedData(
+                RetrievedUserType.Trust(
+                  SAUTR(id.value),
+                  email.filter(_.nonEmpty).map(Email(_)),
+                  ggCredId
+                ),
+                Some(Organisation),
+                request
               )
+            )
           )
     }
 

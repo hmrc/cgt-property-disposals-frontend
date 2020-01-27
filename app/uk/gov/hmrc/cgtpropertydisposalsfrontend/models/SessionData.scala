@@ -27,7 +27,7 @@ final case class SessionData(
   emailToBeVerified: Option[EmailToBeVerified],
   addressLookupResult: Option[AddressLookupResult],
   needMoreDetailsDetails: Option[NeedMoreDetailsDetails],
-  userType : Option[UserType]
+  userType: Option[UserType]
 )
 
 object SessionData {

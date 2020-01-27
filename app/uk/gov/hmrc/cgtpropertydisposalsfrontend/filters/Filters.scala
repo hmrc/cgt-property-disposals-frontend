@@ -20,5 +20,5 @@ import com.google.inject.Inject
 import play.api.http.DefaultHttpFilters
 import uk.gov.hmrc.play.bootstrap.filters.FrontendFilters
 
-class Filters @Inject()(emailWhitelistingFilter: EmailWhitelistingFilter, frontendFilters: FrontendFilters)
+class Filters @Inject() (emailWhitelistingFilter: EmailWhitelistingFilter, frontendFilters: FrontendFilters)
     extends DefaultHttpFilters(frontendFilters.filters :+ emailWhitelistingFilter: _*)

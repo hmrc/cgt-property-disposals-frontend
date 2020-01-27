@@ -45,7 +45,7 @@ trait AgentVerifierMatchRetryStore {
 }
 
 @Singleton
-class AgentVerifierMatchRetryStoreImpl @Inject()(
+class AgentVerifierMatchRetryStoreImpl @Inject() (
   mongo: ReactiveMongoComponent,
   configuration: Configuration
 )(

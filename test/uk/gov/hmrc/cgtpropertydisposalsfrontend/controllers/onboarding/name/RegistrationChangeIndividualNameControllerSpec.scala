@@ -41,7 +41,8 @@ class RegistrationChangeIndividualNameControllerSpec
 
   override val mockUpdateName: Option[(RegistrationReady, RegistrationReady, Either[Error, Unit]) => Unit] = None
 
-  override lazy val controller: RegistrationChangeIndividualNameController = instanceOf[RegistrationChangeIndividualNameController]
+  override lazy val controller: RegistrationChangeIndividualNameController =
+    instanceOf[RegistrationChangeIndividualNameController]
 
   override lazy val validJourney: RegistrationReady = sample[RegistrationReady]
 
@@ -54,9 +55,7 @@ class RegistrationChangeIndividualNameControllerSpec
 
     "handling requests to display the enter name page" must {
 
-      behave like enterNamePage(
-        () => controller.enterIndividualName()(FakeRequest())
-      )
+      behave like enterNamePage(() => controller.enterIndividualName()(FakeRequest()))
 
     }
 

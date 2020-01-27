@@ -532,9 +532,9 @@ trait AddressControllerSpec[J <: JourneyStatus]
       performAction,
       () =>
         inSequence {
-        mockAuthWithNoRetrievals()
-        mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
-      }
+          mockAuthWithNoRetrievals()
+          mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
+        }
     )
 
     "show form errors when no results are found for a postcode" in {

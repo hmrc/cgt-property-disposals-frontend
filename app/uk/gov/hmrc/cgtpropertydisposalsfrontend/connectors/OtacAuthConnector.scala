@@ -22,12 +22,11 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 @Singleton
-class OtacAuthConnectorImpl @Inject()(
-                                       val http: HttpClient,
-                                       servicesConfig: ServicesConfig
-                                     ) extends PlayOtacAuthConnector {
+class OtacAuthConnectorImpl @Inject() (
+  val http: HttpClient,
+  servicesConfig: ServicesConfig
+) extends PlayOtacAuthConnector {
 
   override val serviceUrl: String = servicesConfig.baseUrl("auth")
 
 }
-

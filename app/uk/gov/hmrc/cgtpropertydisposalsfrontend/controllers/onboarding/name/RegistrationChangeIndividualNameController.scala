@@ -37,7 +37,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class RegistrationChangeIndividualNameController @Inject()(
+class RegistrationChangeIndividualNameController @Inject() (
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   val auditService: AuditService,

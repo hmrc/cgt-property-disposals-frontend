@@ -23,8 +23,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.OtacAuthConnectorImpl
 
 class OtacAuthConnectorModule extends Module {
 
-  override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] = {
+  override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] =
     Seq(bind[OtacAuthConnector].to[OtacAuthConnectorImpl])
-  }
 }
-

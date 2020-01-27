@@ -118,32 +118,36 @@ class UpscanControllerSpec
 
     "an upscan request is received" should {
       "return the upscan file descriptor information on a successful call" in {
-        val subscribed = sample[Subscribed]
+        val subscribed   = sample[Subscribed]
         val cgtReference = sample[CgtReference]
 
-        val subscribedDetails = subscribed.subscribedDetails
+        val subscribedDetails    = subscribed.subscribedDetails
         val newSubscribedDetails = subscribedDetails.copy(cgtReference = cgtReference)
 
-        val sessionData = SessionData.empty.copy(journeyStatus = Some(subscribed.copy(subscribedDetails = newSubscribedDetails)))
+        val sessionData =
+          SessionData.empty.copy(journeyStatus = Some(subscribed.copy(subscribedDetails = newSubscribedDetails)))
 
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(Future.successful(Right(Some(sessionData))))
         }
 
-        mockUpscanInitiate(cgtReference)(Right(UpscanResponse(cgtReference.value, UpscanDescriptor("href", UpscanRequest("href", Map.empty)))))
+        mockUpscanInitiate(cgtReference)(
+          Right(UpscanResponse(cgtReference.value, UpscanDescriptor("href", UpscanRequest("href", Map.empty))))
+        )
         def performAction(): Future[Result] = controller.upscan()(requestWithCSRFToken)
-        val result = performAction()
+        val result                          = performAction()
         status(result) shouldBe OK
       }
       "return technical error page if the upscan call fails" in {
-        val subscribed = sample[Subscribed]
+        val subscribed   = sample[Subscribed]
         val cgtReference = sample[CgtReference]
 
-        val subscribedDetails = subscribed.subscribedDetails
+        val subscribedDetails    = subscribed.subscribedDetails
         val newSubscribedDetails = subscribedDetails.copy(cgtReference = cgtReference)
 
-        val sessionData = SessionData.empty.copy(journeyStatus = Some(subscribed.copy(subscribedDetails = newSubscribedDetails)))
+        val sessionData =
+          SessionData.empty.copy(journeyStatus = Some(subscribed.copy(subscribedDetails = newSubscribedDetails)))
 
         inSequence {
           mockAuthWithNoRetrievals()
