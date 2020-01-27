@@ -18,7 +18,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding
 
 import play.api.libs.json.{Format, Json}
 
-
 sealed trait SubscriptionResponse extends Product with Serializable
 
 object SubscriptionResponse {

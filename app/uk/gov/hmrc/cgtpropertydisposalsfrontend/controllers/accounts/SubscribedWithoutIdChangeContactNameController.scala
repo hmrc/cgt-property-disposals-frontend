@@ -41,7 +41,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SubscribedWithoutIdChangeContactNameController @Inject()(
+class SubscribedWithoutIdChangeContactNameController @Inject() (
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   val subscriptionService: SubscriptionService,

@@ -39,7 +39,7 @@ trait AuditService {
 }
 
 @Singleton
-class AuditServiceImpl @Inject()(auditConnector: AuditConnector) extends AuditService {
+class AuditServiceImpl @Inject() (auditConnector: AuditConnector) extends AuditService {
 
   override def sendEvent[A](auditType: String, detail: A, transactionName: String)(
     implicit ec: ExecutionContext,

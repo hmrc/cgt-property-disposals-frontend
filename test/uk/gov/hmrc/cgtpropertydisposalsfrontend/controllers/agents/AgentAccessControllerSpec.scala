@@ -778,9 +778,7 @@ class AgentAccessControllerSpec
         }
       )
 
-      behave like commonRedirectToTooManyAttemptsBehaviour(
-        () => performAction("countryCode" -> nonUkCountryCode)
-      )
+      behave like commonRedirectToTooManyAttemptsBehaviour(() => performAction("countryCode" -> nonUkCountryCode))
 
       "show a form error" when {
 

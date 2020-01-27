@@ -217,7 +217,7 @@ class InsufficientConfidenceLevelController @Inject() (
               handleNameMatchError, {
                 case (_, maybeCgtReference) =>
                   Redirect(
-                    maybeCgtReference.fold(controllers.routes.StartController.start()){ cgtReference =>
+                    maybeCgtReference.fold(controllers.routes.StartController.start()) { cgtReference =>
                       auditService.sendEvent(
                         "accessWithWrongGGAccount",
                         WrongGGAccountEvent(Some(cgtReference.value), insufficientConfidenceLevel.ggCredId.value),

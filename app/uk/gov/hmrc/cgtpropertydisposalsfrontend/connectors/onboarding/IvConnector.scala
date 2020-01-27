@@ -35,7 +35,7 @@ trait IvConnector {
 }
 
 @Singleton
-class IvConnectorImpl @Inject()(http: HttpClient, servicesConfig: ServicesConfig)(
+class IvConnectorImpl @Inject() (http: HttpClient, servicesConfig: ServicesConfig)(
   implicit ec: ExecutionContext
 ) extends IvConnector {
 

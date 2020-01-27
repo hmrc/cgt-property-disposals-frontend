@@ -102,7 +102,7 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
     val contactName = ContactName("Joe Smith")
     val updatedSession =
       sessionDataWithValidJourney.copy(
-        journeyStatus = Some(updateContactName(validJourney,contactName))
+        journeyStatus = Some(updateContactName(validJourney, contactName))
       )
 
     behave like redirectToStartBehaviour(() => performAction(Seq.empty))

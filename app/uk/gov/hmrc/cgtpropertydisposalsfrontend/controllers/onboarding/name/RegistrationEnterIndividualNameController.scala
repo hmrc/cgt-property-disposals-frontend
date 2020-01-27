@@ -35,7 +35,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class RegistrationEnterIndividualNameController @Inject()(
+class RegistrationEnterIndividualNameController @Inject() (
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   cc: MessagesControllerComponents,
@@ -67,9 +67,11 @@ class RegistrationEnterIndividualNameController @Inject()(
 
   override def name(journey: IndividualSupplyingInformation): Option[IndividualName] = journey.name
 
-  override protected lazy val backLinkCall: Call = controllers.onboarding.routes.RegistrationController.selectEntityType()
+  override protected lazy val backLinkCall: Call =
+    controllers.onboarding.routes.RegistrationController.selectEntityType()
   override protected lazy val enterNameSubmitCall: Call =
     routes.RegistrationEnterIndividualNameController.enterIndividualNameSubmit()
-  override protected lazy val continueCall: Call = controllers.onboarding.address.routes.RegistrationEnterAddressController.isUk()
+  override protected lazy val continueCall: Call =
+    controllers.onboarding.address.routes.RegistrationEnterAddressController.isUk()
 
 }

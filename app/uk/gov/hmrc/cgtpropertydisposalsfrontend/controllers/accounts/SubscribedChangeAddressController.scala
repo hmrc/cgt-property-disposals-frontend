@@ -39,7 +39,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class SubscribedChangeAddressController @Inject()(
+class SubscribedChangeAddressController @Inject() (
   val errorHandler: ErrorHandler,
   val ukAddressLookupService: UKAddressLookupService,
   val sessionStore: SessionStore,

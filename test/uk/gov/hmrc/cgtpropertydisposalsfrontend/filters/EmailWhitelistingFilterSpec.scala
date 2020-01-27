@@ -159,11 +159,11 @@ class EmailWhitelistingFilterSpec extends WordSpec with Matchers with MockFactor
               otachAuthResult.fold(Future.failed, Future.successful)
             )
 
-            val result  = filter(testAction)(request)
+            val result = filter(testAction)(request)
             status(result)           shouldBe SEE_OTHER
             redirectLocation(result) shouldBe Some(s"$otacUrl?p=$otacToken")
             session(result).data shouldBe Map(
-              SessionKeys.redirect -> s"/test?p=$otacToken",
+              SessionKeys.redirect  -> s"/test?p=$otacToken",
               SessionKeys.otacToken -> otacToken
             )
           }

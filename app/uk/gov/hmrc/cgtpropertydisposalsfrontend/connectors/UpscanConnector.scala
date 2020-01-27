@@ -61,7 +61,7 @@ trait UpscanConnector {
 }
 
 @Singleton
-class UpscanConnectorImpl @Inject()(http: HttpClient, wsClient: WSClient, config: Configuration)(
+class UpscanConnectorImpl @Inject() (http: HttpClient, wsClient: WSClient, config: Configuration)(
   implicit ec: ExecutionContext
 ) extends UpscanConnector
     with Logging {

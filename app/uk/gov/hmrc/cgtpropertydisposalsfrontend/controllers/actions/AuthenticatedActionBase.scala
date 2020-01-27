@@ -48,13 +48,12 @@ trait AuthenticatedActionBase[P[_]] extends ActionRefiner[MessagesRequest, P] wi
 
   private val selfBaseUrl: String = getString("self.url")
 
-  override protected def refine[A](request: MessagesRequest[A]): Future[Either[Result, P[A]]] = {
+  override protected def refine[A](request: MessagesRequest[A]): Future[Either[Result, P[A]]] =
     authorisedFunction[A](authorisedFunctions, request).recoverWith {
       case _: NoActiveSession =>
         Future.successful(
           Left(Redirect(signInUrl, Map("continue" -> Seq(selfBaseUrl + request.uri), "origin" -> Seq(origin))))
         )
     }
-  }
 
 }

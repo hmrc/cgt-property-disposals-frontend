@@ -27,4 +27,3 @@ object CompletionDate {
   implicit val format: OFormat[CompletionDate] = Json.format
 
 }
-

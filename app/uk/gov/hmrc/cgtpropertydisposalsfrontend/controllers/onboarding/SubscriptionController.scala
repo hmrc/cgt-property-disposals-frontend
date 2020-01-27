@@ -39,7 +39,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class SubscriptionController @Inject()(
+class SubscriptionController @Inject() (
   subscriptionService: SubscriptionService,
   sessionStore: SessionStore,
   errorHandler: ErrorHandler,
@@ -95,7 +95,8 @@ class SubscriptionController @Inject()(
                 case AlreadySubscribed =>
                   updateSession(sessionStore, request)(
                     _.copy(
-                      journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount(request.subscriptionReady.ggCredId, None))
+                      journeyStatus =
+                        Some(AlreadySubscribedWithDifferentGGAccount(request.subscriptionReady.ggCredId, None))
                     )
                   )
               }
@@ -139,8 +140,8 @@ class SubscriptionController @Inject()(
   def alreadySubscribedWithDifferentGGAccount(): Action[AnyContent] = authenticatedActionWithSessionData {
     implicit request =>
       request.sessionData.flatMap(_.journeyStatus) match {
-        case Some(AlreadySubscribedWithDifferentGGAccount(_,_)) => Ok(alreadySubscribedWithDifferentGGAccountPage())
-        case _                                                  => Redirect(controllers.routes.StartController.start())
+        case Some(AlreadySubscribedWithDifferentGGAccount(_, _)) => Ok(alreadySubscribedWithDifferentGGAccountPage())
+        case _                                                   => Redirect(controllers.routes.StartController.start())
       }
   }
 

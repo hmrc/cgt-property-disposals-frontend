@@ -41,7 +41,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class RegistrationChangeEmailController @Inject()(
+class RegistrationChangeEmailController @Inject() (
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   val sessionStore: SessionStore,
@@ -89,9 +89,9 @@ class RegistrationChangeEmailController @Inject()(
     )
 
   override def auditEmailVerifiedEvent(
-                                        journey: RegistrationReady,
-                                        email: Email
-                                      )(implicit hc: HeaderCarrier, request: Request[_]): Unit =
+    journey: RegistrationReady,
+    email: Email
+  )(implicit hc: HeaderCarrier, request: Request[_]): Unit =
     auditService.sendEvent(
       "registrationChangeEmailAddressVerified",
       RegistrationChangeEmailAddressVerifiedEvent(
@@ -102,9 +102,9 @@ class RegistrationChangeEmailController @Inject()(
     )
 
   override def auditEmailChangeAttempt(
-                                        journey: RegistrationReady,
-                                        email: Email
-                                      )(implicit hc: HeaderCarrier, request: Request[_]): Unit =
+    journey: RegistrationReady,
+    email: Email
+  )(implicit hc: HeaderCarrier, request: Request[_]): Unit =
     auditService.sendEvent(
       "registrationChangeEmailAddressAttempted",
       RegistrationChangeEmailAttemptedEvent(

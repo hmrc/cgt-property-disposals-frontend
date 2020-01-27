@@ -142,16 +142,18 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
       }
 
       List(
-        IvErrorStatus.Incomplete           -> (() => controllers.onboarding.routes.IvController.getTechnicalIssue()),
-        IvErrorStatus.FailedMatching       -> (() => controllers.onboarding.routes.IvController.getFailedMatching()),
-        IvErrorStatus.FailedIV             -> (() => controllers.onboarding.routes.IvController.getFailedIV()),
-        IvErrorStatus.InsufficientEvidence -> (() => controllers.onboarding.routes.IvController.getInsufficientEvidence()),
-        IvErrorStatus.LockedOut            -> (() => controllers.onboarding.routes.IvController.getLockedOut()),
-        IvErrorStatus.UserAborted          -> (() => controllers.onboarding.routes.IvController.getUserAborted()),
-        IvErrorStatus.Timeout              -> (() => controllers.onboarding.routes.IvController.getTimedOut()),
-        IvErrorStatus.TechnicalIssue       -> (() => controllers.onboarding.routes.IvController.getTechnicalIssue()),
-        IvErrorStatus.PreconditionFailed   -> (() => controllers.onboarding.routes.IvController.getPreconditionFailed()),
-        IvErrorStatus.Unknown("")          -> (() => controllers.onboarding.routes.IvController.getTechnicalIssue())
+        IvErrorStatus.Incomplete     -> (() => controllers.onboarding.routes.IvController.getTechnicalIssue()),
+        IvErrorStatus.FailedMatching -> (() => controllers.onboarding.routes.IvController.getFailedMatching()),
+        IvErrorStatus.FailedIV       -> (() => controllers.onboarding.routes.IvController.getFailedIV()),
+        IvErrorStatus.InsufficientEvidence -> (
+          () => controllers.onboarding.routes.IvController.getInsufficientEvidence()
+        ),
+        IvErrorStatus.LockedOut          -> (() => controllers.onboarding.routes.IvController.getLockedOut()),
+        IvErrorStatus.UserAborted        -> (() => controllers.onboarding.routes.IvController.getUserAborted()),
+        IvErrorStatus.Timeout            -> (() => controllers.onboarding.routes.IvController.getTimedOut()),
+        IvErrorStatus.TechnicalIssue     -> (() => controllers.onboarding.routes.IvController.getTechnicalIssue()),
+        IvErrorStatus.PreconditionFailed -> (() => controllers.onboarding.routes.IvController.getPreconditionFailed()),
+        IvErrorStatus.Unknown("")        -> (() => controllers.onboarding.routes.IvController.getTechnicalIssue())
       ).foreach {
         case (status, redirectTo) =>
           s"redirect to ${redirectTo().url}" when {

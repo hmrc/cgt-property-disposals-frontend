@@ -18,8 +18,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit
 
 import play.api.libs.json.{Json, OFormat}
 
-final case class HandOffTIvEvent (credentialId : String, redirectUrl : String)
+final case class HandOffTIvEvent(credentialId: String, redirectUrl: String)
 
-object HandOffTIvEvent{
+object HandOffTIvEvent {
   implicit val format: OFormat[HandOffTIvEvent] = Json.format[HandOffTIvEvent]
 }

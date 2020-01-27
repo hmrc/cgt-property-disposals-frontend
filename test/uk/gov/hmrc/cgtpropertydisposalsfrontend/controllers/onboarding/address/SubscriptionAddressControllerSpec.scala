@@ -48,7 +48,9 @@ class SubscriptionAddressControllerSpec
   lazy implicit val messagesApi: MessagesApi = controller.messagesApi
 
   override def updateAddress(journey: SubscriptionReady, address: Address): SubscriptionReady =
-    journey.copy(subscriptionDetails = journey.subscriptionDetails.copy(address = address, addressSource = AddressSource.ManuallyEntered))
+    journey.copy(subscriptionDetails =
+      journey.subscriptionDetails.copy(address = address, addressSource = AddressSource.ManuallyEntered)
+    )
 
   override val mockUpdateAddress: Option[(SubscriptionReady, Address, Either[Error, Unit]) => Unit] = None
 

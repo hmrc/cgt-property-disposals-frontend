@@ -1060,7 +1060,9 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               mockAttemptNameMatch(validTrn, validTrustName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
                 Right(bpr -> Some(cgtReference))
               )
-              mockStoreSession(sessionDataWithStatus(AlreadySubscribedWithDifferentGGAccount(ggCredId, Some(cgtReference))))(
+              mockStoreSession(
+                sessionDataWithStatus(AlreadySubscribedWithDifferentGGAccount(ggCredId, Some(cgtReference)))
+              )(
                 Future.successful(Right(()))
               )
             }

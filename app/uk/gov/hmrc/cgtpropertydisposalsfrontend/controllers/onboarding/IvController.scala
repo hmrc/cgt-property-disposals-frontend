@@ -39,7 +39,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class IvController @Inject()(
+class IvController @Inject() (
   sessionStore: SessionStore,
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,

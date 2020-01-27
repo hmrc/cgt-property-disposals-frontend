@@ -18,8 +18,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit
 
 import play.api.libs.json.{Json, OFormat}
 
-final case class IndividualAuditDetails(firstName : String, lastName : String)
+final case class IndividualAuditDetails(firstName: String, lastName: String)
 
-object IndividualAuditDetails{
+object IndividualAuditDetails {
   implicit val format: OFormat[IndividualAuditDetails] = Json.format[IndividualAuditDetails]
 }

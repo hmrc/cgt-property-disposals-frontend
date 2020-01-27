@@ -25,5 +25,6 @@ final case class BusinessPartnerRecordNameMatchAttemptEvent(
 )
 
 object BusinessPartnerRecordNameMatchAttemptEvent {
-  implicit val format: OFormat[BusinessPartnerRecordNameMatchAttemptEvent] = Json.format[BusinessPartnerRecordNameMatchAttemptEvent]
+  implicit val format: OFormat[BusinessPartnerRecordNameMatchAttemptEvent] =
+    Json.format[BusinessPartnerRecordNameMatchAttemptEvent]
 }

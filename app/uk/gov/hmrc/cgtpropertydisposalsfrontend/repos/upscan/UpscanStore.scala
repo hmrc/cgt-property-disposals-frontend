@@ -50,7 +50,7 @@ trait UpscanStore {
 
 @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.NonUnitStatements"))
 @Singleton
-class UpscanStoreImpl @Inject()(mongo: ReactiveMongoComponent, configuration: Configuration)(
+class UpscanStoreImpl @Inject() (mongo: ReactiveMongoComponent, configuration: Configuration)(
   implicit ec: ExecutionContext
 ) extends UpscanStore
     with Logging {
@@ -113,8 +113,7 @@ class UpscanStoreImpl @Inject()(mongo: ReactiveMongoComponent, configuration: Co
           if (result.ok) {
             println(result.n)
             Right(())
-          }
-          else
+          } else
             Left(
               Error(
                 s"Could not insert upscan notify response due to :${result.writeErrors}"

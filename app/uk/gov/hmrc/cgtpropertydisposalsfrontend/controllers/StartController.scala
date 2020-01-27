@@ -382,7 +382,7 @@ class StartController @Inject() (
           )
           Redirect(onboarding.routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
 
-        case Right(_)                => Redirect(onboarding.routes.SubscriptionController.checkYourDetails())
+        case Right(_) => Redirect(onboarding.routes.SubscriptionController.checkYourDetails())
       }
     )
   }
@@ -419,15 +419,14 @@ class StartController @Inject() (
               Either.fromOption(bprResponse.businessPartnerRecord, Error("Could not find BPR for individual"))
             )
       maybeSubscriptionDetails <- EitherT.pure(
-        bprResponse.cgtReference
-          .fold[Either[BuildSubscriptionDataError, SubscriptionDetails]](
-            SubscriptionDetails(bpr, individual.email, None)
-              .leftMap(_ => BuildSubscriptionDataError.DataMissing(bpr))
-          )(
-            cgtReference =>
-              Left(BuildSubscriptionDataError.AlreadySubscribedToCGT(cgtReference))
-          )
-      )
+                                   bprResponse.cgtReference
+                                     .fold[Either[BuildSubscriptionDataError, SubscriptionDetails]](
+                                       SubscriptionDetails(bpr, individual.email, None)
+                                         .leftMap(_ => BuildSubscriptionDataError.DataMissing(bpr))
+                                     )(cgtReference =>
+                                       Left(BuildSubscriptionDataError.AlreadySubscribedToCGT(cgtReference))
+                                     )
+                                 )
       _ <- updateSession(maybeSubscriptionDetails, individual.email, individual.ggCredId, AffinityGroup.Individual)
     } yield maybeSubscriptionDetails
 

@@ -48,7 +48,7 @@ trait UKAddressLookupService {
 }
 
 @Singleton
-class UKAddressLookupServiceImpl @Inject()(connector: AddressLookupConnector, metrics: Metrics)(
+class UKAddressLookupServiceImpl @Inject() (connector: AddressLookupConnector, metrics: Metrics)(
   implicit ec: ExecutionContext
 ) extends UKAddressLookupService {
 
@@ -112,7 +112,7 @@ object UKAddressLookupServiceImpl {
     postcode: String
   )
 
-  object RawAddress{
+  object RawAddress {
     implicit val format: OFormat[RawAddress] = Json.format[RawAddress]
   }
 
@@ -123,7 +123,7 @@ object UKAddressLookupServiceImpl {
 
       final case class Inner(address: RawAddress)
 
-      object Inner{
+      object Inner {
         implicit val format: OFormat[Inner] = Json.format[Inner]
       }
 

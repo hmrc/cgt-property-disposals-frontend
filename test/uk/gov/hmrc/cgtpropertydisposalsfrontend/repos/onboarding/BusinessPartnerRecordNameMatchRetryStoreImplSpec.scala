@@ -87,7 +87,7 @@ class BusinessPartnerRecordNameMatchRetryStoreImplSpec
         val invalidData = JsObject(Map("numberOfRetriesDone" -> JsString("1")))
         val create: Future[DatabaseUpdate[Cache]] =
           retryStore.cacheRepository.createOrUpdate(Id(ggCredId.value), retryStore.sessionKey, invalidData)
-        await(create).writeResult.inError      shouldBe false
+        await(create).writeResult.inError                                  shouldBe false
         await(retryStore.get[IndividualNameMatchDetails](ggCredId)).isLeft shouldBe true
       }
 

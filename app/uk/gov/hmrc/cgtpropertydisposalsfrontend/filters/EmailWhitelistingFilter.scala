@@ -33,7 +33,7 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.control.NonFatal
 
-class EmailWhitelistingFilter @Inject()(
+class EmailWhitelistingFilter @Inject() (
   val mat: Materializer,
   val authConnector: OtacAuthConnector,
   config: Configuration

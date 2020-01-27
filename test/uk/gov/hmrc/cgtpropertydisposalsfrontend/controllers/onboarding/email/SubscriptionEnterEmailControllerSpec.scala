@@ -37,8 +37,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 
 import scala.concurrent.Future
 
-
-
 class SubscriptionEnterEmailControllerSpec
     extends EmailControllerSpec[SubscriptionMissingData, SubscriptionMissingData]
     with ScalaCheckDrivenPropertyChecks

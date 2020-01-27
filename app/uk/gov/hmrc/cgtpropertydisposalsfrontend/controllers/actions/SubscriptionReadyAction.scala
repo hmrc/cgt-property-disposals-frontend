@@ -45,7 +45,7 @@ final case class RequestWithSubscriptionReady[A](
 }
 
 @Singleton
-class SubscriptionReadyAction @Inject()(sessionStore: SessionStore, errorHandler: ErrorHandler)(
+class SubscriptionReadyAction @Inject() (sessionStore: SessionStore, errorHandler: ErrorHandler)(
   implicit ec: ExecutionContext
 ) extends ActionRefiner[AuthenticatedRequest, RequestWithSubscriptionReady]
     with Logging {

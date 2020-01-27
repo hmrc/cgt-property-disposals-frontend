@@ -67,9 +67,8 @@ trait HomePageControllerSpec
 
 class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
 
-
   override lazy val additionalConfig: Configuration = Configuration(
-  "application.router" -> "prod.Routes"
+    "application.router" -> "prod.Routes"
   )
 
   lazy val controller = instanceOf[HomePageController]
@@ -94,12 +93,12 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
               mockGetSession(Future.successful(Right(Some(subscribedSessionData.copy(userType = userType)))))
             }
 
-            val result = performAction()
+            val result  = performAction()
             val content = contentAsString(result)
 
             status(result) shouldBe OK
-            content should include(message("account.home.title"))
-            content should include(message("account.home.button.start-a-new-return"))
+            content        should include(message("account.home.title"))
+            content        should include(message("account.home.button.start-a-new-return"))
             content shouldNot include(
               message(
                 "account.home.subtitle.agent",
@@ -126,11 +125,11 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
           mockGetSession(Future.successful(Right(Some(sessionData))))
         }
 
-        val result = performAction()
+        val result  = performAction()
         val content = contentAsString(result)
 
-        status(result)          shouldBe OK
-        content should include(message("account.home.title"))
+        status(result) shouldBe OK
+        content        should include(message("account.home.title"))
         content should include(
           message(
             "account.home.subtitle.agent",

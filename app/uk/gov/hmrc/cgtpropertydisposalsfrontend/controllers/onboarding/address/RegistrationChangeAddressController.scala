@@ -37,7 +37,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class RegistrationChangeAddressController @Inject()(
+class RegistrationChangeAddressController @Inject() (
   val errorHandler: ErrorHandler,
   val ukAddressLookupService: UKAddressLookupService,
   val sessionStore: SessionStore,

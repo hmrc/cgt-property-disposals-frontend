@@ -39,7 +39,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 @Singleton
-class SubscribedChangeContactNameController @Inject()(
+class SubscribedChangeContactNameController @Inject() (
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   val subscriptionService: SubscriptionService,
@@ -66,7 +66,8 @@ class SubscribedChangeContactNameController @Inject()(
     }
 
   override def updateContactName(journey: Subscribed, contactName: ContactName)(
-    implicit hc: HeaderCarrier, request: Request[_]
+    implicit hc: HeaderCarrier,
+    request: Request[_]
   ): EitherT[Future, Error, Subscribed] = {
     val journeyWithUpdatedContactName = journey.subscribedDetails.copy(contactName = contactName)
     if (journey.subscribedDetails === journeyWithUpdatedContactName) EitherT.rightT[Future, Error](journey)

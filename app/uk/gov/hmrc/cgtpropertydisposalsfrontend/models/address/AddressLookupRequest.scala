@@ -26,7 +26,7 @@ object AddressLookupRequest {
     Form(
       formMapping(
         "postcode" -> Postcode.mapping,
-        "filter" -> optional(text).transform[Option[String]](_.filter(_.nonEmpty), identity)
+        "filter"   -> optional(text).transform[Option[String]](_.filter(_.nonEmpty), identity)
       )(AddressLookupRequest.apply)(AddressLookupRequest.unapply)
     )
   }

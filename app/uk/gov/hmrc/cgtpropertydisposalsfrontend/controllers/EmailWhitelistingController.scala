@@ -22,7 +22,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-class EmailWhitelistingController @Inject()(
+class EmailWhitelistingController @Inject() (
   cc: MessagesControllerComponents,
   emailWhitelistingProblemPage: views.html.email_whitelisting_problem
 )(implicit viewConfig: ViewConfig)

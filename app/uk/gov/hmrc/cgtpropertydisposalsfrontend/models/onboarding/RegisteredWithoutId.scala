@@ -19,7 +19,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.SapNumber
 
-
 final case class RegisteredWithoutId(sapNumber: SapNumber)
 
 object RegisteredWithoutId {

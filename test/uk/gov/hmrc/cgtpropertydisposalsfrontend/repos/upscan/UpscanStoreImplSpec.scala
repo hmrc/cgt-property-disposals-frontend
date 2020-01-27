@@ -78,7 +78,7 @@ class UpscanStoreImplSpec
 
     }
 
-    "be able to delete all the files uploaded against a particular CGT reference" in  {
+    "be able to delete all the files uploaded against a particular CGT reference" in {
       val upscanNotifyEvent = sample[UpscanNotifyEvent]
 
       val rowsEffected = for {

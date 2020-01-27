@@ -55,7 +55,7 @@ class Metrics @Inject() (metrics: com.kenshoo.play.metrics.Metrics) {
   val ivTimeoutCounter: Counter = counter("iv.journey-status.timeout.count")
 
   val ivUnknownErrorCounter: Counter = counter("iv.journey-status.unknown-error.count")
-  
+
   val ivGetFailedJourneyStatusTimer: Timer = timer("iv.get-failed-journey-status.time")
 
   val ivGetFailedJourneyStatusErrorCounter: Counter = counter("iv.get-failed-journey-status.errors.count")

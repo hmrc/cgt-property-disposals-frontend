@@ -37,7 +37,6 @@ trait PostcodeFormValidationTests { this: ControllerSpec =>
         contentAsString(result) should include(message("postcode.error.required"))
       }
 
-
       "the postcode is too long" in {
         List(
           "BFPO123456",
@@ -55,19 +54,20 @@ trait PostcodeFormValidationTests { this: ControllerSpec =>
 
       "the postcode isn't valid" in {
         List(
-          "A00A" -> "postcode.error.pattern",
+          "A00A"     -> "postcode.error.pattern",
           "AA0A0AAA" -> "postcode.error.pattern",
-          "AA0.0AA" -> "postcode.error.invalidCharacters",
-          "AAA123" -> "postcode.error.pattern",
-          "A11AAA" -> "postcode.error.pattern"
-        ).foreach { case (invalidPostcode, errorMessageKey) =>
-          withClue(s"For postcode '$invalidPostcode'") {
-            mockActions()
+          "AA0.0AA"  -> "postcode.error.invalidCharacters",
+          "AAA123"   -> "postcode.error.pattern",
+          "A11AAA"   -> "postcode.error.pattern"
+        ).foreach {
+          case (invalidPostcode, errorMessageKey) =>
+            withClue(s"For postcode '$invalidPostcode'") {
+              mockActions()
 
-            val result = performAction(Seq("postcode" -> invalidPostcode))
-            status(result) shouldBe BAD_REQUEST
-            contentAsString(result) should include(message(errorMessageKey))
-          }
+              val result = performAction(Seq("postcode" -> invalidPostcode))
+              status(result)          shouldBe BAD_REQUEST
+              contentAsString(result) should include(message(errorMessageKey))
+            }
         }
       }
     }

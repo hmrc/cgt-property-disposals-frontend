@@ -55,20 +55,18 @@ object SubscriptionDetails {
           .orElse(ggEmail.map(_ -> EmailSource.GovernmentGateway)),
         NonEmptyList.one(MissingData.Email)
       )
-      .map(
-        emailWithSource => {
-          SubscriptionDetails(
-            bpr.name,
-            emailWithSource._1,
-            bpr.address,
-            ContactName(bpr.name.fold(_.value, n => n.makeSingleName())),
-            bpr.sapNumber,
-            emailWithSource._2,
-            AddressSource.BusinessPartnerRecord,
-            ContactNameSource.DerivedFromBusinessPartnerRecord
-          )
-        }
-      )
+      .map { emailWithSource =>
+        SubscriptionDetails(
+          bpr.name,
+          emailWithSource._1,
+          bpr.address,
+          ContactName(bpr.name.fold(_.value, n => n.makeSingleName())),
+          bpr.sapNumber,
+          emailWithSource._2,
+          AddressSource.BusinessPartnerRecord,
+          ContactNameSource.DerivedFromBusinessPartnerRecord
+        )
+      }
 
   sealed trait MissingData extends Product with Serializable
 

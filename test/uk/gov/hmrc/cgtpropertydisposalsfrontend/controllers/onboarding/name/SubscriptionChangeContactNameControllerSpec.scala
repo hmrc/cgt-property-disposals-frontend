@@ -41,7 +41,8 @@ class SubscriptionChangeContactNameControllerSpec
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
   override val validJourney: SubscriptionReady = {
-    val contactNameSourceLens: Lens[SubscriptionReady,ContactNameSource] = lens[SubscriptionReady].subscriptionDetails.contactNameSource
+    val contactNameSourceLens: Lens[SubscriptionReady, ContactNameSource] =
+      lens[SubscriptionReady].subscriptionDetails.contactNameSource
     contactNameSourceLens.set(sample[SubscriptionReady])(ContactNameSource.DerivedFromBusinessPartnerRecord)
   }
 
@@ -62,9 +63,7 @@ class SubscriptionChangeContactNameControllerSpec
   "SubscriptionEnterContactNameController" when {
 
     "handling requests to display the enter contact name page" must {
-      behave like enterContactNamePage(
-        () => controller.enterContactName()(FakeRequest())
-      )
+      behave like enterContactNamePage(() => controller.enterContactName()(FakeRequest()))
     }
 
     "handling submitted names" must {
