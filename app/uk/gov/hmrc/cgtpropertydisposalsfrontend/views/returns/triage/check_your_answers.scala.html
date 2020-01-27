@@ -18,6 +18,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.CompleteIndividualTriageAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -35,7 +36,7 @@
 
 @mainTemplate(title = title, userType = request.userType) {
 
-  @pageHeading(title)
+ @pageHeading(title, Some(messages("triage.caption")))
 
  @cyaSection() {
   @cyaRow(
@@ -65,12 +66,12 @@
   )
   @cyaRow(
    messages("triage.cyaLabel.disposalDate"),
-   Html(answers.disposalDate.toString),
+   Html(LocalDateUtils.govDisplayFormat(answers.disposalDate.value)),
    Some(cyaChange(messages("triage.cyaChange.disposalDate"), routes.CanTheyUseOurServiceController.whenWasDisposalDate().url))
   )
   @cyaRow(
    messages("triage.cyaLabel.completionDate"),
-   Html(answers.completionDate.toString),
+   Html(LocalDateUtils.govDisplayFormat(answers.completionDate.value)),
    Some(cyaChange(messages("triage.cyaChange.completionDate"), routes.CanTheyUseOurServiceController.whenWasCompletionDate().url))
   )
  }

@@ -538,3 +538,26 @@ completionDate-year.error.invalid=Enter a real completion date
 completionDate-month.error.monthAndYearRequired=Completion date must include a month and a year
 completionDate-day.error.dayAndYearRequired=Completion date must include a day and a year
 completionDate-day.error.dayAndMonthRequired=Completion date must include a day and a month
+
+triage.check-your-answers.title=Check your answers
+triage.cyaLabel.individualUserType=Who you are reporting the tax for
+triage.cyaLabel.numberOfProperties=How many properties are included in this return
+triage.cyaLabel.disposalMethod=How did you transfer ownership
+triage.cyaLabel.wereYouAUKResident=Were you a UK resident when you exchanged contracts
+triage.cyaLabel.propertyType=Did you sell a residential property
+triage.cyaLabel.disposalDate=Contract exchange date
+triage.cyaLabel.completionDate=Completion date
+
+#Months
+date.1=January
+date.2=February
+date.3=March
+date.4=April
+date.5=May
+date.6=June
+date.7=July
+date.8=August
+date.9=September
+date.10=October
+date.11=November
+date.12=December
