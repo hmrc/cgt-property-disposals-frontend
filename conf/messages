@@ -479,8 +479,8 @@ numberOfProperties.title=How many properties do you want to include in this retu
 numberOfProperties.helpText=If you sold shares instead of property, tell us how many companies you held shares in that you want to include in this return.
 numberOfProperties.one=One
 numberOfProperties.more-than-one=2 or more
-numberOfProperties.error.invalid=Select how many properties you want to include in this return
-numberOfProperties.error.required=Select how many properties you want to include in this return
+numberOfProperties.error.invalid=Select how many properties or companies you want to include in this return
+numberOfProperties.error.required=Select how many properties or companies you want to include in this return
 
 disposalMethod.title=Did you sell the property or give it away?
 disposalMethod.sold=Sold it
@@ -489,13 +489,13 @@ disposalMethod.error.required=Select if you sold it or gave it away
 disposalMethod.error.invalid=Select if you sold it or gave it away
 
 wereYouAUKResident.title=Were you a UK resident when you ‘exchanged’ contracts when selling the property?
-wereYouAUKResident.helpText=You ‘exchanged’ contracts when you swapped signed contracts with the buyer. It’s when the buyer paid the deposit
+wereYouAUKResident.helpText=You ‘exchanged’ contracts when you and the buyer swapped contracts and they paid a deposit. If you sold shares, it was when you sold them.
 wereYouAUKResident.link=<a href="{0}" target="_blank">Work out your residence status (opens in a new window)</a>.
 wereYouAUKResident.error.required=Select yes if you were a UK resident when you ‘exchanged’ contracts
 wereYouAUKResident.error.boolean=Select yes if you were a UK resident when you ‘exchanged’ contracts
 
-didYouDisposeOfResidentialProperty.title=Did you sell or dispose of a ‘residential’ property?
-didYouDisposeOfResidentialProperty.helpText=‘Residential’ property includes houses, flats, or other dwellings, including their gardens and grounds
+didYouDisposeOfResidentialProperty.title=Did you sell a residential property?
+didYouDisposeOfResidentialProperty.helpText=Residential property includes houses, flats, or other dwellings, including their gardens and grounds.
 didYouDisposeOfResidentialProperty.details.summary=How to work out if a property is residential
 didYouDisposeOfResidentialProperty.details.p1=Residential property is:
 didYouDisposeOfResidentialProperty.details.l1=a building where someone lives or could live, like a house, flat or other type of dwelling
@@ -503,15 +503,15 @@ didYouDisposeOfResidentialProperty.details.l2=a building that is being built or 
 didYouDisposeOfResidentialProperty.details.l3=land that’s part of a garden or grounds of a building that’s used as a place where someone lives, or could live
 didYouDisposeOfResidentialProperty.details.link=<a href="{0}" target="_blank">Read a definition of residential property (opens in a new window)</a>.
 
-didYouDisposeOfResidentialProperty.error.required=Select yes if you sold or disposed of a ‘residential’ property
-didYouDisposeOfResidentialProperty.error.boolean=Select yes if you sold or disposed of a ‘residential’ property
+didYouDisposeOfResidentialProperty.error.required=Select yes if you sold or disposed of a residential property
+didYouDisposeOfResidentialProperty.error.boolean=Select yes if you sold or disposed of a residential property
 
 disposalDate.title=What date did you ‘exchange’ contracts when selling the property?
 disposalDate.helpText=It’s when you and the buyer swapped contracts and they paid a deposit. If you sold shares not property it’s when you sold them. For example, 25 4 2020
 disposalDate.link=<a href="{0}" target="_blank">Find out what happens on the ‘exchange’ date (opens in a new window)</a>.
 disposalDate.error.required=Enter a contract exchange date
 disposalDate.error.invalid=Enter a real contract exchange date
-disposalDate.error.tooFarInFuture=Contract exchange date must be today or in the past
+disposalDate.error.tooFarInFuture=The contract exchange date must be today or in the past
 disposalDate-day.error.required=Contract exchange date must include a day
 disposalDate-month.error.required=Contract exchange date must include a month
 disposalDate-year.error.required=Contract exchange date must include a year
