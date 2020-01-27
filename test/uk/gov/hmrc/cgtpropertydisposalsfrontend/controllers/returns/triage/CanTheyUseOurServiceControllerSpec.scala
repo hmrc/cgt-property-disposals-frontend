@@ -543,7 +543,7 @@ class CanTheyUseOurServiceControllerSpec
         performAction
       )(requiredPreviousAnswers, routes.CanTheyUseOurServiceController.wereYouAUKResident())(
         { case (i, w) => i.copy(wasAUKResident         = w) },
-        { case (i, w) => i.copy(wasResidentialProperty = w) }
+        { case (i, w) => i.copy(assetType = w.map( if(_) AssetType.Residential else AssetType.NonResidential)) }
       )(true)(
         "didYouDisposeOfResidentialProperty.title",
         _ => List("checked=\"checked\"")
@@ -552,7 +552,7 @@ class CanTheyUseOurServiceControllerSpec
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
         performAction
       )(true) {
-        case (i, w) => i.copy(wasResidentialProperty = w)
+        case (i, w) => i.copy(assetType = if(w) AssetType.Residential else AssetType.NonResidential)
       }(
         "didYouDisposeOfResidentialProperty.title",
         _ => List("checked=\"checked\"")
@@ -578,8 +578,8 @@ class CanTheyUseOurServiceControllerSpec
         sample[CompleteIndividualTriageAnswers]
       )(
         { case (i, w) => i.copy(wasAUKResident         = w) },
-        { case (i, w) => i.copy(wasResidentialProperty = w) },
-        { case (i, w) => i.copy(wasResidentialProperty = w) }
+        { case (i, w) => i.copy(assetType = w.map( if(_) AssetType.Residential else AssetType.NonResidential)) },
+        { case (i, w) => i.copy(assetType = if(w) AssetType.Residential else AssetType.NonResidential) }
       )(
         "didYouDisposeOfResidentialProperty.title"
       )(
@@ -620,7 +620,7 @@ class CanTheyUseOurServiceControllerSpec
           numberOfProperties     = Some(NumberOfProperties.One),
           disposalMethod         = Some(DisposalMethod.Gifted),
           wasAUKResident         = Some(true),
-          wasResidentialProperty = Some(true)
+          assetType              = Some(AssetType.Residential)
         )
 
       val disposalDate = DisposalDate(LocalDate.of(2020, 1, 2))
@@ -632,7 +632,7 @@ class CanTheyUseOurServiceControllerSpec
       behave like displayIndividualTriagePageBehaviorIncompleteJourney[Boolean, DisposalDate](
         performAction
       )(requiredPreviousAnswers, routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty())(
-        { case (i, w) => i.copy(wasResidentialProperty = w) },
+        { case (i, w) => i.copy(assetType = w.map(if(_) AssetType.Residential else AssetType.NonResidential)) },
         { case (i, d) => i.copy(disposalDate           = d) }
       )(disposalDate)(
         "disposalDate.title",
@@ -673,7 +673,7 @@ class CanTheyUseOurServiceControllerSpec
           numberOfProperties     = Some(NumberOfProperties.One),
           disposalMethod         = Some(DisposalMethod.Gifted),
           wasAUKResident         = Some(true),
-          wasResidentialProperty = Some(true)
+          assetType              = Some(AssetType.Residential)
         )
 
       val formErrorScenarios =
@@ -743,7 +743,7 @@ class CanTheyUseOurServiceControllerSpec
         routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty(),
         sample[CompleteIndividualTriageAnswers]
       )(
-        { case (i, w) => i.copy(wasResidentialProperty = w) },
+        { case (i, w) => i.copy(assetType = w.map(if(_) AssetType.Residential else AssetType.NonResidential)) },
         { case (i, d) => i.copy(disposalDate           = d) }, {
           case (i, d) =>
             IncompleteIndividualTriageAnswers(
@@ -751,7 +751,7 @@ class CanTheyUseOurServiceControllerSpec
               Some(i.numberOfProperties),
               Some(i.disposalMethod),
               Some(i.wasAUKResident),
-              Some(i.wasResidentialProperty),
+              Some(i.assetType),
               Some(d),
               None
             )
@@ -776,7 +776,7 @@ class CanTheyUseOurServiceControllerSpec
           numberOfProperties     = Some(NumberOfProperties.One),
           disposalMethod         = Some(DisposalMethod.Gifted),
           wasAUKResident         = Some(true),
-          wasResidentialProperty = Some(true),
+          assetType              = Some(AssetType.Residential),
           disposalDate           = Some(disposalDate)
         )
 
@@ -832,7 +832,7 @@ class CanTheyUseOurServiceControllerSpec
           numberOfProperties     = Some(NumberOfProperties.One),
           disposalMethod         = Some(DisposalMethod.Gifted),
           wasAUKResident         = Some(true),
-          wasResidentialProperty = Some(true),
+          assetType              = Some(AssetType.Residential),
           disposalDate           = Some(disposalDate)
         )
 
@@ -916,7 +916,7 @@ class CanTheyUseOurServiceControllerSpec
           NumberOfProperties.One,
           DisposalMethod.Sold,
           wasAUKResident = true,
-          wasResidentialProperty = true,
+          assetType = AssetType.Residential,
           sample[DisposalDate],
           sample[CompletionDate]
         )
@@ -926,7 +926,7 @@ class CanTheyUseOurServiceControllerSpec
         Some(completeTriageQuestions.numberOfProperties),
         Some(completeTriageQuestions.disposalMethod),
         Some(completeTriageQuestions.wasAUKResident),
-        Some(completeTriageQuestions.wasResidentialProperty),
+        Some(completeTriageQuestions.assetType),
         Some(completeTriageQuestions.disposalDate),
         Some(completeTriageQuestions.completionDate)
       )
@@ -938,7 +938,7 @@ class CanTheyUseOurServiceControllerSpec
         allQuestionsAnswered.copy(numberOfProperties = None) -> routes.CanTheyUseOurServiceController.howManyProperties(),
         allQuestionsAnswered.copy(disposalMethod = None) -> routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty(),
         allQuestionsAnswered.copy(wasAUKResident = None) -> routes.CanTheyUseOurServiceController.wereYouAUKResident(),
-        allQuestionsAnswered.copy(wasResidentialProperty = None) -> routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty(),
+        allQuestionsAnswered.copy(assetType = None) -> routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty(),
         allQuestionsAnswered.copy(disposalDate = None) -> routes.CanTheyUseOurServiceController.whenWasDisposalDate(),
         allQuestionsAnswered.copy(completionDate = None) -> routes.CanTheyUseOurServiceController.whenWasCompletionDate()
       ).foreach{ case (state, expectedRedirect) =>

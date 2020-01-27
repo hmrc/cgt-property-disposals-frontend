@@ -188,7 +188,7 @@ object JourneyStatusController {
           numberOfProperties,
           disposalMethod,
           wasAUKResident,
-          disposedOfResidentialProperty,
+          disposedOfResidentialProperty.map(if (_) AssetType.Residential else AssetType.NonResidential),
           disposalDate.map(DisposalDate(_)),
           completionDate.map(CompletionDate(_))
         )
@@ -199,7 +199,7 @@ object JourneyStatusController {
           i.numberOfProperties,
           i.disposalMethod,
           i.wasAUKResident,
-          i.wasResidentialProperty,
+          i.assetType.map(_ === AssetType.Residential),
           i.disposalDate.map(_.value),
           i.completionDate.map(_.value)
         )

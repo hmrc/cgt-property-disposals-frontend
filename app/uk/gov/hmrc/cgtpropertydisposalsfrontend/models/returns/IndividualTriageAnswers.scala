@@ -28,7 +28,7 @@ object IndividualTriageAnswers {
     numberOfProperties: Option[NumberOfProperties],
     disposalMethod: Option[DisposalMethod],
     wasAUKResident: Option[Boolean],
-    wasResidentialProperty: Option[Boolean],
+    assetType: Option[AssetType],
     disposalDate: Option[DisposalDate],
     completionDate: Option[CompletionDate]
   ) extends IndividualTriageAnswers
@@ -44,7 +44,7 @@ object IndividualTriageAnswers {
     numberOfProperties: NumberOfProperties,
     disposalMethod: DisposalMethod,
     wasAUKResident: Boolean,
-    wasResidentialProperty: Boolean,
+    assetType: AssetType,
     disposalDate: DisposalDate,
     completionDate: CompletionDate
   ) extends IndividualTriageAnswers

@@ -288,7 +288,8 @@ class CanTheyUseOurServiceController @Inject() (
         _.fold(_.wasAUKResident, c => Some(c.wasAUKResident)),
         routes.CanTheyUseOurServiceController.wereYouAUKResident()
       )(_ => wasResidentialPropertyForm)(
-        extractField = _.fold(_.wasResidentialProperty, c => Some(c.wasResidentialProperty)),
+        extractField =
+          _.fold(_.assetType.map(_ === AssetType.Residential), c => Some(c.assetType === AssetType.Residential)),
         page = {
           case (currentState, form) =>
             didYouDisposeOfResidentialPropertyPage(
@@ -314,9 +315,10 @@ class CanTheyUseOurServiceController @Inject() (
         },
         updateState = {
           case (wasResidentialProperty, i) =>
+            val assetType = if (wasResidentialProperty) AssetType.Residential else AssetType.NonResidential
             i.fold(
-              _.copy(wasResidentialProperty = Some(wasResidentialProperty)),
-              _.copy(wasResidentialProperty = wasResidentialProperty)
+              _.copy(assetType = Some(assetType)),
+              _.copy(assetType = assetType)
             )
         },
         nextResult = {
@@ -335,7 +337,7 @@ class CanTheyUseOurServiceController @Inject() (
 
   def whenWasDisposalDate(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     displayIndividualTriagePage(
-      _.fold(_.wasResidentialProperty, c => Some(c.wasResidentialProperty)),
+      _.fold(_.assetType, c => Some(c.assetType)),
       routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty()
     )(_ => disposalDateForm(today()))(
       extractField = _.fold(_.disposalDate, c => Some(c.disposalDate)),
@@ -351,7 +353,7 @@ class CanTheyUseOurServiceController @Inject() (
 
   def whenWasDisposalDateSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     handleIndividualTriagePageSubmit(
-      _.fold(_.wasResidentialProperty, c => Some(c.wasResidentialProperty)),
+      _.fold(_.assetType, c => Some(c.assetType)),
       routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty()
     )(_ => disposalDateForm(today()))(
       page = {
@@ -371,7 +373,7 @@ class CanTheyUseOurServiceController @Inject() (
                 Some(c.numberOfProperties),
                 Some(c.disposalMethod),
                 Some(c.wasAUKResident),
-                Some(c.wasResidentialProperty),
+                Some(c.assetType),
                 Some(d),
                 None
               )

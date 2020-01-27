@@ -61,7 +61,7 @@
   )
   @cyaRow(
    messages("triage.cyaLabel.propertyType"),
-   Html(answers.wasResidentialProperty.toString),
+   Html(answers.assetType.toString),
    Some(cyaChange(messages("triage.cyaChange.propertyType"), routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty().url))
   )
   @cyaRow(
