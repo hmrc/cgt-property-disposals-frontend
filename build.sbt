@@ -1,7 +1,7 @@
+import scoverage.ScoverageKeys
 import uk.gov.hmrc.DefaultBuildSettings.integrationTestSettings
 import uk.gov.hmrc.SbtArtifactory
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
-import scoverage.ScoverageKeys
 import wartremover.{Wart, wartremoverErrors, wartremoverExcluded}
 
 val appName = "cgt-property-disposals-frontend"
@@ -42,6 +42,7 @@ lazy val microservice = Project(appName, file("."))
     SbtDistributablesPlugin,
     SbtArtifactory
   )
+  .disablePlugins(JUnitXmlReportPlugin)
   .settings(addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"))
   .settings(scalaVersion := "2.12.10")
   .settings(
