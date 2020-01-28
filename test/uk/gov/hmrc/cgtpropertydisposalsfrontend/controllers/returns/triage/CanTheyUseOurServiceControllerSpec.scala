@@ -18,7 +18,10 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 import java.time.format.DateTimeFormatter
 import java.time.{Clock, LocalDate}
+import java.util.UUID
 
+import cats.data.EitherT
+import cats.instances.future._
 import cats.syntax.eq._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.Configuration
@@ -30,14 +33,19 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => returnsRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.{CompleteIndividualTriageAnswers, IncompleteIndividualTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
+import uk.gov.hmrc.http.HeaderCarrier
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class CanTheyUseOurServiceControllerSpec
@@ -47,10 +55,16 @@ class CanTheyUseOurServiceControllerSpec
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
+  val mockReturnsService = mock[ReturnsService]
+
+  val mockUUIDGenerator = mock[UUIDGenerator]
+
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
-      bind[SessionStore].toInstance(mockSessionStore)
+      bind[SessionStore].toInstance(mockSessionStore),
+      bind[ReturnsService].toInstance(mockReturnsService),
+      bind[UUIDGenerator].toInstance(mockUUIDGenerator)
     )
 
   val today = LocalDate.now(Clock.systemUTC())
@@ -77,6 +91,15 @@ class CanTheyUseOurServiceControllerSpec
 
   def sessionDataWithIndividualTriageAnswers(individualTriageAnswers: IndividualTriageAnswers): SessionData =
     sessionDataWithIndividualTriageAnswers(Some(individualTriageAnswers))
+
+  def mockGetNextUUID(uuid: UUID) =
+    (mockUUIDGenerator.nextId _).expects().returning(uuid)
+
+  def mockStoreDraftReturn(draftReturn: DraftReturn)(result: Either[Error, Unit]) =
+    (mockReturnsService
+      .storeDraftReturn(_: DraftReturn)(_: HeaderCarrier))
+      .expects(draftReturn, *)
+      .returning(EitherT.fromEither[Future](result))
 
   "The CanTheyUseOurServiceController" when {
 
@@ -905,7 +928,7 @@ class CanTheyUseOurServiceControllerSpec
 
     }
 
-    "handlling requests to display the check your answers page" must {
+    "handling requests to display the check your answers page" must {
 
       def performAction(): Future[Result] =
         controller.checkYourAnswers()(FakeRequest())
@@ -931,41 +954,45 @@ class CanTheyUseOurServiceControllerSpec
         Some(completeTriageQuestions.completionDate)
       )
 
-      List(
-        allQuestionsAnswered.copy(individualUserType = None) -> routes.CanTheyUseOurServiceController
-          .whoIsIndividualRepresenting(),
-        allQuestionsAnswered.copy(numberOfProperties = None) -> routes.CanTheyUseOurServiceController
-          .howManyProperties(),
-        allQuestionsAnswered.copy(disposalMethod = None) -> routes.CanTheyUseOurServiceController
-          .howDidYouDisposeOfProperty(),
-        allQuestionsAnswered.copy(wasAUKResident = None) -> routes.CanTheyUseOurServiceController.wereYouAUKResident(),
-        allQuestionsAnswered.copy(assetType      = None) -> routes.CanTheyUseOurServiceController
-          .didYouDisposeOfAResidentialProperty(),
-        allQuestionsAnswered.copy(disposalDate   = None) -> routes.CanTheyUseOurServiceController.whenWasDisposalDate(),
-        allQuestionsAnswered.copy(completionDate = None) -> routes.CanTheyUseOurServiceController
-          .whenWasCompletionDate()
-      ).foreach {
-        case (state, expectedRedirect) =>
-          s"redirect to ${expectedRedirect.url}" when {
+      s"redirect to the correct page" when {
 
-            "the corresponding question has not yet been answered" in {
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(
-                  Future.successful(
-                    Right(
-                      Some(
-                        sessionDataWithIndividualTriageAnswers(state)
+        "a question has not yet been answered" in {
+          List(
+            allQuestionsAnswered.copy(individualUserType = None) -> routes.CanTheyUseOurServiceController
+              .whoIsIndividualRepresenting(),
+            allQuestionsAnswered.copy(numberOfProperties = None) -> routes.CanTheyUseOurServiceController
+              .howManyProperties(),
+            allQuestionsAnswered.copy(disposalMethod = None) -> routes.CanTheyUseOurServiceController
+              .howDidYouDisposeOfProperty(),
+            allQuestionsAnswered.copy(wasAUKResident = None) -> routes.CanTheyUseOurServiceController
+              .wereYouAUKResident(),
+            allQuestionsAnswered.copy(assetType = None) -> routes.CanTheyUseOurServiceController
+              .didYouDisposeOfAResidentialProperty(),
+            allQuestionsAnswered.copy(disposalDate = None) -> routes.CanTheyUseOurServiceController
+              .whenWasDisposalDate(),
+            allQuestionsAnswered.copy(completionDate = None) -> routes.CanTheyUseOurServiceController
+              .whenWasCompletionDate()
+          ).foreach {
+            case (state, expectedRedirect) =>
+              withClue(s"For state $state and expected redirect url ${expectedRedirect.url}: ") {
+                inSequence {
+                  mockAuthWithNoRetrievals()
+                  mockGetSession(
+                    Future.successful(
+                      Right(
+                        Some(
+                          sessionDataWithIndividualTriageAnswers(state)
+                        )
                       )
                     )
                   )
-                )
+                }
+
+                checkIsRedirect(performAction(), expectedRedirect)
               }
-
-              checkIsRedirect(performAction(), expectedRedirect)
-            }
-
           }
+
+        }
       }
 
       "show an error page" when {
@@ -1033,6 +1060,86 @@ class CanTheyUseOurServiceControllerSpec
           status(result)          shouldBe OK
           contentAsString(result) should include(message("triage.check-your-answers.title"))
         }
+      }
+
+    }
+
+    "handling submit requests from the check your answers page" must {
+
+      def performAction() =
+        controller.checkYourAnswersSubmit()(FakeRequest())
+
+      val completeAnswers = sample[CompleteIndividualTriageAnswers]
+
+      val uuid = UUID.randomUUID()
+
+      val newDraftReturn = DraftReturn(uuid, subscribed.subscribedDetails.cgtReference, completeAnswers)
+
+      val sessionDataWithNewDraftReturn = SessionData.empty.copy(
+        journeyStatus = Some(
+          subscribed.copy(
+            individualTriageAnswers = None,
+            draftReturn             = Some(newDraftReturn)
+          )
+        )
+      )
+
+      "redirect to the check your answers page" when {
+
+        "the user has not answered all the questions in the triage section" in {
+          val incompleteAnswers = sample[IncompleteIndividualTriageAnswers]
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionDataWithIndividualTriageAnswers(incompleteAnswers)))))
+          }
+
+          checkIsRedirect(performAction(), routes.CanTheyUseOurServiceController.checkYourAnswers())
+        }
+
+      }
+
+      "show an error page" when {
+
+        "there is a problem storing a draft return" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionDataWithIndividualTriageAnswers(completeAnswers)))))
+            mockGetNextUUID(uuid)
+            mockStoreDraftReturn(newDraftReturn)(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
+        "there is a problem updating the session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionDataWithIndividualTriageAnswers(completeAnswers)))))
+            mockGetNextUUID(uuid)
+            mockStoreDraftReturn(newDraftReturn)(Right(()))
+            mockStoreSession(sessionDataWithNewDraftReturn)(Future.successful(Left(Error(""))))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
+      }
+
+      "redirect to the task list page" when {
+
+        "the draft return is stored and the session is updated" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionDataWithIndividualTriageAnswers(completeAnswers)))))
+            mockGetNextUUID(uuid)
+            mockStoreDraftReturn(newDraftReturn)(Right(()))
+            mockStoreSession(sessionDataWithNewDraftReturn)(Future.successful(Right(())))
+          }
+
+          checkIsRedirect(performAction(), returnsRoutes.TaskListController.taskList())
+        }
+
       }
 
     }

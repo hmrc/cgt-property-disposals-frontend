@@ -205,6 +205,7 @@ class AgentAccessController @Inject() (
                   verifierMatchingDetails.clientDetails,
                   agentSupplyingClientDetails.agentGGCredId,
                   Some(agentSupplyingClientDetails.agentReferenceNumber),
+                  None,
                   None
                 )
               )

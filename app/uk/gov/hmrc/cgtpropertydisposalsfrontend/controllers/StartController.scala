@@ -227,7 +227,7 @@ class StartController @Inject() (
             updateSession(sessionStore, request)(
               _.copy(
                 userType      = request.authenticatedRequest.userType,
-                journeyStatus = Some(Subscribed(subscribedDetails, ggCredId, None, None))
+                journeyStatus = Some(Subscribed(subscribedDetails, ggCredId, None, None, None))
               )
             )
           )
