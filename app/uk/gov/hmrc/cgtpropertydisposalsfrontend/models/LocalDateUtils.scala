@@ -23,6 +23,7 @@ import cats.syntax.either._
 import configs.Configs
 import play.api.data.FormError
 import play.api.data.format.Formatter
+import play.api.i18n.Messages
 
 import scala.util.Try
 
@@ -89,4 +90,6 @@ object LocalDateUtils {
 
   }
 
+  def govDisplayFormat(date: LocalDate)(implicit messages: Messages): String =
+    s"""${date.getDayOfMonth()} ${messages(s"date.${date.getMonthValue()}")} ${date.getYear()}"""
 }

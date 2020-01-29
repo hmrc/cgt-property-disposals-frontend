@@ -19,3 +19,5 @@ POST /before-start/date-exchanged-contracts                 uk.gov.hmrc.cgtprope
 GET  /before-start/date-of-completion                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CanTheyUseOurServiceController.whenWasCompletionDate()
 POST /before-start/date-of-completion                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CanTheyUseOurServiceController.whenWasCompletionDateSubmit()
 
+GET  /before-start/check-your-answers                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CanTheyUseOurServiceController.checkYourAnswers()
+POST /before-start/check-your-answers                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CanTheyUseOurServiceController.checkYourAnswersSubmit()

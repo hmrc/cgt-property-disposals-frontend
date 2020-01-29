@@ -29,7 +29,7 @@
         backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@(form: Form[NumberOfProperties])(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[NumberOfProperties], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"numberOfProperties"}
 @title = @{messages("numberOfProperties.title")}
@@ -43,14 +43,14 @@
 
 @options = @{
     List(
-        s"$key.one",
-        s"$key.more-than-one"
+        s"$key.One",
+        s"$key.MoreThanOne"
     ).map(messageKey =>Html(messages(messageKey)))
 }
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
 
-    @backLinkComponent(controllers.returns.triage.routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting())
+    @backLinkComponent(backLink)
 
     @if(hasErrors) {
         @errorSummary(form)

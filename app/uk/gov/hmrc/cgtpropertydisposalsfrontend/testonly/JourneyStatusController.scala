@@ -33,6 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.IncompleteIndividualTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.testonly.JourneyStatusController._
@@ -163,7 +164,7 @@ object JourneyStatusController {
 
   }
 
-  val returnStateForm: Form[IndividualTriageAnswers] = Form(
+  val returnStateForm: Form[IncompleteIndividualTriageAnswers] = Form(
     mapping(
       "individual-user-type"             -> of(individualUserTypeFormatter),
       "number-of-properties"             -> of(numberOfPropertiesFormatter),
@@ -182,12 +183,12 @@ object JourneyStatusController {
           disposalDate,
           completionDate
           ) =>
-        IndividualTriageAnswers(
+        IncompleteIndividualTriageAnswers(
           individualUserType,
           numberOfProperties,
           disposalMethod,
           wasAUKResident,
-          disposedOfResidentialProperty,
+          disposedOfResidentialProperty.map(if (_) AssetType.Residential else AssetType.NonResidential),
           disposalDate.map(DisposalDate(_)),
           completionDate.map(CompletionDate(_))
         )
@@ -198,7 +199,7 @@ object JourneyStatusController {
           i.numberOfProperties,
           i.disposalMethod,
           i.wasAUKResident,
-          i.wasResidentialProperty,
+          i.assetType.map(_ === AssetType.Residential),
           i.disposalDate.map(_.value),
           i.completionDate.map(_.value)
         )

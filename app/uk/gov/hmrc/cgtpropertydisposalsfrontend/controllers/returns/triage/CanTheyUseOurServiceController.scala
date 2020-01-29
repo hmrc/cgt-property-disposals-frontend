@@ -32,10 +32,12 @@ import play.api.http.Writeable
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => homeRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.configs
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalMethod.{Gifted, Sold}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.{CompleteIndividualTriageAnswers, IncompleteIndividualTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
@@ -62,7 +64,8 @@ class CanTheyUseOurServiceController @Inject() (
   wereYouAUKResidentPage: triagePages.were_you_a_uk_resident,
   didYouDisposeOfResidentialPropertyPage: triagePages.did_you_dispose_of_residential_property,
   disposalDatePage: triagePages.disposal_date,
-  completionDatePage: triagePages.completion_date
+  completionDatePage: triagePages.completion_date,
+  checkYourAnswersPage: triagePages.check_your_answers
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -82,10 +85,20 @@ class CanTheyUseOurServiceController @Inject() (
     withSubscribedUser(request) {
       case (_, subscribed) =>
         val form = subscribed.individualTriageAnswers
-          .flatMap(_.individualUserType)
+          .flatMap(_.fold(_.individualUserType, c => Some(c.individualUserType)))
           .fold(whoAreYouReportingForForm)(whoAreYouReportingForForm.fill)
 
-        Ok(whoAreYouReportingForPage(form))
+        val backLink =
+          subscribed.individualTriageAnswers
+            .map(
+              _.fold(
+                _ => homeRoutes.HomePageController.homepage(),
+                _ => routes.CanTheyUseOurServiceController.checkYourAnswers()
+              )
+            )
+            .getOrElse(homeRoutes.HomePageController.homepage())
+
+        Ok(whoAreYouReportingForPage(form, backLink))
     }
   }
 
@@ -93,17 +106,25 @@ class CanTheyUseOurServiceController @Inject() (
     implicit request =>
       withSubscribedUser(request) {
         case (_, subscribed) =>
+          lazy val backLink =
+            subscribed.individualTriageAnswers
+              .map(
+                _.fold(
+                  _ => homeRoutes.HomePageController.homepage(),
+                  _ => routes.CanTheyUseOurServiceController.checkYourAnswers()
+                )
+              )
+              .getOrElse(homeRoutes.HomePageController.homepage())
           whoAreYouReportingForForm
             .bindFromRequest()
             .fold(
-              formWithErrors => BadRequest(whoAreYouReportingForPage(formWithErrors)), { userType =>
-                val newSubscribed = subscribed.copy(
-                  individualTriageAnswers = Some(
-                    subscribed.individualTriageAnswers
-                      .map(_.copy(individualUserType = Some(userType)))
-                      .getOrElse(IndividualTriageAnswers.empty.copy(individualUserType = Some(userType)))
-                  )
-                )
+              formWithErrors => BadRequest(whoAreYouReportingForPage(formWithErrors, backLink)), { userType =>
+                val newAnswers =
+                  subscribed.individualTriageAnswers
+                    .map(_.fold(_.copy(individualUserType = Some(userType)), _.copy(individualUserType = userType)))
+                    .getOrElse(IncompleteIndividualTriageAnswers.empty.copy(individualUserType = Some(userType)))
+
+                val newSubscribed = subscribed.copy(individualTriageAnswers = Some(newAnswers))
 
                 updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newSubscribed)))
                   .map {
@@ -114,7 +135,10 @@ class CanTheyUseOurServiceController @Inject() (
                     case Right(_) =>
                       userType match {
                         case IndividualUserType.Self =>
-                          Redirect(routes.CanTheyUseOurServiceController.howManyProperties())
+                          newAnswers.fold(
+                            _ => Redirect(routes.CanTheyUseOurServiceController.howManyProperties()),
+                            _ => Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
+                          )
 
                         case other => Ok(s"$other not handled yet")
                       }
@@ -128,114 +152,242 @@ class CanTheyUseOurServiceController @Inject() (
 
   def howManyProperties(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     displayIndividualTriagePage(
-      _.individualUserType,
+      _.fold(_.individualUserType, c => Some(c.individualUserType)),
       routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting()
-    )(_ => numberOfPropertiesForm)(_.numberOfProperties, howManyPropertiesPage(_))
+    )(_ => numberOfPropertiesForm)(
+      _.fold(_.numberOfProperties, c => Some(c.numberOfProperties)), {
+        case (currentState, form) =>
+          howManyPropertiesPage(
+            form,
+            backLink(currentState, routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting())
+          )
+      }
+    )
   }
 
   def howManyPropertiesSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     handleIndividualTriagePageSubmit(
-      _.individualUserType,
+      _.fold(_.individualUserType, c => Some(c.individualUserType)),
       routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting()
     )(_ => numberOfPropertiesForm)(
-      howManyPropertiesPage(_),
-      updateState = { case (numberOfProperties, i) => i.copy(numberOfProperties = Some(numberOfProperties)) },
+      {
+        case (currentState, form) =>
+          howManyPropertiesPage(
+            form,
+            backLink(currentState, routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting())
+          )
+      },
+      updateState = {
+        case (numberOfProperties, i) =>
+          i.fold(_.copy(numberOfProperties = Some(numberOfProperties)), _.copy(numberOfProperties = numberOfProperties))
+      },
       nextResult = {
-        case NumberOfProperties.One =>
-          Redirect(routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty())
-
-        case NumberOfProperties.MoreThanOne =>
+        case (NumberOfProperties.One, updatedState) =>
+          updatedState.fold(
+            _ => Redirect(routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty()),
+            _ => Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
+          )
+        case (NumberOfProperties.MoreThanOne, updatedState) =>
           Ok("multiple disposals not handled yet")
       }
     )
   }
 
   def howDidYouDisposeOfProperty(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    displayIndividualTriagePage(_.numberOfProperties, routes.CanTheyUseOurServiceController.howManyProperties())(_ =>
-      disposalMethodForm
-    )(_.disposalMethod, disposalMethodPage(_))
+    displayIndividualTriagePage(
+      _.fold(_.numberOfProperties, c => Some(c.numberOfProperties)),
+      routes.CanTheyUseOurServiceController.howManyProperties()
+    )(_ => disposalMethodForm)(
+      extractField = _.fold(_.disposalMethod, c => Some(c.disposalMethod)),
+      page = {
+        case (currentState, form) =>
+          disposalMethodPage(
+            form,
+            backLink(currentState, routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting())
+          )
+      }
+    )
   }
 
   def howDidYouDisposeOfPropertySubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
-      handleIndividualTriagePageSubmit(_.numberOfProperties, routes.CanTheyUseOurServiceController.howManyProperties())(
-        _ => disposalMethodForm
-      )(
-        disposalMethodPage(_),
-        updateState = { case (disposalMethod, i) => i.copy(disposalMethod = Some(disposalMethod)) },
-        nextResult  = _ => Redirect(routes.CanTheyUseOurServiceController.wereYouAUKResident())
+      handleIndividualTriagePageSubmit(
+        _.fold(_.numberOfProperties, c => Some(c.numberOfProperties)),
+        routes.CanTheyUseOurServiceController.howManyProperties()
+      )(_ => disposalMethodForm)(
+        page = {
+          case (currentState, form) =>
+            disposalMethodPage(
+              form,
+              backLink(currentState, routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting())
+            )
+        },
+        updateState = {
+          case (disposalMethod, i) =>
+            i.fold(_.copy(disposalMethod = Some(disposalMethod)), _.copy(disposalMethod = disposalMethod))
+        },
+        nextResult = {
+          case (_, updatedState) =>
+            updatedState.fold(
+              _ => Redirect(routes.CanTheyUseOurServiceController.wereYouAUKResident()),
+              _ => Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
+            )
+        }
       )
   }
 
   def wereYouAUKResident(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     displayIndividualTriagePage(
-      _.disposalMethod,
+      _.fold(_.disposalMethod, c => Some(c.disposalMethod)),
       routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty()
-    )(_ => wasAUkResidentForm)(_.wasAUKResident, wereYouAUKResidentPage(_))
+    )(_ => wasAUkResidentForm)(
+      extractField = _.fold(_.wasAUKResident, c => Some(c.wasAUKResident)),
+      page = {
+        case (currentState, form) =>
+          wereYouAUKResidentPage(
+            form,
+            backLink(currentState, routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty())
+          )
+      }
+    )
   }
 
   def wereYouAUKResidentSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     handleIndividualTriagePageSubmit(
-      _.disposalMethod,
+      _.fold(_.disposalMethod, c => Some(c.disposalMethod)),
       routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty()
     )(_ => wasAUkResidentForm)(
-      wereYouAUKResidentPage(_),
-      updateState = { case (wasAUKResident, i) => i.copy(wasAUKResident = Some(wasAUKResident)) },
-      nextResult = { wasAUKResident =>
-        if (wasAUKResident) {
-          Redirect(routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty())
-        } else {
-          Ok("non residents not handled yet")
-        }
+      page = {
+        case (currentState, form) =>
+          wereYouAUKResidentPage(
+            form,
+            backLink(currentState, routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty())
+          )
+      },
+      updateState = {
+        case (wasAUKResident, i) =>
+          i.fold(_.copy(wasAUKResident = Some(wasAUKResident)), _.copy(wasAUKResident = wasAUKResident))
+      },
+      nextResult = {
+        case (wasAUKResident, updatedState) =>
+          if (wasAUKResident) {
+            updatedState.fold(
+              _ => Redirect(routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty()),
+              _ => Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
+            )
+          } else {
+            Ok("non residents not handled yet")
+          }
       }
     )
   }
 
   def didYouDisposeOfAResidentialProperty(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
-      displayIndividualTriagePage(_.wasAUKResident, routes.CanTheyUseOurServiceController.wereYouAUKResident())(_ =>
-        wasResidentialPropertyForm
-      )(_.wasResidentialProperty, didYouDisposeOfResidentialPropertyPage(_))
+      displayIndividualTriagePage(
+        _.fold(_.wasAUKResident, c => Some(c.wasAUKResident)),
+        routes.CanTheyUseOurServiceController.wereYouAUKResident()
+      )(_ => wasResidentialPropertyForm)(
+        extractField =
+          _.fold(_.assetType.map(_ === AssetType.Residential), c => Some(c.assetType === AssetType.Residential)),
+        page = {
+          case (currentState, form) =>
+            didYouDisposeOfResidentialPropertyPage(
+              form,
+              backLink(currentState, routes.CanTheyUseOurServiceController.wereYouAUKResident())
+            )
+        }
+      )
   }
 
   def didYouDisposeOfAResidentialPropertySubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
-      handleIndividualTriagePageSubmit(_.wasAUKResident, routes.CanTheyUseOurServiceController.wereYouAUKResident())(
-        _ => wasResidentialPropertyForm
-      )(
-        didYouDisposeOfResidentialPropertyPage(_),
-        updateState = {
-          case (wasResidentialProperty, i) => i.copy(wasResidentialProperty = Some(wasResidentialProperty))
+      handleIndividualTriagePageSubmit(
+        _.fold(_.wasAUKResident, c => Some(c.wasAUKResident)),
+        routes.CanTheyUseOurServiceController.wereYouAUKResident()
+      )(_ => wasResidentialPropertyForm)(
+        page = {
+          case (currentState, form) =>
+            didYouDisposeOfResidentialPropertyPage(
+              form,
+              backLink(currentState, routes.CanTheyUseOurServiceController.wereYouAUKResident())
+            )
         },
-        nextResult = { wasResidentialProperty =>
-          if (wasResidentialProperty) {
-            Redirect(routes.CanTheyUseOurServiceController.whenWasDisposalDate())
-          } else {
-            Ok("individuals can only report on residential properties")
-          }
+        updateState = {
+          case (wasResidentialProperty, i) =>
+            val assetType = if (wasResidentialProperty) AssetType.Residential else AssetType.NonResidential
+            i.fold(
+              _.copy(assetType = Some(assetType)),
+              _.copy(assetType = assetType)
+            )
+        },
+        nextResult = {
+          case (wasResidentialProperty, updatedState) =>
+            if (wasResidentialProperty) {
+              updatedState.fold(
+                _ => Redirect(routes.CanTheyUseOurServiceController.whenWasDisposalDate()),
+                _ => Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
+              )
+            } else {
+              Ok("individuals can only report on residential properties")
+            }
         }
       )
   }
 
   def whenWasDisposalDate(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     displayIndividualTriagePage(
-      _.wasResidentialProperty,
+      _.fold(_.assetType, c => Some(c.assetType)),
       routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty()
-    )(_ => disposalDateForm(today()))(_.disposalDate, disposalDatePage(_))
+    )(_ => disposalDateForm(today()))(
+      extractField = _.fold(_.disposalDate, c => Some(c.disposalDate)),
+      page = {
+        case (currentState, form) =>
+          disposalDatePage(
+            form,
+            backLink(currentState, routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty())
+          )
+      }
+    )
   }
 
   def whenWasDisposalDateSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     handleIndividualTriagePageSubmit(
-      _.wasResidentialProperty,
+      _.fold(_.assetType, c => Some(c.assetType)),
       routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty()
     )(_ => disposalDateForm(today()))(
-      disposalDatePage(_),
-      updateState = { case (d, i) => i.copy(disposalDate = Some(d)) },
-      nextResult = { d =>
+      page = {
+        case (currentState, form) =>
+          disposalDatePage(
+            form,
+            backLink(currentState, routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty())
+          )
+      },
+      updateState = {
+        case (d, i) =>
+          i.fold(
+            _.copy(disposalDate = Some(d)),
+            c =>
+              IncompleteIndividualTriageAnswers(
+                Some(c.individualUserType),
+                Some(c.numberOfProperties),
+                Some(c.disposalMethod),
+                Some(c.wasAUKResident),
+                Some(c.assetType),
+                Some(d),
+                None
+              )
+          )
+      },
+      nextResult = { (d, updatedState) =>
         if (d.value.isBefore(earliestDisposalDateInclusive)) {
           Ok(s"disposal date was strictly before $earliestDisposalDateInclusive")
         } else {
-          Redirect(routes.CanTheyUseOurServiceController.whenWasCompletionDate())
+          updatedState.fold(
+            _ => Redirect(routes.CanTheyUseOurServiceController.whenWasCompletionDate()),
+            _ => Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
+          )
+
         }
       }
     )
@@ -243,22 +395,91 @@ class CanTheyUseOurServiceController @Inject() (
 
   def whenWasCompletionDate(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     displayIndividualTriagePage(
-      _.disposalDate,
+      _.fold(_.disposalDate, c => Some(c.disposalDate)),
       routes.CanTheyUseOurServiceController.whenWasDisposalDate()
-    )(disposalDate => completionDateForm(disposalDate, today()))(_.completionDate, completionDatePage(_))
+    )(disposalDate => completionDateForm(disposalDate, today()))(
+      extractField = _.fold(_.completionDate, c => Some(c.completionDate)),
+      page = {
+        case (currentState, form) =>
+          completionDatePage(
+            form,
+            backLink(currentState, routes.CanTheyUseOurServiceController.whenWasDisposalDate())
+          )
+      }
+    )
   }
 
   def whenWasCompletionDateSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     handleIndividualTriagePageSubmit(
-      _.disposalDate,
+      _.fold(_.disposalDate, c => Some(c.disposalDate)),
       routes.CanTheyUseOurServiceController.whenWasDisposalDate()
     )(disposalDate => completionDateForm(disposalDate, today()))(
-      completionDatePage(_),
-      updateState = { case (d, i) => i.copy(completionDate = Some(d)) },
-      nextResult = { _ =>
-        Ok("Got completion date")
+      page = {
+        case (currentState, form) =>
+          completionDatePage(
+            form,
+            backLink(currentState, routes.CanTheyUseOurServiceController.whenWasDisposalDate())
+          )
+      },
+      updateState = { case (d, i) => i.fold(_.copy(completionDate = Some(d)), _.copy(completionDate = d)) },
+      nextResult = {
+        case (_, _) =>
+          Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
       }
     )
+  }
+
+  def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withIndividualTriageAnswers(request) {
+      case (_, subscribed, individualTriageAnswers) =>
+        individualTriageAnswers match {
+          case c: CompleteIndividualTriageAnswers =>
+            Ok(checkYourAnswersPage(c))
+
+          case IncompleteIndividualTriageAnswers(None, _, _, _, _, _, _) =>
+            Redirect(routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting())
+
+          case IncompleteIndividualTriageAnswers(_, None, _, _, _, _, _) =>
+            Redirect(routes.CanTheyUseOurServiceController.howManyProperties())
+
+          case IncompleteIndividualTriageAnswers(_, _, None, _, _, _, _) =>
+            Redirect(routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty())
+
+          case IncompleteIndividualTriageAnswers(_, _, _, None, _, _, _) =>
+            Redirect(routes.CanTheyUseOurServiceController.wereYouAUKResident())
+
+          case IncompleteIndividualTriageAnswers(_, _, _, _, None, _, _) =>
+            Redirect(routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty())
+
+          case IncompleteIndividualTriageAnswers(_, _, _, _, _, None, _) =>
+            Redirect(routes.CanTheyUseOurServiceController.whenWasDisposalDate())
+          case IncompleteIndividualTriageAnswers(_, _, _, _, _, _, None) =>
+            Redirect(routes.CanTheyUseOurServiceController.whenWasCompletionDate())
+
+          case IncompleteIndividualTriageAnswers(Some(t), Some(n), Some(m), Some(u), Some(r), Some(d), Some(c)) =>
+            val completeIndividualTriageAnswers = CompleteIndividualTriageAnswers(t, n, m, u, r, d, c)
+            updateSession(sessionStore, request)(
+              _.copy(
+                journeyStatus = Some(
+                  subscribed.copy(
+                    individualTriageAnswers = Some(completeIndividualTriageAnswers)
+                  )
+                )
+              )
+            ).map {
+              case Left(e) =>
+                logger.warn("Could not update session", e)
+                errorHandler.errorResult()
+
+              case Right(_) =>
+                Ok(checkYourAnswersPage(completeIndividualTriageAnswers))
+            }
+        }
+    }
+  }
+
+  def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    Ok("submitted")
   }
 
   private def handleIndividualTriagePageSubmit[R, A, Page: Writeable](
@@ -267,9 +488,9 @@ class CanTheyUseOurServiceController @Inject() (
   )(
     form: R => Form[A]
   )(
-    page: Form[A] => Page,
+    page: (IndividualTriageAnswers, Form[A]) => Page,
     updateState: (A, IndividualTriageAnswers) => IndividualTriageAnswers,
-    nextResult: A => Result
+    nextResult: (A, IndividualTriageAnswers) => Result
   )(
     implicit request: RequestWithSessionData[_]
   ): Future[Result] =
@@ -281,10 +502,9 @@ class CanTheyUseOurServiceController @Inject() (
             form(r)
               .bindFromRequest()
               .fold(
-                formWithErrors => BadRequest(page(formWithErrors)), { value =>
-                  val newSubscribed = subscribed.copy(
-                    individualTriageAnswers = Some(updateState(value, individualTriageAnswers))
-                  )
+                formWithErrors => BadRequest(page(individualTriageAnswers, formWithErrors)), { value =>
+                  val updatedState  = updateState(value, individualTriageAnswers)
+                  val newSubscribed = subscribed.copy(individualTriageAnswers = Some(updatedState))
 
                   updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newSubscribed))).map({
                     case Left(e) =>
@@ -292,7 +512,11 @@ class CanTheyUseOurServiceController @Inject() (
                       errorHandler.errorResult()
 
                     case Right(_) =>
-                      nextResult(value)
+                      updatedState.fold(
+                        _ => nextResult(value, updatedState),
+                        _ => Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
+                      )
+
                   })
                 }
               )
@@ -303,7 +527,9 @@ class CanTheyUseOurServiceController @Inject() (
   private def displayIndividualTriagePage[R, A, Page: Writeable](
     requiredField: IndividualTriageAnswers => Option[R],
     redirectToIfNotValidJourney: => Call
-  )(form: R => Form[A])(extractField: IndividualTriageAnswers => Option[A], page: Form[A] => Page)(
+  )(
+    form: R => Form[A]
+  )(extractField: IndividualTriageAnswers => Option[A], page: (IndividualTriageAnswers, Form[A]) => Page)(
     implicit request: RequestWithSessionData[_]
   ): Future[Result] =
     withIndividualTriageAnswers(request) {
@@ -314,7 +540,7 @@ class CanTheyUseOurServiceController @Inject() (
             val f = extractField(individualTriageAnswers)
               .fold(form(r))(form(r).fill)
 
-            Ok(page(f))
+            Ok(page(individualTriageAnswers, f))
 
         }
     }
@@ -338,6 +564,9 @@ class CanTheyUseOurServiceController @Inject() (
       case _ =>
         Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
     }
+
+  private def backLink(currentState: IndividualTriageAnswers, ifIncomplete: Call): Call =
+    currentState.fold(_ => ifIncomplete, _ => routes.CanTheyUseOurServiceController.checkYourAnswers())
 
 }
 

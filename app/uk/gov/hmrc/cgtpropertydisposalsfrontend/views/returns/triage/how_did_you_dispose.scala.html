@@ -29,7 +29,7 @@ radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio
 backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@(form: Form[DisposalMethod])(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[DisposalMethod], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"disposalMethod"}
 @title = @{messages("disposalMethod.title")}
@@ -43,14 +43,14 @@ backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.component
 
 @options = @{
     List(
-        s"$key.sold",
-        s"$key.gifted"
+        s"$key.Sold",
+        s"$key.Gifted"
     ).map(messageKey =>Html(messages(messageKey)))
 }
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
 
-    @backLinkComponent(controllers.returns.triage.routes.CanTheyUseOurServiceController.howManyProperties())
+    @backLinkComponent(backLink)
 
     @if(hasErrors) {
         @errorSummary(form)

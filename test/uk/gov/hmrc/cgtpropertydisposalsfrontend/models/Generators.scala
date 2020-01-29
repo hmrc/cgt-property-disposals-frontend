@@ -33,7 +33,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.Unsuccessf
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscribedUpdateDetails, SubscriptionDetails}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualTriageAnswers, IndividualUserType, NumberOfProperties}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.{CompleteIndividualTriageAnswers, IncompleteIndividualTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompletionDate, DisposalDate, IndividualTriageAnswers, IndividualUserType, NumberOfProperties}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanNotifyResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanServiceResponse.{UpscanNotifyEvent, UpscanResponse}
 
@@ -208,8 +209,18 @@ trait TriageQuestionsGen { this: GenUtils =>
 
   implicit val individualTriageAnswersGen: Gen[IndividualTriageAnswers] = gen[IndividualTriageAnswers]
 
+  implicit val incompleteIndividualTriageAnswersGen: Gen[IncompleteIndividualTriageAnswers] =
+    gen[IncompleteIndividualTriageAnswers]
+
+  implicit val completeIndividualTriageAnswersGen: Gen[CompleteIndividualTriageAnswers] =
+    gen[CompleteIndividualTriageAnswers]
+
   implicit val individualUserTypeGen: Gen[IndividualUserType] = gen[IndividualUserType]
 
   implicit val numberOfPropertiesGen: Gen[NumberOfProperties] = gen[NumberOfProperties]
+
+  implicit val disposalDateGen: Gen[DisposalDate] = gen[DisposalDate]
+
+  implicit val completionDateGen: Gen[CompletionDate] = gen[CompletionDate]
 
 }

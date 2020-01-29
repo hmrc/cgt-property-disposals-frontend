@@ -25,6 +25,8 @@ generic.yes=Yes
 generic.no=No
 generic.success=Success
 generic.errorPrefix=Error:
+yesNo.true=Yes
+yesNo.false=No
 
 cya.change=Change
 cya.add=Add
@@ -469,22 +471,22 @@ triage.caption=Before you start
 
 who-are-you-reporting-for.title=Who are you reporting the tax for?
 
-individualUserType.self=Yourself
-individualUserType.capacitor=Someone else
-individualUserType.personal-representative=Someone who has died
+individualUserType.Self=Yourself
+individualUserType.Capacitor=Someone else
+individualUserType.PersonalRepresentative=Someone who has died
 individualUserType.error.required=Select who are you reporting the tax for
 individualUserType.error.invalid=Select who are you reporting the tax for
 
 numberOfProperties.title=How many properties do you want to include in this return?
 numberOfProperties.helpText=If you sold shares instead of property, tell us how many companies you held shares in that you want to include in this return.
-numberOfProperties.one=One
-numberOfProperties.more-than-one=2 or more
+numberOfProperties.One=One
+numberOfProperties.MoreThanOne=2 or more
 numberOfProperties.error.invalid=Select how many properties or companies you want to include in this return
 numberOfProperties.error.required=Select how many properties or companies you want to include in this return
 
 disposalMethod.title=Did you sell the property or give it away?
-disposalMethod.sold=Sold it
-disposalMethod.gifted=Gave it away
+disposalMethod.Sold=Sold it
+disposalMethod.Gifted=Gave it away
 disposalMethod.error.required=Select if you sold it or gave it away
 disposalMethod.error.invalid=Select if you sold it or gave it away
 
@@ -496,6 +498,8 @@ wereYouAUKResident.error.boolean=Select yes if you were a UK resident when you â
 
 didYouDisposeOfResidentialProperty.title=Did you sell a residential property?
 didYouDisposeOfResidentialProperty.helpText=Residential property includes houses, flats, or other dwellings, including their gardens and grounds.
+didYouDisposeOfResidentialProperty.Residential=Yes
+didYouDisposeOfResidentialProperty.NonResidential=No
 didYouDisposeOfResidentialProperty.details.summary=How to work out if a property is residential
 didYouDisposeOfResidentialProperty.details.p1=Residential property is:
 didYouDisposeOfResidentialProperty.details.l1=a building where someone lives or could live, like a house, flat or other type of dwelling
@@ -538,3 +542,19 @@ completionDate-year.error.invalid=Enter a real completion date
 completionDate-month.error.monthAndYearRequired=Completion date must include a month and a year
 completionDate-day.error.dayAndYearRequired=Completion date must include a day and a year
 completionDate-day.error.dayAndMonthRequired=Completion date must include a day and a month
+
+triage.check-your-answers.title=Check your answers
+
+#Months
+date.1=January
+date.2=February
+date.3=March
+date.4=April
+date.5=May
+date.6=June
+date.7=July
+date.8=August
+date.9=September
+date.10=October
+date.11=November
+date.12=December
