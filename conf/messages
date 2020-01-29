@@ -544,13 +544,6 @@ completionDate-day.error.dayAndYearRequired=Completion date must include a day a
 completionDate-day.error.dayAndMonthRequired=Completion date must include a day and a month
 
 triage.check-your-answers.title=Check your answers
-triage.cyaLabel.individualUserType=Who you are reporting the tax for
-triage.cyaLabel.numberOfProperties=How many properties are included in this return
-triage.cyaLabel.disposalMethod=How did you transfer ownership
-triage.cyaLabel.wereYouAUKResident=Were you a UK resident when you exchanged contracts
-triage.cyaLabel.propertyType=Did you sell a residential property
-triage.cyaLabel.disposalDate=Contract exchange date
-triage.cyaLabel.completionDate=Completion date
 
 #Months
 date.1=January

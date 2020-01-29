@@ -56,7 +56,7 @@
    Some(cyaChange(messages("triage.cyaChange.disposalMethod"), routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty().url))
   )
   @cyaRow(
-   messages("triage.cyaLabel.wereYouAUKResident"),
+   messages("wereYouAUKResident.title"),
    Html(messages(s"yesNo.${answers.wasAUKResident.toString}")),
    Some(cyaChange(messages("triage.cyaChange.wereYouAUKResident"), routes.CanTheyUseOurServiceController.wereYouAUKResident().url))
   )
@@ -71,7 +71,7 @@
    Some(cyaChange(messages("triage.cyaChange.disposalDate"), routes.CanTheyUseOurServiceController.whenWasDisposalDate().url))
   )
   @cyaRow(
-   messages("triage.cyaLabel.completionDate"),
+   messages("completionDate.title"),
    Html(LocalDateUtils.govDisplayFormat(answers.completionDate.value)),
    Some(cyaChange(messages("triage.cyaChange.completionDate"), routes.CanTheyUseOurServiceController.whenWasCompletionDate().url))
   )
