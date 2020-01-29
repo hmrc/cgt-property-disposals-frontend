@@ -542,8 +542,8 @@ class CanTheyUseOurServiceControllerSpec
       behave like displayIndividualTriagePageBehaviorIncompleteJourney[Boolean, Boolean](
         performAction
       )(requiredPreviousAnswers, routes.CanTheyUseOurServiceController.wereYouAUKResident())(
-        { case (i, w) => i.copy(wasAUKResident         = w) },
-        { case (i, w) => i.copy(assetType = w.map( if(_) AssetType.Residential else AssetType.NonResidential)) }
+        { case (i, w) => i.copy(wasAUKResident = w) },
+        { case (i, w) => i.copy(assetType      = w.map(if (_) AssetType.Residential else AssetType.NonResidential)) }
       )(true)(
         "didYouDisposeOfResidentialProperty.title",
         _ => List("checked=\"checked\"")
@@ -552,7 +552,7 @@ class CanTheyUseOurServiceControllerSpec
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
         performAction
       )(true) {
-        case (i, w) => i.copy(assetType = if(w) AssetType.Residential else AssetType.NonResidential)
+        case (i, w) => i.copy(assetType = if (w) AssetType.Residential else AssetType.NonResidential)
       }(
         "didYouDisposeOfResidentialProperty.title",
         _ => List("checked=\"checked\"")
@@ -577,9 +577,9 @@ class CanTheyUseOurServiceControllerSpec
         routes.CanTheyUseOurServiceController.wereYouAUKResident(),
         sample[CompleteIndividualTriageAnswers]
       )(
-        { case (i, w) => i.copy(wasAUKResident         = w) },
-        { case (i, w) => i.copy(assetType = w.map( if(_) AssetType.Residential else AssetType.NonResidential)) },
-        { case (i, w) => i.copy(assetType = if(w) AssetType.Residential else AssetType.NonResidential) }
+        { case (i, w) => i.copy(wasAUKResident = w) },
+        { case (i, w) => i.copy(assetType      = w.map(if (_) AssetType.Residential else AssetType.NonResidential)) },
+        { case (i, w) => i.copy(assetType      = if (w) AssetType.Residential else AssetType.NonResidential) }
       )(
         "didYouDisposeOfResidentialProperty.title"
       )(
@@ -616,11 +616,11 @@ class CanTheyUseOurServiceControllerSpec
 
       val requiredPreviousAnswers =
         IncompleteIndividualTriageAnswers.empty.copy(
-          individualUserType     = Some(sample[IndividualUserType]),
-          numberOfProperties     = Some(NumberOfProperties.One),
-          disposalMethod         = Some(DisposalMethod.Gifted),
-          wasAUKResident         = Some(true),
-          assetType              = Some(AssetType.Residential)
+          individualUserType = Some(sample[IndividualUserType]),
+          numberOfProperties = Some(NumberOfProperties.One),
+          disposalMethod     = Some(DisposalMethod.Gifted),
+          wasAUKResident     = Some(true),
+          assetType          = Some(AssetType.Residential)
         )
 
       val disposalDate = DisposalDate(LocalDate.of(2020, 1, 2))
@@ -632,8 +632,8 @@ class CanTheyUseOurServiceControllerSpec
       behave like displayIndividualTriagePageBehaviorIncompleteJourney[Boolean, DisposalDate](
         performAction
       )(requiredPreviousAnswers, routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty())(
-        { case (i, w) => i.copy(assetType = w.map(if(_) AssetType.Residential else AssetType.NonResidential)) },
-        { case (i, d) => i.copy(disposalDate           = d) }
+        { case (i, w) => i.copy(assetType    = w.map(if (_) AssetType.Residential else AssetType.NonResidential)) },
+        { case (i, d) => i.copy(disposalDate = d) }
       )(disposalDate)(
         "disposalDate.title",
         d =>
@@ -669,11 +669,11 @@ class CanTheyUseOurServiceControllerSpec
 
       val requiredPreviousAnswers =
         IncompleteIndividualTriageAnswers.empty.copy(
-          individualUserType     = Some(sample[IndividualUserType]),
-          numberOfProperties     = Some(NumberOfProperties.One),
-          disposalMethod         = Some(DisposalMethod.Gifted),
-          wasAUKResident         = Some(true),
-          assetType              = Some(AssetType.Residential)
+          individualUserType = Some(sample[IndividualUserType]),
+          numberOfProperties = Some(NumberOfProperties.One),
+          disposalMethod     = Some(DisposalMethod.Gifted),
+          wasAUKResident     = Some(true),
+          assetType          = Some(AssetType.Residential)
         )
 
       val formErrorScenarios =
@@ -743,8 +743,8 @@ class CanTheyUseOurServiceControllerSpec
         routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty(),
         sample[CompleteIndividualTriageAnswers]
       )(
-        { case (i, w) => i.copy(assetType = w.map(if(_) AssetType.Residential else AssetType.NonResidential)) },
-        { case (i, d) => i.copy(disposalDate           = d) }, {
+        { case (i, w) => i.copy(assetType    = w.map(if (_) AssetType.Residential else AssetType.NonResidential)) },
+        { case (i, d) => i.copy(disposalDate = d) }, {
           case (i, d) =>
             IncompleteIndividualTriageAnswers(
               Some(i.individualUserType),
@@ -772,12 +772,12 @@ class CanTheyUseOurServiceControllerSpec
 
       val requiredPreviousAnswers =
         IncompleteIndividualTriageAnswers.empty.copy(
-          individualUserType     = Some(sample[IndividualUserType]),
-          numberOfProperties     = Some(NumberOfProperties.One),
-          disposalMethod         = Some(DisposalMethod.Gifted),
-          wasAUKResident         = Some(true),
-          assetType              = Some(AssetType.Residential),
-          disposalDate           = Some(disposalDate)
+          individualUserType = Some(sample[IndividualUserType]),
+          numberOfProperties = Some(NumberOfProperties.One),
+          disposalMethod     = Some(DisposalMethod.Gifted),
+          wasAUKResident     = Some(true),
+          assetType          = Some(AssetType.Residential),
+          disposalDate       = Some(disposalDate)
         )
 
       def performAction(): Future[Result] = controller.whenWasCompletionDate()(FakeRequest())
@@ -828,12 +828,12 @@ class CanTheyUseOurServiceControllerSpec
 
       val requiredPreviousAnswers =
         IncompleteIndividualTriageAnswers.empty.copy(
-          individualUserType     = Some(sample[IndividualUserType]),
-          numberOfProperties     = Some(NumberOfProperties.One),
-          disposalMethod         = Some(DisposalMethod.Gifted),
-          wasAUKResident         = Some(true),
-          assetType              = Some(AssetType.Residential),
-          disposalDate           = Some(disposalDate)
+          individualUserType = Some(sample[IndividualUserType]),
+          numberOfProperties = Some(NumberOfProperties.One),
+          disposalMethod     = Some(DisposalMethod.Gifted),
+          wasAUKResident     = Some(true),
+          assetType          = Some(AssetType.Residential),
+          disposalDate       = Some(disposalDate)
         )
 
       val formErrorScenarios =
@@ -916,7 +916,7 @@ class CanTheyUseOurServiceControllerSpec
           NumberOfProperties.One,
           DisposalMethod.Sold,
           wasAUKResident = true,
-          assetType = AssetType.Residential,
+          assetType      = AssetType.Residential,
           sample[DisposalDate],
           sample[CompletionDate]
         )
@@ -931,34 +931,41 @@ class CanTheyUseOurServiceControllerSpec
         Some(completeTriageQuestions.completionDate)
       )
 
-
-
       List(
-        allQuestionsAnswered.copy(individualUserType = None) -> routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting(),
-        allQuestionsAnswered.copy(numberOfProperties = None) -> routes.CanTheyUseOurServiceController.howManyProperties(),
-        allQuestionsAnswered.copy(disposalMethod = None) -> routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty(),
+        allQuestionsAnswered.copy(individualUserType = None) -> routes.CanTheyUseOurServiceController
+          .whoIsIndividualRepresenting(),
+        allQuestionsAnswered.copy(numberOfProperties = None) -> routes.CanTheyUseOurServiceController
+          .howManyProperties(),
+        allQuestionsAnswered.copy(disposalMethod = None) -> routes.CanTheyUseOurServiceController
+          .howDidYouDisposeOfProperty(),
         allQuestionsAnswered.copy(wasAUKResident = None) -> routes.CanTheyUseOurServiceController.wereYouAUKResident(),
-        allQuestionsAnswered.copy(assetType = None) -> routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty(),
-        allQuestionsAnswered.copy(disposalDate = None) -> routes.CanTheyUseOurServiceController.whenWasDisposalDate(),
-        allQuestionsAnswered.copy(completionDate = None) -> routes.CanTheyUseOurServiceController.whenWasCompletionDate()
-      ).foreach{ case (state, expectedRedirect) =>
+        allQuestionsAnswered.copy(assetType      = None) -> routes.CanTheyUseOurServiceController
+          .didYouDisposeOfAResidentialProperty(),
+        allQuestionsAnswered.copy(disposalDate   = None) -> routes.CanTheyUseOurServiceController.whenWasDisposalDate(),
+        allQuestionsAnswered.copy(completionDate = None) -> routes.CanTheyUseOurServiceController
+          .whenWasCompletionDate()
+      ).foreach {
+        case (state, expectedRedirect) =>
+          s"redirect to ${expectedRedirect.url}" when {
 
-        s"redirect to ${expectedRedirect.url}" when {
+            "the corresponding question has not yet been answered" in {
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  Future.successful(
+                    Right(
+                      Some(
+                        sessionDataWithIndividualTriageAnswers(state)
+                      )
+                    )
+                  )
+                )
+              }
 
-          "the corresponding question has not yet been answered" in {
-            inSequence{
-              mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(
-              Right(Some(
-               sessionDataWithIndividualTriageAnswers(state)
-              ))
-              ))
+              checkIsRedirect(performAction(), expectedRedirect)
             }
 
-            checkIsRedirect(performAction(), expectedRedirect)
           }
-
-        }
       }
 
       "show an error page" when {
@@ -966,11 +973,15 @@ class CanTheyUseOurServiceControllerSpec
         "all the questions have now been answered but the sessino data cannot be updated" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(
-              Right(Some(
-                sessionDataWithIndividualTriageAnswers(allQuestionsAnswered)
-              ))
-            ))
+            mockGetSession(
+              Future.successful(
+                Right(
+                  Some(
+                    sessionDataWithIndividualTriageAnswers(allQuestionsAnswered)
+                  )
+                )
+              )
+            )
             mockStoreSession(
               sessionDataWithIndividualTriageAnswers(completeTriageQuestions)
             )(Future.successful(Left(Error(""))))
@@ -985,40 +996,44 @@ class CanTheyUseOurServiceControllerSpec
         "all the questions have now been answered and the session is updated" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(
-              Right(Some(
-                sessionDataWithIndividualTriageAnswers(allQuestionsAnswered)
-              ))
-            ))
+            mockGetSession(
+              Future.successful(
+                Right(
+                  Some(
+                    sessionDataWithIndividualTriageAnswers(allQuestionsAnswered)
+                  )
+                )
+              )
+            )
             mockStoreSession(
               sessionDataWithIndividualTriageAnswers(completeTriageQuestions)
             )(Future.successful(Right(())))
           }
 
           val result = performAction()
-          status(result) shouldBe OK
+          status(result)          shouldBe OK
           contentAsString(result) should include(message("triage.check-your-answers.title"))
         }
 
         "all the questions have already been answered" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(
-              Right(Some(
-                sessionDataWithIndividualTriageAnswers(completeTriageQuestions)
-              ))
-            ))
+            mockGetSession(
+              Future.successful(
+                Right(
+                  Some(
+                    sessionDataWithIndividualTriageAnswers(completeTriageQuestions)
+                  )
+                )
+              )
+            )
           }
 
           val result = performAction()
-          status(result) shouldBe OK
+          status(result)          shouldBe OK
           contentAsString(result) should include(message("triage.check-your-answers.title"))
         }
       }
-
-
-
-
 
     }
 

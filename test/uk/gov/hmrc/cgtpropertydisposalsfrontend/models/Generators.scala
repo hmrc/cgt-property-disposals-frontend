@@ -209,9 +209,11 @@ trait TriageQuestionsGen { this: GenUtils =>
 
   implicit val individualTriageAnswersGen: Gen[IndividualTriageAnswers] = gen[IndividualTriageAnswers]
 
-  implicit val incompleteIndividualTriageAnswersGen: Gen[IncompleteIndividualTriageAnswers] = gen[IncompleteIndividualTriageAnswers]
+  implicit val incompleteIndividualTriageAnswersGen: Gen[IncompleteIndividualTriageAnswers] =
+    gen[IncompleteIndividualTriageAnswers]
 
-  implicit val completeIndividualTriageAnswersGen: Gen[CompleteIndividualTriageAnswers] = gen[CompleteIndividualTriageAnswers]
+  implicit val completeIndividualTriageAnswersGen: Gen[CompleteIndividualTriageAnswers] =
+    gen[CompleteIndividualTriageAnswers]
 
   implicit val individualUserTypeGen: Gen[IndividualUserType] = gen[IndividualUserType]
 
