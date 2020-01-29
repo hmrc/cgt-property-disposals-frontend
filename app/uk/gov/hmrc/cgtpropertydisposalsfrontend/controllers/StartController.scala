@@ -80,8 +80,10 @@ class StartController @Inject() (
       request.authenticatedRequest.journeyUserType,
       request.sessionData.journeyStatus
     ) match {
-      case (_, Some(journeyStatus))                  => handleSessionJourneyStatus(journeyStatus)
-      case (retrievedUserType: RetrievedUserType, _) => handleRetrievedUserType(retrievedUserType)
+      // agents coming through start will be handled in the same way
+      case (agent: RetrievedUserType.Agent, _) => handleRetrievedUserType(agent)
+      case (_, Some(journeyStatus))            => handleSessionJourneyStatus(journeyStatus)
+      case (retrievedUserType, _)              => handleRetrievedUserType(retrievedUserType)
     }
   }
 
