@@ -41,7 +41,7 @@ class ReturnsServiceImpl @Inject() (connector: ReturnsConnector)(implicit ec: Ex
 
   def storeDraftReturn(draftReturn: DraftReturn)(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] =
     // TODO: put back to original
-    if (true) {
+    if (false) {
       EitherT.pure[Future, Error](())
     } else {
       connector.storeDraftReturn(draftReturn).subflatMap { httpResponse =>
