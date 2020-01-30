@@ -21,7 +21,8 @@
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading
+        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+        taskLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.taskLink
 )
 
 @(draftReturn: DraftReturn)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
@@ -31,8 +32,23 @@
 
 @mainTemplate(title = title, userType = request.userType) {
 
-  <p><a href="@{triageRoutes.CanTheyUseOurServiceController.checkYourAnswers()}">Check if you can use this service</a></p>
-  <p>@triageState</p>
+  @pageHeading(messages("service.title"))
+
+ <ol class="app-task-list">
+  <li>
+   <h2 class="app-task-list__section">
+    <span class="app-task-list__section-number">
+     1.
+    </span>
+    @messages("triage.caption")
+   </h2>
+   <ul class="app-task-list__items">
+    <li class="app-task-list__item">
+     @taskLink(messages("task-list.triage.link"), triageRoutes.CanTheyUseOurServiceController.checkYourAnswers().url, triageState)
+    </li>
+   </ul>
+  </li>
+ </ol>
 
 }
 
