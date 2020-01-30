@@ -14,22 +14,26 @@
  * limitations under the License.
  *@
 
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus._
+
+
 @this()
 
-@(label: String, href: String, state: String)(implicit messages: Messages)
+@(label: String, href: String, state: TaskListStatus)(implicit messages: Messages)
 
 @className = @{
-  state match {
-   case "IN PROGRESS" => "incomplete"
-   case "COMPLETE" => "complete"
-   case "CANNOT START" => "cannot-start"
-   case _ => "to-do"
-  }
+    state match {
+        case InProgress => "incomplete"
+        case Complete => "complete"
+        case CannotStart => "cannot-start"
+        case ToDo => "to-do"
+    }
 }
 
 <a class="app-task-list__task-name" href="@href">
-    @label
+@label
 </a>
 <strong class="govuk-tag @className">
- @state
+@state
 </strong>

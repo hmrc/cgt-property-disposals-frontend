@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns
 
-import java.util.UUID
+sealed trait TaskListStatus extends Product with Serializable
 
-import cats.Eq
-import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+object TaskListStatus {
 
-final case class DraftReturn(id: UUID, cgtReference: CgtReference, triageAnswers: IndividualTriageAnswers)
+  case object Complete extends TaskListStatus
 
-object DraftReturn {
+  case object InProgress extends TaskListStatus
 
-  implicit val eq: Eq[DraftReturn] = Eq.fromUniversalEquals[DraftReturn]
+  case object CannotStart extends TaskListStatus
 
-  implicit val format: OFormat[DraftReturn] = Json.format[DraftReturn]
+  case object ToDo extends TaskListStatus
 
 }

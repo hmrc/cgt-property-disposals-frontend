@@ -73,7 +73,7 @@ class JourneyStatusController @Inject() (
           .fold(
             formWithErrors => BadRequest(setReturnStatePage(formWithErrors)), { state =>
               updateSession(sessionStore, request)(
-                _.copy(journeyStatus = Some(subscribed.copy(individualTriageAnswers = Some(state))))
+                _.copy(journeyStatus = Some(subscribed.copy(newReturnIndividualTriageAnswers = Some(state))))
               ).map {
                 case Left(e) =>
                   logger.warn("Could not update session", e)

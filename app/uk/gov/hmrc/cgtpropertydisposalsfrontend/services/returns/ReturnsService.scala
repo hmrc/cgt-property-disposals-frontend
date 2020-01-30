@@ -16,15 +16,20 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns
 
-import cats.syntax.eq._
+import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.int._
-import cats.data.EitherT
+import cats.syntax.either._
+import cats.syntax.eq._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.OK
+import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.GetDraftReturnResponse
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -34,6 +39,8 @@ trait ReturnsService {
 
   def storeDraftReturn(draftReturn: DraftReturn)(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit]
 
+  def getDraftReturns(cgtReference: CgtReference)(implicit hc: HeaderCarrier): EitherT[Future, Error, List[DraftReturn]]
+
 }
 
 @Singleton
@@ -41,7 +48,7 @@ class ReturnsServiceImpl @Inject() (connector: ReturnsConnector)(implicit ec: Ex
 
   def storeDraftReturn(draftReturn: DraftReturn)(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] =
     // TODO: put back to original
-    if (true) {
+    if (false) {
       EitherT.pure[Future, Error](())
     } else {
       connector.storeDraftReturn(draftReturn).subflatMap { httpResponse =>
@@ -52,5 +59,31 @@ class ReturnsServiceImpl @Inject() (connector: ReturnsConnector)(implicit ec: Ex
         }
       }
     }
+
+  def getDraftReturns(
+    cgtReference: CgtReference
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, List[DraftReturn]] =
+    connector.getDraftReturns(cgtReference).subflatMap { httpResponse =>
+      if (httpResponse.status === OK) {
+        httpResponse
+          .parseJSON[GetDraftReturnResponse]()
+          .leftMap(Error(_))
+          .map(_.draftReturns)
+      } else {
+        Left(Error(s"Call to get draft returns came back with status ${httpResponse.status}}"))
+      }
+
+    }
+
+}
+
+object ReturnsServiceImpl {
+
+  final case class GetDraftReturnResponse(draftReturns: List[DraftReturn])
+
+  object GetDraftReturnResponse {
+
+    implicit val format: OFormat[GetDraftReturnResponse] = Json.format[GetDraftReturnResponse]
+  }
 
 }

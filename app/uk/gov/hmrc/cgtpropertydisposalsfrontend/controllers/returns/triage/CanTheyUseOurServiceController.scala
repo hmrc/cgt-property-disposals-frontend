@@ -92,7 +92,7 @@ class CanTheyUseOurServiceController @Inject() (
     withSubscribedUser(request) {
       case (_, subscribed) =>
         val state: Either[Option[IndividualTriageAnswers], DraftReturn] =
-          (subscribed.individualTriageAnswers, subscribed.draftReturn) match {
+          (subscribed.newReturnIndividualTriageAnswers, subscribed.currentDraftReturn) match {
             case (individualTriageAnswers, None) => Left(individualTriageAnswers)
             case (_, Some(draftReturn))          => Right(draftReturn)
           }
@@ -104,7 +104,7 @@ class CanTheyUseOurServiceController @Inject() (
           .flatMap(_.fold(_.individualUserType, c => Some(c.individualUserType)))
           .fold(whoAreYouReportingForForm)(whoAreYouReportingForForm.fill)
 
-        val displayReturnToSummaryLink = subscribed.draftReturn.isDefined
+        val displayReturnToSummaryLink = subscribed.currentDraftReturn.isDefined
 
         val backLink: Option[Call] =
           state.fold(
@@ -131,7 +131,7 @@ class CanTheyUseOurServiceController @Inject() (
       withSubscribedUser(request) {
         case (_, subscribed) =>
           val state: Either[Option[IndividualTriageAnswers], DraftReturn] =
-            (subscribed.individualTriageAnswers, subscribed.draftReturn) match {
+            (subscribed.newReturnIndividualTriageAnswers, subscribed.currentDraftReturn) match {
               case (individualTriageAnswers, None) => Left(individualTriageAnswers)
               case (_, Some(draftReturn))          => Right(draftReturn)
             }
@@ -139,7 +139,7 @@ class CanTheyUseOurServiceController @Inject() (
           val individualTriageAnswers =
             state.map(draftReturn => Some(draftReturn.triageAnswers)).merge
 
-          val displayReturnToSummaryLink = subscribed.draftReturn.isDefined
+          val displayReturnToSummaryLink = subscribed.currentDraftReturn.isDefined
 
           lazy val backLink: Option[Call] =
             state.fold(
@@ -169,29 +169,38 @@ class CanTheyUseOurServiceController @Inject() (
                       .getOrElse(IncompleteIndividualTriageAnswers.empty.copy(individualUserType = Some(userType)))
 
                   val newSubscribed = state.fold(
-                    _ => subscribed.copy(individualTriageAnswers = Some(newAnswers)),
-                    draftReturn => subscribed.copy(draftReturn   = Some(draftReturn.copy(triageAnswers = newAnswers)))
+                    _ => subscribed.copy(newReturnIndividualTriageAnswers = Some(newAnswers)),
+                    draftReturn =>
+                      subscribed.copy(currentDraftReturn = Some(draftReturn.copy(triageAnswers = newAnswers)))
                   )
 
-                  updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newSubscribed)))
-                    .map {
-                      case Left(e) =>
-                        logger.warn("Could not update session", e)
-                        errorHandler.errorResult()
+                  val result = for {
+                    _ <- state.fold(
+                          _ => EitherT.pure(()), { draftReturn =>
+                            val updatedDraftReturn = draftReturn.copy(triageAnswers = newAnswers)
+                            if (updatedDraftReturn === draftReturn) EitherT.pure(())
+                            else returnsService.storeDraftReturn(updatedDraftReturn)
+                          }
+                        )
+                    _ <- EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newSubscribed))))
+                  } yield ()
 
-                      case Right(_) =>
-                        userType match {
-                          case IndividualUserType.Self =>
-                            newAnswers.fold(
-                              _ => Redirect(routes.CanTheyUseOurServiceController.howManyProperties()),
-                              _ => Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
-                            )
+                  result.fold(
+                    { e =>
+                      logger.warn("Could not update session", e)
+                      errorHandler.errorResult()
+                    },
+                    _ =>
+                      userType match {
+                        case IndividualUserType.Self =>
+                          newAnswers.fold(
+                            _ => Redirect(routes.CanTheyUseOurServiceController.howManyProperties()),
+                            _ => Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
+                          )
 
-                          case other => Ok(s"$other not handled yet")
-                        }
-
-                    }
-
+                        case other => Ok(s"$other not handled yet")
+                      }
+                  )
               }
             )
       }
@@ -521,11 +530,11 @@ class CanTheyUseOurServiceController @Inject() (
             val updatedSubscribed = state.fold(
               _ =>
                 subscribed.copy(
-                  individualTriageAnswers = Some(completeIndividualTriageAnswers)
+                  newReturnIndividualTriageAnswers = Some(completeIndividualTriageAnswers)
                 ),
               draftReturn =>
                 subscribed.copy(
-                  draftReturn = Some(draftReturn.copy(triageAnswers = completeIndividualTriageAnswers))
+                  currentDraftReturn = Some(draftReturn.copy(triageAnswers = completeIndividualTriageAnswers))
                 )
             )
 
@@ -560,8 +569,8 @@ class CanTheyUseOurServiceController @Inject() (
                       updateSession(sessionStore, request)(
                         _.copy(journeyStatus = Some(
                           subscribed.copy(
-                            individualTriageAnswers = None,
-                            draftReturn             = Some(newDraftReturn)
+                            newReturnIndividualTriageAnswers = None,
+                            currentDraftReturn               = Some(newDraftReturn)
                           )
                         )
                         )
@@ -609,27 +618,37 @@ class CanTheyUseOurServiceController @Inject() (
               .fold(
                 formWithErrors => BadRequest(page(individualTriageAnswers, formWithErrors, state.isRight)), { value =>
                   val updatedState = updateState(value, individualTriageAnswers)
-                  val newSubscribed =
+                  lazy val newSubscribed =
                     state.fold(
-                      _ => subscribed.copy(individualTriageAnswers = Some(updatedState)),
-                      draftReturn => subscribed.copy(draftReturn   = Some(draftReturn.copy(triageAnswers = updatedState)))
+                      _ => subscribed.copy(newReturnIndividualTriageAnswers = Some(updatedState)),
+                      draftReturn =>
+                        subscribed.copy(currentDraftReturn = Some(draftReturn.copy(triageAnswers = updatedState)))
                     )
 
-                  updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newSubscribed))).map({
-                    case Left(e) =>
+                  val result = for {
+                    _ <- state.fold(
+                          _ => EitherT.pure(()), { draftReturn =>
+                            val updatedDraftReturn = draftReturn.copy(triageAnswers = updatedState)
+                            if (updatedDraftReturn === draftReturn) EitherT.pure(())
+                            else returnsService.storeDraftReturn(updatedDraftReturn)
+                          }
+                        )
+                    _ <- EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newSubscribed))))
+                  } yield ()
+
+                  result.fold(
+                    { e =>
                       logger.warn("Could not update session", e)
                       errorHandler.errorResult()
-
-                    case Right(_) =>
+                    },
+                    _ =>
                       updatedState.fold(
                         _ => nextResult(value, updatedState),
                         _ => Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
                       )
-
-                  })
+                  )
                 }
               )
-
         }
     }
 
@@ -668,10 +687,10 @@ class CanTheyUseOurServiceController @Inject() (
     f: (SessionData, Subscribed, Either[IndividualTriageAnswers, DraftReturn]) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((s: SessionData, r @ Subscribed(_, _, _, Some(i), _))) =>
+      case Some((s: SessionData, r @ Subscribed(_, _, _, Some(i), _, _))) =>
         f(s, r, Left(i))
 
-      case Some((s: SessionData, r @ Subscribed(_, _, _, None, Some(d)))) =>
+      case Some((s: SessionData, r @ Subscribed(_, _, _, None, Some(d), _))) =>
         f(s, r, Right(d))
 
       case _ =>

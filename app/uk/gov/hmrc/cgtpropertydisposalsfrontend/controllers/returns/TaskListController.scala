@@ -42,7 +42,7 @@ class TaskListController @Inject() (
 
   def taskList(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
     request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(Subscribed(_, _, _, _, Some(draftReturn))) =>
+      case Some(Subscribed(_, _, _, _, Some(draftReturn), _)) =>
         Ok(taskListPage(draftReturn))
       case _ =>
         Redirect(baseRoutes.StartController.start())

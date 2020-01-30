@@ -206,7 +206,9 @@ class AgentAccessController @Inject() (
                   agentSupplyingClientDetails.agentGGCredId,
                   Some(agentSupplyingClientDetails.agentReferenceNumber),
                   None,
-                  None
+                  None,
+                  // TODO: get draft returns
+                  List.empty
                 )
               )
             )
