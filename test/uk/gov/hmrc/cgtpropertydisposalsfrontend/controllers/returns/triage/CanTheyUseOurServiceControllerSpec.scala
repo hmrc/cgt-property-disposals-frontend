@@ -982,9 +982,9 @@ class CanTheyUseOurServiceControllerSpec
         Some(completeTriageQuestions.completionDate)
       )
 
-      s"redirect to the correct page" when {
+      "redirect to the correct page" when {
 
-        "a question has not yet been answered" in {
+        def test(sessionDataWith: IndividualTriageAnswers => SessionData): Unit =
           List(
             allQuestionsAnswered.copy(individualUserType = None) -> routes.CanTheyUseOurServiceController
               .whoIsIndividualRepresenting(),
@@ -1009,7 +1009,7 @@ class CanTheyUseOurServiceControllerSpec
                     Future.successful(
                       Right(
                         Some(
-                          sessionDataWithIndividualTriageAnswers(state)
+                          sessionDataWith(state)
                         )
                       )
                     )
@@ -1020,7 +1020,14 @@ class CanTheyUseOurServiceControllerSpec
               }
           }
 
+        "a question has not yet been answered and a draft return has not been created" in {
+          test(sessionDataWithIndividualTriageAnswers)
         }
+
+        "a question has not yet been answered and a draft return has been created" in {
+          test(sessionDataWithDraftReturn)
+        }
+
       }
 
       "show an error page" when {
@@ -1048,7 +1055,12 @@ class CanTheyUseOurServiceControllerSpec
 
       "display the page" when {
 
-        "all the questions have now been answered and the session is updated" in {
+        def testIsCYAPagePage(result: Future[Result]) = {
+          status(result)          shouldBe OK
+          contentAsString(result) should include(message("triage.check-your-answers.title"))
+        }
+
+        "all the questions have now been answered and the session is updated when a draft return has not yet been created" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -1065,12 +1077,30 @@ class CanTheyUseOurServiceControllerSpec
             )(Future.successful(Right(())))
           }
 
-          val result = performAction()
-          status(result)          shouldBe OK
-          contentAsString(result) should include(message("triage.check-your-answers.title"))
+          testIsCYAPagePage(performAction())
         }
 
-        "all the questions have already been answered" in {
+        "all the questions have now been answered and the session is updated when a draft return has been created" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(
+                Right(
+                  Some(
+                    sessionDataWithDraftReturn(allQuestionsAnswered)
+                  )
+                )
+              )
+            )
+            mockStoreSession(
+              sessionDataWithDraftReturn(completeTriageQuestions)
+            )(Future.successful(Right(())))
+          }
+
+          testIsCYAPagePage(performAction())
+        }
+
+        "all the questions have already been answered and a draft return has not yet been created" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -1084,10 +1114,26 @@ class CanTheyUseOurServiceControllerSpec
             )
           }
 
-          val result = performAction()
-          status(result)          shouldBe OK
-          contentAsString(result) should include(message("triage.check-your-answers.title"))
+          testIsCYAPagePage(performAction())
         }
+
+        "all the questions have already been answered and a draft return has been created" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(
+                Right(
+                  Some(
+                    sessionDataWithDraftReturn(completeTriageQuestions)
+                  )
+                )
+              )
+            )
+          }
+
+          testIsCYAPagePage(performAction())
+        }
+
       }
 
     }
@@ -1156,13 +1202,22 @@ class CanTheyUseOurServiceControllerSpec
 
       "redirect to the task list page" when {
 
-        "the draft return is stored and the session is updated" in {
+        "the draft return is stored and the session is updated and a draft return had not already been created" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionDataWithIndividualTriageAnswers(completeAnswers)))))
             mockGetNextUUID(uuid)
             mockStoreDraftReturn(newDraftReturn)(Right(()))
             mockStoreSession(sessionDataWithNewDraftReturn)(Future.successful(Right(())))
+          }
+
+          checkIsRedirect(performAction(), returnsRoutes.TaskListController.taskList())
+        }
+
+        "the draft return is stored and the session is updated and a draft return had already been created" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionDataWithDraftReturn(completeAnswers)))))
           }
 
           checkIsRedirect(performAction(), returnsRoutes.TaskListController.taskList())
