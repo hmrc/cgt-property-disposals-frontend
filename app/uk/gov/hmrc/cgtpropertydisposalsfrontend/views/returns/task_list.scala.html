@@ -27,12 +27,12 @@
 
 @(draftReturn: DraftReturn)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
-@title = @{messages("returns.task-list.title")}
+@title = @{messages("service.title")}
 @triageState = @{ draftReturn.triageAnswers.fold(_ => "IN PROGRESS", _ => "COMPLETE") }
 
 @mainTemplate(title = title, userType = request.userType) {
 
-  @pageHeading(messages("service.title"))
+  @pageHeading(title)
 
  <ol class="app-task-list">
   <li>
