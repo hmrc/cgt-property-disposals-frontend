@@ -22,14 +22,16 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{StartingNewDraftReturn, Subscribed}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.IncompleteIndividualTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class HomePageController @Inject() (
   val authenticatedAction: AuthenticatedAction,
@@ -42,7 +44,7 @@ class HomePageController @Inject() (
   privateBetaHomePage: views.html.account.home_private_beta,
   detailUpdatedPage: views.html.account.details_updated,
   signedOutPage: views.html.account.signed_out
-)(implicit viewConfig: ViewConfig)
+)(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with SessionUpdates
@@ -57,10 +59,28 @@ class HomePageController @Inject() (
   }
 
   def startNewReturn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withSubscribedUser(request) { (_, _) =>
+    withSubscribedUser(request) { (_, subscribed) =>
       request.userType match {
         case Some(UserType.Individual) =>
-          Redirect(triage.routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting())
+          updateSession(sessionStore, request)(
+            _.copy(
+              journeyStatus = Some(
+                StartingNewDraftReturn(
+                  subscribed.subscribedDetails,
+                  subscribed.ggCredId,
+                  subscribed.agentReferenceNumber,
+                  IncompleteIndividualTriageAnswers.empty
+                )
+              )
+            )
+          ).map {
+            case Left(e) =>
+              logger.warn("Could not update session", e)
+              errorHandler.errorResult()
+
+            case Right(_) =>
+              Redirect(triage.routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting())
+          }
 
         case other =>
           logger.warn(s"Start a new return for user type: $other is not supported")

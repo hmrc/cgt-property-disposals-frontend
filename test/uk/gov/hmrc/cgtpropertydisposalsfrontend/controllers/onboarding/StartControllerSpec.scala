@@ -763,7 +763,8 @@ class StartControllerSpec
                 ggCredId,
                 None,
                 None,
-                None
+                None,
+                List.empty
               )
               val session =
                 SessionData.empty.copy(userType = Some(UserType.Individual), journeyStatus = Some(subscriptionStatus))
@@ -1116,7 +1117,8 @@ class StartControllerSpec
                 ggCredId,
                 None,
                 None,
-                None
+                None,
+                List.empty
               )
               val session =
                 SessionData.empty.copy(userType = Some(UserType.Organisation), journeyStatus = Some(subscriptionStatus))
@@ -1448,7 +1450,7 @@ class StartControllerSpec
 
         val sessionWithSubscribed = SessionData.empty.copy(
           userType      = Some(UserType.Individual),
-          journeyStatus = Some(Subscribed(subscribedDetails, ggCredId, None, None, None))
+          journeyStatus = Some(Subscribed(subscribedDetails, ggCredId, None, None, None, List.empty))
         )
 
         "the session data indicates they have subscribed" must {

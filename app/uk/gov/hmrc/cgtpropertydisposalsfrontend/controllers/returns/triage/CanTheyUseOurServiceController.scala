@@ -37,7 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => homeRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => returnsRoutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.configs
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalMethod.{Gifted, Sold}
@@ -89,121 +89,49 @@ class CanTheyUseOurServiceController @Inject() (
   def today(): LocalDate = LocalDate.now(clock)
 
   def whoIsIndividualRepresenting(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withSubscribedUser(request) {
-      case (_, subscribed) =>
-        val state: Either[Option[IndividualTriageAnswers], DraftReturn] =
-          (subscribed.newReturnIndividualTriageAnswers, subscribed.currentDraftReturn) match {
-            case (individualTriageAnswers, None) => Left(individualTriageAnswers)
-            case (_, Some(draftReturn))          => Right(draftReturn)
-          }
-
-        val individualTriageAnswers =
-          state.map(draftReturn => Some(draftReturn.triageAnswers)).merge
-
-        val form = individualTriageAnswers
-          .flatMap(_.fold(_.individualUserType, c => Some(c.individualUserType)))
-          .fold(whoAreYouReportingForForm)(whoAreYouReportingForForm.fill)
-
-        val displayReturnToSummaryLink = subscribed.currentDraftReturn.isDefined
-
-        val backLink: Option[Call] =
-          state.fold(
-            answers =>
-              Some(
-                answers
-                  .map(
-                    _.fold(
-                      _ => homeRoutes.HomePageController.homepage(),
-                      _ => routes.CanTheyUseOurServiceController.checkYourAnswers()
-                    )
-                  )
-                  .getOrElse(homeRoutes.HomePageController.homepage())
-              ),
-            _ => None
+    displayIndividualTriagePage(
+      _ => Some(()),
+      homeRoutes.HomePageController.homepage()
+    )(_ => whoAreYouReportingForForm)(
+      _.fold(_.individualUserType, c => Some(c.individualUserType)), {
+        case (_, form, isDraftReturn) =>
+          whoAreYouReportingForPage(
+            form,
+            None,
+            isDraftReturn
           )
-
-        Ok(whoAreYouReportingForPage(form, backLink, displayReturnToSummaryLink))
-    }
+      }
+    )
   }
 
   def whoIsIndividualRepresentingSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
-      withSubscribedUser(request) {
-        case (_, subscribed) =>
-          val state: Either[Option[IndividualTriageAnswers], DraftReturn] =
-            (subscribed.newReturnIndividualTriageAnswers, subscribed.currentDraftReturn) match {
-              case (individualTriageAnswers, None) => Left(individualTriageAnswers)
-              case (_, Some(draftReturn))          => Right(draftReturn)
-            }
-
-          val individualTriageAnswers =
-            state.map(draftReturn => Some(draftReturn.triageAnswers)).merge
-
-          val displayReturnToSummaryLink = subscribed.currentDraftReturn.isDefined
-
-          lazy val backLink: Option[Call] =
-            state.fold(
-              answers =>
-                Some(
-                  answers
-                    .map(
-                      _.fold(
-                        _ => homeRoutes.HomePageController.homepage(),
-                        _ => routes.CanTheyUseOurServiceController.checkYourAnswers()
-                      )
-                    )
-                    .getOrElse(homeRoutes.HomePageController.homepage())
-                ),
-              _ => None
+      handleIndividualTriagePageSubmit(
+        _ => Some(()),
+        homeRoutes.HomePageController.homepage()
+      )(_ => whoAreYouReportingForForm)(
+        {
+          case (_, form, isDraftReturn) =>
+            whoAreYouReportingForPage(
+              form,
+              None,
+              isDraftReturn
+            )
+        },
+        updateState = {
+          case (userType, i) =>
+            i.fold(_.copy(individualUserType = Some(userType)), _.copy(individualUserType = userType))
+        },
+        nextResult = {
+          case (IndividualUserType.Self, newAnswers) =>
+            newAnswers.fold(
+              _ => Redirect(routes.CanTheyUseOurServiceController.howManyProperties()),
+              _ => Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
             )
 
-          whoAreYouReportingForForm
-            .bindFromRequest()
-            .fold(
-              formWithErrors =>
-                BadRequest(whoAreYouReportingForPage(formWithErrors, backLink, displayReturnToSummaryLink)), {
-                userType =>
-                  val newAnswers =
-                    individualTriageAnswers
-                      .map(_.fold(_.copy(individualUserType = Some(userType)), _.copy(individualUserType = userType)))
-                      .getOrElse(IncompleteIndividualTriageAnswers.empty.copy(individualUserType = Some(userType)))
-
-                  val newSubscribed = state.fold(
-                    _ => subscribed.copy(newReturnIndividualTriageAnswers = Some(newAnswers)),
-                    draftReturn =>
-                      subscribed.copy(currentDraftReturn = Some(draftReturn.copy(triageAnswers = newAnswers)))
-                  )
-
-                  val result = for {
-                    _ <- state.fold(
-                          _ => EitherT.pure(()), { draftReturn =>
-                            val updatedDraftReturn = draftReturn.copy(triageAnswers = newAnswers)
-                            if (updatedDraftReturn === draftReturn) EitherT.pure(())
-                            else returnsService.storeDraftReturn(updatedDraftReturn)
-                          }
-                        )
-                    _ <- EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newSubscribed))))
-                  } yield ()
-
-                  result.fold(
-                    { e =>
-                      logger.warn("Could not update session", e)
-                      errorHandler.errorResult()
-                    },
-                    _ =>
-                      userType match {
-                        case IndividualUserType.Self =>
-                          newAnswers.fold(
-                            _ => Redirect(routes.CanTheyUseOurServiceController.howManyProperties()),
-                            _ => Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
-                          )
-
-                        case other => Ok(s"$other not handled yet")
-                      }
-                  )
-              }
-            )
-      }
+          case (other, _) => Ok(s"$other not handled yet")
+        }
+      )
   }
 
   def howManyProperties(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
@@ -499,8 +427,8 @@ class CanTheyUseOurServiceController @Inject() (
 
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withIndividualTriageAnswers(request) {
-      case (_, subscribed, state) =>
-        state.map(_.triageAnswers).merge match {
+      case (_, state) =>
+        individualTriageAnswersFomState(state) match {
           case c: CompleteIndividualTriageAnswers =>
             Ok(checkYourAnswersPage(c))
 
@@ -527,18 +455,12 @@ class CanTheyUseOurServiceController @Inject() (
           case IncompleteIndividualTriageAnswers(Some(t), Some(n), Some(m), Some(u), Some(r), Some(d), Some(c)) =>
             val completeIndividualTriageAnswers = CompleteIndividualTriageAnswers(t, n, m, u, r, d, c)
 
-            val updatedSubscribed = state.fold(
-              _ =>
-                subscribed.copy(
-                  newReturnIndividualTriageAnswers = Some(completeIndividualTriageAnswers)
-                ),
-              draftReturn =>
-                subscribed.copy(
-                  currentDraftReturn = Some(draftReturn.copy(triageAnswers = completeIndividualTriageAnswers))
-                )
+            val updatedJourney = state.fold(
+              _.copy(newReturnTriageAnswers = completeIndividualTriageAnswers),
+              r => r.copy(draftReturn = r.draftReturn.copy(triageAnswers = completeIndividualTriageAnswers))
             )
 
-            updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedSubscribed))).map {
+            updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedJourney))).map {
               case Left(e) =>
                 logger.warn("Could not update session", e)
                 errorHandler.errorResult()
@@ -552,25 +474,27 @@ class CanTheyUseOurServiceController @Inject() (
 
   def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withIndividualTriageAnswers(request) {
-      case (_, subscribed, state) =>
-        state.map(_.triageAnswers).merge match {
+      case (_, state) =>
+        individualTriageAnswersFomState(state) match {
           case _: IncompleteIndividualTriageAnswers =>
             Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
 
           case complete: CompleteIndividualTriageAnswers =>
             lazy val continueToTaskList = Redirect(returnsRoutes.TaskListController.taskList())
 
-            lazy val handleNewDraftReturn = {
+            def toFillingOurNewReturn(startingNewDraftReturn: StartingNewDraftReturn): Future[Result] = {
               val newDraftReturn =
-                DraftReturn(uuidGenerator.nextId(), subscribed.subscribedDetails.cgtReference, complete)
+                DraftReturn(uuidGenerator.nextId(), startingNewDraftReturn.subscribedDetails.cgtReference, complete)
               val result = for {
                 _ <- returnsService.storeDraftReturn(newDraftReturn)
                 _ <- EitherT(
                       updateSession(sessionStore, request)(
                         _.copy(journeyStatus = Some(
-                          subscribed.copy(
-                            newReturnIndividualTriageAnswers = None,
-                            currentDraftReturn               = Some(newDraftReturn)
+                          FillingOutReturn(
+                            startingNewDraftReturn.subscribedDetails,
+                            startingNewDraftReturn.ggCredId,
+                            startingNewDraftReturn.agentReferenceNumber,
+                            newDraftReturn
                           )
                         )
                         )
@@ -588,7 +512,7 @@ class CanTheyUseOurServiceController @Inject() (
             }
 
             state.fold[Future[Result]](
-              _ => handleNewDraftReturn,
+              toFillingOurNewReturn,
               _ => continueToTaskList
             )
         }
@@ -608,8 +532,8 @@ class CanTheyUseOurServiceController @Inject() (
     implicit request: RequestWithSessionData[_]
   ): Future[Result] =
     withIndividualTriageAnswers(request) {
-      case (_, subscribed, state) =>
-        val individualTriageAnswers = state.map(_.triageAnswers).merge
+      case (_, state) =>
+        val individualTriageAnswers = individualTriageAnswersFomState(state)
         requiredField(individualTriageAnswers) match {
           case None => Redirect(redirectToIfNotValidJourney)
           case Some(r) =>
@@ -617,23 +541,26 @@ class CanTheyUseOurServiceController @Inject() (
               .bindFromRequest()
               .fold(
                 formWithErrors => BadRequest(page(individualTriageAnswers, formWithErrors, state.isRight)), { value =>
-                  val updatedState = updateState(value, individualTriageAnswers)
-                  lazy val newSubscribed =
-                    state.fold(
-                      _ => subscribed.copy(newReturnIndividualTriageAnswers = Some(updatedState)),
-                      draftReturn =>
-                        subscribed.copy(currentDraftReturn = Some(draftReturn.copy(triageAnswers = updatedState)))
+                  val updatedAnswers = updateState(value, individualTriageAnswers)
+                  lazy val oldJourneyStatusWithNewJourneyStatus =
+                    state.bimap(
+                      s => s -> s.copy(newReturnTriageAnswers = updatedAnswers),
+                      r => r -> r.copy(draftReturn            = r.draftReturn.copy(triageAnswers = updatedAnswers))
                     )
 
                   val result = for {
-                    _ <- state.fold(
-                          _ => EitherT.pure(()), { draftReturn =>
-                            val updatedDraftReturn = draftReturn.copy(triageAnswers = updatedState)
-                            if (updatedDraftReturn === draftReturn) EitherT.pure(())
-                            else returnsService.storeDraftReturn(updatedDraftReturn)
+                    _ <- oldJourneyStatusWithNewJourneyStatus.fold(
+                          _ => EitherT.pure(()), {
+                            case (oldJourneyStatus, updatedJourneyStatus) =>
+                              if (updatedJourneyStatus.draftReturn === oldJourneyStatus.draftReturn) EitherT.pure(())
+                              else returnsService.storeDraftReturn(updatedJourneyStatus.draftReturn)
                           }
                         )
-                    _ <- EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newSubscribed))))
+                    _ <- EitherT(
+                          updateSession(sessionStore, request)(
+                            _.copy(journeyStatus = Some(oldJourneyStatusWithNewJourneyStatus.bimap(_._2, _._2).merge))
+                          )
+                        )
                   } yield ()
 
                   result.fold(
@@ -641,11 +568,7 @@ class CanTheyUseOurServiceController @Inject() (
                       logger.warn("Could not update session", e)
                       errorHandler.errorResult()
                     },
-                    _ =>
-                      updatedState.fold(
-                        _ => nextResult(value, updatedState),
-                        _ => Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
-                      )
+                    _ => nextResult(value, updatedAnswers)
                   )
                 }
               )
@@ -661,8 +584,8 @@ class CanTheyUseOurServiceController @Inject() (
     implicit request: RequestWithSessionData[_]
   ): Future[Result] =
     withIndividualTriageAnswers(request) {
-      case (_, _, state) =>
-        val individualTriageAnswers = state.map(_.triageAnswers).merge
+      case (_, state) =>
+        val individualTriageAnswers = individualTriageAnswersFomState(state)
         requiredField(individualTriageAnswers) match {
           case None => Redirect(redirectToIfNotValidJourney)
           case Some(r) =>
@@ -673,25 +596,15 @@ class CanTheyUseOurServiceController @Inject() (
         }
     }
 
-  private def withSubscribedUser(request: RequestWithSessionData[_])(
-    f: (SessionData, Subscribed) => Future[Result]
-  ): Future[Result] =
-    request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((s: SessionData, r: Subscribed)) =>
-        f(s, r)
-      case _ =>
-        Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
-    }
-
   private def withIndividualTriageAnswers(request: RequestWithSessionData[_])(
-    f: (SessionData, Subscribed, Either[IndividualTriageAnswers, DraftReturn]) => Future[Result]
+    f: (SessionData, Either[StartingNewDraftReturn, FillingOutReturn]) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((s: SessionData, r @ Subscribed(_, _, _, Some(i), _, _))) =>
-        f(s, r, Left(i))
+      case Some((session, s: StartingNewDraftReturn)) =>
+        f(session, Left(s))
 
-      case Some((s: SessionData, r @ Subscribed(_, _, _, None, Some(d), _))) =>
-        f(s, r, Right(d))
+      case Some((session, r: FillingOutReturn)) =>
+        f(session, Right(r))
 
       case _ =>
         Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
@@ -699,6 +612,11 @@ class CanTheyUseOurServiceController @Inject() (
 
   private def backLink(currentState: IndividualTriageAnswers, ifIncomplete: Call): Call =
     currentState.fold(_ => ifIncomplete, _ => routes.CanTheyUseOurServiceController.checkYourAnswers())
+
+  private def individualTriageAnswersFomState(
+    state: Either[StartingNewDraftReturn, FillingOutReturn]
+  ): IndividualTriageAnswers =
+    state.bimap(_.newReturnTriageAnswers, _.draftReturn.triageAnswers).merge
 
 }
 

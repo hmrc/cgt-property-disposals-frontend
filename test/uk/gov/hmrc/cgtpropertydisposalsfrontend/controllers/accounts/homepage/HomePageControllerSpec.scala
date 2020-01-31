@@ -30,8 +30,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.pr
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{StartingNewDraftReturn, Subscribed}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.IncompleteIndividualTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 
 import scala.concurrent.Future
@@ -170,6 +171,30 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
             }
           }
         }
+
+        "there is an error updating the session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(Right(Some(subscribedSessionData.copy(userType = Some(UserType.Individual)))))
+            )
+            mockStoreSession(
+              subscribedSessionData.copy(
+                journeyStatus = Some(
+                  StartingNewDraftReturn(
+                    subscribed.subscribedDetails,
+                    subscribed.ggCredId,
+                    subscribed.agentReferenceNumber,
+                    IncompleteIndividualTriageAnswers.empty
+                  )
+                ),
+                userType = Some(UserType.Individual)
+              )
+            )(Future.successful(Left(Error(""))))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
       }
 
       "redirect to the who is the individual reporting for page" when {
@@ -180,6 +205,19 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
             mockGetSession(
               Future.successful(Right(Some(subscribedSessionData.copy(userType = Some(UserType.Individual)))))
             )
+            mockStoreSession(
+              subscribedSessionData.copy(
+                journeyStatus = Some(
+                  StartingNewDraftReturn(
+                    subscribed.subscribedDetails,
+                    subscribed.ggCredId,
+                    subscribed.agentReferenceNumber,
+                    IncompleteIndividualTriageAnswers.empty
+                  )
+                ),
+                userType = Some(UserType.Individual)
+              )
+            )(Future.successful(Right(())))
           }
 
           checkIsRedirect(

@@ -33,6 +33,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => homeRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => returnsRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
@@ -84,13 +85,13 @@ class CanTheyUseOurServiceControllerSpec
     case _             => false
   }
 
-  val subscribed = sample[Subscribed].copy(newReturnIndividualTriageAnswers = None, currentDraftReturn = None)
+  val subscribed = sample[Subscribed].copy(newReturnTriageAnswers = None, currentDraftReturn = None)
 
   val draftReturn = sample[DraftReturn]
 
   def sessionDataWithIndividualTriageAnswers(individualTriageAnswers: Option[IndividualTriageAnswers]): SessionData =
     SessionData.empty
-      .copy(journeyStatus = Some(subscribed.copy(newReturnIndividualTriageAnswers = individualTriageAnswers)))
+      .copy(journeyStatus = Some(subscribed.copy(newReturnTriageAnswers = individualTriageAnswers)))
 
   def sessionDataWithIndividualTriageAnswers(individualTriageAnswers: IndividualTriageAnswers): SessionData =
     sessionDataWithIndividualTriageAnswers(Some(individualTriageAnswers))
@@ -116,51 +117,28 @@ class CanTheyUseOurServiceControllerSpec
 
       def performAction(): Future[Result] = controller.whoIsIndividualRepresenting()(FakeRequest())
 
+      val requiredPreviousAnswers = IncompleteIndividualTriageAnswers.empty
+
       behave like redirectToStartWhenInvalidJourney(performAction, isSubscribedJourney)
 
-      "display the page when no option has been selected before" in {
-        List(
-          sessionDataWithIndividualTriageAnswers(None),
-          sessionDataWithIndividualTriageAnswers(IncompleteIndividualTriageAnswers.empty),
-          sessionDataWithDraftReturn(IncompleteIndividualTriageAnswers.empty)
-        ).foreach { sessionData =>
-          withClue(s"For session data $sessionData: ") {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(sessionData))))
-            }
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney[Unit, IndividualUserType](
+        performAction
+      )(requiredPreviousAnswers, homeRoutes.HomePageController.homepage())(
+        { case (i, _) => i },
+        { case (i, t) => i.copy(individualUserType = t) }
+      )(IndividualUserType.Self)(
+        "who-are-you-reporting-for.title",
+        _ => List("checked=\"checked\"")
+      )
 
-            val result = performAction()
-            status(result)          shouldBe OK
-            contentAsString(result) should include(message("who-are-you-reporting-for.title"))
-            contentAsString(result) should not include ("checked=\"checked\"")
-          }
-        }
-      }
-
-      "display the page when an option has been selected before" in {
-        val individualTriageAnswers =
-          sample[IncompleteIndividualTriageAnswers].copy(individualUserType = Some(IndividualUserType.Self))
-
-        List(
-          sessionDataWithIndividualTriageAnswers(individualTriageAnswers),
-          sessionDataWithIndividualTriageAnswers(sample[CompleteIndividualTriageAnswers]),
-          sessionDataWithDraftReturn(individualTriageAnswers),
-          sessionDataWithDraftReturn(sample[CompleteIndividualTriageAnswers])
-        ).foreach { sessionData =>
-          withClue(s"For session data $sessionData: ") {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(sessionData))))
-            }
-
-            val result = performAction()
-            status(result)          shouldBe OK
-            contentAsString(result) should include(message("who-are-you-reporting-for.title"))
-            contentAsString(result) should include("checked=\"checked\"")
-          }
-        }
-      }
+      behave like displayIndividualTriagePageBehaviorCompleteJourney(
+        performAction
+      )(IndividualUserType.Self) {
+        case (i, t) => i.copy(individualUserType = t)
+      }(
+        "who-are-you-reporting-for.title",
+        _ => List("checked=\"checked\"")
+      )
 
     }
 
@@ -169,235 +147,48 @@ class CanTheyUseOurServiceControllerSpec
       def performAction(formData: (String, String)*): Future[Result] =
         controller.whoIsIndividualRepresentingSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
 
+      val requiredPreviousAnswers = IncompleteIndividualTriageAnswers.empty
+
       behave like redirectToStartWhenInvalidJourney(() => performAction(), isSubscribedJourney)
 
-      "show a form error" when {
-
-        def testFormError(submittedData: (String, String)*)(expectedErrorKey: String): Unit = {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionDataWithIndividualTriageAnswers(None)))))
-          }
-
-          val result  = performAction(submittedData: _*)
-          val content = contentAsString(result)
-
-          status(result)          shouldBe BAD_REQUEST
-          contentAsString(result) should include(message("who-are-you-reporting-for.title"))
-          content                 should include(message(expectedErrorKey))
-        }
-
-        "no option has been selected" in {
-          testFormError()("individualUserType.error.required")
-        }
-
-        "the option submitted is not valid" in {
-          testFormError("individualUserType" -> "3")("individualUserType.error.invalid")
-        }
-
-      }
-
-      "show an error" when {
-
-        "the submitted value is valid but there is an error updating the session" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionDataWithIndividualTriageAnswers(None)))))
-            mockStoreSession(
-              sessionDataWithIndividualTriageAnswers(
-                IncompleteIndividualTriageAnswers.empty.copy(
-                  individualUserType = Some(IndividualUserType.Self)
-                )
+      behave like submitIndividualTriagePageBehavior[Unit, IndividualUserType](
+        performAction
+      )(
+        requiredPreviousAnswers,
+        homeRoutes.HomePageController.homepage(),
+        sample[CompleteIndividualTriageAnswers]
+      )(
+        { case (i, _) => i },
+        { case (i, t) => i.copy(individualUserType = t) },
+        { case (i, t) => i.copy(individualUserType = t) }
+      )(
+        "who-are-you-reporting-for.title"
+      )(
+        formErrorScenarios = List(
+          List.empty -> "individualUserType.error.required",
+          List("individualUserType" -> "3") -> "individualUserType.error.invalid"
+        )
+      )(
+        validValueScenarios = List(
+          (List("individualUserType" -> "0"), IndividualUserType.Self, {
+            case (result, updatedState) =>
+              updatedState.fold(
+                _ => checkIsRedirect(result, routes.CanTheyUseOurServiceController.howManyProperties()),
+                _ => checkIsRedirect(result, routes.CanTheyUseOurServiceController.checkYourAnswers())
               )
-            )(Future.successful(Left(Error(""))))
-          }
-
-          val result = performAction("individualUserType" -> "0")
-          checkIsTechnicalErrorPage(result)
-        }
-
-        "there is an error storing a draft return" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(sessionDataWithDraftReturn(IncompleteIndividualTriageAnswers.empty))))
-            )
-            mockStoreDraftReturn(
-              draftReturn.copy(triageAnswers =
-                IncompleteIndividualTriageAnswers.empty.copy(individualUserType = Some(IndividualUserType.Self))
-              )
-            )(Left(Error("")))
-          }
-
-          checkIsTechnicalErrorPage(performAction("individualUserType" -> "0"))
-        }
-
-      }
-
-      "show a dummy page" when {
-
-        "the submitted value is not 'self' and the session is updated" in {
-          List(
-            1 -> IndividualUserType.Capacitor,
-            2 -> IndividualUserType.PersonalRepresentative
-          ).foreach {
-            case (value, userType) =>
-              withClue(s"For user type '$userType' and value '$value': ") {
-                inSequence {
-                  mockAuthWithNoRetrievals()
-                  mockGetSession(Future.successful(Right(Some(sessionDataWithIndividualTriageAnswers(None)))))
-                  mockStoreSession(
-                    sessionDataWithIndividualTriageAnswers(
-                      IncompleteIndividualTriageAnswers.empty.copy(
-                        individualUserType = Some(userType)
-                      )
-                    )
-                  )(Future.successful(Right(())))
-                }
-
-                val result = performAction("individualUserType" -> value.toString)
-                status(result)          shouldBe OK
-                contentAsString(result) shouldBe s"$userType not handled yet"
-              }
-          }
-
-        }
-
-      }
-
-      "redirect to the how many properties page" when {
-
-        val (userType, userTypeValue) = IndividualUserType.Self -> 0
-        val updatedAnswers            = IncompleteIndividualTriageAnswers.empty.copy(individualUserType = Some(userType))
-
-        "the submitted value is self and the session is updated when a draft return hasn't been saved" in {
-          List(
-            sessionDataWithIndividualTriageAnswers(None) ->
-              sessionDataWithIndividualTriageAnswers(updatedAnswers),
-            sessionDataWithIndividualTriageAnswers(IncompleteIndividualTriageAnswers.empty) ->
-              sessionDataWithIndividualTriageAnswers(updatedAnswers)
-          ).foreach {
-            case (currentState, updatedState) =>
-              withClue(s"With currentState $currentState and updatedState $updatedState: ") {
-                inSequence {
-                  mockAuthWithNoRetrievals()
-                  mockGetSession(Future.successful(Right(Some(sessionDataWithIndividualTriageAnswers(None)))))
-                  mockStoreSession(sessionDataWithIndividualTriageAnswers(updatedAnswers))(Future.successful(Right(())))
-                }
-
-                val result = performAction("individualUserType" -> userTypeValue.toString)
-                checkIsRedirect(result, routes.CanTheyUseOurServiceController.howManyProperties())
-              }
-
-          }
-
-        }
-
-        "the submitted value is self and the session is updated when a draft return hsa been saved" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(sessionDataWithDraftReturn(IncompleteIndividualTriageAnswers.empty))))
-            )
-            mockStoreDraftReturn(draftReturn.copy(triageAnswers = updatedAnswers))(Right(()))
-            mockStoreSession(sessionDataWithDraftReturn(updatedAnswers))(Future.successful(Right(())))
-          }
-
-          val result = performAction("individualUserType" -> userTypeValue.toString)
-          checkIsRedirect(result, routes.CanTheyUseOurServiceController.howManyProperties())
-        }
-
-      }
-
-      "redirect to the check your answers page" when {
-
-        val currentCompleteAnswers =
-          sample[CompleteIndividualTriageAnswers].copy(individualUserType = IndividualUserType.Capacitor)
-        val (userType, userTypeValue) = IndividualUserType.Self -> 0
-        val updatedCompleteAnswers    = currentCompleteAnswers.copy(individualUserType = userType)
-
-        "the user has already complete the section" in {
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(sessionDataWithIndividualTriageAnswers(currentCompleteAnswers))))
-            )
-            mockStoreSession(sessionDataWithIndividualTriageAnswers(updatedCompleteAnswers))(
-              Future.successful(Right(()))
-            )
-          }
-
-          val result = performAction("individualUserType" -> userTypeValue.toString)
-          checkIsRedirect(result, routes.CanTheyUseOurServiceController.checkYourAnswers())
-        }
-
-        "the user has already complete the section and they have saved a draft return" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionDataWithDraftReturn(currentCompleteAnswers)))))
-            mockStoreDraftReturn(draftReturn.copy(triageAnswers = updatedCompleteAnswers))(Right(()))
-            mockStoreSession(sessionDataWithDraftReturn(updatedCompleteAnswers))(Future.successful(Right(())))
-          }
-
-          val result = performAction("individualUserType" -> userTypeValue.toString)
-          checkIsRedirect(result, routes.CanTheyUseOurServiceController.checkYourAnswers())
-        }
-
-      }
-
-      "not update the session" when {
-
-        "the answer submitted is the same as the one already stored in session" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithIndividualTriageAnswers(
-                      IncompleteIndividualTriageAnswers.empty.copy(
-                        individualUserType = Some(IndividualUserType.Self)
-                      )
-                    )
-                  )
-                )
-              )
-            )
-          }
-
-          val result = performAction("individualUserType" -> "0")
-          checkIsRedirect(result, routes.CanTheyUseOurServiceController.howManyProperties())
-        }
-
-      }
-
-      "not update the draft return" when {
-
-        "the draft return has not changed" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithDraftReturn(
-                      IncompleteIndividualTriageAnswers.empty.copy(
-                        individualUserType = Some(IndividualUserType.Self)
-                      )
-                    )
-                  )
-                )
-              )
-            )
-          }
-
-          val result = performAction("individualUserType" -> "0")
-          checkIsRedirect(result, routes.CanTheyUseOurServiceController.howManyProperties())
-        }
-
-      }
-
+          }),
+          (List("individualUserType" -> "1"), IndividualUserType.Capacitor, {
+            case (result, _) =>
+              status(result)          shouldBe OK
+              contentAsString(result) shouldBe s"${IndividualUserType.Capacitor} not handled yet"
+          }),
+          (List("individualUserType" -> "2"), IndividualUserType.PersonalRepresentative, {
+            case (result, _) =>
+              status(result)          shouldBe OK
+              contentAsString(result) shouldBe s"${IndividualUserType.PersonalRepresentative} not handled yet"
+          })
+        )
+      )
     }
 
     "handling requests to display the how many properties page" must {
@@ -459,15 +250,9 @@ class CanTheyUseOurServiceControllerSpec
       )(
         validValueScenarios = List(
           (List("numberOfProperties" -> "1"), NumberOfProperties.MoreThanOne, {
-            case (result, updatedState) =>
-              updatedState.fold(
-                _ => {
-                  status(result)          shouldBe OK
-                  contentAsString(result) shouldBe "multiple disposals not handled yet"
-                },
-                _ => checkIsRedirect(result, routes.CanTheyUseOurServiceController.checkYourAnswers())
-              )
-
+            case (result, _) =>
+              status(result)          shouldBe OK
+              contentAsString(result) shouldBe "multiple disposals not handled yet"
           }),
           (List("numberOfProperties" -> "0"), NumberOfProperties.One, {
             case (result, updatedState) =>
@@ -629,13 +414,8 @@ class CanTheyUseOurServiceControllerSpec
           }),
           (List("wereYouAUKResident" -> "false"), false, {
             case (result, updatedState) =>
-              updatedState.fold(
-                _ => {
-                  status(result)          shouldBe OK
-                  contentAsString(result) shouldBe "non residents not handled yet"
-                },
-                _ => checkIsRedirect(result, routes.CanTheyUseOurServiceController.checkYourAnswers())
-              )
+              status(result)          shouldBe OK
+              contentAsString(result) shouldBe "non residents not handled yet"
           })
         )
       )
@@ -710,14 +490,8 @@ class CanTheyUseOurServiceControllerSpec
           }),
           (List("didYouDisposeOfResidentialProperty" -> "false"), false, {
             case (result, updatedState) =>
-              updatedState.fold(
-                _ => {
-                  status(result)          shouldBe OK
-                  contentAsString(result) shouldBe "individuals can only report on residential properties"
-                },
-                _ => checkIsRedirect(result, routes.CanTheyUseOurServiceController.checkYourAnswers())
-              )
-
+              status(result)          shouldBe OK
+              contentAsString(result) shouldBe "individuals can only report on residential properties"
           })
         )
       )
@@ -819,15 +593,9 @@ class CanTheyUseOurServiceControllerSpec
       val validValueScenarios =
         List[(LocalDate, (Future[Result], IndividualTriageAnswers) => Unit)](
           earliestDisposalDate.minusDays(1L) -> {
-            case (result, updatedState) =>
-              updatedState.fold(
-                _ => {
-                  status(result)          shouldBe OK
-                  contentAsString(result) shouldBe s"disposal date was strictly before $earliestDisposalDate"
-                },
-                _ => checkIsRedirect(result, routes.CanTheyUseOurServiceController.checkYourAnswers())
-              )
-
+            case (result, _) =>
+              status(result)          shouldBe OK
+              contentAsString(result) shouldBe s"disposal date was strictly before $earliestDisposalDate"
           },
           earliestDisposalDate -> { (result, updatedState) =>
             checkIsRedirect(result, expectedRedirectLocation(updatedState))
@@ -1213,8 +981,9 @@ class CanTheyUseOurServiceControllerSpec
       val sessionDataWithNewDraftReturn = SessionData.empty.copy(
         journeyStatus = Some(
           subscribed.copy(
-            newReturnIndividualTriageAnswers = None,
-            currentDraftReturn               = Some(newDraftReturn)
+            newReturnTriageAnswers = None,
+            currentDraftReturn     = Some(newDraftReturn),
+            draftReturns           = newDraftReturn :: subscribed.draftReturns
           )
         )
       )
@@ -1301,32 +1070,36 @@ class CanTheyUseOurServiceControllerSpec
   )(pageTitleKey: String)(
     formErrorScenarios: Seq[(Seq[(String, String)], String)]
   )(validValueScenarios: Seq[(Seq[(String, String)], B, (Future[Result], IndividualTriageAnswers) => Unit)]): Unit = {
-    s"redirect to ${redirectToIfNotValidJourney.url}" when {
 
-      "that question has not already answered" in {
-        List(
-          sessionDataWithIndividualTriageAnswers(setPreviousAnswer(requiredPreviousAnswers, None)),
-          sessionDataWithDraftReturn(setPreviousAnswer(requiredPreviousAnswers, None))
-        ).foreach { currentSession =>
-          withClue(s"For currentSession $currentSession: ") {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                Future.successful(
-                  Right(
-                    Some(
-                      sessionDataWithIndividualTriageAnswers(setPreviousAnswer(requiredPreviousAnswers, None))
+    if (setPreviousAnswer(requiredPreviousAnswers, None) =!= requiredPreviousAnswers) {
+
+      s"redirect to ${redirectToIfNotValidJourney.url}" when {
+
+        "that question has not already answered" in {
+          List(
+            sessionDataWithIndividualTriageAnswers(setPreviousAnswer(requiredPreviousAnswers, None)),
+            sessionDataWithDraftReturn(setPreviousAnswer(requiredPreviousAnswers, None))
+          ).foreach { currentSession =>
+            withClue(s"For currentSession $currentSession: ") {
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  Future.successful(
+                    Right(
+                      Some(
+                        sessionDataWithIndividualTriageAnswers(setPreviousAnswer(requiredPreviousAnswers, None))
+                      )
                     )
                   )
                 )
-              )
-            }
+              }
 
-            checkIsRedirect(performAction(Seq.empty), redirectToIfNotValidJourney)
+              checkIsRedirect(performAction(Seq.empty), redirectToIfNotValidJourney)
+            }
           }
         }
-      }
 
+      }
     }
 
     "show a form error" when {
@@ -1542,25 +1315,28 @@ class CanTheyUseOurServiceControllerSpec
     pageTitleKey: String,
     prepopulatedContent: B => List[String]
   ): Unit = {
-    s"redirect to ${redirectToIfNotValidJourney.url}" when {
 
-      "that question has not already answered" in {
-        List(
-          sessionDataWithIndividualTriageAnswers(setPreviousAnswer(requiredPreviousAnswers, None)),
-          sessionDataWithDraftReturn(setPreviousAnswer(requiredPreviousAnswers, None))
-        ).foreach { currentSession =>
-          withClue(s"For currentSession $currentSession: ") {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(currentSession))))
+    if (setPreviousAnswer(requiredPreviousAnswers, None) =!= requiredPreviousAnswers) {
+      s"redirect to ${redirectToIfNotValidJourney.url}" when {
+
+        "that question has not already answered" in {
+          List(
+            sessionDataWithIndividualTriageAnswers(setPreviousAnswer(requiredPreviousAnswers, None)),
+            sessionDataWithDraftReturn(setPreviousAnswer(requiredPreviousAnswers, None))
+          ).foreach { currentSession =>
+            withClue(s"For currentSession $currentSession: ") {
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(Future.successful(Right(Some(currentSession))))
+              }
+
+              checkIsRedirect(performAction(), redirectToIfNotValidJourney)
             }
-
-            checkIsRedirect(performAction(), redirectToIfNotValidJourney)
           }
+
         }
 
       }
-
     }
 
     "display the page when no option has been selected before" in {

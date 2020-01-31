@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
+import cats.Eq
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
 
@@ -65,6 +66,8 @@ object IndividualTriageAnswers {
     }
 
   }
+
+  implicit val eq: Eq[IncompleteIndividualTriageAnswers] = Eq.fromUniversalEquals
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
   implicit val format: OFormat[IndividualTriageAnswers] = derived.oformat()

@@ -1084,7 +1084,7 @@ class AgentAccessControllerSpec
           mockStoreSession(
             SessionData.empty
               .copy(journeyStatus =
-                Some(Subscribed(ukClientDetails, agentGGCredId, Some(agentReferenceNumber), None, None))
+                Some(Subscribed(ukClientDetails, agentGGCredId, Some(agentReferenceNumber), None, None, List.empty))
               )
           )(Future.successful(Left(Error(""))))
         }
@@ -1101,7 +1101,8 @@ class AgentAccessControllerSpec
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, clientDetails.cgtReference)(Right(None))
             mockStoreSession(
               SessionData.empty.copy(
-                journeyStatus = Some(Subscribed(clientDetails, agentGGCredId, Some(agentReferenceNumber), None, None))
+                journeyStatus =
+                  Some(Subscribed(clientDetails, agentGGCredId, Some(agentReferenceNumber), None, None, List.empty))
               )
             )(Future.successful(Right(())))
           }
