@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
 
+import cats.data.EitherT
+import cats.instances.future._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.Configuration
 import play.api.i18n.MessagesApi
@@ -31,12 +33,16 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, Subscribed}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.IncompleteIndividualTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 trait HomePageControllerSpec
     extends ControllerSpec
@@ -49,13 +55,22 @@ trait HomePageControllerSpec
     "application.router" -> "prod.Routes"
   )
 
+  val mockReturnsService = mock[ReturnsService]
+
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
-      bind[SessionStore].toInstance(mockSessionStore)
+      bind[SessionStore].toInstance(mockSessionStore),
+      bind[ReturnsService].toInstance(mockReturnsService)
     )
 
   val subscribed = sample[Subscribed]
+
+  def mockGetDraftReturns(cgtReference: CgtReference)(response: Either[Error, List[DraftReturn]]) =
+    (mockReturnsService
+      .getDraftReturns(_: CgtReference)(_: HeaderCarrier))
+      .expects(cgtReference, *)
+      .returning(EitherT.fromEither[Future](response))
 
 }
 
@@ -176,6 +191,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
                 )
               )
             )
+            mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Right(subscribed.draftReturns))
             mockStoreSession(
               SessionData.empty.copy(
                 journeyStatus = Some(subscribed),
@@ -189,31 +205,57 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
           contentAsString(result) should include(message("account.home.title"))
         }
 
-        s"show an error page when the conversion from ${journeyStatus.getClass.getSimpleName} is unsuccessful" in {
+        "show an error page" when {
 
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    SessionData.empty.copy(
-                      journeyStatus = Some(journeyStatus),
-                      userType      = Some(UserType.Individual)
+          s"the conversion from ${journeyStatus.getClass.getSimpleName} is unsuccessful" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                Future.successful(
+                  Right(
+                    Some(
+                      SessionData.empty.copy(
+                        journeyStatus = Some(journeyStatus),
+                        userType      = Some(UserType.Individual)
+                      )
                     )
                   )
                 )
               )
-            )
-            mockStoreSession(
-              SessionData.empty.copy(
-                journeyStatus = Some(subscribed),
-                userType      = Some(UserType.Individual)
-              )
-            )(Future.successful(Left(Error(""))))
+              mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Right(subscribed.draftReturns))
+              mockStoreSession(
+                SessionData.empty.copy(
+                  journeyStatus = Some(subscribed),
+                  userType      = Some(UserType.Individual)
+                )
+              )(Future.successful(Left(Error(""))))
+            }
+
+            checkIsTechnicalErrorPage(performAction())
           }
 
-          checkIsTechnicalErrorPage(performAction())
+          s"the conversion from ${journeyStatus.getClass.getSimpleName} is successful but " +
+            "there is an error getting the draft returns" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                Future.successful(
+                  Right(
+                    Some(
+                      SessionData.empty.copy(
+                        journeyStatus = Some(journeyStatus),
+                        userType      = Some(UserType.Individual)
+                      )
+                    )
+                  )
+                )
+              )
+              mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Left(Error("")))
+            }
+
+            checkIsTechnicalErrorPage(performAction())
+          }
+
         }
 
       }

@@ -16,18 +16,28 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
 
+import java.util.UUID
+
+import cats.data.EitherT
+import cats.instances.future._
+import cats.instances.uuid._
+import cats.syntax.eq._
 import com.google.inject.Inject
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, Subscribed}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.IncompleteIndividualTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
@@ -39,6 +49,7 @@ class HomePageController @Inject() (
   val sessionDataAction: SessionDataAction,
   errorHandler: ErrorHandler,
   sessionStore: SessionStore,
+  returnsService: ReturnsService,
   cc: MessagesControllerComponents,
   manageYourDetailsPage: views.html.account.manage_your_details,
   homePage: views.html.account.home,
@@ -55,7 +66,7 @@ class HomePageController @Inject() (
   def homepage(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request: RequestWithSessionData[AnyContent] =>
       withSubscribedUser { (_, subscribed) =>
-        Ok(homePage(subscribed.subscribedDetails))
+        Ok(homePage(subscribed.subscribedDetails, subscribed.draftReturns))
       }(withUplift = true)
   }
 
@@ -90,20 +101,56 @@ class HomePageController @Inject() (
     }(withUplift = false)
   }
 
+  def resumeDraftReturn(id: UUID): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withSubscribedUser { (_, subscribed) =>
+      subscribed.draftReturns
+        .find(_.id === id)
+        .fold[Future[Result]] {
+          logger.warn(
+            s"For cgt reference ${subscribed.subscribedDetails.cgtReference.value} " +
+              s"could not find draft return with id $id"
+          )
+          errorHandler.errorResult()
+        } { draftReturn =>
+          updateSession(sessionStore, request)(
+            _.copy(
+              journeyStatus = Some(
+                FillingOutReturn(
+                  subscribed.subscribedDetails,
+                  subscribed.ggCredId,
+                  subscribed.agentReferenceNumber,
+                  draftReturn
+                )
+              )
+            )
+          ).map {
+            case Left(e) =>
+              logger.warn("Could not update session", e)
+              errorHandler.errorResult()
+
+            case Right(_) =>
+              Redirect(returns.routes.TaskListController.taskList())
+          }
+        }
+    }(withUplift = false)
+  }
+
   private def withSubscribedUser(
     f: (SessionData, Subscribed) => Future[Result]
   )(withUplift: Boolean)(implicit hc: HeaderCarrier, request: RequestWithSessionData[_]): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((s: SessionData, r: StartingNewDraftReturn)) if withUplift =>
         // TODO: get draft returns
-        upliftToSubscribedAndThen(r)(r =>
-          Subscribed(r.subscribedDetails, r.ggCredId, r.agentReferenceNumber, List.empty)
-        )(f(s, _))
+        upliftToSubscribedAndThen(r, r.subscribedDetails.cgtReference) {
+          case (r, draftReturns) =>
+            Subscribed(r.subscribedDetails, r.ggCredId, r.agentReferenceNumber, draftReturns)
+        }(f(s, _))
 
       case Some((s: SessionData, r: FillingOutReturn)) if withUplift =>
-        upliftToSubscribedAndThen(r)(r =>
-          Subscribed(r.subscribedDetails, r.ggCredId, r.agentReferenceNumber, List.empty)
-        )(f(s, _))
+        upliftToSubscribedAndThen(r, r.subscribedDetails.cgtReference) {
+          case (r, draftReturns) =>
+            Subscribed(r.subscribedDetails, r.ggCredId, r.agentReferenceNumber, draftReturns)
+        }(f(s, _))
 
       case Some((s: SessionData, r: Subscribed)) =>
         f(s, r)
@@ -112,18 +159,23 @@ class HomePageController @Inject() (
         Redirect(controllers.routes.StartController.start().url)
     }
 
-  private def upliftToSubscribedAndThen[J](journey: J)(uplift: J => Subscribed)(
+  private def upliftToSubscribedAndThen[J](journey: J, cgtReference: CgtReference)(
+    uplift: (J, List[DraftReturn]) => Subscribed
+  )(
     f: Subscribed => Future[Result]
   )()(implicit hc: HeaderCarrier, request: RequestWithSessionData[_]): Future[Result] = {
-    val subscribed = uplift(journey)
-    updateSession(sessionStore, request)(_.copy(journeyStatus = Some(subscribed))).flatMap {
-      case Left(e) =>
+    val result = for {
+      draftReturns <- returnsService.getDraftReturns(cgtReference)
+      subscribed = uplift(journey, draftReturns)
+      _ <- EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(subscribed))))
+    } yield subscribed
+
+    result
+      .biSemiflatMap({ e =>
         logger.warn("Could not update session", e)
         errorHandler.errorResult()
-
-      case Right(_) =>
-        f(subscribed)
-    }
+      }, f)
+      .merge
   }
 
 }

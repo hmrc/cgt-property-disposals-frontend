@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns
 
+import java.util.UUID
+
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.int._
@@ -46,9 +48,15 @@ trait ReturnsService {
 @Singleton
 class ReturnsServiceImpl @Inject() (connector: ReturnsConnector)(implicit ec: ExecutionContext) extends ReturnsService {
 
+  @SuppressWarnings(Array("org.wartremover.warts.Var"))
+  var draftReturns: Map[UUID, DraftReturn] = Map.empty
+
+  val test: Boolean = true
+
   def storeDraftReturn(draftReturn: DraftReturn)(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] =
     // TODO: put back to original
-    if (false) {
+    if (test) {
+      draftReturns = draftReturns.updated(draftReturn.id, draftReturn)
       EitherT.pure[Future, Error](())
     } else {
       connector.storeDraftReturn(draftReturn).subflatMap { httpResponse =>
@@ -63,17 +71,20 @@ class ReturnsServiceImpl @Inject() (connector: ReturnsConnector)(implicit ec: Ex
   def getDraftReturns(
     cgtReference: CgtReference
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, List[DraftReturn]] =
-    connector.getDraftReturns(cgtReference).subflatMap { httpResponse =>
-      if (httpResponse.status === OK) {
-        httpResponse
-          .parseJSON[GetDraftReturnResponse]()
-          .leftMap(Error(_))
-          .map(_.draftReturns)
-      } else {
-        Left(Error(s"Call to get draft returns came back with status ${httpResponse.status}}"))
-      }
+    if (test)
+      EitherT.pure(draftReturns.values.toList)
+    else
+      connector.getDraftReturns(cgtReference).subflatMap { httpResponse =>
+        if (httpResponse.status === OK) {
+          httpResponse
+            .parseJSON[GetDraftReturnResponse]()
+            .leftMap(Error(_))
+            .map(_.draftReturns)
+        } else {
+          Left(Error(s"Call to get draft returns came back with status ${httpResponse.status}}"))
+        }
 
-    }
+      }
 
 }
 

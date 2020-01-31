@@ -17,20 +17,20 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.account.AccountMenuItem
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
- mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
- pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
- accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu,
- insetPanel: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.inset_panel,
- buttonLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.button_link
+mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu,
+insetPanel: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.inset_panel,
+buttonLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.button_link
 )
 
-
-@(details: SubscribedDetails)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(details: SubscribedDetails, draftReturns: List[DraftReturn])(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @isAnAgent = @{request.userType.contains(UserType.Agent)}
 @title = @{messages(s"account.home.title")}
@@ -44,6 +44,12 @@
  @pageHeading(title, Some(messages("account.caption")), Some(subtitle))
 
  @buttonLink(messages("account.home.button.start-a-new-return"), controllers.accounts.homepage.routes.HomePageController.startNewReturn().url)
+
+ <ul>
+ @draftReturns.map { draftReturn =>
+  <li><a href="@{controllers.accounts.homepage.routes.HomePageController.resumeDraftReturn(draftReturn.id)}">@{draftReturn.id}</a></li>
+ }
+ </ul>
 
 <div class="grid-row">
  <div class="column-two-thirds">
