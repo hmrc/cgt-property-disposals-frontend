@@ -1706,6 +1706,41 @@ class StartControllerSpec
             )
           }
 
+          "create a fresh session if the session data indicates they have already reached the client homepage" in {
+            inSequence {
+              mockAuthWithAllRetrievals(
+                ConfidenceLevel.L50,
+                Some(AffinityGroup.Agent),
+                None,
+                None,
+                None,
+                Set(agentsEnrolment),
+                Some(retrievedGGCredId)
+              )
+              mockGetSession(
+                Future.successful(
+                  Right(
+                    Some(
+                      SessionData.empty
+                        .copy(journeyStatus = Some(sample[Subscribed].copy(agentReferenceNumber = Some(arn))))
+                    )
+                  )
+                )
+              )
+              mockStoreSession(
+                SessionData.empty.copy(
+                  userType      = Some(UserType.Agent),
+                  journeyStatus = Some(AgentStatus.AgentSupplyingClientDetails(arn, ggCredId, None))
+                )
+              )(Future.successful(Right(())))
+            }
+
+            checkIsRedirect(
+              performAction(),
+              agents.routes.AgentAccessController.enterClientsCgtRef()
+            )
+          }
+
         }
 
         "show an error page" when {
