@@ -21,8 +21,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Country, Postcod
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
 
 final case class AgentVerifierMatchAttempt(
-  agentReferenceNumber: AgentReferenceNumber,
-  clientCgtReference: CgtReference,
+  agentReferenceNumber: String,
+  clientCgtReference: String,
   attemptsMade: Int,
   maxAttempts: Int,
   attemptedVerifier: Either[Country, Postcode],
