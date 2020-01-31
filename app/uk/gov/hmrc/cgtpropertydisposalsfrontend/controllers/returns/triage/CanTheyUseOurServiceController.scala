@@ -173,7 +173,7 @@ class CanTheyUseOurServiceController @Inject() (
             _ => Redirect(routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty()),
             _ => Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
           )
-        case (NumberOfProperties.MoreThanOne, updatedState) =>
+        case (NumberOfProperties.MoreThanOne, _) =>
           Ok("multiple disposals not handled yet")
       }
     )
@@ -189,7 +189,7 @@ class CanTheyUseOurServiceController @Inject() (
         case (currentState, form, isDraftReturn) =>
           disposalMethodPage(
             form,
-            backLink(currentState, routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting()),
+            backLink(currentState, routes.CanTheyUseOurServiceController.howManyProperties()),
             isDraftReturn
           )
       }
@@ -206,7 +206,7 @@ class CanTheyUseOurServiceController @Inject() (
           case (currentState, form, isDraftReturn) =>
             disposalMethodPage(
               form,
-              backLink(currentState, routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting()),
+              backLink(currentState, routes.CanTheyUseOurServiceController.howManyProperties()),
               isDraftReturn
             )
         },

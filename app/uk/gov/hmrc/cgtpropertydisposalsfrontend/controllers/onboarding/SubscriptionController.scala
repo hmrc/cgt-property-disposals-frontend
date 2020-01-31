@@ -87,8 +87,6 @@ class SubscriptionController @Inject() (
                           ),
                           request.subscriptionReady.ggCredId,
                           None,
-                          None,
-                          None,
                           List.empty
                         )
                       )
@@ -134,8 +132,8 @@ class SubscriptionController @Inject() (
 
   def subscribed(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
     request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(Subscribed(accountDetails, _, _, _, _, _)) => Ok(subscribedPage(accountDetails))
-      case _                                               => Redirect(controllers.routes.StartController.start())
+      case Some(subscribed: Subscribed) => Ok(subscribedPage(subscribed.subscribedDetails))
+      case _                            => Redirect(controllers.routes.StartController.start())
     }
   }
 

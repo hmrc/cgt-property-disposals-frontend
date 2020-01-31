@@ -22,13 +22,14 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{StartingNewDraftReturn, Subscribed}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.IncompleteIndividualTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -53,13 +54,13 @@ class HomePageController @Inject() (
   // homepage for after private beta: includes functionality to do with returns
   def homepage(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request: RequestWithSessionData[AnyContent] =>
-      withSubscribedUser(request) { (_, subscribed) =>
+      withSubscribedUser { (_, subscribed) =>
         Ok(homePage(subscribed.subscribedDetails))
-      }
+      }(withUplift = true)
   }
 
   def startNewReturn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withSubscribedUser(request) { (_, subscribed) =>
+    withSubscribedUser { (_, subscribed) =>
       request.userType match {
         case Some(UserType.Individual) =>
           updateSession(sessionStore, request)(
@@ -86,17 +87,43 @@ class HomePageController @Inject() (
           logger.warn(s"Start a new return for user type: $other is not supported")
           errorHandler.errorResult()
       }
-    }
+    }(withUplift = false)
   }
 
-  private def withSubscribedUser(request: RequestWithSessionData[_])(
+  private def withSubscribedUser(
     f: (SessionData, Subscribed) => Future[Result]
-  ): Future[Result] =
+  )(withUplift: Boolean)(implicit hc: HeaderCarrier, request: RequestWithSessionData[_]): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
+      case Some((s: SessionData, r: StartingNewDraftReturn)) if withUplift =>
+        // TODO: get draft returns
+        upliftToSubscribedAndThen(r)(r =>
+          Subscribed(r.subscribedDetails, r.ggCredId, r.agentReferenceNumber, List.empty)
+        )(f(s, _))
+
+      case Some((s: SessionData, r: FillingOutReturn)) if withUplift =>
+        upliftToSubscribedAndThen(r)(r =>
+          Subscribed(r.subscribedDetails, r.ggCredId, r.agentReferenceNumber, List.empty)
+        )(f(s, _))
+
       case Some((s: SessionData, r: Subscribed)) =>
         f(s, r)
+
       case _ =>
         Redirect(controllers.routes.StartController.start().url)
     }
+
+  private def upliftToSubscribedAndThen[J](journey: J)(uplift: J => Subscribed)(
+    f: Subscribed => Future[Result]
+  )()(implicit hc: HeaderCarrier, request: RequestWithSessionData[_]): Future[Result] = {
+    val subscribed = uplift(journey)
+    updateSession(sessionStore, request)(_.copy(journeyStatus = Some(subscribed))).flatMap {
+      case Left(e) =>
+        logger.warn("Could not update session", e)
+        errorHandler.errorResult()
+
+      case Right(_) =>
+        f(subscribed)
+    }
+  }
 
 }

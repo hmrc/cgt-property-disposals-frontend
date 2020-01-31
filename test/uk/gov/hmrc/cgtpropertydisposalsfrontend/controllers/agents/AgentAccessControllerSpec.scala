@@ -41,10 +41,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifierAttempts
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.agents.AgentVerifierMatchRetryStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -61,6 +63,8 @@ class AgentAccessControllerSpec
   val mockAgentVerifierMatchRetryStore: AgentVerifierMatchRetryStore =
     mock[AgentVerifierMatchRetryStore]
 
+  val mockReturnsService = mock[ReturnsService]
+
   val maxVerifierMatchAttempts = 5
 
   override lazy val additionalConfig: Configuration = Configuration(
@@ -72,7 +76,8 @@ class AgentAccessControllerSpec
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
       bind[SubscriptionService].toInstance(mockSubscriptionService),
-      bind[AgentVerifierMatchRetryStore].toInstance(mockAgentVerifierMatchRetryStore)
+      bind[AgentVerifierMatchRetryStore].toInstance(mockAgentVerifierMatchRetryStore),
+      bind[ReturnsService].toInstance(mockReturnsService)
     )
 
   lazy val controller = instanceOf[AgentAccessController]
@@ -143,6 +148,12 @@ class AgentAccessControllerSpec
       .store(_: GGCredId, _: CgtReference, _: UnsuccessfulVerifierAttempts))
       .expects(agentGGCredId, clientCgtReference, unsuccessfulVerifierAttempts)
       .returning(Future.successful(result))
+
+  def mockGetDraftReturns(cgtReference: CgtReference)(response: Either[Error, List[DraftReturn]]) =
+    (mockReturnsService
+      .getDraftReturns(_: CgtReference)(_: HeaderCarrier))
+      .expects(cgtReference, *)
+      .returning(EitherT.fromEither[Future](response))
 
   "AgentAccessController" when {
 
@@ -1037,6 +1048,8 @@ class AgentAccessControllerSpec
 
       def performAction(): Future[Result] = controller.confirmClientSubmit()(FakeRequest())
 
+      val draftReturns = List(sample[DraftReturn])
+
       behave like redirectToStartWhenInvalidJourney(
         performAction, {
           case AgentSupplyingClientDetails(_, _, Some(_)) => true
@@ -1076,20 +1089,35 @@ class AgentAccessControllerSpec
         }
       }
 
-      "show an error page if the session data cannot be updated" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = true)))))
-          mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(Right(None))
-          mockStoreSession(
-            SessionData.empty
-              .copy(journeyStatus =
-                Some(Subscribed(ukClientDetails, agentGGCredId, Some(agentReferenceNumber), None, None, List.empty))
-              )
-          )(Future.successful(Left(Error(""))))
+      "show an error page" when {
+
+        "there is an error getting the client's draft returns" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = true)))))
+            mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(Right(None))
+            mockGetDraftReturns(ukClientDetails.cgtReference)(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
         }
 
-        checkIsTechnicalErrorPage(performAction())
+        "the session data cannot be updated" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = true)))))
+            mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(Right(None))
+            mockGetDraftReturns(ukClientDetails.cgtReference)(Right(draftReturns))
+            mockStoreSession(
+              SessionData.empty
+                .copy(journeyStatus =
+                  Some(Subscribed(ukClientDetails, agentGGCredId, Some(agentReferenceNumber), draftReturns))
+                )
+            )(Future.successful(Left(Error(""))))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
       }
 
       "redirect to the homepage" when {
@@ -1099,10 +1127,10 @@ class AgentAccessControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(Future.successful(Right(Some(sessionData(clientDetails, correctVerifierSupplied = true)))))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, clientDetails.cgtReference)(Right(None))
+            mockGetDraftReturns(ukClientDetails.cgtReference)(Right(draftReturns))
             mockStoreSession(
               SessionData.empty.copy(
-                journeyStatus =
-                  Some(Subscribed(clientDetails, agentGGCredId, Some(agentReferenceNumber), None, None, List.empty))
+                journeyStatus = Some(Subscribed(clientDetails, agentGGCredId, Some(agentReferenceNumber), draftReturns))
               )
             )(Future.successful(Right(())))
           }

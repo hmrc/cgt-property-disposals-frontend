@@ -69,8 +69,6 @@ object JourneyStatus {
     subscribedDetails: SubscribedDetails,
     ggCredId: GGCredId,
     agentReferenceNumber: Option[AgentReferenceNumber],
-    newReturnTriageAnswers: Option[IndividualTriageAnswers],
-    currentDraftReturn: Option[DraftReturn],
     draftReturns: List[DraftReturn]
   ) extends JourneyStatus
 

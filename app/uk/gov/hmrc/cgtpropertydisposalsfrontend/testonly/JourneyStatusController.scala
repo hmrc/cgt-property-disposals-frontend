@@ -68,21 +68,22 @@ class JourneyStatusController @Inject() (
   def setReturnStateSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withSubscribedUser(request) {
       case (_, subscribed) =>
-        returnStateForm
-          .bindFromRequest()
-          .fold(
-            formWithErrors => BadRequest(setReturnStatePage(formWithErrors)), { state =>
-              updateSession(sessionStore, request)(
-                _.copy(journeyStatus = Some(subscribed.copy(newReturnTriageAnswers = Some(state))))
-              ).map {
-                case Left(e) =>
-                  logger.warn("Could not update session", e)
-                  InternalServerError(s"Could not update session: $e")
-                case Right(_) =>
-                  Ok("session updated")
-              }
-            }
-          )
+//        returnStateForm
+//          .bindFromRequest()
+//          .fold(
+//            formWithErrors => BadRequest(setReturnStatePage(formWithErrors)), { state =>
+//              updateSession(sessionStore, request)(
+//                _.copy(journeyStatus = Some(subscribed.copy(newReturnTriageAnswers = Some(state))))
+//              ).map {
+//                case Left(e) =>
+//                  logger.warn("Could not update session", e)
+//                  InternalServerError(s"Could not update session: $e")
+//                case Right(_) =>
+//                  Ok("session updated")
+//              }
+//            }
+//          )
+        Ok("")
     }
   }
 

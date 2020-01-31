@@ -37,7 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{r
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => returnsRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.{CompleteIndividualTriageAnswers, IncompleteIndividualTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
@@ -80,27 +80,31 @@ class CanTheyUseOurServiceControllerSpec
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
-  def isSubscribedJourney(journeyStatus: JourneyStatus): Boolean = journeyStatus match {
-    case _: Subscribed => true
-    case _             => false
+  def isValidJourney(journeyStatus: JourneyStatus): Boolean = journeyStatus match {
+    case _: StartingNewDraftReturn | _: FillingOutReturn => true
+    case _                                               => false
   }
 
-  val subscribed = sample[Subscribed].copy(newReturnTriageAnswers = None, currentDraftReturn = None)
+  val startingNewDraftReturn = sample[StartingNewDraftReturn]
+
+  val fillingOutReturn = sample[FillingOutReturn]
+    .copy(
+      subscribedDetails = startingNewDraftReturn.subscribedDetails,
+      startingNewDraftReturn.ggCredId,
+      startingNewDraftReturn.agentReferenceNumber
+    )
 
   val draftReturn = sample[DraftReturn]
 
-  def sessionDataWithIndividualTriageAnswers(individualTriageAnswers: Option[IndividualTriageAnswers]): SessionData =
+  def sessionDataWithStartingNewDraftReturn(individualTriageAnswers: IndividualTriageAnswers): SessionData =
     SessionData.empty
-      .copy(journeyStatus = Some(subscribed.copy(newReturnTriageAnswers = individualTriageAnswers)))
+      .copy(journeyStatus = Some(startingNewDraftReturn.copy(newReturnTriageAnswers = individualTriageAnswers)))
 
-  def sessionDataWithIndividualTriageAnswers(individualTriageAnswers: IndividualTriageAnswers): SessionData =
-    sessionDataWithIndividualTriageAnswers(Some(individualTriageAnswers))
+  def sessionDataWithFillingOurReturn(draftReturn: DraftReturn): SessionData =
+    SessionData.empty.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = draftReturn)))
 
-  def sessionDataWithDraftReturn(draftReturn: DraftReturn): SessionData =
-    SessionData.empty.copy(journeyStatus = Some(subscribed.copy(currentDraftReturn = Some(draftReturn))))
-
-  def sessionDataWithDraftReturn(individualTriageAnswers: IndividualTriageAnswers): SessionData =
-    sessionDataWithDraftReturn(draftReturn.copy(triageAnswers = individualTriageAnswers))
+  def sessionDataWithFillingOurReturn(individualTriageAnswers: IndividualTriageAnswers): SessionData =
+    sessionDataWithFillingOurReturn(draftReturn.copy(triageAnswers = individualTriageAnswers))
 
   def mockGetNextUUID(uuid: UUID) =
     (mockUUIDGenerator.nextId _).expects().returning(uuid)
@@ -119,7 +123,7 @@ class CanTheyUseOurServiceControllerSpec
 
       val requiredPreviousAnswers = IncompleteIndividualTriageAnswers.empty
 
-      behave like redirectToStartWhenInvalidJourney(performAction, isSubscribedJourney)
+      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney[Unit, IndividualUserType](
         performAction
@@ -149,7 +153,7 @@ class CanTheyUseOurServiceControllerSpec
 
       val requiredPreviousAnswers = IncompleteIndividualTriageAnswers.empty
 
-      behave like redirectToStartWhenInvalidJourney(() => performAction(), isSubscribedJourney)
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like submitIndividualTriagePageBehavior[Unit, IndividualUserType](
         performAction
@@ -198,7 +202,7 @@ class CanTheyUseOurServiceControllerSpec
 
       def performAction(): Future[Result] = controller.howManyProperties()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(performAction, isSubscribedJourney)
+      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney[IndividualUserType, NumberOfProperties](
         performAction
@@ -228,7 +232,7 @@ class CanTheyUseOurServiceControllerSpec
       val requiredPreviousAnswers =
         IncompleteIndividualTriageAnswers.empty.copy(individualUserType = Some(sample[IndividualUserType]))
 
-      behave like redirectToStartWhenInvalidJourney(() => performAction(), isSubscribedJourney)
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like submitIndividualTriagePageBehavior[IndividualUserType, NumberOfProperties](
         performAction
@@ -273,7 +277,7 @@ class CanTheyUseOurServiceControllerSpec
 
       def performAction(): Future[Result] = controller.howDidYouDisposeOfProperty()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(performAction, isSubscribedJourney)
+      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney[NumberOfProperties, DisposalMethod](
         performAction
@@ -304,7 +308,7 @@ class CanTheyUseOurServiceControllerSpec
       val requiredPreviousAnswers =
         IncompleteIndividualTriageAnswers.empty.copy(numberOfProperties = Some(NumberOfProperties.One))
 
-      behave like redirectToStartWhenInvalidJourney(() => performAction(), isSubscribedJourney)
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like submitIndividualTriagePageBehavior[NumberOfProperties, DisposalMethod](
         performAction
@@ -351,7 +355,7 @@ class CanTheyUseOurServiceControllerSpec
 
       def performAction(): Future[Result] = controller.wereYouAUKResident()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(performAction, isSubscribedJourney)
+      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney[DisposalMethod, Boolean](
         performAction
@@ -382,7 +386,7 @@ class CanTheyUseOurServiceControllerSpec
       val requiredPreviousAnswers =
         IncompleteIndividualTriageAnswers.empty.copy(disposalMethod = Some(DisposalMethod.Sold))
 
-      behave like redirectToStartWhenInvalidJourney(() => performAction(), isSubscribedJourney)
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like submitIndividualTriagePageBehavior[DisposalMethod, Boolean](
         performAction
@@ -429,7 +433,7 @@ class CanTheyUseOurServiceControllerSpec
 
       def performAction(): Future[Result] = controller.didYouDisposeOfAResidentialProperty()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(performAction, isSubscribedJourney)
+      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney[Boolean, Boolean](
         performAction
@@ -460,7 +464,7 @@ class CanTheyUseOurServiceControllerSpec
       val requiredPreviousAnswers =
         IncompleteIndividualTriageAnswers.empty.copy(wasAUKResident = Some(true))
 
-      behave like redirectToStartWhenInvalidJourney(() => performAction(), isSubscribedJourney)
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like submitIndividualTriagePageBehavior[Boolean, Boolean](
         performAction
@@ -513,7 +517,7 @@ class CanTheyUseOurServiceControllerSpec
 
       def performAction(): Future[Result] = controller.whenWasDisposalDate()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(performAction, isSubscribedJourney)
+      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney[Boolean, DisposalDate](
         performAction
@@ -614,7 +618,7 @@ class CanTheyUseOurServiceControllerSpec
             (formData, DisposalDate(date), checks)
         }
 
-      behave like redirectToStartWhenInvalidJourney(() => performAction(), isSubscribedJourney)
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like submitIndividualTriagePageBehavior[Boolean, DisposalDate](
         performAction
@@ -662,7 +666,7 @@ class CanTheyUseOurServiceControllerSpec
 
       def performAction(): Future[Result] = controller.whenWasCompletionDate()(FakeRequest())
 
-      behave like redirectToStartWhenInvalidJourney(performAction, isSubscribedJourney)
+      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney[DisposalDate, CompletionDate](
         performAction
@@ -763,7 +767,7 @@ class CanTheyUseOurServiceControllerSpec
             (formData, CompletionDate(date), checks)
         }
 
-      behave like redirectToStartWhenInvalidJourney(() => performAction(), isSubscribedJourney)
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like submitIndividualTriagePageBehavior[DisposalDate, CompletionDate](
         performAction
@@ -850,11 +854,11 @@ class CanTheyUseOurServiceControllerSpec
           }
 
         "a question has not yet been answered and a draft return has not been created" in {
-          test(sessionDataWithIndividualTriageAnswers)
+          test(sessionDataWithStartingNewDraftReturn)
         }
 
         "a question has not yet been answered and a draft return has been created" in {
-          test(sessionDataWithDraftReturn)
+          test(sessionDataWithFillingOurReturn)
         }
 
       }
@@ -868,13 +872,13 @@ class CanTheyUseOurServiceControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    sessionDataWithIndividualTriageAnswers(allQuestionsAnswered)
+                    sessionDataWithStartingNewDraftReturn(allQuestionsAnswered)
                   )
                 )
               )
             )
             mockStoreSession(
-              sessionDataWithIndividualTriageAnswers(completeTriageQuestions)
+              sessionDataWithStartingNewDraftReturn(completeTriageQuestions)
             )(Future.successful(Left(Error(""))))
           }
 
@@ -896,13 +900,13 @@ class CanTheyUseOurServiceControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    sessionDataWithIndividualTriageAnswers(allQuestionsAnswered)
+                    sessionDataWithStartingNewDraftReturn(allQuestionsAnswered)
                   )
                 )
               )
             )
             mockStoreSession(
-              sessionDataWithIndividualTriageAnswers(completeTriageQuestions)
+              sessionDataWithStartingNewDraftReturn(completeTriageQuestions)
             )(Future.successful(Right(())))
           }
 
@@ -916,13 +920,13 @@ class CanTheyUseOurServiceControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    sessionDataWithDraftReturn(allQuestionsAnswered)
+                    sessionDataWithFillingOurReturn(allQuestionsAnswered)
                   )
                 )
               )
             )
             mockStoreSession(
-              sessionDataWithDraftReturn(completeTriageQuestions)
+              sessionDataWithFillingOurReturn(completeTriageQuestions)
             )(Future.successful(Right(())))
           }
 
@@ -936,7 +940,7 @@ class CanTheyUseOurServiceControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    sessionDataWithIndividualTriageAnswers(completeTriageQuestions)
+                    sessionDataWithStartingNewDraftReturn(completeTriageQuestions)
                   )
                 )
               )
@@ -953,7 +957,7 @@ class CanTheyUseOurServiceControllerSpec
               Future.successful(
                 Right(
                   Some(
-                    sessionDataWithDraftReturn(completeTriageQuestions)
+                    sessionDataWithFillingOurReturn(completeTriageQuestions)
                   )
                 )
               )
@@ -976,14 +980,12 @@ class CanTheyUseOurServiceControllerSpec
 
       val uuid = UUID.randomUUID()
 
-      val newDraftReturn = DraftReturn(uuid, subscribed.subscribedDetails.cgtReference, completeAnswers)
+      val newDraftReturn = DraftReturn(uuid, startingNewDraftReturn.subscribedDetails.cgtReference, completeAnswers)
 
       val sessionDataWithNewDraftReturn = SessionData.empty.copy(
         journeyStatus = Some(
-          subscribed.copy(
-            newReturnTriageAnswers = None,
-            currentDraftReturn     = Some(newDraftReturn),
-            draftReturns           = newDraftReturn :: subscribed.draftReturns
+          fillingOutReturn.copy(
+            draftReturn = newDraftReturn
           )
         )
       )
@@ -995,7 +997,7 @@ class CanTheyUseOurServiceControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionDataWithIndividualTriageAnswers(incompleteAnswers)))))
+            mockGetSession(Future.successful(Right(Some(sessionDataWithStartingNewDraftReturn(incompleteAnswers)))))
           }
 
           checkIsRedirect(performAction(), routes.CanTheyUseOurServiceController.checkYourAnswers())
@@ -1008,7 +1010,7 @@ class CanTheyUseOurServiceControllerSpec
         "there is a problem storing a draft return" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionDataWithIndividualTriageAnswers(completeAnswers)))))
+            mockGetSession(Future.successful(Right(Some(sessionDataWithStartingNewDraftReturn(completeAnswers)))))
             mockGetNextUUID(uuid)
             mockStoreDraftReturn(newDraftReturn)(Left(Error("")))
           }
@@ -1019,7 +1021,7 @@ class CanTheyUseOurServiceControllerSpec
         "there is a problem updating the session" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionDataWithIndividualTriageAnswers(completeAnswers)))))
+            mockGetSession(Future.successful(Right(Some(sessionDataWithStartingNewDraftReturn(completeAnswers)))))
             mockGetNextUUID(uuid)
             mockStoreDraftReturn(newDraftReturn)(Right(()))
             mockStoreSession(sessionDataWithNewDraftReturn)(Future.successful(Left(Error(""))))
@@ -1035,7 +1037,7 @@ class CanTheyUseOurServiceControllerSpec
         "the draft return is stored and the session is updated and a draft return had not already been created" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionDataWithIndividualTriageAnswers(completeAnswers)))))
+            mockGetSession(Future.successful(Right(Some(sessionDataWithStartingNewDraftReturn(completeAnswers)))))
             mockGetNextUUID(uuid)
             mockStoreDraftReturn(newDraftReturn)(Right(()))
             mockStoreSession(sessionDataWithNewDraftReturn)(Future.successful(Right(())))
@@ -1047,7 +1049,7 @@ class CanTheyUseOurServiceControllerSpec
         "the draft return is stored and the session is updated and a draft return had already been created" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionDataWithDraftReturn(completeAnswers)))))
+            mockGetSession(Future.successful(Right(Some(sessionDataWithFillingOurReturn(completeAnswers)))))
           }
 
           checkIsRedirect(performAction(), returnsRoutes.TaskListController.taskList())
@@ -1077,8 +1079,8 @@ class CanTheyUseOurServiceControllerSpec
 
         "that question has not already answered" in {
           List(
-            sessionDataWithIndividualTriageAnswers(setPreviousAnswer(requiredPreviousAnswers, None)),
-            sessionDataWithDraftReturn(setPreviousAnswer(requiredPreviousAnswers, None))
+            sessionDataWithStartingNewDraftReturn(setPreviousAnswer(requiredPreviousAnswers, None)),
+            sessionDataWithFillingOurReturn(setPreviousAnswer(requiredPreviousAnswers, None))
           ).foreach { currentSession =>
             withClue(s"For currentSession $currentSession: ") {
               inSequence {
@@ -1087,7 +1089,7 @@ class CanTheyUseOurServiceControllerSpec
                   Future.successful(
                     Right(
                       Some(
-                        sessionDataWithIndividualTriageAnswers(setPreviousAnswer(requiredPreviousAnswers, None))
+                        sessionDataWithStartingNewDraftReturn(setPreviousAnswer(requiredPreviousAnswers, None))
                       )
                     )
                   )
@@ -1113,7 +1115,7 @@ class CanTheyUseOurServiceControllerSpec
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(
-                  Future.successful(Right(Some(sessionDataWithIndividualTriageAnswers(requiredPreviousAnswers))))
+                  Future.successful(Right(Some(sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers))))
                 )
               }
 
@@ -1138,10 +1140,10 @@ class CanTheyUseOurServiceControllerSpec
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(
-                  Future.successful(Right(Some(sessionDataWithIndividualTriageAnswers(requiredPreviousAnswers))))
+                  Future.successful(Right(Some(sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers))))
                 )
                 mockStoreSession(
-                  sessionDataWithIndividualTriageAnswers(
+                  sessionDataWithStartingNewDraftReturn(
                     updateCurrentIncompleteAnswer(requiredPreviousAnswers, Some(validValue))
                   )
                 )(Future.successful(Left(Error(""))))
@@ -1160,7 +1162,7 @@ class CanTheyUseOurServiceControllerSpec
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(
-                  Future.successful(Right(Some(sessionDataWithDraftReturn(requiredPreviousAnswers))))
+                  Future.successful(Right(Some(sessionDataWithFillingOurReturn(requiredPreviousAnswers))))
                 )
                 mockStoreDraftReturn(
                   draftReturn.copy(
@@ -1190,7 +1192,7 @@ class CanTheyUseOurServiceControllerSpec
           s"For:\n form data [${formData.mkString(";")}]\n value '$validValue'\n initialState\n '$initialState'\n updatedState '$updatedState': "
         ) {
           val (currentSession, updatedSession) =
-            sessionDataWithDraftReturn(initialState) -> sessionDataWithDraftReturn(updatedState)
+            sessionDataWithFillingOurReturn(initialState) -> sessionDataWithFillingOurReturn(updatedState)
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1214,7 +1216,7 @@ class CanTheyUseOurServiceControllerSpec
           s"For:\n form data [${formData.mkString(";")}]\n value '$validValue'\n initialState\n '$initialState'\n updatedState '$updatedState': "
         ) {
           val (currentSession, updatedSession) =
-            sessionDataWithIndividualTriageAnswers(initialState) -> sessionDataWithIndividualTriageAnswers(updatedState)
+            sessionDataWithStartingNewDraftReturn(initialState) -> sessionDataWithStartingNewDraftReturn(updatedState)
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1288,7 +1290,7 @@ class CanTheyUseOurServiceControllerSpec
                   Future.successful(
                     Right(
                       Some(
-                        sessionDataWithIndividualTriageAnswers((updatedState))
+                        sessionDataWithStartingNewDraftReturn((updatedState))
                       )
                     )
                   )
@@ -1321,8 +1323,8 @@ class CanTheyUseOurServiceControllerSpec
 
         "that question has not already answered" in {
           List(
-            sessionDataWithIndividualTriageAnswers(setPreviousAnswer(requiredPreviousAnswers, None)),
-            sessionDataWithDraftReturn(setPreviousAnswer(requiredPreviousAnswers, None))
+            sessionDataWithStartingNewDraftReturn(setPreviousAnswer(requiredPreviousAnswers, None)),
+            sessionDataWithFillingOurReturn(setPreviousAnswer(requiredPreviousAnswers, None))
           ).foreach { currentSession =>
             withClue(s"For currentSession $currentSession: ") {
               inSequence {
@@ -1341,8 +1343,8 @@ class CanTheyUseOurServiceControllerSpec
 
     "display the page when no option has been selected before" in {
       List(
-        sessionDataWithIndividualTriageAnswers(requiredPreviousAnswers),
-        sessionDataWithDraftReturn(requiredPreviousAnswers)
+        sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers),
+        sessionDataWithFillingOurReturn(requiredPreviousAnswers)
       ).foreach { currentSession =>
         withClue(s"For currentSession $currentSession: ") {
           inSequence {
@@ -1359,8 +1361,8 @@ class CanTheyUseOurServiceControllerSpec
 
     "display the page when an option has been selected before" in {
       List(
-        sessionDataWithIndividualTriageAnswers(setCurrentAnswer(requiredPreviousAnswers, Some(sampleCurrentAnswer))),
-        sessionDataWithDraftReturn(setCurrentAnswer(requiredPreviousAnswers, Some(sampleCurrentAnswer)))
+        sessionDataWithStartingNewDraftReturn(setCurrentAnswer(requiredPreviousAnswers, Some(sampleCurrentAnswer))),
+        sessionDataWithFillingOurReturn(setCurrentAnswer(requiredPreviousAnswers, Some(sampleCurrentAnswer)))
       ).foreach { currentSession =>
         withClue(s"For currentSession $currentSession: ") {
           inSequence {
@@ -1390,10 +1392,10 @@ class CanTheyUseOurServiceControllerSpec
 
     "display the page when the journey has already been completed" in {
       List(
-        sessionDataWithIndividualTriageAnswers(
+        sessionDataWithStartingNewDraftReturn(
           setCurrentAnswer(completeIndividualTriageAnswers, sampleCurrentAnswer)
         ),
-        sessionDataWithDraftReturn(setCurrentAnswer(completeIndividualTriageAnswers, sampleCurrentAnswer))
+        sessionDataWithFillingOurReturn(setCurrentAnswer(completeIndividualTriageAnswers, sampleCurrentAnswer))
       ).foreach { currentSession =>
         withClue(s"For currentSession $currentSession: ") {
           inSequence {

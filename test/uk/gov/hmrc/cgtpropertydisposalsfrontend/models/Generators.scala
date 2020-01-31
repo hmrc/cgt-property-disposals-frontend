@@ -21,7 +21,7 @@ import java.time.LocalDate
 import org.scalacheck.ScalacheckShapeless._
 import org.scalacheck.{Arbitrary, Gen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, IndividualSupplyingInformation, RegistrationReady}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
@@ -133,6 +133,10 @@ trait JourneyStatusLowerPriorityGen { this: GenUtils =>
   implicit val individualMissingEmailGen: Gen[IndividualMissingEmail] = gen[IndividualMissingEmail]
 
   implicit val registrationReadyGen: Gen[RegistrationReady] = gen[RegistrationReady]
+
+  implicit val startingNewDraftReturnGen: Gen[StartingNewDraftReturn] = gen[StartingNewDraftReturn]
+
+  implicit val fillingOutReturnGen: Gen[FillingOutReturn] = gen[FillingOutReturn]
 
 }
 

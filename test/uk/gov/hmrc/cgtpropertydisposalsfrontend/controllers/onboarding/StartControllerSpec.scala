@@ -38,7 +38,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AgentStatus, AlreadySubscribedWithDifferentGGAccount, NonGovernmentGatewayJourney, RegistrationStatus, Subscribed, SubscriptionStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AgentStatus, AlreadySubscribedWithDifferentGGAccount, FillingOutReturn, NonGovernmentGatewayJourney, RegistrationStatus, StartingNewDraftReturn, Subscribed, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.RetrievedUserType.Individual
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
@@ -50,9 +50,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPa
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, BusinessPartnerRecordResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{NeedMoreDetailsDetails, SubscribedDetails, SubscriptionDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPartnerRecordService, SubscriptionService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -70,13 +72,16 @@ class StartControllerSpec
 
   val mockAuditService = mock[AuditService]
 
+  val mockReturnsService = mock[ReturnsService]
+
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
       bind[BusinessPartnerRecordService].toInstance(mockBprService),
       bind[SubscriptionService].toInstance(mockSubscriptionService),
-      bind[AuditService].toInstance(mockAuditService)
+      bind[AuditService].toInstance(mockAuditService),
+      bind[ReturnsService].toInstance(mockReturnsService)
     )
 
   override lazy val additionalConfig = ivConfig(useRelativeUrls = false)
@@ -105,6 +110,12 @@ class StartControllerSpec
       .expects(cgtReference, *)
       .returning(EitherT(Future.successful(response)))
 
+  def mockGetDraftReturns(cgtReference: CgtReference)(response: Either[Error, List[DraftReturn]]) =
+    (mockReturnsService
+      .getDraftReturns(_: CgtReference)(_: HeaderCarrier))
+      .expects(cgtReference, *)
+      .returning(EitherT.fromEither[Future](response))
+
   def mockSendAuditEvent[A: Writes](event: A, auditType: String, transactionName: String) =
     (mockAuditService
       .sendEvent(_: String, _: A, _: String)(
@@ -132,6 +143,14 @@ class StartControllerSpec
 
       def performAction(rh: Request[AnyContent] = FakeRequest()): Future[Result] =
         controller.start()(rh)
+
+      val cgtReference = sample[CgtReference]
+
+      val cgtEnrolment = Enrolment(
+        CgtEnrolment.key,
+        Seq(EnrolmentIdentifier(CgtEnrolment.cgtReferenceIdentifier, cgtReference.value)),
+        ""
+      )
 
       "the session data indicates the user has already subscribed with a different gg account" must {
 
@@ -762,8 +781,6 @@ class StartControllerSpec
                 ),
                 ggCredId,
                 None,
-                None,
-                None,
                 List.empty
               )
               val session =
@@ -1116,8 +1133,6 @@ class StartControllerSpec
                 ),
                 ggCredId,
                 None,
-                None,
-                None,
                 List.empty
               )
               val session =
@@ -1440,17 +1455,13 @@ class StartControllerSpec
 
       "the user has a CGT enrolment" when {
 
-        val cgtReference = sample[CgtReference]
-        val cgtEnrolment = Enrolment(
-          CgtEnrolment.key,
-          Seq(EnrolmentIdentifier(CgtEnrolment.cgtReferenceIdentifier, cgtReference.value)),
-          ""
-        )
         val subscribedDetails = sample[SubscribedDetails].copy(cgtReference = cgtReference)
+
+        val draftReturns = List(sample[DraftReturn])
 
         val sessionWithSubscribed = SessionData.empty.copy(
           userType      = Some(UserType.Individual),
-          journeyStatus = Some(Subscribed(subscribedDetails, ggCredId, None, None, None, List.empty))
+          journeyStatus = Some(Subscribed(subscribedDetails, ggCredId, None, draftReturns))
         )
 
         "the session data indicates they have subscribed" must {
@@ -1496,6 +1507,25 @@ class StartControllerSpec
               checkIsTechnicalErrorPage(performAction())
             }
 
+            "the call to get draft returns fails" in {
+              inSequence {
+                mockAuthWithAllRetrievals(
+                  ConfidenceLevel.L200,
+                  Some(AffinityGroup.Individual),
+                  None,
+                  None,
+                  None,
+                  Set(cgtEnrolment),
+                  Some(retrievedGGCredId)
+                )
+                mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+                mockGetSubscribedDetails(cgtReference)(Right(subscribedDetails))
+                mockGetDraftReturns(cgtReference)(Left(Error("")))
+              }
+
+              checkIsTechnicalErrorPage(performAction())
+            }
+
             "the session cannot be updated with the subscribed details" in {
               inSequence {
                 mockAuthWithAllRetrievals(
@@ -1509,6 +1539,7 @@ class StartControllerSpec
                 )
                 mockGetSession(Future.successful(Right(Some(SessionData.empty))))
                 mockGetSubscribedDetails(cgtReference)(Right(subscribedDetails))
+                mockGetDraftReturns(cgtReference)(Right(draftReturns))
                 mockStoreSession(sessionWithSubscribed.copy(userType = Some(UserType.Individual)))(
                   Future.successful(Left(Error("")))
                 )
@@ -1533,6 +1564,7 @@ class StartControllerSpec
               )
               mockGetSession(Future.successful(Right(Some(SessionData.empty))))
               mockGetSubscribedDetails(cgtReference)(Right(subscribedDetails))
+              mockGetDraftReturns(cgtReference)(Right(draftReturns))
               mockStoreSession(sessionWithSubscribed.copy(userType = Some(UserType.Individual)))(
                 Future.successful(Right(()))
               )
@@ -1772,6 +1804,67 @@ class StartControllerSpec
 
       }
 
+      "the session data indicates the user was starting a new draft return" must {
+
+        "redirect to the account homepage screen" in {
+          inSequence {
+            mockAuthWithAllRetrievals(
+              ConfidenceLevel.L200,
+              Some(AffinityGroup.Individual),
+              None,
+              None,
+              None,
+              Set(cgtEnrolment),
+              Some(retrievedGGCredId)
+            )
+            mockGetSession(
+              Future.successful(
+                Right(
+                  Some(
+                    SessionData.empty.copy(
+                      journeyStatus = Some(sample[StartingNewDraftReturn])
+                    )
+                  )
+                )
+              )
+            )
+
+            checkIsRedirect(performAction(), controllers.accounts.homepage.routes.HomePageController.homepage())
+          }
+
+        }
+      }
+
+      "the session data indicates the user was filling out a return" must {
+
+        "redirect to the account homepage screen" in {
+          inSequence {
+            mockAuthWithAllRetrievals(
+              ConfidenceLevel.L200,
+              Some(AffinityGroup.Individual),
+              None,
+              None,
+              None,
+              Set(cgtEnrolment),
+              Some(retrievedGGCredId)
+            )
+            mockGetSession(
+              Future.successful(
+                Right(
+                  Some(
+                    SessionData.empty.copy(
+                      journeyStatus = Some(sample[FillingOutReturn])
+                    )
+                  )
+                )
+              )
+            )
+
+            checkIsRedirect(performAction(), controllers.accounts.homepage.routes.HomePageController.homepage())
+          }
+
+        }
+      }
     }
 
     "handling requests to display the need more details page" must {
