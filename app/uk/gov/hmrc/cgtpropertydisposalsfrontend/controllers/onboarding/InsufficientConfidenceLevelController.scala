@@ -166,13 +166,13 @@ class InsufficientConfidenceLevelController @Inject() (
           bprNameMatchService
             .getNumberOfUnsuccessfulAttempts[IndividualNameMatchDetails](insufficientConfidenceLevel.ggCredId)
             .fold(
-              handleNameMatchError, { numberOfUnsuccessfulNameMatchAttempts =>
-                val form = numberOfUnsuccessfulNameMatchAttempts.fold(
-                  InsufficientConfidenceLevelController.sautrAndNameForm
-                )(
-                  InsufficientConfidenceLevelController.sautrAndNameForm.withUnsuccessfulAttemptsError
+              handleNameMatchError, { _ =>
+                Ok(
+                  enterSautrAndNamePage(
+                    InsufficientConfidenceLevelController.sautrAndNameForm,
+                    routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()
+                  )
                 )
-                Ok(enterSautrAndNamePage(form, routes.InsufficientConfidenceLevelController.doYouHaveAnSaUtr()))
               }
             )
 

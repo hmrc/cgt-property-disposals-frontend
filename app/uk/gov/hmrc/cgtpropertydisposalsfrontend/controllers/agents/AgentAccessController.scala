@@ -242,7 +242,7 @@ class AgentAccessController @Inject() (
       ) {
         agentAccessAuditService.sendEvent(
           "agentAccessAttempt",
-          AgentAccessAttempt(agentReferenceNumber, cgtReference, success = true),
+          AgentAccessAttempt(agentReferenceNumber.value, cgtReference.value, success = true),
           "agent-access-attempt"
         )
 
@@ -276,7 +276,7 @@ class AgentAccessController @Inject() (
         case _: InsufficientEnrolments =>
           agentAccessAuditService.sendEvent(
             "agentAccessAttempt",
-            AgentAccessAttempt(agentReferenceNumber, cgtReference, success = false),
+            AgentAccessAttempt(agentReferenceNumber.value, cgtReference.value, success = false),
             "agent-access-attempt"
           )
           BadRequest(
@@ -355,8 +355,8 @@ class AgentAccessController @Inject() (
       agentAccessAuditService.sendEvent(
         "agentVerifierMatchAttempt",
         AgentVerifierMatchAttempt(
-          currentAgentSupplyingClientDetails.agentReferenceNumber,
-          currentVerifierMatchingDetails.clientDetails.cgtReference,
+          currentAgentSupplyingClientDetails.agentReferenceNumber.value,
+          currentVerifierMatchingDetails.clientDetails.cgtReference.value,
           numberOfUnsuccessfulAttempts,
           maxVerifierNameMatchAttempts,
           toEither(submittedVerifier),
