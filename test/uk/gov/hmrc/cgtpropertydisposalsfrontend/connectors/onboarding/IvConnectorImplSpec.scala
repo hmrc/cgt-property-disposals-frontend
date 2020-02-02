@@ -21,16 +21,14 @@ import java.util.UUID
 import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
-import play.api.libs.json.JsString
-import play.api.test.Helpers._
 import play.api.{Configuration, Mode}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.HttpSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.{ConnectorSpec, HttpSupport}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class IvConnectorImplSpec extends WordSpec with Matchers with MockFactory with HttpSupport {
+class IvConnectorImplSpec extends WordSpec with Matchers with MockFactory with HttpSupport with ConnectorSpec {
 
   val config = Configuration(
     ConfigFactory.parseString(
@@ -58,29 +56,10 @@ class IvConnectorImplSpec extends WordSpec with Matchers with MockFactory with H
       val journeyId                  = UUID.randomUUID()
       val expectedUrl                = s"http://host:123/mdtp/journey/journeyId/${journeyId.toString}"
 
-      "do a get http call and return the result" in {
-        List(
-          HttpResponse(200),
-          HttpResponse(200, Some(JsString("hi"))),
-          HttpResponse(500)
-        ).foreach { httpResponse =>
-          withClue(s"For http response [${httpResponse.toString}]") {
-            mockGet(expectedUrl)(Some(httpResponse))
-
-            await(connector.getFailedJourneyStatus(journeyId).value) shouldBe Right(httpResponse)
-          }
-        }
-      }
-
-      "return an error" when {
-
-        "the future fails" in {
-          mockGet(expectedUrl)(None)
-
-          await(connector.getFailedJourneyStatus(journeyId).value).isLeft shouldBe true
-        }
-
-      }
+      behave like connectorBehaviour(
+        mockGet[HttpResponse](expectedUrl),
+        () => connector.getFailedJourneyStatus(journeyId)
+      )
 
     }
 

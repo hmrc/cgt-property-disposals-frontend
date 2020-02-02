@@ -47,7 +47,7 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
 
   val storeDraftReturnUrl: String = s"$baseUrl/draft-return"
 
-  val getDraftReturnsUrl: String = s"$baseUrl/draft-returns"
+  def getDraftReturnsUrl(cgtReference: CgtReference): String = s"$baseUrl/draft-returns/${cgtReference.value}"
 
   override def storeDraftReturn(
     draftReturn: DraftReturn
@@ -66,7 +66,7 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
     EitherT[Future, Error, HttpResponse](
       http
-        .get(getDraftReturnsUrl, Map("cgtRef" -> cgtReference.value))
+        .get(getDraftReturnsUrl(cgtReference))
         .map(Right(_))
         .recover {
           case NonFatal(e) => Left(Error(e))

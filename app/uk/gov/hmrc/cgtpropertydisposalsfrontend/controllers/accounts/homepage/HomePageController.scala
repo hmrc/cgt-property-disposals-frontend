@@ -140,7 +140,6 @@ class HomePageController @Inject() (
   )(withUplift: Boolean)(implicit hc: HeaderCarrier, request: RequestWithSessionData[_]): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((s: SessionData, r: StartingNewDraftReturn)) if withUplift =>
-        // TODO: get draft returns
         upliftToSubscribedAndThen(r, r.subscribedDetails.cgtReference) {
           case (r, draftReturns) =>
             Subscribed(r.subscribedDetails, r.ggCredId, r.agentReferenceNumber, draftReturns)

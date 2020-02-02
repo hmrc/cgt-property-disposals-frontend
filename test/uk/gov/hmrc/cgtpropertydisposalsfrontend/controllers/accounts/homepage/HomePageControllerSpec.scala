@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
 
+import java.util.UUID
+
 import cats.data.EitherT
 import cats.instances.future._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -342,6 +344,70 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
             performAction(),
             controllers.returns.triage.routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting()
           )
+        }
+
+      }
+
+    }
+
+    "handling requests to resume a draft return" must {
+
+      def performAction(id: UUID): Future[Result] = controller.resumeDraftReturn(id)(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(() => performAction(UUID.randomUUID()), {
+        case _: Subscribed => true
+        case _             => false
+      })
+
+      val draftReturn = sample[DraftReturn]
+
+      val subscribed = sample[Subscribed].copy(draftReturns = List(draftReturn))
+
+      val sessionWithSubscribed = SessionData.empty.copy(journeyStatus = Some(subscribed))
+
+      val fillingOutReturn = FillingOutReturn(
+        subscribed.subscribedDetails,
+        subscribed.ggCredId,
+        subscribed.agentReferenceNumber,
+        draftReturn
+      )
+
+      "show an error page" when {
+
+        "no draft return can be found with the given id" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionWithSubscribed))))
+          }
+
+          checkIsTechnicalErrorPage(performAction(UUID.randomUUID()))
+        }
+
+        "there is an error updating the session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionWithSubscribed))))
+            mockStoreSession(SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)))(
+              Future.successful(Left(Error("")))
+            )
+          }
+
+          checkIsTechnicalErrorPage(performAction(draftReturn.id))
+        }
+      }
+
+      "redirect to the task list page" when {
+
+        "a draft return can be found with the given id and the session is successfully updated" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionWithSubscribed))))
+            mockStoreSession(SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)))(
+              Future.successful(Right(()))
+            )
+          }
+
+          checkIsRedirect(performAction(draftReturn.id), controllers.returns.routes.TaskListController.taskList())
         }
 
       }

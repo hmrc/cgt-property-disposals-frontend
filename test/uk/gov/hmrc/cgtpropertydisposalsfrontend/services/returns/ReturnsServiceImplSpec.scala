@@ -20,11 +20,14 @@ import cats.data.EitherT
 import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
+import play.api.libs.json.Json
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.GetDraftReturnResponse
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -40,13 +43,19 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
       .expects(draftReturn, *)
       .returning(EitherT.fromEither[Future](response))
 
+  def mockGetDraftReturns(cgtReference: CgtReference)(response: Either[Error, HttpResponse]) =
+    (mockConnector
+      .getDraftReturns(_: CgtReference)(_: HeaderCarrier))
+      .expects(cgtReference, *)
+      .returning(EitherT.fromEither[Future](response))
+
   val service = new ReturnsServiceImpl(mockConnector)
+
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
   "ReturnsServiceImpl" when {
 
     "handling requests to store draft returns" must {
-
-      implicit val hc: HeaderCarrier = HeaderCarrier()
 
       val draftReturn = sample[DraftReturn]
 
@@ -72,6 +81,40 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
           mockStoreDraftReturn(draftReturn)(Right(HttpResponse(OK)))
 
           await(service.storeDraftReturn(draftReturn).value) shouldBe Right(())
+        }
+
+      }
+
+    }
+
+    "handling requests to get draft returns" must {
+
+      val cgtReference = sample[CgtReference]
+
+      "return an error" when {
+
+        "the http response does not come back with status 200" in {
+          mockGetDraftReturns(cgtReference)(Right(HttpResponse(INTERNAL_SERVER_ERROR)))
+
+          await(service.getDraftReturns(cgtReference).value).isLeft shouldBe true
+        }
+
+        "the http response comes back with status 200 but the body cannot be parsed" in {
+          mockGetDraftReturns(cgtReference)(Left(Error("")))
+
+          await(service.getDraftReturns(cgtReference).value).isLeft shouldBe true
+        }
+
+      }
+
+      "return an ok response" when {
+
+        val draftReturnsResponse = GetDraftReturnResponse(List(sample[DraftReturn]))
+
+        "the http call came back with a 200 and the body can be parsed" in {
+          mockGetDraftReturns(cgtReference)(Right(HttpResponse(OK, Some(Json.toJson(draftReturnsResponse)))))
+
+          await(service.getDraftReturns(cgtReference).value) shouldBe Right(draftReturnsResponse.draftReturns)
         }
 
       }

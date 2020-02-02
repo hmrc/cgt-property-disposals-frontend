@@ -51,10 +51,10 @@ class ReturnsServiceImpl @Inject() (connector: ReturnsConnector)(implicit ec: Ex
   @SuppressWarnings(Array("org.wartremover.warts.Var"))
   var draftReturns: Map[UUID, DraftReturn] = Map.empty
 
-  val test: Boolean = true
+  // TODO: take out
+  val test: Boolean = false
 
   def storeDraftReturn(draftReturn: DraftReturn)(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] =
-    // TODO: put back to original
     if (test) {
       draftReturns = draftReturns.updated(draftReturn.id, draftReturn)
       EitherT.pure[Future, Error](())
