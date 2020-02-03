@@ -203,7 +203,7 @@ class CanTheyUseOurServiceController @Inject() (
         case (currentState, form) =>
           disposalMethodPage(
             form,
-            backLink(currentState, routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting())
+            backLink(currentState, routes.CanTheyUseOurServiceController.howManyProperties())
           )
       }
     )
@@ -219,7 +219,7 @@ class CanTheyUseOurServiceController @Inject() (
           case (currentState, form) =>
             disposalMethodPage(
               form,
-              backLink(currentState, routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting())
+              backLink(currentState, routes.CanTheyUseOurServiceController.howManyProperties())
             )
         },
         updateState = {
