@@ -39,7 +39,7 @@ class SubscriptionAddressControllerSpec
     with RedirectToStartBehaviour {
 
   val subscriptionDetails: SubscriptionDetails =
-    sample[SubscriptionDetails].copy(address = address(1), addressSource = AddressSource.BusinessPartnerRecord)
+    sample[SubscriptionDetails].copy(address = ukAddress(1), addressSource = AddressSource.BusinessPartnerRecord)
 
   val validJourneyStatus = SubscriptionReady(subscriptionDetails, sample[GGCredId])
 

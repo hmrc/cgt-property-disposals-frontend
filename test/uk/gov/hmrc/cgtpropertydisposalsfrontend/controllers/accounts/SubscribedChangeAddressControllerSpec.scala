@@ -43,7 +43,7 @@ class SubscribedChangeAddressControllerSpec
     with RedirectToStartBehaviour {
 
   val subscribedDetails: SubscribedDetails =
-    sample[SubscribedDetails].copy(address = address(1))
+    sample[SubscribedDetails].copy(address = ukAddress(1))
 
   val validJourneyStatus = Subscribed(subscribedDetails, sample[GGCredId], None, List.empty)
 

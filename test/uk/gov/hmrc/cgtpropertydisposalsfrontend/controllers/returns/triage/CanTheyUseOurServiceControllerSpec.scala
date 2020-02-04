@@ -980,7 +980,8 @@ class CanTheyUseOurServiceControllerSpec
 
       val uuid = UUID.randomUUID()
 
-      val newDraftReturn = DraftReturn(uuid, startingNewDraftReturn.subscribedDetails.cgtReference, completeAnswers)
+      val newDraftReturn =
+        DraftReturn(uuid, startingNewDraftReturn.subscribedDetails.cgtReference, completeAnswers, None)
 
       val sessionDataWithNewDraftReturn = SessionData.empty.copy(
         journeyStatus = Some(

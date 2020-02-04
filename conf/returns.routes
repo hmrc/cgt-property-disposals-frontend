@@ -1,3 +1,15 @@
 -> /  triage.Routes
 
+GET  /enter-property-address      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.enterUkAddress()
+POST /enter-property-address      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.enterUkAddressSubmit()
+
+GET  /find-uk-property-address      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.enterPostcode()
+POST /find-uk-property-address      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.enterPostcodeSubmit()
+
+GET  /select-property-address      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.selectAddress()
+POST /select-property-address      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.selectAddressSubmit()
+
+GET  /confirm-property-address      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.checkYourAnswers()
+POST /confirm-property-address      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.checkYourAnswersSubmit()
+
 GET  /task-list        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.TaskListController.taskList()

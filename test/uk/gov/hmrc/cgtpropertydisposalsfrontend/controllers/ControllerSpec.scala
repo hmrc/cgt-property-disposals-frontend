@@ -36,7 +36,7 @@ import scala.reflect.ClassTag
 
 trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with MockFactory {
 
-  val overrideBindings: List[GuiceableModule] = List.empty[GuiceableModule]
+  def overrideBindings: List[GuiceableModule] = List.empty[GuiceableModule]
 
   lazy val additionalConfig = Configuration()
 

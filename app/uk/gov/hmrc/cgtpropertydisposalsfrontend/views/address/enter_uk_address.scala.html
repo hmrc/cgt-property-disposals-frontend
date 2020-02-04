@@ -18,6 +18,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType
 
 @this(
   mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -27,10 +28,11 @@
   errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
   formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
   backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-  accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu
+  accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu,
+  returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(form: Form[UkAddress], backLink: Call, submit: Call, enterPostcode: Call, showAccountMenu: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[UkAddress], backLink: Call, submit: Call, enterPostcode: Call, addressJourneyType: AddressJourneyType)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"address"}
 @line1Key = @{s"${key}-line1"}
@@ -39,11 +41,15 @@
 @line4Key = @{s"${key}-county"}
 @postcodeKey = @{"postcode"}
 
-@title = @{messages("address.uk.title")}
-@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-@menu = {@if(showAccountMenu) { @accountMenu(None) }}
+@title = @{ addressJourneyType match {
+  case AddressJourneyType.Returns => messages("address.uk.returns.title")
+  case _ => messages("address.uk.title")
+}}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = !showAccountMenu, accountMenu = Some(menu)) {
+@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@menu = {@if(addressJourneyType.showAccountMenu()) { @accountMenu(None) }}
+
+@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = !addressJourneyType.showAccountMenu(), accountMenu = Some(menu)) {
 
   @backLinkComponent(backLink)
 
@@ -54,7 +60,7 @@
   @formWrapper(submit, 'novalidate -> "novalidate") {
     <fieldset id="@key">
       <legend>
-        @pageHeading(title, Some(messages(if (showAccountMenu) "account.caption" else "subscription.caption")))
+        @pageHeading(title, Some(messages(addressJourneyType.captionMessageKey())))
       </legend>
       @textInput(
         fieldId = line1Key,
@@ -107,5 +113,7 @@
 
     @submitButton(messages("button.continue"))
   }
+
+  @returnToSummaryLink(addressJourneyType.showReturnToSummaryLink())
 
 }

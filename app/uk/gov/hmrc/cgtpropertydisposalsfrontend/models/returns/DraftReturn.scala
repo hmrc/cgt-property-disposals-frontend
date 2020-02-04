@@ -20,13 +20,21 @@ import java.util.UUID
 
 import cats.Eq
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 
-final case class DraftReturn(id: UUID, cgtReference: CgtReference, triageAnswers: IndividualTriageAnswers)
+final case class DraftReturn(
+  id: UUID,
+  cgtReference: CgtReference,
+  triageAnswers: IndividualTriageAnswers,
+  propertyAddress: Option[UkAddress]
+)
 
 object DraftReturn {
 
   implicit val eq: Eq[DraftReturn] = Eq.fromUniversalEquals[DraftReturn]
+
+  implicit val ukAddressFormat: OFormat[UkAddress] = Json.format[UkAddress]
 
   implicit val format: OFormat[DraftReturn] = Json.format[DraftReturn]
 
