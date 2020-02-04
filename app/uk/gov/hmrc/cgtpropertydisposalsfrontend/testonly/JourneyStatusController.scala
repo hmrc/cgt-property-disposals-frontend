@@ -31,7 +31,7 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{StartingNewDraftReturn, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.IncompleteIndividualTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
@@ -59,39 +59,38 @@ class JourneyStatusController @Inject() (
     with Logging {
 
   def setReturnState(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withSubscribedUser(request) {
+    withStartingNewReturn(request) {
       case (_, _) =>
         Ok(setReturnStatePage(returnStateForm))
     }
   }
 
   def setReturnStateSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withSubscribedUser(request) {
-      case (_, subscribed) =>
-//        returnStateForm
-//          .bindFromRequest()
-//          .fold(
-//            formWithErrors => BadRequest(setReturnStatePage(formWithErrors)), { state =>
-//              updateSession(sessionStore, request)(
-//                _.copy(journeyStatus = Some(subscribed.copy(newReturnTriageAnswers = Some(state))))
-//              ).map {
-//                case Left(e) =>
-//                  logger.warn("Could not update session", e)
-//                  InternalServerError(s"Could not update session: $e")
-//                case Right(_) =>
-//                  Ok("session updated")
-//              }
-//            }
-//          )
-        Ok("")
+    withStartingNewReturn(request) {
+      case (_, newReturn) =>
+        returnStateForm
+          .bindFromRequest()
+          .fold(
+            formWithErrors => BadRequest(setReturnStatePage(formWithErrors)), { state =>
+              updateSession(sessionStore, request)(
+                _.copy(journeyStatus = Some(newReturn.copy(newReturnTriageAnswers = state)))
+              ).map {
+                case Left(e) =>
+                  logger.warn("Could not update session", e)
+                  InternalServerError(s"Could not update session: $e")
+                case Right(_) =>
+                  Ok("session updated")
+              }
+            }
+          )
     }
   }
 
-  private def withSubscribedUser(request: RequestWithSessionData[_])(
-    f: (SessionData, Subscribed) => Future[Result]
+  private def withStartingNewReturn(request: RequestWithSessionData[_])(
+    f: (SessionData, StartingNewDraftReturn) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((s: SessionData, r: Subscribed)) =>
+      case Some((s: SessionData, r: StartingNewDraftReturn)) =>
         f(s, r)
       case _ =>
         BadRequest("User has not subscribed and logged in")
