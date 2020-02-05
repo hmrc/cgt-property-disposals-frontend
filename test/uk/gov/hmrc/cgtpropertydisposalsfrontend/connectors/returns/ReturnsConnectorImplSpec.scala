@@ -14,28 +14,29 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.onboarding
-
-import java.util.UUID
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns
 
 import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
 import play.api.{Configuration, Mode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.{ConnectorSpec, HttpSupport}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class IvConnectorImplSpec extends WordSpec with Matchers with MockFactory with HttpSupport with ConnectorSpec {
+class ReturnsConnectorImplSpec extends WordSpec with Matchers with MockFactory with HttpSupport with ConnectorSpec {
 
   val config = Configuration(
     ConfigFactory.parseString(
       """
         |microservice {
         |  services {
-        |    iv {
+        |    cgt-property-disposals {
         |      protocol = http
         |      host     = host
         |      port     = 123
@@ -46,23 +47,33 @@ class IvConnectorImplSpec extends WordSpec with Matchers with MockFactory with H
     )
   )
 
-  val connector = new IvConnectorImpl(mockHttp, new ServicesConfig(config, new RunMode(config, Mode.Test)))
+  val connector = new ReturnsConnectorImpl(mockHttp, new ServicesConfig(config, new RunMode(config, Mode.Test)))
 
-  "IvConnectorImpl" when {
+  "ReturnsConnectorImpl" when {
 
-    "handling requests to get a failed journey status" must {
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
-      implicit val hc: HeaderCarrier = HeaderCarrier()
-      val journeyId                  = UUID.randomUUID()
-      val expectedUrl                = s"http://host:123/mdtp/journey/journeyId/${journeyId.toString}"
+    "handling requests to store a draft return" must {
+
+      val expectedUrl = s"http://host:123/draft-return"
+      val draftReturn = sample[DraftReturn]
 
       behave like connectorBehaviour(
-        mockGet[HttpResponse](expectedUrl),
-        () => connector.getFailedJourneyStatus(journeyId)
+        mockPost(expectedUrl, Map.empty, draftReturn),
+        () => connector.storeDraftReturn(draftReturn)
       )
+    }
 
+    "handling requests to get a draft returns" must {
+
+      val cgtReference = sample[CgtReference]
+      val expectedUrl  = s"http://host:123/draft-returns/${cgtReference.value}"
+
+      behave like connectorBehaviour(
+        mockGet[HttpResponse](expectedUrl, Map.empty, Map.empty),
+        () => connector.getDraftReturns(cgtReference)
+      )
     }
 
   }
-
 }

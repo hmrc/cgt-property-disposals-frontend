@@ -45,7 +45,7 @@ class SubscribedChangeAddressControllerSpec
   val subscribedDetails: SubscribedDetails =
     sample[SubscribedDetails].copy(address = address(1))
 
-  val validJourneyStatus = Subscribed(subscribedDetails, sample[GGCredId], None, None)
+  val validJourneyStatus = Subscribed(subscribedDetails, sample[GGCredId], None, List.empty)
 
   lazy val controller = instanceOf[SubscribedChangeAddressController]
 

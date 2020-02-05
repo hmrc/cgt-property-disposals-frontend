@@ -1,0 +1,58 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => homeRoutes}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.{routes => triageRoutes}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus
+
+@this(
+        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+        taskLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.taskLink
+)
+
+@(draftReturn: DraftReturn)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+
+@title = @{messages("service.title")}
+@triageState = @{ draftReturn.triageAnswers.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete) }
+
+@mainTemplate(title = title, userType = request.userType) {
+
+  @pageHeading(title)
+
+ <ol class="app-task-list">
+  <li>
+   <h2 class="app-task-list__section">
+    <span class="app-task-list__section-number">
+     1.
+    </span>
+    @messages("triage.caption")
+   </h2>
+   <ul class="app-task-list__items">
+    <li class="app-task-list__item">
+     @taskLink(messages("task-list.triage.link"), triageRoutes.CanTheyUseOurServiceController.checkYourAnswers().url, triageState)
+    </li>
+   </ul>
+  </li>
+ </ol>
+
+  <p><a href="@{homeRoutes.HomePageController.homepage()}">@messages("task-list.save-and-come-back.link")</a></p>
+
+}
+

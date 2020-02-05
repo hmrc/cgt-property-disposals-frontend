@@ -27,8 +27,8 @@ import play.api.data.Forms.{mapping, of}
 import play.api.http.Writeable
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.auth.core.{AuthConnector, AuthorisedFunctions, Enrolment, InsufficientEnrolments}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.EnrolmentConfig._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents.AgentAccessController._
@@ -44,6 +44,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.agents.AgentVerifierMatchRetryStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
@@ -62,6 +63,7 @@ class AgentAccessController @Inject() (
   errorHandler: ErrorHandler,
   agentAccessAuditService: AuditService,
   subscriptionService: SubscriptionService,
+  returnsService: ReturnsService,
   agentVerifierMatchRetryStore: AgentVerifierMatchRetryStore,
   cc: MessagesControllerComponents,
   enterClientsCgtRefPage: views.html.agents.enter_client_cgt_ref,
@@ -197,26 +199,33 @@ class AgentAccessController @Inject() (
   def confirmClientSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withVerifierMatchingDetails {
       case (agentSupplyingClientDetails, verifierMatchingDetails, _) =>
-        if (verifierMatchingDetails.correctVerifierSupplied)
-          updateSession(sessionStore, request)(
-            _.copy(
-              journeyStatus = Some(
-                Subscribed(
-                  verifierMatchingDetails.clientDetails,
-                  agentSupplyingClientDetails.agentGGCredId,
-                  Some(agentSupplyingClientDetails.agentReferenceNumber),
-                  None
+        if (verifierMatchingDetails.correctVerifierSupplied) {
+          val result = for {
+            draftReturns <- returnsService.getDraftReturns(verifierMatchingDetails.clientDetails.cgtReference)
+            _ <- EitherT(
+                  updateSession(sessionStore, request)(
+                    _.copy(
+                      journeyStatus = Some(
+                        Subscribed(
+                          verifierMatchingDetails.clientDetails,
+                          agentSupplyingClientDetails.agentGGCredId,
+                          Some(agentSupplyingClientDetails.agentReferenceNumber),
+                          draftReturns
+                        )
+                      )
+                    )
+                  )
                 )
-              )
-            )
-          ).map {
-            case Left(e) =>
+          } yield ()
+
+          result.fold(
+            { e =>
               logger.warn("Could not update session", e)
               errorHandler.errorResult()
-            case Right(_) =>
-              Redirect(controllers.accounts.homepage.routes.HomePageController.homepage())
-          }
-        else
+            },
+            _ => Redirect(controllers.accounts.homepage.routes.HomePageController.homepage())
+          )
+        } else
           Redirect(enterVerifierCall(verifierMatchingDetails.clientDetails))
     }
   }

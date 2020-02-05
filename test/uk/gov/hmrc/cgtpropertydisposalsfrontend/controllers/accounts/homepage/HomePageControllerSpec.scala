@@ -16,6 +16,10 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
 
+import java.util.UUID
+
+import cats.data.EitherT
+import cats.instances.future._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.Configuration
 import play.api.i18n.MessagesApi
@@ -30,11 +34,17 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.pr
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, Subscribed}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.IncompleteIndividualTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
 trait HomePageControllerSpec
     extends ControllerSpec
@@ -47,21 +57,22 @@ trait HomePageControllerSpec
     "application.router" -> "prod.Routes"
   )
 
+  val mockReturnsService = mock[ReturnsService]
+
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
-      bind[SessionStore].toInstance(mockSessionStore)
+      bind[SessionStore].toInstance(mockSessionStore),
+      bind[ReturnsService].toInstance(mockReturnsService)
     )
 
   val subscribed = sample[Subscribed]
 
-  def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
-    redirectToStartWhenInvalidJourney(
-      performAction, {
-        case _: Subscribed => true
-        case _             => false
-      }
-    )
+  def mockGetDraftReturns(cgtReference: CgtReference)(response: Either[Error, List[DraftReturn]]) =
+    (mockReturnsService
+      .getDraftReturns(_: CgtReference)(_: HeaderCarrier))
+      .expects(cgtReference, *)
+      .returning(EitherT.fromEither[Future](response))
 
 }
 
@@ -83,7 +94,12 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
 
       def performAction(): Future[Result] = controller.homepage()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      behave like redirectToStartWhenInvalidJourney(
+        performAction, {
+          case _: Subscribed | _: StartingNewDraftReturn | _: FillingOutReturn => true
+          case _                                                               => false
+        }
+      )
 
       "display the home page" in {
         forAll { userType: Option[UserType] =>
@@ -146,13 +162,118 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
         )
       }
 
+      val startingNewDraftReturn = StartingNewDraftReturn(
+        subscribed.subscribedDetails,
+        subscribed.ggCredId,
+        subscribed.agentReferenceNumber,
+        sample[IncompleteIndividualTriageAnswers]
+      )
+
+      val fillingOurReturn = FillingOutReturn(
+        subscribed.subscribedDetails,
+        subscribed.ggCredId,
+        subscribed.agentReferenceNumber,
+        sample[DraftReturn]
+      )
+
+      List(startingNewDraftReturn, fillingOurReturn).foreach { journeyStatus =>
+        s"convert a ${journeyStatus.getClass.getSimpleName} to Subscribed journey status" in {
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(
+                Right(
+                  Some(
+                    SessionData.empty.copy(
+                      journeyStatus = Some(journeyStatus),
+                      userType      = Some(UserType.Individual)
+                    )
+                  )
+                )
+              )
+            )
+            mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Right(subscribed.draftReturns))
+            mockStoreSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(subscribed),
+                userType      = Some(UserType.Individual)
+              )
+            )(Future.successful(Right(())))
+          }
+
+          val result = performAction()
+          status(result)          shouldBe OK
+          contentAsString(result) should include(message("account.home.title"))
+        }
+
+        "show an error page" when {
+
+          s"the conversion from ${journeyStatus.getClass.getSimpleName} is unsuccessful" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                Future.successful(
+                  Right(
+                    Some(
+                      SessionData.empty.copy(
+                        journeyStatus = Some(journeyStatus),
+                        userType      = Some(UserType.Individual)
+                      )
+                    )
+                  )
+                )
+              )
+              mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Right(subscribed.draftReturns))
+              mockStoreSession(
+                SessionData.empty.copy(
+                  journeyStatus = Some(subscribed),
+                  userType      = Some(UserType.Individual)
+                )
+              )(Future.successful(Left(Error(""))))
+            }
+
+            checkIsTechnicalErrorPage(performAction())
+          }
+
+          s"the conversion from ${journeyStatus.getClass.getSimpleName} is successful but " +
+            "there is an error getting the draft returns" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                Future.successful(
+                  Right(
+                    Some(
+                      SessionData.empty.copy(
+                        journeyStatus = Some(journeyStatus),
+                        userType      = Some(UserType.Individual)
+                      )
+                    )
+                  )
+                )
+              )
+              mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Left(Error("")))
+            }
+
+            checkIsTechnicalErrorPage(performAction())
+          }
+
+        }
+
+      }
+
     }
 
     "handling requests to start a new return" must {
 
       def performAction(): Future[Result] = controller.startNewReturn()(FakeRequest())
 
-      behave like redirectToStartBehaviour(performAction)
+      redirectToStartWhenInvalidJourney(
+        performAction, {
+          case _: Subscribed => true
+          case _             => false
+        }
+      )
 
       "show an error page" when {
 
@@ -170,6 +291,30 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
             }
           }
         }
+
+        "there is an error updating the session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(Right(Some(subscribedSessionData.copy(userType = Some(UserType.Individual)))))
+            )
+            mockStoreSession(
+              subscribedSessionData.copy(
+                journeyStatus = Some(
+                  StartingNewDraftReturn(
+                    subscribed.subscribedDetails,
+                    subscribed.ggCredId,
+                    subscribed.agentReferenceNumber,
+                    IncompleteIndividualTriageAnswers.empty
+                  )
+                ),
+                userType = Some(UserType.Individual)
+              )
+            )(Future.successful(Left(Error(""))))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
       }
 
       "redirect to the who is the individual reporting for page" when {
@@ -180,12 +325,89 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
             mockGetSession(
               Future.successful(Right(Some(subscribedSessionData.copy(userType = Some(UserType.Individual)))))
             )
+            mockStoreSession(
+              subscribedSessionData.copy(
+                journeyStatus = Some(
+                  StartingNewDraftReturn(
+                    subscribed.subscribedDetails,
+                    subscribed.ggCredId,
+                    subscribed.agentReferenceNumber,
+                    IncompleteIndividualTriageAnswers.empty
+                  )
+                ),
+                userType = Some(UserType.Individual)
+              )
+            )(Future.successful(Right(())))
           }
 
           checkIsRedirect(
             performAction(),
             controllers.returns.triage.routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting()
           )
+        }
+
+      }
+
+    }
+
+    "handling requests to resume a draft return" must {
+
+      def performAction(id: UUID): Future[Result] = controller.resumeDraftReturn(id)(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(() => performAction(UUID.randomUUID()), {
+        case _: Subscribed => true
+        case _             => false
+      })
+
+      val draftReturn = sample[DraftReturn]
+
+      val subscribed = sample[Subscribed].copy(draftReturns = List(draftReturn))
+
+      val sessionWithSubscribed = SessionData.empty.copy(journeyStatus = Some(subscribed))
+
+      val fillingOutReturn = FillingOutReturn(
+        subscribed.subscribedDetails,
+        subscribed.ggCredId,
+        subscribed.agentReferenceNumber,
+        draftReturn
+      )
+
+      "show an error page" when {
+
+        "no draft return can be found with the given id" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionWithSubscribed))))
+          }
+
+          checkIsTechnicalErrorPage(performAction(UUID.randomUUID()))
+        }
+
+        "there is an error updating the session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionWithSubscribed))))
+            mockStoreSession(SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)))(
+              Future.successful(Left(Error("")))
+            )
+          }
+
+          checkIsTechnicalErrorPage(performAction(draftReturn.id))
+        }
+      }
+
+      "redirect to the task list page" when {
+
+        "a draft return can be found with the given id and the session is successfully updated" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionWithSubscribed))))
+            mockStoreSession(SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)))(
+              Future.successful(Right(()))
+            )
+          }
+
+          checkIsRedirect(performAction(draftReturn.id), controllers.returns.routes.TaskListController.taskList())
         }
 
       }
@@ -205,6 +427,14 @@ class PrivateBetaHomePageControllerSpec extends HomePageControllerSpec {
   lazy val controller = instanceOf[PrivateBetaHomePageController]
 
   implicit val messagesApi: MessagesApi = controller.messagesApi
+
+  def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
+    redirectToStartWhenInvalidJourney(
+      performAction, {
+        case _: Subscribed => true
+        case _             => false
+      }
+    )
 
   "The HomePage Controller" when {
 

@@ -21,7 +21,7 @@ import java.time.LocalDate
 import org.scalacheck.ScalacheckShapeless._
 import org.scalacheck.{Arbitrary, Gen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, IndividualSupplyingInformation, RegistrationReady}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
@@ -34,7 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessP
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscribedUpdateDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.{CompleteIndividualTriageAnswers, IncompleteIndividualTriageAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompletionDate, DisposalDate, IndividualTriageAnswers, IndividualUserType, NumberOfProperties}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompletionDate, DisposalDate, DraftReturn, IndividualTriageAnswers, IndividualUserType, NumberOfProperties}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanNotifyResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanServiceResponse.{UpscanNotifyEvent, UpscanResponse}
 
@@ -52,7 +52,8 @@ object Generators
     with VerifierMatchGen
     with UserTypeGen
     with UpscanGen
-    with TriageQuestionsGen {
+    with TriageQuestionsGen
+    with ReturnGen {
 
   def sample[A](implicit gen: Gen[A]): A =
     gen.sample.getOrElse(sys.error(s"Could not generate instance with $gen"))
@@ -132,6 +133,10 @@ trait JourneyStatusLowerPriorityGen { this: GenUtils =>
   implicit val individualMissingEmailGen: Gen[IndividualMissingEmail] = gen[IndividualMissingEmail]
 
   implicit val registrationReadyGen: Gen[RegistrationReady] = gen[RegistrationReady]
+
+  implicit val startingNewDraftReturnGen: Gen[StartingNewDraftReturn] = gen[StartingNewDraftReturn]
+
+  implicit val fillingOutReturnGen: Gen[FillingOutReturn] = gen[FillingOutReturn]
 
 }
 
@@ -222,5 +227,11 @@ trait TriageQuestionsGen { this: GenUtils =>
   implicit val disposalDateGen: Gen[DisposalDate] = gen[DisposalDate]
 
   implicit val completionDateGen: Gen[CompletionDate] = gen[CompletionDate]
+
+}
+
+trait ReturnGen { this: GenUtils =>
+
+  implicit val draftReturnGen: Gen[DraftReturn] = gen[DraftReturn]
 
 }

@@ -14,8 +14,6 @@
  * limitations under the License.
  *@
 
-@import java.time.LocalDate
-
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
@@ -28,10 +26,11 @@ submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.sub
 errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
 formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
 dateInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.date_input,
-backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
+backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(form: Form[CompletionDate], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(form: Form[CompletionDate], backLink: Call, displayReturnToSummaryLink: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"completionDate"}
 @hasErrors = @{form.hasErrors}
@@ -61,4 +60,7 @@ backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.component
   <p>@Html(messages("completionDate.link", viewConfig.completionDateHelp))</p>
   @submitButton(messages("button.continue"))
  }
+
+  @returnToSummaryLink(displayReturnToSummaryLink)
+
 }

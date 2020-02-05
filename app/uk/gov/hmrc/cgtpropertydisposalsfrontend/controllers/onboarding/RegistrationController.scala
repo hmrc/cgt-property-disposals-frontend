@@ -246,7 +246,7 @@ class RegistrationController @Inject() (
                           ),
                           ggCredId,
                           None,
-                          None
+                          List.empty
                         )
                       )
                     )

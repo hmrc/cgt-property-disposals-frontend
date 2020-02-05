@@ -25,7 +25,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscriptionDetails}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, IndividualTriageAnswers}
 
 sealed trait JourneyStatus extends Product with Serializable
 
@@ -69,7 +69,21 @@ object JourneyStatus {
     subscribedDetails: SubscribedDetails,
     ggCredId: GGCredId,
     agentReferenceNumber: Option[AgentReferenceNumber],
-    individualTriageAnswers: Option[IndividualTriageAnswers]
+    draftReturns: List[DraftReturn]
+  ) extends JourneyStatus
+
+  final case class StartingNewDraftReturn(
+    subscribedDetails: SubscribedDetails,
+    ggCredId: GGCredId,
+    agentReferenceNumber: Option[AgentReferenceNumber],
+    newReturnTriageAnswers: IndividualTriageAnswers
+  ) extends JourneyStatus
+
+  final case class FillingOutReturn(
+    subscribedDetails: SubscribedDetails,
+    ggCredId: GGCredId,
+    agentReferenceNumber: Option[AgentReferenceNumber],
+    draftReturn: DraftReturn
   ) extends JourneyStatus
 
   final case class AlreadySubscribedWithDifferentGGAccount(ggCredId: GGCredId, cgtReference: Option[CgtReference])

@@ -19,26 +19,29 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.onboarding
 import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
-import play.api.libs.json.{JsString, Json}
-import play.api.test.Helpers._
+import play.api.libs.json.Json
 import play.api.{Configuration, Mode}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.HttpSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.{ConnectorSpec, HttpSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TelephoneNumber}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TelephoneNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscribedUpdateDetails, SubscriptionDetails}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
-class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with MockFactory with HttpSupport {
+class CGTPropertyDisposalsConnectorImplSpec
+    extends WordSpec
+    with Matchers
+    with MockFactory
+    with HttpSupport
+    with ConnectorSpec {
 
   val config = Configuration(
     ConfigFactory.parseString(
@@ -62,35 +65,6 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
   "CGTPropertyDisposalsConnectorImpl" when {
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
-
-    def commonBehaviour(
-      performAction: () => Future[Either[Error, HttpResponse]],
-      mockActions: Option[HttpResponse] => Unit
-    ): Unit = {
-      "do a http call and return the result" in {
-        List(
-          HttpResponse(204),
-          HttpResponse(200, Some(JsString("hi"))),
-          HttpResponse(500)
-        ).foreach { httpResponse =>
-          withClue(s"For http response [${httpResponse.toString}]") {
-            mockActions(Some(httpResponse))
-
-            await(performAction()) shouldBe Right(httpResponse)
-          }
-        }
-      }
-
-      "return an error" when {
-
-        "the future fails" in {
-          mockActions(None)
-
-          await(performAction()).isLeft shouldBe true
-        }
-
-      }
-    }
 
     "handling request to update to the subscription details" must {
 
@@ -130,9 +104,9 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
 
       val subscribedUpdateDetails = SubscribedUpdateDetails(newSubscribedDetails, previousSubscribedDetails)
 
-      behave like commonBehaviour(
-        () => connector.updateSubscribedDetails(subscribedUpdateDetails).value,
-        mockPut(subscriptionStatusUrl, subscribedUpdateDetails)(_)
+      behave like connectorBehaviour(
+        mockPut(subscriptionStatusUrl, subscribedUpdateDetails)(_),
+        () => connector.updateSubscribedDetails(subscribedUpdateDetails)
       )
     }
 
@@ -140,9 +114,9 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
 
       val subscriptionStatusUrl = "http://host:123/cgt-property-disposals/check-subscription-status"
 
-      behave like commonBehaviour(
-        () => connector.getSubscriptionStatus().value,
-        mockGet(subscriptionStatusUrl, Map.empty)(_)
+      behave like connectorBehaviour(
+        mockGet(subscriptionStatusUrl, Map.empty)(_),
+        () => connector.getSubscriptionStatus()
       )
     }
 
@@ -151,9 +125,9 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
       val bprUrl     = "http://host:123/cgt-property-disposals/business-partner-record"
       val bprRequest = sample[BusinessPartnerRecordRequest]
 
-      behave like commonBehaviour(
-        () => connector.getBusinessPartnerRecord(bprRequest).value,
-        mockPost(bprUrl, Map.empty, Json.toJson(bprRequest))(_)
+      behave like connectorBehaviour(
+        mockPost(bprUrl, Map.empty, Json.toJson(bprRequest))(_),
+        () => connector.getBusinessPartnerRecord(bprRequest)
       )
 
     }
@@ -161,22 +135,22 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
     "handling request to subscribe" must {
       val subscriptionDetails = sample[SubscriptionDetails]
 
-      behave like commonBehaviour(
-        () => connector.subscribe(subscriptionDetails).value,
-        mockPost("http://host:123/cgt-property-disposals/subscription", Map.empty, Json.toJson(subscriptionDetails))(_)
+      behave like connectorBehaviour(
+        mockPost("http://host:123/cgt-property-disposals/subscription", Map.empty, Json.toJson(subscriptionDetails))(_),
+        () => connector.subscribe(subscriptionDetails)
       )
     }
 
     "handling request to register without id" must {
       val registrationDetails = sample[RegistrationDetails]
 
-      behave like commonBehaviour(
-        () => connector.registerWithoutId(registrationDetails).value,
+      behave like connectorBehaviour(
         mockPost(
           "http://host:123/cgt-property-disposals/register-without-id",
           Map.empty,
           Json.toJson(registrationDetails)
-        )(_)
+        )(_),
+        () => connector.registerWithoutId(registrationDetails)
       )
 
     }
@@ -184,12 +158,12 @@ class CGTPropertyDisposalsConnectorImplSpec extends WordSpec with Matchers with 
     "handling request to get subscribed details" must {
       val cgtReference = sample[CgtReference]
 
-      behave like commonBehaviour(
-        () => connector.getSubscribedDetails(cgtReference).value,
+      behave like connectorBehaviour(
         mockGet(
           s"http://host:123/cgt-property-disposals/subscription/${cgtReference.value}",
           Map.empty
-        )(_)
+        )(_),
+        () => connector.getSubscribedDetails(cgtReference)
       )
 
     }

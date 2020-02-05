@@ -43,6 +43,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{NeedMoreDetai
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPartnerRecordService, SubscriptionService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
@@ -62,6 +63,7 @@ class StartController @Inject() (
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   val auditService: AuditService,
+  returnsService: ReturnsService,
   val config: Configuration,
   subscriptionService: SubscriptionService,
   weNeedMoreDetailsPage: views.html.onboarding.we_need_more_details,
@@ -162,6 +164,9 @@ class StartController @Inject() (
 
     case _: AgentStatus.AgentSupplyingClientDetails =>
       Redirect(agents.routes.AgentAccessController.enterClientsCgtRef())
+
+    case _: StartingNewDraftReturn | _: FillingOutReturn =>
+      Redirect(accounts.homepage.routes.HomePageController.homepage())
   }
 
   private def handleRetrievedUserType(
@@ -225,11 +230,12 @@ class StartController @Inject() (
   ): Future[Result] = {
     val result = for {
       subscribedDetails <- subscriptionService.getSubscribedDetails(cgtReference)
+      draftReturns      <- returnsService.getDraftReturns(cgtReference)
       _ <- EitherT(
             updateSession(sessionStore, request)(
               _.copy(
                 userType      = request.authenticatedRequest.userType,
-                journeyStatus = Some(Subscribed(subscribedDetails, ggCredId, None, None))
+                journeyStatus = Some(Subscribed(subscribedDetails, ggCredId, None, draftReturns))
               )
             )
           )

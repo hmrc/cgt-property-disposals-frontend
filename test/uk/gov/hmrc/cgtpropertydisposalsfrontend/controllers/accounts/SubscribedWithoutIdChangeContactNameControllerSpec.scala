@@ -71,7 +71,7 @@ class SubscribedWithoutIdChangeContactNameControllerSpec
     ),
     GGCredId("id"),
     None,
-    None
+    List.empty
   )
 
   override def updateName(name: IndividualName, journey: Subscribed): Subscribed = {

@@ -25,11 +25,11 @@
         errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
         backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-        yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no
-
+        yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no,
+        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(form: Form[Boolean], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(form: Form[Boolean], backLink: Call, displayReturnToSummaryLink: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"wereYouAUKResident"}
 @title = @{messages("wereYouAUKResident.title")}
@@ -58,6 +58,8 @@
 
         @submitButton(messages("button.continue"))
     }
+
+    @returnToSummaryLink(displayReturnToSummaryLink)
 
 }
 
