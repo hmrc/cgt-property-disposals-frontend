@@ -638,7 +638,7 @@ class InsufficientConfidenceLevelControllerSpec
 
           val result = performAction()
           contentAsString(result) should include(message("enterSaUtr.title"))
-          contentAsString(result) should include(message("enterSaUtr.error.notFound", 1, 2))
+          contentAsString(result) should not include (message("enterSaUtr.error.notFound", 1, 2))
         }
 
       }

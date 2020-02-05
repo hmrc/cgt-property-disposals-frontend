@@ -748,7 +748,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
           val result = performAction()
           contentAsString(result) should include(message("enterTrn.title"))
-          contentAsString(result) should include(message("enterTrn.error.notFound", 1, 2))
+          contentAsString(result) should not include (message("enterTrn.error.notFound", 1, 2))
         }
 
       }

@@ -192,13 +192,13 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
           bprNameMatchService
             .getNumberOfUnsuccessfulAttempts[TrustNameMatchDetails](determiningIfOrganisationIsTrust.ggCredId)
             .fold(
-              handleNameMatchError, { numberOfUnsuccessfulNameMatchAttempts =>
-                val form = numberOfUnsuccessfulNameMatchAttempts.fold(
-                  enterTrnAndNameForm
-                )(
-                  enterTrnAndNameForm.withUnsuccessfulAttemptsError
+              handleNameMatchError, { _ =>
+                Ok(
+                  enterTrnAndNamePage(
+                    enterTrnAndNameForm,
+                    routes.DeterminingIfOrganisationIsTrustController.doYouHaveATrn()
+                  )
                 )
-                Ok(enterTrnAndNamePage(form, routes.DeterminingIfOrganisationIsTrustController.doYouHaveATrn()))
               }
             )
         case _ => Redirect(controllers.routes.StartController.start())
