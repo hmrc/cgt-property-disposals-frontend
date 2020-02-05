@@ -66,6 +66,11 @@
      ) (_ => returns.address.routes.PropertyAddressController.checkYourAnswers().url), propertyAddressState)
     </li>
    </ul>
+   <ul class="app-task-list__items">
+    <li class="app-task-list__item">
+    @taskLink(messages("task-list.disposals-details.link"),
+     returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwn().url, TaskListStatus.InProgress)
+   </ul>
   </li>
  </ol>
 
