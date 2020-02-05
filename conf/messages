@@ -561,4 +561,16 @@ date.12=December
 
 returns.return-to-summary-link=Return to summary
 task-list.triage.link=Check if you can use this service
+task-list.provide-details.heading=Provide details
+task-list.enter-property-address.link=Enter property address
 task-list.save-and-come-back.link=Save and come back later
+
+
+returns.property-address.caption=Property address
+enterPostcode.returns.title=Find the address of the UK property you disposed of
+address-select.returns.title=Select the address of the UK property you disposed of
+address.uk.returns.title=Enter the address of the UK property you disposed of
+
+returns.property-address.cya.title=Check your answers
+returns.property-address.cyaLabel.property-address=Property address
+returns.property-address.cyaChange.property-address=your property address

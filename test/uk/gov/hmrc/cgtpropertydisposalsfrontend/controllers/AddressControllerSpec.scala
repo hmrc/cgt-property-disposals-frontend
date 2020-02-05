@@ -31,6 +31,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, Se
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -60,8 +61,8 @@ trait AddressControllerSpec[J <: JourneyStatus]
       .expects(expectedPostcode, filter, *)
       .returning(EitherT.fromEither[Future](result))
 
-  override val overrideBindings: List[GuiceableModule] =
-    List(
+  override def overrideBindings: List[GuiceableModule] =
+    List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
       bind[UKAddressLookupService].toInstance(mockService),
@@ -70,13 +71,13 @@ trait AddressControllerSpec[J <: JourneyStatus]
 
   val postcode = Postcode("AB1 2CD")
 
-  def address(i: Int) =
+  def ukAddress(i: Int): UkAddress =
     UkAddress(s"$i the Street", Some("The Town"), None, None, postcode)
 
   val (addressHead, lastAddress, lastAddressIndex, addresses) = {
-    val head = address(1)
-    val last = address(5)
-    (head, last, 4, head :: ((2 to 4).map(address).toList ::: List(last)))
+    val head = ukAddress(1)
+    val last = ukAddress(5)
+    (head, last, 4, head :: ((2 to 4).map(ukAddress).toList ::: List(last)))
   }
   val addressLookupResult = AddressLookupResult(postcode, None, addresses)
 
@@ -184,6 +185,12 @@ trait AddressControllerSpec[J <: JourneyStatus]
 
   def displayEnterUkAddressPage(performAction: () => Future[Result])(implicit messagesApi: MessagesApi): Unit =
     "display the enter UK address page" when {
+      val expectedTitleMessageKey =
+        controller.addressJourneyType match {
+          case AddressJourneyType.Returns => "address.uk.returns.title"
+          case _                          => "address.uk.title"
+        }
+
       "the endpoint is requested" in {
         val session = SessionData.empty.copy(
           journeyStatus       = Some(validJourneyStatus),
@@ -196,7 +203,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("address.uk.title"))
+        contentAsString(result) should include(message(expectedTitleMessageKey))
       }
     }
 
@@ -310,7 +317,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
       }
     }
 
-    "redirect to check your details page" when {
+    s"redirect to ${continue.url}" when {
       "address has been stored in session" in {
         val newAddress =
           UkAddress("Flat 1", Some("The Street"), Some("The Town"), Some("Countyshire"), Postcode("W1A2HR"))
@@ -496,6 +503,11 @@ trait AddressControllerSpec[J <: JourneyStatus]
 
   def enterPostcodePage(performAction: () => Future[Result])(implicit messagesApi: MessagesApi): Unit =
     "display the enter postcode page" when {
+      val expectedTitleMessageKey =
+        controller.addressJourneyType match {
+          case AddressJourneyType.Returns => "enterPostcode.returns.title"
+          case _                          => "enterPostcode.title"
+        }
 
       "there is no address lookup result in session" in {
         inSequence {
@@ -503,7 +515,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
           mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
         }
 
-        contentAsString(performAction()) should include(message("enterPostcode.title"))
+        contentAsString(performAction()) should include(message(expectedTitleMessageKey))
       }
 
       "there is an address lookup result in session" in {
@@ -518,7 +530,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
         }
 
         val content = contentAsString(performAction())
-        content should include(message("enterPostcode.title"))
+        content should include(message(expectedTitleMessageKey))
         content should include(s"""value="${postcode.value}"""")
       }
 
@@ -748,6 +760,10 @@ trait AddressControllerSpec[J <: JourneyStatus]
     }
 
     "display the select address page" when {
+      val expectedMessageTitleKey = controller.addressJourneyType match {
+        case AddressJourneyType.Returns => "address-select.returns.title"
+        case _                          => "address-select.title"
+      }
 
       "there is an address lookup result in session" in {
         val session = sessionWithValidJourneyStatus.copy(
@@ -761,7 +777,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("address-select.title"))
+        contentAsString(result) should include(message(expectedMessageTitleKey))
       }
 
     }

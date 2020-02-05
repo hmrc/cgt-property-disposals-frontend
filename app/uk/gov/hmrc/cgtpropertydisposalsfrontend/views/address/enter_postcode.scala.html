@@ -18,31 +18,37 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.AddressLookupRequest
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType
 
 @this(
- mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
- pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
- textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
- submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
- errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
- formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
- backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
- accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu
+mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input,
+submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu,
+returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
 @(form: Form[AddressLookupRequest],
         backLink: Call,
         submit: Call,
         enterUkAddress: Call,
-        showAccountMenu: Boolean)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+        addressJourneyType: AddressJourneyType)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"postcode"}
 @postcodeFilterKey = @{"filter"}
-@title = @{messages("enterPostcode.title")}
-@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-@menu = {@if(showAccountMenu) { @accountMenu(None) }}
+@title = @{ addressJourneyType match {
+ case AddressJourneyType.Returns => messages("enterPostcode.returns.title")
+ case _ => messages("enterPostcode.title")
+}}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = !showAccountMenu, accountMenu = Some(menu)) {
+@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@menu = {@if(addressJourneyType.showAccountMenu()) { @accountMenu(None) }}
+
+@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = !addressJourneyType.showAccountMenu(), accountMenu = Some(menu)) {
 
  @backLinkComponent(backLink)
 
@@ -50,7 +56,7 @@
   @errorSummary(form)
  }
 
- @pageHeading(title, Some(messages(if (showAccountMenu) "account.caption" else "subscription.caption")))
+ @pageHeading(title, Some(messages(addressJourneyType.captionMessageKey())))
 
  @formWrapper(submit, 'novalidate -> "novalidate") {
    @textInput(
@@ -79,5 +85,7 @@
 
    @submitButton(messages("button.findAddress"))
  }
+
+  @returnToSummaryLink(addressJourneyType.showReturnToSummaryLink())
 
 }

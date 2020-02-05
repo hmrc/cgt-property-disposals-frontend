@@ -16,8 +16,8 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => homeRoutes}
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.{routes => triageRoutes}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus
 
@@ -31,7 +31,7 @@
 
 @title = @{messages("service.title")}
 @triageState = @{ draftReturn.triageAnswers.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete) }
-
+@propertyAddressState = @{ draftReturn.propertyAddress.fold[TaskListStatus](TaskListStatus.ToDo)(_ => TaskListStatus.Complete) }
 @mainTemplate(title = title, userType = request.userType) {
 
   @pageHeading(title)
@@ -46,13 +46,30 @@
    </h2>
    <ul class="app-task-list__items">
     <li class="app-task-list__item">
-     @taskLink(messages("task-list.triage.link"), triageRoutes.CanTheyUseOurServiceController.checkYourAnswers().url, triageState)
+     @taskLink(messages("task-list.triage.link"), returns.triage.routes.CanTheyUseOurServiceController.checkYourAnswers().url, triageState)
+    </li>
+   </ul>
+  </li>
+
+  <li>
+   <h2 class="app-task-list__section">
+    <span class="app-task-list__section-number">
+     2.
+    </span>
+    @messages("task-list.provide-details.heading")
+   </h2>
+   <ul class="app-task-list__items">
+    <li class="app-task-list__item">
+    @taskLink(messages("task-list.enter-property-address.link"),
+     draftReturn.propertyAddress.fold(
+       returns.address.routes.PropertyAddressController.enterPostcode().url
+     ) (_ => returns.address.routes.PropertyAddressController.checkYourAnswers().url), propertyAddressState)
     </li>
    </ul>
   </li>
  </ol>
 
-  <p><a href="@{homeRoutes.HomePageController.homepage()}">@messages("task-list.save-and-come-back.link")</a></p>
+  <p><a href="@{accounts.homepage.routes.HomePageController.homepage()}">@messages("task-list.save-and-come-back.link")</a></p>
 
 }
 

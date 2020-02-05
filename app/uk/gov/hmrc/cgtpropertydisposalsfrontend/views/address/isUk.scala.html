@@ -16,6 +16,7 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType
 
 @this(
  mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -28,14 +29,14 @@
  accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu
 )
 
-@(form: Form[Boolean], backLink: Call, submit: Call, showAccountMenu: Boolean)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[Boolean], backLink: Call, submit: Call, addressJourneyType: AddressJourneyType)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"isUk"}
 @title = @{messages("subscription.isUk.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-@menu = {@if(showAccountMenu) { @accountMenu(None) }}
+@menu = {@if(addressJourneyType.showAccountMenu()) { @accountMenu(None) }}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = !showAccountMenu, accountMenu = Some(menu)) {
+@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = !addressJourneyType.showAccountMenu(), accountMenu = Some(menu)) {
   @backLinkComponent(backLink)
 
   @if(hasErrors) {
@@ -45,7 +46,7 @@
   @formWrapper(submit, 'novalidate -> "novalidate") {
    @yesNo(
     fieldId = key,
-    label = pageHeading(title, Some(messages(if (showAccountMenu) "account.caption" else "subscription.caption"))),
+    label = pageHeading(title, Some(messages(addressJourneyType.captionMessageKey()))),
     labelAsHeading = true,
     errorKey = form.error(key).map(e => e.message),
     hasErrors = hasErrors,

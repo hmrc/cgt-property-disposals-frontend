@@ -484,7 +484,12 @@ class CanTheyUseOurServiceController @Inject() (
 
             def toFillingOurNewReturn(startingNewDraftReturn: StartingNewDraftReturn): Future[Result] = {
               val newDraftReturn =
-                DraftReturn(uuidGenerator.nextId(), startingNewDraftReturn.subscribedDetails.cgtReference, complete)
+                DraftReturn(
+                  uuidGenerator.nextId(),
+                  startingNewDraftReturn.subscribedDetails.cgtReference,
+                  complete,
+                  None
+                )
               val result = for {
                 _ <- returnsService.storeDraftReturn(newDraftReturn)
                 _ <- EitherT(
