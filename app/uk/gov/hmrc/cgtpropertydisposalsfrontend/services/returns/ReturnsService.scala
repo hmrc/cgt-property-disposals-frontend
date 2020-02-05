@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns
 
-import java.util.UUID
-
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.int._
@@ -48,43 +46,28 @@ trait ReturnsService {
 @Singleton
 class ReturnsServiceImpl @Inject() (connector: ReturnsConnector)(implicit ec: ExecutionContext) extends ReturnsService {
 
-  @SuppressWarnings(Array("org.wartremover.warts.Var"))
-  var draftReturns: Map[UUID, DraftReturn] = Map.empty
-
-  // TODO: take out
-  val test: Boolean = false
-
   def storeDraftReturn(draftReturn: DraftReturn)(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] =
-    if (test) {
-      draftReturns = draftReturns.updated(draftReturn.id, draftReturn)
-      EitherT.pure[Future, Error](())
-    } else {
-      connector.storeDraftReturn(draftReturn).subflatMap { httpResponse =>
-        if (httpResponse.status === OK) {
-          Right(())
-        } else {
-          Left(Error(s"Call to store draft return came back with status ${httpResponse.status}}"))
-        }
+    connector.storeDraftReturn(draftReturn).subflatMap { httpResponse =>
+      if (httpResponse.status === OK) {
+        Right(())
+      } else {
+        Left(Error(s"Call to store draft return came back with status ${httpResponse.status}}"))
       }
     }
 
   def getDraftReturns(
     cgtReference: CgtReference
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, List[DraftReturn]] =
-    if (test)
-      EitherT.pure(draftReturns.values.toList)
-    else
-      connector.getDraftReturns(cgtReference).subflatMap { httpResponse =>
-        if (httpResponse.status === OK) {
-          httpResponse
-            .parseJSON[GetDraftReturnResponse]()
-            .leftMap(Error(_))
-            .map(_.draftReturns)
-        } else {
-          Left(Error(s"Call to get draft returns came back with status ${httpResponse.status}}"))
-        }
-
+    connector.getDraftReturns(cgtReference).subflatMap { httpResponse =>
+      if (httpResponse.status === OK) {
+        httpResponse
+          .parseJSON[GetDraftReturnResponse]()
+          .leftMap(Error(_))
+          .map(_.draftReturns)
+      } else {
+        Left(Error(s"Call to get draft returns came back with status ${httpResponse.status}}"))
       }
+    }
 
 }
 
