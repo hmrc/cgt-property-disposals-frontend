@@ -25,11 +25,13 @@ import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms.{bigDecimal, mapping => formMapping}
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationResult}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.http.Writeable
+import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails.DisposalDetailsController._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AmountInPence._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers
@@ -61,66 +63,59 @@ class DisposalDetailsController @Inject() (
     with Logging
     with SessionUpdates {
 
-  def withFillingOutReturn(
+  private def withFillingOutReturnAndDisposalDetailsAnswers(
     request: RequestWithSessionData[_]
-  )(f: (SessionData, FillingOutReturn) => Future[Result]): Future[Result] =
+  )(f: (SessionData, FillingOutReturn, DisposalDetailsAnswers) => Future[Result]): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((s, r: FillingOutReturn)) => f(s, r)
-      case _                              => Redirect(controllers.routes.StartController.start())
+      case Some((s, r: FillingOutReturn)) =>
+        r.draftReturn.disposalDetailsAnswers.fold[Future[Result]](
+          f(s, r, IncompleteDisposalDetailsAnswers.empty)
+        )(f(s, r, _))
+
+      case _ => Redirect(controllers.routes.StartController.start())
     }
 
-  def howMuchDidYouOwn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturn(request) {
-      case (_, r) =>
-        val (backLink, form) = r.draftReturn.disposalDetailsAnswers.fold(
-          controllers.returns.routes.TaskListController.taskList() -> propertySharePercentageForm
-        )(
-          _.fold(
-            incomplete =>
-              controllers.returns.routes.TaskListController.taskList() ->
-                incomplete.percentageOwned.fold(propertySharePercentageForm)(propertySharePercentageForm.fill),
-            complete =>
-              controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers() ->
-                propertySharePercentageForm.fill(complete.percentageOwned)
-          )
-        )
-
-        Ok(howMuchDidYouOwnPage(form, backLink))
-
-    }
-  }
-
-  def howMuchDidYouOwnSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturn(request) {
-      case (_, r) =>
-        lazy val backLink = r.draftReturn.disposalDetailsAnswers.fold(
-          controllers.returns.routes.TaskListController.taskList()
-        )(
-          _.fold(
-            _ => controllers.returns.routes.TaskListController.taskList(),
+  def displayPage[A, P: Writeable, R](form: DisposalDetailsAnswers => Form[A])(
+    page: (Form[A], Call) => P
+  )(
+    requiredPreviousAnswer: DisposalDetailsAnswers => Option[R],
+    redirectToIfNoRequiredPreviousAnswer: Call
+  )(implicit request: RequestWithSessionData[_]): Future[Result] =
+    withFillingOutReturnAndDisposalDetailsAnswers(request) {
+      case (_, _, d) =>
+        if (requiredPreviousAnswer(d).isDefined) {
+          val backLink = d.fold(
+            _ => redirectToIfNoRequiredPreviousAnswer,
             _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
           )
+
+          Ok(page(form(d), backLink))
+        } else {
+          Redirect(redirectToIfNoRequiredPreviousAnswer)
+        }
+
+    }
+
+  def s[A, P: Writeable, R](form: DisposalDetailsAnswers => Form[A])(
+    page: (Form[A], Call) => P
+  )(
+    requiredPreviousAnswer: DisposalDetailsAnswers => Option[R],
+    redirectToIfNoRequiredPreviousAnswer: Call
+  )(updateAnswers: (A, DisposalDetailsAnswers) => DisposalDetailsAnswers, nextPage: DisposalDetailsAnswers => Call)(
+    implicit request: RequestWithSessionData[_]
+  ): Future[Result] =
+    withFillingOutReturnAndDisposalDetailsAnswers(request) {
+      case (_, r, d) =>
+        lazy val backLink = d.fold(
+          _ => redirectToIfNoRequiredPreviousAnswer,
+          _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
         )
-        propertySharePercentageForm
+        form(d)
           .bindFromRequest()
           .fold(
-            formWithErrors => BadRequest(howMuchDidYouOwnPage(formWithErrors, backLink)), { percentage =>
-              val newAnswers =
-                r.draftReturn.disposalDetailsAnswers.fold[DisposalDetailsAnswers](
-                  IncompleteDisposalDetailsAnswers(Some(percentage), None, None)
-                )(
-                  _.fold(
-                    _.copy(percentageOwned = Some(percentage)),
-                    _.copy(percentageOwned = percentage)
-                  )
-                )
-
+            formWithErrors => BadRequest(page(formWithErrors, backLink)), { value =>
+              val newAnswers     = updateAnswers(value, d)
               val newDraftReturn = r.draftReturn.copy(disposalDetailsAnswers = Some(newAnswers))
-
-              lazy val redirectTo = newAnswers.fold(
-                _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice(),
-                _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
-              )
 
               val result = for {
                 _ <- if (newDraftReturn === r.draftReturn) EitherT.pure(())
@@ -135,18 +130,91 @@ class DisposalDetailsController @Inject() (
               result.fold({ e =>
                 logger.warn("Could not update draft return", e)
                 errorHandler.errorResult()
-              }, _ => Redirect(redirectTo))
+              }, _ => Redirect(nextPage(newAnswers)))
             }
           )
     }
+
+  def howMuchDidYouOwn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    displayPage(
+      form = _.fold(
+        _.percentageOwned.fold(propertySharePercentageForm)(propertySharePercentageForm.fill),
+        c => propertySharePercentageForm.fill(c.percentageOwned)
+      )
+    )(
+      page = howMuchDidYouOwnPage(_, _)
+    )(
+      requiredPreviousAnswer               = _ => Some(()),
+      redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
+    )
   }
 
-  def whatWasDisposalPrice(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
-    Ok("")
+  def howMuchDidYouOwnSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    s(
+      form = _.fold(
+        _.percentageOwned.fold(propertySharePercentageForm)(propertySharePercentageForm.fill),
+        c => propertySharePercentageForm.fill(c.percentageOwned)
+      )
+    )(
+      page = howMuchDidYouOwnPage(_, _)
+    )(
+      requiredPreviousAnswer               = _ => Some(()),
+      redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
+    )(
+      updateAnswers = {
+        case (percentage, d) =>
+          d.fold(
+            _.copy(percentageOwned = Some(percentage)),
+            _.copy(percentageOwned = percentage)
+          )
+      },
+      nextPage = _.fold(
+        _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice(),
+        _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
+      )
+    )
   }
 
-  def whatWasDisposalPriceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
-    Ok("")
+  def whatWasDisposalPrice(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    displayPage(
+      form = _.fold(
+        _.disposalPrice.fold(propertyPriceForm)(a => propertyPriceForm.fill(a.inPounds())),
+        c => propertyPriceForm.fill(c.disposalPrice.inPounds())
+      )
+    )(
+      page = disposalPricePage(_, _)
+    )(
+      requiredPreviousAnswer = _.fold(_.percentageOwned, c => Some(c.percentageOwned)),
+      redirectToIfNoRequiredPreviousAnswer =
+        controllers.returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwn()
+    )
+  }
+
+  def whatWasDisposalPriceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    s(
+      form = _.fold(
+        _.disposalPrice.fold(propertyPriceForm)(a => propertyPriceForm.fill(a.inPounds())),
+        c => propertyPriceForm.fill(c.disposalPrice.inPounds())
+      )
+    )(
+      page = disposalPricePage(_, _)
+    )(
+      requiredPreviousAnswer = _.fold(_.percentageOwned, c => Some(c.percentageOwned)),
+      redirectToIfNoRequiredPreviousAnswer =
+        controllers.returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwn()
+    )(
+      updateAnswers = {
+        case (price, d) =>
+          d.fold(
+            _.copy(disposalPrice = Some(fromPounds(price))),
+            _.copy(disposalPrice = fromPounds(price))
+          )
+      },
+      nextPage = _.fold(
+        _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWereDisposalFees(),
+        _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
+      )
+    )
   }
 
   def whatWereDisposalFees(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
@@ -168,13 +236,13 @@ class DisposalDetailsController @Inject() (
 
 object DisposalDetailsController {
 
-  val propertySharePercentageForm: Form[Double] = {
-    def numberHasMoreThanNDecimalPlaces(d: BigDecimal, n: Int): Boolean =
-      d.toString.split('.').toList match {
-        case _ :: decimals :: _ => decimals.length() > n
-        case _                  => false
-      }
+  def numberHasMoreThanNDecimalPlaces(d: BigDecimal, n: Int): Boolean =
+    d.toString.split('.').toList match {
+      case _ :: decimals :: _ => decimals.length() > n
+      case _                  => false
+    }
 
+  val propertySharePercentageForm: Form[Double] = {
     def validatePercentage(d: BigDecimal): ValidationResult =
       if (d > 100) Invalid("error.tooLarge")
       else if (d < 0) Invalid("error.tooSmall")
@@ -185,12 +253,32 @@ object DisposalDetailsController {
       formMapping(
         "propertySharePercentage" ->
           bigDecimal
-            .verifying(Constraint(validatePercentage(_)))
+            .verifying(Constraint[BigDecimal](validatePercentage(_)))
             .transform[Double](_.toDouble, BigDecimal(_))
       )(identity)(Some(_))
     )
   }
 
   implicit val fillingOutReturnEq: Eq[FillingOutReturn] = Eq.fromUniversalEquals
+
+  val propertyPriceForm: Form[Double] = {
+
+    def validatePercentage(d: BigDecimal): ValidationResult =
+      // TODO: find out actual max value
+      if (d > 100) Invalid("error.tooLarge")
+      // TODO: is 0 valid?
+      else if (d < 0) Invalid("error.tooSmall")
+      else if (numberHasMoreThanNDecimalPlaces(d, 2)) Invalid("error.tooManyDecimals")
+      else Valid
+
+    Form(
+      formMapping(
+        "propertyPrice" ->
+          bigDecimal
+            .verifying(Constraint[BigDecimal](validatePercentage(_)))
+            .transform[Double](_.toDouble, BigDecimal(_))
+      )(identity)(Some(_))
+    )
+  }
 
 }

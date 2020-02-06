@@ -23,6 +23,12 @@ final case class AmountInPence(value: Long)
 
 object AmountInPence {
 
+  def fromPounds(amount: Double): AmountInPence = AmountInPence((amount * 100d).toLong)
+
+  implicit class AmountInPenceOps(private val a: AmountInPence) extends AnyVal {
+    def inPounds(): Double = a.value / 100d
+  }
+
   implicit val format: Format[AmountInPence] =
     implicitly[Format[Long]].inmap(AmountInPence(_), _.value)
 
