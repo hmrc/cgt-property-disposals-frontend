@@ -19,11 +19,14 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldet
 import cats.Eq
 import cats.data.EitherT
 import cats.instances.future._
+import cats.instances.int._
+import cats.syntax.either._
 import cats.syntax.eq._
 import com.google.inject.Inject
 import play.api.Configuration
-import play.api.data.Form
-import play.api.data.Forms.{bigDecimal, mapping => formMapping}
+import play.api.data.{Form, FormError}
+import play.api.data.Forms.{bigDecimal, mapping => formMapping, of}
+import play.api.data.format.Formatter
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationResult}
 import play.api.http.Writeable
 import play.api.mvc._
@@ -34,8 +37,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldeta
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AmountInPence._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDetailsAnswers, ShareOfProperty}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.IncompleteDisposalDetailsAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ShareOfProperty.{Full, Half}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
@@ -44,6 +48,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 class DisposalDetailsController @Inject() (
   val authenticatedAction: AuthenticatedAction,
@@ -138,8 +143,8 @@ class DisposalDetailsController @Inject() (
   def howMuchDidYouOwn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     displayPage(
       form = _.fold(
-        _.percentageOwned.fold(propertySharePercentageForm)(propertySharePercentageForm.fill),
-        c => propertySharePercentageForm.fill(c.percentageOwned)
+        _.shareOfProperty.fold(shareOfPropertyForm)(shareOfPropertyForm.fill),
+        c => shareOfPropertyForm.fill(c.shareOfProperty)
       )
     )(
       page = howMuchDidYouOwnPage(_, _)
@@ -152,8 +157,8 @@ class DisposalDetailsController @Inject() (
   def howMuchDidYouOwnSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     s(
       form = _.fold(
-        _.percentageOwned.fold(propertySharePercentageForm)(propertySharePercentageForm.fill),
-        c => propertySharePercentageForm.fill(c.percentageOwned)
+        _.shareOfProperty.fold(shareOfPropertyForm)(shareOfPropertyForm.fill),
+        c => shareOfPropertyForm.fill(c.shareOfProperty)
       )
     )(
       page = howMuchDidYouOwnPage(_, _)
@@ -164,8 +169,8 @@ class DisposalDetailsController @Inject() (
       updateAnswers = {
         case (percentage, d) =>
           d.fold(
-            _.copy(percentageOwned = Some(percentage)),
-            _.copy(percentageOwned = percentage)
+            _.copy(shareOfProperty = Some(percentage)),
+            _.copy(shareOfProperty = percentage)
           )
       },
       nextPage = _.fold(
@@ -184,7 +189,7 @@ class DisposalDetailsController @Inject() (
     )(
       page = disposalPricePage(_, _)
     )(
-      requiredPreviousAnswer = _.fold(_.percentageOwned, c => Some(c.percentageOwned)),
+      requiredPreviousAnswer = _.fold(_.shareOfProperty, c => Some(c.shareOfProperty)),
       redirectToIfNoRequiredPreviousAnswer =
         controllers.returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwn()
     )
@@ -199,7 +204,7 @@ class DisposalDetailsController @Inject() (
     )(
       page = disposalPricePage(_, _)
     )(
-      requiredPreviousAnswer = _.fold(_.percentageOwned, c => Some(c.percentageOwned)),
+      requiredPreviousAnswer = _.fold(_.shareOfProperty, c => Some(c.shareOfProperty)),
       redirectToIfNoRequiredPreviousAnswer =
         controllers.returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwn()
     )(
@@ -242,19 +247,50 @@ object DisposalDetailsController {
       case _                  => false
     }
 
-  val propertySharePercentageForm: Form[Double] = {
-    def validatePercentage(d: BigDecimal): ValidationResult =
-      if (d > 100) Invalid("error.tooLarge")
-      else if (d < 0) Invalid("error.tooSmall")
-      else if (numberHasMoreThanNDecimalPlaces(d, 2)) Invalid("error.tooManyDecimals")
-      else Valid
+  val shareOfPropertyForm: Form[ShareOfProperty] = {
+
+    val formatter: Formatter[ShareOfProperty] = new Formatter[ShareOfProperty] {
+      def validatePercentage(d: BigDecimal, key: String): Either[FormError, ShareOfProperty.Other] =
+        if (d > 100) Left(FormError(key, "error.tooLarge"))
+        else if (d < 0) Left(FormError(key, "error.tooSmall"))
+        else if (numberHasMoreThanNDecimalPlaces(d, 2)) Left(FormError(key, "error.tooManyDecimals"))
+        else Right(ShareOfProperty.Other(d.toDouble))
+
+      def readValue[A](key: String, data: Map[String, String], f: String => A): Either[FormError, A] =
+        data
+          .get(key)
+          .map(_.trim())
+          .filter(_.nonEmpty)
+          .fold[Either[FormError, A]](Left(FormError(key, "error.required"))) { stringValue =>
+            Either
+              .fromTry(Try(f(stringValue)))
+              .leftMap(_ => FormError(key, "error.invalid"))
+          }
+
+      override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], ShareOfProperty] = {
+        val result = readValue("shareOfProperty", data, _.toInt)
+          .flatMap { i =>
+            if (i === 0)
+              Right(Full)
+            else if (i === 1)
+              Right(Half)
+            else if (i === 2) {
+              readValue("percentageShare", data, BigDecimal(_))
+                .flatMap(validatePercentage(_, "percentageShare"))
+            } else {
+              Left(FormError(key, "error.invalid"))
+            }
+          }
+
+        result.leftMap(Seq(_))
+      }
+
+      override def unbind(key: String, value: ShareOfProperty): Map[String, String] = ???
+    }
 
     Form(
       formMapping(
-        "propertySharePercentage" ->
-          bigDecimal
-            .verifying(Constraint[BigDecimal](validatePercentage(_)))
-            .transform[Double](_.toDouble, BigDecimal(_))
+        "" -> of(formatter)
       )(identity)(Some(_))
     )
   }

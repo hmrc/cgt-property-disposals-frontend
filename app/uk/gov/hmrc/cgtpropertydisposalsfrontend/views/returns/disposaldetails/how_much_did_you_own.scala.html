@@ -17,6 +17,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ShareOfProperty
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 
 @this(
@@ -30,7 +31,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input
 )
 
-@(form: Form[Double], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[ShareOfProperty], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 @key = @{ "propertySharePercentage" }
 @title = @{messages("propertyShare.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}

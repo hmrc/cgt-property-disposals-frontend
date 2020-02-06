@@ -25,7 +25,7 @@ sealed trait DisposalDetailsAnswers extends Product with Serializable
 object DisposalDetailsAnswers {
 
   final case class IncompleteDisposalDetailsAnswers(
-    percentageOwned: Option[Double],
+    shareOfProperty: Option[ShareOfProperty],
     disposalPrice: Option[AmountInPence],
     disposalFees: Option[AmountInPence]
   ) extends DisposalDetailsAnswers
@@ -35,7 +35,7 @@ object DisposalDetailsAnswers {
   }
 
   final case class CompleteDisposalDetailsAnswers(
-    percentageOwned: Double,
+    shareOfProperty: ShareOfProperty,
     disposalPrice: AmountInPence,
     disposalFees: AmountInPence
   ) extends DisposalDetailsAnswers
