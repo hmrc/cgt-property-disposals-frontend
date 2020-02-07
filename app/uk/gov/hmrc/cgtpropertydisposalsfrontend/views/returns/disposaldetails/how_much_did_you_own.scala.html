@@ -55,10 +55,13 @@
       value = form.data.getOrElse(percentageShareKey, ""),
       errorKey = form.error(percentageShareKey).map(e => e.message),
       hasErrors = form.error(percentageShareKey).nonEmpty,
-      inputType = Some("number"),
       label = Html(messages(s"$percentageShareKey.label")),
       helpText = None,
-      autoComplete = AutoCompleteType.On
+      autoComplete = AutoCompleteType.On,
+      inputClass = Some("small"),
+      aspect = "right",
+      unit = "%",
+      assistiveText = "do not enter the percentage sign"
     ))
   )
 )}

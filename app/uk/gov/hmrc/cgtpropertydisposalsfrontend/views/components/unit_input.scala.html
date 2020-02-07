@@ -26,11 +26,13 @@
         value: String,
         hasErrors: Boolean,
         autoComplete: AutoCompleteType,
+        unit: String = "£",
+        aspect: String = "left",
+        assistiveText: String = "do not enter the pound sign",
         helpText: Option[Html] = None,
         labelAsHeading: Boolean = false,
         errorKey: Option[String],
         extraContent: Option[Html] = None,
-        inputType: Option[String] = Some("text"),
         inputClass: Option[String] = None,
         labelClass: Option[String] = None
 )(implicit messages: Messages)
@@ -39,13 +41,14 @@
 
 @classes = @{if(hasErrors) "form-group form-group-error" else "form-group" }
 @inputClasses = @{if(hasErrors) {
-  classBuilder(Some("form-control"), Some("form-control-error"), inputClass)
+  classBuilder(Some("form-control"), Some("form-control-error"))
 } else {
-  classBuilder(Some("form-control"), inputClass)
+  classBuilder(Some("form-control"))
 }}
 
 @hintTextKey = @{s"${{fieldId}}-form-hint"}
 @extraContentKey = @{s"${{fieldId}}-extra-content"}
+@assistiveKey = @{s"${{fieldId}}-assistive-text"}
 @errorId = @{s"${{fieldId}}-inline-error"}
 @hintIdWithHintText = @{helpText.map(hintTextKey -> _)}
 @extraContentIdWithContent = @{extraContent.map(extraContentKey -> _)}
@@ -53,7 +56,7 @@
 @labelClasses = @{classBuilder(Some("form-label"), labelClass)}
 
 @describedByKeys = @{
-  List(hintIdWithHintText.map(_._1), extraContentIdWithContent.map(_._1), errorIdWithMessageKey.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
+  List(Some(assistiveKey), hintIdWithHintText.map(_._1), extraContentIdWithContent.map(_._1), errorIdWithMessageKey.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
 
 @fieldLabel = {
   @if(labelAsHeading) {
@@ -68,25 +71,35 @@
 <div class="@classes">
   @fieldLabel
   @extraContentIdWithContent.map { case (id, text) =>
-  <div id="@id">
-    @text
-  </div>
+    <div id="@id">
+      @text
+    </div>
   }
   @hintIdWithHintText.map { case (id, text) =>
-  <span id="@id" class="form-hint">
-    @text
-  </span>
+    <span id="@id" class="form-hint">
+      @text
+    </span>
   }
+
+  <div id="@assistiveKey" class="visuallyhidden">
+    @assistiveText
+  </div>
   @errorIdWithMessageKey.map { case (id, key) =>
     @errorInline(id, messages(s"$fieldId.$key"))
   }
+  <div class="hmcts-currency-input custom-input-wrapper @inputClass @aspect">
+    <div class="hmcts-currency-input__symbol @aspect@if(hasErrors){ form-control--error}" aria-hidden="true">
+      @unit
+    </div>
+    <input
+      value="@value"
+      autocomplete="@autoComplete.value"
+      class="@inputClasses"
+      id="@fieldId"
+      name="@fieldId"
+      type="text"
+      pattern="[0-9]*"
+      @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
+  </div>
 
-  <input
-    class="@inputClasses"
-    id="@fieldId"
-    type="@inputType"
-    name="@fieldId"
-    value="@value"
-    autocomplete="@autoComplete.value"
-    @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
 </div>
