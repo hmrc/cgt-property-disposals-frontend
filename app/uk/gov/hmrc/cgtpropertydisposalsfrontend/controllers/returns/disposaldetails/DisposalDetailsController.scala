@@ -267,16 +267,19 @@ object DisposalDetailsController {
               .leftMap(_ => FormError(key, "error.invalid"))
           }
 
+
+      val (shareOfPropertyKey, percentageKey) = "shareOfProperty" -> "percentageShare"
+
       override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], ShareOfProperty] = {
-        val result = readValue("shareOfProperty", data, _.toInt)
+        val result = readValue(shareOfPropertyKey, data, _.toInt)
           .flatMap { i =>
             if (i === 0)
               Right(Full)
             else if (i === 1)
               Right(Half)
             else if (i === 2) {
-              readValue("percentageShare", data, BigDecimal(_))
-                .flatMap(validatePercentage(_, "percentageShare"))
+              readValue(percentageKey, data, BigDecimal(_))
+                .flatMap(validatePercentage(_, percentageKey))
             } else {
               Left(FormError(key, "error.invalid"))
             }
@@ -285,7 +288,12 @@ object DisposalDetailsController {
         result.leftMap(Seq(_))
       }
 
-      override def unbind(key: String, value: ShareOfProperty): Map[String, String] = ???
+      override def unbind(key: String, value: ShareOfProperty): Map[String, String] =
+        value match {
+          case ShareOfProperty.Full =>  Map(shareOfPropertyKey -> "0")
+          case ShareOfProperty.Half =>Map(shareOfPropertyKey -> "1")
+          case ShareOfProperty.Other(percentageValue) =>Map(shareOfPropertyKey -> "2", percentageKey -> percentageValue.toString.stripSuffix(".0"))
+        }
     }
 
     Form(
