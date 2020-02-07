@@ -34,13 +34,30 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 @(answers: CompleteDisposalDetailsAnswers)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 
-@title = @{messages("returns.property-address.cya.title")}
+@title = @{messages("returns.disposal-details.cya.title")}
 
 @mainTemplate(title = title, userType = request.userType) {
 
-    @pageHeading(title, Some(messages("returns.property-address.caption")))
+    @pageHeading(title, Some(messages("returns.disposal-details.caption")))
 
 
+@cyaSection() {
+@cyaRow(
+messages("propertyShare.title"),
+Html(s"${answers.shareOfProperty.percentageValue.toString}%"),
+Some(cyaChange(messages("disposalDetails.cyaChange.propertyShare"), returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwn().url))
+)
+@cyaRow(
+messages("disposalPrice.title"),
+Html(answers.disposalPrice.inPounds().toString),
+Some(cyaChange(messages("disposalDetails.cyaChange.disposalPrice"), returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice().url))
+)
+@cyaRow(
+messages("disposalFees.title"),
+Html(answers.disposalFees.inPounds().toString),
+Some(cyaChange(messages("disposalDetails.cyaChange.disposalFees"), returns.disposaldetails.routes.DisposalDetailsController.whatWereDisposalFees().url))
+)
+}
 
     @formWrapper(returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
         @submitButton(messages("button.confirmAndContinue"))

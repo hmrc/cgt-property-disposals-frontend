@@ -17,6 +17,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalMethod, ShareOfProperty}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 
 @this(
@@ -30,8 +31,8 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input
 )
 
-@(form: Form[Double], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
-@key = @{ "propertyPrice" }
+@(form: Form[Double], backLink: Call, disposalMethod: DisposalMethod, shareOfProperty: ShareOfProperty)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@key = @{ "disposalPrice" }
 @title = @{messages("disposalPrice.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
@@ -46,15 +47,14 @@ textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_i
 
     @formWrapper(controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPriceSubmit(), 'novalidate -> "novalidate") {
         @textInput(
-        fieldId = key,
-        value = form.data.getOrElse(key, ""),
-        errorKey = form.error(key).map(e => e.message),
-        hasErrors = form.error(key).nonEmpty,
-        inputType = Some("number"),
-        label = Html(messages("propertyPrice.label")),
-        labelClass = Some(" govuk-label--m"),
-        helpText = None,
-        autoComplete = AutoCompleteType.On
+            fieldId = key,
+            value = form.data.getOrElse(key, ""),
+            errorKey = form.error(key).map(e => e.message),
+            hasErrors = form.error(key).nonEmpty,
+            label = Html(messages("disposalPrice.label")),
+            labelClass = Some(" govuk-label--m"),
+            helpText = None,
+            autoComplete = AutoCompleteType.On
         )
         @submitButton(messages("button.continue"))
     }

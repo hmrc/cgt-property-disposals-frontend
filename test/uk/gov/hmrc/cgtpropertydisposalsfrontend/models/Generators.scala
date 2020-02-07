@@ -35,7 +35,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, 
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscribedUpdateDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.{CompleteIndividualTriageAnswers, IncompleteIndividualTriageAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompletionDate, DisposalDate, DraftReturn, IndividualTriageAnswers, IndividualUserType, NumberOfProperties}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompletionDate, DisposalDate, DraftReturn, IndividualTriageAnswers, IndividualUserType, NumberOfProperties, ShareOfProperty}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanNotifyResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanServiceResponse.{UpscanNotifyEvent, UpscanResponse}
 
@@ -55,7 +55,8 @@ object Generators
     with UpscanGen
     with TriageQuestionsGen
     with ReturnGen
-    with DisposalDetailsGen {
+    with DisposalDetailsGen
+    with AmountInPenceGen {
 
   def sample[A](implicit gen: Gen[A]): A =
     gen.sample.getOrElse(sys.error(s"Could not generate instance with $gen"))
@@ -245,4 +246,13 @@ trait DisposalDetailsGen { this: GenUtils =>
 
   implicit val incompleteDisposalDetailsAnswersGen: Gen[IncompleteDisposalDetailsAnswers] =
     gen[IncompleteDisposalDetailsAnswers]
+
+  implicit val shareOfPropertyGen: Gen[ShareOfProperty] = gen[ShareOfProperty]
+
+}
+
+trait AmountInPenceGen { this: GenUtils =>
+
+  implicit val amountInPenceGen: Gen[AmountInPence] = gen[AmountInPence]
+
 }
