@@ -596,7 +596,7 @@ disposalPrice.full-share.gifted-it.title=What was the market value of the proper
 disposalPrice.not-full-share.sold-it.title=How much did you sell your share of the property for?
 disposalPrice.not-full-share.gifted-it.title=What was the market value of your share of the property when you disposed of it?
 
-disposalPrice.extraContent=You’ll be able to enter any selling or improvement costs, like solicitor’s or estate agent’s fees later.
+disposalPrice.helpText=You’ll be able to enter any selling or improvement costs, like solicitor’s or estate agent’s fees later.
 disposalPrice.error.required=Enter how much you sold your share or the property for
 disposalPrice.error.invalid=How much you sold your share of the property for must be an amount of money, like 160,000 or 11,200.45
 disposalPrice.error.tooSmall=How much you sold the property for must be 0 or more
@@ -607,15 +607,11 @@ disposalFees.full-share.sold-it.title=Enter your selling costs when you sold the
 disposalFees.full-share.gifted-it.title=Enter your selling costs when you gave away the property
 disposalFees.not-full-share.sold-it.title=Enter your share of the selling costs when you sold your share of the property
 disposalFees.not-full-share.gifted-it.title=Enter your share of the selling costs when you gave away your share of the property
-
-disposalFees.extraContent=or example, the amount you paid to an estate agent or solicitor.
+disposalFees.helpText=For example, the amount you paid to an estate agent or solicitor.
 disposalFees.error.required=Enter your share of the selling costs when you sold the property
 disposalFees.error.invalid=Your share of the selling costs must be an amount of money, like 1,500 or 7,300.50
-disposalFees.error.tooSmall=Selling costs must be 0 or more 
+disposalFees.error.tooSmall=Selling costs must more than 0
 disposalFees.error.tooLarge=Selling costs must be 50,000,000,000.00 or less 
 disposalFees.error.tooManyDecimals= Selling costs must be 2 decimal places or less, for example 33.33
 
-disposalPrice.title=How much did you sell your share of the property for?
-disposalPrice.helpText=If the ownership of the property was shared, only enter the amount you received for your share. You’ll be able to enter any additional costs later.
-disposalPrice.error.required=Enter how much you sold your share of the property for
-disposalPrice.error.invalid=How much you sold your share of the property for must be an amount of money, like 160,000 or 11,200.45
+returns.disposal-details.cya.title=Check your answers

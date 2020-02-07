@@ -39,7 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutR
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ShareOfProperty.{Full, Half}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDetailsAnswers, DisposalMethod, ShareOfProperty}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, MoneyUtils, NumberUtils, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{MoneyUtils, NumberUtils, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
@@ -348,27 +348,27 @@ class DisposalDetailsController @Inject() (
   }
 
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(f: FillingOutReturn) =>
-        f.draftReturn.disposalDetailsAnswers match {
-          case None | Some(IncompleteDisposalDetailsAnswers(None, _, _)) =>
+    withFillingOutReturnAndDisposalDetailsAnswers(request) {
+      case (_, fillingOutReturn, disposalDetailsAnswers, disposalMethod, _) =>
+        disposalDetailsAnswers match {
+          case IncompleteDisposalDetailsAnswers(None, _, _) =>
             Redirect(routes.DisposalDetailsController.howMuchDidYouOwn())
 
-          case Some(IncompleteDisposalDetailsAnswers(_, None, _)) =>
+          case IncompleteDisposalDetailsAnswers(_, None, _) =>
             Redirect(routes.DisposalDetailsController.whatWasDisposalPrice())
 
-          case Some(IncompleteDisposalDetailsAnswers(_, _, None)) =>
+          case IncompleteDisposalDetailsAnswers(_, _, None) =>
             Redirect(routes.DisposalDetailsController.whatWereDisposalFees())
 
-          case Some(IncompleteDisposalDetailsAnswers(Some(share), Some(price), Some(fees))) =>
+          case IncompleteDisposalDetailsAnswers(Some(share), Some(price), Some(fees)) =>
             val completeAnswers    = CompleteDisposalDetailsAnswers(share, price, fees)
-            val updatedDraftReturn = f.draftReturn.copy(disposalDetailsAnswers = Some(completeAnswers))
+            val updatedDraftReturn = fillingOutReturn.draftReturn.copy(disposalDetailsAnswers = Some(completeAnswers))
 
             val result = for {
               _ <- returnsService.storeDraftReturn(updatedDraftReturn)
               _ <- EitherT(
                     updateSession(sessionStore, request)(
-                      _.copy(journeyStatus = Some(f.copy(draftReturn = updatedDraftReturn)))
+                      _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = updatedDraftReturn)))
                     )
                   )
             } yield ()
@@ -376,10 +376,10 @@ class DisposalDetailsController @Inject() (
             result.fold({ e =>
               logger.warn("Could not update session", e)
               errorHandler.errorResult
-            }, _ => Ok(checkYouAnswers(completeAnswers)))
+            }, _ => Ok(checkYouAnswers(completeAnswers, disposalMethod)))
 
-          case Some(answers: CompleteDisposalDetailsAnswers) =>
-            Ok(checkYouAnswers(answers))
+          case answers: CompleteDisposalDetailsAnswers =>
+            Ok(checkYouAnswers(answers, disposalMethod))
         }
 
       case _ => Redirect(controllers.routes.StartController.start())
