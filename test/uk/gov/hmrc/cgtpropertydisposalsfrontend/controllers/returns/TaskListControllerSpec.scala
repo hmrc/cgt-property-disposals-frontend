@@ -92,8 +92,7 @@ class TaskListControllerSpec
           status(result) shouldBe OK
 
           val doc: Document = parse(contentAsString(result))
-          doc.title shouldBe "Report and pay Capital Gains Tax on UK property - GOV.UK"
-
+          doc.select("h1").text shouldBe messagefromMessageKey("service.title")
           doc.select("li#canTheyUseOurService > a").text should include(messagefromMessageKey("task-list.triage.link"))
           doc.select("li#canTheyUseOurService > a").attr("href") shouldBe triage.routes.CanTheyUseOurServiceController.checkYourAnswers().url
           doc.select("li#canTheyUseOurService > strong").text shouldBe triageState.toString
@@ -140,8 +139,7 @@ class TaskListControllerSpec
           status(result) shouldBe OK
 
           val doc: Document = parse(contentAsString(result))
-          doc.title shouldBe messagefromMessageKey("service.title") + " - GOV.UK"
-
+          doc.select("h1").text shouldBe messagefromMessageKey("service.title")
           doc.select("li#propertyAddress > a").text shouldBe messagefromMessageKey("task-list.enter-property-address.link")
           doc.select("li#propertyAddress > a").attr("href") shouldBe address.routes.PropertyAddressController.enterPostcode().url
           doc.select("li#propertyAddress > strong").text shouldBe TaskListStatus.ToDo.toString
@@ -170,8 +168,7 @@ class TaskListControllerSpec
           status(result) shouldBe OK
 
           val doc: Document = parse(contentAsString(result))
-          doc.title shouldBe "Report and pay Capital Gains Tax on UK property - GOV.UK"
-
+          doc.select("h1").text shouldBe messagefromMessageKey("service.title")
           doc.select("li#propertyAddress > a").text shouldBe messagefromMessageKey("task-list.enter-property-address.link")
           doc.select("li#propertyAddress > a").attr("href") shouldBe address.routes.PropertyAddressController.checkYourAnswers().url
           doc.select("li#propertyAddress > strong").text shouldBe TaskListStatus.Complete.toString
@@ -200,7 +197,8 @@ class TaskListControllerSpec
           status(result) shouldBe OK
 
           val doc: Document = parse(contentAsString(result))
-          doc.select("a#saveAndComeBackLater").attr("href") shouldBe "/capital-gains-tax-uk-property/account-home"
+          doc.select("h1").text shouldBe messagefromMessageKey("service.title")
+          doc.select("a#saveAndComeBackLater").attr("href") shouldBe uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.routes.HomePageController.homepage().url
         }
       }
     }
