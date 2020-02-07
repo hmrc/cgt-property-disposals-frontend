@@ -381,9 +381,6 @@ class DisposalDetailsController @Inject() (
           case answers: CompleteDisposalDetailsAnswers =>
             Ok(checkYouAnswers(answers, disposalMethod))
         }
-
-      case _ => Redirect(controllers.routes.StartController.start())
-
     }
   }
 

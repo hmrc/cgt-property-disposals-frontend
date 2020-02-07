@@ -611,7 +611,7 @@ disposalFees.helpText=For example, the amount you paid to an estate agent or sol
 disposalFees.error.required=Enter your share of the selling costs when you sold the property
 disposalFees.error.invalid=Your share of the selling costs must be an amount of money, like 1,500 or 7,300.50
 disposalFees.error.tooSmall=Selling costs must more than 0
-disposalFees.error.tooLarge=Selling costs must be 50,000,000,000.00 or less 
+disposalFees.error.tooLarge=Selling costs must be 50,000,000,000.00 or less
 disposalFees.error.tooManyDecimals= Selling costs must be 2 decimal places or less, for example 33.33
 
 returns.disposal-details.cya.title=Check your answers

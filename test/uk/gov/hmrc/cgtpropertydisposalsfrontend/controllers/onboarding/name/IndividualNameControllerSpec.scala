@@ -71,7 +71,7 @@ trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidatio
         }
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(messagefromMessageKey("enterName.title"))
+        contentAsString(result) should include(messageFromMessageKey("enterName.title"))
       }
 
       "the endpoint is requested and the user has previously entered a name" in {
@@ -87,7 +87,7 @@ trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidatio
         status(result) shouldBe OK
 
         val content = contentAsString(result)
-        content should include(messagefromMessageKey("enterName.title"))
+        content should include(messageFromMessageKey("enterName.title"))
         content should include(name.firstName)
         content should include(name.lastName)
       }

@@ -99,7 +99,7 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
           mockGetSession(Future.successful(Right(Some(sessionDataWithValidJourneyStatus))))
         }
 
-        contentAsString(performAction()) should include(messagefromMessageKey(titleKey))
+        contentAsString(performAction()) should include(messageFromMessageKey(titleKey))
       }
 
       "there is a BPR in session and there is an email to be verified in session" in {
@@ -114,7 +114,7 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
         }
 
         val result = performAction()
-        contentAsString(result) should include(messagefromMessageKey(titleKey))
+        contentAsString(result) should include(messageFromMessageKey(titleKey))
         contentAsString(result) should include(s"""value="${email.value}"""")
       }
 
@@ -146,9 +146,9 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
 
           status(result) shouldBe BAD_REQUEST
 
-          content should include(messagefromMessageKey(titleKey))
+          content should include(messageFromMessageKey(titleKey))
           content should include(s"""value="$email"""")
-          content should include(messagefromMessageKey("email.invalid"))
+          content should include(messageFromMessageKey("email.invalid"))
         }
 
       "the email has no '@' character" in {
@@ -307,7 +307,7 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
       val result         = performAction()
       val resultAsString = contentAsString(result)
       status(result) shouldBe OK
-      resultAsString should include(messagefromMessageKey("confirmEmail.title"))
+      resultAsString should include(messageFromMessageKey("confirmEmail.title"))
       resultAsString should include(expectedBackLink)
     }
   }
@@ -470,7 +470,7 @@ trait EmailControllerSpec[Journey <: JourneyStatus, VerificationCompleteJourney 
         val result = performAction()
         status(result) shouldBe OK
         val content = contentAsString(result)
-        content should include(messagefromMessageKey("confirmEmail.verified.title"))
+        content should include(messageFromMessageKey("confirmEmail.verified.title"))
         content should include(expectedContinueCall.url)
       }
 

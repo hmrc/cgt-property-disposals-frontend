@@ -20,6 +20,14 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalMethod, 
 
 package object disposaldetails {
 
+  def disposalPriceTitleKey(disposalMethod: DisposalMethod, shareOfProperty: ShareOfProperty): String =
+    (disposalMethod, shareOfProperty) match {
+      case (DisposalMethod.Sold, ShareOfProperty.Full) => "disposalPrice.full-share.sold-it.title"
+      case (DisposalMethod.Sold, _)                    => "disposalPrice.not-full-share.sold-it.title"
+      case (_, ShareOfProperty.Full)                   => "disposalPrice.full-share.gifted-it.title"
+      case (_, _)                                      => "disposalPrice.not-full-share.gifted-it.title"
+    }
+
   def disposalFeesTitleKey(disposalMethod: DisposalMethod, shareOfProperty: ShareOfProperty): String =
     (disposalMethod, shareOfProperty) match {
       case (DisposalMethod.Sold, ShareOfProperty.Full) => "disposalFees.full-share.sold-it.title"
@@ -28,11 +36,4 @@ package object disposaldetails {
       case (_, _)                                      => "disposalFees.not-full-share.gifted-it.title"
     }
 
-  def disposalPriceTitleKey(disposalMethod: DisposalMethod, shareOfProperty: ShareOfProperty): String =
-    (disposalMethod, shareOfProperty) match {
-      case (DisposalMethod.Sold, ShareOfProperty.Full) => "disposalPrice.full-share.sold-it.title"
-      case (DisposalMethod.Sold, _)                    => "disposalPrice.not-full-share.sold-it.title"
-      case (_, ShareOfProperty.Full)                   => "disposalPrice.full-share.gifted-it.title"
-      case (_, _)                                      => "disposalPrice.not-full-share.gifted-it.title"
-    }
 }

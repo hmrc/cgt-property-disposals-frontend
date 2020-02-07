@@ -69,7 +69,7 @@ class AccountControllerSpec
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(messagefromMessageKey("signed-out.title"))
+        contentAsString(result) should include(messageFromMessageKey("signed-out.title"))
       }
 
     }
@@ -90,7 +90,7 @@ class AccountControllerSpec
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(messagefromMessageKey("account.manageYourDetails.p"))
+        contentAsString(result) should include(messageFromMessageKey("account.manageYourDetails.p"))
       }
 
     }
@@ -111,7 +111,7 @@ class AccountControllerSpec
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(messagefromMessageKey("account.manageYourDetails.Address.changed"))
+        contentAsString(result) should include(messageFromMessageKey("account.manageYourDetails.Address.changed"))
       }
 
     }
@@ -132,7 +132,7 @@ class AccountControllerSpec
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(messagefromMessageKey("account.manageYourDetails.Email.changed"))
+        contentAsString(result) should include(messageFromMessageKey("account.manageYourDetails.Email.changed"))
       }
 
     }
@@ -153,7 +153,7 @@ class AccountControllerSpec
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(messagefromMessageKey("account.manageYourDetails.ContactName.changed"))
+        contentAsString(result) should include(messageFromMessageKey("account.manageYourDetails.ContactName.changed"))
       }
 
     }

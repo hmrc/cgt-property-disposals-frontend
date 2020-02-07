@@ -113,17 +113,17 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
             val content = contentAsString(result)
 
             status(result) shouldBe OK
-            content        should include(messagefromMessageKey("account.home.title"))
-            content        should include(messagefromMessageKey("account.home.button.start-a-new-return"))
+            content        should include(messageFromMessageKey("account.home.title"))
+            content        should include(messageFromMessageKey("account.home.button.start-a-new-return"))
             content shouldNot include(
-              messagefromMessageKey(
+              messageFromMessageKey(
                 "account.home.subtitle.agent",
                 subscribed.subscribedDetails.makeAccountName(),
                 subscribed.subscribedDetails.cgtReference.value
               )
             )
             content should include(
-              messagefromMessageKey(
+              messageFromMessageKey(
                 "account.home.subtitle",
                 subscribed.subscribedDetails.cgtReference.value
               )
@@ -145,16 +145,16 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
         val content = contentAsString(result)
 
         status(result) shouldBe OK
-        content        should include(messagefromMessageKey("account.home.title"))
+        content        should include(messageFromMessageKey("account.home.title"))
         content should include(
-          messagefromMessageKey(
+          messageFromMessageKey(
             "account.home.subtitle.agent",
             subscribed.subscribedDetails.makeAccountName(),
             subscribed.subscribedDetails.cgtReference.value
           )
         )
         content should include(
-          messagefromMessageKey(
+          messageFromMessageKey(
             "account.home.subtitle.agent",
             subscribed.subscribedDetails.makeAccountName(),
             subscribed.subscribedDetails.cgtReference.value
@@ -204,7 +204,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
 
           val result = performAction()
           status(result)          shouldBe OK
-          contentAsString(result) should include(messagefromMessageKey("account.home.title"))
+          contentAsString(result) should include(messageFromMessageKey("account.home.title"))
         }
 
         "show an error page" when {
@@ -455,8 +455,8 @@ class PrivateBetaHomePageControllerSpec extends HomePageControllerSpec {
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(messagefromMessageKey("account.home.title"))
-        contentAsString(result) shouldNot include(messagefromMessageKey("account.home.button.start-a-new-return"))
+        contentAsString(result) should include(messageFromMessageKey("account.home.title"))
+        contentAsString(result) shouldNot include(messageFromMessageKey("account.home.button.start-a-new-return"))
       }
 
     }

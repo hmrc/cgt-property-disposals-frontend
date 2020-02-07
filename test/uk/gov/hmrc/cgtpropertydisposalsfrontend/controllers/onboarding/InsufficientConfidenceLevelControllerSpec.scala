@@ -143,7 +143,7 @@ class InsufficientConfidenceLevelControllerSpec
 
           val result = performAction()
           status(result)          shouldBe OK
-          contentAsString(result) should include(messagefromMessageKey("haveANino.title"))
+          contentAsString(result) should include(messageFromMessageKey("haveANino.title"))
 
         }
 
@@ -165,7 +165,7 @@ class InsufficientConfidenceLevelControllerSpec
           val result = performAction()
           status(result) shouldBe OK
           val content = contentAsString(result)
-          content should include(messagefromMessageKey("haveANino.title"))
+          content should include(messageFromMessageKey("haveANino.title"))
           content should include("checked=\"checked\"")
         }
 
@@ -198,7 +198,7 @@ class InsufficientConfidenceLevelControllerSpec
 
           val result = performAction()
           status(result)          shouldBe BAD_REQUEST
-          contentAsString(result) should include(messagefromMessageKey("hasNino.error.required"))
+          contentAsString(result) should include(messageFromMessageKey("hasNino.error.required"))
         }
 
         "the submitted data cannot be parsed" in {
@@ -217,7 +217,7 @@ class InsufficientConfidenceLevelControllerSpec
 
           val result = performAction("hasNino" -> "blah")
           status(result)          shouldBe BAD_REQUEST
-          contentAsString(result) should include(messagefromMessageKey("hasNino.error.boolean"))
+          contentAsString(result) should include(messageFromMessageKey("hasNino.error.boolean"))
         }
 
       }
@@ -396,7 +396,7 @@ class InsufficientConfidenceLevelControllerSpec
 
           val result = performAction()
           status(result)          shouldBe OK
-          contentAsString(result) should include(messagefromMessageKey("haveAnSaUtr.title"))
+          contentAsString(result) should include(messageFromMessageKey("haveAnSaUtr.title"))
 
         }
 
@@ -419,7 +419,7 @@ class InsufficientConfidenceLevelControllerSpec
           val result = performAction()
           status(result) shouldBe OK
           val content = contentAsString(result)
-          content should include(messagefromMessageKey("haveAnSaUtr.title"))
+          content should include(messageFromMessageKey("haveAnSaUtr.title"))
           content should include("checked=\"checked\"")
         }
 
@@ -442,7 +442,7 @@ class InsufficientConfidenceLevelControllerSpec
           val result = performAction()
           status(result) shouldBe OK
           val content = contentAsString(result)
-          content should include(messagefromMessageKey("haveAnSaUtr.title"))
+          content should include(messageFromMessageKey("haveAnSaUtr.title"))
           content should include("checked=\"checked\"")
         }
 
@@ -496,7 +496,7 @@ class InsufficientConfidenceLevelControllerSpec
 
           val result = performAction()
           status(result)          shouldBe BAD_REQUEST
-          contentAsString(result) should include(messagefromMessageKey("hasSaUtr.error.required"))
+          contentAsString(result) should include(messageFromMessageKey("hasSaUtr.error.required"))
         }
 
       }
@@ -608,8 +608,8 @@ class InsufficientConfidenceLevelControllerSpec
           }
 
           val result = performAction()
-          contentAsString(result) should include(messagefromMessageKey("enterSaUtr.title"))
-          contentAsString(result) should not include (messagefromMessageKey("enterSaUtr.error.notFound", 0, 2))
+          contentAsString(result) should include(messageFromMessageKey("enterSaUtr.title"))
+          contentAsString(result) should not include (messageFromMessageKey("enterSaUtr.error.notFound", 0, 2))
         }
 
         "the user has indicated that they have no NINO but they do have an SA UTR and they have " +
@@ -637,8 +637,8 @@ class InsufficientConfidenceLevelControllerSpec
           }
 
           val result = performAction()
-          contentAsString(result) should include(messagefromMessageKey("enterSaUtr.title"))
-          contentAsString(result) should not include (messagefromMessageKey("enterSaUtr.error.notFound", 1, 2))
+          contentAsString(result) should include(messageFromMessageKey("enterSaUtr.title"))
+          contentAsString(result) should not include (messageFromMessageKey("enterSaUtr.error.notFound", 1, 2))
         }
 
       }
@@ -779,7 +779,7 @@ class InsufficientConfidenceLevelControllerSpec
 
           val result = performAction("firstName" -> validName.firstName, "lastName" -> validName.lastName)
           status(result)          shouldBe BAD_REQUEST
-          contentAsString(result) should include(messagefromMessageKey("saUtr.error.required"))
+          contentAsString(result) should include(messageFromMessageKey("saUtr.error.required"))
         }
 
         "the SA UTR is an empty string" in {
@@ -797,7 +797,7 @@ class InsufficientConfidenceLevelControllerSpec
             "saUtr"     -> ""
           )
           status(result)          shouldBe BAD_REQUEST
-          contentAsString(result) should include(messagefromMessageKey("saUtr.error.required"))
+          contentAsString(result) should include(messageFromMessageKey("saUtr.error.required"))
         }
 
         "the SA UTR is not valid" in {
@@ -815,7 +815,7 @@ class InsufficientConfidenceLevelControllerSpec
             "saUtr"     -> "not-an-sa-utr"
           )
           status(result)          shouldBe BAD_REQUEST
-          contentAsString(result) should include(messagefromMessageKey("saUtr.error.pattern"))
+          contentAsString(result) should include(messageFromMessageKey("saUtr.error.pattern"))
         }
 
         "a valid SA UTR and name are entered but they cannot be matched to a BPR and the " +
@@ -839,7 +839,7 @@ class InsufficientConfidenceLevelControllerSpec
             "saUtr"     -> validSautr.value
           )
           status(result)          shouldBe BAD_REQUEST
-          contentAsString(result) should include(messagefromMessageKey("enterSaUtr.error.notFound", 2, 3))
+          contentAsString(result) should include(messageFromMessageKey("enterSaUtr.error.notFound", 2, 3))
         }
 
       }
@@ -1045,7 +1045,7 @@ class InsufficientConfidenceLevelControllerSpec
 
             val result = performAction()
             status(result)          shouldBe OK
-            contentAsString(result) should include(messagefromMessageKey("enterSaUtr.tooManyAttempts.title"))
+            contentAsString(result) should include(messageFromMessageKey("enterSaUtr.tooManyAttempts.title"))
           }
         }
 
