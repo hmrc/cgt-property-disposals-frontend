@@ -35,8 +35,6 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 
 
 @title = @{messages("returns.disposal-details.cya.title")}
-@propertyShareValue = @{answers.percentageOwned}
-
 
 @mainTemplate(title = title, userType = request.userType) {
 
@@ -46,17 +44,17 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 @cyaSection() {
 @cyaRow(
 messages("propertyShare.title"),
-Html(s"${answers.percentageOwned.toString}%"),
+Html(s"${answers.shareOfProperty.percentageValue.toString}%"),
 Some(cyaChange(messages("disposalDetails.cyaChange.propertyShare"), returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwn().url))
 )
 @cyaRow(
 messages("disposalPrice.title"),
-Html(answers.disposalPrice.toString),
+Html(answers.disposalPrice.inPounds().toString),
 Some(cyaChange(messages("disposalDetails.cyaChange.disposalPrice"), returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice().url))
 )
 @cyaRow(
 messages("disposalFees.title"),
-Html(answers.disposalFees.toString),
+Html(answers.disposalFees.inPounds().toString),
 Some(cyaChange(messages("disposalDetails.cyaChange.disposalFees"), returns.disposaldetails.routes.DisposalDetailsController.whatWereDisposalFees().url))
 )
 }

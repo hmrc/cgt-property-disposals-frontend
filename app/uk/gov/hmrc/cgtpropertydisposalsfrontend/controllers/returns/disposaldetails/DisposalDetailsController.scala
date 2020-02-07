@@ -39,7 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, NumberUti
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDetailsAnswers, DisposalMethod}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDetailsAnswers, ShareOfProperty}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.IncompleteDisposalDetailsAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ShareOfProperty.{Full, Half}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -72,7 +72,13 @@ class DisposalDetailsController @Inject() (
   private def withFillingOutReturnAndDisposalDetailsAnswers(
     request: RequestWithSessionData[_]
   )(
-    f: (SessionData, FillingOutReturn, DisposalDetailsAnswers, DisposalMethod, Option[Double]) => Future[Result]
+    f: (
+      SessionData,
+      FillingOutReturn,
+      DisposalDetailsAnswers,
+      DisposalMethod,
+      Option[ShareOfProperty]
+    ) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((s, r: FillingOutReturn)) =>
@@ -112,7 +118,7 @@ class DisposalDetailsController @Inject() (
     }
 
   private def displayPageWithShareOfProperty[A, P: Writeable, R](form: DisposalDetailsAnswers => Form[A])(
-    page: (Form[A], Call, DisposalMethod, Double) => P
+    page: (Form[A], Call, DisposalMethod, ShareOfProperty) => P
   )(
     requiredPreviousAnswer: DisposalDetailsAnswers => Option[R],
     redirectToIfNoRequiredPreviousAnswer: Call
@@ -185,7 +191,7 @@ class DisposalDetailsController @Inject() (
   }
 
   private def submitBehaviourWithShareOfProperty[A, P: Writeable, R](form: DisposalDetailsAnswers => Form[A])(
-    page: (Form[A], Call, DisposalMethod, Double) => P
+    page: (Form[A], Call, DisposalMethod, ShareOfProperty) => P
   )(
     requiredPreviousAnswer: DisposalDetailsAnswers => Option[R],
     redirectToIfNoRequiredPreviousAnswer: Call
@@ -348,13 +354,53 @@ class DisposalDetailsController @Inject() (
     )
   }
 
-  def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
-    Ok("")
+  def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    request.sessionData.flatMap(_.journeyStatus) match {
+      case Some(f: FillingOutReturn) =>
+        f.draftReturn.disposalDetailsAnswers match {
+          case None | Some(IncompleteDisposalDetailsAnswers(None, _, _)) =>
+            Redirect(routes.DisposalDetailsController.howMuchDidYouOwn())
+
+          case Some(IncompleteDisposalDetailsAnswers(_, None, _)) =>
+            Redirect(routes.DisposalDetailsController.whatWasDisposalPrice())
+
+          case Some(IncompleteDisposalDetailsAnswers(_, _, None)) =>
+            Redirect(routes.DisposalDetailsController.whatWereDisposalFees())
+
+          case Some(IncompleteDisposalDetailsAnswers(Some(share), Some(price), Some(fees))) =>
+            val completeAnswers    = CompleteDisposalDetailsAnswers(share, price, fees)
+            val updatedDraftReturn = f.draftReturn.copy(disposalDetailsAnswers = Some(completeAnswers))
+
+            val result = for {
+              _ <- returnsService.storeDraftReturn(updatedDraftReturn)
+              _ <- EitherT(
+                    updateSession(sessionStore, request)(
+                      _.copy(journeyStatus = Some(f.copy(draftReturn = updatedDraftReturn)))
+                    )
+                  )
+            } yield ()
+
+            result.fold({ e =>
+              logger.warn("Could not update session", e)
+              errorHandler.errorResult
+            }, _ => Ok(checkYouAnswers(completeAnswers)))
+
+          case Some(answers: CompleteDisposalDetailsAnswers) =>
+            Ok(checkYouAnswers(answers))
+        }
+
+      case _ => Redirect(controllers.routes.StartController.start())
+
+    }
   }
 
-  def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
-    Ok("")
+  def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withFillingOutReturnAndDisposalDetailsAnswers(request) {
+      case _ =>
+        Redirect(controllers.returns.routes.TaskListController.taskList())
+    }
   }
+
 }
 
 object DisposalDetailsController {
