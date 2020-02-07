@@ -140,7 +140,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
           val result = performAction()
           status(result)          shouldBe OK
-          contentAsString(result) should include(message("isReportingForATrust.title"))
+          contentAsString(result) should include(messagefromMessageKey("isReportingForATrust.title"))
         }
 
         "the user has selected an option before" in {
@@ -161,7 +161,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           val content = contentAsString(result)
 
           status(result) shouldBe OK
-          content        should include(message("isReportingForATrust.title"))
+          content        should include(messagefromMessageKey("isReportingForATrust.title"))
           content        should include("checked=\"checked\"")
         }
 
@@ -194,7 +194,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
           val result = performAction()
           status(result)          shouldBe BAD_REQUEST
-          contentAsString(result) should include(message("isReportingForATrust.error.required"))
+          contentAsString(result) should include(messagefromMessageKey("isReportingForATrust.error.required"))
         }
 
         "the data submitted cannot be read" in {
@@ -213,7 +213,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
           val result = performAction("isReportingForATrust" -> "123")
           status(result)          shouldBe BAD_REQUEST
-          contentAsString(result) should include(message("isReportingForATrust.error.boolean"))
+          contentAsString(result) should include(messagefromMessageKey("isReportingForATrust.error.boolean"))
         }
 
       }
@@ -366,7 +366,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
           val result = performAction()
           status(result)          shouldBe 200
-          contentAsString(result) should include(message("reportCorpTax.title"))
+          contentAsString(result) should include(messagefromMessageKey("reportCorpTax.title"))
         }
 
       }
@@ -436,7 +436,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
           val result = performAction()
           status(result)          shouldBe OK
-          contentAsString(result) should include(message("haveATrn.title"))
+          contentAsString(result) should include(messagefromMessageKey("haveATrn.title"))
         }
 
         "the user has selected an option before" in {
@@ -457,7 +457,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           val content = contentAsString(result)
 
           status(result) shouldBe OK
-          content        should include(message("haveATrn.title"))
+          content        should include(messagefromMessageKey("haveATrn.title"))
           content        should include("checked=\"checked\"")
         }
 
@@ -528,7 +528,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
           val result = performAction()
           status(result)          shouldBe BAD_REQUEST
-          contentAsString(result) should include(message("hasTrn.error.required"))
+          contentAsString(result) should include(messagefromMessageKey("hasTrn.error.required"))
         }
 
         "the data submitted cannot be read" in {
@@ -547,7 +547,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
           val result = performAction("hasTrn" -> "123")
           status(result)          shouldBe BAD_REQUEST
-          contentAsString(result) should include(message("hasTrn.error.boolean"))
+          contentAsString(result) should include(messagefromMessageKey("hasTrn.error.boolean"))
         }
 
       }
@@ -655,7 +655,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
           val result = performAction()
           status(result)          shouldBe OK
-          contentAsString(result) should include(message("registerTrust.title"))
+          contentAsString(result) should include(messagefromMessageKey("registerTrust.title"))
         }
 
       }
@@ -718,8 +718,8 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           }
 
           val result = performAction()
-          contentAsString(result) should include(message("enterTrn.title"))
-          contentAsString(result) should not include (message("enterTrn.error.notFound", 0, 2))
+          contentAsString(result) should include(messagefromMessageKey("enterTrn.title"))
+          contentAsString(result) should not include (messagefromMessageKey("enterTrn.error.notFound", 0, 2))
         }
 
         "the user has indicated that they have a TRN and they have " +
@@ -747,8 +747,8 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           }
 
           val result = performAction()
-          contentAsString(result) should include(message("enterTrn.title"))
-          contentAsString(result) should not include (message("enterTrn.error.notFound", 1, 2))
+          contentAsString(result) should include(messagefromMessageKey("enterTrn.title"))
+          contentAsString(result) should not include (messagefromMessageKey("enterTrn.error.notFound", 1, 2))
         }
 
       }
@@ -873,7 +873,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
             val result = performAction("trustName" -> validTrustName.value)
             status(result)          shouldBe BAD_REQUEST
-            contentAsString(result) should include(message("trn.error.required"))
+            contentAsString(result) should include(messagefromMessageKey("trn.error.required"))
           }
 
           "the TRN is an empty string" in {
@@ -881,7 +881,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
             val result = performAction("trustName" -> validTrustName.value, "trn" -> "")
             status(result)          shouldBe BAD_REQUEST
-            contentAsString(result) should include(message("trn.error.required"))
+            contentAsString(result) should include(messagefromMessageKey("trn.error.required"))
           }
 
           "the TRN is non empty but less than 15 characters" in {
@@ -890,7 +890,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
             val result = performAction("trustName" -> validTrustName.value, "trn" -> trn)
             status(result)          shouldBe BAD_REQUEST
-            contentAsString(result) should include(message("trn.error.tooShort"))
+            contentAsString(result) should include(messagefromMessageKey("trn.error.tooShort"))
             // make sure trn is displayed as submitted by the user
             contentAsString(result) should include(trn)
           }
@@ -900,7 +900,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
             val result = performAction("trustName" -> validTrustName.value, "trn" -> ("1" * 16))
             status(result)          shouldBe BAD_REQUEST
-            contentAsString(result) should include(message("trn.error.tooLong"))
+            contentAsString(result) should include(messagefromMessageKey("trn.error.tooLong"))
           }
 
           "the TRN contains invalid characters" in {
@@ -908,7 +908,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
             val result = performAction("trustName" -> validTrustName.value, "trn" -> ("?" * 15))
             status(result)          shouldBe BAD_REQUEST
-            contentAsString(result) should include(message("trn.error.pattern"))
+            contentAsString(result) should include(messagefromMessageKey("trn.error.pattern"))
           }
 
           "a trust name is not submitted" in {
@@ -916,7 +916,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
             val result = performAction("trn" -> validTrn.value)
             status(result)          shouldBe BAD_REQUEST
-            contentAsString(result) should include(message("trustName.error.required"))
+            contentAsString(result) should include(messagefromMessageKey("trustName.error.required"))
           }
 
           "a trust name is submitted but it is an empty string" in {
@@ -924,7 +924,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
             val result = performAction("trustName" -> "", "trn" -> validTrn.value)
             status(result)          shouldBe BAD_REQUEST
-            contentAsString(result) should include(message("trustName.error.required"))
+            contentAsString(result) should include(messagefromMessageKey("trustName.error.required"))
           }
 
           "a trust name is submitted but it is more than 105 characters" in {
@@ -932,7 +932,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
             val result = performAction("trustName" -> ("a" * 106), "trn" -> validTrn.value)
             status(result)          shouldBe BAD_REQUEST
-            contentAsString(result) should include(message("trustName.error.tooLong"))
+            contentAsString(result) should include(messagefromMessageKey("trustName.error.tooLong"))
           }
 
           "a trust name is submitted but it contains invalid characters" in {
@@ -940,7 +940,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
             val result = performAction("trustName" -> "???", "trn" -> validTrn.value)
             status(result)          shouldBe BAD_REQUEST
-            contentAsString(result) should include(message("trustName.error.pattern"))
+            contentAsString(result) should include(messagefromMessageKey("trustName.error.pattern"))
           }
 
           "a valid SA UTR and name are entered but they cannot be matched to a BPR and the " +
@@ -960,7 +960,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
             val result = performAction("trustName" -> validTrustName.value, "trn" -> validTrn.value)
             status(result)          shouldBe BAD_REQUEST
-            contentAsString(result) should include(message("enterTrn.error.notFound", 2, 3))
+            contentAsString(result) should include(messagefromMessageKey("enterTrn.error.notFound", 2, 3))
           }
 
         }
@@ -1166,7 +1166,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
             val result = performAction()
             status(result)          shouldBe OK
-            contentAsString(result) should include(message("enterTrn.tooManyAttempts.title"))
+            contentAsString(result) should include(messagefromMessageKey("enterTrn.tooManyAttempts.title"))
           }
         }
 

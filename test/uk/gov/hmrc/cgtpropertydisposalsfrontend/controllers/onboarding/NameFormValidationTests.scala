@@ -37,8 +37,8 @@ trait NameFormValidationTests { this: ControllerSpec =>
         val result = performAction(Seq.empty)
         status(result) shouldBe BAD_REQUEST
         val resultAsString = contentAsString(result)
-        resultAsString should include(message("firstName.error.required"))
-        resultAsString should include(message("lastName.error.required"))
+        resultAsString should include(messagefromMessageKey("firstName.error.required"))
+        resultAsString should include(messagefromMessageKey("lastName.error.required"))
       }
 
       "the request submits a first name that is too long" in {
@@ -48,7 +48,7 @@ trait NameFormValidationTests { this: ControllerSpec =>
           Seq("firstName" -> List.fill(36)("a").mkString(""), "lastName" -> "Smith")
         )
         status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(message("firstName.error.tooLong"))
+        contentAsString(result) should include(messagefromMessageKey("firstName.error.tooLong"))
       }
 
       "the request submits a first name with illegal characters" in {
@@ -61,7 +61,7 @@ trait NameFormValidationTests { this: ControllerSpec =>
           )
         )
         status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(message("firstName.error.pattern"))
+        contentAsString(result) should include(messagefromMessageKey("firstName.error.pattern"))
       }
 
       "the request submits a last name that is too long" in {
@@ -74,7 +74,7 @@ trait NameFormValidationTests { this: ControllerSpec =>
           )
         )
         status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(message("lastName.error.tooLong"))
+        contentAsString(result) should include(messagefromMessageKey("lastName.error.tooLong"))
       }
 
       "the request submits a last name with illegal characters" in {
@@ -87,7 +87,7 @@ trait NameFormValidationTests { this: ControllerSpec =>
           )
         )
         status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(message("lastName.error.pattern"))
+        contentAsString(result) should include(messagefromMessageKey("lastName.error.pattern"))
       }
 
     }

@@ -428,9 +428,11 @@ class CanTheyUseOurServiceController @Inject() (
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withIndividualTriageAnswers(request) {
       case (_, state) =>
+        lazy val displayReturnToSummaryLink = state.fold(_ => false, _ => true)
+
         individualTriageAnswersFomState(state) match {
           case c: CompleteIndividualTriageAnswers =>
-            Ok(checkYourAnswersPage(c))
+            Ok(checkYourAnswersPage(c, displayReturnToSummaryLink))
 
           case IncompleteIndividualTriageAnswers(None, _, _, _, _, _, _) =>
             Redirect(routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting())
@@ -466,7 +468,7 @@ class CanTheyUseOurServiceController @Inject() (
                 errorHandler.errorResult()
 
               case Right(_) =>
-                Ok(checkYourAnswersPage(completeIndividualTriageAnswers))
+                Ok(checkYourAnswersPage(completeIndividualTriageAnswers, displayReturnToSummaryLink))
             }
         }
     }

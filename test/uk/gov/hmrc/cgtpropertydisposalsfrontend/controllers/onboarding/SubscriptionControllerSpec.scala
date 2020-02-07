@@ -111,7 +111,7 @@ class SubscriptionControllerSpec
 
           val result = performAction()
           status(result)          shouldBe OK
-          contentAsString(result) should include(message("subscription.individual.title"))
+          contentAsString(result) should include(messagefromMessageKey("subscription.individual.title"))
         }
 
         "there are subscription details in session for an organisation" in {
@@ -127,7 +127,7 @@ class SubscriptionControllerSpec
 
           val result = performAction()
           status(result)          shouldBe OK
-          contentAsString(result) should include(message("subscription.organisation.title"))
+          contentAsString(result) should include(messagefromMessageKey("subscription.organisation.title"))
         }
 
       }
@@ -261,7 +261,7 @@ class SubscriptionControllerSpec
           val result = performAction()
           status(result)          shouldBe OK
           contentAsString(result) should include(cgtReferenceNumber)
-          contentAsString(result) should include(message("subscribed.title"))
+          contentAsString(result) should include(messagefromMessageKey("subscribed.title"))
 
         }
       }
@@ -299,7 +299,7 @@ class SubscriptionControllerSpec
 
           val result = performAction()
           status(result)          shouldBe OK
-          contentAsString(result) should include(message("alreadySubscribedWithDifferentGGAccount.title"))
+          contentAsString(result) should include(messagefromMessageKey("alreadySubscribedWithDifferentGGAccount.title"))
 
         }
 
@@ -337,7 +337,7 @@ class SubscriptionControllerSpec
 
           val result = performAction()
           status(result)          shouldBe OK
-          contentAsString(result) should include(message("changeGGAccount.title"))
+          contentAsString(result) should include(messagefromMessageKey("changeGGAccount.title"))
 
         }
 
