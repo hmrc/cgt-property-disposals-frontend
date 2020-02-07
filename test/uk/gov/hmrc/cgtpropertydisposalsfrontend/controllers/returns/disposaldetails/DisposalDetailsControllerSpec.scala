@@ -34,6 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, Error, Jo
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDetailsAnswers, DraftReturn, ShareOfProperty}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.{CompleteIndividualTriageAnswers, IncompleteIndividualTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -70,6 +71,7 @@ class DisposalDetailsControllerSpec
     )
 
   val fillingOutReturn = sample[FillingOutReturn]
+    .copy(draftReturn = sample[DraftReturn].copy(triageAnswers = sample[CompleteIndividualTriageAnswers]))
 
   def sessionWithDisposalDetailsAnswers(answers: Option[DisposalDetailsAnswers]): SessionData =
     SessionData.empty.copy(
@@ -98,6 +100,8 @@ class DisposalDetailsControllerSpec
       def performAction(): Future[Result] = controller.howMuchDidYouOwn()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
+
+      behave like noDisposalMethodBehaviour(performAction)
 
       "display the page" when {
 
@@ -176,6 +180,8 @@ class DisposalDetailsControllerSpec
         controller.howMuchDidYouOwnSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
+
+      behave like noDisposalMethodBehaviour(() => performAction(Seq.empty))
 
       "show a form error" when {
 
@@ -381,14 +387,20 @@ class DisposalDetailsControllerSpec
 
       def performAction(): Future[Result] = controller.whatWasDisposalPrice()(FakeRequest())
 
+      val requiredPreviousAnswers = IncompleteDisposalDetailsAnswers.empty.copy(percentageOwned = Some(1d))
+
       behave like redirectToStartBehaviour(performAction)
+
+      behave like noDisposalMethodBehaviour(performAction)
+
+      behave like noPropertyShareBehaviour(performAction)
 
       "display the page" when {
 
         "the user has not answered the question before" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionWithDisposalDetailsAnswers(None)))))
+            mockGetSession(Future.successful(Right(Some(sessionWithDisposalDetailsAnswers(requiredPreviousAnswers)))))
           }
 
           val result = performAction()
@@ -405,7 +417,7 @@ class DisposalDetailsControllerSpec
                 Right(
                   Some(
                     sessionWithDisposalDetailsAnswers(
-                      IncompleteDisposalDetailsAnswers.empty.copy(
+                      requiredPreviousAnswers.copy(
                         disposalPrice = Some(AmountInPence.fromPounds(12.34))
                       )
                     )
@@ -457,9 +469,13 @@ class DisposalDetailsControllerSpec
     "handling submitted answers to the what was disposal price page" must {
 
       def performAction(data: Seq[(String, String)]): Future[Result] =
-        controller.whatWasDisposalPrice()(FakeRequest().withFormUrlEncodedBody(data: _*))
+        controller.whatWasDisposalPriceSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
+
+      behave like noDisposalMethodBehaviour(() => performAction(Seq.empty))
+
+      behave like noPropertyShareBehaviour(() => performAction(Seq.empty))
 
       "show a form error" when {
 
@@ -477,12 +493,10 @@ class DisposalDetailsControllerSpec
           status(result) shouldBe BAD_REQUEST
           content        should include(message("disposalPrice.title"))
           content        should include(message(expectedErrorMessageKey))
-
         }
 
         "nothing is submitted" in {
           test()("disposalPrice.error.required")
-
         }
 
         "the number is less than zero" in {
@@ -490,13 +504,11 @@ class DisposalDetailsControllerSpec
         }
 
         "the number is greater than 100" in {
-          test("disposalPrice" -> "101")("disposalPrice.error.tooLarge")
-
+          test("disposalPrice" -> (5e10 + 1).toString)("disposalPrice.error.tooLarge")
         }
 
         "the number has more than two decimal places" in {
           test("disposalPrice" -> "1.234")("disposalPrice.error.tooManyDecimals")
-
         }
 
       }
@@ -523,7 +535,7 @@ class DisposalDetailsControllerSpec
             mockStoreDraftReturn(newDraftReturn)(Left(Error("")))
           }
 
-          checkIsTechnicalErrorPage(performAction(Seq("disposalPrice" -> newDisposalPrice.toString)))
+          checkIsTechnicalErrorPage(performAction(Seq("disposalPrice" -> newDisposalPrice.inPounds().toString)))
         }
 
         "there is an error updating the session data" in {
@@ -538,7 +550,7 @@ class DisposalDetailsControllerSpec
             )(Future.successful(Left(Error(""))))
           }
 
-          checkIsTechnicalErrorPage(performAction(Seq("disposalPrice" -> newDisposalPrice.toString)))
+          checkIsTechnicalErrorPage(performAction(Seq("disposalPrice" -> newDisposalPrice.inPounds().toString)))
 
         }
 
@@ -548,8 +560,9 @@ class DisposalDetailsControllerSpec
 
         "the user hasn't ever answered the disposal details question " +
           "and the draft return and session data has been successfully updated" in {
-          val newDisposalPrice = 2d
-          val updatedAnswers = IncompleteDisposalDetailsAnswers.empty.copy(
+          val newDisposalPrice                 = 2d
+          val incompleteDisposalDetailsAnswers = IncompleteDisposalDetailsAnswers(Some(1d), None, None)
+          val updatedAnswers = incompleteDisposalDetailsAnswers.copy(
             disposalPrice = Some(AmountInPence.fromPounds(newDisposalPrice))
           )
           val newDraftReturn = fillingOutReturn.draftReturn.copy(
@@ -559,7 +572,11 @@ class DisposalDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(Right(Some(sessionWithDisposalDetailsAnswers(None))))
+              Future.successful(
+                Right(
+                  Some(sessionWithDisposalDetailsAnswers(incompleteDisposalDetailsAnswers))
+                )
+              )
             )
             mockStoreDraftReturn(newDraftReturn)(Right(()))
             mockStoreSession(sessionWithDisposalDetailsAnswers(updatedAnswers))(Future.successful(Right(())))
@@ -567,7 +584,7 @@ class DisposalDetailsControllerSpec
 
           checkIsRedirect(
             performAction(Seq("disposalPrice" -> newDisposalPrice.toString)),
-            controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice()
+            controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWereDisposalFees()
           )
         }
 
@@ -593,7 +610,7 @@ class DisposalDetailsControllerSpec
 
           checkIsRedirect(
             performAction(Seq("disposalPrice" -> newDisposalPrice.toString)),
-            controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice()
+            controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWereDisposalFees()
           )
 
         }
@@ -656,7 +673,417 @@ class DisposalDetailsControllerSpec
 
       }
 
+      "accept submitted values with commas" in {
+        val currentAnswers =
+          sample[CompleteDisposalDetailsAnswers].copy(disposalPrice = AmountInPence.fromPounds(1000d))
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            Future.successful(Right(Some(sessionWithDisposalDetailsAnswers(currentAnswers))))
+          )
+        }
+
+        checkIsRedirect(
+          performAction(Seq("disposalPrice" -> "1,000")),
+          controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
+        )
+      }
+
+      "accept submitted values with pound signs" in {
+        val currentAnswers = sample[CompleteDisposalDetailsAnswers].copy(disposalPrice = AmountInPence.fromPounds(1d))
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            Future.successful(Right(Some(sessionWithDisposalDetailsAnswers(currentAnswers))))
+          )
+        }
+
+        checkIsRedirect(
+          performAction(Seq("disposalPrice" -> "£1")),
+          controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
+        )
+      }
+
     }
+
+    "handling requests to display the what were disposal fees page" must {
+
+      def performAction(): Future[Result] = controller.whatWereDisposalFees()(FakeRequest())
+
+      val requiredPreviousAnswers = IncompleteDisposalDetailsAnswers.empty
+        .copy(percentageOwned = Some(1d), disposalPrice = Some(AmountInPence.fromPounds(2d)))
+
+      behave like redirectToStartBehaviour(performAction)
+
+      behave like noDisposalMethodBehaviour(performAction)
+
+      behave like noPropertyShareBehaviour(performAction)
+
+      "display the page" when {
+
+        "the user has not answered the question before" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(Future.successful(Right(Some(sessionWithDisposalDetailsAnswers(requiredPreviousAnswers)))))
+          }
+
+          val result = performAction()
+          status(result)          shouldBe OK
+          contentAsString(result) should include(message("disposalFees.title"))
+        }
+
+        "the user has answered the question before but has " +
+          "not completed the disposal detail section" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(
+                Right(
+                  Some(
+                    sessionWithDisposalDetailsAnswers(
+                      requiredPreviousAnswers.copy(
+                        disposalFees = Some(AmountInPence.fromPounds(12.34))
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          }
+
+          val result  = performAction()
+          val content = contentAsString(result)
+
+          status(result) shouldBe OK
+          content        should include(message("disposalFees.title"))
+          content        should include("12.34")
+        }
+
+        "the user has answered the question before but has " +
+          "completed the disposal detail section" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(
+                Right(
+                  Some(
+                    sessionWithDisposalDetailsAnswers(
+                      sample[CompleteDisposalDetailsAnswers].copy(
+                        disposalFees = AmountInPence.fromPounds(12.34)
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          }
+
+          val result  = performAction()
+          val content = contentAsString(result)
+
+          status(result) shouldBe OK
+          content        should include(message("disposalFees.title"))
+          content        should include("12.34")
+        }
+
+      }
+
+    }
+
+    "handling submitted answers to the what was disposal fees page" must {
+
+      def performAction(data: Seq[(String, String)]): Future[Result] =
+        controller.whatWereDisposalFeesSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
+
+      behave like redirectToStartBehaviour(() => performAction(Seq.empty))
+
+      behave like noDisposalMethodBehaviour(() => performAction(Seq.empty))
+
+      behave like noPropertyShareBehaviour(() => performAction(Seq.empty))
+
+      "show a form error" when {
+
+        def test(data: (String, String)*)(expectedErrorMessageKey: String) = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(Right(Some(sessionWithDisposalDetailsAnswers(sample[CompleteDisposalDetailsAnswers]))))
+            )
+          }
+
+          val result  = performAction(data)
+          val content = contentAsString(result)
+
+          status(result) shouldBe BAD_REQUEST
+          content        should include(message("disposalFees.title"))
+          content        should include(message(expectedErrorMessageKey))
+        }
+
+        "nothing is submitted" in {
+          test()("disposalFees.error.required")
+        }
+
+        "the number is less than zero" in {
+          test("disposalFees" -> "-1")("disposalFees.error.tooSmall")
+        }
+
+        "the number is greater than 5e10" in {
+          test("disposalFees" -> (5e10 + 1).toString)("disposalFees.error.tooLarge")
+        }
+
+        "the number has more than two decimal places" in {
+          test("disposalFees" -> "1.234")("disposalFees.error.tooManyDecimals")
+        }
+
+      }
+
+      "show an error page" when {
+
+        val currentAnswers  = sample[CompleteDisposalDetailsAnswers].copy(disposalFees = AmountInPence.fromPounds(1d))
+        val newDisposalFees = AmountInPence.fromPounds(2d)
+        val newDraftReturn = fillingOutReturn.draftReturn.copy(
+          disposalDetailsAnswers = Some(
+            currentAnswers.copy(
+              disposalFees = newDisposalFees
+            )
+          )
+        )
+
+        "there is an error updating the draft return" in {
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(Right(Some(sessionWithDisposalDetailsAnswers(currentAnswers))))
+            )
+            mockStoreDraftReturn(newDraftReturn)(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction(Seq("disposalFees" -> newDisposalFees.inPounds().toString)))
+        }
+
+        "there is an error updating the session data" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(Right(Some(sessionWithDisposalDetailsAnswers(currentAnswers))))
+            )
+            mockStoreDraftReturn(newDraftReturn)(Right(()))
+            mockStoreSession(
+              sessionWithDisposalDetailsAnswers(currentAnswers.copy(disposalFees = newDisposalFees))
+            )(Future.successful(Left(Error(""))))
+          }
+
+          checkIsTechnicalErrorPage(performAction(Seq("disposalFees" -> newDisposalFees.inPounds().toString)))
+
+        }
+
+      }
+
+      "redirect to the check your answers page" when {
+
+        "the user hasn't ever answered the disposal details question " +
+          "and the draft return and session data has been successfully updated" in {
+          val newDisposalFees = 2d
+          val incompleteDisposalDetailsAnswers =
+            IncompleteDisposalDetailsAnswers(Some(1d), Some(AmountInPence.fromPounds(1d)), None)
+
+          val updatedAnswers = incompleteDisposalDetailsAnswers.copy(
+            disposalFees = Some(AmountInPence.fromPounds(newDisposalFees))
+          )
+          val newDraftReturn = fillingOutReturn.draftReturn.copy(
+            disposalDetailsAnswers = Some(updatedAnswers)
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(
+                Right(
+                  Some(sessionWithDisposalDetailsAnswers(incompleteDisposalDetailsAnswers))
+                )
+              )
+            )
+            mockStoreDraftReturn(newDraftReturn)(Right(()))
+            mockStoreSession(sessionWithDisposalDetailsAnswers(updatedAnswers))(Future.successful(Right(())))
+          }
+
+          checkIsRedirect(
+            performAction(Seq("disposalFees" -> newDisposalFees.toString)),
+            controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
+          )
+        }
+
+        "the user has not answered all of the disposal details questions " +
+          "and the draft return and session data has been successfully updated" in {
+          val currentAnswers  = sample[IncompleteDisposalDetailsAnswers].copy(disposalFees = None)
+          val newDisposalFees = 2d
+          val updatedAnswers = currentAnswers.copy(
+            disposalFees = Some(AmountInPence.fromPounds(newDisposalFees))
+          )
+          val newDraftReturn = fillingOutReturn.draftReturn.copy(
+            disposalDetailsAnswers = Some(updatedAnswers)
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(Right(Some(sessionWithDisposalDetailsAnswers(currentAnswers))))
+            )
+            mockStoreDraftReturn(newDraftReturn)(Right(()))
+            mockStoreSession(sessionWithDisposalDetailsAnswers(updatedAnswers))(Future.successful(Right(())))
+          }
+
+          checkIsRedirect(
+            performAction(Seq("disposalFees" -> newDisposalFees.toString)),
+            controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
+          )
+
+        }
+
+      }
+
+      "redirect to the cya page" when {
+
+        "the user has answered all of the disposal details questions " +
+          "and the draft return and session data has been successfully updated" in {
+          val currentAnswers  = sample[CompleteDisposalDetailsAnswers].copy(disposalFees = AmountInPence.fromPounds(1d))
+          val newDisposalFees = 2d
+          val newDraftReturn = fillingOutReturn.draftReturn.copy(
+            disposalDetailsAnswers = Some(
+              currentAnswers.copy(
+                disposalFees = AmountInPence.fromPounds(newDisposalFees)
+              )
+            )
+          )
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(Right(Some(sessionWithDisposalDetailsAnswers(currentAnswers))))
+            )
+            mockStoreDraftReturn(newDraftReturn)(Right(()))
+            mockStoreSession(
+              sessionWithDisposalDetailsAnswers(
+                currentAnswers.copy(disposalFees = AmountInPence.fromPounds(newDisposalFees))
+              )
+            )(Future.successful(Right(())))
+          }
+
+          checkIsRedirect(
+            performAction(Seq("disposalFees" -> newDisposalFees.toString)),
+            controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
+          )
+
+        }
+
+      }
+
+      "not update the draft return or the session data" when {
+
+        "the answer given has not changed from a previous one" in {
+          val currentAnswers = sample[CompleteDisposalDetailsAnswers].copy(disposalFees = AmountInPence.fromPounds(1d))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(Right(Some(sessionWithDisposalDetailsAnswers(currentAnswers))))
+            )
+          }
+
+          checkIsRedirect(
+            performAction(Seq("disposalFees" -> "1")),
+            controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
+          )
+
+        }
+
+      }
+
+      "accept submitted values with commas" in {
+        val currentAnswers =
+          sample[CompleteDisposalDetailsAnswers].copy(disposalFees = AmountInPence.fromPounds(1000d))
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            Future.successful(Right(Some(sessionWithDisposalDetailsAnswers(currentAnswers))))
+          )
+        }
+
+        checkIsRedirect(
+          performAction(Seq("disposalFees" -> "1,000")),
+          controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
+        )
+      }
+
+      "accept submitted values with pound signs" in {
+        val currentAnswers = sample[CompleteDisposalDetailsAnswers].copy(disposalFees = AmountInPence.fromPounds(1d))
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            Future.successful(Right(Some(sessionWithDisposalDetailsAnswers(currentAnswers))))
+          )
+        }
+
+        checkIsRedirect(
+          performAction(Seq("disposalFees" -> "£1")),
+          controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
+        )
+      }
+
+    }
+
   }
 
+  def noDisposalMethodBehaviour(performAction: () => Future[Result]): Unit =
+    "redirect to start endpoint" when {
+
+      "there is no disposal method" in {
+        val draftReturn = sample[DraftReturn].copy(
+          triageAnswers = sample[IncompleteIndividualTriageAnswers].copy(disposalMethod = None)
+        )
+
+        val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+        val sessionData      = SessionData.empty.copy(journeyStatus      = Some(fillingOutReturn))
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(Future.successful(Right(Some(sessionData))))
+        }
+
+        checkIsRedirect(performAction(), controllers.routes.StartController.start())
+      }
+    }
+
+  def noPropertyShareBehaviour(performAction: () => Future[Result]): Unit =
+    "redirect to how much did you own endpoint" when {
+
+      "there is no property share" in {
+        val draftReturn = sample[DraftReturn].copy(
+          triageAnswers = sample[CompleteIndividualTriageAnswers],
+          disposalDetailsAnswers = Some(
+            IncompleteDisposalDetailsAnswers(
+              None,
+              Some(sample[AmountInPence]),
+              Some(sample[AmountInPence])
+            )
+          )
+        )
+
+        val sessionData = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = draftReturn)))
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(Future.successful(Right(Some(sessionData))))
+        }
+
+        checkIsRedirect(
+          performAction(),
+          controllers.returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwn()
+        )
+      }
+    }
 }

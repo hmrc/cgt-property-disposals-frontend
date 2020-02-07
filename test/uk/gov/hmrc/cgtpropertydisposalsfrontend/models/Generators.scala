@@ -55,7 +55,8 @@ object Generators
     with UpscanGen
     with TriageQuestionsGen
     with ReturnGen
-    with DisposalDetailsGen {
+    with DisposalDetailsGen
+    with AmountInPenceGen {
 
   def sample[A](implicit gen: Gen[A]): A =
     gen.sample.getOrElse(sys.error(s"Could not generate instance with $gen"))
@@ -245,4 +246,10 @@ trait DisposalDetailsGen { this: GenUtils =>
 
   implicit val incompleteDisposalDetailsAnswersGen: Gen[IncompleteDisposalDetailsAnswers] =
     gen[IncompleteDisposalDetailsAnswers]
+}
+
+trait AmountInPenceGen { this: GenUtils =>
+
+  implicit val amountInPenceGen: Gen[AmountInPence] = gen[AmountInPence]
+
 }

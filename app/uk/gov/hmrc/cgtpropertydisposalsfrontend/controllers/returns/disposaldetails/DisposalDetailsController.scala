@@ -25,9 +25,8 @@ import cats.syntax.eq._
 import com.google.inject.Inject
 import play.api.Configuration
 import play.api.data.{Form, FormError}
-import play.api.data.Forms.{bigDecimal, mapping => formMapping, of}
+import play.api.data.Forms.{of, mapping => formMapping}
 import play.api.data.format.Formatter
-import play.api.data.validation.{Constraint, Invalid, Valid, ValidationResult}
 import play.api.http.Writeable
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
@@ -36,6 +35,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails.DisposalDetailsController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AmountInPence._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, NumberUtils, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDetailsAnswers, DisposalMethod}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDetailsAnswers, ShareOfProperty}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.IncompleteDisposalDetailsAnswers
@@ -70,39 +71,121 @@ class DisposalDetailsController @Inject() (
 
   private def withFillingOutReturnAndDisposalDetailsAnswers(
     request: RequestWithSessionData[_]
-  )(f: (SessionData, FillingOutReturn, DisposalDetailsAnswers) => Future[Result]): Future[Result] =
+  )(
+    f: (SessionData, FillingOutReturn, DisposalDetailsAnswers, DisposalMethod, Option[Double]) => Future[Result]
+  ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((s, r: FillingOutReturn)) =>
-        r.draftReturn.disposalDetailsAnswers.fold[Future[Result]](
-          f(s, r, IncompleteDisposalDetailsAnswers.empty)
-        )(f(s, r, _))
+        val shareOfProperty = r.draftReturn.disposalDetailsAnswers.flatMap(
+          _.fold(_.shareOfProperty, c => Some(c.shareOfProperty))
+        )
+
+        r.draftReturn.triageAnswers.fold(_.disposalMethod, c => Some(c.disposalMethod)) match {
+          case Some(d) =>
+            r.draftReturn.disposalDetailsAnswers.fold[Future[Result]](
+              f(s, r, IncompleteDisposalDetailsAnswers.empty, d, shareOfProperty)
+            )(f(s, r, _, d, shareOfProperty))
+
+          case None =>
+            logger.warn("Could not find disposal method in disposal details section")
+            Redirect(controllers.routes.StartController.start())
+        }
 
       case _ => Redirect(controllers.routes.StartController.start())
     }
 
-  def displayPage[A, P: Writeable, R](form: DisposalDetailsAnswers => Form[A])(
-    page: (Form[A], Call) => P
+  private def commonDisplayBehaviour[A, P: Writeable, R](form: DisposalDetailsAnswers => Form[A])(
+    page: Call => P
+  )(
+    requiredPreviousAnswer: DisposalDetailsAnswers => Option[R],
+    redirectToIfNoRequiredPreviousAnswer: Call
+  )(answers: DisposalDetailsAnswers)(implicit request: RequestWithSessionData[_]): Future[Result] =
+    if (requiredPreviousAnswer(answers).isDefined) {
+      val backLink = answers.fold(
+        _ => redirectToIfNoRequiredPreviousAnswer,
+        _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
+      )
+
+      Ok(page(backLink))
+    } else {
+      Redirect(redirectToIfNoRequiredPreviousAnswer)
+    }
+
+  private def displayPageWithShareOfProperty[A, P: Writeable, R](form: DisposalDetailsAnswers => Form[A])(
+    page: (Form[A], Call, DisposalMethod, Double) => P
   )(
     requiredPreviousAnswer: DisposalDetailsAnswers => Option[R],
     redirectToIfNoRequiredPreviousAnswer: Call
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     withFillingOutReturnAndDisposalDetailsAnswers(request) {
-      case (_, _, d) =>
-        if (requiredPreviousAnswer(d).isDefined) {
-          val backLink = d.fold(
-            _ => redirectToIfNoRequiredPreviousAnswer,
-            _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
-          )
+      case (_, _, answers, disposalMethod, Some(shareOfProperty)) =>
+        commonDisplayBehaviour(form)(page(form(answers), _, disposalMethod, shareOfProperty))(
+          requiredPreviousAnswer,
+          redirectToIfNoRequiredPreviousAnswer
+        )(answers)
 
-          Ok(page(form(d), backLink))
-        } else {
-          Redirect(redirectToIfNoRequiredPreviousAnswer)
-        }
+      case (_, _, _, _, None) =>
+        logger.warn("Could not find share of property value")
+        Redirect(routes.DisposalDetailsController.howMuchDidYouOwn())
 
     }
 
-  def s[A, P: Writeable, R](form: DisposalDetailsAnswers => Form[A])(
-    page: (Form[A], Call) => P
+  private def displayPage[A, P: Writeable, R](form: DisposalDetailsAnswers => Form[A])(
+    page: (Form[A], Call, DisposalMethod) => P
+  )(
+    requiredPreviousAnswer: DisposalDetailsAnswers => Option[R],
+    redirectToIfNoRequiredPreviousAnswer: Call
+  )(implicit request: RequestWithSessionData[_]): Future[Result] =
+    withFillingOutReturnAndDisposalDetailsAnswers(request) {
+      case (_, _, answers, disposalMethod, _) =>
+        commonDisplayBehaviour(form)(page(form(answers), _, disposalMethod))(
+          requiredPreviousAnswer,
+          redirectToIfNoRequiredPreviousAnswer
+        )(answers)
+    }
+
+  private def commonSubmitBehaviour[A, P: Writeable, R](form: DisposalDetailsAnswers => Form[A])(
+    page: (Form[A], Call, DisposalMethod) => P
+  )(
+    requiredPreviousAnswer: DisposalDetailsAnswers => Option[R],
+    redirectToIfNoRequiredPreviousAnswer: Call
+  )(
+    updateAnswers: (A, DisposalDetailsAnswers) => DisposalDetailsAnswers,
+    nextPage: DisposalDetailsAnswers => Call
+  )(answers: DisposalDetailsAnswers, disposalMethod: DisposalMethod, fillingOurReturn: FillingOutReturn)(
+    implicit request: RequestWithSessionData[_]
+  ): Future[Result] = {
+    lazy val backLink = answers.fold(
+      _ => redirectToIfNoRequiredPreviousAnswer,
+      _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
+    )
+    form(answers)
+      .bindFromRequest()
+      .fold(
+        formWithErrors => BadRequest(page(formWithErrors, backLink, disposalMethod)), { value =>
+          val newAnswers     = updateAnswers(value, answers)
+          val newDraftReturn = fillingOurReturn.draftReturn.copy(disposalDetailsAnswers = Some(newAnswers))
+
+          val result = for {
+            _ <- if (newDraftReturn === fillingOurReturn.draftReturn) EitherT.pure(())
+                else returnsService.storeDraftReturn(newDraftReturn)
+            _ <- EitherT(
+                  updateSession(sessionStore, request)(
+                    _.copy(journeyStatus = Some(fillingOurReturn.copy(draftReturn = newDraftReturn)))
+                  )
+                )
+          } yield ()
+
+          result.fold({ e =>
+            logger.warn("Could not update draft return", e)
+            errorHandler.errorResult()
+          }, _ => Redirect(nextPage(newAnswers)))
+        }
+      )
+  }
+
+  private def submitBehaviourWithShareOfProperty[A, P: Writeable, R](form: DisposalDetailsAnswers => Form[A])(
+    page: (Form[A], Call, DisposalMethod, Double) => P
   )(
     requiredPreviousAnswer: DisposalDetailsAnswers => Option[R],
     redirectToIfNoRequiredPreviousAnswer: Call
@@ -110,34 +193,31 @@ class DisposalDetailsController @Inject() (
     implicit request: RequestWithSessionData[_]
   ): Future[Result] =
     withFillingOutReturnAndDisposalDetailsAnswers(request) {
-      case (_, r, d) =>
-        lazy val backLink = d.fold(
-          _ => redirectToIfNoRequiredPreviousAnswer,
-          _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
-        )
-        form(d)
-          .bindFromRequest()
-          .fold(
-            formWithErrors => BadRequest(page(formWithErrors, backLink)), { value =>
-              val newAnswers     = updateAnswers(value, d)
-              val newDraftReturn = r.draftReturn.copy(disposalDetailsAnswers = Some(newAnswers))
+      case (_, r, answers, disposalMethod, Some(shareOfProperty)) =>
+        commonSubmitBehaviour(form)(page(_, _, _, shareOfProperty))(
+          requiredPreviousAnswer,
+          redirectToIfNoRequiredPreviousAnswer
+        )(updateAnswers, nextPage)(answers, disposalMethod, r)
 
-              val result = for {
-                _ <- if (newDraftReturn === r.draftReturn) EitherT.pure(())
-                    else returnsService.storeDraftReturn(newDraftReturn)
-                _ <- EitherT(
-                      updateSession(sessionStore, request)(
-                        _.copy(journeyStatus = Some(r.copy(draftReturn = newDraftReturn)))
-                      )
-                    )
-              } yield ()
+      case (_, _, _, _, None) =>
+        logger.warn("Could not find share of property value")
+        Redirect(routes.DisposalDetailsController.howMuchDidYouOwn())
+    }
 
-              result.fold({ e =>
-                logger.warn("Could not update draft return", e)
-                errorHandler.errorResult()
-              }, _ => Redirect(nextPage(newAnswers)))
-            }
-          )
+  private def submitBehaviour[A, P: Writeable, R](form: DisposalDetailsAnswers => Form[A])(
+    page: (Form[A], Call, DisposalMethod) => P
+  )(
+    requiredPreviousAnswer: DisposalDetailsAnswers => Option[R],
+    redirectToIfNoRequiredPreviousAnswer: Call
+  )(updateAnswers: (A, DisposalDetailsAnswers) => DisposalDetailsAnswers, nextPage: DisposalDetailsAnswers => Call)(
+    implicit request: RequestWithSessionData[_]
+  ): Future[Result] =
+    withFillingOutReturnAndDisposalDetailsAnswers(request) {
+      case (_, r, answers, disposalMethod, _) =>
+        commonSubmitBehaviour(form)(page(_, _, _))(
+          requiredPreviousAnswer,
+          redirectToIfNoRequiredPreviousAnswer
+        )(updateAnswers, nextPage)(answers, disposalMethod, r)
     }
 
   def howMuchDidYouOwn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
@@ -147,7 +227,9 @@ class DisposalDetailsController @Inject() (
         c => shareOfPropertyForm.fill(c.shareOfProperty)
       )
     )(
-      page = howMuchDidYouOwnPage(_, _)
+      page = {
+        case (form, backlink, _) => howMuchDidYouOwnPage(form, backlink)
+      }
     )(
       requiredPreviousAnswer               = _ => Some(()),
       redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
@@ -155,13 +237,15 @@ class DisposalDetailsController @Inject() (
   }
 
   def howMuchDidYouOwnSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    s(
+    submitBehaviour(
       form = _.fold(
         _.shareOfProperty.fold(shareOfPropertyForm)(shareOfPropertyForm.fill),
         c => shareOfPropertyForm.fill(c.shareOfProperty)
       )
     )(
-      page = howMuchDidYouOwnPage(_, _)
+      page = {
+        case (form, backlink, _) => howMuchDidYouOwnPage(form, backlink)
+      }
     )(
       requiredPreviousAnswer               = _ => Some(()),
       redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
@@ -181,13 +265,13 @@ class DisposalDetailsController @Inject() (
   }
 
   def whatWasDisposalPrice(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    displayPage(
+    displayPageWithShareOfProperty(
       form = _.fold(
-        _.disposalPrice.fold(propertyPriceForm)(a => propertyPriceForm.fill(a.inPounds())),
-        c => propertyPriceForm.fill(c.disposalPrice.inPounds())
+        _.disposalPrice.fold(disposalPriceForm)(a => disposalPriceForm.fill(a.inPounds())),
+        c => disposalPriceForm.fill(c.disposalPrice.inPounds())
       )
     )(
-      page = disposalPricePage(_, _)
+      page = disposalPricePage(_, _, _, _)
     )(
       requiredPreviousAnswer = _.fold(_.shareOfProperty, c => Some(c.shareOfProperty)),
       redirectToIfNoRequiredPreviousAnswer =
@@ -196,13 +280,13 @@ class DisposalDetailsController @Inject() (
   }
 
   def whatWasDisposalPriceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    s(
+    submitBehaviourWithShareOfProperty(
       form = _.fold(
-        _.disposalPrice.fold(propertyPriceForm)(a => propertyPriceForm.fill(a.inPounds())),
-        c => propertyPriceForm.fill(c.disposalPrice.inPounds())
+        _.disposalPrice.fold(disposalPriceForm)(a => disposalPriceForm.fill(a.inPounds())),
+        c => disposalPriceForm.fill(c.disposalPrice.inPounds())
       )
     )(
-      page = disposalPricePage(_, _)
+      page = disposalPricePage(_, _, _, _)
     )(
       requiredPreviousAnswer = _.fold(_.shareOfProperty, c => Some(c.shareOfProperty)),
       redirectToIfNoRequiredPreviousAnswer =
@@ -222,12 +306,46 @@ class DisposalDetailsController @Inject() (
     )
   }
 
-  def whatWereDisposalFees(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
-    Ok("")
+  def whatWereDisposalFees(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    displayPageWithShareOfProperty(
+      form = _.fold(
+        _.disposalFees.fold(disposalFeesForm)(a => disposalFeesForm.fill(a.inPounds())),
+        c => disposalFeesForm.fill(c.disposalFees.inPounds())
+      )
+    )(
+      page = disposalFeesPage(_, _, _, _)
+    )(
+      requiredPreviousAnswer = _.fold(_.disposalPrice, c => Some(c.disposalPrice)),
+      redirectToIfNoRequiredPreviousAnswer =
+        controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice()
+    )
   }
 
-  def whatWereDisposalFeesSubmit(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
-    Ok("")
+  def whatWereDisposalFeesSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    submitBehaviourWithShareOfProperty(
+      form = _.fold(
+        _.disposalFees.fold(disposalFeesForm)(a => disposalFeesForm.fill(a.inPounds())),
+        c => disposalFeesForm.fill(c.disposalFees.inPounds())
+      )
+    )(
+      page = disposalFeesPage(_, _, _, _)
+    )(
+      requiredPreviousAnswer = _.fold(_.disposalFees, c => Some(c.disposalFees)),
+      redirectToIfNoRequiredPreviousAnswer =
+        controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWereDisposalFees()
+    )(
+      updateAnswers = {
+        case (price, d) =>
+          d.fold(
+            _.copy(disposalFees = Some(fromPounds(price))),
+            _.copy(disposalFees = fromPounds(price))
+          )
+      },
+      nextPage = _.fold(
+        _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers(),
+        _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
+      )
+    )
   }
 
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
@@ -241,19 +359,13 @@ class DisposalDetailsController @Inject() (
 
 object DisposalDetailsController {
 
-  def numberHasMoreThanNDecimalPlaces(d: BigDecimal, n: Int): Boolean =
-    d.toString.split('.').toList match {
-      case _ :: decimals :: _ => decimals.length() > n
-      case _                  => false
-    }
-
   val shareOfPropertyForm: Form[ShareOfProperty] = {
 
     val formatter: Formatter[ShareOfProperty] = new Formatter[ShareOfProperty] {
       def validatePercentage(d: BigDecimal, key: String): Either[FormError, ShareOfProperty.Other] =
         if (d > 100) Left(FormError(key, "error.tooLarge"))
         else if (d < 0) Left(FormError(key, "error.tooSmall"))
-        else if (numberHasMoreThanNDecimalPlaces(d, 2)) Left(FormError(key, "error.tooManyDecimals"))
+        else if (NumberUtils.numberHasMoreThanNDecimalPlaces(d, 2)) Left(FormError(key, "error.tooManyDecimals"))
         else Right(ShareOfProperty.Other(d.toDouble))
 
       def readValue[A](key: String, data: Map[String, String], f: String => A): Either[FormError, A] =
@@ -305,24 +417,18 @@ object DisposalDetailsController {
 
   implicit val fillingOutReturnEq: Eq[FillingOutReturn] = Eq.fromUniversalEquals
 
-  val propertyPriceForm: Form[Double] = {
-
-    def validatePercentage(d: BigDecimal): ValidationResult =
-      // TODO: find out actual max value
-      if (d > 100) Invalid("error.tooLarge")
-      // TODO: is 0 valid?
-      else if (d < 0) Invalid("error.tooSmall")
-      else if (numberHasMoreThanNDecimalPlaces(d, 2)) Invalid("error.tooManyDecimals")
-      else Valid
-
+  val disposalPriceForm: Form[Double] =
     Form(
       formMapping(
-        "propertyPrice" ->
-          bigDecimal
-            .verifying(Constraint[BigDecimal](validatePercentage(_)))
-            .transform[Double](_.toDouble, BigDecimal(_))
+        "disposalPrice" -> of(AmountInPence.amountInPoundsFormatter)
       )(identity)(Some(_))
     )
-  }
+
+  val disposalFeesForm: Form[Double] =
+    Form(
+      formMapping(
+        "disposalFees" -> of(AmountInPence.amountInPoundsFormatter)
+      )(identity)(Some(_))
+    )
 
 }
