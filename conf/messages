@@ -577,4 +577,8 @@ returns.property-address.cyaLabel.property-address=Property address
 returns.property-address.cyaChange.property-address=your property address
 
 returns.disposal-details.caption=Sale or disposal details
-returns.property-share.title=How much of the property did you own?
+shareOfProperty.title=How much of the property did you own?
+returns.shareOfProperty.Full=100%
+returns.shareOfProperty.Half=50%
+returns.shareOfProperty.Other=Other share
+percentageShare.label=Percentage you owned

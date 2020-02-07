@@ -267,7 +267,6 @@ object DisposalDetailsController {
               .leftMap(_ => FormError(key, "error.invalid"))
           }
 
-
       val (shareOfPropertyKey, percentageKey) = "shareOfProperty" -> "percentageShare"
 
       override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], ShareOfProperty] = {
@@ -290,9 +289,10 @@ object DisposalDetailsController {
 
       override def unbind(key: String, value: ShareOfProperty): Map[String, String] =
         value match {
-          case ShareOfProperty.Full =>  Map(shareOfPropertyKey -> "0")
-          case ShareOfProperty.Half =>Map(shareOfPropertyKey -> "1")
-          case ShareOfProperty.Other(percentageValue) =>Map(shareOfPropertyKey -> "2", percentageKey -> percentageValue.toString.stripSuffix(".0"))
+          case ShareOfProperty.Full => Map(shareOfPropertyKey -> "0")
+          case ShareOfProperty.Half => Map(shareOfPropertyKey -> "1")
+          case ShareOfProperty.Other(percentageValue) =>
+            Map(shareOfPropertyKey -> "2", percentageKey -> percentageValue.toString.stripSuffix(".0"))
         }
     }
 
