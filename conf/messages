@@ -587,3 +587,8 @@ percentageShare.error.invalid=Percentage you owned must be a number
 percentageShare.error.tooLarge=Percentage you owned must be 100 or less
 percentageShare.error.tooSmall=Percentage you owned must be more than 0
 percentageShare.error.tooManyDecimals=Percentage you owned must have 2 decimal places or fewer
+
+disposalPrice.title=How much did you sell your share of the property for?
+disposalPrice.helpText=If the ownership of the property was shared, only enter the amount you received for your share. You’ll be able to enter any additional costs later.
+disposalPrice.error.required=Enter how much you sold your share of the property for
+disposalPrice.error.invalid=How much you sold your share of the property for must be an amount of money, like 160,000 or 11,200.45

@@ -13,7 +13,9 @@ legend>h1.heading-xlarge {
 .form-group-error h1>label.heading-xlarge,
 h1 > span.heading-medium,
 .column-half > .heading-medium,
-.govuk-box-highlight > h1 {
+.govuk-box-highlight > h1,
+.govuk-caption-xl + form h1,
+.govuk-caption-xl + form label.heading-xlarge {
     margin-top: 0;
 }
 .govuk-box-highlight > h1 {
@@ -249,6 +251,27 @@ input:focus, textarea:focus, select:focus, #global-header input:focus {
 
 details {
     margin-bottom: 20px;
+}
+
+.govuk-caption-xl {
+    font-family: "nta", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 1.11111;
+    display: block;
+    margin-bottom: 5px;
+    color: #6f777b;
+    padding-top: 20px;
+}
+
+@media (min-width: 40.0625em) {
+    .govuk-caption-xl {
+        padding-top: 40px;
+        font-size: 27px;
+        line-height: 1.11111;
+    }
 }
 
 .govuk-tag {

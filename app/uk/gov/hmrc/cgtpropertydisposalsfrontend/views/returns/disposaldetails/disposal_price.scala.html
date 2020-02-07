@@ -28,7 +28,8 @@ errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.err
 formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
 backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
 returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input
+unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
+caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
 @(form: Form[Double], backLink: Call, disposalMethod: DisposalMethod, shareOfProperty: ShareOfProperty)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
@@ -45,18 +46,25 @@ textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_i
         @errorSummary(form)
     }
 
+    @caption(messages("returns.disposal-details.caption"))
+
     @formWrapper(controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPriceSubmit(), 'novalidate -> "novalidate") {
-        @textInput(
-            fieldId = key,
-            value = form.data.getOrElse(key, ""),
-            errorKey = form.error(key).map(e => e.message),
-            hasErrors = form.error(key).nonEmpty,
-            label = Html(messages("disposalPrice.label")),
-            labelClass = Some(" govuk-label--m"),
-            helpText = None,
-            autoComplete = AutoCompleteType.On
-        )
-        @submitButton(messages("button.continue"))
+      @unitInput(
+        fieldId = key,
+        value = form.data.getOrElse(key, ""),
+        errorKey = form.error(key).map(e => e.message),
+        hasErrors = form.error(key).nonEmpty,
+        label = Html(title),
+        labelAsHeading = true,
+        helpText = Some(Html(messages(s"$key.helpText"))),
+        autoComplete = AutoCompleteType.On,
+        inputClass = Some("small"),
+        aspect = "left",
+        unit = "£",
+        assistiveText = "do not enter the pound sign"
+      )
+
+      @submitButton(messages("button.continue"))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)
