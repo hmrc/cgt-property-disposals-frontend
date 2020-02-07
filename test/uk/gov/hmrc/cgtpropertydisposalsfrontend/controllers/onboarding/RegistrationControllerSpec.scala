@@ -128,7 +128,7 @@ class RegistrationControllerSpec
 
           val result = performAction()
           status(result)          shouldBe OK
-          contentAsString(result) should include(message("entityType.title"))
+          contentAsString(result) should include(messagefromMessageKey("entityType.title"))
         }
       }
 
@@ -149,7 +149,7 @@ class RegistrationControllerSpec
 
           val result = performAction()
           status(result)          shouldBe OK
-          contentAsString(result) should include(message("entityType.title"))
+          contentAsString(result) should include(messagefromMessageKey("entityType.title"))
           contentAsString(result) should include("""checked="checked"""")
         }
 
@@ -176,7 +176,7 @@ class RegistrationControllerSpec
 
           val result = performAction()
           status(result)          shouldBe BAD_REQUEST
-          contentAsString(result) should include(message("entityType.error.required"))
+          contentAsString(result) should include(messagefromMessageKey("entityType.error.required"))
         }
 
         "the request submits an invalid value" in {
@@ -186,7 +186,7 @@ class RegistrationControllerSpec
           }
           val result = performAction("entityType" -> "2")
           status(result)          shouldBe BAD_REQUEST
-          contentAsString(result) should include(message("entityType.invalid"))
+          contentAsString(result) should include(messagefromMessageKey("entityType.invalid"))
         }
       }
 
@@ -307,7 +307,7 @@ class RegistrationControllerSpec
           }
           val result = performAction()
           status(result)          shouldBe OK
-          contentAsString(result) should include(message("wrongAccountForTrusts.title"))
+          contentAsString(result) should include(messagefromMessageKey("wrongAccountForTrusts.title"))
         }
       }
 

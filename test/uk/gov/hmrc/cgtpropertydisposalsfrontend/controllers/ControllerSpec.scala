@@ -77,12 +77,12 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
     super.afterAll()
   }
 
-  def message(messageKey: String, args: Any*)(implicit messagesApi: MessagesApi): String =
+  def messagefromMessageKey(messageKey: String, args: Any*)(implicit messagesApi: MessagesApi): String =
     messagesApi(messageKey, args: _*)(Lang.defaultLang)
 
   def checkIsTechnicalErrorPage(result: Future[Result])(implicit messagesApi: MessagesApi): Unit = {
     status(result)          shouldBe INTERNAL_SERVER_ERROR
-    contentAsString(result) should include(message("global.error.InternalServerError500.title"))
+    contentAsString(result) should include(messagefromMessageKey("global.error.InternalServerError500.title"))
   }
 
   def checkIsRedirect(result: Future[Result], expectedRedirectUrl: String): Unit = {
