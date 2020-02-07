@@ -30,17 +30,17 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, Error, JourneyStatus, SessionData}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDetailsAnswers, DraftReturn, ShareOfProperty}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.{CompleteIndividualTriageAnswers, IncompleteIndividualTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDetailsAnswers, DraftReturn, ShareOfProperty}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class DisposalDetailsControllerSpec
     extends ControllerSpec
@@ -226,6 +226,13 @@ class DisposalDetailsControllerSpec
 
         }
 
+        "the submitted value for shareOfProperty is not an integer" in {
+          test("shareOfProperty" -> "abc")("shareOfProperty.error.invalid")
+        }
+
+        "the submitted value for shareOfProperty is an integer but is not recognised" in {
+          test("shareOfProperty" -> "3")("shareOfProperty.error.invalid")
+        }
       }
 
       "show an error page" when {
@@ -331,8 +338,10 @@ class DisposalDetailsControllerSpec
 
         "the user has answered all of the disposal details questions " +
           "and the draft return and session data has been successfully updated" in {
-          val currentAnswers            = sample[CompleteDisposalDetailsAnswers].copy(shareOfProperty = ShareOfProperty.Full)
-          val (newShare, newShareValue) = ShareOfProperty.Half -> "1"
+          val percentage = 40.23
+          val currentAnswers =
+            sample[CompleteDisposalDetailsAnswers].copy(shareOfProperty = ShareOfProperty.Full)
+          val (newShare, newShareValue) = ShareOfProperty.Other(percentage) -> "2"
           val newDraftReturn = fillingOutReturn.draftReturn.copy(
             disposalDetailsAnswers = Some(
               currentAnswers.copy(
@@ -352,7 +361,7 @@ class DisposalDetailsControllerSpec
           }
 
           checkIsRedirect(
-            performAction(Seq("shareOfProperty" -> newShareValue)),
+            performAction(Seq("shareOfProperty" -> newShareValue, "percentageShare" -> percentage.toString)),
             controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
           )
 
@@ -379,6 +388,52 @@ class DisposalDetailsControllerSpec
 
         }
 
+      }
+
+      "convert a submitted option of 'Other' with value 100 to the 'Full' option" in {
+        val updatedAnswers = IncompleteDisposalDetailsAnswers.empty.copy(
+          shareOfProperty = Some(ShareOfProperty.Full)
+        )
+        val newDraftReturn = fillingOutReturn.draftReturn.copy(
+          disposalDetailsAnswers = Some(updatedAnswers)
+        )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            Future.successful(Right(Some(sessionWithDisposalDetailsAnswers(None))))
+          )
+          mockStoreDraftReturn(newDraftReturn)(Right(()))
+          mockStoreSession(sessionWithDisposalDetailsAnswers(updatedAnswers))(Future.successful(Right(())))
+        }
+
+        checkIsRedirect(
+          performAction(Seq("shareOfProperty" -> "2", "percentageShare" -> "100")),
+          controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice()
+        )
+      }
+
+      "convert a submitted option of 'Other' with value 50 to the 'Half' option" in {
+        val updatedAnswers = IncompleteDisposalDetailsAnswers.empty.copy(
+          shareOfProperty = Some(ShareOfProperty.Half)
+        )
+        val newDraftReturn = fillingOutReturn.draftReturn.copy(
+          disposalDetailsAnswers = Some(updatedAnswers)
+        )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            Future.successful(Right(Some(sessionWithDisposalDetailsAnswers(None))))
+          )
+          mockStoreDraftReturn(newDraftReturn)(Right(()))
+          mockStoreSession(sessionWithDisposalDetailsAnswers(updatedAnswers))(Future.successful(Right(())))
+        }
+
+        checkIsRedirect(
+          performAction(Seq("shareOfProperty" -> "2", "percentageShare" -> "50")),
+          controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice()
+        )
       }
 
     }
@@ -502,6 +557,10 @@ class DisposalDetailsControllerSpec
 
         "the number is less than zero" in {
           test("disposalPrice" -> "-1")("disposalPrice.error.tooSmall")
+        }
+
+        "the number is equal to zero" in {
+          test("disposalPrice" -> "0")("disposalPrice.error.tooSmall")
         }
 
         "the number is greater than 100" in {
@@ -723,6 +782,23 @@ class DisposalDetailsControllerSpec
 
       behave like noPropertyShareBehaviour(performAction)
 
+      "redirect to the disposal price page" when {
+
+        "the user has not answered that question yet" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(
+                Right(Some(sessionWithDisposalDetailsAnswers(requiredPreviousAnswers.copy(disposalPrice = None))))
+              )
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.DisposalDetailsController.whatWasDisposalPrice())
+        }
+
+      }
+
       "display the page" when {
 
         "the user has not answered the question before" in {
@@ -799,11 +875,31 @@ class DisposalDetailsControllerSpec
       def performAction(data: Seq[(String, String)]): Future[Result] =
         controller.whatWereDisposalFeesSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
 
+      val requiredPreviousAnswers = IncompleteDisposalDetailsAnswers.empty
+        .copy(shareOfProperty = Some(ShareOfProperty.Full), disposalPrice = Some(AmountInPence.fromPounds(2d)))
+
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
       behave like noDisposalMethodBehaviour(() => performAction(Seq.empty))
 
       behave like noPropertyShareBehaviour(() => performAction(Seq.empty))
+
+      "redirect to the disposal price page" when {
+
+        "the user has not answered that question yet" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(
+                Right(Some(sessionWithDisposalDetailsAnswers(requiredPreviousAnswers.copy(disposalPrice = None))))
+              )
+            )
+          }
+
+          checkIsRedirect(performAction(Seq.empty), routes.DisposalDetailsController.whatWasDisposalPrice())
+        }
+
+      }
 
       "show a form error" when {
 

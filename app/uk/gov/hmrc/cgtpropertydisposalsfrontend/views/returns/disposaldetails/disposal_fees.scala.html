@@ -33,8 +33,16 @@ textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_i
 
 @(form: Form[Double], backLink: Call, disposalMethod: DisposalMethod, shareOfProperty: ShareOfProperty)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 @key = @{ "disposalFees" }
-@title = @{messages("disposalFees.title")}
+@title = @{messages(
+    (disposalMethod, shareOfProperty) match {
+        case (DisposalMethod.Sold, ShareOfProperty.Full) => "disposalFees.full-share.sold-it.title"
+        case (DisposalMethod.Sold, _) => "disposalFees.not-full-share.sold-it.title"
+        case (_, ShareOfProperty.Full) => "disposalFees.full-share.gifted-it.title"
+        case (_, _) => "disposalFees.not-full-share.gifted-it.title"
+    })
+}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@labelWithCaption = @{Html(s"""<span class="heading-secondary">${messages("returns.disposal-details.caption")}</span>$title""")}
 
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
@@ -51,9 +59,9 @@ textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_i
             value = form.data.getOrElse(key, ""),
             errorKey = form.error(key).map(e => e.message),
             hasErrors = form.error(key).nonEmpty,
-            label = Html(messages("disposalFees.label")),
-            labelClass = Some(" govuk-label--m"),
-            helpText = None,
+            label = labelWithCaption,
+            labelAsHeading = true,
+            helpText = Some(Html(messages("disposalFees.extraContent"))),
             autoComplete = AutoCompleteType.On
         )
         @submitButton(messages("button.continue"))

@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.audit
 
 import play.api.libs.json.{Json, Writes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
 
 final case class AgentAccessAttempt(
   agentReferenceNumber: String,

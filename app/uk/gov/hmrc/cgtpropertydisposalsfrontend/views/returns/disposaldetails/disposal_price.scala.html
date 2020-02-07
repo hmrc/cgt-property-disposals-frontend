@@ -34,8 +34,16 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 
 @(form: Form[Double], backLink: Call, disposalMethod: DisposalMethod, shareOfProperty: ShareOfProperty)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 @key = @{ "disposalPrice" }
-@title = @{messages("disposalPrice.title")}
+@title = @{messages(
+    (disposalMethod, shareOfProperty) match {
+        case (DisposalMethod.Sold, ShareOfProperty.Full) => "disposalPrice.full-share.sold-it.title"
+        case (DisposalMethod.Sold, _) => "disposalPrice.not-full-share.sold-it.title"
+        case (_, ShareOfProperty.Full) => "disposalPrice.full-share.gifted-it.title"
+        case (_, _) => "disposalPrice.not-full-share.gifted-it.title"
+    })
+}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@labelWithCaption = @{Html(s"""<span class="heading-secondary">${messages("returns.disposal-details.caption")}</span>$title""")}
 
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {

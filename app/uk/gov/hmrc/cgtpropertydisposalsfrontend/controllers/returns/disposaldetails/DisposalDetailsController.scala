@@ -18,15 +18,16 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldet
 
 import cats.Eq
 import cats.data.EitherT
+import cats.instances.bigDecimal._
 import cats.instances.future._
 import cats.instances.int._
 import cats.syntax.either._
 import cats.syntax.eq._
 import com.google.inject.Inject
 import play.api.Configuration
-import play.api.data.{Form, FormError}
 import play.api.data.Forms.{of, mapping => formMapping}
 import play.api.data.format.Formatter
+import play.api.data.{Form, FormError}
 import play.api.http.Writeable
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
@@ -35,12 +36,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails.DisposalDetailsController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AmountInPence._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, NumberUtils, SessionData}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDetailsAnswers, DisposalMethod}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDetailsAnswers, ShareOfProperty}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ShareOfProperty.{Full, Half}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDetailsAnswers, DisposalMethod, ShareOfProperty}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, MoneyUtils, NumberUtils, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
@@ -105,7 +104,7 @@ class DisposalDetailsController @Inject() (
   )(
     requiredPreviousAnswer: DisposalDetailsAnswers => Option[R],
     redirectToIfNoRequiredPreviousAnswer: Call
-  )(answers: DisposalDetailsAnswers)(implicit request: RequestWithSessionData[_]): Future[Result] =
+  )(answers: DisposalDetailsAnswers): Future[Result] =
     if (requiredPreviousAnswer(answers).isDefined) {
       val backLink = answers.fold(
         _ => redirectToIfNoRequiredPreviousAnswer,
@@ -160,35 +159,38 @@ class DisposalDetailsController @Inject() (
     nextPage: DisposalDetailsAnswers => Call
   )(answers: DisposalDetailsAnswers, disposalMethod: DisposalMethod, fillingOurReturn: FillingOutReturn)(
     implicit request: RequestWithSessionData[_]
-  ): Future[Result] = {
-    lazy val backLink = answers.fold(
-      _ => redirectToIfNoRequiredPreviousAnswer,
-      _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
-    )
-    form(answers)
-      .bindFromRequest()
-      .fold(
-        formWithErrors => BadRequest(page(formWithErrors, backLink, disposalMethod)), { value =>
-          val newAnswers     = updateAnswers(value, answers)
-          val newDraftReturn = fillingOurReturn.draftReturn.copy(disposalDetailsAnswers = Some(newAnswers))
-
-          val result = for {
-            _ <- if (newDraftReturn === fillingOurReturn.draftReturn) EitherT.pure(())
-                else returnsService.storeDraftReturn(newDraftReturn)
-            _ <- EitherT(
-                  updateSession(sessionStore, request)(
-                    _.copy(journeyStatus = Some(fillingOurReturn.copy(draftReturn = newDraftReturn)))
-                  )
-                )
-          } yield ()
-
-          result.fold({ e =>
-            logger.warn("Could not update draft return", e)
-            errorHandler.errorResult()
-          }, _ => Redirect(nextPage(newAnswers)))
-        }
+  ): Future[Result] =
+    if (requiredPreviousAnswer(answers).isDefined) {
+      lazy val backLink = answers.fold(
+        _ => redirectToIfNoRequiredPreviousAnswer,
+        _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
       )
-  }
+      form(answers)
+        .bindFromRequest()
+        .fold(
+          formWithErrors => BadRequest(page(formWithErrors, backLink, disposalMethod)), { value =>
+            val newAnswers     = updateAnswers(value, answers)
+            val newDraftReturn = fillingOurReturn.draftReturn.copy(disposalDetailsAnswers = Some(newAnswers))
+
+            val result = for {
+              _ <- if (newDraftReturn === fillingOurReturn.draftReturn) EitherT.pure(())
+                  else returnsService.storeDraftReturn(newDraftReturn)
+              _ <- EitherT(
+                    updateSession(sessionStore, request)(
+                      _.copy(journeyStatus = Some(fillingOurReturn.copy(draftReturn = newDraftReturn)))
+                    )
+                  )
+            } yield ()
+
+            result.fold({ e =>
+              logger.warn("Could not update draft return", e)
+              errorHandler.errorResult()
+            }, _ => Redirect(nextPage(newAnswers)))
+          }
+        )
+    } else {
+      Redirect(redirectToIfNoRequiredPreviousAnswer)
+    }
 
   private def submitBehaviourWithShareOfProperty[A, P: Writeable, R](form: DisposalDetailsAnswers => Form[A])(
     page: (Form[A], Call, DisposalMethod, ShareOfProperty) => P
@@ -244,10 +246,7 @@ class DisposalDetailsController @Inject() (
 
   def howMuchDidYouOwnSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     submitBehaviour(
-      form = _.fold(
-        _.shareOfProperty.fold(shareOfPropertyForm)(shareOfPropertyForm.fill),
-        c => shareOfPropertyForm.fill(c.shareOfProperty)
-      )
+      form = _ => shareOfPropertyForm
     )(
       page = {
         case (form, backlink, _) => howMuchDidYouOwnPage(form, backlink)
@@ -287,10 +286,7 @@ class DisposalDetailsController @Inject() (
 
   def whatWasDisposalPriceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     submitBehaviourWithShareOfProperty(
-      form = _.fold(
-        _.disposalPrice.fold(disposalPriceForm)(a => disposalPriceForm.fill(a.inPounds())),
-        c => disposalPriceForm.fill(c.disposalPrice.inPounds())
-      )
+      form = _ => disposalPriceForm
     )(
       page = disposalPricePage(_, _, _, _)
     )(
@@ -329,16 +325,13 @@ class DisposalDetailsController @Inject() (
 
   def whatWereDisposalFeesSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     submitBehaviourWithShareOfProperty(
-      form = _.fold(
-        _.disposalFees.fold(disposalFeesForm)(a => disposalFeesForm.fill(a.inPounds())),
-        c => disposalFeesForm.fill(c.disposalFees.inPounds())
-      )
+      form = _ => disposalFeesForm
     )(
       page = disposalFeesPage(_, _, _, _)
     )(
-      requiredPreviousAnswer = _.fold(_.disposalFees, c => Some(c.disposalFees)),
+      requiredPreviousAnswer = _.fold(_.disposalPrice, c => Some(c.disposalPrice)),
       redirectToIfNoRequiredPreviousAnswer =
-        controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWereDisposalFees()
+        controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice()
     )(
       updateAnswers = {
         case (price, d) =>
@@ -408,10 +401,12 @@ object DisposalDetailsController {
   val shareOfPropertyForm: Form[ShareOfProperty] = {
 
     val formatter: Formatter[ShareOfProperty] = new Formatter[ShareOfProperty] {
-      def validatePercentage(d: BigDecimal, key: String): Either[FormError, ShareOfProperty.Other] =
+      def validatePercentage(d: BigDecimal, key: String): Either[FormError, ShareOfProperty] =
         if (d > 100) Left(FormError(key, "error.tooLarge"))
         else if (d < 0) Left(FormError(key, "error.tooSmall"))
         else if (NumberUtils.numberHasMoreThanNDecimalPlaces(d, 2)) Left(FormError(key, "error.tooManyDecimals"))
+        else if (d === BigDecimal(100)) Right(ShareOfProperty.Full)
+        else if (d === BigDecimal(50)) Right(ShareOfProperty.Half)
         else Right(ShareOfProperty.Other(d.toDouble))
 
       def readValue[A](key: String, data: Map[String, String], f: String => A): Either[FormError, A] =
@@ -438,7 +433,7 @@ object DisposalDetailsController {
               readValue(percentageKey, data, BigDecimal(_))
                 .flatMap(validatePercentage(_, percentageKey))
             } else {
-              Left(FormError(key, "error.invalid"))
+              Left(FormError(shareOfPropertyKey, "error.invalid"))
             }
           }
 
@@ -466,14 +461,14 @@ object DisposalDetailsController {
   val disposalPriceForm: Form[Double] =
     Form(
       formMapping(
-        "disposalPrice" -> of(AmountInPence.amountInPoundsFormatter)
+        "disposalPrice" -> of(MoneyUtils.amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds))
       )(identity)(Some(_))
     )
 
   val disposalFeesForm: Form[Double] =
     Form(
       formMapping(
-        "disposalFees" -> of(AmountInPence.amountInPoundsFormatter)
+        "disposalFees" -> of(MoneyUtils.amountInPoundsFormatter(_ < 0, _ > MoneyUtils.maxAmountOfPounds))
       )(identity)(Some(_))
     )
 
