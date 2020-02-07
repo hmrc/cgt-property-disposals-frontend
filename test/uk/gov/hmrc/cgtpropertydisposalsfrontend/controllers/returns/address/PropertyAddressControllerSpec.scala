@@ -221,7 +221,7 @@ class PropertyAddressControllerSpec
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("returns.property-address.cya.title"))
+        contentAsString(result) should include(messagefromMessageKey("returns.property-address.cya.title"))
       }
 
     }

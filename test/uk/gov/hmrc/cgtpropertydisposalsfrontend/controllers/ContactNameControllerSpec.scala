@@ -72,7 +72,7 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
         }
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("contactName.title"))
+        contentAsString(result) should include(messagefromMessageKey("contactName.title"))
       }
 
       "the endpoint is requested and the user has previously entered a contact name" in {
@@ -88,7 +88,7 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
         status(result) shouldBe OK
 
         val content = contentAsString(result)
-        content should include(message("contactName.title"))
+        content should include(messagefromMessageKey("contactName.title"))
         content should include(contactName.value)
       }
 

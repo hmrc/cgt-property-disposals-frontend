@@ -1923,7 +1923,7 @@ class StartControllerSpec
           val content = contentAsString(result)
 
           status(result) shouldBe OK
-          content        should include(message("weNeedMoreDetails.title"))
+          content        should include(messagefromMessageKey("weNeedMoreDetails.title"))
           content        should include(continueUrl)
         }
       }
@@ -1957,7 +1957,7 @@ class StartControllerSpec
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("weOnlySupportGG.title"))
+        contentAsString(result) should include(messagefromMessageKey("weOnlySupportGG.title"))
       }
     }
 
@@ -2048,7 +2048,7 @@ class StartControllerSpec
       "display the page" in {
         val result = controller.timedOut()(FakeRequest())
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("timed-out.title"))
+        contentAsString(result) should include(messagefromMessageKey("timed-out.title"))
       }
 
     }

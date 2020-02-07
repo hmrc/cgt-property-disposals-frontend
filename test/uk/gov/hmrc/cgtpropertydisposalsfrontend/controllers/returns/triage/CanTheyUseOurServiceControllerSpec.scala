@@ -890,7 +890,7 @@ class CanTheyUseOurServiceControllerSpec
 
         def testIsCYAPagePage(result: Future[Result]) = {
           status(result)          shouldBe OK
-          contentAsString(result) should include(message("triage.check-your-answers.title"))
+          contentAsString(result) should include(messagefromMessageKey("triage.check-your-answers.title"))
         }
 
         "all the questions have now been answered and the session is updated when a draft return has not yet been created" in {
@@ -1124,8 +1124,8 @@ class CanTheyUseOurServiceControllerSpec
               val content = contentAsString(result)
 
               status(result)          shouldBe BAD_REQUEST
-              contentAsString(result) should include(message(pageTitleKey))
-              content                 should include(message(expectedErrorMessageKey))
+              contentAsString(result) should include(messagefromMessageKey(pageTitleKey))
+              content                 should include(messagefromMessageKey(expectedErrorMessageKey))
             }
         }
       }
@@ -1355,7 +1355,7 @@ class CanTheyUseOurServiceControllerSpec
 
           val result = performAction()
           status(result)          shouldBe OK
-          contentAsString(result) should include(message(pageTitleKey))
+          contentAsString(result) should include(messagefromMessageKey(pageTitleKey))
         }
       }
     }
@@ -1375,7 +1375,7 @@ class CanTheyUseOurServiceControllerSpec
           val content = contentAsString(result)
           status(result) shouldBe OK
 
-          content should include(message(pageTitleKey))
+          content should include(messagefromMessageKey(pageTitleKey))
           prepopulatedContent(sampleCurrentAnswer).foreach(content should include(_))
         }
       }
@@ -1408,7 +1408,7 @@ class CanTheyUseOurServiceControllerSpec
           val content = contentAsString(result)
           status(result) shouldBe OK
 
-          content should include(message(pageTitleKey))
+          content should include(messagefromMessageKey(pageTitleKey))
           prepopulatedContent(sampleCurrentAnswer).foreach(content should include(_))
         }
       }
