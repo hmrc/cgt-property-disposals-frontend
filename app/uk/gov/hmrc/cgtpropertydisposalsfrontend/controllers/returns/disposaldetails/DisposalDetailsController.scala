@@ -149,7 +149,7 @@ class DisposalDetailsController @Inject() (
         )(answers)
     }
 
-  private def commonSubmitBehaviour[A, P: Writeable, R](form: DisposalDetailsAnswers => Form[A])(
+  private def commonSubmitBehaviour[A, P: Writeable, R](form: Form[A])(
     page: (Form[A], Call, DisposalMethod) => P
   )(
     requiredPreviousAnswer: DisposalDetailsAnswers => Option[R],
@@ -157,7 +157,7 @@ class DisposalDetailsController @Inject() (
   )(
     updateAnswers: (A, DisposalDetailsAnswers) => DisposalDetailsAnswers,
     nextPage: DisposalDetailsAnswers => Call
-  )(answers: DisposalDetailsAnswers, disposalMethod: DisposalMethod, fillingOurReturn: FillingOutReturn)(
+  )(answers: DisposalDetailsAnswers, disposalMethod: DisposalMethod, fillingOutReturn: FillingOutReturn)(
     implicit request: RequestWithSessionData[_]
   ): Future[Result] =
     if (requiredPreviousAnswer(answers).isDefined) {
@@ -165,19 +165,19 @@ class DisposalDetailsController @Inject() (
         _ => redirectToIfNoRequiredPreviousAnswer,
         _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
       )
-      form(answers)
+      form
         .bindFromRequest()
         .fold(
           formWithErrors => BadRequest(page(formWithErrors, backLink, disposalMethod)), { value =>
             val newAnswers     = updateAnswers(value, answers)
-            val newDraftReturn = fillingOurReturn.draftReturn.copy(disposalDetailsAnswers = Some(newAnswers))
+            val newDraftReturn = fillingOutReturn.draftReturn.copy(disposalDetailsAnswers = Some(newAnswers))
 
             val result = for {
-              _ <- if (newDraftReturn === fillingOurReturn.draftReturn) EitherT.pure(())
+              _ <- if (newDraftReturn === fillingOutReturn.draftReturn) EitherT.pure(())
                   else returnsService.storeDraftReturn(newDraftReturn)
               _ <- EitherT(
                     updateSession(sessionStore, request)(
-                      _.copy(journeyStatus = Some(fillingOurReturn.copy(draftReturn = newDraftReturn)))
+                      _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
                     )
                   )
             } yield ()
@@ -192,7 +192,7 @@ class DisposalDetailsController @Inject() (
       Redirect(redirectToIfNoRequiredPreviousAnswer)
     }
 
-  private def submitBehaviourWithShareOfProperty[A, P: Writeable, R](form: DisposalDetailsAnswers => Form[A])(
+  private def submitBehaviourWithShareOfProperty[A, P: Writeable, R](form: Form[A])(
     page: (Form[A], Call, DisposalMethod, ShareOfProperty) => P
   )(
     requiredPreviousAnswer: DisposalDetailsAnswers => Option[R],
@@ -212,7 +212,7 @@ class DisposalDetailsController @Inject() (
         Redirect(routes.DisposalDetailsController.howMuchDidYouOwn())
     }
 
-  private def submitBehaviour[A, P: Writeable, R](form: DisposalDetailsAnswers => Form[A])(
+  private def submitBehaviour[A, P: Writeable, R](form: Form[A])(
     page: (Form[A], Call, DisposalMethod) => P
   )(
     requiredPreviousAnswer: DisposalDetailsAnswers => Option[R],
@@ -246,7 +246,7 @@ class DisposalDetailsController @Inject() (
 
   def howMuchDidYouOwnSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     submitBehaviour(
-      form = _ => shareOfPropertyForm
+      form = shareOfPropertyForm
     )(
       page = {
         case (form, backlink, _) => howMuchDidYouOwnPage(form, backlink)
@@ -286,7 +286,7 @@ class DisposalDetailsController @Inject() (
 
   def whatWasDisposalPriceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     submitBehaviourWithShareOfProperty(
-      form = _ => disposalPriceForm
+      form = disposalPriceForm
     )(
       page = disposalPricePage(_, _, _, _)
     )(
@@ -325,7 +325,7 @@ class DisposalDetailsController @Inject() (
 
   def whatWereDisposalFeesSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     submitBehaviourWithShareOfProperty(
-      form = _ => disposalFeesForm
+      form = disposalFeesForm
     )(
       page = disposalFeesPage(_, _, _, _)
     )(
