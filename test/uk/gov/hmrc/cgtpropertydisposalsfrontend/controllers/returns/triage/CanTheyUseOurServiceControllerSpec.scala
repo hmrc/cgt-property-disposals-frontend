@@ -32,6 +32,7 @@ import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DateErrorScenarios.{DateErrorScenario, dateErrorScenarios}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => homeRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => returnsRoutes}
@@ -567,18 +568,18 @@ class CanTheyUseOurServiceControllerSpec
         )
 
       val formErrorScenarios =
-        (commonDateErrorScenarios("disposalDate") ::: List(
+        (dateErrorScenarios("disposalDate") ::: List(
           // date in the future
-          (
+          DateErrorScenario(
             Some(tomorrow.getDayOfMonth.toString),
             Some(tomorrow.getMonthValue.toString),
             Some(tomorrow.getYear.toString),
             "disposalDate.error.tooFarInFuture"
           ),
           // date does not exist
-          (Some("31"), Some("2"), Some("2019"), "disposalDate.error.invalid")
+          DateErrorScenario(Some("31"), Some("2"), Some("2019"), "disposalDate.error.invalid")
         )).map {
-          case (dayString, monthString, yearString, expectedErrorKey) =>
+          case DateErrorScenario(dayString, monthString, yearString, expectedErrorKey) =>
             val formData = List(
               "disposalDate-day"   -> dayString,
               "disposalDate-month" -> monthString,
@@ -721,23 +722,23 @@ class CanTheyUseOurServiceControllerSpec
         )
 
       val formErrorScenarios =
-        (commonDateErrorScenarios("completionDate") ::: List(
+        (dateErrorScenarios("completionDate") ::: List(
           // date before disposal date
-          (
+          DateErrorScenario(
             Some(dayBeforeDisposalDate.getDayOfMonth.toString),
             Some(dayBeforeDisposalDate.getMonthValue.toString),
             Some(dayBeforeDisposalDate.getYear.toString),
             "completionDate.error.tooFarInPast"
           ),
           // date in future
-          (
+          DateErrorScenario(
             Some(tomorrow.getDayOfMonth.toString),
             Some(tomorrow.getMonthValue.toString),
             Some(tomorrow.getYear.toString),
             "completionDate.error.tooFarInFuture"
           )
         )).map {
-          case (dayString, monthString, yearString, expectedErrorKey) =>
+          case DateErrorScenario(dayString, monthString, yearString, expectedErrorKey) =>
             val formData = List(
               "completionDate-day"   -> dayString,
               "completionDate-month" -> monthString,
@@ -981,7 +982,7 @@ class CanTheyUseOurServiceControllerSpec
       val uuid = UUID.randomUUID()
 
       val newDraftReturn =
-        DraftReturn(uuid, startingNewDraftReturn.subscribedDetails.cgtReference, completeAnswers, None, None)
+        DraftReturn(uuid, startingNewDraftReturn.subscribedDetails.cgtReference, completeAnswers, None, None, None)
 
       val sessionDataWithNewDraftReturn = SessionData.empty.copy(
         journeyStatus = Some(
@@ -1414,47 +1415,5 @@ class CanTheyUseOurServiceControllerSpec
       }
     }
   }
-
-  def commonDateErrorScenarios(dateKey: String) =
-    List(
-      (None, None, None, s"$dateKey.error.required"),
-      (Some(""), None, None, s"$dateKey.error.required"),
-      (None, Some(""), None, s"$dateKey.error.required"),
-      (None, None, Some(""), s"$dateKey.error.required"),
-      (Some(""), Some(""), None, s"$dateKey.error.required"),
-      (Some(""), None, Some(""), s"$dateKey.error.required"),
-      (None, Some(""), Some(""), s"$dateKey.error.required"),
-      (Some(""), Some(""), Some(""), s"$dateKey.error.required"),
-      // single field empty
-      (None, Some("12"), Some("2020"), s"$dateKey-day.error.required"),
-      (None, Some("100"), Some("-1000"), s"$dateKey-day.error.required"),
-      (Some("1"), None, Some("2020"), s"$dateKey-month.error.required"),
-      (Some("-1"), None, Some("1.2"), s"$dateKey-month.error.required"),
-      (Some("1"), Some("12"), None, s"$dateKey-year.error.required"),
-      (Some("0"), Some("-1"), None, s"$dateKey-year.error.required"),
-      // two fields mossing
-      (Some("1"), None, None, s"$dateKey-month.error.monthAndYearRequired"),
-      (Some("0"), None, None, s"$dateKey-month.error.monthAndYearRequired"),
-      (None, Some("12"), None, s"$dateKey-day.error.dayAndYearRequired"),
-      (None, Some("-1"), None, s"$dateKey-day.error.dayAndYearRequired"),
-      (None, None, Some("2020"), s"$dateKey-day.error.dayAndMonthRequired"),
-      (None, None, Some("-1"), s"$dateKey-day.error.dayAndMonthRequired"),
-      // day invalid and takes precedence over month and year
-      (Some("0"), Some("12"), Some("2020"), s"$dateKey-day.error.invalid"),
-      (Some("32"), Some("12"), Some("2020"), s"$dateKey-day.error.invalid"),
-      (Some("-1"), Some("-1"), Some("-2020"), s"$dateKey-day.error.invalid"),
-      (Some("1.2"), Some("3.4"), Some("4.5"), s"$dateKey-day.error.invalid"),
-      // month invalid and takes precedence over year
-      (Some("1"), Some("13"), Some("2020"), s"$dateKey-month.error.invalid"),
-      (Some("1"), Some("0"), Some("0"), s"$dateKey-month.error.invalid"),
-      (Some("1"), Some("-1"), Some("-6"), s"$dateKey-month.error.invalid"),
-      (Some("1"), Some("1.2"), Some("3.4"), s"$dateKey-month.error.invalid"),
-      // year invalid
-      (Some("1"), Some("12"), Some("0"), s"$dateKey-year.error.invalid"),
-      (Some("1"), Some("12"), Some("-1"), s"$dateKey-year.error.invalid"),
-      (Some("1"), Some("12"), Some("1.2"), s"$dateKey-year.error.invalid"),
-      // date does not exist
-      (Some("31"), Some("2"), Some("2019"), s"$dateKey.error.invalid")
-    )
 
 }

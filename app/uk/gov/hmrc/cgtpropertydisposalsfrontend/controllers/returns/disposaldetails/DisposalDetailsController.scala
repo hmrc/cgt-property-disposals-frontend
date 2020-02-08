@@ -20,7 +20,6 @@ import cats.Eq
 import cats.data.EitherT
 import cats.instances.bigDecimal._
 import cats.instances.future._
-import cats.instances.int._
 import cats.syntax.either._
 import cats.syntax.eq._
 import com.google.inject.Inject
@@ -37,9 +36,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldeta
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AmountInPence._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ShareOfProperty.{Full, Half}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDetailsAnswers, DisposalMethod, ShareOfProperty}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{MoneyUtils, NumberUtils, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, MoneyUtils, NumberUtils, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
@@ -362,53 +360,39 @@ object DisposalDetailsController {
 
   val shareOfPropertyForm: Form[ShareOfProperty] = {
 
-    val formatter: Formatter[ShareOfProperty] = new Formatter[ShareOfProperty] {
-      def validatePercentage(d: BigDecimal, key: String): Either[FormError, ShareOfProperty] =
-        if (d > 100) Left(FormError(key, "error.tooLarge"))
-        else if (d < 0) Left(FormError(key, "error.tooSmall"))
-        else if (NumberUtils.numberHasMoreThanNDecimalPlaces(d, 2)) Left(FormError(key, "error.tooManyDecimals"))
-        else if (d === BigDecimal(100)) Right(ShareOfProperty.Full)
-        else if (d === BigDecimal(50)) Right(ShareOfProperty.Half)
-        else Right(ShareOfProperty.Other(d.toDouble))
-
-      def readValue[A](key: String, data: Map[String, String], f: String => A): Either[FormError, A] =
-        data
-          .get(key)
-          .map(_.trim())
-          .filter(_.nonEmpty)
-          .fold[Either[FormError, A]](Left(FormError(key, "error.required"))) { stringValue =>
-            Either
-              .fromTry(Try(f(stringValue)))
-              .leftMap(_ => FormError(key, "error.invalid"))
-          }
-
+    val formatter: Formatter[ShareOfProperty] = {
       val (shareOfPropertyKey, percentageKey) = "shareOfProperty" -> "percentageShare"
 
-      override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], ShareOfProperty] = {
-        val result = readValue(shareOfPropertyKey, data, _.toInt)
-          .flatMap { i =>
-            if (i === 0)
-              Right(Full)
-            else if (i === 1)
-              Right(Half)
-            else if (i === 2) {
-              readValue(percentageKey, data, BigDecimal(_))
-                .flatMap(validatePercentage(_, percentageKey))
-            } else {
-              Left(FormError(shareOfPropertyKey, "error.invalid"))
-            }
+      def validatePercentage(s: String): Either[FormError, ShareOfProperty] =
+        Try(BigDecimal(s)).toEither
+          .leftMap(_ => FormError(percentageKey, "error.invalid"))
+          .flatMap { d =>
+            if (d > 100) Left(FormError(percentageKey, "error.tooLarge"))
+            else if (d < 0) Left(FormError(percentageKey, "error.tooSmall"))
+            else if (NumberUtils.numberHasMoreThanNDecimalPlaces(d, 2))
+              Left(FormError(percentageKey, "error.tooManyDecimals"))
+            else if (d === BigDecimal(100)) Right(ShareOfProperty.Full)
+            else if (d === BigDecimal(50)) Right(ShareOfProperty.Half)
+            else Right(ShareOfProperty.Other(d.toDouble))
           }
 
-        result.leftMap(Seq(_))
+      ConditionalRadioUtils.formatter(shareOfPropertyKey)(
+        List(
+          Right(ShareOfProperty.Full),
+          Right(ShareOfProperty.Half),
+          Left(
+            ConditionalRadioUtils.InnerOption(
+              percentageKey,
+              validatePercentage
+            )
+          )
+        )
+      ) {
+        case ShareOfProperty.Full => Map(shareOfPropertyKey -> "0")
+        case ShareOfProperty.Half => Map(shareOfPropertyKey -> "1")
+        case ShareOfProperty.Other(percentageValue) =>
+          Map(shareOfPropertyKey -> "2", percentageKey -> percentageValue.toString)
       }
-
-      override def unbind(key: String, value: ShareOfProperty): Map[String, String] =
-        value match {
-          case ShareOfProperty.Full => Map(shareOfPropertyKey -> "0")
-          case ShareOfProperty.Half => Map(shareOfPropertyKey -> "1")
-          case ShareOfProperty.Other(percentageValue) =>
-            Map(shareOfPropertyKey -> "2", percentageKey -> percentageValue.toString.stripSuffix(".0"))
-        }
     }
 
     Form(

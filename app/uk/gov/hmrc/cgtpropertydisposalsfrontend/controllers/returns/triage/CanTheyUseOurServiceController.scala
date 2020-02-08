@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
-import java.time.{Clock, LocalDate}
+import java.time.LocalDate
 
 import cats.Eq
 import cats.data.EitherT
@@ -83,10 +83,6 @@ class CanTheyUseOurServiceController @Inject() (
 
   val earliestDisposalDateInclusive: LocalDate =
     config.underlying.get[LocalDate]("returns.earliest-disposal-date-inclusive").value
-
-  val clock: Clock = Clock.systemUTC()
-
-  def today(): LocalDate = LocalDate.now(clock)
 
   def whoIsIndividualRepresenting(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     displayIndividualTriagePage(
@@ -331,7 +327,7 @@ class CanTheyUseOurServiceController @Inject() (
     displayIndividualTriagePage(
       _.fold(_.assetType, c => Some(c.assetType)),
       routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty()
-    )(_ => disposalDateForm(today()))(
+    )(_ => disposalDateForm(LocalDateUtils.today()))(
       extractField = _.fold(_.disposalDate, c => Some(c.disposalDate)),
       page = {
         case (currentState, form, isDraftReturn) =>
@@ -348,7 +344,7 @@ class CanTheyUseOurServiceController @Inject() (
     handleIndividualTriagePageSubmit(
       _.fold(_.assetType, c => Some(c.assetType)),
       routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty()
-    )(_ => disposalDateForm(today()))(
+    )(_ => disposalDateForm(LocalDateUtils.today()))(
       page = {
         case (currentState, form, isDraftReturn) =>
           disposalDatePage(
@@ -391,7 +387,7 @@ class CanTheyUseOurServiceController @Inject() (
     displayIndividualTriagePage(
       _.fold(_.disposalDate, c => Some(c.disposalDate)),
       routes.CanTheyUseOurServiceController.whenWasDisposalDate()
-    )(disposalDate => completionDateForm(disposalDate, today()))(
+    )(disposalDate => completionDateForm(disposalDate, LocalDateUtils.today()))(
       extractField = _.fold(_.completionDate, c => Some(c.completionDate)),
       page = {
         case (currentState, form, isDraftReturn) =>
@@ -408,7 +404,7 @@ class CanTheyUseOurServiceController @Inject() (
     handleIndividualTriagePageSubmit(
       _.fold(_.disposalDate, c => Some(c.disposalDate)),
       routes.CanTheyUseOurServiceController.whenWasDisposalDate()
-    )(disposalDate => completionDateForm(disposalDate, today()))(
+    )(disposalDate => completionDateForm(disposalDate, LocalDateUtils.today()))(
       page = {
         case (currentState, form, isDraftReturn) =>
           completionDatePage(
@@ -490,6 +486,7 @@ class CanTheyUseOurServiceController @Inject() (
                   uuidGenerator.nextId(),
                   startingNewDraftReturn.subscribedDetails.cgtReference,
                   complete,
+                  None,
                   None,
                   None
                 )

@@ -564,6 +564,7 @@ task-list.triage.link=Check if you can use this service
 task-list.provide-details.heading=Provide details
 task-list.enter-property-address.link=Enter property address
 task-list.disposals-details.link=Enter sale or disposal details
+task-list.acquisition-details.link=Enter purchase or acquisition details
 task-list.save-and-come-back.link=Save and come back later
 
 
@@ -615,3 +616,88 @@ disposalFees.error.tooLarge=Selling costs must be 50,000,000,000.00 or less
 disposalFees.error.tooManyDecimals= Selling costs must have 2 decimal places or less, for example 33.33
 
 returns.disposal-details.cya.title=Check your answers
+
+
+acquisitionDetails.caption=Purchase or acquisition details
+
+acquisitionMethod.title=How did you get your share of the property?
+returns.acquisitionMethod.Bought=Bought it
+returns.acquisitionMethod.Inherited=Inherited it
+returns.acquisitionMethod.Gifted=Got it as a gift
+returns.acquisitionMethod.Other=Other
+returns.otherAcquisitionMethod.label=How you got the property
+
+acquisitionMethod.error.required=Select how you got your share of the property
+acquisitionMethod.error.invalid=Select how you got your share of the property
+otherAcquisitionMethod.error.required=Enter how you got your share of the property
+otherAcquisitionMethod.error.invalid=How you got your share of the property must only include letters a to z, spaces and number
+otherAcquisitionMethod.error.tooLong=How you got your share of the property must be 35 characters or less
+
+
+acquisitionDate.title=What date did you become the owner of the property?
+acquisitionDate.helpText=This is the date the property was transferred into your name. For example, 21 5 2020
+acquisitionDate.error.required=Enter the date you became the owner
+acquisitionDate.error.invalid=Enter a real date you became the owner
+acquisitionDate.error.tooFarInFuture=Date you became the owner must be today or in the past
+acquisitionDate-day.error.required=Date you became the owner must include a day
+acquisitionDate-month.error.required=Date you became the owner must include a month
+acquisitionDate-year.error.required=Date you became the owner must include a year
+acquisitionDate-day.error.invalid=Enter a real date you became the owner
+acquisitionDate-month.error.invalid=Enter a real date you became the owner
+acquisitionDate-year.error.invalid=Enter a real date you became the owner
+acquisitionDate-month.error.monthAndYearRequired=Date you became the owner must include a month and a year
+acquisitionDate-day.error.dayAndYearRequired=Date you became the owner must include a day and a year
+acquisitionDate-day.error.dayAndMonthRequired=Date you became the owner must include a day and a month
+
+acquisitionPrice.title=How much did you pay for your share of the property?
+acquisitionPrice.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later.
+acquisitionPrice.error.required=Enter how much you paid for your share of the property
+acquisitionPrice.error.invalid=The amount of money must only include numbers, for example 160,000 or 23,040.50
+acquisitionPrice.error.tooSmall=The amount of money must be a number between 1 and 50,000,000,000.00
+acquisitionPrice.error.tooLarge=The amount of money must be a number between 1 and 50,000,000,000.00
+acquisitionPrice.error.tooManyDecimals=The amount of money must be 2 decimal places or less, for example 160,000 or 23,040.50
+
+improvementCosts.title=Do you want to claim any improvement costs?
+improvementCosts.helpText=You can only claim for your share of any costs that added value to the property. You cannot claim for mortgage interest, decorating or maintenance.
+improvementCosts.error.required=Select yes if you want to claim any improvement costs
+improvementCosts.error.invalid=Select yes if you want to claim any improvement costs
+improvementCostsValue.error.invalid=The amount of money must only include numbers, for example 160,000 or 23,040.50
+improvementCostsValue.error.tooSmall=The amount of money must be a number between £1 and £50,000,000,000.00
+improvementCostsValue.error.tooLarge=The amount of money must be a number betw een £1 and £50,000,000,000.00
+improvementCostsValue.error.tooManyDecimals=The amount of money must be 2 decimal places or less, for example £160,000 or £23,040.50
+improvementCostsValue.error.required=Enter how much you paid for improvements of your share of the property
+improvementCostsValue.label=Amount spent on improvements
+improvementCosts.details.summary=What are improvements?
+improvementCosts.details.p1=Improvement include adding an extension or replacing a basic kitchen with a luxury one.
+
+acquisitionFees.title=Do you want to claim any additional costs you paid when you bought the property?
+acquisitionFees.helpText=For example, Stamp Duty Land Tax, or fees for surveyors or solicitors. If you owned part of the property, only enter the amount you paid for.
+acquisitionFees.error.required=Select yes if you paid in additional costs when buying your share of the property
+acquisitionFeesValue.label=Amount of additional costs
+acquisitionFeesValue.error.required=Enter how much you paid in additional costs when buying your share of the property
+acquisitionFeesValue.error.invalid=The amount of money must only include numbers, for example 160,000 or 23,040.50
+acquisitionFeesValue.error.tooSmall=The amount of money must be a number between 1 and 50,000,000,000.00
+acquisitionFeesValue.error.tooLarge=The amount of money must be a number between 1 and 50,000,000,000.00
+acquisitionFeesValue.error.tooManyDecimals=The amount of money must be 2 decimal places or less, for example £160,000 or £23,040.50
+
+acquisitionDetails.cya.title=Check your answers
+acquisitionDetails.cyaLabel.rebased=Property value rebased
+acquisitionDetails.cyaLabel.rebasedValue=Rebased value
+acquisitionDetails.cyaLabel.improvementCostsValue=Amount of improvement costs
+acquisitionDetails.cyaLabel.acquisitionFeesValue=Amount of buying costs
+acquisitionDetails.cyaChange.acquisitionMethod=your acquisition method
+acquisitionDetails.cyaChange.acquisitionDate=your acquisition date
+acquisitionDetails.cyaChange.acquisitionPrice=your acquisition price
+acquisitionDetails.cyaChange.rebasedAcquisitionPrice=your rebased acquisition price
+acquisitionDetails.cyaChange.improvementCosts=your improvements costs
+acquisitionDetails.cyaChange.acquisitionFees=your acquisition fees
+
+rebaseAcquisitionPrice.title=Are you rebasing your share of the property to its market value on {0}?
+rebaseAcquisitionPrice.helpText=You can work out your gain or loss by including the property’s market value on {0} in your calculation.
+rebaseAcquisitionPrice.error.required=Select yes if you rebasing the property to its market value on {0}
+rebaseAcquisitionPriceValue.label=Property’s market value on {0}
+rebaseAcquisitionPriceValue.error.required=Enter the property’s market value on {0}
+rebaseAcquisitionPriceValue.error.invalid=The amount of money must only include numbers, for example 160,000 or 23,040.50
+rebaseAcquisitionPriceValue.error.tooSmall=The amount of money must be a number between 1 and 50,000,000,000.00
+rebaseAcquisitionPriceValue.error.tooLarge=The amount of money must be a number between 1 and 50,000,000,000.00
+rebaseAcquisitionPriceValue.error.tooManyDecimals=The amount of money must be 2 decimal places or less, for example £160,000 or £23,040.50

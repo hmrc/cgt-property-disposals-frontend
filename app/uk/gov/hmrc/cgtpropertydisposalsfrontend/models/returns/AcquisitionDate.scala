@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
+
+import java.time.LocalDate
 
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Format
 
-final case class AmountInPence(value: Long)
+final case class AcquisitionDate(value: LocalDate) extends AnyVal
 
-object AmountInPence {
+object AcquisitionDate {
 
-  def fromPounds(amount: Double): AmountInPence = AmountInPence((amount * 100d).toLong)
-
-  implicit class AmountInPenceOps(private val a: AmountInPence) extends AnyVal {
-    def inPounds(): Double = a.value.toDouble / 100d
-  }
-
-  implicit val format: Format[AmountInPence] =
-    implicitly[Format[Long]].inmap(AmountInPence(_), _.value)
+  implicit val format: Format[AcquisitionDate] =
+    implicitly[Format[LocalDate]].inmap(AcquisitionDate(_), _.value)
 
 }

@@ -14,22 +14,24 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import play.api.libs.functional.syntax._
-import play.api.libs.json.Format
+import julienrf.json.derived
+import play.api.libs.json.OFormat
 
-final case class AmountInPence(value: Long)
+sealed trait AcquisitionMethod extends Product with Serializable
 
-object AmountInPence {
+object AcquisitionMethod {
 
-  def fromPounds(amount: Double): AmountInPence = AmountInPence((amount * 100d).toLong)
+  final case object Bought extends AcquisitionMethod
 
-  implicit class AmountInPenceOps(private val a: AmountInPence) extends AnyVal {
-    def inPounds(): Double = a.value.toDouble / 100d
-  }
+  final case object Inherited extends AcquisitionMethod
 
-  implicit val format: Format[AmountInPence] =
-    implicitly[Format[Long]].inmap(AmountInPence(_), _.value)
+  final case object Gifted extends AcquisitionMethod
+
+  final case class Other(value: String) extends AcquisitionMethod
+
+  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
+  implicit val format: OFormat[AcquisitionMethod] = derived.oformat()
 
 }
