@@ -74,90 +74,60 @@ class DisposalDetailsController @Inject() (
     f: (
       SessionData,
       FillingOutReturn,
-      DisposalDetailsAnswers,
-      DisposalMethod,
-      Option[ShareOfProperty]
+      DisposalDetailsAnswers
     ) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((s, r: FillingOutReturn)) =>
-        val shareOfProperty = r.draftReturn.disposalDetailsAnswers.flatMap(
-          _.fold(_.shareOfProperty, c => Some(c.shareOfProperty))
-        )
-
-        r.draftReturn.triageAnswers.fold(_.disposalMethod, c => Some(c.disposalMethod)) match {
-          case Some(d) =>
-            r.draftReturn.disposalDetailsAnswers.fold[Future[Result]](
-              f(s, r, IncompleteDisposalDetailsAnswers.empty, d, shareOfProperty)
-            )(f(s, r, _, d, shareOfProperty))
-
-          case None =>
-            logger.warn("Could not find disposal method in disposal details section")
-            Redirect(controllers.routes.StartController.start())
-        }
+        r.draftReturn.disposalDetailsAnswers
+          .fold[Future[Result]](f(s, r, IncompleteDisposalDetailsAnswers.empty))(f(s, r, _))
 
       case _ => Redirect(controllers.routes.StartController.start())
     }
 
-  private def commonDisplayBehaviour[A, P: Writeable, R](form: DisposalDetailsAnswers => Form[A])(
-    page: Call => P
+  private def withDisposalMethod(fillingOutReturn: FillingOutReturn)(
+    f: DisposalMethod => Future[Result]
+  ): Future[Result] =
+    fillingOutReturn.draftReturn.triageAnswers.fold(_.disposalMethod, c => Some(c.disposalMethod)) match {
+      case Some(method) => f(method)
+      case _            => Redirect(controllers.routes.StartController.start())
+    }
+
+  private def withDisposalMethodAndShareOfProperty(fillingOutReturn: FillingOutReturn, answers: DisposalDetailsAnswers)(
+    f: (DisposalMethod, ShareOfProperty) => Future[Result]
+  ): Future[Result] =
+    withDisposalMethod(fillingOutReturn) { method =>
+      answers.fold(_.shareOfProperty, c => Some(c.shareOfProperty)) match {
+        case Some(share) => f(method, share)
+        case _           => Redirect(routes.DisposalDetailsController.howMuchDidYouOwn())
+      }
+    }
+
+  private def displayPage[A, P: Writeable, R](answers: DisposalDetailsAnswers)(form: DisposalDetailsAnswers => Form[A])(
+    page: (Form[A], Call) => P
   )(
     requiredPreviousAnswer: DisposalDetailsAnswers => Option[R],
     redirectToIfNoRequiredPreviousAnswer: Call
-  )(answers: DisposalDetailsAnswers): Future[Result] =
+  ): Future[Result] =
     if (requiredPreviousAnswer(answers).isDefined) {
       val backLink = answers.fold(
         _ => redirectToIfNoRequiredPreviousAnswer,
         _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
       )
 
-      Ok(page(backLink))
+      Ok(page(form(answers), backLink))
     } else {
       Redirect(redirectToIfNoRequiredPreviousAnswer)
     }
 
-  private def displayPageWithShareOfProperty[A, P: Writeable, R](form: DisposalDetailsAnswers => Form[A])(
-    page: (Form[A], Call, DisposalMethod, ShareOfProperty) => P
+  private def submitBehaviour[A, P: Writeable, R](fillingOutReturn: FillingOutReturn, answers: DisposalDetailsAnswers)(
+    form: Form[A]
+  )(
+    page: (Form[A], Call) => P
   )(
     requiredPreviousAnswer: DisposalDetailsAnswers => Option[R],
     redirectToIfNoRequiredPreviousAnswer: Call
-  )(implicit request: RequestWithSessionData[_]): Future[Result] =
-    withFillingOutReturnAndDisposalDetailsAnswers(request) {
-      case (_, _, answers, disposalMethod, Some(shareOfProperty)) =>
-        commonDisplayBehaviour(form)(page(form(answers), _, disposalMethod, shareOfProperty))(
-          requiredPreviousAnswer,
-          redirectToIfNoRequiredPreviousAnswer
-        )(answers)
-
-      case (_, _, _, _, None) =>
-        logger.warn("Could not find share of property value")
-        Redirect(routes.DisposalDetailsController.howMuchDidYouOwn())
-
-    }
-
-  private def displayPage[A, P: Writeable, R](form: DisposalDetailsAnswers => Form[A])(
-    page: (Form[A], Call, DisposalMethod) => P
-  )(
-    requiredPreviousAnswer: DisposalDetailsAnswers => Option[R],
-    redirectToIfNoRequiredPreviousAnswer: Call
-  )(implicit request: RequestWithSessionData[_]): Future[Result] =
-    withFillingOutReturnAndDisposalDetailsAnswers(request) {
-      case (_, _, answers, disposalMethod, _) =>
-        commonDisplayBehaviour(form)(page(form(answers), _, disposalMethod))(
-          requiredPreviousAnswer,
-          redirectToIfNoRequiredPreviousAnswer
-        )(answers)
-    }
-
-  private def commonSubmitBehaviour[A, P: Writeable, R](form: Form[A])(
-    page: (Form[A], Call, DisposalMethod) => P
-  )(
-    requiredPreviousAnswer: DisposalDetailsAnswers => Option[R],
-    redirectToIfNoRequiredPreviousAnswer: Call
-  )(
-    updateAnswers: (A, DisposalDetailsAnswers) => DisposalDetailsAnswers,
-    nextPage: DisposalDetailsAnswers => Call
-  )(answers: DisposalDetailsAnswers, disposalMethod: DisposalMethod, fillingOutReturn: FillingOutReturn)(
+  )(updateAnswers: (A, DisposalDetailsAnswers) => DisposalDetailsAnswers, nextPage: DisposalDetailsAnswers => Call)(
     implicit request: RequestWithSessionData[_]
   ): Future[Result] =
     if (requiredPreviousAnswer(answers).isDefined) {
@@ -168,7 +138,7 @@ class DisposalDetailsController @Inject() (
       form
         .bindFromRequest()
         .fold(
-          formWithErrors => BadRequest(page(formWithErrors, backLink, disposalMethod)), { value =>
+          formWithErrors => BadRequest(page(formWithErrors, backLink)), { value =>
             val newAnswers     = updateAnswers(value, answers)
             val newDraftReturn = fillingOutReturn.draftReturn.copy(disposalDetailsAnswers = Some(newAnswers))
 
@@ -192,194 +162,189 @@ class DisposalDetailsController @Inject() (
       Redirect(redirectToIfNoRequiredPreviousAnswer)
     }
 
-  private def submitBehaviourWithShareOfProperty[A, P: Writeable, R](form: Form[A])(
-    page: (Form[A], Call, DisposalMethod, ShareOfProperty) => P
-  )(
-    requiredPreviousAnswer: DisposalDetailsAnswers => Option[R],
-    redirectToIfNoRequiredPreviousAnswer: Call
-  )(updateAnswers: (A, DisposalDetailsAnswers) => DisposalDetailsAnswers, nextPage: DisposalDetailsAnswers => Call)(
-    implicit request: RequestWithSessionData[_]
-  ): Future[Result] =
-    withFillingOutReturnAndDisposalDetailsAnswers(request) {
-      case (_, r, answers, disposalMethod, Some(shareOfProperty)) =>
-        commonSubmitBehaviour(form)(page(_, _, _, shareOfProperty))(
-          requiredPreviousAnswer,
-          redirectToIfNoRequiredPreviousAnswer
-        )(updateAnswers, nextPage)(answers, disposalMethod, r)
-
-      case (_, _, _, _, None) =>
-        logger.warn("Could not find share of property value")
-        Redirect(routes.DisposalDetailsController.howMuchDidYouOwn())
-    }
-
-  private def submitBehaviour[A, P: Writeable, R](form: Form[A])(
-    page: (Form[A], Call, DisposalMethod) => P
-  )(
-    requiredPreviousAnswer: DisposalDetailsAnswers => Option[R],
-    redirectToIfNoRequiredPreviousAnswer: Call
-  )(updateAnswers: (A, DisposalDetailsAnswers) => DisposalDetailsAnswers, nextPage: DisposalDetailsAnswers => Call)(
-    implicit request: RequestWithSessionData[_]
-  ): Future[Result] =
-    withFillingOutReturnAndDisposalDetailsAnswers(request) {
-      case (_, r, answers, disposalMethod, _) =>
-        commonSubmitBehaviour(form)(page(_, _, _))(
-          requiredPreviousAnswer,
-          redirectToIfNoRequiredPreviousAnswer
-        )(updateAnswers, nextPage)(answers, disposalMethod, r)
-    }
-
   def howMuchDidYouOwn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    displayPage(
-      form = _.fold(
-        _.shareOfProperty.fold(shareOfPropertyForm)(shareOfPropertyForm.fill),
-        c => shareOfPropertyForm.fill(c.shareOfProperty)
-      )
-    )(
-      page = {
-        case (form, backlink, _) => howMuchDidYouOwnPage(form, backlink)
-      }
-    )(
-      requiredPreviousAnswer               = _ => Some(()),
-      redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
-    )
+    withFillingOutReturnAndDisposalDetailsAnswers(request) {
+      case (_, _, answers) =>
+        displayPage(answers)(
+          form = _.fold(
+            _.shareOfProperty.fold(shareOfPropertyForm)(shareOfPropertyForm.fill),
+            c => shareOfPropertyForm.fill(c.shareOfProperty)
+          )
+        )(
+          page = howMuchDidYouOwnPage(_, _)
+        )(
+          requiredPreviousAnswer               = _ => Some(()),
+          redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
+        )
+    }
   }
 
   def howMuchDidYouOwnSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    submitBehaviour(
-      form = shareOfPropertyForm
-    )(
-      page = {
-        case (form, backlink, _) => howMuchDidYouOwnPage(form, backlink)
-      }
-    )(
-      requiredPreviousAnswer               = _ => Some(()),
-      redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
-    )(
-      updateAnswers = {
-        case (percentage, d) =>
-          d.fold(
-            _.copy(shareOfProperty = Some(percentage)),
-            _.copy(shareOfProperty = percentage)
+    withFillingOutReturnAndDisposalDetailsAnswers(request) {
+      case (_, fillingOutReturn, answers) =>
+        submitBehaviour(fillingOutReturn, answers)(
+          form = shareOfPropertyForm
+        )(
+          page = howMuchDidYouOwnPage(_, _)
+        )(
+          requiredPreviousAnswer               = _ => Some(()),
+          redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
+        )(
+          updateAnswers = {
+            case (percentage, d) =>
+              d.fold(
+                _.copy(shareOfProperty = Some(percentage)),
+                _.copy(shareOfProperty = percentage)
+              )
+          },
+          nextPage = _.fold(
+            _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice(),
+            _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
           )
-      },
-      nextPage = _.fold(
-        _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice(),
-        _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
-      )
-    )
+        )
+    }
   }
 
   def whatWasDisposalPrice(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    displayPageWithShareOfProperty(
-      form = _.fold(
-        _.disposalPrice.fold(disposalPriceForm)(a => disposalPriceForm.fill(a.inPounds())),
-        c => disposalPriceForm.fill(c.disposalPrice.inPounds())
-      )
-    )(
-      page = disposalPricePage(_, _, _, _)
-    )(
-      requiredPreviousAnswer = _.fold(_.shareOfProperty, c => Some(c.shareOfProperty)),
-      redirectToIfNoRequiredPreviousAnswer =
-        controllers.returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwn()
-    )
+    withFillingOutReturnAndDisposalDetailsAnswers(request) {
+      case (_, fillingOutReturn, answers) =>
+        withDisposalMethodAndShareOfProperty(fillingOutReturn, answers) {
+          case (disposalMethod, shareOfProperty) =>
+            displayPage(answers)(
+              form = _.fold(
+                _.disposalPrice.fold(disposalPriceForm)(a => disposalPriceForm.fill(a.inPounds())),
+                c => disposalPriceForm.fill(c.disposalPrice.inPounds())
+              )
+            )(
+              page = disposalPricePage(_, _, disposalMethod, shareOfProperty)
+            )(
+              requiredPreviousAnswer = _.fold(_.shareOfProperty, c => Some(c.shareOfProperty)),
+              redirectToIfNoRequiredPreviousAnswer =
+                controllers.returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwn()
+            )
+        }
+    }
   }
 
   def whatWasDisposalPriceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    submitBehaviourWithShareOfProperty(
-      form = disposalPriceForm
-    )(
-      page = disposalPricePage(_, _, _, _)
-    )(
-      requiredPreviousAnswer = _.fold(_.shareOfProperty, c => Some(c.shareOfProperty)),
-      redirectToIfNoRequiredPreviousAnswer =
-        controllers.returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwn()
-    )(
-      updateAnswers = {
-        case (price, d) =>
-          d.fold(
-            _.copy(disposalPrice = Some(fromPounds(price))),
-            _.copy(disposalPrice = fromPounds(price))
-          )
-      },
-      nextPage = _.fold(
-        _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWereDisposalFees(),
-        _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
-      )
-    )
+    withFillingOutReturnAndDisposalDetailsAnswers(request) {
+      case (_, fillingOutReturn, answers) =>
+        withDisposalMethodAndShareOfProperty(fillingOutReturn, answers) {
+          case (disposalMethod, shareOfProperty) =>
+            submitBehaviour(fillingOutReturn, answers)(
+              form = disposalPriceForm
+            )(
+              page = disposalPricePage(_, _, disposalMethod, shareOfProperty)
+            )(
+              requiredPreviousAnswer = _.fold(_.shareOfProperty, c => Some(c.shareOfProperty)),
+              redirectToIfNoRequiredPreviousAnswer =
+                controllers.returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwn()
+            )(
+              updateAnswers = {
+                case (price, d) =>
+                  d.fold(
+                    _.copy(disposalPrice = Some(fromPounds(price))),
+                    _.copy(disposalPrice = fromPounds(price))
+                  )
+              },
+              nextPage = _.fold(
+                _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWereDisposalFees(),
+                _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
+              )
+            )
+        }
+    }
   }
 
   def whatWereDisposalFees(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    displayPageWithShareOfProperty(
-      form = _.fold(
-        _.disposalFees.fold(disposalFeesForm)(a => disposalFeesForm.fill(a.inPounds())),
-        c => disposalFeesForm.fill(c.disposalFees.inPounds())
-      )
-    )(
-      page = disposalFeesPage(_, _, _, _)
-    )(
-      requiredPreviousAnswer = _.fold(_.disposalPrice, c => Some(c.disposalPrice)),
-      redirectToIfNoRequiredPreviousAnswer =
-        controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice()
-    )
+    withFillingOutReturnAndDisposalDetailsAnswers(request) {
+      case (_, fillingOutReturn, answers) =>
+        withDisposalMethodAndShareOfProperty(fillingOutReturn, answers) {
+          case (disposalMethod, shareOfProperty) =>
+            displayPage(answers)(
+              form = _.fold(
+                _.disposalFees.fold(disposalFeesForm)(a => disposalFeesForm.fill(a.inPounds())),
+                c => disposalFeesForm.fill(c.disposalFees.inPounds())
+              )
+            )(
+              page = disposalFeesPage(_, _, disposalMethod, shareOfProperty)
+            )(
+              requiredPreviousAnswer = _.fold(_.disposalPrice, c => Some(c.disposalPrice)),
+              redirectToIfNoRequiredPreviousAnswer =
+                controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice()
+            )
+        }
+    }
   }
 
   def whatWereDisposalFeesSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    submitBehaviourWithShareOfProperty(
-      form = disposalFeesForm
-    )(
-      page = disposalFeesPage(_, _, _, _)
-    )(
-      requiredPreviousAnswer = _.fold(_.disposalPrice, c => Some(c.disposalPrice)),
-      redirectToIfNoRequiredPreviousAnswer =
-        controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice()
-    )(
-      updateAnswers = {
-        case (price, d) =>
-          d.fold(
-            _.copy(disposalFees = Some(fromPounds(price))),
-            _.copy(disposalFees = fromPounds(price))
-          )
-      },
-      nextPage = _.fold(
-        _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers(),
-        _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
-      )
-    )
+    withFillingOutReturnAndDisposalDetailsAnswers(request) {
+      case (_, fillingOutReturn, answers) =>
+        withDisposalMethodAndShareOfProperty(fillingOutReturn, answers) {
+          case (disposalMethod, shareOfProperty) =>
+            submitBehaviour(fillingOutReturn, answers)(
+              form = disposalFeesForm
+            )(
+              page = disposalFeesPage(_, _, disposalMethod, shareOfProperty)
+            )(
+              requiredPreviousAnswer = _.fold(_.disposalPrice, c => Some(c.disposalPrice)),
+              redirectToIfNoRequiredPreviousAnswer =
+                controllers.returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice()
+            )(
+              updateAnswers = {
+                case (price, d) =>
+                  d.fold(
+                    _.copy(disposalFees = Some(fromPounds(price))),
+                    _.copy(disposalFees = fromPounds(price))
+                  )
+              },
+              nextPage = _.fold(
+                _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers(),
+                _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
+              )
+            )
+        }
+    }
   }
 
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndDisposalDetailsAnswers(request) {
-      case (_, fillingOutReturn, disposalDetailsAnswers, disposalMethod, _) =>
-        disposalDetailsAnswers match {
-          case IncompleteDisposalDetailsAnswers(None, _, _) =>
-            Redirect(routes.DisposalDetailsController.howMuchDidYouOwn())
+      case (_, fillingOutReturn, answers) =>
+        withDisposalMethod(fillingOutReturn) {
+          case (disposalMethod) =>
+            answers match {
+              case IncompleteDisposalDetailsAnswers(None, _, _) =>
+                Redirect(routes.DisposalDetailsController.howMuchDidYouOwn())
 
-          case IncompleteDisposalDetailsAnswers(_, None, _) =>
-            Redirect(routes.DisposalDetailsController.whatWasDisposalPrice())
+              case IncompleteDisposalDetailsAnswers(_, None, _) =>
+                Redirect(routes.DisposalDetailsController.whatWasDisposalPrice())
 
-          case IncompleteDisposalDetailsAnswers(_, _, None) =>
-            Redirect(routes.DisposalDetailsController.whatWereDisposalFees())
+              case IncompleteDisposalDetailsAnswers(_, _, None) =>
+                Redirect(routes.DisposalDetailsController.whatWereDisposalFees())
 
-          case IncompleteDisposalDetailsAnswers(Some(share), Some(price), Some(fees)) =>
-            val completeAnswers    = CompleteDisposalDetailsAnswers(share, price, fees)
-            val updatedDraftReturn = fillingOutReturn.draftReturn.copy(disposalDetailsAnswers = Some(completeAnswers))
+              case IncompleteDisposalDetailsAnswers(Some(share), Some(price), Some(fees)) =>
+                val completeAnswers = CompleteDisposalDetailsAnswers(share, price, fees)
+                val updatedDraftReturn =
+                  fillingOutReturn.draftReturn.copy(disposalDetailsAnswers = Some(completeAnswers))
 
-            val result = for {
-              _ <- returnsService.storeDraftReturn(updatedDraftReturn)
-              _ <- EitherT(
-                    updateSession(sessionStore, request)(
-                      _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = updatedDraftReturn)))
-                    )
-                  )
-            } yield ()
+                val result = for {
+                  _ <- returnsService.storeDraftReturn(updatedDraftReturn)
+                  _ <- EitherT(
+                        updateSession(sessionStore, request)(
+                          _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = updatedDraftReturn)))
+                        )
+                      )
+                } yield ()
 
-            result.fold({ e =>
-              logger.warn("Could not update session", e)
-              errorHandler.errorResult
-            }, _ => Ok(checkYouAnswers(completeAnswers, disposalMethod)))
+                result.fold({ e =>
+                  logger.warn("Could not update session", e)
+                  errorHandler.errorResult
+                }, _ => Ok(checkYouAnswers(completeAnswers, disposalMethod)))
 
-          case answers: CompleteDisposalDetailsAnswers =>
-            Ok(checkYouAnswers(answers, disposalMethod))
+              case answers: CompleteDisposalDetailsAnswers =>
+                Ok(checkYouAnswers(answers, disposalMethod))
+            }
+
         }
     }
   }

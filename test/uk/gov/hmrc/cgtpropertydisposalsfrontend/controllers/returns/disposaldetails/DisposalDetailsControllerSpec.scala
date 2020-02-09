@@ -114,8 +114,6 @@ class DisposalDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like noDisposalMethodBehaviour(performAction)
-
       "display the page" when {
 
         "the user has not answered the question before" in {
@@ -188,8 +186,6 @@ class DisposalDetailsControllerSpec
         controller.howMuchDidYouOwnSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
-
-      behave like noDisposalMethodBehaviour(() => performAction(Seq.empty))
 
       "show a form error" when {
 
@@ -1671,7 +1667,7 @@ class DisposalDetailsControllerSpec
     }
 
   def noPropertyShareBehaviour(performAction: () => Future[Result]): Unit =
-    "redirect to how much did you own endpoint" when {
+    "redirect to the what was your share page" when {
 
       "there is no property share" in {
         val draftReturn = sample[DraftReturn].copy(
@@ -1699,7 +1695,7 @@ class DisposalDetailsControllerSpec
 
         checkIsRedirect(
           performAction(),
-          controllers.returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwn()
+          routes.DisposalDetailsController.howMuchDidYouOwn()
         )
       }
     }
