@@ -20,8 +20,10 @@ import java.util.Locale
 
 import cats.syntax.either._
 import cats.syntax.eq._
+import cats.instances.bigDecimal._
 import cats.instances.char._
-import play.api.data.FormError
+import play.api.data.Forms.{mapping, of}
+import play.api.data.{Form, FormError}
 import play.api.data.format.Formatter
 
 import scala.util.Try
@@ -65,6 +67,42 @@ object MoneyUtils {
       override def unbind(key: String, value: Double): Map[String, String] =
         Map(key -> formatAmountOfMoneyWithoutPoundSign(value))
     }
+
+  // form for yes/no radio page with no mapping to £0 and yes expecting an amount of money
+  // to be submitted
+  def amountInPoundsYesNoForm(optionId: String, valueId: String): Form[Double] = {
+    val formatter =
+      ConditionalRadioUtils.formatter(optionId)(
+        List(
+          Left(
+            ConditionalRadioUtils.InnerOption(
+              valueId,
+              MoneyUtils.validateAmountOfMoney(
+                valueId,
+                _ <= 0,
+                _ > MoneyUtils.maxAmountOfPounds
+              )
+            )
+          ),
+          Right(BigDecimal(0))
+        )
+      ) { d =>
+        if (d === BigDecimal(0)) {
+          Map(optionId -> "1")
+        } else {
+          Map(
+            optionId -> "0",
+            valueId  -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign(d.toDouble)
+          )
+        }
+      }
+
+    Form(
+      mapping(
+        "" -> of(formatter).transform[Double](_.toDouble, BigDecimal(_))
+      )(identity)(Some(_))
+    )
+  }
 
   private def cleanupAmountOfMoneyString(s: String): String =
     s.trim().filter(c => c =!= ',' && c =!= '£')
