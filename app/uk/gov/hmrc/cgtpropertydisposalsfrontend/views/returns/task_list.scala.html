@@ -69,12 +69,12 @@
      ) (_ => returns.address.routes.PropertyAddressController.checkYourAnswers().url), propertyAddressState)
     </li>
 
-    <li class="app-task-list__item">
+    <li id="disposalDetails" class="app-task-list__item">
     @taskLink(messages("task-list.disposals-details.link"),
      returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers().url, disposalDetailsState)
     </li>
 
-    <li class="app-task-list__item">
+    <li id="acquisitionDetails" class="app-task-list__item">
     @taskLink(messages("task-list.acquisition-details.link"),
      returns.acquisitiondetails.routes.AcquisitionDetailsController.checkYourAnswers().url, acquistionDetailsState)
     </li>
