@@ -30,14 +30,6 @@
         case ToDo => "to-do"
     }
 }
-  @tagLabel = @{
-    state match {
-      case InProgress => "In progress"
-      case Complete => "complete"
-      case CannotStart => "Cannot start"
-      case ToDo => "To do"
-    }
-  }
 
 <a class="app-task-list__task-name" href="@href">
 @label
