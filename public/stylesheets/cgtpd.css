@@ -501,6 +501,10 @@ details {
     height: 37px;
 }
 
+input:focus + .hmcts-currency-input__symbol.form-control--error {
+    border-color: #0b0c0c;
+}
+
 @media (min-width: 40.0625em) {
     .hmcts-currency-input .hmcts-currency-input__symbol {
         height: 38px;
