@@ -1,4 +1,4 @@
-/*
+@*
  * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,20 +12,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *@
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.audit
+@this()
 
-import play.api.libs.json.{Json, Writes}
+@(sectionName: String)(implicit messages: Messages)
 
-final case class AgentAccessAttempt(
-  agentReferenceNumber: String,
-  clientCgtReference: String,
-  success: Boolean
-)
-
-object AgentAccessAttempt {
-
-  implicit val writes: Writes[AgentAccessAttempt] = Json.writes[AgentAccessAttempt]
-
-}
+<span class="govuk-caption-xl">@sectionName</span>

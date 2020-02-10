@@ -36,7 +36,7 @@ trait ContactNameFormValidationTests { this: ControllerSpec =>
         val result = performAction(Seq.empty)
         status(result) shouldBe BAD_REQUEST
         val resultAsString = contentAsString(result)
-        resultAsString should include(messagefromMessageKey("contactName.error.required"))
+        resultAsString should include(messageFromMessageKey("contactName.error.required"))
       }
 
       "the request submits a contact name that is too long" in {
@@ -46,7 +46,7 @@ trait ContactNameFormValidationTests { this: ControllerSpec =>
           Seq("contactName" -> List.fill(110)("a").mkString(""))
         )
         status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messagefromMessageKey("contactName.error.tooLong"))
+        contentAsString(result) should include(messageFromMessageKey("contactName.error.tooLong"))
       }
 
       "the request submits a contact name with illegal characters" in {
@@ -58,7 +58,7 @@ trait ContactNameFormValidationTests { this: ControllerSpec =>
           )
         )
         status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messagefromMessageKey("contactName.error.pattern"))
+        contentAsString(result) should include(messageFromMessageKey("contactName.error.pattern"))
       }
 
     }

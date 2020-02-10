@@ -490,6 +490,7 @@ class CanTheyUseOurServiceController @Inject() (
                   uuidGenerator.nextId(),
                   startingNewDraftReturn.subscribedDetails.cgtReference,
                   complete,
+                  None,
                   None
                 )
               val result = for {

@@ -13,7 +13,9 @@ legend>h1.heading-xlarge {
 .form-group-error h1>label.heading-xlarge,
 h1 > span.heading-medium,
 .column-half > .heading-medium,
-.govuk-box-highlight > h1 {
+.govuk-box-highlight > h1,
+.govuk-caption-xl + form h1,
+.govuk-caption-xl + form label.heading-xlarge {
     margin-top: 0;
 }
 .govuk-box-highlight > h1 {
@@ -82,11 +84,20 @@ input:focus, textarea:focus, select:focus, #global-header input:focus {
     width: 50%;
 }
 
-.autocomplete__wrapper {
+.autocomplete__wrapper, .custom-input-wrapper {
     width: 50%;
 }
 
-.autocomplete__wrapper input[type="text"] {
+.autocomplete__wrapper, .custom-input-wrapper.small {
+    width: 33%;
+}
+
+.autocomplete__wrapper input[type="text"],
+.custom-input-wrapper input[type="text"] {
+    width: 100%;
+}
+
+.multiple-choice + .panel-indent .custom-input-wrapper .form-control {
     width: 100%;
 }
 
@@ -240,6 +251,27 @@ input:focus, textarea:focus, select:focus, #global-header input:focus {
 
 details {
     margin-bottom: 20px;
+}
+
+.govuk-caption-xl {
+    font-family: "nta", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 1.11111;
+    display: block;
+    margin-bottom: 5px;
+    color: #6f777b;
+    padding-top: 20px;
+}
+
+@media (min-width: 40.0625em) {
+    .govuk-caption-xl {
+        padding-top: 40px;
+        font-size: 27px;
+        line-height: 1.11111;
+    }
 }
 
 .govuk-tag {
@@ -440,4 +472,63 @@ details {
     background-color: #fff;
     border-style: double;
     color: #005ea5;
+}
+
+.hmcts-currency-input {
+    position: relative;
+}
+
+.hmcts-currency-input .hmcts-currency-input__symbol {
+    font-family: "nta", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-size: 16px;
+    line-height: 1.25;
+    position: absolute;
+    top: 0;
+    font-weight: bold;
+    padding: 6px 10px;
+    height: 33px;
+    box-sizing: border-box;
+    background-color: #f3f2f1;
+    border: 2px solid #0b0c0c;
+}
+
+.hmcts-currency-input__symbol.form-control--error {
+    border: 4px solid #b10e1e;
+    height: 37px;
+}
+
+@media (min-width: 40.0625em) {
+    .hmcts-currency-input .hmcts-currency-input__symbol {
+        height: 38px;
+        padding: 8px 10px;
+    }
+    .hmcts-currency-input__symbol.form-control--error {
+        height: 42px;
+    }
+}
+
+
+
+.hmcts-currency-input input {
+    padding-left: 40px;
+}
+
+.hmcts-currency-input.left .hmcts-currency-input__symbol {
+    left: 0;
+}
+
+
+.hmcts-currency-input input {
+    padding-left: 40px;
+}
+
+.hmcts-currency-input.right .hmcts-currency-input__symbol {
+    right: 0;
+}
+
+.hmcts-currency-input.right input {
+    padding-left: 5px;
+    padding-right: 40px;
 }

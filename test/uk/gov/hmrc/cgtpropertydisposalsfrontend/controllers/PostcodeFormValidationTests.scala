@@ -34,7 +34,7 @@ trait PostcodeFormValidationTests { this: ControllerSpec =>
 
         val result = performAction(Seq("postcode" -> ""))
         status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messagefromMessageKey("postcode.error.required"))
+        contentAsString(result) should include(messageFromMessageKey("postcode.error.required"))
       }
 
       "the postcode is too long" in {
@@ -47,7 +47,7 @@ trait PostcodeFormValidationTests { this: ControllerSpec =>
 
             val result = performAction(Seq("postcode" -> invalidPostcode))
             status(result)          shouldBe BAD_REQUEST
-            contentAsString(result) should include(messagefromMessageKey("postcode.error.tooLong"))
+            contentAsString(result) should include(messageFromMessageKey("postcode.error.tooLong"))
           }
         }
       }
@@ -66,7 +66,7 @@ trait PostcodeFormValidationTests { this: ControllerSpec =>
 
               val result = performAction(Seq("postcode" -> invalidPostcode))
               status(result)          shouldBe BAD_REQUEST
-              contentAsString(result) should include(messagefromMessageKey(errorMessageKey))
+              contentAsString(result) should include(messageFromMessageKey(errorMessageKey))
             }
         }
       }

@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.audit
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import play.api.libs.json.{Json, Writes}
+import play.api.libs.functional.syntax._
+import play.api.libs.json.Format
 
-final case class AgentAccessAttempt(
-  agentReferenceNumber: String,
-  clientCgtReference: String,
-  success: Boolean
-)
+final case class AmountInPence(value: Long)
 
-object AgentAccessAttempt {
+object AmountInPence {
 
-  implicit val writes: Writes[AgentAccessAttempt] = Json.writes[AgentAccessAttempt]
+  def fromPounds(amount: Double): AmountInPence = AmountInPence((amount * 100d).toLong)
+
+  implicit class AmountInPenceOps(private val a: AmountInPence) extends AnyVal {
+    def inPounds(): Double = a.value / 100d
+  }
+
+  implicit val format: Format[AmountInPence] =
+    implicitly[Format[Long]].inmap(AmountInPence(_), _.value)
 
 }

@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.audit
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import play.api.libs.json.{Json, Writes}
+object NumberUtils {
 
-final case class AgentAccessAttempt(
-  agentReferenceNumber: String,
-  clientCgtReference: String,
-  success: Boolean
-)
-
-object AgentAccessAttempt {
-
-  implicit val writes: Writes[AgentAccessAttempt] = Json.writes[AgentAccessAttempt]
+  def numberHasMoreThanNDecimalPlaces(d: BigDecimal, n: Int): Boolean =
+    d.toString.split('.').toList match {
+      case _ :: decimals :: _ => decimals.length() > n
+      case _                  => false
+    }
 
 }

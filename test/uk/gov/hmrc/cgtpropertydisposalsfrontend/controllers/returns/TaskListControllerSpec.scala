@@ -92,24 +92,26 @@ class TaskListControllerSpec
           status(result) shouldBe OK
 
           val doc: Document = parse(contentAsString(result))
-          doc.select("h1").text shouldBe messagefromMessageKey("service.title")
-          doc.select("li#canTheyUseOurService > a").text should include(messagefromMessageKey("task-list.triage.link"))
-          doc.select("li#canTheyUseOurService > a").attr("href") shouldBe triage.routes.CanTheyUseOurServiceController.checkYourAnswers().url
+          doc.select("h1").text                          shouldBe messageFromMessageKey("service.title")
+          doc.select("li#canTheyUseOurService > a").text should include(messageFromMessageKey("task-list.triage.link"))
+          doc.select("li#canTheyUseOurService > a").attr("href") shouldBe triage.routes.CanTheyUseOurServiceController
+            .checkYourAnswers()
+            .url
           doc.select("li#canTheyUseOurService > strong").text shouldBe triageState.toString
         }
 
         "the session data indicates that they are filling in a return and the triage section is incomplete" in {
           testTemplate(
-            sample[FillingOutReturn].copy(draftReturn = sample[DraftReturn].copy(triageAnswers =
-              sample[IncompleteIndividualTriageAnswers])),
+            sample[FillingOutReturn]
+              .copy(draftReturn = sample[DraftReturn].copy(triageAnswers = sample[IncompleteIndividualTriageAnswers])),
             TaskListStatus.InProgress
           )
         }
 
         "the session data indicates that they are filling in a return and the triage section is complete" in {
           testTemplate(
-            sample[FillingOutReturn].copy(draftReturn = sample[DraftReturn].copy(triageAnswers =
-              sample[CompleteIndividualTriageAnswers])),
+            sample[FillingOutReturn]
+              .copy(draftReturn = sample[DraftReturn].copy(triageAnswers = sample[CompleteIndividualTriageAnswers])),
             TaskListStatus.Complete
           )
         }
@@ -118,7 +120,8 @@ class TaskListControllerSpec
       "display the page with the proper Enter property address section status" when {
         "the session data indicates that they are filling in a return and enter property address is todo" in {
           val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn = sample[DraftReturn]
-              .copy(propertyAddress = None))
+            .copy(propertyAddress = None)
+          )
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -139,15 +142,20 @@ class TaskListControllerSpec
           status(result) shouldBe OK
 
           val doc: Document = parse(contentAsString(result))
-          doc.select("h1").text shouldBe messagefromMessageKey("service.title")
-          doc.select("li#propertyAddress > a").text shouldBe messagefromMessageKey("task-list.enter-property-address.link")
-          doc.select("li#propertyAddress > a").attr("href") shouldBe address.routes.PropertyAddressController.enterPostcode().url
+          doc.select("h1").text shouldBe messageFromMessageKey("service.title")
+          doc.select("li#propertyAddress > a").text shouldBe messageFromMessageKey(
+            "task-list.enter-property-address.link"
+          )
+          doc.select("li#propertyAddress > a").attr("href") shouldBe address.routes.PropertyAddressController
+            .enterPostcode()
+            .url
           doc.select("li#propertyAddress > strong").text shouldBe TaskListStatus.ToDo.toString
         }
 
         "the session data indicates that they are filling in a return and enter property address is complete" in {
           val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn = sample[DraftReturn]
-            .copy(propertyAddress = Some(sample[UkAddress])))
+            .copy(propertyAddress = Some(sample[UkAddress]))
+          )
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -168,9 +176,13 @@ class TaskListControllerSpec
           status(result) shouldBe OK
 
           val doc: Document = parse(contentAsString(result))
-          doc.select("h1").text shouldBe messagefromMessageKey("service.title")
-          doc.select("li#propertyAddress > a").text shouldBe messagefromMessageKey("task-list.enter-property-address.link")
-          doc.select("li#propertyAddress > a").attr("href") shouldBe address.routes.PropertyAddressController.checkYourAnswers().url
+          doc.select("h1").text shouldBe messageFromMessageKey("service.title")
+          doc.select("li#propertyAddress > a").text shouldBe messageFromMessageKey(
+            "task-list.enter-property-address.link"
+          )
+          doc.select("li#propertyAddress > a").attr("href") shouldBe address.routes.PropertyAddressController
+            .checkYourAnswers()
+            .url
           doc.select("li#propertyAddress > strong").text shouldBe TaskListStatus.Complete.toString
 
         }
@@ -197,8 +209,12 @@ class TaskListControllerSpec
           status(result) shouldBe OK
 
           val doc: Document = parse(contentAsString(result))
-          doc.select("h1").text shouldBe messagefromMessageKey("service.title")
-          doc.select("a#saveAndComeBackLater").attr("href") shouldBe uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.routes.HomePageController.homepage().url
+          doc.select("h1").text shouldBe messageFromMessageKey("service.title")
+          doc
+            .select("a#saveAndComeBackLater")
+            .attr("href") shouldBe uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.routes.HomePageController
+            .homepage()
+            .url
         }
       }
     }

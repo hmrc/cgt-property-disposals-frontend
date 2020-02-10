@@ -27,7 +27,8 @@ final case class DraftReturn(
   id: UUID,
   cgtReference: CgtReference,
   triageAnswers: IndividualTriageAnswers,
-  propertyAddress: Option[UkAddress]
+  propertyAddress: Option[UkAddress],
+  disposalDetailsAnswers: Option[DisposalDetailsAnswers]
 )
 
 object DraftReturn {

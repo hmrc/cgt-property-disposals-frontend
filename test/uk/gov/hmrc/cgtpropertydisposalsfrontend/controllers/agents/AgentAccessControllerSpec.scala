@@ -183,7 +183,7 @@ class AgentAccessControllerSpec
 
           val result = performAction()
           status(result)          shouldBe OK
-          contentAsString(result) should include(messagefromMessageKey("agent.enter-client-cgt-ref.title"))
+          contentAsString(result) should include(messageFromMessageKey("agent.enter-client-cgt-ref.title"))
         }
 
       }
@@ -216,8 +216,8 @@ class AgentAccessControllerSpec
 
           val result = performAction("cgtReference" -> value)
           status(result)          shouldBe BAD_REQUEST
-          contentAsString(result) should include(messagefromMessageKey("agent.enter-client-cgt-ref.title"))
-          contentAsString(result) should include(messagefromMessageKey(errorMessageKey))
+          contentAsString(result) should include(messageFromMessageKey("agent.enter-client-cgt-ref.title"))
+          contentAsString(result) should include(messageFromMessageKey(errorMessageKey))
         }
 
         "the submitted value is more than 15 characters long" in {
@@ -253,8 +253,8 @@ class AgentAccessControllerSpec
 
           val result = performAction("cgtReference" -> validCgtReference.value)
           status(result)          shouldBe BAD_REQUEST
-          contentAsString(result) should include(messagefromMessageKey("agent.enter-client-cgt-ref.title"))
-          contentAsString(result) should include(messagefromMessageKey("cgtReference.error.notPermitted"))
+          contentAsString(result) should include(messageFromMessageKey("agent.enter-client-cgt-ref.title"))
+          contentAsString(result) should include(messageFromMessageKey("cgtReference.error.notPermitted"))
 
         }
 
@@ -451,7 +451,7 @@ class AgentAccessControllerSpec
           val result = performAction()
           status(result) shouldBe OK
           val content = contentAsString(result)
-          content should include(messagefromMessageKey("agent.enter-client-postcode.title"))
+          content should include(messageFromMessageKey("agent.enter-client-postcode.title"))
           content should not include (ukAddress.postcode.value)
         }
 
@@ -465,7 +465,7 @@ class AgentAccessControllerSpec
           val result = performAction()
           status(result) shouldBe OK
           val content = contentAsString(result)
-          content should include(messagefromMessageKey("agent.enter-client-postcode.title"))
+          content should include(messageFromMessageKey("agent.enter-client-postcode.title"))
           content should include(ukAddress.postcode.value)
         }
       }
@@ -521,8 +521,8 @@ class AgentAccessControllerSpec
           val result = performAction("postcode" -> incorrectPostcode.value)
           status(result) shouldBe BAD_REQUEST
           val content = contentAsString(result)
-          content should include(messagefromMessageKey("agent.enter-client-postcode.title"))
-          content should include(messagefromMessageKey("postcode.error.noMatch"))
+          content should include(messageFromMessageKey("agent.enter-client-postcode.title"))
+          content should include(messageFromMessageKey("postcode.error.noMatch"))
         }
 
         "the submitted postcode is valid but it doesn't match the client's one and " +
@@ -545,8 +545,8 @@ class AgentAccessControllerSpec
           val result = performAction("postcode" -> incorrectPostcode.value)
           status(result) shouldBe BAD_REQUEST
           val content = contentAsString(result)
-          content should include(messagefromMessageKey("agent.enter-client-postcode.title"))
-          content should include(messagefromMessageKey("postcode.error.noMatch"))
+          content should include(messageFromMessageKey("agent.enter-client-postcode.title"))
+          content should include(messageFromMessageKey("postcode.error.noMatch"))
         }
 
         "the submitted postcode is valid but it doesn't match the client's one and" +
@@ -565,8 +565,8 @@ class AgentAccessControllerSpec
           val result = performAction("postcode" -> incorrectPostcode.value)
           status(result) shouldBe BAD_REQUEST
           val content = contentAsString(result)
-          content should include(messagefromMessageKey("agent.enter-client-postcode.title"))
-          content should include(messagefromMessageKey("postcode.error.noMatch"))
+          content should include(messageFromMessageKey("agent.enter-client-postcode.title"))
+          content should include(messageFromMessageKey("postcode.error.noMatch"))
         }
 
       }
@@ -751,7 +751,7 @@ class AgentAccessControllerSpec
           val result = performAction()
           status(result) shouldBe OK
           val content = contentAsString(result)
-          content should include(messagefromMessageKey("agent.enter-client-country.title"))
+          content should include(messageFromMessageKey("agent.enter-client-country.title"))
           content should not include (s""""$nonUkCountryCode" selected""")
         }
 
@@ -767,7 +767,7 @@ class AgentAccessControllerSpec
           val result = performAction()
           status(result) shouldBe OK
           val content = contentAsString(result)
-          content should include(messagefromMessageKey("agent.enter-client-country.title"))
+          content should include(messageFromMessageKey("agent.enter-client-country.title"))
           content should include(s""""$nonUkCountryCode" selected""")
         }
       }
@@ -814,8 +814,8 @@ class AgentAccessControllerSpec
           val result = performAction(formData: _*)
           status(result) shouldBe BAD_REQUEST
           val content = contentAsString(result)
-          content should include(messagefromMessageKey("agent.enter-client-country.title"))
-          content should include(messagefromMessageKey(errorKey))
+          content should include(messageFromMessageKey("agent.enter-client-country.title"))
+          content should include(messageFromMessageKey(errorKey))
         }
 
         "no country is submitted" in {
@@ -1026,7 +1026,7 @@ class AgentAccessControllerSpec
           status(result) shouldBe OK
 
           val content = contentAsString(result)
-          content should include(messagefromMessageKey("agent.confirm-client.title"))
+          content should include(messageFromMessageKey("agent.confirm-client.title"))
           content should include(clientDetails.makeAccountName())
           content should include(clientDetails.cgtReference.value)
         }
@@ -1172,7 +1172,7 @@ class AgentAccessControllerSpec
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(messagefromMessageKey("agent.too-many-attempts.title"))
+        contentAsString(result) should include(messageFromMessageKey("agent.too-many-attempts.title"))
 
       }
 

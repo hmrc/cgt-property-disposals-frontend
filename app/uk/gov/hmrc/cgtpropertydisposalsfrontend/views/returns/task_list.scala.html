@@ -32,6 +32,8 @@
 @title = @{messages("service.title")}
 @triageState = @{ draftReturn.triageAnswers.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete) }
 @propertyAddressState = @{ draftReturn.propertyAddress.fold[TaskListStatus](TaskListStatus.ToDo)(_ => TaskListStatus.Complete) }
+@disposalDetailsState = @{ draftReturn.disposalDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress,_ => TaskListStatus.Complete)) }
+
 @mainTemplate(title = title, userType = request.userType) {
 
   @pageHeading(title)
@@ -64,6 +66,11 @@
      draftReturn.propertyAddress.fold(
        returns.address.routes.PropertyAddressController.enterPostcode().url
      ) (_ => returns.address.routes.PropertyAddressController.checkYourAnswers().url), propertyAddressState)
+    </li>
+
+    <li class="app-task-list__item">
+    @taskLink(messages("task-list.disposals-details.link"),
+     returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers().url, disposalDetailsState)
     </li>
    </ul>
   </li>

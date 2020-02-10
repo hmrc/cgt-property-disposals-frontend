@@ -1,0 +1,11 @@
+GET   /sale-disposal-details/how-much-of-property-owned        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails.DisposalDetailsController.howMuchDidYouOwn()
+POST  /sale-disposal-details/how-much-of-property-owned        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails.DisposalDetailsController.howMuchDidYouOwnSubmit()
+
+GET   /disposal-details/disposal-amount                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails.DisposalDetailsController.whatWasDisposalPrice()
+POST  /disposal-details/disposal-amount                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails.DisposalDetailsController.whatWasDisposalPriceSubmit()
+
+GET   /disposal-details/disposal-costs                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails.DisposalDetailsController.whatWereDisposalFees()
+POST  /disposal-details/disposal-costs                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails.DisposalDetailsController.whatWereDisposalFeesSubmit()
+
+GET   /disposal-details/check-your-answers                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails.DisposalDetailsController.checkYourAnswers()
+POST  /disposal-details/check-your-answers                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails.DisposalDetailsController.checkYourAnswersSubmit()

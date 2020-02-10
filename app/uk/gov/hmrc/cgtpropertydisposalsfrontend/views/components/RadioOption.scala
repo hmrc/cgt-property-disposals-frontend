@@ -14,18 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.audit
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components
 
-import play.api.libs.json.{Json, Writes}
+import play.twirl.api.Html
 
-final case class AgentAccessAttempt(
-  agentReferenceNumber: String,
-  clientCgtReference: String,
-  success: Boolean
+final case class RadioOption(
+  label: String,
+  content: Option[Html]
 )
-
-object AgentAccessAttempt {
-
-  implicit val writes: Writes[AgentAccessAttempt] = Json.writes[AgentAccessAttempt]
-
-}

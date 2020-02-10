@@ -183,7 +183,7 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
 
         val result = controller.getFailedMatching()(FakeRequest())
         status(result)          shouldBe OK
-        contentAsString(result) should include(messagefromMessageKey("iv.failedMatching.title"))
+        contentAsString(result) should include(messageFromMessageKey("iv.failedMatching.title"))
       }
 
     }
@@ -198,7 +198,7 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
 
         val result = controller.getFailedIV()(FakeRequest())
         status(result)          shouldBe OK
-        contentAsString(result) should include(messagefromMessageKey("iv.failedIv.title"))
+        contentAsString(result) should include(messageFromMessageKey("iv.failedIv.title"))
       }
 
     }
@@ -213,7 +213,7 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
 
         val result = controller.getInsufficientEvidence()(FakeRequest())
         status(result)          shouldBe OK
-        contentAsString(result) should include(messagefromMessageKey("iv.insufficientEvidence.title"))
+        contentAsString(result) should include(messageFromMessageKey("iv.insufficientEvidence.title"))
       }
 
     }
@@ -228,7 +228,7 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
 
         val result = controller.getLockedOut()(FakeRequest())
         status(result)          shouldBe OK
-        contentAsString(result) should include(messagefromMessageKey("iv.lockedOut.title"))
+        contentAsString(result) should include(messageFromMessageKey("iv.lockedOut.title"))
 
       }
 
@@ -244,7 +244,7 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
 
         val result = controller.getUserAborted()(FakeRequest())
         status(result)          shouldBe OK
-        contentAsString(result) should include(messagefromMessageKey("iv.userAborted.title"))
+        contentAsString(result) should include(messageFromMessageKey("iv.userAborted.title"))
 
       }
 
@@ -260,7 +260,7 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
 
         val result = controller.getTimedOut()(FakeRequest())
         status(result)          shouldBe OK
-        contentAsString(result) should include(messagefromMessageKey("iv.timeout.title"))
+        contentAsString(result) should include(messageFromMessageKey("iv.timeout.title"))
 
       }
 
@@ -276,7 +276,7 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
 
         val result = controller.getTechnicalIssue()(FakeRequest())
         status(result)          shouldBe OK
-        contentAsString(result) should include(messagefromMessageKey("iv.technicalIssue.title"))
+        contentAsString(result) should include(messageFromMessageKey("iv.technicalIssue.title"))
 
       }
 
@@ -292,7 +292,7 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
 
         val result = controller.getPreconditionFailed()(FakeRequest())
         status(result)          shouldBe OK
-        contentAsString(result) should include(messagefromMessageKey("iv.preconditionFailed.title"))
+        contentAsString(result) should include(messageFromMessageKey("iv.preconditionFailed.title"))
 
       }
 

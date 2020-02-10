@@ -1,4 +1,5 @@
 -> /  triage.Routes
+-> /  disposal_details.Routes
 
 GET  /enter-property-address      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.enterUkAddress()
 POST /enter-property-address      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.enterUkAddressSubmit()

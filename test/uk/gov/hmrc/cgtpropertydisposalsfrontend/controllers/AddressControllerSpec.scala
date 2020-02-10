@@ -105,7 +105,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(messagefromMessageKey("subscription.isUk.title"))
+        contentAsString(result) should include(messageFromMessageKey("subscription.isUk.title"))
       }
 
       "there are no address lookup results to clear from session" in {
@@ -118,7 +118,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(messagefromMessageKey("subscription.isUk.title"))
+        contentAsString(result) should include(messageFromMessageKey("subscription.isUk.title"))
       }
     }
     "display an error page" when {
@@ -156,7 +156,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
         }
         val result = performAction(Seq.empty)
         status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messagefromMessageKey("isUk.error.required"))
+        contentAsString(result) should include(messageFromMessageKey("isUk.error.required"))
       }
     }
 
@@ -203,7 +203,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(messagefromMessageKey(expectedTitleMessageKey))
+        contentAsString(result) should include(messageFromMessageKey(expectedTitleMessageKey))
       }
     }
 
@@ -218,7 +218,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
         }
         val result = performAction(Seq("postcode" -> "W1A2HV"))
         status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messagefromMessageKey("address-line1.error.required"))
+        contentAsString(result) should include(messageFromMessageKey("address-line1.error.required"))
       }
       "address line 1 is too long" in {
         inSequence {
@@ -229,7 +229,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
           Seq("address-line1" -> "1290b StreetWithAVeryLongNameForTestingTheMaxLength", "postcode" -> "W1A2HV")
         )
         status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messagefromMessageKey("address-line1.error.tooLong"))
+        contentAsString(result) should include(messageFromMessageKey("address-line1.error.tooLong"))
       }
       "address line 1 is invalid" in {
         inSequence {
@@ -238,7 +238,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
         }
         val result = performAction(Seq("address-line1" -> "ContainsIllegal={%}=Characters", "postcode" -> "W1A2HV"))
         status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messagefromMessageKey("address-line1.error.pattern"))
+        contentAsString(result) should include(messageFromMessageKey("address-line1.error.pattern"))
       }
       "address line 2 is too long" in {
         inSequence {
@@ -253,7 +253,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
           )
         )
         status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messagefromMessageKey("address-line2.error.tooLong"))
+        contentAsString(result) should include(messageFromMessageKey("address-line2.error.tooLong"))
       }
       "address postcode is empty" in {
         inSequence {
@@ -262,7 +262,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
         }
         val result = performAction(Seq("address-line1" -> "Some street"))
         status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messagefromMessageKey("postcode.error.required"))
+        contentAsString(result) should include(messageFromMessageKey("postcode.error.required"))
       }
 
       "the address postcode contains invalid characters" in {
@@ -272,7 +272,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
         }
         val result = performAction(Seq("address-line1" -> "Some street", "postcode" -> "W1A,2HV"))
         status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messagefromMessageKey("postcode.error.invalidCharacters"))
+        contentAsString(result) should include(messageFromMessageKey("postcode.error.invalidCharacters"))
       }
 
       "the address postcode does not have a valid format" in {
@@ -282,7 +282,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
         }
         val result = performAction(Seq("address-line1" -> "Some street", "postcode" -> "ABC123"))
         status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messagefromMessageKey("postcode.error.pattern"))
+        contentAsString(result) should include(messageFromMessageKey("postcode.error.pattern"))
       }
 
     }
@@ -359,7 +359,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(messagefromMessageKey("nonUkAddress.title"))
+        contentAsString(result) should include(messageFromMessageKey("nonUkAddress.title"))
       }
     }
 
@@ -374,7 +374,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
         }
         val result = performAction(Seq("countryCode" -> "NZ"))
         status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messagefromMessageKey("nonUkAddress-line1.error.required"))
+        contentAsString(result) should include(messageFromMessageKey("nonUkAddress-line1.error.required"))
       }
       "address line 1 is too long" in {
         inSequence {
@@ -385,7 +385,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
           Seq("nonUkAddress-line1" -> "1290b StreetWithAVeryLongNameForTestingTheMaxLength", "countryCode" -> "NZ")
         )
         status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messagefromMessageKey("nonUkAddress-line1.error.tooLong"))
+        contentAsString(result) should include(messageFromMessageKey("nonUkAddress-line1.error.tooLong"))
       }
       "address line 1 is invalid" in {
         inSequence {
@@ -395,7 +395,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
         val result =
           performAction(Seq("nonUkAddress-line1" -> "12 ContainsIllegal={%}=Characters", "countryCode" -> "NZ"))
         status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messagefromMessageKey("nonUkAddress-line1.error.pattern"))
+        contentAsString(result) should include(messageFromMessageKey("nonUkAddress-line1.error.pattern"))
       }
       "address line 2 is invalid" in {
         inSequence {
@@ -410,7 +410,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
           )
         )
         status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messagefromMessageKey("nonUkAddress-line2.error.pattern"))
+        contentAsString(result) should include(messageFromMessageKey("nonUkAddress-line2.error.pattern"))
       }
       "countryCode is empty" in {
         inSequence {
@@ -419,7 +419,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
         }
         val result = performAction(Seq("nonUkAddress-line1" -> "10 Some Street"))
         status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messagefromMessageKey("countryCode.error.required"))
+        contentAsString(result) should include(messageFromMessageKey("countryCode.error.required"))
       }
       "countryCode is invalid" in {
         inSequence {
@@ -428,7 +428,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
         }
         val result = performAction(Seq("countryCode" -> "XX"))
         status(result)          shouldBe BAD_REQUEST
-        contentAsString(result) should include(messagefromMessageKey("countryCode.error.notFound"))
+        contentAsString(result) should include(messageFromMessageKey("countryCode.error.notFound"))
       }
     }
 
@@ -515,7 +515,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
           mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
         }
 
-        contentAsString(performAction()) should include(messagefromMessageKey(expectedTitleMessageKey))
+        contentAsString(performAction()) should include(messageFromMessageKey(expectedTitleMessageKey))
       }
 
       "there is an address lookup result in session" in {
@@ -530,7 +530,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
         }
 
         val content = contentAsString(performAction())
-        content should include(messagefromMessageKey(expectedTitleMessageKey))
+        content should include(messageFromMessageKey(expectedTitleMessageKey))
         content should include(s"""value="${postcode.value}"""")
       }
 
@@ -562,7 +562,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
       }
       val result = performAction(Seq("postcode" -> p.value))
       status(result)          shouldBe BAD_REQUEST
-      contentAsString(result) should include(messagefromMessageKey("postcode.error.noResults"))
+      contentAsString(result) should include(messageFromMessageKey("postcode.error.noResults"))
     }
 
     "show form errors when no results are found for a filter" in {
@@ -579,7 +579,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
       }
       val result = performAction(Seq("postcode" -> p.value, "filter" -> filter))
       status(result)          shouldBe BAD_REQUEST
-      contentAsString(result) should include(messagefromMessageKey("filter.error.noResults"))
+      contentAsString(result) should include(messageFromMessageKey("filter.error.noResults"))
     }
 
     "show form errors when no results are found for a postcode within a stored search" in {
@@ -595,7 +595,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
       }
       val result = performAction(Seq("postcode" -> p.value))
       status(result)          shouldBe BAD_REQUEST
-      contentAsString(result) should include(messagefromMessageKey("postcode.error.noResults"))
+      contentAsString(result) should include(messageFromMessageKey("postcode.error.noResults"))
     }
 
     "show form errors when no results are found for a filter within a stored search" in {
@@ -612,7 +612,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
       }
       val result = performAction(Seq("postcode" -> p.value, "filter" -> filter))
       status(result)          shouldBe BAD_REQUEST
-      contentAsString(result) should include(messagefromMessageKey("filter.error.noResults"))
+      contentAsString(result) should include(messageFromMessageKey("filter.error.noResults"))
     }
 
     "show an error page" when {
@@ -777,7 +777,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(messagefromMessageKey(expectedMessageTitleKey))
+        contentAsString(result) should include(messageFromMessageKey(expectedMessageTitleKey))
       }
 
     }
@@ -824,7 +824,7 @@ trait AddressControllerSpec[J <: JourneyStatus]
 
               val result = performAction(Seq("address-select" -> submitted))
               status(result)          shouldBe BAD_REQUEST
-              contentAsString(result) should include(messagefromMessageKey(errorKey))
+              contentAsString(result) should include(messageFromMessageKey(errorKey))
             }
         }
       }
