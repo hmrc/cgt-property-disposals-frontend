@@ -76,13 +76,15 @@ class AcquisitionDetailsControllerSpec
   def sessionWithState(
     answers: Option[AcquisitionDetailsAnswers],
     assetType: Option[AssetType],
-    wasUkResident: Option[Boolean]
+    wasUkResident: Option[Boolean],
+    disposalDate: Option[DisposalDate]
   ): (SessionData, FillingOutReturn) = {
     val journey = sample[FillingOutReturn].copy(
       draftReturn = sample[DraftReturn].copy(
         triageAnswers = sample[IncompleteIndividualTriageAnswers].copy(
           assetType      = assetType,
-          wasAUKResident = wasUkResident
+          wasAUKResident = wasUkResident,
+          disposalDate   = disposalDate
         ),
         acquisitionDetailsAnswers = answers
       )
@@ -94,9 +96,10 @@ class AcquisitionDetailsControllerSpec
   def sessionWithState(
     answers: AcquisitionDetailsAnswers,
     assetType: AssetType,
-    wasUkResident: Boolean
+    wasUkResident: Boolean,
+    disposalDate: DisposalDate = sample[DisposalDate]
   ): (SessionData, FillingOutReturn) =
-    sessionWithState(Some(answers), Some(assetType), Some(wasUkResident))
+    sessionWithState(Some(answers), Some(assetType), Some(wasUkResident), Some(disposalDate))
 
   "AcquisitionDetailsController" when {
 
@@ -113,7 +116,9 @@ class AcquisitionDetailsControllerSpec
             withClue(s"For answers $answers: ") {
               inSequence {
                 mockAuthWithNoRetrievals()
-                mockGetSession(Future.successful(Right(Some(sessionWithState(answers, None, None)._1))))
+                mockGetSession(
+                  Future.successful(Right(Some(sessionWithState(answers, None, None, Some(sample[DisposalDate]))._1)))
+                )
               }
 
               checkPageIsDisplayed(
@@ -219,7 +224,7 @@ class AcquisitionDetailsControllerSpec
       "show an error page" when {
 
         val (method, methodValue) = AcquisitionMethod.Bought -> 0
-        val (session, journey)    = sessionWithState(None, None, None)
+        val (session, journey)    = sessionWithState(None, None, None, None)
         val updatedDraftReturn = journey.draftReturn.copy(acquisitionDetailsAnswers = Some(
           IncompleteAcquisitionDetailsAnswers.empty.copy(acquisitionMethod = Some(method))
         )
@@ -254,7 +259,7 @@ class AcquisitionDetailsControllerSpec
         "the acquisition details journey is incomplete and" when {
 
           def test(data: (String, String)*)(method: AcquisitionMethod): Unit = {
-            val (session, journey) = sessionWithState(None, None, None)
+            val (session, journey) = sessionWithState(None, None, None, None)
             val updatedDraftReturn = journey.draftReturn.copy(acquisitionDetailsAnswers = Some(
               IncompleteAcquisitionDetailsAnswers.empty.copy(acquisitionMethod = Some(method))
             )
@@ -375,6 +380,32 @@ class AcquisitionDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
+      "redirect to the task list page" when {
+
+        "there is no disposal date in the session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(
+                Right(
+                  Some(
+                    sessionWithState(
+                      Some(sample[CompleteAcquisitionDetailsAnswers]),
+                      Some(sample[AssetType]),
+                      Some(sample[Boolean]),
+                      None
+                    )._1
+                  )
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+        }
+
+      }
+
       "redirect to the acquisition method page" when {
 
         "that question has not yet been answered" in {
@@ -478,14 +509,50 @@ class AcquisitionDetailsControllerSpec
           "acquisitionDate-year"  -> date.getYear.toString
         )
 
+      val disposalDate = DisposalDate(LocalDate.of(2020, 1, 1))
+
       behave like redirectToStartBehaviour(() => performAction())
 
       behave like missingAssetTypeAndResidentialStatusBehaviour(() => performAction())
 
+      "redirect to the task list page" when {
+
+        "there is no disposal date in the session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              Future.successful(
+                Right(
+                  Some(
+                    sessionWithState(
+                      Some(sample[CompleteAcquisitionDetailsAnswers]),
+                      Some(sample[AssetType]),
+                      Some(sample[Boolean]),
+                      None
+                    )._1
+                  )
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+        }
+
+      }
+
       "show a form error" when {
 
         def test(data: (String, String)*)(expectedErrorKey: String): Unit =
-          testFormError(data: _*)(expectedErrorKey)("acquisitionDate.title")(performAction)
+          testFormError(data: _*)(expectedErrorKey)("acquisitionDate.title")(
+            performAction,
+            sessionWithState(
+              sample[CompleteAcquisitionDetailsAnswers],
+              sample[AssetType],
+              sample[Boolean],
+              disposalDate
+            )._1
+          )
 
         "the date is invalid" in {
           dateErrorScenarios("acquisitionDate").foreach {
@@ -503,8 +570,8 @@ class AcquisitionDetailsControllerSpec
           }
         }
 
-        "the date is after today" in {
-          val tomorrow = LocalDateUtils.today().plusDays(1L)
+        "the date is after the disposal date" in {
+          val tomorrow = disposalDate.value.plusDays(1L)
 
           test(formData(tomorrow): _*)("acquisitionDate.error.tooFarInFuture")
         }
@@ -513,10 +580,10 @@ class AcquisitionDetailsControllerSpec
 
       "show an error page" when {
 
-        val acquisitionDate = AcquisitionDate(LocalDate.ofEpochDay(0L))
+        val acquisitionDate = AcquisitionDate(disposalDate.value)
         val answers = sample[CompleteAcquisitionDetailsAnswers]
           .copy(acquisitionDate = AcquisitionDate(acquisitionDate.value.plusDays(1L)))
-        val (session, journey) = sessionWithState(answers, sample[AssetType], sample[Boolean])
+        val (session, journey) = sessionWithState(answers, sample[AssetType], sample[Boolean], disposalDate)
         val updatedDraftReturn = journey.draftReturn.copy(acquisitionDetailsAnswers = Some(
           answers.copy(acquisitionDate = acquisitionDate)
         )
@@ -553,7 +620,7 @@ class AcquisitionDetailsControllerSpec
           oldAnswers: AcquisitionDetailsAnswers,
           newAnswers: AcquisitionDetailsAnswers
         ): Unit = {
-          val (session, journey) = sessionWithState(oldAnswers, assetType, wasUkResident)
+          val (session, journey) = sessionWithState(oldAnswers, assetType, wasUkResident, disposalDate)
           val updatedDraftReturn = journey.draftReturn.copy(acquisitionDetailsAnswers = Some(newAnswers))
           val updatedSession     = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
@@ -572,7 +639,7 @@ class AcquisitionDetailsControllerSpec
         }
 
         "the user has not answered this question before" in {
-          val date = LocalDate.ofEpochDay(0L)
+          val date = disposalDate.value
           val oldAnswers = IncompleteAcquisitionDetailsAnswers.empty.copy(
             acquisitionMethod = Some(AcquisitionMethod.Bought)
           )
@@ -1441,7 +1508,10 @@ class AcquisitionDetailsControllerSpec
           scenarios.foreach {
             case (formData, expectedAmountInPence) =>
               withClue(s"For form data $formData and expected amount in pence $expectedAmountInPence: ") {
-                val answers            = sample[CompleteAcquisitionDetailsAnswers].copy(acquisitionDate = acquisitionDate)
+                val answers = sample[CompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate         = acquisitionDate,
+                  rebasedAcquisitionPrice = Some(AmountInPence(expectedAmountInPence.value + 1L))
+                )
                 val (session, journey) = sessionWithState(answers, AssetType.Residential, true)
                 val updatedDraftReturn = journey.draftReturn
                   .copy(acquisitionDetailsAnswers =
@@ -1616,6 +1686,7 @@ class AcquisitionDetailsControllerSpec
                     sessionWithState(
                       sample[IncompleteAcquisitionDetailsAnswers].copy(
                         acquisitionDate         = Some(AcquisitionDate(RebasingCutoffDates.ukResidents)),
+                        acquisitionPrice        = Some(sample[AmountInPence]),
                         rebasedAcquisitionPrice = Some(sample[AmountInPence])
                       ),
                       AssetType.Residential,
@@ -2330,7 +2401,8 @@ class AcquisitionDetailsControllerSpec
             case (formData, expectedAmountInPence) =>
               withClue(s"For form data $formData and expected amount in pence $expectedAmountInPence: ") {
                 val answers =
-                  sample[CompleteAcquisitionDetailsAnswers].copy(rebasedAcquisitionPrice = Some(sample[AmountInPence]))
+                  sample[CompleteAcquisitionDetailsAnswers]
+                    .copy(rebasedAcquisitionPrice = Some(AmountInPence(expectedAmountInPence.value + 1L)))
                 val (session, journey) = sessionWithState(answers, sample[AssetType], sample[Boolean])
                 val updatedDraftReturn = journey.draftReturn
                   .copy(acquisitionDetailsAnswers = Some(answers.copy(acquisitionFees = expectedAmountInPence)))
@@ -2632,7 +2704,14 @@ class AcquisitionDetailsControllerSpec
           mockGetSession(
             Future.successful(
               Right(
-                Some(sessionWithState(Some(sample[CompleteAcquisitionDetailsAnswers]), None, Some(sample[Boolean]))._1)
+                Some(
+                  sessionWithState(
+                    Some(sample[CompleteAcquisitionDetailsAnswers]),
+                    None,
+                    Some(sample[Boolean]),
+                    Some(sample[DisposalDate])
+                  )._1
+                )
               )
             )
           )
@@ -2648,7 +2727,12 @@ class AcquisitionDetailsControllerSpec
             Future.successful(
               Right(
                 Some(
-                  sessionWithState(Some(sample[CompleteAcquisitionDetailsAnswers]), Some(sample[AssetType]), None)._1
+                  sessionWithState(
+                    Some(sample[CompleteAcquisitionDetailsAnswers]),
+                    Some(sample[AssetType]),
+                    None,
+                    Some(sample[DisposalDate])
+                  )._1
                 )
               )
             )
@@ -2663,23 +2747,16 @@ class AcquisitionDetailsControllerSpec
   def testFormError(
     data: (String, String)*
   )(expectedErrorMessageKey: String, errorArgs: String*)(pageTitleKey: String, titleArgs: String*)(
-    performAction: Seq[(String, String)] => Future[Result]
+    performAction: Seq[(String, String)] => Future[Result],
+    currentSession: SessionData = sessionWithState(
+      sample[CompleteAcquisitionDetailsAnswers].copy(rebasedAcquisitionPrice = Some(sample[AmountInPence])),
+      sample[AssetType],
+      sample[Boolean]
+    )._1
   ): Unit = {
     inSequence {
       mockAuthWithNoRetrievals()
-      mockGetSession(
-        Future.successful(
-          Right(
-            Some(
-              sessionWithState(
-                sample[CompleteAcquisitionDetailsAnswers].copy(rebasedAcquisitionPrice = Some(sample[AmountInPence])),
-                sample[AssetType],
-                sample[Boolean]
-              )._1
-            )
-          )
-        )
-      )
+      mockGetSession(Future.successful(Right(Some(currentSession))))
     }
 
     checkPageIsDisplayed(

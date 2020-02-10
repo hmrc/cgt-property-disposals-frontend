@@ -13,8 +13,8 @@ POST   /acquisition-details/rebase                        uk.gov.hmrc.cgtpropert
 GET    /acquisition-details/improvement-costs             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.AcquisitionDetailsController.improvementCosts()
 POST   /acquisition-details/improvement-costs             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.AcquisitionDetailsController.improvementCostsSubmit()
 
-GET    /acquisition-details/acquired-fees                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.AcquisitionDetailsController.acquisitionFees()
-POST   /acquisition-details/acquired-fees                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.AcquisitionDetailsController.acquisitionFeesSubmit()
+GET    /acquisition-details/acquisition-costs             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.AcquisitionDetailsController.acquisitionFees()
+POST   /acquisition-details/acquisition-costs             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.AcquisitionDetailsController.acquisitionFeesSubmit()
 
 GET    /acquisition-details/check-your-answers             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.AcquisitionDetailsController.checkYourAnswers()
 POST   /acquisition-details/check-your-answers             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.AcquisitionDetailsController.checkYourAnswersSubmit()

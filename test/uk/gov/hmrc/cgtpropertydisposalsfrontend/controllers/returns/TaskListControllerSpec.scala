@@ -99,7 +99,7 @@ class TaskListControllerSpec
           messageFromMessageKey("service.title"), { doc =>
             doc.select(s"li#$sectionLinkId > a").text         shouldBe sectionLinkText
             doc.select(s"li#$sectionLinkId > a").attr("href") shouldBe sectionLinkHref.url
-            doc.select(s"li#$sectionLinkId > strong").text    shouldBe sectionsStatus.toString
+            doc.select(s"li#$sectionLinkId > strong").text    shouldBe messageFromMessageKey(s"task-list.$sectionsStatus")
           }
         )
       }
