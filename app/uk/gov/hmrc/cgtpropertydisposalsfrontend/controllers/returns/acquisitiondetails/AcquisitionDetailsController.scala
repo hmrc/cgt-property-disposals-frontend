@@ -675,112 +675,13 @@ object AcquisitionDetailsController {
       )(identity)(Some(_))
     )
 
-  val rebasedAcquisitionPriceForm: Form[Double] = {
-    val (rebaseAcquisitionPriceKey, rebaseAcquisitionPriceValueKey) = "rebaseAcquisitionPrice" -> "rebaseAcquisitionPriceValue"
+  val rebasedAcquisitionPriceForm: Form[Double] =
+    MoneyUtils.amountInPoundsYesNoForm("rebaseAcquisitionPrice", "rebaseAcquisitionPriceValue")
 
-    val formatter =
-      ConditionalRadioUtils.formatter(rebaseAcquisitionPriceKey)(
-        List(
-          Left(
-            ConditionalRadioUtils.InnerOption(
-              rebaseAcquisitionPriceValueKey,
-              MoneyUtils.validateAmountOfMoney(
-                rebaseAcquisitionPriceValueKey,
-                _ <= 0,
-                _ > MoneyUtils.maxAmountOfPounds
-              )
-            )
-          ),
-          Right(BigDecimal(0))
-        )
-      ) { d =>
-        if (d === BigDecimal(0)) {
-          Map(rebaseAcquisitionPriceKey -> "1")
-        } else {
-          Map(
-            rebaseAcquisitionPriceKey      -> "0",
-            rebaseAcquisitionPriceValueKey -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign(d.toDouble)
-          )
-        }
-      }
+  val improvementCostsForm: Form[Double] =
+    MoneyUtils.amountInPoundsYesNoForm("improvementCosts", "improvementCostsValue")
 
-    Form(
-      mapping(
-        "" -> of(formatter).transform[Double](_.toDouble, BigDecimal(_))
-      )(identity)(Some(_))
-    )
-  }
-
-  val improvementCostsForm: Form[Double] = {
-    val (improvementCostsKey, improvementCostsValueKey) = "improvementCosts" -> "improvementCostsValue"
-
-    val formatter =
-      ConditionalRadioUtils.formatter(improvementCostsKey)(
-        List(
-          Left(
-            ConditionalRadioUtils.InnerOption(
-              improvementCostsValueKey,
-              MoneyUtils.validateAmountOfMoney(
-                improvementCostsValueKey,
-                _ <= 0,
-                _ > MoneyUtils.maxAmountOfPounds
-              )
-            )
-          ),
-          Right(BigDecimal(0))
-        )
-      ) { d =>
-        if (d === BigDecimal(0)) {
-          Map(improvementCostsKey -> "1")
-        } else {
-          Map(
-            improvementCostsKey      -> "0",
-            improvementCostsValueKey -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign(d.toDouble)
-          )
-        }
-      }
-
-    Form(
-      mapping(
-        "" -> of(formatter).transform[Double](_.toDouble, BigDecimal(_))
-      )(identity)(Some(_))
-    )
-  }
-
-  val acquisitionFeesForm: Form[Double] = {
-    val (acquisitionFeesKey, acquisitionFeesValueKey) = "acquisitionFees" -> "acquisitionFeesValue"
-
-    val formatter =
-      ConditionalRadioUtils.formatter(acquisitionFeesKey)(
-        List(
-          Left(
-            ConditionalRadioUtils.InnerOption(
-              acquisitionFeesValueKey,
-              MoneyUtils.validateAmountOfMoney(
-                acquisitionFeesValueKey,
-                _ <= 0,
-                _ > MoneyUtils.maxAmountOfPounds
-              )
-            )
-          ),
-          Right(BigDecimal(0))
-        )
-      ) { d =>
-        if (d === BigDecimal(0)) {
-          Map(acquisitionFeesKey -> "1")
-        } else {
-          Map(
-            acquisitionFeesKey      -> "0",
-            acquisitionFeesValueKey -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign(d.toDouble)
-          )
-        }
-      }
-
-    Form(
-      mapping(
-        "" -> of(formatter).transform[Double](_.toDouble, BigDecimal(_))
-      )(identity)(Some(_))
-    )
-  }
+  val acquisitionFeesForm: Form[Double] =
+    MoneyUtils.amountInPoundsYesNoForm("acquisitionFees", "acquisitionFeesValue")
 
 }
