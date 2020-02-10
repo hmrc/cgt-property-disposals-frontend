@@ -4,6 +4,7 @@ GET /capital-gains-tax-uk-property/account-home                           uk.gov
 ->         /capital-gains-tax-uk-property   app.Routes
 ->         /capital-gains-tax-uk-property   accounts.Routes
 ->         /capital-gains-tax-uk-property   onboarding.Routes
+->         /capital-gains-tax-uk-property   agents.Routes
 ->         /                                health.Routes
 ->     	   /template                        template.Routes
 
