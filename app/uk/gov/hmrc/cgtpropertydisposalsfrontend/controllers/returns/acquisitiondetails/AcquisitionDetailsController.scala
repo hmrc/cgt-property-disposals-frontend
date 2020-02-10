@@ -37,7 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiond
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AcquisitionDetailsAnswers, AcquisitionMethod, AssetType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
@@ -96,6 +96,15 @@ class AcquisitionDetailsController @Inject() (
       case (Some(a), Some(w)) => f(a, w)
       case _                  => Redirect(controllers.returns.routes.TaskListController.taskList())
     }
+
+  private def withDisposalDate(
+    fillingOutReturn: FillingOutReturn
+  )(f: DisposalDate => Future[Result]): Future[Result] =
+    fillingOutReturn.draftReturn.triageAnswers
+      .fold(_.disposalDate, c => Some(c.disposalDate))
+      .fold[Future[Result]](
+        Redirect(controllers.returns.routes.TaskListController.taskList())
+      )(f)
 
   private def withAcquisitionDate(
     answers: AcquisitionDetailsAnswers
@@ -212,79 +221,83 @@ class AcquisitionDetailsController @Inject() (
 
   def acquisitionDate(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
-      case (_, _, answers) =>
-        val form = acquisitionDateForm(LocalDateUtils.today())
+      case (_, fillingOutReturn, answers) =>
+        withDisposalDate(fillingOutReturn) { disposalDate =>
+          val form = acquisitionDateForm(disposalDate.value)
 
-        commonDisplayBehaviour(answers)(
-          form = _.fold(
-            _.acquisitionDate.fold(form)(form.fill),
-            c => form.fill(c.acquisitionDate)
+          commonDisplayBehaviour(answers)(
+            form = _.fold(
+              _.acquisitionDate.fold(form)(form.fill),
+              c => form.fill(c.acquisitionDate)
+            )
+          )(
+            page = acquisitionDatePage(_, _)
+          )(
+            requiredPreviousAnswer = _.fold(
+              _.acquisitionMethod,
+              c => Some(c.acquisitionMethod)
+            ),
+            redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionMethod()
           )
-        )(
-          page = acquisitionDatePage(_, _)
-        )(
-          requiredPreviousAnswer = _.fold(
-            _.acquisitionMethod,
-            c => Some(c.acquisitionMethod)
-          ),
-          redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionMethod()
-        )
+        }
     }
   }
 
   def acquisitionDateSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
       case (_, fillingOutReturn, answers) =>
-        withAssetTypeAndResidentialStatus(fillingOutReturn, answers) {
-          case (assetType, wasUkResident) =>
-            commonSubmitBehaviour(
-              fillingOutReturn,
-              answers
-            )(
-              form = acquisitionDateForm(LocalDateUtils.today())
-            )(acquisitionDatePage(_, _))(
-              requiredPreviousAnswer = _.fold(
-                _.acquisitionMethod,
-                c => Some(c.acquisitionMethod)
-              ),
-              redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionMethod()
-            )(
-              updateAnswers = {
-                case (d, answers) =>
-                  val didMeetRebasingCriteria =
-                    answers
-                      .fold(_.acquisitionDate, c => Some(c.acquisitionDate))
-                      .exists(date => rebasingCutOffDate(date, assetType, wasUkResident).isDefined)
+        withDisposalDate(fillingOutReturn) { disposalDate =>
+          withAssetTypeAndResidentialStatus(fillingOutReturn, answers) {
+            case (assetType, wasUkResident) =>
+              commonSubmitBehaviour(
+                fillingOutReturn,
+                answers
+              )(
+                form = acquisitionDateForm(disposalDate.value)
+              )(acquisitionDatePage(_, _))(
+                requiredPreviousAnswer = _.fold(
+                  _.acquisitionMethod,
+                  c => Some(c.acquisitionMethod)
+                ),
+                redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionMethod()
+              )(
+                updateAnswers = {
+                  case (d, answers) =>
+                    val didMeetRebasingCriteria =
+                      answers
+                        .fold(_.acquisitionDate, c => Some(c.acquisitionDate))
+                        .exists(date => rebasingCutOffDate(date, assetType, wasUkResident).isDefined)
 
-                  val nowMeetsRebasingCriteria =
-                    rebasingCutOffDate(d, assetType, wasUkResident).isDefined
+                    val nowMeetsRebasingCriteria =
+                      rebasingCutOffDate(d, assetType, wasUkResident).isDefined
 
-                  if (didMeetRebasingCriteria && !nowMeetsRebasingCriteria) {
-                    answers.fold(
-                      _.copy(acquisitionDate = Some(d), rebasedAcquisitionPrice = None),
-                      _.copy(acquisitionDate = d, rebasedAcquisitionPrice       = None)
-                    )
-                  } else if (!didMeetRebasingCriteria && nowMeetsRebasingCriteria) {
-                    answers.fold(
-                      _.copy(acquisitionDate = Some(d), acquisitionPrice = None, rebasedAcquisitionPrice = None),
-                      c =>
-                        IncompleteAcquisitionDetailsAnswers(
-                          Some(c.acquisitionMethod),
-                          Some(d),
-                          None,
-                          None,
-                          Some(c.improvementCosts),
-                          Some(c.acquisitionFees)
-                        )
-                    )
-                  } else {
-                    answers.fold(
-                      _.copy(acquisitionDate = Some(d)),
-                      _.copy(acquisitionDate = d)
-                    )
-                  }
-              }
-            )
+                    if (didMeetRebasingCriteria && !nowMeetsRebasingCriteria) {
+                      answers.fold(
+                        _.copy(acquisitionDate = Some(d), rebasedAcquisitionPrice = None),
+                        _.copy(acquisitionDate = d, rebasedAcquisitionPrice       = None)
+                      )
+                    } else if (!didMeetRebasingCriteria && nowMeetsRebasingCriteria) {
+                      answers.fold(
+                        _.copy(acquisitionDate = Some(d), acquisitionPrice = None, rebasedAcquisitionPrice = None),
+                        c =>
+                          IncompleteAcquisitionDetailsAnswers(
+                            Some(c.acquisitionMethod),
+                            Some(d),
+                            None,
+                            None,
+                            Some(c.improvementCosts),
+                            Some(c.acquisitionFees)
+                          )
+                      )
+                    } else {
+                      answers.fold(
+                        _.copy(acquisitionDate = Some(d)),
+                        _.copy(acquisitionDate = d)
+                      )
+                    }
+                }
+              )
+          }
         }
     }
   }
@@ -684,7 +697,10 @@ object AcquisitionDetailsController {
         if (d === BigDecimal(0)) {
           Map(rebaseAcquisitionPriceKey -> "1")
         } else {
-          Map(rebaseAcquisitionPriceKey -> "0", rebaseAcquisitionPriceValueKey -> d.toString)
+          Map(
+            rebaseAcquisitionPriceKey      -> "0",
+            rebaseAcquisitionPriceValueKey -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign(d.toDouble)
+          )
         }
       }
 
@@ -717,7 +733,10 @@ object AcquisitionDetailsController {
         if (d === BigDecimal(0)) {
           Map(improvementCostsKey -> "1")
         } else {
-          Map(improvementCostsKey -> "0", improvementCostsValueKey -> d.toString)
+          Map(
+            improvementCostsKey      -> "0",
+            improvementCostsValueKey -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign(d.toDouble)
+          )
         }
       }
 
@@ -750,7 +769,10 @@ object AcquisitionDetailsController {
         if (d === BigDecimal(0)) {
           Map(acquisitionFeesKey -> "1")
         } else {
-          Map(acquisitionFeesKey -> "0", acquisitionFeesValueKey -> d.toString)
+          Map(
+            acquisitionFeesKey      -> "0",
+            acquisitionFeesValueKey -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign(d.toDouble)
+          )
         }
       }
 

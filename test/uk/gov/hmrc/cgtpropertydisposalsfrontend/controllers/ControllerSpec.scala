@@ -101,7 +101,8 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
     contentChecks: Document => Unit = _ => (),
     expectedStatus: Int             = OK
   )(implicit messagesApi: MessagesApi): Unit = {
-    status(result) shouldBe expectedStatus
+    redirectLocation(result) shouldBe None
+    status(result)           shouldBe expectedStatus
 
     val doc = Jsoup.parse(contentAsString(result))
     doc.select("h1").text should include(expectedTitle)

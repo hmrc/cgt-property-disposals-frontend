@@ -30,7 +30,11 @@ object MoneyUtils {
 
   val maxAmountOfPounds: Double = 5e10
 
-  val currencyFormatter = java.text.NumberFormat.getCurrencyInstance(Locale.UK)
+  private val currencyFormatter = java.text.NumberFormat.getCurrencyInstance(Locale.UK)
+
+  def formatAmountOfMoneyWithPoundSign(d: Double): String = currencyFormatter.format(d).stripSuffix(".00")
+
+  def formatAmountOfMoneyWithoutPoundSign(d: Double): String = formatAmountOfMoneyWithPoundSign(d).stripPrefix("£")
 
   def validateAmountOfMoney(key: String, isTooSmall: BigDecimal => Boolean, isTooLarge: BigDecimal => Boolean)(
     s: String
@@ -59,7 +63,7 @@ object MoneyUtils {
       }
 
       override def unbind(key: String, value: Double): Map[String, String] =
-        Map(key -> value.toString)
+        Map(key -> formatAmountOfMoneyWithoutPoundSign(value))
     }
 
   private def cleanupAmountOfMoneyString(s: String): String =
