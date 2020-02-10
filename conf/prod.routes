@@ -10,10 +10,9 @@ POST /capital-gains-tax-uk-property/upscan-call-back/cgt-reference/:id      uk.g
 ->   /capital-gains-tax-uk-property                                         app.Routes
 ->   /capital-gains-tax-uk-property                                         accounts.Routes
 ->   /capital-gains-tax-uk-property                                         onboarding.Routes
+->   /capital-gains-tax-uk-property                                         agents.Routes
 ->   /capital-gains-tax-uk-property                                         returns.Routes
 
-## TODO copy into private_beta.routes once whole agent access journey is ready
-->   /capital-gains-tax-uk-property                                         agents.Routes
 
 ->   /                                                                      health.Routes
 ->   /template                                                              template.Routes
