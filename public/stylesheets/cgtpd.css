@@ -86,10 +86,12 @@ input:focus, textarea:focus, select:focus, #global-header input:focus {
 
 .autocomplete__wrapper, .custom-input-wrapper {
     width: 50%;
+    min-width: 85px;
 }
 
 .autocomplete__wrapper, .custom-input-wrapper.small {
     width: 33%;
+    min-width: 85px;
 }
 
 .autocomplete__wrapper input[type="text"],
@@ -509,8 +511,6 @@ details {
     }
 }
 
-
-
 .hmcts-currency-input input {
     padding-left: 40px;
 }
@@ -518,7 +518,6 @@ details {
 .hmcts-currency-input.left .hmcts-currency-input__symbol {
     left: 0;
 }
-
 
 .hmcts-currency-input input {
     padding-left: 40px;
@@ -531,4 +530,15 @@ details {
 .hmcts-currency-input.right input {
     padding-left: 5px;
     padding-right: 40px;
+}
+
+input:focus + .hmcts-currency-input__symbol.left {
+    border-top-width: 4px;
+    border-bottom-width: 4px;
+    border-left-width: 3px;
+}
+input:focus + .hmcts-currency-input__symbol.right {
+    border-top-width: 4px;
+    border-bottom-width: 4px;
+    border-right-width: 3px;
 }

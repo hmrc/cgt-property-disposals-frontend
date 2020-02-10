@@ -88,9 +88,6 @@
     @errorInline(id, messages(s"$fieldId.$key"))
   }
   <div class="hmcts-currency-input custom-input-wrapper @inputClass @aspect">
-    <div class="hmcts-currency-input__symbol @aspect@if(hasErrors){ form-control--error}" aria-hidden="true">
-      @unit
-    </div>
     <input
       value="@value"
       autocomplete="@autoComplete.value"
@@ -100,6 +97,9 @@
       type="text"
       pattern="[0-9]*"
       @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
+    <div class="hmcts-currency-input__symbol @aspect@if(hasErrors){ form-control--error}" aria-hidden="true">
+    @unit
+    </div>
   </div>
 
 </div>

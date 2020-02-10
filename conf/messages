@@ -701,3 +701,5 @@ rebaseAcquisitionPriceValue.error.invalid=The amount of money must only include 
 rebaseAcquisitionPriceValue.error.tooSmall=The amount of money must be a number between 1 and 50,000,000,000.00
 rebaseAcquisitionPriceValue.error.tooLarge=The amount of money must be a number between 1 and 50,000,000,000.00
 rebaseAcquisitionPriceValue.error.tooManyDecimals=The amount of money must be 2 decimal places or less, for example £160,000 or £23,040.50
+
+disposalPrice.title=How much did you sell your share of the property for?
