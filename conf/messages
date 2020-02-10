@@ -211,6 +211,7 @@ nonUkAddress.line2.label=Address line 2 (optional)
 nonUkAddress.line3.label=Address line 3 (optional)
 nonUkAddress.line4.label=Address line 4 (optional)
 countryCode.label=Country
+countryCode.placeholder=Select a country
 nonUkAddress-line1.error.required=Enter address line 1
 nonUkAddress-line1.error.tooLong=Address line 1 must be 35 characters or fewer
 nonUkAddress-line2.error.tooLong=Address line 2 must be 35 characters or fewer
