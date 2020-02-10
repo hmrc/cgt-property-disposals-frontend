@@ -53,7 +53,7 @@
           inputClass = Some("small"),
           aspect = "left",
           unit = "£",
-          assistiveText = "do not enter the pound sign"
+          assistiveText = messages("unit-input.assistive.pounds")
         ))
     ),
     RadioOption(
@@ -90,10 +90,11 @@
             options = options,
             helpText = Some(Html(messages(s"$key.helpText")))
         )
+        @details(messages(s"$key.details.summary"), Html(messages(s"$key.details.p1")))
+
         @submitButton(messages("button.continue"))
     }
 
-    @details(messages(s"$key.details.summary"), Html(messages(s"$key.details.p1")))
     @returnToSummaryLink(displayReturnToSummaryLink = true)
 
 }

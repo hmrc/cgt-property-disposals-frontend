@@ -31,6 +31,9 @@ yesNo.false=No
 cya.change=Change
 cya.add=Add
 
+unit-input.assistive.pounds=do not enter the pound sign
+unit-input.assistive.percent=do not enter the percent sign
+
 error.summary.heading=There’s a problem
 
 landingPage.title=Report and pay Capital Gains Tax on UK property
@@ -211,6 +214,7 @@ nonUkAddress.line2.label=Address line 2 (optional)
 nonUkAddress.line3.label=Address line 3 (optional)
 nonUkAddress.line4.label=Address line 4 (optional)
 countryCode.label=Country
+countryCode.placeholder=Select a country
 nonUkAddress-line1.error.required=Enter address line 1
 nonUkAddress-line1.error.tooLong=Address line 1 must be 35 characters or fewer
 nonUkAddress-line2.error.tooLong=Address line 2 must be 35 characters or fewer
@@ -560,6 +564,10 @@ date.11=November
 date.12=December
 
 returns.return-to-summary-link=Return to summary
+task-list.InProgress=In progress
+task-list.Complete=Complete
+task-list.CannotStart=Cannot start
+task-list.ToDo=To do
 task-list.triage.link=Check if you can use this service
 task-list.provide-details.heading=Provide details
 task-list.enter-property-address.link=Enter property address
@@ -638,7 +646,7 @@ acquisitionDate.title=What date did you become the owner of the property?
 acquisitionDate.helpText=This is the date the property was transferred into your name. For example, 21 5 2020
 acquisitionDate.error.required=Enter the date you became the owner
 acquisitionDate.error.invalid=Enter a real date you became the owner
-acquisitionDate.error.tooFarInFuture=Date you became the owner must be today or in the past
+acquisitionDate.error.tooFarInFuture=Date you became the owner must be before you sold the property
 acquisitionDate-day.error.required=Date you became the owner must include a day
 acquisitionDate-month.error.required=Date you became the owner must include a month
 acquisitionDate-year.error.required=Date you became the owner must include a year
@@ -671,14 +679,14 @@ improvementCosts.details.summary=What are improvements?
 improvementCosts.details.p1=Improvement include adding an extension or replacing a basic kitchen with a luxury one.
 
 acquisitionFees.title=Do you want to claim any additional costs you paid when you bought the property?
-acquisitionFees.helpText=For example, Stamp Duty Land Tax, or fees for surveyors or solicitors. If you owned part of the property, only enter the amount you paid for.
-acquisitionFees.error.required=Select yes if you paid in additional costs when buying your share of the property
+acquisitionFees.helpText=For example, fees for surveyors or solicitors. If you shared these costs, you can only claim your share.
+acquisitionFees.error.required=Select yes if you have extra costs
 acquisitionFeesValue.label=Amount of additional costs
-acquisitionFeesValue.error.required=Enter how much you paid in additional costs when buying your share of the property
-acquisitionFeesValue.error.invalid=The amount of money must only include numbers, for example 160,000 or 23,040.50
-acquisitionFeesValue.error.tooSmall=The amount of money must be a number between 1 and 50,000,000,000.00
-acquisitionFeesValue.error.tooLarge=The amount of money must be a number between 1 and 50,000,000,000.00
-acquisitionFeesValue.error.tooManyDecimals=The amount of money must be 2 decimal places or less, for example £160,000 or £23,040.50
+acquisitionFeesValue.error.required=Enter how much you paid in additional purchase or acquisition costs
+acquisitionFeesValue.error.invalid=Additional purchase or acquisition costs must only include numbers, for example 1,480 or 900.50
+acquisitionFeesValue.error.tooSmall=Purchase or acquisition costs must be 50,000,000,000.00 or less
+acquisitionFeesValue.error.tooLarge=Purchase or acquisition costs must be 50,000,000,000.00 or less
+acquisitionFeesValue.error.tooManyDecimals=Purchase or acquisition costs must be 2 decimal places or less, for example 1,480 or 900.50
 
 acquisitionDetails.cya.title=Check your answers
 acquisitionDetails.cyaLabel.rebased=Property value rebased

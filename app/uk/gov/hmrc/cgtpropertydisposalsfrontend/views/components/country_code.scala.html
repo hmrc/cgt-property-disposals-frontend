@@ -67,7 +67,7 @@
    class="@inputClasses"
    autocomplete="@{autoComplete.value}"
    @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
-    <option value=""></option>
+    <option value="">@messages("countryCode.placeholder")</option>
       @for(country <- countryCodeToCountryName) {
         <option value="@{country._1}" @{if(selected.contains(country._1))"selected"}>@{country._2}</option>
       }
