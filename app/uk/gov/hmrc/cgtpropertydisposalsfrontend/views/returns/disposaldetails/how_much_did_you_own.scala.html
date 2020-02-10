@@ -18,8 +18,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ShareOfProperty
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.RadioOption
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
 
 @this(
   mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -89,7 +88,7 @@
         fieldId = key,
         label = pageHeading(title),
         selected = selectedIndex,
-        errorKey = form.error(key).map(e => e.message),
+          error = form.error(key),
         hasErrors = hasErrors,
         options = options
       )

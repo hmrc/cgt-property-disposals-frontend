@@ -33,9 +33,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.Unsuccessf
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscribedUpdateDetails, SubscriptionDetails}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.{CompleteIndividualTriageAnswers, IncompleteIndividualTriageAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompletionDate, DisposalDate, DraftReturn, IndividualTriageAnswers, IndividualUserType, NumberOfProperties, ShareOfProperty}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AcquisitionMethod, AssetType, CompletionDate, DisposalDate, DraftReturn, IndividualTriageAnswers, IndividualUserType, NumberOfProperties, ShareOfProperty}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanNotifyResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanServiceResponse.{UpscanNotifyEvent, UpscanResponse}
 
@@ -56,7 +57,10 @@ object Generators
     with TriageQuestionsGen
     with ReturnGen
     with DisposalDetailsGen
-    with AmountInPenceGen {
+    with AmountInPenceGen
+    with AcquisitionDetailsGen {
+
+  implicit val booleanGen: Gen[Boolean] = Gen.oneOf(true, false)
 
   def sample[A](implicit gen: Gen[A]): A =
     gen.sample.getOrElse(sys.error(s"Could not generate instance with $gen"))
@@ -231,6 +235,8 @@ trait TriageQuestionsGen { this: GenUtils =>
 
   implicit val completionDateGen: Gen[CompletionDate] = gen[CompletionDate]
 
+  implicit val assetTypeGen: Gen[AssetType] = gen[AssetType]
+
 }
 
 trait ReturnGen { this: GenUtils =>
@@ -248,6 +254,20 @@ trait DisposalDetailsGen { this: GenUtils =>
     gen[IncompleteDisposalDetailsAnswers]
 
   implicit val shareOfPropertyGen: Gen[ShareOfProperty] = gen[ShareOfProperty]
+
+}
+
+trait AcquisitionDetailsGen { this: GenUtils =>
+
+  implicit val completeAcquisitionDetailsAnswersGen: Gen[CompleteAcquisitionDetailsAnswers] =
+    gen[CompleteAcquisitionDetailsAnswers]
+
+  implicit val incompleteAcquisitionDetailsAnswersGen: Gen[IncompleteAcquisitionDetailsAnswers] =
+    gen[IncompleteAcquisitionDetailsAnswers]
+
+  implicit val acquisitionMethodGen: Gen[AcquisitionMethod] = gen[AcquisitionMethod]
+
+  implicit val acquisitionDateGen: Gen[AcquisitionDate] = gen[AcquisitionDate]
 
 }
 

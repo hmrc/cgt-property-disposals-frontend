@@ -32,23 +32,27 @@ object MoneyUtils {
 
   val currencyFormatter = java.text.NumberFormat.getCurrencyInstance(Locale.UK)
 
+  def validateAmountOfMoney(key: String, isTooSmall: BigDecimal => Boolean, isTooLarge: BigDecimal => Boolean)(
+    s: String
+  ): Either[FormError, BigDecimal] =
+    Try(BigDecimal(cleanupAmountOfMoneyString(s))).toEither
+      .leftMap(_ => FormError(key, "error.invalid"))
+      .flatMap { d =>
+        if (isTooSmall(d)) Left(FormError(key, "error.tooSmall"))
+        else if (isTooLarge(d)) Left(FormError(key, "error.tooLarge"))
+        else if (NumberUtils.numberHasMoreThanNDecimalPlaces(d, 2)) Left(FormError(key, "error.tooManyDecimals"))
+        else Right(d)
+      }
+
   def amountInPoundsFormatter(isTooSmall: BigDecimal => Boolean, isTooLarge: BigDecimal => Boolean): Formatter[Double] =
     new Formatter[Double] {
       override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Double] = {
-        def validatePercentage(d: BigDecimal): Either[FormError, BigDecimal] =
-          if (isTooSmall(d)) Left(FormError(key, "error.tooSmall"))
-          else if (isTooLarge(d)) Left(FormError(key, "error.tooLarge"))
-          else if (NumberUtils.numberHasMoreThanNDecimalPlaces(d, 2)) Left(FormError(key, "error.tooManyDecimals"))
-          else Right(d)
-
         val result = data
           .get(key)
-          .map(_.trim().filter(c => c =!= ',' && c =!= '£'))
+          .map(cleanupAmountOfMoneyString)
           .filter(_.nonEmpty)
-          .fold[Either[FormError, BigDecimal]](Left(FormError(key, "error.required"))) { s =>
-            Try(BigDecimal(s)).toEither
-              .leftMap(_ => FormError(key, "error.invalid"))
-              .flatMap(validatePercentage)
+          .fold[Either[FormError, BigDecimal]](Left(FormError(key, "error.required"))) {
+            validateAmountOfMoney(key, isTooSmall, isTooLarge)(_)
           }
 
         result.bimap(Seq(_), _.toDouble)
@@ -57,5 +61,8 @@ object MoneyUtils {
       override def unbind(key: String, value: Double): Map[String, String] =
         Map(key -> value.toString)
     }
+
+  private def cleanupAmountOfMoneyString(s: String): String =
+    s.trim().filter(c => c =!= ',' && c =!= '£')
 
 }

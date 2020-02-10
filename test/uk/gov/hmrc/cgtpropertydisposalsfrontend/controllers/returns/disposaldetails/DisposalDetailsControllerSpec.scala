@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails
 
-import cats.data.EitherT
-import cats.instances.future._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
@@ -27,7 +25,9 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
@@ -37,19 +37,16 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDetailsA
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
-import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class DisposalDetailsControllerSpec
     extends ControllerSpec
     with AuthSupport
     with SessionSupport
+    with ReturnsServiceSupport
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
-
-  val mockReturnsService = mock[ReturnsService]
 
   override val overrideBindings =
     List[GuiceableModule](
@@ -100,12 +97,6 @@ class DisposalDetailsControllerSpec
   ): (SessionData, FillingOutReturn) =
     sessionWithDisposalDetailsAnswers(Some(answers), disposalMethod)
 
-  def mockStoreDraftReturn(draftReturn: DraftReturn)(result: Either[Error, Unit]) =
-    (mockReturnsService
-      .storeDraftReturn(_: DraftReturn)(_: HeaderCarrier))
-      .expects(draftReturn, *)
-      .returning(EitherT.fromEither[Future](result))
-
   "DisposalDetailsController" when {
 
     "handling requests to display the how much did you own page" must {
@@ -124,7 +115,7 @@ class DisposalDetailsControllerSpec
             )
           }
 
-          checkPageIsDisplayed(performAction(), "shareOfProperty.title")
+          checkPageIsDisplayed(performAction(), messageFromMessageKey("shareOfProperty.title"))
         }
 
         "the user has answered the question before but has " +
@@ -147,7 +138,7 @@ class DisposalDetailsControllerSpec
             )
           }
 
-          checkPageIsDisplayed(performAction(), "shareOfProperty.title", { doc =>
+          checkPageIsDisplayed(performAction(), messageFromMessageKey("shareOfProperty.title"), { doc =>
             doc.select("#percentageShare").attr("value") shouldBe "12.34"
           })
         }
@@ -172,7 +163,7 @@ class DisposalDetailsControllerSpec
             )
           }
 
-          checkPageIsDisplayed(performAction(), "shareOfProperty.title", { doc =>
+          checkPageIsDisplayed(performAction(), messageFromMessageKey("shareOfProperty.title"), { doc =>
             doc.select("#percentageShare").attr("value") shouldBe "12.34"
           })
         }
@@ -205,7 +196,7 @@ class DisposalDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(data),
-            "shareOfProperty.title", { doc =>
+            messageFromMessageKey("shareOfProperty.title"), { doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               )
@@ -530,7 +521,7 @@ class DisposalDetailsControllerSpec
                   )
                 }
 
-                checkPageIsDisplayed(performAction(), expectedTitleKey)
+                checkPageIsDisplayed(performAction(), messageFromMessageKey(expectedTitleKey))
               }
           }
         }
@@ -562,7 +553,7 @@ class DisposalDetailsControllerSpec
                   )
                 }
 
-                checkPageIsDisplayed(performAction(), expectedTitleKey, { doc =>
+                checkPageIsDisplayed(performAction(), messageFromMessageKey(expectedTitleKey), { doc =>
                   doc.select("#disposalPrice").attr("value") shouldBe "12.34"
                 })
               }
@@ -596,7 +587,7 @@ class DisposalDetailsControllerSpec
                   )
                 }
 
-                checkPageIsDisplayed(performAction(), expectedTitleKey, { doc =>
+                checkPageIsDisplayed(performAction(), messageFromMessageKey(expectedTitleKey), { doc =>
                   doc.select("#disposalPrice").attr("value") shouldBe "12.34"
                 })
               }
@@ -641,7 +632,7 @@ class DisposalDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(data),
-            "disposalPrice.full-share.sold-it.title", { doc =>
+            messageFromMessageKey("disposalPrice.full-share.sold-it.title"), { doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               )
@@ -650,28 +641,12 @@ class DisposalDetailsControllerSpec
           )
         }
 
-        "nothing is submitted" in {
-          test()("disposalPrice.error.required")
-        }
-
-        "the number is less than zero" in {
-          test("disposalPrice" -> "-1")("disposalPrice.error.tooSmall")
-        }
-
-        "the number is equal to zero" in {
-          test("disposalPrice" -> "0")("disposalPrice.error.tooSmall")
-        }
-
-        "the number is greater than 100" in {
-          test("disposalPrice" -> (5e10 + 1).toString)("disposalPrice.error.tooLarge")
-        }
-
-        "the number has more than two decimal places" in {
-          test("disposalPrice" -> "1.234")("disposalPrice.error.tooManyDecimals")
-        }
-
-        "the submitted value contains invalid characters" in {
-          test("disposalPrice" -> "abc")("disposalPrice.error.invalid")
+        "the data is invalid" in {
+          amountOfMoneyErrorScenarios("disposalPrice").foreach { scenario =>
+            withClue(s"For $scenario: ") {
+              test(scenario.formData: _*)(scenario.expectedErrorMessageKey)
+            }
+          }
         }
       }
 
@@ -764,7 +739,8 @@ class DisposalDetailsControllerSpec
 
         "the user has not answered all of the disposal details questions " +
           "and the draft return and session data has been successfully updated" in {
-          val currentAnswers     = sample[IncompleteDisposalDetailsAnswers].copy(disposalPrice = None)
+          val currentAnswers = sample[IncompleteDisposalDetailsAnswers]
+            .copy(shareOfProperty = Some(sample[ShareOfProperty]), disposalPrice = None)
           val (session, journey) = sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)
 
           val newDisposalPrice = 2d
@@ -965,7 +941,7 @@ class DisposalDetailsControllerSpec
                   )
                 }
 
-                checkPageIsDisplayed(performAction(), expectedTitleKey)
+                checkPageIsDisplayed(performAction(), messageFromMessageKey(expectedTitleKey))
               }
           }
         }
@@ -997,7 +973,7 @@ class DisposalDetailsControllerSpec
                   )
                 }
 
-                checkPageIsDisplayed(performAction(), expectedTitleKey, { doc =>
+                checkPageIsDisplayed(performAction(), messageFromMessageKey(expectedTitleKey), { doc =>
                   doc.select("#disposalFees").attr("value") shouldBe "12.34"
                 })
               }
@@ -1031,7 +1007,7 @@ class DisposalDetailsControllerSpec
                   )
                 }
 
-                checkPageIsDisplayed(performAction(), expectedTitleKey, { doc =>
+                checkPageIsDisplayed(performAction(), messageFromMessageKey(expectedTitleKey), { doc =>
                   doc.select("#disposalFees").attr("value") shouldBe "12.34"
                 })
               }
@@ -1103,7 +1079,7 @@ class DisposalDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(data),
-            "disposalFees.full-share.sold-it.title", { doc =>
+            messageFromMessageKey("disposalFees.full-share.sold-it.title"), { doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               )
@@ -1112,24 +1088,10 @@ class DisposalDetailsControllerSpec
           )
         }
 
-        "nothing is submitted" in {
-          test()("disposalFees.error.required")
-        }
-
-        "the number is less than zero" in {
-          test("disposalFees" -> "-1")("disposalFees.error.tooSmall")
-        }
-
-        "the number is greater than 5e10" in {
-          test("disposalFees" -> (5e10 + 1).toString)("disposalFees.error.tooLarge")
-        }
-
-        "the number has more than two decimal places" in {
-          test("disposalFees" -> "1.234")("disposalFees.error.tooManyDecimals")
-        }
-
-        "the submitted value contains invalid characters" in {
-          test("disposalFees" -> "abc")("disposalFees.error.invalid")
+        amountOfMoneyErrorScenarios("disposalFees").foreach { scenario =>
+          withClue(s"For $scenario: ") {
+            test(scenario.formData: _*)(scenario.expectedErrorMessageKey)
+          }
         }
 
       }
@@ -1525,7 +1487,7 @@ class DisposalDetailsControllerSpec
         ): Unit =
           checkPageIsDisplayed(
             result,
-            "returns.disposal-details.cya.title", { doc =>
+            messageFromMessageKey("returns.disposal-details.cya.title"), { doc =>
               doc.select("#content > article > dl > div:nth-child(1) > dt").text() shouldBe messageFromMessageKey(
                 "shareOfProperty.title"
               )
