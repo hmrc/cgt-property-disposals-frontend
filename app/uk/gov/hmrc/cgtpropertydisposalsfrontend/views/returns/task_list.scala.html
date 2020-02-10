@@ -34,6 +34,7 @@
 @propertyAddressState = @{ draftReturn.propertyAddress.fold[TaskListStatus](TaskListStatus.ToDo)(_ => TaskListStatus.Complete) }
 @disposalDetailsState = @{ draftReturn.disposalDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress,_ => TaskListStatus.Complete)) }
 @acquistionDetailsState = @{ draftReturn.acquisitionDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress,_ => TaskListStatus.Complete)) }
+@reliefDetailsState = @{ draftReturn.reliefDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress,_ => TaskListStatus.Complete)) }
 
 @mainTemplate(title = title, userType = request.userType) {
 
@@ -77,6 +78,11 @@
     <li class="app-task-list__item">
     @taskLink(messages("task-list.acquisition-details.link"),
      returns.acquisitiondetails.routes.AcquisitionDetailsController.acquisitionMethod().url, acquistionDetailsState)
+    </li>
+
+    <li class="app-task-list__item">
+     @taskLink(messages("task-list.relief-details.link"),
+     returns.reliefdetails.routes.ReliefDetailsController.areYouEntitledToClaimPRR().url, reliefDetailsState)
     </li>
    </ul>
   </li>
