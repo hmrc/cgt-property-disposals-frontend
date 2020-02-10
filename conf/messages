@@ -31,6 +31,9 @@ yesNo.false=No
 cya.change=Change
 cya.add=Add
 
+unit-input.assistive.pounds=do not enter the pound sign
+unit-input.assistive.percent=do not enter the percent sign
+
 error.summary.heading=There’s a problem
 
 landingPage.title=Report and pay Capital Gains Tax on UK property
