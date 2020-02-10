@@ -684,7 +684,10 @@ object AcquisitionDetailsController {
         if (d === BigDecimal(0)) {
           Map(rebaseAcquisitionPriceKey -> "1")
         } else {
-          Map(rebaseAcquisitionPriceKey -> "0", rebaseAcquisitionPriceValueKey -> d.toString)
+          Map(
+            rebaseAcquisitionPriceKey      -> "0",
+            rebaseAcquisitionPriceValueKey -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign(d.toDouble)
+          )
         }
       }
 
@@ -717,7 +720,10 @@ object AcquisitionDetailsController {
         if (d === BigDecimal(0)) {
           Map(improvementCostsKey -> "1")
         } else {
-          Map(improvementCostsKey -> "0", improvementCostsValueKey -> d.toString)
+          Map(
+            improvementCostsKey      -> "0",
+            improvementCostsValueKey -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign(d.toDouble)
+          )
         }
       }
 
@@ -750,7 +756,10 @@ object AcquisitionDetailsController {
         if (d === BigDecimal(0)) {
           Map(acquisitionFeesKey -> "1")
         } else {
-          Map(acquisitionFeesKey -> "0", acquisitionFeesValueKey -> d.toString)
+          Map(
+            acquisitionFeesKey      -> "0",
+            acquisitionFeesValueKey -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign(d.toDouble)
+          )
         }
       }
 

@@ -67,7 +67,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
         )
         @cyaRow(
             messages("acquisitionPrice.title"),
-            Html(MoneyUtils.currencyFormatter.format(answers.acquisitionPrice.inPounds())),
+            Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.acquisitionPrice.inPounds())),
             Some(cyaChange(messages("acquisitionDetails.cyaChange.acquisitionPrice"), routes.AcquisitionDetailsController.acquisitionPrice().url))
         )
         @answers.rebasedAcquisitionPrice.map{ rebasedValue =>
@@ -85,7 +85,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
                 )
                 @cyaRow(
                     messages("acquisitionDetails.cyaLabel.rebasedValue"),
-                    Html(MoneyUtils.currencyFormatter.format(rebasedValue.inPounds())),
+                    Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(rebasedValue.inPounds())),
                     Some(cyaChange(messages("acquisitionDetails.cyaChange.rebasedAcquisitionPrice"), routes.AcquisitionDetailsController.rebasedAcquisitionPrice().url))
                 )
             }
@@ -104,7 +104,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
             )
             @cyaRow(
                 messages("acquisitionDetails.cyaLabel.improvementCostsValue"),
-                Html(MoneyUtils.currencyFormatter.format(answers.improvementCosts.inPounds())),
+                Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.improvementCosts.inPounds())),
                 Some(cyaChange(messages("acquisitionDetails.cyaChange.improvementCosts"), routes.AcquisitionDetailsController.improvementCosts().url))
             )
         }
@@ -122,7 +122,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
             )
             @cyaRow(
                 messages("acquisitionDetails.cyaLabel.acquisitionFeesValue"),
-                Html(MoneyUtils.currencyFormatter.format(answers.acquisitionFees.inPounds())),
+                Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.acquisitionFees.inPounds())),
                 Some(cyaChange(messages("acquisitionDetails.cyaChange.acquisitionFees"), routes.AcquisitionDetailsController.acquisitionFees().url))
             )
         }

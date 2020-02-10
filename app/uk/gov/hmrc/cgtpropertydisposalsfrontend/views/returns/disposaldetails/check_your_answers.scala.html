@@ -55,12 +55,12 @@
         )
         @cyaRow(
             disposalPriceTitle,
-            Html(MoneyUtils.currencyFormatter.format(answers.disposalPrice.inPounds())),
+            Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.disposalPrice.inPounds())),
             Some(cyaChange(messages("disposalDetails.cyaChange.disposalPrice"), returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice().url))
         )
         @cyaRow(
             disposalFeesTitle,
-            Html(MoneyUtils.currencyFormatter.format(answers.disposalFees.inPounds())),
+            Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.disposalFees.inPounds())),
             Some(cyaChange(messages("disposalDetails.cyaChange.disposalFees"), returns.disposaldetails.routes.DisposalDetailsController.whatWereDisposalFees().url))
         )
     }
