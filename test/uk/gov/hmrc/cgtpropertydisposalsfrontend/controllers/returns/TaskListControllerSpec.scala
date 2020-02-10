@@ -35,7 +35,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.{CompleteIndividualTriageAnswers, IncompleteIndividualTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus
 
@@ -91,9 +93,16 @@ class TaskListControllerSpec
         checkPageIsDisplayed(
           performAction(),
           messageFromMessageKey("service.title"), { doc =>
-            doc.select(s"li#$sectionLinkId > a").text         shouldBe sectionLinkText
-            doc.select(s"li#$sectionLinkId > a").attr("href") shouldBe sectionLinkHref.url
-            doc.select(s"li#$sectionLinkId > strong").text    shouldBe messageFromMessageKey(s"task-list.$sectionsStatus")
+            sectionsStatus match {
+              case TaskListStatus.CannotStart =>
+                doc.select(s"li#$sectionLinkId > div").text shouldBe sectionLinkText
+
+              case _ =>
+                doc.select(s"li#$sectionLinkId > a").text         shouldBe sectionLinkText
+                doc.select(s"li#$sectionLinkId > a").attr("href") shouldBe sectionLinkHref.url
+            }
+
+            doc.select(s"li#$sectionLinkId > strong").text shouldBe messageFromMessageKey(s"task-list.$sectionsStatus")
           }
         )
       }
@@ -215,6 +224,177 @@ class TaskListControllerSpec
             "acquisitionDetails",
             messageFromMessageKey("task-list.acquisition-details.link"),
             acquisitiondetails.routes.AcquisitionDetailsController.checkYourAnswers(),
+            TaskListStatus.Complete
+          )
+        }
+      }
+
+      "display the page with the proper reliefs details section status" when {
+
+        def test(draftReturn: DraftReturn, expectedStatus: TaskListStatus) =
+          testStateOfSection(draftReturn)(
+            "reliefDetails",
+            messageFromMessageKey("task-list.relief-details.link"),
+            reliefdetails.routes.ReliefDetailsController.checkYourAnswers(),
+            expectedStatus
+          )
+
+        "the session data indicates that the property address has not been entered in" in {
+          test(
+            sample[DraftReturn].copy(
+              propertyAddress           = None,
+              disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
+              reliefDetailsAnswers      = None,
+              exemptionAndLossesAnswers = None
+            ),
+            TaskListStatus.CannotStart
+          )
+        }
+
+        "the session data indicates that the disposal details section is not yet complete" in {
+          List(None, Some(sample[IncompleteDisposalDetailsAnswers])).foreach { disposalDetailsState =>
+            test(
+              sample[DraftReturn].copy(
+                propertyAddress           = Some(sample[UkAddress]),
+                disposalDetailsAnswers    = disposalDetailsState,
+                acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
+                reliefDetailsAnswers      = None,
+                exemptionAndLossesAnswers = None
+              ),
+              TaskListStatus.CannotStart
+            )
+          }
+        }
+
+        "the session data indicates that the acuquisition details section is not yet complete" in {
+          List(None, Some(sample[IncompleteAcquisitionDetailsAnswers])).foreach { acquisitionDetailsAnswers =>
+            test(
+              sample[DraftReturn].copy(
+                propertyAddress           = Some(sample[UkAddress]),
+                disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
+                acquisitionDetailsAnswers = acquisitionDetailsAnswers,
+                reliefDetailsAnswers      = None,
+                exemptionAndLossesAnswers = None
+              ),
+              TaskListStatus.CannotStart
+            )
+          }
+        }
+
+        "the property address, disposal details and acquisition details section have all " +
+          "been completed and the reliefs section has not been started yet" in {
+          test(
+            sample[DraftReturn].copy(
+              propertyAddress           = Some(sample[UkAddress]),
+              disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
+              reliefDetailsAnswers      = None,
+              exemptionAndLossesAnswers = None
+            ),
+            TaskListStatus.ToDo
+          )
+        }
+
+        "the property address, disposal details and acquisition details section have all " +
+          "been completed and the reliefs section has been started but not completed yet" in {
+          test(
+            sample[DraftReturn].copy(
+              propertyAddress           = Some(sample[UkAddress]),
+              disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
+              reliefDetailsAnswers      = Some(sample[IncompleteReliefDetailsAnswers]),
+              exemptionAndLossesAnswers = None
+            ),
+            TaskListStatus.InProgress
+          )
+        }
+
+        "the session data indicates that they are filling in a return and they have completed the section" in {
+          test(
+            sample[DraftReturn].copy(
+              propertyAddress           = Some(sample[UkAddress]),
+              disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
+              reliefDetailsAnswers      = Some(sample[CompleteReliefDetailsAnswers]),
+              exemptionAndLossesAnswers = None
+            ),
+            TaskListStatus.Complete
+          )
+        }
+      }
+
+      "display the page with the proper exemptions and losses section status" when {
+
+        def test(draftReturn: DraftReturn, expectedStatus: TaskListStatus) =
+          testStateOfSection(draftReturn)(
+            "exemptionsAndLosses",
+            messageFromMessageKey("task-list.exemptions-and-losses.link"),
+            exemptionandlosses.routes.ExemptionAndLossesController.checkYourAnswers(),
+            expectedStatus
+          )
+
+        "the session data indicates that the reliefs section is has not yet been started" in {
+          test(
+            sample[DraftReturn].copy(
+              propertyAddress           = Some(sample[UkAddress]),
+              disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
+              reliefDetailsAnswers      = None,
+              exemptionAndLossesAnswers = None
+            ),
+            TaskListStatus.CannotStart
+          )
+        }
+
+        "the session data indicates that the reliefs section is has not yet been completed" in {
+          test(
+            sample[DraftReturn].copy(
+              propertyAddress           = Some(sample[UkAddress]),
+              disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
+              reliefDetailsAnswers      = Some(sample[IncompleteReliefDetailsAnswers]),
+              exemptionAndLossesAnswers = None
+            ),
+            TaskListStatus.CannotStart
+          )
+        }
+
+        "the reliefs section has been completed and the section has not been started yet" in {
+          test(
+            sample[DraftReturn].copy(
+              propertyAddress           = Some(sample[UkAddress]),
+              disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
+              reliefDetailsAnswers      = Some(sample[CompleteReliefDetailsAnswers]),
+              exemptionAndLossesAnswers = None
+            ),
+            TaskListStatus.ToDo
+          )
+        }
+
+        "the session data indicates that they are filling in a return and they have started the section but not complete it yet" in {
+          test(
+            sample[DraftReturn].copy(
+              propertyAddress           = Some(sample[UkAddress]),
+              disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
+              reliefDetailsAnswers      = Some(sample[CompleteReliefDetailsAnswers]),
+              exemptionAndLossesAnswers = Some(sample[IncompleteExemptionAndLossesAnswers])
+            ),
+            TaskListStatus.InProgress
+          )
+        }
+
+        "the session data indicates that they are filling in a return and they have completed the section" in {
+          test(
+            sample[DraftReturn].copy(
+              propertyAddress           = Some(sample[UkAddress]),
+              disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
+              reliefDetailsAnswers      = Some(sample[CompleteReliefDetailsAnswers]),
+              exemptionAndLossesAnswers = Some(sample[CompleteExemptionAndLossesAnswers])
+            ),
             TaskListStatus.Complete
           )
         }

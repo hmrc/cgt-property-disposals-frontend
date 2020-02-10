@@ -31,7 +31,7 @@
         assistiveText: String,
         helpText: Option[Html] = None,
         labelAsHeading: Boolean = false,
-        errorKey: Option[String],
+        formError: Option[FormError] = None,
         extraContent: Option[Html] = None,
         inputClass: Option[String] = None,
         labelClass: Option[String] = None
@@ -52,11 +52,11 @@
 @errorId = @{s"${{fieldId}}-inline-error"}
 @hintIdWithHintText = @{helpText.map(hintTextKey -> _)}
 @extraContentIdWithContent = @{extraContent.map(extraContentKey -> _)}
-@errorIdWithMessageKey = @{errorKey.map(errorId -> _)}
+@errorIdWithError = @{formError.map(errorId -> _)}
 @labelClasses = @{classBuilder(Some("form-label"), labelClass)}
 
 @describedByKeys = @{
-  List(Some(assistiveKey), hintIdWithHintText.map(_._1), extraContentIdWithContent.map(_._1), errorIdWithMessageKey.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
+  List(Some(assistiveKey), hintIdWithHintText.map(_._1), extraContentIdWithContent.map(_._1), errorIdWithError.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
 
 @fieldLabel = {
   @if(labelAsHeading) {
@@ -84,8 +84,8 @@
   <div id="@assistiveKey" class="visuallyhidden">
     @assistiveText
   </div>
-  @errorIdWithMessageKey.map { case (id, key) =>
-    @errorInline(id, messages(s"$fieldId.$key"))
+  @errorIdWithError.map { case (id, error) =>
+    @errorInline(id, messages(s"$fieldId.${error.message}", error.args: _*))
   }
   <div class="hmcts-currency-input custom-input-wrapper @inputClass @aspect">
     <input

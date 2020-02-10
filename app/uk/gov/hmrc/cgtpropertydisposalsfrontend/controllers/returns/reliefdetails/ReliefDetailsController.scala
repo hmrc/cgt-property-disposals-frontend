@@ -37,6 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AmountInPence._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.InnerOption
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.IncompleteExemptionAndLossesAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{ReliefDetailsAnswers, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -110,7 +111,7 @@ class ReliefDetailsController @Inject() (
     requiredPreviousAnswer: ReliefDetailsAnswers => Option[R],
     redirectToIfNoRequiredPreviousAnswer: Call
   )(
-    updateAnswers: (A, ReliefDetailsAnswers) => ReliefDetailsAnswers
+    updateAnswers: (A, DraftReturn) => DraftReturn
   )(
     implicit request: RequestWithSessionData[_]
   ): Future[Result] =
@@ -123,8 +124,7 @@ class ReliefDetailsController @Inject() (
         .bindFromRequest()
         .fold(
           formWithErrors => BadRequest(page(formWithErrors, backLink)), { value =>
-            val newAnswers     = updateAnswers(value, currentAnswers)
-            val newDraftReturn = currentFillingOutReturn.draftReturn.copy(reliefDetailsAnswers = Some(newAnswers))
+            val newDraftReturn = updateAnswers(value, currentFillingOutReturn.draftReturn)
 
             val result = for {
               _ <- if (newDraftReturn === currentFillingOutReturn.draftReturn) EitherT.pure(())
@@ -180,10 +180,14 @@ class ReliefDetailsController @Inject() (
             redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
           )(
             updateAnswers = {
-              case (p, answers) =>
-                answers.fold(
-                  _.copy(privateResidentsRelief = Some(AmountInPence.fromPounds(p))),
-                  _.copy(privateResidentsRelief = AmountInPence.fromPounds(p))
+              case (p, draftReturn) =>
+                draftReturn.copy(
+                  reliefDetailsAnswers = Some(
+                    answers.fold(
+                      _.copy(privateResidentsRelief = Some(AmountInPence.fromPounds(p))),
+                      _.copy(privateResidentsRelief = AmountInPence.fromPounds(p))
+                    )
+                  )
                 )
             }
           )
@@ -223,10 +227,14 @@ class ReliefDetailsController @Inject() (
           redirectToIfNoRequiredPreviousAnswer = routes.ReliefDetailsController.privateResidentsRelief()
         )(
           updateAnswers = {
-            case (p, answers) =>
-              answers.fold(
-                _.copy(lettingsRelief = Some(AmountInPence.fromPounds(p))),
-                _.copy(lettingsRelief = AmountInPence.fromPounds(p))
+            case (p, draftReturn) =>
+              draftReturn.copy(
+                reliefDetailsAnswers = Some(
+                  answers.fold(
+                    _.copy(lettingsRelief = Some(AmountInPence.fromPounds(p))),
+                    _.copy(lettingsRelief = AmountInPence.fromPounds(p))
+                  )
+                )
               )
           }
         )
@@ -277,7 +285,7 @@ class ReliefDetailsController @Inject() (
           redirectToIfNoRequiredPreviousAnswer = routes.ReliefDetailsController.lettingsRelief()
         )(
           updateAnswers = {
-            case (maybeOtherReliefs, answers) =>
+            case (maybeOtherReliefs, draftReturn) =>
               val otherReliefs = maybeOtherReliefs
                 .bimap({
                   case (name, amount) =>
@@ -285,10 +293,62 @@ class ReliefDetailsController @Inject() (
                 }, _ => OtherReliefsOption.NoOtherReliefs)
                 .merge
 
-              answers.fold(_.copy(otherReliefs = Some(otherReliefs)), _.copy(otherReliefs = Some(otherReliefs)))
+              val updatedExemptionAndLossesAnswers =
+                changeExemptionsAndLossesAnswersState(
+                  fillingOutReturn.draftReturn.exemptionAndLossesAnswers,
+                  answers,
+                  otherReliefs
+                )
+
+              val updatedReliefDetailsAnswers =
+                answers.fold(_.copy(otherReliefs = Some(otherReliefs)), _.copy(otherReliefs = Some(otherReliefs)))
+
+              draftReturn.copy(
+                reliefDetailsAnswers      = Some(updatedReliefDetailsAnswers),
+                exemptionAndLossesAnswers = updatedExemptionAndLossesAnswers
+              )
           }
         )
     }
+  }
+
+  private def changeExemptionsAndLossesAnswersState(
+    existingExemptionAndLossesAnswers: Option[ExemptionAndLossesAnswers],
+    existingReliefDetailsAnswers: ReliefDetailsAnswers,
+    newOtherReliefsOption: OtherReliefsOption
+  ): Option[ExemptionAndLossesAnswers] = {
+    def hasEnteredOtherReliefs(option: Option[OtherReliefsOption]): Boolean =
+      option match {
+        case Some(_: OtherReliefsOption.OtherReliefs) => true
+        case _                                        => false
+      }
+
+    val (hadEnteredOtherReliefs, hasNowEnteredOtherReliefs) =
+      hasEnteredOtherReliefs(existingReliefDetailsAnswers.fold(_.otherReliefs, _.otherReliefs)) ->
+        hasEnteredOtherReliefs(Some(newOtherReliefsOption))
+
+    if (hadEnteredOtherReliefs && !hasNowEnteredOtherReliefs)
+      existingExemptionAndLossesAnswers.map(
+        _.fold(
+          _.copy(taxableGainOrLoss = None),
+          _.copy(taxableGainOrLoss = None)
+        )
+      )
+    else if (!hadEnteredOtherReliefs && hasNowEnteredOtherReliefs)
+      existingExemptionAndLossesAnswers.map(
+        _.fold(
+          _.copy(taxableGainOrLoss = None),
+          complete =>
+            IncompleteExemptionAndLossesAnswers(
+              Some(complete.inYearLosses),
+              Some(complete.previousYearsLosses),
+              Some(complete.annualExemptAmount),
+              None
+            )
+        )
+      )
+    else
+      existingExemptionAndLossesAnswers
   }
 
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>

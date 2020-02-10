@@ -52,7 +52,7 @@
     content = Some(unitInput(
       fieldId = percentageShareKey,
       value = form.data.getOrElse(percentageShareKey, ""),
-      errorKey = form.error(percentageShareKey).map(e => e.message),
+      formError = form.error(percentageShareKey),
       hasErrors = form.error(percentageShareKey).nonEmpty,
       label = Html(messages(s"$percentageShareKey.label")),
       helpText = None,

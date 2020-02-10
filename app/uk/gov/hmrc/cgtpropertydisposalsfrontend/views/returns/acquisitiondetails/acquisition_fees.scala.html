@@ -46,7 +46,7 @@
             fieldId = valueKey,
             value = form.data.getOrElse(valueKey, ""),
             label = Html(messages(s"$valueKey.label")),
-            errorKey = form.error(valueKey).map(e => e.message),
+            formError = form.error(valueKey),
             hasErrors = form.error(valueKey).nonEmpty,
             autoComplete = AutoCompleteType.On,
             inputClass = Some("small"),

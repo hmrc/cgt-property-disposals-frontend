@@ -38,7 +38,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutR
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.IncompleteIndividualTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, Error, LocalDateUtils, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, Error, LocalDateUtils, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 
@@ -470,7 +470,7 @@ class AcquisitionDetailsControllerSpec
           "acquisitionDate-year"  -> date.getYear.toString
         )
 
-      val disposalDate = DisposalDate(LocalDate.of(2020, 1, 1))
+      val disposalDate = DisposalDate(LocalDate.of(2020, 1, 1), sample[TaxYear])
 
       behave like redirectToStartBehaviour(() => performAction())
 
@@ -2507,7 +2507,7 @@ class AcquisitionDetailsControllerSpec
       messageFromMessageKey(pageTitleKey, titleArgs), { doc =>
         doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
           expectedErrorMessageKey,
-          errorArgs
+          errorArgs: _*
         )
       },
       BAD_REQUEST

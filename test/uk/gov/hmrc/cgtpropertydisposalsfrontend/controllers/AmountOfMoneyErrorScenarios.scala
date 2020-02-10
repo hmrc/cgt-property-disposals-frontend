@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.MoneyUtils
+
 object AmountOfMoneyErrorScenarios {
 
   final case class AmountOfMoneyErrorScenario(key: String, input: Option[String], expectedErrorMessageKey: String) {
@@ -23,11 +25,11 @@ object AmountOfMoneyErrorScenarios {
       List(input).collect { case Some(v) => key -> v }
   }
 
-  def amountOfMoneyErrorScenarios(key: String) = List(
+  def amountOfMoneyErrorScenarios(key: String, maximumAmountInclusive: Double = MoneyUtils.maxAmountOfPounds) = List(
     AmountOfMoneyErrorScenario(key, None, s"$key.error.required"),
     AmountOfMoneyErrorScenario(key, Some(""), s"$key.error.required"),
     AmountOfMoneyErrorScenario(key, Some("-1"), s"$key.error.tooSmall"),
-    AmountOfMoneyErrorScenario(key, Some((5e10 + 1).toString), s"$key.error.tooLarge"),
+    AmountOfMoneyErrorScenario(key, Some((maximumAmountInclusive + 1).toString), s"$key.error.tooLarge"),
     AmountOfMoneyErrorScenario(key, Some("1.234"), s"$key.error.tooManyDecimals"),
     AmountOfMoneyErrorScenario(key, Some("abc"), s"$key.error.invalid")
   )

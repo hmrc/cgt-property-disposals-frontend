@@ -23,6 +23,7 @@ import java.util.UUID
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.eq._
+import com.typesafe.config.ConfigFactory
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.Configuration
 import play.api.i18n.MessagesApi
@@ -39,10 +40,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => r
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.LocalDateOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.{CompleteIndividualTriageAnswers, IncompleteIndividualTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, Error, JourneyStatus, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -73,8 +75,36 @@ class CanTheyUseOurServiceControllerSpec
 
   val earliestDisposalDate = today.minusDays(10L)
 
+  val taxYear = {
+    val startYear =
+      if (earliestDisposalDate > LocalDate.of(earliestDisposalDate.getYear, 4, 6))
+        earliestDisposalDate.getYear
+      else
+        earliestDisposalDate.getYear - 1
+
+    TaxYear(
+      LocalDate.of(startYear, 4, 6),
+      LocalDate.of(startYear + 1, 4, 6),
+      sample[AmountInPence],
+      sample[AmountInPence]
+    )
+  }
+
   override lazy val additionalConfig: Configuration = Configuration(
-    "returns.earliest-disposal-date-inclusive" -> earliestDisposalDate.format(DateTimeFormatter.ISO_DATE)
+    ConfigFactory.parseString(
+      s"""
+        | returns.earliest-disposal-date-inclusive = ${earliestDisposalDate.format(DateTimeFormatter.ISO_DATE)}
+        | tax-years = [
+        |  {
+        |    start-year = ${taxYear.startDateInclusive.getYear}
+        |    annual-exempt-amount {
+        |      general              = ${taxYear.annualExemptAmountGeneral.inPounds()}
+        |      non-vulnerable-trust = ${taxYear.annualExemptAmountNonVulnerableTrust.inPounds()}
+        |    }
+        |  }
+        | ]
+        |""".stripMargin
+    )
   )
 
   lazy val controller = instanceOf[CanTheyUseOurServiceController]
@@ -514,7 +544,7 @@ class CanTheyUseOurServiceControllerSpec
           assetType          = Some(AssetType.Residential)
         )
 
-      val disposalDate = DisposalDate(LocalDate.of(2020, 1, 2))
+      val disposalDate = DisposalDate(LocalDate.of(2020, 1, 2), taxYear)
 
       def performAction(): Future[Result] = controller.whenWasDisposalDate()(FakeRequest())
 
@@ -616,7 +646,7 @@ class CanTheyUseOurServiceControllerSpec
               "disposalDate-month" -> date.getMonthValue().toString,
               "disposalDate-year"  -> date.getYear().toString
             )
-            (formData, DisposalDate(date), checks)
+            (formData, DisposalDate(date, taxYear), checks)
         }
 
       behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
@@ -653,7 +683,7 @@ class CanTheyUseOurServiceControllerSpec
 
     "handling requests to display the when was completion date page" must {
 
-      val disposalDate = DisposalDate(today)
+      val disposalDate = DisposalDate(today, taxYear)
 
       val requiredPreviousAnswers =
         IncompleteIndividualTriageAnswers.empty.copy(
@@ -705,7 +735,7 @@ class CanTheyUseOurServiceControllerSpec
       def performAction(formData: (String, String)*): Future[Result] =
         controller.whenWasCompletionDateSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
 
-      val disposalDate = DisposalDate(today.minusDays(5L))
+      val disposalDate = DisposalDate(today.minusDays(5L), taxYear)
 
       val tomorrow = today.plusDays(1L)
 
@@ -932,6 +962,7 @@ class CanTheyUseOurServiceControllerSpec
           uuid,
           startingNewDraftReturn.subscribedDetails.cgtReference,
           completeAnswers,
+          None,
           None,
           None,
           None,

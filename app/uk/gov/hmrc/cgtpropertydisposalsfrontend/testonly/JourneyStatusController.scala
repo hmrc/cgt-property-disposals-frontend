@@ -32,7 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingNewDraftReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.IncompleteIndividualTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -164,48 +164,57 @@ object JourneyStatusController {
 
   }
 
-  val returnStateForm: Form[IncompleteIndividualTriageAnswers] = Form(
-    mapping(
-      "individual-user-type"             -> of(individualUserTypeFormatter),
-      "number-of-properties"             -> of(numberOfPropertiesFormatter),
-      "disposal-method"                  -> of(disposalMethodFormatter),
-      "was-a-uk-resident"                -> of(optionalBooleanFormatter),
-      "disposed-of-residential-property" -> of(optionalBooleanFormatter),
-      "disposal-date"                    -> of(optionalDateFormatter),
-      "completion-date"                  -> of(optionalDateFormatter)
-    ) {
-      case (
-          individualUserType,
-          numberOfProperties,
-          disposalMethod,
-          wasAUKResident,
-          disposedOfResidentialProperty,
-          disposalDate,
-          completionDate
-          ) =>
-        IncompleteIndividualTriageAnswers(
-          individualUserType,
-          numberOfProperties,
-          disposalMethod,
-          wasAUKResident,
-          disposedOfResidentialProperty.map(if (_) AssetType.Residential else AssetType.NonResidential),
-          disposalDate.map(DisposalDate(_)),
-          completionDate.map(CompletionDate(_))
+  val returnStateForm: Form[IncompleteIndividualTriageAnswers] = {
+    val dummyTaxYear = TaxYear(
+      LocalDate.ofEpochDay(0L),
+      LocalDate.ofEpochDay(1L),
+      AmountInPence(0L),
+      AmountInPence(1L)
+    )
+
+    Form(
+      mapping(
+        "individual-user-type"             -> of(individualUserTypeFormatter),
+        "number-of-properties"             -> of(numberOfPropertiesFormatter),
+        "disposal-method"                  -> of(disposalMethodFormatter),
+        "was-a-uk-resident"                -> of(optionalBooleanFormatter),
+        "disposed-of-residential-property" -> of(optionalBooleanFormatter),
+        "disposal-date"                    -> of(optionalDateFormatter),
+        "completion-date"                  -> of(optionalDateFormatter)
+      ) {
+        case (
+            individualUserType,
+            numberOfProperties,
+            disposalMethod,
+            wasAUKResident,
+            disposedOfResidentialProperty,
+            disposalDate,
+            completionDate
+            ) =>
+          IncompleteIndividualTriageAnswers(
+            individualUserType,
+            numberOfProperties,
+            disposalMethod,
+            wasAUKResident,
+            disposedOfResidentialProperty.map(if (_) AssetType.Residential else AssetType.NonResidential),
+            disposalDate.map(DisposalDate(_, dummyTaxYear)),
+            completionDate.map(CompletionDate(_))
+          )
+      } { i =>
+        Some(
+          (
+            i.individualUserType,
+            i.numberOfProperties,
+            i.disposalMethod,
+            i.wasAUKResident,
+            i.assetType.map(_ === AssetType.Residential),
+            i.disposalDate.map(_.value),
+            i.completionDate.map(_.value)
+          )
         )
-    } { i =>
-      Some(
-        (
-          i.individualUserType,
-          i.numberOfProperties,
-          i.disposalMethod,
-          i.wasAUKResident,
-          i.assetType.map(_ === AssetType.Residential),
-          i.disposalDate.map(_.value),
-          i.completionDate.map(_.value)
-        )
-      )
-    }
-  )
+      }
+    )
+  }
 
   implicit class MapOps[A, B](private val m: Map[A, B]) extends AnyVal {
 

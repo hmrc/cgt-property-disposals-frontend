@@ -573,6 +573,7 @@ task-list.provide-details.heading=Provide details
 task-list.enter-property-address.link=Enter property address
 task-list.disposals-details.link=Enter sale or disposal details
 task-list.acquisition-details.link=Enter purchase or acquisition details
+task-list.exemptions-and-losses.link=Enter any losses, allowances and exemptions
 task-list.save-and-come-back.link=Save and come back later
 task-list.relief-details.link=Enter reliefs
 
@@ -755,3 +756,86 @@ reliefDetails.cyaChange.privateResidentsReliefValue=Amount of Private Residence 
 reliefDetails.cyaChange.lettingsReliefValue=Amount of Lettings Relief
 reliefDetails.cyaChange.otherReliefsName=Other reliefs names
 reliefDetails.cyaChange.otherReliefsAmount=Other reliefs amount
+
+
+
+exemptionAndLosses.caption=Losses, allowances and exemptions
+
+inYearLosses.title=Do you want to include any Capital Gains Tax losses you made in this tax year?
+inYearLosses.helpText=You can include any Capital Gains Tax losses you mde on UK property sales or disposals from tax year {0} to {1} to reduce your gain
+inYearLosses.error.required=Select yes if you want to include any Capital Gains Tax losses you made in this tax year
+inYearLosses.error.invalid=Select yes if you want to include any Capital Gains Tax losses you made in this tax year
+inYearLossesValue.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
+inYearLossesValue.error.tooSmall=Amount of Capital Gains Tax losses must be more than than 0, or select no
+inYearLossesValue.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
+inYearLossesValue.error.tooManyDecimals=Amount of Capital Gains Tax losses must have 2 decimal places or less, for example 33 or 33.33
+inYearLossesValue.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
+inYearLossesValue.label=Amount of losses from this tax year
+inYearLosses.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
+
+
+previousYearsLosses.title= Do you want to include any Capital Gains Tax losses you made in previous tax years?
+previousYearsLosses.helpText=You can include previous losses in this return to reduce your gain. You can only include losses you have already reported to HMRC.
+previousYearsLosses.error.required=Select yes if you want to include any Capital Gains Tax losses you made in previous tax years
+previousYearsLosses.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
+previousYearsLossesValue.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
+previousYearsLossesValue.error.tooSmall=Amount of Capital Gains Tax losses must be more than than 0, or select no
+previousYearsLossesValue.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
+previousYearsLossesValue.error.tooManyDecimals=	Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
+previousYearsLossesValue.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
+previousYearsLossesValue.label=Amount of losses from previous tax years
+previousYearsLosses.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new window)</a>.
+
+annualExemptAmount.title=How much of your Capital Gains Tax Annual Exempt Amount do you want to use?
+annualExemptAmount.helpText=In the tax year {0} to {1}, you only have to pay Capital Gains Tax on gains above {2}.
+annualExemptAmount.error.required=Enter how much of your Capital Gains Tax Annual Exempt Amount you want to use, like 0 or 12,000
+annualExemptAmount.error.invalid=Annual Exempt Amount must be a number, like 0 or 12,000
+annualExemptAmount.error.tooSmall=Annual Exempt Amount must be 0 or more
+annualExemptAmount.error.tooLarge=Annual Exempt Amount must be {0} or less
+annualExemptAmount.error.tooManyDecimals=Annual Exempt Amount must have 2 decimal places or less, like 8,700 or 33.33
+annualExemptAmount.link=<a href="{0}" target="_blank">Find out about the Annual Exempt Amount (opens in a new window)</a>.
+
+
+taxableGainOrLoss.title=Did you make a taxable gain on the property disposal?
+taxableGainOrLoss.helpText=This is after you have subtracted any reliefs, improvements or losses you are using
+taxableGainOrLoss.error.required=Select yes if you made a taxable gain on the property disposal
+taxableGainOrLoss.error.invalid=Select yes if you made a taxable gain on the property disposal
+
+taxableGainOrLoss.gain.label=Yes, I made a taxable gain
+taxableGain.label=Amount of taxable gain
+taxableGain.error.required=Enter the amount of the gain you made on the property disposal
+taxableGain.error.invalid=Amount of the gain or loss must be a number and must have 2 decimal places or less, for example 33.33
+taxableGain.error.tooSmall=The amount of the gain or loss must be a number more than 0., or select no taxable gain, no net loss
+taxableGain.error.tooLarge=Gain or loss must be a number that is 50,000,000,000.00 or less
+taxableGain.error.tooManyDecimals=Amount of the gain or loss must have 2 decimal places or less, for example 33.33 
+
+taxableGainOrLoss.loss.label=No, I made a net loss
+netLoss.label=Amount of net loss
+netLoss.error.required=Enter the amount of loss you made on the property disposal
+netLoss.error.invalid=Amount of the gain or loss must be a number and must have 2 decimal places or less, for example 33.33
+netLoss.error.tooSmall=	The amount of the gain or loss must be a number more than 0., or select no taxable gain, no net loss
+netLoss.error.tooLarge=Gain or loss must be a number that is 50,000,000,000.00 or less
+netLoss.error.tooManyDecimals=Amount of the gain or loss must have 2 decimal places or less, for example 33.33 
+
+taxableGainOrLoss.noLossOrGain.label=No taxable gain, no net loss
+taxableGainOrLoss.details.summary=How to work out if you made a taxable gain
+taxableGainOrLoss.details.p1=Subtract the amount you sold the property for as well as any reliefs, allowances, exemptions, or losses from the market value of the property when you inherited it. If the amount is more than £0 you made a taxable gain.
+
+exemptionsAndLosses.cya.title=Check your answers
+
+exemptionsAndLosses.cyaLabel.inYearLosses=Use losses from this tax year?
+exemptionsAndLosses.cyaChange.inYearLosses=your in year losses
+
+exemptionsAndLosses.cyaLabel.inYearLossesValue=Amount of losses from this tax year used
+exemptionsAndLosses.cyaChange.inYearLossesValue=your in year losses
+
+exemptionsAndLosses.cyaLabel.previousYearsLosses=Use losses from previous tax years?
+exemptionsAndLosses.cyaChange.previousYearsLosses=your previous years losses
+
+exemptionsAndLosses.cyaLabel.previousYearsLossesValue=Amount of losses from previous tax year used
+exemptionsAndLosses.cyaChange.previousYearsLossesValue=your previous years losses
+
+exemptionsAndLosses.cyaChange.annualExemptAmount=your annual exempt amount
+exemptionsAndLosses.cyaChange.taxableGainOrLoss=your taxable gain or net loss
+
+
