@@ -1,0 +1,11 @@
+GET    /reliefs/private-residence-relief      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.ReliefDetailsController.privateResidentsRelief()
+POST   /reliefs/private-residence-relief      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.ReliefDetailsController.privateResidentsReliefSubmit()
+
+GET    /reliefs/letting-relief                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.ReliefDetailsController.lettingsRelief()
+POST   /reliefs/letting-relief                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.ReliefDetailsController.lettingsReliefSubmit()
+
+GET    /reliefs/other-reliefs                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.ReliefDetailsController.otherReliefs()
+POST   /reliefs/other-reliefs                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.ReliefDetailsController.otherReliefsSubmit()
+
+GET    /reliefs/check-answers                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.ReliefDetailsController.checkYourAnswers()
+POST   /reliefs/check-answers                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.ReliefDetailsController.checkYourAnswersSubmit()
