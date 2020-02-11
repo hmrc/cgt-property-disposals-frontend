@@ -82,14 +82,8 @@ class TaskListControllerSpec
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(
-            Future.successful(
-              Right(
-                Some(
-                  SessionData.empty.copy(
-                    journeyStatus = Some(fillingOutReturn)
-                  )
-                )
-              )
+            SessionData.empty.copy(
+              journeyStatus = Some(fillingOutReturn)
             )
           )
         }
@@ -231,14 +225,8 @@ class TaskListControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    SessionData.empty.copy(
-                      journeyStatus = Some(sample[FillingOutReturn])
-                    )
-                  )
-                )
+              SessionData.empty.copy(
+                journeyStatus = Some(sample[FillingOutReturn])
               )
             )
           }

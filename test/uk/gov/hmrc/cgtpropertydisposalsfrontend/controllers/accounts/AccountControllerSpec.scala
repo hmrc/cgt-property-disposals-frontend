@@ -85,7 +85,7 @@ class AccountControllerSpec
 
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionData))))
+          mockGetSession(sessionData)
         }
 
         val result = performAction()
@@ -106,7 +106,7 @@ class AccountControllerSpec
 
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionData))))
+          mockGetSession(sessionData)
         }
 
         val result = performAction()
@@ -127,7 +127,7 @@ class AccountControllerSpec
 
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionData))))
+          mockGetSession(sessionData)
         }
 
         val result = performAction()
@@ -148,7 +148,7 @@ class AccountControllerSpec
 
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionData))))
+          mockGetSession(sessionData)
         }
 
         val result = performAction()

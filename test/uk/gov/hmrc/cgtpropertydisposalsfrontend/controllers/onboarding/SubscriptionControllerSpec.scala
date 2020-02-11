@@ -106,7 +106,7 @@ class SubscriptionControllerSpec
             )
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(individualSessionWithSubscriptionDetails))))
+            mockGetSession(individualSessionWithSubscriptionDetails)
           }
 
           val result = performAction()
@@ -122,7 +122,7 @@ class SubscriptionControllerSpec
             )
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(organisationSessionWithSubscriptionDetails))))
+            mockGetSession(organisationSessionWithSubscriptionDetails)
           }
 
           val result = performAction()
@@ -160,7 +160,7 @@ class SubscriptionControllerSpec
         "there is an error during subscription" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionWithSubscriptionDetails))))
+            mockGetSession(sessionWithSubscriptionDetails)
             mockSubscribe(subscriptionDetails)(Left(Error(new Exception(""))))
           }
 
@@ -170,9 +170,9 @@ class SubscriptionControllerSpec
         "there is an error updating the session" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionWithSubscriptionDetails))))
+            mockGetSession(sessionWithSubscriptionDetails)
             mockSubscribe(subscriptionDetails)(Right(subscriptionSuccessfulResponse))
-            mockStoreSession(sessionWithSubscriptionComplete)(Future.successful(Left(Error(""))))
+            mockStoreSession(sessionWithSubscriptionComplete)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -185,9 +185,9 @@ class SubscriptionControllerSpec
         "subscription is successful and the session is updated successfully" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionWithSubscriptionDetails))))
+            mockGetSession(sessionWithSubscriptionDetails)
             mockSubscribe(subscriptionDetails)(Right(subscriptionSuccessfulResponse))
-            mockStoreSession(sessionWithSubscriptionComplete)(Future.successful(Right(())))
+            mockStoreSession(sessionWithSubscriptionComplete)(Right(()))
           }
 
           checkIsRedirect(performAction(), onboardingRoutes.SubscriptionController.subscribed())
@@ -203,9 +203,9 @@ class SubscriptionControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionWithSubscriptionDetails))))
+            mockGetSession(sessionWithSubscriptionDetails)
             mockSubscribe(subscriptionDetails)(Right(AlreadySubscribed))
-            mockStoreSession(sessionWithAlreadySubscribed)(Future.successful(Right(())))
+            mockStoreSession(sessionWithAlreadySubscribed)(Right(()))
           }
 
           checkIsRedirect(
@@ -255,7 +255,7 @@ class SubscriptionControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
           }
 
           val result = performAction()
@@ -286,14 +286,7 @@ class SubscriptionControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    SessionData.empty.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount(ggCredId, None))
-                    )
-                  )
-                )
-              )
+              SessionData.empty.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount(ggCredId, None)))
             )
           }
 
@@ -324,15 +317,7 @@ class SubscriptionControllerSpec
         "the session data indicates that the user has already subscribed with a different gg account" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    SessionData.empty.copy(journeyStatus = Some(sample[SubscriptionReady]))
-                  )
-                )
-              )
-            )
+            mockGetSession(SessionData.empty.copy(journeyStatus = Some(sample[SubscriptionReady])))
           }
 
           val result = performAction()

@@ -106,7 +106,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
           whenever(!userType.contains(UserType.Agent)) {
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(subscribedSessionData.copy(userType = userType)))))
+              mockGetSession(subscribedSessionData.copy(userType = userType))
             }
 
             val result  = performAction()
@@ -138,7 +138,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
 
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionData))))
+          mockGetSession(sessionData)
         }
 
         val result  = performAction()
@@ -182,15 +182,9 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    SessionData.empty.copy(
-                      journeyStatus = Some(journeyStatus),
-                      userType      = Some(UserType.Individual)
-                    )
-                  )
-                )
+              SessionData.empty.copy(
+                journeyStatus = Some(journeyStatus),
+                userType      = Some(UserType.Individual)
               )
             )
             mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Right(subscribed.draftReturns))
@@ -199,7 +193,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
                 journeyStatus = Some(subscribed),
                 userType      = Some(UserType.Individual)
               )
-            )(Future.successful(Right(())))
+            )(Right(()))
           }
 
           val result = performAction()
@@ -213,15 +207,9 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
-                Future.successful(
-                  Right(
-                    Some(
-                      SessionData.empty.copy(
-                        journeyStatus = Some(journeyStatus),
-                        userType      = Some(UserType.Individual)
-                      )
-                    )
-                  )
+                SessionData.empty.copy(
+                  journeyStatus = Some(journeyStatus),
+                  userType      = Some(UserType.Individual)
                 )
               )
               mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Right(subscribed.draftReturns))
@@ -230,7 +218,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
                   journeyStatus = Some(subscribed),
                   userType      = Some(UserType.Individual)
                 )
-              )(Future.successful(Left(Error(""))))
+              )(Left(Error("")))
             }
 
             checkIsTechnicalErrorPage(performAction())
@@ -241,15 +229,9 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
-                Future.successful(
-                  Right(
-                    Some(
-                      SessionData.empty.copy(
-                        journeyStatus = Some(journeyStatus),
-                        userType      = Some(UserType.Individual)
-                      )
-                    )
-                  )
+                SessionData.empty.copy(
+                  journeyStatus = Some(journeyStatus),
+                  userType      = Some(UserType.Individual)
                 )
               )
               mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Left(Error("")))
@@ -283,7 +265,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
               withClue(s"For user type '$userType': ") {
                 inSequence {
                   mockAuthWithNoRetrievals()
-                  mockGetSession(Future.successful(Right(Some(subscribedSessionData.copy(userType = userType)))))
+                  mockGetSession(subscribedSessionData.copy(userType = userType))
                 }
 
                 checkIsTechnicalErrorPage(performAction())
@@ -295,9 +277,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
         "there is an error updating the session" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(subscribedSessionData.copy(userType = Some(UserType.Individual)))))
-            )
+            mockGetSession(subscribedSessionData.copy(userType = Some(UserType.Individual)))
             mockStoreSession(
               subscribedSessionData.copy(
                 journeyStatus = Some(
@@ -310,7 +290,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
                 ),
                 userType = Some(UserType.Individual)
               )
-            )(Future.successful(Left(Error(""))))
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -322,9 +302,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
         "the user type is individual" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(subscribedSessionData.copy(userType = Some(UserType.Individual)))))
-            )
+            mockGetSession(subscribedSessionData.copy(userType = Some(UserType.Individual)))
             mockStoreSession(
               subscribedSessionData.copy(
                 journeyStatus = Some(
@@ -337,7 +315,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
                 ),
                 userType = Some(UserType.Individual)
               )
-            )(Future.successful(Right(())))
+            )(Right(()))
           }
 
           checkIsRedirect(
@@ -377,7 +355,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
         "no draft return can be found with the given id" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionWithSubscribed))))
+            mockGetSession(sessionWithSubscribed)
           }
 
           checkIsTechnicalErrorPage(performAction(UUID.randomUUID()))
@@ -386,10 +364,8 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
         "there is an error updating the session" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionWithSubscribed))))
-            mockStoreSession(SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)))(
-              Future.successful(Left(Error("")))
-            )
+            mockGetSession(sessionWithSubscribed)
+            mockStoreSession(SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)))(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction(draftReturn.id))
@@ -401,10 +377,8 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
         "a draft return can be found with the given id and the session is successfully updated" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionWithSubscribed))))
-            mockStoreSession(SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)))(
-              Future.successful(Right(()))
-            )
+            mockGetSession(sessionWithSubscribed)
+            mockStoreSession(SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)))(Right(()))
           }
 
           checkIsRedirect(performAction(draftReturn.id), controllers.returns.routes.TaskListController.taskList())
@@ -450,7 +424,7 @@ class PrivateBetaHomePageControllerSpec extends HomePageControllerSpec {
 
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionData))))
+          mockGetSession(sessionData)
         }
 
         val result = performAction()
