@@ -116,9 +116,7 @@ class AcquisitionDetailsControllerSpec
             withClue(s"For answers $answers: ") {
               inSequence {
                 mockAuthWithNoRetrievals()
-                mockGetSession(
-                  Future.successful(Right(Some(sessionWithState(answers, None, None, Some(sample[DisposalDate]))._1)))
-                )
+                mockGetSession(sessionWithState(answers, None, None, Some(sample[DisposalDate]))._1)
               }
 
               checkPageIsDisplayed(
@@ -141,18 +139,11 @@ class AcquisitionDetailsControllerSpec
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(
-                  Future
-                    .successful(
-                      Right(
-                        Some(
-                          sessionWithState(
-                            sample[CompleteAcquisitionDetailsAnswers],
-                            sample[AssetType],
-                            sample[Boolean]
-                          )._1
-                        )
-                      )
-                    )
+                  sessionWithState(
+                    sample[CompleteAcquisitionDetailsAnswers],
+                    sample[AssetType],
+                    sample[Boolean]
+                  )._1
                 )
               }
 
@@ -234,7 +225,7 @@ class AcquisitionDetailsControllerSpec
         "there is an error updating the draft return" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
             mockStoreDraftReturn(updatedDraftReturn)(Left(Error("")))
           }
 
@@ -244,9 +235,9 @@ class AcquisitionDetailsControllerSpec
         "there is an error updating the session" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
             mockStoreDraftReturn(updatedDraftReturn)(Right(()))
-            mockStoreSession(updatedSession)(Future.successful(Left(Error(""))))
+            mockStoreSession(updatedSession)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction("acquisitionMethod" -> methodValue.toString))
@@ -268,9 +259,9 @@ class AcquisitionDetailsControllerSpec
 
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(session))))
+              mockGetSession(session)
               mockStoreDraftReturn(updatedDraftReturn)(Right(()))
-              mockStoreSession(updatedSession)(Future.successful(Right(())))
+              mockStoreSession(updatedSession)(Right(()))
             }
 
             checkIsRedirect(performAction(data: _*), routes.AcquisitionDetailsController.checkYourAnswers())
@@ -307,9 +298,9 @@ class AcquisitionDetailsControllerSpec
 
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(session))))
+              mockGetSession(session)
               mockStoreDraftReturn(updatedDraftReturn)(Right(()))
-              mockStoreSession(updatedSession)(Future.successful(Right(())))
+              mockStoreSession(updatedSession)(Right(()))
             }
 
             checkIsRedirect(performAction(data: _*), routes.AcquisitionDetailsController.checkYourAnswers())
@@ -361,9 +352,7 @@ class AcquisitionDetailsControllerSpec
             case (data, answers) =>
               inSequence {
                 mockAuthWithNoRetrievals()
-                mockGetSession(
-                  Future.successful(Right(Some(sessionWithState(answers, sample[AssetType], sample[Boolean])._1)))
-                )
+                mockGetSession(sessionWithState(answers, sample[AssetType], sample[Boolean])._1)
               }
 
               checkIsRedirect(performAction(data: _*), routes.AcquisitionDetailsController.checkYourAnswers())
@@ -386,18 +375,12 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      Some(sample[CompleteAcquisitionDetailsAnswers]),
-                      Some(sample[AssetType]),
-                      Some(sample[Boolean]),
-                      None
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                Some(sample[CompleteAcquisitionDetailsAnswers]),
+                Some(sample[AssetType]),
+                Some(sample[Boolean]),
+                None
+              )._1
             )
           }
 
@@ -412,17 +395,11 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[IncompleteAcquisitionDetailsAnswers].copy(acquisitionMethod = None),
-                      sample[AssetType],
-                      sample[Boolean]
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(acquisitionMethod = None),
+                sample[AssetType],
+                sample[Boolean]
+              )._1
             )
           }
 
@@ -437,19 +414,13 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[IncompleteAcquisitionDetailsAnswers].copy(
-                        acquisitionMethod = Some(AcquisitionMethod.Bought)
-                      ),
-                      sample[AssetType],
-                      sample[Boolean]
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionMethod = Some(AcquisitionMethod.Bought)
+                ),
+                sample[AssetType],
+                sample[Boolean]
+              )._1
             )
           }
 
@@ -468,17 +439,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[CompleteAcquisitionDetailsAnswers],
-                      sample[AssetType],
-                      sample[Boolean]
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(sample[CompleteAcquisitionDetailsAnswers], sample[AssetType], sample[Boolean])._1
             )
           }
 
@@ -521,18 +482,12 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      Some(sample[CompleteAcquisitionDetailsAnswers]),
-                      Some(sample[AssetType]),
-                      Some(sample[Boolean]),
-                      None
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                Some(sample[CompleteAcquisitionDetailsAnswers]),
+                Some(sample[AssetType]),
+                Some(sample[Boolean]),
+                None
+              )._1
             )
           }
 
@@ -593,7 +548,7 @@ class AcquisitionDetailsControllerSpec
         "there is an error updating the draft return" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
             mockStoreDraftReturn(updatedDraftReturn)(Left(Error("")))
           }
 
@@ -603,9 +558,9 @@ class AcquisitionDetailsControllerSpec
         "there is an error updating the session" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
             mockStoreDraftReturn(updatedDraftReturn)(Right(()))
-            mockStoreSession(updatedSession)(Future.successful(Left(Error(""))))
+            mockStoreSession(updatedSession)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction(formData(acquisitionDate.value): _*))
@@ -626,9 +581,9 @@ class AcquisitionDetailsControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
             mockStoreDraftReturn(updatedDraftReturn)(Right(()))
-            mockStoreSession(updatedSession)(Future.successful(Right(())))
+            mockStoreSession(updatedSession)(Right(()))
 
           }
 
@@ -823,19 +778,13 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[IncompleteAcquisitionDetailsAnswers].copy(
-                        acquisitionDate = None
-                      ),
-                      sample[AssetType],
-                      sample[Boolean]
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate = None
+                ),
+                sample[AssetType],
+                sample[Boolean]
+              )._1
             )
           }
 
@@ -853,19 +802,13 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[IncompleteAcquisitionDetailsAnswers].copy(
-                        acquisitionDate = Some(sample[AcquisitionDate])
-                      ),
-                      sample[AssetType],
-                      sample[Boolean]
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate = Some(sample[AcquisitionDate])
+                ),
+                sample[AssetType],
+                sample[Boolean]
+              )._1
             )
           }
 
@@ -884,17 +827,11 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[CompleteAcquisitionDetailsAnswers],
-                      sample[AssetType],
-                      sample[Boolean]
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[CompleteAcquisitionDetailsAnswers],
+                sample[AssetType],
+                sample[Boolean]
+              )._1
             )
           }
 
@@ -925,19 +862,13 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[IncompleteAcquisitionDetailsAnswers].copy(
-                        acquisitionDate = None
-                      ),
-                      sample[AssetType],
-                      sample[Boolean]
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate = None
+                ),
+                sample[AssetType],
+                sample[Boolean]
+              )._1
             )
           }
 
@@ -987,7 +918,7 @@ class AcquisitionDetailsControllerSpec
         "there is an error updating the draft return" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
             mockStoreDraftReturn(updatedDraftReturn)(Left(Error("")))
           }
 
@@ -997,9 +928,9 @@ class AcquisitionDetailsControllerSpec
         "there is an error updating the session" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
             mockStoreDraftReturn(updatedDraftReturn)(Right(()))
-            mockStoreSession(updatedSession)(Future.successful(Left(Error(""))))
+            mockStoreSession(updatedSession)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction("acquisitionPrice" -> price.toString))
@@ -1018,9 +949,9 @@ class AcquisitionDetailsControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
             mockStoreDraftReturn(updatedDraftReturn)(Right(()))
-            mockStoreSession(updatedSession)(Future.successful(Right(())))
+            mockStoreSession(updatedSession)(Right(()))
           }
 
           checkIsRedirect(
@@ -1038,9 +969,9 @@ class AcquisitionDetailsControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
             mockStoreDraftReturn(updatedDraftReturn)(Right(()))
-            mockStoreSession(updatedSession)(Future.successful(Right(())))
+            mockStoreSession(updatedSession)(Right(()))
           }
 
           checkIsRedirect(
@@ -1070,20 +1001,14 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[IncompleteAcquisitionDetailsAnswers].copy(
-                        acquisitionDate  = Some(acquisitionDate),
-                        acquisitionPrice = None
-                      ),
-                      sample[AssetType],
-                      sample[Boolean]
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate  = Some(acquisitionDate),
+                  acquisitionPrice = None
+                ),
+                sample[AssetType],
+                sample[Boolean]
+              )._1
             )
           }
 
@@ -1101,20 +1026,14 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[IncompleteAcquisitionDetailsAnswers].copy(
-                        acquisitionDate  = None,
-                        acquisitionPrice = Some(sample[AmountInPence])
-                      ),
-                      sample[AssetType],
-                      sample[Boolean]
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate  = None,
+                  acquisitionPrice = Some(sample[AmountInPence])
+                ),
+                sample[AssetType],
+                sample[Boolean]
+              )._1
             )
           }
 
@@ -1131,19 +1050,13 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[CompleteAcquisitionDetailsAnswers].copy(
-                        acquisitionDate = AcquisitionDate(RebasingCutoffDates.ukResidents)
-                      ),
-                      AssetType.Residential,
-                      true
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[CompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate = AcquisitionDate(RebasingCutoffDates.ukResidents)
+                ),
+                AssetType.Residential,
+                true
+              )._1
             )
           }
           checkIsRedirect(performAction(), routes.AcquisitionDetailsController.checkYourAnswers())
@@ -1158,20 +1071,14 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[IncompleteAcquisitionDetailsAnswers].copy(
-                        acquisitionDate  = Some(acquisitionDate),
-                        acquisitionPrice = Some(sample[AmountInPence])
-                      ),
-                      AssetType.Residential,
-                      true
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate  = Some(acquisitionDate),
+                  acquisitionPrice = Some(sample[AmountInPence])
+                ),
+                AssetType.Residential,
+                true
+              )._1
             )
           }
 
@@ -1193,17 +1100,11 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[CompleteAcquisitionDetailsAnswers].copy(acquisitionDate = acquisitionDate),
-                      AssetType.Residential,
-                      true
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[CompleteAcquisitionDetailsAnswers].copy(acquisitionDate = acquisitionDate),
+                AssetType.Residential,
+                true
+              )._1
             )
           }
 
@@ -1225,20 +1126,14 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[CompleteAcquisitionDetailsAnswers].copy(
-                        acquisitionDate         = acquisitionDate,
-                        rebasedAcquisitionPrice = Some(AmountInPence(0L))
-                      ),
-                      AssetType.Residential,
-                      true
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[CompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate         = acquisitionDate,
+                  rebasedAcquisitionPrice = Some(AmountInPence(0L))
+                ),
+                AssetType.Residential,
+                true
+              )._1
             )
           }
 
@@ -1257,20 +1152,14 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[CompleteAcquisitionDetailsAnswers].copy(
-                        acquisitionDate         = acquisitionDate,
-                        rebasedAcquisitionPrice = Some(AmountInPence(1L))
-                      ),
-                      AssetType.Residential,
-                      true
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[CompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate         = acquisitionDate,
+                  rebasedAcquisitionPrice = Some(AmountInPence(1L))
+                ),
+                AssetType.Residential,
+                true
+              )._1
             )
           }
 
@@ -1307,20 +1196,14 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[IncompleteAcquisitionDetailsAnswers].copy(
-                        acquisitionDate  = Some(acquisitionDate),
-                        acquisitionPrice = None
-                      ),
-                      sample[AssetType],
-                      sample[Boolean]
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate  = Some(acquisitionDate),
+                  acquisitionPrice = None
+                ),
+                sample[AssetType],
+                sample[Boolean]
+              )._1
             )
           }
 
@@ -1338,20 +1221,14 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[IncompleteAcquisitionDetailsAnswers].copy(
-                        acquisitionDate  = None,
-                        acquisitionPrice = Some(sample[AmountInPence])
-                      ),
-                      sample[AssetType],
-                      sample[Boolean]
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate  = None,
+                  acquisitionPrice = Some(sample[AmountInPence])
+                ),
+                sample[AssetType],
+                sample[Boolean]
+              )._1
             )
           }
 
@@ -1368,17 +1245,11 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[CompleteAcquisitionDetailsAnswers].copy(acquisitionDate = acquisitionDate),
-                      AssetType.Residential,
-                      true
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[CompleteAcquisitionDetailsAnswers].copy(acquisitionDate = acquisitionDate),
+                AssetType.Residential,
+                true
+              )._1
             )
           }
 
@@ -1438,7 +1309,7 @@ class AcquisitionDetailsControllerSpec
         "there is an error updating the draft return" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
             mockStoreDraftReturn(updatedDraftReturn)(Left(Error("")))
           }
 
@@ -1453,9 +1324,9 @@ class AcquisitionDetailsControllerSpec
         "there is an error updating the session" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
             mockStoreDraftReturn(updatedDraftReturn)(Right(()))
-            mockStoreSession(updatedSession)(Future.successful(Left(Error(""))))
+            mockStoreSession(updatedSession)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(
@@ -1491,9 +1362,9 @@ class AcquisitionDetailsControllerSpec
 
                 inSequence {
                   mockAuthWithNoRetrievals()
-                  mockGetSession(Future.successful(Right(Some(session))))
+                  mockGetSession(session)
                   mockStoreDraftReturn(updatedDraftReturn)(Right(()))
-                  mockStoreSession(updatedSession)(Future.successful(Right(())))
+                  mockStoreSession(updatedSession)(Right(()))
                 }
 
                 checkIsRedirect(
@@ -1521,9 +1392,9 @@ class AcquisitionDetailsControllerSpec
 
                 inSequence {
                   mockAuthWithNoRetrievals()
-                  mockGetSession(Future.successful(Right(Some(session))))
+                  mockGetSession(session)
                   mockStoreDraftReturn(updatedDraftReturn)(Right(()))
-                  mockStoreSession(updatedSession)(Future.successful(Right(())))
+                  mockStoreSession(updatedSession)(Right(()))
                 }
 
                 checkIsRedirect(
@@ -1553,19 +1424,13 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[IncompleteAcquisitionDetailsAnswers].copy(
-                        acquisitionDate = None
-                      ),
-                      sample[AssetType],
-                      sample[Boolean]
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate = None
+                ),
+                sample[AssetType],
+                sample[Boolean]
+              )._1
             )
           }
 
@@ -1584,20 +1449,14 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[IncompleteAcquisitionDetailsAnswers].copy(
-                        acquisitionDate  = Some(AcquisitionDate(RebasingCutoffDates.ukResidents)),
-                        acquisitionPrice = None
-                      ),
-                      AssetType.Residential,
-                      true
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate  = Some(AcquisitionDate(RebasingCutoffDates.ukResidents)),
+                  acquisitionPrice = None
+                ),
+                AssetType.Residential,
+                true
+              )._1
             )
           }
 
@@ -1615,20 +1474,14 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[IncompleteAcquisitionDetailsAnswers].copy(
-                        acquisitionDate         = Some(AcquisitionDate(RebasingCutoffDates.ukResidents.minusDays(1L))),
-                        rebasedAcquisitionPrice = None
-                      ),
-                      AssetType.Residential,
-                      true
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate         = Some(AcquisitionDate(RebasingCutoffDates.ukResidents.minusDays(1L))),
+                  rebasedAcquisitionPrice = None
+                ),
+                AssetType.Residential,
+                true
+              )._1
             )
           }
 
@@ -1646,20 +1499,14 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[IncompleteAcquisitionDetailsAnswers].copy(
-                        acquisitionDate         = Some(AcquisitionDate(RebasingCutoffDates.ukResidents.minusDays(1L))),
-                        rebasedAcquisitionPrice = Some(sample[AmountInPence])
-                      ),
-                      AssetType.Residential,
-                      true
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate         = Some(AcquisitionDate(RebasingCutoffDates.ukResidents.minusDays(1L))),
+                  rebasedAcquisitionPrice = Some(sample[AmountInPence])
+                ),
+                AssetType.Residential,
+                true
+              )._1
             )
           }
 
@@ -1680,21 +1527,15 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[IncompleteAcquisitionDetailsAnswers].copy(
-                        acquisitionDate         = Some(AcquisitionDate(RebasingCutoffDates.ukResidents)),
-                        acquisitionPrice        = Some(sample[AmountInPence]),
-                        rebasedAcquisitionPrice = Some(sample[AmountInPence])
-                      ),
-                      AssetType.Residential,
-                      true
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate         = Some(AcquisitionDate(RebasingCutoffDates.ukResidents)),
+                  acquisitionPrice        = Some(sample[AmountInPence]),
+                  rebasedAcquisitionPrice = Some(sample[AmountInPence])
+                ),
+                AssetType.Residential,
+                true
+              )._1
             )
           }
 
@@ -1713,20 +1554,14 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[CompleteAcquisitionDetailsAnswers].copy(
-                        acquisitionDate         = AcquisitionDate(RebasingCutoffDates.ukResidents.minusDays(1L)),
-                        rebasedAcquisitionPrice = Some(sample[AmountInPence])
-                      ),
-                      AssetType.Residential,
-                      true
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[CompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate         = AcquisitionDate(RebasingCutoffDates.ukResidents.minusDays(1L)),
+                  rebasedAcquisitionPrice = Some(sample[AmountInPence])
+                ),
+                AssetType.Residential,
+                true
+              )._1
             )
           }
 
@@ -1745,20 +1580,14 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[CompleteAcquisitionDetailsAnswers].copy(
-                        acquisitionDate         = AcquisitionDate(RebasingCutoffDates.ukResidents),
-                        rebasedAcquisitionPrice = Some(sample[AmountInPence])
-                      ),
-                      AssetType.Residential,
-                      true
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[CompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate         = AcquisitionDate(RebasingCutoffDates.ukResidents),
+                  rebasedAcquisitionPrice = Some(sample[AmountInPence])
+                ),
+                AssetType.Residential,
+                true
+              )._1
             )
           }
 
@@ -1777,21 +1606,15 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[CompleteAcquisitionDetailsAnswers].copy(
-                        acquisitionDate         = AcquisitionDate(RebasingCutoffDates.ukResidents),
-                        rebasedAcquisitionPrice = Some(sample[AmountInPence]),
-                        improvementCosts        = AmountInPence(0L)
-                      ),
-                      AssetType.Residential,
-                      true
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[CompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate         = AcquisitionDate(RebasingCutoffDates.ukResidents),
+                  rebasedAcquisitionPrice = Some(sample[AmountInPence]),
+                  improvementCosts        = AmountInPence(0L)
+                ),
+                AssetType.Residential,
+                true
+              )._1
             )
 
           }
@@ -1810,21 +1633,15 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[CompleteAcquisitionDetailsAnswers].copy(
-                        acquisitionDate         = AcquisitionDate(RebasingCutoffDates.ukResidents),
-                        rebasedAcquisitionPrice = Some(sample[AmountInPence]),
-                        improvementCosts        = AmountInPence(2L)
-                      ),
-                      AssetType.Residential,
-                      true
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[CompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate         = AcquisitionDate(RebasingCutoffDates.ukResidents),
+                  rebasedAcquisitionPrice = Some(sample[AmountInPence]),
+                  improvementCosts        = AmountInPence(2L)
+                ),
+                AssetType.Residential,
+                true
+              )._1
             )
 
           }
@@ -1861,19 +1678,13 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[IncompleteAcquisitionDetailsAnswers].copy(
-                        acquisitionDate = None
-                      ),
-                      sample[AssetType],
-                      sample[Boolean]
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate = None
+                ),
+                sample[AssetType],
+                sample[Boolean]
+              )._1
             )
           }
 
@@ -1892,20 +1703,14 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[IncompleteAcquisitionDetailsAnswers].copy(
-                        acquisitionDate  = Some(AcquisitionDate(RebasingCutoffDates.ukResidents)),
-                        acquisitionPrice = None
-                      ),
-                      AssetType.Residential,
-                      true
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate  = Some(AcquisitionDate(RebasingCutoffDates.ukResidents)),
+                  acquisitionPrice = None
+                ),
+                AssetType.Residential,
+                true
+              )._1
             )
           }
 
@@ -1923,20 +1728,14 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[IncompleteAcquisitionDetailsAnswers].copy(
-                        acquisitionDate         = Some(AcquisitionDate(RebasingCutoffDates.ukResidents.minusDays(1L))),
-                        rebasedAcquisitionPrice = None
-                      ),
-                      AssetType.Residential,
-                      true
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate         = Some(AcquisitionDate(RebasingCutoffDates.ukResidents.minusDays(1L))),
+                  rebasedAcquisitionPrice = None
+                ),
+                AssetType.Residential,
+                true
+              )._1
             )
           }
 
@@ -1994,7 +1793,7 @@ class AcquisitionDetailsControllerSpec
         "there is an error updating the draft return" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
             mockStoreDraftReturn(updatedDraftReturn)(Left(Error("")))
           }
 
@@ -2009,9 +1808,9 @@ class AcquisitionDetailsControllerSpec
         "there is an error updating the session" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
             mockStoreDraftReturn(updatedDraftReturn)(Right(()))
-            mockStoreSession(updatedSession)(Future.successful(Left(Error(""))))
+            mockStoreSession(updatedSession)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(
@@ -2046,9 +1845,9 @@ class AcquisitionDetailsControllerSpec
 
                 inSequence {
                   mockAuthWithNoRetrievals()
-                  mockGetSession(Future.successful(Right(Some(session))))
+                  mockGetSession(session)
                   mockStoreDraftReturn(updatedDraftReturn)(Right(()))
-                  mockStoreSession(updatedSession)(Future.successful(Right(())))
+                  mockStoreSession(updatedSession)(Right(()))
                 }
 
                 checkIsRedirect(
@@ -2077,9 +1876,9 @@ class AcquisitionDetailsControllerSpec
 
                 inSequence {
                   mockAuthWithNoRetrievals()
-                  mockGetSession(Future.successful(Right(Some(session))))
+                  mockGetSession(session)
                   mockStoreDraftReturn(updatedDraftReturn)(Right(()))
-                  mockStoreSession(updatedSession)(Future.successful(Right(())))
+                  mockStoreSession(updatedSession)(Right(()))
                 }
 
                 checkIsRedirect(
@@ -2105,19 +1904,13 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[IncompleteAcquisitionDetailsAnswers].copy(
-                        improvementCosts = None
-                      ),
-                      sample[AssetType],
-                      sample[Boolean]
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  improvementCosts = None
+                ),
+                sample[AssetType],
+                sample[Boolean]
+              )._1
             )
           }
 
@@ -2135,19 +1928,13 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[IncompleteAcquisitionDetailsAnswers].copy(
-                        improvementCosts = Some(sample[AmountInPence])
-                      ),
-                      sample[AssetType],
-                      sample[Boolean]
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  improvementCosts = Some(sample[AmountInPence])
+                ),
+                sample[AssetType],
+                sample[Boolean]
+              )._1
             )
           }
 
@@ -2166,17 +1953,11 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[CompleteAcquisitionDetailsAnswers],
-                      sample[AssetType],
-                      sample[Boolean]
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[CompleteAcquisitionDetailsAnswers],
+                sample[AssetType],
+                sample[Boolean]
+              )._1
             )
           }
 
@@ -2195,17 +1976,11 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[CompleteAcquisitionDetailsAnswers].copy(acquisitionFees = AmountInPence(0L)),
-                      sample[AssetType],
-                      sample[Boolean]
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[CompleteAcquisitionDetailsAnswers].copy(acquisitionFees = AmountInPence(0L)),
+                sample[AssetType],
+                sample[Boolean]
+              )._1
             )
           }
 
@@ -2223,17 +1998,11 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[CompleteAcquisitionDetailsAnswers].copy(acquisitionFees = AmountInPence(3L)),
-                      sample[AssetType],
-                      sample[Boolean]
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[CompleteAcquisitionDetailsAnswers].copy(acquisitionFees = AmountInPence(3L)),
+                sample[AssetType],
+                sample[Boolean]
+              )._1
             )
           }
 
@@ -2264,19 +2033,13 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithState(
-                      sample[IncompleteAcquisitionDetailsAnswers].copy(
-                        improvementCosts = None
-                      ),
-                      sample[AssetType],
-                      sample[Boolean]
-                    )._1
-                  )
-                )
-              )
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  improvementCosts = None
+                ),
+                sample[AssetType],
+                sample[Boolean]
+              )._1
             )
           }
 
@@ -2333,7 +2096,7 @@ class AcquisitionDetailsControllerSpec
         "there is an error updating the draft return" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
             mockStoreDraftReturn(updatedDraftReturn)(Left(Error("")))
           }
 
@@ -2348,9 +2111,9 @@ class AcquisitionDetailsControllerSpec
         "there is an error updating the session" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
             mockStoreDraftReturn(updatedDraftReturn)(Right(()))
-            mockStoreSession(updatedSession)(Future.successful(Left(Error(""))))
+            mockStoreSession(updatedSession)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(
@@ -2383,9 +2146,9 @@ class AcquisitionDetailsControllerSpec
 
                 inSequence {
                   mockAuthWithNoRetrievals()
-                  mockGetSession(Future.successful(Right(Some(session))))
+                  mockGetSession(session)
                   mockStoreDraftReturn(updatedDraftReturn)(Right(()))
-                  mockStoreSession(updatedSession)(Future.successful(Right(())))
+                  mockStoreSession(updatedSession)(Right(()))
                 }
 
                 checkIsRedirect(
@@ -2410,9 +2173,9 @@ class AcquisitionDetailsControllerSpec
 
                 inSequence {
                   mockAuthWithNoRetrievals()
-                  mockGetSession(Future.successful(Right(Some(session))))
+                  mockGetSession(session)
                   mockStoreDraftReturn(updatedDraftReturn)(Right(()))
-                  mockStoreSession(updatedSession)(Future.successful(Right(())))
+                  mockStoreSession(updatedSession)(Right(()))
                 }
 
                 checkIsRedirect(
@@ -2459,7 +2222,7 @@ class AcquisitionDetailsControllerSpec
       ): Unit = {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(session))))
+          mockGetSession(session)
         }
 
         checkIsRedirect(performAction(), expectedRedirect)
@@ -2599,7 +2362,7 @@ class AcquisitionDetailsControllerSpec
         "there is an error updating the draft return" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
             mockStoreDraftReturn(newDraftReturn)(Left(Error("")))
           }
 
@@ -2610,9 +2373,9 @@ class AcquisitionDetailsControllerSpec
         "there is an error updating the session" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
             mockStoreDraftReturn(newDraftReturn)(Right(()))
-            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Future.successful(Left(Error(""))))
+            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -2629,9 +2392,9 @@ class AcquisitionDetailsControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
             mockStoreDraftReturn(newDraftReturn)(Right(()))
-            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Future.successful(Right(())))
+            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
           }
 
           checkPageIsDisplayed(
@@ -2647,9 +2410,7 @@ class AcquisitionDetailsControllerSpec
         "the user has already answered all the questions" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(sessionWithState(completeAnswers, sample[AssetType], sample[Boolean])._1)))
-            )
+            mockGetSession(sessionWithState(completeAnswers, sample[AssetType], sample[Boolean])._1)
           }
 
           checkPageIsDisplayed(
@@ -2674,17 +2435,11 @@ class AcquisitionDetailsControllerSpec
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(
-            Future.successful(
-              Right(
-                Some(
-                  sessionWithState(
-                    sample[CompleteAcquisitionDetailsAnswers],
-                    sample[AssetType],
-                    sample[Boolean]
-                  )._1
-                )
-              )
-            )
+            sessionWithState(
+              sample[CompleteAcquisitionDetailsAnswers],
+              sample[AssetType],
+              sample[Boolean]
+            )._1
           )
         }
 
@@ -2702,18 +2457,12 @@ class AcquisitionDetailsControllerSpec
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(
-            Future.successful(
-              Right(
-                Some(
-                  sessionWithState(
-                    Some(sample[CompleteAcquisitionDetailsAnswers]),
-                    None,
-                    Some(sample[Boolean]),
-                    Some(sample[DisposalDate])
-                  )._1
-                )
-              )
-            )
+            sessionWithState(
+              Some(sample[CompleteAcquisitionDetailsAnswers]),
+              None,
+              Some(sample[Boolean]),
+              Some(sample[DisposalDate])
+            )._1
           )
         }
 
@@ -2724,18 +2473,12 @@ class AcquisitionDetailsControllerSpec
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(
-            Future.successful(
-              Right(
-                Some(
-                  sessionWithState(
-                    Some(sample[CompleteAcquisitionDetailsAnswers]),
-                    Some(sample[AssetType]),
-                    None,
-                    Some(sample[DisposalDate])
-                  )._1
-                )
-              )
-            )
+            sessionWithState(
+              Some(sample[CompleteAcquisitionDetailsAnswers]),
+              Some(sample[AssetType]),
+              None,
+              Some(sample[DisposalDate])
+            )._1
           )
         }
 
@@ -2756,7 +2499,7 @@ class AcquisitionDetailsControllerSpec
   ): Unit = {
     inSequence {
       mockAuthWithNoRetrievals()
-      mockGetSession(Future.successful(Right(Some(currentSession))))
+      mockGetSession(currentSession)
     }
 
     checkPageIsDisplayed(

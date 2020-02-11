@@ -134,11 +134,7 @@ class InsufficientConfidenceLevelControllerSpec
         "the session indicates that the user does not have sufficient confidence level" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(Some(session(TryingToGetIndividualsFootprint(None, None, None, sample[GGCredId]))))
-              )
-            )
+            mockGetSession(session(TryingToGetIndividualsFootprint(None, None, None, sample[GGCredId])))
           }
 
           val result = performAction()
@@ -151,15 +147,7 @@ class InsufficientConfidenceLevelControllerSpec
           "has previously answered this question" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    session(TryingToGetIndividualsFootprint(Some(true), None, None, sample[GGCredId]))
-                  )
-                )
-              )
-            )
+            mockGetSession(session(TryingToGetIndividualsFootprint(Some(true), None, None, sample[GGCredId])))
           }
 
           val result = performAction()
@@ -185,15 +173,7 @@ class InsufficientConfidenceLevelControllerSpec
         "no data has been submitted" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    session(TryingToGetIndividualsFootprint(None, None, None, sample[GGCredId]))
-                  )
-                )
-              )
-            )
+            mockGetSession(session(TryingToGetIndividualsFootprint(None, None, None, sample[GGCredId])))
           }
 
           val result = performAction()
@@ -204,15 +184,7 @@ class InsufficientConfidenceLevelControllerSpec
         "the submitted data cannot be parsed" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    session(TryingToGetIndividualsFootprint(None, None, None, sample[GGCredId]))
-                  )
-                )
-              )
-            )
+            mockGetSession(session(TryingToGetIndividualsFootprint(None, None, None, sample[GGCredId])))
           }
 
           val result = performAction("hasNino" -> "blah")
@@ -228,18 +200,8 @@ class InsufficientConfidenceLevelControllerSpec
           val credId = sample[GGCredId]
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    session(TryingToGetIndividualsFootprint(None, None, None, credId))
-                  )
-                )
-              )
-            )
-            mockStoreSession(
-              session(TryingToGetIndividualsFootprint(Some(true), None, None, credId))
-            )(Future.successful(Right(())))
+            mockGetSession(session(TryingToGetIndividualsFootprint(None, None, None, credId)))
+            mockStoreSession(session(TryingToGetIndividualsFootprint(Some(true), None, None, credId)))(Right(()))
           }
 
           val result = performAction("hasNino" -> "true")
@@ -263,18 +225,8 @@ class InsufficientConfidenceLevelControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    session(TryingToGetIndividualsFootprint(None, None, None, credId))
-                  )
-                )
-              )
-            )
-            mockStoreSession(
-              session(TryingToGetIndividualsFootprint(Some(true), None, None, credId))
-            )(Future.successful(Right(())))
+            mockGetSession(session(TryingToGetIndividualsFootprint(None, None, None, credId)))
+            mockStoreSession(session(TryingToGetIndividualsFootprint(Some(true), None, None, credId)))(Right(()))
           }
 
           val result =
@@ -290,18 +242,8 @@ class InsufficientConfidenceLevelControllerSpec
           val credId = sample[GGCredId]
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    session(TryingToGetIndividualsFootprint(None, None, None, credId))
-                  )
-                )
-              )
-            )
-            mockStoreSession(
-              session(TryingToGetIndividualsFootprint(Some(false), None, None, credId))
-            )(Future.successful(Right(())))
+            mockGetSession(session(TryingToGetIndividualsFootprint(None, None, None, credId)))
+            mockStoreSession(session(TryingToGetIndividualsFootprint(Some(false), None, None, credId)))(Right(()))
           }
 
           val result = performAction("hasNino" -> "false")
@@ -315,13 +257,7 @@ class InsufficientConfidenceLevelControllerSpec
         "the user has previously indicated that they have a NINO" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(session(TryingToGetIndividualsFootprint(Some(true), None, None, sample[GGCredId])))
-                )
-              )
-            )
+            mockGetSession(session(TryingToGetIndividualsFootprint(Some(true), None, None, sample[GGCredId])))
           }
 
           val result = performAction("hasNino" -> "true")
@@ -331,15 +267,7 @@ class InsufficientConfidenceLevelControllerSpec
         "the user has previously indicated that they do not have a NINO" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    session(TryingToGetIndividualsFootprint(Some(false), None, None, sample[GGCredId]))
-                  )
-                )
-              )
-            )
+            mockGetSession(session(TryingToGetIndividualsFootprint(Some(false), None, None, sample[GGCredId])))
           }
 
           val result = performAction("hasNino" -> "false")
@@ -361,15 +289,7 @@ class InsufficientConfidenceLevelControllerSpec
         "the session data indicates the user hasn't selected whether or not they have a NINO" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    session(TryingToGetIndividualsFootprint(None, None, None, sample[GGCredId]))
-                  )
-                )
-              )
-            )
+            mockGetSession(session(TryingToGetIndividualsFootprint(None, None, None, sample[GGCredId])))
           }
 
           checkIsRedirect(performAction(), routes.InsufficientConfidenceLevelController.doYouHaveNINO())
@@ -383,15 +303,7 @@ class InsufficientConfidenceLevelControllerSpec
           "has indicated that they do not have a NINO" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    session(TryingToGetIndividualsFootprint(Some(false), None, None, sample[GGCredId]))
-                  )
-                )
-              )
-            )
+            mockGetSession(session(TryingToGetIndividualsFootprint(Some(false), None, None, sample[GGCredId])))
           }
 
           val result = performAction()
@@ -405,15 +317,7 @@ class InsufficientConfidenceLevelControllerSpec
           "have an SAUTR" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    session(TryingToGetIndividualsFootprint(Some(false), Some(true), None, sample[GGCredId]))
-                  )
-                )
-              )
-            )
+            mockGetSession(session(TryingToGetIndividualsFootprint(Some(false), Some(true), None, sample[GGCredId])))
           }
 
           val result = performAction()
@@ -428,15 +332,7 @@ class InsufficientConfidenceLevelControllerSpec
           "do not have an SAUTR" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    session(TryingToGetIndividualsFootprint(Some(false), Some(false), None, sample[GGCredId]))
-                  )
-                )
-              )
-            )
+            mockGetSession(session(TryingToGetIndividualsFootprint(Some(false), Some(false), None, sample[GGCredId])))
           }
 
           val result = performAction()
@@ -462,15 +358,7 @@ class InsufficientConfidenceLevelControllerSpec
         "the session data indicates the user hasn't selected whether or not they have a NINO" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    session(TryingToGetIndividualsFootprint(None, None, None, sample[GGCredId]))
-                  )
-                )
-              )
-            )
+            mockGetSession(session(TryingToGetIndividualsFootprint(None, None, None, sample[GGCredId])))
           }
 
           checkIsRedirect(performAction(), routes.InsufficientConfidenceLevelController.doYouHaveNINO())
@@ -483,15 +371,7 @@ class InsufficientConfidenceLevelControllerSpec
         "the user did not select an option" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    session(TryingToGetIndividualsFootprint(Some(false), None, None, sample[GGCredId]))
-                  )
-                )
-              )
-            )
+            mockGetSession(session(TryingToGetIndividualsFootprint(Some(false), None, None, sample[GGCredId])))
           }
 
           val result = performAction()
@@ -509,8 +389,8 @@ class InsufficientConfidenceLevelControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(subscriptionStatus)))))
-            mockStoreSession(session(subscriptionStatus.copy(hasSautr = Some(true))))(Future.successful(Right(())))
+            mockGetSession(session(subscriptionStatus))
+            mockStoreSession(session(subscriptionStatus.copy(hasSautr = Some(true))))(Right(()))
           }
 
           val result = performAction("hasSaUtr" -> "true")
@@ -527,8 +407,8 @@ class InsufficientConfidenceLevelControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session(subscriptionStatus)))))
-            mockStoreSession(session(subscriptionStatus.copy(hasSautr = Some(false))))(Future.successful(Right(())))
+            mockGetSession(session(subscriptionStatus))
+            mockStoreSession(session(subscriptionStatus.copy(hasSautr = Some(false))))(Right(()))
           }
 
           val result = performAction("hasSaUtr" -> "false")
@@ -554,14 +434,8 @@ class InsufficientConfidenceLevelControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    session(
-                      TryingToGetIndividualsFootprint(hasNino, hasSautr, None, ggCredId)
-                    )
-                  )
-                )
+              session(
+                TryingToGetIndividualsFootprint(hasNino, hasSautr, None, ggCredId)
               )
             )
           }
@@ -594,14 +468,8 @@ class InsufficientConfidenceLevelControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    session(
-                      TryingToGetIndividualsFootprint(Some(false), Some(true), None, ggCredId)
-                    )
-                  )
-                )
+              session(
+                TryingToGetIndividualsFootprint(Some(false), Some(true), None, ggCredId)
               )
             )
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(None))
@@ -617,14 +485,8 @@ class InsufficientConfidenceLevelControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    session(
-                      TryingToGetIndividualsFootprint(Some(false), Some(true), None, ggCredId)
-                    )
-                  )
-                )
+              session(
+                TryingToGetIndividualsFootprint(Some(false), Some(true), None, ggCredId)
               )
             )
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
@@ -649,14 +511,8 @@ class InsufficientConfidenceLevelControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    session(
-                      TryingToGetIndividualsFootprint(Some(false), Some(true), None, ggCredId)
-                    )
-                  )
-                )
+              session(
+                TryingToGetIndividualsFootprint(Some(false), Some(true), None, ggCredId)
               )
             )
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(NameMatchError.TooManyUnsuccessfulAttempts()))
@@ -673,14 +529,8 @@ class InsufficientConfidenceLevelControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    session(
-                      TryingToGetIndividualsFootprint(Some(false), Some(true), None, ggCredId)
-                    )
-                  )
-                )
+              session(
+                TryingToGetIndividualsFootprint(Some(false), Some(true), None, ggCredId)
               )
             )
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(NameMatchError.BackendError(Error(""))))
@@ -719,7 +569,7 @@ class InsufficientConfidenceLevelControllerSpec
         () =>
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+            mockGetSession(expectedSessionData)
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
               Right(Some(UnsuccessfulNameMatchAttempts(1, 2, IndividualNameMatchDetails(validName, validSautr))))
             )
@@ -732,14 +582,8 @@ class InsufficientConfidenceLevelControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    session(
-                      TryingToGetIndividualsFootprint(hasNino, hasSautr, None, sample[GGCredId])
-                    )
-                  )
-                )
+              session(
+                TryingToGetIndividualsFootprint(hasNino, hasSautr, None, sample[GGCredId])
               )
             )
           }
@@ -771,7 +615,7 @@ class InsufficientConfidenceLevelControllerSpec
         "an SA UTR is not submitted" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+            mockGetSession(expectedSessionData)
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
               Right(Some(UnsuccessfulNameMatchAttempts(1, 2, IndividualNameMatchDetails(validName, validSautr))))
             )
@@ -785,7 +629,7 @@ class InsufficientConfidenceLevelControllerSpec
         "the SA UTR is an empty string" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+            mockGetSession(expectedSessionData)
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
               Right(Some(UnsuccessfulNameMatchAttempts(1, 2, IndividualNameMatchDetails(validName, validSautr))))
             )
@@ -803,7 +647,7 @@ class InsufficientConfidenceLevelControllerSpec
         "the SA UTR is not valid" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+            mockGetSession(expectedSessionData)
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
               Right(Some(UnsuccessfulNameMatchAttempts(1, 2, IndividualNameMatchDetails(validName, validSautr))))
             )
@@ -822,7 +666,7 @@ class InsufficientConfidenceLevelControllerSpec
           "user has not yet made too many unsuccessful attempts" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+            mockGetSession(expectedSessionData)
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(Some(previousUnsuccessfulNameMatchAttempt)))
             mockAttemptNameMatch(validSautr, validName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
               Left(
@@ -849,7 +693,7 @@ class InsufficientConfidenceLevelControllerSpec
         "there is an error retrieving the number of previous unsuccessful attempts" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+            mockGetSession(expectedSessionData)
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(NameMatchError.BackendError(Error(""))))
           }
 
@@ -861,7 +705,7 @@ class InsufficientConfidenceLevelControllerSpec
         "there is an error getting the BPR" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+            mockGetSession(expectedSessionData)
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(Some(previousUnsuccessfulNameMatchAttempt)))
             mockAttemptNameMatch(validSautr, validName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
               Left(NameMatchError.BackendError(Error("")))
@@ -880,14 +724,12 @@ class InsufficientConfidenceLevelControllerSpec
         "there is an error storing a retrieved BPR in mongo" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+            mockGetSession(expectedSessionData)
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(Some(previousUnsuccessfulNameMatchAttempt)))
             mockAttemptNameMatch(validSautr, validName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
               Right(bpr -> None)
             )
-            mockStoreSession(session(SubscriptionMissingData(bpr, None, ggCredId, None)))(
-              Future.successful(Left(Error("")))
-            )
+            mockStoreSession(session(SubscriptionMissingData(bpr, None, ggCredId, None)))(Left(Error("")))
           }
 
           val result = performAction(
@@ -902,7 +744,7 @@ class InsufficientConfidenceLevelControllerSpec
         "a BPR is found but it is one for a trust instead of an individual" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+            mockGetSession(expectedSessionData)
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(Some(previousUnsuccessfulNameMatchAttempt)))
             mockAttemptNameMatch(validSautr, validName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
               Right(bpr.copy(name = Left(TrustName(""))) -> None)
@@ -926,12 +768,12 @@ class InsufficientConfidenceLevelControllerSpec
         "the user submits a valid SA UTR and name and a BPR can be retrieved and the user does not already have a cgt reference" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+            mockGetSession(expectedSessionData)
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(Some(previousUnsuccessfulNameMatchAttempt)))
             mockAttemptNameMatch(validSautr, validName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
               Right(bpr -> None)
             )
-            mockStoreSession(session(SubscriptionMissingData(bpr, None, ggCredId, None)))(Future.successful(Right(())))
+            mockStoreSession(session(SubscriptionMissingData(bpr, None, ggCredId, None)))(Right(()))
           }
 
           val result = performAction(
@@ -952,14 +794,12 @@ class InsufficientConfidenceLevelControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+            mockGetSession(expectedSessionData)
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(Some(previousUnsuccessfulNameMatchAttempt)))
             mockAttemptNameMatch(validSautr, validName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
               Right(bpr -> Some(cgtReference))
             )
-            mockStoreSession(session(AlreadySubscribedWithDifferentGGAccount(ggCredId, Some(cgtReference))))(
-              Future.successful(Right(()))
-            )
+            mockStoreSession(session(AlreadySubscribedWithDifferentGGAccount(ggCredId, Some(cgtReference))))(Right(()))
           }
 
           val result = performAction(
@@ -978,7 +818,7 @@ class InsufficientConfidenceLevelControllerSpec
         "the user has attempted to perform a name match too many times" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+            mockGetSession(expectedSessionData)
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(NameMatchError.TooManyUnsuccessfulAttempts()))
           }
 
@@ -991,7 +831,7 @@ class InsufficientConfidenceLevelControllerSpec
           "details which do not match a BPR and have now made too many attempts" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+            mockGetSession(expectedSessionData)
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(Some(previousUnsuccessfulNameMatchAttempt)))
             mockAttemptNameMatch(validSautr, validName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
               Left(NameMatchError.TooManyUnsuccessfulAttempts())
@@ -1027,7 +867,7 @@ class InsufficientConfidenceLevelControllerSpec
         "there is an error trying to get the number of unsuccessful name match attempts" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+            mockGetSession(expectedSessionData)
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(NameMatchError.BackendError(Error(""))))
           }
 
@@ -1039,7 +879,7 @@ class InsufficientConfidenceLevelControllerSpec
           "the user has attempted a name match too many times" in {
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+              mockGetSession(expectedSessionData)
               mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(NameMatchError.TooManyUnsuccessfulAttempts()))
             }
 
@@ -1054,7 +894,7 @@ class InsufficientConfidenceLevelControllerSpec
           "the user has attempted a name match but they still have attempts left" in {
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+              mockGetSession(expectedSessionData)
               mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
                 Right(Some(UnsuccessfulNameMatchAttempts(1, 2, sample[IndividualNameMatchDetails])))
               )
@@ -1066,7 +906,7 @@ class InsufficientConfidenceLevelControllerSpec
           "the user has not attempted a name match" in {
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+              mockGetSession(expectedSessionData)
               mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(None))
             }
 

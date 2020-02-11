@@ -178,7 +178,7 @@ class AgentAccessControllerSpec
         "the session data is valid" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(initialAgentSessionData))))
+            mockGetSession(initialAgentSessionData)
           }
 
           val result = performAction()
@@ -211,7 +211,7 @@ class AgentAccessControllerSpec
         def testInvalidCgtReference(value: String, errorMessageKey: String): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(initialAgentSessionData))))
+            mockGetSession(initialAgentSessionData)
           }
 
           val result = performAction("cgtReference" -> value)
@@ -247,7 +247,7 @@ class AgentAccessControllerSpec
         "the submitted value is valid but the agent does not have permission to access the client" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(initialAgentSessionData))))
+            mockGetSession(initialAgentSessionData)
             mockDelegatedAuthCheck(validCgtReference)(Future.failed(InsufficientEnrolments()))
           }
 
@@ -268,7 +268,7 @@ class AgentAccessControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(initialAgentSessionData))))
+            mockGetSession(initialAgentSessionData)
             mockDelegatedAuthCheck(validCgtReference)(Future.successful(()))
             mockGetSubscriptionDetails(validCgtReference)(Right(clientDetails))
             mockStoreSession(
@@ -281,7 +281,7 @@ class AgentAccessControllerSpec
                   )
                 )
               )
-            )(Future.successful(Left(Error(""))))
+            )(Left(Error("")))
           }
 
           val result = performAction("cgtReference" -> validCgtReference.value)
@@ -292,7 +292,7 @@ class AgentAccessControllerSpec
           "but no details can be found for the cgt reference" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(initialAgentSessionData))))
+            mockGetSession(initialAgentSessionData)
             mockDelegatedAuthCheck(validCgtReference)(Future.successful(()))
             mockGetSubscriptionDetails(validCgtReference)(Left(Error("")))
           }
@@ -318,7 +318,7 @@ class AgentAccessControllerSpec
             withClue(s"For authorisation exception '$authException'") {
               inSequence {
                 mockAuthWithNoRetrievals()
-                mockGetSession(Future.successful(Right(Some(initialAgentSessionData))))
+                mockGetSession(initialAgentSessionData)
                 mockDelegatedAuthCheck(validCgtReference)(Future.failed(authException))
               }
 
@@ -340,7 +340,7 @@ class AgentAccessControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(initialAgentSessionData))))
+            mockGetSession(initialAgentSessionData)
             mockDelegatedAuthCheck(validCgtReference)(Future.successful(()))
             mockGetSubscriptionDetails(validCgtReference)(Right(ukClientDetails))
             mockStoreSession(
@@ -353,7 +353,7 @@ class AgentAccessControllerSpec
                   )
                 )
               )
-            )(Future.successful(Right(())))
+            )(Right(()))
           }
 
           val result = performAction("cgtReference" -> validCgtReference.value)
@@ -370,7 +370,7 @@ class AgentAccessControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(initialAgentSessionData))))
+            mockGetSession(initialAgentSessionData)
             mockDelegatedAuthCheck(validCgtReference)(Future.successful(()))
             mockGetSubscriptionDetails(validCgtReference)(Right(nonUkClientDetails))
             mockStoreSession(
@@ -383,7 +383,7 @@ class AgentAccessControllerSpec
                   )
                 )
               )
-            )(Future.successful(Right(())))
+            )(Right(()))
           }
 
           val result = performAction("cgtReference" -> validCgtReference.value)
@@ -413,18 +413,12 @@ class AgentAccessControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    SessionData.empty.copy(
-                      journeyStatus = Some(
-                        AgentSupplyingClientDetails(
-                          agentReferenceNumber,
-                          agentGGCredId,
-                          Some(VerifierMatchingDetails(ukClientDetails.copy(address = sample[NonUkAddress]), false))
-                        )
-                      )
-                    )
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  AgentSupplyingClientDetails(
+                    agentReferenceNumber,
+                    agentGGCredId,
+                    Some(VerifierMatchingDetails(ukClientDetails.copy(address = sample[NonUkAddress]), false))
                   )
                 )
               )
@@ -442,9 +436,7 @@ class AgentAccessControllerSpec
         "the session data is valid and the agent has not yet supplied the correct postcode" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false))))
-            )
+            mockGetSession(sessionData(ukClientDetails, correctVerifierSupplied = false))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(Right(None))
           }
 
@@ -458,7 +450,7 @@ class AgentAccessControllerSpec
         "the session data is valid and the agent has already supplied the correct postcode" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = true)))))
+            mockGetSession(sessionData(ukClientDetails, correctVerifierSupplied = true))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(Right(None))
           }
 
@@ -492,9 +484,7 @@ class AgentAccessControllerSpec
         () =>
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false))))
-            )
+            mockGetSession(sessionData(ukClientDetails, correctVerifierSupplied = false))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(Right(None))
           }
       )
@@ -507,9 +497,7 @@ class AgentAccessControllerSpec
           "the agent has not previously made an attempt" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false))))
-            )
+            mockGetSession(sessionData(ukClientDetails, correctVerifierSupplied = false))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(Right(None))
             mockStoreUnsuccessfulVerifierAttempts(
               agentGGCredId,
@@ -529,9 +517,7 @@ class AgentAccessControllerSpec
           "the agent has previously made an attempt" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false))))
-            )
+            mockGetSession(sessionData(ukClientDetails, correctVerifierSupplied = false))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(
               Right(Some(UnsuccessfulVerifierAttempts(1, Right(otherIncorrectPostcode))))
             )
@@ -554,9 +540,7 @@ class AgentAccessControllerSpec
           "as the one in the previous attempt" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false))))
-            )
+            mockGetSession(sessionData(ukClientDetails, correctVerifierSupplied = false))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(
               Right(Some(UnsuccessfulVerifierAttempts(1, Right(incorrectPostcode))))
             )
@@ -577,18 +561,12 @@ class AgentAccessControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    SessionData.empty.copy(
-                      journeyStatus = Some(
-                        AgentSupplyingClientDetails(
-                          agentReferenceNumber,
-                          agentGGCredId,
-                          Some(VerifierMatchingDetails(ukClientDetails.copy(address = sample[NonUkAddress]), false))
-                        )
-                      )
-                    )
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  AgentSupplyingClientDetails(
+                    agentReferenceNumber,
+                    agentGGCredId,
+                    Some(VerifierMatchingDetails(ukClientDetails.copy(address = sample[NonUkAddress]), false))
                   )
                 )
               )
@@ -606,13 +584,9 @@ class AgentAccessControllerSpec
         "the submitted postcode is valid and matches the client's one but there is a problem updating the session" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false))))
-            )
+            mockGetSession(sessionData(ukClientDetails, correctVerifierSupplied = false))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(Right(None))
-            mockStoreSession(sessionData(ukClientDetails, correctVerifierSupplied = true))(
-              Future.successful(Left(Error("")))
-            )
+            mockStoreSession(sessionData(ukClientDetails, correctVerifierSupplied = true))(Left(Error("")))
           }
 
           val result = performAction("postcode" -> ukAddress.postcode.value)
@@ -622,9 +596,7 @@ class AgentAccessControllerSpec
         "the submitted postcode does not match and there is a problem updating the store" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false))))
-            )
+            mockGetSession(sessionData(ukClientDetails, correctVerifierSupplied = false))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(Right(None))
             mockStoreUnsuccessfulVerifierAttempts(
               agentGGCredId,
@@ -644,9 +616,7 @@ class AgentAccessControllerSpec
           "they have now made too many attempts" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false))))
-            )
+            mockGetSession(sessionData(ukClientDetails, correctVerifierSupplied = false))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(
               Right(Some(UnsuccessfulVerifierAttempts(maxVerifierMatchAttempts - 1, Right(otherIncorrectPostcode))))
             )
@@ -675,13 +645,9 @@ class AgentAccessControllerSpec
           ).foreach { postcode =>
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(
-                Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false))))
-              )
+              mockGetSession(sessionData(ukClientDetails, correctVerifierSupplied = false))
               mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(Right(None))
-              mockStoreSession(sessionData(ukClientDetails, correctVerifierSupplied = true))(
-                Future.successful(Right(()))
-              )
+              mockStoreSession(sessionData(ukClientDetails, correctVerifierSupplied = true))(Right(()))
             }
 
             val result = performAction("postcode" -> postcode)
@@ -713,18 +679,12 @@ class AgentAccessControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    SessionData.empty.copy(
-                      journeyStatus = Some(
-                        AgentSupplyingClientDetails(
-                          agentReferenceNumber,
-                          agentGGCredId,
-                          Some(VerifierMatchingDetails(nonUkClientDetails.copy(address = sample[UkAddress]), false))
-                        )
-                      )
-                    )
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  AgentSupplyingClientDetails(
+                    agentReferenceNumber,
+                    agentGGCredId,
+                    Some(VerifierMatchingDetails(nonUkClientDetails.copy(address = sample[UkAddress]), false))
                   )
                 )
               )
@@ -742,9 +702,7 @@ class AgentAccessControllerSpec
         "the session data is valid and the agent has not yet supplied the correct country" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = false))))
-            )
+            mockGetSession(sessionData(nonUkClientDetails, correctVerifierSupplied = false))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, nonUkClientDetails.cgtReference)(Right(None))
           }
 
@@ -758,9 +716,7 @@ class AgentAccessControllerSpec
         "the session data is valid and the agent has already supplied the correct country" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = true))))
-            )
+            mockGetSession(sessionData(nonUkClientDetails, correctVerifierSupplied = true))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, nonUkClientDetails.cgtReference)(Right(None))
           }
 
@@ -800,9 +756,7 @@ class AgentAccessControllerSpec
         ): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = false))))
-            )
+            mockGetSession(sessionData(nonUkClientDetails, correctVerifierSupplied = false))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, nonUkClientDetails.cgtReference)(
               Right(currentUnsuccessfulAttempt)
             )
@@ -862,18 +816,12 @@ class AgentAccessControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    SessionData.empty.copy(
-                      journeyStatus = Some(
-                        AgentSupplyingClientDetails(
-                          agentReferenceNumber,
-                          agentGGCredId,
-                          Some(VerifierMatchingDetails(nonUkClientDetails.copy(address = sample[UkAddress]), false))
-                        )
-                      )
-                    )
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  AgentSupplyingClientDetails(
+                    agentReferenceNumber,
+                    agentGGCredId,
+                    Some(VerifierMatchingDetails(nonUkClientDetails.copy(address = sample[UkAddress]), false))
                   )
                 )
               )
@@ -891,13 +839,9 @@ class AgentAccessControllerSpec
         "the submitted country is valid and matches the client's one but there is a problem updating the session" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = false))))
-            )
+            mockGetSession(sessionData(nonUkClientDetails, correctVerifierSupplied = false))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, nonUkClientDetails.cgtReference)(Right(None))
-            mockStoreSession(sessionData(nonUkClientDetails, correctVerifierSupplied = true))(
-              Future.successful(Left(Error("")))
-            )
+            mockStoreSession(sessionData(nonUkClientDetails, correctVerifierSupplied = true))(Left(Error("")))
           }
 
           val result = performAction("countryCode" -> nonUkCountryCode)
@@ -907,9 +851,7 @@ class AgentAccessControllerSpec
         "the submitted postcode does not match and there is a problem updating the store" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = false))))
-            )
+            mockGetSession(sessionData(nonUkClientDetails, correctVerifierSupplied = false))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, nonUkClientDetails.cgtReference)(Right(None))
             mockStoreUnsuccessfulVerifierAttempts(
               agentGGCredId,
@@ -929,9 +871,7 @@ class AgentAccessControllerSpec
           "they have now made too many attempts" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = false))))
-            )
+            mockGetSession(sessionData(nonUkClientDetails, correctVerifierSupplied = false))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, nonUkClientDetails.cgtReference)(
               Right(Some(UnsuccessfulVerifierAttempts(maxVerifierMatchAttempts - 1, Left(otherIncorrectCountry))))
             )
@@ -955,13 +895,9 @@ class AgentAccessControllerSpec
         "the submitted postcode is valid and matches the client's one and the session is updated" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = false))))
-            )
+            mockGetSession(sessionData(nonUkClientDetails, correctVerifierSupplied = false))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, nonUkClientDetails.cgtReference)(Right(None))
-            mockStoreSession(sessionData(nonUkClientDetails, correctVerifierSupplied = true))(
-              Future.successful(Right(()))
-            )
+            mockStoreSession(sessionData(nonUkClientDetails, correctVerifierSupplied = true))(Right(()))
           }
 
           val result = performAction("countryCode" -> nonUkCountryCode)
@@ -988,9 +924,7 @@ class AgentAccessControllerSpec
         "the client's address is in the uk but the agent has not yet submitted it" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false))))
-            )
+            mockGetSession(sessionData(ukClientDetails, correctVerifierSupplied = false))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(Right(None))
           }
 
@@ -1003,9 +937,7 @@ class AgentAccessControllerSpec
         "the client's address is in the not uk but the agent has not yet submitted it" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = false))))
-            )
+            mockGetSession(sessionData(nonUkClientDetails, correctVerifierSupplied = false))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, nonUkClientDetails.cgtReference)(Right(None))
           }
 
@@ -1018,7 +950,7 @@ class AgentAccessControllerSpec
         def testPageIsDisplayed(clientDetails: SubscribedDetails): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData(clientDetails, correctVerifierSupplied = true)))))
+            mockGetSession(sessionData(clientDetails, correctVerifierSupplied = true))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, clientDetails.cgtReference)(Right(None))
           }
 
@@ -1064,9 +996,7 @@ class AgentAccessControllerSpec
         "the client's address is in the uk but the agent has not yet submitted it" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = false))))
-            )
+            mockGetSession(sessionData(ukClientDetails, correctVerifierSupplied = false))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(Right(None))
           }
 
@@ -1079,9 +1009,7 @@ class AgentAccessControllerSpec
         "the client's address is in the not uk but the agent has not yet submitted it" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(sessionData(nonUkClientDetails, correctVerifierSupplied = false))))
-            )
+            mockGetSession(sessionData(nonUkClientDetails, correctVerifierSupplied = false))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, nonUkClientDetails.cgtReference)(Right(None))
           }
 
@@ -1094,7 +1022,7 @@ class AgentAccessControllerSpec
         "there is an error getting the client's draft returns" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = true)))))
+            mockGetSession(sessionData(ukClientDetails, correctVerifierSupplied = true))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(Right(None))
             mockGetDraftReturns(ukClientDetails.cgtReference)(Left(Error("")))
           }
@@ -1105,7 +1033,7 @@ class AgentAccessControllerSpec
         "the session data cannot be updated" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData(ukClientDetails, correctVerifierSupplied = true)))))
+            mockGetSession(sessionData(ukClientDetails, correctVerifierSupplied = true))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(Right(None))
             mockGetDraftReturns(ukClientDetails.cgtReference)(Right(draftReturns))
             mockStoreSession(
@@ -1113,7 +1041,7 @@ class AgentAccessControllerSpec
                 .copy(journeyStatus =
                   Some(Subscribed(ukClientDetails, agentGGCredId, Some(agentReferenceNumber), draftReturns))
                 )
-            )(Future.successful(Left(Error(""))))
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -1125,14 +1053,14 @@ class AgentAccessControllerSpec
         def test(clientDetails: SubscribedDetails): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData(clientDetails, correctVerifierSupplied = true)))))
+            mockGetSession(sessionData(clientDetails, correctVerifierSupplied = true))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, clientDetails.cgtReference)(Right(None))
             mockGetDraftReturns(ukClientDetails.cgtReference)(Right(draftReturns))
             mockStoreSession(
               SessionData.empty.copy(
                 journeyStatus = Some(Subscribed(clientDetails, agentGGCredId, Some(agentReferenceNumber), draftReturns))
               )
-            )(Future.successful(Right(())))
+            )(Right(()))
           }
 
           checkIsRedirect(performAction(), controllers.accounts.homepage.routes.HomePageController.homepage())
@@ -1165,9 +1093,7 @@ class AgentAccessControllerSpec
       "display the page" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(
-            Future.successful(Right(Some(sessionData(sample[SubscribedDetails], correctVerifierSupplied = true))))
-          )
+          mockGetSession(sessionData(sample[SubscribedDetails], correctVerifierSupplied = true))
         }
 
         val result = performAction()
@@ -1188,9 +1114,7 @@ class AgentAccessControllerSpec
       "the stored data indicates the agent has already tried to enter in the client's verifier too many times" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(
-            Future.successful(Right(Some(sessionData(clientDetails, correctVerifierSupplied = false))))
-          )
+          mockGetSession(sessionData(clientDetails, correctVerifierSupplied = false))
           mockGetUnsuccessfulVerifierAttempts(agentGGCredId, clientDetails.cgtReference)(
             Right(Some(UnsuccessfulVerifierAttempts(maxVerifierMatchAttempts, Right(sample[Postcode]))))
           )
@@ -1206,9 +1130,7 @@ class AgentAccessControllerSpec
       "there is an error checking the number of attempts already made" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(
-            Future.successful(Right(Some(sessionData(clientDetails, correctVerifierSupplied = false))))
-          )
+          mockGetSession(sessionData(clientDetails, correctVerifierSupplied = false))
           mockGetUnsuccessfulVerifierAttempts(agentGGCredId, clientDetails.cgtReference)(Left(Error("")))
         }
 
