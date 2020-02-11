@@ -25,9 +25,12 @@ import scala.util.Try
 object ConditionalRadioUtils {
 
   final case class InnerOption[A](
-    key: String,
-    readValue: String => Either[FormError, A]
-  )
+    readValue: Map[String, String] => Either[Seq[FormError], A]
+  ) {
+    def map[B](f: A => B): InnerOption[B] = InnerOption(
+      readValue(_).map(f)
+    )
+  }
 
   def formatter[A](outerKey: String)(options: List[Either[InnerOption[A], A]])(
     unbindValue: A => Map[String, String]
@@ -43,19 +46,18 @@ object ConditionalRadioUtils {
             .leftMap(_ => FormError(key, "error.invalid"))
         }
 
-    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], A] = {
-      val result = readValue(outerKey, data, _.toInt)
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], A] =
+      readValue(outerKey, data, _.toInt)
+        .leftMap(Seq(_))
         .flatMap { i =>
           options.lift(i) match {
             case Some(Right(value)) => Right(value)
             case Some(Left(innerOption)) =>
-              readValue(innerOption.key, data, identity).flatMap(innerOption.readValue)
+              innerOption.readValue(data)
 
-            case None => Left(FormError(outerKey, "error.invalid"))
+            case None => Left(Seq(FormError(outerKey, "error.invalid")))
           }
         }
-      result.leftMap(Seq(_))
-    }
 
     override def unbind(key: String, value: A): Map[String, String] =
       unbindValue(value)

@@ -27,7 +27,7 @@ object ReliefDetailsAnswers {
   final case class IncompleteReliefDetailsAnswers(
     privateResidentsRelief: Option[AmountInPence],
     lettingsRelief: Option[AmountInPence],
-    otherReliefs: Option[AmountInPence]
+    otherReliefs: Option[OtherReliefsOption]
   ) extends ReliefDetailsAnswers
 
   object IncompleteReliefDetailsAnswers {
@@ -38,7 +38,7 @@ object ReliefDetailsAnswers {
   final case class CompleteReliefDetailsAnswers(
     privateResidentsRelief: AmountInPence,
     lettingsRelief: AmountInPence,
-    otherReliefs: AmountInPence
+    otherReliefs: Option[OtherReliefsOption]
   ) extends ReliefDetailsAnswers
 
   object CompleteReliefDetailsAnswers {}

@@ -16,28 +16,30 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails
 
-import cats.data.EitherT
+import cats.data.{EitherT, NonEmptyList, Validated, ValidatedNel}
+import cats.instances.future._
+import cats.syntax.apply._
+import cats.syntax.either._
+import cats.syntax.eq._
 import com.google.inject.Inject
 import play.api.Configuration
-import play.api.data.Form
+import play.api.data.Forms.{mapping, of}
+import play.api.data.format.Formatter
+import play.api.data.{Form, FormError}
 import play.api.http.Writeable
-import cats.instances.bigDecimal._
-import cats.instances.future._
-import cats.syntax.eq._
 import play.api.mvc._
-import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.ReliefDetailsController._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, LocalDateUtils, MoneyUtils, SessionData}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AmountInPence._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.InnerOption
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{ReliefDetailsAnswers, _}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
@@ -236,8 +238,19 @@ class ReliefDetailsController @Inject() (
       case (_, _, answers) =>
         commonDisplayBehaviour(answers)(
           form = _.fold(
-            _.otherReliefs.fold(otherReliefsForm)(a => otherReliefsForm.fill(a.inPounds())),
-            c => otherReliefsForm.fill(c.otherReliefs.inPounds())
+            _.otherReliefs.fold(otherReliefsForm)(
+              _.fold(
+                otherReliefs => otherReliefsForm.fill(Left(otherReliefs.name -> otherReliefs.amount.inPounds)),
+                () => otherReliefsForm.fill(Right(()))
+              )
+            ),
+            c =>
+              c.otherReliefs.fold(otherReliefsForm)(
+                _.fold(
+                  otherReliefs => otherReliefsForm.fill(Left(otherReliefs.name -> otherReliefs.amount.inPounds)),
+                  () => otherReliefsForm.fill(Right(()))
+                )
+              )
           )
         )(
           page = otherReliefsPage(_, _)
@@ -264,11 +277,15 @@ class ReliefDetailsController @Inject() (
           redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
         )(
           updateAnswers = {
-            case (p, answers) =>
-              answers.fold(
-                _.copy(otherReliefs = Some(AmountInPence.fromPounds(p))),
-                _.copy(otherReliefs = AmountInPence.fromPounds(p))
-              )
+            case (maybeOtherReliefs, answers) =>
+              val otherReliefs = maybeOtherReliefs
+                .bimap({
+                  case (name, amount) =>
+                    OtherReliefsOption.OtherReliefs(name, AmountInPence.fromPounds(amount))
+                }, _ => OtherReliefsOption.NoOtherReliefs)
+                .merge
+
+              answers.fold(_.copy(otherReliefs = Some(otherReliefs)), _.copy(otherReliefs = Some(otherReliefs)))
           }
         )
     }
@@ -290,7 +307,7 @@ class ReliefDetailsController @Inject() (
           case IncompleteReliefDetailsAnswers(_, _, None) =>
             Redirect(routes.ReliefDetailsController.otherReliefs())
 
-          case IncompleteReliefDetailsAnswers(Some(prr), Some(lr), Some(or)) =>
+          case IncompleteReliefDetailsAnswers(Some(prr), Some(lr), or) =>
             val completeAnswers = CompleteReliefDetailsAnswers(prr, lr, or)
             val newDraftReturn =
               fillingOutReturn.draftReturn.copy(reliefDetailsAnswers = Some(completeAnswers))
@@ -326,7 +343,68 @@ object ReliefDetailsController {
   val lettingsReliefForm: Form[Double] =
     MoneyUtils.amountInPoundsYesNoForm("lettingsRelief", "lettingsReliefValue")
 
-  val otherReliefsForm: Form[Double] =
-    MoneyUtils.amountInPoundsYesNoForm("otherReliefs", "otherReliefsValue")
+  @SuppressWarnings(Array("org.wartremover.warts.Any"))
+  val otherReliefsForm: Form[Either[(String, Double), Unit]] = {
+    val formatter: Formatter[Either[(String, Double), Unit]] = {
+      val (otherReliefKey, otherReliefsNameKey, otherReliefsAmountKey) =
+        ("otherReliefs", "otherReliefsName", "otherReliefsAmount")
+
+      val otherReliefsNamePredicate = "^[A-Za-z0-9 ]{1,105}$".r.pattern.asPredicate()
+
+      def validateReliefsName(s: String): Either[FormError, String] =
+        if (s.length > 105) Left(FormError(otherReliefsNameKey, "error.tooLong"))
+        else if (!otherReliefsNamePredicate.test(s)) Left(FormError(otherReliefsNameKey, "error.invalid"))
+        else Right(s)
+
+      val innerOption = InnerOption { data =>
+        val nameResult: ValidatedNel[FormError, String] =
+          Validated
+            .fromEither(
+              FormUtils
+                .readValue(otherReliefsNameKey, data, identity)
+                .flatMap(validateReliefsName)
+            )
+            .leftMap(NonEmptyList.one(_))
+
+        val amountResult: ValidatedNel[FormError, Double] =
+          Validated
+            .fromEither(
+              FormUtils
+                .readValue(otherReliefsAmountKey, data, identity)
+                .flatMap(
+                  MoneyUtils.validateAmountOfMoney(
+                    otherReliefsAmountKey,
+                    _ <= 0,
+                    _ > MoneyUtils.maxAmountOfPounds
+                  )(_)
+                )
+            )
+            .bimap(NonEmptyList.one(_), _.toDouble)
+
+        (nameResult, amountResult).mapN(_ -> _).toEither.leftMap(_.toList)
+      }
+
+      ConditionalRadioUtils.formatter[Either[(String, Double), Unit]](otherReliefKey)(
+        List(
+          Left(innerOption.map(Left(_))),
+          Right(Right(()))
+        )
+      ) {
+        case Left((s, d)) =>
+          Map(
+            otherReliefKey        -> "0",
+            otherReliefsNameKey   -> s,
+            otherReliefsAmountKey -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign(d)
+          )
+        case Right(()) => Map(otherReliefKey -> "1")
+      }
+    }
+
+    Form(
+      mapping(
+        "" -> of(formatter)
+      )(identity)(Some(_))
+    )
+  }
 
 }

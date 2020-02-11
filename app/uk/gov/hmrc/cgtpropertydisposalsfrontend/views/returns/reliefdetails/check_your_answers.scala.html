@@ -21,6 +21,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{LocalDateUtils, MoneyUtils}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 
 @this(
@@ -45,62 +46,75 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
  @pageHeading(title, Some(messages("reliefDetails.caption")))
 
  @cyaSection() {
-    @if(answers.privateResidentsRelief.value === 0L){
-      @cyaRow(
-        messages("privateResidentsRelief.title"),
-        Html(messages("generic.no")),
-        Some(cyaChange(messages("reliefDetails.cyaChange.privateResidentsRelief"), routes.ReliefDetailsController.privateResidentsRelief().url))
-      )
-    } else {
-      @cyaRow(
-        messages("privateResidentsRelief.title"),
-        Html(messages("generic.yes")),
-        Some(cyaChange(messages("reliefDetails.cyaChange.privateResidentsRelief"), routes.ReliefDetailsController.privateResidentsRelief().url))
-      )
-      @cyaRow(
-        messages("reliefDetails.cyaLabel.privateResidentsReliefValue"),
-        Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.privateResidentsRelief.inPounds())),
-        Some(cyaChange(messages("reliefDetails.cyaChange.privateResidentsRelief"), routes.ReliefDetailsController.privateResidentsRelief().url))
-      )
-    }
+     @if(answers.privateResidentsRelief.value === 0L) {
+         @cyaRow(
+             messages("privateResidentsRelief.title"),
+             Html(messages("generic.no")),
+             Some(cyaChange(messages("reliefDetails.cyaChange.privateResidentsRelief"), routes.ReliefDetailsController.privateResidentsRelief().url))
+         )
+     } else {
+         @cyaRow(
+             messages("privateResidentsRelief.title"),
+             Html(messages("generic.yes")),
+             Some(cyaChange(messages("reliefDetails.cyaChange.privateResidentsRelief"), routes.ReliefDetailsController.privateResidentsRelief().url))
+         )
+         @cyaRow(
+             messages("reliefDetails.cyaLabel.privateResidentsReliefValue"),
+             Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.privateResidentsRelief.inPounds())),
+             Some(cyaChange(messages("reliefDetails.cyaChange.privateResidentsRelief"), routes.ReliefDetailsController.privateResidentsRelief().url))
+         )
+     }
 
-    @if(answers.lettingsRelief.value === 0L){
-        @cyaRow(
-            messages("lettingsRelief.title"),
-            Html(messages("generic.no")),
-            Some(cyaChange(messages("reliefDetails.cyaChange.lettingsRelief"), routes.ReliefDetailsController.lettingsRelief().url))
-        )
-    } else {
-        @cyaRow(
-            messages("lettingsRelief.title"),
-            Html(messages("generic.yes")),
-            Some(cyaChange(messages("reliefDetails.cyaChange.lettingsRelief"), routes.ReliefDetailsController.lettingsRelief().url))
-        )
-        @cyaRow(
-            messages("reliefDetails.cyaLabel.lettingsReliefValue"),
-            Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.lettingsRelief.inPounds())),
-            Some(cyaChange(messages("reliefDetails.cyaChange.lettingsRelief"), routes.ReliefDetailsController.lettingsRelief().url))
-        )
-    }
+     @if(answers.lettingsRelief.value === 0L) {
+         @cyaRow(
+             messages("lettingsRelief.title"),
+             Html(messages("generic.no")),
+             Some(cyaChange(messages("reliefDetails.cyaChange.lettingsRelief"), routes.ReliefDetailsController.lettingsRelief().url))
+         )
+     } else {
+         @cyaRow(
+             messages("lettingsRelief.title"),
+             Html(messages("generic.yes")),
+             Some(cyaChange(messages("reliefDetails.cyaChange.lettingsRelief"), routes.ReliefDetailsController.lettingsRelief().url))
+         )
+         @cyaRow(
+             messages("reliefDetails.cyaLabel.lettingsReliefValue"),
+             Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.lettingsRelief.inPounds())),
+             Some(cyaChange(messages("reliefDetails.cyaChange.lettingsRelief"), routes.ReliefDetailsController.lettingsRelief().url))
+         )
+     }
 
-    @if(answers.otherReliefs.value === 0L){
-        @cyaRow(
-            messages("otherReliefs.title"),
-            Html(messages("generic.no")),
-            Some(cyaChange(messages("reliefDetails.cyaChange.otherReliefs"), routes.ReliefDetailsController.otherReliefs().url))
-        )
-    } else {
-        @cyaRow(
-            messages("otherReliefs.title"),
-            Html(messages("generic.yes")),
-            Some(cyaChange(messages("reliefDetails.cyaChange.otherReliefs"), routes.ReliefDetailsController.otherReliefs().url))
-        )
-        @cyaRow(
-            messages("reliefDetails.cyaLabel.otherReliefsValue"),
-            Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.otherReliefs.inPounds())),
-            Some(cyaChange(messages("reliefDetails.cyaChange.otherReliefs"), routes.ReliefDetailsController.otherReliefs().url))
-        )
-    }
+
+     @answers.otherReliefs.map {
+             case OtherReliefsOption.NoOtherReliefs => {
+                 @cyaRow(
+                 messages("otherReliefs.title"),
+                 Html(messages("generic.no")),
+                 Some(cyaChange(messages("reliefDetails.cyaChange.otherReliefs"), routes.ReliefDetailsController.otherReliefs().url))
+                 )
+             }
+
+             case OtherReliefsOption.OtherReliefs(name, amount) => {
+                 @cyaRow(
+                     messages("otherReliefs.title"),
+                     Html(messages("generic.yes")),
+                     Some(cyaChange(messages("reliefDetails.cyaChange.otherReliefs"), routes.ReliefDetailsController.otherReliefs().url))
+                 )
+
+                 @cyaRow(
+                     messages("reliefDetails.cyaLabel.otherReliefsName"),
+                     Html(name),
+                     Some(cyaChange(messages("reliefDetails.cyaChange.otherReliefs"), routes.ReliefDetailsController.otherReliefs().url))
+                 )
+                 @cyaRow(
+                     messages("reliefDetails.cyaLabel.otherReliefsAmount"),
+                     Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(amount.inPounds())),
+                     Some(cyaChange(messages("reliefDetails.cyaChange.otherReliefs"), routes.ReliefDetailsController.otherReliefs().url))
+                 )
+             }
+
+         }
+
  }
 
  @formWrapper(routes.ReliefDetailsController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
