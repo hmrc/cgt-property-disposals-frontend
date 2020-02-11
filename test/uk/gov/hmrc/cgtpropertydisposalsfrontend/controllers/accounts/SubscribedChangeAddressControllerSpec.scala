@@ -201,7 +201,7 @@ class SubscribedChangeAddressControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
           }
 
           val result = performAction(Seq("address-select" -> "0"))

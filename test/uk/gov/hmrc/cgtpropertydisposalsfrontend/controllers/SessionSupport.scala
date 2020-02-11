@@ -27,16 +27,22 @@ trait SessionSupport { this: MockFactory =>
 
   val mockSessionStore: SessionStore = mock[SessionStore]
 
-  def mockGetSession(session: Future[Either[Error, Option[SessionData]]]) =
+  def mockGetSession(result: Either[Error, Option[SessionData]]) =
     (mockSessionStore
       .get()(_: HeaderCarrier))
       .expects(*)
-      .returning(session)
+      .returning(Future.successful(result))
 
-  def mockStoreSession(session: SessionData)(result: Future[Either[Error, Unit]]) =
+  def mockGetSession(session: SessionData) =
+    (mockSessionStore
+      .get()(_: HeaderCarrier))
+      .expects(*)
+      .returning(Future.successful(Right(Some(session))))
+
+  def mockStoreSession(session: SessionData)(result: Either[Error, Unit]) =
     (mockSessionStore
       .store(_: SessionData)(_: HeaderCarrier))
       .expects(session, *)
-      .returning(result)
+      .returning(Future.successful(result))
 
 }

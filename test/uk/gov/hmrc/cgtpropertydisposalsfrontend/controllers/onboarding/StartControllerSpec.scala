@@ -167,15 +167,9 @@ class StartControllerSpec
             )
             mockHasFailedCgtEnrolment()(Right(None))
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    SessionData.empty.copy(
-                      userType      = Some(UserType.Organisation),
-                      journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount(ggCredId, None))
-                    )
-                  )
-                )
+              SessionData.empty.copy(
+                userType      = Some(UserType.Organisation),
+                journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount(ggCredId, None))
               )
             )
           }
@@ -213,7 +207,7 @@ class StartControllerSpec
                 Some(retrievedGGCredId)
               )
               mockHasFailedCgtEnrolment()(Right(None))
-              mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+              mockGetSession(SessionData.empty)
               mockStoreSession(
                 determiningIfOrganisationIsTrustSession.copy(
                   needMoreDetailsDetails = Some(
@@ -224,7 +218,7 @@ class StartControllerSpec
                   ),
                   userType = Some(UserType.Organisation)
                 )
-              )(Future.successful(Left(Error(""))))
+              )(Left(Error("")))
             }
 
             checkIsTechnicalErrorPage(performAction(FakeRequest()))
@@ -249,7 +243,7 @@ class StartControllerSpec
                 Some(retrievedGGCredId)
               )
               mockHasFailedCgtEnrolment()(Right(None))
-              mockGetSession(Future.successful(Right(Some(sessionData))))
+              mockGetSession(sessionData)
               mockStoreSession(
                 sessionData.copy(
                   needMoreDetailsDetails = Some(
@@ -260,7 +254,7 @@ class StartControllerSpec
                   ),
                   userType = Some(UserType.Organisation)
                 )
-              )(Future.successful(Right(())))
+              )(Right(()))
             }
 
             checkIsRedirect(performAction(FakeRequest()), controllers.routes.StartController.weNeedMoreDetails())
@@ -278,7 +272,7 @@ class StartControllerSpec
                 Some(retrievedGGCredId)
               )
               mockHasFailedCgtEnrolment()(Right(None))
-              mockGetSession(Future.successful(Right(None)))
+              mockGetSession(Right(None))
               mockStoreSession(
                 determiningIfOrganisationIsTrustSession.copy(
                   needMoreDetailsDetails = Some(
@@ -289,7 +283,7 @@ class StartControllerSpec
                   ),
                   userType = Some(UserType.Organisation)
                 )
-              )(Future.successful(Right(())))
+              )(Right(()))
 
             }
 
@@ -317,7 +311,7 @@ class StartControllerSpec
                   Some(retrievedGGCredId)
                 )
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+                mockGetSession(SessionData.empty)
                 mockStoreSession(
                   SessionData.empty.copy(
                     journeyStatus = Some(SubscriptionStatus.TryingToGetIndividualsFootprint(None, None, None, ggCredId)),
@@ -329,7 +323,7 @@ class StartControllerSpec
                     ),
                     userType = Some(UserType.Individual)
                   )
-                )(Future.successful(Left(Error(""))))
+                )(Left(Error("")))
               }
 
               checkIsTechnicalErrorPage(performAction())
@@ -353,7 +347,7 @@ class StartControllerSpec
                   Some(retrievedGGCredId)
                 )
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+                mockGetSession(SessionData.empty)
                 mockSendAuditEvent(HandOffTIvEvent(ggCredId.value, "/uri"), "handOffToIv", "handoff-to-iv")
               }
 
@@ -385,7 +379,7 @@ class StartControllerSpec
                   Some(retrievedGGCredId)
                 )
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+                mockGetSession(SessionData.empty)
               }
 
               checkIsRedirectToIv(controller.start()(request), true)
@@ -407,7 +401,7 @@ class StartControllerSpec
                   Some(retrievedGGCredId)
                 )
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+                mockGetSession(SessionData.empty)
                 mockStoreSession(
                   SessionData.empty.copy(
                     journeyStatus = Some(
@@ -421,7 +415,7 @@ class StartControllerSpec
                     ),
                     userType = Some(UserType.Individual)
                   )
-                )(Future.successful(Right(())))
+                )(Right(()))
               }
 
               checkIsRedirect(performAction(), controllers.routes.StartController.weNeedMoreDetails())
@@ -440,17 +434,11 @@ class StartControllerSpec
                 )
                 mockHasFailedCgtEnrolment()(Right(None))
                 mockGetSession(
-                  Future.successful(
-                    Right(
-                      Some(
-                        SessionData.empty.copy(
-                          journeyStatus = Some(
-                            SubscriptionStatus.TryingToGetIndividualsFootprint(None, None, None, ggCredId)
-                          ),
-                          userType = Some(UserType.Individual)
-                        )
-                      )
-                    )
+                  SessionData.empty.copy(
+                    journeyStatus = Some(
+                      SubscriptionStatus.TryingToGetIndividualsFootprint(None, None, None, ggCredId)
+                    ),
+                    userType = Some(UserType.Individual)
                   )
                 )
               }
@@ -481,7 +469,7 @@ class StartControllerSpec
                 Some(retrievedGGCredId)
               )
               mockHasFailedCgtEnrolment()(Right(None))
-              mockGetSession(Future.successful(Right(Some(sessionData))))
+              mockGetSession(sessionData)
             }
 
             checkIsRedirect(performAction(), onboardingRoutes.InsufficientConfidenceLevelController.doYouHaveNINO())
@@ -536,8 +524,8 @@ class StartControllerSpec
                   Some(retrievedGGCredId)
                 )
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(Some(session))))
-                mockStoreSession(updatedSession)(Future.successful(Right(())))
+                mockGetSession(session)
+                mockStoreSession(updatedSession)(Right(()))
               }
               checkIsRedirect(performAction(), onboardingRoutes.SubscriptionController.checkYourDetails())
             }
@@ -562,7 +550,7 @@ class StartControllerSpec
                   Some(retrievedGGCredId)
                 )
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(Some(sessionData))))
+                mockGetSession(sessionData)
               }
 
               checkIsRedirect(performAction(), emailRoutes.SubscriptionEnterEmailController.enterEmail().url)
@@ -606,7 +594,7 @@ class StartControllerSpec
               inSequence {
                 mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, None, retrievedGGCredId)
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(Some(session))))
+                mockGetSession(session)
               }
 
               checkIsRedirect(performAction(), onboardingRoutes.SubscriptionController.checkYourDetails())
@@ -626,11 +614,11 @@ class StartControllerSpec
                 inSequence {
                   mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, None, retrievedGGCredId)
                   mockHasFailedCgtEnrolment()(Right(None))
-                  mockGetSession(Future.successful(Right(maybeSession)))
+                  mockGetSession(Right(maybeSession))
                   mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Right(nino), None))(
                     Right(BusinessPartnerRecordResponse(Some(bpr), None))
                   )
-                  mockStoreSession(session)(Future.successful(Right(())))
+                  mockStoreSession(session)(Right(()))
                 }
 
                 checkIsRedirect(performAction(), onboardingRoutes.SubscriptionController.checkYourDetails())
@@ -660,11 +648,11 @@ class StartControllerSpec
                     Some(retrievedGGCredId)
                   )
                   mockHasFailedCgtEnrolment()(Right(None))
-                  mockGetSession(Future.successful(Right(maybeSession)))
+                  mockGetSession(Right(maybeSession))
                   mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Left(SAUTR("sautr")), None))(
                     Right(BusinessPartnerRecordResponse(Some(bpr), None))
                   )
-                  mockStoreSession(session)(Future.successful(Right(())))
+                  mockStoreSession(session)(Right(()))
                 }
 
                 checkIsRedirect(performAction(), onboardingRoutes.SubscriptionController.checkYourDetails())
@@ -690,11 +678,11 @@ class StartControllerSpec
               inSequence {
                 mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, Some(ggEmail.value), retrievedGGCredId)
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+                mockGetSession(SessionData.empty)
                 mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Right(nino), None))(
                   Right(BusinessPartnerRecordResponse(Some(bprWithNoEmail), None))
                 )
-                mockStoreSession(session)(Future.successful(Right(())))
+                mockStoreSession(session)(Right(()))
               }
 
               checkIsRedirect(performAction(), onboardingRoutes.SubscriptionController.checkYourDetails())
@@ -728,11 +716,11 @@ class StartControllerSpec
                   Some(retrievedGGCredId)
                 )
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+                mockGetSession(SessionData.empty)
                 mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Left(sautr), None))(
                   Right(BusinessPartnerRecordResponse(Some(bprWithNoEmail), None))
                 )
-                mockStoreSession(session)(Future.successful(Right(())))
+                mockStoreSession(session)(Right(()))
               }
 
               checkIsRedirect(performAction(), onboardingRoutes.SubscriptionController.checkYourDetails())
@@ -758,8 +746,8 @@ class StartControllerSpec
               inSequence {
                 mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, None, retrievedGGCredId)
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(Some(session))))
-                mockStoreSession(updatedSession)(Future.successful(Right(())))
+                mockGetSession(session)
+                mockStoreSession(updatedSession)(Right(()))
               }
               checkIsRedirect(performAction(), onboardingRoutes.SubscriptionController.checkYourDetails())
             }
@@ -788,7 +776,7 @@ class StartControllerSpec
 
               inSequence {
                 mockAuthWithCgtEnrolmentRetrievals()
-                mockGetSession(Future.successful(Right(Some(session))))
+                mockGetSession(session)
               }
 
               checkIsRedirect(performAction(), controllers.accounts.homepage.routes.HomePageController.homepage())
@@ -818,7 +806,7 @@ class StartControllerSpec
                       Some(retrievedGGCredId)
                     )
                     mockHasFailedCgtEnrolment()(Right(None))
-                    mockGetSession(Future.successful(Right(Some(session))))
+                    mockGetSession(session)
                   }
 
                   checkIsRedirect(performAction(), onboardingRoutes.RegistrationController.selectEntityType())
@@ -846,7 +834,7 @@ class StartControllerSpec
                   Some(retrievedGGCredId)
                 )
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(Some(session))))
+                mockGetSession(session)
               }
 
               checkIsRedirect(performAction(), onboardingRoutes.RegistrationController.checkYourAnswers())
@@ -873,7 +861,7 @@ class StartControllerSpec
                     Some(retrievedGGCredId)
                   )
                   mockHasFailedCgtEnrolment()(Right(None))
-                  mockGetSession(Future.successful(Right(Some(session))))
+                  mockGetSession(session)
                 }
 
                 checkIsRedirect(performAction(), emailRoutes.RegistrationEnterEmailController.enterEmail())
@@ -887,7 +875,7 @@ class StartControllerSpec
               inSequence {
                 mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, None, retrievedGGCredId)
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+                mockGetSession(SessionData.empty)
                 mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Right(nino), None))(
                   Left(Error("error"))
                 )
@@ -899,7 +887,7 @@ class StartControllerSpec
               inSequence {
                 mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, None, retrievedGGCredId)
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+                mockGetSession(SessionData.empty)
                 mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Right(nino), None))(
                   Right(BusinessPartnerRecordResponse(None, None))
                 )
@@ -918,11 +906,11 @@ class StartControllerSpec
               inSequence {
                 mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, None, retrievedGGCredId)
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+                mockGetSession(SessionData.empty)
                 mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Right(nino), None))(
                   Right(BusinessPartnerRecordResponse(Some(bpr), None))
                 )
-                mockStoreSession(session)(Future.successful(Left(Error("Oh no!"))))
+                mockStoreSession(session)(Left(Error("Oh no!")))
               }
 
               checkIsTechnicalErrorPage(performAction())
@@ -941,7 +929,7 @@ class StartControllerSpec
                   Some(retrievedGGCredId)
                 )
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+                mockGetSession(SessionData.empty)
                 mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Left(SAUTR("sautr")), None))(
                   Right(BusinessPartnerRecordResponse(None, None))
                 )
@@ -968,11 +956,11 @@ class StartControllerSpec
                   Some(retrievedGGCredId)
                 )
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+                mockGetSession(SessionData.empty)
                 mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Left(SAUTR("sautr")), None))(
                   Right(BusinessPartnerRecordResponse(Some(bpr), None))
                 )
-                mockStoreSession(session)(Future.successful(Left(Error("Oh no!"))))
+                mockStoreSession(session)(Left(Error("Oh no!")))
               }
 
               checkIsTechnicalErrorPage(performAction())
@@ -988,7 +976,7 @@ class StartControllerSpec
               inSequence {
                 mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, None, retrievedGGCredId)
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(None)))
+                mockGetSession(Right(None))
                 mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Right(nino), None))(
                   Right(BusinessPartnerRecordResponse(Some(bpr), Some(cgtReference)))
                 )
@@ -997,7 +985,7 @@ class StartControllerSpec
                     userType      = Some(UserType.Individual),
                     journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount(ggCredId, Some(cgtReference)))
                   )
-                )(Future.successful(Right(())))
+                )(Right(()))
                 mockSendAuditEvent(
                   WrongGGAccountEvent(Some(cgtReference.value), ggCredId.value),
                   "accessWithWrongGGAccount",
@@ -1032,11 +1020,11 @@ class StartControllerSpec
               inSequence {
                 mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, None, retrievedGGCredId)
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+                mockGetSession(SessionData.empty)
                 mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Right(nino), None))(
                   Right(BusinessPartnerRecordResponse(Some(bprWithNoEmail), None))
                 )
-                mockStoreSession(updatedSession)(Future.successful(Right(())))
+                mockStoreSession(updatedSession)(Right(()))
               }
 
               checkIsRedirect(performAction(), controllers.routes.StartController.weNeedMoreDetails())
@@ -1067,11 +1055,11 @@ class StartControllerSpec
                   Some(retrievedGGCredId)
                 )
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+                mockGetSession(SessionData.empty)
                 mockGetBusinessPartnerRecord(IndividualBusinessPartnerRecordRequest(Left(SAUTR("sautr")), None))(
                   Right(BusinessPartnerRecordResponse(Some(bprWithNoEmail), None))
                 )
-                mockStoreSession(updatedSession)(Future.successful(Right(())))
+                mockStoreSession(updatedSession)(Right(()))
               }
 
               checkIsRedirect(performAction(), controllers.routes.StartController.weNeedMoreDetails())
@@ -1089,7 +1077,7 @@ class StartControllerSpec
               inSequence {
                 mockAuthWithCl200AndWithAllIndividualRetrievals(nino.value, None, retrievedGGCredId)
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(Some(sessionData))))
+                mockGetSession(sessionData)
               }
 
               checkIsRedirect(performAction(), emailRoutes.SubscriptionEnterEmailController.enterEmail().url)
@@ -1141,7 +1129,7 @@ class StartControllerSpec
               inSequence {
                 mockAuthWithAllTrustRetrievals(sautr, None, retrievedGGCredId)
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(Some(session))))
+                mockGetSession(session)
               }
 
               checkIsRedirect(performAction(), controllers.accounts.homepage.routes.HomePageController.homepage())
@@ -1155,7 +1143,7 @@ class StartControllerSpec
               inSequence {
                 mockAuthWithAllTrustRetrievals(sautr, None, retrievedGGCredId)
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(None)))
+                mockGetSession(Right(None))
                 mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(Right(sautr), None))(Left(Error("")))
               }
 
@@ -1166,7 +1154,7 @@ class StartControllerSpec
               inSequence {
                 mockAuthWithAllTrustRetrievals(sautr, None, retrievedGGCredId)
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(None)))
+                mockGetSession(Right(None))
                 mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(Right(sautr), None))(
                   Right(BusinessPartnerRecordResponse(Some(bpr.copy(name = Right(IndividualName("", "")))), None))
                 )
@@ -1179,7 +1167,7 @@ class StartControllerSpec
               inSequence {
                 mockAuthWithAllTrustRetrievals(sautr, None, retrievedGGCredId)
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(None)))
+                mockGetSession(Right(None))
                 mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(Right(sautr), None))(
                   Right(BusinessPartnerRecordResponse(Some(bpr), None))
                 )
@@ -1188,7 +1176,7 @@ class StartControllerSpec
                     userType      = Some(UserType.Organisation),
                     journeyStatus = Some(SubscriptionReady(trustSubscriptionDetails, ggCredId))
                   )
-                )(Future.successful(Left(Error(""))))
+                )(Left(Error("")))
               }
 
               checkIsTechnicalErrorPage(performAction())
@@ -1198,7 +1186,7 @@ class StartControllerSpec
               inSequence {
                 mockAuthWithAllTrustRetrievals(sautr, None, retrievedGGCredId)
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(None)))
+                mockGetSession(Right(None))
                 mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(Right(sautr), None))(
                   Right(BusinessPartnerRecordResponse(None, None))
                 )
@@ -1215,7 +1203,7 @@ class StartControllerSpec
               inSequence {
                 mockAuthWithAllTrustRetrievals(sautr, None, retrievedGGCredId)
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(None)))
+                mockGetSession(Right(None))
                 mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(Right(sautr), None))(
                   Right(BusinessPartnerRecordResponse(Some(bpr), None))
                 )
@@ -1224,7 +1212,7 @@ class StartControllerSpec
                     userType      = Some(UserType.Organisation),
                     journeyStatus = Some(SubscriptionReady(trustSubscriptionDetails, ggCredId))
                   )
-                )(Future.successful(Right(())))
+                )(Right(()))
               }
 
               checkIsRedirect(performAction(), onboardingRoutes.SubscriptionController.checkYourDetails())
@@ -1235,7 +1223,7 @@ class StartControllerSpec
               inSequence {
                 mockAuthWithAllTrustRetrievals(sautr, Some("email"), retrievedGGCredId)
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(None)))
+                mockGetSession(Right(None))
                 mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(Right(sautr), None))(
                   Right(BusinessPartnerRecordResponse(Some(bpr.copy(emailAddress = None)), None))
                 )
@@ -1252,7 +1240,7 @@ class StartControllerSpec
                       )
                     )
                   )
-                )(Future.successful(Right(())))
+                )(Right(()))
               }
 
               checkIsRedirect(performAction(), onboardingRoutes.SubscriptionController.checkYourDetails())
@@ -1268,7 +1256,7 @@ class StartControllerSpec
               inSequence {
                 mockAuthWithAllTrustRetrievals(sautr, None, retrievedGGCredId)
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(Some(session))))
+                mockGetSession(session)
               }
 
               checkIsRedirect(performAction(), onboardingRoutes.SubscriptionController.checkYourDetails())
@@ -1295,8 +1283,8 @@ class StartControllerSpec
               inSequence {
                 mockAuthWithAllTrustRetrievals(sautr, None, retrievedGGCredId)
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(Some(session))))
-                mockStoreSession(updatedSession)(Future.successful(Right(())))
+                mockGetSession(session)
+                mockStoreSession(updatedSession)(Right(()))
               }
               checkIsRedirect(performAction(), onboardingRoutes.SubscriptionController.checkYourDetails())
             }
@@ -1330,8 +1318,8 @@ class StartControllerSpec
                   Some(retrievedGGCredId)
                 )
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(Some(session))))
-                mockStoreSession(updatedSession)(Future.successful(Right(())))
+                mockGetSession(session)
+                mockStoreSession(updatedSession)(Right(()))
               }
 
               checkIsRedirect(performAction(), onboardingRoutes.SubscriptionController.checkYourDetails())
@@ -1360,7 +1348,7 @@ class StartControllerSpec
                   Some(retrievedGGCredId)
                 )
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(Some(session))))
+                mockGetSession(session)
               }
 
               checkIsRedirect(performAction(), emailRoutes.SubscriptionEnterEmailController.enterEmail())
@@ -1376,7 +1364,7 @@ class StartControllerSpec
               inSequence {
                 mockAuthWithAllTrustRetrievals(sautr, None, retrievedGGCredId)
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(None)))
+                mockGetSession(Right(None))
                 mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(Right(sautr), None))(
                   Right(BusinessPartnerRecordResponse(Some(bpr), Some(cgtReference)))
                 )
@@ -1385,7 +1373,7 @@ class StartControllerSpec
                     userType      = Some(UserType.Organisation),
                     journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount(ggCredId, Some(cgtReference)))
                   )
-                )(Future.successful(Right(())))
+                )(Right(()))
                 mockSendAuditEvent(
                   WrongGGAccountEvent(Some(cgtReference.value), ggCredId.value),
                   "accessWithWrongGGAccount",
@@ -1409,7 +1397,7 @@ class StartControllerSpec
               inSequence {
                 mockAuthWithAllTrustRetrievals(sautr, None, retrievedGGCredId)
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(None)))
+                mockGetSession(Right(None))
                 mockGetBusinessPartnerRecord(TrustBusinessPartnerRecordRequest(Right(sautr), None))(
                   Right(BusinessPartnerRecordResponse(Some(bprWithNoEmail), None))
                 )
@@ -1424,7 +1412,7 @@ class StartControllerSpec
                       )
                     )
                   )
-                )(Future.successful(Right(())))
+                )(Right(()))
               }
 
               checkIsRedirect(performAction(), controllers.routes.StartController.weNeedMoreDetails())
@@ -1441,7 +1429,7 @@ class StartControllerSpec
               inSequence {
                 mockAuthWithAllTrustRetrievals(sautr, None, retrievedGGCredId)
                 mockHasFailedCgtEnrolment()(Right(None))
-                mockGetSession(Future.successful(Right(Some(sessionData))))
+                mockGetSession(sessionData)
               }
 
               checkIsRedirect(performAction(), emailRoutes.SubscriptionEnterEmailController.enterEmail().url)
@@ -1477,7 +1465,7 @@ class StartControllerSpec
                 Set(cgtEnrolment),
                 Some(retrievedGGCredId)
               )
-              mockGetSession(Future.successful(Right(Some(sessionWithSubscribed))))
+              mockGetSession(sessionWithSubscribed)
             }
 
             checkIsRedirect(performAction(), controllers.accounts.homepage.routes.HomePageController.homepage())
@@ -1500,7 +1488,7 @@ class StartControllerSpec
                   Set(cgtEnrolment),
                   Some(retrievedGGCredId)
                 )
-                mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+                mockGetSession(SessionData.empty)
                 mockGetSubscribedDetails(cgtReference)(Left(Error("")))
               }
 
@@ -1518,7 +1506,7 @@ class StartControllerSpec
                   Set(cgtEnrolment),
                   Some(retrievedGGCredId)
                 )
-                mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+                mockGetSession(SessionData.empty)
                 mockGetSubscribedDetails(cgtReference)(Right(subscribedDetails))
                 mockGetDraftReturns(cgtReference)(Left(Error("")))
               }
@@ -1537,12 +1525,10 @@ class StartControllerSpec
                   Set(cgtEnrolment),
                   Some(retrievedGGCredId)
                 )
-                mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+                mockGetSession(SessionData.empty)
                 mockGetSubscribedDetails(cgtReference)(Right(subscribedDetails))
                 mockGetDraftReturns(cgtReference)(Right(draftReturns))
-                mockStoreSession(sessionWithSubscribed.copy(userType = Some(UserType.Individual)))(
-                  Future.successful(Left(Error("")))
-                )
+                mockStoreSession(sessionWithSubscribed.copy(userType = Some(UserType.Individual)))(Left(Error("")))
               }
 
               checkIsTechnicalErrorPage(performAction())
@@ -1562,12 +1548,10 @@ class StartControllerSpec
                 Set(cgtEnrolment),
                 Some(retrievedGGCredId)
               )
-              mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+              mockGetSession(SessionData.empty)
               mockGetSubscribedDetails(cgtReference)(Right(subscribedDetails))
               mockGetDraftReturns(cgtReference)(Right(draftReturns))
-              mockStoreSession(sessionWithSubscribed.copy(userType = Some(UserType.Individual)))(
-                Future.successful(Right(()))
-              )
+              mockStoreSession(sessionWithSubscribed.copy(userType = Some(UserType.Individual)))(Right(()))
             }
 
             checkIsRedirect(performAction(), controllers.accounts.homepage.routes.HomePageController.homepage())
@@ -1594,15 +1578,13 @@ class StartControllerSpec
                 Set.empty,
                 Some(nonGGCreds)
               )
-              mockGetSession(Future.successful(Right(None)))
+              mockGetSession(Right(None))
               mockStoreSession(
                 SessionData.empty.copy(
                   userType      = Some(UserType.NonGovernmentGatewayUser),
                   journeyStatus = Some(NonGovernmentGatewayJourney)
                 )
-              )(
-                Future.successful(Left(Error("")))
-              )
+              )(Left(Error("")))
             }
 
             checkIsTechnicalErrorPage(performAction())
@@ -1623,15 +1605,13 @@ class StartControllerSpec
                 Set.empty,
                 Some(nonGGCreds)
               )
-              mockGetSession(Future.successful(Right(None)))
+              mockGetSession(Right(None))
               mockStoreSession(
                 SessionData.empty.copy(
                   userType      = Some(UserType.NonGovernmentGatewayUser),
                   journeyStatus = Some(NonGovernmentGatewayJourney)
                 )
-              )(
-                Future.successful(Right(()))
-              )
+              )(Right(()))
             }
 
             checkIsRedirect(performAction(), controllers.routes.StartController.weOnlySupportGG())
@@ -1649,15 +1629,9 @@ class StartControllerSpec
                 Some(nonGGCreds)
               )
               mockGetSession(
-                Future.successful(
-                  Right(
-                    Some(
-                      SessionData.empty.copy(
-                        userType      = Some(UserType.Individual),
-                        journeyStatus = Some(NonGovernmentGatewayJourney)
-                      )
-                    )
-                  )
+                SessionData.empty.copy(
+                  userType      = Some(UserType.Individual),
+                  journeyStatus = Some(NonGovernmentGatewayJourney)
                 )
               )
             }
@@ -1693,15 +1667,9 @@ class StartControllerSpec
                 Some(retrievedGGCredId)
               )
               mockGetSession(
-                Future.successful(
-                  Right(
-                    Some(
-                      SessionData.empty.copy(
-                        userType      = Some(UserType.Agent),
-                        journeyStatus = Some(AgentStatus.AgentSupplyingClientDetails(arn, ggCredId, None))
-                      )
-                    )
-                  )
+                SessionData.empty.copy(
+                  userType      = Some(UserType.Agent),
+                  journeyStatus = Some(AgentStatus.AgentSupplyingClientDetails(arn, ggCredId, None))
                 )
               )
             }
@@ -1723,13 +1691,13 @@ class StartControllerSpec
                 Set(agentsEnrolment),
                 Some(retrievedGGCredId)
               )
-              mockGetSession(Future.successful(Right(None)))
+              mockGetSession(Right(None))
               mockStoreSession(
                 SessionData.empty.copy(
                   userType      = Some(UserType.Agent),
                   journeyStatus = Some(AgentStatus.AgentSupplyingClientDetails(arn, ggCredId, None))
                 )
-              )(Future.successful(Right(())))
+              )(Right(()))
             }
 
             checkIsRedirect(
@@ -1750,21 +1718,15 @@ class StartControllerSpec
                 Some(retrievedGGCredId)
               )
               mockGetSession(
-                Future.successful(
-                  Right(
-                    Some(
-                      SessionData.empty
-                        .copy(journeyStatus = Some(sample[Subscribed].copy(agentReferenceNumber = Some(arn))))
-                    )
-                  )
-                )
+                SessionData.empty
+                  .copy(journeyStatus = Some(sample[Subscribed].copy(agentReferenceNumber = Some(arn))))
               )
               mockStoreSession(
                 SessionData.empty.copy(
                   userType      = Some(UserType.Agent),
                   journeyStatus = Some(AgentStatus.AgentSupplyingClientDetails(arn, ggCredId, None))
                 )
-              )(Future.successful(Right(())))
+              )(Right(()))
             }
 
             checkIsRedirect(
@@ -1788,13 +1750,13 @@ class StartControllerSpec
                 Set(agentsEnrolment),
                 Some(retrievedGGCredId)
               )
-              mockGetSession(Future.successful(Right(None)))
+              mockGetSession(Right(None))
               mockStoreSession(
                 SessionData.empty.copy(
                   userType      = Some(UserType.Agent),
                   journeyStatus = Some(AgentStatus.AgentSupplyingClientDetails(arn, ggCredId, None))
                 )
-              )(Future.successful(Left(Error(""))))
+              )(Left(Error("")))
             }
 
             checkIsTechnicalErrorPage(performAction())
@@ -1818,14 +1780,8 @@ class StartControllerSpec
               Some(retrievedGGCredId)
             )
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    SessionData.empty.copy(
-                      journeyStatus = Some(sample[StartingNewDraftReturn])
-                    )
-                  )
-                )
+              SessionData.empty.copy(
+                journeyStatus = Some(sample[StartingNewDraftReturn])
               )
             )
 
@@ -1849,14 +1805,8 @@ class StartControllerSpec
               Some(retrievedGGCredId)
             )
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    SessionData.empty.copy(
-                      journeyStatus = Some(sample[FillingOutReturn])
-                    )
-                  )
-                )
+              SessionData.empty.copy(
+                journeyStatus = Some(sample[FillingOutReturn])
               )
             )
 
@@ -1876,15 +1826,7 @@ class StartControllerSpec
         "there is no continue url in session" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    SessionData.empty.copy(journeyStatus = Some(sample[JourneyStatus]))
-                  )
-                )
-              )
-            )
+            mockGetSession(SessionData.empty.copy(journeyStatus = Some(sample[JourneyStatus])))
           }
 
           checkIsRedirect(performAction(), controllers.routes.StartController.start())
@@ -1900,20 +1842,11 @@ class StartControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    SessionData.empty.copy(
-                      userType      = Some(UserType.Individual),
-                      journeyStatus = Some(sample[JourneyStatus]),
-                      needMoreDetailsDetails = Some(
-                        NeedMoreDetailsDetails(
-                          continueUrl,
-                          NeedMoreDetailsDetails.AffinityGroup.Individual
-                        )
-                      )
-                    )
-                  )
+              SessionData.empty.copy(
+                userType      = Some(UserType.Individual),
+                journeyStatus = Some(sample[JourneyStatus]),
+                needMoreDetailsDetails = Some(
+                  NeedMoreDetailsDetails(continueUrl, NeedMoreDetailsDetails.AffinityGroup.Individual)
                 )
               )
             )
@@ -1944,15 +1877,7 @@ class StartControllerSpec
       "display the page" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(
-            Future.successful(
-              Right(
-                Some(
-                  SessionData.empty.copy(journeyStatus = Some(NonGovernmentGatewayJourney))
-                )
-              )
-            )
-          )
+          mockGetSession(SessionData.empty.copy(journeyStatus = Some(NonGovernmentGatewayJourney)))
         }
 
         val result = performAction()
@@ -1977,14 +1902,8 @@ class StartControllerSpec
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(
-            Future.successful(
-              Right(
-                Some(
-                  SessionData.empty
-                    .copy(userType = Some(UserType.Individual), journeyStatus = Some(NonGovernmentGatewayJourney))
-                )
-              )
-            )
+            SessionData.empty
+              .copy(userType = Some(UserType.Individual), journeyStatus = Some(NonGovernmentGatewayJourney))
           )
         }
 
@@ -2010,15 +1929,7 @@ class StartControllerSpec
       "trash the session adn redirect to the gg registration service" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(
-            Future.successful(
-              Right(
-                Some(
-                  SessionData.empty.copy(journeyStatus = Some(NonGovernmentGatewayJourney))
-                )
-              )
-            )
-          )
+          mockGetSession(SessionData.empty.copy(journeyStatus = Some(NonGovernmentGatewayJourney)))
         }
 
         val result = performAction(Seq("key" -> "value"))
@@ -2033,7 +1944,7 @@ class StartControllerSpec
       "return an ok response with an empty body" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(None)))
+          mockGetSession(Right(None))
         }
 
         val result = controller.keepAlive()(FakeRequest())

@@ -129,7 +129,7 @@ class UpscanControllerSpec
 
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionData))))
+          mockGetSession(sessionData)
         }
 
         mockUpscanInitiate(cgtReference)(
@@ -151,7 +151,7 @@ class UpscanControllerSpec
 
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionData))))
+          mockGetSession(sessionData)
         }
         mockUpscanInitiate(CgtReference(cgtReference.value))(Left(Error("Some error")))
         def performAction(): Future[Result] = controller.upscan()(requestWithCSRFToken)

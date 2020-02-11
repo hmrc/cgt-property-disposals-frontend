@@ -60,7 +60,7 @@ class SubscriptionReadyActionSpec extends ControllerSpec with SessionSupport {
     }
 
     "return an error if there is an error getting session data" in {
-      mockGetSession(Future.successful(Left(Error(new Exception("Oh no!")))))
+      mockGetSession(Left(Error(new Exception("Oh no!"))))
 
       checkIsTechnicalErrorPage(performAction(sample[SessionData]))
     }
@@ -68,13 +68,13 @@ class SubscriptionReadyActionSpec extends ControllerSpec with SessionSupport {
     "redirect to the start journey endpoint" when {
 
       "there is no session data in store" in {
-        mockGetSession(Future.successful(Right(None)))
+        mockGetSession(Right(None))
 
         checkIsRedirect(performAction(sample[SessionData]), routes.StartController.start())
       }
 
       "there is no subscription details in the session data" in {
-        mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+        mockGetSession(SessionData.empty)
 
         checkIsRedirect(performAction(sample[SessionData]), routes.StartController.start())
       }
@@ -88,7 +88,7 @@ class SubscriptionReadyActionSpec extends ControllerSpec with SessionSupport {
           journeyStatus = Some(SubscriptionReady(subscriptionDetails, ggCredId))
         )
 
-        mockGetSession(Future.successful(Right(Some(sessionData))))
+        mockGetSession(sessionData)
 
         status(performAction(sessionData)) shouldBe OK
       }

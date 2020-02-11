@@ -38,7 +38,7 @@ trait RedirectToStartBehaviour {
       "there is no journey status in session" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+          mockGetSession(SessionData.empty)
         }
 
         checkIsRedirect(
@@ -54,7 +54,7 @@ trait RedirectToStartBehaviour {
           whenever(!isValidJourneyStatus(j)) {
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(SessionData.empty.copy(journeyStatus = Some(j))))))
+              mockGetSession(SessionData.empty.copy(journeyStatus = Some(j)))
             }
 
             checkIsRedirect(

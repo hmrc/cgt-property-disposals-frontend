@@ -839,15 +839,7 @@ class CanTheyUseOurServiceControllerSpec
               withClue(s"For state $state and expected redirect url ${expectedRedirect.url}: ") {
                 inSequence {
                   mockAuthWithNoRetrievals()
-                  mockGetSession(
-                    Future.successful(
-                      Right(
-                        Some(
-                          sessionDataWith(state)
-                        )
-                      )
-                    )
-                  )
+                  mockGetSession(sessionDataWith(state))
                 }
 
                 checkIsRedirect(performAction(), expectedRedirect)
@@ -869,18 +861,8 @@ class CanTheyUseOurServiceControllerSpec
         "all the questions have now been answered but the sessino data cannot be updated" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStartingNewDraftReturn(allQuestionsAnswered)
-                  )
-                )
-              )
-            )
-            mockStoreSession(
-              sessionDataWithStartingNewDraftReturn(completeTriageQuestions)
-            )(Future.successful(Left(Error(""))))
+            mockGetSession(sessionDataWithStartingNewDraftReturn(allQuestionsAnswered))
+            mockStoreSession(sessionDataWithStartingNewDraftReturn(completeTriageQuestions))(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -897,18 +879,8 @@ class CanTheyUseOurServiceControllerSpec
         "all the questions have now been answered and the session is updated when a draft return has not yet been created" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStartingNewDraftReturn(allQuestionsAnswered)
-                  )
-                )
-              )
-            )
-            mockStoreSession(
-              sessionDataWithStartingNewDraftReturn(completeTriageQuestions)
-            )(Future.successful(Right(())))
+            mockGetSession(sessionDataWithStartingNewDraftReturn(allQuestionsAnswered))
+            mockStoreSession(sessionDataWithStartingNewDraftReturn(completeTriageQuestions))(Right(()))
           }
 
           testIsCYAPagePage(performAction())
@@ -917,18 +889,8 @@ class CanTheyUseOurServiceControllerSpec
         "all the questions have now been answered and the session is updated when a draft return has been created" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithFillingOurReturn(allQuestionsAnswered)
-                  )
-                )
-              )
-            )
-            mockStoreSession(
-              sessionDataWithFillingOurReturn(completeTriageQuestions)
-            )(Future.successful(Right(())))
+            mockGetSession(sessionDataWithFillingOurReturn(allQuestionsAnswered))
+            mockStoreSession(sessionDataWithFillingOurReturn(completeTriageQuestions))(Right(()))
           }
 
           testIsCYAPagePage(performAction())
@@ -937,15 +899,7 @@ class CanTheyUseOurServiceControllerSpec
         "all the questions have already been answered and a draft return has not yet been created" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStartingNewDraftReturn(completeTriageQuestions)
-                  )
-                )
-              )
-            )
+            mockGetSession(sessionDataWithStartingNewDraftReturn(completeTriageQuestions))
           }
 
           testIsCYAPagePage(performAction())
@@ -954,15 +908,7 @@ class CanTheyUseOurServiceControllerSpec
         "all the questions have already been answered and a draft return has been created" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithFillingOurReturn(completeTriageQuestions)
-                  )
-                )
-              )
-            )
+            mockGetSession(sessionDataWithFillingOurReturn(completeTriageQuestions))
           }
 
           testIsCYAPagePage(performAction())
@@ -999,7 +945,7 @@ class CanTheyUseOurServiceControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionDataWithStartingNewDraftReturn(incompleteAnswers)))))
+            mockGetSession(sessionDataWithStartingNewDraftReturn(incompleteAnswers))
           }
 
           checkIsRedirect(performAction(), routes.CanTheyUseOurServiceController.checkYourAnswers())
@@ -1012,7 +958,7 @@ class CanTheyUseOurServiceControllerSpec
         "there is a problem storing a draft return" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionDataWithStartingNewDraftReturn(completeAnswers)))))
+            mockGetSession(sessionDataWithStartingNewDraftReturn(completeAnswers))
             mockGetNextUUID(uuid)
             mockStoreDraftReturn(newDraftReturn)(Left(Error("")))
           }
@@ -1023,10 +969,10 @@ class CanTheyUseOurServiceControllerSpec
         "there is a problem updating the session" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionDataWithStartingNewDraftReturn(completeAnswers)))))
+            mockGetSession(sessionDataWithStartingNewDraftReturn(completeAnswers))
             mockGetNextUUID(uuid)
             mockStoreDraftReturn(newDraftReturn)(Right(()))
-            mockStoreSession(sessionDataWithNewDraftReturn)(Future.successful(Left(Error(""))))
+            mockStoreSession(sessionDataWithNewDraftReturn)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -1039,10 +985,10 @@ class CanTheyUseOurServiceControllerSpec
         "the draft return is stored and the session is updated and a draft return had not already been created" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionDataWithStartingNewDraftReturn(completeAnswers)))))
+            mockGetSession(sessionDataWithStartingNewDraftReturn(completeAnswers))
             mockGetNextUUID(uuid)
             mockStoreDraftReturn(newDraftReturn)(Right(()))
-            mockStoreSession(sessionDataWithNewDraftReturn)(Future.successful(Right(())))
+            mockStoreSession(sessionDataWithNewDraftReturn)(Right(()))
           }
 
           checkIsRedirect(performAction(), returnsRoutes.TaskListController.taskList())
@@ -1051,7 +997,7 @@ class CanTheyUseOurServiceControllerSpec
         "the draft return is stored and the session is updated and a draft return had already been created" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionDataWithFillingOurReturn(completeAnswers)))))
+            mockGetSession(sessionDataWithFillingOurReturn(completeAnswers))
           }
 
           checkIsRedirect(performAction(), returnsRoutes.TaskListController.taskList())
@@ -1087,15 +1033,7 @@ class CanTheyUseOurServiceControllerSpec
             withClue(s"For currentSession $currentSession: ") {
               inSequence {
                 mockAuthWithNoRetrievals()
-                mockGetSession(
-                  Future.successful(
-                    Right(
-                      Some(
-                        sessionDataWithStartingNewDraftReturn(setPreviousAnswer(requiredPreviousAnswers, None))
-                      )
-                    )
-                  )
-                )
+                mockGetSession(sessionDataWithStartingNewDraftReturn(setPreviousAnswer(requiredPreviousAnswers, None)))
               }
 
               checkIsRedirect(performAction(Seq.empty), redirectToIfNotValidJourney)
@@ -1116,9 +1054,7 @@ class CanTheyUseOurServiceControllerSpec
             ) {
               inSequence {
                 mockAuthWithNoRetrievals()
-                mockGetSession(
-                  Future.successful(Right(Some(sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers))))
-                )
+                mockGetSession(sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers))
               }
 
               val result  = performAction(formData)
@@ -1141,14 +1077,12 @@ class CanTheyUseOurServiceControllerSpec
             withClue(s"For form data [${formData.mkString(";")}] and value '$validValue': ") {
               inSequence {
                 mockAuthWithNoRetrievals()
-                mockGetSession(
-                  Future.successful(Right(Some(sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers))))
-                )
+                mockGetSession(sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers))
                 mockStoreSession(
                   sessionDataWithStartingNewDraftReturn(
                     updateCurrentIncompleteAnswer(requiredPreviousAnswers, Some(validValue))
                   )
-                )(Future.successful(Left(Error(""))))
+                )(Left(Error("")))
               }
 
               val result = performAction(formData)
@@ -1163,9 +1097,7 @@ class CanTheyUseOurServiceControllerSpec
             withClue(s"For form data [${formData.mkString(";")}] and value '$validValue': ") {
               inSequence {
                 mockAuthWithNoRetrievals()
-                mockGetSession(
-                  Future.successful(Right(Some(sessionDataWithFillingOurReturn(requiredPreviousAnswers))))
-                )
+                mockGetSession(sessionDataWithFillingOurReturn(requiredPreviousAnswers))
                 mockStoreDraftReturn(
                   draftReturn.copy(
                     triageAnswers = updateCurrentIncompleteAnswer(requiredPreviousAnswers, Some(validValue))
@@ -1198,9 +1130,9 @@ class CanTheyUseOurServiceControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(currentSession))))
+            mockGetSession(currentSession)
             if (updatedState =!= initialState) mockStoreDraftReturn(updatedState)(Right(()))
-            if (currentSession =!= updatedSession) mockStoreSession(updatedSession)(Future.successful(Right(())))
+            if (currentSession =!= updatedSession) mockStoreSession(updatedSession)(Right(()))
           }
 
           val result = performAction(formData)
@@ -1222,8 +1154,8 @@ class CanTheyUseOurServiceControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(currentSession))))
-            if (currentSession =!= updatedSession) mockStoreSession(updatedSession)(Future.successful(Right(())))
+            mockGetSession(currentSession)
+            if (currentSession =!= updatedSession) mockStoreSession(updatedSession)(Right(()))
           }
 
           val result = performAction(formData)
@@ -1288,15 +1220,7 @@ class CanTheyUseOurServiceControllerSpec
             withClue(s"For form data [${formData.mkString(";")}] and value '$validValue': ") {
               inSequence {
                 mockAuthWithNoRetrievals()
-                mockGetSession(
-                  Future.successful(
-                    Right(
-                      Some(
-                        sessionDataWithStartingNewDraftReturn((updatedState))
-                      )
-                    )
-                  )
-                )
+                mockGetSession(sessionDataWithStartingNewDraftReturn((updatedState)))
               }
 
               val result = performAction(formData)
@@ -1331,7 +1255,7 @@ class CanTheyUseOurServiceControllerSpec
             withClue(s"For currentSession $currentSession: ") {
               inSequence {
                 mockAuthWithNoRetrievals()
-                mockGetSession(Future.successful(Right(Some(currentSession))))
+                mockGetSession(currentSession)
               }
 
               checkIsRedirect(performAction(), redirectToIfNotValidJourney)
@@ -1351,7 +1275,7 @@ class CanTheyUseOurServiceControllerSpec
         withClue(s"For currentSession $currentSession: ") {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(currentSession))))
+            mockGetSession(currentSession)
           }
 
           val result = performAction()
@@ -1369,7 +1293,7 @@ class CanTheyUseOurServiceControllerSpec
         withClue(s"For currentSession $currentSession: ") {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(currentSession))))
+            mockGetSession(currentSession)
           }
 
           val result  = performAction()
@@ -1402,7 +1326,7 @@ class CanTheyUseOurServiceControllerSpec
         withClue(s"For currentSession $currentSession: ") {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(currentSession))))
+            mockGetSession(currentSession)
           }
 
           val result  = performAction()

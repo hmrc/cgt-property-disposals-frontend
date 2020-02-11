@@ -127,15 +127,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
         "the user has not selected an option before" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None, None))
-                  )
-                )
-              )
-            )
+            mockGetSession(sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None, None)))
           }
 
           val result = performAction()
@@ -146,15 +138,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
         "the user has selected an option before" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), None))
-                  )
-                )
-              )
-            )
+            mockGetSession(sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), None)))
           }
 
           val result  = performAction()
@@ -181,15 +165,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
         "an option has not been selected" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None, None))
-                  )
-                )
-              )
-            )
+            mockGetSession(sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None, None)))
           }
 
           val result = performAction()
@@ -200,15 +176,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
         "the data submitted cannot be read" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None, None))
-                  )
-                )
-              )
-            )
+            mockGetSession(sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None, None)))
           }
 
           val result = performAction("isReportingForATrust" -> "123")
@@ -223,20 +191,12 @@ class DeterminingIfOrganisationIsTrustControllerSpec
         "the answer cannot be stored in mongo" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None, None))
-                  )
-                )
-              )
-            )
+            mockGetSession(sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None, None)))
             mockStoreSession(
               SessionData.empty.copy(
                 journeyStatus = Some(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), None))
               )
-            )(Future.successful(Left(Error(""))))
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction("isReportingForATrust" -> "true"))
@@ -249,20 +209,12 @@ class DeterminingIfOrganisationIsTrustControllerSpec
         "the answer says they are not reporting for a trust" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None, None))
-                  )
-                )
-              )
-            )
+            mockGetSession(sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None, None)))
             mockStoreSession(
               SessionData.empty.copy(
                 journeyStatus = Some(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(false), None))
               )
-            )(Future.successful(Right(())))
+            )(Right(()))
           }
 
           checkIsRedirect(
@@ -278,20 +230,12 @@ class DeterminingIfOrganisationIsTrustControllerSpec
         "the answer says they are reporting for a trust" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None, None))
-                  )
-                )
-              )
-            )
+            mockGetSession(sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None, None)))
             mockStoreSession(
               SessionData.empty.copy(
                 journeyStatus = Some(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), None))
               )
-            )(Future.successful(Right(())))
+            )(Right(()))
           }
 
           checkIsRedirect(
@@ -315,15 +259,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
         "the user has not answered whether or not they're reporting for a trust" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None, None))
-                  )
-                )
-              )
-            )
+            mockGetSession(sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None, None)))
           }
 
           checkIsRedirect(performAction(), cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
@@ -332,15 +268,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
         "the user has said that they're reporting for a trust" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), None))
-                  )
-                )
-              )
-            )
+            mockGetSession(sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), None)))
           }
 
           checkIsRedirect(performAction(), cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
@@ -353,15 +281,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
         "the user has said that they're not reporting for a trust" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(false), None))
-                  )
-                )
-              )
-            )
+            mockGetSession(sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(false), None)))
           }
 
           val result = performAction()
@@ -385,15 +305,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
         "the user has not indicated whether or not they are reporting for a trust" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None, None))
-                  )
-                )
-              )
-            )
+            mockGetSession(sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None, None)))
           }
 
           checkIsRedirect(performAction(), cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
@@ -402,15 +314,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
         "the user has indicated that they are not reporting for a trust" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(false), None))
-                  )
-                )
-              )
-            )
+            mockGetSession(sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(false), None)))
           }
 
           checkIsRedirect(performAction(), cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
@@ -423,15 +327,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
         "the user has not selected an option before" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), None))
-                  )
-                )
-              )
-            )
+            mockGetSession(sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), None)))
           }
 
           val result = performAction()
@@ -443,13 +339,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), Some(true)))
-                  )
-                )
-              )
+              sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), Some(true)))
             )
           }
 
@@ -477,15 +367,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
         "the user has not indicated whether or not they are reporting for a trust" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None, None))
-                  )
-                )
-              )
-            )
+            mockGetSession(sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, None, None)))
           }
 
           checkIsRedirect(performAction(), cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
@@ -494,15 +376,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
         "the user has indicated that they are not reporting for a trust" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(false), None))
-                  )
-                )
-              )
-            )
+            mockGetSession(sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(false), None)))
           }
 
           checkIsRedirect(performAction(), cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
@@ -515,15 +389,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
         "an option has not been selected" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), None))
-                  )
-                )
-              )
-            )
+            mockGetSession(sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), None)))
           }
 
           val result = performAction()
@@ -534,15 +400,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
         "the data submitted cannot be read" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), None))
-                  )
-                )
-              )
-            )
+            mockGetSession(sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), None)))
           }
 
           val result = performAction("hasTrn" -> "123")
@@ -557,20 +415,12 @@ class DeterminingIfOrganisationIsTrustControllerSpec
         "the answer cannot be stored in mongo" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), None))
-                  )
-                )
-              )
-            )
+            mockGetSession(sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), None)))
             mockStoreSession(
               SessionData.empty.copy(
                 journeyStatus = Some(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), Some(true)))
               )
-            )(Future.successful(Left(Error(""))))
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction("hasTrn" -> "true"))
@@ -583,20 +433,12 @@ class DeterminingIfOrganisationIsTrustControllerSpec
         "the user does not have a TRN" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), None))
-                  )
-                )
-              )
-            )
+            mockGetSession(sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), None)))
             mockStoreSession(
               SessionData.empty.copy(
                 journeyStatus = Some(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), Some(false)))
               )
-            )(Future.successful(Right(())))
+            )(Right(()))
           }
 
           checkIsRedirect(
@@ -612,20 +454,12 @@ class DeterminingIfOrganisationIsTrustControllerSpec
         "the user does  have a TRN" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), None))
-                  )
-                )
-              )
-            )
+            mockGetSession(sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), None)))
             mockStoreSession(
               SessionData.empty.copy(
                 journeyStatus = Some(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), Some(true)))
               )
-            )(Future.successful(Right(())))
+            )(Right(()))
           }
 
           checkIsRedirect(
@@ -650,7 +484,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData))))
+            mockGetSession(sessionData)
           }
 
           val result = performAction()
@@ -675,13 +509,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
         def test(hasTrn: Option[Boolean]) = {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), hasTrn)))
-                )
-              )
-            )
+            mockGetSession(sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), hasTrn)))
           }
 
           val result = performAction()
@@ -704,14 +532,8 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStatus(
-                      DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), Some(true))
-                    )
-                  )
-                )
+              sessionDataWithStatus(
+                DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), Some(true))
               )
             )
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(None))
@@ -727,14 +549,8 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStatus(
-                      DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), Some(true))
-                    )
-                  )
-                )
+              sessionDataWithStatus(
+                DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), Some(true))
               )
             )
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
@@ -759,14 +575,8 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStatus(
-                      DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), Some(true))
-                    )
-                  )
-                )
+              sessionDataWithStatus(
+                DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), Some(true))
               )
             )
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(TooManyUnsuccessfulAttempts()))
@@ -786,14 +596,8 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStatus(
-                      DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), Some(true))
-                    )
-                  )
-                )
+              sessionDataWithStatus(
+                DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), Some(true))
               )
             )
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(NameMatchError.BackendError(Error(""))))
@@ -835,11 +639,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
-                Future.successful(
-                  Right(
-                    Some(sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), hasTrn)))
-                  )
-                )
+                sessionDataWithStatus(DeterminingIfOrganisationIsTrust(ggCredId, None, Some(true), hasTrn))
               )
             }
 
@@ -862,7 +662,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           def mockActions(): Unit =
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+              mockGetSession(expectedSessionData)
               mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
                 Right(Some(UnsuccessfulNameMatchAttempts(1, 2, TrustNameMatchDetails(validTrustName, validTrn))))
               )
@@ -947,7 +747,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
             "user has not yet made too many unsuccessful attempts" in {
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+              mockGetSession(expectedSessionData)
               mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(Some(previousUnsuccessfulNameMatchAttempt)))
               mockAttemptNameMatch(validTrn, validTrustName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
                 Left(
@@ -970,7 +770,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           "there is an error retrieving the number of previous unsuccessful attempts" in {
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+              mockGetSession(expectedSessionData)
               mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(NameMatchError.BackendError(Error(""))))
             }
 
@@ -982,7 +782,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           "there is an error getting the BPR" in {
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+              mockGetSession(expectedSessionData)
               mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(Some(previousUnsuccessfulNameMatchAttempt)))
               mockAttemptNameMatch(validTrn, validTrustName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
                 Left(NameMatchError.BackendError(Error("")))
@@ -996,13 +796,13 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           "there is an error storing a retrieved BPR in mongo" in {
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+              mockGetSession(expectedSessionData)
               mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(Some(previousUnsuccessfulNameMatchAttempt)))
               mockAttemptNameMatch(validTrn, validTrustName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
                 Right(bpr -> None)
               )
               mockStoreSession(sessionDataWithStatus(SubscriptionMissingData(bpr, None, ggCredId, None)))(
-                Future.successful(Left(Error("")))
+                Left(Error(""))
               )
             }
 
@@ -1013,7 +813,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           "a BPR is found but it is one for an individual instead of a trust" in {
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+              mockGetSession(expectedSessionData)
               mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(Some(previousUnsuccessfulNameMatchAttempt)))
               mockAttemptNameMatch(validTrn, validTrustName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
                 Right(bpr.copy(name = Right(IndividualName("Name", "Wame"))) -> None)
@@ -1032,14 +832,12 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           "the user submits a valid TRN and trust name and a BPR can be retrieved and the user does not already have a cgt reference" in {
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+              mockGetSession(expectedSessionData)
               mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(Some(previousUnsuccessfulNameMatchAttempt)))
               mockAttemptNameMatch(validTrn, validTrustName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
                 Right(bpr -> None)
               )
-              mockStoreSession(sessionDataWithStatus(SubscriptionMissingData(bpr, None, ggCredId, None)))(
-                Future.successful(Right(()))
-              )
+              mockStoreSession(sessionDataWithStatus(SubscriptionMissingData(bpr, None, ggCredId, None)))(Right(()))
             }
 
             val result = performAction("trustName" -> validTrustName.value, "trn" -> validTrn.value)
@@ -1055,16 +853,14 @@ class DeterminingIfOrganisationIsTrustControllerSpec
 
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+              mockGetSession(expectedSessionData)
               mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(Some(previousUnsuccessfulNameMatchAttempt)))
               mockAttemptNameMatch(validTrn, validTrustName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
                 Right(bpr -> Some(cgtReference))
               )
               mockStoreSession(
                 sessionDataWithStatus(AlreadySubscribedWithDifferentGGAccount(ggCredId, Some(cgtReference)))
-              )(
-                Future.successful(Right(()))
-              )
+              )(Right(()))
             }
 
             val result = performAction("trustName" -> validTrustName.value, "trn" -> validTrn.value)
@@ -1078,7 +874,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           "the user has attempted to perform a name match too many times" in {
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+              mockGetSession(expectedSessionData)
               mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(NameMatchError.TooManyUnsuccessfulAttempts()))
             }
 
@@ -1092,7 +888,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
             "details which do not match a BPR and have now made too many attempts" in {
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+              mockGetSession(expectedSessionData)
               mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(Some(previousUnsuccessfulNameMatchAttempt)))
               mockAttemptNameMatch(validTrn, validTrustName, ggCredId, Some(previousUnsuccessfulNameMatchAttempt))(
                 Left(NameMatchError.TooManyUnsuccessfulAttempts())
@@ -1111,7 +907,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           val validTrnWithSpaces = TRN("1234567890     12 345")
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+            mockGetSession(expectedSessionData)
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(Some(previousUnsuccessfulNameMatchAttempt)))
             mockAttemptNameMatch(
               validTrnWithSpaces,
@@ -1121,9 +917,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
             )(
               Right(bpr -> None)
             )
-            mockStoreSession(sessionDataWithStatus(SubscriptionMissingData(bpr, None, ggCredId, None)))(
-              Future.successful(Right(()))
-            )
+            mockStoreSession(sessionDataWithStatus(SubscriptionMissingData(bpr, None, ggCredId, None)))(Right(()))
           }
 
           val result = performAction("trustName" -> validTrustName.value, "trn" -> validTrnWithSpaces.value)
@@ -1148,7 +942,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
         "there is an error trying to get the number of unsuccessful name match attempts" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+            mockGetSession(expectedSessionData)
             mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(NameMatchError.BackendError(Error(""))))
           }
 
@@ -1160,7 +954,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           "the user has attempted a name match too many times" in {
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+              mockGetSession(expectedSessionData)
               mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Left(NameMatchError.TooManyUnsuccessfulAttempts()))
             }
 
@@ -1175,7 +969,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           "the user has attempted a name match but they still have attempts left" in {
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+              mockGetSession(expectedSessionData)
               mockGetNumberOfUnsuccessfulAttempts(ggCredId)(
                 Right(Some(UnsuccessfulNameMatchAttempts(1, 2, sample[TrustNameMatchDetails])))
               )
@@ -1187,7 +981,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           "the user has not attempted a name match" in {
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(expectedSessionData))))
+              mockGetSession(expectedSessionData)
               mockGetNumberOfUnsuccessfulAttempts(ggCredId)(Right(None))
             }
 

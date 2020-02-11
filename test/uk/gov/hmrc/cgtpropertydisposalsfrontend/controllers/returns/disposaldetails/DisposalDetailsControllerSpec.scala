@@ -110,9 +110,7 @@ class DisposalDetailsControllerSpec
         "the user has not answered the question before" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(sessionWithDisposalDetailsAnswers(None, DisposalMethod.Sold)._1)))
-            )
+            mockGetSession(sessionWithDisposalDetailsAnswers(None, DisposalMethod.Sold)._1)
           }
 
           checkPageIsDisplayed(performAction(), messageFromMessageKey("shareOfProperty.title"))
@@ -123,18 +121,12 @@ class DisposalDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithDisposalDetailsAnswers(
-                      IncompleteDisposalDetailsAnswers.empty.copy(
-                        shareOfProperty = Some(ShareOfProperty.Other(12.34))
-                      ),
-                      DisposalMethod.Sold
-                    )._1
-                  )
-                )
-              )
+              sessionWithDisposalDetailsAnswers(
+                IncompleteDisposalDetailsAnswers.empty.copy(
+                  shareOfProperty = Some(ShareOfProperty.Other(12.34))
+                ),
+                DisposalMethod.Sold
+              )._1
             )
           }
 
@@ -148,18 +140,12 @@ class DisposalDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithDisposalDetailsAnswers(
-                      sample[CompleteDisposalDetailsAnswers].copy(
-                        shareOfProperty = ShareOfProperty.Other(12.34)
-                      ),
-                      DisposalMethod.Sold
-                    )._1
-                  )
-                )
-              )
+              sessionWithDisposalDetailsAnswers(
+                sample[CompleteDisposalDetailsAnswers].copy(
+                  shareOfProperty = ShareOfProperty.Other(12.34)
+                ),
+                DisposalMethod.Sold
+              )._1
             )
           }
 
@@ -184,13 +170,7 @@ class DisposalDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithDisposalDetailsAnswers(sample[CompleteDisposalDetailsAnswers], DisposalMethod.Sold)._1
-                  )
-                )
-              )
+              sessionWithDisposalDetailsAnswers(sample[CompleteDisposalDetailsAnswers], DisposalMethod.Sold)._1
             )
           }
 
@@ -255,9 +235,7 @@ class DisposalDetailsControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(session)))
-            )
+            mockGetSession(session)
             mockStoreDraftReturn(newDraftReturn)(Left(Error("")))
           }
 
@@ -267,9 +245,7 @@ class DisposalDetailsControllerSpec
         "there is an error updating the session data" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(session)))
-            )
+            mockGetSession(session)
             mockStoreDraftReturn(newDraftReturn)(Right(()))
             mockStoreSession(
               session.copy(
@@ -279,7 +255,7 @@ class DisposalDetailsControllerSpec
                   )
                 )
               )
-            )(Future.successful(Left(Error(""))))
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction(Seq("shareOfProperty" -> "0")))
@@ -303,15 +279,13 @@ class DisposalDetailsControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(session)))
-            )
+            mockGetSession(session)
             mockStoreDraftReturn(newDraftReturn)(Right(()))
             mockStoreSession(
               session.copy(
                 journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))
               )
-            )(Future.successful(Right(())))
+            )(Right(()))
           }
 
           checkIsRedirect(
@@ -334,15 +308,13 @@ class DisposalDetailsControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(session)))
-            )
+            mockGetSession(session)
             mockStoreDraftReturn(newDraftReturn)(Right(()))
             mockStoreSession(
               session.copy(
                 journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))
               )
-            )(Future.successful(Right(())))
+            )(Right(()))
           }
 
           checkIsRedirect(
@@ -373,15 +345,13 @@ class DisposalDetailsControllerSpec
           )
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(session)))
-            )
+            mockGetSession(session)
             mockStoreDraftReturn(newDraftReturn)(Right(()))
             mockStoreSession(
               session.copy(
                 journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))
               )
-            )(Future.successful(Right(())))
+            )(Right(()))
           }
 
           checkIsRedirect(
@@ -400,9 +370,7 @@ class DisposalDetailsControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)._1)))
-            )
+            mockGetSession(sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)._1)
           }
 
           checkIsRedirect(
@@ -426,15 +394,13 @@ class DisposalDetailsControllerSpec
 
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(
-            Future.successful(Right(Some(session)))
-          )
+          mockGetSession(session)
           mockStoreDraftReturn(newDraftReturn)(Right(()))
           mockStoreSession(
             session.copy(
               journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))
             )
-          )(Future.successful(Right(())))
+          )(Right(()))
         }
 
         checkIsRedirect(
@@ -455,15 +421,13 @@ class DisposalDetailsControllerSpec
 
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(
-            Future.successful(Right(Some(session)))
-          )
+          mockGetSession(session)
           mockStoreDraftReturn(newDraftReturn)(Right(()))
           mockStoreSession(
             session.copy(
               journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))
             )
-          )(Future.successful(Right(())))
+          )(Right(()))
         }
 
         checkIsRedirect(
@@ -508,16 +472,10 @@ class DisposalDetailsControllerSpec
                 inSequence {
                   mockAuthWithNoRetrievals()
                   mockGetSession(
-                    Future.successful(
-                      Right(
-                        Some(
-                          sessionWithDisposalDetailsAnswers(
-                            requiredPreviousAnswers.copy(shareOfProperty = Some(share)),
-                            disposalMethod
-                          )._1
-                        )
-                      )
-                    )
+                    sessionWithDisposalDetailsAnswers(
+                      requiredPreviousAnswers.copy(shareOfProperty = Some(share)),
+                      disposalMethod
+                    )._1
                   )
                 }
 
@@ -537,19 +495,13 @@ class DisposalDetailsControllerSpec
                 inSequence {
                   mockAuthWithNoRetrievals()
                   mockGetSession(
-                    Future.successful(
-                      Right(
-                        Some(
-                          sessionWithDisposalDetailsAnswers(
-                            requiredPreviousAnswers.copy(
-                              shareOfProperty = Some(share),
-                              disposalPrice   = Some(AmountInPence.fromPounds(12.34))
-                            ),
-                            disposalMethod
-                          )._1
-                        )
-                      )
-                    )
+                    sessionWithDisposalDetailsAnswers(
+                      requiredPreviousAnswers.copy(
+                        shareOfProperty = Some(share),
+                        disposalPrice   = Some(AmountInPence.fromPounds(12.34))
+                      ),
+                      disposalMethod
+                    )._1
                   )
                 }
 
@@ -571,19 +523,13 @@ class DisposalDetailsControllerSpec
                 inSequence {
                   mockAuthWithNoRetrievals()
                   mockGetSession(
-                    Future.successful(
-                      Right(
-                        Some(
-                          sessionWithDisposalDetailsAnswers(
-                            sample[CompleteDisposalDetailsAnswers].copy(
-                              shareOfProperty = share,
-                              disposalPrice   = AmountInPence.fromPounds(12.34)
-                            ),
-                            disposalMethod
-                          )._1
-                        )
-                      )
-                    )
+                    sessionWithDisposalDetailsAnswers(
+                      sample[CompleteDisposalDetailsAnswers].copy(
+                        shareOfProperty = share,
+                        disposalPrice   = AmountInPence.fromPounds(12.34)
+                      ),
+                      disposalMethod
+                    )._1
                   )
                 }
 
@@ -615,18 +561,12 @@ class DisposalDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithDisposalDetailsAnswers(
-                      sample[CompleteDisposalDetailsAnswers].copy(
-                        shareOfProperty = ShareOfProperty.Full
-                      ),
-                      DisposalMethod.Sold
-                    )._1
-                  )
-                )
-              )
+              sessionWithDisposalDetailsAnswers(
+                sample[CompleteDisposalDetailsAnswers].copy(
+                  shareOfProperty = ShareOfProperty.Full
+                ),
+                DisposalMethod.Sold
+              )._1
             )
           }
 
@@ -667,9 +607,7 @@ class DisposalDetailsControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(session)))
-            )
+            mockGetSession(session)
             mockStoreDraftReturn(newDraftReturn)(Left(Error("")))
           }
 
@@ -679,9 +617,7 @@ class DisposalDetailsControllerSpec
         "there is an error updating the session data" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(session)))
-            )
+            mockGetSession(session)
             mockStoreDraftReturn(newDraftReturn)(Right(()))
             mockStoreSession(
               session.copy(journeyStatus = Some(
@@ -690,7 +626,7 @@ class DisposalDetailsControllerSpec
                 )
               )
               )
-            )(Future.successful(Left(Error(""))))
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction(Seq("disposalPrice" -> newDisposalPrice.inPounds().toString)))
@@ -719,7 +655,7 @@ class DisposalDetailsControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
             mockStoreDraftReturn(newDraftReturn)(Right(()))
             mockStoreSession(
               session.copy(journeyStatus = Some(
@@ -728,7 +664,7 @@ class DisposalDetailsControllerSpec
                 )
               )
               )
-            )(Future.successful(Right(())))
+            )(Right(()))
           }
 
           checkIsRedirect(
@@ -753,7 +689,7 @@ class DisposalDetailsControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
             mockStoreDraftReturn(newDraftReturn)(Right(()))
             mockStoreSession(
               session.copy(journeyStatus = Some(
@@ -762,7 +698,7 @@ class DisposalDetailsControllerSpec
                 )
               )
               )
-            )(Future.successful(Right(())))
+            )(Right(()))
           }
 
           checkIsRedirect(
@@ -791,7 +727,7 @@ class DisposalDetailsControllerSpec
           )
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
             mockStoreDraftReturn(newDraftReturn)(Right(()))
             mockStoreSession(
               session.copy(journeyStatus = Some(
@@ -800,7 +736,7 @@ class DisposalDetailsControllerSpec
                 )
               )
               )
-            )(Future.successful(Right(())))
+            )(Right(()))
           }
 
           checkIsRedirect(
@@ -819,9 +755,7 @@ class DisposalDetailsControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)._1)))
-            )
+            mockGetSession(sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)._1)
           }
 
           checkIsRedirect(
@@ -839,9 +773,7 @@ class DisposalDetailsControllerSpec
 
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(
-            Future.successful(Right(Some(sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)._1)))
-          )
+          mockGetSession(sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)._1)
         }
 
         checkIsRedirect(
@@ -855,9 +787,7 @@ class DisposalDetailsControllerSpec
 
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(
-            Future.successful(Right(Some(sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)._1)))
-          )
+          mockGetSession(sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)._1)
         }
 
         checkIsRedirect(
@@ -896,16 +826,10 @@ class DisposalDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithDisposalDetailsAnswers(
-                      requiredPreviousAnswers.copy(disposalPrice = None),
-                      DisposalMethod.Sold
-                    )._1
-                  )
-                )
-              )
+              sessionWithDisposalDetailsAnswers(
+                requiredPreviousAnswers.copy(disposalPrice = None),
+                DisposalMethod.Sold
+              )._1
             )
           }
 
@@ -926,18 +850,12 @@ class DisposalDetailsControllerSpec
                 inSequence {
                   mockAuthWithNoRetrievals()
                   mockGetSession(
-                    Future.successful(
-                      Right(
-                        Some(
-                          sessionWithDisposalDetailsAnswers(
-                            requiredPreviousAnswers.copy(
-                              shareOfProperty = Some(share)
-                            ),
-                            disposalMethod
-                          )._1
-                        )
-                      )
-                    )
+                    sessionWithDisposalDetailsAnswers(
+                      requiredPreviousAnswers.copy(
+                        shareOfProperty = Some(share)
+                      ),
+                      disposalMethod
+                    )._1
                   )
                 }
 
@@ -957,19 +875,13 @@ class DisposalDetailsControllerSpec
                 inSequence {
                   mockAuthWithNoRetrievals()
                   mockGetSession(
-                    Future.successful(
-                      Right(
-                        Some(
-                          sessionWithDisposalDetailsAnswers(
-                            requiredPreviousAnswers.copy(
-                              shareOfProperty = Some(share),
-                              disposalFees    = Some(AmountInPence.fromPounds(12.34))
-                            ),
-                            disposalMethod
-                          )._1
-                        )
-                      )
-                    )
+                    sessionWithDisposalDetailsAnswers(
+                      requiredPreviousAnswers.copy(
+                        shareOfProperty = Some(share),
+                        disposalFees    = Some(AmountInPence.fromPounds(12.34))
+                      ),
+                      disposalMethod
+                    )._1
                   )
                 }
 
@@ -991,19 +903,13 @@ class DisposalDetailsControllerSpec
                 inSequence {
                   mockAuthWithNoRetrievals()
                   mockGetSession(
-                    Future.successful(
-                      Right(
-                        Some(
-                          sessionWithDisposalDetailsAnswers(
-                            sample[CompleteDisposalDetailsAnswers].copy(
-                              shareOfProperty = share,
-                              disposalFees    = AmountInPence.fromPounds(12.34)
-                            ),
-                            disposalMethod
-                          )._1
-                        )
-                      )
-                    )
+                    sessionWithDisposalDetailsAnswers(
+                      sample[CompleteDisposalDetailsAnswers].copy(
+                        shareOfProperty = share,
+                        disposalFees    = AmountInPence.fromPounds(12.34)
+                      ),
+                      disposalMethod
+                    )._1
                   )
                 }
 
@@ -1038,16 +944,10 @@ class DisposalDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithDisposalDetailsAnswers(
-                      requiredPreviousAnswers.copy(disposalPrice = None),
-                      DisposalMethod.Sold
-                    )._1
-                  )
-                )
-              )
+              sessionWithDisposalDetailsAnswers(
+                requiredPreviousAnswers.copy(disposalPrice = None),
+                DisposalMethod.Sold
+              )._1
             )
           }
 
@@ -1062,18 +962,12 @@ class DisposalDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithDisposalDetailsAnswers(
-                      sample[CompleteDisposalDetailsAnswers].copy(
-                        shareOfProperty = ShareOfProperty.Full
-                      ),
-                      DisposalMethod.Sold
-                    )._1
-                  )
-                )
-              )
+              sessionWithDisposalDetailsAnswers(
+                sample[CompleteDisposalDetailsAnswers].copy(
+                  shareOfProperty = ShareOfProperty.Full
+                ),
+                DisposalMethod.Sold
+              )._1
             )
           }
 
@@ -1114,7 +1008,7 @@ class DisposalDetailsControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
             mockStoreDraftReturn(newDraftReturn)(Left(Error("")))
           }
 
@@ -1124,11 +1018,11 @@ class DisposalDetailsControllerSpec
         "there is an error updating the session data" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
             mockStoreDraftReturn(newDraftReturn)(Right(()))
-            mockStoreSession(
-              session.copy(journeyStatus = Some(journey.copy(draftReturn = newDraftReturn)))
-            )(Future.successful(Left(Error(""))))
+            mockStoreSession(session.copy(journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))))(
+              Left(Error(""))
+            )
           }
 
           checkIsTechnicalErrorPage(performAction(Seq("disposalFees" -> newDisposalFees.inPounds().toString)))
@@ -1157,11 +1051,9 @@ class DisposalDetailsControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
             mockStoreDraftReturn(newDraftReturn)(Right(()))
-            mockStoreSession(
-              session.copy(journeyStatus = Some(journey.copy(draftReturn = newDraftReturn)))
-            )(Future.successful(Right(())))
+            mockStoreSession(session.copy(journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))))(Right(()))
           }
 
           checkIsRedirect(
@@ -1185,11 +1077,9 @@ class DisposalDetailsControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
             mockStoreDraftReturn(newDraftReturn)(Right(()))
-            mockStoreSession(
-              session.copy(journeyStatus = Some(journey.copy(draftReturn = newDraftReturn)))
-            )(Future.successful(Right(())))
+            mockStoreSession(session.copy(journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))))(Right(()))
           }
 
           checkIsRedirect(
@@ -1218,11 +1108,9 @@ class DisposalDetailsControllerSpec
           )
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
             mockStoreDraftReturn(newDraftReturn)(Right(()))
-            mockStoreSession(
-              session.copy(journeyStatus = Some(journey.copy(draftReturn = newDraftReturn)))
-            )(Future.successful(Right(())))
+            mockStoreSession(session.copy(journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))))(Right(()))
           }
 
           checkIsRedirect(
@@ -1241,9 +1129,7 @@ class DisposalDetailsControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)._1)))
-            )
+            mockGetSession(sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)._1)
           }
 
           checkIsRedirect(
@@ -1261,9 +1147,7 @@ class DisposalDetailsControllerSpec
 
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(
-            Future.successful(Right(Some(sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)._1)))
-          )
+          mockGetSession(sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)._1)
         }
 
         checkIsRedirect(
@@ -1277,9 +1161,7 @@ class DisposalDetailsControllerSpec
 
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(
-            Future.successful(Right(Some(sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)._1)))
-          )
+          mockGetSession(sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)._1)
         }
 
         checkIsRedirect(
@@ -1352,9 +1234,7 @@ class DisposalDetailsControllerSpec
         "there are no disposal details answers in session" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(sessionWithDisposalDetailsAnswers(None, DisposalMethod.Sold)._1)))
-            )
+            mockGetSession(sessionWithDisposalDetailsAnswers(None, DisposalMethod.Sold)._1)
           }
 
           checkIsRedirect(performAction(), routes.DisposalDetailsController.howMuchDidYouOwn())
@@ -1364,16 +1244,10 @@ class DisposalDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithDisposalDetailsAnswers(
-                      allQuestionsAnswered.copy(shareOfProperty = None),
-                      DisposalMethod.Sold
-                    )._1
-                  )
-                )
-              )
+              sessionWithDisposalDetailsAnswers(
+                allQuestionsAnswered.copy(shareOfProperty = None),
+                DisposalMethod.Sold
+              )._1
             )
           }
 
@@ -1389,16 +1263,10 @@ class DisposalDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithDisposalDetailsAnswers(
-                      allQuestionsAnswered.copy(disposalPrice = None),
-                      DisposalMethod.Sold
-                    )._1
-                  )
-                )
-              )
+              sessionWithDisposalDetailsAnswers(
+                allQuestionsAnswered.copy(disposalPrice = None),
+                DisposalMethod.Sold
+              )._1
             )
           }
 
@@ -1413,16 +1281,10 @@ class DisposalDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionWithDisposalDetailsAnswers(
-                      allQuestionsAnswered.copy(disposalFees = None),
-                      DisposalMethod.Sold
-                    )._1
-                  )
-                )
-              )
+              sessionWithDisposalDetailsAnswers(
+                allQuestionsAnswered.copy(disposalFees = None),
+                DisposalMethod.Sold
+              )._1
             )
           }
 
@@ -1438,7 +1300,7 @@ class DisposalDetailsControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
             mockStoreDraftReturn(
               journey.draftReturn.copy(
                 disposalDetailsAnswers = Some(completeAnswers)
@@ -1454,7 +1316,7 @@ class DisposalDetailsControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
             mockStoreDraftReturn(
               journey.draftReturn.copy(
                 disposalDetailsAnswers = Some(completeAnswers)
@@ -1469,7 +1331,7 @@ class DisposalDetailsControllerSpec
                   )
                 )
               )
-            )(Future.successful(Left(Error(""))))
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -1510,16 +1372,10 @@ class DisposalDetailsControllerSpec
                 inSequence {
                   mockAuthWithNoRetrievals()
                   mockGetSession(
-                    Future.successful(
-                      Right(
-                        Some(
-                          sessionWithDisposalDetailsAnswers(
-                            completeAnswers.copy(shareOfProperty = share),
-                            disposalMethod
-                          )._1
-                        )
-                      )
-                    )
+                    sessionWithDisposalDetailsAnswers(
+                      completeAnswers.copy(shareOfProperty = share),
+                      disposalMethod
+                    )._1
                   )
                 }
 
@@ -1551,7 +1407,7 @@ class DisposalDetailsControllerSpec
 
                 inSequence {
                   mockAuthWithNoRetrievals()
-                  mockGetSession(Future.successful(Right(Some(session))))
+                  mockGetSession(session)
                   mockStoreDraftReturn(
                     journey.draftReturn.copy(
                       disposalDetailsAnswers = Some(updatedAnswers)
@@ -1566,7 +1422,7 @@ class DisposalDetailsControllerSpec
                         )
                       )
                     )
-                  )(Future.successful(Right(())))
+                  )(Right(()))
                 }
 
                 testIsCheckYourAnswers(
@@ -1594,11 +1450,7 @@ class DisposalDetailsControllerSpec
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(
-            Future.successful(
-              Right(
-                Some(sessionWithDisposalDetailsAnswers(sample[CompleteDisposalDetailsAnswers], DisposalMethod.Sold)._1)
-              )
-            )
+            sessionWithDisposalDetailsAnswers(sample[CompleteDisposalDetailsAnswers], DisposalMethod.Sold)._1
           )
         }
 
@@ -1621,7 +1473,7 @@ class DisposalDetailsControllerSpec
 
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionData))))
+          mockGetSession(sessionData)
         }
 
         checkIsRedirect(performAction(), controllers.routes.StartController.start())
@@ -1652,7 +1504,7 @@ class DisposalDetailsControllerSpec
 
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionData))))
+          mockGetSession(sessionData)
         }
 
         checkIsRedirect(

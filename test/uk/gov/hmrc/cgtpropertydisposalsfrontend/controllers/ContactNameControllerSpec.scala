@@ -68,7 +68,7 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
       "the endpoint is requested" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionDataWithValidJourney))))
+          mockGetSession(sessionDataWithValidJourney)
         }
         val result = performAction()
         status(result)          shouldBe OK
@@ -82,7 +82,7 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
 
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionDataWithName))))
+          mockGetSession(sessionDataWithName)
         }
         val result = performAction()
         status(result) shouldBe OK
@@ -112,7 +112,7 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
       () =>
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionDataWithValidJourney))))
+          mockGetSession(sessionDataWithValidJourney)
         }
     )
 
@@ -121,11 +121,11 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
       "the request submits valid values" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionDataWithValidJourney))))
+          mockGetSession(sessionDataWithValidJourney)
           mockUpdateContactName.foreach { f =>
             f(validJourney, updateContactName(validJourney, contactName), Right(()))
           }
-          mockStoreSession(updatedSession)(Future.successful(Right(())))
+          mockStoreSession(updatedSession)(Right(()))
         }
 
         val result = performAction(Seq("contactName" -> contactName.value))
@@ -135,11 +135,11 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
       "request submits valid values with leading and trailing spaces" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionDataWithValidJourney))))
+          mockGetSession(sessionDataWithValidJourney)
           mockUpdateContactName.foreach { f =>
             f(validJourney, updateContactName(validJourney, contactName), Right(()))
           }
-          mockStoreSession(updatedSession)(Future.successful(Right(())))
+          mockStoreSession(updatedSession)(Right(()))
         }
 
         val result = performAction(Seq("contactName" -> s"${contactName.value} "))
@@ -153,7 +153,7 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
       "the contact name submitted is the same in the session" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(updatedSession))))
+          mockGetSession(updatedSession)
         }
         val result = performAction(Seq("contactName" -> contactName.value))
         checkIsRedirect(result, continueCall)
@@ -165,11 +165,11 @@ trait ContactNameControllerSpec[J <: JourneyStatus]
       "the session cannot be updated" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionDataWithValidJourney))))
+          mockGetSession(sessionDataWithValidJourney)
           mockUpdateContactName.foreach { f =>
             f(validJourney, updateContactName(validJourney, contactName), Right(()))
           }
-          mockStoreSession(updatedSession)(Future.successful(Left(Error(""))))
+          mockStoreSession(updatedSession)(Left(Error("")))
         }
 
         checkIsTechnicalErrorPage(performAction(Seq("contactName" -> contactName.value)))
