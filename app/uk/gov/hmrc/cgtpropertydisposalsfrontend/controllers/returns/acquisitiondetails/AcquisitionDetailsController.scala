@@ -19,7 +19,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisition
 import java.time.LocalDate
 
 import cats.data.EitherT
-import cats.instances.bigDecimal._
 import cats.instances.future._
 import cats.syntax.eq._
 import com.google.inject.Inject
@@ -150,7 +149,7 @@ class AcquisitionDetailsController @Inject() (
     if (requiredPreviousAnswer(currentAnswers).isDefined) {
       lazy val backLink = currentAnswers.fold(
         _ => redirectToIfNoRequiredPreviousAnswer,
-        _ => controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
+        _ => routes.AcquisitionDetailsController.checkYourAnswers()
       )
       form
         .bindFromRequest()

@@ -37,7 +37,6 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 @key = @{ "disposalFees" }
 @title = @{messages(disposalFeesTitleKey(disposalMethod, shareOfProperty))}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
-@labelWithCaption = @{Html(s"""<span class="heading-secondary">${messages("returns.disposal-details.caption")}</span>$title""")}
 
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
