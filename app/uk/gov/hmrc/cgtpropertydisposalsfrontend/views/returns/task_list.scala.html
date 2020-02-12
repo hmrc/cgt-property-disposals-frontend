@@ -34,7 +34,13 @@
 @propertyAddressState = @{ draftReturn.propertyAddress.fold[TaskListStatus](TaskListStatus.ToDo)(_ => TaskListStatus.Complete) }
 @disposalDetailsState = @{ draftReturn.disposalDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress,_ => TaskListStatus.Complete)) }
 @acquistionDetailsState = @{ draftReturn.acquisitionDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress,_ => TaskListStatus.Complete)) }
-@reliefDetailsState = @{ draftReturn.reliefDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress,_ => TaskListStatus.Complete)) }
+@reliefDetailsState = @{
+ (propertyAddressState, disposalDetailsState, acquistionDetailsState) match {
+     case (TaskListStatus.Complete,TaskListStatus.Complete,TaskListStatus.Complete) =>
+         draftReturn.reliefDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress,_ => TaskListStatus.Complete))
+     case _ => TaskListStatus.CannotStart
+  }
+}
 
 @mainTemplate(title = title, userType = request.userType) {
 
