@@ -632,7 +632,7 @@ class ReliefDetailsControllerSpec
 
       val otherReliefs = OtherReliefs("ReliefName", AmountInPence.fromPounds(13.34))
 
-      "show a form error" when {
+      "show a form error for amount" when {
 
         def test(data: (String, String)*)(expectedErrorMessageKey: String) = {
           inSequence {
@@ -662,6 +662,67 @@ class ReliefDetailsControllerSpec
               test(data: _*)(scenario.expectedErrorMessageKey)
             }
           }
+        }
+
+      }
+
+      "show a form error for name and amount" when {
+
+        def test(data: (String, String)*)(expectedErrorMessageKey: String*) = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithReliefDetailsAnswers(sample[CompleteReliefDetailsAnswers])._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(data),
+            messageFromMessageKey("otherReliefs.title"), { doc =>
+              expectedErrorMessageKey.toList match {
+                case Nil =>
+                case errorKey :: Nil =>
+                  doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+                    errorKey
+                  )
+                case errorKeys =>
+                  val errors =
+                    (1 to errorKeys.length).map(i =>
+                      doc.select(s"#error-summary-display > ul > li:nth-child($i) > a").text()
+                    )
+                  expectedErrorMessageKey
+                    .map(messageFromMessageKey(_))
+                    .foreach(message => errors should contain(message))
+              }
+            },
+            BAD_REQUEST
+          )
+        }
+
+        "nothing is submitted" in {
+          test("otherReliefs" -> "0")("otherReliefsName.error.required", "otherReliefsAmount.error.required")
+        }
+
+        "invalid characters are submitted for name and nothing submitted to amount" in {
+          test("otherReliefs" -> "0", "otherReliefsName" -> "£££££")(
+            "otherReliefsName.error.invalid",
+            "otherReliefsAmount.error.required"
+          )
+        }
+
+        "empty other reliefs name" in {
+          test("otherReliefs" -> "0", "otherReliefsName" -> "    ", "otherReliefsAmount" -> "£1")(
+            "otherReliefsName.error.required"
+          )
+        }
+
+        val otherReliefsNameTooLong =
+          "The other reliefs name is too long. The other reliefs name is too long. The other reliefs name is too long."
+
+        "other reliefs name too long " in {
+          test("otherReliefs" -> "0", "otherReliefsName" -> otherReliefsNameTooLong, "otherReliefsAmount" -> "£1")(
+            "otherReliefsName.error.tooLong"
+          )
         }
 
       }
