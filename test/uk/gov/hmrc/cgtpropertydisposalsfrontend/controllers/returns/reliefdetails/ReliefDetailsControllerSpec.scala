@@ -516,43 +516,7 @@ class ReliefDetailsControllerSpec
 
       }
 
-      "redirect to the other reliefs page" when {
-
-        "the user hasn't ever answered the relief details question " +
-          "and the draft return and session data has been successfully updated" in {
-
-          val incompleteReliefDetailsAnswers =
-            IncompleteReliefDetailsAnswers(Some(AmountInPence.fromPounds(1)), None, None)
-          val (session, journey) =
-            sessionWithReliefDetailsAnswers(incompleteReliefDetailsAnswers)
-
-          val newLettingsRelief = 2d
-          val updatedAnswers = incompleteReliefDetailsAnswers.copy(
-            lettingsRelief = Some(AmountInPence.fromPounds(newLettingsRelief))
-          )
-          val newDraftReturn = journey.draftReturn.copy(
-            reliefDetailsAnswers = Some(updatedAnswers)
-          )
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn)(Right(()))
-            mockStoreSession(
-              session.copy(journeyStatus = Some(
-                journey.copy(
-                  draftReturn = newDraftReturn
-                )
-              )
-              )
-            )(Right(()))
-          }
-
-          checkIsRedirect(
-            performAction(Seq("lettingsRelief" -> "0", "lettingsReliefValue" -> newLettingsRelief.toString)),
-            controllers.returns.reliefdetails.routes.ReliefDetailsController.checkYourAnswers()
-          )
-        }
+      "redirect to the cya page" when {
 
         "the user has not answered all of the relief details questions " +
           "and the draft return and session data has been successfully updated" in {
@@ -588,9 +552,6 @@ class ReliefDetailsControllerSpec
           )
 
         }
-      }
-
-      "redirect to the cya page" when {
 
         "the user has answered all of the relief details questions " +
           "and the draft return and session data has been successfully updated" in {
@@ -863,49 +824,7 @@ class ReliefDetailsControllerSpec
 
       }
 
-      "redirect to the check your answers page" when {
-
-        "the user hasn't ever answered the relief details question " +
-          "and the draft return and session data has been successfully updated" in {
-
-          val incompleteReliefDetailsAnswers =
-            IncompleteReliefDetailsAnswers(Some(AmountInPence.fromPounds(1)), Some(AmountInPence.fromPounds(2)), None)
-          val (session, journey) =
-            sessionWithReliefDetailsAnswers(incompleteReliefDetailsAnswers)
-
-          val newOtherReliefs = OtherReliefs("ReliefName", AmountInPence.fromPounds(3d))
-          val updatedAnswers = incompleteReliefDetailsAnswers.copy(
-            otherReliefs = Some(newOtherReliefs)
-          )
-          val newDraftReturn = journey.draftReturn.copy(
-            reliefDetailsAnswers = Some(updatedAnswers)
-          )
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn)(Right(()))
-            mockStoreSession(
-              session.copy(journeyStatus = Some(
-                journey.copy(
-                  draftReturn = newDraftReturn
-                )
-              )
-              )
-            )(Right(()))
-          }
-
-          checkIsRedirect(
-            performAction(
-              Seq(
-                "otherReliefs"       -> "0",
-                "otherReliefsName"   -> newOtherReliefs.name,
-                "otherReliefsAmount" -> newOtherReliefs.amount.inPounds().toString
-              )
-            ),
-            controllers.returns.reliefdetails.routes.ReliefDetailsController.checkYourAnswers()
-          )
-        }
+      "redirect to the cya page" when {
 
         "the user has not answered all of the relief details questions " +
           "and the draft return and session data has been successfully updated" in {
@@ -951,10 +870,6 @@ class ReliefDetailsControllerSpec
           )
 
         }
-
-      }
-
-      "redirect to the cya page" when {
 
         "the user has answered all of the relief details questions " +
           "and the draft return and session data has been successfully updated" in {
