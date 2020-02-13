@@ -36,6 +36,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationD
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.{CompleteIndividualTriageAnswers, IncompleteIndividualTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.OtherReliefs
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AcquisitionMethod, AssetType, CompletionDate, DisposalDate, DraftReturn, IndividualTriageAnswers, IndividualUserType, NumberOfProperties, OtherReliefsOption, ShareOfProperty}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanNotifyResponse
@@ -61,7 +62,8 @@ object Generators
     with AmountInPenceGen
     with AcquisitionDetailsGen
     with ReliefDetailsGen
-    with OtherReliefsOptionGen {
+    with OtherReliefsOptionGen
+    with OtherReliefsGen {
 
   implicit val booleanGen: Gen[Boolean] = Gen.oneOf(true, false)
 
@@ -291,6 +293,13 @@ trait AmountInPenceGen { this: GenUtils =>
 }
 
 trait OtherReliefsOptionGen { this: GenUtils =>
+
   implicit val otherReliefsOption: Gen[OtherReliefsOption] = gen[OtherReliefsOption]
+
+}
+
+trait OtherReliefsGen { this: GenUtils =>
+
+  implicit val otherReliefs: Gen[OtherReliefs] = gen[OtherReliefs]
 
 }

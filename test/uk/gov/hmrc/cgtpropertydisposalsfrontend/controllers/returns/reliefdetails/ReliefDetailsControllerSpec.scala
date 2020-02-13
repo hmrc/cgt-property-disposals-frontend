@@ -698,8 +698,6 @@ class ReliefDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like noPrivateResidentsReliefBehaviour(performAction)
-
       behave like noLettingsReliefBehaviour(performAction)
 
       val otherReliefs = OtherReliefs("ReliefName", AmountInPence.fromPounds(13.34))
@@ -775,8 +773,6 @@ class ReliefDetailsControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
-      behave like noPrivateResidentsReliefBehaviour(() => performAction(Seq.empty))
-
       behave like noLettingsReliefBehaviour(() => performAction(Seq.empty))
 
       val otherReliefs = OtherReliefs("ReliefName", AmountInPence.fromPounds(13.34))
@@ -840,8 +836,8 @@ class ReliefDetailsControllerSpec
             performAction(
               Seq(
                 "otherReliefs"       -> "0",
-                "otherReliefsName"   -> "ReliefName",
-                "otherReliefsAmount" -> newOtherReliefs.amount.toString
+                "otherReliefsName"   -> newOtherReliefs.name,
+                "otherReliefsAmount" -> newOtherReliefs.amount.inPounds().toString
               )
             )
           )
@@ -866,8 +862,8 @@ class ReliefDetailsControllerSpec
             performAction(
               Seq(
                 "otherReliefs"       -> "0",
-                "otherReliefsName"   -> "ReliefName",
-                "otherReliefsAmount" -> newOtherReliefs.amount.toString
+                "otherReliefsName"   -> newOtherReliefs.name,
+                "otherReliefsAmount" -> newOtherReliefs.amount.inPounds().toString
               )
             )
           )
@@ -876,21 +872,405 @@ class ReliefDetailsControllerSpec
 
       }
 
-      "redirect to the other reliefs page" when {}
+      "redirect to the check your answers page" when {
 
-      "redirect to the cya page" when {}
+        "the user hasn't ever answered the relief details question " +
+          "and the draft return and session data has been successfully updated" in {
 
-      "not update the draft return or the session data" when {}
+          val incompleteReliefDetailsAnswers =
+            IncompleteReliefDetailsAnswers(Some(AmountInPence.fromPounds(1)), Some(AmountInPence.fromPounds(2)), None)
+          val (session, journey) =
+            sessionWithReliefDetailsAnswers(incompleteReliefDetailsAnswers)
 
-      "accept submitted values with commas" in {}
+          val newOtherReliefs = OtherReliefs("ReliefName", AmountInPence.fromPounds(3d))
+          val updatedAnswers = incompleteReliefDetailsAnswers.copy(
+            otherReliefs = Some(newOtherReliefs)
+          )
+          val newDraftReturn = journey.draftReturn.copy(
+            reliefDetailsAnswers = Some(updatedAnswers)
+          )
 
-      "accept submitted values with pound signs" in {}
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(newDraftReturn)(Right(()))
+            mockStoreSession(
+              session.copy(journeyStatus = Some(
+                journey.copy(
+                  draftReturn = newDraftReturn
+                )
+              )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(
+              Seq(
+                "otherReliefs"       -> "0",
+                "otherReliefsName"   -> newOtherReliefs.name,
+                "otherReliefsAmount" -> newOtherReliefs.amount.inPounds().toString
+              )
+            ),
+            controllers.returns.reliefdetails.routes.ReliefDetailsController.checkYourAnswers()
+          )
+        }
+
+        "the user has not answered all of the relief details questions " +
+          "and the draft return and session data has been successfully updated" in {
+          val currentAnswers = sample[IncompleteReliefDetailsAnswers]
+            .copy(
+              privateResidentsRelief = Some(sample[AmountInPence]),
+              lettingsRelief         = Some(sample[AmountInPence]),
+              otherReliefs           = None
+            )
+          val (session, journey) = sessionWithReliefDetailsAnswers(currentAnswers)
+
+          val newOtherReliefs = OtherReliefs("ReliefName", AmountInPence.fromPounds(3d))
+          val updatedAnswers = currentAnswers.copy(
+            otherReliefs = Some(newOtherReliefs)
+          )
+          val newDraftReturn = journey.draftReturn.copy(
+            reliefDetailsAnswers = Some(updatedAnswers)
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(newDraftReturn)(Right(()))
+            mockStoreSession(
+              session.copy(journeyStatus = Some(
+                journey.copy(
+                  draftReturn = newDraftReturn
+                )
+              )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(
+              Seq(
+                "otherReliefs"       -> "0",
+                "otherReliefsName"   -> newOtherReliefs.name,
+                "otherReliefsAmount" -> newOtherReliefs.amount.inPounds().toString
+              )
+            ),
+            controllers.returns.reliefdetails.routes.ReliefDetailsController.checkYourAnswers()
+          )
+
+        }
+
+      }
+
+      "redirect to the cya page" when {
+
+        "the user has answered all of the relief details questions " +
+          "and the draft return and session data has been successfully updated" in {
+
+          val otherReliefs       = OtherReliefs("ReliefName1", AmountInPence.fromPounds(1d))
+          val currentAnswers     = sample[CompleteReliefDetailsAnswers].copy(otherReliefs = Some(otherReliefs))
+          val (session, journey) = sessionWithReliefDetailsAnswers(currentAnswers)
+
+          val newOtherReliefs = OtherReliefs("ReliefName2", AmountInPence.fromPounds(2d))
+          val newDraftReturn = journey.draftReturn.copy(
+            reliefDetailsAnswers = Some(
+              currentAnswers.copy(
+                otherReliefs = Some(newOtherReliefs)
+              )
+            )
+          )
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(newDraftReturn)(Right(()))
+            mockStoreSession(
+              session.copy(journeyStatus = Some(
+                journey.copy(
+                  draftReturn = newDraftReturn
+                )
+              )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(
+              Seq(
+                "otherReliefs"       -> "0",
+                "otherReliefsName"   -> newOtherReliefs.name,
+                "otherReliefsAmount" -> newOtherReliefs.amount.inPounds().toString
+              )
+            ),
+            controllers.returns.reliefdetails.routes.ReliefDetailsController.checkYourAnswers()
+          )
+
+        }
+
+      }
+
+      "not update the draft return or the session data" when {
+
+        "the answer given has not changed from a previous one" in {
+          val otherReliefs   = OtherReliefs("ReliefName1", AmountInPence.fromPounds(1d))
+          val currentAnswers = sample[CompleteReliefDetailsAnswers].copy(otherReliefs = Some(otherReliefs))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithReliefDetailsAnswers(currentAnswers)._1)
+          }
+
+          checkIsRedirect(
+            performAction(
+              Seq(
+                "otherReliefs"       -> "0",
+                "otherReliefsName"   -> otherReliefs.name,
+                "otherReliefsAmount" -> otherReliefs.amount.inPounds().toString
+              )
+            ),
+            controllers.returns.reliefdetails.routes.ReliefDetailsController.checkYourAnswers()
+          )
+
+        }
+
+      }
+
+      "accept submitted values with commas" in {
+
+        val otherReliefs = OtherReliefs("ReliefName1", AmountInPence.fromPounds(1000d))
+        val currentAnswers =
+          sample[CompleteReliefDetailsAnswers].copy(otherReliefs = Some(otherReliefs))
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionWithReliefDetailsAnswers(currentAnswers)._1)
+        }
+
+        checkIsRedirect(
+          performAction(
+            Seq(
+              "otherReliefs"       -> "0",
+              "otherReliefsName"   -> "ReliefName1",
+              "otherReliefsAmount" -> "1,000"
+            )
+          ),
+          controllers.returns.reliefdetails.routes.ReliefDetailsController.checkYourAnswers()
+        )
+
+      }
+
+      "accept submitted values with pound signs" in {
+
+        val otherReliefs = OtherReliefs("ReliefName1", AmountInPence.fromPounds(1000d))
+        val currentAnswers =
+          sample[CompleteReliefDetailsAnswers].copy(otherReliefs = Some(otherReliefs))
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionWithReliefDetailsAnswers(currentAnswers)._1)
+        }
+
+        checkIsRedirect(
+          performAction(
+            Seq(
+              "otherReliefs"       -> "0",
+              "otherReliefsName"   -> "ReliefName1",
+              "otherReliefsAmount" -> "£1,000"
+            )
+          ),
+          controllers.returns.reliefdetails.routes.ReliefDetailsController.checkYourAnswers()
+        )
+      }
 
     }
 
-    "handling requests to display the check your answers page" must {}
+    "handling requests to display the check your answers page" must {
 
-    "handling submitted answers to the check your answers page" must {}
+      def performAction(): Future[Result] = controller.checkYourAnswers()(FakeRequest())
+
+      val completeAnswers = CompleteReliefDetailsAnswers(
+        sample[AmountInPence],
+        sample[AmountInPence],
+        Some(sample[OtherReliefs])
+      )
+
+      val allQuestionsAnswered = IncompleteReliefDetailsAnswers(
+        Some(completeAnswers.privateResidentsRelief),
+        Some(completeAnswers.lettingsRelief),
+        completeAnswers.otherReliefs
+      )
+
+      behave like redirectToStartBehaviour(performAction)
+
+      "redirect to the private residents relief page" when {
+
+        "there are no relief details answers in session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithReliefDetailsAnswers(None)._1)
+          }
+
+          checkIsRedirect(performAction(), routes.ReliefDetailsController.privateResidentsRelief())
+        }
+
+        "there are relief details in session but no answer for the private residents relief question" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithReliefDetailsAnswers(
+                allQuestionsAnswered.copy(privateResidentsRelief = None)
+              )._1
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.ReliefDetailsController.privateResidentsRelief())
+
+        }
+
+      }
+
+      "redirect to the lettings relief page" when {
+
+        "the user has not answered that question" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithReliefDetailsAnswers(
+                allQuestionsAnswered.copy(lettingsRelief = None)
+              )._1
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.ReliefDetailsController.lettingsRelief())
+
+        }
+
+      }
+
+      "redirect to the other reliefs page" when {
+
+        "the user has not answered that question" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithReliefDetailsAnswers(
+                allQuestionsAnswered.copy(otherReliefs = None)
+              )._1
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.ReliefDetailsController.otherReliefs())
+
+        }
+      }
+
+      "show an error page" when {
+
+        "there is an error updating the draft return" in {
+          val (session, journey) = sessionWithReliefDetailsAnswers(allQuestionsAnswered)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              journey.draftReturn.copy(
+                reliefDetailsAnswers = Some(completeAnswers)
+              )
+            )(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
+        "there is an error updating the session" in {
+          val (session, journey) = sessionWithReliefDetailsAnswers(allQuestionsAnswered)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              journey.draftReturn.copy(
+                reliefDetailsAnswers = Some(completeAnswers)
+              )
+            )(Right(()))
+            mockStoreSession(
+              session.copy(
+                journeyStatus = Some(
+                  journey.copy(draftReturn = journey.draftReturn.copy(
+                    reliefDetailsAnswers = Some(completeAnswers)
+                  )
+                  )
+                )
+              )
+            )(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
+      }
+
+      "show the page" when {
+
+        "the user has just answered all the questions and all updates are successful" in {
+          val (session, journey) = sessionWithReliefDetailsAnswers(allQuestionsAnswered)
+          val newDraftReturn     = journey.draftReturn.copy(reliefDetailsAnswers = Some(completeAnswers))
+          val updatedJourney     = journey.copy(draftReturn = newDraftReturn)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(newDraftReturn)(Right(()))
+            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("reliefDetails.cya.title"), { doc =>
+              doc.select("#content > article > form").attr("action") shouldBe routes.ReliefDetailsController
+                .checkYourAnswersSubmit()
+                .url
+            }
+          )
+        }
+
+        "the user has already answered all the questions" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithReliefDetailsAnswers(completeAnswers)._1)
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("reliefDetails.cya.title"), { doc =>
+              doc.select("#content > article > form").attr("action") shouldBe routes.ReliefDetailsController
+                .checkYourAnswersSubmit()
+                .url
+            }
+          )
+        }
+
+      }
+
+    }
+
+    "handling submitted answers to the check your answers page" must {
+      def performAction(): Future[Result] = controller.checkYourAnswersSubmit()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+      "redirect to the task list page" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionWithReliefDetailsAnswers(sample[CompleteReliefDetailsAnswers])._1
+          )
+        }
+
+        checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+      }
+
+    }
 
     def noPrivateResidentsReliefBehaviour(performAction: () => Future[Result]): Unit =
       "redirect to the what was your private residents relief page" when {

@@ -330,7 +330,10 @@ class ReliefDetailsController @Inject() (
   }
 
   def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    Redirect(controllers.returns.routes.TaskListController.taskList())
+    withFillingOutReturnAndReliefDetailsAnswers(request) {
+      case _ =>
+        Redirect(controllers.returns.routes.TaskListController.taskList())
+    }
   }
 
 }
