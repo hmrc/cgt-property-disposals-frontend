@@ -66,7 +66,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
     errorKey = form.error(postcodeFilterKey).map(e => e.message),
     value = form.data.getOrElse(postcodeFilterKey, ""),
     hasErrors = form.error(postcodeFilterKey).nonEmpty,
-    autoComplete = AutoCompleteType.StreetAddress
+    autoComplete = AutoCompleteType.On
    )
    @textInput(
     fieldId = key,
