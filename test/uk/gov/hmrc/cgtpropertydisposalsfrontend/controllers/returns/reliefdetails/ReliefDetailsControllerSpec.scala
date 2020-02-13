@@ -164,7 +164,9 @@ class ReliefDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              sessionWithReliefDetailsAnswers(sample[CompleteReliefDetailsAnswers])._1
+              sessionWithReliefDetailsAnswers(
+                sample[CompleteReliefDetailsAnswers]
+              )._1
             )
           }
 
@@ -179,44 +181,14 @@ class ReliefDetailsControllerSpec
           )
         }
 
-        "nothing is submitted" in {
-          test()("privateResidentsRelief.error.required")
+        "the data is invalid" in {
+          amountOfMoneyErrorScenarios("privateResidentsReliefValue").foreach { scenario =>
+            withClue(s"For $scenario: ") {
+              val data = ("privateResidentsRelief" -> "0") :: scenario.formData
+              test(data: _*)(scenario.expectedErrorMessageKey)
+            }
+          }
         }
-
-        "invalid option is selected" in {
-          test("privateResidentsRelief" -> "2")("privateResidentsRelief.error.invalid")
-        }
-
-        "yes is selected but no private residents relief is submitted" in {
-          test("privateResidentsRelief" -> "0")("privateResidentsReliefValue.error.required")
-        }
-
-        "the private residents relief is less than zero" in {
-          test("privateResidentsRelief" -> "0", "privateResidentsReliefValue" -> "-1")(
-            "privateResidentsReliefValue.error.tooSmall"
-          )
-        }
-
-        "the private residents relief is greater than 50,000,000,000.00" in {
-          test("privateResidentsRelief" -> "0", "privateResidentsReliefValue" -> "50,000,000,001.00")(
-            "privateResidentsReliefValue.error.tooLarge"
-          )
-        }
-
-        "the private residents relief has more than two decimal places" in {
-          test("privateResidentsRelief" -> "0", "privateResidentsReliefValue" -> "1.234")(
-            "privateResidentsReliefValue.error.tooManyDecimals"
-          )
-        }
-
-        "the submitted value for private residents relief is not an integer" in {
-          test("privateResidentsRelief" -> "abc")("privateResidentsRelief.error.invalid")
-        }
-
-        "the submitted value for private residents relief is an integer but is not recognised" in {
-          test("privateResidentsRelief" -> "3")("privateResidentsRelief.error.invalid")
-        }
-
       }
 
       "show an error page" when {
