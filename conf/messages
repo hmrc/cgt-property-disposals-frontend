@@ -574,7 +574,7 @@ task-list.enter-property-address.link=Enter property address
 task-list.disposals-details.link=Enter sale or disposal details
 task-list.acquisition-details.link=Enter purchase or acquisition details
 task-list.save-and-come-back.link=Save and come back later
-
+task-list.relief-details.link=Enter reliefs
 
 returns.property-address.caption=Property address
 enterPostcode.returns.title=Find the address of the UK property you disposed of
