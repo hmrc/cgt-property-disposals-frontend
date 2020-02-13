@@ -1,0 +1,125 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import cats.instances.long._
+@import cats.syntax.eq._
+
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{LocalDateUtils, MoneyUtils}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
+
+@this(
+mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
+addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
+submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
+)
+
+@(answers: CompleteReliefDetailsAnswers)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+
+
+@title = @{messages("reliefDetails.cya.title")}
+
+@mainTemplate(title = title, userType = request.userType) {
+
+ @pageHeading(title, Some(messages("reliefDetails.caption")))
+
+ @cyaSection() {
+     @if(answers.privateResidentsRelief.value === 0L) {
+         @cyaRow(
+             messages("reliefDetails.cyaLabel.privateResidentsRelief"),
+             Html(messages("generic.no")),
+             Some(cyaChange(messages("reliefDetails.cyaChange.privateResidentsReliefValue"), routes.ReliefDetailsController.privateResidentsRelief().url))
+         )
+     } else {
+         @cyaRow(
+             messages("reliefDetails.cyaLabel.privateResidentsRelief"),
+             Html(messages("generic.yes")),
+             Some(cyaChange(messages("reliefDetails.cyaChange.privateResidentsRelief"), routes.ReliefDetailsController.privateResidentsRelief().url))
+         )
+         @cyaRow(
+             messages("reliefDetails.cyaChange.privateResidentsReliefValue"),
+             Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.privateResidentsRelief.inPounds())),
+             Some(cyaChange(messages("reliefDetails.cyaChange.privateResidentsRelief"), routes.ReliefDetailsController.privateResidentsRelief().url))
+         )
+     }
+
+     @if(answers.lettingsRelief.value === 0L) {
+         @cyaRow(
+             messages("reliefDetails.cyaLabel.lettingsRelief"),
+             Html(messages("generic.no")),
+             Some(cyaChange(messages("reliefDetails.cyaChange.lettingsReliefValue"), routes.ReliefDetailsController.lettingsRelief().url))
+         )
+     } else {
+         @cyaRow(
+             messages("reliefDetails.cyaLabel.lettingsRelief"),
+             Html(messages("generic.yes")),
+             Some(cyaChange(messages("reliefDetails.cyaChange.lettingsRelief"), routes.ReliefDetailsController.lettingsRelief().url))
+         )
+         @cyaRow(
+             messages("reliefDetails.cyaChange.lettingsReliefValue"),
+             Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.lettingsRelief.inPounds())),
+             Some(cyaChange(messages("reliefDetails.cyaChange.lettingsReliefValue"), routes.ReliefDetailsController.lettingsRelief().url))
+         )
+     }
+
+     @answers.otherReliefs.map {
+             case OtherReliefsOption.NoOtherReliefs => {
+                 @cyaRow(
+                 messages("reliefDetails.cyaLabel.otherReliefs"),
+                 Html(messages("generic.no")),
+                 Some(cyaChange(messages("reliefDetails.cyaChange.otherReliefs"), routes.ReliefDetailsController.otherReliefs().url))
+                 )
+             }
+
+             case OtherReliefsOption.OtherReliefs(name, amount) => {
+                 @cyaRow(
+                     messages("reliefDetails.cyaLabel.otherReliefs"),
+                     Html(messages("generic.yes")),
+                     Some(cyaChange(messages("reliefDetails.cyaChange.otherReliefs"), routes.ReliefDetailsController.otherReliefs().url))
+                 )
+
+                 @cyaRow(
+                     messages("reliefDetails.cyaChange.otherReliefsName"),
+                     Html(name),
+                     Some(cyaChange(messages("reliefDetails.cyaChange.otherReliefs"), routes.ReliefDetailsController.otherReliefs().url))
+                 )
+                 @cyaRow(
+                     messages("reliefDetails.cyaChange.otherReliefsAmount"),
+                     Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(amount.inPounds())),
+                     Some(cyaChange(messages("reliefDetails.cyaChange.otherReliefs"), routes.ReliefDetailsController.otherReliefs().url))
+                 )
+             }
+
+         }
+
+ }
+
+ @formWrapper(routes.ReliefDetailsController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
+ @submitButton(messages("button.confirmAndContinue"))
+ }
+
+ @returnToSummaryLink(displayReturnToSummaryLink = true)
+
+}

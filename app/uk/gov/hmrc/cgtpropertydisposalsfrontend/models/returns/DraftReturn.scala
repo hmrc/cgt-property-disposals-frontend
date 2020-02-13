@@ -29,7 +29,8 @@ final case class DraftReturn(
   triageAnswers: IndividualTriageAnswers,
   propertyAddress: Option[UkAddress],
   disposalDetailsAnswers: Option[DisposalDetailsAnswers],
-  acquisitionDetailsAnswers: Option[AcquisitionDetailsAnswers]
+  acquisitionDetailsAnswers: Option[AcquisitionDetailsAnswers],
+  reliefDetailsAnswers: Option[ReliefDetailsAnswers]
 )
 
 object DraftReturn {

@@ -20,6 +20,7 @@ import java.time.LocalDate
 
 import cats.data.EitherT
 import cats.instances.future._
+import cats.syntax.either._
 import cats.syntax.eq._
 import com.google.inject.Inject
 import play.api.Configuration
@@ -33,6 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.AcquisitionDetailsController._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.InnerOption
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
@@ -624,17 +626,19 @@ object AcquisitionDetailsController {
         else if (!otherAcquisitionMethodPredicate.test(s)) Left(FormError(otherAcquisitionMethodKey, "error.invalid"))
         else Right(AcquisitionMethod.Other(s))
 
+      val innerOption = InnerOption { data =>
+        FormUtils
+          .readValue(otherAcquisitionMethodKey, data, identity)
+          .flatMap(validateOtherAcquisitionMethod)
+          .leftMap(Seq(_))
+      }
+
       ConditionalRadioUtils.formatter(acquisitionMethodKey)(
         List(
           Right(AcquisitionMethod.Bought),
           Right(AcquisitionMethod.Inherited),
           Right(AcquisitionMethod.Gifted),
-          Left(
-            ConditionalRadioUtils.InnerOption(
-              otherAcquisitionMethodKey,
-              validateOtherAcquisitionMethod
-            )
-          )
+          Left(innerOption)
         )
       ) {
         case AcquisitionMethod.Bought    => Map(acquisitionMethodKey -> "0")

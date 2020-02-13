@@ -18,13 +18,14 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import java.util.Locale
 
-import cats.syntax.either._
-import cats.syntax.eq._
 import cats.instances.bigDecimal._
 import cats.instances.char._
+import cats.syntax.either._
+import cats.syntax.eq._
 import play.api.data.Forms.{mapping, of}
-import play.api.data.{Form, FormError}
 import play.api.data.format.Formatter
+import play.api.data.{Form, FormError}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.InnerOption
 
 import scala.util.Try
 
@@ -53,14 +54,8 @@ object MoneyUtils {
   def amountInPoundsFormatter(isTooSmall: BigDecimal => Boolean, isTooLarge: BigDecimal => Boolean): Formatter[Double] =
     new Formatter[Double] {
       override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Double] = {
-        val result = data
-          .get(key)
-          .map(cleanupAmountOfMoneyString)
-          .filter(_.nonEmpty)
-          .fold[Either[FormError, BigDecimal]](Left(FormError(key, "error.required"))) {
-            validateAmountOfMoney(key, isTooSmall, isTooLarge)(_)
-          }
-
+        val result =
+          FormUtils.readValue(key, data, identity).flatMap(validateAmountOfMoney(key, isTooSmall, isTooLarge)(_))
         result.bimap(Seq(_), _.toDouble)
       }
 
@@ -71,19 +66,23 @@ object MoneyUtils {
   // form for yes/no radio page with no mapping to £0 and yes expecting an amount of money
   // to be submitted
   def amountInPoundsYesNoForm(optionId: String, valueId: String): Form[Double] = {
+    val innerOption = InnerOption { data =>
+      FormUtils
+        .readValue(valueId, data, identity)
+        .flatMap(
+          validateAmountOfMoney(
+            valueId,
+            _ <= 0,
+            _ > maxAmountOfPounds
+          )(_)
+        )
+        .leftMap(Seq(_))
+    }
+
     val formatter =
       ConditionalRadioUtils.formatter(optionId)(
         List(
-          Left(
-            ConditionalRadioUtils.InnerOption(
-              valueId,
-              MoneyUtils.validateAmountOfMoney(
-                valueId,
-                _ <= 0,
-                _ > MoneyUtils.maxAmountOfPounds
-              )
-            )
-          ),
+          Left(innerOption),
           Right(BigDecimal(0))
         )
       ) { d =>

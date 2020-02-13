@@ -22,18 +22,23 @@
 
 @(label: String, href: String, state: TaskListStatus)(implicit messages: Messages)
 
-@className = @{
-    state match {
-        case InProgress => "incomplete"
-        case Complete => "complete"
-        case CannotStart => "cannot-start"
-        case ToDo => "to-do"
-    }
+@classNameWithIsLink = @{
+  state match {
+    case InProgress => "app-task-list__task-inprogress" -> true
+    case Complete => "app-task-list__task-completed complete" -> true
+    case CannotStart => "app-task-list__task-completed cannot-start" -> false
+    case ToDo => "app-task-list__task-completed to-do" -> true
+  }
 }
 
-<a class="app-task-list__task-name" href="@href">
-@label
-</a>
-<strong class="govuk-tag @className">
+@if(classNameWithIsLink._2) {
+  <a class="app-task-list__task-name" href="@href">
+  @label
+  </a>
+} else {
+  @label
+}
+
+<strong class="govuk-tag @classNameWithIsLink._1">
 @messages(s"task-list.$state")
 </strong>
