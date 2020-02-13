@@ -220,7 +220,7 @@ class ReliefDetailsController @Inject() (
             _.privateResidentsRelief,
             c => Some(c.privateResidentsRelief)
           ),
-          redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
+          redirectToIfNoRequiredPreviousAnswer = routes.ReliefDetailsController.privateResidentsRelief()
         )(
           updateAnswers = {
             case (p, answers) =>
@@ -274,7 +274,7 @@ class ReliefDetailsController @Inject() (
             _.lettingsRelief,
             c => Some(c.lettingsRelief)
           ),
-          redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
+          redirectToIfNoRequiredPreviousAnswer = routes.ReliefDetailsController.lettingsRelief()
         )(
           updateAnswers = {
             case (maybeOtherReliefs, answers) =>
