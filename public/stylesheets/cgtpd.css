@@ -84,12 +84,17 @@ input:focus, textarea:focus, select:focus, #global-header input:focus {
     width: 50%;
 }
 
-.autocomplete__wrapper, .custom-input-wrapper {
+.autocomplete__wrapper {
+    width: 75%;
+    min-width: 85px;
+}
+
+.custom-input-wrapper {
     width: 50%;
     min-width: 85px;
 }
 
-.autocomplete__wrapper, .custom-input-wrapper.small {
+.custom-input-wrapper.small {
     width: 33%;
     min-width: 85px;
 }
