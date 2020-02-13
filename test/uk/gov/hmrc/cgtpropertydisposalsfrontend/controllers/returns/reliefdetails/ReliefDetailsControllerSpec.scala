@@ -70,24 +70,15 @@ class ReliefDetailsControllerSpec
       }
     )
 
-  def fillingOutReturn(): FillingOutReturn =
-    sample[FillingOutReturn]
-      .copy(draftReturn = sample[DraftReturn].copy(
-        reliefDetailsAnswers = Some(sample[CompleteReliefDetailsAnswers])
-      )
-      )
-
   def sessionWithReliefDetailsAnswers(
     answers: Option[ReliefDetailsAnswers]
   ): (SessionData, FillingOutReturn) = {
-    val journey = fillingOutReturn()
-    SessionData.empty.copy(
-      journeyStatus = Some(
-        journey.copy(
-          draftReturn = journey.draftReturn.copy(reliefDetailsAnswers = answers)
-        )
+    val journey = sample[FillingOutReturn].copy(
+      draftReturn = sample[DraftReturn].copy(
+        reliefDetailsAnswers = answers
       )
-    ) -> journey
+    )
+    SessionData.empty.copy(journeyStatus = Some(journey)) -> journey
   }
 
   def sessionWithReliefDetailsAnswers(answers: ReliefDetailsAnswers): (SessionData, FillingOutReturn) =
@@ -1276,23 +1267,13 @@ class ReliefDetailsControllerSpec
       "redirect to the what was your private residents relief page" when {
 
         "there is no private residents relief " in {
-          val draftReturn = sample[DraftReturn].copy(
-            triageAnswers = sample[CompleteIndividualTriageAnswers],
-            reliefDetailsAnswers = Some(
-              IncompleteReliefDetailsAnswers(
-                None,
-                Some(sample[AmountInPence]),
-                Some(sample[OtherReliefsOption])
-              )
+          val sessionData = sessionWithReliefDetailsAnswers(
+            IncompleteReliefDetailsAnswers(
+              None,
+              Some(sample[AmountInPence]),
+              Some(sample[OtherReliefsOption])
             )
-          )
-
-          val sessionData = SessionData.empty.copy(journeyStatus = Some(
-            fillingOutReturn().copy(
-              draftReturn = draftReturn
-            )
-          )
-          )
+          )._1
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1310,23 +1291,13 @@ class ReliefDetailsControllerSpec
       "redirect to the what was your lettings relief page" when {
 
         "there is no lettings relief " in {
-          val draftReturn = sample[DraftReturn].copy(
-            triageAnswers = sample[CompleteIndividualTriageAnswers],
-            reliefDetailsAnswers = Some(
-              IncompleteReliefDetailsAnswers(
-                Some(sample[AmountInPence]),
-                None,
-                Some(sample[OtherReliefsOption])
-              )
+          val sessionData = sessionWithReliefDetailsAnswers(
+            IncompleteReliefDetailsAnswers(
+              Some(sample[AmountInPence]),
+              None,
+              Some(sample[OtherReliefsOption])
             )
-          )
-
-          val sessionData = SessionData.empty.copy(journeyStatus = Some(
-            fillingOutReturn().copy(
-              draftReturn = draftReturn
-            )
-          )
-          )
+          )._1
 
           inSequence {
             mockAuthWithNoRetrievals()
