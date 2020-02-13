@@ -38,14 +38,14 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{r
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => returnsRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.configs
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.{LocalDateOps, configs}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalMethod.{Gifted, Sold}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.{CompleteIndividualTriageAnswers, IncompleteIndividualTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, LocalDateUtils, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, LocalDateUtils, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
@@ -83,6 +83,9 @@ class CanTheyUseOurServiceController @Inject() (
 
   val earliestDisposalDateInclusive: LocalDate =
     config.underlying.get[LocalDate]("returns.earliest-disposal-date-inclusive").value
+
+  val taxYears: List[TaxYear] =
+    config.underlying.get[List[TaxYear]]("tax-years").value
 
   def whoIsIndividualRepresenting(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     displayIndividualTriagePage(
@@ -327,7 +330,7 @@ class CanTheyUseOurServiceController @Inject() (
     displayIndividualTriagePage(
       _.fold(_.assetType, c => Some(c.assetType)),
       routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty()
-    )(_ => disposalDateForm(LocalDateUtils.today()))(
+    )(_ => disposalDateForm(LocalDateUtils.today(), taxYears))(
       extractField = _.fold(_.disposalDate, c => Some(c.disposalDate)),
       page = {
         case (currentState, form, isDraftReturn) =>
@@ -344,7 +347,7 @@ class CanTheyUseOurServiceController @Inject() (
     handleIndividualTriagePageSubmit(
       _.fold(_.assetType, c => Some(c.assetType)),
       routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty()
-    )(_ => disposalDateForm(LocalDateUtils.today()))(
+    )(_ => disposalDateForm(LocalDateUtils.today(), taxYears))(
       page = {
         case (currentState, form, isDraftReturn) =>
           disposalDatePage(
@@ -486,6 +489,7 @@ class CanTheyUseOurServiceController @Inject() (
                   uuidGenerator.nextId(),
                   startingNewDraftReturn.subscribedDetails.cgtReference,
                   complete,
+                  None,
                   None,
                   None,
                   None,
@@ -683,20 +687,39 @@ object CanTheyUseOurServiceController {
     )(identity)(Some(_))
   )
 
-  def disposalDateForm(maximumDateInclusive: LocalDate): Form[DisposalDate] = Form(
-    mapping(
-      "" -> of(
-        LocalDateUtils.dateFormatter(
-          Some(maximumDateInclusive),
-          None,
-          "disposalDate-day",
-          "disposalDate-month",
-          "disposalDate-year",
-          "disposalDate"
-        )
+  def disposalDateForm(maximumDateInclusive: LocalDate, taxYears: List[TaxYear]): Form[DisposalDate] = {
+    val dateFormatter =
+      LocalDateUtils.dateFormatter(
+        Some(maximumDateInclusive),
+        None,
+        "disposalDate-day",
+        "disposalDate-month",
+        "disposalDate-year",
+        "disposalDate"
       )
-    )(DisposalDate(_))(d => Some(d.value))
-  )
+
+    val disposalDateFormatter: Formatter[DisposalDate] = new Formatter[DisposalDate] {
+      override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], DisposalDate] =
+        dateFormatter.bind(key, data).flatMap { d =>
+          Either
+            .fromOption(
+              taxYears.find(t => d < t.endDateExclusive && d >= (t.startDateInclusive)),
+              Seq(FormError("disposalDate", "error.tooFarInPast"))
+            )
+            .map(DisposalDate(d, _))
+        }
+
+      override def unbind(key: String, value: DisposalDate): Map[String, String] =
+        dateFormatter.unbind(key, value.value)
+
+    }
+
+    Form(
+      mapping(
+        "" -> of(disposalDateFormatter)
+      )(identity)(Some(_))
+    )
+  }
 
   def completionDateForm(disposalDate: DisposalDate, maximumDateInclusive: LocalDate): Form[CompletionDate] = Form(
     mapping(

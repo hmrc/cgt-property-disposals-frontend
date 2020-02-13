@@ -51,7 +51,7 @@
         @unitInput(
             fieldId = key,
             value = form.data.getOrElse(key, ""),
-            errorKey = form.error(key).map(e => e.message),
+            formError = form.error(key),
             hasErrors = form.error(key).nonEmpty,
             label = Html(title),
             labelAsHeading = true,

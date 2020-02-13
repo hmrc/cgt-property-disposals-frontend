@@ -15,7 +15,7 @@
  *@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
 
@@ -35,25 +35,25 @@
 )
 
 @(form: Form[Double], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
-@key = @{ "improvementCosts" }
-@valueKey = @{ "improvementCostsValue" }
-@title = @{messages("improvementCosts.title")}
+@key = @{ "previousYearsLosses" }
+@valueKey = @{ "previousYearsLossesValue" }
+@title = @{messages(s"$key.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @options = @{List(
     RadioOption(
         label = messages(s"generic.yes"),
         content = Some(unitInput(
-          fieldId = valueKey,
-          value = form.data.getOrElse(valueKey, ""),
-          label = Html(messages(s"$valueKey.label")),
+            fieldId = valueKey,
+            value = form.data.getOrElse(valueKey, ""),
+            label = Html(messages(s"$valueKey.label")),
             formError = form.error(valueKey),
-          hasErrors = form.error(valueKey).nonEmpty,
-          autoComplete = AutoCompleteType.On,
-          inputClass = Some("small"),
-          aspect = "left",
-          unit = "£",
-          assistiveText = messages("unit-input.assistive.pounds")
+            hasErrors = form.error(valueKey).nonEmpty,
+            autoComplete = AutoCompleteType.On,
+            inputClass = Some("small"),
+            aspect = "left",
+            unit = "£",
+            assistiveText = messages("unit-input.assistive.pounds")
         ))
     ),
     RadioOption(
@@ -78,9 +78,9 @@
         @errorSummary(form)
     }
 
-    @caption(messages("acquisitionDetails.caption"))
+    @caption(messages("exemptionAndLosses.caption"))
 
-    @formWrapper(routes.AcquisitionDetailsController.improvementCostsSubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(routes.ExemptionAndLossesController.previousYearsLossesSubmit(), 'novalidate -> "novalidate") {
         @radioGroupConditional(
             fieldId = key,
             label = pageHeading(title),
@@ -90,10 +90,12 @@
             options = options,
             helpText = Some(Html(messages(s"$key.helpText")))
         )
-        @details(messages(s"$key.details.summary"), Html(messages(s"$key.details.p1")))
+
+        <p>@Html(messages(s"$key.link", appConfig.cgtLossesUrl))</p>
 
         @submitButton(messages("button.continue"))
     }
+
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)
 

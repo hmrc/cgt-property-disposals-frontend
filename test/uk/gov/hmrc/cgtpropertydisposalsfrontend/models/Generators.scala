@@ -35,10 +35,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, 
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscribedUpdateDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.{CompleteIndividualTriageAnswers, IncompleteIndividualTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.OtherReliefs
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AcquisitionMethod, AssetType, CompletionDate, DisposalDate, DraftReturn, IndividualTriageAnswers, IndividualUserType, NumberOfProperties, OtherReliefsOption, ShareOfProperty}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AcquisitionMethod, AssetType, CompletionDate, DisposalDate, DraftReturn, IndividualTriageAnswers, IndividualUserType, NumberOfProperties, ReliefDetailsAnswers, ShareOfProperty}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanNotifyResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanServiceResponse.{UpscanNotifyEvent, UpscanResponse}
 
@@ -61,9 +62,9 @@ object Generators
     with DisposalDetailsGen
     with AmountInPenceGen
     with AcquisitionDetailsGen
-    with ReliefDetailsGen
-    with OtherReliefsOptionGen
-    with OtherReliefsGen {
+    with ReliefDetailsAnswersGen
+    with TaxYearGen
+    with ExemptionAndLossesAnswersGen {
 
   implicit val booleanGen: Gen[Boolean] = Gen.oneOf(true, false)
 
@@ -80,6 +81,8 @@ sealed trait GenUtils {
 
   // define our own Arbitrary instance for String to generate more legible strings
   implicit val stringArb: Arbitrary[String] = Arbitrary(Gen.alphaNumStr)
+
+  implicit val longArb: Arbitrary[Long] = Arbitrary(Gen.chooseNum(0L, 100L))
 
   implicit val localDateArb: Arbitrary[LocalDate] = Arbitrary(
     Gen.chooseNum(0, Int.MaxValue).map(LocalDate.ofEpochDay(_))
@@ -292,14 +295,35 @@ trait AmountInPenceGen { this: GenUtils =>
 
 }
 
-trait OtherReliefsOptionGen { this: GenUtils =>
+trait TaxYearGen { this: GenUtils =>
 
-  implicit val otherReliefsOption: Gen[OtherReliefsOption] = gen[OtherReliefsOption]
+  implicit val taxYearGen: Gen[TaxYear] = gen[TaxYear]
 
 }
 
-trait OtherReliefsGen { this: GenUtils =>
+trait ReliefDetailsAnswersGen extends LowerPriorityReliefDetailsAnswersGen { this: GenUtils =>
 
-  implicit val otherReliefs: Gen[OtherReliefs] = gen[OtherReliefs]
+  implicit val reliefDetailsAnswersGen: Gen[ReliefDetailsAnswers] =
+    gen[ReliefDetailsAnswers]
 
+  implicit val completeReliefDetailsAnswersGen: Gen[CompleteReliefDetailsAnswers] =
+    gen[CompleteReliefDetailsAnswers]
+
+  implicit val otherReliefsGen: Gen[OtherReliefs] = gen[OtherReliefs]
+}
+
+trait LowerPriorityReliefDetailsAnswersGen { this: GenUtils =>
+
+  implicit val incompleteReliefDetailsAnswersGen: Gen[IncompleteReliefDetailsAnswers] =
+    gen[IncompleteReliefDetailsAnswers]
+
+}
+
+trait ExemptionAndLossesAnswersGen { this: GenUtils =>
+
+  implicit val completeExemptionAndLossesAnswersGen: Gen[CompleteExemptionAndLossesAnswers] =
+    gen[CompleteExemptionAndLossesAnswers]
+
+  implicit val incompleteExemptionAndLossesAnswersGen: Gen[IncompleteExemptionAndLossesAnswers] =
+    gen[IncompleteExemptionAndLossesAnswers]
 }

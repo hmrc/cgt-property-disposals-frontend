@@ -41,6 +41,15 @@
      case _ => TaskListStatus.CannotStart
   }
 }
+@exemptionsAndLossesState = @{
+  reliefDetailsState match {
+   case TaskListStatus.Complete =>
+    draftReturn.exemptionAndLossesAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress,_ => TaskListStatus.Complete))
+   case _ =>
+      TaskListStatus.CannotStart
+  }
+}
+
 
 @mainTemplate(title = title, userType = request.userType) {
 
@@ -89,6 +98,11 @@
     <li id="reliefDetails" class="app-task-list__item">
      @taskLink(messages("task-list.relief-details.link"),
      returns.reliefdetails.routes.ReliefDetailsController.checkYourAnswers().url, reliefDetailsState)
+    </li>
+
+    <li id="exemptionsAndLosses" class="app-task-list__item">
+    @taskLink(messages("task-list.exemptions-and-losses.link"),
+     returns.exemptionandlosses.routes.ExemptionAndLossesController.checkYourAnswers().url, exemptionsAndLossesState)
     </li>
    </ul>
   </li>

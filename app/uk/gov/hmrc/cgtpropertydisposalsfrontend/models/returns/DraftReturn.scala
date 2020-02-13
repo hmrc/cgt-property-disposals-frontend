@@ -30,7 +30,8 @@ final case class DraftReturn(
   propertyAddress: Option[UkAddress],
   disposalDetailsAnswers: Option[DisposalDetailsAnswers],
   acquisitionDetailsAnswers: Option[AcquisitionDetailsAnswers],
-  reliefDetailsAnswers: Option[ReliefDetailsAnswers]
+  reliefDetailsAnswers: Option[ReliefDetailsAnswers],
+  exemptionAndLossesAnswers: Option[ExemptionAndLossesAnswers]
 )
 
 object DraftReturn {

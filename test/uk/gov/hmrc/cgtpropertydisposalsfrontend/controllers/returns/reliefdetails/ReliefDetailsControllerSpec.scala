@@ -31,9 +31,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServi
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.OtherReliefs
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.{NoOtherReliefs, OtherReliefs}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, OtherReliefsOption, ReliefDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, ExemptionAndLossesAnswers, OtherReliefsOption, ReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -70,18 +71,23 @@ class ReliefDetailsControllerSpec
     )
 
   def sessionWithReliefDetailsAnswers(
-    answers: Option[ReliefDetailsAnswers]
+    reliefDetailsAnswers: Option[ReliefDetailsAnswers],
+    exemptionAndLossesAnswers: Option[ExemptionAndLossesAnswers]
   ): (SessionData, FillingOutReturn) = {
     val journey = sample[FillingOutReturn].copy(
       draftReturn = sample[DraftReturn].copy(
-        reliefDetailsAnswers = answers
+        reliefDetailsAnswers      = reliefDetailsAnswers,
+        exemptionAndLossesAnswers = exemptionAndLossesAnswers
       )
     )
     SessionData.empty.copy(journeyStatus = Some(journey)) -> journey
   }
 
-  def sessionWithReliefDetailsAnswers(answers: ReliefDetailsAnswers): (SessionData, FillingOutReturn) =
-    sessionWithReliefDetailsAnswers(Some(answers))
+  def sessionWithReliefDetailsAnswers(
+    reliefDetailsAnswers: ReliefDetailsAnswers,
+    exemptionAndLossesAnswers: Option[ExemptionAndLossesAnswers] = None
+  ): (SessionData, FillingOutReturn) =
+    sessionWithReliefDetailsAnswers(Some(reliefDetailsAnswers), exemptionAndLossesAnswers)
 
   "ReliefDetailsController" when {
 
@@ -97,7 +103,7 @@ class ReliefDetailsControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionWithReliefDetailsAnswers(None)._1)
+            mockGetSession(sessionWithReliefDetailsAnswers(None, None)._1)
           }
 
           checkPageIsDisplayed(performAction(), messageFromMessageKey("privateResidentsRelief.title"))
@@ -232,11 +238,22 @@ class ReliefDetailsControllerSpec
 
       }
 
-      "redirect to the  lettings relief page" when {
+      "redirect to the cya page" when {
 
         "the user hasn't ever answered the relief details question " +
           "and the draft return and session data has been successfully updated" in {
           val (newPrivateResidentsRelief, newPrivateResidentsReliefValue) = "0" -> 10d
+          val oldDraftReturn = sample[DraftReturn].copy(
+            reliefDetailsAnswers = None
+          )
+          val newDraftReturn =
+            oldDraftReturn.copy(
+              reliefDetailsAnswers = Some(
+                IncompleteReliefDetailsAnswers.empty.copy(
+                  privateResidentsRelief = Some(AmountInPence.fromPounds(newPrivateResidentsReliefValue))
+                )
+              )
+            )
 
           testSuccessfulUpdatesAfterSubmit(
             performAction(
@@ -245,21 +262,25 @@ class ReliefDetailsControllerSpec
                 "privateResidentsReliefValue" -> newPrivateResidentsReliefValue.toString
               )
             ),
-            None,
-            IncompleteReliefDetailsAnswers.empty.copy(
-              privateResidentsRelief = Some(AmountInPence.fromPounds(newPrivateResidentsReliefValue))
-            )
+            oldDraftReturn,
+            newDraftReturn
           )
         }
 
         "the user has not answered all of the relief details questions " +
           "and the draft return and session data has been successfully updated" in {
-
-          val currentAnswers                                              = sample[IncompleteReliefDetailsAnswers].copy(privateResidentsRelief = None)
           val (newPrivateResidentsRelief, newPrivateResidentsReliefValue) = "0" -> 1d
-          val updatedAnswers = currentAnswers.copy(
-            privateResidentsRelief = Some(AmountInPence.fromPounds(newPrivateResidentsReliefValue))
-          )
+          val oldAnswers                                                  = sample[IncompleteReliefDetailsAnswers].copy(privateResidentsRelief = None)
+
+          val oldDraftReturn = sample[DraftReturn].copy(reliefDetailsAnswers = Some(oldAnswers))
+          val newDraftReturn =
+            oldDraftReturn.copy(
+              reliefDetailsAnswers = Some(
+                oldAnswers.copy(
+                  privateResidentsRelief = Some(AmountInPence.fromPounds(newPrivateResidentsReliefValue))
+                )
+              )
+            )
 
           testSuccessfulUpdatesAfterSubmit(
             performAction(
@@ -268,8 +289,8 @@ class ReliefDetailsControllerSpec
                 "privateResidentsReliefValue" -> newPrivateResidentsReliefValue.toString
               )
             ),
-            currentAnswers,
-            updatedAnswers
+            oldDraftReturn,
+            newDraftReturn
           )
         }
 
@@ -463,30 +484,44 @@ class ReliefDetailsControllerSpec
           val currentAnswers = sample[IncompleteReliefDetailsAnswers]
             .copy(privateResidentsRelief = Some(sample[AmountInPence]), lettingsRelief = None)
           val newLettingsRelief = 2d
-          val updatedAnswers = currentAnswers.copy(
-            lettingsRelief = Some(AmountInPence.fromPounds(newLettingsRelief))
-          )
+
+          val oldDraftReturn = sample[DraftReturn].copy(reliefDetailsAnswers = Some(currentAnswers))
+
+          val newDraftReturn =
+            oldDraftReturn.copy(
+              reliefDetailsAnswers = Some(
+                currentAnswers.copy(
+                  lettingsRelief = Some(AmountInPence.fromPounds(newLettingsRelief))
+                )
+              )
+            )
 
           testSuccessfulUpdatesAfterSubmit(
             performAction(Seq("lettingsRelief" -> "0", "lettingsReliefValue" -> newLettingsRelief.toString)),
-            currentAnswers,
-            updatedAnswers
+            oldDraftReturn,
+            newDraftReturn
           )
         }
 
         "the user has answered all of the relief details questions " +
           "and the draft return and session data has been successfully updated" in {
-          val currentAnswers = sample[CompleteReliefDetailsAnswers].copy(lettingsRelief = AmountInPence.fromPounds(1d))
-
+          val currentAnswers    = sample[CompleteReliefDetailsAnswers].copy(lettingsRelief = AmountInPence.fromPounds(1d))
           val newLettingsRelief = 2d
-          val updatedAnswers = currentAnswers.copy(
-            lettingsRelief = AmountInPence.fromPounds(newLettingsRelief)
-          )
+          val oldDraftReturn    = sample[DraftReturn].copy(reliefDetailsAnswers = Some(currentAnswers))
+
+          val newDraftReturn =
+            oldDraftReturn.copy(
+              reliefDetailsAnswers = Some(
+                currentAnswers.copy(
+                  lettingsRelief = AmountInPence.fromPounds(newLettingsRelief)
+                )
+              )
+            )
 
           testSuccessfulUpdatesAfterSubmit(
             performAction(Seq("lettingsRelief" -> "0", "lettingsReliefValue" -> newLettingsRelief.toString)),
-            currentAnswers,
-            updatedAnswers
+            oldDraftReturn,
+            newDraftReturn
           )
         }
       }
@@ -803,6 +838,12 @@ class ReliefDetailsControllerSpec
             otherReliefs = Some(newOtherReliefs)
           )
 
+          val oldDraftReturn = sample[DraftReturn].copy(
+            reliefDetailsAnswers      = Some(currentAnswers),
+            exemptionAndLossesAnswers = None
+          )
+          val newDraftReturn = oldDraftReturn.copy(reliefDetailsAnswers = Some(updatedAnswers))
+
           testSuccessfulUpdatesAfterSubmit(
             performAction(
               Seq(
@@ -811,8 +852,8 @@ class ReliefDetailsControllerSpec
                 "otherReliefsAmount" -> newOtherReliefs.amount.inPounds().toString
               )
             ),
-            currentAnswers,
-            updatedAnswers
+            oldDraftReturn,
+            newDraftReturn
           )
         }
 
@@ -826,6 +867,11 @@ class ReliefDetailsControllerSpec
             currentAnswers.copy(
               otherReliefs = Some(newOtherReliefs)
             )
+          val oldDraftReturn = sample[DraftReturn].copy(
+            reliefDetailsAnswers      = Some(currentAnswers),
+            exemptionAndLossesAnswers = None
+          )
+          val newDraftReturn = oldDraftReturn.copy(reliefDetailsAnswers = Some(updatedAnswers))
 
           testSuccessfulUpdatesAfterSubmit(
             performAction(
@@ -835,8 +881,8 @@ class ReliefDetailsControllerSpec
                 "otherReliefsAmount" -> newOtherReliefs.amount.inPounds().toString
               )
             ),
-            currentAnswers,
-            updatedAnswers
+            oldDraftReturn,
+            newDraftReturn
           )
         }
 
@@ -915,6 +961,123 @@ class ReliefDetailsControllerSpec
         )
       }
 
+      "update the exemption and losses answers correctly" when {
+
+        def test(
+          oldReliefAnswers: ReliefDetailsAnswers,
+          oldExemptionAndLossesAnswers: ExemptionAndLossesAnswers,
+          newReliefAnswers: ReliefDetailsAnswers,
+          newExemptionAndLossesAnswers: ExemptionAndLossesAnswers
+        )(formData: (String, String)*) = {
+          val oldDraftReturn = sample[DraftReturn].copy(
+            reliefDetailsAnswers      = Some(oldReliefAnswers),
+            exemptionAndLossesAnswers = Some(oldExemptionAndLossesAnswers)
+          )
+          val newDraftReturn = oldDraftReturn.copy(
+            reliefDetailsAnswers      = Some(newReliefAnswers),
+            exemptionAndLossesAnswers = Some(newExemptionAndLossesAnswers)
+          )
+
+          testSuccessfulUpdatesAfterSubmit(
+            performAction(formData),
+            oldDraftReturn,
+            newDraftReturn
+          )
+        }
+
+        "the user had entered in other relief details and has now chosen not " +
+          "to enter other reliefs and the exemption and losses section was incomplete" in {
+          val oldReliefsAnswers = sample[CompleteReliefDetailsAnswers].copy(
+            otherReliefs = Some(sample[OtherReliefs])
+          )
+          val oldExemptionAndLossesAnswers = sample[IncompleteExemptionAndLossesAnswers].copy(
+            taxableGainOrLoss = Some(sample[AmountInPence])
+          )
+          val newReliefAnswers = oldReliefsAnswers.copy(
+            otherReliefs = Some(NoOtherReliefs)
+          )
+          val newExemptionAndLossesAnswers = oldExemptionAndLossesAnswers.copy(
+            taxableGainOrLoss = None
+          )
+
+          test(oldReliefsAnswers, oldExemptionAndLossesAnswers, newReliefAnswers, newExemptionAndLossesAnswers)(
+            "otherReliefs" -> "1"
+          )
+        }
+
+        "the user had entered in other relief details and has now chosen not " +
+          "to enter other reliefs and the exemption and losses section was complete" in {
+          val oldReliefsAnswers = sample[CompleteReliefDetailsAnswers].copy(
+            otherReliefs = Some(sample[OtherReliefs])
+          )
+          val oldExemptionAndLossesAnswers = sample[CompleteExemptionAndLossesAnswers].copy(
+            taxableGainOrLoss = Some(sample[AmountInPence])
+          )
+          val newReliefAnswers = oldReliefsAnswers.copy(
+            otherReliefs = Some(NoOtherReliefs)
+          )
+          val newExemptionAndLossesAnswers = oldExemptionAndLossesAnswers.copy(
+            taxableGainOrLoss = None
+          )
+          test(oldReliefsAnswers, oldExemptionAndLossesAnswers, newReliefAnswers, newExemptionAndLossesAnswers)(
+            "otherReliefs" -> "1"
+          )
+
+        }
+
+        "the user had not entered in other relief details and has now chosen " +
+          "to enter other reliefs and the exemption and losses section was incomplete" in {
+          val otherRelief = OtherReliefs("name", AmountInPence(1L))
+
+          val oldReliefsAnswers = sample[CompleteReliefDetailsAnswers].copy(
+            otherReliefs = Some(NoOtherReliefs)
+          )
+          val oldExemptionAndLossesAnswers = sample[IncompleteExemptionAndLossesAnswers].copy(
+            taxableGainOrLoss = Some(sample[AmountInPence])
+          )
+          val newReliefAnswers = oldReliefsAnswers.copy(
+            otherReliefs = Some(otherRelief)
+          )
+          val newExemptionAndLossesAnswers = oldExemptionAndLossesAnswers.copy(
+            taxableGainOrLoss = None
+          )
+
+          test(oldReliefsAnswers, oldExemptionAndLossesAnswers, newReliefAnswers, newExemptionAndLossesAnswers)(
+            "otherReliefs"       -> "0",
+            "otherReliefsName"   -> otherRelief.name,
+            "otherReliefsAmount" -> otherRelief.amount.inPounds().toString
+          )
+        }
+
+        "the user had not entered in other relief details and has now chosen " +
+          "to enter other reliefs and the exemption and losses section was complete" in {
+          val otherRelief = OtherReliefs("name", AmountInPence(1L))
+
+          val oldReliefsAnswers = sample[CompleteReliefDetailsAnswers].copy(
+            otherReliefs = Some(NoOtherReliefs)
+          )
+          val oldExemptionAndLossesAnswers = sample[CompleteExemptionAndLossesAnswers].copy(
+            taxableGainOrLoss = Some(sample[AmountInPence])
+          )
+          val newReliefAnswers = oldReliefsAnswers.copy(
+            otherReliefs = Some(otherRelief)
+          )
+          val newExemptionAndLossesAnswers = IncompleteExemptionAndLossesAnswers(
+            Some(oldExemptionAndLossesAnswers.inYearLosses),
+            Some(oldExemptionAndLossesAnswers.previousYearsLosses),
+            Some(oldExemptionAndLossesAnswers.annualExemptAmount),
+            None
+          )
+
+          test(oldReliefsAnswers, oldExemptionAndLossesAnswers, newReliefAnswers, newExemptionAndLossesAnswers)(
+            "otherReliefs"       -> "0",
+            "otherReliefsName"   -> otherRelief.name,
+            "otherReliefsAmount" -> otherRelief.amount.inPounds().toString
+          )
+        }
+
+      }
+
     }
 
     "handling requests to display the check your answers page" must {
@@ -940,7 +1103,7 @@ class ReliefDetailsControllerSpec
         "there are no relief details answers in session" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionWithReliefDetailsAnswers(None)._1)
+            mockGetSession(sessionWithReliefDetailsAnswers(None, None)._1)
           }
 
           checkIsRedirect(performAction(), routes.ReliefDetailsController.privateResidentsRelief())
@@ -1156,31 +1319,24 @@ class ReliefDetailsControllerSpec
 
   def testSuccessfulUpdatesAfterSubmit(
     result: => Future[Result],
-    oldAnswers: Option[ReliefDetailsAnswers],
-    newAnswers: ReliefDetailsAnswers
+    oldDraftReturn: DraftReturn,
+    newDraftReturn: DraftReturn
   ): Unit = {
-    val (session, journey) = sessionWithReliefDetailsAnswers(oldAnswers)
-    val updatedDraftReturn =
-      journey.draftReturn.copy(reliefDetailsAnswers = Some(newAnswers))
+    val journey = sample[FillingOutReturn].copy(draftReturn = oldDraftReturn)
+    val session = SessionData.empty.copy(journeyStatus      = Some(journey))
 
     inSequence {
       mockAuthWithNoRetrievals()
       mockGetSession(session)
-      mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+      mockStoreDraftReturn(newDraftReturn)(Right(()))
       mockStoreSession(
         session.copy(
-          journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn))
+          journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))
         )
       )(Right(()))
     }
 
     checkIsRedirect(result, routes.ReliefDetailsController.checkYourAnswers())
   }
-
-  def testSuccessfulUpdatesAfterSubmit(
-    result: => Future[Result],
-    oldAnswers: ReliefDetailsAnswers,
-    newAnswers: ReliefDetailsAnswers
-  ): Unit = testSuccessfulUpdatesAfterSubmit(result, Some(oldAnswers), newAnswers)
 
 }

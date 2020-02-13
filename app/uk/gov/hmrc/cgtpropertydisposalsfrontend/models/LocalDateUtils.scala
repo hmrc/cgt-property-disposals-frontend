@@ -96,4 +96,11 @@ object LocalDateUtils {
 
   def govDisplayFormat(date: LocalDate)(implicit messages: Messages): String =
     s"""${date.getDayOfMonth()} ${messages(s"date.${date.getMonthValue()}")} ${date.getYear()}"""
+
+  implicit val localDateOrdering: Ordering[LocalDate] = _ compareTo _
+
+  implicit class LocalDateOps(private val localDate: LocalDate) extends AnyVal with Ordered[LocalDate] {
+    override def compare(that: LocalDate): Int = localDateOrdering.compare(localDate, that)
+  }
+
 }

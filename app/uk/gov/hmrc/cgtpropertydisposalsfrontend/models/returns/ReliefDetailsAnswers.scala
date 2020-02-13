@@ -41,8 +41,6 @@ object ReliefDetailsAnswers {
     otherReliefs: Option[OtherReliefsOption]
   ) extends ReliefDetailsAnswers
 
-  object CompleteReliefDetailsAnswers {}
-
   implicit class ReliefDetailsAnswersOps(private val a: ReliefDetailsAnswers) extends AnyVal {
 
     def fold[A](
