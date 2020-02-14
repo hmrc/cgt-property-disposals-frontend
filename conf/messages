@@ -40,7 +40,7 @@ landingPage.title=Report and pay Capital Gains Tax on UK property
 landingPage.intro.p1=You may have to pay <a href="{0}">Capital Gains Tax</a> if you make a profit (‘gain’) when you sell (or ‘<a href="{0}">dispose of</a>’) property that’s not your home. For example, buy-to-let properties, land or inherited property.
 landingPage.intro.p2=In most cases you do not need to pay the tax when you <a href="{0}">sell your main home</a>.
 landingPage.createAccount.h2=Create a Capital Gains Tax on UK property account
-landingPage.createAccount.p1=Before 6 April 2020, you'll be able sign in to this service using your Government Gateway user ID and password to:
+landingPage.createAccount.p1=Before 6 April 2020, you’ll be able sign in to this service using your Government Gateway user ID and password to:
 landingPage.createAccount.bullet1=create a Capital Gains Tax on UK property account
 landingPage.createAccount.bullet2=update your contact details in your Capital Gains Tax on UK property account once you have created one
 landingPage.createAccount.p2=If you do not have a Government Gateway user ID, you can create one.
@@ -50,7 +50,7 @@ landingPage.warning=From 6 April 2020, you will have 30 days after the property 
 landingPage.howTo.p1=From 6 April 2020, you will be able to use this service to:
 landingPage.howTo.list1.bullet1=report and pay any Capital Gains Tax due on UK property sales or disposals made from 6 April 2020
 landingPage.howTo.list1.bullet2=view and amend your Capital Gains Tax on UK property returns made from 6 April 2020
-landingPage.howTo.p2=If you’re a non-resident, you'll also be able to use this service from 6 April 2020 to report the sale or disposal and pay the tax on:
+landingPage.howTo.p2=If you’re a non-resident, you’ll also be able to use this service from 6 April 2020 to report the sale or disposal and pay the tax on:
 landingPage.howTo.list2.bullet1=the sale or disposal of residential and non-residential UK property or land
 landingPage.howTo.list2.bullet2=indirect disposals
 landingPage.startButton=Create account or sign in
