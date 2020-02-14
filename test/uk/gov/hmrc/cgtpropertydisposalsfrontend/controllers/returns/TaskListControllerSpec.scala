@@ -95,7 +95,7 @@ class TaskListControllerSpec
           messageFromMessageKey("service.title"), { doc =>
             sectionsStatus match {
               case TaskListStatus.CannotStart =>
-                doc.select(s"li#$sectionLinkId > div").text shouldBe sectionLinkText
+                doc.select(s"li#$sectionLinkId > span").text shouldBe sectionLinkText
 
               case _ =>
                 doc.select(s"li#$sectionLinkId > a").text         shouldBe sectionLinkText
