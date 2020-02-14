@@ -894,7 +894,7 @@ class ExemptionAndLossesControllerSpec
         def test(data: (String, String)*)(expectedErrorKey: String): Unit =
           testFormError(data: _*)(
             expectedErrorKey,
-            MoneyUtils.formatAmountOfMoneyWithPoundSign(disposalDate.taxYear.annualExemptAmountGeneral.inPounds())
+            MoneyUtils.formatAmountOfMoneyWithoutPoundSign(disposalDate.taxYear.annualExemptAmountGeneral.inPounds())
           )("annualExemptAmount.title")(performAction, currentSession)
 
         "the amount of money is invalid" in {
