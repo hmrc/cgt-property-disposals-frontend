@@ -1,5 +1,12 @@
 GET    /tax-amount/estimated-income       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnController.estimatedIncome()
 POST   /tax-amount/estimated-income       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnController.estimatedIncomeSubmit()
 
+GET    /tax-amount/personal-allowance     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnController.personalAllowance()
+POST   /tax-amount/personal-allowance     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnController.personalAllowanceSubmit()
+
+GET    /tax-amount/estimates              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnController.hasEstimatedDetails()
+POST   /tax-amount/estimates              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnController.hasEstimatedDetailsSubmit()
+
 GET    /tax-amount/check-answers          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnController.checkYourAnswers()
 POST   /tax-amount/check-answers          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnController.checkYourAnswersSubmit()
+

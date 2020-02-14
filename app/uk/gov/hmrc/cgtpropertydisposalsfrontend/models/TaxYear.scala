@@ -43,7 +43,8 @@ object TaxYear {
         LocalDate.of(startYear, 4, 6),
         LocalDate.of(startYear + 1, 4, 6),
         AmountInPence.fromPounds(annualExemptAmountGeneral),
-        AmountInPence.fromPounds(annualExemptAmountNonVulnerableTrust)
+        AmountInPence.fromPounds(annualExemptAmountNonVulnerableTrust),
+        AmountInPence.fromPounds(personalAllowance)
       )
 
   }

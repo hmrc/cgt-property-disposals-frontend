@@ -25,16 +25,20 @@ sealed trait YearToDateLiabilityAnswers extends Product with Serializable
 object YearToDateLiabilityAnswers {
 
   final case class IncompleteYearToDateLiabilityAnswers(
-    estimatedIncome: Option[AmountInPence]
+    estimatedIncome: Option[AmountInPence],
+    personalAllowance: Option[AmountInPence],
+    hasEstimatedDetails: Option[Boolean]
   ) extends YearToDateLiabilityAnswers
 
   object IncompleteYearToDateLiabilityAnswers {
     val empty: IncompleteYearToDateLiabilityAnswers =
-      IncompleteYearToDateLiabilityAnswers(None)
+      IncompleteYearToDateLiabilityAnswers(None, None, None)
   }
 
   final case class CompleteYearToDateLiabilityAnswers(
-    estimatedIncome: AmountInPence
+    estimatedIncome: AmountInPence,
+    personalAllowance: Option[AmountInPence],
+    hasEstimatedDetails: Boolean
   ) extends YearToDateLiabilityAnswers
 
   implicit class YTDLiabilityAnswersOps(private val a: YearToDateLiabilityAnswers) extends AnyVal {

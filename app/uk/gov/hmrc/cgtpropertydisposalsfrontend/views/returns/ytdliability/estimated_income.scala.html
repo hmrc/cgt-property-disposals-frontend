@@ -59,7 +59,7 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
             hasErrors = form.error(key).nonEmpty,
             label = Html(title),
             labelAsHeading = true,
-            helpText = Some(Html(messages(s"$key.helpText"))),
+            helpText = Some(Html(messages(s"$key.helpText", taxYearStartYear, taxYearEndYear))),
             autoComplete = AutoCompleteType.On,
             inputClass = Some("small"),
             aspect = "left",

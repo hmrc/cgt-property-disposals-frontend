@@ -658,7 +658,7 @@ improvementCosts.error.required=Select yes if you want to claim any improvement 
 improvementCosts.error.invalid=Select yes if you want to claim any improvement costs
 improvementCostsValue.error.invalid=The amount of money must only include numbers, for example 160,000 or 23,040.50
 improvementCostsValue.error.tooSmall=The amount of money must be a number between £1 and £50,000,000,000.00
-improvementCostsValue.error.tooLarge=The amount of money must be a number betw een £1 and £50,000,000,000.00
+improvementCostsValue.error.tooLarge=The amount of money must be a number between £1 and £50,000,000,000.00
 improvementCostsValue.error.tooManyDecimals=The amount of money must be 2 decimal places or less, for example £160,000 or £23,040.50
 improvementCostsValue.error.required=Enter how much you paid for improvements of your share of the property
 improvementCostsValue.label=Amount spent on improvements
@@ -671,7 +671,7 @@ acquisitionFees.error.required=Select yes if you have extra costs
 acquisitionFeesValue.label=Amount of additional costs
 acquisitionFeesValue.error.required=Enter how much you paid in additional purchase or acquisition costs
 acquisitionFeesValue.error.invalid=Additional purchase or acquisition costs must only include numbers, for example 1,480 or 900.50
-acquisitionFeesValue.error.tooSmall=Purchase or acquisition costs must be 50,000,000,000.00 or less
+acquisitionFeesValue.error.tooSmall=Purchase or acquisition costs must more than 0
 acquisitionFeesValue.error.tooLarge=Purchase or acquisition costs must be 50,000,000,000.00 or less
 acquisitionFeesValue.error.tooManyDecimals=Purchase or acquisition costs must be 2 decimal places or less, for example 1,480 or 900.50
 
@@ -791,7 +791,7 @@ taxableGainOrLoss.gain.label=Yes, I made a taxable gain
 taxableGain.label=Amount of taxable gain
 taxableGain.error.required=Enter the amount of the gain you made on the property disposal
 taxableGain.error.invalid=Amount of the gain or loss must be a number and must have 2 decimal places or less, for example 33.33
-taxableGain.error.tooSmall=The amount of the gain or loss must be a number more than 0., or select no taxable gain, no net loss
+taxableGain.error.tooSmall=The amount of the gain or loss must be a number more than 0, or select no taxable gain, no net loss
 taxableGain.error.tooLarge=Gain or loss must be a number that is 50,000,000,000.00 or less
 taxableGain.error.tooManyDecimals=Amount of the gain or loss must have 2 decimal places or less, for example 33.33 
 
@@ -799,7 +799,7 @@ taxableGainOrLoss.loss.label=No, I made a net loss
 netLoss.label=Amount of net loss
 netLoss.error.required=Enter the amount of loss you made on the property disposal
 netLoss.error.invalid=Amount of the gain or loss must be a number and must have 2 decimal places or less, for example 33.33
-netLoss.error.tooSmall=	The amount of the gain or loss must be a number more than 0., or select no taxable gain, no net loss
+netLoss.error.tooSmall=	The amount of the gain or loss must be a number more than 0, or select no taxable gain, no net loss
 netLoss.error.tooLarge=Gain or loss must be a number that is 50,000,000,000.00 or less
 netLoss.error.tooManyDecimals=Amount of the gain or loss must have 2 decimal places or less, for example 33.33 
 

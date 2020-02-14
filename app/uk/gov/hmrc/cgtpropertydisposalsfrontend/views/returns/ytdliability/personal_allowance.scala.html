@@ -1,18 +1,18 @@
 @*
-* Copyright 2020 HM Revenue & Customs
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*@
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
@@ -37,6 +37,7 @@
 @key = @{ "personalAllowance" }
 @taxYearStartYear = @{disposalDate.taxYear.startDateInclusive.getYear.toString}
 @taxYearEndYear = @{disposalDate.taxYear.endDateExclusive.getYear.toString}
+@personalAllowance = @{ MoneyUtils.formatAmountOfMoneyWithPoundSign(disposalDate.taxYear.personalAllowance.inPounds())}
 
 @title = @{messages(s"$key.title", taxYearStartYear, taxYearEndYear)}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
@@ -51,7 +52,7 @@
 
     @caption(messages("ytdLiability.caption"))
 
-    @formWrapper(routes.YearToDateLiabilityFirstReturnController.estimatedIncomeSubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(routes.YearToDateLiabilityFirstReturnController.personalAllowanceSubmit(), 'novalidate -> "novalidate") {
         @unitInput(
             fieldId = key,
             value = form.data.getOrElse(key, ""),
@@ -59,7 +60,7 @@
             hasErrors = form.error(key).nonEmpty,
             label = Html(title),
             labelAsHeading = true,
-            helpText = Some(Html(messages(s"$key.helpText", taxYearStartYear, taxYearEndYear, MoneyUtils.formatAmountOfMoneyWithPoundSign(disposalDate.taxYear.personalAllowance.inPounds())))),
+            helpText = Some(Html(messages(s"$key.helpText", taxYearStartYear, taxYearEndYear, personalAllowance))),
             autoComplete = AutoCompleteType.On,
             inputClass = Some("small"),
             aspect = "left",
@@ -67,7 +68,7 @@
             assistiveText = messages("unit-input.assistive.pounds")
         )
 
-        <p>@Html(messages(s"$key.link", viewConfig.exchangeDateHelp))</p>
+        <p>@Html(messages(s"$key.link", viewConfig.personalAllowanceUrl))</p>
         @submitButton(messages("button.continue"))
     }
 
