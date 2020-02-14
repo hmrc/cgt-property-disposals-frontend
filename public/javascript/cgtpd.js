@@ -17,8 +17,7 @@
 
   var exclude = '[data-ga-event="false"]';
   var GA_ENABLED = typeof window.ga === 'function';
-  // wrapper function to ensure ga is
-  // available in the environment
+
   function sendToGA() {
     if (GA_ENABLED) {
       window.ga.apply(null, arguments)
@@ -57,8 +56,6 @@
   }
 
   function sendErrorToGA(link) {
-    // Google Analytics event reporting, using template:
-    // ga('send', 'event', [eventCategory], [eventAction], [eventLabel], [eventValue], [fieldsObject])
     sendToGA('send', 'event', 'error', labelText(link), textContent(link))
   }
 
@@ -101,7 +98,7 @@
       var checkedRadios = Array.prototype.slice.call(radios).filter(function (r) { return r.checked });
       var checkedCheckboxes = Array.prototype.slice.call(checkboxes).filter(function (c) { return c.checked });
       var totalEvents = checkedRadios.length + checkedCheckboxes.length;
-      // only intercept the submission if there are checked items to report on and we have GA
+
       if (totalEvents > 0 && GA_ENABLED) {
         event.preventDefault();
         var r = 0;
@@ -159,13 +156,11 @@
   if (countryEl) {
     openregisterLocationPicker({
       selectElement: countryEl,
+      name: 'countryCode-name',
       url: '/capital-gains-tax-uk-property/assets/location-autocomplete-graph.json',
       defaultValue: ''
     });
-    // patch to ensure clearing the pseudo input also clears the select element
-    // this is an active issue on accessible-autocomplete
-    // https://github.com/alphagov/accessible-autocomplete/issues/260
-    // when it is resolved we can remove this code
+
     var wrapper = document.querySelector('.country-code-wrapper');
 
     function resetSelectIfEmpty(e) {

@@ -37,52 +37,36 @@ unit-input.assistive.percent=do not enter the percent sign
 error.summary.heading=There’s a problem
 
 landingPage.title=Report and pay Capital Gains Tax on UK property
-landingPage.intro.p1=You may have to pay <a href="{0}">Capital Gains Tax</a> if you make a profit (‘gain’) when you sell (or ‘<a href="{0}">dispose of</a>’) property that’s not your home, for example:
-landingPage.intro.bullet1=buy-to-let properties
-landingPage.intro.bullet2=land
-landingPage.intro.bullet3=inherited property
-landingPage.intro.p2=In most cases you do not need to the tax when you <a href="{0}">sell your main home</a>.
-landingPage.warning=You have 30 days after the property completion date to report and pay Capital Gains Tax on your UK property disposals.
-landingPage.h2.1=How to report and pay the tax
-landingPage.p1=You can use this service to:
-landingPage.list1.bullet1=work out if you made a gain on the sale or disposal of UK residential property or land
-landingPage.list1.bullet2=get an estimate of the amount of tax due
-landingPage.list1.bullet3=report the disposal by the 30-day deadline
-landingPage.list1.bullet4=pay any tax you might owe for that disposal
-landingPage.list1.bullet5=create a Capital Gains Tax on UK property account
-landingPage.list1.bullet6=view and amend your previous and current returns
-landingPage.h2.2=If you’re a non-resident
-landingPage.p2=You can use this service to report the disposal and pay the tax on:
-landingPage.list2.bullet1=the sale or disposal of residential and non-residential UK property or land
-landingPage.list2.bullet2=indirect disposals
-landingPage.p3=You must report the disposal by the 30-day deadline, even if:
-landingPage.list3.bullet1=you’ve no tax to pay
-landingPage.list3.bullet2=you’ve made a loss
-landingPage.signIn=Sign in
-landingPage.signIn.p1=<a href="{0}">Sign in</a> if you already have an account.
-landingPage.beforeYouStart=Before you start
-landingPage.beforeYouStart.p1=You’ll need a <a href="{0}">Government Gateway</a> user ID and password to use this service. If you do not have a user ID, you can create one.
-landingPage.beforeYouStart.p2=You can <a href="{0}">contact HMRC</a> if you need help accessing the service.
-landingPage.whatYoullNeed=What you’ll need to complete a return
-landingPage.whatYoullNeed.p1=You’ll need to provide the:
-landingPage.whatYoullNeed.bullet1=property’s address and postcode
-landingPage.whatYoullNeed.bullet2=date you got the property
-landingPage.whatYoullNeed.bullet3=date you exchanged contracts when you were selling or disposing of the property
-landingPage.whatYoullNeed.bullet4=date you stopped being the property’s owner (completion date)
-landingPage.whatYoullNeed.bullet5=property’s value when you got it, and when you disposed of it
-landingPage.whatYoullNeed.bullet6=costs of buying, selling or making improvements to the property
-landingPage.whatYoullNeed.bullet7=details of any tax reliefs, allowances or exemptions you’re entitled to claim
-landingPage.whatYoullNeed.bullet8=property type, if you’re a non-resident
-landingPage.ifYoureAnAgent=If you’re an agent
-landingPage.ifYoureAnAgent.p1=Go to your <a href="{0}">agent services account</a> to access this service. If you do not already have one, you can <a href="{1}">apply for an agent services account</a>.
-landingPage.ifYoureRepresentingATrust=If you’re representing a trust
-landingPage.ifYoureRepresentingATrust.p1=The trust will need to be <a href="{0}">registered</a>. You will need the trust’s Self Assessment Unique Taxpayer Reference.
+landingPage.intro.p1=You may have to pay <a href="{0}">Capital Gains Tax</a> if you make a profit (‘gain’) when you sell (or ‘<a href="{0}">dispose of</a>’) property that’s not your home. For example, buy-to-let properties, land or inherited property.
+landingPage.intro.p2=In most cases you do not need to pay the tax when you <a href="{0}">sell your main home</a>.
+landingPage.createAccount.h2=Create a Capital Gains Tax on UK property account
+landingPage.createAccount.p1=Before 6 April 2020, you'll be able sign in to this service using your Government Gateway user ID and password to:
+landingPage.createAccount.bullet1=create a Capital Gains Tax on UK property account
+landingPage.createAccount.bullet2=update your contact details in your Capital Gains Tax on UK property account once you have created one
+landingPage.createAccount.p2=If you do not have a Government Gateway user ID, you can create one.
+
+landingPage.howTo.h2=How to report and pay the tax
+landingPage.warning=From 6 April 2020, you will have 30 days after the property completion date to report and pay Capital Gains Tax on your UK property sales or disposals.
+landingPage.howTo.p1=From 6 April 2020, you will be able to use this service to:
+landingPage.howTo.list1.bullet1=report and pay any Capital Gains Tax due on UK property sales or disposals made from 6 April 2020
+landingPage.howTo.list1.bullet2=view and amend your Capital Gains Tax on UK property returns made from 6 April 2020
+landingPage.howTo.p2=If you’re a non-resident, you'll also be able to use this service from 6 April 2020 to report the sale or disposal and pay the tax on:
+landingPage.howTo.list2.bullet1=the sale or disposal of residential and non-residential UK property or land
+landingPage.howTo.list2.bullet2=indirect disposals
+landingPage.startButton=Create account or sign in
+landingPage.beforeYouStart.h2=Before you start
+landingPage.beforeYouStart.p1=You’ll need a Government Gateway user ID and password to use this service. If you do not have a Government Gateway user ID, you can create one.
+landingPage.beforeYouStart.p2=To sign in, enter the same Government Gateway user ID and password you used to create your Capital Gains Tax on UK property account.
+landingPage.beforeYouStart.p3=You can <a href="{0}">contact HMRC</a> if you need help accessing the service.
+landingPage.ifAgent.h2=If you’re an agent
+landingPage.ifAgent.p1=Go to your <a href="{0}">agent services account</a> to access this service. If you do not already have one, you can <a href="{1}">apply for an agent services account</a>.
+landingPage.ifTrust.h2=If you’re representing a trust
+landingPage.ifTrust.p1=The trust will need to be <a href="{0}">registered</a>. You will need the trust’s Self Assessment Unique Taxpayer Reference.
 
 landingPage.sidebar.title=Related content
-landingPage.sidebar.1=Sign in to report and pay Capital Gains Tax on UK property
-landingPage.sidebar.2=Capital Gains Tax
-landingPage.sidebar.3=Tell HMRC about Capital Gains Tax on UK property or land if you’re non-resident
-landingPage.sidebar.4=Calculate Capital Gains Tax on UK property
+landingPage.sidebar.1=Capital Gains Tax
+landingPage.sidebar.2=Tell HMRC about Capital Gains Tax on UK property or land if you’re non-resident
+landingPage.sidebar.3=More
 
 signInPage.title=Sign in to report and pay Capital Gains Tax on UK property
 signInPage.list1.bullet5=view and amend your previous and current Capital Gains Tax on UK property returns
