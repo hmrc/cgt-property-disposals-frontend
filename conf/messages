@@ -828,6 +828,9 @@ estimatedIncome.title=What is your estimated income liable for UK tax in this ta
 estimatedIncome.helpText=Tha amount should be your total estimated earnings for the tax year {0} to {1} before any tax is taken off
 ytdLiability.cya.title=Check your answers
 ytdLiability.cyaLabel.estimatedIncome=What is your estimated income liable for UK tax in this tax year?
+estimatedIncome.details.summary=How to estimate your income
+estimatedIncome.details.p1=The amount should be your total estimated earnings for the tax year {0} to {1} before any tax is taken off.
+estimatedIncome.details.p2=Do not include the money you made from selling the property, from ISAs, Tax Credits or income from any foreign employment.
 
 task-list.ytd-liability.link=Enter Capital Gains Tax liability so far this tax year
 

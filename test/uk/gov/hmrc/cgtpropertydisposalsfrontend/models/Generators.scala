@@ -39,7 +39,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLosse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.{CompleteIndividualTriageAnswers, IncompleteIndividualTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.OtherReliefs
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AcquisitionMethod, AssetType, CompletionDate, DisposalDate, DraftReturn, IndividualTriageAnswers, IndividualUserType, NumberOfProperties, ReliefDetailsAnswers, ShareOfProperty}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YTDLiabilityAnswers.CompleteYTDLiabilityAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AcquisitionMethod, AssetType, CompletionDate, DisposalDate, DraftReturn, IndividualTriageAnswers, IndividualUserType, NumberOfProperties, ReliefDetailsAnswers, ShareOfProperty, YTDLiabilityAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanNotifyResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanServiceResponse.{UpscanNotifyEvent, UpscanResponse}
 
@@ -64,7 +65,8 @@ object Generators
     with AcquisitionDetailsGen
     with ReliefDetailsAnswersGen
     with TaxYearGen
-    with ExemptionAndLossesAnswersGen {
+    with ExemptionAndLossesAnswersGen
+    with YTDLiabilityAnswersGen {
 
   implicit val booleanGen: Gen[Boolean] = Gen.oneOf(true, false)
 
@@ -326,4 +328,14 @@ trait ExemptionAndLossesAnswersGen { this: GenUtils =>
 
   implicit val incompleteExemptionAndLossesAnswersGen: Gen[IncompleteExemptionAndLossesAnswers] =
     gen[IncompleteExemptionAndLossesAnswers]
+}
+
+trait YTDLiabilityAnswersGen { this: GenUtils =>
+
+  implicit val ytdLiabilityAnswersGen: Gen[YTDLiabilityAnswers] =
+    gen[YTDLiabilityAnswers]
+
+  implicit val completeYTDLiabilityAnswersGen: Gen[CompleteYTDLiabilityAnswers] =
+    gen[CompleteYTDLiabilityAnswers]
+
 }

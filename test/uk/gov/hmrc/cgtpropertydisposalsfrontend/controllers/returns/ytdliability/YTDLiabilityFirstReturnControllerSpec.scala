@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ytdliability
 
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -10,7 +26,11 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YTDLiabilityAnswers.{CompleteYTDLiabilityAnswers, IncompleteYTDLiabilityAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, YTDLiabilityAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 
@@ -45,17 +65,85 @@ class YTDLiabilityFirstReturnControllerSpec
       }
     )
 
+  def sessionWithYTDLiabilityAnswers(
+    ytdLiabilityAnswers: Option[YTDLiabilityAnswers]
+  ): (SessionData, FillingOutReturn) = {
+    val journey = sample[FillingOutReturn].copy(
+      draftReturn = sample[DraftReturn].copy(
+        ytdLiabilityAnswers = ytdLiabilityAnswers
+      )
+    )
+    SessionData.empty.copy(journeyStatus = Some(journey)) -> journey
+  }
+
+  def sessionWithYTDLiabilityAnswers(
+    ytdLiabilityAnswers: YTDLiabilityAnswers
+  ): (SessionData, FillingOutReturn) =
+    sessionWithYTDLiabilityAnswers(Some(ytdLiabilityAnswers))
+
   "ReliefDetailsController" when {
 
     "handling requests to display the estimated income page" must {
 
+      behave like redirectToStartBehaviour(performAction)
+
       def performAction(): Future[Result] = controller.estimatedIncome()(FakeRequest())
 
+      "display the page" when {
+
+        "the user has not answered the question before" in {
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithYTDLiabilityAnswers(None)._1)
+          }
+
+          checkPageIsDisplayed(performAction(), messageFromMessageKey("privateResidentsRelief.title"))
+        }
+
+        "the user has answered the question before but has " +
+          "not completed the relief detail section" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithYTDLiabilityAnswers(
+                IncompleteYTDLiabilityAnswers.empty.copy(
+                  estimatedIncome = Some(AmountInPence.fromPounds(12.34))
+                )
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(performAction(), messageFromMessageKey("estimatedIncome.title"), { doc =>
+            doc.select("#estimatedIncome").attr("value") shouldBe "12.34"
+          })
+        }
+
+        "the user has answered the question before but has " +
+          "completed the relief detail section" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithYTDLiabilityAnswers(
+                sample[CompleteYTDLiabilityAnswers].copy(estimatedIncome = AmountInPence.fromPounds(12.34))
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(performAction(), messageFromMessageKey("estimatedIncome.title"), { doc =>
+            doc.select("#estimatedIncome").attr("value") shouldBe "12.34"
+          })
+        }
+
+      }
     }
 
     "handling submitted answers to the estimated income page" must {
 
-      def performAction(): Future[Result] = controller.estimatedIncomeSubmit()(FakeRequest())
+      def performAction(data: Seq[(String, String)]): Future[Result] =
+        controller.estimatedIncomeSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
+
+      behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
     }
 
