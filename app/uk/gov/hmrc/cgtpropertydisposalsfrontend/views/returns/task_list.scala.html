@@ -49,6 +49,7 @@
       TaskListStatus.CannotStart
   }
 }
+@ytdLiabilityState = @{ draftReturn.ytdLiabilityAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress,_ => TaskListStatus.Complete)) }
 
 
 @mainTemplate(title = title, userType = request.userType) {
@@ -103,6 +104,11 @@
     <li id="exemptionsAndLosses" class="app-task-list__item">
     @taskLink(messages("task-list.exemptions-and-losses.link"),
      returns.exemptionandlosses.routes.ExemptionAndLossesController.checkYourAnswers().url, exemptionsAndLossesState)
+    </li>
+
+    <li id="ytdLiability" class="app-task-list__item">
+     @taskLink(messages("task-list.ytd-liability.link"),
+     returns.ytdliability.routes.YTDLiabilityFirstReturnController.checkYourAnswers().url, ytdLiabilityState)
     </li>
    </ul>
   </li>
