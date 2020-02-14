@@ -2165,7 +2165,7 @@ class AcquisitionDetailsControllerSpec
               withClue(s"For form data $formData and expected amount in pence $expectedAmountInPence: ") {
                 val answers =
                   sample[CompleteAcquisitionDetailsAnswers]
-                    .copy(rebasedAcquisitionPrice = Some(AmountInPence(expectedAmountInPence.value + 1L)))
+                    .copy(acquisitionFees = AmountInPence(expectedAmountInPence.value + 1L))
                 val (session, journey) = sessionWithState(answers, sample[AssetType], sample[Boolean])
                 val updatedDraftReturn = journey.draftReturn
                   .copy(acquisitionDetailsAnswers = Some(answers.copy(acquisitionFees = expectedAmountInPence)))
