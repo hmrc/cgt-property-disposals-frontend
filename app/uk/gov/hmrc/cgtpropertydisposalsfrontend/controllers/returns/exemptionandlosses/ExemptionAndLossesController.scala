@@ -287,9 +287,10 @@ class ExemptionAndLossesController @Inject() (
             page = { (form, backlink) =>
               val updatedForm = form.copy(errors = form.errors.map(
                 _.copy(args = Seq(
-                  MoneyUtils.formatAmountOfMoneyWithPoundSign(
-                    disposalDate.taxYear.annualExemptAmountGeneral.inPounds()
-                  )
+                  MoneyUtils
+                    .formatAmountOfMoneyWithoutPoundSign(
+                      disposalDate.taxYear.annualExemptAmountGeneral.inPounds()
+                    )
                 )
                 )
               )
