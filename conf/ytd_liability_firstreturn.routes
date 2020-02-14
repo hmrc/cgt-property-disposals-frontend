@@ -1,5 +1,5 @@
-GET    /tax-amount/estimated-income       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ytdliability.YTDLiabilityFirstReturnController.estimatedIncome()
-POST   /tax-amount/estimated-income       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ytdliability.YTDLiabilityFirstReturnController.estimatedIncomeSubmit()
+GET    /tax-amount/estimated-income       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnController.estimatedIncome()
+POST   /tax-amount/estimated-income       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnController.estimatedIncomeSubmit()
 
-GET    /tax-amount/check-answers          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ytdliability.YTDLiabilityFirstReturnController.checkYourAnswers()
-POST   /tax-amount/check-answers          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ytdliability.YTDLiabilityFirstReturnController.checkYourAnswersSubmit()
+GET    /tax-amount/check-answers          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnController.checkYourAnswers()
+POST   /tax-amount/check-answers          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnController.checkYourAnswersSubmit()

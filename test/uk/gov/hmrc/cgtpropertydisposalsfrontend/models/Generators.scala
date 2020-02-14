@@ -39,8 +39,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLosse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.{CompleteIndividualTriageAnswers, IncompleteIndividualTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.OtherReliefs
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YTDLiabilityAnswers.CompleteYTDLiabilityAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AcquisitionMethod, AssetType, CompletionDate, DisposalDate, DraftReturn, IndividualTriageAnswers, IndividualUserType, NumberOfProperties, ReliefDetailsAnswers, ShareOfProperty, YTDLiabilityAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CompleteYearToDateLiabilityAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AcquisitionMethod, AssetType, CompletionDate, DisposalDate, DraftReturn, IndividualTriageAnswers, IndividualUserType, NumberOfProperties, ReliefDetailsAnswers, ShareOfProperty, YearToDateLiabilityAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanNotifyResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanServiceResponse.{UpscanNotifyEvent, UpscanResponse}
 
@@ -332,10 +332,10 @@ trait ExemptionAndLossesAnswersGen { this: GenUtils =>
 
 trait YTDLiabilityAnswersGen { this: GenUtils =>
 
-  implicit val ytdLiabilityAnswersGen: Gen[YTDLiabilityAnswers] =
-    gen[YTDLiabilityAnswers]
+  implicit val ytdLiabilityAnswersGen: Gen[YearToDateLiabilityAnswers] =
+    gen[YearToDateLiabilityAnswers]
 
-  implicit val completeYTDLiabilityAnswersGen: Gen[CompleteYTDLiabilityAnswers] =
-    gen[CompleteYTDLiabilityAnswers]
+  implicit val completeYTDLiabilityAnswersGen: Gen[CompleteYearToDateLiabilityAnswers] =
+    gen[CompleteYearToDateLiabilityAnswers]
 
 }

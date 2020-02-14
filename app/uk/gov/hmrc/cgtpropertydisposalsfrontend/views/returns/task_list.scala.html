@@ -49,7 +49,7 @@
       TaskListStatus.CannotStart
   }
 }
-@ytdLiabilityState = @{ draftReturn.ytdLiabilityAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress,_ => TaskListStatus.Complete)) }
+@ytdLiabilityState = @{ draftReturn.yearToDateLiabilityAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress,_ => TaskListStatus.Complete)) }
 
 
 @mainTemplate(title = title, userType = request.userType) {
@@ -105,10 +105,19 @@
     @taskLink(messages("task-list.exemptions-and-losses.link"),
      returns.exemptionandlosses.routes.ExemptionAndLossesController.checkYourAnswers().url, exemptionsAndLossesState)
     </li>
+   </ul>
+  </li>
 
-    <li id="ytdLiability" class="app-task-list__item">
-     @taskLink(messages("task-list.ytd-liability.link"),
-     returns.ytdliability.routes.YTDLiabilityFirstReturnController.checkYourAnswers().url, ytdLiabilityState)
+  <li>
+   <h2 class="app-task-list__section">
+    <span class="app-task-list__section-number">
+     3.
+    </span>
+    @messages("task-list.report-and-pay-the-tax.heading")
+   </h2>
+   <ul class="app-task-list__items">
+    <li id="enterCgtLiability" class="app-task-list__item">
+    @taskLink(messages("task-list.enter-cgt-liability.link"), returns.yeartodatelliability.routes.YearToDateLiabilityFirstReturnController.checkYourAnswers().url, ytdLiabilityState)
     </li>
    </ul>
   </li>

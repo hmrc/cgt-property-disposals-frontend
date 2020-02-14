@@ -19,9 +19,9 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ytdliability.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{LocalDateUtils, MoneyUtils}
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YTDLiabilityAnswers.CompleteYTDLiabilityAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CompleteYearToDateLiabilityAnswers
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -35,7 +35,7 @@ formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
 returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(answers: CompleteYTDLiabilityAnswers)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(answers: CompleteYearToDateLiabilityAnswers)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 
 @title = @{messages("ytdLiability.cya.title")}
@@ -48,11 +48,11 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
          @cyaRow(
              messages("ytdLiability.cyaLabel.estimatedIncome"),
              Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.estimatedIncome.inPounds())),
-             Some(cyaChange(messages("ytdLiability.cyaChange.estimatedIncome"), routes.YTDLiabilityFirstReturnController.estimatedIncome().url))
+             Some(cyaChange(messages("ytdLiability.cyaChange.estimatedIncome"), routes.YearToDateLiabilityFirstReturnController.estimatedIncome().url))
          )
  }
 
- @formWrapper(routes.YTDLiabilityFirstReturnController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
+ @formWrapper(routes.YearToDateLiabilityFirstReturnController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
  @submitButton(messages("button.confirmAndContinue"))
  }
 

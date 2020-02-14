@@ -20,36 +20,36 @@ import julienrf.json.derived
 import play.api.libs.json.OFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AmountInPence
 
-sealed trait YTDLiabilityAnswers extends Product with Serializable
+sealed trait YearToDateLiabilityAnswers extends Product with Serializable
 
-object YTDLiabilityAnswers {
+object YearToDateLiabilityAnswers {
 
-  final case class IncompleteYTDLiabilityAnswers(
+  final case class IncompleteYearToDateLiabilityAnswers(
     estimatedIncome: Option[AmountInPence]
-  ) extends YTDLiabilityAnswers
+  ) extends YearToDateLiabilityAnswers
 
-  object IncompleteYTDLiabilityAnswers {
-    val empty: IncompleteYTDLiabilityAnswers =
-      IncompleteYTDLiabilityAnswers(None)
+  object IncompleteYearToDateLiabilityAnswers {
+    val empty: IncompleteYearToDateLiabilityAnswers =
+      IncompleteYearToDateLiabilityAnswers(None)
   }
 
-  final case class CompleteYTDLiabilityAnswers(
+  final case class CompleteYearToDateLiabilityAnswers(
     estimatedIncome: AmountInPence
-  ) extends YTDLiabilityAnswers
+  ) extends YearToDateLiabilityAnswers
 
-  implicit class YTDLiabilityAnswersOps(private val a: YTDLiabilityAnswers) extends AnyVal {
+  implicit class YTDLiabilityAnswersOps(private val a: YearToDateLiabilityAnswers) extends AnyVal {
 
     def fold[A](
-      ifIncomplete: IncompleteYTDLiabilityAnswers => A,
-      ifComplete: CompleteYTDLiabilityAnswers => A
+      ifIncomplete: IncompleteYearToDateLiabilityAnswers => A,
+      ifComplete: CompleteYearToDateLiabilityAnswers => A
     ): A = a match {
-      case i: IncompleteYTDLiabilityAnswers => ifIncomplete(i)
-      case c: CompleteYTDLiabilityAnswers   => ifComplete(c)
+      case i: IncompleteYearToDateLiabilityAnswers => ifIncomplete(i)
+      case c: CompleteYearToDateLiabilityAnswers   => ifComplete(c)
     }
 
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[YTDLiabilityAnswers] = derived.oformat()
+  implicit val format: OFormat[YearToDateLiabilityAnswers] = derived.oformat()
 
 }

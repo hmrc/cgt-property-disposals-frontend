@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ytdliability
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability
 
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
@@ -28,15 +28,15 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServi
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YTDLiabilityAnswers.{CompleteYTDLiabilityAnswers, IncompleteYTDLiabilityAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, YTDLiabilityAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CompleteYearToDateLiabilityAnswers, IncompleteYearToDateLiabilityAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, YearToDateLiabilityAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 
 import scala.concurrent.Future
 
-class YTDLiabilityFirstReturnControllerSpec
+class YearToDateLiabilityFirstReturnControllerSpec
     extends ControllerSpec
     with AuthSupport
     with SessionSupport
@@ -51,7 +51,7 @@ class YTDLiabilityFirstReturnControllerSpec
       bind[ReturnsService].toInstance(mockReturnsService)
     )
 
-  lazy val controller = instanceOf[YTDLiabilityFirstReturnController]
+  lazy val controller = instanceOf[YearToDateLiabilityFirstReturnController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
@@ -66,18 +66,18 @@ class YTDLiabilityFirstReturnControllerSpec
     )
 
   def sessionWithYTDLiabilityAnswers(
-    ytdLiabilityAnswers: Option[YTDLiabilityAnswers]
+    ytdLiabilityAnswers: Option[YearToDateLiabilityAnswers]
   ): (SessionData, FillingOutReturn) = {
     val journey = sample[FillingOutReturn].copy(
       draftReturn = sample[DraftReturn].copy(
-        ytdLiabilityAnswers = ytdLiabilityAnswers
+        yearToDateLiabilityAnswers = ytdLiabilityAnswers
       )
     )
     SessionData.empty.copy(journeyStatus = Some(journey)) -> journey
   }
 
   def sessionWithYTDLiabilityAnswers(
-    ytdLiabilityAnswers: YTDLiabilityAnswers
+    ytdLiabilityAnswers: YearToDateLiabilityAnswers
   ): (SessionData, FillingOutReturn) =
     sessionWithYTDLiabilityAnswers(Some(ytdLiabilityAnswers))
 
@@ -107,7 +107,7 @@ class YTDLiabilityFirstReturnControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithYTDLiabilityAnswers(
-                IncompleteYTDLiabilityAnswers.empty.copy(
+                IncompleteYearToDateLiabilityAnswers.empty.copy(
                   estimatedIncome = Some(AmountInPence.fromPounds(12.34))
                 )
               )._1
@@ -125,7 +125,7 @@ class YTDLiabilityFirstReturnControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithYTDLiabilityAnswers(
-                sample[CompleteYTDLiabilityAnswers].copy(estimatedIncome = AmountInPence.fromPounds(12.34))
+                sample[CompleteYearToDateLiabilityAnswers].copy(estimatedIncome = AmountInPence.fromPounds(12.34))
               )._1
             )
           }

@@ -26,7 +26,8 @@ final case class TaxYear(
   startDateInclusive: LocalDate,
   endDateExclusive: LocalDate,
   annualExemptAmountGeneral: AmountInPence,
-  annualExemptAmountNonVulnerableTrust: AmountInPence
+  annualExemptAmountNonVulnerableTrust: AmountInPence,
+  personalAllowance: AmountInPence
 )
 
 object TaxYear {
@@ -37,6 +38,7 @@ object TaxYear {
         startYear                            <- config.get[Int](s"$key.start-year")
         annualExemptAmountGeneral            <- config.get[Double](s"$key.annual-exempt-amount.general")
         annualExemptAmountNonVulnerableTrust <- config.get[Double](s"$key.annual-exempt-amount.non-vulnerable-trust")
+        personalAllowance                    <- config.get[Double](s"$key.personal-allowance")
       } yield TaxYear(
         LocalDate.of(startYear, 4, 6),
         LocalDate.of(startYear + 1, 4, 6),
