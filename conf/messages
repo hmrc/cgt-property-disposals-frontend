@@ -493,7 +493,7 @@ didYouDisposeOfResidentialProperty.details.p1=Residential property is:
 didYouDisposeOfResidentialProperty.details.l1=a building where someone lives or could live, like a house, flat or other type of dwelling
 didYouDisposeOfResidentialProperty.details.l2=a building that is being built or changed so it can be used as a place where someone could live
 didYouDisposeOfResidentialProperty.details.l3=land that’s part of a garden or grounds of a building that’s used as a place where someone lives, or could live
-didYouDisposeOfResidentialProperty.details.link=<a href="{0}" tabindex="0" target="_blank">Read a definition of residential property (opens in a new window)</a>.
+didYouDisposeOfResidentialProperty.details.link=<a href="{0}" tabindex="-1" target="_blank">Read a definition of residential property (opens in a new window)</a>.
 
 didYouDisposeOfResidentialProperty.error.required=Select yes if you sold or disposed of a residential property
 didYouDisposeOfResidentialProperty.error.boolean=Select yes if you sold or disposed of a residential property
