@@ -50,6 +50,23 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
              Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.estimatedIncome.inPounds())),
              Some(cyaChange(messages("ytdLiability.cyaChange.estimatedIncome"), routes.YearToDateLiabilityFirstReturnController.estimatedIncome().url))
          )
+        @answers.personalAllowance.map { personalAllowance =>
+         @cyaRow(
+          messages("personalAllowance.title"),
+          Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(personalAllowance.inPounds())),
+          Some(cyaChange(messages("ytdLiability.cyaChange.personalAllowance"), routes.YearToDateLiabilityFirstReturnController.personalAllowance().url))
+         )
+        }
+  @cyaRow(
+   messages("hasEstimatedDetails.title"),
+   Html(messages(if(answers.hasEstimatedDetails.hasEstimatedDetails) "generic.yes" else "generic.no")),
+   Some(cyaChange(messages("ytdLiability.cyaChange.hasEstimatedDetails"), routes.YearToDateLiabilityFirstReturnController.hasEstimatedDetails().url))
+  )
+  @cyaRow(
+   messages("taxDue.title"),
+   Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.taxDue.inPounds())),
+   Some(cyaChange(messages("ytdLiability.cyaChange.taxDue"), routes.YearToDateLiabilityFirstReturnController.taxDue().url))
+  )
  }
 
  @formWrapper(routes.YearToDateLiabilityFirstReturnController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {

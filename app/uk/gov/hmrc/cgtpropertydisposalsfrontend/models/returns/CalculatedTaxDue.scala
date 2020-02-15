@@ -36,6 +36,7 @@ sealed trait CalculatedTaxDue extends Product with Serializable {
   val gainOrLossAfterLosses: AmountInPence
   val taxableGain: AmountInPence
   val yearToDateLiability: AmountInPence
+  val amountOfTaxDue: AmountInPence
 }
 
 object CalculatedTaxDue {

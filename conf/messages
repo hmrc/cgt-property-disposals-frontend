@@ -562,6 +562,7 @@ task-list.save-and-come-back.link=Save and come back later
 task-list.relief-details.link=Enter reliefs
 task-list.report-and-pay-the-tax.heading=Report and pay the tax
 task-list.enter-cgt-liability.link=Enter Capital Gains Tax liability so far this tax year
+task-list.ytd-liability.link=Enter Capital Gains Tax liability so far this tax year
 
 returns.property-address.caption=Property address
 enterPostcode.returns.title=Find the address of the UK property you disposed of
@@ -827,12 +828,30 @@ exemptionsAndLosses.cyaChange.taxableGainOrLoss=your taxable gain or net loss
 ytdLiability.caption=Tax amount owed
 
 estimatedIncome.title=What is your estimated income liable for UK tax in this tax year?
-estimatedIncome.helpText=Tha amount should be your total estimated earnings for the tax year {0} to {1} before any tax is taken off
-ytdLiability.cya.title=Check your answers
-ytdLiability.cyaLabel.estimatedIncome=What is your estimated income liable for UK tax in this tax year?
+estimatedIncome.helpText=The amount should be your total estimated earnings for the tax year {0} to {1} before any tax is taken off
 estimatedIncome.details.summary=How to estimate your income
 estimatedIncome.details.p1=The amount should be your total estimated earnings for the tax year {0} to {1} before any tax is taken off.
 estimatedIncome.details.p2=Do not include the money you made from selling the property, from ISAs, Tax Credits or income from any foreign employment.
+estimatedIncome.error.required=Enter your estimated income liable for UK tax in this tax year
+estimatedIncome.error.invalid=Estimated income must only include numbers, for example 160,000 or 23,040.50
+estimatedIncome.error.tooSmall=???Too small!
+estimatedIncome.error.tooLarge=Estimated income must be a number less than 50,000,000,000.00
+estimatedIncome.error.tooManyDecimals=Estimated income must be 2 decimal places or less, for example 23,040.50 or 76,000
 
-task-list.ytd-liability.link=Enter Capital Gains Tax liability so far this tax year
+personalAllowance.title=How much of your Personal Allowance do you want to apply?
+personalAllowance.helpText=Based on your income for the tax year {0} to {1}, you can apply up to {2}.
+personalAllowance.link=<a href="{0}" target="_blank">Find out about Personal Allowances (opens in a new window)</a>.
+personalAllowance.error.required=Enter how much of your Personal Allowance you want to apply
+personalAllowance.error.invalid=Personal Allowance amount must only include numbers, for example 12,500 or 207.50
+personalAllowance.error.tooSmall=???Too small!
+personalAllowance.error.tooLarge=Personal Allowance amount must be {0} or less
+personalAllowance.error.tooManyDecimals=Personal Allowance amount must be 2 decimal places or less, for example 12,500 or 200.50
 
+estimatedDetails.title=Have any of the details in this return been estimated?
+estimatedDetails.yes.content=You’ll need to confirm any estimates with HMRC when you get the details. You can do this through your Self Assessment tax return or this service.
+estimatedDetails.error.required=Select yes if any of the details in this return been estimated
+estimatedDetails.error.boolean=Select yes if any of the details in this return been estimated
+
+
+ytdLiability.cya.title=Check your answers
+ytdLiability.cyaLabel.estimatedIncome=What is your estimated income liable for UK tax in this tax year?

@@ -65,11 +65,13 @@
 
     @caption(messages("ytdLiability.caption"))
 
-    <p>We think your tax due is @{MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.yearToDateLiability.inPounds())}</p>
+    @pageHeading(messages(s"$key.title"))
 
-    <p>What do <em>you</em>> think it is?</p>
+    <p>We think your tax due is @{MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.amountOfTaxDue.inPounds())}</p>
 
-    @formWrapper(routes.YearToDateLiabilityFirstReturnController.estimatedIncomeSubmit(), 'novalidate -> "novalidate") {
+    <p>What do <em>you</em> think it is?</p>
+
+    @formWrapper(routes.YearToDateLiabilityFirstReturnController.taxDueSubmit(), 'novalidate -> "novalidate") {
         @unitInput(
             fieldId = key,
             value = form.data.getOrElse(key, ""),
