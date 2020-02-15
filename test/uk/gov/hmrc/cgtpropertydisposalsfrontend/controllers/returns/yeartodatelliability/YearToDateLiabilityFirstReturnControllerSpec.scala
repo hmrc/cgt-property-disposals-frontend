@@ -909,7 +909,10 @@ class YearToDateLiabilityFirstReturnControllerSpec
       behave like incompleteOtherJourneysBehaviour(() => performAction())
 
       {
-        val oldAnswers  = sample[CompleteYearToDateLiabilityAnswers]
+        val oldAnswers = sample[CompleteYearToDateLiabilityAnswers].copy(
+          estimatedIncome   = AmountInPence(0L),
+          personalAllowance = None
+        )
         val draftReturn = draftReturnWithCompleteJourneys(Some(oldAnswers), sample[DisposalDate])
         val newDraftReturn = draftReturn.copy(
           yearToDateLiabilityAnswers = Some(oldAnswers.copy(taxDue = AmountInPence(123L)))
@@ -1045,13 +1048,148 @@ class YearToDateLiabilityFirstReturnControllerSpec
 
     "handling requests to display the check you answers page" must {
 
-      "do things" in {}
+      def performAction(): Future[Result] = controller.checkYourAnswers()(FakeRequest())
+
+      val completeAnswers = CompleteYearToDateLiabilityAnswers(
+        AmountInPence(1L),
+        Some(AmountInPence(2L)),
+        sample[HasEstimatedDetailsWithCalculatedTaxDue],
+        sample[AmountInPence]
+      )
+
+      val allQuestionAnswered = IncompleteYearToDateLiabilityAnswers(
+        Some(completeAnswers.estimatedIncome),
+        completeAnswers.personalAllowance,
+        Some(completeAnswers.hasEstimatedDetails),
+        Some(completeAnswers.taxDue)
+      )
+
+      def testRedirectWhenIncompleteAnswers(
+        answers: IncompleteYearToDateLiabilityAnswers,
+        expectedRedirect: Call
+      ): Unit = {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionWithState(answers, sample[DisposalDate])._1)
+        }
+
+        checkIsRedirect(performAction(), expectedRedirect)
+      }
+
+      behave like redirectToStartBehaviour(performAction)
+
+      behave like unsuccessfulUpdateBehaviour(
+        allQuestionAnswered,
+        completeAnswers,
+        () => performAction()
+      )
+
+      "redirect to the estimated income page" when {
+
+        "that question has not been answered yet" in {
+          testRedirectWhenIncompleteAnswers(
+            allQuestionAnswered.copy(estimatedIncome = None),
+            routes.YearToDateLiabilityFirstReturnController.estimatedIncome()
+          )
+        }
+
+      }
+
+      "redirect to the personal allowance page" when {
+
+        "that question has not been answered yet and the estimated income is non zero" in {
+          testRedirectWhenIncompleteAnswers(
+            allQuestionAnswered.copy(
+              estimatedIncome   = Some(AmountInPence(1L)),
+              personalAllowance = None
+            ),
+            routes.YearToDateLiabilityFirstReturnController.personalAllowance()
+          )
+        }
+
+      }
+
+      "redirect to the has estimated details  page" when {
+
+        "that question has not been answered yet" in {
+          testRedirectWhenIncompleteAnswers(
+            allQuestionAnswered.copy(
+              estimatedIncome     = Some(AmountInPence.zero),
+              personalAllowance   = None,
+              hasEstimatedDetails = None
+            ),
+            routes.YearToDateLiabilityFirstReturnController.hasEstimatedDetails()
+          )
+        }
+
+      }
+
+      "redirect to the tax due page" when {
+
+        "that question has not been answered yet" in {
+          testRedirectWhenIncompleteAnswers(
+            allQuestionAnswered.copy(
+              taxDue = None
+            ),
+            routes.YearToDateLiabilityFirstReturnController.taxDue
+          )
+        }
+
+      }
+
+      "show the page" when {
+
+        "the section is complete" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithState(completeAnswers, sample[DisposalDate])._1)
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("ytdLiability.cya.title")
+          )
+        }
+
+        "the section has just been completed and all updates are successful" in {
+          val (session, journey) = sessionWithState(allQuestionAnswered, sample[DisposalDate])
+          val updatedDraftReturn = journey.draftReturn.copy(yearToDateLiabilityAnswers = Some(completeAnswers))
+          val updatedSession = session.copy(journeyStatus = Some(
+            journey.copy(draftReturn = updatedDraftReturn)
+          )
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+            mockStoreSession(updatedSession)(Right(()))
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("ytdLiability.cya.title")
+          )
+        }
+
+      }
 
     }
 
     "handling submits from the check you answers page" must {
 
-      "do things" in {}
+      def performAction(): Future[Result] = controller.checkYourAnswersSubmit()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+      "redirect to the task list page" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionWithState(sample[CompleteYearToDateLiabilityAnswers], sample[DisposalDate])._1)
+        }
+
+        checkIsRedirect(performAction(), returns.routes.TaskListController.taskList())
+      }
 
     }
 
