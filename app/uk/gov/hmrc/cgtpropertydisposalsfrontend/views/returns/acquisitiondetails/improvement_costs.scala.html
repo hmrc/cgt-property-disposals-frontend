@@ -34,7 +34,7 @@
         details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
-@(form: Form[Double], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[BigDecimal], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 @key = @{ "improvementCosts" }
 @valueKey = @{ "improvementCostsValue" }
 @title = @{messages("improvementCosts.title")}

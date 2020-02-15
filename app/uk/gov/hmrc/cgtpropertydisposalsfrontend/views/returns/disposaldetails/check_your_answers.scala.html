@@ -39,7 +39,7 @@
 
 
 @title = @{messages("returns.disposal-details.cya.title")}
-@formatPercentage(p: Double) = @{s"${p.toString.stripSuffix(".0")}%"}
+@formatPercentage(p: BigDecimal) = @{s"${p.toString.stripSuffix(".0")}%"}
 @disposalPriceTitle = @{messages(disposalPriceTitleKey(disposalMethod, answers.shareOfProperty))}
 @disposalFeesTitle = @{messages(disposalFeesTitleKey(disposalMethod, answers.shareOfProperty))}
 

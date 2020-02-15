@@ -35,7 +35,7 @@ radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compo
 details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
-@(form: Form[Double], backLink: Call, disposalDate: DisposalDate)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[BigDecimal], backLink: Call, disposalDate: DisposalDate)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 @key = @{ "inYearLosses" }
 @valueKey = @{ "inYearLossesValue" }
 @title = @{messages("inYearLosses.title")}

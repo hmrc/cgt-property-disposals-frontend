@@ -671,20 +671,20 @@ object AcquisitionDetailsController {
     )(AcquisitionDate(_))(d => Some(d.value))
   )
 
-  val acquisitionPriceForm: Form[Double] =
+  val acquisitionPriceForm: Form[BigDecimal] =
     Form(
       mapping(
         "acquisitionPrice" -> of(MoneyUtils.amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds))
       )(identity)(Some(_))
     )
 
-  val rebasedAcquisitionPriceForm: Form[Double] =
+  val rebasedAcquisitionPriceForm: Form[BigDecimal] =
     MoneyUtils.amountInPoundsYesNoForm("rebaseAcquisitionPrice", "rebaseAcquisitionPriceValue")
 
-  val improvementCostsForm: Form[Double] =
+  val improvementCostsForm: Form[BigDecimal] =
     MoneyUtils.amountInPoundsYesNoForm("improvementCosts", "improvementCostsValue")
 
-  val acquisitionFeesForm: Form[Double] =
+  val acquisitionFeesForm: Form[BigDecimal] =
     MoneyUtils.amountInPoundsYesNoForm("acquisitionFees", "acquisitionFeesValue")
 
 }

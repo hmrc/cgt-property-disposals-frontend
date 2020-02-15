@@ -373,7 +373,7 @@ object DisposalDetailsController {
               Left(FormError(percentageKey, "error.tooManyDecimals"))
             else if (d === BigDecimal(100)) Right(ShareOfProperty.Full)
             else if (d === BigDecimal(50)) Right(ShareOfProperty.Half)
-            else Right(ShareOfProperty.Other(d.toDouble))
+            else Right(ShareOfProperty.Other(d))
           }
 
       ConditionalRadioUtils.formatter(shareOfPropertyKey)(
@@ -406,14 +406,14 @@ object DisposalDetailsController {
 
   implicit val fillingOutReturnEq: Eq[FillingOutReturn] = Eq.fromUniversalEquals
 
-  val disposalPriceForm: Form[Double] =
+  val disposalPriceForm: Form[BigDecimal] =
     Form(
       formMapping(
         "disposalPrice" -> of(MoneyUtils.amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds))
       )(identity)(Some(_))
     )
 
-  val disposalFeesForm: Form[Double] =
+  val disposalFeesForm: Form[BigDecimal] =
     Form(
       formMapping(
         "disposalFees" -> of(MoneyUtils.amountInPoundsFormatter(_ < 0, _ > MoneyUtils.maxAmountOfPounds))

@@ -33,7 +33,7 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
 details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
-@(form: Form[Double], backLink: Call, disposalDate: DisposalDate)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[BigDecimal], backLink: Call, disposalDate: DisposalDate)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 @key = @{ "estimatedIncome" }
 @taxYearStartYear = @{disposalDate.taxYear.startDateInclusive.getYear.toString}
 @taxYearEndYear = @{disposalDate.taxYear.endDateExclusive.getYear.toString}
@@ -72,9 +72,7 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
             |<p>${messages(s"$key.details.p1", taxYearStartYear, taxYearEndYear)}</p>
             |<p>${messages(s"$key.details.p2")}</p>
             |""".stripMargin
-        )
-
-)
+        ))
 
         @submitButton(messages("button.continue"))
     }

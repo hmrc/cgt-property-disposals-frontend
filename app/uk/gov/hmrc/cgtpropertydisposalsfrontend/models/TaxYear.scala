@@ -27,7 +27,12 @@ final case class TaxYear(
   endDateExclusive: LocalDate,
   annualExemptAmountGeneral: AmountInPence,
   annualExemptAmountNonVulnerableTrust: AmountInPence,
-  personalAllowance: AmountInPence
+  personalAllowance: AmountInPence,
+  incomeTaxHigherRateThreshold: AmountInPence,
+  cgtRateLowerBandResidential: BigDecimal,
+  cgtRateLowerBandNonResidential: BigDecimal,
+  cgtRateHigherBandResidential: BigDecimal,
+  cgtRateHigherBandNonResidential: BigDecimal
 )
 
 object TaxYear {
@@ -35,18 +40,29 @@ object TaxYear {
   implicit val configs: Configs[TaxYear] = Configs.from {
     case (config, key) =>
       for {
-        startYear                            <- config.get[Int](s"$key.start-year")
-        annualExemptAmountGeneral            <- config.get[Double](s"$key.annual-exempt-amount.general")
-        annualExemptAmountNonVulnerableTrust <- config.get[Double](s"$key.annual-exempt-amount.non-vulnerable-trust")
-        personalAllowance                    <- config.get[Double](s"$key.personal-allowance")
+        startYear                 <- config.get[Int](s"$key.start-year")
+        annualExemptAmountGeneral <- config.get[BigDecimal](s"$key.annual-exempt-amount.general")
+        annualExemptAmountNonVulnerableTrust <- config.get[BigDecimal](
+                                                 s"$key.annual-exempt-amount.non-vulnerable-trust"
+                                               )
+        personalAllowance               <- config.get[BigDecimal](s"$key.personal-allowance")
+        incomeTaxHigherRateThreshold    <- config.get[BigDecimal](s"$key.income-tax-higher-rate-threshold")
+        cgtRateLowerBandResidential     <- config.get[BigDecimal](s"$key.cgt-rates.lower-band-residential")
+        cgtRateLowerBandNonResidential  <- config.get[BigDecimal](s"$key.cgt-rates.lower-band-non-residential")
+        cgtRateHigherBandResidential    <- config.get[BigDecimal](s"$key.cgt-rates.higher-band-residential")
+        cgtRateHigherBandNonResidential <- config.get[BigDecimal](s"$key.cgt-rates.higher-band-non-residential")
       } yield TaxYear(
         LocalDate.of(startYear, 4, 6),
         LocalDate.of(startYear + 1, 4, 6),
         AmountInPence.fromPounds(annualExemptAmountGeneral),
         AmountInPence.fromPounds(annualExemptAmountNonVulnerableTrust),
-        AmountInPence.fromPounds(personalAllowance)
+        AmountInPence.fromPounds(personalAllowance),
+        AmountInPence.fromPounds(incomeTaxHigherRateThreshold),
+        cgtRateLowerBandResidential,
+        cgtRateLowerBandNonResidential,
+        cgtRateHigherBandResidential,
+        cgtRateHigherBandNonResidential
       )
-
   }
 
   implicit val format: OFormat[TaxYear] = Json.format

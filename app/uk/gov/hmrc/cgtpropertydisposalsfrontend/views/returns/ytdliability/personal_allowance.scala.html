@@ -33,7 +33,7 @@
         caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(form: Form[Double], backLink: Call, disposalDate: DisposalDate)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(form: Form[BigDecimal], backLink: Call, disposalDate: DisposalDate)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 @key = @{ "personalAllowance" }
 @taxYearStartYear = @{disposalDate.taxYear.startDateInclusive.getYear.toString}
 @taxYearEndYear = @{disposalDate.taxYear.endDateExclusive.getYear.toString}

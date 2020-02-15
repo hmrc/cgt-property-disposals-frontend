@@ -27,7 +27,7 @@ object YearToDateLiabilityAnswers {
   final case class IncompleteYearToDateLiabilityAnswers(
     estimatedIncome: Option[AmountInPence],
     personalAllowance: Option[AmountInPence],
-    hasEstimatedDetails: Option[Boolean]
+    hasEstimatedDetails: Option[HasEstimatedDetailsWithCalculatedTaxDue]
   ) extends YearToDateLiabilityAnswers
 
   object IncompleteYearToDateLiabilityAnswers {
@@ -38,7 +38,7 @@ object YearToDateLiabilityAnswers {
   final case class CompleteYearToDateLiabilityAnswers(
     estimatedIncome: AmountInPence,
     personalAllowance: Option[AmountInPence],
-    hasEstimatedDetails: Boolean
+    hasEstimatedDetails: HasEstimatedDetailsWithCalculatedTaxDue
   ) extends YearToDateLiabilityAnswers
 
   implicit class YTDLiabilityAnswersOps(private val a: YearToDateLiabilityAnswers) extends AnyVal {

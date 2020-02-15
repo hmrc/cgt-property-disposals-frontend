@@ -40,7 +40,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageA
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.OtherReliefs
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CompleteYearToDateLiabilityAnswers, IncompleteYearToDateLiabilityAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AcquisitionMethod, AssetType, CompletionDate, DisposalDate, DraftReturn, IndividualTriageAnswers, IndividualUserType, NumberOfProperties, ReliefDetailsAnswers, ShareOfProperty, YearToDateLiabilityAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AcquisitionMethod, AssetType, CompletionDate, DisposalDate, DraftReturn, HasEstimatedDetailsWithCalculatedTaxDue, IndividualTriageAnswers, IndividualUserType, NumberOfProperties, ReliefDetailsAnswers, ShareOfProperty, YearToDateLiabilityAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanNotifyResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanServiceResponse.{UpscanNotifyEvent, UpscanResponse}
 
@@ -337,5 +337,8 @@ trait YearToDateLiabilityAnswersGen { this: GenUtils =>
 
   implicit val incompleteYTDLiabilityAnswersGen: Gen[IncompleteYearToDateLiabilityAnswers] =
     gen[IncompleteYearToDateLiabilityAnswers]
+
+  implicit val hasEstimatedDetailsWithCalculatedTaxDueGen: Gen[HasEstimatedDetailsWithCalculatedTaxDue] =
+    gen[HasEstimatedDetailsWithCalculatedTaxDue]
 
 }

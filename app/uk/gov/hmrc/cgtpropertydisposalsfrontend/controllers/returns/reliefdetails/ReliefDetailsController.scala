@@ -400,15 +400,15 @@ class ReliefDetailsController @Inject() (
 
 object ReliefDetailsController {
 
-  val privateResidentsReliefForm: Form[Double] =
+  val privateResidentsReliefForm: Form[BigDecimal] =
     MoneyUtils.amountInPoundsYesNoForm("privateResidentsRelief", "privateResidentsReliefValue")
 
-  val lettingsReliefForm: Form[Double] =
+  val lettingsReliefForm: Form[BigDecimal] =
     MoneyUtils.amountInPoundsYesNoForm("lettingsRelief", "lettingsReliefValue")
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  val otherReliefsForm: Form[Either[(String, Double), Unit]] = {
-    val formatter: Formatter[Either[(String, Double), Unit]] = {
+  val otherReliefsForm: Form[Either[(String, BigDecimal), Unit]] = {
+    val formatter: Formatter[Either[(String, BigDecimal), Unit]] = {
       val (otherReliefKey, otherReliefsNameKey, otherReliefsAmountKey) =
         ("otherReliefs", "otherReliefsName", "otherReliefsAmount")
 
@@ -429,7 +429,7 @@ object ReliefDetailsController {
             )
             .leftMap(NonEmptyList.one(_))
 
-        val amountResult: ValidatedNel[FormError, Double] =
+        val amountResult: ValidatedNel[FormError, BigDecimal] =
           Validated
             .fromEither(
               FormUtils
@@ -442,12 +442,12 @@ object ReliefDetailsController {
                   )(_)
                 )
             )
-            .bimap(NonEmptyList.one(_), _.toDouble)
+            .leftMap(NonEmptyList.one(_))
 
         (nameResult, amountResult).mapN(_ -> _).toEither.leftMap(_.toList)
       }
 
-      ConditionalRadioUtils.formatter[Either[(String, Double), Unit]](otherReliefKey)(
+      ConditionalRadioUtils.formatter[Either[(String, BigDecimal), Unit]](otherReliefKey)(
         List(
           Left(innerOption.map(Left(_))),
           Right(Right(()))

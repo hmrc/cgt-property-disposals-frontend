@@ -1129,7 +1129,7 @@ class AcquisitionDetailsControllerSpec
               sessionWithState(
                 sample[CompleteAcquisitionDetailsAnswers].copy(
                   acquisitionDate         = acquisitionDate,
-                  rebasedAcquisitionPrice = Some(AmountInPence(0L))
+                  rebasedAcquisitionPrice = Some(AmountInPence.zero)
                 ),
                 AssetType.Residential,
                 true
@@ -1342,7 +1342,7 @@ class AcquisitionDetailsControllerSpec
       "redirect to the check you answers page" when {
         val scenarios = List(
           List("rebaseAcquisitionPrice" -> "0", "rebaseAcquisitionPriceValue" -> "£1,234") -> AmountInPence(123400L),
-          List("rebaseAcquisitionPrice" -> "1") -> AmountInPence(0L)
+          List("rebaseAcquisitionPrice" -> "1") -> AmountInPence.zero
         )
 
         "the price submitted is valid and the journey was incomplete" in {
@@ -1610,7 +1610,7 @@ class AcquisitionDetailsControllerSpec
                 sample[CompleteAcquisitionDetailsAnswers].copy(
                   acquisitionDate         = AcquisitionDate(RebasingCutoffDates.ukResidents),
                   rebasedAcquisitionPrice = Some(sample[AmountInPence]),
-                  improvementCosts        = AmountInPence(0L)
+                  improvementCosts        = AmountInPence.zero
                 ),
                 AssetType.Residential,
                 true
@@ -1826,7 +1826,7 @@ class AcquisitionDetailsControllerSpec
       "redirect to the check you answers page" when {
         val scenarios = List(
           List("improvementCosts" -> "0", "improvementCostsValue" -> "£1,234") -> AmountInPence(123400L),
-          List("improvementCosts" -> "1") -> AmountInPence(0L)
+          List("improvementCosts" -> "1") -> AmountInPence.zero
         )
 
         "the price submitted is valid and the journey was incomplete" in {
@@ -1977,7 +1977,7 @@ class AcquisitionDetailsControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithState(
-                sample[CompleteAcquisitionDetailsAnswers].copy(acquisitionFees = AmountInPence(0L)),
+                sample[CompleteAcquisitionDetailsAnswers].copy(acquisitionFees = AmountInPence.zero),
                 sample[AssetType],
                 sample[Boolean]
               )._1
@@ -2130,7 +2130,7 @@ class AcquisitionDetailsControllerSpec
 
         val scenarios = List(
           List("acquisitionFees" -> "0", "acquisitionFeesValue" -> "£1,234") -> AmountInPence(123400L),
-          List("acquisitionFees" -> "1") -> AmountInPence(0L)
+          List("acquisitionFees" -> "1") -> AmountInPence.zero
         )
 
         "the price submitted is valid and the journey was incomplete" in {

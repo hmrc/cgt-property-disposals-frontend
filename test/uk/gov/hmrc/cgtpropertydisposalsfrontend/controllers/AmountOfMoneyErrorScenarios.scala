@@ -25,13 +25,14 @@ object AmountOfMoneyErrorScenarios {
       List(input).collect { case Some(v) => key -> v }
   }
 
-  def amountOfMoneyErrorScenarios(key: String, maximumAmountInclusive: Double = MoneyUtils.maxAmountOfPounds) = List(
-    AmountOfMoneyErrorScenario(key, None, s"$key.error.required"),
-    AmountOfMoneyErrorScenario(key, Some(""), s"$key.error.required"),
-    AmountOfMoneyErrorScenario(key, Some("-1"), s"$key.error.tooSmall"),
-    AmountOfMoneyErrorScenario(key, Some((maximumAmountInclusive + 1).toString), s"$key.error.tooLarge"),
-    AmountOfMoneyErrorScenario(key, Some("1.234"), s"$key.error.tooManyDecimals"),
-    AmountOfMoneyErrorScenario(key, Some("abc"), s"$key.error.invalid")
-  )
+  def amountOfMoneyErrorScenarios(key: String, maximumAmountInclusive: BigDecimal = MoneyUtils.maxAmountOfPounds) =
+    List(
+      AmountOfMoneyErrorScenario(key, None, s"$key.error.required"),
+      AmountOfMoneyErrorScenario(key, Some(""), s"$key.error.required"),
+      AmountOfMoneyErrorScenario(key, Some("-1"), s"$key.error.tooSmall"),
+      AmountOfMoneyErrorScenario(key, Some((maximumAmountInclusive + 1).toString), s"$key.error.tooLarge"),
+      AmountOfMoneyErrorScenario(key, Some("1.234"), s"$key.error.tooManyDecimals"),
+      AmountOfMoneyErrorScenario(key, Some("abc"), s"$key.error.invalid")
+    )
 
 }

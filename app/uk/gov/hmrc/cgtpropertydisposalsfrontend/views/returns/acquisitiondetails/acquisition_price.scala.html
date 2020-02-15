@@ -31,7 +31,7 @@
         caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(form: Form[Double], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[BigDecimal], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 @key = @{ "acquisitionPrice" }
 @title = @{messages("acquisitionPrice.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}

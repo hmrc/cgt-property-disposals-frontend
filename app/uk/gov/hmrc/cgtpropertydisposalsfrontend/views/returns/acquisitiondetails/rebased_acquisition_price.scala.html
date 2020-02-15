@@ -36,7 +36,7 @@ unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_i
 caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(form: Form[Double], backLink: Call, rebaseCutOffDate: LocalDate)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[BigDecimal], backLink: Call, rebaseCutOffDate: LocalDate)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 @key = @{ "rebaseAcquisitionPrice" }
 @valueKey = @{"rebaseAcquisitionPriceValue"}
 @rebaseCutOffDateDisplayString = @{LocalDateUtils.govDisplayFormat(rebaseCutOffDate)}
