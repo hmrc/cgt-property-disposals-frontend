@@ -27,7 +27,7 @@ object YearToDateLiabilityAnswers {
   final case class IncompleteYearToDateLiabilityAnswers(
     estimatedIncome: Option[AmountInPence],
     personalAllowance: Option[AmountInPence],
-    hasEstimatedDetails: Option[HasEstimatedDetailsWithCalculatedTaxDue],
+    hasEstimatedDetailsWithCalculatedTaxDue: Option[HasEstimatedDetailsWithCalculatedTaxDue],
     taxDue: Option[AmountInPence]
   ) extends YearToDateLiabilityAnswers
 
@@ -39,7 +39,7 @@ object YearToDateLiabilityAnswers {
   final case class CompleteYearToDateLiabilityAnswers(
     estimatedIncome: AmountInPence,
     personalAllowance: Option[AmountInPence],
-    hasEstimatedDetails: HasEstimatedDetailsWithCalculatedTaxDue,
+    hasEstimatedDetailsWithCalculatedTaxDue: HasEstimatedDetailsWithCalculatedTaxDue,
     taxDue: AmountInPence
   ) extends YearToDateLiabilityAnswers
 

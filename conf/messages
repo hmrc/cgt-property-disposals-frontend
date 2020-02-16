@@ -847,11 +847,12 @@ personalAllowance.error.tooSmall=???Too small!
 personalAllowance.error.tooLarge=Personal Allowance amount must be {0} or less
 personalAllowance.error.tooManyDecimals=Personal Allowance amount must be 2 decimal places or less, for example 12,500 or 200.50
 
-estimatedDetails.title=Have any of the details in this return been estimated?
-estimatedDetails.yes.content=You’ll need to confirm any estimates with HMRC when you get the details. You can do this through your Self Assessment tax return or this service.
-estimatedDetails.error.required=Select yes if any of the details in this return been estimated
-estimatedDetails.error.boolean=Select yes if any of the details in this return been estimated
+hasEstimatedDetails.title=Have any of the details in this return been estimated?
+hasEstimatedDetails.yes.content=You’ll need to confirm any estimates with HMRC when you get the details. You can do this through your Self Assessment tax return or this service.
+hasEstimatedDetails.error.required=Select yes if any of the details in this return been estimated
+hasEstimatedDetails.error.boolean=Select yes if any of the details in this return been estimated
 
+taxDue.title=Enter the Capital Gains Tax due for this return
 
 ytdLiability.cya.title=Check your answers
 ytdLiability.cyaLabel.estimatedIncome=What is your estimated income liable for UK tax in this tax year?

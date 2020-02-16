@@ -470,9 +470,9 @@ class YearToDateLiabilityFirstReturnControllerSpec
         "the user had started answering questions in this section but had not completed it" in {
           val oldAnswers =
             IncompleteYearToDateLiabilityAnswers.empty.copy(
-              estimatedIncome     = Some(AmountInPence(1L)),
-              personalAllowance   = None,
-              hasEstimatedDetails = Some(sample[HasEstimatedDetailsWithCalculatedTaxDue])
+              estimatedIncome                         = Some(AmountInPence(1L)),
+              personalAllowance                       = None,
+              hasEstimatedDetailsWithCalculatedTaxDue = Some(sample[HasEstimatedDetailsWithCalculatedTaxDue])
             )
 
           val newAnswers = oldAnswers.copy(personalAllowance = Some(AmountInPence(100L)))
@@ -670,7 +670,9 @@ class YearToDateLiabilityFirstReturnControllerSpec
           draftReturnWithCompleteJourneys,
           draftReturnWithCompleteJourneys.copy(
             yearToDateLiabilityAnswers = Some(
-              ytdAnswers.copy(hasEstimatedDetails = Some(HasEstimatedDetailsWithCalculatedTaxDue(true, calculatedTax)))
+              ytdAnswers.copy(hasEstimatedDetailsWithCalculatedTaxDue =
+                Some(HasEstimatedDetailsWithCalculatedTaxDue(true, calculatedTax))
+              )
             )
           ),
           () => performAction("hasEstimatedDetails" -> "true")
@@ -743,7 +745,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
 
             val updatedDraftReturn = draftReturnWithCompleteJourneys.copy(
               yearToDateLiabilityAnswers = Some(
-                ytdAnswers.copy(hasEstimatedDetails = Some(
+                ytdAnswers.copy(hasEstimatedDetailsWithCalculatedTaxDue = Some(
                   HasEstimatedDetailsWithCalculatedTaxDue(true, calculatedTax)
                 )
                 )
@@ -764,10 +766,11 @@ class YearToDateLiabilityFirstReturnControllerSpec
             val draftReturn = draftReturnWithCompleteJourneys.copy(
               yearToDateLiabilityAnswers = Some(
                 CompleteYearToDateLiabilityAnswers(
-                  estimatedIncome     = AmountInPence.zero,
-                  personalAllowance   = None,
-                  hasEstimatedDetails = HasEstimatedDetailsWithCalculatedTaxDue(false, calculatedTax),
-                  taxDue              = sample[AmountInPence]
+                  estimatedIncome   = AmountInPence.zero,
+                  personalAllowance = None,
+                  hasEstimatedDetailsWithCalculatedTaxDue =
+                    HasEstimatedDetailsWithCalculatedTaxDue(false, calculatedTax),
+                  taxDue = sample[AmountInPence]
                 )
               )
             )
@@ -775,9 +778,10 @@ class YearToDateLiabilityFirstReturnControllerSpec
               draftReturnWithCompleteJourneys.copy(
                 yearToDateLiabilityAnswers = Some(
                   IncompleteYearToDateLiabilityAnswers(
-                    estimatedIncome     = Some(AmountInPence.zero),
-                    personalAllowance   = None,
-                    hasEstimatedDetails = Some(HasEstimatedDetailsWithCalculatedTaxDue(true, calculatedTax)),
+                    estimatedIncome   = Some(AmountInPence.zero),
+                    personalAllowance = None,
+                    hasEstimatedDetailsWithCalculatedTaxDue =
+                      Some(HasEstimatedDetailsWithCalculatedTaxDue(true, calculatedTax)),
                     None
                   )
                 )
@@ -1060,7 +1064,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
       val allQuestionAnswered = IncompleteYearToDateLiabilityAnswers(
         Some(completeAnswers.estimatedIncome),
         completeAnswers.personalAllowance,
-        Some(completeAnswers.hasEstimatedDetails),
+        Some(completeAnswers.hasEstimatedDetailsWithCalculatedTaxDue),
         Some(completeAnswers.taxDue)
       )
 
@@ -1114,9 +1118,9 @@ class YearToDateLiabilityFirstReturnControllerSpec
         "that question has not been answered yet" in {
           testRedirectWhenIncompleteAnswers(
             allQuestionAnswered.copy(
-              estimatedIncome     = Some(AmountInPence.zero),
-              personalAllowance   = None,
-              hasEstimatedDetails = None
+              estimatedIncome                         = Some(AmountInPence.zero),
+              personalAllowance                       = None,
+              hasEstimatedDetailsWithCalculatedTaxDue = None
             ),
             routes.YearToDateLiabilityFirstReturnController.hasEstimatedDetails()
           )
@@ -1216,9 +1220,9 @@ class YearToDateLiabilityFirstReturnControllerSpec
           mockGetSession(
             sessionWithState(
               sample[IncompleteYearToDateLiabilityAnswers].copy(
-                estimatedIncome     = None,
-                personalAllowance   = Some(sample[AmountInPence]),
-                hasEstimatedDetails = Some(sample[HasEstimatedDetailsWithCalculatedTaxDue])
+                estimatedIncome                         = None,
+                personalAllowance                       = Some(sample[AmountInPence]),
+                hasEstimatedDetailsWithCalculatedTaxDue = Some(sample[HasEstimatedDetailsWithCalculatedTaxDue])
               ),
               sample[DisposalDate]
             )._1

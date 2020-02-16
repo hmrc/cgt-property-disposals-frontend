@@ -34,7 +34,7 @@ sealed trait CalculatedTaxDue extends Product with Serializable {
   val gainOrLossAfterReliefs: AmountInPence
   val totalLosses: AmountInPence
   val gainOrLossAfterLosses: AmountInPence
-  val taxableGain: AmountInPence
+  val taxableGainOrNetLoss: AmountInPence
   val yearToDateLiability: AmountInPence
   val amountOfTaxDue: AmountInPence
 }
@@ -49,7 +49,7 @@ object CalculatedTaxDue {
     gainOrLossAfterReliefs: AmountInPence,
     totalLosses: AmountInPence,
     gainOrLossAfterLosses: AmountInPence,
-    taxableGain: AmountInPence,
+    taxableGainOrNetLoss: AmountInPence,
     yearToDateLiability: AmountInPence,
     amountOfTaxDue: AmountInPence
   ) extends CalculatedTaxDue
@@ -62,7 +62,7 @@ object CalculatedTaxDue {
     gainOrLossAfterReliefs: AmountInPence,
     totalLosses: AmountInPence,
     gainOrLossAfterLosses: AmountInPence,
-    taxableGain: AmountInPence,
+    taxableGainOrNetLoss: AmountInPence,
     taxableIncome: AmountInPence,
     taxDueAtLowerRate: TaxableAmountOfMoney,
     taxDueAtHigherRate: TaxableAmountOfMoney,
@@ -83,7 +83,8 @@ object CalculatedTaxDue {
       disposalDetails.disposalPrice -- disposalDetails.disposalFees
 
     val acquisitionAmountPlusCosts: AmountInPence =
-      acquisitionDetails.rebasedAcquisitionPrice.getOrElse(acquisitionDetails.acquisitionPrice) --
+      acquisitionDetails.rebasedAcquisitionPrice.getOrElse(acquisitionDetails.acquisitionPrice) ++
+        acquisitionDetails.improvementCosts ++
         acquisitionDetails.acquisitionFees
 
     val initialGainOrLoss: AmountInPence =
@@ -92,7 +93,7 @@ object CalculatedTaxDue {
     val totalReliefs: AmountInPence = {
       val otherReliefs =
         reliefDetails.otherReliefs.map(_.fold(_.amount, () => AmountInPence.zero)).getOrElse(AmountInPence.zero)
-      (reliefDetails.privateResidentsRelief ++ reliefDetails.lettingsRelief) ++ otherReliefs
+      reliefDetails.privateResidentsRelief ++ reliefDetails.lettingsRelief ++ otherReliefs
     }
 
     val gainOrLossAfterReliefs: AmountInPence =
@@ -103,8 +104,16 @@ object CalculatedTaxDue {
       else
         AmountInPence.zero
 
-    val totalLosses: AmountInPence =
-      exemptionAndLosses.inYearLosses ++ exemptionAndLosses.previousYearsLosses
+    val totalLosses: AmountInPence = {
+      val previousYearsLosses =
+        if (gainOrLossAfterReliefs < AmountInPence.zero ||
+            (gainOrLossAfterReliefs -- exemptionAndLosses.inYearLosses) < AmountInPence.zero)
+          AmountInPence.zero
+        else
+          exemptionAndLosses.previousYearsLosses
+
+      exemptionAndLosses.inYearLosses ++ previousYearsLosses
+    }
 
     val gainOrLossAfterLosses: AmountInPence =
       if (gainOrLossAfterReliefs >= AmountInPence.zero)

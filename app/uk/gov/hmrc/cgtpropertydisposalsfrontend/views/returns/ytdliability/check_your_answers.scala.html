@@ -59,7 +59,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
         }
   @cyaRow(
    messages("hasEstimatedDetails.title"),
-   Html(messages(if(answers.hasEstimatedDetails.hasEstimatedDetails) "generic.yes" else "generic.no")),
+   Html(messages(if(answers.hasEstimatedDetailsWithCalculatedTaxDue.hasEstimatedDetails) "generic.yes" else "generic.no")),
    Some(cyaChange(messages("ytdLiability.cyaChange.hasEstimatedDetails"), routes.YearToDateLiabilityFirstReturnController.hasEstimatedDetails().url))
   )
   @cyaRow(
