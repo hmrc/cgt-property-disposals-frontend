@@ -834,8 +834,8 @@ estimatedIncome.details.p1=The amount should be your total estimated earnings fo
 estimatedIncome.details.p2=Do not include the money you made from selling the property, from ISAs, Tax Credits or income from any foreign employment.
 estimatedIncome.error.required=Enter your estimated income liable for UK tax in this tax year
 estimatedIncome.error.invalid=Estimated income must only include numbers, for example 160,000 or 23,040.50
-estimatedIncome.error.tooSmall=???Too small!
-estimatedIncome.error.tooLarge=Estimated income must be a number less than 50,000,000,000.00
+estimatedIncome.error.tooSmall=Estimated income must be a number between 0 and 50,000,000,000.00
+estimatedIncome.error.tooLarge=Estimated income must be a number between 0 and 50,000,000,000.00
 estimatedIncome.error.tooManyDecimals=Estimated income must be 2 decimal places or less, for example 23,040.50 or 76,000
 
 personalAllowance.title=How much of your Personal Allowance do you want to apply?
@@ -843,8 +843,8 @@ personalAllowance.helpText=Based on your income for the tax year {0} to {1}, you
 personalAllowance.link=<a href="{0}" target="_blank">Find out about Personal Allowances (opens in a new window)</a>.
 personalAllowance.error.required=Enter how much of your Personal Allowance you want to apply
 personalAllowance.error.invalid=Personal Allowance amount must only include numbers, for example 12,500 or 207.50
-personalAllowance.error.tooSmall=???Too small!
-personalAllowance.error.tooLarge=Personal Allowance amount must be {0} or less
+personalAllowance.error.tooSmall=Personal Allowance amount must be a number between 0 and {0}
+personalAllowance.error.tooLarge=Personal Allowance amount must be a number between 0 and {0}
 personalAllowance.error.tooManyDecimals=Personal Allowance amount must be 2 decimal places or less, for example 12,500 or 200.50
 
 hasEstimatedDetails.title=Have any of the details in this return been estimated?
@@ -853,6 +853,11 @@ hasEstimatedDetails.error.required=Select yes if any of the details in this retu
 hasEstimatedDetails.error.boolean=Select yes if any of the details in this return been estimated
 
 taxDue.title=Enter the Capital Gains Tax due for this return
+taxDue.error.required=Enter the amount of Capital Gains Tax due for this return
+taxDue.error.invalid=Amount of Capital Gains Tax due must be a number, for example 493 or 2,040.59
+taxDue.error.tooSmall=Amount of Capital Gains Tax due must be a number between 0 and 50,000,000,000.00
+taxDue.error.tooLarge=Amount of Capital Gains Tax due must be a number between 0 and 50,000,000,000.00
+taxDue.error.tooManyDecimals=Amount of Capital Gains Tax due must have 2 decimal places or less, for example 493 or 2,040.59
 
 mandatoryEvidence.title=Add a document showing how you worked out the tax
 mandatoryEvidence.helpText=Upload one or more documents (maximum file size 5MB) showing how you worked out the Capital Gains Tax. For example, a spreadsheet or PDF.

@@ -327,9 +327,21 @@ class YearToDateLiabilityFirstReturnController @Inject() (
             if (estimatedIncome.value > 0L) {
               commonSubmitBehaviour(fillingOutReturn, answers)(
                 form = personalAllowanceForm(disposalDate)
-              )(
-                page = personalAllowancePage(_, _, disposalDate)
-              )(
+              )(page = {
+                case (form, backLink) =>
+                  val updatedForm = form.copy(errors = form.errors.map(
+                    _.copy(args = Seq(
+                      MoneyUtils
+                        .formatAmountOfMoneyWithoutPoundSign(
+                          disposalDate.taxYear.personalAllowance.inPounds()
+                        )
+                    )
+                    )
+                  )
+                  )
+
+                  personalAllowancePage(updatedForm, backLink, disposalDate)
+              })(
                 requiredPreviousAnswer = _.fold(_.estimatedIncome, c => Some(c.estimatedIncome)),
                 routes.YearToDateLiabilityFirstReturnController.estimatedIncome()
               ) {
