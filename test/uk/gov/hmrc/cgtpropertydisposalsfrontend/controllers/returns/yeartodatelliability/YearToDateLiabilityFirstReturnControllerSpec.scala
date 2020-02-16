@@ -1109,13 +1109,14 @@ class YearToDateLiabilityFirstReturnControllerSpec
       behave like incompleteOtherJourneysBehaviour(() => performAction())
 
       {
-        val oldAnswers = sample[CompleteYearToDateLiabilityAnswers].copy(
-          estimatedIncome   = AmountInPence(0L),
-          personalAllowance = None
+        val oldAnswers = sample[IncompleteYearToDateLiabilityAnswers].copy(
+          estimatedIncome   = Some(AmountInPence(0L)),
+          personalAllowance = None,
+          mandatoryEvidence = None
         )
         val draftReturn = draftReturnWithCompleteJourneys(Some(oldAnswers), sample[DisposalDate])
         val newDraftReturn = draftReturn.copy(
-          yearToDateLiabilityAnswers = Some(oldAnswers.copy(taxDue = AmountInPence(123L)))
+          yearToDateLiabilityAnswers = Some(oldAnswers.copy(taxDue = Some(AmountInPence(123L))))
         )
 
         behave like unsuccessfulUpdateBehaviour(
@@ -1201,13 +1202,13 @@ class YearToDateLiabilityFirstReturnControllerSpec
               Some(AmountInPence(2L)),
               Some(sample[HasEstimatedDetailsWithCalculatedTaxDue]),
               None,
-              None
+              Some(sample[String])
             )
             val draftReturn = draftReturnWithCompleteJourneys(Some(answers), disposalDate)
 
             val updatedDraftReturn = draftReturn.copy(
               yearToDateLiabilityAnswers = Some(
-                answers.copy(taxDue = Some(AmountInPence(101L)))
+                answers.copy(taxDue = Some(AmountInPence(101L)), mandatoryEvidence = None)
               )
             )
 
@@ -1227,14 +1228,20 @@ class YearToDateLiabilityFirstReturnControllerSpec
               AmountInPence(1L),
               Some(AmountInPence(2L)),
               sample[HasEstimatedDetailsWithCalculatedTaxDue],
-              sample[AmountInPence],
+              AmountInPence(1L),
               Some(sample[String])
             )
             val draftReturn = draftReturnWithCompleteJourneys(Some(answers), disposalDate)
 
             val updatedDraftReturn = draftReturn.copy(
               yearToDateLiabilityAnswers = Some(
-                answers.copy(taxDue = AmountInPence(123456L))
+                IncompleteYearToDateLiabilityAnswers(
+                  Some(answers.estimatedIncome),
+                  answers.personalAllowance,
+                  Some(answers.hasEstimatedDetailsWithCalculatedTaxDue),
+                  Some(AmountInPence(123456L)),
+                  None
+                )
               )
             )
 
@@ -1399,6 +1406,88 @@ class YearToDateLiabilityFirstReturnControllerSpec
         }
 
       }
+
+    }
+
+    "handling requests to display the upload mandatory evidence page" must {
+
+      def performAction(): Future[Result] = controller.uploadMandatoryEvidence()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+      behave like commonUploadMandatoryEvidencebehaviour(performAction)
+
+      "display the page" when {
+
+        def test(
+          answers: YearToDateLiabilityAnswers,
+          backLink: Call
+        ): Unit = {
+          val draftReturn = draftReturnWithCompleteJourneys(Some(answers), sample[DisposalDate])
+          val session = SessionData.empty.copy(
+            journeyStatus = Some(
+              sample[FillingOutReturn].copy(
+                draftReturn = draftReturn
+              )
+            )
+          )
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("mandatoryEvidence.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe backLink.url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.YearToDateLiabilityFirstReturnController
+                .uploadMandatoryEvidenceSubmit()
+                .url
+            }
+          )
+        }
+
+        val calculatedTaxDue = sample[GainCalculatedTaxDue].copy(amountOfTaxDue = AmountInPence(100L))
+
+        "the section is incomplete" in {
+          test(
+            IncompleteYearToDateLiabilityAnswers(
+              Some(AmountInPence.zero),
+              None,
+              Some(
+                sample[HasEstimatedDetailsWithCalculatedTaxDue].copy(calculatedTaxDue = calculatedTaxDue)
+              ),
+              Some(AmountInPence(200L)),
+              None
+            ),
+            routes.YearToDateLiabilityFirstReturnController.taxDue()
+          )
+        }
+
+        "the section is complete" in {
+          test(
+            sample[CompleteYearToDateLiabilityAnswers].copy(
+              hasEstimatedDetailsWithCalculatedTaxDue =
+                sample[HasEstimatedDetailsWithCalculatedTaxDue].copy(calculatedTaxDue = calculatedTaxDue),
+              taxDue = AmountInPence(200L)
+            ),
+            routes.YearToDateLiabilityFirstReturnController.checkYourAnswers()
+          )
+        }
+
+      }
+
+    }
+
+    "handling submitted files from the upload mandatory evidence page" must {
+
+      def performAction(): Future[Result] = controller.uploadMandatoryEvidenceSubmit()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+      behave like commonUploadMandatoryEvidencebehaviour(performAction)
 
     }
 
@@ -1666,5 +1755,55 @@ class YearToDateLiabilityFirstReturnControllerSpec
     disposalDate: DisposalDate   = sample[DisposalDate],
     extraMockActions: () => Unit = () => ()
   ): Unit = testSuccessfulUpdatesAfterSubmit(result, Some(oldAnswers), newAnswers, disposalDate, extraMockActions)
+
+  def commonUploadMandatoryEvidencebehaviour(performAction: () => Future[Result]): Unit =
+    "redirect to the check your answers page" when {
+
+      val calculatedTaxDue = sample[GainCalculatedTaxDue].copy(amountOfTaxDue = AmountInPence(100L))
+
+      val answers = IncompleteYearToDateLiabilityAnswers.empty.copy(
+        estimatedIncome   = Some(AmountInPence(1L)),
+        personalAllowance = Some(AmountInPence.zero),
+        hasEstimatedDetailsWithCalculatedTaxDue = Some(
+          sample[HasEstimatedDetailsWithCalculatedTaxDue].copy(
+            calculatedTaxDue = calculatedTaxDue
+          )
+        )
+      )
+
+      "there is no answer to the tax due question" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionWithState(answers, sample[DisposalDate])._1)
+        }
+
+        checkIsRedirect(performAction(), routes.YearToDateLiabilityFirstReturnController.checkYourAnswers())
+      }
+      "there is no answer to the tax due but it is equal to the calculated tax due" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionWithState(answers.copy(taxDue = Some(calculatedTaxDue.amountOfTaxDue)), sample[DisposalDate])._1
+          )
+        }
+
+        checkIsRedirect(performAction(), routes.YearToDateLiabilityFirstReturnController.checkYourAnswers())
+      }
+
+      "the user hasn't verified whether or not any details given in the return were estimates" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionWithState(
+              answers.copy(hasEstimatedDetailsWithCalculatedTaxDue = None),
+              sample[DisposalDate]
+            )._1
+          )
+        }
+
+        checkIsRedirect(performAction(), routes.YearToDateLiabilityFirstReturnController.checkYourAnswers())
+      }
+
+    }
 
 }
