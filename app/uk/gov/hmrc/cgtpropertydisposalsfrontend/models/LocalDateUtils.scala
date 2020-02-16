@@ -19,6 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import java.time.{Clock, LocalDate}
 import java.time.format.DateTimeFormatter
 
+import cats.Order
 import cats.syntax.either._
 import configs.Configs
 import play.api.data.FormError
@@ -97,10 +98,6 @@ object LocalDateUtils {
   def govDisplayFormat(date: LocalDate)(implicit messages: Messages): String =
     s"""${date.getDayOfMonth()} ${messages(s"date.${date.getMonthValue()}")} ${date.getYear()}"""
 
-  implicit val localDateOrdering: Ordering[LocalDate] = _ compareTo _
-
-  implicit class LocalDateOps(private val localDate: LocalDate) extends AnyVal with Ordered[LocalDate] {
-    override def compare(that: LocalDate): Int = localDateOrdering.compare(localDate, that)
-  }
+  implicit val order: Order[LocalDate] = Order.from(_ compareTo _)
 
 }

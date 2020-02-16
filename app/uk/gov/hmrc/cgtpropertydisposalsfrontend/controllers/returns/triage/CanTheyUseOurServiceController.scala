@@ -23,8 +23,8 @@ import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.int._
 import cats.syntax.either._
-import cats.syntax.eq._
-import com.google.inject.Inject
+import cats.syntax.order._
+import com.google.inject.{Inject, Singleton}
 import configs.syntax._
 import play.api.Configuration
 import play.api.data.Forms.{mapping, of}
@@ -38,7 +38,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{r
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => returnsRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.{LocalDateOps, configs}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.{configs, order}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalMethod.{Gifted, Sold}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.{CompleteIndividualTriageAnswers, IncompleteIndividualTriageAnswers}
@@ -56,6 +56,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
+@Singleton
 class CanTheyUseOurServiceController @Inject() (
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,

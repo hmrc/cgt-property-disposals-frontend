@@ -20,7 +20,7 @@ import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.either._
 import cats.syntax.eq._
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms.{mapping, of}
@@ -46,6 +46,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class ExemptionAndLossesController @Inject() (
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,

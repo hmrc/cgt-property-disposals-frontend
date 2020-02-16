@@ -10,6 +10,9 @@ POST   /tax-amount/estimates                          uk.gov.hmrc.cgtpropertydis
 GET   /tax-amount/check-calculation-enter-cgt-due     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnController.taxDue()
 POST  /tax-amount/check-calculation-enter-cgt-due     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnController.taxDueSubmit()
 
+GET  /tax-amount/add-showing-workings                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnController.uploadMandatoryEvidence()
+POST /tax-amount/add-showing-workings                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnController.uploadMandatoryEvidenceSubmit()
+
 GET    /tax-amount/check-answers                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnController.checkYourAnswers()
 POST   /tax-amount/check-answers                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnController.checkYourAnswersSubmit()
 

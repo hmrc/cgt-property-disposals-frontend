@@ -34,13 +34,14 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessP
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscribedUpdateDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue.GainCalculatedTaxDue
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.{CompleteIndividualTriageAnswers, IncompleteIndividualTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.OtherReliefs
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CompleteYearToDateLiabilityAnswers, IncompleteYearToDateLiabilityAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AcquisitionMethod, AssetType, CompletionDate, DisposalDate, DraftReturn, HasEstimatedDetailsWithCalculatedTaxDue, IndividualTriageAnswers, IndividualUserType, NumberOfProperties, ReliefDetailsAnswers, ShareOfProperty, YearToDateLiabilityAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AcquisitionMethod, AssetType, CalculatedTaxDue, CompletionDate, DisposalDate, DraftReturn, HasEstimatedDetailsWithCalculatedTaxDue, IndividualTriageAnswers, IndividualUserType, NumberOfProperties, ReliefDetailsAnswers, ShareOfProperty, YearToDateLiabilityAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanNotifyResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanServiceResponse.{UpscanNotifyEvent, UpscanResponse}
 
@@ -69,6 +70,8 @@ object Generators
     with YearToDateLiabilityAnswersGen {
 
   implicit val booleanGen: Gen[Boolean] = Gen.oneOf(true, false)
+
+  implicit val stringGen: Gen[String] = stringArb.arbitrary
 
   def sample[A](implicit gen: Gen[A]): A =
     gen.sample.getOrElse(sys.error(s"Could not generate instance with $gen"))
@@ -340,5 +343,9 @@ trait YearToDateLiabilityAnswersGen { this: GenUtils =>
 
   implicit val hasEstimatedDetailsWithCalculatedTaxDueGen: Gen[HasEstimatedDetailsWithCalculatedTaxDue] =
     gen[HasEstimatedDetailsWithCalculatedTaxDue]
+
+  implicit val calculatedTaxDueGen: Gen[CalculatedTaxDue] = gen[CalculatedTaxDue]
+
+  implicit val gainCalculatedTaxDueGen: Gen[GainCalculatedTaxDue] = gen[GainCalculatedTaxDue]
 
 }

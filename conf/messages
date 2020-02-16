@@ -854,5 +854,9 @@ hasEstimatedDetails.error.boolean=Select yes if any of the details in this retur
 
 taxDue.title=Enter the Capital Gains Tax due for this return
 
+mandatoryEvidence.title=Add a document showing how you worked out the tax
+mandatoryEvidence.helpText=Upload one or more documents (maximum file size 5MB) showing how you worked out the Capital Gains Tax. For example, a spreadsheet or PDF.
+
 ytdLiability.cya.title=Check your answers
-ytdLiability.cyaLabel.estimatedIncome=What is your estimated income liable for UK tax in this tax year?
+ytdLiability.cyaLabel.mandatoryEvidence=Supporting file
+ytdLiability.cyaChange.mandatoryEvidence=your supporting file

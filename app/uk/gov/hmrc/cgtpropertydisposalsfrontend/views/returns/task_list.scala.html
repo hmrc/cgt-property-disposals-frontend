@@ -49,8 +49,15 @@
       TaskListStatus.CannotStart
   }
 }
-@ytdLiabilityState = @{ draftReturn.yearToDateLiabilityAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress,_ => TaskListStatus.Complete)) }
+@ytdLiabilityState = @{
+ (propertyAddressState, disposalDetailsState, acquistionDetailsState, reliefDetailsState, exemptionsAndLossesState) match {
+  case (TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete) =>
+   draftReturn.yearToDateLiabilityAnswers.fold[TaskListStatus] (TaskListStatus.ToDo) (_.fold (_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete) )
 
+  case _ =>
+     TaskListStatus.CannotStart
+ }
+}
 
 @mainTemplate(title = title, userType = request.userType) {
 

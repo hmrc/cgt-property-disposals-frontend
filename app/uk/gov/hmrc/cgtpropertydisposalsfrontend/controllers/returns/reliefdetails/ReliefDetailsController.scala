@@ -21,7 +21,7 @@ import cats.instances.future._
 import cats.syntax.apply._
 import cats.syntax.either._
 import cats.syntax.eq._
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.data.Forms.{mapping, of}
 import play.api.data.format.Formatter
@@ -49,6 +49,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class ReliefDetailsController @Inject() (
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,

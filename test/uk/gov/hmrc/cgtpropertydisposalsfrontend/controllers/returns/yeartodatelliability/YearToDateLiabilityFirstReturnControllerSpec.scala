@@ -34,6 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutR
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue.GainCalculatedTaxDue
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.{CompleteIndividualTriageAnswers, IncompleteIndividualTriageAnswers}
@@ -42,7 +43,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabili
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, Error, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{CgtCalculationService, ReturnsService}
 
 import scala.concurrent.Future
 
@@ -54,11 +55,14 @@ class YearToDateLiabilityFirstReturnControllerSpec
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
+  val mockCgtCalculationService = mock[CgtCalculationService]
+
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
-      bind[ReturnsService].toInstance(mockReturnsService)
+      bind[ReturnsService].toInstance(mockReturnsService),
+      bind[CgtCalculationService].toInstance(mockCgtCalculationService)
     )
 
   lazy val controller = instanceOf[YearToDateLiabilityFirstReturnController]
@@ -109,6 +113,38 @@ class YearToDateLiabilityFirstReturnControllerSpec
       Some(sample[CompleteExemptionAndLossesAnswers]),
       yearToDateLiabilityAnswers
     )
+
+  def mockCalculationService(
+    triageAnswers: CompleteIndividualTriageAnswers,
+    disposalDetails: CompleteDisposalDetailsAnswers,
+    acquisitionDetails: CompleteAcquisitionDetailsAnswers,
+    reliefDetails: CompleteReliefDetailsAnswers,
+    exemptionAndLosses: CompleteExemptionAndLossesAnswers,
+    estimatedIncome: AmountInPence,
+    personalAllowance: AmountInPence
+  )(result: CalculatedTaxDue) =
+    (
+      mockCgtCalculationService
+        .calculateTaxDue(
+          _: CompleteIndividualTriageAnswers,
+          _: CompleteDisposalDetailsAnswers,
+          _: CompleteAcquisitionDetailsAnswers,
+          _: CompleteReliefDetailsAnswers,
+          _: CompleteExemptionAndLossesAnswers,
+          _: AmountInPence,
+          _: AmountInPence
+        )
+      )
+      .expects(
+        triageAnswers,
+        disposalDetails,
+        acquisitionDetails,
+        reliefDetails,
+        exemptionAndLosses,
+        estimatedIncome,
+        personalAllowance
+      )
+      .returning(result)
 
   "ReliefDetailsController" when {
 
@@ -228,7 +264,8 @@ class YearToDateLiabilityFirstReturnControllerSpec
             performAction("estimatedIncome" -> "1"),
             None,
             IncompleteYearToDateLiabilityAnswers.empty.copy(estimatedIncome = Some(AmountInPence(100L))),
-            sample[DisposalDate]
+            sample[DisposalDate],
+            () => ()
           )
         }
 
@@ -285,6 +322,44 @@ class YearToDateLiabilityFirstReturnControllerSpec
             oldAnswers.copy(estimatedIncome = Some(AmountInPence(100L)), personalAllowance = None)
           )
         }
+      }
+
+      "not do any updates if the submitted answer is the same as one already stored in session and" when {
+
+        "the section is incomplete" in {
+          val answers = sample[IncompleteYearToDateLiabilityAnswers].copy(
+            estimatedIncome   = Some(AmountInPence(1L)),
+            personalAllowance = Some(AmountInPence(2L))
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithState(answers, sample[DisposalDate])._1)
+          }
+
+          checkIsRedirect(
+            performAction("estimatedIncome" -> "0.01"),
+            routes.YearToDateLiabilityFirstReturnController.checkYourAnswers()
+          )
+        }
+
+        "the section is complete" in {
+          val answers = sample[CompleteYearToDateLiabilityAnswers].copy(
+            estimatedIncome   = AmountInPence(1L),
+            personalAllowance = Some(AmountInPence(2L))
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithState(answers, sample[DisposalDate])._1)
+          }
+
+          checkIsRedirect(
+            performAction("estimatedIncome" -> "0.01"),
+            routes.YearToDateLiabilityFirstReturnController.checkYourAnswers()
+          )
+        }
+
       }
 
     }
@@ -507,6 +582,48 @@ class YearToDateLiabilityFirstReturnControllerSpec
 
       }
 
+      "not do any updates if the submitted answer is the same as one already stored in session and" when {
+
+        val disposalDate = sample[DisposalDate].copy(
+          taxYear = sample[TaxYear].copy(personalAllowance = AmountInPence(1000L))
+        )
+
+        "the section is incomplete" in {
+          val answers = sample[IncompleteYearToDateLiabilityAnswers].copy(
+            estimatedIncome   = Some(AmountInPence(1L)),
+            personalAllowance = Some(AmountInPence(2L))
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithState(answers, disposalDate)._1)
+          }
+
+          checkIsRedirect(
+            performAction("personalAllowance" -> "0.02"),
+            routes.YearToDateLiabilityFirstReturnController.checkYourAnswers()
+          )
+        }
+
+        "the section is complete" in {
+          val answers = sample[CompleteYearToDateLiabilityAnswers].copy(
+            estimatedIncome   = AmountInPence(1L),
+            personalAllowance = Some(AmountInPence(2L))
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithState(answers, disposalDate)._1)
+          }
+
+          checkIsRedirect(
+            performAction("personalAllowance" -> "0.02"),
+            routes.YearToDateLiabilityFirstReturnController.checkYourAnswers()
+          )
+        }
+
+      }
+
     }
 
     "handling requests to display the has estimated details page" must {
@@ -623,27 +740,15 @@ class YearToDateLiabilityFirstReturnControllerSpec
         estimatedIncome: AmountInPence,
         personalAllowance: Option[AmountInPence],
         disposalDate: DisposalDate
-      ): (DraftReturn, CalculatedTaxDue, IncompleteYearToDateLiabilityAnswers) = {
+      ): (DraftReturn, IncompleteYearToDateLiabilityAnswers, CalculatedTaxDue => Unit) = {
         val triageAnswers             = sample[CompleteIndividualTriageAnswers].copy(disposalDate = disposalDate)
         val disposalDetailsAnswers    = sample[CompleteDisposalDetailsAnswers]
         val acquisitionDetailsAnswers = sample[CompleteAcquisitionDetailsAnswers]
         val reliefDetailsAnswers      = sample[CompleteReliefDetailsAnswers]
         val exemptionAndLossesAnswers = sample[CompleteExemptionAndLossesAnswers]
-        val estimatedIncome           = AmountInPence(100L)
-        val personalAllowance         = AmountInPence(1L)
         val yearToDateLiabilityAnswers = IncompleteYearToDateLiabilityAnswers.empty.copy(
           estimatedIncome   = Some(estimatedIncome),
-          personalAllowance = Some(personalAllowance)
-        )
-
-        val calculatedTaxDue = CalculatedTaxDue.calculate(
-          triageAnswers,
-          disposalDetailsAnswers,
-          acquisitionDetailsAnswers,
-          reliefDetailsAnswers,
-          exemptionAndLossesAnswers,
-          estimatedIncome,
-          personalAllowance
+          personalAllowance = personalAllowance
         )
 
         val draftReturn = sample[DraftReturn].copy(
@@ -655,7 +760,17 @@ class YearToDateLiabilityFirstReturnControllerSpec
           yearToDateLiabilityAnswers = Some(yearToDateLiabilityAnswers)
         )
 
-        (draftReturn, calculatedTaxDue, yearToDateLiabilityAnswers)
+        val mockCalculateTaxDue: CalculatedTaxDue => Unit = mockCalculationService(
+          triageAnswers,
+          disposalDetailsAnswers,
+          acquisitionDetailsAnswers,
+          reliefDetailsAnswers,
+          exemptionAndLossesAnswers,
+          estimatedIncome,
+          personalAllowance.getOrElse(AmountInPence.zero)
+        )
+
+        (draftReturn, yearToDateLiabilityAnswers, mockCalculateTaxDue)
       }
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -663,8 +778,10 @@ class YearToDateLiabilityFirstReturnControllerSpec
       behave like noEstimatedIncomeBehaviour(() => performAction())
 
       {
-        val (draftReturnWithCompleteJourneys, calculatedTax, ytdAnswers) =
+        val (draftReturnWithCompleteJourneys, ytdAnswers, mockCalculateCgt) =
           state(AmountInPence(1L), Some(AmountInPence(2L)), sample[DisposalDate])
+
+        val calculatedTax = sample[CalculatedTaxDue]
 
         behave like unsuccessfulUpdateBehaviour(
           draftReturnWithCompleteJourneys,
@@ -675,7 +792,8 @@ class YearToDateLiabilityFirstReturnControllerSpec
               )
             )
           ),
-          () => performAction("hasEstimatedDetails" -> "true")
+          () => performAction("hasEstimatedDetails" -> "true"),
+          () => mockCalculateCgt(calculatedTax)
         )
       }
 
@@ -739,8 +857,10 @@ class YearToDateLiabilityFirstReturnControllerSpec
         "all updates are successful and" when {
 
           "the journey was incomplete" in {
-            val disposalDate = sample[DisposalDate]
-            val (draftReturnWithCompleteJourneys, calculatedTax, ytdAnswers) =
+            val disposalDate  = sample[DisposalDate]
+            val calculatedTax = sample[CalculatedTaxDue]
+
+            val (draftReturnWithCompleteJourneys, ytdAnswers, mockCalculateCgt) =
               state(AmountInPence(1L), Some(AmountInPence(2L)), disposalDate)
 
             val updatedDraftReturn = draftReturnWithCompleteJourneys.copy(
@@ -756,13 +876,16 @@ class YearToDateLiabilityFirstReturnControllerSpec
               performAction("hasEstimatedDetails" -> "true"),
               draftReturnWithCompleteJourneys,
               updatedDraftReturn,
-              disposalDate
+              disposalDate,
+              () => mockCalculateCgt(calculatedTax)
             )
           }
 
           "the journey was complete" in {
-            val disposalDate                                        = sample[DisposalDate]
-            val (draftReturnWithCompleteJourneys, calculatedTax, _) = state(AmountInPence.zero, None, disposalDate)
+            val disposalDate                                           = sample[DisposalDate]
+            val calculatedTax                                          = sample[CalculatedTaxDue]
+            val (draftReturnWithCompleteJourneys, _, mockCalculateCgt) = state(AmountInPence.zero, None, disposalDate)
+
             val draftReturn = draftReturnWithCompleteJourneys.copy(
               yearToDateLiabilityAnswers = Some(
                 CompleteYearToDateLiabilityAnswers(
@@ -770,7 +893,8 @@ class YearToDateLiabilityFirstReturnControllerSpec
                   personalAllowance = None,
                   hasEstimatedDetailsWithCalculatedTaxDue =
                     HasEstimatedDetailsWithCalculatedTaxDue(false, calculatedTax),
-                  taxDue = sample[AmountInPence]
+                  taxDue = sample[AmountInPence],
+                  Some(sample[String])
                 )
               )
             )
@@ -782,6 +906,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
                     personalAllowance = None,
                     hasEstimatedDetailsWithCalculatedTaxDue =
                       Some(HasEstimatedDetailsWithCalculatedTaxDue(true, calculatedTax)),
+                    None,
                     None
                   )
                 )
@@ -790,10 +915,80 @@ class YearToDateLiabilityFirstReturnControllerSpec
               performAction("hasEstimatedDetails" -> "true"),
               draftReturn,
               updatedDraftReturn,
-              disposalDate
+              disposalDate,
+              () => mockCalculateCgt(calculatedTax)
             )
           }
         }
+      }
+
+      "not do any updates if the submitted answer is the same as one already stored in session and" when {
+
+        val disposalDate  = sample[DisposalDate]
+        val calculatedTax = sample[CalculatedTaxDue]
+        val (draftReturnWithCompleteJourneys, ytdAnswers, mockCalculateCgt) =
+          state(AmountInPence.zero, None, disposalDate)
+        val hasEstimatedDetailsWithCalculatedTaxDue = HasEstimatedDetailsWithCalculatedTaxDue(true, calculatedTax)
+
+        "the section is incomplete" in {
+
+          val session = SessionData.empty.copy(journeyStatus = Some(
+            sample[FillingOutReturn].copy(
+              draftReturn = draftReturnWithCompleteJourneys.copy(
+                yearToDateLiabilityAnswers = Some(
+                  ytdAnswers.copy(
+                    hasEstimatedDetailsWithCalculatedTaxDue = Some(
+                      hasEstimatedDetailsWithCalculatedTaxDue
+                    )
+                  )
+                )
+              )
+            )
+          )
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockCalculateCgt(calculatedTax)
+          }
+
+          checkIsRedirect(
+            performAction("hasEstimatedDetails" -> "true"),
+            routes.YearToDateLiabilityFirstReturnController.checkYourAnswers()
+          )
+        }
+
+        "the section is complete" in {
+          val session = SessionData.empty.copy(journeyStatus = Some(
+            sample[FillingOutReturn].copy(
+              draftReturn = draftReturnWithCompleteJourneys.copy(
+                yearToDateLiabilityAnswers = Some(
+                  CompleteYearToDateLiabilityAnswers(
+                    ytdAnswers.estimatedIncome.getOrElse(sys.error(("Could not find estimated income"))),
+                    ytdAnswers.personalAllowance,
+                    hasEstimatedDetailsWithCalculatedTaxDue,
+                    sample[AmountInPence],
+                    Some(sample[String])
+                  )
+                )
+              )
+            )
+          )
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockCalculateCgt(calculatedTax)
+          }
+
+          checkIsRedirect(
+            performAction("hasEstimatedDetails" -> "true"),
+            routes.YearToDateLiabilityFirstReturnController.checkYourAnswers()
+          )
+        }
+
       }
 
     }
@@ -884,6 +1079,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
               Some(AmountInPence.zero),
               None,
               Some(sample[HasEstimatedDetailsWithCalculatedTaxDue]),
+              None,
               None
             ),
             routes.YearToDateLiabilityFirstReturnController.hasEstimatedDetails()
@@ -925,7 +1121,8 @@ class YearToDateLiabilityFirstReturnControllerSpec
         behave like unsuccessfulUpdateBehaviour(
           draftReturn,
           newDraftReturn,
-          () => performAction("taxDue" -> "£1.23")
+          () => performAction("taxDue" -> "£1.23"),
+          () => ()
         )
       }
 
@@ -1003,6 +1200,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
               Some(AmountInPence(1L)),
               Some(AmountInPence(2L)),
               Some(sample[HasEstimatedDetailsWithCalculatedTaxDue]),
+              None,
               None
             )
             val draftReturn = draftReturnWithCompleteJourneys(Some(answers), disposalDate)
@@ -1017,7 +1215,8 @@ class YearToDateLiabilityFirstReturnControllerSpec
               performAction("taxDue" -> "1.01"),
               draftReturn,
               updatedDraftReturn,
-              disposalDate
+              disposalDate,
+              () => ()
             )
           }
 
@@ -1028,7 +1227,8 @@ class YearToDateLiabilityFirstReturnControllerSpec
               AmountInPence(1L),
               Some(AmountInPence(2L)),
               sample[HasEstimatedDetailsWithCalculatedTaxDue],
-              sample[AmountInPence]
+              sample[AmountInPence],
+              Some(sample[String])
             )
             val draftReturn = draftReturnWithCompleteJourneys(Some(answers), disposalDate)
 
@@ -1042,7 +1242,8 @@ class YearToDateLiabilityFirstReturnControllerSpec
               performAction("taxDue" -> "£1,234.56"),
               draftReturn,
               updatedDraftReturn,
-              disposalDate
+              disposalDate,
+              () => ()
             )
           }
         }
@@ -1058,14 +1259,16 @@ class YearToDateLiabilityFirstReturnControllerSpec
         AmountInPence(1L),
         Some(AmountInPence(2L)),
         sample[HasEstimatedDetailsWithCalculatedTaxDue],
-        sample[AmountInPence]
+        sample[AmountInPence],
+        Some(sample[String])
       )
 
       val allQuestionAnswered = IncompleteYearToDateLiabilityAnswers(
         Some(completeAnswers.estimatedIncome),
         completeAnswers.personalAllowance,
         Some(completeAnswers.hasEstimatedDetailsWithCalculatedTaxDue),
-        Some(completeAnswers.taxDue)
+        Some(completeAnswers.taxDue),
+        completeAnswers.mandatoryEvidence
       )
 
       def testRedirectWhenIncompleteAnswers(
@@ -1136,6 +1339,25 @@ class YearToDateLiabilityFirstReturnControllerSpec
               taxDue = None
             ),
             routes.YearToDateLiabilityFirstReturnController.taxDue
+          )
+        }
+
+      }
+
+      "redirect to the upload mandatory evidence page" when {
+
+        "that question hasn't been completed yet and the calculated tax due is not the same as the submitted tax due" in {
+          testRedirectWhenIncompleteAnswers(
+            allQuestionAnswered.copy(
+              hasEstimatedDetailsWithCalculatedTaxDue = Some(
+                sample[HasEstimatedDetailsWithCalculatedTaxDue].copy(
+                  calculatedTaxDue = sample[GainCalculatedTaxDue].copy(amountOfTaxDue = AmountInPence(100L))
+                )
+              ),
+              taxDue            = Some(AmountInPence(200L)),
+              mandatoryEvidence = None
+            ),
+            routes.YearToDateLiabilityFirstReturnController.uploadMandatoryEvidence()
           )
         }
 
@@ -1309,20 +1531,23 @@ class YearToDateLiabilityFirstReturnControllerSpec
   def unsuccessfulUpdateBehaviour(
     currentAnswers: YearToDateLiabilityAnswers,
     updatedAnswers: YearToDateLiabilityAnswers,
-    result: () => Future[Result]
+    result: () => Future[Result],
+    extraMockActions: () => Unit = () => ()
   ): Unit = {
     val journey = sessionWithState(currentAnswers, sample[DisposalDate])._2
     unsuccessfulUpdateBehaviour(
       journey.draftReturn,
       journey.draftReturn.copy(yearToDateLiabilityAnswers = Some(updatedAnswers)),
-      result
+      result,
+      extraMockActions
     )
   }
 
   def unsuccessfulUpdateBehaviour(
     currentDraftReturn: DraftReturn,
     updatedDraftReturn: DraftReturn,
-    result: () => Future[Result]
+    result: () => Future[Result],
+    extraMockActions: () => Unit
   ): Unit = {
     val journey = sample[FillingOutReturn].copy(draftReturn = currentDraftReturn)
     val session = SessionData.empty.copy(journeyStatus      = Some(journey))
@@ -1339,6 +1564,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(session)
+          extraMockActions()
           mockStoreDraftReturn(updatedDraftReturn)(Left(Error("")))
         }
 
@@ -1350,6 +1576,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(session)
+          extraMockActions()
           mockStoreDraftReturn(updatedDraftReturn)(Right(()))
           mockStoreSession(updatedSession)(Left(Error("")))
         }
@@ -1391,7 +1618,8 @@ class YearToDateLiabilityFirstReturnControllerSpec
     result: => Future[Result],
     oldDraftReturn: DraftReturn,
     updatedDraftReturn: DraftReturn,
-    disposalDate: DisposalDate
+    disposalDate: DisposalDate,
+    extraMockActions: () => Unit
   ): Unit = {
     val journey = sample[FillingOutReturn].copy(draftReturn = oldDraftReturn.copy(
       triageAnswers = oldDraftReturn.triageAnswers.fold(
@@ -1405,6 +1633,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
     inSequence {
       mockAuthWithNoRetrievals()
       mockGetSession(session)
+      extraMockActions()
       mockStoreDraftReturn(updatedDraftReturn)(Right(()))
       mockStoreSession(
         session.copy(
@@ -1420,20 +1649,22 @@ class YearToDateLiabilityFirstReturnControllerSpec
     result: => Future[Result],
     oldAnswers: Option[YearToDateLiabilityAnswers],
     newAnswers: YearToDateLiabilityAnswers,
-    disposalDate: DisposalDate
+    disposalDate: DisposalDate,
+    extraMockActions: () => Unit
   ): Unit = {
     val draftReturn = draftReturnWithCompleteJourneys(oldAnswers, disposalDate)
     val newDraftReturn = draftReturn.copy(
       yearToDateLiabilityAnswers = Some(newAnswers)
     )
-    testSuccessfulUpdatesAfterSubmit(result, draftReturn, newDraftReturn, disposalDate)
+    testSuccessfulUpdatesAfterSubmit(result, draftReturn, newDraftReturn, disposalDate, extraMockActions)
   }
 
   def testSuccessfulUpdatesAfterSubmit(
     result: => Future[Result],
     oldAnswers: YearToDateLiabilityAnswers,
     newAnswers: YearToDateLiabilityAnswers,
-    disposalDate: DisposalDate = sample[DisposalDate]
-  ): Unit = testSuccessfulUpdatesAfterSubmit(result, Some(oldAnswers), newAnswers, disposalDate)
+    disposalDate: DisposalDate   = sample[DisposalDate],
+    extraMockActions: () => Unit = () => ()
+  ): Unit = testSuccessfulUpdatesAfterSubmit(result, Some(oldAnswers), newAnswers, disposalDate, extraMockActions)
 
 }
