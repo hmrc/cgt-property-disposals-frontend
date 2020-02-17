@@ -21,29 +21,18 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-        summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.summary
+        cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+        cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+        cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
+        addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
 )
 
 @(propertyAddress: UkAddress)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
-
-@title = @{messages("returns.property-address.cya.title")}
-
-@mainTemplate(title = title, userType = request.userType) {
-
-    @pageHeading(title, Some(messages("returns.property-address.caption")))
-
-    @summary(propertyAddress)
-
-    @formWrapper(returns.address.routes.PropertyAddressController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
-        @submitButton(messages("button.confirmAndContinue"))
-    }
-
-    @returnToSummaryLink(displayReturnToSummaryLink = true)
-
+@cyaSection() {
+  @cyaRow(
+    messages("returns.property-address.cyaLabel.property-address"),
+    addressDisplay(propertyAddress, DisplayFormat.Block),
+    Some(cyaChange(messages("returns.property-address.cyaChange.property-address"), returns.address.routes.PropertyAddressController.enterPostcode().url))
+  )
 }

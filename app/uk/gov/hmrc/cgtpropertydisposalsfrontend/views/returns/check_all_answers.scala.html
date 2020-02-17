@@ -17,7 +17,6 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes
-
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn
 
 @this(
@@ -26,21 +25,52 @@
         taskLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.taskLink,
         submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
+        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+        triageSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.summary,
+        addressSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.summary,
+        yearToDateLiabilitySummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.summary,
+        acquisitionDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.acquisitiondetails.summary,
+        disposalDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.disposaldetails.summary,
+        reliefDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.reliefdetails.summary,
+        lossesSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.exemptionandlosses.summary
 )
 
 @(draftReturn: CompleteReturn)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @title = @{ messages("checkAllAnswers.title") }
+@disposalMethod= @{draftReturn.triageAnswers.disposalMethod}
 
 
 @mainTemplate(title = title, userType = request.userType) {
 
  @pageHeading(title)
 
+ <h2>@messages("task-list.triage.link")</h2>
+ @triageSummary(draftReturn.triageAnswers)
+
+ <h2 class="heading-medium">@messages("task-list.enter-property-address.link")</h2>
+ @addressSummary(draftReturn.propertyAddress)
+
+ <h2 class="heading-medium">@messages("task-list.disposals-details.link")</h2>
+ @disposalDetailsSummary(draftReturn.disposalDetails, disposalMethod)
+
+ <h2 class="heading-medium">@messages("task-list.acquisition-details.link")</h2>
+ @acquisitionDetailsSummary(draftReturn.acquisitionDetails)
+
+ <h2 class="heading-medium">@messages("task-list.relief-details.link")</h2>
+ @reliefDetailsSummary(draftReturn.reliefDetails)
+
+ <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
+ @lossesSummary(draftReturn.exemptionsAndLossesDetails)
+
+ <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
+ @yearToDateLiabilitySummary(draftReturn.yearToDateLiabilityAnswers)
 
  @formWrapper(routes.CheckAllAnswersController.checkAllAnswersSubmit(), 'novalidate -> "novalidate") {
-  @submitButton(messages("button.confirmAndContinue"))
+  <h2 class="heading-medium">@messages("checkAllAnswers.declaration")</h2>
+  <p>@messages("checkAllAnswers.declaration.p1")</p>
+  <p>@messages("checkAllAnswers.declaration.p2")</p>
+  @submitButton(messages("button.acceptAndSend"))
  }
 
  @returnToSummaryLink(displayReturnToSummaryLink = true)

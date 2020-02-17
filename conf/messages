@@ -15,6 +15,7 @@ button.tryAgain=Try again
 button.startAgain=Start again
 button.signIn=Sign in
 button.manageAccount=Manage account
+button.acceptAndSend=Accept and send
 
 generic.warning=Warning
 generic.day=Day
@@ -875,3 +876,8 @@ mandatoryEvidence.helpText=Upload one or more documents (maximum file size 5MB) 
 ytdLiability.cya.title=Check your answers
 ytdLiability.cyaLabel.mandatoryEvidence=Supporting file
 ytdLiability.cyaChange.mandatoryEvidence=your supporting file
+
+checkAllAnswers.title=Check your answers before sending the return
+checkAllAnswers.declaration=Declaration
+checkAllAnswers.declaration.p1=By continuing you are confirming that, to the best of your knowledge, the details you are providing are correct.
+checkAllAnswers.declaration.p2=You may have to pay financial penalties and face prosecution if you give incorrect information.
