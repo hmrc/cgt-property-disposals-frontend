@@ -17,9 +17,11 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import java.time.LocalDate
+import cats.syntax.order._
 
 import org.scalacheck.ScalacheckShapeless._
 import org.scalacheck.{Arbitrary, Gen}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AmountInPence._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, IndividualSupplyingInformation, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
@@ -87,7 +89,9 @@ sealed trait GenUtils {
   // define our own Arbitrary instance for String to generate more legible strings
   implicit val stringArb: Arbitrary[String] = Arbitrary(Gen.alphaNumStr)
 
-  implicit val longArb: Arbitrary[Long] = Arbitrary(Gen.chooseNum(0L, 100L))
+  implicit val longArb: Arbitrary[Long] = Arbitrary(Gen.choose(-5e13.toLong, 5e13.toLong))
+
+  implicit val bigDecimalGen: Arbitrary[BigDecimal] = Arbitrary(Gen.choose(0L, 1e9.toLong).map(BigDecimal(_)))
 
   implicit val localDateArb: Arbitrary[LocalDate] = Arbitrary(
     Gen.chooseNum(0, Int.MaxValue).map(LocalDate.ofEpochDay(_))
@@ -336,10 +340,20 @@ trait ExemptionAndLossesAnswersGen { this: GenUtils =>
 trait YearToDateLiabilityAnswersGen { this: GenUtils =>
 
   implicit val completeYTDLiabilityAnswersGen: Gen[CompleteYearToDateLiabilityAnswers] =
-    gen[CompleteYearToDateLiabilityAnswers]
+    gen[CompleteYearToDateLiabilityAnswers].map {
+      case a: CompleteYearToDateLiabilityAnswers
+          if a.estimatedIncome > AmountInPence.zero && a.personalAllowance.isEmpty =>
+        a.copy(personalAllowance = Some(AmountInPence.zero))
+      case other => other
+    }
 
   implicit val incompleteYTDLiabilityAnswersGen: Gen[IncompleteYearToDateLiabilityAnswers] =
-    gen[IncompleteYearToDateLiabilityAnswers]
+    gen[IncompleteYearToDateLiabilityAnswers].map {
+      case a: IncompleteYearToDateLiabilityAnswers
+          if a.estimatedIncome.exists(_ > AmountInPence.zero) && a.personalAllowance.isEmpty =>
+        a.copy(personalAllowance = Some(AmountInPence.zero))
+      case other => other
+    }
 
   implicit val hasEstimatedDetailsWithCalculatedTaxDueGen: Gen[HasEstimatedDetailsWithCalculatedTaxDue] =
     gen[HasEstimatedDetailsWithCalculatedTaxDue]
