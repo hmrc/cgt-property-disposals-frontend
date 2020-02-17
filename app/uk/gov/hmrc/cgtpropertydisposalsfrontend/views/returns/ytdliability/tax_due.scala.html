@@ -36,7 +36,8 @@
         backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
         errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
         caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
-        unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input
+        unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
+        calcRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_row
 )
 
 @(form: Form[BigDecimal],
@@ -63,9 +64,18 @@
         @errorSummary(form)
     }
 
-    @caption(messages("ytdLiability.caption"))
+    @pageHeading(messages(s"$key.title"), Some(messages("ytdLiability.caption")))
 
-    @pageHeading(messages(s"$key.title"))
+    <p>@messages(s"$key.p1")</p>
+
+    <ul class="calc-rows">
+      <li>
+        @calcRow(calculatedTax.initialGainOrLoss, messages("taxDue.initialGainOrLoss"))
+      </li>
+      <li>
+        @calcRow(calculatedTax.gainOrLossAfterReliefs, messages("taxDue.gainOrLossAfterReliefs"))
+      </li>
+    </ul>
 
     <p>We think your tax due is @{MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.amountOfTaxDue.inPounds())}</p>
 

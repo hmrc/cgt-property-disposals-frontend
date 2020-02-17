@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import cats.Order
 import cats.instances.long._
+import cats.syntax.order._
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Format
 
@@ -39,6 +40,12 @@ object AmountInPence {
     def withFloorZero: AmountInPence = if (a.value < 0L) AmountInPence.zero else a
 
     def withCeilingZero: AmountInPence = if (a.value > 0L) AmountInPence.zero else a
+
+    def isNegative: Boolean = a < AmountInPence.zero
+
+    def isZero: Boolean = a.value === 0L
+
+    def abs(): AmountInPence = if (a.isNegative) AmountInPence(-a.value) else a
 
   }
 
