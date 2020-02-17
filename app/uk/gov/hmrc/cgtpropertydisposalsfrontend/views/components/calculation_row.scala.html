@@ -19,11 +19,13 @@
 
 @this()
 
-@(total: AmountInPence, label: String)(implicit messages: Messages)
+@(total: AmountInPence, label: String, showGainType: Boolean)(implicit messages: Messages)
 
 <span class="calc-total">
   @{MoneyUtils.formatAmountOfMoneyWithPoundSign(total.abs().inPounds())}
+ @if(showGainType) {
   @{if (total.isNegative) s"(${messages("generic.loss")})" else if (!total.isZero) s"(${messages("generic.gain")})"}
+ }
 </span>
 <h2 class="heading-medium">
    @label

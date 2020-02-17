@@ -70,10 +70,19 @@
 
     <ul class="calc-rows">
       <li>
-        @calcRow(calculatedTax.initialGainOrLoss, messages("taxDue.initialGainOrLoss"))
+        @calcRow(calculatedTax.initialGainOrLoss, messages("taxDue.initialGainOrLoss"), true)
       </li>
       <li>
-        @calcRow(calculatedTax.gainOrLossAfterReliefs, messages("taxDue.gainOrLossAfterReliefs"))
+        @calcRow(calculatedTax.gainOrLossAfterReliefs, messages("taxDue.gainOrLossAfterReliefs"), true)
+      </li>
+      <li>
+      @calcRow(calculatedTax.gainOrLossAfterLosses, messages("taxDue.gainAfterLosses"), true)
+      </li>
+      <li>
+      @calcRow(calculatedTax.taxableGainOrNetLoss, messages("taxDue.taxableGain"), true)
+      </li>
+      <li>
+      @calcRow(calculatedTax.amountOfTaxDue, messages("taxDue.amountOfTaxDue"), false)
       </li>
     </ul>
 
