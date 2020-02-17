@@ -57,6 +57,10 @@ fieldset .form-hint {
     margin-bottom: 5px;
 }
 
+.with-bottom-margin {
+    margin-bottom: 1.875em;
+}
+
 /*
     Assets Frontend does not render focus styles accessibly
  */

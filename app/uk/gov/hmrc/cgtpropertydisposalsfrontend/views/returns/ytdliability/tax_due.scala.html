@@ -68,7 +68,7 @@
 
     <p>@messages(s"$key.p1")</p>
 
-    <ul class="calc-rows">
+    <ul class="calc-rows with-bottom-margin">
       <li>
         @calcRow(calculatedTax.initialGainOrLoss, messages("taxDue.initialGainOrLoss"), true)
       </li>
@@ -86,18 +86,16 @@
       </li>
     </ul>
 
-    <p>We think your tax due is @{MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.amountOfTaxDue.inPounds())}</p>
-
-    <p>What do <em>you</em> think it is?</p>
-
     @formWrapper(routes.YearToDateLiabilityFirstReturnController.taxDueSubmit(), 'novalidate -> "novalidate") {
         @unitInput(
             fieldId = key,
             value = form.data.getOrElse(key, ""),
             formError = form.error(key),
             hasErrors = form.error(key).nonEmpty,
-            label = Html(""),
+            label = Html(messages("taxDue.title")),
+            labelClass = Some("govuk-label--m"),
             labelAsHeading = false,
+            helpText = Some(Html(messages("taxDue.helpText", MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.amountOfTaxDue.inPounds())))),
             autoComplete = AutoCompleteType.On,
             inputClass = Some("small"),
             aspect = "left",
