@@ -19,5 +19,7 @@ POST /confirm-property-address           uk.gov.hmrc.cgtpropertydisposalsfronten
 
 GET  /task-list                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.TaskListController.taskList()
 
-GET   /check-answers-accept-send         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersController.checkAllAnswers()
-POST  /check-answers-accept-send         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersController.checkAllAnswersSubmit()
+GET   /check-answers-accept-send         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.checkAllAnswers()
+POST  /check-answers-accept-send         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.checkAllAnswersSubmit()
+
+GET   /return-sent-confirmation          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.confirmationOfSubmission()

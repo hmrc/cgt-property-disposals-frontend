@@ -27,7 +27,7 @@ import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftReturn, SubmitReturnResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.GetDraftReturnResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -40,6 +40,10 @@ trait ReturnsService {
   def storeDraftReturn(draftReturn: DraftReturn)(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit]
 
   def getDraftReturns(cgtReference: CgtReference)(implicit hc: HeaderCarrier): EitherT[Future, Error, List[DraftReturn]]
+
+  def submitReturn(completeReturn: CompleteReturn)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, SubmitReturnResponse]
 
 }
 
@@ -66,6 +70,19 @@ class ReturnsServiceImpl @Inject() (connector: ReturnsConnector)(implicit ec: Ex
           .map(_.draftReturns)
       } else {
         Left(Error(s"Call to get draft returns came back with status ${httpResponse.status}}"))
+      }
+    }
+
+  def submitReturn(
+    completeReturn: CompleteReturn
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, SubmitReturnResponse] =
+    connector.submitReturn(completeReturn).subflatMap { httpResponse =>
+      if (httpResponse.status === OK) {
+        httpResponse
+          .parseJSON[SubmitReturnResponse]()
+          .leftMap(Error(_))
+      } else {
+        Left(Error(s"Call to get submit return came back with status ${httpResponse.status}}"))
       }
     }
 

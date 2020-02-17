@@ -21,7 +21,7 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftReturn}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
@@ -36,6 +36,8 @@ trait ReturnsConnector {
 
   def getDraftReturns(cgtReference: CgtReference)(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
 
+  def submitReturn(completeReturn: CompleteReturn)(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
+
 }
 
 @Singleton
@@ -48,6 +50,8 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
   val storeDraftReturnUrl: String = s"$baseUrl/draft-return"
 
   def getDraftReturnsUrl(cgtReference: CgtReference): String = s"$baseUrl/draft-returns/${cgtReference.value}"
+
+  val submitReturnUrl: String = s"$baseUrl/return"
 
   override def storeDraftReturn(
     draftReturn: DraftReturn
@@ -67,6 +71,16 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
     EitherT[Future, Error, HttpResponse](
       http
         .get(getDraftReturnsUrl(cgtReference))
+        .map(Right(_))
+        .recover {
+          case NonFatal(e) => Left(Error(e))
+        }
+    )
+
+  def submitReturn(completeReturn: CompleteReturn)(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
+    EitherT[Future, Error, HttpResponse](
+      http
+        .post(submitReturnUrl, completeReturn)
         .map(Right(_))
         .recover {
           case NonFatal(e) => Left(Error(e))

@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
+import java.time.LocalDate
+
 import cats.Eq
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
@@ -25,7 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscriptionDetails}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, IndividualTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftReturn, IndividualTriageAnswers, SubmitReturnResponse}
 
 sealed trait JourneyStatus extends Product with Serializable
 
@@ -84,6 +86,11 @@ object JourneyStatus {
     ggCredId: GGCredId,
     agentReferenceNumber: Option[AgentReferenceNumber],
     draftReturn: DraftReturn
+  ) extends JourneyStatus
+
+  final case class JustSubmittedReturn(
+    completeReturn: CompleteReturn,
+    submissionResponse: SubmitReturnResponse
   ) extends JourneyStatus
 
   final case class AlreadySubscribedWithDifferentGGAccount(ggCredId: GGCredId, cgtReference: Option[CgtReference])

@@ -66,7 +66,7 @@
  <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
  @yearToDateLiabilitySummary(draftReturn.yearToDateLiabilityAnswers)
 
- @formWrapper(routes.CheckAllAnswersController.checkAllAnswersSubmit(), 'novalidate -> "novalidate") {
+ @formWrapper(routes.CheckAllAnswersAndSubmitController.checkAllAnswersSubmit(), 'novalidate -> "novalidate") {
   <h2 class="heading-medium">@messages("checkAllAnswers.declaration")</h2>
   <p>@messages("checkAllAnswers.declaration.p1")</p>
   <p>@messages("checkAllAnswers.declaration.p2")</p>

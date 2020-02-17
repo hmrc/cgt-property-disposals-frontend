@@ -16,32 +16,39 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 
+import cats.data.EitherT
+import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{routes => baseRoutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, routes => baseRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.{returns => pages}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class CheckAllAnswersController @Inject() (
+class CheckAllAnswersAndSubmitController @Inject() (
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
+  returnsService: ReturnsService,
   cc: MessagesControllerComponents,
-  checkAllAnswersPage: pages.check_all_answers
-)(implicit viewConfig: ViewConfig)
+  checkAllAnswersPage: pages.check_all_answers,
+  confirmationOfSubmissionPage: pages.confirmation_of_submission
+)(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
+    with SessionUpdates
     with Logging {
 
   def checkAllAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
@@ -54,7 +61,30 @@ class CheckAllAnswersController @Inject() (
   def checkAllAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withCompleteDraftReturn(request) {
       case (_, _, completeReturn) =>
-        Ok(s"going to submit to DES: $completeReturn")
+        val result =
+          for {
+            response <- returnsService.submitReturn(completeReturn)
+            _ <- EitherT(
+                  updateSession(sessionStore, request)(
+                    _.copy(journeyStatus = Some(JustSubmittedReturn(completeReturn, response)))
+                  )
+                )
+          } yield ()
+
+        result.fold(
+          { e =>
+            logger.warn("Error while try to submit return and udpate session", e)
+            errorHandler.errorResult()
+          },
+          _ => Redirect(routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission())
+        )
+    }
+  }
+
+  def confirmationOfSubmission(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    request.sessionData.flatMap(_.journeyStatus) match {
+      case Some(j: JustSubmittedReturn) => Ok(confirmationOfSubmissionPage(j))
+      case _                            => Redirect(baseRoutes.StartController.start())
     }
   }
 
