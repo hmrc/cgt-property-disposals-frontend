@@ -38,6 +38,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.{CompleteIndividualTriageAnswers, IncompleteIndividualTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CompleteYearToDateLiabilityAnswers, IncompleteYearToDateLiabilityAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus
 
@@ -394,6 +395,87 @@ class TaskListControllerSpec
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
               reliefDetailsAnswers      = Some(sample[CompleteReliefDetailsAnswers]),
               exemptionAndLossesAnswers = Some(sample[CompleteExemptionAndLossesAnswers])
+            ),
+            TaskListStatus.Complete
+          )
+        }
+      }
+
+      "display the page with the proper year to date liability section status" when {
+
+        def test(draftReturn: DraftReturn, expectedStatus: TaskListStatus) =
+          testStateOfSection(draftReturn)(
+            "enterCgtLiability",
+            messageFromMessageKey("task-list.enter-cgt-liability.link"),
+            yeartodatelliability.routes.YearToDateLiabilityFirstReturnController.checkYourAnswers(),
+            expectedStatus
+          )
+
+        "the session data indicates that the exemptions and losses section has not yet been started" in {
+          test(
+            sample[DraftReturn].copy(
+              propertyAddress            = Some(sample[UkAddress]),
+              disposalDetailsAnswers     = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
+              reliefDetailsAnswers       = Some(sample[CompleteReliefDetailsAnswers]),
+              exemptionAndLossesAnswers  = None,
+              yearToDateLiabilityAnswers = None
+            ),
+            TaskListStatus.CannotStart
+          )
+        }
+
+        "the session data indicates that the reliefs section is has not yet been completed" in {
+          test(
+            sample[DraftReturn].copy(
+              propertyAddress            = Some(sample[UkAddress]),
+              disposalDetailsAnswers     = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
+              reliefDetailsAnswers       = Some(sample[CompleteReliefDetailsAnswers]),
+              exemptionAndLossesAnswers  = Some(sample[IncompleteExemptionAndLossesAnswers]),
+              yearToDateLiabilityAnswers = None
+            ),
+            TaskListStatus.CannotStart
+          )
+        }
+
+        "the reliefs section has been completed and the section has not been started yet" in {
+          test(
+            sample[DraftReturn].copy(
+              propertyAddress            = Some(sample[UkAddress]),
+              disposalDetailsAnswers     = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
+              reliefDetailsAnswers       = Some(sample[CompleteReliefDetailsAnswers]),
+              exemptionAndLossesAnswers  = Some(sample[CompleteExemptionAndLossesAnswers]),
+              yearToDateLiabilityAnswers = None
+            ),
+            TaskListStatus.ToDo
+          )
+        }
+
+        "the session data indicates that they are filling in a return and they have started the section but not complete it yet" in {
+          test(
+            sample[DraftReturn].copy(
+              propertyAddress            = Some(sample[UkAddress]),
+              disposalDetailsAnswers     = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
+              reliefDetailsAnswers       = Some(sample[CompleteReliefDetailsAnswers]),
+              exemptionAndLossesAnswers  = Some(sample[CompleteExemptionAndLossesAnswers]),
+              yearToDateLiabilityAnswers = Some(sample[IncompleteYearToDateLiabilityAnswers])
+            ),
+            TaskListStatus.InProgress
+          )
+        }
+
+        "the session data indicates that they are filling in a return and they have completed the section" in {
+          test(
+            sample[DraftReturn].copy(
+              propertyAddress            = Some(sample[UkAddress]),
+              disposalDetailsAnswers     = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
+              reliefDetailsAnswers       = Some(sample[CompleteReliefDetailsAnswers]),
+              exemptionAndLossesAnswers  = Some(sample[CompleteExemptionAndLossesAnswers]),
+              yearToDateLiabilityAnswers = Some(sample[CompleteYearToDateLiabilityAnswers])
             ),
             TaskListStatus.Complete
           )

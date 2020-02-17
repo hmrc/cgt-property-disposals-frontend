@@ -20,7 +20,7 @@ import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.either._
 import cats.syntax.eq._
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms.{mapping, of}
@@ -46,6 +46,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class ExemptionAndLossesController @Inject() (
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
@@ -425,20 +426,20 @@ class ExemptionAndLossesController @Inject() (
 
 object ExemptionAndLossesController {
 
-  val inYearLossesForm: Form[Double] =
+  val inYearLossesForm: Form[BigDecimal] =
     MoneyUtils.amountInPoundsYesNoForm("inYearLosses", "inYearLossesValue")
 
-  val previousYearsLossesForm: Form[Double] =
+  val previousYearsLossesForm: Form[BigDecimal] =
     MoneyUtils.amountInPoundsYesNoForm("previousYearsLosses", "previousYearsLossesValue")
 
-  def annualExemptAmountForm(maximumAnnualExemptAmount: AmountInPence): Form[Double] =
+  def annualExemptAmountForm(maximumAnnualExemptAmount: AmountInPence): Form[BigDecimal] =
     Form(
       mapping(
         "annualExemptAmount" -> of(MoneyUtils.amountInPoundsFormatter(_ < 0, _ > maximumAnnualExemptAmount.inPounds()))
       )(identity)(Some(_))
     )
 
-  val taxableGainOrLossForm: Form[Double] = {
+  val taxableGainOrLossForm: Form[BigDecimal] = {
     val (outerId, gainId, lossId) = ("taxableGainOrLoss", "taxableGain", "netLoss")
 
     def innerOption(id: String): InnerOption[BigDecimal] =
@@ -463,16 +464,16 @@ object ExemptionAndLossesController {
       )
     ) { d =>
       if (d > 0)
-        Map(outerId -> "0", gainId -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign(d.toDouble))
+        Map(outerId -> "0", gainId -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign(d))
       else if (d < 0)
-        Map(outerId -> "1", lossId -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign((d * -1).toDouble))
+        Map(outerId -> "1", lossId -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign((d * -1)))
       else
         Map(outerId -> "2")
     }
 
     Form(
       mapping(
-        "" -> of(formatter).transform[Double](_.toDouble, BigDecimal(_))
+        "" -> of(formatter)
       )(identity)(Some(_))
     )
   }

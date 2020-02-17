@@ -178,7 +178,7 @@ class ExemptionAndLossesControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteExemptionAndLossesAnswers].copy(
-                  inYearLosses = Some(AmountInPence(0L))
+                  inYearLosses = Some(AmountInPence.zero)
                 ),
                 sample[DisposalDate],
                 sample[CompleteReliefDetailsAnswers]
@@ -365,7 +365,7 @@ class ExemptionAndLossesControllerSpec
               performAction(
                 "inYearLosses" -> "1"
               )
-            )(answers, answers.copy(inYearLosses = Some(AmountInPence(0L))))
+            )(answers, answers.copy(inYearLosses = Some(AmountInPence.zero)))
           }
 
           "the user selects yes and submits a valid value and the journey was complete" in {
@@ -376,7 +376,7 @@ class ExemptionAndLossesControllerSpec
               performAction(
                 "inYearLosses" -> "1"
               )
-            )(answers, answers.copy(inYearLosses = AmountInPence(0L)))
+            )(answers, answers.copy(inYearLosses = AmountInPence.zero))
           }
 
         }
@@ -387,7 +387,7 @@ class ExemptionAndLossesControllerSpec
 
         "the value submitted hasn't changed" in {
           val answers =
-            sample[CompleteExemptionAndLossesAnswers].copy(inYearLosses = AmountInPence(0L))
+            sample[CompleteExemptionAndLossesAnswers].copy(inYearLosses = AmountInPence.zero)
           val session = sessionWithState(answers, sample[DisposalDate], sample[CompleteReliefDetailsAnswers])._1
 
           inSequence {
@@ -490,7 +490,7 @@ class ExemptionAndLossesControllerSpec
               sessionWithState(
                 sample[IncompleteExemptionAndLossesAnswers].copy(
                   inYearLosses        = Some(sample[AmountInPence]),
-                  previousYearsLosses = Some(AmountInPence(0L))
+                  previousYearsLosses = Some(AmountInPence.zero)
                 ),
                 sample[DisposalDate],
                 sample[CompleteReliefDetailsAnswers]
@@ -684,7 +684,7 @@ class ExemptionAndLossesControllerSpec
               performAction(
                 "previousYearsLosses" -> "1"
               )
-            )(answers, answers.copy(previousYearsLosses = Some(AmountInPence(0L))))
+            )(answers, answers.copy(previousYearsLosses = Some(AmountInPence.zero)))
           }
 
           "the user selects yes and submits a valid value and the journey was complete" in {
@@ -695,7 +695,7 @@ class ExemptionAndLossesControllerSpec
               performAction(
                 "previousYearsLosses" -> "1"
               )
-            )(answers, answers.copy(previousYearsLosses = AmountInPence(0L)))
+            )(answers, answers.copy(previousYearsLosses = AmountInPence.zero))
 
           }
 
@@ -1124,7 +1124,7 @@ class ExemptionAndLossesControllerSpec
         }
 
         "the amount answered previously is neither a gain or loss" in {
-          val amount = AmountInPence(0L)
+          val amount = AmountInPence.zero
 
           mockActions(
             sample[CompleteExemptionAndLossesAnswers].copy(taxableGainOrLoss = Some(amount))
@@ -1214,7 +1214,7 @@ class ExemptionAndLossesControllerSpec
           sample[CompleteExemptionAndLossesAnswers].copy(taxableGainOrLoss = None)
         val (session, journey) = sessionWithState(answers, sample[DisposalDate], reliefsAnswersWithOtherReliefs)
         val updatedDraftReturn = journey.draftReturn.copy(exemptionAndLossesAnswers = Some(
-          answers.copy(taxableGainOrLoss = Some(AmountInPence(0L)))
+          answers.copy(taxableGainOrLoss = Some(AmountInPence.zero))
         )
         )
 
@@ -1301,7 +1301,7 @@ class ExemptionAndLossesControllerSpec
               )
             )(
               answers,
-              answers.copy(taxableGainOrLoss = Some(AmountInPence(0L))),
+              answers.copy(taxableGainOrLoss = Some(AmountInPence.zero)),
               reliefDetailsAnswers = reliefsAnswersWithOtherReliefs
             )
           }

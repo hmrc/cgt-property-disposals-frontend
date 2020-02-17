@@ -15,8 +15,10 @@
  *@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.MoneyUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDate
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 
 @this(
@@ -31,11 +33,14 @@
         caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(form: Form[BigDecimal], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
-@key = @{ "acquisitionPrice" }
-@title = @{messages("acquisitionPrice.title")}
-@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@(form: Form[BigDecimal], backLink: Call, disposalDate: DisposalDate)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@key = @{ "personalAllowance" }
+@taxYearStartYear = @{disposalDate.taxYear.startDateInclusive.getYear.toString}
+@taxYearEndYear = @{disposalDate.taxYear.endDateExclusive.getYear.toString}
+@personalAllowance = @{ MoneyUtils.formatAmountOfMoneyWithPoundSign(disposalDate.taxYear.personalAllowance.inPounds())}
 
+@title = @{messages(s"$key.title", taxYearStartYear, taxYearEndYear)}
+@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
 
@@ -45,9 +50,9 @@
         @errorSummary(form)
     }
 
-    @caption(messages("acquisitionDetails.caption"))
+    @caption(messages("ytdLiability.caption"))
 
-    @formWrapper(routes.AcquisitionDetailsController.acquisitionPriceSubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(routes.YearToDateLiabilityFirstReturnController.personalAllowanceSubmit(), 'novalidate -> "novalidate") {
         @unitInput(
             fieldId = key,
             value = form.data.getOrElse(key, ""),
@@ -55,7 +60,7 @@
             hasErrors = form.error(key).nonEmpty,
             label = Html(title),
             labelAsHeading = true,
-            helpText = Some(Html(messages(s"$key.helpText"))),
+            helpText = Some(Html(messages(s"$key.helpText", taxYearStartYear, taxYearEndYear, personalAllowance))),
             autoComplete = AutoCompleteType.On,
             inputClass = Some("small"),
             aspect = "left",
@@ -63,6 +68,7 @@
             assistiveText = messages("unit-input.assistive.pounds")
         )
 
+        <p>@Html(messages(s"$key.link", viewConfig.personalAllowanceUrl))</p>
         @submitButton(messages("button.continue"))
     }
 

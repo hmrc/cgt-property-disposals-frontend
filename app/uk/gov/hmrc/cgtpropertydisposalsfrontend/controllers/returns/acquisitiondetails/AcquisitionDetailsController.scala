@@ -22,7 +22,7 @@ import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.either._
 import cats.syntax.eq._
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.data.Forms.{mapping, of}
 import play.api.data.format.Formatter
@@ -48,6 +48,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class AcquisitionDetailsController @Inject() (
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
@@ -671,20 +672,20 @@ object AcquisitionDetailsController {
     )(AcquisitionDate(_))(d => Some(d.value))
   )
 
-  val acquisitionPriceForm: Form[Double] =
+  val acquisitionPriceForm: Form[BigDecimal] =
     Form(
       mapping(
         "acquisitionPrice" -> of(MoneyUtils.amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds))
       )(identity)(Some(_))
     )
 
-  val rebasedAcquisitionPriceForm: Form[Double] =
+  val rebasedAcquisitionPriceForm: Form[BigDecimal] =
     MoneyUtils.amountInPoundsYesNoForm("rebaseAcquisitionPrice", "rebaseAcquisitionPriceValue")
 
-  val improvementCostsForm: Form[Double] =
+  val improvementCostsForm: Form[BigDecimal] =
     MoneyUtils.amountInPoundsYesNoForm("improvementCosts", "improvementCostsValue")
 
-  val acquisitionFeesForm: Form[Double] =
+  val acquisitionFeesForm: Form[BigDecimal] =
     MoneyUtils.amountInPoundsYesNoForm("acquisitionFees", "acquisitionFeesValue")
 
 }

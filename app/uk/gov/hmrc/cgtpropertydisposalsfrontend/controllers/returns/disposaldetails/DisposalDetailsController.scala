@@ -22,7 +22,7 @@ import cats.instances.bigDecimal._
 import cats.instances.future._
 import cats.syntax.either._
 import cats.syntax.eq._
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.data.Forms.{of, mapping => formMapping}
 import play.api.data.format.Formatter
@@ -48,6 +48,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
+@Singleton
 class DisposalDetailsController @Inject() (
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
@@ -373,7 +374,7 @@ object DisposalDetailsController {
               Left(FormError(percentageKey, "error.tooManyDecimals"))
             else if (d === BigDecimal(100)) Right(ShareOfProperty.Full)
             else if (d === BigDecimal(50)) Right(ShareOfProperty.Half)
-            else Right(ShareOfProperty.Other(d.toDouble))
+            else Right(ShareOfProperty.Other(d))
           }
 
       ConditionalRadioUtils.formatter(shareOfPropertyKey)(
@@ -406,14 +407,14 @@ object DisposalDetailsController {
 
   implicit val fillingOutReturnEq: Eq[FillingOutReturn] = Eq.fromUniversalEquals
 
-  val disposalPriceForm: Form[Double] =
+  val disposalPriceForm: Form[BigDecimal] =
     Form(
       formMapping(
         "disposalPrice" -> of(MoneyUtils.amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds))
       )(identity)(Some(_))
     )
 
-  val disposalFeesForm: Form[Double] =
+  val disposalFeesForm: Form[BigDecimal] =
     Form(
       formMapping(
         "disposalFees" -> of(MoneyUtils.amountInPoundsFormatter(_ < 0, _ > MoneyUtils.maxAmountOfPounds))

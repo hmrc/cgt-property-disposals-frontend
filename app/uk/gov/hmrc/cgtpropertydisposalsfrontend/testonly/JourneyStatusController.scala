@@ -24,7 +24,7 @@ import cats.data.OptionT
 import cats.instances.either._
 import cats.instances.string._
 import cats.syntax.either._
-import cats.syntax.eq._
+import cats.syntax.order._
 import com.google.inject.Inject
 import configs.syntax._
 import play.api.Configuration
@@ -36,7 +36,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingNewDraftReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.order
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.IncompleteIndividualTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, TaxYear}

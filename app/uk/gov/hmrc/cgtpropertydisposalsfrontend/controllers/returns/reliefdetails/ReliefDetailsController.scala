@@ -21,7 +21,7 @@ import cats.instances.future._
 import cats.syntax.apply._
 import cats.syntax.either._
 import cats.syntax.eq._
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.data.Forms.{mapping, of}
 import play.api.data.format.Formatter
@@ -49,6 +49,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class ReliefDetailsController @Inject() (
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
@@ -400,15 +401,15 @@ class ReliefDetailsController @Inject() (
 
 object ReliefDetailsController {
 
-  val privateResidentsReliefForm: Form[Double] =
+  val privateResidentsReliefForm: Form[BigDecimal] =
     MoneyUtils.amountInPoundsYesNoForm("privateResidentsRelief", "privateResidentsReliefValue")
 
-  val lettingsReliefForm: Form[Double] =
+  val lettingsReliefForm: Form[BigDecimal] =
     MoneyUtils.amountInPoundsYesNoForm("lettingsRelief", "lettingsReliefValue")
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
-  val otherReliefsForm: Form[Either[(String, Double), Unit]] = {
-    val formatter: Formatter[Either[(String, Double), Unit]] = {
+  val otherReliefsForm: Form[Either[(String, BigDecimal), Unit]] = {
+    val formatter: Formatter[Either[(String, BigDecimal), Unit]] = {
       val (otherReliefKey, otherReliefsNameKey, otherReliefsAmountKey) =
         ("otherReliefs", "otherReliefsName", "otherReliefsAmount")
 
@@ -429,7 +430,7 @@ object ReliefDetailsController {
             )
             .leftMap(NonEmptyList.one(_))
 
-        val amountResult: ValidatedNel[FormError, Double] =
+        val amountResult: ValidatedNel[FormError, BigDecimal] =
           Validated
             .fromEither(
               FormUtils
@@ -442,12 +443,12 @@ object ReliefDetailsController {
                   )(_)
                 )
             )
-            .bimap(NonEmptyList.one(_), _.toDouble)
+            .leftMap(NonEmptyList.one(_))
 
         (nameResult, amountResult).mapN(_ -> _).toEither.leftMap(_.toList)
       }
 
-      ConditionalRadioUtils.formatter[Either[(String, Double), Unit]](otherReliefKey)(
+      ConditionalRadioUtils.formatter[Either[(String, BigDecimal), Unit]](otherReliefKey)(
         List(
           Left(innerOption.map(Left(_))),
           Right(Right(()))

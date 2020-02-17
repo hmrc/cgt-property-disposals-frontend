@@ -22,7 +22,7 @@ import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
-import cats.syntax.eq._
+import cats.syntax.order._
 import com.typesafe.config.ConfigFactory
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.Configuration
@@ -34,17 +34,17 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DateErrorScenarios.{DateErrorScenario, dateErrorScenarios}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => homeRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => returnsRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.LocalDateOps
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.order
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.{CompleteIndividualTriageAnswers, IncompleteIndividualTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, Error, JourneyStatus, SessionData, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -82,11 +82,9 @@ class CanTheyUseOurServiceControllerSpec
       else
         earliestDisposalDate.getYear - 1
 
-    TaxYear(
-      LocalDate.of(startYear, 4, 6),
-      LocalDate.of(startYear + 1, 4, 6),
-      sample[AmountInPence],
-      sample[AmountInPence]
+    sample[TaxYear].copy(
+      startDateInclusive = LocalDate.of(startYear, 4, 6),
+      endDateExclusive   = LocalDate.of(startYear + 1, 4, 6)
     )
   }
 
@@ -100,6 +98,14 @@ class CanTheyUseOurServiceControllerSpec
         |    annual-exempt-amount {
         |      general              = ${taxYear.annualExemptAmountGeneral.inPounds()}
         |      non-vulnerable-trust = ${taxYear.annualExemptAmountNonVulnerableTrust.inPounds()}
+        |    }
+        |    personal-allowance = ${taxYear.personalAllowance.inPounds()}
+        |    income-tax-higher-rate-threshold = ${taxYear.incomeTaxHigherRateThreshold.inPounds()}
+        |    cgt-rates {
+        |      lower-band-residential      = ${taxYear.cgtRateLowerBandResidential}
+        |      lower-band-non-residential  = ${taxYear.cgtRateLowerBandNonResidential}
+        |      higher-band-residential     = ${taxYear.cgtRateHigherBandResidential}
+        |      higher-band-non-residential = ${taxYear.cgtRateHigherBandNonResidential}
         |    }
         |  }
         | ]
@@ -962,6 +968,7 @@ class CanTheyUseOurServiceControllerSpec
           uuid,
           startingNewDraftReturn.subscribedDetails.cgtReference,
           completeAnswers,
+          None,
           None,
           None,
           None,

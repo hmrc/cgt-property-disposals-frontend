@@ -33,7 +33,7 @@
         caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(form: Form[Either[(String, Double), Unit]], backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(form: Form[Either[(String, BigDecimal), Unit]], backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
 @key = @{"otherReliefs"}
 @nameKey = @{"otherReliefsName"}
 @valueKey = @{"otherReliefsAmount"}

@@ -31,13 +31,13 @@ import scala.util.Try
 
 object MoneyUtils {
 
-  val maxAmountOfPounds: Double = 5e10
+  val maxAmountOfPounds: BigDecimal = BigDecimal("5e10")
 
   private val currencyFormatter = java.text.NumberFormat.getCurrencyInstance(Locale.UK)
 
-  def formatAmountOfMoneyWithPoundSign(d: Double): String = currencyFormatter.format(d).stripSuffix(".00")
+  def formatAmountOfMoneyWithPoundSign(d: BigDecimal): String = currencyFormatter.format(d).stripSuffix(".00")
 
-  def formatAmountOfMoneyWithoutPoundSign(d: Double): String = formatAmountOfMoneyWithPoundSign(d).stripPrefix("£")
+  def formatAmountOfMoneyWithoutPoundSign(d: BigDecimal): String = formatAmountOfMoneyWithPoundSign(d).stripPrefix("£")
 
   def validateAmountOfMoney(key: String, isTooSmall: BigDecimal => Boolean, isTooLarge: BigDecimal => Boolean)(
     s: String
@@ -51,21 +51,24 @@ object MoneyUtils {
         else Right(d)
       }
 
-  def amountInPoundsFormatter(isTooSmall: BigDecimal => Boolean, isTooLarge: BigDecimal => Boolean): Formatter[Double] =
-    new Formatter[Double] {
-      override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Double] = {
+  def amountInPoundsFormatter(
+    isTooSmall: BigDecimal => Boolean,
+    isTooLarge: BigDecimal => Boolean
+  ): Formatter[BigDecimal] =
+    new Formatter[BigDecimal] {
+      override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], BigDecimal] = {
         val result =
           FormUtils.readValue(key, data, identity).flatMap(validateAmountOfMoney(key, isTooSmall, isTooLarge)(_))
-        result.bimap(Seq(_), _.toDouble)
+        result.leftMap(Seq(_))
       }
 
-      override def unbind(key: String, value: Double): Map[String, String] =
+      override def unbind(key: String, value: BigDecimal): Map[String, String] =
         Map(key -> formatAmountOfMoneyWithoutPoundSign(value))
     }
 
   // form for yes/no radio page with no mapping to £0 and yes expecting an amount of money
   // to be submitted
-  def amountInPoundsYesNoForm(optionId: String, valueId: String): Form[Double] = {
+  def amountInPoundsYesNoForm(optionId: String, valueId: String): Form[BigDecimal] = {
     val innerOption = InnerOption { data =>
       FormUtils
         .readValue(valueId, data, identity)
@@ -83,22 +86,22 @@ object MoneyUtils {
       ConditionalRadioUtils.formatter(optionId)(
         List(
           Left(innerOption),
-          Right(BigDecimal(0))
+          Right(BigDecimal("0"))
         )
       ) { d =>
-        if (d === BigDecimal(0)) {
+        if (d === BigDecimal("0")) {
           Map(optionId -> "1")
         } else {
           Map(
             optionId -> "0",
-            valueId  -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign(d.toDouble)
+            valueId  -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign(d)
           )
         }
       }
 
     Form(
       mapping(
-        "" -> of(formatter).transform[Double](_.toDouble, BigDecimal(_))
+        "" -> of(formatter)
       )(identity)(Some(_))
     )
   }

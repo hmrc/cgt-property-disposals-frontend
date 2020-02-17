@@ -16,26 +16,28 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import julienrf.json.derived
-import play.api.libs.json.OFormat
+import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AmountInPence
 
-sealed trait ShareOfProperty extends Product with Serializable {
-  val percentageValue: BigDecimal
-}
+import scala.math.BigDecimal.RoundingMode
 
-object ShareOfProperty {
+final case class TaxableAmountOfMoney(
+  taxRate: BigDecimal,
+  taxableAmount: AmountInPence
+)
 
-  case object Full extends ShareOfProperty {
-    val percentageValue: BigDecimal = BigDecimal("100")
+object TaxableAmountOfMoney {
+
+  implicit class TaxableAmountOfMoneyOps(private val t: TaxableAmountOfMoney) extends AnyVal {
+
+    def taxDue(): AmountInPence = {
+      val result = (BigDecimal(t.taxableAmount.value.toString) * (BigDecimal(t.taxRate.toString))) / BigDecimal("100")
+
+      AmountInPence(result.setScale(0, RoundingMode.DOWN).longValue())
+    }
+
   }
 
-  case object Half extends ShareOfProperty {
-    val percentageValue: BigDecimal = BigDecimal("50")
-  }
-
-  final case class Other(percentageValue: BigDecimal) extends ShareOfProperty
-
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[ShareOfProperty] = derived.oformat()
+  implicit val format: OFormat[TaxableAmountOfMoney] = Json.format
 
 }

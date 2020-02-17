@@ -1,0 +1,96 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.MoneyUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AmountInPence
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.CompleteIndividualTriageAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+
+@this(
+        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+        unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input
+)
+
+@(form: Form[BigDecimal],
+  backLink: Call,
+  triageAnswers: CompleteIndividualTriageAnswers,
+  disposalDetails: CompleteDisposalDetailsAnswers,
+  acquisitionDetails: CompleteAcquisitionDetailsAnswers,
+  reliefDetails: CompleteReliefDetailsAnswers,
+  exemptionsAndLossesDetails: CompleteExemptionAndLossesAnswers,
+  estimatedIncome: AmountInPence,
+  personalAllowance: AmountInPence,
+  calculatedTax: CalculatedTaxDue
+)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+
+@key = @{ "taxDue" }
+@title = @{messages(s"$key.title")}
+@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+
+@mainTemplate(title = title, userType = request.userType) {
+
+   @backLinkComponent(backLink)
+
+    @if(hasErrors) {
+        @errorSummary(form)
+    }
+
+    @caption(messages("ytdLiability.caption"))
+
+    @pageHeading(messages(s"$key.title"))
+
+    <p>We think your tax due is @{MoneyUtils.formatAmountOfMoneyWithPoundSign(calculatedTax.amountOfTaxDue.inPounds())}</p>
+
+    <p>What do <em>you</em> think it is?</p>
+
+    @formWrapper(routes.YearToDateLiabilityFirstReturnController.taxDueSubmit(), 'novalidate -> "novalidate") {
+        @unitInput(
+            fieldId = key,
+            value = form.data.getOrElse(key, ""),
+            formError = form.error(key),
+            hasErrors = form.error(key).nonEmpty,
+            label = Html(""),
+            labelAsHeading = false,
+            autoComplete = AutoCompleteType.On,
+            inputClass = Some("small"),
+            aspect = "left",
+            unit = "£",
+            assistiveText = messages("unit-input.assistive.pounds")
+        )
+
+        @submitButton(messages("button.continue"))
+    }
+
+    @returnToSummaryLink(displayReturnToSummaryLink = true)
+
+
+}
+

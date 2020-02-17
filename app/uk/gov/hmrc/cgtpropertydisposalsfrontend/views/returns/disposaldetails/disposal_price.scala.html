@@ -33,7 +33,7 @@ unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_i
 caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(form: Form[Double], backLink: Call, disposalMethod: DisposalMethod, shareOfProperty: ShareOfProperty)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[BigDecimal], backLink: Call, disposalMethod: DisposalMethod, shareOfProperty: ShareOfProperty)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 @key = @{ "disposalPrice" }
 @title = @{messages(disposalPriceTitleKey(disposalMethod, shareOfProperty))}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
