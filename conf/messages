@@ -25,6 +25,8 @@ generic.yes=Yes
 generic.no=No
 generic.success=Success
 generic.errorPrefix=Error:
+generic.loss=loss
+generic.gain=gain
 yesNo.true=Yes
 yesNo.false=No
 
@@ -853,6 +855,13 @@ hasEstimatedDetails.error.required=Select yes if any of the details in this retu
 hasEstimatedDetails.error.boolean=Select yes if any of the details in this return been estimated
 
 taxDue.title=Enter the Capital Gains Tax due for this return
+taxDue.p1=We used the details that were entered into this return to work out the amount of Capital Gains Tax due.
+taxDue.initialGainOrLoss=Initial gain or loss
+taxDue.gainOrLossAfterReliefs=Gain or loss after reliefs
+taxDue.gainAfterLosses=Gain after losses
+taxDue.taxableGain=Taxable gain
+taxDue.amountOfTaxDue=Capital Gains Tax due for this return
+taxDue.helpText=If you agree with these workings enter {0}. If you want to enter a different amount you will be asked to upload a file later showing your workings.
 taxDue.error.required=Enter the amount of Capital Gains Tax due for this return
 taxDue.error.invalid=Amount of Capital Gains Tax due must be a number, for example 493 or 2,040.59
 taxDue.error.tooSmall=Amount of Capital Gains Tax due must be a number between 0 and 50,000,000,000.00

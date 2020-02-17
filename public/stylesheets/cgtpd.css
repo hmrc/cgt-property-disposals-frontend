@@ -57,6 +57,10 @@ fieldset .form-hint {
     margin-bottom: 5px;
 }
 
+.with-bottom-margin {
+    margin-bottom: 1.875em;
+}
+
 /*
     Assets Frontend does not render focus styles accessibly
  */
@@ -555,4 +559,17 @@ input:focus + .hmcts-currency-input__symbol.right {
     border-top-width: 4px;
     border-bottom-width: 4px;
     border-right-width: 3px;
+}
+
+.calc-rows > li {
+    position: relative;
+    border-bottom: 1px solid #aaa;
+}
+
+.calc-total {
+    font-family: "nta", Arial, sans-serif;
+    position: absolute;
+    top: 8px;
+    right: 0;
+    font-weight: bold;
 }
