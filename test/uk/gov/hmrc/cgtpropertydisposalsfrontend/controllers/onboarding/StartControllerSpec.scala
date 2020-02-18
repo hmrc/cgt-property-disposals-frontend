@@ -38,7 +38,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AgentStatus, AlreadySubscribedWithDifferentGGAccount, FillingOutReturn, NonGovernmentGatewayJourney, RegistrationStatus, StartingNewDraftReturn, Subscribed, SubscriptionStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AgentStatus, AlreadySubscribedWithDifferentGGAccount, FillingOutReturn, JustSubmittedReturn, NonGovernmentGatewayJourney, RegistrationStatus, StartingNewDraftReturn, Subscribed, SubscriptionStatus}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.RetrievedUserType.Individual
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
@@ -1811,6 +1811,34 @@ class StartControllerSpec
             )
 
             checkIsRedirect(performAction(), controllers.accounts.homepage.routes.HomePageController.homepage())
+          }
+
+        }
+      }
+
+      "the session data indicates the user has just submitted a return" must {
+
+        "redirect to the submission confirmation screen" in {
+          inSequence {
+            mockAuthWithAllRetrievals(
+              ConfidenceLevel.L200,
+              Some(AffinityGroup.Individual),
+              None,
+              None,
+              None,
+              Set(cgtEnrolment),
+              Some(retrievedGGCredId)
+            )
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(sample[JustSubmittedReturn])
+              )
+            )
+
+            checkIsRedirect(
+              performAction(),
+              controllers.returns.routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission()
+            )
           }
 
         }

@@ -61,13 +61,13 @@ object CompleteReturn {
   }
 
   implicit val format: OFormat[CompleteReturn] = {
-    implicit val f1: OFormat[CompleteIndividualTriageAnswers]    = Json.format
-    implicit val f2: OFormat[UkAddress]                          = Json.format
-    implicit val f3: OFormat[CompleteDisposalDetailsAnswers]     = Json.format
-    implicit val f4: OFormat[CompleteAcquisitionDetailsAnswers]  = Json.format
-    implicit val f5: OFormat[CompleteReliefDetailsAnswers]       = Json.format
-    implicit val f6: OFormat[CompleteExemptionAndLossesAnswers]  = Json.format
-    implicit val f7: OFormat[CompleteYearToDateLiabilityAnswers] = Json.format
+    implicit val triageFormat: OFormat[CompleteIndividualTriageAnswers]                 = Json.format
+    implicit val ukAddressFormat: OFormat[UkAddress]                                    = Json.format
+    implicit val disposalDetailsFormat: OFormat[CompleteDisposalDetailsAnswers]         = Json.format
+    implicit val acquisitionDetailsFormat: OFormat[CompleteAcquisitionDetailsAnswers]   = Json.format
+    implicit val reliefDetailsFormat: OFormat[CompleteReliefDetailsAnswers]             = Json.format
+    implicit val exemptionAndLossesFormat: OFormat[CompleteExemptionAndLossesAnswers]   = Json.format
+    implicit val yearToDateLiabilityFormat: OFormat[CompleteYearToDateLiabilityAnswers] = Json.format
     Json.format
   }
 

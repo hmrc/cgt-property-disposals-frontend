@@ -25,6 +25,7 @@
         taskLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.taskLink,
         submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
         triageSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.summary,
         addressSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.summary,
@@ -42,6 +43,8 @@
 
 
 @mainTemplate(title = title, userType = request.userType) {
+
+ @backLinkComponent(routes.TaskListController.taskList())
 
  @pageHeading(title)
 

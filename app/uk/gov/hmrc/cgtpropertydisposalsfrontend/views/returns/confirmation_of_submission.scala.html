@@ -68,7 +68,7 @@
    @Html(messages(s"$key.howToPay", justSubmittedReturn.submissionResponse.chargeReference))
   </p>
 
-  @formWrapper(routes.CheckAllAnswersAndSubmitController.checkAllAnswersSubmit()) {
+  @formWrapper(routes.CheckAllAnswersAndSubmitController.payReturn()) {
     @submitButton(messages("button.payNow"))
   }
 

@@ -75,7 +75,7 @@ class ReturnsServiceImpl @Inject() (connector: ReturnsConnector)(implicit ec: Ex
       }
     }
 
-  val test: Boolean = true
+  val test: Boolean = false
 
   def submitReturn(
     completeReturn: CompleteReturn

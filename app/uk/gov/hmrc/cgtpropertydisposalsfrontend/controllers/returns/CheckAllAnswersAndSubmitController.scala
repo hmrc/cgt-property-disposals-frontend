@@ -23,11 +23,12 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, routes => baseRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{PaymentsService, ReturnsService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.{returns => pages}
@@ -42,6 +43,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
   returnsService: ReturnsService,
+  paymentsService: PaymentsService,
   cc: MessagesControllerComponents,
   checkAllAnswersPage: pages.check_all_answers,
   confirmationOfSubmissionPage: pages.confirmation_of_submission
@@ -91,11 +93,42 @@ class CheckAllAnswersAndSubmitController @Inject() (
   }
 
   def confirmationOfSubmission(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withJustSubmittedReturn(request)(j => Ok(confirmationOfSubmissionPage(j)))
+  }
+
+  def payReturn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withJustSubmittedReturn(request) { j =>
+      paymentsService
+        .startPaymentJourney(
+          j.completeReturn.cgtReference,
+          j.submissionResponse.chargeReference,
+          j.submissionResponse.amount,
+          routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission(),
+          homepage.routes.HomePageController.homepage()
+        )
+        .fold(
+          { e =>
+            logger.warn("Could not start payments journey", e)
+            errorHandler.errorResult()
+          }, { paymentsJourney =>
+            logger.info(
+              s"Payment journey started with journey id ${paymentsJourney.journeyId}. Redirecting to ${paymentsJourney.nextUrl}"
+            )
+            Redirect(paymentsJourney.nextUrl)
+          }
+        )
+
+    }
+
+  }
+
+  private def withJustSubmittedReturn(
+    request: RequestWithSessionData[_]
+  )(f: JustSubmittedReturn => Future[Result]): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(j: JustSubmittedReturn) => Ok(confirmationOfSubmissionPage(j))
+      case Some(j: JustSubmittedReturn) => f(j)
       case _                            => Redirect(baseRoutes.StartController.start())
     }
-  }
 
   private def withCompleteDraftReturn(
     request: RequestWithSessionData[_]
