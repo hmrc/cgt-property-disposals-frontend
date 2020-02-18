@@ -20,12 +20,15 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.MoneyUtils.formatAmountOfMoneyWithPoundSign
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => accountRoutes}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
+
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
         pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
         submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        exitSurveyLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.exit_survey
+        exitSurveyLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.exit_survey,
+        warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 )
 
 @(justSubmittedReturn: JustSubmittedReturn)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
@@ -58,6 +61,8 @@
   </p>
 
   <h2 class="heading-medium">@messages(s"$key.whatNext")</h2>
+
+  @warning(messages(s"$key.warning", LocalDateUtils.govDisplayFormat(justSubmittedReturn.submissionResponse.dueDate)))
 
   <p>
    @Html(messages(s"$key.howToPay", justSubmittedReturn.submissionResponse.chargeReference))
