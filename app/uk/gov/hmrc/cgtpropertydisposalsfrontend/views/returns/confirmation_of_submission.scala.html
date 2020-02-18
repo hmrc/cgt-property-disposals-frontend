@@ -17,22 +17,66 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.JustSubmittedReturn
-
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.MoneyUtils.formatAmountOfMoneyWithPoundSign
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => accountRoutes}
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
         pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
         submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
+        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+        exitSurveyLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.exit_survey
 )
 
 @(justSubmittedReturn: JustSubmittedReturn)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
-@title = @{ messages("confirmationOfSubmission.title") }
+@key=@{"confirmationOfSubmission"}
+@title = @{ messages(s"$key.title") }
 
 @mainTemplate(title = title, userType = request.userType) {
 
-    @pageHeading(title)
+ <div class="govuk-box-highlight">
+  <h1 class="heading-xlarge">@title</h1>
+  <span class="heading-large" style="font-weight: normal;">
+    @messages(s"$key.taxOwed")
+    <strong style="display:block; font-weight: bold;">
+     @{{formatAmountOfMoneyWithPoundSign(justSubmittedReturn.submissionResponse.amount.inPounds())}}
+    </strong>
+  </span>
+  <span class="heading-large" style="font-weight: normal;">
+   @messages(s"$key.returnReference")
+   <strong style="display:block; font-weight: bold;">@{{justSubmittedReturn.submissionResponse.formBundleId}}</strong>
+  </span>
+ </div>
 
-    <p>@{justSubmittedReturn}</p>
+  <p>
+   @Html(messages(s"$key.emailSent", justSubmittedReturn.subscribedDetails.emailAddress.value))
+  </p>
+
+  <p>
+   <a href="JavaScript: window.print();">@messages(s"$key.printPage")</a>
+  </p>
+
+  <h2 class="heading-medium">@messages(s"$key.whatNext")</h2>
+
+  <p>
+   @Html(messages(s"$key.howToPay", justSubmittedReturn.submissionResponse.chargeReference))
+  </p>
+
+  @formWrapper(routes.CheckAllAnswersAndSubmitController.checkAllAnswersSubmit()) {
+    @submitButton(messages("button.payNow"))
+  }
+
+ <div class="panel panel-border-wide">
+   <h2 class="heading-medium">@messages(s"$key.ifSa")</h2>
+   <p>@Html(messages(s"$key.ifSa.p1", viewConfig.selfAssessmentUrl))</p>
+ </div>
+
+  <p>
+   @Html(messages(s"$key.returnToAccount", accountRoutes.HomePageController.homepage().url))
+  </p>
+
+ @exitSurveyLink(viewConfig.returnsExitSurveyUrl)
+
 
 }

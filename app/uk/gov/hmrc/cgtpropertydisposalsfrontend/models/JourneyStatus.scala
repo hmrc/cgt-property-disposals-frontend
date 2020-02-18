@@ -89,6 +89,9 @@ object JourneyStatus {
   ) extends JourneyStatus
 
   final case class JustSubmittedReturn(
+    subscribedDetails: SubscribedDetails,
+    ggCredId: GGCredId,
+    agentReferenceNumber: Option[AgentReferenceNumber],
     completeReturn: CompleteReturn,
     submissionResponse: SubmitReturnResponse
   ) extends JourneyStatus

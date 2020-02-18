@@ -60,13 +60,22 @@ class CheckAllAnswersAndSubmitController @Inject() (
 
   def checkAllAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withCompleteDraftReturn(request) {
-      case (_, _, completeReturn) =>
+      case (_, fillingOutReturn, completeReturn) =>
         val result =
           for {
             response <- returnsService.submitReturn(completeReturn)
             _ <- EitherT(
                   updateSession(sessionStore, request)(
-                    _.copy(journeyStatus = Some(JustSubmittedReturn(completeReturn, response)))
+                    _.copy(journeyStatus = Some(
+                      JustSubmittedReturn(
+                        fillingOutReturn.subscribedDetails,
+                        fillingOutReturn.ggCredId,
+                        fillingOutReturn.agentReferenceNumber,
+                        completeReturn,
+                        response
+                      )
+                    )
+                    )
                   )
                 )
           } yield ()

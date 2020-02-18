@@ -92,7 +92,12 @@ class ReturnsServiceImpl @Inject() (connector: ReturnsConnector)(implicit ec: Ex
       }
     } else {
       EitherT.pure(
-        SubmitReturnResponse("0987654321AB", completeReturn.yearToDateLiabilityAnswers.taxDue, LocalDate.of(2021, 2, 1))
+        SubmitReturnResponse(
+          "XDCGTX100006",
+          completeReturn.yearToDateLiabilityAnswers.taxDue,
+          LocalDate.of(2021, 2, 1),
+          "0987654321AB"
+        )
       )
     }
 
