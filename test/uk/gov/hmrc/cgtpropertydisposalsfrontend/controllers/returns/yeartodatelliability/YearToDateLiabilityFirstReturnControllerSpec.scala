@@ -1626,7 +1626,10 @@ class YearToDateLiabilityFirstReturnControllerSpec
     result: () => Future[Result],
     extraMockActions: () => Unit = () => ()
   ): Unit = {
-    val journey = sessionWithState(currentAnswers, sample[DisposalDate])._2
+    val journey = sessionWithState(
+      currentAnswers,
+      sample[DisposalDate].copy(taxYear = sample[TaxYear].copy(personalAllowance = AmountInPence(Long.MaxValue)))
+    )._2
     unsuccessfulUpdateBehaviour(
       journey.draftReturn,
       journey.draftReturn.copy(yearToDateLiabilityAnswers = Some(updatedAnswers)),
