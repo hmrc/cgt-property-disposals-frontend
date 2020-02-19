@@ -280,8 +280,8 @@ class CheckAllAnswersAndSubmitControllerSpec
               justSubmittedReturn.completeReturn.cgtReference,
               justSubmittedReturn.submissionResponse.chargeReference,
               justSubmittedReturn.submissionResponse.amount,
-              routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission(),
-              homepage.routes.HomePageController.homepage()
+              homepage.routes.HomePageController.homepage(),
+              routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission()
             )(Right(paymentJourney))
 
             checkIsRedirect(performAction(), paymentJourney.nextUrl)

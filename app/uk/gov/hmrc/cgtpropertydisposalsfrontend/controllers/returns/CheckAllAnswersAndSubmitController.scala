@@ -103,8 +103,8 @@ class CheckAllAnswersAndSubmitController @Inject() (
           j.completeReturn.cgtReference,
           j.submissionResponse.chargeReference,
           j.submissionResponse.amount,
-          routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission(),
-          homepage.routes.HomePageController.homepage()
+          homepage.routes.HomePageController.homepage(),
+          routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission()
         )
         .fold(
           { e =>

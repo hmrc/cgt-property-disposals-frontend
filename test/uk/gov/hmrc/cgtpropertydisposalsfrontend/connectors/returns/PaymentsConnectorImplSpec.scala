@@ -21,7 +21,6 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.Json
 import play.api.{Configuration, Mode}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.PaymentsConnectorImpl.StartPaymentJourneyRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.{ConnectorSpec, HttpSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AmountInPence
@@ -66,7 +65,7 @@ class PaymentsConnectorImplSpec extends WordSpec with Matchers with MockFactory 
       val amount          = sample[AmountInPence]
       val returnCall      = controllers.routes.StartController.start()
       val backCall        = controllers.routes.EmailWhitelistingController.thereIsAProblem()
-      val expectedUrl     = "http://host:123/pay-api-capital-gains-tax/journey/start"
+      val expectedUrl     = "http://host:123/pay-api/capital-gains-tax/journey/start"
 
       behave like connectorBehaviour(
         mockPost(
