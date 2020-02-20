@@ -29,7 +29,7 @@ import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftReturn, SubmitReturnResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftReturn, SubmitReturnRequest, SubmitReturnResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.GetDraftReturnResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -43,7 +43,7 @@ trait ReturnsService {
 
   def getDraftReturns(cgtReference: CgtReference)(implicit hc: HeaderCarrier): EitherT[Future, Error, List[DraftReturn]]
 
-  def submitReturn(completeReturn: CompleteReturn)(
+  def submitReturn(submitReturnRequest: SubmitReturnRequest)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, SubmitReturnResponse]
 
@@ -78,10 +78,10 @@ class ReturnsServiceImpl @Inject() (connector: ReturnsConnector)(implicit ec: Ex
   val test: Boolean = false
 
   def submitReturn(
-    completeReturn: CompleteReturn
+    submitReturnRequest: SubmitReturnRequest
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, SubmitReturnResponse] =
     if (!test) {
-      connector.submitReturn(completeReturn).subflatMap { httpResponse =>
+      connector.submitReturn(submitReturnRequest).subflatMap { httpResponse =>
         if (httpResponse.status === OK) {
           httpResponse
             .parseJSON[SubmitReturnResponse]()
@@ -94,7 +94,7 @@ class ReturnsServiceImpl @Inject() (connector: ReturnsConnector)(implicit ec: Ex
       EitherT.pure(
         SubmitReturnResponse(
           "XDCGTX100006",
-          completeReturn.yearToDateLiabilityAnswers.taxDue,
+          submitReturnRequest.completeReturn.yearToDateLiabilityAnswers.taxDue,
           LocalDate.of(2021, 2, 1),
           "0987654321AB"
         )

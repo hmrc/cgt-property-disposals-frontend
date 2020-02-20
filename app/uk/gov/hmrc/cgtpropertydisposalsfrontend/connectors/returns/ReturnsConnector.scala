@@ -21,7 +21,7 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftReturn, SubmitReturnRequest}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
@@ -36,7 +36,9 @@ trait ReturnsConnector {
 
   def getDraftReturns(cgtReference: CgtReference)(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
 
-  def submitReturn(completeReturn: CompleteReturn)(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
+  def submitReturn(submitReturnRequest: SubmitReturnRequest)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, HttpResponse]
 
 }
 
@@ -77,10 +79,12 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
         }
     )
 
-  def submitReturn(completeReturn: CompleteReturn)(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
+  def submitReturn(
+    submitReturnRequest: SubmitReturnRequest
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
     EitherT[Future, Error, HttpResponse](
       http
-        .post(submitReturnUrl, completeReturn)
+        .post(submitReturnUrl, submitReturnRequest)
         .map(Right(_))
         .recover {
           case NonFatal(e) => Left(Error(e))

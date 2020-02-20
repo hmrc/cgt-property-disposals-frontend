@@ -25,7 +25,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 
 final case class DraftReturn(
   id: UUID,
-  cgtReference: CgtReference,
   triageAnswers: IndividualTriageAnswers,
   propertyAddress: Option[UkAddress],
   disposalDetailsAnswers: Option[DisposalDetailsAnswers],

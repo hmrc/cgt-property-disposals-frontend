@@ -26,7 +26,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, rou
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, SubmitReturnRequest}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{PaymentsService, ReturnsService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
@@ -63,9 +63,11 @@ class CheckAllAnswersAndSubmitController @Inject() (
   def checkAllAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withCompleteDraftReturn(request) {
       case (_, fillingOutReturn, completeReturn) =>
+        val submittedReturnRequest =
+          SubmitReturnRequest(completeReturn, fillingOutReturn.subscribedDetails, fillingOutReturn.agentReferenceNumber)
         val result =
           for {
-            response <- returnsService.submitReturn(completeReturn)
+            response <- returnsService.submitReturn(submittedReturnRequest)
             _ <- EitherT(
                   updateSession(sessionStore, request)(
                     _.copy(journeyStatus = Some(
@@ -100,7 +102,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
     withJustSubmittedReturn(request) { j =>
       paymentsService
         .startPaymentJourney(
-          j.completeReturn.cgtReference,
+          j.subscribedDetails.cgtReference,
           j.submissionResponse.chargeReference,
           j.submissionResponse.amount,
           homepage.routes.HomePageController.homepage(),

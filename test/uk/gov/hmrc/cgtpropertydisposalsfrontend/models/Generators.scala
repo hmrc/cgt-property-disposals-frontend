@@ -264,6 +264,8 @@ trait ReturnGen { this: GenUtils =>
 
   implicit val completeReturnGen: Gen[CompleteReturn] = gen[CompleteReturn]
 
+  implicit val submitReturnRequestGen: Gen[SubmitReturnRequest] = gen[SubmitReturnRequest]
+
   implicit val submitReturnResponseGen: Gen[SubmitReturnResponse] = gen[SubmitReturnResponse]
 
 }

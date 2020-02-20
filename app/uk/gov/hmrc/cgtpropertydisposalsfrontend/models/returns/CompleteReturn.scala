@@ -30,7 +30,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabili
 
 final case class CompleteReturn(
   id: UUID,
-  cgtReference: CgtReference,
   triageAnswers: CompleteIndividualTriageAnswers,
   propertyAddress: UkAddress,
   disposalDetails: CompleteDisposalDetailsAnswers,
@@ -45,7 +44,6 @@ object CompleteReturn {
   def fromDraftReturn(draftReturn: DraftReturn): Option[CompleteReturn] = draftReturn match {
     case DraftReturn(
         id,
-        cgtReference,
         t: CompleteIndividualTriageAnswers,
         Some(p: UkAddress),
         Some(d: CompleteDisposalDetailsAnswers),
@@ -54,7 +52,7 @@ object CompleteReturn {
         Some(e: CompleteExemptionAndLossesAnswers),
         Some(y: CompleteYearToDateLiabilityAnswers)
         ) =>
-      Some(CompleteReturn(id, cgtReference, t, p, d, a, r, e, y))
+      Some(CompleteReturn(id, t, p, d, a, r, e, y))
 
     case _ =>
       None

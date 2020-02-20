@@ -25,10 +25,10 @@ import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsNumber, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, Error}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftReturn, SubmitReturnResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, SubmitReturnRequest, SubmitReturnResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, Error}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.GetDraftReturnResponse
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -51,10 +51,10 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
       .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockSubmitReturn(completeReturn: CompleteReturn)(response: Either[Error, HttpResponse]) =
+  def mockSubmitReturn(submitReturnRequest: SubmitReturnRequest)(response: Either[Error, HttpResponse]) =
     (mockConnector
-      .submitReturn(_: CompleteReturn)(_: HeaderCarrier))
-      .expects(completeReturn, *)
+      .submitReturn(_: SubmitReturnRequest)(_: HeaderCarrier))
+      .expects(submitReturnRequest, *)
       .returning(EitherT.fromEither[Future](response))
 
   val service = new ReturnsServiceImpl(mockConnector)
@@ -131,14 +131,14 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
     "handling requests to submit a return" must {
 
-      val completeReturn = sample[CompleteReturn]
+      val submitReturnRequest = sample[SubmitReturnRequest]
 
       "return an error" when {
 
         def test(response: Either[Error, HttpResponse]) = {
-          mockSubmitReturn(completeReturn)(response)
+          mockSubmitReturn(submitReturnRequest)(response)
 
-          await(service.submitReturn(completeReturn).value).isLeft shouldBe true
+          await(service.submitReturn(submitReturnRequest).value).isLeft shouldBe true
         }
 
         "the http call fails" in {
@@ -164,7 +164,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
         "the http call came back with a 200 and the JSON " in {
           val response = SubmitReturnResponse("charge", AmountInPence(123L), LocalDate.of(2000, 1, 2), "bundleId")
 
-          mockSubmitReturn(completeReturn)(
+          mockSubmitReturn(submitReturnRequest)(
             Right(
               HttpResponse(
                 OK,
@@ -180,7 +180,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
             )
           )
 
-          await(service.submitReturn(completeReturn).value) shouldBe Right(response)
+          await(service.submitReturn(submitReturnRequest).value) shouldBe Right(response)
         }
 
       }

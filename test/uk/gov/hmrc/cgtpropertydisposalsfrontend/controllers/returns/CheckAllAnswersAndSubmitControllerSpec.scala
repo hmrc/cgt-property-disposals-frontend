@@ -37,7 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLosse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.IncompleteIndividualTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.IncompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.IncompleteYearToDateLiabilityAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftReturn, PaymentsJourney, SubmitReturnResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftReturn, PaymentsJourney, SubmitReturnRequest, SubmitReturnResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{PaymentsService, ReturnsService}
@@ -72,10 +72,10 @@ class CheckAllAnswersAndSubmitControllerSpec
   def sessionWitJourney(journeyStatus: JourneyStatus): SessionData =
     SessionData.empty.copy(journeyStatus = Some(journeyStatus))
 
-  def mockSubmitReturn(completeReturn: CompleteReturn)(response: Either[Error, SubmitReturnResponse]) =
+  def mockSubmitReturn(submitReturnRequest: SubmitReturnRequest)(response: Either[Error, SubmitReturnResponse]) =
     (mockReturnsService
-      .submitReturn(_: CompleteReturn)(_: HeaderCarrier))
-      .expects(completeReturn, *)
+      .submitReturn(_: SubmitReturnRequest)(_: HeaderCarrier))
+      .expects(submitReturnRequest, *)
       .returning(EitherT.fromEither[Future](response))
 
   def mockStartPaymentJourney(
@@ -96,7 +96,6 @@ class CheckAllAnswersAndSubmitControllerSpec
 
     val completeDraftReturn = DraftReturn(
       completeReturn.id,
-      completeReturn.cgtReference,
       completeReturn.triageAnswers,
       Some(completeReturn.propertyAddress),
       Some(completeReturn.disposalDetails),
@@ -158,6 +157,12 @@ class CheckAllAnswersAndSubmitControllerSpec
         submitReturnResponse
       )
 
+      val submitReturnRequest = SubmitReturnRequest(
+        completeReturn,
+        completeFillingOutReturn.subscribedDetails,
+        completeFillingOutReturn.agentReferenceNumber
+      )
+
       behave like redirectToStartWhenInvalidJourney(
         performAction, {
           case _: FillingOutReturn => true
@@ -173,7 +178,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWitJourney(completeFillingOutReturn))
-            mockSubmitReturn(completeReturn)(Left(Error("")))
+            mockSubmitReturn(submitReturnRequest)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -183,7 +188,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWitJourney(completeFillingOutReturn))
-            mockSubmitReturn(completeReturn)(Right(submitReturnResponse))
+            mockSubmitReturn(submitReturnRequest)(Right(submitReturnResponse))
             mockStoreSession(sessionWitJourney(justSubmittedReturn))(Left(Error("")))
           }
 
@@ -198,7 +203,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWitJourney(completeFillingOutReturn))
-            mockSubmitReturn(completeReturn)(Right(submitReturnResponse))
+            mockSubmitReturn(submitReturnRequest)(Right(submitReturnResponse))
             mockStoreSession(sessionWitJourney(justSubmittedReturn))(Right(()))
           }
 
@@ -253,7 +258,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWitJourney(justSubmittedReturn))
             mockStartPaymentJourney(
-              justSubmittedReturn.completeReturn.cgtReference,
+              justSubmittedReturn.subscribedDetails.cgtReference,
               justSubmittedReturn.submissionResponse.chargeReference,
               justSubmittedReturn.submissionResponse.amount,
               homepage.routes.HomePageController.homepage(),
@@ -277,7 +282,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWitJourney(justSubmittedReturn))
             mockStartPaymentJourney(
-              justSubmittedReturn.completeReturn.cgtReference,
+              justSubmittedReturn.subscribedDetails.cgtReference,
               justSubmittedReturn.submissionResponse.chargeReference,
               justSubmittedReturn.submissionResponse.amount,
               homepage.routes.HomePageController.homepage(),
