@@ -93,7 +93,7 @@ class AcquisitionDetailsController @Inject() (
   )(f: (AssetType, Boolean) => Future[Result]): Future[Result] =
     fillingOutReturn.draftReturn.triageAnswers.fold(
       i => i.assetType       -> i.wasAUKResident,
-      c => Some(c.assetType) -> Some(c.wasAUKResident)
+      c => Some(c.assetType) -> Some(c.countryOfResidence.isUk())
     ) match {
       case (Some(a), Some(w)) => f(a, w)
       case _                  => Redirect(controllers.returns.routes.TaskListController.taskList())

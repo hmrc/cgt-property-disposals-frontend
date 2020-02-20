@@ -37,7 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue.GainCalculatedTaxDue
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.{CompleteIndividualTriageAnswers, IncompleteIndividualTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TriageAnswers.{CompleteTriageAnswers, IncompleteTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CompleteYearToDateLiabilityAnswers, IncompleteYearToDateLiabilityAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
@@ -85,7 +85,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
   ): (SessionData, FillingOutReturn) = {
     val journey = sample[FillingOutReturn].copy(
       draftReturn = sample[DraftReturn].copy(
-        triageAnswers              = sample[IncompleteIndividualTriageAnswers].copy(disposalDate = disposalDate),
+        triageAnswers              = sample[IncompleteTriageAnswers].copy(disposalDate = disposalDate),
         yearToDateLiabilityAnswers = ytdLiabilityAnswers
       )
     )
@@ -105,7 +105,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
     DraftReturn(
       UUID.randomUUID(),
       sample[CgtReference],
-      sample[CompleteIndividualTriageAnswers].copy(disposalDate = disposalDate),
+      sample[CompleteTriageAnswers].copy(disposalDate = disposalDate),
       Some(sample[UkAddress]),
       Some(sample[CompleteDisposalDetailsAnswers]),
       Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -115,7 +115,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
     )
 
   def mockCalculationService(
-    triageAnswers: CompleteIndividualTriageAnswers,
+    triageAnswers: CompleteTriageAnswers,
     disposalDetails: CompleteDisposalDetailsAnswers,
     acquisitionDetails: CompleteAcquisitionDetailsAnswers,
     reliefDetails: CompleteReliefDetailsAnswers,
@@ -126,7 +126,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
     (
       mockCgtCalculationService
         .calculateTaxDue(
-          _: CompleteIndividualTriageAnswers,
+          _: CompleteTriageAnswers,
           _: CompleteDisposalDetailsAnswers,
           _: CompleteAcquisitionDetailsAnswers,
           _: CompleteReliefDetailsAnswers,
@@ -744,7 +744,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
         personalAllowance: Option[AmountInPence],
         disposalDate: DisposalDate
       ): (DraftReturn, IncompleteYearToDateLiabilityAnswers, CalculatedTaxDue => Unit) = {
-        val triageAnswers             = sample[CompleteIndividualTriageAnswers].copy(disposalDate = disposalDate)
+        val triageAnswers             = sample[CompleteTriageAnswers].copy(disposalDate = disposalDate)
         val disposalDetailsAnswers    = sample[CompleteDisposalDetailsAnswers]
         val acquisitionDetailsAnswers = sample[CompleteAcquisitionDetailsAnswers]
         val reliefDetailsAnswers      = sample[CompleteReliefDetailsAnswers]
@@ -1573,7 +1573,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
       }
 
       "the triage section is incomplete" in {
-        test(draftReturn.copy(triageAnswers = sample[IncompleteIndividualTriageAnswers]))
+        test(draftReturn.copy(triageAnswers = sample[IncompleteTriageAnswers]))
       }
 
       "the disposal details hasn't been started yet" in {

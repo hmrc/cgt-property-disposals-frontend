@@ -37,7 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.IncompleteIndividualTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TriageAnswers.IncompleteTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -166,7 +166,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
         subscribed.subscribedDetails,
         subscribed.ggCredId,
         subscribed.agentReferenceNumber,
-        sample[IncompleteIndividualTriageAnswers]
+        sample[IncompleteTriageAnswers]
       )
 
       val fillingOurReturn = FillingOutReturn(
@@ -285,7 +285,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
                     subscribed.subscribedDetails,
                     subscribed.ggCredId,
                     subscribed.agentReferenceNumber,
-                    IncompleteIndividualTriageAnswers.empty
+                    IncompleteTriageAnswers.empty
                   )
                 ),
                 userType = Some(UserType.Individual)
@@ -310,7 +310,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
                     subscribed.subscribedDetails,
                     subscribed.ggCredId,
                     subscribed.agentReferenceNumber,
-                    IncompleteIndividualTriageAnswers.empty
+                    IncompleteTriageAnswers.empty
                   )
                 ),
                 userType = Some(UserType.Individual)

@@ -6,13 +6,14 @@ import sbt._
 object AppDependencies {
 
   val compile = Seq(
-    "uk.gov.hmrc"       %% "govuk-template"           % "5.45.0-play-26",
-    "uk.gov.hmrc"       %% "play-ui"                  % "8.4.0-play-26",
-    "uk.gov.hmrc"       %% "bootstrap-play-26"        % "1.3.0",
-    "uk.gov.hmrc"       %% "mongo-caching"            % "6.8.0-play-26",
-    "org.typelevel"     %% "cats-core"                % "2.1.0",
-    "com.github.kxbmap" %% "configs"                  % "0.4.4",
-    "org.julienrf"      %% "play-json-derived-codecs" % "7.0.0"
+    "uk.gov.hmrc"                %% "govuk-template"           % "5.45.0-play-26",
+    "uk.gov.hmrc"                %% "play-ui"                  % "8.4.0-play-26",
+    "uk.gov.hmrc"                %% "bootstrap-play-26"        % "1.3.0",
+    "uk.gov.hmrc"                %% "mongo-caching"            % "6.8.0-play-26",
+    "org.typelevel"              %% "cats-core"                % "2.1.0",
+    "com.github.kxbmap"          %% "configs"                  % "0.4.4",
+    "org.julienrf"               %% "play-json-derived-codecs" % "7.0.0",
+    "com.softwaremill.quicklens" %% "quicklens"                % "1.4.12"
   )
 
   val test = Seq(
