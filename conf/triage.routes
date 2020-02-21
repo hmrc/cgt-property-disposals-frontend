@@ -10,6 +10,9 @@ POST /before-start/how-disposed-of-property                 uk.gov.hmrc.cgtprope
 GET  /before-start/were-uk-resident                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CanTheyUseOurServiceController.wereYouAUKResident()
 POST /before-start/were-uk-resident                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CanTheyUseOurServiceController.wereYouAUKResidentSubmit()
 
+GET  /before-start/enter-country-residence                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CanTheyUseOurServiceController.countryOfResidence()
+POST /before-start/enter-country-residence                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CanTheyUseOurServiceController.countryOfResidenceSubmit()
+
 GET  /before-start/did-sell-dispose-residential-property    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty()
 POST /before-start/did-sell-dispose-residential-property    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CanTheyUseOurServiceController.didYouDisposeOfAResidentialPropertySubmit()
 

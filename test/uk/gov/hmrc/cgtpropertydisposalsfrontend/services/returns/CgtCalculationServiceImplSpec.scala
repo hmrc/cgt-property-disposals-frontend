@@ -25,7 +25,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, CalculatedTaxDue, DisposalDate, OtherReliefsOption, TaxableAmountOfMoney}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.CompleteIndividualTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TriageAnswers.CompleteTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 
 class CgtCalculationServiceImplSpec extends WordSpec with Matchers with ScalaCheckDrivenPropertyChecks {
@@ -35,7 +35,7 @@ class CgtCalculationServiceImplSpec extends WordSpec with Matchers with ScalaChe
   "CgtCalculationServiceImpl" when {
 
     "calculating tax due" must {
-      val completeTriageAnswers = sample[CompleteIndividualTriageAnswers]
+      val completeTriageAnswers = sample[CompleteTriageAnswers]
 
       val zeroDisposalDetails = sample[CompleteDisposalDetailsAnswers].copy(
         disposalPrice = AmountInPence.zero,
@@ -62,7 +62,7 @@ class CgtCalculationServiceImplSpec extends WordSpec with Matchers with ScalaChe
       )
 
       def calculate(
-        triageAnswers: CompleteIndividualTriageAnswers        = completeTriageAnswers,
+        triageAnswers: CompleteTriageAnswers                  = completeTriageAnswers,
         disposalDetails: CompleteDisposalDetailsAnswers       = zeroDisposalDetails,
         acquisitionDetails: CompleteAcquisitionDetailsAnswers = zeroAcquisitionDetails,
         reliefDetails: CompleteReliefDetailsAnswers           = zeroReliefDetails,
@@ -617,7 +617,7 @@ class CgtCalculationServiceImplSpec extends WordSpec with Matchers with ScalaChe
           val incomeTaxHigherBandThreshold = AmountInPence(1000L)
           val taxYear                      = sample[TaxYear].copy(incomeTaxHigherRateThreshold = incomeTaxHigherBandThreshold)
 
-          val triageAnswers = sample[CompleteIndividualTriageAnswers].copy(
+          val triageAnswers = sample[CompleteTriageAnswers].copy(
             disposalDate = sample[DisposalDate].copy(taxYear = taxYear),
             assetType    = assetType
           )
@@ -760,7 +760,7 @@ class CgtCalculationServiceImplSpec extends WordSpec with Matchers with ScalaChe
         def test(assetType: AssetType, expectedHigherRate: TaxYear => BigDecimal): Unit = {
           val incomeTaxHigherRateThreshold = AmountInPence(1000L)
           val taxYear                      = sample[TaxYear].copy(incomeTaxHigherRateThreshold = incomeTaxHigherRateThreshold)
-          val triageAnswers = sample[CompleteIndividualTriageAnswers].copy(
+          val triageAnswers = sample[CompleteTriageAnswers].copy(
             disposalDate = sample[DisposalDate].copy(taxYear = taxYear),
             assetType    = assetType
           )
@@ -860,7 +860,7 @@ class CgtCalculationServiceImplSpec extends WordSpec with Matchers with ScalaChe
             cgtRateHigherBandResidential = higherBandTaxRate
           )
 
-          val triageAnswers = sample[CompleteIndividualTriageAnswers].copy(
+          val triageAnswers = sample[CompleteTriageAnswers].copy(
             disposalDate = sample[DisposalDate].copy(taxYear = taxYear),
             assetType    = AssetType.Residential
           )

@@ -24,7 +24,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue.{GainCalculatedTaxDue, NonGainCalculatedTaxDue}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.CompleteIndividualTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TriageAnswers.CompleteTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, CalculatedTaxDue, TaxableAmountOfMoney}
 
@@ -32,7 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, Calcu
 trait CgtCalculationService {
 
   def calculateTaxDue(
-    triageAnswers: CompleteIndividualTriageAnswers,
+    triageAnswers: CompleteTriageAnswers,
     disposalDetails: CompleteDisposalDetailsAnswers,
     acquisitionDetails: CompleteAcquisitionDetailsAnswers,
     reliefDetails: CompleteReliefDetailsAnswers,
@@ -47,7 +47,7 @@ trait CgtCalculationService {
 class CgtCalculationServiceImpl extends CgtCalculationService {
 
   def calculateTaxDue(
-    triageAnswers: CompleteIndividualTriageAnswers,
+    triageAnswers: CompleteTriageAnswers,
     disposalDetails: CompleteDisposalDetailsAnswers,
     acquisitionDetails: CompleteAcquisitionDetailsAnswers,
     reliefDetails: CompleteReliefDetailsAnswers,
