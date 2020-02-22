@@ -24,6 +24,7 @@ import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.order._
 import com.typesafe.config.ConfigFactory
+import org.jsoup.nodes.Document
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.Configuration
 import play.api.i18n.MessagesApi
@@ -163,22 +164,30 @@ class CanTheyUseOurServiceControllerSpec
 
       behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
 
-      behave like displayIndividualTriagePageBehaviorIncompleteJourney[IndividualUserType](
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney(
         performAction
-      )(requiredPreviousAnswers)(
-        { case (answers, t) => answers.copy(individualUserType = t) }
-      )(IndividualUserType.Self)(
-        "who-are-you-reporting-for.title",
-        _ => List("checked=\"checked\"")
+      )(requiredPreviousAnswers, requiredPreviousAnswers.copy(individualUserType = Some(IndividualUserType.Self)))(
+        "who-are-you-reporting-for.title", {
+          _.select("#content > article > form")
+            .attr("action") shouldBe routes.CanTheyUseOurServiceController
+            .whoIsIndividualRepresentingSubmit()
+            .url
+        }, {
+          _.select("#individualUserType-0").attr("checked") shouldBe "checked"
+        }
       )
 
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
         performAction
-      )(IndividualUserType.Self) {
-        case (answers, t) => answers.copy(individualUserType = t)
-      }(
-        "who-are-you-reporting-for.title",
-        _ => List("checked=\"checked\"")
+      )(sample[CompleteTriageAnswers].copy(individualUserType = IndividualUserType.Self))(
+        "who-are-you-reporting-for.title", { doc =>
+          doc
+            .select("#content > article > form")
+            .attr("action") shouldBe routes.CanTheyUseOurServiceController
+            .whoIsIndividualRepresentingSubmit()
+            .url
+          doc.select("#individualUserType-0").attr("checked") shouldBe "checked"
+        }
       )
 
     }
@@ -327,23 +336,34 @@ class CanTheyUseOurServiceControllerSpec
         { case (answers, t) => answers.copy(individualUserType = t) }
       )
 
-      behave like displayIndividualTriagePageBehaviorIncompleteJourney[NumberOfProperties](
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney(
         performAction
-      )(requiredPreviousAnswers)(
-        { case (answers, n) => answers.copy(numberOfProperties = n) }
-      )(NumberOfProperties.One)(
+      )(
+        requiredPreviousAnswers,
+        requiredPreviousAnswers.copy(numberOfProperties = Some(NumberOfProperties.MoreThanOne))
+      )(
         "numberOfProperties.title",
-        _ => List("checked=\"checked\"")
+        checkContent(_, routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting()),
+        _.select("#numberOfProperties-1").attr("checked") shouldBe "checked"
       )
 
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
         performAction
-      )(NumberOfProperties.One) {
-        case (answers, n) => answers.copy(numberOfProperties = n)
-      }(
-        "numberOfProperties.title",
-        _ => List("checked=\"checked\"")
+      )(sample[CompleteTriageAnswers].copy(numberOfProperties = NumberOfProperties.One))(
+        "numberOfProperties.title", { doc =>
+          checkContent(doc, routes.CanTheyUseOurServiceController.checkYourAnswers())
+          doc.select("#numberOfProperties-0").attr("checked") shouldBe "checked"
+        }
       )
+
+      def checkContent(doc: Document, backLink: Call): Unit = {
+        doc.select("#back").attr("href") shouldBe backLink.url
+        doc
+          .select("#content > article > form")
+          .attr("action") shouldBe routes.CanTheyUseOurServiceController
+          .howManyPropertiesSubmit()
+          .url
+      }
 
     }
 
@@ -489,23 +509,31 @@ class CanTheyUseOurServiceControllerSpec
         { case (answers, n) => answers.copy(numberOfProperties = n) }
       )
 
-      behave like displayIndividualTriagePageBehaviorIncompleteJourney[DisposalMethod](
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney(
         performAction
-      )(requiredPreviousAnswers)(
-        { case (answers, m) => answers.copy(disposalMethod = m) }
-      )(DisposalMethod.Gifted)(
+      )(requiredPreviousAnswers, requiredPreviousAnswers.copy(disposalMethod = Some(DisposalMethod.Sold)))(
         "disposalMethod.title",
-        _ => List("checked=\"checked\"")
+        checkContent(_, routes.CanTheyUseOurServiceController.howManyProperties()),
+        _.select("#disposalMethod-0").attr("checked") shouldBe "checked"
       )
 
-      behave like displayIndividualTriagePageBehaviorCompleteJourney[DisposalMethod](
+      behave like displayIndividualTriagePageBehaviorCompleteJourney(
         performAction
-      )(DisposalMethod.Gifted) {
-        case (answers, m) => answers.copy(disposalMethod = m)
-      }(
-        "disposalMethod.title",
-        _ => List("checked=\"checked\"")
+      )(sample[CompleteTriageAnswers].copy(disposalMethod = DisposalMethod.Gifted))(
+        "disposalMethod.title", { doc =>
+          checkContent(doc, routes.CanTheyUseOurServiceController.checkYourAnswers())
+          doc.select("#disposalMethod-1").attr("checked") shouldBe "checked"
+        }
       )
+
+      def checkContent(doc: Document, backLink: Call): Unit = {
+        doc.select("#back").attr("href") shouldBe backLink.url
+        doc
+          .select("#content > article > form")
+          .attr("action") shouldBe routes.CanTheyUseOurServiceController
+          .howDidYouDisposeOfPropertySubmit()
+          .url
+      }
 
     }
 
@@ -640,23 +668,33 @@ class CanTheyUseOurServiceControllerSpec
         { case (answers, m) => answers.copy(disposalMethod = m) }
       )
 
-      behave like displayIndividualTriagePageBehaviorIncompleteJourney[Boolean](
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney(
         performAction
-      )(requiredPreviousAnswers)(
-        { case (answers, w) => answers.copy(wasAUKResident = w) }
-      )(true)(
+      )(requiredPreviousAnswers, requiredPreviousAnswers.copy(wasAUKResident = Some(false)))(
         "wereYouAUKResident.title",
-        _ => List("checked=\"checked\"")
+        checkContent(_, routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty()),
+        _.select("#wereYouAUKResident-false").attr("checked") shouldBe "checked"
       )
 
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
         performAction
-      )(true) {
-        case (answers, w) => answers.copy(countryOfResidence = if (w) Country.uk else Country("FR", None))
-      }(
-        "wereYouAUKResident.title",
-        _ => List("checked=\"checked\"")
+      )(
+        sample[CompleteTriageAnswers].copy(countryOfResidence = Country.uk)
+      )(
+        "wereYouAUKResident.title", { doc =>
+          checkContent(doc, routes.CanTheyUseOurServiceController.checkYourAnswers())
+          doc.select("#wereYouAUKResident-true").attr("checked") shouldBe "checked"
+        }
       )
+
+      def checkContent(doc: Document, backLink: Call): Unit = {
+        doc.select("#back").attr("href") shouldBe backLink.url
+        doc
+          .select("#content > article > form")
+          .attr("action") shouldBe routes.CanTheyUseOurServiceController
+          .wereYouAUKResidentSubmit()
+          .url
+      }
 
     }
 
@@ -850,26 +888,38 @@ class CanTheyUseOurServiceControllerSpec
         { case (answers, w) => answers.copy(wasAUKResident = w) }
       )
 
-      behave like displayIndividualTriagePageBehaviorIncompleteJourney[Boolean](
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney(
         performAction
-      )(requiredPreviousAnswers)(
-        {
-          case (answers, w) =>
-            answers.copy(assetType = w.map(if (_) AssetType.Residential else AssetType.NonResidential))
-        }
-      )(true)(
+      )(requiredPreviousAnswers, requiredPreviousAnswers.copy(assetType = Some(AssetType.NonResidential)))(
         "didYouDisposeOfResidentialProperty.title",
-        _ => List("checked=\"checked\"")
+        checkContent(_, routes.CanTheyUseOurServiceController.wereYouAUKResident()),
+        _.select("#didYouDisposeOfResidentialProperty-false").attr("checked") shouldBe "checked"
       )
 
-      behave like displayIndividualTriagePageBehaviorCompleteJourney(
-        performAction
-      )(true) {
-        case (answers, w) => answers.copy(assetType = if (w) AssetType.Residential else AssetType.NonResidential)
-      }(
-        "didYouDisposeOfResidentialProperty.title",
-        _ => List("checked=\"checked\"")
-      )
+      {
+        val completeAnswers = sample[CompleteTriageAnswers].copy(
+          countryOfResidence = Country.uk,
+          assetType          = AssetType.Residential
+        )
+        behave like displayIndividualTriagePageBehaviorCompleteJourney(
+          performAction
+        )(completeAnswers)(
+          "didYouDisposeOfResidentialProperty.title", { doc =>
+            checkContent(doc, routes.CanTheyUseOurServiceController.checkYourAnswers())
+            doc.select("#didYouDisposeOfResidentialProperty-true").attr("checked") shouldBe "checked"
+          }
+        )
+      }
+
+      def checkContent(doc: Document, backLink: Call): Unit = {
+        doc.select("#back").attr("href") shouldBe backLink.url
+        doc
+          .select("#content > article > form")
+          .attr("action") shouldBe routes.CanTheyUseOurServiceController
+          .didYouDisposeOfAResidentialPropertySubmit()
+          .url
+
+      }
 
     }
 
@@ -1007,7 +1057,7 @@ class CanTheyUseOurServiceControllerSpec
 
     "handling requests to display the when was disposal date page" must {
 
-      val requiredPreviousAnswers =
+      val requiredPreviousAnswersUkResident =
         IncompleteTriageAnswers.empty.copy(
           individualUserType = Some(sample[IndividualUserType]),
           numberOfProperties = Some(NumberOfProperties.One),
@@ -1025,40 +1075,66 @@ class CanTheyUseOurServiceControllerSpec
       behave like redirectWhenNoPreviousAnswerBehaviour[Boolean](
         performAction
       )(
-        requiredPreviousAnswers,
+        requiredPreviousAnswersUkResident,
         routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty(), {
           case (answers, w) =>
             answers.copy(assetType = w.map(if (_) AssetType.Residential else AssetType.NonResidential))
         }
       )
 
-      behave like displayIndividualTriagePageBehaviorIncompleteJourney[DisposalDate](
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney(
         performAction
-      )(requiredPreviousAnswers)(
-        { case (answers, d) => answers.copy(disposalDate = d) }
-      )(disposalDate)(
+      )(
+        requiredPreviousAnswersUkResident,
+        requiredPreviousAnswersUkResident.copy(disposalDate = Some(disposalDate)),
+        Some("the user was a uk resident")
+      )(
         "disposalDate.title",
-        d =>
-          List(
-            s"""value="${d.value.getDayOfMonth()}"""",
-            s"""value="${d.value.getMonthValue()}"""",
-            s"""value="${d.value.getYear()}""""
-          )
+        checkContent(_, routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty()),
+        checkPrepopulatedContent(_, disposalDate)
       )
+
+      {
+        val answers = requiredPreviousAnswersUkResident.copy(
+          wasAUKResident     = Some(false),
+          countryOfResidence = Some(sample[Country]),
+          assetType          = Some(AssetType.Residential)
+        )
+        behave like displayIndividualTriagePageBehaviorIncompleteJourney(
+          performAction
+        )(answers, answers.copy(disposalDate = Some(disposalDate)), Some("the user was not a uk resident"))(
+          "disposalDate.title",
+          checkContent(_, routes.CanTheyUseOurServiceController.assetTypeForNonUkResidents()),
+          checkPrepopulatedContent(_, disposalDate)
+        )
+      }
 
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
         performAction
-      )(disposalDate) {
-        case (answers, d) => answers.copy(disposalDate = d)
-      }(
-        "disposalDate.title",
-        d =>
-          List(
-            s"""value="${d.value.getDayOfMonth()}"""",
-            s"""value="${d.value.getMonthValue()}"""",
-            s"""value="${d.value.getYear()}""""
-          )
+      )(
+        sample[CompleteTriageAnswers]
+          .copy(countryOfResidence = Country.uk, assetType = AssetType.Residential, disposalDate = disposalDate)
+      )(
+        "disposalDate.title", { doc =>
+          checkContent(doc, routes.CanTheyUseOurServiceController.checkYourAnswers())
+          checkPrepopulatedContent(doc, disposalDate)
+        }
       )
+
+      def checkContent(doc: Document, backLink: Call): Unit = {
+        doc.select("#back").attr("href") shouldBe backLink.url
+        doc
+          .select("#content > article > form")
+          .attr("action") shouldBe routes.CanTheyUseOurServiceController
+          .whenWasDisposalDateSubmit()
+          .url
+      }
+
+      def checkPrepopulatedContent(doc: Document, date: DisposalDate) = {
+        doc.select("#disposalDate-day").attr("value")   shouldBe disposalDate.value.getDayOfMonth.toString
+        doc.select("#disposalDate-month").attr("value") shouldBe disposalDate.value.getMonthValue.toString
+        doc.select("#disposalDate-year").attr("value")  shouldBe disposalDate.value.getYear.toString
+      }
 
     }
 
@@ -1275,33 +1351,46 @@ class CanTheyUseOurServiceControllerSpec
         { case (answers, d) => answers.copy(disposalDate = d) }
       )
 
-      behave like displayIndividualTriagePageBehaviorIncompleteJourney[CompletionDate](
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney(
         performAction
-      )(requiredPreviousAnswers)(
-        { case (answers, d) => answers.copy(completionDate = d) }
-      )(CompletionDate(disposalDate.value))(
+      )(
+        requiredPreviousAnswers,
+        requiredPreviousAnswers.copy(completionDate = Some(CompletionDate(disposalDate.value)))
+      )(
         "completionDate.title",
-        d =>
-          List(
-            s"""value="${d.value.getDayOfMonth()}"""",
-            s"""value="${d.value.getMonthValue()}"""",
-            s"""value="${d.value.getYear()}""""
-          )
+        checkContent(_, routes.CanTheyUseOurServiceController.whenWasDisposalDate()),
+        checkPrepopulatedContent(_, disposalDate.value)
       )
 
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
         performAction
-      )(CompletionDate(disposalDate.value)) {
-        case (answers, d) => answers.copy(completionDate = d)
-      }(
-        "completionDate.title",
-        d =>
-          List(
-            s"""value="${d.value.getDayOfMonth()}"""",
-            s"""value="${d.value.getMonthValue()}"""",
-            s"""value="${d.value.getYear()}""""
-          )
+      )(
+        sample[CompleteTriageAnswers].copy(
+          assetType      = AssetType.Residential,
+          completionDate = CompletionDate(disposalDate.value)
+        )
+      )(
+        "completionDate.title", { doc =>
+          checkContent(doc, routes.CanTheyUseOurServiceController.checkYourAnswers())
+          checkPrepopulatedContent(doc, disposalDate.value)
+        }
       )
+
+      def checkContent(doc: Document, backLink: Call): Unit = {
+        doc.select("#back").attr("href") shouldBe backLink.url
+        doc
+          .select("#content > article > form")
+          .attr("action") shouldBe routes.CanTheyUseOurServiceController
+          .whenWasCompletionDateSubmit()
+          .url
+
+      }
+
+      def checkPrepopulatedContent(doc: Document, date: LocalDate) = {
+        doc.select("#completionDate-day").attr("value")   shouldBe date.getDayOfMonth.toString
+        doc.select("#completionDate-month").attr("value") shouldBe date.getMonthValue.toString
+        doc.select("#completionDate-year").attr("value")  shouldBe date.getYear.toString
+      }
 
     }
 
@@ -1519,23 +1608,30 @@ class CanTheyUseOurServiceControllerSpec
 
       }
 
-      behave like displayIndividualTriagePageBehaviorIncompleteJourney[Country](
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney(
         performAction
-      )(requiredPreviousAnswers)(
-        { case (answers, c) => answers.copy(countryOfResidence = c) }
-      )(country)(
+      )(requiredPreviousAnswers, requiredPreviousAnswers.copy(countryOfResidence = Some(country)))(
         "triage.enterCountry.title",
-        _ => List(countryName)
+        checkContent(_, routes.CanTheyUseOurServiceController.wereYouAUKResident()),
+        _ => ()
       )
 
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
         performAction
-      )(country) {
-        case (answers, c) => answers.copy(countryOfResidence = c)
-      }(
-        "triage.enterCountry.title",
-        _ => List(countryName)
+      )(sample[CompleteTriageAnswers].copy(countryOfResidence = country))(
+        "triage.enterCountry.title", { doc =>
+          checkContent(doc, routes.CanTheyUseOurServiceController.checkYourAnswers())
+        }
       )
+
+      def checkContent(doc: Document, backLink: Call): Unit = {
+        doc.select("#back").attr("href") shouldBe backLink.url
+        doc
+          .select("#content > article > form")
+          .attr("action") shouldBe routes.CanTheyUseOurServiceController
+          .countryOfResidenceSubmit()
+          .url
+      }
 
     }
 
@@ -1717,23 +1813,31 @@ class CanTheyUseOurServiceControllerSpec
         { case (answers, country) => answers.copy(countryOfResidence = country) }
       )
 
-      behave like displayIndividualTriagePageBehaviorIncompleteJourney[AssetType](
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney(
         performAction
-      )(requiredPreviousAnswers)(
-        { case (answers, assetType) => answers.copy(assetType = assetType) }
-      )(AssetType.Residential)(
+      )(requiredPreviousAnswers, requiredPreviousAnswers.copy(assetType = Some(AssetType.MixedUse)))(
         "assetTypeForNonUkResidents.title",
-        _ => List("checked=\"checked\"")
+        checkContent(_, routes.CanTheyUseOurServiceController.countryOfResidence()),
+        _.select("#assetTypeForNonUkResidents-2").attr("checked") shouldBe "checked"
       )
 
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
         performAction
-      )(AssetType.Residential) {
-        case (answers, assetType) => answers.copy(assetType = assetType)
-      }(
-        "assetTypeForNonUkResidents.title",
-        _ => List("checked=\"checked\"")
+      )(sample[CompleteTriageAnswers].copy(countryOfResidence = sample[Country], assetType = AssetType.Residential))(
+        "assetTypeForNonUkResidents.title", { doc =>
+          checkContent(doc, routes.CanTheyUseOurServiceController.checkYourAnswers())
+          doc.select("#assetTypeForNonUkResidents-0").attr("checked") shouldBe "checked"
+        }
       )
+
+      def checkContent(doc: Document, backLink: Call): Unit = {
+        doc.select("#back").attr("href") shouldBe backLink.url
+        doc
+          .select("#content > article > form")
+          .attr("action") shouldBe routes.CanTheyUseOurServiceController
+          .assetTypeForNonUkResidentsSubmit()
+          .url
+      }
 
     }
 
@@ -1952,6 +2056,23 @@ class CanTheyUseOurServiceControllerSpec
 
       }
 
+      "show a dummy page when a user has selected indirect disposals" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionDataWithStartingNewDraftReturn(
+              allQuestionsAnswered.copy(
+                assetType = Some(AssetType.IndirectDisposal)
+              )
+            )
+          )
+        }
+
+        val result = performAction()
+        status(result)          shouldBe OK
+        contentAsString(result) shouldBe "Indirect disposals not handled yet"
+      }
+
       "show an error page" when {
 
         "all the questions have now been answered but the sessino data cannot be updated" in {
@@ -2156,16 +2277,17 @@ class CanTheyUseOurServiceControllerSpec
     content                 should include(messageFromMessageKey(expectedErrorMessageKey))
   }
 
-  def displayIndividualTriagePageBehaviorIncompleteJourney[B](performAction: () => Future[Result])(
-    requiredPreviousAnswers: IncompleteTriageAnswers
+  def displayIndividualTriagePageBehaviorIncompleteJourney(performAction: () => Future[Result])(
+    requiredPreviousAnswers: IncompleteTriageAnswers,
+    answersWithCurrentAnswer: IncompleteTriageAnswers,
+    description: Option[String] = None
   )(
-    setCurrentAnswer: (IncompleteTriageAnswers, Option[B]) => IncompleteTriageAnswers
-  )(sampleCurrentAnswer: B)(
     pageTitleKey: String,
-    prepopulatedContent: B => List[String]
+    checkContent: Document => Unit,
+    checkPrepopulatedContent: Document => Unit
   ): Unit = {
-
-    "display the page when no option has been selected before" in {
+    val scenarioDescription = description.map(_ + " and when ").getOrElse("")
+    s"display the page when ${scenarioDescription}no option has been selected before" in {
       List(
         sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers),
         sessionDataWithFillingOurReturn(requiredPreviousAnswers)
@@ -2176,17 +2298,19 @@ class CanTheyUseOurServiceControllerSpec
             mockGetSession(currentSession)
           }
 
-          val result = performAction()
-          status(result)          shouldBe OK
-          contentAsString(result) should include(messageFromMessageKey(pageTitleKey))
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(pageTitleKey),
+            checkContent
+          )
         }
       }
     }
 
-    "display the page when an option has been selected before" in {
+    s"display the page when ${scenarioDescription}an option has been selected before" in {
       List(
-        sessionDataWithStartingNewDraftReturn(setCurrentAnswer(requiredPreviousAnswers, Some(sampleCurrentAnswer))),
-        sessionDataWithFillingOurReturn(setCurrentAnswer(requiredPreviousAnswers, Some(sampleCurrentAnswer)))
+        sessionDataWithStartingNewDraftReturn(answersWithCurrentAnswer),
+        sessionDataWithFillingOurReturn(answersWithCurrentAnswer)
       ).foreach { currentSession =>
         withClue(s"For currentSession $currentSession: ") {
           inSequence {
@@ -2194,32 +2318,29 @@ class CanTheyUseOurServiceControllerSpec
             mockGetSession(currentSession)
           }
 
-          val result  = performAction()
-          val content = contentAsString(result)
-          status(result) shouldBe OK
-
-          content should include(messageFromMessageKey(pageTitleKey))
-          prepopulatedContent(sampleCurrentAnswer).foreach(content should include(_))
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(pageTitleKey), { document =>
+              checkContent(document)
+              checkPrepopulatedContent(document)
+            }
+          )
         }
       }
     }
 
   }
 
-  def displayIndividualTriagePageBehaviorCompleteJourney[A](
+  def displayIndividualTriagePageBehaviorCompleteJourney(
     performAction: () => Future[Result]
-  )(sampleCurrentAnswer: A)(setCurrentAnswer: (CompleteTriageAnswers, A) => CompleteTriageAnswers)(
+  )(answers: CompleteTriageAnswers)(
     pageTitleKey: String,
-    prepopulatedContent: A => List[String]
-  ): Unit = {
-    val completeIndividualTriageAnswers = sample[CompleteTriageAnswers]
-
+    checkContent: Document => Unit
+  ): Unit =
     "display the page when the journey has already been completed" in {
       List(
-        sessionDataWithStartingNewDraftReturn(
-          setCurrentAnswer(completeIndividualTriageAnswers, sampleCurrentAnswer)
-        ),
-        sessionDataWithFillingOurReturn(setCurrentAnswer(completeIndividualTriageAnswers, sampleCurrentAnswer))
+        sessionDataWithStartingNewDraftReturn(answers),
+        sessionDataWithFillingOurReturn(answers)
       ).foreach { currentSession =>
         withClue(s"For currentSession $currentSession: ") {
           inSequence {
@@ -2227,16 +2348,14 @@ class CanTheyUseOurServiceControllerSpec
             mockGetSession(currentSession)
           }
 
-          val result  = performAction()
-          val content = contentAsString(result)
-          status(result) shouldBe OK
-
-          content should include(messageFromMessageKey(pageTitleKey))
-          prepopulatedContent(sampleCurrentAnswer).foreach(content should include(_))
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(pageTitleKey),
+            checkContent
+          )
         }
       }
     }
-  }
 
   def unsuccessfulUpdatesStartingNewDraftBehaviour(
     performAction: Seq[(String, String)] => Future[Result],

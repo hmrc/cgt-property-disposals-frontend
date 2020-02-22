@@ -14,7 +14,6 @@
  * limitations under the License.
  *@
 
-@import cats.syntax.eq._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
@@ -35,10 +34,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 
 @key = @{"disposalDate"}
 @hasErrors = @{form.hasErrors}
-@isIndirectDisposal = @{assetType === AssetType.IndirectDisposal}
-@title = @{ messages(
- if(isIndirectDisposal) "disposalDate.indirectDisposal.title" else "disposalDate.title"
-)}
+@title = @{messages( "disposalDate.title")}
 @errorKey = @{List("disposalDate-day", "disposalDate-month", "disposalDate-year", "disposalDate").map(form.error).find(_.isDefined).flatten}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
@@ -56,15 +52,13 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
    dayValue = form.data.get("disposalDate-day"),
    monthValue = form.data.get("disposalDate-month"),
    yearValue = form.data.get("disposalDate-year"),
-   helpText = if(isIndirectDisposal) None else Some(Html(messages("disposalDate.helpText"))),
+   helpText = Some(Html(messages("disposalDate.helpText"))),
    labelAsHeading = true,
    errorKey = errorKey.map(e => s"${e.key}.${e.message}"),
    hasErrors = hasErrors
   )
 
-   @if(!isIndirectDisposal) {
-    <p>@Html(messages("disposalDate.link", viewConfig.exchangeDateHelp))</p>
-   }
+  <p>@Html(messages("disposalDate.link", viewConfig.exchangeDateHelp))</p>
   @submitButton(messages("button.continue"))
  }
 
