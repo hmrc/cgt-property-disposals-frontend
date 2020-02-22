@@ -13,6 +13,9 @@ POST /before-start/were-uk-resident                         uk.gov.hmrc.cgtprope
 GET  /before-start/enter-country-residence                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CanTheyUseOurServiceController.countryOfResidence()
 POST /before-start/enter-country-residence                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CanTheyUseOurServiceController.countryOfResidenceSubmit()
 
+GET  /before-start/property-type                            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CanTheyUseOurServiceController.assetTypeForNonUkResidents()
+POST /before-start/property-type                            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CanTheyUseOurServiceController.assetTypeForNonUkResidentsSubmit()
+
 GET  /before-start/did-sell-dispose-residential-property    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty()
 POST /before-start/did-sell-dispose-residential-property    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CanTheyUseOurServiceController.didYouDisposeOfAResidentialPropertySubmit()
 

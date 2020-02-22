@@ -490,6 +490,14 @@ triage.enterCountry.title=What was your country of residence on the day you ‘e
 triage.enterCountry.helpText=It’s usually the day you and the new owner swapped contracts and they paid a deposit. If you made an indirect disposal, it’s the day you sold the shares.
 triage.enterCountry.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>.
 
+assetTypeForNonUkResidents.title=What type of property or asset did you sell?
+assetTypeForNonUkResidents.Residential=Residential
+assetTypeForNonUkResidents.NonResidential=Non-residential
+assetTypeForNonUkResidents.MixedUse=Mixed use
+assetTypeForNonUkResidents.IndirectDisposal=Company shares - you made an indirect disposal
+assetTypeForNonUkResidents.error.required=Select the type of property or asset you sold or disposed of
+assetTypeForNonUkResidents.error.invalid=Select the type of property or asset you sold or disposed of
+
 didYouDisposeOfResidentialProperty.title=Did you sell a residential property?
 didYouDisposeOfResidentialProperty.helpText=Residential property includes houses, flats, or other dwellings, including their gardens and grounds.
 didYouDisposeOfResidentialProperty.Residential=Yes

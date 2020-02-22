@@ -69,7 +69,6 @@ object Country {
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Country] =
       data.get(key).filter(_.nonEmpty) match {
         case Some(c) =>
-          println(s"Got $c\n\n")
           Either.fromOption(
             Country.countryCodeToCountryName.get(c).map(name => Country(c, Some(name))),
             Seq(FormError(key, "error.notFound"))

@@ -18,10 +18,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 import java.time.LocalDate
 
-import cats.Eq
 import cats.data.EitherT
 import cats.instances.future._
-import cats.instances.int._
 import cats.syntax.either._
 import cats.syntax.order._
 import com.google.inject.{Inject, Singleton}
@@ -36,18 +34,18 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => homeRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents.AgentAccessController.countryKey
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => returnsRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.{configs, order}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{IndirectDisposal, MixedUse, NonResidential, Residential}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalMethod.{Gifted, Sold}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TriageAnswers.{CompleteTriageAnswers, IncompleteTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, LocalDateUtils, SessionData, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, FormUtils, LocalDateUtils, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
@@ -57,7 +55,6 @@ import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
 
 @Singleton
 class CanTheyUseOurServiceController @Inject() (
@@ -74,6 +71,7 @@ class CanTheyUseOurServiceController @Inject() (
   disposalMethodPage: triagePages.how_did_you_dispose,
   wereYouAUKResidentPage: triagePages.were_you_a_uk_resident,
   countryOfResidencePage: triagePages.country_of_residence,
+  assetTypeForNonUkResidentsPage: triagePages.asset_type_for_non_uk_residents,
   didYouDisposeOfResidentialPropertyPage: triagePages.did_you_dispose_of_residential_property,
   disposalDatePage: triagePages.disposal_date,
   completionDatePage: triagePages.completion_date,
@@ -127,11 +125,8 @@ class CanTheyUseOurServiceController @Inject() (
             i.fold(_.copy(individualUserType = Some(userType)), _.copy(individualUserType = userType))
         },
         nextResult = {
-          case (IndividualUserType.Self, newAnswers) =>
-            newAnswers.fold(
-              _ => Redirect(routes.CanTheyUseOurServiceController.howManyProperties()),
-              _ => Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
-            )
+          case (IndividualUserType.Self, _) =>
+            Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
 
           case (other, _) => Ok(s"$other not handled yet")
         }
@@ -173,10 +168,8 @@ class CanTheyUseOurServiceController @Inject() (
       },
       nextResult = {
         case (NumberOfProperties.One, updatedState) =>
-          updatedState.fold(
-            _ => Redirect(routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty()),
-            _ => Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
-          )
+          Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
+
         case (NumberOfProperties.MoreThanOne, _) =>
           Ok("multiple disposals not handled yet")
       }
@@ -220,10 +213,7 @@ class CanTheyUseOurServiceController @Inject() (
         },
         nextResult = {
           case (_, updatedState) =>
-            updatedState.fold(
-              _ => Redirect(routes.CanTheyUseOurServiceController.wereYouAUKResident()),
-              _ => Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
-            )
+            Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
         }
       )
   }
@@ -280,18 +270,8 @@ class CanTheyUseOurServiceController @Inject() (
           }
       },
       nextResult = {
-        case (wasAUKResident, updatedState) =>
-          if (wasAUKResident) {
-            updatedState.fold(
-              _ => Redirect(routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty()),
-              _ => Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
-            )
-          } else {
-            updatedState.fold(
-              _ => Redirect(routes.CanTheyUseOurServiceController.countryOfResidence()),
-              _ => Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
-            )
-          }
+        case (_, _) =>
+          Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
       }
     )
   }
@@ -340,10 +320,7 @@ class CanTheyUseOurServiceController @Inject() (
         nextResult = {
           case (wasResidentialProperty, updatedState) =>
             if (wasResidentialProperty) {
-              updatedState.fold(
-                _ => Redirect(routes.CanTheyUseOurServiceController.whenWasDisposalDate()),
-                _ => Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
-              )
+              Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
             } else {
               Ok("individuals can only report on residential properties")
             }
@@ -402,11 +379,7 @@ class CanTheyUseOurServiceController @Inject() (
         if (d.value.isBefore(earliestDisposalDateInclusive)) {
           Ok(s"disposal date was strictly before $earliestDisposalDateInclusive")
         } else {
-          updatedState.fold(
-            _ => Redirect(routes.CanTheyUseOurServiceController.whenWasCompletionDate()),
-            _ => Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
-          )
-
+          Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
         }
       }
     )
@@ -452,7 +425,7 @@ class CanTheyUseOurServiceController @Inject() (
 
   def countryOfResidence(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     displayTriagePage(
-      _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())),
+      _.fold(_.wasAUKResident.filterNot(identity), c => Some(c.countryOfResidence.isUk()).filterNot(identity)),
       routes.CanTheyUseOurServiceController.wereYouAUKResident()
     )(_ => countryOfResidenceForm)(
       extractField = _.fold(_.countryOfResidence, c => Some(c.countryOfResidence)),
@@ -469,7 +442,7 @@ class CanTheyUseOurServiceController @Inject() (
 
   def countryOfResidenceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     handleTriagePageSubmit(
-      _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())),
+      _.fold(_.wasAUKResident.filterNot(identity), c => Some(c.countryOfResidence.isUk()).filterNot(identity)),
       routes.CanTheyUseOurServiceController.wereYouAUKResident()
     )(_ => countryOfResidenceForm)(
       page = {
@@ -482,10 +455,68 @@ class CanTheyUseOurServiceController @Inject() (
       },
       updateState = { case (c, i) => i.fold(_.copy(countryOfResidence = Some(c)), _.copy(countryOfResidence = c)) },
       nextResult = {
-        case (c, _) =>
-          Ok(s"Got country $c")
+        case (_, _) =>
+          Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
       }
     )
+  }
+
+  def assetTypeForNonUkResidents(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    displayTriagePage(
+      _.fold(_.countryOfResidence, c => Some(c.countryOfResidence).filterNot(_.isUk())),
+      routes.CanTheyUseOurServiceController.countryOfResidence()
+    )(_ => assetTypeForNonUkResidentsForm)(
+      _.fold(_.assetType, c => Some(c.assetType)), {
+        case (currentState, form, isDraftReturn) =>
+          assetTypeForNonUkResidentsPage(
+            form,
+            backLink(currentState, routes.CanTheyUseOurServiceController.countryOfResidence()),
+            isDraftReturn
+          )
+      }
+    )
+  }
+
+  def assetTypeForNonUkResidentsSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request =>
+      handleTriagePageSubmit(
+        _.fold(_.countryOfResidence, c => Some(c.countryOfResidence).filterNot(_.isUk())),
+        routes.CanTheyUseOurServiceController.countryOfResidence()
+      )(_ => assetTypeForNonUkResidentsForm)(
+        {
+          case (currentState, form, isDraftReturn) =>
+            assetTypeForNonUkResidentsPage(
+              form,
+              backLink(currentState, routes.CanTheyUseOurServiceController.countryOfResidence()),
+              isDraftReturn
+            )
+        },
+        updateState = {
+          case (assetType, answers) =>
+            if (answers.fold(_.assetType, c => Some(c.assetType)).contains(assetType)) {
+              answers
+            } else {
+              answers.fold(
+                i => i.copy(assetType = Some(assetType), disposalDate = None, completionDate = None),
+                c =>
+                  IncompleteTriageAnswers(
+                    Some(c.individualUserType),
+                    Some(c.numberOfProperties),
+                    Some(c.disposalMethod),
+                    Some(false),
+                    Some(c.countryOfResidence),
+                    Some(assetType),
+                    None,
+                    None
+                  )
+              )
+            }
+        },
+        nextResult = {
+          case (_, _) =>
+            Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
+        }
+      )
   }
 
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
@@ -512,13 +543,16 @@ class CanTheyUseOurServiceController @Inject() (
           case IncompleteTriageAnswers(_, _, _, Some(false), None, _, _, _) =>
             Redirect(routes.CanTheyUseOurServiceController.countryOfResidence())
 
-          case IncompleteTriageAnswers(_, _, _, _, _, None, _, _) =>
+          case IncompleteTriageAnswers(_, _, _, Some(false), Some(_), None, _, _) =>
+            Redirect(routes.CanTheyUseOurServiceController.assetTypeForNonUkResidents())
+
+          case IncompleteTriageAnswers(_, _, _, Some(true), _, None, _, _) =>
             Redirect(routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty())
 
           case IncompleteTriageAnswers(_, _, _, _, _, _, None, _) =>
             Redirect(routes.CanTheyUseOurServiceController.whenWasDisposalDate())
 
-          case IncompleteTriageAnswers(_, _, _, _, _, _, _, None) =>
+          case IncompleteTriageAnswers(_, _, _, Some(true), _, _, _, None) =>
             Redirect(routes.CanTheyUseOurServiceController.whenWasCompletionDate())
 
           case IncompleteTriageAnswers(Some(t), Some(n), Some(m), Some(true), _, Some(r), Some(d), Some(c)) =>
@@ -536,11 +570,11 @@ class CanTheyUseOurServiceController @Inject() (
               Some(country),
               Some(r),
               Some(d),
-              Some(c)
+              _
               ) =>
             updateAnswersAndShowCheckYourAnswersPage(
               state,
-              CompleteTriageAnswers(t, n, m, country, r, d, c),
+              CompleteTriageAnswers(t, n, m, country, r, d, CompletionDate(d.value)),
               displayReturnToSummaryLink
             )
         }
@@ -727,46 +761,23 @@ class CanTheyUseOurServiceController @Inject() (
 
 object CanTheyUseOurServiceController {
 
-  def radioFormFormatter[A: Eq](id: String, orderedOptions: List[A]): Formatter[A] = new Formatter[A] {
-    val optionsZippedWithIndex = orderedOptions.zipWithIndex
-
-    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], A] = {
-      lazy val invalidError = FormError(key, "error.invalid")
-      data
-        .get(key)
-        .map(_.trim())
-        .filter(_.nonEmpty)
-        .fold[Either[Seq[FormError], A]](Left(Seq(FormError(key, "error.required")))) { stringValue =>
-          Either
-            .fromTry(Try(stringValue.toInt))
-            .leftMap(_ => Seq(invalidError))
-            .flatMap(i => Either.fromOption(optionsZippedWithIndex.find(_._2 === i), Seq(invalidError)).map(_._1))
-        }
-    }
-
-    override def unbind(key: String, value: A): Map[String, String] =
-      optionsZippedWithIndex
-        .find(_._1 === value)
-        .fold(Map.empty[String, String]) { case (_, i) => Map(key -> i.toString) }
-  }
-
   val whoAreYouReportingForForm: Form[IndividualUserType] = Form(
     mapping(
       "individualUserType" -> of(
-        radioFormFormatter("individualUserType", List(Self, Capacitor, PersonalRepresentative))
+        FormUtils.radioFormFormatter("individualUserType", List(Self, Capacitor, PersonalRepresentative))
       )
     )(identity)(Some(_))
   )
 
   val numberOfPropertiesForm: Form[NumberOfProperties] = Form(
     mapping(
-      "numberOfProperties" -> of(radioFormFormatter("numberOfProperties", List(One, MoreThanOne)))
+      "numberOfProperties" -> of(FormUtils.radioFormFormatter("numberOfProperties", List(One, MoreThanOne)))
     )(identity)(Some(_))
   )
 
   val disposalMethodForm: Form[DisposalMethod] = Form(
     mapping(
-      "disposalMethod" -> of(radioFormFormatter("disposalMethod", List(Sold, Gifted)))
+      "disposalMethod" -> of(FormUtils.radioFormFormatter("disposalMethod", List(Sold, Gifted)))
     )(identity)(Some(_))
   )
 
@@ -834,6 +845,17 @@ object CanTheyUseOurServiceController {
   val countryOfResidenceForm: Form[Country] = Form(
     mapping(
       "countryCode" -> of(Country.formatter)
+    )(identity)(Some(_))
+  )
+
+  val assetTypeForNonUkResidentsForm: Form[AssetType] = Form(
+    mapping(
+      "assetTypeForNonUkResidents" -> of(
+        FormUtils.radioFormFormatter(
+          "assetTypeForNonUkResidents",
+          List(Residential, NonResidential, MixedUse, IndirectDisposal)
+        )
+      )
     )(identity)(Some(_))
   )
 

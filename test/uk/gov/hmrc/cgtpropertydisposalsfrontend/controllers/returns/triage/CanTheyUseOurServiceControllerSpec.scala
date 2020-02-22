@@ -34,7 +34,6 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DateErrorScenarios.{DateErrorScenario, dateErrorScenarios}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => homeRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => returnsRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
@@ -45,7 +44,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{NonResidential, Residential}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TriageAnswers.{CompleteTriageAnswers, IncompleteTriageAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{TriageAnswers, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -229,7 +228,7 @@ class CanTheyUseOurServiceControllerSpec
               IncompleteTriageAnswers.empty,
               List("individualUserType" -> "0"),
               IncompleteTriageAnswers.empty.copy(individualUserType = Some(IndividualUserType.Self)),
-              checkIsRedirect(_, routes.CanTheyUseOurServiceController.howManyProperties())
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
             )
           }
 
@@ -303,7 +302,7 @@ class CanTheyUseOurServiceControllerSpec
 
           checkIsRedirect(
             performAction("individualUserType" -> "0"),
-            routes.CanTheyUseOurServiceController.howManyProperties()
+            routes.CanTheyUseOurServiceController.checkYourAnswers()
           )
         }
 
@@ -398,7 +397,7 @@ class CanTheyUseOurServiceControllerSpec
               answers,
               List("numberOfProperties" -> "0"),
               answers.copy(numberOfProperties = Some(NumberOfProperties.One)),
-              checkIsRedirect(_, routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty())
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
             )
           }
 
@@ -443,7 +442,7 @@ class CanTheyUseOurServiceControllerSpec
               answers,
               List("numberOfProperties" -> "0"),
               answers.copy(numberOfProperties = Some(NumberOfProperties.One)),
-              checkIsRedirect(_, routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty())
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
             )
           }
         }
@@ -465,7 +464,7 @@ class CanTheyUseOurServiceControllerSpec
 
           checkIsRedirect(
             performAction("numberOfProperties" -> "0"),
-            routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty()
+            routes.CanTheyUseOurServiceController.checkYourAnswers()
           )
         }
 
@@ -558,7 +557,7 @@ class CanTheyUseOurServiceControllerSpec
               requiredPreviousAnswers,
               List("disposalMethod" -> "0"),
               requiredPreviousAnswers.copy(disposalMethod = Some(DisposalMethod.Sold)),
-              checkIsRedirect(_, routes.CanTheyUseOurServiceController.wereYouAUKResident())
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
             )
           }
 
@@ -594,7 +593,7 @@ class CanTheyUseOurServiceControllerSpec
               requiredPreviousAnswers,
               List("disposalMethod" -> "0"),
               requiredPreviousAnswers.copy(disposalMethod = Some(DisposalMethod.Sold)),
-              checkIsRedirect(_, routes.CanTheyUseOurServiceController.wereYouAUKResident())
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
             )
           }
         }
@@ -616,7 +615,7 @@ class CanTheyUseOurServiceControllerSpec
 
           checkIsRedirect(
             performAction("disposalMethod" -> "0"),
-            routes.CanTheyUseOurServiceController.wereYouAUKResident()
+            routes.CanTheyUseOurServiceController.checkYourAnswers()
           )
         }
 
@@ -714,7 +713,7 @@ class CanTheyUseOurServiceControllerSpec
               answers,
               List("wereYouAUKResident" -> "true"),
               requiredPreviousAnswers.copy(wasAUKResident = Some(true), countryOfResidence = None, assetType = None),
-              checkIsRedirect(_, routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty())
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
             )
           }
 
@@ -727,7 +726,7 @@ class CanTheyUseOurServiceControllerSpec
               answers,
               List("wereYouAUKResident" -> "false"),
               requiredPreviousAnswers.copy(wasAUKResident = Some(false), countryOfResidence = None, assetType = None),
-              checkIsRedirect(_, routes.CanTheyUseOurServiceController.countryOfResidence())
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
             )
           }
 
@@ -747,7 +746,7 @@ class CanTheyUseOurServiceControllerSpec
                 Some(completeAnswers.disposalDate),
                 Some(completeAnswers.completionDate)
               ),
-              checkIsRedirect(_, routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty())
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
             )
           }
 
@@ -767,7 +766,7 @@ class CanTheyUseOurServiceControllerSpec
                 Some(completeAnswers.disposalDate),
                 Some(completeAnswers.completionDate)
               ),
-              checkIsRedirect(_, routes.CanTheyUseOurServiceController.countryOfResidence())
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
             )
           }
 
@@ -791,7 +790,7 @@ class CanTheyUseOurServiceControllerSpec
                 Some(completeAnswers.disposalDate),
                 Some(completeAnswers.completionDate)
               ),
-              checkIsRedirect(_, routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty())
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
             )
           }
 
@@ -804,7 +803,7 @@ class CanTheyUseOurServiceControllerSpec
               answers,
               List("wereYouAUKResident" -> "false"),
               requiredPreviousAnswers.copy(wasAUKResident = Some(false), countryOfResidence = None, assetType = None),
-              checkIsRedirect(_, routes.CanTheyUseOurServiceController.countryOfResidence())
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
             )
           }
         }
@@ -826,7 +825,7 @@ class CanTheyUseOurServiceControllerSpec
 
           checkIsRedirect(
             performAction("wereYouAUKResident" -> "true"),
-            routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty()
+            routes.CanTheyUseOurServiceController.checkYourAnswers()
           )
         }
 
@@ -926,7 +925,7 @@ class CanTheyUseOurServiceControllerSpec
               requiredPreviousAnswers,
               List("didYouDisposeOfResidentialProperty" -> "true"),
               requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential)),
-              checkIsRedirect(_, routes.CanTheyUseOurServiceController.whenWasDisposalDate())
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
             )
           }
 
@@ -963,7 +962,7 @@ class CanTheyUseOurServiceControllerSpec
               requiredPreviousAnswers,
               List("didYouDisposeOfResidentialProperty" -> "true"),
               requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential)),
-              checkIsRedirect(_, routes.CanTheyUseOurServiceController.whenWasDisposalDate())
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
             )
           }
 
@@ -998,7 +997,7 @@ class CanTheyUseOurServiceControllerSpec
 
           checkIsRedirect(
             performAction("didYouDisposeOfResidentialProperty" -> "true"),
-            routes.CanTheyUseOurServiceController.whenWasDisposalDate()
+            routes.CanTheyUseOurServiceController.checkYourAnswers()
           )
         }
 
@@ -1157,7 +1156,7 @@ class CanTheyUseOurServiceControllerSpec
               requiredPreviousAnswers,
               formData(earliestDisposalDate),
               requiredPreviousAnswers.copy(disposalDate = Some(DisposalDate(earliestDisposalDate, taxYear))),
-              checkIsRedirect(_, routes.CanTheyUseOurServiceController.whenWasCompletionDate())
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
             )
           }
 
@@ -1180,7 +1179,7 @@ class CanTheyUseOurServiceControllerSpec
                 Some(DisposalDate(date, taxYear)),
                 None
               ),
-              checkIsRedirect(_, routes.CanTheyUseOurServiceController.whenWasCompletionDate())
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
             )
 
           }
@@ -1195,7 +1194,7 @@ class CanTheyUseOurServiceControllerSpec
               requiredPreviousAnswers,
               formData(earliestDisposalDate),
               requiredPreviousAnswers.copy(disposalDate = Some(DisposalDate(earliestDisposalDate, taxYear))),
-              checkIsRedirect(_, routes.CanTheyUseOurServiceController.whenWasCompletionDate())
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
             )
 
           }
@@ -1219,7 +1218,7 @@ class CanTheyUseOurServiceControllerSpec
                 Some(DisposalDate(date, taxYear)),
                 None
               ),
-              checkIsRedirect(_, routes.CanTheyUseOurServiceController.whenWasCompletionDate())
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
             )
           }
         }
@@ -1242,7 +1241,7 @@ class CanTheyUseOurServiceControllerSpec
 
           checkIsRedirect(
             performAction(formData(earliestDisposalDate): _*),
-            routes.CanTheyUseOurServiceController.whenWasCompletionDate()
+            routes.CanTheyUseOurServiceController.checkYourAnswers()
           )
         }
 
@@ -1488,6 +1487,38 @@ class CanTheyUseOurServiceControllerSpec
         { case (answers, w) => answers.copy(wasAUKResident = w) }
       )
 
+      "redirect to the were you a uk resident page" when {
+
+        "the user has answered yes to that question and" when {
+
+          "the section is incomplete" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers.copy(wasAUKResident = Some(true)))
+              )
+            }
+
+            checkIsRedirect(performAction(), routes.CanTheyUseOurServiceController.wereYouAUKResident())
+          }
+
+          "the section is complete" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  sample[CompleteTriageAnswers].copy(countryOfResidence = Country.uk)
+                )
+              )
+            }
+
+            checkIsRedirect(performAction(), routes.CanTheyUseOurServiceController.wereYouAUKResident())
+
+          }
+        }
+
+      }
+
       behave like displayIndividualTriagePageBehaviorIncompleteJourney[Country](
         performAction
       )(requiredPreviousAnswers)(
@@ -1532,6 +1563,38 @@ class CanTheyUseOurServiceControllerSpec
         { case (answers, w) => answers.copy(wasAUKResident = w) }
       )
 
+      "redirect to the were you a uk resident page" when {
+
+        "the user has answered yes to that question and" when {
+
+          "the section is incomplete" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers.copy(wasAUKResident = Some(true)))
+              )
+            }
+
+            checkIsRedirect(performAction(), routes.CanTheyUseOurServiceController.wereYouAUKResident())
+          }
+
+          "the section is complete" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  sample[CompleteTriageAnswers].copy(countryOfResidence = Country.uk)
+                )
+              )
+            }
+
+            checkIsRedirect(performAction(), routes.CanTheyUseOurServiceController.wereYouAUKResident())
+
+          }
+        }
+
+      }
+
       "show a form error" when {
 
         def test(formData: Seq[(String, String)], expectedErrorKey: String) =
@@ -1567,10 +1630,8 @@ class CanTheyUseOurServiceControllerSpec
               performAction,
               requiredPreviousAnswers,
               List("countryCode" -> countryCode),
-              requiredPreviousAnswers.copy(countryOfResidence = Some(country)), { result =>
-                status(result)          shouldBe OK
-                contentAsString(result) shouldBe s"Got country $country"
-              }
+              requiredPreviousAnswers.copy(countryOfResidence = Some(country)),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
             )
           }
 
@@ -1580,10 +1641,8 @@ class CanTheyUseOurServiceControllerSpec
               performAction,
               completeAnswers,
               List("countryCode" -> countryCode),
-              completeAnswers.copy(countryOfResidence = country), { result =>
-                status(result)          shouldBe OK
-                contentAsString(result) shouldBe s"Got country $country"
-              }
+              completeAnswers.copy(countryOfResidence = country),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
             )
           }
         }
@@ -1595,10 +1654,8 @@ class CanTheyUseOurServiceControllerSpec
               performAction,
               requiredPreviousAnswers,
               List("countryCode" -> countryCode),
-              requiredPreviousAnswers.copy(countryOfResidence = Some(country)), { result =>
-                status(result)          shouldBe OK
-                contentAsString(result) shouldBe s"Got country $country"
-              }
+              requiredPreviousAnswers.copy(countryOfResidence = Some(country)),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
             )
           }
 
@@ -1608,10 +1665,8 @@ class CanTheyUseOurServiceControllerSpec
               performAction,
               completeAnswers,
               List("countryCode" -> countryCode),
-              completeAnswers.copy(countryOfResidence = country), { result =>
-                status(result)          shouldBe OK
-                contentAsString(result) shouldBe s"Got country $country"
-              }
+              completeAnswers.copy(countryOfResidence = country),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
             )
           }
         }
@@ -1632,9 +1687,7 @@ class CanTheyUseOurServiceControllerSpec
           }
 
           val result = performAction("countryCode" -> countryCode)
-          status(result)          shouldBe OK
-          contentAsString(result) shouldBe s"Got country $country"
-
+          checkIsRedirect(result, routes.CanTheyUseOurServiceController.checkYourAnswers())
         }
 
       }
