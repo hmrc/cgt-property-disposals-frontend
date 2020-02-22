@@ -1,4 +1,9 @@
 -> /  triage.Routes
+-> /  disposal_details.Routes
+-> /  acquisition_details.Routes
+-> /  relief_details.Routes
+-> /  exemptions_losses.Routes
+-> /  ytd_liability_firstreturn.Routes
 
 GET  /enter-property-address      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.enterUkAddress()
 POST /enter-property-address      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.enterUkAddressSubmit()

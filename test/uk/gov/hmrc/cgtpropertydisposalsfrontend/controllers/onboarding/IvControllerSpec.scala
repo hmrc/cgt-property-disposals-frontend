@@ -79,8 +79,8 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
       "clear the session and redirect to the start endpoint" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(nonEmptySession))))
-          mockStoreSession(SessionData.empty)(Future.successful(Right(())))
+          mockGetSession(nonEmptySession)
+          mockStoreSession(SessionData.empty)(Right(()))
         }
 
         checkIsRedirect(performAction(), controllers.routes.StartController.start())
@@ -89,8 +89,8 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
       "show an error page if there is an error clearing the session" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(nonEmptySession))))
-          mockStoreSession(SessionData.empty)(Future.successful(Left(Error(""))))
+          mockGetSession(nonEmptySession)
+          mockStoreSession(SessionData.empty)(Left(Error("")))
         }
 
         checkIsTechnicalErrorPage(performAction())
@@ -101,7 +101,7 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
         "there is no session data" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(None)))
+            mockGetSession(Right(None))
           }
 
           checkIsRedirect(performAction(), controllers.routes.StartController.start())
@@ -110,7 +110,7 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
         "the session data is empty" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+            mockGetSession(SessionData.empty)
           }
 
           checkIsRedirect(performAction(), controllers.routes.StartController.start())
@@ -132,7 +132,7 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
         "there is an error querying the journey status" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(None)))
+            mockGetSession(Right(None))
             mockGetFailedJourneyStatus(journeyId)(Left(Error("")))
           }
 
@@ -161,7 +161,7 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
             s"the iv error status is $status" in {
               inSequence {
                 mockAuthWithNoRetrievals()
-                mockGetSession(Future.successful(Right(None)))
+                mockGetSession(Right(None))
                 mockGetFailedJourneyStatus(journeyId)(Right(status))
               }
 
@@ -178,12 +178,12 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
       "display the page" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+          mockGetSession(SessionData.empty)
         }
 
         val result = controller.getFailedMatching()(FakeRequest())
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("iv.failedMatching.title"))
+        contentAsString(result) should include(messageFromMessageKey("iv.failedMatching.title"))
       }
 
     }
@@ -193,12 +193,12 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
       "display the page" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+          mockGetSession(SessionData.empty)
         }
 
         val result = controller.getFailedIV()(FakeRequest())
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("iv.failedIv.title"))
+        contentAsString(result) should include(messageFromMessageKey("iv.failedIv.title"))
       }
 
     }
@@ -208,12 +208,12 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
       "display the page" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+          mockGetSession(SessionData.empty)
         }
 
         val result = controller.getInsufficientEvidence()(FakeRequest())
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("iv.insufficientEvidence.title"))
+        contentAsString(result) should include(messageFromMessageKey("iv.insufficientEvidence.title"))
       }
 
     }
@@ -223,12 +223,12 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
       "display the page" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+          mockGetSession(SessionData.empty)
         }
 
         val result = controller.getLockedOut()(FakeRequest())
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("iv.lockedOut.title"))
+        contentAsString(result) should include(messageFromMessageKey("iv.lockedOut.title"))
 
       }
 
@@ -239,12 +239,12 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
       "display the page" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+          mockGetSession(SessionData.empty)
         }
 
         val result = controller.getUserAborted()(FakeRequest())
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("iv.userAborted.title"))
+        contentAsString(result) should include(messageFromMessageKey("iv.userAborted.title"))
 
       }
 
@@ -255,12 +255,12 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
       "display the page" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+          mockGetSession(SessionData.empty)
         }
 
         val result = controller.getTimedOut()(FakeRequest())
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("iv.timeout.title"))
+        contentAsString(result) should include(messageFromMessageKey("iv.timeout.title"))
 
       }
 
@@ -271,12 +271,12 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
       "display the page" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+          mockGetSession(SessionData.empty)
         }
 
         val result = controller.getTechnicalIssue()(FakeRequest())
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("iv.technicalIssue.title"))
+        contentAsString(result) should include(messageFromMessageKey("iv.technicalIssue.title"))
 
       }
 
@@ -287,12 +287,12 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
       "display the page" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(SessionData.empty))))
+          mockGetSession(SessionData.empty)
         }
 
         val result = controller.getPreconditionFailed()(FakeRequest())
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("iv.preconditionFailed.title"))
+        contentAsString(result) should include(messageFromMessageKey("iv.preconditionFailed.title"))
 
       }
 

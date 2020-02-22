@@ -25,61 +25,50 @@ generic.yes=Yes
 generic.no=No
 generic.success=Success
 generic.errorPrefix=Error:
+generic.loss=loss
+generic.gain=gain
 yesNo.true=Yes
 yesNo.false=No
 
 cya.change=Change
 cya.add=Add
 
+unit-input.assistive.pounds=do not enter the pound sign
+unit-input.assistive.percent=do not enter the percent sign
+
 error.summary.heading=There’s a problem
 
 landingPage.title=Report and pay Capital Gains Tax on UK property
-landingPage.intro.p1=You may have to pay <a href="{0}">Capital Gains Tax</a> if you make a profit (‘gain’) when you sell (or ‘<a href="{0}">dispose of</a>’) property that’s not your home, for example:
-landingPage.intro.bullet1=buy-to-let properties
-landingPage.intro.bullet2=land
-landingPage.intro.bullet3=inherited property
-landingPage.intro.p2=In most cases you do not need to the tax when you <a href="{0}">sell your main home</a>.
-landingPage.warning=You have 30 days after the property completion date to report and pay Capital Gains Tax on your UK property disposals.
-landingPage.h2.1=How to report and pay the tax
-landingPage.p1=You can use this service to:
-landingPage.list1.bullet1=work out if you made a gain on the sale or disposal of UK residential property or land
-landingPage.list1.bullet2=get an estimate of the amount of tax due
-landingPage.list1.bullet3=report the disposal by the 30-day deadline
-landingPage.list1.bullet4=pay any tax you might owe for that disposal
-landingPage.list1.bullet5=create a Capital Gains Tax on UK property account
-landingPage.list1.bullet6=view and amend your previous and current returns
-landingPage.h2.2=If you’re a non-resident
-landingPage.p2=You can use this service to report the disposal and pay the tax on:
-landingPage.list2.bullet1=the sale or disposal of residential and non-residential UK property or land
-landingPage.list2.bullet2=indirect disposals
-landingPage.p3=You must report the disposal by the 30-day deadline, even if:
-landingPage.list3.bullet1=you’ve no tax to pay
-landingPage.list3.bullet2=you’ve made a loss
-landingPage.signIn=Sign in
-landingPage.signIn.p1=<a href="{0}">Sign in</a> if you already have an account.
-landingPage.beforeYouStart=Before you start
-landingPage.beforeYouStart.p1=You’ll need a <a href="{0}">Government Gateway</a> user ID and password to use this service. If you do not have a user ID, you can create one.
-landingPage.beforeYouStart.p2=You can <a href="{0}">contact HMRC</a> if you need help accessing the service.
-landingPage.whatYoullNeed=What you’ll need to complete a return
-landingPage.whatYoullNeed.p1=You’ll need to provide the:
-landingPage.whatYoullNeed.bullet1=property’s address and postcode
-landingPage.whatYoullNeed.bullet2=date you got the property
-landingPage.whatYoullNeed.bullet3=date you exchanged contracts when you were selling or disposing of the property
-landingPage.whatYoullNeed.bullet4=date you stopped being the property’s owner (completion date)
-landingPage.whatYoullNeed.bullet5=property’s value when you got it, and when you disposed of it
-landingPage.whatYoullNeed.bullet6=costs of buying, selling or making improvements to the property
-landingPage.whatYoullNeed.bullet7=details of any tax reliefs, allowances or exemptions you’re entitled to claim
-landingPage.whatYoullNeed.bullet8=property type, if you’re a non-resident
-landingPage.ifYoureAnAgent=If you’re an agent
-landingPage.ifYoureAnAgent.p1=Go to your <a href="{0}">agent services account</a> to access this service. If you do not already have one, you can <a href="{1}">apply for an agent services account</a>.
-landingPage.ifYoureRepresentingATrust=If you’re representing a trust
-landingPage.ifYoureRepresentingATrust.p1=The trust will need to be <a href="{0}">registered</a>. You will need the trust’s Self Assessment Unique Taxpayer Reference.
+landingPage.intro.p1=You may have to pay <a href="{0}">Capital Gains Tax</a> if you make a profit (‘gain’) when you sell (or ‘<a href="{0}">dispose of</a>’) property that’s not your home. For example, buy-to-let properties, land or inherited property.
+landingPage.intro.p2=In most cases you do not need to pay the tax when you <a href="{0}">sell your main home</a>.
+landingPage.createAccount.h2=Create a Capital Gains Tax on UK property account
+landingPage.createAccount.p1=Before 6 April 2020, you’ll be able sign in to this service using your Government Gateway user ID and password to:
+landingPage.createAccount.bullet1=create a Capital Gains Tax on UK property account
+landingPage.createAccount.bullet2=update your contact details in your Capital Gains Tax on UK property account once you have created one
+landingPage.createAccount.p2=If you do not have a Government Gateway user ID, you can create one.
+
+landingPage.howTo.h2=How to report and pay the tax
+landingPage.warning=From 6 April 2020, you will have 30 days after the property completion date to report and pay Capital Gains Tax on your UK property sales or disposals.
+landingPage.howTo.p1=From 6 April 2020, you will be able to use this service to:
+landingPage.howTo.list1.bullet1=report and pay any Capital Gains Tax due on UK property sales or disposals made from 6 April 2020
+landingPage.howTo.list1.bullet2=view and amend your Capital Gains Tax on UK property returns made from 6 April 2020
+landingPage.howTo.p2=If you’re a non-resident, you’ll also be able to use this service from 6 April 2020 to report the sale or disposal and pay the tax on:
+landingPage.howTo.list2.bullet1=the sale or disposal of residential and non-residential UK property or land
+landingPage.howTo.list2.bullet2=indirect disposals
+landingPage.startButton=Create account or sign in
+landingPage.beforeYouStart.h2=Before you start
+landingPage.beforeYouStart.p1=You’ll need a Government Gateway user ID and password to use this service. If you do not have a Government Gateway user ID, you can create one.
+landingPage.beforeYouStart.p2=To sign in, enter the same Government Gateway user ID and password you used to create your Capital Gains Tax on UK property account.
+landingPage.beforeYouStart.p3=You can <a href="{0}">contact HMRC</a> if you need help accessing the service.
+landingPage.ifAgent.h2=If you’re an agent
+landingPage.ifAgent.p1=Go to your <a href="{0}">agent services account</a> to access this service. If you do not already have one, you can <a href="{1}">apply for an agent services account</a>.
+landingPage.ifTrust.h2=If you’re representing a trust
+landingPage.ifTrust.p1=The trust will need to be <a href="{0}">registered</a>. You will need the trust’s Self Assessment Unique Taxpayer Reference.
 
 landingPage.sidebar.title=Related content
-landingPage.sidebar.1=Sign in to report and pay Capital Gains Tax on UK property
-landingPage.sidebar.2=Capital Gains Tax
-landingPage.sidebar.3=Tell HMRC about Capital Gains Tax on UK property or land if you’re non-resident
-landingPage.sidebar.4=Calculate Capital Gains Tax on UK property
+landingPage.sidebar.1=Capital Gains Tax
+landingPage.sidebar.2=Tell HMRC about Capital Gains Tax on UK property or land if you’re non-resident
+landingPage.sidebar.3=More
 
 signInPage.title=Sign in to report and pay Capital Gains Tax on UK property
 signInPage.list1.bullet5=view and amend your previous and current Capital Gains Tax on UK property returns
@@ -211,6 +200,7 @@ nonUkAddress.line2.label=Address line 2 (optional)
 nonUkAddress.line3.label=Address line 3 (optional)
 nonUkAddress.line4.label=Address line 4 (optional)
 countryCode.label=Country
+countryCode.placeholder=Select a country
 nonUkAddress-line1.error.required=Enter address line 1
 nonUkAddress-line1.error.tooLong=Address line 1 must be 35 characters or fewer
 nonUkAddress-line2.error.tooLong=Address line 2 must be 35 characters or fewer
@@ -496,6 +486,10 @@ wereYouAUKResident.link=<a href="{0}" target="_blank">Work out your residence st
 wereYouAUKResident.error.required=Select yes if you were a UK resident when you ‘exchanged’ contracts
 wereYouAUKResident.error.boolean=Select yes if you were a UK resident when you ‘exchanged’ contracts
 
+triage.enterCountry.title=What was your country of residence on the day you ‘exchanged’ contracts?
+triage.enterCountry.helpText=It’s usually the day you and the new owner swapped contracts and they paid a deposit. If you made an indirect disposal, it’s the day you sold the shares.
+triage.enterCountry.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>.
+
 didYouDisposeOfResidentialProperty.title=Did you sell a residential property?
 didYouDisposeOfResidentialProperty.helpText=Residential property includes houses, flats, or other dwellings, including their gardens and grounds.
 didYouDisposeOfResidentialProperty.Residential=Yes
@@ -505,7 +499,7 @@ didYouDisposeOfResidentialProperty.details.p1=Residential property is:
 didYouDisposeOfResidentialProperty.details.l1=a building where someone lives or could live, like a house, flat or other type of dwelling
 didYouDisposeOfResidentialProperty.details.l2=a building that is being built or changed so it can be used as a place where someone could live
 didYouDisposeOfResidentialProperty.details.l3=land that’s part of a garden or grounds of a building that’s used as a place where someone lives, or could live
-didYouDisposeOfResidentialProperty.details.link=<a href="{0}" target="_blank">Read a definition of residential property (opens in a new window)</a>.
+didYouDisposeOfResidentialProperty.details.link=<a href="{0}" tabindex="-1" target="_blank">Read a definition of residential property (opens in a new window)</a>.
 
 didYouDisposeOfResidentialProperty.error.required=Select yes if you sold or disposed of a residential property
 didYouDisposeOfResidentialProperty.error.boolean=Select yes if you sold or disposed of a residential property
@@ -560,11 +554,21 @@ date.11=November
 date.12=December
 
 returns.return-to-summary-link=Return to summary
+task-list.InProgress=In progress
+task-list.Complete=Complete
+task-list.CannotStart=Cannot start
+task-list.ToDo=To do
 task-list.triage.link=Check if you can use this service
 task-list.provide-details.heading=Provide details
 task-list.enter-property-address.link=Enter property address
+task-list.disposals-details.link=Enter sale or disposal details
+task-list.acquisition-details.link=Enter purchase or acquisition details
+task-list.exemptions-and-losses.link=Enter any losses, allowances and exemptions
 task-list.save-and-come-back.link=Save and come back later
-
+task-list.relief-details.link=Enter reliefs
+task-list.report-and-pay-the-tax.heading=Report and pay the tax
+task-list.enter-cgt-liability.link=Enter Capital Gains Tax liability so far this tax year
+task-list.ytd-liability.link=Enter Capital Gains Tax liability so far this tax year
 
 returns.property-address.caption=Property address
 enterPostcode.returns.title=Find the address of the UK property you disposed of
@@ -574,3 +578,304 @@ address.uk.returns.title=Enter the address of the UK property you disposed of
 returns.property-address.cya.title=Check your answers
 returns.property-address.cyaLabel.property-address=Property address
 returns.property-address.cyaChange.property-address=your property address
+
+returns.disposal-details.caption=Sale or disposal details
+shareOfProperty.title=How much of the property did you own?
+shareOfProperty.error.required=Select how much of the property you owned
+shareOfProperty.error.invalid=Select how much of the property you owned
+returns.shareOfProperty.Full=100%
+returns.shareOfProperty.Half=50%
+returns.shareOfProperty.Other=Other share
+percentageShare.label=Percentage you owned
+percentageShare.error.required=Enter how much of the property you owned as a percentage
+percentageShare.error.invalid=The percentage of the property you owned must be a number
+percentageShare.error.tooLarge=The percentage of the property you owned must be a number between 0 and 100, for example 25 or 33.33
+percentageShare.error.tooSmall=The percentage of the property you owned must be a number between 0 and 100, for example 25 or 33.33
+percentageShare.error.tooManyDecimals=The percentage of the property you owned must have 2 decimal places or less, for example 33.33
+
+
+disposalPrice.full-share.sold-it.title=How much did you sell the property for?
+disposalPrice.full-share.gifted-it.title=What was the market value of the property when you disposed of it?
+disposalPrice.not-full-share.sold-it.title=How much did you sell your share of the property for?
+disposalPrice.not-full-share.gifted-it.title=What was the market value of your share of the property when you disposed of it?
+
+disposalPrice.helpText=You’ll be able to enter any selling or improvement costs, like solicitor’s or estate agent’s fees later.
+disposalPrice.error.required=Enter how much you sold the property for
+disposalPrice.error.invalid=How much you sold your the property for must a number, like 160,000 or 11,200.45
+disposalPrice.error.tooSmall=How much you sold the property for must be more than 0
+disposalPrice.error.tooLarge=How much you sold the property for must be 50,000,000,000.00 or less
+disposalPrice.error.tooManyDecimals=How much you sold the property for must have 2 decimal places or less, for example 33.33
+
+disposalFees.full-share.sold-it.title=Enter your selling costs when you sold the property
+disposalFees.full-share.gifted-it.title=Enter your selling costs when you gave away the property
+disposalFees.not-full-share.sold-it.title=Enter your share of the selling costs when you sold your share of the property
+disposalFees.not-full-share.gifted-it.title=Enter your share of the selling costs when you gave away your share of the property
+disposalFees.helpText=For example, the amount you paid to an estate agent or solicitor.
+disposalFees.error.required=Enter your share of the selling costs when you sold the property
+disposalFees.error.invalid=Your share of the selling costs must be an amount of money, like 1,500 or 7,300.50
+disposalFees.error.tooSmall=Selling costs must be 0 or more
+disposalFees.error.tooLarge=Selling costs must be 50,000,000,000.00 or less
+disposalFees.error.tooManyDecimals= Selling costs must have 2 decimal places or less, for example 33.33
+
+returns.disposal-details.cya.title=Check your answers
+
+
+acquisitionDetails.caption=Purchase or acquisition details
+
+acquisitionMethod.title=How did you get your share of the property?
+returns.acquisitionMethod.Bought=Bought it
+returns.acquisitionMethod.Inherited=Inherited it
+returns.acquisitionMethod.Gifted=Got it as a gift
+returns.acquisitionMethod.Other=Other
+returns.otherAcquisitionMethod.label=How you got the property
+
+acquisitionMethod.error.required=Select how you got your share of the property
+acquisitionMethod.error.invalid=Select how you got your share of the property
+otherAcquisitionMethod.error.required=Enter how you got your share of the property
+otherAcquisitionMethod.error.invalid=How you got your share of the property must only include letters a to z, spaces and number
+otherAcquisitionMethod.error.tooLong=How you got your share of the property must be 35 characters or less
+
+
+acquisitionDate.title=What date did you become the owner of the property?
+acquisitionDate.helpText=This is the date the property was transferred into your name. For example, 21 5 2020
+acquisitionDate.error.required=Enter the date you became the owner
+acquisitionDate.error.invalid=Enter a real date you became the owner
+acquisitionDate.error.tooFarInFuture=Date you became the owner must be before you sold the property
+acquisitionDate-day.error.required=Date you became the owner must include a day
+acquisitionDate-month.error.required=Date you became the owner must include a month
+acquisitionDate-year.error.required=Date you became the owner must include a year
+acquisitionDate-day.error.invalid=Enter a real date you became the owner
+acquisitionDate-month.error.invalid=Enter a real date you became the owner
+acquisitionDate-year.error.invalid=Enter a real date you became the owner
+acquisitionDate-month.error.monthAndYearRequired=Date you became the owner must include a month and a year
+acquisitionDate-day.error.dayAndYearRequired=Date you became the owner must include a day and a year
+acquisitionDate-day.error.dayAndMonthRequired=Date you became the owner must include a day and a month
+
+acquisitionPrice.title=How much did you pay for your share of the property?
+acquisitionPrice.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later.
+acquisitionPrice.error.required=Enter how much you paid for your share of the property
+acquisitionPrice.error.invalid=The amount of money must only include numbers, for example 160,000 or 23,040.50
+acquisitionPrice.error.tooSmall=The amount of money must be a number between 1 and 50,000,000,000.00
+acquisitionPrice.error.tooLarge=The amount of money must be a number between 1 and 50,000,000,000.00
+acquisitionPrice.error.tooManyDecimals=The amount of money must be 2 decimal places or less, for example 160,000 or 23,040.50
+
+improvementCosts.title=Do you want to claim any improvement costs?
+improvementCosts.helpText=You can only claim for your share of any costs that added value to the property. You cannot claim for mortgage interest, decorating or maintenance.
+improvementCosts.error.required=Select yes if you want to claim any improvement costs
+improvementCosts.error.invalid=Select yes if you want to claim any improvement costs
+improvementCostsValue.error.invalid=The amount of money must only include numbers, for example 160,000 or 23,040.50
+improvementCostsValue.error.tooSmall=The amount of money must be a number between £1 and £50,000,000,000.00
+improvementCostsValue.error.tooLarge=The amount of money must be a number between £1 and £50,000,000,000.00
+improvementCostsValue.error.tooManyDecimals=The amount of money must be 2 decimal places or less, for example £160,000 or £23,040.50
+improvementCostsValue.error.required=Enter how much you paid for improvements of your share of the property
+improvementCostsValue.label=Amount spent on improvements
+improvementCosts.details.summary=What are improvements?
+improvementCosts.details.p1=Improvement include adding an extension or replacing a basic kitchen with a luxury one.
+
+acquisitionFees.title=Do you want to claim any additional costs you paid when you bought the property?
+acquisitionFees.helpText=For example, fees for surveyors or solicitors. If you shared these costs, you can only claim your share.
+acquisitionFees.error.required=Select yes if you have extra costs
+acquisitionFeesValue.label=Amount of additional costs
+acquisitionFeesValue.error.required=Enter how much you paid in additional purchase or acquisition costs
+acquisitionFeesValue.error.invalid=Additional purchase or acquisition costs must only include numbers, for example 1,480 or 900.50
+acquisitionFeesValue.error.tooSmall=Purchase or acquisition costs must more than 0
+acquisitionFeesValue.error.tooLarge=Purchase or acquisition costs must be 50,000,000,000.00 or less
+acquisitionFeesValue.error.tooManyDecimals=Purchase or acquisition costs must be 2 decimal places or less, for example 1,480 or 900.50
+
+acquisitionDetails.cya.title=Check your answers
+acquisitionDetails.cyaLabel.rebased=Property value rebased
+acquisitionDetails.cyaLabel.rebasedValue=Rebased value
+acquisitionDetails.cyaLabel.improvementCostsValue=Amount of improvement costs
+acquisitionDetails.cyaLabel.acquisitionFeesValue=Amount of buying costs
+acquisitionDetails.cyaChange.acquisitionMethod=your acquisition method
+acquisitionDetails.cyaChange.acquisitionDate=your acquisition date
+acquisitionDetails.cyaChange.acquisitionPrice=your acquisition price
+acquisitionDetails.cyaChange.rebasedAcquisitionPrice=your rebased acquisition price
+acquisitionDetails.cyaChange.improvementCosts=your improvements costs
+acquisitionDetails.cyaChange.acquisitionFees=your acquisition fees
+
+rebaseAcquisitionPrice.title=Are you rebasing your share of the property to its market value on {0}?
+rebaseAcquisitionPrice.helpText=You can work out your gain or loss by including the property’s market value on {0} in your calculation.
+rebaseAcquisitionPrice.error.required=Select yes if you rebasing the property to its market value on {0}
+rebaseAcquisitionPriceValue.label=Property’s market value on {0}
+rebaseAcquisitionPriceValue.error.required=Enter the property’s market value on {0}
+rebaseAcquisitionPriceValue.error.invalid=The amount of money must only include numbers, for example 160,000 or 23,040.50
+rebaseAcquisitionPriceValue.error.tooSmall=The amount of money must be a number between 1 and 50,000,000,000.00
+rebaseAcquisitionPriceValue.error.tooLarge=The amount of money must be a number between 1 and 50,000,000,000.00
+rebaseAcquisitionPriceValue.error.tooManyDecimals=The amount of money must be 2 decimal places or less, for example £160,000 or £23,040.50
+
+
+reliefDetails.caption=Reliefs
+
+privateResidentsRelief.title=Are you entitled to claim Private Residence Relief?
+privateResidentsRelief.helpText=You might qualify for this relief if the property had been your main home at some point.
+privateResidentsReliefValue.label=Amount of Private Residence Relief you are entitled to
+
+privateResidentsRelief.error.required=Select yes if you are entitled to Private Residence Relief
+privateResidentsReliefValue.error.required=Enter an amount of Private Residence Relief, like 108 or 2,940.54
+privateResidentsReliefValue.error.tooSmall=Amount of Private Residence Relief must be more than than 0, or select no
+privateResidentsReliefValue.error.tooLarge=Amount of Private Residence Relief must be 50,000,000,000.00 or less
+privateResidentsReliefValue.error.invalid=Amount of Private Residence Relief must be a number, like 108 or 2,940.54
+
+lettingsRelief.title=Do you want to claim Letting Relief?
+lettingsRelief.helpText=You might be able to claim this relief if the property was your main home and they also let it our for a time.
+lettingsReliefValue.label=Amount of Letting Relief
+
+lettingsRelief.error.required=Select yes if you are claiming Letting Relief
+lettingsReliefValue.error.required=Enter an amount of Letting Relief, like 108 or 2,940.54
+lettingsReliefValue.error.tooSmall=Amount of Letting Relief must be more than than 0, or select no
+lettingsReliefValue.error.tooLarge=Amount of Letting Relief must be 50,000,000,000.00 or less
+lettingsReliefValue.error.invalid=Amount of Letting Relief must be a number, like 108 or 2,940.54
+
+otherReliefs.title=Do you want to claim any other reliefs?
+otherReliefs.helpText=You will need to tell us what other reliefs you are claiming and what the total amount of these is.
+otherReliefsName.label=Name(s) of the other relief(s) you are claiming
+otherReliefsAmount.label=Total amount of other relief(s) you are claiming
+
+otherReliefs.error.required=Select yes if you are claiming other reliefs
+otherReliefsName.error.required=Enter the names of the other reliefs you are claiming
+otherReliefsName.error.tooLong=The names of the other reliefs you are claiming must be 105 characters or less
+otherReliefsName.error.invalid=The names of the other reliefs must only include letters, spaces or numbers
+otherReliefsAmount.error.required=Enter the total amount of the other reliefs, like 108 or 2,940.54
+otherReliefsAmount.error.tooSmall=Amount of other reliefs must be more than than 0, or select no
+otherReliefsAmount.error.tooLarge=Amount of other reliefs must be 50,000,000,000.00 or less
+otherReliefsAmount.error.invalid=Amount of other reliefs must be a number, like 108 or 2,940.54
+
+reliefDetails.cya.title=Check your answers
+reliefDetails.cyaLabel.privateResidentsRelief=Entitled to Private Residence Relief?
+reliefDetails.cyaLabel.lettingsRelief=Apply Letting Relief?
+reliefDetails.cyaLabel.otherReliefs=Apply other reliefs?
+reliefDetails.cyaChange.privateResidentsReliefValue=Amount of Private Residence Relief
+reliefDetails.cyaChange.lettingsReliefValue=Amount of Lettings Relief
+reliefDetails.cyaChange.otherReliefsName=Other reliefs names
+reliefDetails.cyaChange.otherReliefsAmount=Other reliefs amount
+
+
+
+exemptionAndLosses.caption=Losses, allowances and exemptions
+
+inYearLosses.title=Do you want to include any Capital Gains Tax losses you made in this tax year?
+inYearLosses.helpText=You can include any Capital Gains Tax losses you mde on UK property sales or disposals from tax year {0} to {1} to reduce your gain
+inYearLosses.error.required=Select yes if you want to include any Capital Gains Tax losses you made in this tax year
+inYearLosses.error.invalid=Select yes if you want to include any Capital Gains Tax losses you made in this tax year
+inYearLossesValue.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
+inYearLossesValue.error.tooSmall=Amount of Capital Gains Tax losses must be more than than 0, or select no
+inYearLossesValue.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
+inYearLossesValue.error.tooManyDecimals=Amount of Capital Gains Tax losses must have 2 decimal places or less, for example 33 or 33.33
+inYearLossesValue.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
+inYearLossesValue.label=Amount of losses from this tax year
+inYearLosses.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
+
+
+previousYearsLosses.title= Do you want to include any Capital Gains Tax losses you made in previous tax years?
+previousYearsLosses.helpText=You can include previous losses in this return to reduce your gain. You can only include losses you have already reported to HMRC.
+previousYearsLosses.error.required=Select yes if you want to include any Capital Gains Tax losses you made in previous tax years
+previousYearsLosses.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
+previousYearsLossesValue.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
+previousYearsLossesValue.error.tooSmall=Amount of Capital Gains Tax losses must be more than than 0, or select no
+previousYearsLossesValue.error.tooLarge=Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
+previousYearsLossesValue.error.tooManyDecimals=	Amount of Capital Gains Tax losses must be 50,000,000,000.00 or less
+previousYearsLossesValue.error.required=Enter an amount of Capital Gains Tax losses, like 108 or 2,940.54
+previousYearsLossesValue.label=Amount of losses from previous tax years
+previousYearsLosses.link=<a href="{0}" target="_blank">Find out how to report losses (opens in a new window)</a>.
+
+annualExemptAmount.title=How much of your Capital Gains Tax Annual Exempt Amount do you want to use?
+annualExemptAmount.helpText=In the tax year {0} to {1}, you only have to pay Capital Gains Tax on gains above {2}.
+annualExemptAmount.error.required=Enter how much of your Capital Gains Tax Annual Exempt Amount you want to use, like 0 or 12,000
+annualExemptAmount.error.invalid=Annual Exempt Amount must be a number, like 0 or 12,000
+annualExemptAmount.error.tooSmall=Annual Exempt Amount must be 0 or more
+annualExemptAmount.error.tooLarge=Annual Exempt Amount must be {0} or less
+annualExemptAmount.error.tooManyDecimals=Annual Exempt Amount must have 2 decimal places or less, like 8,700 or 33.33
+annualExemptAmount.link=<a href="{0}" target="_blank">Find out about the Annual Exempt Amount (opens in a new window)</a>.
+
+
+taxableGainOrLoss.title=Did you make a taxable gain on the property disposal?
+taxableGainOrLoss.helpText=This is after you have subtracted any reliefs, improvements or losses you are using
+taxableGainOrLoss.error.required=Select yes if you made a taxable gain on the property disposal
+taxableGainOrLoss.error.invalid=Select yes if you made a taxable gain on the property disposal
+
+taxableGainOrLoss.gain.label=Yes, I made a taxable gain
+taxableGain.label=Amount of taxable gain
+taxableGain.error.required=Enter the amount of the gain you made on the property disposal
+taxableGain.error.invalid=Amount of the gain or loss must be a number and must have 2 decimal places or less, for example 33.33
+taxableGain.error.tooSmall=The amount of the gain or loss must be a number more than 0, or select no taxable gain, no net loss
+taxableGain.error.tooLarge=Gain or loss must be a number that is 50,000,000,000.00 or less
+taxableGain.error.tooManyDecimals=Amount of the gain or loss must have 2 decimal places or less, for example 33.33 
+
+taxableGainOrLoss.loss.label=No, I made a net loss
+netLoss.label=Amount of net loss
+netLoss.error.required=Enter the amount of loss you made on the property disposal
+netLoss.error.invalid=Amount of the gain or loss must be a number and must have 2 decimal places or less, for example 33.33
+netLoss.error.tooSmall=	The amount of the gain or loss must be a number more than 0, or select no taxable gain, no net loss
+netLoss.error.tooLarge=Gain or loss must be a number that is 50,000,000,000.00 or less
+netLoss.error.tooManyDecimals=Amount of the gain or loss must have 2 decimal places or less, for example 33.33 
+
+taxableGainOrLoss.noLossOrGain.label=No taxable gain, no net loss
+taxableGainOrLoss.details.summary=How to work out if you made a taxable gain
+taxableGainOrLoss.details.p1=Subtract the amount you sold the property for as well as any reliefs, allowances, exemptions, or losses from the market value of the property when you inherited it. If the amount is more than £0 you made a taxable gain.
+
+exemptionsAndLosses.cya.title=Check your answers
+
+exemptionsAndLosses.cyaLabel.inYearLosses=Use losses from this tax year?
+exemptionsAndLosses.cyaChange.inYearLosses=your in year losses
+
+exemptionsAndLosses.cyaLabel.inYearLossesValue=Amount of losses from this tax year used
+exemptionsAndLosses.cyaChange.inYearLossesValue=your in year losses
+
+exemptionsAndLosses.cyaLabel.previousYearsLosses=Use losses from previous tax years?
+exemptionsAndLosses.cyaChange.previousYearsLosses=your previous years losses
+
+exemptionsAndLosses.cyaLabel.previousYearsLossesValue=Amount of losses from previous tax year used
+exemptionsAndLosses.cyaChange.previousYearsLossesValue=your previous years losses
+
+exemptionsAndLosses.cyaChange.annualExemptAmount=your annual exempt amount
+exemptionsAndLosses.cyaChange.taxableGainOrLoss=your taxable gain or net loss
+
+ytdLiability.caption=Tax amount owed
+
+estimatedIncome.title=What is your estimated income liable for UK tax in this tax year?
+estimatedIncome.helpText=The amount should be your total estimated earnings for the tax year {0} to {1} before any tax is taken off
+estimatedIncome.details.summary=How to estimate your income
+estimatedIncome.details.p1=The amount should be your total estimated earnings for the tax year {0} to {1} before any tax is taken off.
+estimatedIncome.details.p2=Do not include the money you made from selling the property, from ISAs, Tax Credits or income from any foreign employment.
+estimatedIncome.error.required=Enter your estimated income liable for UK tax in this tax year
+estimatedIncome.error.invalid=Estimated income must only include numbers, for example 160,000 or 23,040.50
+estimatedIncome.error.tooSmall=Estimated income must be a number between 0 and 50,000,000,000.00
+estimatedIncome.error.tooLarge=Estimated income must be a number between 0 and 50,000,000,000.00
+estimatedIncome.error.tooManyDecimals=Estimated income must be 2 decimal places or less, for example 23,040.50 or 76,000
+
+personalAllowance.title=How much of your Personal Allowance do you want to apply?
+personalAllowance.helpText=Based on your income for the tax year {0} to {1}, you can apply up to {2}.
+personalAllowance.link=<a href="{0}" target="_blank">Find out about Personal Allowances (opens in a new window)</a>.
+personalAllowance.error.required=Enter how much of your Personal Allowance you want to apply
+personalAllowance.error.invalid=Personal Allowance amount must only include numbers, for example 12,500 or 207.50
+personalAllowance.error.tooSmall=Personal Allowance amount must be a number between 0 and {0}
+personalAllowance.error.tooLarge=Personal Allowance amount must be a number between 0 and {0}
+personalAllowance.error.tooManyDecimals=Personal Allowance amount must be 2 decimal places or less, for example 12,500 or 200.50
+
+hasEstimatedDetails.title=Have any of the details in this return been estimated?
+hasEstimatedDetails.yes.content=You’ll need to confirm any estimates with HMRC when you get the details. You can do this through your Self Assessment tax return or this service.
+hasEstimatedDetails.error.required=Select yes if any of the details in this return been estimated
+hasEstimatedDetails.error.boolean=Select yes if any of the details in this return been estimated
+
+taxDue.title=Enter the Capital Gains Tax due for this return
+taxDue.p1=We used the details that were entered into this return to work out the amount of Capital Gains Tax due.
+taxDue.initialGainOrLoss=Initial gain or loss
+taxDue.gainOrLossAfterReliefs=Gain or loss after reliefs
+taxDue.gainAfterLosses=Gain after losses
+taxDue.taxableGain=Taxable gain
+taxDue.amountOfTaxDue=Capital Gains Tax due for this return
+taxDue.helpText=If you agree with these workings enter {0}. If you want to enter a different amount you will be asked to upload a file later showing your workings.
+taxDue.error.required=Enter the amount of Capital Gains Tax due for this return
+taxDue.error.invalid=Amount of Capital Gains Tax due must be a number, for example 493 or 2,040.59
+taxDue.error.tooSmall=Amount of Capital Gains Tax due must be a number between 0 and 50,000,000,000.00
+taxDue.error.tooLarge=Amount of Capital Gains Tax due must be a number between 0 and 50,000,000,000.00
+taxDue.error.tooManyDecimals=Amount of Capital Gains Tax due must have 2 decimal places or less, for example 493 or 2,040.59
+
+mandatoryEvidence.title=Add a document showing how you worked out the tax
+mandatoryEvidence.helpText=Upload one or more documents (maximum file size 5MB) showing how you worked out the Capital Gains Tax. For example, a spreadsheet or PDF.
+
+ytdLiability.cya.title=Check your answers
+ytdLiability.cyaLabel.mandatoryEvidence=Supporting file
+ytdLiability.cyaChange.mandatoryEvidence=your supporting file
+

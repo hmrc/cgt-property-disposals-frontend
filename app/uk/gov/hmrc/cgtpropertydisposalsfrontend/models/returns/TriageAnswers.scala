@@ -19,57 +19,59 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 import cats.Eq
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 
-sealed trait IndividualTriageAnswers extends Product with Serializable
+sealed trait TriageAnswers extends Product with Serializable
 
-object IndividualTriageAnswers {
+object TriageAnswers {
 
-  final case class IncompleteIndividualTriageAnswers(
+  final case class IncompleteTriageAnswers(
     individualUserType: Option[IndividualUserType],
     numberOfProperties: Option[NumberOfProperties],
     disposalMethod: Option[DisposalMethod],
     wasAUKResident: Option[Boolean],
+    countryOfResidence: Option[Country],
     assetType: Option[AssetType],
     disposalDate: Option[DisposalDate],
     completionDate: Option[CompletionDate]
-  ) extends IndividualTriageAnswers
+  ) extends TriageAnswers
 
-  object IncompleteIndividualTriageAnswers {
-    val empty: IncompleteIndividualTriageAnswers =
-      IncompleteIndividualTriageAnswers(None, None, None, None, None, None, None)
+  object IncompleteTriageAnswers {
+    val empty: IncompleteTriageAnswers =
+      IncompleteTriageAnswers(None, None, None, None, None, None, None, None)
 
-    implicit val format: OFormat[IncompleteIndividualTriageAnswers] = Json.format
+    implicit val format: OFormat[IncompleteTriageAnswers] = Json.format
   }
-  final case class CompleteIndividualTriageAnswers(
+  final case class CompleteTriageAnswers(
     individualUserType: IndividualUserType,
     numberOfProperties: NumberOfProperties,
     disposalMethod: DisposalMethod,
-    wasAUKResident: Boolean,
+    countryOfResidence: Country,
     assetType: AssetType,
     disposalDate: DisposalDate,
     completionDate: CompletionDate
-  ) extends IndividualTriageAnswers
+  ) extends TriageAnswers
 
-  object CompleteIndividualTriageAnswers {
+  object CompleteTriageAnswers {
 
-    implicit val format: OFormat[CompleteIndividualTriageAnswers] = Json.format
+    implicit val format: OFormat[CompleteTriageAnswers] = Json.format
   }
 
-  implicit class IndividualTriageQuestionOps(private val i: IndividualTriageAnswers) extends AnyVal {
+  implicit class IndividualTriageQuestionOps(val i: TriageAnswers) extends AnyVal {
 
     def fold[A](
-      ifIncomplete: IncompleteIndividualTriageAnswers => A,
-      ifComplete: CompleteIndividualTriageAnswers => A
+      ifIncomplete: IncompleteTriageAnswers => A,
+      ifComplete: CompleteTriageAnswers => A
     ): A = i match {
-      case incomplete: IncompleteIndividualTriageAnswers => ifIncomplete(incomplete)
-      case complete: CompleteIndividualTriageAnswers     => ifComplete(complete)
+      case incomplete: IncompleteTriageAnswers => ifIncomplete(incomplete)
+      case complete: CompleteTriageAnswers     => ifComplete(complete)
     }
 
   }
 
-  implicit val eq: Eq[IncompleteIndividualTriageAnswers] = Eq.fromUniversalEquals
+  implicit val eq: Eq[IncompleteTriageAnswers] = Eq.fromUniversalEquals
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[IndividualTriageAnswers] = derived.oformat()
+  implicit val format: OFormat[TriageAnswers] = derived.oformat()
 
 }

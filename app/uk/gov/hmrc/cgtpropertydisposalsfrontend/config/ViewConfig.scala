@@ -59,6 +59,9 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
   val residentialPropertyDefinitionUrl: String = getString("external-url.residential-property-definition")
   val exchangeDateHelp: String                 = getString("external-url.exchange-date-help")
   val completionDateHelp: String               = getString("external-url.completion-date-help")
+  val cgtLossesUrl: String                     = getString("external-url.cgt-losses")
+  val annualExemptAmountUrl: String            = getString("external-url.annual-exempt-amount")
+  val personalAllowanceUrl: String             = getString("external-url.personal-allowance")
 
   val onboardingExitSurveyUrl: String = "/feedback/CGTPD-REG"
   val ggCreateAccountUrl: String =

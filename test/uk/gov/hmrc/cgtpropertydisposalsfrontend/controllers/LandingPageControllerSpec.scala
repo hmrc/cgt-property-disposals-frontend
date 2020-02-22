@@ -28,12 +28,14 @@ class LandingPageControllerSpec extends ControllerSpec {
 
     "display the landing page" in {
       implicit val messagesApi: MessagesApi = controller.messagesApi
-      contentAsString(controller.landingPage()(FakeRequest())) should include(message("landingPage.title"))
+      contentAsString(controller.landingPage()(FakeRequest())) should include(
+        messageFromMessageKey("landingPage.title")
+      )
     }
 
     "display the sign in page" in {
       implicit val messagesApi: MessagesApi = controller.messagesApi
-      contentAsString(controller.signInPage()(FakeRequest())) should include(message("signInPage.title"))
+      contentAsString(controller.signInPage()(FakeRequest())) should include(messageFromMessageKey("signInPage.title"))
     }
 
   }

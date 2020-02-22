@@ -37,7 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.IncompleteIndividualTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TriageAnswers.IncompleteTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -106,24 +106,24 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
           whenever(!userType.contains(UserType.Agent)) {
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(subscribedSessionData.copy(userType = userType)))))
+              mockGetSession(subscribedSessionData.copy(userType = userType))
             }
 
             val result  = performAction()
             val content = contentAsString(result)
 
             status(result) shouldBe OK
-            content        should include(message("account.home.title"))
-            content        should include(message("account.home.button.start-a-new-return"))
+            content        should include(messageFromMessageKey("account.home.title"))
+            content        should include(messageFromMessageKey("account.home.button.start-a-new-return"))
             content shouldNot include(
-              message(
+              messageFromMessageKey(
                 "account.home.subtitle.agent",
                 subscribed.subscribedDetails.makeAccountName(),
                 subscribed.subscribedDetails.cgtReference.value
               )
             )
             content should include(
-              message(
+              messageFromMessageKey(
                 "account.home.subtitle",
                 subscribed.subscribedDetails.cgtReference.value
               )
@@ -138,23 +138,23 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
 
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionData))))
+          mockGetSession(sessionData)
         }
 
         val result  = performAction()
         val content = contentAsString(result)
 
         status(result) shouldBe OK
-        content        should include(message("account.home.title"))
+        content        should include(messageFromMessageKey("account.home.title"))
         content should include(
-          message(
+          messageFromMessageKey(
             "account.home.subtitle.agent",
             subscribed.subscribedDetails.makeAccountName(),
             subscribed.subscribedDetails.cgtReference.value
           )
         )
         content should include(
-          message(
+          messageFromMessageKey(
             "account.home.subtitle.agent",
             subscribed.subscribedDetails.makeAccountName(),
             subscribed.subscribedDetails.cgtReference.value
@@ -166,7 +166,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
         subscribed.subscribedDetails,
         subscribed.ggCredId,
         subscribed.agentReferenceNumber,
-        sample[IncompleteIndividualTriageAnswers]
+        sample[IncompleteTriageAnswers]
       )
 
       val fillingOurReturn = FillingOutReturn(
@@ -182,15 +182,9 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    SessionData.empty.copy(
-                      journeyStatus = Some(journeyStatus),
-                      userType      = Some(UserType.Individual)
-                    )
-                  )
-                )
+              SessionData.empty.copy(
+                journeyStatus = Some(journeyStatus),
+                userType      = Some(UserType.Individual)
               )
             )
             mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Right(subscribed.draftReturns))
@@ -199,12 +193,12 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
                 journeyStatus = Some(subscribed),
                 userType      = Some(UserType.Individual)
               )
-            )(Future.successful(Right(())))
+            )(Right(()))
           }
 
           val result = performAction()
           status(result)          shouldBe OK
-          contentAsString(result) should include(message("account.home.title"))
+          contentAsString(result) should include(messageFromMessageKey("account.home.title"))
         }
 
         "show an error page" when {
@@ -213,15 +207,9 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
-                Future.successful(
-                  Right(
-                    Some(
-                      SessionData.empty.copy(
-                        journeyStatus = Some(journeyStatus),
-                        userType      = Some(UserType.Individual)
-                      )
-                    )
-                  )
+                SessionData.empty.copy(
+                  journeyStatus = Some(journeyStatus),
+                  userType      = Some(UserType.Individual)
                 )
               )
               mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Right(subscribed.draftReturns))
@@ -230,7 +218,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
                   journeyStatus = Some(subscribed),
                   userType      = Some(UserType.Individual)
                 )
-              )(Future.successful(Left(Error(""))))
+              )(Left(Error("")))
             }
 
             checkIsTechnicalErrorPage(performAction())
@@ -241,15 +229,9 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
-                Future.successful(
-                  Right(
-                    Some(
-                      SessionData.empty.copy(
-                        journeyStatus = Some(journeyStatus),
-                        userType      = Some(UserType.Individual)
-                      )
-                    )
-                  )
+                SessionData.empty.copy(
+                  journeyStatus = Some(journeyStatus),
+                  userType      = Some(UserType.Individual)
                 )
               )
               mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Left(Error("")))
@@ -283,7 +265,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
               withClue(s"For user type '$userType': ") {
                 inSequence {
                   mockAuthWithNoRetrievals()
-                  mockGetSession(Future.successful(Right(Some(subscribedSessionData.copy(userType = userType)))))
+                  mockGetSession(subscribedSessionData.copy(userType = userType))
                 }
 
                 checkIsTechnicalErrorPage(performAction())
@@ -295,9 +277,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
         "there is an error updating the session" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(subscribedSessionData.copy(userType = Some(UserType.Individual)))))
-            )
+            mockGetSession(subscribedSessionData.copy(userType = Some(UserType.Individual)))
             mockStoreSession(
               subscribedSessionData.copy(
                 journeyStatus = Some(
@@ -305,12 +285,12 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
                     subscribed.subscribedDetails,
                     subscribed.ggCredId,
                     subscribed.agentReferenceNumber,
-                    IncompleteIndividualTriageAnswers.empty
+                    IncompleteTriageAnswers.empty
                   )
                 ),
                 userType = Some(UserType.Individual)
               )
-            )(Future.successful(Left(Error(""))))
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -322,9 +302,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
         "the user type is individual" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(Right(Some(subscribedSessionData.copy(userType = Some(UserType.Individual)))))
-            )
+            mockGetSession(subscribedSessionData.copy(userType = Some(UserType.Individual)))
             mockStoreSession(
               subscribedSessionData.copy(
                 journeyStatus = Some(
@@ -332,12 +310,12 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
                     subscribed.subscribedDetails,
                     subscribed.ggCredId,
                     subscribed.agentReferenceNumber,
-                    IncompleteIndividualTriageAnswers.empty
+                    IncompleteTriageAnswers.empty
                   )
                 ),
                 userType = Some(UserType.Individual)
               )
-            )(Future.successful(Right(())))
+            )(Right(()))
           }
 
           checkIsRedirect(
@@ -377,7 +355,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
         "no draft return can be found with the given id" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionWithSubscribed))))
+            mockGetSession(sessionWithSubscribed)
           }
 
           checkIsTechnicalErrorPage(performAction(UUID.randomUUID()))
@@ -386,10 +364,8 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
         "there is an error updating the session" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionWithSubscribed))))
-            mockStoreSession(SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)))(
-              Future.successful(Left(Error("")))
-            )
+            mockGetSession(sessionWithSubscribed)
+            mockStoreSession(SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)))(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction(draftReturn.id))
@@ -401,10 +377,8 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
         "a draft return can be found with the given id and the session is successfully updated" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionWithSubscribed))))
-            mockStoreSession(SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)))(
-              Future.successful(Right(()))
-            )
+            mockGetSession(sessionWithSubscribed)
+            mockStoreSession(SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)))(Right(()))
           }
 
           checkIsRedirect(performAction(draftReturn.id), controllers.returns.routes.TaskListController.taskList())
@@ -450,13 +424,13 @@ class PrivateBetaHomePageControllerSpec extends HomePageControllerSpec {
 
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionData))))
+          mockGetSession(sessionData)
         }
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("account.home.title"))
-        contentAsString(result) shouldNot include(message("account.home.button.start-a-new-return"))
+        contentAsString(result) should include(messageFromMessageKey("account.home.title"))
+        contentAsString(result) shouldNot include(messageFromMessageKey("account.home.button.start-a-new-return"))
       }
 
     }

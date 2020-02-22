@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import java.time.LocalDate
+import java.time.{Clock, LocalDate}
 import java.time.format.DateTimeFormatter
 
+import cats.Order
 import cats.syntax.either._
 import configs.Configs
 import play.api.data.FormError
@@ -33,6 +34,10 @@ object LocalDateUtils {
     case (config, key) =>
       LocalDate.parse(config.getString(key), DateTimeFormatter.ISO_DATE)
   }
+
+  val clock: Clock = Clock.systemUTC()
+
+  def today(): LocalDate = LocalDate.now(clock)
 
   def dateFormatter(
     maximumDateInclusive: Option[LocalDate],
@@ -92,4 +97,7 @@ object LocalDateUtils {
 
   def govDisplayFormat(date: LocalDate)(implicit messages: Messages): String =
     s"""${date.getDayOfMonth()} ${messages(s"date.${date.getMonthValue()}")} ${date.getYear()}"""
+
+  implicit val order: Order[LocalDate] = Order.from(_ compareTo _)
+
 }

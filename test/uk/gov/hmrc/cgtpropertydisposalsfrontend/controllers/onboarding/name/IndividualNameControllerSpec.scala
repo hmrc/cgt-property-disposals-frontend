@@ -67,11 +67,11 @@ trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidatio
       "the endpoint is requested" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionDataWithValidJourney))))
+          mockGetSession(sessionDataWithValidJourney)
         }
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("enterName.title"))
+        contentAsString(result) should include(messageFromMessageKey("enterName.title"))
       }
 
       "the endpoint is requested and the user has previously entered a name" in {
@@ -81,13 +81,13 @@ trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidatio
 
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionDataWithName))))
+          mockGetSession(sessionDataWithName)
         }
         val result = performAction()
         status(result) shouldBe OK
 
         val content = contentAsString(result)
-        content should include(message("enterName.title"))
+        content should include(messageFromMessageKey("enterName.title"))
         content should include(name.firstName)
         content should include(name.lastName)
       }
@@ -112,7 +112,7 @@ trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidatio
       () =>
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionDataWithValidJourney))))
+          mockGetSession(sessionDataWithValidJourney)
         }
     )
 
@@ -121,11 +121,11 @@ trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidatio
       "the request submits valid values" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionDataWithValidJourney))))
+          mockGetSession(sessionDataWithValidJourney)
           mockUpdateName.foreach { f =>
             f(validJourney, updateName(name, validJourney), Right(()))
           }
-          mockStoreSession(updatedSession)(Future.successful(Right(())))
+          mockStoreSession(updatedSession)(Right(()))
         }
 
         val result = performAction(Seq("firstName" -> name.firstName, "lastName" -> name.lastName))
@@ -135,12 +135,12 @@ trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidatio
       "request submits valid values with leading and trailing spaces" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionDataWithValidJourney))))
+          mockGetSession(sessionDataWithValidJourney)
           mockUpdateName.foreach { f =>
             f(validJourney, updateName(name, validJourney), Right(()))
           }
 
-          mockStoreSession(updatedSession)(Future.successful(Right(())))
+          mockStoreSession(updatedSession)(Right(()))
         }
 
         val result = performAction(Seq("firstName" -> s" ${name.firstName}  ", "lastName" -> s" ${name.lastName} "))
@@ -154,7 +154,7 @@ trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidatio
       "the name submitted is the same in the session" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(updatedSession))))
+          mockGetSession(updatedSession)
         }
         val result = performAction(Seq("firstName" -> name.firstName, "lastName" -> name.lastName))
         checkIsRedirect(result, continueCall)
@@ -166,11 +166,11 @@ trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidatio
       "the session cannot be updated" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionDataWithValidJourney))))
+          mockGetSession(sessionDataWithValidJourney)
           mockUpdateName.foreach { f =>
             f(validJourney, updateName(name, validJourney), Right(()))
           }
-          mockStoreSession(updatedSession)(Future.successful(Left(Error(""))))
+          mockStoreSession(updatedSession)(Left(Error("")))
         }
 
         checkIsTechnicalErrorPage(performAction(Seq("firstName" -> name.firstName, "lastName" -> name.lastName)))

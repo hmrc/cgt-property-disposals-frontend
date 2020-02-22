@@ -51,13 +51,13 @@ class SessionDataActionSpec extends ControllerSpec with SessionSupport {
       )
 
     "return an error if there is an error getting session data" in {
-      mockGetSession(Future.successful(Left(Error(new Exception("Oh no!")))))
+      mockGetSession(Left(Error(new Exception("Oh no!"))))
 
       checkIsTechnicalErrorPage(performAction())
     }
 
     "perform the action with the session data if it can be retrieved" in {
-      mockGetSession(Future.successful(Right(Some(sessionData))))
+      mockGetSession(sessionData)
 
       status(performAction()) shouldBe OK
     }

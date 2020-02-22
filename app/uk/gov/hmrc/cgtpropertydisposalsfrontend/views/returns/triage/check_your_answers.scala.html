@@ -17,7 +17,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.CompleteIndividualTriageAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TriageAnswers.CompleteTriageAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
 
@@ -28,10 +28,11 @@
         cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
         cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
         submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF
+        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(answers: CompleteIndividualTriageAnswers)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(answers: CompleteTriageAnswers, displayReturnToSummaryLink: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @title = @{messages("triage.check-your-answers.title")}
 
@@ -57,7 +58,7 @@
   )
   @cyaRow(
    messages("wereYouAUKResident.title"),
-   Html(messages(s"yesNo.${answers.wasAUKResident.toString}")),
+   Html(messages(s"yesNo.${answers.countryOfResidence.isUk().toString}")),
    Some(cyaChange(messages("triage.cyaChange.wereYouAUKResident"), routes.CanTheyUseOurServiceController.wereYouAUKResident().url))
   )
   @cyaRow(
@@ -80,5 +81,7 @@
  @formWrapper(routes.CanTheyUseOurServiceController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
   @submitButton(messages("button.continue"))
  }
+
+ @returnToSummaryLink(displayReturnToSummaryLink)
 
 }

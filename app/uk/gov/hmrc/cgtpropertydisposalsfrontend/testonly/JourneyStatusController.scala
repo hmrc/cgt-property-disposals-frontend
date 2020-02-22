@@ -20,10 +20,14 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import cats.Eq
+import cats.data.OptionT
+import cats.instances.either._
 import cats.instances.string._
 import cats.syntax.either._
-import cats.syntax.eq._
+import cats.syntax.order._
 import com.google.inject.Inject
+import configs.syntax._
+import play.api.Configuration
 import play.api.data.Forms.{mapping, of}
 import play.api.data.format.Formatter
 import play.api.data.{Form, FormError}
@@ -32,9 +36,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingNewDraftReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.IncompleteIndividualTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.order
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TriageAnswers.IncompleteTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.testonly.JourneyStatusController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
@@ -48,6 +54,7 @@ import scala.util.Try
 class JourneyStatusController @Inject() (
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
+  config: Configuration,
   sessionStore: SessionStore,
   cc: MessagesControllerComponents,
   setReturnStatePage: views.html.testonly.set_return_state,
@@ -58,17 +65,20 @@ class JourneyStatusController @Inject() (
     with SessionUpdates
     with Logging {
 
+  val taxYears: List[TaxYear] =
+    config.underlying.get[List[TaxYear]]("tax-years").value
+
   def setReturnState(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withStartingNewReturn(request) {
       case (_, _) =>
-        Ok(setReturnStatePage(returnStateForm))
+        Ok(setReturnStatePage((returnStateForm(taxYears))))
     }
   }
 
   def setReturnStateSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withStartingNewReturn(request) {
       case (_, newReturn) =>
-        returnStateForm
+        returnStateForm(taxYears)
           .bindFromRequest()
           .fold(
             formWithErrors => BadRequest(setReturnStatePage(formWithErrors)), { state =>
@@ -161,51 +171,70 @@ object JourneyStatusController {
 
     override def unbind(key: String, value: Option[LocalDate]): Map[String, String] =
       value.fold(Map.empty[String, String])(d => Map(key -> d.format(DateTimeFormatter.ISO_DATE)))
-
   }
 
-  val returnStateForm: Form[IncompleteIndividualTriageAnswers] = Form(
-    mapping(
-      "individual-user-type"             -> of(individualUserTypeFormatter),
-      "number-of-properties"             -> of(numberOfPropertiesFormatter),
-      "disposal-method"                  -> of(disposalMethodFormatter),
-      "was-a-uk-resident"                -> of(optionalBooleanFormatter),
-      "disposed-of-residential-property" -> of(optionalBooleanFormatter),
-      "disposal-date"                    -> of(optionalDateFormatter),
-      "completion-date"                  -> of(optionalDateFormatter)
-    ) {
-      case (
-          individualUserType,
-          numberOfProperties,
-          disposalMethod,
-          wasAUKResident,
-          disposedOfResidentialProperty,
-          disposalDate,
-          completionDate
-          ) =>
-        IncompleteIndividualTriageAnswers(
-          individualUserType,
-          numberOfProperties,
-          disposalMethod,
-          wasAUKResident,
-          disposedOfResidentialProperty.map(if (_) AssetType.Residential else AssetType.NonResidential),
-          disposalDate.map(DisposalDate(_)),
-          completionDate.map(CompletionDate(_))
-        )
-    } { i =>
-      Some(
-        (
-          i.individualUserType,
-          i.numberOfProperties,
-          i.disposalMethod,
-          i.wasAUKResident,
-          i.assetType.map(_ === AssetType.Residential),
-          i.disposalDate.map(_.value),
-          i.completionDate.map(_.value)
-        )
-      )
+  def disposalDateFormatter(taxYears: List[TaxYear]): Formatter[Option[DisposalDate]] =
+    new Formatter[Option[DisposalDate]] {
+      override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Option[DisposalDate]] =
+        OptionT[Either[Seq[FormError], ?], LocalDate](
+          optionalDateFormatter.bind(key, data)
+        ).semiflatMap { d =>
+          Either
+            .fromOption(
+              taxYears.find(t => d < t.endDateExclusive && d >= (t.startDateInclusive)),
+              Seq(FormError("disposal-date", "could not find tax year"))
+            )
+            .map(DisposalDate(d, _))
+        }.value
+
+      override def unbind(key: String, value: Option[DisposalDate]): Map[String, String] =
+        optionalDateFormatter.unbind(key, value.map(_.value))
     }
-  )
+
+  def returnStateForm(taxYears: List[TaxYear]): Form[IncompleteTriageAnswers] =
+    Form(
+      mapping(
+        "individual-user-type"             -> of(individualUserTypeFormatter),
+        "number-of-properties"             -> of(numberOfPropertiesFormatter),
+        "disposal-method"                  -> of(disposalMethodFormatter),
+        "was-a-uk-resident"                -> of(optionalBooleanFormatter),
+        "disposed-of-residential-property" -> of(optionalBooleanFormatter),
+        "disposal-date"                    -> of(disposalDateFormatter(taxYears)),
+        "completion-date"                  -> of(optionalDateFormatter)
+      ) {
+        case (
+            individualUserType,
+            numberOfProperties,
+            disposalMethod,
+            wasAUKResident,
+            disposedOfResidentialProperty,
+            disposalDate,
+            completionDate
+            ) =>
+          IncompleteTriageAnswers(
+            individualUserType,
+            numberOfProperties,
+            disposalMethod,
+            wasAUKResident,
+            wasAUKResident.map(if (_) Country.uk else Country("HK", Some("Hong Kong"))),
+            disposedOfResidentialProperty.map(if (_) AssetType.Residential else AssetType.NonResidential),
+            disposalDate,
+            completionDate.map(CompletionDate(_))
+          )
+      } { i =>
+        Some(
+          (
+            i.individualUserType,
+            i.numberOfProperties,
+            i.disposalMethod,
+            i.wasAUKResident,
+            i.assetType.map(_ === AssetType.Residential),
+            i.disposalDate,
+            i.completionDate.map(_.value)
+          )
+        )
+      }
+    )
 
   implicit class MapOps[A, B](private val m: Map[A, B]) extends AnyVal {
 

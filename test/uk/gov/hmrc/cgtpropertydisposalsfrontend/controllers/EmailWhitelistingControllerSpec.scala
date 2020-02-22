@@ -34,7 +34,7 @@ class EmailWhitelistingControllerSpec extends ControllerSpec {
         val result = controller.thereIsAProblem()(FakeRequest())
 
         status(result)          shouldBe FORBIDDEN
-        contentAsString(result) should include(message("email-whitelisting.problem.title"))
+        contentAsString(result) should include(messageFromMessageKey("email-whitelisting.problem.title"))
       }
 
     }

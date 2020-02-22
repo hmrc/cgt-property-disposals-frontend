@@ -58,15 +58,15 @@
     <div class="form-date">
       <div class="form-group form-group-day">
         <label class="form-label" for="@{fieldId}-day">@messages("generic.day")</label>
-        <input class="@inputClasses" id="@{fieldId}-day" name="@{fieldId}-day" type="number" pattern="[0-9]*" @dayValue.map{d => value="@d"}>
+        <input class="@inputClasses" id="@{fieldId}-day" name="@{fieldId}-day" type="text" pattern="[0-9]*" inputmode="numeric" @dayValue.map{d => value="@d"}>
       </div>
       <div class="form-group form-group-month">
         <label class="form-label" for="@{fieldId}-month">@messages("generic.month")</label>
-        <input class="@inputClasses" id="@{fieldId}-month" name="@{fieldId}-month" type="number" pattern="[0-9]*" @monthValue.map{m => value="@m"}>
+        <input class="@inputClasses" id="@{fieldId}-month" name="@{fieldId}-month" type="text" pattern="[0-9]*" inputmode="numeric" @monthValue.map{m => value="@m"}>
       </div>
       <div class="form-group form-group-year">
         <label class="form-label" for="@{fieldId}-year">@messages("generic.year")</label>
-        <input class="@inputClasses" id="@{fieldId}-year" name="@{fieldId}-year" type="number" pattern="[0-9]*" @yearValue.map{y => value="@y"}>
+        <input class="@inputClasses" id="@{fieldId}-year" name="@{fieldId}-year" type="text" pattern="[0-9]*" inputmode="numeric" @yearValue.map{y => value="@y"}>
       </div>
     </div>
   </fieldset>

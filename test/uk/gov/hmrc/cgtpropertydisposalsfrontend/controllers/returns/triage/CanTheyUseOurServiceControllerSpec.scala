@@ -22,7 +22,8 @@ import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
-import cats.syntax.eq._
+import cats.syntax.order._
+import com.typesafe.config.ConfigFactory
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.Configuration
 import play.api.i18n.MessagesApi
@@ -32,16 +33,20 @@ import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DateErrorScenarios.{DateErrorScenario, dateErrorScenarios}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => homeRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => returnsRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.order
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.{CompleteIndividualTriageAnswers, IncompleteIndividualTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{NonResidential, Residential}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TriageAnswers.{CompleteTriageAnswers, IncompleteTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -72,8 +77,42 @@ class CanTheyUseOurServiceControllerSpec
 
   val earliestDisposalDate = today.minusDays(10L)
 
+  val taxYear = {
+    val startYear =
+      if (earliestDisposalDate > LocalDate.of(earliestDisposalDate.getYear, 4, 6))
+        earliestDisposalDate.getYear
+      else
+        earliestDisposalDate.getYear - 1
+
+    sample[TaxYear].copy(
+      startDateInclusive = LocalDate.of(startYear, 4, 6),
+      endDateExclusive   = LocalDate.of(startYear + 1, 4, 6)
+    )
+  }
+
   override lazy val additionalConfig: Configuration = Configuration(
-    "returns.earliest-disposal-date-inclusive" -> earliestDisposalDate.format(DateTimeFormatter.ISO_DATE)
+    ConfigFactory.parseString(
+      s"""
+        | returns.earliest-disposal-date-inclusive = ${earliestDisposalDate.format(DateTimeFormatter.ISO_DATE)}
+        | tax-years = [
+        |  {
+        |    start-year = ${taxYear.startDateInclusive.getYear}
+        |    annual-exempt-amount {
+        |      general              = ${taxYear.annualExemptAmountGeneral.inPounds()}
+        |      non-vulnerable-trust = ${taxYear.annualExemptAmountNonVulnerableTrust.inPounds()}
+        |    }
+        |    personal-allowance = ${taxYear.personalAllowance.inPounds()}
+        |    income-tax-higher-rate-threshold = ${taxYear.incomeTaxHigherRateThreshold.inPounds()}
+        |    cgt-rates {
+        |      lower-band-residential      = ${taxYear.cgtRateLowerBandResidential}
+        |      lower-band-non-residential  = ${taxYear.cgtRateLowerBandNonResidential}
+        |      higher-band-residential     = ${taxYear.cgtRateHigherBandResidential}
+        |      higher-band-non-residential = ${taxYear.cgtRateHigherBandNonResidential}
+        |    }
+        |  }
+        | ]
+        |""".stripMargin
+    )
   )
 
   lazy val controller = instanceOf[CanTheyUseOurServiceController]
@@ -96,14 +135,14 @@ class CanTheyUseOurServiceControllerSpec
 
   val draftReturn = sample[DraftReturn]
 
-  def sessionDataWithStartingNewDraftReturn(individualTriageAnswers: IndividualTriageAnswers): SessionData =
+  def sessionDataWithStartingNewDraftReturn(individualTriageAnswers: TriageAnswers): SessionData =
     SessionData.empty
       .copy(journeyStatus = Some(startingNewDraftReturn.copy(newReturnTriageAnswers = individualTriageAnswers)))
 
   def sessionDataWithFillingOurReturn(draftReturn: DraftReturn): SessionData =
     SessionData.empty.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = draftReturn)))
 
-  def sessionDataWithFillingOurReturn(individualTriageAnswers: IndividualTriageAnswers): SessionData =
+  def sessionDataWithFillingOurReturn(individualTriageAnswers: TriageAnswers): SessionData =
     sessionDataWithFillingOurReturn(draftReturn.copy(triageAnswers = individualTriageAnswers))
 
   def mockGetNextUUID(uuid: UUID) =
@@ -121,15 +160,14 @@ class CanTheyUseOurServiceControllerSpec
 
       def performAction(): Future[Result] = controller.whoIsIndividualRepresenting()(FakeRequest())
 
-      val requiredPreviousAnswers = IncompleteIndividualTriageAnswers.empty
+      val requiredPreviousAnswers = IncompleteTriageAnswers.empty
 
       behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
 
-      behave like displayIndividualTriagePageBehaviorIncompleteJourney[Unit, IndividualUserType](
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney[IndividualUserType](
         performAction
-      )(requiredPreviousAnswers, homeRoutes.HomePageController.homepage())(
-        { case (i, _) => i },
-        { case (i, t) => i.copy(individualUserType = t) }
+      )(requiredPreviousAnswers)(
+        { case (answers, t) => answers.copy(individualUserType = t) }
       )(IndividualUserType.Self)(
         "who-are-you-reporting-for.title",
         _ => List("checked=\"checked\"")
@@ -138,7 +176,7 @@ class CanTheyUseOurServiceControllerSpec
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
         performAction
       )(IndividualUserType.Self) {
-        case (i, t) => i.copy(individualUserType = t)
+        case (answers, t) => answers.copy(individualUserType = t)
       }(
         "who-are-you-reporting-for.title",
         _ => List("checked=\"checked\"")
@@ -151,64 +189,149 @@ class CanTheyUseOurServiceControllerSpec
       def performAction(formData: (String, String)*): Future[Result] =
         controller.whoIsIndividualRepresentingSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
 
-      val requiredPreviousAnswers = IncompleteIndividualTriageAnswers.empty
+      val requiredPreviousAnswers = IncompleteTriageAnswers.empty
 
       behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
-      behave like submitIndividualTriagePageBehavior[Unit, IndividualUserType](
-        performAction
-      )(
-        requiredPreviousAnswers,
-        homeRoutes.HomePageController.homepage(),
-        sample[CompleteIndividualTriageAnswers]
-      )(
-        { case (i, _) => i },
-        { case (i, t) => i.copy(individualUserType = t) },
-        { case (i, t) => i.copy(individualUserType = t) }
-      )(
-        "who-are-you-reporting-for.title"
-      )(
-        formErrorScenarios = List(
-          List.empty -> "individualUserType.error.required",
-          List("individualUserType" -> "3") -> "individualUserType.error.invalid"
-        )
-      )(
-        validValueScenarios = List(
-          (List("individualUserType" -> "0"), IndividualUserType.Self, {
-            case (result, updatedState) =>
-              updatedState.fold(
-                _ => checkIsRedirect(result, routes.CanTheyUseOurServiceController.howManyProperties()),
-                _ => checkIsRedirect(result, routes.CanTheyUseOurServiceController.checkYourAnswers())
-              )
-          }),
-          (List("individualUserType" -> "1"), IndividualUserType.Capacitor, {
-            case (result, _) =>
-              status(result)          shouldBe OK
-              contentAsString(result) shouldBe s"${IndividualUserType.Capacitor} not handled yet"
-          }),
-          (List("individualUserType" -> "2"), IndividualUserType.PersonalRepresentative, {
-            case (result, _) =>
-              status(result)          shouldBe OK
-              contentAsString(result) shouldBe s"${IndividualUserType.PersonalRepresentative} not handled yet"
-          })
-        )
+      "show a form error" when {
+
+        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+          testFormError(performAction, "who-are-you-reporting-for.title")(
+            formData,
+            expectedErrorKey,
+            requiredPreviousAnswers
+          )
+
+        "nothing is submitted" in {
+          test(List.empty, "individualUserType.error.required")
+        }
+
+        "the option is not recognised" in {
+          test(List("individualUserType" -> "3"), "individualUserType.error.invalid")
+        }
+
+      }
+
+      behave like unsuccessfulUpdatesStartingNewDraftBehaviour(
+        performAction,
+        IncompleteTriageAnswers.empty,
+        List("individualUserType" -> "0"),
+        IncompleteTriageAnswers.empty.copy(individualUserType = Some(IndividualUserType.Self))
       )
+
+      "handle successful updates" when {
+
+        "the user is starting a new draft return and" when {
+
+          "the user has not answered any questions before" in {
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              IncompleteTriageAnswers.empty,
+              List("individualUserType" -> "0"),
+              IncompleteTriageAnswers.empty.copy(individualUserType = Some(IndividualUserType.Self)),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.howManyProperties())
+            )
+          }
+
+          "the user has answered some questions but not complete the section" in {
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              IncompleteTriageAnswers.empty.copy(individualUserType = Some(IndividualUserType.Self)),
+              List("individualUserType" -> "1"),
+              IncompleteTriageAnswers.empty.copy(individualUserType = Some(IndividualUserType.Capacitor)), { result =>
+                status(result)          shouldBe OK
+                contentAsString(result) shouldBe s"${IndividualUserType.Capacitor} not handled yet"
+              }
+            )
+          }
+
+          "the user has complete the section" in {
+            val completeAnswers = sample[CompleteTriageAnswers]
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              completeAnswers.copy(individualUserType = IndividualUserType.Capacitor),
+              List("individualUserType" -> "0"),
+              completeAnswers.copy(individualUserType = IndividualUserType.Self),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
+            )
+          }
+
+        }
+
+        "the user is filling out a draft return and" when {
+
+          "the section is complete" in {
+            val completeAnswers = sample[CompleteTriageAnswers]
+            behave like testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              completeAnswers.copy(individualUserType = IndividualUserType.Capacitor),
+              List("individualUserType" -> "0"),
+              completeAnswers.copy(individualUserType = IndividualUserType.Self),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
+            )
+
+          }
+
+          "the section is incomplete" in {
+            behave like testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              IncompleteTriageAnswers.empty,
+              List("individualUserType" -> "2"),
+              IncompleteTriageAnswers.empty
+                .copy(individualUserType = Some(IndividualUserType.PersonalRepresentative)), { result =>
+                status(result)          shouldBe OK
+                contentAsString(result) shouldBe s"${IndividualUserType.PersonalRepresentative} not handled yet"
+              }
+            )
+          }
+        }
+      }
+
+      "not do any updates" when {
+
+        "the answers submitted is the same as the one in session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithFillingOurReturn(
+                requiredPreviousAnswers.copy(
+                  individualUserType = Some(IndividualUserType.Self)
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(
+            performAction("individualUserType" -> "0"),
+            routes.CanTheyUseOurServiceController.howManyProperties()
+          )
+        }
+
+      }
+
     }
 
     "handling requests to display the how many properties page" must {
 
       val requiredPreviousAnswers =
-        IncompleteIndividualTriageAnswers.empty.copy(individualUserType = Some(sample[IndividualUserType]))
+        IncompleteTriageAnswers.empty.copy(individualUserType = Some(sample[IndividualUserType]))
 
       def performAction(): Future[Result] = controller.howManyProperties()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
 
-      behave like displayIndividualTriagePageBehaviorIncompleteJourney[IndividualUserType, NumberOfProperties](
+      behave like redirectWhenNoPreviousAnswerBehaviour[IndividualUserType](
         performAction
-      )(requiredPreviousAnswers, routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting())(
-        { case (i, t) => i.copy(individualUserType = t) },
-        { case (i, n) => i.copy(numberOfProperties = n) }
+      )(
+        requiredPreviousAnswers,
+        routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting(),
+        { case (answers, t) => answers.copy(individualUserType = t) }
+      )
+
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney[NumberOfProperties](
+        performAction
+      )(requiredPreviousAnswers)(
+        { case (answers, n) => answers.copy(numberOfProperties = n) }
       )(NumberOfProperties.One)(
         "numberOfProperties.title",
         _ => List("checked=\"checked\"")
@@ -217,11 +340,12 @@ class CanTheyUseOurServiceControllerSpec
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
         performAction
       )(NumberOfProperties.One) {
-        case (i, n) => i.copy(numberOfProperties = n)
+        case (answers, n) => answers.copy(numberOfProperties = n)
       }(
         "numberOfProperties.title",
         _ => List("checked=\"checked\"")
       )
+
     }
 
     "handling submitted answers to the how many properties page" must {
@@ -230,60 +354,146 @@ class CanTheyUseOurServiceControllerSpec
         controller.howManyPropertiesSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
 
       val requiredPreviousAnswers =
-        IncompleteIndividualTriageAnswers.empty.copy(individualUserType = Some(sample[IndividualUserType]))
+        IncompleteTriageAnswers.empty.copy(individualUserType = Some(sample[IndividualUserType]))
 
       behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
-      behave like submitIndividualTriagePageBehavior[IndividualUserType, NumberOfProperties](
-        performAction
-      )(
+      behave like redirectWhenNoPreviousAnswerBehaviour[IndividualUserType](() => performAction())(
         requiredPreviousAnswers,
         routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting(),
-        sample[CompleteIndividualTriageAnswers]
-      )(
-        { case (i, t) => i.copy(individualUserType = t) },
-        { case (i, n) => i.copy(numberOfProperties = n) },
-        { case (i, n) => i.copy(numberOfProperties = n) }
-      )(
-        "numberOfProperties.title"
-      )(
-        formErrorScenarios = List(
-          List.empty -> "numberOfProperties.error.required",
-          List("numberOfProperties" -> "2") -> "numberOfProperties.error.invalid"
-        )
-      )(
-        validValueScenarios = List(
-          (List("numberOfProperties" -> "1"), NumberOfProperties.MoreThanOne, {
-            case (result, _) =>
-              status(result)          shouldBe OK
-              contentAsString(result) shouldBe "multiple disposals not handled yet"
-          }),
-          (List("numberOfProperties" -> "0"), NumberOfProperties.One, {
-            case (result, updatedState) =>
-              updatedState.fold(
-                _ => checkIsRedirect(result, routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty()),
-                _ => checkIsRedirect(result, routes.CanTheyUseOurServiceController.checkYourAnswers())
-              )
-          })
-        )
+        { case (answers, t) => answers.copy(individualUserType = t) }
       )
+
+      "show a form error" when {
+
+        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+          testFormError(performAction, "numberOfProperties.title")(formData, expectedErrorKey, requiredPreviousAnswers)
+
+        "nothing is submitted" in {
+          test(List.empty, "numberOfProperties.error.required")
+        }
+
+        "the option is not recognised" in {
+          test(List("numberOfProperties" -> "3"), "numberOfProperties.error.invalid")
+        }
+
+      }
+
+      behave like unsuccessfulUpdatesStartingNewDraftBehaviour(
+        performAction,
+        requiredPreviousAnswers,
+        List("numberOfProperties" -> "0"),
+        requiredPreviousAnswers.copy(numberOfProperties = Some(NumberOfProperties.One))
+      )
+
+      "handle successful updates" when {
+
+        "the user is starting a new draft return and" when {
+
+          "the user has answered some questions but not complete the section" in {
+            val answers = IncompleteTriageAnswers.empty.copy(individualUserType = Some(IndividualUserType.Self))
+
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              answers,
+              List("numberOfProperties" -> "0"),
+              answers.copy(numberOfProperties = Some(NumberOfProperties.One)),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty())
+            )
+          }
+
+          "the user has complete the section" in {
+            val completeAnswers = sample[CompleteTriageAnswers]
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              completeAnswers.copy(numberOfProperties = NumberOfProperties.One),
+              List("numberOfProperties" -> "1"),
+              completeAnswers.copy(numberOfProperties = NumberOfProperties.MoreThanOne), { result =>
+                status(result)          shouldBe OK
+                contentAsString(result) shouldBe "multiple disposals not handled yet"
+
+              }
+            )
+          }
+
+        }
+
+        "the user is filling out a draft return and" when {
+
+          "the section is complete" in {
+            val completeAnswers = sample[CompleteTriageAnswers]
+            testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              completeAnswers.copy(numberOfProperties = NumberOfProperties.One),
+              List("numberOfProperties" -> "1"),
+              completeAnswers.copy(numberOfProperties = NumberOfProperties.MoreThanOne), { result =>
+                status(result)          shouldBe OK
+                contentAsString(result) shouldBe "multiple disposals not handled yet"
+
+              }
+            )
+
+          }
+
+          "the section is incomplete" in {
+            val answers = IncompleteTriageAnswers.empty.copy(individualUserType = Some(IndividualUserType.Self))
+
+            testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              answers,
+              List("numberOfProperties" -> "0"),
+              answers.copy(numberOfProperties = Some(NumberOfProperties.One)),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty())
+            )
+          }
+        }
+      }
+
+      "not do any updates" when {
+
+        "the answers submitted is the same as the one in session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithFillingOurReturn(
+                requiredPreviousAnswers.copy(
+                  numberOfProperties = Some(NumberOfProperties.One)
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(
+            performAction("numberOfProperties" -> "0"),
+            routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty()
+          )
+        }
+
+      }
 
     }
 
     "handling requests to display how did you dispose of your property page" must {
 
       val requiredPreviousAnswers =
-        IncompleteIndividualTriageAnswers.empty.copy(numberOfProperties = Some(NumberOfProperties.One))
+        IncompleteTriageAnswers.empty.copy(numberOfProperties = Some(NumberOfProperties.One))
 
       def performAction(): Future[Result] = controller.howDidYouDisposeOfProperty()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
 
-      behave like displayIndividualTriagePageBehaviorIncompleteJourney[NumberOfProperties, DisposalMethod](
+      behave like redirectWhenNoPreviousAnswerBehaviour[NumberOfProperties](
         performAction
-      )(requiredPreviousAnswers, routes.CanTheyUseOurServiceController.howManyProperties())(
-        { case (i, n) => i.copy(numberOfProperties = n) },
-        { case (i, m) => i.copy(disposalMethod     = m) }
+      )(
+        requiredPreviousAnswers,
+        routes.CanTheyUseOurServiceController.howManyProperties(),
+        { case (answers, n) => answers.copy(numberOfProperties = n) }
+      )
+
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney[DisposalMethod](
+        performAction
+      )(requiredPreviousAnswers)(
+        { case (answers, m) => answers.copy(disposalMethod = m) }
       )(DisposalMethod.Gifted)(
         "disposalMethod.title",
         _ => List("checked=\"checked\"")
@@ -292,7 +502,7 @@ class CanTheyUseOurServiceControllerSpec
       behave like displayIndividualTriagePageBehaviorCompleteJourney[DisposalMethod](
         performAction
       )(DisposalMethod.Gifted) {
-        case (i, m) => i.copy(disposalMethod = m)
+        case (answers, m) => answers.copy(disposalMethod = m)
       }(
         "disposalMethod.title",
         _ => List("checked=\"checked\"")
@@ -306,62 +516,135 @@ class CanTheyUseOurServiceControllerSpec
         controller.howDidYouDisposeOfPropertySubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
 
       val requiredPreviousAnswers =
-        IncompleteIndividualTriageAnswers.empty.copy(numberOfProperties = Some(NumberOfProperties.One))
+        IncompleteTriageAnswers.empty.copy(numberOfProperties = Some(NumberOfProperties.One))
 
       behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
-      behave like submitIndividualTriagePageBehavior[NumberOfProperties, DisposalMethod](
-        performAction
-      )(
+      behave like redirectWhenNoPreviousAnswerBehaviour[NumberOfProperties](() => performAction())(
         requiredPreviousAnswers,
         routes.CanTheyUseOurServiceController.howManyProperties(),
-        sample[CompleteIndividualTriageAnswers]
-      )(
-        { case (i, n) => i.copy(numberOfProperties = n) },
-        { case (i, m) => i.copy(disposalMethod     = m) },
-        { case (i, m) => i.copy(disposalMethod     = m) }
-      )(
-        "disposalMethod.title"
-      )(
-        formErrorScenarios = List(
-          List.empty -> "disposalMethod.error.required",
-          List("disposalMethod" -> "2") -> "disposalMethod.error.invalid"
-        )
-      )(
-        validValueScenarios = List(
-          (List("disposalMethod" -> "0"), DisposalMethod.Sold, {
-            case (result, updatedState) =>
-              updatedState.fold(
-                _ => checkIsRedirect(result, routes.CanTheyUseOurServiceController.wereYouAUKResident()),
-                _ => checkIsRedirect(result, routes.CanTheyUseOurServiceController.checkYourAnswers())
-              )
-          }),
-          (List("disposalMethod" -> "1"), DisposalMethod.Gifted, {
-            case (result, updatedState) =>
-              updatedState.fold(
-                _ => checkIsRedirect(result, routes.CanTheyUseOurServiceController.wereYouAUKResident()),
-                _ => checkIsRedirect(result, routes.CanTheyUseOurServiceController.checkYourAnswers())
-              )
-          })
-        )
+        { case (answers, n) => answers.copy(numberOfProperties = n) }
       )
+
+      "show a form error" when {
+
+        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+          testFormError(performAction, "disposalMethod.title")(formData, expectedErrorKey, requiredPreviousAnswers)
+
+        "nothing is submitted" in {
+          test(List.empty, "disposalMethod.error.required")
+        }
+
+        "the option is not recognised" in {
+          test(List("disposalMethod" -> "3"), "disposalMethod.error.invalid")
+        }
+
+      }
+
+      behave like unsuccessfulUpdatesStartingNewDraftBehaviour(
+        performAction,
+        requiredPreviousAnswers,
+        List("disposalMethod" -> "0"),
+        requiredPreviousAnswers.copy(disposalMethod = Some(DisposalMethod.Sold))
+      )
+
+      "handle successful updates" when {
+
+        "the user is starting a new draft return and" when {
+
+          "the user has answered some questions but not complete the section" in {
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              requiredPreviousAnswers,
+              List("disposalMethod" -> "0"),
+              requiredPreviousAnswers.copy(disposalMethod = Some(DisposalMethod.Sold)),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.wereYouAUKResident())
+            )
+          }
+
+          "the user has complete the section" in {
+            val completeAnswers = sample[CompleteTriageAnswers]
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              completeAnswers.copy(disposalMethod = DisposalMethod.Sold),
+              List("disposalMethod" -> "1"),
+              completeAnswers.copy(disposalMethod = DisposalMethod.Gifted),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
+            )
+          }
+
+        }
+
+        "the user is filling out a draft return and" when {
+
+          "the section is complete" in {
+            val completeAnswers = sample[CompleteTriageAnswers]
+            testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              completeAnswers.copy(disposalMethod = DisposalMethod.Sold),
+              List("disposalMethod" -> "1"),
+              completeAnswers.copy(disposalMethod = DisposalMethod.Gifted),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
+            )
+          }
+
+          "the section is incomplete" in {
+            testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              requiredPreviousAnswers,
+              List("disposalMethod" -> "0"),
+              requiredPreviousAnswers.copy(disposalMethod = Some(DisposalMethod.Sold)),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.wereYouAUKResident())
+            )
+          }
+        }
+      }
+
+      "not do any updates" when {
+
+        "the answers submitted is the same as the one in session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithFillingOurReturn(
+                requiredPreviousAnswers.copy(
+                  disposalMethod = Some(DisposalMethod.Sold)
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(
+            performAction("disposalMethod" -> "0"),
+            routes.CanTheyUseOurServiceController.wereYouAUKResident()
+          )
+        }
+
+      }
 
     }
 
     "handling requests to display the were you a uk resident page" must {
 
       val requiredPreviousAnswers =
-        IncompleteIndividualTriageAnswers.empty.copy(disposalMethod = Some(DisposalMethod.Sold))
+        IncompleteTriageAnswers.empty.copy(disposalMethod = Some(DisposalMethod.Sold))
 
       def performAction(): Future[Result] = controller.wereYouAUKResident()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
 
-      behave like displayIndividualTriagePageBehaviorIncompleteJourney[DisposalMethod, Boolean](
+      behave like redirectWhenNoPreviousAnswerBehaviour[DisposalMethod](
         performAction
-      )(requiredPreviousAnswers, routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty())(
-        { case (i, m) => i.copy(disposalMethod = m) },
-        { case (i, w) => i.copy(wasAUKResident = w) }
+      )(
+        requiredPreviousAnswers,
+        routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty(),
+        { case (answers, m) => answers.copy(disposalMethod = m) }
+      )
+
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney[Boolean](
+        performAction
+      )(requiredPreviousAnswers)(
+        { case (answers, w) => answers.copy(wasAUKResident = w) }
       )(true)(
         "wereYouAUKResident.title",
         _ => List("checked=\"checked\"")
@@ -370,7 +653,7 @@ class CanTheyUseOurServiceControllerSpec
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
         performAction
       )(true) {
-        case (i, w) => i.copy(wasAUKResident = w)
+        case (answers, w) => answers.copy(countryOfResidence = if (w) Country.uk else Country("FR", None))
       }(
         "wereYouAUKResident.title",
         _ => List("checked=\"checked\"")
@@ -384,62 +667,197 @@ class CanTheyUseOurServiceControllerSpec
         controller.wereYouAUKResidentSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
 
       val requiredPreviousAnswers =
-        IncompleteIndividualTriageAnswers.empty.copy(disposalMethod = Some(DisposalMethod.Sold))
+        IncompleteTriageAnswers.empty.copy(disposalMethod = Some(DisposalMethod.Sold))
 
       behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
-      behave like submitIndividualTriagePageBehavior[DisposalMethod, Boolean](
-        performAction
-      )(
+      behave like redirectWhenNoPreviousAnswerBehaviour[DisposalMethod](() => performAction())(
         requiredPreviousAnswers,
         routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty(),
-        sample[CompleteIndividualTriageAnswers]
-      )(
-        { case (i, m) => i.copy(disposalMethod = m) },
-        { case (i, w) => i.copy(wasAUKResident = w) },
-        { case (i, w) => i.copy(wasAUKResident = w) }
-      )(
-        "wereYouAUKResident.title"
-      )(
-        formErrorScenarios = List(
-          List.empty -> "wereYouAUKResident.error.required",
-          List("wereYouAUKResident" -> "2") -> "wereYouAUKResident.error.boolean"
-        )
-      )(
-        validValueScenarios = List(
-          (List("wereYouAUKResident" -> "true"), true, {
-            case (result, updatedState) =>
-              updatedState.fold(
-                _ =>
-                  checkIsRedirect(result, routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty()),
-                _ => checkIsRedirect(result, routes.CanTheyUseOurServiceController.checkYourAnswers())
-              )
-
-          }),
-          (List("wereYouAUKResident" -> "false"), false, {
-            case (result, updatedState) =>
-              status(result)          shouldBe OK
-              contentAsString(result) shouldBe "non residents not handled yet"
-          })
-        )
+        { case (answers, m) => answers.copy(disposalMethod = m) }
       )
+
+      "show a form error" when {
+
+        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+          testFormError(performAction, "wereYouAUKResident.title")(formData, expectedErrorKey, requiredPreviousAnswers)
+
+        "nothing is submitted" in {
+          test(List.empty, "wereYouAUKResident.error.required")
+        }
+
+        "the option is not recognised" in {
+          test(List("wereYouAUKResident" -> "3"), "wereYouAUKResident.error.boolean")
+        }
+      }
+
+      behave like unsuccessfulUpdatesStartingNewDraftBehaviour(
+        performAction,
+        requiredPreviousAnswers,
+        List("wereYouAUKResident" -> "true"),
+        requiredPreviousAnswers.copy(wasAUKResident = Some(true))
+      )
+
+      "handle successful updates" when {
+
+        "the user is starting a new draft return and" when {
+
+          "the user has answered some questions but not complete the section and has changed their answer from not in the uk to was in the uk" in {
+            val answers = requiredPreviousAnswers.copy(
+              wasAUKResident     = Some(false),
+              countryOfResidence = Some(Country("AB", None)),
+              assetType          = Some(AssetType.Residential)
+            )
+
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              answers,
+              List("wereYouAUKResident" -> "true"),
+              requiredPreviousAnswers.copy(wasAUKResident = Some(true), countryOfResidence = None, assetType = None),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty())
+            )
+          }
+
+          "the user has answered some questions but not complete the section and has changed their answer from was in the uk to not in the uk" in {
+            val answers = requiredPreviousAnswers
+              .copy(wasAUKResident = Some(true), countryOfResidence = None, assetType = Some(AssetType.Residential))
+
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              answers,
+              List("wereYouAUKResident" -> "false"),
+              requiredPreviousAnswers.copy(wasAUKResident = Some(false), countryOfResidence = None, assetType = None),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.countryOfResidence())
+            )
+          }
+
+          "the user has complete the section and has changed their answer from not in the uk to was in the uk" in {
+            val completeAnswers = sample[CompleteTriageAnswers]
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              completeAnswers.copy(countryOfResidence = Country("AB", None)),
+              List("wereYouAUKResident" -> "true"),
+              IncompleteTriageAnswers(
+                Some(completeAnswers.individualUserType),
+                Some(completeAnswers.numberOfProperties),
+                Some(completeAnswers.disposalMethod),
+                Some(true),
+                None,
+                None,
+                Some(completeAnswers.disposalDate),
+                Some(completeAnswers.completionDate)
+              ),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty())
+            )
+          }
+
+          "the user has completed the section and has changed their answer from was in the uk to not in the uk" in {
+            val completeAnswers = sample[CompleteTriageAnswers]
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              completeAnswers.copy(countryOfResidence = Country.uk),
+              List("wereYouAUKResident" -> "false"),
+              IncompleteTriageAnswers(
+                Some(completeAnswers.individualUserType),
+                Some(completeAnswers.numberOfProperties),
+                Some(completeAnswers.disposalMethod),
+                Some(false),
+                None,
+                None,
+                Some(completeAnswers.disposalDate),
+                Some(completeAnswers.completionDate)
+              ),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.countryOfResidence())
+            )
+          }
+
+        }
+
+        "the user is filling out a draft return and" when {
+
+          "the section is complete" in {
+            val completeAnswers = sample[CompleteTriageAnswers]
+            testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              completeAnswers.copy(countryOfResidence = Country("AB", None)),
+              List("wereYouAUKResident" -> "true"),
+              IncompleteTriageAnswers(
+                Some(completeAnswers.individualUserType),
+                Some(completeAnswers.numberOfProperties),
+                Some(completeAnswers.disposalMethod),
+                Some(true),
+                None,
+                None,
+                Some(completeAnswers.disposalDate),
+                Some(completeAnswers.completionDate)
+              ),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty())
+            )
+          }
+
+          "the section is incomplete" in {
+            val answers = requiredPreviousAnswers
+              .copy(wasAUKResident = Some(true), countryOfResidence = None, assetType = Some(AssetType.Residential))
+
+            testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              answers,
+              List("wereYouAUKResident" -> "false"),
+              requiredPreviousAnswers.copy(wasAUKResident = Some(false), countryOfResidence = None, assetType = None),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.countryOfResidence())
+            )
+          }
+        }
+      }
+
+      "not do any updates" when {
+
+        "the answers submitted is the same as the one in session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithFillingOurReturn(
+                requiredPreviousAnswers.copy(
+                  wasAUKResident = Some(true)
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(
+            performAction("wereYouAUKResident" -> "true"),
+            routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty()
+          )
+        }
+
+      }
 
     }
 
     "handling requests to display the did you dispose of a residential property page" must {
 
       val requiredPreviousAnswers =
-        IncompleteIndividualTriageAnswers.empty.copy(wasAUKResident = Some(true))
+        IncompleteTriageAnswers.empty.copy(wasAUKResident = Some(true))
 
       def performAction(): Future[Result] = controller.didYouDisposeOfAResidentialProperty()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
 
-      behave like displayIndividualTriagePageBehaviorIncompleteJourney[Boolean, Boolean](
+      behave like redirectWhenNoPreviousAnswerBehaviour[Boolean](
         performAction
-      )(requiredPreviousAnswers, routes.CanTheyUseOurServiceController.wereYouAUKResident())(
-        { case (i, w) => i.copy(wasAUKResident = w) },
-        { case (i, w) => i.copy(assetType      = w.map(if (_) AssetType.Residential else AssetType.NonResidential)) }
+      )(
+        requiredPreviousAnswers,
+        routes.CanTheyUseOurServiceController.wereYouAUKResident(),
+        { case (answers, w) => answers.copy(wasAUKResident = w) }
+      )
+
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney[Boolean](
+        performAction
+      )(requiredPreviousAnswers)(
+        {
+          case (answers, w) =>
+            answers.copy(assetType = w.map(if (_) AssetType.Residential else AssetType.NonResidential))
+        }
       )(true)(
         "didYouDisposeOfResidentialProperty.title",
         _ => List("checked=\"checked\"")
@@ -448,7 +866,7 @@ class CanTheyUseOurServiceControllerSpec
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
         performAction
       )(true) {
-        case (i, w) => i.copy(assetType = if (w) AssetType.Residential else AssetType.NonResidential)
+        case (answers, w) => answers.copy(assetType = if (w) AssetType.Residential else AssetType.NonResidential)
       }(
         "didYouDisposeOfResidentialProperty.title",
         _ => List("checked=\"checked\"")
@@ -462,50 +880,136 @@ class CanTheyUseOurServiceControllerSpec
         controller.didYouDisposeOfAResidentialPropertySubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
 
       val requiredPreviousAnswers =
-        IncompleteIndividualTriageAnswers.empty.copy(wasAUKResident = Some(true))
+        IncompleteTriageAnswers.empty.copy(wasAUKResident = Some(true))
 
       behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
-      behave like submitIndividualTriagePageBehavior[Boolean, Boolean](
-        performAction
-      )(
+      behave like redirectWhenNoPreviousAnswerBehaviour[Boolean](() => performAction())(
         requiredPreviousAnswers,
         routes.CanTheyUseOurServiceController.wereYouAUKResident(),
-        sample[CompleteIndividualTriageAnswers]
-      )(
-        { case (i, w) => i.copy(wasAUKResident = w) },
-        { case (i, w) => i.copy(assetType      = w.map(if (_) AssetType.Residential else AssetType.NonResidential)) },
-        { case (i, w) => i.copy(assetType      = if (w) AssetType.Residential else AssetType.NonResidential) }
-      )(
-        "didYouDisposeOfResidentialProperty.title"
-      )(
-        formErrorScenarios = List(
-          List.empty -> "didYouDisposeOfResidentialProperty.error.required",
-          List("didYouDisposeOfResidentialProperty" -> "2") -> "didYouDisposeOfResidentialProperty.error.boolean"
-        )
-      )(
-        validValueScenarios = List(
-          (List("didYouDisposeOfResidentialProperty" -> "true"), true, {
-            case (result, updatedState) =>
-              updatedState.fold(
-                _ => checkIsRedirect(result, routes.CanTheyUseOurServiceController.whenWasDisposalDate()),
-                _ => checkIsRedirect(result, routes.CanTheyUseOurServiceController.checkYourAnswers())
-              )
-          }),
-          (List("didYouDisposeOfResidentialProperty" -> "false"), false, {
-            case (result, updatedState) =>
-              status(result)          shouldBe OK
-              contentAsString(result) shouldBe "individuals can only report on residential properties"
-          })
-        )
+        { case (answers, w) => answers.copy(wasAUKResident = w) }
       )
+
+      "show a form error" when {
+
+        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+          testFormError(performAction, "didYouDisposeOfResidentialProperty.title")(
+            formData,
+            expectedErrorKey,
+            requiredPreviousAnswers
+          )
+
+        "nothing is submitted" in {
+          test(List.empty, "didYouDisposeOfResidentialProperty.error.required")
+        }
+
+        "the option is not recognised" in {
+          test(List("didYouDisposeOfResidentialProperty" -> "3"), "didYouDisposeOfResidentialProperty.error.boolean")
+        }
+
+      }
+
+      behave like unsuccessfulUpdatesStartingNewDraftBehaviour(
+        performAction,
+        requiredPreviousAnswers,
+        List("didYouDisposeOfResidentialProperty" -> "true"),
+        requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential))
+      )
+
+      "handle successful updates" when {
+
+        "the user is starting a new draft return and" when {
+
+          "the user has answered some questions but not complete the section" in {
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              requiredPreviousAnswers,
+              List("didYouDisposeOfResidentialProperty" -> "true"),
+              requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential)),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.whenWasDisposalDate())
+            )
+          }
+
+          "the user has complete the section and has changed their answer and they choose asset type non-residential" in {
+            val completeAnswers = sample[CompleteTriageAnswers]
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              completeAnswers.copy(assetType = Residential),
+              List("didYouDisposeOfResidentialProperty" -> "false"),
+              completeAnswers.copy(assetType = NonResidential), { result =>
+                status(result)          shouldBe OK
+                contentAsString(result) shouldBe "individuals can only report on residential properties"
+              }
+            )
+          }
+
+          "the user has complete the section and has changed their answer and they choose asset type residential" in {
+            val completeAnswers = sample[CompleteTriageAnswers]
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              completeAnswers.copy(assetType = NonResidential),
+              List("didYouDisposeOfResidentialProperty" -> "true"),
+              completeAnswers.copy(assetType = Residential),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
+            )
+          }
+        }
+
+        "the user is filling out a draft return and" when {
+
+          "the user has answered some questions but not complete the section" in {
+            testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              requiredPreviousAnswers,
+              List("didYouDisposeOfResidentialProperty" -> "true"),
+              requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential)),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.whenWasDisposalDate())
+            )
+          }
+
+          "the user has complete the section and has changed their answer from not in the uk to was in the uk" in {
+            val completeAnswers = sample[CompleteTriageAnswers]
+            testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              completeAnswers.copy(assetType = Residential),
+              List("didYouDisposeOfResidentialProperty" -> "false"),
+              completeAnswers.copy(assetType = NonResidential), { result =>
+                status(result)          shouldBe OK
+                contentAsString(result) shouldBe "individuals can only report on residential properties"
+              }
+            )
+          }
+        }
+      }
+
+      "not do any updates" when {
+
+        "the answers submitted is the same as the one in session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithFillingOurReturn(
+                requiredPreviousAnswers.copy(
+                  assetType = Some(Residential)
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(
+            performAction("didYouDisposeOfResidentialProperty" -> "true"),
+            routes.CanTheyUseOurServiceController.whenWasDisposalDate()
+          )
+        }
+
+      }
 
     }
 
     "handling requests to display the when was disposal date page" must {
 
       val requiredPreviousAnswers =
-        IncompleteIndividualTriageAnswers.empty.copy(
+        IncompleteTriageAnswers.empty.copy(
           individualUserType = Some(sample[IndividualUserType]),
           numberOfProperties = Some(NumberOfProperties.One),
           disposalMethod     = Some(DisposalMethod.Gifted),
@@ -513,17 +1017,26 @@ class CanTheyUseOurServiceControllerSpec
           assetType          = Some(AssetType.Residential)
         )
 
-      val disposalDate = DisposalDate(LocalDate.of(2020, 1, 2))
+      val disposalDate = DisposalDate(LocalDate.of(2020, 1, 2), taxYear)
 
       def performAction(): Future[Result] = controller.whenWasDisposalDate()(FakeRequest())
 
       behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
 
-      behave like displayIndividualTriagePageBehaviorIncompleteJourney[Boolean, DisposalDate](
+      behave like redirectWhenNoPreviousAnswerBehaviour[Boolean](
         performAction
-      )(requiredPreviousAnswers, routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty())(
-        { case (i, w) => i.copy(assetType    = w.map(if (_) AssetType.Residential else AssetType.NonResidential)) },
-        { case (i, d) => i.copy(disposalDate = d) }
+      )(
+        requiredPreviousAnswers,
+        routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty(), {
+          case (answers, w) =>
+            answers.copy(assetType = w.map(if (_) AssetType.Residential else AssetType.NonResidential))
+        }
+      )
+
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney[DisposalDate](
+        performAction
+      )(requiredPreviousAnswers)(
+        { case (answers, d) => answers.copy(disposalDate = d) }
       )(disposalDate)(
         "disposalDate.title",
         d =>
@@ -537,7 +1050,7 @@ class CanTheyUseOurServiceControllerSpec
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
         performAction
       )(disposalDate) {
-        case (i, d) => i.copy(disposalDate = d)
+        case (answers, d) => answers.copy(disposalDate = d)
       }(
         "disposalDate.title",
         d =>
@@ -555,10 +1068,17 @@ class CanTheyUseOurServiceControllerSpec
       def performAction(formData: (String, String)*): Future[Result] =
         controller.whenWasDisposalDateSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
 
+      def formData(date: LocalDate) =
+        List(
+          "disposalDate-day"   -> date.getDayOfMonth().toString,
+          "disposalDate-month" -> date.getMonthValue().toString,
+          "disposalDate-year"  -> date.getYear().toString
+        )
+
       val tomorrow = today.plusDays(1L)
 
       val requiredPreviousAnswers =
-        IncompleteIndividualTriageAnswers.empty.copy(
+        IncompleteTriageAnswers.empty.copy(
           individualUserType = Some(sample[IndividualUserType]),
           numberOfProperties = Some(NumberOfProperties.One),
           disposalMethod     = Some(DisposalMethod.Gifted),
@@ -566,96 +1086,176 @@ class CanTheyUseOurServiceControllerSpec
           assetType          = Some(AssetType.Residential)
         )
 
-      val formErrorScenarios =
-        (commonDateErrorScenarios("disposalDate") ::: List(
-          // date in the future
-          (
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
+
+      behave like redirectWhenNoPreviousAnswerBehaviour[Boolean](() => performAction())(
+        requiredPreviousAnswers,
+        routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty(), {
+          case (answers, w) =>
+            answers.copy(assetType = w.map(if (_) AssetType.Residential else AssetType.NonResidential))
+        }
+      )
+
+      "show a form error" when {
+
+        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+          testFormError(performAction, "disposalDate.title")(formData, expectedErrorKey, requiredPreviousAnswers)
+
+        "the date is invalid" in {
+          dateErrorScenarios("disposalDate").foreach { scenario =>
+            withClue(s"For $scenario: ") {
+              val formData = List(
+                "disposalDate-day"   -> scenario.dayInput,
+                "disposalDate-month" -> scenario.monthInput,
+                "disposalDate-year"  -> scenario.yearInput
+              ).collect { case (id, Some(input)) => id -> input }
+              test(formData, scenario.expectedErrorMessageKey)
+            }
+          }
+        }
+
+        "the disposal date is in the future" in {
+          DateErrorScenario(
             Some(tomorrow.getDayOfMonth.toString),
             Some(tomorrow.getMonthValue.toString),
             Some(tomorrow.getYear.toString),
             "disposalDate.error.tooFarInFuture"
-          ),
-          // date does not exist
-          (Some("31"), Some("2"), Some("2019"), "disposalDate.error.invalid")
-        )).map {
-          case (dayString, monthString, yearString, expectedErrorKey) =>
-            val formData = List(
-              "disposalDate-day"   -> dayString,
-              "disposalDate-month" -> monthString,
-              "disposalDate-year"  -> yearString
-            ).collect { case (id, Some(input)) => id -> input }
+          )
 
-            formData -> expectedErrorKey
+          test(formData(tomorrow), "disposalDate.error.tooFarInFuture")
         }
 
-      def expectedRedirectLocation(updatedState: IndividualTriageAnswers): Call =
-        updatedState.fold(
-          _ => routes.CanTheyUseOurServiceController.whenWasCompletionDate(),
-          _ => routes.CanTheyUseOurServiceController.checkYourAnswers()
-        )
+      }
 
-      val validValueScenarios =
-        List[(LocalDate, (Future[Result], IndividualTriageAnswers) => Unit)](
-          earliestDisposalDate.minusDays(1L) -> {
-            case (result, _) =>
-              status(result)          shouldBe OK
-              contentAsString(result) shouldBe s"disposal date was strictly before $earliestDisposalDate"
-          },
-          earliestDisposalDate -> { (result, updatedState) =>
-            checkIsRedirect(result, expectedRedirectLocation(updatedState))
-          },
-          earliestDisposalDate.plusDays(1L) -> {
-            case (result, updatedState) =>
-              checkIsRedirect(result, expectedRedirectLocation(updatedState))
-          }
-        ).map {
-          case (date, checks) =>
-            val formData = List(
-              "disposalDate-day"   -> date.getDayOfMonth().toString,
-              "disposalDate-month" -> date.getMonthValue().toString,
-              "disposalDate-year"  -> date.getYear().toString
-            )
-            (formData, DisposalDate(date), checks)
-        }
-
-      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
-
-      behave like submitIndividualTriagePageBehavior[Boolean, DisposalDate](
-        performAction
-      )(
+      behave like unsuccessfulUpdatesStartingNewDraftBehaviour(
+        performAction,
         requiredPreviousAnswers,
-        routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty(),
-        sample[CompleteIndividualTriageAnswers]
-      )(
-        { case (i, w) => i.copy(assetType    = w.map(if (_) AssetType.Residential else AssetType.NonResidential)) },
-        { case (i, d) => i.copy(disposalDate = d) }, {
-          case (i, d) =>
-            IncompleteIndividualTriageAnswers(
-              Some(i.individualUserType),
-              Some(i.numberOfProperties),
-              Some(i.disposalMethod),
-              Some(i.wasAUKResident),
-              Some(i.assetType),
-              Some(d),
-              None
-            )
-        }
-      )(
-        "disposalDate.title"
-      )(
-        formErrorScenarios
-      )(
-        validValueScenarios
+        formData(earliestDisposalDate),
+        requiredPreviousAnswers.copy(disposalDate = Some(DisposalDate(earliestDisposalDate, taxYear)))
       )
+
+      "handle valid dates" when {
+
+        "the user is starting in a draft return and" when {
+
+          "the disposal date entered is before the configured earliest disposal date" in {
+            val date = earliestDisposalDate.minusDays(1L)
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              requiredPreviousAnswers,
+              formData(date),
+              requiredPreviousAnswers.copy(disposalDate = Some(DisposalDate(date, taxYear))), { result =>
+                status(result)          shouldBe OK
+                contentAsString(result) shouldBe s"disposal date was strictly before $earliestDisposalDate"
+              }
+            )
+          }
+
+          "the disposal date is on the configured earliest disposal date and the journey was incomplete" in {
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              requiredPreviousAnswers,
+              formData(earliestDisposalDate),
+              requiredPreviousAnswers.copy(disposalDate = Some(DisposalDate(earliestDisposalDate, taxYear))),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.whenWasCompletionDate())
+            )
+          }
+
+          "the disposal date is after the configured earliest disposal date and the journey was complete" in {
+            val completeJourney =
+              sample[CompleteTriageAnswers].copy(disposalDate = DisposalDate(earliestDisposalDate, taxYear))
+            val date = earliestDisposalDate.plusDays(1L)
+
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              completeJourney,
+              formData(date),
+              IncompleteTriageAnswers(
+                Some(completeJourney.individualUserType),
+                Some(completeJourney.numberOfProperties),
+                Some(completeJourney.disposalMethod),
+                Some(completeJourney.countryOfResidence.isUk()),
+                if (completeJourney.countryOfResidence.isUk()) None else Some(completeJourney.countryOfResidence),
+                Some(completeJourney.assetType),
+                Some(DisposalDate(date, taxYear)),
+                None
+              ),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.whenWasCompletionDate())
+            )
+
+          }
+
+        }
+
+        "the user is filling our a draft return and" when {
+
+          "the section is incomplete" in {
+            testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              requiredPreviousAnswers,
+              formData(earliestDisposalDate),
+              requiredPreviousAnswers.copy(disposalDate = Some(DisposalDate(earliestDisposalDate, taxYear))),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.whenWasCompletionDate())
+            )
+
+          }
+
+          "the section is complete" in {
+            val completeJourney =
+              sample[CompleteTriageAnswers].copy(disposalDate = DisposalDate(earliestDisposalDate, taxYear))
+            val date = earliestDisposalDate.plusDays(1L)
+
+            testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              completeJourney,
+              formData(date),
+              IncompleteTriageAnswers(
+                Some(completeJourney.individualUserType),
+                Some(completeJourney.numberOfProperties),
+                Some(completeJourney.disposalMethod),
+                Some(completeJourney.countryOfResidence.isUk()),
+                if (completeJourney.countryOfResidence.isUk()) None else Some(completeJourney.countryOfResidence),
+                Some(completeJourney.assetType),
+                Some(DisposalDate(date, taxYear)),
+                None
+              ),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.whenWasCompletionDate())
+            )
+          }
+        }
+
+      }
+
+      "not do any updates" when {
+
+        "the answers submitted is the same as the one in session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithFillingOurReturn(
+                requiredPreviousAnswers.copy(
+                  disposalDate = Some(DisposalDate(earliestDisposalDate, taxYear))
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(
+            performAction(formData(earliestDisposalDate): _*),
+            routes.CanTheyUseOurServiceController.whenWasCompletionDate()
+          )
+        }
+
+      }
 
     }
 
     "handling requests to display the when was completion date page" must {
 
-      val disposalDate = DisposalDate(today)
+      val disposalDate = DisposalDate(today, taxYear)
 
       val requiredPreviousAnswers =
-        IncompleteIndividualTriageAnswers.empty.copy(
+        IncompleteTriageAnswers.empty.copy(
           individualUserType = Some(sample[IndividualUserType]),
           numberOfProperties = Some(NumberOfProperties.One),
           disposalMethod     = Some(DisposalMethod.Gifted),
@@ -668,11 +1268,18 @@ class CanTheyUseOurServiceControllerSpec
 
       behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
 
-      behave like displayIndividualTriagePageBehaviorIncompleteJourney[DisposalDate, CompletionDate](
+      behave like redirectWhenNoPreviousAnswerBehaviour[DisposalDate](
         performAction
-      )(requiredPreviousAnswers, routes.CanTheyUseOurServiceController.whenWasDisposalDate())(
-        { case (i, d) => i.copy(disposalDate   = d) },
-        { case (i, d) => i.copy(completionDate = d) }
+      )(
+        requiredPreviousAnswers,
+        routes.CanTheyUseOurServiceController.whenWasDisposalDate(),
+        { case (answers, d) => answers.copy(disposalDate = d) }
+      )
+
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney[CompletionDate](
+        performAction
+      )(requiredPreviousAnswers)(
+        { case (answers, d) => answers.copy(completionDate = d) }
       )(CompletionDate(disposalDate.value))(
         "completionDate.title",
         d =>
@@ -686,7 +1293,7 @@ class CanTheyUseOurServiceControllerSpec
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
         performAction
       )(CompletionDate(disposalDate.value)) {
-        case (i, d) => i.copy(completionDate = d)
+        case (answers, d) => answers.copy(completionDate = d)
       }(
         "completionDate.title",
         d =>
@@ -704,14 +1311,21 @@ class CanTheyUseOurServiceControllerSpec
       def performAction(formData: (String, String)*): Future[Result] =
         controller.whenWasCompletionDateSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
 
-      val disposalDate = DisposalDate(today.minusDays(5L))
+      def formData(date: LocalDate) =
+        List(
+          "completionDate-day"   -> date.getDayOfMonth().toString,
+          "completionDate-month" -> date.getMonthValue().toString,
+          "completionDate-year"  -> date.getYear().toString
+        )
+
+      val disposalDate = DisposalDate(today.minusDays(5L), taxYear)
 
       val tomorrow = today.plusDays(1L)
 
       val dayBeforeDisposalDate = disposalDate.value.minusDays(1L)
 
       val requiredPreviousAnswers =
-        IncompleteIndividualTriageAnswers.empty.copy(
+        IncompleteTriageAnswers.empty.copy(
           individualUserType = Some(sample[IndividualUserType]),
           numberOfProperties = Some(NumberOfProperties.One),
           disposalMethod     = Some(DisposalMethod.Gifted),
@@ -720,72 +1334,310 @@ class CanTheyUseOurServiceControllerSpec
           disposalDate       = Some(disposalDate)
         )
 
-      val formErrorScenarios =
-        (commonDateErrorScenarios("completionDate") ::: List(
-          // date before disposal date
-          (
-            Some(dayBeforeDisposalDate.getDayOfMonth.toString),
-            Some(dayBeforeDisposalDate.getMonthValue.toString),
-            Some(dayBeforeDisposalDate.getYear.toString),
-            "completionDate.error.tooFarInPast"
-          ),
-          // date in future
-          (
-            Some(tomorrow.getDayOfMonth.toString),
-            Some(tomorrow.getMonthValue.toString),
-            Some(tomorrow.getYear.toString),
-            "completionDate.error.tooFarInFuture"
-          )
-        )).map {
-          case (dayString, monthString, yearString, expectedErrorKey) =>
-            val formData = List(
-              "completionDate-day"   -> dayString,
-              "completionDate-month" -> monthString,
-              "completionDate-year"  -> yearString
-            ).collect { case (id, Some(input)) => id -> input }
-
-            formData -> expectedErrorKey
-        }
-
-      val validValueScenarios =
-        List[(LocalDate, (Future[Result], IndividualTriageAnswers) => Unit)](
-          disposalDate.value -> {
-            case (result, _) =>
-              checkIsRedirect(result, routes.CanTheyUseOurServiceController.checkYourAnswers())
-          },
-          disposalDate.value.plusDays(1L) -> {
-            case (result, _) =>
-              checkIsRedirect(result, routes.CanTheyUseOurServiceController.checkYourAnswers())
-          }
-        ).map {
-          case (date, checks) =>
-            val formData = List(
-              "completionDate-day"   -> date.getDayOfMonth().toString,
-              "completionDate-month" -> date.getMonthValue().toString,
-              "completionDate-year"  -> date.getYear().toString
-            )
-            (formData, CompletionDate(date), checks)
-        }
-
       behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
-      behave like submitIndividualTriagePageBehavior[DisposalDate, CompletionDate](
+      behave like redirectWhenNoPreviousAnswerBehaviour[DisposalDate](() => performAction())(
+        requiredPreviousAnswers,
+        routes.CanTheyUseOurServiceController.whenWasDisposalDate(),
+        { case (i, d) => i.copy(disposalDate = d) }
+      )
+
+      "show a form error" when {
+
+        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+          testFormError(performAction, "completionDate.title")(formData, expectedErrorKey, requiredPreviousAnswers)
+
+        "the date is invalid" in {
+          dateErrorScenarios("completionDate").foreach { scenario =>
+            withClue(s"For $scenario: ") {
+              val formData = List(
+                "completionDate-day"   -> scenario.dayInput,
+                "completionDate-month" -> scenario.monthInput,
+                "completionDate-year"  -> scenario.yearInput
+              ).collect { case (id, Some(input)) => id -> input }
+              test(formData, scenario.expectedErrorMessageKey)
+            }
+          }
+        }
+
+        "the completion date is in the future" in {
+          test(formData(tomorrow), "completionDate.error.tooFarInFuture")
+        }
+
+        "the completion date is before the disposal date" in {
+          test(formData(dayBeforeDisposalDate), "completionDate.error.tooFarInPast")
+        }
+
+      }
+
+      behave like unsuccessfulUpdatesStartingNewDraftBehaviour(
+        performAction,
+        requiredPreviousAnswers,
+        formData(disposalDate.value),
+        requiredPreviousAnswers.copy(completionDate = Some(CompletionDate(disposalDate.value)))
+      )
+
+      "handle valid dates" when {
+
+        "the user is starting in a draft return and" when {
+
+          "the section is incomplete" in {
+            val completionDate = CompletionDate(disposalDate.value)
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              requiredPreviousAnswers,
+              formData(completionDate.value),
+              requiredPreviousAnswers.copy(completionDate = Some(completionDate)),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
+            )
+          }
+
+          "the section is complete" in {
+            val completionDate = CompletionDate(disposalDate.value.plusDays(1L))
+            val completeAnswers =
+              sample[CompleteTriageAnswers]
+                .copy(completionDate = CompletionDate(disposalDate.value), disposalDate = disposalDate)
+
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              completeAnswers,
+              formData(completionDate.value),
+              completeAnswers.copy(completionDate = completionDate),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
+            )
+          }
+        }
+
+        "the user is filling our a draft return and" when {
+
+          "the section is incomplete" in {
+            val completionDate = CompletionDate(disposalDate.value)
+            testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              requiredPreviousAnswers,
+              formData(completionDate.value),
+              requiredPreviousAnswers.copy(completionDate = Some(completionDate)),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
+            )
+          }
+
+          "the section is complete" in {
+            val completionDate = CompletionDate(disposalDate.value.plusDays(1L))
+            val completeAnswers =
+              sample[CompleteTriageAnswers]
+                .copy(completionDate = CompletionDate(disposalDate.value), disposalDate = disposalDate)
+
+            testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              completeAnswers,
+              formData(completionDate.value),
+              completeAnswers.copy(completionDate = completionDate),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
+            )
+          }
+        }
+
+      }
+
+      "not do any updates" when {
+
+        "the answers submitted is the same as the one in session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithFillingOurReturn(
+                requiredPreviousAnswers.copy(
+                  completionDate = Some(CompletionDate(disposalDate.value))
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(
+            performAction(formData(disposalDate.value): _*),
+            routes.CanTheyUseOurServiceController.checkYourAnswers()
+          )
+        }
+
+      }
+
+    }
+
+    "handling requests to display the country of residence page" must {
+
+      val requiredPreviousAnswers =
+        IncompleteTriageAnswers.empty.copy(
+          individualUserType = Some(IndividualUserType.Self),
+          numberOfProperties = Some(NumberOfProperties.One),
+          disposalMethod     = Some(DisposalMethod.Sold),
+          wasAUKResident     = Some(false)
+        )
+
+      val (countryCode, countryName) = "HK" -> "Hong Kong"
+      val country                    = Country(countryCode, Some(countryName))
+
+      def performAction(): Future[Result] = controller.countryOfResidence()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
+
+      behave like redirectWhenNoPreviousAnswerBehaviour[Boolean](
         performAction
       )(
         requiredPreviousAnswers,
-        routes.CanTheyUseOurServiceController.whenWasDisposalDate(),
-        sample[CompleteIndividualTriageAnswers].copy(disposalDate = disposalDate)
-      )(
-        { case (i, d) => i.copy(disposalDate   = d) },
-        { case (i, d) => i.copy(completionDate = d) },
-        { case (i, d) => i.copy(completionDate = d) }
-      )(
-        "completionDate.title"
-      )(
-        formErrorScenarios
-      )(
-        validValueScenarios
+        routes.CanTheyUseOurServiceController.wereYouAUKResident(),
+        { case (answers, w) => answers.copy(wasAUKResident = w) }
       )
+
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney[Country](
+        performAction
+      )(requiredPreviousAnswers)(
+        { case (answers, c) => answers.copy(countryOfResidence = c) }
+      )(country)(
+        "triage.enterCountry.title",
+        _ => List(countryName)
+      )
+
+      behave like displayIndividualTriagePageBehaviorCompleteJourney(
+        performAction
+      )(country) {
+        case (answers, c) => answers.copy(countryOfResidence = c)
+      }(
+        "triage.enterCountry.title",
+        _ => List(countryName)
+      )
+
+    }
+
+    "handling submitted answers to the country of residence page" must {
+
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.countryOfResidenceSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
+
+      val requiredPreviousAnswers =
+        IncompleteTriageAnswers.empty.copy(
+          individualUserType = Some(IndividualUserType.Self),
+          numberOfProperties = Some(NumberOfProperties.One),
+          disposalMethod     = Some(DisposalMethod.Sold),
+          wasAUKResident     = Some(false)
+        )
+
+      val (countryCode, countryName) = "HK" -> "Hong Kong"
+      val country                    = Country(countryCode, Some(countryName))
+
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
+
+      behave like redirectWhenNoPreviousAnswerBehaviour[Boolean](() => performAction())(
+        requiredPreviousAnswers,
+        routes.CanTheyUseOurServiceController.wereYouAUKResident(),
+        { case (answers, w) => answers.copy(wasAUKResident = w) }
+      )
+
+      "show a form error" when {
+
+        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+          testFormError(performAction, "triage.enterCountry.title")(
+            formData,
+            expectedErrorKey,
+            requiredPreviousAnswers
+          )
+
+        "nothing is submitted" in {
+          test(List.empty, "countryCode.error.required")
+        }
+
+        "the option is not recognised" in {
+          test(List("countryCode" -> "XX"), "countryCode.error.notFound")
+        }
+
+      }
+
+      behave like unsuccessfulUpdatesStartingNewDraftBehaviour(
+        performAction,
+        requiredPreviousAnswers,
+        List("countryCode" -> countryCode),
+        requiredPreviousAnswers.copy(countryOfResidence = Some(country))
+      )
+
+      "handle successful updates" when {
+
+        "the user is starting a new draft return and" when {
+
+          "the user has answered some questions but not complete the section" in {
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              requiredPreviousAnswers,
+              List("countryCode" -> countryCode),
+              requiredPreviousAnswers.copy(countryOfResidence = Some(country)), { result =>
+                status(result)          shouldBe OK
+                contentAsString(result) shouldBe s"Got country $country"
+              }
+            )
+          }
+
+          "the user has complete the section and has changed their answer and they choose asset type residential" in {
+            val completeAnswers = sample[CompleteTriageAnswers].copy(countryOfResidence = Country("CC", None))
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              completeAnswers,
+              List("countryCode" -> countryCode),
+              completeAnswers.copy(countryOfResidence = country), { result =>
+                status(result)          shouldBe OK
+                contentAsString(result) shouldBe s"Got country $country"
+              }
+            )
+          }
+        }
+
+        "the user is filling out a draft return and" when {
+
+          "the user has answered some questions but not complete the section" in {
+            testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              requiredPreviousAnswers,
+              List("countryCode" -> countryCode),
+              requiredPreviousAnswers.copy(countryOfResidence = Some(country)), { result =>
+                status(result)          shouldBe OK
+                contentAsString(result) shouldBe s"Got country $country"
+              }
+            )
+          }
+
+          "the user has complete the section and has changed their answer from not in the uk to was in the uk" in {
+            val completeAnswers = sample[CompleteTriageAnswers].copy(countryOfResidence = Country("CC", None))
+            testSuccessfulUpdateFillingOutReturn(
+              performAction,
+              completeAnswers,
+              List("countryCode" -> countryCode),
+              completeAnswers.copy(countryOfResidence = country), { result =>
+                status(result)          shouldBe OK
+                contentAsString(result) shouldBe s"Got country $country"
+              }
+            )
+          }
+        }
+      }
+
+      "not do any updates" when {
+
+        "the answers submitted is the same as the one in session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithFillingOurReturn(
+                requiredPreviousAnswers.copy(
+                  countryOfResidence = Some(country)
+                )
+              )
+            )
+          }
+
+          val result = performAction("countryCode" -> countryCode)
+          status(result)          shouldBe OK
+          contentAsString(result) shouldBe s"Got country $country"
+
+        }
+
+      }
 
     }
 
@@ -795,21 +1647,22 @@ class CanTheyUseOurServiceControllerSpec
         controller.checkYourAnswers()(FakeRequest())
 
       val completeTriageQuestions =
-        CompleteIndividualTriageAnswers(
+        CompleteTriageAnswers(
           IndividualUserType.Self,
           NumberOfProperties.One,
           DisposalMethod.Sold,
-          wasAUKResident = true,
-          assetType      = AssetType.Residential,
+          Country.uk,
+          assetType = AssetType.Residential,
           sample[DisposalDate],
           sample[CompletionDate]
         )
 
-      val allQuestionsAnswered = IncompleteIndividualTriageAnswers(
+      val allQuestionsAnswered = IncompleteTriageAnswers(
         Some(completeTriageQuestions.individualUserType),
         Some(completeTriageQuestions.numberOfProperties),
         Some(completeTriageQuestions.disposalMethod),
-        Some(completeTriageQuestions.wasAUKResident),
+        Some(true),
+        None,
         Some(completeTriageQuestions.assetType),
         Some(completeTriageQuestions.disposalDate),
         Some(completeTriageQuestions.completionDate)
@@ -817,7 +1670,7 @@ class CanTheyUseOurServiceControllerSpec
 
       "redirect to the correct page" when {
 
-        def test(sessionDataWith: IndividualTriageAnswers => SessionData): Unit =
+        def test(sessionDataWith: TriageAnswers => SessionData): Unit =
           List(
             allQuestionsAnswered.copy(individualUserType = None) -> routes.CanTheyUseOurServiceController
               .whoIsIndividualRepresenting(),
@@ -832,21 +1685,16 @@ class CanTheyUseOurServiceControllerSpec
             allQuestionsAnswered.copy(disposalDate = None) -> routes.CanTheyUseOurServiceController
               .whenWasDisposalDate(),
             allQuestionsAnswered.copy(completionDate = None) -> routes.CanTheyUseOurServiceController
-              .whenWasCompletionDate()
+              .whenWasCompletionDate(),
+            allQuestionsAnswered
+              .copy(wasAUKResident = Some(false), countryOfResidence = None) -> routes.CanTheyUseOurServiceController
+              .countryOfResidence()
           ).foreach {
             case (state, expectedRedirect) =>
               withClue(s"For state $state and expected redirect url ${expectedRedirect.url}: ") {
                 inSequence {
                   mockAuthWithNoRetrievals()
-                  mockGetSession(
-                    Future.successful(
-                      Right(
-                        Some(
-                          sessionDataWith(state)
-                        )
-                      )
-                    )
-                  )
+                  mockGetSession(sessionDataWith(state))
                 }
 
                 checkIsRedirect(performAction(), expectedRedirect)
@@ -868,18 +1716,8 @@ class CanTheyUseOurServiceControllerSpec
         "all the questions have now been answered but the sessino data cannot be updated" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStartingNewDraftReturn(allQuestionsAnswered)
-                  )
-                )
-              )
-            )
-            mockStoreSession(
-              sessionDataWithStartingNewDraftReturn(completeTriageQuestions)
-            )(Future.successful(Left(Error(""))))
+            mockGetSession(sessionDataWithStartingNewDraftReturn(allQuestionsAnswered))
+            mockStoreSession(sessionDataWithStartingNewDraftReturn(completeTriageQuestions))(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -890,24 +1728,14 @@ class CanTheyUseOurServiceControllerSpec
 
         def testIsCYAPagePage(result: Future[Result]) = {
           status(result)          shouldBe OK
-          contentAsString(result) should include(message("triage.check-your-answers.title"))
+          contentAsString(result) should include(messageFromMessageKey("triage.check-your-answers.title"))
         }
 
         "all the questions have now been answered and the session is updated when a draft return has not yet been created" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStartingNewDraftReturn(allQuestionsAnswered)
-                  )
-                )
-              )
-            )
-            mockStoreSession(
-              sessionDataWithStartingNewDraftReturn(completeTriageQuestions)
-            )(Future.successful(Right(())))
+            mockGetSession(sessionDataWithStartingNewDraftReturn(allQuestionsAnswered))
+            mockStoreSession(sessionDataWithStartingNewDraftReturn(completeTriageQuestions))(Right(()))
           }
 
           testIsCYAPagePage(performAction())
@@ -916,18 +1744,8 @@ class CanTheyUseOurServiceControllerSpec
         "all the questions have now been answered and the session is updated when a draft return has been created" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithFillingOurReturn(allQuestionsAnswered)
-                  )
-                )
-              )
-            )
-            mockStoreSession(
-              sessionDataWithFillingOurReturn(completeTriageQuestions)
-            )(Future.successful(Right(())))
+            mockGetSession(sessionDataWithFillingOurReturn(allQuestionsAnswered))
+            mockStoreSession(sessionDataWithFillingOurReturn(completeTriageQuestions))(Right(()))
           }
 
           testIsCYAPagePage(performAction())
@@ -936,15 +1754,7 @@ class CanTheyUseOurServiceControllerSpec
         "all the questions have already been answered and a draft return has not yet been created" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithStartingNewDraftReturn(completeTriageQuestions)
-                  )
-                )
-              )
-            )
+            mockGetSession(sessionDataWithStartingNewDraftReturn(completeTriageQuestions))
           }
 
           testIsCYAPagePage(performAction())
@@ -953,15 +1763,7 @@ class CanTheyUseOurServiceControllerSpec
         "all the questions have already been answered and a draft return has been created" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionDataWithFillingOurReturn(completeTriageQuestions)
-                  )
-                )
-              )
-            )
+            mockGetSession(sessionDataWithFillingOurReturn(completeTriageQuestions))
           }
 
           testIsCYAPagePage(performAction())
@@ -976,12 +1778,22 @@ class CanTheyUseOurServiceControllerSpec
       def performAction() =
         controller.checkYourAnswersSubmit()(FakeRequest())
 
-      val completeAnswers = sample[CompleteIndividualTriageAnswers]
+      val completeAnswers = sample[CompleteTriageAnswers]
 
       val uuid = UUID.randomUUID()
 
       val newDraftReturn =
-        DraftReturn(uuid, startingNewDraftReturn.subscribedDetails.cgtReference, completeAnswers, None)
+        DraftReturn(
+          uuid,
+          startingNewDraftReturn.subscribedDetails.cgtReference,
+          completeAnswers,
+          None,
+          None,
+          None,
+          None,
+          None,
+          None
+        )
 
       val sessionDataWithNewDraftReturn = SessionData.empty.copy(
         journeyStatus = Some(
@@ -994,11 +1806,11 @@ class CanTheyUseOurServiceControllerSpec
       "redirect to the check your answers page" when {
 
         "the user has not answered all the questions in the triage section" in {
-          val incompleteAnswers = sample[IncompleteIndividualTriageAnswers]
+          val incompleteAnswers = sample[IncompleteTriageAnswers]
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionDataWithStartingNewDraftReturn(incompleteAnswers)))))
+            mockGetSession(sessionDataWithStartingNewDraftReturn(incompleteAnswers))
           }
 
           checkIsRedirect(performAction(), routes.CanTheyUseOurServiceController.checkYourAnswers())
@@ -1011,7 +1823,7 @@ class CanTheyUseOurServiceControllerSpec
         "there is a problem storing a draft return" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionDataWithStartingNewDraftReturn(completeAnswers)))))
+            mockGetSession(sessionDataWithStartingNewDraftReturn(completeAnswers))
             mockGetNextUUID(uuid)
             mockStoreDraftReturn(newDraftReturn)(Left(Error("")))
           }
@@ -1022,10 +1834,10 @@ class CanTheyUseOurServiceControllerSpec
         "there is a problem updating the session" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionDataWithStartingNewDraftReturn(completeAnswers)))))
+            mockGetSession(sessionDataWithStartingNewDraftReturn(completeAnswers))
             mockGetNextUUID(uuid)
             mockStoreDraftReturn(newDraftReturn)(Right(()))
-            mockStoreSession(sessionDataWithNewDraftReturn)(Future.successful(Left(Error(""))))
+            mockStoreSession(sessionDataWithNewDraftReturn)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -1038,10 +1850,10 @@ class CanTheyUseOurServiceControllerSpec
         "the draft return is stored and the session is updated and a draft return had not already been created" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionDataWithStartingNewDraftReturn(completeAnswers)))))
+            mockGetSession(sessionDataWithStartingNewDraftReturn(completeAnswers))
             mockGetNextUUID(uuid)
             mockStoreDraftReturn(newDraftReturn)(Right(()))
-            mockStoreSession(sessionDataWithNewDraftReturn)(Future.successful(Right(())))
+            mockStoreSession(sessionDataWithNewDraftReturn)(Right(()))
           }
 
           checkIsRedirect(performAction(), returnsRoutes.TaskListController.taskList())
@@ -1050,7 +1862,7 @@ class CanTheyUseOurServiceControllerSpec
         "the draft return is stored and the session is updated and a draft return had already been created" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionDataWithFillingOurReturn(completeAnswers)))))
+            mockGetSession(sessionDataWithFillingOurReturn(completeAnswers))
           }
 
           checkIsRedirect(performAction(), returnsRoutes.TaskListController.taskList())
@@ -1062,285 +1874,55 @@ class CanTheyUseOurServiceControllerSpec
 
   }
 
-  def submitIndividualTriagePageBehavior[A, B](performAction: Seq[(String, String)] => Future[Result])(
-    requiredPreviousAnswers: IncompleteIndividualTriageAnswers,
-    redirectToIfNotValidJourney: => Call,
-    sampleCompleteJourney: CompleteIndividualTriageAnswers
-  )(
-    setPreviousAnswer: (IncompleteIndividualTriageAnswers, Option[A]) => IncompleteIndividualTriageAnswers,
-    updateCurrentIncompleteAnswer: (IncompleteIndividualTriageAnswers, Option[B]) => IncompleteIndividualTriageAnswers,
-    updateCurrentCompleteAnswer: (CompleteIndividualTriageAnswers, B) => IndividualTriageAnswers
-  )(pageTitleKey: String)(
-    formErrorScenarios: Seq[(Seq[(String, String)], String)]
-  )(validValueScenarios: Seq[(Seq[(String, String)], B, (Future[Result], IndividualTriageAnswers) => Unit)]): Unit = {
+  def redirectWhenNoPreviousAnswerBehaviour[A](performAction: () => Future[Result])(
+    requiredPreviousAnswers: IncompleteTriageAnswers,
+    redirectToPreviousAnswer: => Call,
+    setPreviousAnswer: (IncompleteTriageAnswers, Option[A]) => IncompleteTriageAnswers
+  ): Unit =
+    s"redirect to ${redirectToPreviousAnswer.url}" when {
 
-    if (setPreviousAnswer(requiredPreviousAnswers, None) =!= requiredPreviousAnswers) {
-
-      s"redirect to ${redirectToIfNotValidJourney.url}" when {
-
-        "that question has not already answered" in {
-          List(
-            sessionDataWithStartingNewDraftReturn(setPreviousAnswer(requiredPreviousAnswers, None)),
-            sessionDataWithFillingOurReturn(setPreviousAnswer(requiredPreviousAnswers, None))
-          ).foreach { currentSession =>
-            withClue(s"For currentSession $currentSession: ") {
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(
-                  Future.successful(
-                    Right(
-                      Some(
-                        sessionDataWithStartingNewDraftReturn(setPreviousAnswer(requiredPreviousAnswers, None))
-                      )
-                    )
-                  )
-                )
-              }
-
-              checkIsRedirect(performAction(Seq.empty), redirectToIfNotValidJourney)
+      "that question has not already answered" in {
+        List(
+          sessionDataWithStartingNewDraftReturn(setPreviousAnswer(requiredPreviousAnswers, None)),
+          sessionDataWithFillingOurReturn(setPreviousAnswer(requiredPreviousAnswers, None))
+        ).foreach { currentSession =>
+          withClue(s"For currentSession $currentSession: ") {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(sessionDataWithStartingNewDraftReturn(setPreviousAnswer(requiredPreviousAnswers, None)))
             }
+
+            checkIsRedirect(performAction(), redirectToPreviousAnswer)
           }
-        }
-
-      }
-    }
-
-    "show a form error" when {
-
-      "the submitted data is invalid" in {
-        formErrorScenarios.foreach {
-          case (formData, expectedErrorMessageKey) =>
-            withClue(
-              s"For form data [${formData.mkString(";")}] and expected error message key '$expectedErrorMessageKey': "
-            ) {
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(
-                  Future.successful(Right(Some(sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers))))
-                )
-              }
-
-              val result  = performAction(formData)
-              val content = contentAsString(result)
-
-              status(result)          shouldBe BAD_REQUEST
-              contentAsString(result) should include(message(pageTitleKey))
-              content                 should include(message(expectedErrorMessageKey))
-            }
         }
       }
     }
 
-    "show an error page" when {
-
-      "the submitted value is valid but there is an error updating the session" in {
-
-        validValueScenarios.foreach {
-          case (formData, validValue, _) =>
-            withClue(s"For form data [${formData.mkString(";")}] and value '$validValue': ") {
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(
-                  Future.successful(Right(Some(sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers))))
-                )
-                mockStoreSession(
-                  sessionDataWithStartingNewDraftReturn(
-                    updateCurrentIncompleteAnswer(requiredPreviousAnswers, Some(validValue))
-                  )
-                )(Future.successful(Left(Error(""))))
-              }
-
-              val result = performAction(formData)
-              checkIsTechnicalErrorPage(result)
-            }
-        }
-      }
-
-      "the submitted value is valid but there is an error storing the draft return" in {
-        validValueScenarios.foreach {
-          case (formData, validValue, _) =>
-            withClue(s"For form data [${formData.mkString(";")}] and value '$validValue': ") {
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(
-                  Future.successful(Right(Some(sessionDataWithFillingOurReturn(requiredPreviousAnswers))))
-                )
-                mockStoreDraftReturn(
-                  draftReturn.copy(
-                    triageAnswers = updateCurrentIncompleteAnswer(requiredPreviousAnswers, Some(validValue))
-                  )
-                )(Left(Error("")))
-              }
-
-              val result = performAction(formData)
-              checkIsTechnicalErrorPage(result)
-            }
-        }
-      }
-
+  def testFormError(
+    performAction: Seq[(String, String)] => Future[Result],
+    pageTitleKey: String
+  )(formData: Seq[(String, String)], expectedErrorMessageKey: String, currentAnswers: TriageAnswers): Unit = {
+    inSequence {
+      mockAuthWithNoRetrievals()
+      mockGetSession(sessionDataWithStartingNewDraftReturn(currentAnswers))
     }
 
-    "handle valid data" when {
+    val result  = performAction(formData)
+    val content = contentAsString(result)
 
-      def testDraftReturnJourney(
-        formData: Seq[(String, String)],
-        validValue: B,
-        checkResult: (Future[Result], IndividualTriageAnswers) => Unit,
-        initialState: DraftReturn,
-        updatedState: DraftReturn
-      ): Unit =
-        withClue(
-          s"For:\n form data [${formData.mkString(";")}]\n value '$validValue'\n initialState\n '$initialState'\n updatedState '$updatedState': "
-        ) {
-          val (currentSession, updatedSession) =
-            sessionDataWithFillingOurReturn(initialState) -> sessionDataWithFillingOurReturn(updatedState)
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(currentSession))))
-            if (updatedState =!= initialState) mockStoreDraftReturn(updatedState)(Right(()))
-            if (currentSession =!= updatedSession) mockStoreSession(updatedSession)(Future.successful(Right(())))
-          }
-
-          val result = performAction(formData)
-          checkResult(result, updatedState.triageAnswers)
-        }
-
-      def test(
-        formData: Seq[(String, String)],
-        validValue: B,
-        checkResult: (Future[Result], IndividualTriageAnswers) => Unit,
-        initialState: IndividualTriageAnswers,
-        updatedState: IndividualTriageAnswers
-      ): Unit =
-        withClue(
-          s"For:\n form data [${formData.mkString(";")}]\n value '$validValue'\n initialState\n '$initialState'\n updatedState '$updatedState': "
-        ) {
-          val (currentSession, updatedSession) =
-            sessionDataWithStartingNewDraftReturn(initialState) -> sessionDataWithStartingNewDraftReturn(updatedState)
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(currentSession))))
-            if (currentSession =!= updatedSession) mockStoreSession(updatedSession)(Future.successful(Right(())))
-          }
-
-          val result = performAction(formData)
-          checkResult(result, updatedState)
-        }
-
-      validValueScenarios.foreach {
-        case (formData, validValue, checkResult) =>
-          s"submitting [${formData.mkString("; ")}] when the current state is incomplete when the " +
-            "user has not yet created a draft return" in {
-            test(
-              formData,
-              validValue,
-              checkResult,
-              requiredPreviousAnswers,
-              updateCurrentIncompleteAnswer(requiredPreviousAnswers, Some(validValue))
-            )
-          }
-
-          s"submitting [${formData.mkString("; ")}] when the current state is incomplete when the " +
-            "user has created a draft return" in {
-            testDraftReturnJourney(
-              formData,
-              validValue,
-              checkResult,
-              draftReturn.copy(triageAnswers = requiredPreviousAnswers),
-              draftReturn.copy(triageAnswers = updateCurrentIncompleteAnswer(requiredPreviousAnswers, Some(validValue)))
-            )
-          }
-
-          s"submitting [${formData.mkString("; ")}] when the current state is complete when the " +
-            "user has not yet created a draft return" in {
-            test(
-              formData,
-              validValue,
-              checkResult,
-              sampleCompleteJourney,
-              updateCurrentCompleteAnswer(sampleCompleteJourney, validValue)
-            )
-          }
-
-          s"submitting [${formData.mkString("; ")}] when the current state is complete when the " +
-            "user has created a draft return" in {
-            testDraftReturnJourney(
-              formData,
-              validValue,
-              checkResult,
-              draftReturn.copy(triageAnswers = sampleCompleteJourney),
-              draftReturn.copy(triageAnswers = updateCurrentCompleteAnswer(sampleCompleteJourney, validValue))
-            )
-          }
-      }
-    }
-
-    "not update the session" when {
-
-      "the answer submitted is the same as the one already stored in session" in {
-        validValueScenarios.foreach {
-          case (formData, validValue, checkResult) =>
-            val updatedState = updateCurrentIncompleteAnswer(requiredPreviousAnswers, Some(validValue))
-
-            withClue(s"For form data [${formData.mkString(";")}] and value '$validValue': ") {
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(
-                  Future.successful(
-                    Right(
-                      Some(
-                        sessionDataWithStartingNewDraftReturn((updatedState))
-                      )
-                    )
-                  )
-                )
-              }
-
-              val result = performAction(formData)
-              checkResult(result, updatedState)
-            }
-
-        }
-
-      }
-    }
+    status(result)          shouldBe BAD_REQUEST
+    contentAsString(result) should include(messageFromMessageKey(pageTitleKey))
+    content                 should include(messageFromMessageKey(expectedErrorMessageKey))
   }
 
-  def displayIndividualTriagePageBehaviorIncompleteJourney[A, B](performAction: () => Future[Result])(
-    requiredPreviousAnswers: IncompleteIndividualTriageAnswers,
-    redirectToIfNotValidJourney: => Call
+  def displayIndividualTriagePageBehaviorIncompleteJourney[B](performAction: () => Future[Result])(
+    requiredPreviousAnswers: IncompleteTriageAnswers
   )(
-    setPreviousAnswer: (IncompleteIndividualTriageAnswers, Option[A]) => IncompleteIndividualTriageAnswers,
-    setCurrentAnswer: (IncompleteIndividualTriageAnswers, Option[B]) => IncompleteIndividualTriageAnswers
+    setCurrentAnswer: (IncompleteTriageAnswers, Option[B]) => IncompleteTriageAnswers
   )(sampleCurrentAnswer: B)(
     pageTitleKey: String,
     prepopulatedContent: B => List[String]
   ): Unit = {
-
-    if (setPreviousAnswer(requiredPreviousAnswers, None) =!= requiredPreviousAnswers) {
-      s"redirect to ${redirectToIfNotValidJourney.url}" when {
-
-        "that question has not already answered" in {
-          List(
-            sessionDataWithStartingNewDraftReturn(setPreviousAnswer(requiredPreviousAnswers, None)),
-            sessionDataWithFillingOurReturn(setPreviousAnswer(requiredPreviousAnswers, None))
-          ).foreach { currentSession =>
-            withClue(s"For currentSession $currentSession: ") {
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(Future.successful(Right(Some(currentSession))))
-              }
-
-              checkIsRedirect(performAction(), redirectToIfNotValidJourney)
-            }
-          }
-
-        }
-
-      }
-    }
 
     "display the page when no option has been selected before" in {
       List(
@@ -1350,12 +1932,12 @@ class CanTheyUseOurServiceControllerSpec
         withClue(s"For currentSession $currentSession: ") {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(currentSession))))
+            mockGetSession(currentSession)
           }
 
           val result = performAction()
           status(result)          shouldBe OK
-          contentAsString(result) should include(message(pageTitleKey))
+          contentAsString(result) should include(messageFromMessageKey(pageTitleKey))
         }
       }
     }
@@ -1368,14 +1950,14 @@ class CanTheyUseOurServiceControllerSpec
         withClue(s"For currentSession $currentSession: ") {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(currentSession))))
+            mockGetSession(currentSession)
           }
 
           val result  = performAction()
           val content = contentAsString(result)
           status(result) shouldBe OK
 
-          content should include(message(pageTitleKey))
+          content should include(messageFromMessageKey(pageTitleKey))
           prepopulatedContent(sampleCurrentAnswer).foreach(content should include(_))
         }
       }
@@ -1385,11 +1967,11 @@ class CanTheyUseOurServiceControllerSpec
 
   def displayIndividualTriagePageBehaviorCompleteJourney[A](
     performAction: () => Future[Result]
-  )(sampleCurrentAnswer: A)(setCurrentAnswer: (CompleteIndividualTriageAnswers, A) => CompleteIndividualTriageAnswers)(
+  )(sampleCurrentAnswer: A)(setCurrentAnswer: (CompleteTriageAnswers, A) => CompleteTriageAnswers)(
     pageTitleKey: String,
     prepopulatedContent: A => List[String]
   ): Unit = {
-    val completeIndividualTriageAnswers = sample[CompleteIndividualTriageAnswers]
+    val completeIndividualTriageAnswers = sample[CompleteTriageAnswers]
 
     "display the page when the journey has already been completed" in {
       List(
@@ -1401,60 +1983,111 @@ class CanTheyUseOurServiceControllerSpec
         withClue(s"For currentSession $currentSession: ") {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(currentSession))))
+            mockGetSession(currentSession)
           }
 
           val result  = performAction()
           val content = contentAsString(result)
           status(result) shouldBe OK
 
-          content should include(message(pageTitleKey))
+          content should include(messageFromMessageKey(pageTitleKey))
           prepopulatedContent(sampleCurrentAnswer).foreach(content should include(_))
         }
       }
     }
   }
 
-  def commonDateErrorScenarios(dateKey: String) =
-    List(
-      (None, None, None, s"$dateKey.error.required"),
-      (Some(""), None, None, s"$dateKey.error.required"),
-      (None, Some(""), None, s"$dateKey.error.required"),
-      (None, None, Some(""), s"$dateKey.error.required"),
-      (Some(""), Some(""), None, s"$dateKey.error.required"),
-      (Some(""), None, Some(""), s"$dateKey.error.required"),
-      (None, Some(""), Some(""), s"$dateKey.error.required"),
-      (Some(""), Some(""), Some(""), s"$dateKey.error.required"),
-      // single field empty
-      (None, Some("12"), Some("2020"), s"$dateKey-day.error.required"),
-      (None, Some("100"), Some("-1000"), s"$dateKey-day.error.required"),
-      (Some("1"), None, Some("2020"), s"$dateKey-month.error.required"),
-      (Some("-1"), None, Some("1.2"), s"$dateKey-month.error.required"),
-      (Some("1"), Some("12"), None, s"$dateKey-year.error.required"),
-      (Some("0"), Some("-1"), None, s"$dateKey-year.error.required"),
-      // two fields mossing
-      (Some("1"), None, None, s"$dateKey-month.error.monthAndYearRequired"),
-      (Some("0"), None, None, s"$dateKey-month.error.monthAndYearRequired"),
-      (None, Some("12"), None, s"$dateKey-day.error.dayAndYearRequired"),
-      (None, Some("-1"), None, s"$dateKey-day.error.dayAndYearRequired"),
-      (None, None, Some("2020"), s"$dateKey-day.error.dayAndMonthRequired"),
-      (None, None, Some("-1"), s"$dateKey-day.error.dayAndMonthRequired"),
-      // day invalid and takes precedence over month and year
-      (Some("0"), Some("12"), Some("2020"), s"$dateKey-day.error.invalid"),
-      (Some("32"), Some("12"), Some("2020"), s"$dateKey-day.error.invalid"),
-      (Some("-1"), Some("-1"), Some("-2020"), s"$dateKey-day.error.invalid"),
-      (Some("1.2"), Some("3.4"), Some("4.5"), s"$dateKey-day.error.invalid"),
-      // month invalid and takes precedence over year
-      (Some("1"), Some("13"), Some("2020"), s"$dateKey-month.error.invalid"),
-      (Some("1"), Some("0"), Some("0"), s"$dateKey-month.error.invalid"),
-      (Some("1"), Some("-1"), Some("-6"), s"$dateKey-month.error.invalid"),
-      (Some("1"), Some("1.2"), Some("3.4"), s"$dateKey-month.error.invalid"),
-      // year invalid
-      (Some("1"), Some("12"), Some("0"), s"$dateKey-year.error.invalid"),
-      (Some("1"), Some("12"), Some("-1"), s"$dateKey-year.error.invalid"),
-      (Some("1"), Some("12"), Some("1.2"), s"$dateKey-year.error.invalid"),
-      // date does not exist
-      (Some("31"), Some("2"), Some("2019"), s"$dateKey.error.invalid")
-    )
+  def unsuccessfulUpdatesStartingNewDraftBehaviour(
+    performAction: Seq[(String, String)] => Future[Result],
+    currentAnswers: TriageAnswers,
+    formData: Seq[(String, String)],
+    updatedAnswers: TriageAnswers
+  ): Unit =
+    "show an error page" when {
+
+      "the user is starting a new draft return and" when {
+
+        "there is an error updating the session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionDataWithStartingNewDraftReturn(currentAnswers))
+            mockStoreSession(sessionDataWithStartingNewDraftReturn(updatedAnswers))(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction(formData))
+        }
+
+      }
+
+      "the user is filling in a draft return and" when {
+        val draftReturn        = sample[DraftReturn].copy(triageAnswers = currentAnswers)
+        val updatedDraftReturn = draftReturn.copy(triageAnswers         = updatedAnswers)
+
+        val fillingOutReturn        = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+        val updatedFillingOutReturn = fillingOutReturn.copy(draftReturn         = updatedDraftReturn)
+
+        "there is an error updating the draft return" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)))
+            mockStoreDraftReturn(updatedDraftReturn)(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction(formData))
+        }
+
+        "there is an error updating the session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)))
+            mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+            mockStoreSession(SessionData.empty.copy(journeyStatus = Some(updatedFillingOutReturn)))(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction(formData))
+        }
+
+      }
+
+    }
+
+  def testSuccessfulUpdateStartingNewDraft[A](
+    performAction: Seq[(String, String)] => Future[Result],
+    currentAnswers: TriageAnswers,
+    formData: Seq[(String, String)],
+    updatedAnswers: TriageAnswers,
+    checkNextResult: Future[Result] => Unit
+  ): Unit = {
+    inSequence {
+      mockAuthWithNoRetrievals()
+      mockGetSession(sessionDataWithStartingNewDraftReturn(currentAnswers))
+      mockStoreSession(sessionDataWithStartingNewDraftReturn(updatedAnswers))(Right(()))
+    }
+
+    checkNextResult(performAction(formData))
+  }
+
+  def testSuccessfulUpdateFillingOutReturn[A](
+    performAction: Seq[(String, String)] => Future[Result],
+    currentAnswers: TriageAnswers,
+    formData: Seq[(String, String)],
+    updatedAnswers: TriageAnswers,
+    checkNextResult: Future[Result] => Unit
+  ): Unit = {
+    val draftReturn        = sample[DraftReturn].copy(triageAnswers = currentAnswers)
+    val updatedDraftReturn = draftReturn.copy(triageAnswers         = updatedAnswers)
+
+    val fillingOutReturn        = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+    val updatedFillingOutReturn = fillingOutReturn.copy(draftReturn         = updatedDraftReturn)
+
+    inSequence {
+      mockAuthWithNoRetrievals()
+      mockGetSession(SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)))
+      mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+      mockStoreSession(SessionData.empty.copy(journeyStatus = Some(updatedFillingOutReturn)))(Right(()))
+    }
+
+    checkNextResult(performAction(formData))
+  }
 
 }

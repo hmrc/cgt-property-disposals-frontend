@@ -123,12 +123,12 @@ class RegistrationControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData))))
+            mockGetSession(sessionData)
           }
 
           val result = performAction()
           status(result)          shouldBe OK
-          contentAsString(result) should include(message("entityType.title"))
+          contentAsString(result) should include(messageFromMessageKey("entityType.title"))
         }
       }
 
@@ -144,12 +144,12 @@ class RegistrationControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData))))
+            mockGetSession(sessionData)
           }
 
           val result = performAction()
           status(result)          shouldBe OK
-          contentAsString(result) should include(message("entityType.title"))
+          contentAsString(result) should include(messageFromMessageKey("entityType.title"))
           contentAsString(result) should include("""checked="checked"""")
         }
 
@@ -171,22 +171,22 @@ class RegistrationControllerSpec
         "the request submits no selection" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData))))
+            mockGetSession(sessionData)
           }
 
           val result = performAction()
           status(result)          shouldBe BAD_REQUEST
-          contentAsString(result) should include(message("entityType.error.required"))
+          contentAsString(result) should include(messageFromMessageKey("entityType.error.required"))
         }
 
         "the request submits an invalid value" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData))))
+            mockGetSession(sessionData)
           }
           val result = performAction("entityType" -> "2")
           status(result)          shouldBe BAD_REQUEST
-          contentAsString(result) should include(message("entityType.invalid"))
+          contentAsString(result) should include(messageFromMessageKey("entityType.invalid"))
         }
       }
 
@@ -197,8 +197,8 @@ class RegistrationControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData))))
-            mockStoreSession(updatedSession)(Future.successful(Right(())))
+            mockGetSession(sessionData)
+            mockStoreSession(updatedSession)(Right(()))
           }
           val result = performAction("entityType" -> "0")
           checkIsRedirect(result, onboardingRoutes.RegistrationController.wrongGGAccountForTrusts())
@@ -214,8 +214,8 @@ class RegistrationControllerSpec
 
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(sessionData))))
-              mockStoreSession(updatedSession)(Future.successful(Right(())))
+              mockGetSession(sessionData)
+              mockStoreSession(updatedSession)(Right(()))
             }
             val result = performAction("entityType" -> "1")
             checkIsRedirect(
@@ -237,10 +237,8 @@ class RegistrationControllerSpec
               case (entityType, registrationStatus) =>
                 inSequence {
                   mockAuthWithNoRetrievals()
-                  mockGetSession(Future.successful(Right(Some(sessionData))))
-                  mockStoreSession(sessionData.copy(journeyStatus = Some(registrationStatus)))(
-                    Future.successful(Left(Error("")))
-                  )
+                  mockGetSession(sessionData)
+                  mockStoreSession(sessionData.copy(journeyStatus = Some(registrationStatus)))(Left(Error("")))
                 }
 
                 checkIsTechnicalErrorPage(performAction("entityType" -> entityType))
@@ -258,7 +256,7 @@ class RegistrationControllerSpec
 
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(session))))
+              mockGetSession(session)
             }
             val result = performAction("entityType" -> "0")
             checkIsRedirect(result, onboardingRoutes.RegistrationController.wrongGGAccountForTrusts())
@@ -274,7 +272,7 @@ class RegistrationControllerSpec
 
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(Future.successful(Right(Some(session))))
+              mockGetSession(session)
             }
             val result = performAction("entityType" -> "1")
             checkIsRedirect(result, nameRoutes.RegistrationEnterIndividualNameController.enterIndividualName())
@@ -303,11 +301,11 @@ class RegistrationControllerSpec
         "the endpoint is requested" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData))))
+            mockGetSession(sessionData)
           }
           val result = performAction()
           status(result)          shouldBe OK
-          contentAsString(result) should include(message("wrongAccountForTrusts.title"))
+          contentAsString(result) should include(messageFromMessageKey("wrongAccountForTrusts.title"))
         }
       }
 
@@ -317,17 +315,11 @@ class RegistrationControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    sessionData
-                      .copy(
-                        journeyStatus =
-                          Some(RegistrationStatus.IndividualSupplyingInformation(None, None, None, None, ggCredId))
-                      )
-                  )
+              sessionData
+                .copy(
+                  journeyStatus =
+                    Some(RegistrationStatus.IndividualSupplyingInformation(None, None, None, None, ggCredId))
                 )
-              )
             )
           }
           checkIsRedirect(performAction(), onboardingRoutes.RegistrationController.selectEntityType())
@@ -354,15 +346,9 @@ class RegistrationControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    SessionData.empty.copy(
-                      journeyStatus = Some(
-                        RegistrationStatus.IndividualSupplyingInformation(None, None, None, None, ggCredId)
-                      )
-                    )
-                  )
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  RegistrationStatus.IndividualSupplyingInformation(None, None, None, None, ggCredId)
                 )
               )
             )
@@ -379,21 +365,10 @@ class RegistrationControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    SessionData.empty.copy(
-                      journeyStatus = Some(
-                        RegistrationStatus.IndividualSupplyingInformation(
-                          Some(sample[IndividualName]),
-                          None,
-                          None,
-                          None,
-                          ggCredId
-                        )
-                      )
-                    )
-                  )
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  RegistrationStatus
+                    .IndividualSupplyingInformation(Some(sample[IndividualName]), None, None, None, ggCredId)
                 )
               )
             )
@@ -413,21 +388,9 @@ class RegistrationControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    SessionData.empty.copy(
-                      journeyStatus = Some(
-                        RegistrationStatus.IndividualSupplyingInformation(
-                          Some(name),
-                          Some(address),
-                          None,
-                          None,
-                          ggCredId
-                        )
-                      )
-                    )
-                  )
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), None, None, ggCredId)
                 )
               )
             )
@@ -437,7 +400,7 @@ class RegistrationControllerSpec
                   RegistrationStatus.IndividualMissingEmail(name, address, ggCredId)
                 )
               )
-            )(Future.successful(Right(())))
+            )(Right(()))
           }
 
           checkIsRedirect(performAction(), emailRoutes.RegistrationEnterEmailController.enterEmail())
@@ -454,21 +417,9 @@ class RegistrationControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    SessionData.empty.copy(
-                      journeyStatus = Some(
-                        RegistrationStatus.IndividualSupplyingInformation(
-                          Some(name),
-                          Some(address),
-                          None,
-                          None,
-                          ggCredId
-                        )
-                      )
-                    )
-                  )
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  RegistrationStatus.IndividualSupplyingInformation(Some(name), Some(address), None, None, ggCredId)
                 )
               )
             )
@@ -478,7 +429,7 @@ class RegistrationControllerSpec
                   RegistrationStatus.IndividualMissingEmail(name, address, ggCredId)
                 )
               )
-            )(Future.successful(Left(Error(""))))
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -493,21 +444,10 @@ class RegistrationControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    SessionData.empty.copy(
-                      journeyStatus = Some(
-                        RegistrationStatus.IndividualSupplyingInformation(
-                          Some(name),
-                          Some(address),
-                          Some(email),
-                          Some(emailSource),
-                          ggCredId
-                        )
-                      )
-                    )
-                  )
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  RegistrationStatus
+                    .IndividualSupplyingInformation(Some(name), Some(address), Some(email), Some(emailSource), ggCredId)
                 )
               )
             )
@@ -517,7 +457,7 @@ class RegistrationControllerSpec
                   RegistrationStatus.RegistrationReady(RegistrationDetails(name, email, address, emailSource), ggCredId)
                 )
               )
-            )(Future.successful(Left(Error(""))))
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -531,22 +471,16 @@ class RegistrationControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    SessionData.empty.copy(
-                      journeyStatus = Some(
-                        RegistrationStatus.RegistrationReady(
-                          RegistrationDetails(
-                            sample[IndividualName],
-                            sample[Email],
-                            sample[Address],
-                            sample[EmailSource]
-                          ),
-                          ggCredId
-                        )
-                      )
-                    )
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  RegistrationStatus.RegistrationReady(
+                    RegistrationDetails(
+                      sample[IndividualName],
+                      sample[Email],
+                      sample[Address],
+                      sample[EmailSource]
+                    ),
+                    ggCredId
                   )
                 )
               )
@@ -566,21 +500,10 @@ class RegistrationControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              Future.successful(
-                Right(
-                  Some(
-                    SessionData.empty.copy(
-                      journeyStatus = Some(
-                        RegistrationStatus.IndividualSupplyingInformation(
-                          Some(name),
-                          Some(address),
-                          Some(email),
-                          Some(emailSource),
-                          ggCredId
-                        )
-                      )
-                    )
-                  )
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  RegistrationStatus
+                    .IndividualSupplyingInformation(Some(name), Some(address), Some(email), Some(emailSource), ggCredId)
                 )
               )
             )
@@ -593,7 +516,7 @@ class RegistrationControllerSpec
                   )
                 )
               )
-            )(Future.successful(Right(())))
+            )(Right(()))
           }
 
           val result = performAction()
@@ -649,7 +572,7 @@ class RegistrationControllerSpec
         "the call to register without id fails" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData))))
+            mockGetSession(sessionData)
             mockRegisterWithoutId(registrationReady.registrationDetails)(Left(Error("")))
           }
 
@@ -659,7 +582,7 @@ class RegistrationControllerSpec
         "the call to subscribe fails" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData))))
+            mockGetSession(sessionData)
             mockRegisterWithoutId(registrationReady.registrationDetails)(Right(RegisteredWithoutId(sapNumber)))
             mockSubscribe(subscriptionDetails)(Left(Error("")))
           }
@@ -670,13 +593,13 @@ class RegistrationControllerSpec
         "the session data cannot be updated" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData))))
+            mockGetSession(sessionData)
             mockRegisterWithoutId(registrationReady.registrationDetails)(Right(RegisteredWithoutId(sapNumber)))
             mockSubscribe(subscriptionDetails)(Right(subscriptionSuccessfulResponse))
             mockStoreSession(
               SessionData.empty
                 .copy(journeyStatus = Some(Subscribed(subscribedDetails, registrationReady.ggCredId, None, List.empty)))
-            )(Future.successful(Left(Error(""))))
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -690,13 +613,13 @@ class RegistrationControllerSpec
           "session data has been updated" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData))))
+            mockGetSession(sessionData)
             mockRegisterWithoutId(registrationReady.registrationDetails)(Right(RegisteredWithoutId(sapNumber)))
             mockSubscribe(subscriptionDetails)(Right(subscriptionSuccessfulResponse))
             mockStoreSession(
               SessionData.empty
                 .copy(journeyStatus = Some(Subscribed(subscribedDetails, registrationReady.ggCredId, None, List.empty)))
-            )(Future.successful(Right(())))
+            )(Right(()))
           }
 
           checkIsRedirect(performAction(), controllers.onboarding.routes.SubscriptionController.subscribed())
@@ -714,10 +637,10 @@ class RegistrationControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(sessionData))))
+            mockGetSession(sessionData)
             mockRegisterWithoutId(registrationReady.registrationDetails)(Right(RegisteredWithoutId(sapNumber)))
             mockSubscribe(subscriptionDetails)(Right(AlreadySubscribed))
-            mockStoreSession(sessionWithAlreadySubscribed)(Future.successful(Right(())))
+            mockStoreSession(sessionWithAlreadySubscribed)(Right(()))
           }
 
           checkIsRedirect(

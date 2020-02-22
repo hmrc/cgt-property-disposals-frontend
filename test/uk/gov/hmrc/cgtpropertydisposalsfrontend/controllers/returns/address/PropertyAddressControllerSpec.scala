@@ -173,7 +173,7 @@ class PropertyAddressControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(Future.successful(Right(Some(session))))
+            mockGetSession(session)
           }
 
           val result = performAction(Seq("address-select" -> "0"))
@@ -195,17 +195,11 @@ class PropertyAddressControllerSpec
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(
-            Future.successful(
-              Right(
-                Some(
-                  SessionData.empty.copy(journeyStatus = Some(
-                    sample[FillingOutReturn].copy(
-                      draftReturn = draftReturn.copy(propertyAddress = None)
-                    )
-                  )
-                  )
-                )
+            SessionData.empty.copy(journeyStatus = Some(
+              sample[FillingOutReturn].copy(
+                draftReturn = draftReturn.copy(propertyAddress = None)
               )
+            )
             )
           )
         }
@@ -216,12 +210,12 @@ class PropertyAddressControllerSpec
       "display the page if there is an address in session" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
+          mockGetSession(sessionWithValidJourneyStatus)
         }
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("returns.property-address.cya.title"))
+        contentAsString(result) should include(messageFromMessageKey("returns.property-address.cya.title"))
       }
 
     }
@@ -236,7 +230,7 @@ class PropertyAddressControllerSpec
       "redirect to the task list" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionWithValidJourneyStatus))))
+          mockGetSession(sessionWithValidJourneyStatus)
         }
 
         checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())

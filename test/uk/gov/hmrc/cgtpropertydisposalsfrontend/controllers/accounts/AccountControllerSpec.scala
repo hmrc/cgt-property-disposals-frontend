@@ -69,7 +69,7 @@ class AccountControllerSpec
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("signed-out.title"))
+        contentAsString(result) should include(messageFromMessageKey("signed-out.title"))
       }
 
     }
@@ -85,12 +85,12 @@ class AccountControllerSpec
 
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionData))))
+          mockGetSession(sessionData)
         }
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("account.manageYourDetails.p"))
+        contentAsString(result) should include(messageFromMessageKey("account.manageYourDetails.p"))
       }
 
     }
@@ -106,12 +106,12 @@ class AccountControllerSpec
 
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionData))))
+          mockGetSession(sessionData)
         }
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("account.manageYourDetails.Address.changed"))
+        contentAsString(result) should include(messageFromMessageKey("account.manageYourDetails.Address.changed"))
       }
 
     }
@@ -127,12 +127,12 @@ class AccountControllerSpec
 
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionData))))
+          mockGetSession(sessionData)
         }
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("account.manageYourDetails.Email.changed"))
+        contentAsString(result) should include(messageFromMessageKey("account.manageYourDetails.Email.changed"))
       }
 
     }
@@ -148,12 +148,12 @@ class AccountControllerSpec
 
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(Future.successful(Right(Some(sessionData))))
+          mockGetSession(sessionData)
         }
 
         val result = performAction()
         status(result)          shouldBe OK
-        contentAsString(result) should include(message("account.manageYourDetails.ContactName.changed"))
+        contentAsString(result) should include(messageFromMessageKey("account.manageYourDetails.ContactName.changed"))
       }
 
     }

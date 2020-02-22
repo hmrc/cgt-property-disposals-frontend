@@ -20,10 +20,12 @@ import java.net.URLEncoder
 
 import akka.stream.Materializer
 import com.typesafe.config.ConfigFactory
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpec}
-import play.api.inject.bind
 import play.api.i18n.{Lang, MessagesApi}
+import play.api.inject.bind
 import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
 import play.api.mvc.{Call, Result}
 import play.api.test.Helpers._
@@ -77,12 +79,12 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
     super.afterAll()
   }
 
-  def message(messageKey: String, args: Any*)(implicit messagesApi: MessagesApi): String =
+  def messageFromMessageKey(messageKey: String, args: Any*)(implicit messagesApi: MessagesApi): String =
     messagesApi(messageKey, args: _*)(Lang.defaultLang)
 
   def checkIsTechnicalErrorPage(result: Future[Result])(implicit messagesApi: MessagesApi): Unit = {
     status(result)          shouldBe INTERNAL_SERVER_ERROR
-    contentAsString(result) should include(message("global.error.InternalServerError500.title"))
+    contentAsString(result) should include(messageFromMessageKey("global.error.InternalServerError500.title"))
   }
 
   def checkIsRedirect(result: Future[Result], expectedRedirectUrl: String): Unit = {
@@ -92,6 +94,20 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
 
   def checkIsRedirect(result: Future[Result], expectedRedirectCall: Call): Unit =
     checkIsRedirect(result, expectedRedirectCall.url)
+
+  def checkPageIsDisplayed(
+    result: Future[Result],
+    expectedTitle: String,
+    contentChecks: Document => Unit = _ => (),
+    expectedStatus: Int             = OK
+  )(implicit messagesApi: MessagesApi): Unit = {
+    redirectLocation(result) shouldBe None
+    status(result)           shouldBe expectedStatus
+
+    val doc = Jsoup.parse(contentAsString(result))
+    doc.select("h1").text should include(expectedTitle)
+    contentChecks(doc)
+  }
 
   def urlEncode(s: String): String = URLEncoder.encode(s, "UTF-8")
 

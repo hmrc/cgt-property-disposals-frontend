@@ -18,7 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address
 
 import cats.data.EitherT
 import cats.instances.future._
-import com.google.inject.Inject
+import com.google.inject.{Inject, Singleton}
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
@@ -40,6 +40,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class PropertyAddressController @Inject() (
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,

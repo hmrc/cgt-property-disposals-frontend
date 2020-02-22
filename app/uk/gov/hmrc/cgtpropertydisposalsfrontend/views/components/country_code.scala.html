@@ -28,6 +28,7 @@
   errorKey: Option[String],
   hasErrors: Boolean,
   autoComplete: AutoCompleteType,
+  helpText: Option[Html] = None,
   extraContent: Option[Html] = None,
   labelAsHeading: Boolean = false
 )(implicit messages: Messages)
@@ -37,6 +38,8 @@
 @inputClasses = @{if(hasErrors) "form-control form-control-error"  else "form-control"}
 @errorId = @{s"${{fieldId}}-inline-error"}
 @errorIdWithMessageKey = @{errorKey.map(errorId -> _)}
+@hintTextKey = @{s"${{fieldId}}-form-hint"}
+@hintIdWithHintText = @{helpText.map(hintTextKey -> _)}
 @extraContentId = @{s"${{fieldId}}-extra-content"}
 @extraContentIdWithContent = @{extraContent.map(extraContentId -> _)}
 @fieldLabel = {
@@ -49,7 +52,7 @@
   }
 }
 
-@describedByKeys = @{List(extraContentIdWithContent.map(_._1), errorIdWithMessageKey.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
+@describedByKeys = @{List(hintIdWithHintText.map(_._1), extraContentIdWithContent.map(_._1), errorIdWithMessageKey.map(_._1)).collect{ case Some(t) => t }.mkString(" ")}
 
 <div class="@classes country-code-wrapper">
  @fieldLabel
@@ -57,6 +60,11 @@
    <div id="@extraContentId">
      @text
    </div>
+ }
+ @hintIdWithHintText.map { case (id, text) =>
+  <span id="@id" class="form-hint">
+    @text
+  </span>
  }
  @errorIdWithMessageKey.map { case (id, key) =>
   @errorInline(id, messages(s"$fieldId.$key"))
@@ -67,7 +75,7 @@
    class="@inputClasses"
    autocomplete="@{autoComplete.value}"
    @if(describedByKeys.nonEmpty) { aria-describedby="@describedByKeys" }>
-    <option value=""></option>
+    <option value="">@messages("countryCode.placeholder")</option>
       @for(country <- countryCodeToCountryName) {
         <option value="@{country._1}" @{if(selected.contains(country._1))"selected"}>@{country._2}</option>
       }
