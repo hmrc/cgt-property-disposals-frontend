@@ -14,18 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.audit
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan
 
-import play.api.libs.json.{Json, Writes}
+sealed trait UpscanInitiateResponse
 
-final case class AgentAccessAttempt(
-  agentReferenceNumber: String,
-  clientCgtReference: String,
-  success: Boolean
-)
-
-object AgentAccessAttempt {
-
-  implicit val writes: Writes[AgentAccessAttempt] = Json.writes[AgentAccessAttempt]
-
+object UpscanInitiateResponse {
+  case object MaximumFileUploadReached extends UpscanInitiateResponse
+  case object FailedToGetUpscanSnapshot extends UpscanInitiateResponse
+  final case class UpscanInititateResponseStored(value: String) extends UpscanInitiateResponse
 }

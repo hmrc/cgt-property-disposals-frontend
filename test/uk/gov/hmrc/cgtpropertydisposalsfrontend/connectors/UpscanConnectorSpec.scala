@@ -21,7 +21,7 @@ import akka.util.ByteString
 import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
-import play.api.Configuration
+import play.api.{Configuration, Mode}
 import play.api.libs.json.JsString
 import play.api.libs.ws.ahc.AhcWSResponse
 import play.api.libs.ws.ahc.cache.{CacheableHttpResponseBodyPart, CacheableHttpResponseHeaders, CacheableHttpResponseStatus}
@@ -34,6 +34,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
@@ -59,6 +61,11 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
     ConfigFactory.parseString(
       """
         | microservice.services {
+        |   cgt-property-disposals {
+        |      host = localhost
+        |      port = 7021
+        |   }
+        |
         |    upscan-initiate {
         |        protocol = http
         |        host = host
@@ -74,7 +81,8 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
     )
   )
 
-  val connector = new UpscanConnectorImpl(mockHttp, mockWsClient, config)
+  val connector =
+    new UpscanConnectorImpl(mockHttp, mockWsClient, config, new ServicesConfig(config, new RunMode(config, Mode.Test)))
 
   "UpscanConnectorImpl" when {
 

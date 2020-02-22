@@ -18,7 +18,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.audit
 
 import play.api.libs.json.{JsObject, JsString, Json, Writes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Country, Postcode}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
 
 final case class AgentVerifierMatchAttempt(
   agentReferenceNumber: String,

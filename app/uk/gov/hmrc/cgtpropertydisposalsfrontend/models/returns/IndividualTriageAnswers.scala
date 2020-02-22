@@ -55,7 +55,7 @@ object IndividualTriageAnswers {
     implicit val format: OFormat[CompleteIndividualTriageAnswers] = Json.format
   }
 
-  implicit class IndividualTriageQuestionOps(val i: IndividualTriageAnswers) extends AnyVal {
+  implicit class IndividualTriageQuestionOps(private val i: IndividualTriageAnswers) extends AnyVal {
 
     def fold[A](
       ifIncomplete: IncompleteIndividualTriageAnswers => A,

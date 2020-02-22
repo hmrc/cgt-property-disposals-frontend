@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.audit
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan
 
-import play.api.libs.json.{Json, Writes}
+import play.api.libs.json.Json
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanFileDescriptor.UpscanFileDescriptorStatus
 
-final case class AgentAccessAttempt(
-  agentReferenceNumber: String,
-  clientCgtReference: String,
-  success: Boolean
+final case class UpscanCallBack(
+  reference: String,
+  fileStatus: UpscanFileDescriptorStatus,
+  downloadUrl: String,
+  uploadDetails: Map[String, String]
 )
 
-object AgentAccessAttempt {
-
-  implicit val writes: Writes[AgentAccessAttempt] = Json.writes[AgentAccessAttempt]
-
+object UpscanCallBack {
+  implicit val format = Json.format[UpscanCallBack]
 }

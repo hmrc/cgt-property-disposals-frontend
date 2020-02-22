@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.audit
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.dms
 
-import play.api.libs.json.{Json, Writes}
-
-final case class AgentAccessAttempt(
-  agentReferenceNumber: String,
-  clientCgtReference: String,
-  success: Boolean
-)
-
-object AgentAccessAttempt {
-
-  implicit val writes: Writes[AgentAccessAttempt] = Json.writes[AgentAccessAttempt]
+/*
+  This is called when we have made a successful submission
+  and we have the formbundle id and have html and have all
+  the files
+ */
+trait DmsSubmissionService {
+  def submitToDms(): Unit
 
 }
+
+class DefaultDmsSubmissionService {}

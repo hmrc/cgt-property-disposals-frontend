@@ -23,21 +23,22 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.libs.json.Json
 import play.api.mvc.Result
+import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{status, _}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.upscan.UpscanController
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UpscanCallBack, UpscanInitiateResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanFileDescriptor.UpscanFileDescriptorStatus.READY_TO_UPLOAD
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanInitiateResponse.UpscanInititateResponseStored
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanServiceResponse.{UpscanDescriptor, UpscanRequest, UpscanResponse}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.{UpscanNotifyResponse, UpscanServiceResponse}
 import uk.gov.hmrc.http.HeaderCarrier
-import play.api.test.CSRFTokenHelper._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.upscan.UpscanController
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 
 import scala.concurrent.Future
 
@@ -61,18 +62,18 @@ class UpscanControllerSpec
 
   val requestWithCSRFToken = FakeRequest().withCSRFToken
 
-  def mockUpscanInitiate(cgtReference: CgtReference)(response: Either[Error, UpscanServiceResponse]) =
+  def mockUpscanInitiate(cgtReference: CgtReference)(response: Either[Error, UpscanInitiateResponse]) =
     (mockUpscanService
       .initiate(_: CgtReference)(_: HeaderCarrier))
       .expects(cgtReference, *)
       .returning(EitherT(Future.successful(response)))
 
-  def mockStoreUpscanNotifyEvent(cgtReference: CgtReference, upscanNotifyResponse: UpscanNotifyResponse)(
+  def mockSaveUpscanCallBack(cgtReference: CgtReference, upscanCallBack: UpscanCallBack)(
     response: Either[Error, Unit]
   ) =
     (mockUpscanService
-      .storeNotifyEvent(_: CgtReference, _: UpscanNotifyResponse)(_: HeaderCarrier))
-      .expects(cgtReference, upscanNotifyResponse, *)
+      .saveUpscanCallBackResponse(_: CgtReference, _: UpscanCallBack)(_: HeaderCarrier))
+      .expects(cgtReference, upscanCallBack, *)
       .returning(EitherT(Future.successful(response)))
 
   "The UpscanController" when {
@@ -95,7 +96,11 @@ class UpscanControllerSpec
           """
             | {
             |   "reference" : "upscan-ref",
-            |   "fileStatus" : "READY",
+            |      "fileStatus":{
+            |      "READY_TO_UPLOAD":{
+            |
+            |      }
+            |   },
             |   "downloadUrl" : "http://upscan.bucket",
             |   "uploadDetails" : {
             |       "field-1" : "value-1"
@@ -103,15 +108,14 @@ class UpscanControllerSpec
             | }
             |""".stripMargin
 
-        mockStoreUpscanNotifyEvent(
+        mockSaveUpscanCallBack(
           cgtReference,
-          UpscanNotifyResponse("upscan-ref", "READY", "http://upscan.bucket", Map("field-1" -> "value-1"))
-        )(Right(Unit))
+          UpscanCallBack("upscan-ref", READY_TO_UPLOAD, "http://upscan.bucket", Map("field-1" -> "value-1"))
+        )(Right(()))
         def performAction(): Future[Result] =
           controller.callBack(cgtReference.value).apply(FakeRequest().withBody(Json.parse(body)))
         val result = performAction()
         status(result) shouldBe NO_CONTENT
-
       }
 
     }
@@ -132,9 +136,8 @@ class UpscanControllerSpec
           mockGetSession(Future.successful(Right(Some(sessionData))))
         }
 
-        mockUpscanInitiate(cgtReference)(
-          Right(UpscanResponse(cgtReference.value, UpscanDescriptor("href", UpscanRequest("href", Map.empty))))
-        )
+        mockUpscanInitiate(cgtReference)(Right(UpscanInititateResponseStored("")))
+
         def performAction(): Future[Result] = controller.upscan()(requestWithCSRFToken)
         val result                          = performAction()
         status(result) shouldBe OK

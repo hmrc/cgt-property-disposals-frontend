@@ -32,10 +32,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanFileDescriptor.UpscanFileDescriptorStatus.UPLOADED
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanInitiateResponse._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UpscanCallBack, UpscanInitiateReference}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanNotifyResponse
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanServiceResponse._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
@@ -83,56 +84,101 @@ class UpscanController @Inject() (
 
   private val maxFileSize: Int = getUpscanInitiateConfig[Int]("max-uploads")
 
-  @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
-  def upload(): Action[MultipartFormData[Files.TemporaryFile]] = Action(parse.multipartFormData(maxFileSize)).async {
-    implicit request: MessagesRequest[MultipartFormData[Files.TemporaryFile]] =>
-      val multipart = request.body
-      multipart.dataParts.get("href").flatMap(_.headOption).fold(Future.successful(BadRequest("missing href"))) {
-        href =>
-          val data: Map[String, Seq[String]] = multipart.dataParts.map {
-            case (k, v) => (k.stripPrefix("upscan."), v)
-          }
-          val withSource =
-            multipart.files.map(file => file.copy(ref = FileIO.fromPath(file.ref.path): Source[ByteString, Any]))
-          val prepared = multipart.copy(files = withSource, dataParts = data)
-          upscanConnector.upload(href, prepared).value.map {
-            case Left(error) =>
-              logger.warn(s"Could not upload file to S3", error)
-              errorHandler.errorResult(None)
-            case Right(_) => Ok
-          }
-      }
-  }
-
-  def callBack(cgtReference: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    request.body
-      .validate[UpscanNotifyResponse]
-      .asOpt
-      .fold(Future.successful(BadRequest("Invalid call back response received from upscan notify")))(notifyEvent =>
-        upscanService.storeNotifyEvent(CgtReference(cgtReference), notifyEvent).value.map {
+  def upscan(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withSubscribedUser(request) { (_, subscribed) =>
+        upscanService.initiate(subscribed.subscribedDetails.cgtReference).value.map {
           case Left(error) =>
-            logger.warn("upscan notifier call back handler failed", error)
+            logger.warn(s"could not initiate upscan due to $error")
             errorHandler.errorResult(None)
-          case Right(_) =>
-            logger.info("upscan notifier call back succeeded")
-            NoContent
+          case Right(upscanInitiateResponse) =>
+            upscanInitiateResponse match {
+              case FailedToGetUpscanSnapshot                => errorHandler.errorResult(None)
+              case MaximumFileUploadReached                 => Ok(upscanLimitPage())
+              case UpscanInititateResponseStored(reference) => Ok(upscanPage(reference))
+            }
         }
-      )
-  }
+      }
+    }
 
-  def upscan(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withSubscribedUser(request) { (_, subscribed) =>
-      upscanService.initiate(subscribed.subscribedDetails.cgtReference).value.map {
-        case Left(error) =>
-          logger.warn(s"Could not initiate upscan due to $error")
-          errorHandler.errorResult(None)
-        case Right(upscanResult) =>
-          upscanResult match {
-            case MaximumFileUploadReached            => Ok(upscanLimitPage())
-            case UpscanResponse(_, upscanDescriptor) => Ok(upscanPage(upscanDescriptor))
+  @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
+  def upload(): Action[MultipartFormData[Files.TemporaryFile]] =
+    authenticatedActionWithSessionData(parse.multipartFormData(maxFileSize)).async { implicit request =>
+      withSubscribedUser(request) { (_, subscribed) =>
+        val multipart: MultipartFormData[Files.TemporaryFile] = request.body
+        multipart.dataParts
+          .get("reference")
+          .flatMap(_.headOption)
+          .fold(Future.successful(BadRequest("missing upscan file descriptor id"))) { reference =>
+            upscanService
+              .getUpscanFileDescriptor(subscribed.subscribedDetails.cgtReference, UpscanInitiateReference(reference))
+              .value
+              .flatMap {
+                case Right(maybeUpscanFileDescriptor) => {
+                  maybeUpscanFileDescriptor match {
+                    case Some(upscanFileDescriptor) => {
+                      val userFile =
+                        multipart.files
+                          .map(file => file.copy(ref = FileIO.fromPath(file.ref.path): Source[ByteString, Any]))
+                      val prepared: MultipartFormData[Source[ByteString, Any]] =
+                        multipart
+                          .copy(
+                            files = userFile,
+                            dataParts = upscanFileDescriptor.fileDescriptor.uploadRequest.fields
+                              .mapValues(fieldValue => Seq(fieldValue))
+                          )
+                      upscanConnector
+                        .upload(upscanFileDescriptor.fileDescriptor.uploadRequest.href, prepared)
+                        .value
+                        .flatMap {
+                          case Left(error) =>
+                            logger.warn(s"could not upload file to S3", error)
+                            Future.successful(errorHandler.errorResult(None))
+                          case Right(_) => {
+                            upscanConnector
+                              .updateUpscanFileDescriptorStatus(upscanFileDescriptor.copy(status = UPLOADED))
+                              .value
+                              .map {
+                                case Left(error) => {
+                                  logger.warn(s"could not update upscan initiate file descriptor upload status: $error")
+                                  InternalServerError
+                                }
+                                case Right(_) => Ok
+                              }
+                          }
+                        }
+                    }
+                    case None => {
+                      logger.warn(
+                        s"could not find upscan initiate file descriptors with parameters: " +
+                          s"CGT Reference: ${subscribed.subscribedDetails.cgtReference.value} | Upscan Reference: $reference"
+                      )
+                      BadRequest
+                    }
+                  }
+                }
+                case Left(e) => {
+                  logger.warn(s"failed to get upscan file descriptor: $e")
+                  BadRequest
+                }
+              }
           }
       }
     }
-  }
+
+  def callBack(cgtReference: String): Action[JsValue] =
+    Action.async(parse.json) { implicit request =>
+      request.body
+        .validate[UpscanCallBack]
+        .asOpt
+        .fold(Future.successful(BadRequest("failed to parse upscan call back response")))(upscanCallBack =>
+          upscanService.saveUpscanCallBackResponse(CgtReference(cgtReference), upscanCallBack).value.map {
+            case Left(error) =>
+              logger.warn("failed to save upscan call back response", error)
+              errorHandler.errorResult(None)
+            case Right(_) => NoContent
+          }
+        )
+    }
 
 }

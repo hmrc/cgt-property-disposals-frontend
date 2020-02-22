@@ -16,17 +16,17 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 
 import org.scalacheck.ScalacheckShapeless._
 import org.scalacheck.{Arbitrary, Gen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, IndividualSupplyingInformation, RegistrationReady}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifierAttempts
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, GGCredId, SAUTR, SapNumber}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.SubscriptionSuccessful
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.{IndividualNameMatchDetails, TrustNameMatchDetails}
@@ -34,9 +34,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessP
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscribedUpdateDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.{CompleteIndividualTriageAnswers, IncompleteIndividualTriageAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompletionDate, DisposalDate, DraftReturn, IndividualTriageAnswers, IndividualUserType, NumberOfProperties}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanNotifyResponse
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanServiceResponse.{UpscanNotifyEvent, UpscanResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{FileDescriptor, UploadRequest, UpscanFileDescriptor}
 
 object Generators
     extends GenUtils
@@ -51,9 +50,9 @@ object Generators
     with EmailGen
     with VerifierMatchGen
     with UserTypeGen
-    with UpscanGen
     with TriageQuestionsGen
-    with ReturnGen {
+    with ReturnGen
+    with UpscanGen {
 
   def sample[A](implicit gen: Gen[A]): A =
     gen.sample.getOrElse(sys.error(s"Could not generate instance with $gen"))
@@ -71,6 +70,14 @@ sealed trait GenUtils {
 
   implicit val localDateArb: Arbitrary[LocalDate] = Arbitrary(
     Gen.chooseNum(0, Int.MaxValue).map(LocalDate.ofEpochDay(_))
+  )
+
+  import java.time.ZoneOffset
+
+  implicit val localDateTimeArb: Arbitrary[LocalDateTime] = Arbitrary(
+    Gen
+      .chooseNum(0, Int.MaxValue)
+      .map(LocalDateTime.ofEpochSecond(_, 0, ZoneOffset.of("+00:00")))
   )
 
 }
@@ -187,16 +194,6 @@ trait EmailGen { this: GenUtils =>
   implicit val emailSourceGen: Gen[EmailSource] = gen[EmailSource]
 }
 
-trait UpscanGen { this: GenUtils =>
-
-  implicit val upscanGen: Gen[UpscanNotifyEvent] = gen[UpscanNotifyEvent]
-
-  implicit val upscanNotifyResponse: Gen[UpscanNotifyResponse] = gen[UpscanNotifyResponse]
-
-  implicit val upscanResponse: Gen[UpscanResponse] = gen[UpscanResponse]
-
-}
-
 trait VerifierMatchGen { this: GenUtils =>
 
   implicit val unsuccessfulVerifierMatchAttemptsGen: Gen[UnsuccessfulVerifierAttempts] =
@@ -233,5 +230,13 @@ trait TriageQuestionsGen { this: GenUtils =>
 trait ReturnGen { this: GenUtils =>
 
   implicit val draftReturnGen: Gen[DraftReturn] = gen[DraftReturn]
+
+}
+
+trait UpscanGen { this: GenUtils =>
+
+  implicit val uploadRequestGen: Gen[UploadRequest]               = gen[UploadRequest]
+  implicit val fileDescriptorGen: Gen[FileDescriptor]             = gen[FileDescriptor]
+  implicit val upscanFileDescriptorGen: Gen[UpscanFileDescriptor] = gen[UpscanFileDescriptor]
 
 }

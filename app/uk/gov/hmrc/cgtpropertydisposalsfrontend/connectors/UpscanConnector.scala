@@ -23,19 +23,22 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import configs.Configs
 import configs.syntax._
 import play.api.Configuration
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{JsObject, JsValue, Json, OFormat}
 import play.api.libs.ws.WSClient
 import play.api.mvc.MultipartFormData
 import play.mvc.Http.Status
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{upscan => _, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.control.NonFatal
 
 final case class UpscanInitiateRequest(
   callbackUrl: String,
@@ -50,18 +53,42 @@ final object UpscanInitiateRequest {
 @ImplementedBy(classOf[UpscanConnectorImpl])
 trait UpscanConnector {
 
+  def getUpscanSnapshot(cgtReference: CgtReference)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, Option[UpscanSnapshot]]
+
   def initiate(cgtReference: CgtReference)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
+
+  def saveUpscanInititateResponse(upscanFileDescriptor: UpscanFileDescriptor)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, Unit]
+
+  def getFileDescriptor(cgtReference: CgtReference, upscanInitiateReference: UpscanInitiateReference)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, Option[UpscanFileDescriptor]]
 
   def upload(href: String, form: MultipartFormData[Source[ByteString, _]])(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Unit]
 
-}
+  def saveUpscanCallBackResponse(cgtReference: CgtReference, upscanCallBack: UpscanCallBack)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, Unit]
 
+  def updateUpscanFileDescriptorStatus(upscanFileDescriptor: UpscanFileDescriptor)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, Unit]
+
+}
 @Singleton
-class UpscanConnectorImpl @Inject() (http: HttpClient, wsClient: WSClient, config: Configuration)(
+class UpscanConnectorImpl @Inject() (
+  http: HttpClient,
+  wsClient: WSClient,
+  config: Configuration,
+  servicesConfig: ServicesConfig
+)(
   implicit ec: ExecutionContext
 ) extends UpscanConnector
     with Logging {
@@ -78,21 +105,35 @@ class UpscanConnectorImpl @Inject() (http: HttpClient, wsClient: WSClient, confi
     s"$protocol://$host:$port/upscan/initiate"
   }
 
+  val baseUrl: String = servicesConfig.baseUrl("cgt-property-disposals")
+
   val selfBaseUrl: String = config.underlying.get[String]("self.url").value
 
   private val minFileSize: Int  = getUpscanInitiateConfig[Int]("min-file-size")
   private val maxFileSize: Long = getUpscanInitiateConfig[Long]("max-file-size")
 
+  override def getUpscanSnapshot(
+    cgtReference: CgtReference
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, Option[UpscanSnapshot]] = {
+    val url = baseUrl + s"/upscan-snapshot-info/${cgtReference.value}"
+    EitherT[Future, Error, Option[UpscanSnapshot]](
+      http
+        .get(url)
+        .map(httpResponse => Right(Json.fromJson[UpscanSnapshot](httpResponse.json).asOpt))
+        .recover {
+          case NonFatal(e) => Left(Error(e))
+        }
+    )
+  }
+
   override def initiate(cgtReference: CgtReference)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] = {
-
     val payload = UpscanInitiateRequest(
       selfBaseUrl + upscan.routes.UpscanController.callBack(cgtReference.value).url,
       minFileSize,
       maxFileSize
     )
-
     EitherT[Future, Error, HttpResponse](
       http
         .post[UpscanInitiateRequest](url, payload)
@@ -105,17 +146,96 @@ class UpscanConnectorImpl @Inject() (http: HttpClient, wsClient: WSClient, confi
         }
         .recover { case e => Left(Error(e)) }
     )
-
   }
 
+  override def saveUpscanInititateResponse(upscanFileDescriptor: UpscanFileDescriptor)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, Unit] = {
+    val url = baseUrl + s"/upscan-fd"
+    EitherT[Future, Error, Unit](
+      http
+        .post[UpscanFileDescriptor](url, upscanFileDescriptor)
+        .map { httpResponse =>
+          httpResponse.status match {
+            case Status.OK => Right(())
+            case Status.BAD_REQUEST | Status.INTERNAL_SERVER_ERROR =>
+              Left(Error(s"failed to save upscan initiate response: $httpResponse"))
+          }
+        }
+        .recover { case e => Left(Error(e)) }
+    )
+  }
+
+  override def getFileDescriptor(cgtReference: CgtReference, upscanInitiateReference: UpscanInitiateReference)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, Option[UpscanFileDescriptor]] = {
+    val url = baseUrl + s"/upscan-fd/${upscanInitiateReference.value}"
+    EitherT[Future, Error, Option[UpscanFileDescriptor]](
+      http
+        .get(url)
+        .map { httpResponse =>
+          httpResponse.status match {
+            case Status.OK => Right(Json.fromJson[UpscanFileDescriptor](httpResponse.json).asOpt)
+            case Status.BAD_REQUEST | Status.INTERNAL_SERVER_ERROR =>
+              Left(Error(s"failed to get upscan file descriptor: $httpResponse"))
+          }
+        }
+        .recover {
+          case NonFatal(e) => Left(Error(e))
+        }
+    )
+  }
+
+  override def saveUpscanCallBackResponse(cgtReference: CgtReference, upscanCallBack: UpscanCallBack)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, Unit] = {
+    val url = baseUrl + s"/upscan-cb"
+    val payload: JsObject = Json
+      .toJson[CgtReference](cgtReference)
+      .as[JsObject]
+      .deepMerge(Json.toJson[UpscanCallBack](upscanCallBack).as[JsObject])
+
+    EitherT[Future, Error, Unit](
+      http
+        .post[JsValue](url, payload)
+        .map { httpResponse =>
+          httpResponse.status match {
+            case Status.OK => Right(())
+            case Status.BAD_REQUEST | Status.INTERNAL_SERVER_ERROR =>
+              Left(Error(s"failed to save upscan call back response: $httpResponse"))
+          }
+        }
+        .recover { case e => Left(Error(e)) }
+    )
+  }
+
+  override def updateUpscanFileDescriptorStatus(upscanFileDescriptor: UpscanFileDescriptor)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, Unit] = {
+    val url = baseUrl + s"/upscan-fd/status"
+    EitherT[Future, Error, Unit](
+      http
+        .put[UpscanFileDescriptor](url, upscanFileDescriptor)
+        .map { httpResponse =>
+          httpResponse.status match {
+            case Status.OK => Right(())
+            case Status.BAD_REQUEST | Status.INTERNAL_SERVER_ERROR =>
+              Left(Error(s"failed to update upscan file descriptor status: $httpResponse"))
+          }
+        }
+        .recover { case e => Left(Error(e)) }
+    )
+  }
   @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
   override def upload(href: String, form: MultipartFormData[Source[ByteString, _]])(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Unit] = {
+
     val parts: Source[MultipartFormData.Part[Source[ByteString, _]], _] = Source.apply(form.dataParts.flatMap {
       case (key, values) =>
         values.map(value => MultipartFormData.DataPart(key, value): MultipartFormData.Part[Source[ByteString, _]])
     } ++ form.files)
+
     EitherT[Future, Error, Unit](
       wsClient
         .url(href)
@@ -133,5 +253,6 @@ class UpscanConnectorImpl @Inject() (http: HttpClient, wsClient: WSClient, confi
   }
 
   private def is4xx(status: Int): Boolean = status >= 400 && status < 500
+
   private def is5xx(status: Int): Boolean = status >= 500 && status < 600
 }
