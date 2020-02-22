@@ -96,7 +96,7 @@ class CanTheyUseOurServiceController @Inject() (
       homeRoutes.HomePageController.homepage()
     )(_ => whoAreYouReportingForForm)(
       _.fold(_.individualUserType, c => Some(c.individualUserType)), {
-        case (_, form, isDraftReturn) =>
+        case (_, form, isDraftReturn, _) =>
           whoAreYouReportingForPage(
             form,
             None,
@@ -113,7 +113,7 @@ class CanTheyUseOurServiceController @Inject() (
         homeRoutes.HomePageController.homepage()
       )(_ => whoAreYouReportingForForm)(
         {
-          case (_, form, isDraftReturn) =>
+          case (_, form, isDraftReturn, _) =>
             whoAreYouReportingForPage(
               form,
               None,
@@ -139,7 +139,7 @@ class CanTheyUseOurServiceController @Inject() (
       routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting()
     )(_ => numberOfPropertiesForm)(
       _.fold(_.numberOfProperties, c => Some(c.numberOfProperties)), {
-        case (currentState, form, isDraftReturn) =>
+        case (currentState, form, isDraftReturn, _) =>
           howManyPropertiesPage(
             form,
             backLink(currentState, routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting()),
@@ -155,7 +155,7 @@ class CanTheyUseOurServiceController @Inject() (
       routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting()
     )(_ => numberOfPropertiesForm)(
       {
-        case (currentState, form, isDraftReturn) =>
+        case (currentState, form, isDraftReturn, _) =>
           howManyPropertiesPage(
             form,
             backLink(currentState, routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting()),
@@ -167,7 +167,7 @@ class CanTheyUseOurServiceController @Inject() (
           i.fold(_.copy(numberOfProperties = Some(numberOfProperties)), _.copy(numberOfProperties = numberOfProperties))
       },
       nextResult = {
-        case (NumberOfProperties.One, updatedState) =>
+        case (NumberOfProperties.One, _) =>
           Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
 
         case (NumberOfProperties.MoreThanOne, _) =>
@@ -183,7 +183,7 @@ class CanTheyUseOurServiceController @Inject() (
     )(_ => disposalMethodForm)(
       extractField = _.fold(_.disposalMethod, c => Some(c.disposalMethod)),
       page = {
-        case (currentState, form, isDraftReturn) =>
+        case (currentState, form, isDraftReturn, _) =>
           disposalMethodPage(
             form,
             backLink(currentState, routes.CanTheyUseOurServiceController.howManyProperties()),
@@ -200,7 +200,7 @@ class CanTheyUseOurServiceController @Inject() (
         routes.CanTheyUseOurServiceController.howManyProperties()
       )(_ => disposalMethodForm)(
         page = {
-          case (currentState, form, isDraftReturn) =>
+          case (currentState, form, isDraftReturn, _) =>
             disposalMethodPage(
               form,
               backLink(currentState, routes.CanTheyUseOurServiceController.howManyProperties()),
@@ -212,7 +212,7 @@ class CanTheyUseOurServiceController @Inject() (
             i.fold(_.copy(disposalMethod = Some(disposalMethod)), _.copy(disposalMethod = disposalMethod))
         },
         nextResult = {
-          case (_, updatedState) =>
+          case (_, _) =>
             Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
         }
       )
@@ -225,7 +225,7 @@ class CanTheyUseOurServiceController @Inject() (
     )(_ => wasAUkResidentForm)(
       extractField = _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())),
       page = {
-        case (currentState, form, isDraftReturn) =>
+        case (currentState, form, isDraftReturn, _) =>
           wereYouAUKResidentPage(
             form,
             backLink(currentState, routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty()),
@@ -241,7 +241,7 @@ class CanTheyUseOurServiceController @Inject() (
       routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty()
     )(_ => wasAUkResidentForm)(
       page = {
-        case (currentState, form, isDraftReturn) =>
+        case (currentState, form, isDraftReturn, _) =>
           wereYouAUKResidentPage(
             form,
             backLink(currentState, routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty()),
@@ -285,7 +285,7 @@ class CanTheyUseOurServiceController @Inject() (
         extractField =
           _.fold(_.assetType.map(_ === AssetType.Residential), c => Some(c.assetType === AssetType.Residential)),
         page = {
-          case (currentState, form, isDraftReturn) =>
+          case (currentState, form, isDraftReturn, _) =>
             didYouDisposeOfResidentialPropertyPage(
               form,
               backLink(currentState, routes.CanTheyUseOurServiceController.wereYouAUKResident()),
@@ -302,7 +302,7 @@ class CanTheyUseOurServiceController @Inject() (
         routes.CanTheyUseOurServiceController.wereYouAUKResident()
       )(_ => wasResidentialPropertyForm)(
         page = {
-          case (currentState, form, isDraftReturn) =>
+          case (currentState, form, isDraftReturn, _) =>
             didYouDisposeOfResidentialPropertyPage(
               form,
               backLink(currentState, routes.CanTheyUseOurServiceController.wereYouAUKResident()),
@@ -318,7 +318,7 @@ class CanTheyUseOurServiceController @Inject() (
             )
         },
         nextResult = {
-          case (wasResidentialProperty, updatedState) =>
+          case (wasResidentialProperty, _) =>
             if (wasResidentialProperty) {
               Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
             } else {
@@ -335,11 +335,18 @@ class CanTheyUseOurServiceController @Inject() (
     )(_ => disposalDateForm(LocalDateUtils.today(), taxYears))(
       extractField = _.fold(_.disposalDate, c => Some(c.disposalDate)),
       page = {
-        case (currentState, form, isDraftReturn) =>
+        case (currentState, form, isDraftReturn, assetType) =>
+          val back =
+            if (currentState.fold(_.wasAUKResident.exists(identity), _.countryOfResidence.isUk()))
+              routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty()
+            else
+              routes.CanTheyUseOurServiceController.assetTypeForNonUkResidents()
+
           disposalDatePage(
             form,
-            backLink(currentState, routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty()),
-            isDraftReturn
+            backLink(currentState, back),
+            isDraftReturn,
+            assetType
           )
       }
     )
@@ -351,11 +358,18 @@ class CanTheyUseOurServiceController @Inject() (
       routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty()
     )(_ => disposalDateForm(LocalDateUtils.today(), taxYears))(
       page = {
-        case (currentState, form, isDraftReturn) =>
+        case (currentState, form, isDraftReturn, assetType) =>
+          val back =
+            if (currentState.fold(_.wasAUKResident.exists(identity), _.countryOfResidence.isUk()))
+              routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty()
+            else
+              routes.CanTheyUseOurServiceController.assetTypeForNonUkResidents()
+
           disposalDatePage(
             form,
-            backLink(currentState, routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty()),
-            isDraftReturn
+            backLink(currentState, back),
+            isDraftReturn,
+            assetType
           )
       },
       updateState = {
@@ -392,7 +406,7 @@ class CanTheyUseOurServiceController @Inject() (
     )(disposalDate => completionDateForm(disposalDate, LocalDateUtils.today()))(
       extractField = _.fold(_.completionDate, c => Some(c.completionDate)),
       page = {
-        case (currentState, form, isDraftReturn) =>
+        case (currentState, form, isDraftReturn, _) =>
           completionDatePage(
             form,
             backLink(currentState, routes.CanTheyUseOurServiceController.whenWasDisposalDate()),
@@ -408,7 +422,7 @@ class CanTheyUseOurServiceController @Inject() (
       routes.CanTheyUseOurServiceController.whenWasDisposalDate()
     )(disposalDate => completionDateForm(disposalDate, LocalDateUtils.today()))(
       page = {
-        case (currentState, form, isDraftReturn) =>
+        case (currentState, form, isDraftReturn, _) =>
           completionDatePage(
             form,
             backLink(currentState, routes.CanTheyUseOurServiceController.whenWasDisposalDate()),
@@ -430,7 +444,7 @@ class CanTheyUseOurServiceController @Inject() (
     )(_ => countryOfResidenceForm)(
       extractField = _.fold(_.countryOfResidence, c => Some(c.countryOfResidence)),
       page = {
-        case (currentState, form, isDraftReturn) =>
+        case (currentState, form, isDraftReturn, _) =>
           countryOfResidencePage(
             form,
             backLink(currentState, routes.CanTheyUseOurServiceController.wereYouAUKResident()),
@@ -446,7 +460,7 @@ class CanTheyUseOurServiceController @Inject() (
       routes.CanTheyUseOurServiceController.wereYouAUKResident()
     )(_ => countryOfResidenceForm)(
       page = {
-        case (currentState, form, isDraftReturn) =>
+        case (currentState, form, isDraftReturn, _) =>
           countryOfResidencePage(
             form,
             backLink(currentState, routes.CanTheyUseOurServiceController.wereYouAUKResident()),
@@ -467,7 +481,7 @@ class CanTheyUseOurServiceController @Inject() (
       routes.CanTheyUseOurServiceController.countryOfResidence()
     )(_ => assetTypeForNonUkResidentsForm)(
       _.fold(_.assetType, c => Some(c.assetType)), {
-        case (currentState, form, isDraftReturn) =>
+        case (currentState, form, isDraftReturn, _) =>
           assetTypeForNonUkResidentsPage(
             form,
             backLink(currentState, routes.CanTheyUseOurServiceController.countryOfResidence()),
@@ -484,7 +498,7 @@ class CanTheyUseOurServiceController @Inject() (
         routes.CanTheyUseOurServiceController.countryOfResidence()
       )(_ => assetTypeForNonUkResidentsForm)(
         {
-          case (currentState, form, isDraftReturn) =>
+          case (currentState, form, isDraftReturn, _) =>
             assetTypeForNonUkResidentsPage(
               form,
               backLink(currentState, routes.CanTheyUseOurServiceController.countryOfResidence()),
@@ -664,7 +678,7 @@ class CanTheyUseOurServiceController @Inject() (
   )(
     form: R => Form[A]
   )(
-    page: (TriageAnswers, Form[A], Boolean) => Page,
+    page: (TriageAnswers, Form[A], Boolean, R) => Page,
     updateState: (A, TriageAnswers) => TriageAnswers,
     nextResult: (A, TriageAnswers) => Result
   )(
@@ -679,7 +693,7 @@ class CanTheyUseOurServiceController @Inject() (
             form(r)
               .bindFromRequest()
               .fold(
-                formWithErrors => BadRequest(page(triageAnswers, formWithErrors, state.isRight)), { value =>
+                formWithErrors => BadRequest(page(triageAnswers, formWithErrors, state.isRight, r)), { value =>
                   val updatedAnswers = updateState(value, triageAnswers)
                   lazy val oldJourneyStatusWithNewJourneyStatus =
                     state.bimap(
@@ -719,7 +733,7 @@ class CanTheyUseOurServiceController @Inject() (
     redirectToIfNotValidJourney: => Call
   )(
     form: R => Form[A]
-  )(extractField: TriageAnswers => Option[A], page: (TriageAnswers, Form[A], Boolean) => Page)(
+  )(extractField: TriageAnswers => Option[A], page: (TriageAnswers, Form[A], Boolean, R) => Page)(
     implicit request: RequestWithSessionData[_]
   ): Future[Result] =
     withTriageAnswers(request) {
@@ -731,7 +745,7 @@ class CanTheyUseOurServiceController @Inject() (
             val f = extractField(triageAnswers)
               .fold(form(r))(form(r).fill)
 
-            Ok(page(triageAnswers, f, state.isRight))
+            Ok(page(triageAnswers, f, state.isRight, r))
         }
     }
 

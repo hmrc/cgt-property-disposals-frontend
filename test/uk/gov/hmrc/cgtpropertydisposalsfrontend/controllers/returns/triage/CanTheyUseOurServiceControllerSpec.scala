@@ -1694,6 +1694,194 @@ class CanTheyUseOurServiceControllerSpec
 
     }
 
+    "handling requests to display the asset type for non uk residents page" must {
+
+      val requiredPreviousAnswers =
+        IncompleteTriageAnswers.empty.copy(
+          individualUserType = Some(sample[IndividualUserType]),
+          numberOfProperties = Some(NumberOfProperties.One),
+          disposalMethod     = Some(DisposalMethod.Sold),
+          wasAUKResident     = Some(false),
+          countryOfResidence = Some(sample[Country])
+        )
+
+      def performAction(): Future[Result] = controller.assetTypeForNonUkResidents()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
+
+      behave like redirectWhenNoPreviousAnswerBehaviour[Country](
+        performAction
+      )(
+        requiredPreviousAnswers,
+        routes.CanTheyUseOurServiceController.countryOfResidence(),
+        { case (answers, country) => answers.copy(countryOfResidence = country) }
+      )
+
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney[AssetType](
+        performAction
+      )(requiredPreviousAnswers)(
+        { case (answers, assetType) => answers.copy(assetType = assetType) }
+      )(AssetType.Residential)(
+        "assetTypeForNonUkResidents.title",
+        _ => List("checked=\"checked\"")
+      )
+
+      behave like displayIndividualTriagePageBehaviorCompleteJourney(
+        performAction
+      )(AssetType.Residential) {
+        case (answers, assetType) => answers.copy(assetType = assetType)
+      }(
+        "assetTypeForNonUkResidents.title",
+        _ => List("checked=\"checked\"")
+      )
+
+    }
+
+    "handling submitted answers to the asset type for non uk residents page" must {
+
+      val requiredPreviousAnswers =
+        IncompleteTriageAnswers.empty.copy(
+          individualUserType = Some(sample[IndividualUserType]),
+          numberOfProperties = Some(NumberOfProperties.One),
+          disposalMethod     = Some(DisposalMethod.Sold),
+          wasAUKResident     = Some(false),
+          countryOfResidence = Some(sample[Country])
+        )
+
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.assetTypeForNonUkResidentsSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
+
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
+
+      behave like redirectWhenNoPreviousAnswerBehaviour[Country](() => performAction())(
+        requiredPreviousAnswers,
+        routes.CanTheyUseOurServiceController.countryOfResidence(),
+        { case (answers, country) => answers.copy(countryOfResidence = country) }
+      )
+
+      "show a form error" when {
+
+        def test(formData: Seq[(String, String)], expectedErrorKey: String) =
+          testFormError(performAction, "assetTypeForNonUkResidents.title")(
+            formData,
+            expectedErrorKey,
+            requiredPreviousAnswers
+          )
+
+        "nothing is submitted" in {
+          test(List.empty, "assetTypeForNonUkResidents.error.required")
+        }
+
+        "the option is not recognised" in {
+          test(List("assetTypeForNonUkResidents" -> "4"), "assetTypeForNonUkResidents.error.invalid")
+        }
+
+      }
+
+      behave like unsuccessfulUpdatesStartingNewDraftBehaviour(
+        performAction,
+        requiredPreviousAnswers,
+        List("assetTypeForNonUkResidents" -> "0"),
+        requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential))
+      )
+
+      "handle successful updates" when {
+
+        "the user is starting a new draft return and" when {
+
+          "the user has answered some questions but not complete the section" in {
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              requiredPreviousAnswers,
+              List("assetTypeForNonUkResidents" -> "0"),
+              requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential)),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
+            )
+          }
+
+          "the user has complete the section" in {
+            val completeAnswers = sample[CompleteTriageAnswers]
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              completeAnswers.copy(assetType = AssetType.Residential),
+              List("assetTypeForNonUkResidents" -> "1"),
+              IncompleteTriageAnswers(
+                Some(completeAnswers.individualUserType),
+                Some(completeAnswers.numberOfProperties),
+                Some(completeAnswers.disposalMethod),
+                Some(false),
+                Some(completeAnswers.countryOfResidence),
+                Some(AssetType.NonResidential),
+                None,
+                None
+              ),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
+            )
+          }
+
+        }
+
+        "the user is filling out a draft return and" when {
+
+          "the section is complete" in {
+            val completeAnswers = sample[CompleteTriageAnswers]
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              completeAnswers.copy(assetType = AssetType.Residential),
+              List("assetTypeForNonUkResidents" -> "2"),
+              IncompleteTriageAnswers(
+                Some(completeAnswers.individualUserType),
+                Some(completeAnswers.numberOfProperties),
+                Some(completeAnswers.disposalMethod),
+                Some(false),
+                Some(completeAnswers.countryOfResidence),
+                Some(AssetType.MixedUse),
+                None,
+                None
+              ),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
+            )
+
+          }
+
+          "the section is incomplete" in {
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              requiredPreviousAnswers
+                .copy(disposalDate = Some(sample[DisposalDate]), completionDate = Some(sample[CompletionDate])),
+              List("assetTypeForNonUkResidents" -> "3"),
+              requiredPreviousAnswers
+                .copy(assetType = Some(AssetType.IndirectDisposal), disposalDate = None, completionDate = None),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
+            )
+          }
+        }
+      }
+
+      "not do any updates" when {
+
+        "the answers submitted is the same as the one in session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithFillingOurReturn(
+                requiredPreviousAnswers.copy(
+                  assetType = Some(AssetType.Residential)
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(
+            performAction("assetTypeForNonUkResidents" -> "0"),
+            routes.CanTheyUseOurServiceController.checkYourAnswers()
+          )
+        }
+
+      }
+
+    }
+
     "handling requests to display the check your answers page" must {
 
       def performAction(): Future[Result] =

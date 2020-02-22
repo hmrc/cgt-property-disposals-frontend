@@ -17,8 +17,8 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import java.time.LocalDate
-import cats.syntax.order._
 
+import cats.syntax.order._
 import org.scalacheck.ScalacheckShapeless._
 import org.scalacheck.{Arbitrary, Gen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AmountInPence._
@@ -26,7 +26,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Registratio
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifierAttempts
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, GGCredId, SAUTR, SapNumber}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
@@ -171,6 +171,11 @@ trait AddressGen extends AddressLowerPriorityGen { this: GenUtils =>
   implicit val nonUkAddressGen: Gen[NonUkAddress] = gen[NonUkAddress]
 
   implicit val postcodeGen: Gen[Postcode] = gen[Postcode]
+
+  implicit val countryGen: Gen[Country] = {
+    val countries = Country.countryCodeToCountryName.map { case (code, name) => Country(code, Some(name)) }.toList
+    Gen.oneOf(countries)
+  }
 
 }
 
