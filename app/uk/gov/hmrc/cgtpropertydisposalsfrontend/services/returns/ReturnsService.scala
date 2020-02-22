@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns
 
-import java.time.LocalDate
-
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.int._
@@ -75,30 +73,17 @@ class ReturnsServiceImpl @Inject() (connector: ReturnsConnector)(implicit ec: Ex
       }
     }
 
-  val test: Boolean = false
-
   def submitReturn(
     submitReturnRequest: SubmitReturnRequest
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, SubmitReturnResponse] =
-    if (!test) {
-      connector.submitReturn(submitReturnRequest).subflatMap { httpResponse =>
-        if (httpResponse.status === OK) {
-          httpResponse
-            .parseJSON[SubmitReturnResponse]()
-            .leftMap(Error(_))
-        } else {
-          Left(Error(s"Call to get submit return came back with status ${httpResponse.status}}"))
-        }
+    connector.submitReturn(submitReturnRequest).subflatMap { httpResponse =>
+      if (httpResponse.status === OK) {
+        httpResponse
+          .parseJSON[SubmitReturnResponse]()
+          .leftMap(Error(_))
+      } else {
+        Left(Error(s"Call to get submit return came back with status ${httpResponse.status}}"))
       }
-    } else {
-      EitherT.pure(
-        SubmitReturnResponse(
-          "XDCGTX100006",
-          submitReturnRequest.completeReturn.yearToDateLiabilityAnswers.taxDue,
-          LocalDate.of(2021, 2, 1),
-          "0987654321AB"
-        )
-      )
     }
 
 }
