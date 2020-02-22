@@ -37,7 +37,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingNewDraftReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.order
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.IncompleteIndividualTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TriageAnswers.IncompleteTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -190,7 +191,7 @@ object JourneyStatusController {
         optionalDateFormatter.unbind(key, value.map(_.value))
     }
 
-  def returnStateForm(taxYears: List[TaxYear]): Form[IncompleteIndividualTriageAnswers] =
+  def returnStateForm(taxYears: List[TaxYear]): Form[IncompleteTriageAnswers] =
     Form(
       mapping(
         "individual-user-type"             -> of(individualUserTypeFormatter),
@@ -210,11 +211,12 @@ object JourneyStatusController {
             disposalDate,
             completionDate
             ) =>
-          IncompleteIndividualTriageAnswers(
+          IncompleteTriageAnswers(
             individualUserType,
             numberOfProperties,
             disposalMethod,
             wasAUKResident,
+            wasAUKResident.map(if (_) Country.uk else Country("HK", Some("Hong Kong"))),
             disposedOfResidentialProperty.map(if (_) AssetType.Residential else AssetType.NonResidential),
             disposalDate,
             completionDate.map(CompletionDate(_))

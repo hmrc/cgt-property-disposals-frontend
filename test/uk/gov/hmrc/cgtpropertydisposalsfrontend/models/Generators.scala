@@ -39,7 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue.GainCalculatedTaxDue
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.{CompleteIndividualTriageAnswers, IncompleteIndividualTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TriageAnswers.{CompleteTriageAnswers, IncompleteTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.OtherReliefs
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CompleteYearToDateLiabilityAnswers, IncompleteYearToDateLiabilityAnswers}
@@ -238,13 +238,13 @@ trait UserTypeGen { this: GenUtils =>
 
 trait TriageQuestionsGen { this: GenUtils =>
 
-  implicit val individualTriageAnswersGen: Gen[IndividualTriageAnswers] = gen[IndividualTriageAnswers]
+  implicit val individualTriageAnswersGen: Gen[TriageAnswers] = gen[TriageAnswers]
 
-  implicit val incompleteIndividualTriageAnswersGen: Gen[IncompleteIndividualTriageAnswers] =
-    gen[IncompleteIndividualTriageAnswers]
+  implicit val incompleteIndividualTriageAnswersGen: Gen[IncompleteTriageAnswers] =
+    gen[IncompleteTriageAnswers]
 
-  implicit val completeIndividualTriageAnswersGen: Gen[CompleteIndividualTriageAnswers] =
-    gen[CompleteIndividualTriageAnswers]
+  implicit val completeIndividualTriageAnswersGen: Gen[CompleteTriageAnswers] =
+    gen[CompleteTriageAnswers]
 
   implicit val individualUserTypeGen: Gen[IndividualUserType] = gen[IndividualUserType]
 

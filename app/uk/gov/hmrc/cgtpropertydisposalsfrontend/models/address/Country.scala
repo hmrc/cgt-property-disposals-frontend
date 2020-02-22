@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address
 
 import cats.Eq
 import cats.syntax.either._
+import cats.syntax.eq._
 import play.api.data.FormError
 import play.api.data.format.Formatter
 import play.api.libs.json.{Json, OFormat, Reads}
@@ -31,6 +32,8 @@ final case class Country(
 )
 
 object Country {
+
+  val uk: Country = Country("GB", Some("United Kingdom"))
 
   implicit val countryFormat: OFormat[Country] = Json.format[Country]
 
@@ -58,10 +61,15 @@ object Country {
     }
   }
 
+  implicit class CountryOps(private val c: Country) extends AnyVal {
+    def isUk(): Boolean = c === Country.uk
+  }
+
   val formatter: Formatter[Country] = new Formatter[Country] {
     override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Country] =
       data.get(key).filter(_.nonEmpty) match {
         case Some(c) =>
+          println(s"Got $c\n\n")
           Either.fromOption(
             Country.countryCodeToCountryName.get(c).map(name => Country(c, Some(name))),
             Seq(FormError(key, "error.notFound"))
@@ -71,4 +79,5 @@ object Country {
 
     override def unbind(key: String, value: Country): Map[String, String] = Map(key -> value.code)
   }
+
 }

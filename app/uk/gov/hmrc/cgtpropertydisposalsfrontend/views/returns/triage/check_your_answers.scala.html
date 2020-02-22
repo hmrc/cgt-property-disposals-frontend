@@ -17,7 +17,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.CompleteIndividualTriageAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TriageAnswers.CompleteTriageAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
 
@@ -30,7 +30,7 @@
         summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.summary
 )
 
-@(answers: CompleteIndividualTriageAnswers, displayReturnToSummaryLink: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(answers: CompleteTriageAnswers, displayReturnToSummaryLink: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @title = @{messages("triage.check-your-answers.title")}
 

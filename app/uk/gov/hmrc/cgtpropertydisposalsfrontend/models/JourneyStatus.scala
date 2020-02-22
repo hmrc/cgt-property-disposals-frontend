@@ -27,7 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscriptionDetails}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftReturn, IndividualTriageAnswers, SubmitReturnResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftReturn, SubmitReturnResponse, TriageAnswers}
 
 sealed trait JourneyStatus extends Product with Serializable
 
@@ -78,7 +78,7 @@ object JourneyStatus {
     subscribedDetails: SubscribedDetails,
     ggCredId: GGCredId,
     agentReferenceNumber: Option[AgentReferenceNumber],
-    newReturnTriageAnswers: IndividualTriageAnswers
+    newReturnTriageAnswers: TriageAnswers
   ) extends JourneyStatus
 
   final case class FillingOutReturn(

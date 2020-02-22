@@ -36,7 +36,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.{CompleteIndividualTriageAnswers, IncompleteIndividualTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TriageAnswers.{CompleteTriageAnswers, IncompleteTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CompleteYearToDateLiabilityAnswers, IncompleteYearToDateLiabilityAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -112,7 +112,7 @@ class TaskListControllerSpec
 
         "the session data indicates that they are filling in a return and the triage section is incomplete" in {
           testStateOfSection(
-            sample[DraftReturn].copy(triageAnswers = sample[IncompleteIndividualTriageAnswers])
+            sample[DraftReturn].copy(triageAnswers = sample[IncompleteTriageAnswers])
           )(
             "canTheyUseOurService",
             messageFromMessageKey("task-list.triage.link"),
@@ -123,7 +123,7 @@ class TaskListControllerSpec
 
         "the session data indicates that they are filling in a return and the triage section is complete" in {
           testStateOfSection(
-            sample[DraftReturn].copy(triageAnswers = sample[CompleteIndividualTriageAnswers])
+            sample[DraftReturn].copy(triageAnswers = sample[CompleteTriageAnswers])
           )(
             "canTheyUseOurService",
             messageFromMessageKey("task-list.triage.link"),
