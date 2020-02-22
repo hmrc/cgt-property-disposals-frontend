@@ -21,7 +21,6 @@ import java.util.UUID
 import cats.Eq
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 
 final case class DraftReturn(
   id: UUID,

@@ -14,13 +14,9 @@
  * limitations under the License.
  *@
 
-@import cats.instances.long._
-@import cats.syntax.eq._
-
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{LocalDateUtils, MoneyUtils}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionMethod
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 
@@ -38,14 +34,6 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 
 
 @title = @{messages("acquisitionDetails.cya.title")}
-@acquisitionMethodValue = @{
-    answers.acquisitionMethod match {
-        case AcquisitionMethod.Bought => messages("returns.acquisitionMethod.Bought")
-        case AcquisitionMethod.Inherited => messages("returns.acquisitionMethod.Inherited")
-        case AcquisitionMethod.Gifted => messages("returns.acquisitionMethod.Gifted")
-        case AcquisitionMethod.Other(value) => value
-    }
-}
 
 @mainTemplate(title = title, userType = request.userType) {
 

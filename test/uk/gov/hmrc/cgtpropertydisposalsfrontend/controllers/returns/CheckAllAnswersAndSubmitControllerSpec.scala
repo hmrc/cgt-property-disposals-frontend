@@ -34,7 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.IncompleteAcquisitionDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.IncompleteDisposalDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.IncompleteExemptionAndLossesAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.IncompleteIndividualTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TriageAnswers.IncompleteTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.IncompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.IncompleteYearToDateLiabilityAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftReturn, PaymentsJourney, SubmitReturnRequest, SubmitReturnResponse}
@@ -302,7 +302,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 
   def incompleteJourneyBehaviour(performAction: () => Future[Result], completeDraftReturn: DraftReturn) = {
     val makeIncompleteFunctions = List[DraftReturn => DraftReturn](
-      _.copy(triageAnswers              = sample[IncompleteIndividualTriageAnswers]),
+      _.copy(triageAnswers              = sample[IncompleteTriageAnswers]),
       _.copy(propertyAddress            = None),
       _.copy(disposalDetailsAnswers     = Some(sample[IncompleteDisposalDetailsAnswers])),
       _.copy(disposalDetailsAnswers     = None),
