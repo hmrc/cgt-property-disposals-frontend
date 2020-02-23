@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
-import java.time.format.DateTimeFormatter
 import java.time.{Clock, LocalDate}
 import java.util.UUID
 
@@ -75,14 +74,12 @@ class CanTheyUseOurServiceControllerSpec
 
   val today = LocalDate.now(Clock.systemUTC())
 
-  val earliestDisposalDate = today.minusDays(10L)
-
-  val taxYear = {
+  val thisTaxYear = {
     val startYear =
-      if (earliestDisposalDate > LocalDate.of(earliestDisposalDate.getYear, 4, 6))
-        earliestDisposalDate.getYear
+      if (today > LocalDate.of(today.getYear, 4, 6))
+        today.getYear
       else
-        earliestDisposalDate.getYear - 1
+        today.getYear - 1
 
     sample[TaxYear].copy(
       startDateInclusive = LocalDate.of(startYear, 4, 6),
@@ -93,21 +90,20 @@ class CanTheyUseOurServiceControllerSpec
   override lazy val additionalConfig: Configuration = Configuration(
     ConfigFactory.parseString(
       s"""
-        | returns.earliest-disposal-date-inclusive = ${earliestDisposalDate.format(DateTimeFormatter.ISO_DATE)}
         | tax-years = [
         |  {
-        |    start-year = ${taxYear.startDateInclusive.getYear}
+        |    start-year = ${thisTaxYear.startDateInclusive.getYear}
         |    annual-exempt-amount {
-        |      general              = ${taxYear.annualExemptAmountGeneral.inPounds()}
-        |      non-vulnerable-trust = ${taxYear.annualExemptAmountNonVulnerableTrust.inPounds()}
+        |      general              = ${thisTaxYear.annualExemptAmountGeneral.inPounds()}
+        |      non-vulnerable-trust = ${thisTaxYear.annualExemptAmountNonVulnerableTrust.inPounds()}
         |    }
-        |    personal-allowance = ${taxYear.personalAllowance.inPounds()}
-        |    income-tax-higher-rate-threshold = ${taxYear.incomeTaxHigherRateThreshold.inPounds()}
+        |    personal-allowance = ${thisTaxYear.personalAllowance.inPounds()}
+        |    income-tax-higher-rate-threshold = ${thisTaxYear.incomeTaxHigherRateThreshold.inPounds()}
         |    cgt-rates {
-        |      lower-band-residential      = ${taxYear.cgtRateLowerBandResidential}
-        |      lower-band-non-residential  = ${taxYear.cgtRateLowerBandNonResidential}
-        |      higher-band-residential     = ${taxYear.cgtRateHigherBandResidential}
-        |      higher-band-non-residential = ${taxYear.cgtRateHigherBandNonResidential}
+        |      lower-band-residential      = ${thisTaxYear.cgtRateLowerBandResidential}
+        |      lower-band-non-residential  = ${thisTaxYear.cgtRateLowerBandNonResidential}
+        |      higher-band-residential     = ${thisTaxYear.cgtRateHigherBandResidential}
+        |      higher-band-non-residential = ${thisTaxYear.cgtRateHigherBandNonResidential}
         |    }
         |  }
         | ]
@@ -782,7 +778,8 @@ class CanTheyUseOurServiceControllerSpec
                 None,
                 None,
                 Some(completeAnswers.disposalDate),
-                Some(completeAnswers.completionDate)
+                Some(completeAnswers.completionDate),
+                None
               ),
               checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
             )
@@ -802,7 +799,8 @@ class CanTheyUseOurServiceControllerSpec
                 None,
                 None,
                 Some(completeAnswers.disposalDate),
-                Some(completeAnswers.completionDate)
+                Some(completeAnswers.completionDate),
+                None
               ),
               checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
             )
@@ -826,7 +824,8 @@ class CanTheyUseOurServiceControllerSpec
                 None,
                 None,
                 Some(completeAnswers.disposalDate),
-                Some(completeAnswers.completionDate)
+                Some(completeAnswers.completionDate),
+                None
               ),
               checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
             )
@@ -1066,7 +1065,7 @@ class CanTheyUseOurServiceControllerSpec
           assetType          = Some(AssetType.Residential)
         )
 
-      val disposalDate = DisposalDate(LocalDate.of(2020, 1, 2), taxYear)
+      val disposalDate = DisposalDate(LocalDate.of(2020, 1, 2), thisTaxYear)
 
       def performAction(): Future[Result] = controller.whenWasDisposalDate()(FakeRequest())
 
@@ -1108,6 +1107,18 @@ class CanTheyUseOurServiceControllerSpec
           checkPrepopulatedContent(_, disposalDate)
         )
       }
+
+      behave like displayIndividualTriagePageBehaviorIncompleteJourney(
+        performAction
+      )(
+        requiredPreviousAnswersUkResident,
+        requiredPreviousAnswersUkResident.copy(tooEarlyDisposalDate = Some(disposalDate.value)),
+        Some("the user had not disposed of their property in a valid tax year")
+      )(
+        "disposalDate.title",
+        checkContent(_, routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty()),
+        checkPrepopulatedContent(_, disposalDate)
+      )
 
       behave like displayIndividualTriagePageBehaviorCompleteJourney(
         performAction
@@ -1205,41 +1216,46 @@ class CanTheyUseOurServiceControllerSpec
       behave like unsuccessfulUpdatesStartingNewDraftBehaviour(
         performAction,
         requiredPreviousAnswers,
-        formData(earliestDisposalDate),
-        requiredPreviousAnswers.copy(disposalDate = Some(DisposalDate(earliestDisposalDate, taxYear)))
+        formData(today),
+        requiredPreviousAnswers.copy(disposalDate = Some(DisposalDate(today, thisTaxYear)))
       )
 
       "handle valid dates" when {
 
         "the user is starting in a draft return and" when {
 
-          "the disposal date entered is before the configured earliest disposal date" in {
-            val date = earliestDisposalDate.minusDays(1L)
+          "no tax year can be found for the given disposal date" in {
+            val date = thisTaxYear.startDateInclusive.minusDays(1L)
             testSuccessfulUpdateStartingNewDraft(
               performAction,
               requiredPreviousAnswers,
               formData(date),
-              requiredPreviousAnswers.copy(disposalDate = Some(DisposalDate(date, taxYear))), { result =>
-                status(result)          shouldBe OK
-                contentAsString(result) shouldBe s"disposal date was strictly before $earliestDisposalDate"
-              }
+              requiredPreviousAnswers
+                .copy(tooEarlyDisposalDate = Some(date)),
+              checkIsRedirect(_, routes.CanTheyUseOurServiceController.disposalDateTooEarly())
             )
+
           }
 
-          "the disposal date is on the configured earliest disposal date and the journey was incomplete" in {
+          "the disposal date is on the first available tax year and the journey was incomplete" in {
             testSuccessfulUpdateStartingNewDraft(
               performAction,
-              requiredPreviousAnswers,
-              formData(earliestDisposalDate),
-              requiredPreviousAnswers.copy(disposalDate = Some(DisposalDate(earliestDisposalDate, taxYear))),
+              requiredPreviousAnswers.copy(tooEarlyDisposalDate = Some(thisTaxYear.startDateInclusive.minusDays(1L))),
+              formData(thisTaxYear.startDateInclusive),
+              requiredPreviousAnswers
+                .copy(
+                  disposalDate         = Some(DisposalDate(thisTaxYear.startDateInclusive, thisTaxYear)),
+                  tooEarlyDisposalDate = None
+                ),
               checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
             )
           }
 
           "the disposal date is after the configured earliest disposal date and the journey was complete" in {
             val completeJourney =
-              sample[CompleteTriageAnswers].copy(disposalDate = DisposalDate(earliestDisposalDate, taxYear))
-            val date = earliestDisposalDate.plusDays(1L)
+              sample[CompleteTriageAnswers]
+                .copy(disposalDate = DisposalDate(thisTaxYear.startDateInclusive, thisTaxYear))
+            val date = thisTaxYear.startDateInclusive.plusDays(1L)
 
             testSuccessfulUpdateStartingNewDraft(
               performAction,
@@ -1252,7 +1268,8 @@ class CanTheyUseOurServiceControllerSpec
                 Some(completeJourney.countryOfResidence.isUk()),
                 if (completeJourney.countryOfResidence.isUk()) None else Some(completeJourney.countryOfResidence),
                 Some(completeJourney.assetType),
-                Some(DisposalDate(date, taxYear)),
+                Some(DisposalDate(date, thisTaxYear)),
+                None,
                 None
               ),
               checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
@@ -1268,8 +1285,9 @@ class CanTheyUseOurServiceControllerSpec
             testSuccessfulUpdateFillingOutReturn(
               performAction,
               requiredPreviousAnswers,
-              formData(earliestDisposalDate),
-              requiredPreviousAnswers.copy(disposalDate = Some(DisposalDate(earliestDisposalDate, taxYear))),
+              formData(thisTaxYear.startDateInclusive),
+              requiredPreviousAnswers
+                .copy(disposalDate = Some(DisposalDate(thisTaxYear.startDateInclusive, thisTaxYear))),
               checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
             )
 
@@ -1277,8 +1295,9 @@ class CanTheyUseOurServiceControllerSpec
 
           "the section is complete" in {
             val completeJourney =
-              sample[CompleteTriageAnswers].copy(disposalDate = DisposalDate(earliestDisposalDate, taxYear))
-            val date = earliestDisposalDate.plusDays(1L)
+              sample[CompleteTriageAnswers]
+                .copy(disposalDate = DisposalDate(thisTaxYear.startDateInclusive, thisTaxYear))
+            val date = thisTaxYear.startDateInclusive.plusDays(1L)
 
             testSuccessfulUpdateFillingOutReturn(
               performAction,
@@ -1291,7 +1310,8 @@ class CanTheyUseOurServiceControllerSpec
                 Some(completeJourney.countryOfResidence.isUk()),
                 if (completeJourney.countryOfResidence.isUk()) None else Some(completeJourney.countryOfResidence),
                 Some(completeJourney.assetType),
-                Some(DisposalDate(date, taxYear)),
+                Some(DisposalDate(date, thisTaxYear)),
+                None,
                 None
               ),
               checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
@@ -1309,14 +1329,14 @@ class CanTheyUseOurServiceControllerSpec
             mockGetSession(
               sessionDataWithFillingOurReturn(
                 requiredPreviousAnswers.copy(
-                  disposalDate = Some(DisposalDate(earliestDisposalDate, taxYear))
+                  disposalDate = Some(DisposalDate(thisTaxYear.startDateInclusive, thisTaxYear))
                 )
               )
             )
           }
 
           checkIsRedirect(
-            performAction(formData(earliestDisposalDate): _*),
+            performAction(formData(thisTaxYear.startDateInclusive): _*),
             routes.CanTheyUseOurServiceController.checkYourAnswers()
           )
         }
@@ -1327,7 +1347,7 @@ class CanTheyUseOurServiceControllerSpec
 
     "handling requests to display the when was completion date page" must {
 
-      val disposalDate = DisposalDate(today, taxYear)
+      val disposalDate = DisposalDate(today, thisTaxYear)
 
       val requiredPreviousAnswers =
         IncompleteTriageAnswers.empty.copy(
@@ -1406,7 +1426,7 @@ class CanTheyUseOurServiceControllerSpec
           "completionDate-year"  -> date.getYear().toString
         )
 
-      val disposalDate = DisposalDate(today.minusDays(5L), taxYear)
+      val disposalDate = DisposalDate(today.minusDays(5L), thisTaxYear)
 
       val tomorrow = today.plusDays(1L)
 
@@ -1917,6 +1937,7 @@ class CanTheyUseOurServiceControllerSpec
                 Some(completeAnswers.countryOfResidence),
                 Some(AssetType.NonResidential),
                 None,
+                None,
                 None
               ),
               checkIsRedirect(_, routes.CanTheyUseOurServiceController.checkYourAnswers())
@@ -1940,6 +1961,7 @@ class CanTheyUseOurServiceControllerSpec
                 Some(false),
                 Some(completeAnswers.countryOfResidence),
                 Some(AssetType.MixedUse),
+                None,
                 None,
                 None
               ),
@@ -2010,7 +2032,8 @@ class CanTheyUseOurServiceControllerSpec
         None,
         Some(completeTriageQuestions.assetType),
         Some(completeTriageQuestions.disposalDate),
-        Some(completeTriageQuestions.completionDate)
+        Some(completeTriageQuestions.completionDate),
+        None
       )
 
       "redirect to the correct page" when {
@@ -2230,6 +2253,99 @@ class CanTheyUseOurServiceControllerSpec
           checkIsRedirect(performAction(), returnsRoutes.TaskListController.taskList())
         }
 
+      }
+
+    }
+
+    "handling requests to display the disposal date too early page" must {
+
+      def performAction(): Future[Result] =
+        controller.disposalDateTooEarly()(FakeRequest())
+
+      val requiredPreviousAnswers = IncompleteTriageAnswers.empty.copy(
+        individualUserType = Some(IndividualUserType.Self),
+        numberOfProperties = Some(NumberOfProperties.One),
+        disposalMethod     = Some(DisposalMethod.Sold),
+        wasAUKResident     = Some(true),
+        countryOfResidence = None,
+        assetType          = Some(AssetType.Residential)
+      )
+
+      "redirect to the check you answers page" when {
+
+        def test(sessionData: SessionData): Unit = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionData)
+          }
+
+          checkIsRedirect(performAction(), routes.CanTheyUseOurServiceController.checkYourAnswers())
+        }
+
+        "the section is incomplete and the was a uk resident question has not been answered yet and" when {
+          "the user is starting a new draft return and" in {
+            test(sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers.copy(wasAUKResident = None)))
+          }
+
+          "the user is filling in a draft return" in {
+            test(sessionDataWithFillingOurReturn(requiredPreviousAnswers.copy(wasAUKResident = None)))
+
+          }
+        }
+
+      }
+
+      "display the page" when {
+
+        "the user was a uk resident" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers))
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("disposalDateTooEarly.uk.title"), { doc =>
+              doc.select("#content > article > p:nth-child(3)").text() shouldBe messageFromMessageKey(
+                "disposalDateTooEarly.uk.p1"
+              )
+              doc.select("#content > article > p:nth-child(4)").html() shouldBe messageFromMessageKey(
+                "disposalDateTooEarly.uk.p2",
+                viewConfig.reportingCgtBefore6April2020
+              )
+            }
+          )
+        }
+
+        "the user was not a uk resident" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                requiredPreviousAnswers.copy(
+                  wasAUKResident     = Some(false),
+                  countryOfResidence = Some(sample[Country])
+                )
+              )
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("disposalDateTooEarly.non-uk.title"), { doc =>
+              doc.select("#content > article > p:nth-child(3)").text() shouldBe messageFromMessageKey(
+                "disposalDateTooEarly.non-uk.p1"
+              )
+              doc.select("#content > article > p:nth-child(4)").text() shouldBe messageFromMessageKey(
+                "disposalDateTooEarly.non-uk.p2"
+              )
+              doc.select("#content > article > p:nth-child(5)").html() shouldBe messageFromMessageKey(
+                "disposalDateTooEarly.non-uk.p3",
+                viewConfig.reportingCgtBefore6April2020
+              )
+            }
+          )
+        }
       }
 
     }

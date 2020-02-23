@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
+import java.time.LocalDate
+
 import cats.Eq
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
@@ -33,12 +35,13 @@ object TriageAnswers {
     countryOfResidence: Option[Country],
     assetType: Option[AssetType],
     disposalDate: Option[DisposalDate],
-    completionDate: Option[CompletionDate]
+    completionDate: Option[CompletionDate],
+    tooEarlyDisposalDate: Option[LocalDate]
   ) extends TriageAnswers
 
   object IncompleteTriageAnswers {
     val empty: IncompleteTriageAnswers =
-      IncompleteTriageAnswers(None, None, None, None, None, None, None, None)
+      IncompleteTriageAnswers(None, None, None, None, None, None, None, None, None)
 
     implicit val format: OFormat[IncompleteTriageAnswers] = Json.format
   }

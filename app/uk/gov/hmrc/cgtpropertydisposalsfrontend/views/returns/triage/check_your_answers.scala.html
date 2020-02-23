@@ -61,11 +61,24 @@
    Html(messages(s"yesNo.${answers.countryOfResidence.isUk().toString}")),
    Some(cyaChange(messages("triage.cyaChange.wereYouAUKResident"), routes.CanTheyUseOurServiceController.wereYouAUKResident().url))
   )
-  @cyaRow(
-   messages("didYouDisposeOfResidentialProperty.title"),
-   Html(messages(s"didYouDisposeOfResidentialProperty.${answers.assetType.toString}")),
-   Some(cyaChange(messages("triage.cyaChange.propertyType"), routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty().url))
-  )
+  @if(!answers.countryOfResidence.isUk()){
+   @cyaRow(
+    messages("triage.enterCountry.title"),
+    Html(answers.countryOfResidence.name.getOrElse(answers.countryOfResidence.code)),
+    Some(cyaChange(messages("triage.cyaChange.countryOfResidence"), routes.CanTheyUseOurServiceController.countryOfResidence().url))
+   )
+   @cyaRow(
+    messages("assetTypeForNonUkResidents.title"),
+    Html(messages(s"assetTypeForNonUkResidents.${answers.assetType.toString}")),
+    Some(cyaChange(messages("triage.cyaChange.assetTypeForNonUkResidents"), routes.CanTheyUseOurServiceController.assetTypeForNonUkResidents().url))
+   )
+  } else {
+   @cyaRow(
+    messages("didYouDisposeOfResidentialProperty.title"),
+    Html(messages(s"didYouDisposeOfResidentialProperty.${answers.assetType.toString}")),
+    Some(cyaChange(messages("triage.cyaChange.propertyType"), routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty().url))
+   )
+  }
   @cyaRow(
    messages("disposalDate.title"),
    Html(LocalDateUtils.govDisplayFormat(answers.disposalDate.value)),

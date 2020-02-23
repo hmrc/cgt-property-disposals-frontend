@@ -26,8 +26,7 @@ import com.google.inject.{Inject, Singleton}
 import configs.syntax._
 import play.api.Configuration
 import play.api.data.Forms.{mapping, of}
-import play.api.data.format.Formatter
-import play.api.data.{Form, FormError}
+import play.api.data.Form
 import play.api.http.Writeable
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
@@ -75,6 +74,8 @@ class CanTheyUseOurServiceController @Inject() (
   didYouDisposeOfResidentialPropertyPage: triagePages.did_you_dispose_of_residential_property,
   disposalDatePage: triagePages.disposal_date,
   completionDatePage: triagePages.completion_date,
+  disposalDateTooEarlyUkResidents: triagePages.disposal_date_too_early_uk_residents,
+  disposalDateTooEarlyNonUkResidents: triagePages.disposal_date_too_early_non_uk_residents,
   checkYourAnswersPage: triagePages.check_your_answers
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
@@ -83,9 +84,6 @@ class CanTheyUseOurServiceController @Inject() (
     with SessionUpdates {
 
   import CanTheyUseOurServiceController._
-
-  val earliestDisposalDateInclusive: LocalDate =
-    config.underlying.get[LocalDate]("returns.earliest-disposal-date-inclusive").value
 
   val taxYears: List[TaxYear] =
     config.underlying.get[List[TaxYear]]("tax-years").value
@@ -264,7 +262,8 @@ class CanTheyUseOurServiceController @Inject() (
                   None,
                   None,
                   Some(complete.disposalDate),
-                  Some(complete.completionDate)
+                  Some(complete.completionDate),
+                  None
                 )
             )
           }
@@ -344,7 +343,8 @@ class CanTheyUseOurServiceController @Inject() (
       _.fold(_.assetType, c => Some(c.assetType)),
       answers => disposalDateBackLink(answers)
     )(_ => disposalDateForm(LocalDateUtils.today(), taxYears))(
-      extractField = _.fold(_.disposalDate, c => Some(c.disposalDate)),
+      extractField =
+        _.fold(i => i.disposalDate.map(_.value).orElse(i.tooEarlyDisposalDate), c => Some(c.disposalDate.value)),
       page = {
         case (currentState, form, isDraftReturn, assetType) =>
           disposalDatePage(
@@ -358,6 +358,9 @@ class CanTheyUseOurServiceController @Inject() (
   }
 
   def whenWasDisposalDateSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    def taxYear(d: LocalDate): Option[TaxYear] =
+      taxYears.find(t => d < t.endDateExclusive && d >= (t.startDateInclusive))
+
     handleTriagePageSubmit(
       _.fold(_.assetType, c => Some(c.assetType)),
       answers => disposalDateBackLink(answers)
@@ -372,25 +375,38 @@ class CanTheyUseOurServiceController @Inject() (
           )
       },
       updateState = {
-        case (d, i) =>
-          i.fold(
-            _.copy(disposalDate = Some(d)),
-            c =>
-              IncompleteTriageAnswers(
-                Some(c.individualUserType),
-                Some(c.numberOfProperties),
-                Some(c.disposalMethod),
-                Some(c.countryOfResidence.isUk()),
-                if (c.countryOfResidence.isUk()) None else Some(c.countryOfResidence),
-                Some(c.assetType),
-                Some(d),
-                None
-              )
-          )
+        case (d, answers) =>
+          def updateCompleteAnswers(
+            c: CompleteTriageAnswers,
+            date: Either[LocalDate, DisposalDate]
+          ): IncompleteTriageAnswers =
+            IncompleteTriageAnswers(
+              Some(c.individualUserType),
+              Some(c.numberOfProperties),
+              Some(c.disposalMethod),
+              Some(c.countryOfResidence.isUk()),
+              if (c.countryOfResidence.isUk()) None else Some(c.countryOfResidence),
+              Some(c.assetType),
+              date.toOption,
+              None,
+              date.swap.toOption
+            )
+
+          taxYear(d).fold {
+            answers.fold(
+              _.copy(disposalDate = None, tooEarlyDisposalDate = Some(d)),
+              updateCompleteAnswers(_, Left(d))
+            )
+          } { taxYear =>
+            answers.fold(
+              _.copy(disposalDate = Some(DisposalDate(d, taxYear)), tooEarlyDisposalDate = None),
+              updateCompleteAnswers(_, Right(DisposalDate(d, taxYear)))
+            )
+          }
       },
-      nextResult = { (d, updatedState) =>
-        if (d.value.isBefore(earliestDisposalDateInclusive)) {
-          Ok(s"disposal date was strictly before $earliestDisposalDateInclusive")
+      nextResult = { (d, _) =>
+        if (taxYear(d).isEmpty) {
+          Redirect(routes.CanTheyUseOurServiceController.disposalDateTooEarly())
         } else {
           Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
         }
@@ -520,6 +536,7 @@ class CanTheyUseOurServiceController @Inject() (
                     Some(c.countryOfResidence),
                     Some(assetType),
                     None,
+                    None,
                     None
                   )
               )
@@ -532,6 +549,18 @@ class CanTheyUseOurServiceController @Inject() (
       )
   }
 
+  def disposalDateTooEarly(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withTriageAnswers(request) {
+      case (_, state) =>
+        triageAnswersFomState(state).fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())) match {
+          case None => Redirect(routes.CanTheyUseOurServiceController.checkYourAnswers())
+          case Some(wasUk) =>
+            if (wasUk) Ok(disposalDateTooEarlyUkResidents())
+            else Ok(disposalDateTooEarlyNonUkResidents())
+        }
+    }
+  }
+
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withTriageAnswers(request) {
       case (_, state) =>
@@ -541,37 +570,37 @@ class CanTheyUseOurServiceController @Inject() (
           case c: CompleteTriageAnswers =>
             Ok(checkYourAnswersPage(c, displayReturnToSummaryLink))
 
-          case IncompleteTriageAnswers(None, _, _, _, _, _, _, _) =>
+          case IncompleteTriageAnswers(None, _, _, _, _, _, _, _, _) =>
             Redirect(routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting())
 
-          case IncompleteTriageAnswers(_, None, _, _, _, _, _, _) =>
+          case IncompleteTriageAnswers(_, None, _, _, _, _, _, _, _) =>
             Redirect(routes.CanTheyUseOurServiceController.howManyProperties())
 
-          case IncompleteTriageAnswers(_, _, None, _, _, _, _, _) =>
+          case IncompleteTriageAnswers(_, _, None, _, _, _, _, _, _) =>
             Redirect(routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty())
 
-          case IncompleteTriageAnswers(_, _, _, None, _, _, _, _) =>
+          case IncompleteTriageAnswers(_, _, _, None, _, _, _, _, _) =>
             Redirect(routes.CanTheyUseOurServiceController.wereYouAUKResident())
 
-          case IncompleteTriageAnswers(_, _, _, Some(false), None, _, _, _) =>
+          case IncompleteTriageAnswers(_, _, _, Some(false), None, _, _, _, _) =>
             Redirect(routes.CanTheyUseOurServiceController.countryOfResidence())
 
-          case IncompleteTriageAnswers(_, _, _, Some(false), Some(_), None, _, _) =>
+          case IncompleteTriageAnswers(_, _, _, Some(false), Some(_), None, _, _, _) =>
             Redirect(routes.CanTheyUseOurServiceController.assetTypeForNonUkResidents())
 
-          case IncompleteTriageAnswers(_, _, _, Some(true), _, None, _, _) =>
+          case IncompleteTriageAnswers(_, _, _, Some(true), _, None, _, _, _) =>
             Redirect(routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty())
 
-          case IncompleteTriageAnswers(_, _, _, _, _, Some(AssetType.IndirectDisposal), _, _) =>
+          case IncompleteTriageAnswers(_, _, _, _, _, Some(AssetType.IndirectDisposal), _, _, _) =>
             Ok("Indirect disposals not handled yet")
 
-          case IncompleteTriageAnswers(_, _, _, _, _, _, None, _) =>
+          case IncompleteTriageAnswers(_, _, _, _, _, _, None, _, _) =>
             Redirect(routes.CanTheyUseOurServiceController.whenWasDisposalDate())
 
-          case IncompleteTriageAnswers(_, _, _, _, _, _, _, None) =>
+          case IncompleteTriageAnswers(_, _, _, _, _, _, _, None, _) =>
             Redirect(routes.CanTheyUseOurServiceController.whenWasCompletionDate())
 
-          case IncompleteTriageAnswers(Some(t), Some(n), Some(m), Some(true), _, Some(r), Some(d), Some(c)) =>
+          case IncompleteTriageAnswers(Some(t), Some(n), Some(m), Some(true), _, Some(r), Some(d), Some(c), _) =>
             updateAnswersAndShowCheckYourAnswersPage(
               state,
               CompleteTriageAnswers(t, n, m, Country.uk, r, d, c),
@@ -586,7 +615,8 @@ class CanTheyUseOurServiceController @Inject() (
               Some(country),
               Some(r),
               Some(d),
-              Some(c)
+              Some(c),
+              _
               ) =>
             updateAnswersAndShowCheckYourAnswersPage(
               state,
@@ -809,39 +839,21 @@ object CanTheyUseOurServiceController {
     )(identity)(Some(_))
   )
 
-  def disposalDateForm(maximumDateInclusive: LocalDate, taxYears: List[TaxYear]): Form[DisposalDate] = {
-    val dateFormatter =
-      LocalDateUtils.dateFormatter(
-        Some(maximumDateInclusive),
-        None,
-        "disposalDate-day",
-        "disposalDate-month",
-        "disposalDate-year",
-        "disposalDate"
-      )
-
-    val disposalDateFormatter: Formatter[DisposalDate] = new Formatter[DisposalDate] {
-      override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], DisposalDate] =
-        dateFormatter.bind(key, data).flatMap { d =>
-          Either
-            .fromOption(
-              taxYears.find(t => d < t.endDateExclusive && d >= (t.startDateInclusive)),
-              Seq(FormError("disposalDate", "error.tooFarInPast"))
-            )
-            .map(DisposalDate(d, _))
-        }
-
-      override def unbind(key: String, value: DisposalDate): Map[String, String] =
-        dateFormatter.unbind(key, value.value)
-
-    }
-
+  def disposalDateForm(maximumDateInclusive: LocalDate, taxYears: List[TaxYear]): Form[LocalDate] =
     Form(
       mapping(
-        "" -> of(disposalDateFormatter)
+        "" -> of(
+          LocalDateUtils.dateFormatter(
+            Some(maximumDateInclusive),
+            None,
+            "disposalDate-day",
+            "disposalDate-month",
+            "disposalDate-year",
+            "disposalDate"
+          )
+        )
       )(identity)(Some(_))
     )
-  }
 
   def completionDateForm(disposalDate: DisposalDate, maximumDateInclusive: LocalDate): Form[CompletionDate] = Form(
     mapping(

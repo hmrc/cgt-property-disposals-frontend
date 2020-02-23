@@ -219,7 +219,8 @@ object JourneyStatusController {
             wasAUKResident.map(if (_) Country.uk else Country("HK", Some("Hong Kong"))),
             disposedOfResidentialProperty.map(if (_) AssetType.Residential else AssetType.NonResidential),
             disposalDate,
-            completionDate.map(CompletionDate(_))
+            completionDate.map(CompletionDate(_)),
+            None
           )
       } { i =>
         Some(

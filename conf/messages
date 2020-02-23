@@ -546,7 +546,26 @@ completionDate-month.error.monthAndYearRequired=Completion date must include a m
 completionDate-day.error.dayAndYearRequired=Completion date must include a day and a year
 completionDate-day.error.dayAndMonthRequired=Completion date must include a day and a month
 
+disposalDateTooEarly.non-uk.title=You cannot use this service
+disposalDateTooEarly.non-uk.p1=This is because when you sold or disposed of the property, you exchanged contracts before 6 April 2020.
+disposalDateTooEarly.non-uk.p2=If you made an indirect disposal and sold shares not property it’s because you sold the shares before 6 April 2020.
+disposalDateTooEarly.non-uk.p3=Find out how to report and pay Capital Gains Tax on <a href="{0}">UK property sales or disposals before 6 April 2020</a>.
+
+disposalDateTooEarly.uk.title=You cannot use this service
+disposalDateTooEarly.uk.p1=This is because when you sold or disposed of the property, you exchanged contracts before 6 April 2020.
+disposalDateTooEarly.uk.p2=Find out how to report and pay Capital Gains Tax on <a href="{0}">UK property sales or disposals before 6 April 2020</a>.
+
 triage.check-your-answers.title=Check your answers
+triage.cyaChange.individualUserType=who you are reporting the tax for
+triage.cyaChange.numberOfProperties=how many properties you want to include in this return
+triage.cyaChange.disposalMethod=how you sold or disposed of the property
+triage.cyaChange.wereYouAUKResident=whether you were a UK resident when you exchanged contracts when selling the property
+triage.cyaChange.countryOfResidence=your country of residence on the day you ‘exchanged’ contracts
+triage.cyaChange.assetTypeForNonUkResidents=the type of property or asset you sold
+triage.cyaChange.propertyType=whether you sold or disposed of a residential property
+triage.cyaChange.disposalDate=the date you exchanged contracts when selling the property
+triage.cyaChange.completionDate=the completion date when you sold the property
+
 
 #Months
 date.1=January
