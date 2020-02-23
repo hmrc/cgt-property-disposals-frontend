@@ -37,7 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TriageAnswers.IncompleteTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -166,7 +166,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
         subscribed.subscribedDetails,
         subscribed.ggCredId,
         subscribed.agentReferenceNumber,
-        sample[IncompleteTriageAnswers]
+        Right(sample[IncompleteSingleDisposalTriageAnswers])
       )
 
       val fillingOurReturn = FillingOutReturn(
@@ -285,7 +285,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
                     subscribed.subscribedDetails,
                     subscribed.ggCredId,
                     subscribed.agentReferenceNumber,
-                    IncompleteTriageAnswers.empty
+                    Right(IncompleteSingleDisposalTriageAnswers.empty)
                   )
                 ),
                 userType = Some(UserType.Individual)
@@ -310,7 +310,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
                     subscribed.subscribedDetails,
                     subscribed.ggCredId,
                     subscribed.agentReferenceNumber,
-                    IncompleteTriageAnswers.empty
+                    Right(IncompleteSingleDisposalTriageAnswers.empty)
                   )
                 ),
                 userType = Some(UserType.Individual)
@@ -320,7 +320,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
 
           checkIsRedirect(
             performAction(),
-            controllers.returns.triage.routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting()
+            controllers.returns.triage.routes.InitialTriageQuestionsController.whoIsIndividualRepresenting()
           )
         }
 

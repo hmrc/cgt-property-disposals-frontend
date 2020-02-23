@@ -45,7 +45,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
   @errorSummary(form)
  }
 
- @formWrapper(controllers.returns.triage.routes.CanTheyUseOurServiceController.whenWasCompletionDateSubmit(), 'novalidate -> "novalidate") {
+ @formWrapper(controllers.returns.triage.routes.SingleDisposalsTriageController.whenWasCompletionDateSubmit(), 'novalidate -> "novalidate") {
   @dateInput(
    fieldId = key,
    label = pageHeading(title, Some(messages("triage.caption"))),
@@ -57,7 +57,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
    errorKey = errorKey.map(e => s"${e.key}.${e.message}"),
    hasErrors = hasErrors
   )
-  <p>@Html(messages("completionDate.link", viewConfig.completionDateHelp))</p>
+  <p>@Html(messages("completionDate.link", viewConfig.tranferringOwnershipHelp))</p>
   @submitButton(messages("button.continue"))
  }
 

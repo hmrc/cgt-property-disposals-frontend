@@ -907,3 +907,14 @@ ytdLiability.cya.title=Check your answers
 ytdLiability.cyaLabel.mandatoryEvidence=Supporting file
 ytdLiability.cyaChange.mandatoryEvidence=your supporting file
 
+multiple-disposals.guidance.title=You sold or disposed of 2 or more properties
+multiple-disposals.guidance.p1=You can report all property sales (or ‘disposals’) in the same return. You can only do this if they all had:
+multiple-disposals.guidance.li1=the same ‘completion’ date
+multiple-disposals.guidance.li2=contract ‘exchange’ dates on or after 6 April 2020
+multiple-disposals.guidance.li3=contract exchange dates that were in the same tax year
+multiple-disposals.guidance.p2=The contract exchange dates can be in a different tax year to the completion date.
+multiple-disposals.guidance.p3=You must send separate returns of the contract exchange dates were in different tax years.
+multiple-disposals.guidance.details.summary=What happens on ‘exchange’ and ‘completion’ dates?
+multiple-disposals.guidance.details.p1=The ‘completion’ date is usually the day the new owner gets the key to the property,
+multiple-disposals.guidance.details.p2=Contract ‘exchange’ usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
+multiple-disposals.guidance.details.link=<a href="{0}" target="_blank">Read about ‘exchange’ and ‘completion’ (opens in a new window)</a>.

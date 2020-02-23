@@ -39,11 +39,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue.GainCalculatedTaxDue
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TriageAnswers.{CompleteTriageAnswers, IncompleteTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.OtherReliefs
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CompleteYearToDateLiabilityAnswers, IncompleteYearToDateLiabilityAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AcquisitionMethod, AssetType, CalculatedTaxDue, CompletionDate, DisposalDate, DraftReturn, HasEstimatedDetailsWithCalculatedTaxDue, IndividualUserType, NumberOfProperties, ReliefDetailsAnswers, ShareOfProperty, TriageAnswers, YearToDateLiabilityAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AcquisitionMethod, AssetType, CalculatedTaxDue, CompletionDate, DisposalDate, DraftReturn, HasEstimatedDetailsWithCalculatedTaxDue, IndividualUserType, NumberOfProperties, ReliefDetailsAnswers, ShareOfProperty, SingleDisposalTriageAnswers, YearToDateLiabilityAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanNotifyResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanServiceResponse.{UpscanNotifyEvent, UpscanResponse}
 
@@ -241,13 +242,16 @@ trait UserTypeGen { this: GenUtils =>
 
 trait TriageQuestionsGen { this: GenUtils =>
 
-  implicit val individualTriageAnswersGen: Gen[TriageAnswers] = gen[TriageAnswers]
+  implicit val individualTriageAnswersGen: Gen[SingleDisposalTriageAnswers] = gen[SingleDisposalTriageAnswers]
 
-  implicit val incompleteIndividualTriageAnswersGen: Gen[IncompleteTriageAnswers] =
-    gen[IncompleteTriageAnswers]
+  implicit val incompleteSingleDisposalTriageAnswersGen: Gen[IncompleteSingleDisposalTriageAnswers] =
+    gen[IncompleteSingleDisposalTriageAnswers]
 
-  implicit val completeIndividualTriageAnswersGen: Gen[CompleteTriageAnswers] =
-    gen[CompleteTriageAnswers]
+  implicit val completeSingleDisposalTriageAnswersGen: Gen[CompleteSingleDisposalTriageAnswers] =
+    gen[CompleteSingleDisposalTriageAnswers]
+
+  implicit val completeMultipleDisposalsTriageAnswersGen: Gen[CompleteMultipleDisposalsAnswers] =
+    gen[CompleteMultipleDisposalsAnswers]
 
   implicit val individualUserTypeGen: Gen[IndividualUserType] = gen[IndividualUserType]
 
