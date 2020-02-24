@@ -16,10 +16,17 @@
 
 @this()
 
-@(heading: Option[String] = None, classes: Option[String] = None)(rows: => Html)(implicit request: Request[_], messages: Messages)
+@(heading: String, subHeading: Option[String], reference: Option[String])
 
-@heading.map(h => Html(s"""<h2 class="heading-medium">$h</h2>"""))
-
-<dl class="govuk-check-your-answers cya-questions-long@{classes.map(c => s" $c")}">
-  @rows
-</dl>
+<div class="govuk-box-highlight">
+  <h1 class="heading-xlarge">@heading</h1>
+  @subHeading.map(s =>
+      Html(
+            s"""
+            |<span class="heading-large">
+            |${s}
+            |${reference.map(r => s"""<strong>$r</strong>""")}
+            |</span>
+            |""".stripMargin)
+  )
+</div>

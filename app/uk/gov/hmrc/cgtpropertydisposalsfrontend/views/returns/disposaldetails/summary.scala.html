@@ -1,0 +1,53 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.MoneyUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalMethod
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.disposaldetails._
+
+
+@this(
+        cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+        cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+        cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
+)
+
+@(answers: CompleteDisposalDetailsAnswers, disposalMethod: DisposalMethod)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@formatPercentage(p: BigDecimal) = @{s"${p.toString.stripSuffix(".0")}%"}
+@disposalPriceTitle = @{messages(disposalPriceTitleKey(disposalMethod, answers.shareOfProperty))}
+@disposalFeesTitle = @{messages(disposalFeesTitleKey(disposalMethod, answers.shareOfProperty))}
+
+@cyaSection() {
+  @cyaRow(
+    messages("shareOfProperty.title"),
+    Html(formatPercentage(answers.shareOfProperty.percentageValue)),
+    Some(cyaChange(messages("disposalDetails.cyaChange.propertyShare"), returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwn().url))
+  )
+  @cyaRow(
+    disposalPriceTitle,
+    Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.disposalPrice.inPounds())),
+    Some(cyaChange(messages("disposalDetails.cyaChange.disposalPrice"), returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice().url))
+  )
+  @cyaRow(
+    disposalFeesTitle,
+    Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.disposalFees.inPounds())),
+    Some(cyaChange(messages("disposalDetails.cyaChange.disposalFees"), returns.disposaldetails.routes.DisposalDetailsController.whatWereDisposalFees().url))
+  )
+}

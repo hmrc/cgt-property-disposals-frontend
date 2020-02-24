@@ -17,18 +17,18 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import java.time.LocalDate
-import cats.syntax.order._
 
+import cats.syntax.order._
 import org.scalacheck.ScalacheckShapeless._
 import org.scalacheck.{Arbitrary, Gen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AmountInPence._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, IndividualSupplyingInformation, RegistrationReady}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, StartingNewDraftReturn, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifierAttempts
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, GGCredId, SAUTR, SapNumber}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.SubscriptionSuccessful
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.{IndividualNameMatchDetails, TrustNameMatchDetails}
@@ -43,7 +43,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TriageAnswers.{Co
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.OtherReliefs
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CompleteYearToDateLiabilityAnswers, IncompleteYearToDateLiabilityAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AcquisitionMethod, AssetType, CalculatedTaxDue, CompletionDate, DisposalDate, DraftReturn, HasEstimatedDetailsWithCalculatedTaxDue, IndividualUserType, NumberOfProperties, ReliefDetailsAnswers, ShareOfProperty, TriageAnswers, YearToDateLiabilityAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanNotifyResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanServiceResponse.{UpscanNotifyEvent, UpscanResponse}
 
@@ -162,6 +162,8 @@ trait JourneyStatusLowerPriorityGen { this: GenUtils =>
 
   implicit val fillingOutReturnGen: Gen[FillingOutReturn] = gen[FillingOutReturn]
 
+  implicit val justSubmittedReturnGen: Gen[JustSubmittedReturn] = gen[JustSubmittedReturn]
+
 }
 
 trait AddressGen extends AddressLowerPriorityGen { this: GenUtils =>
@@ -259,6 +261,12 @@ trait TriageQuestionsGen { this: GenUtils =>
 trait ReturnGen { this: GenUtils =>
 
   implicit val draftReturnGen: Gen[DraftReturn] = gen[DraftReturn]
+
+  implicit val completeReturnGen: Gen[CompleteReturn] = gen[CompleteReturn]
+
+  implicit val submitReturnRequestGen: Gen[SubmitReturnRequest] = gen[SubmitReturnRequest]
+
+  implicit val submitReturnResponseGen: Gen[SubmitReturnResponse] = gen[SubmitReturnResponse]
 
 }
 

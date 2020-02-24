@@ -17,53 +17,29 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalMethod
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.disposaldetails._
 
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
         pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
-        cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-        cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
-        addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
         submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
+        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+        summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.disposaldetails.summary
 )
 
 @(answers: CompleteDisposalDetailsAnswers, disposalMethod: DisposalMethod)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 
 @title = @{messages("returns.disposal-details.cya.title")}
-@formatPercentage(p: BigDecimal) = @{s"${p.toString.stripSuffix(".0")}%"}
-@disposalPriceTitle = @{messages(disposalPriceTitleKey(disposalMethod, answers.shareOfProperty))}
-@disposalFeesTitle = @{messages(disposalFeesTitleKey(disposalMethod, answers.shareOfProperty))}
 
 @mainTemplate(title = title, userType = request.userType) {
 
     @pageHeading(title, Some(messages("returns.disposal-details.caption")))
 
-    @cyaSection() {
-        @cyaRow(
-            messages("shareOfProperty.title"),
-            Html(formatPercentage(answers.shareOfProperty.percentageValue)),
-            Some(cyaChange(messages("disposalDetails.cyaChange.propertyShare"), returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwn().url))
-        )
-        @cyaRow(
-            disposalPriceTitle,
-            Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.disposalPrice.inPounds())),
-            Some(cyaChange(messages("disposalDetails.cyaChange.disposalPrice"), returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice().url))
-        )
-        @cyaRow(
-            disposalFeesTitle,
-            Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.disposalFees.inPounds())),
-            Some(cyaChange(messages("disposalDetails.cyaChange.disposalFees"), returns.disposaldetails.routes.DisposalDetailsController.whatWereDisposalFees().url))
-        )
-    }
+    @summary(answers, disposalMethod)
 
     @formWrapper(returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
         @submitButton(messages("button.confirmAndContinue"))

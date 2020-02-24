@@ -7,6 +7,7 @@ label.beta=Private Beta
 
 button.startNow=Start now
 button.continue=Continue
+button.saveAndContinue=Save and continue
 button.confirmAndContinue=Confirm and continue
 button.createAccount=Create account
 button.resendEmail=Resend email
@@ -15,6 +16,8 @@ button.tryAgain=Try again
 button.startAgain=Start again
 button.signIn=Sign in
 button.manageAccount=Manage account
+button.acceptAndSend=Accept and send
+button.payNow=Pay now
 
 generic.warning=Warning
 generic.day=Day
@@ -569,6 +572,7 @@ task-list.relief-details.link=Enter reliefs
 task-list.report-and-pay-the-tax.heading=Report and pay the tax
 task-list.enter-cgt-liability.link=Enter Capital Gains Tax liability so far this tax year
 task-list.ytd-liability.link=Enter Capital Gains Tax liability so far this tax year
+task-list.check-and-send-return.link=Check and send return, pay any tax due
 
 returns.property-address.caption=Property address
 enterPostcode.returns.title=Find the address of the UK property you disposed of
@@ -879,3 +883,19 @@ ytdLiability.cya.title=Check your answers
 ytdLiability.cyaLabel.mandatoryEvidence=Supporting file
 ytdLiability.cyaChange.mandatoryEvidence=your supporting file
 
+checkAllAnswers.title=Check your answers before sending the return
+checkAllAnswers.declaration=Declaration
+checkAllAnswers.declaration.p1=By continuing you are confirming that, to the best of your knowledge, the details you are providing are correct.
+checkAllAnswers.declaration.p2=You may have to pay financial penalties and face prosecution if you give incorrect information.
+
+confirmationOfSubmission.title=Return sent
+confirmationOfSubmission.taxOwed=Tax owed
+confirmationOfSubmission.returnReference=Return reference
+confirmationOfSubmission.emailSent=We have sent a confirmation email to <strong class="bold">{0}</strong>
+confirmationOfSubmission.printPage=Print or save this page as a PDF
+confirmationOfSubmission.whatNext=What you need to do next
+confirmationOfSubmission.warning=You must pay your Capital Gains Tax on UK property by {0}. You may get a penalty if your payment is late.
+confirmationOfSubmission.howToPay=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class="bold">{0}</strong>.
+confirmationOfSubmission.ifSa=If you need to file a Self Assessment tax return
+confirmationOfSubmission.ifSa.p1=You’ll need to provide details from this return in your next <a href="{0}" target="_blank">Self Assessment tax return (opens in a new window)</a>.
+confirmationOfSubmission.returnToAccount=Go to your <a href="{0}">Capital Gains Tax on UK property account</a>.

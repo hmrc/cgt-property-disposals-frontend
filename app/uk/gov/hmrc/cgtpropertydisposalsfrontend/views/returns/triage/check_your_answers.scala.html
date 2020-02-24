@@ -18,18 +18,14 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TriageAnswers.CompleteTriageAnswers
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
         pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
-        cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-        cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
         submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
+        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+        summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.summary
 )
 
 @(answers: CompleteTriageAnswers, displayReturnToSummaryLink: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
@@ -40,43 +36,7 @@
 
  @pageHeading(title, Some(messages("triage.caption")))
 
- @cyaSection() {
-  @cyaRow(
-   messages("who-are-you-reporting-for.title"),
-   Html(messages(s"individualUserType.${answers.individualUserType.toString}")),
-   Some(cyaChange(messages("triage.cyaChange.individualUserType"), routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting().url))
-  )
-  @cyaRow(
-   messages("numberOfProperties.title"),
-   Html(messages(s"numberOfProperties.${answers.numberOfProperties.toString}")),
-   Some(cyaChange(messages("triage.cyaChange.numberOfProperties"), routes.CanTheyUseOurServiceController.howManyProperties().url))
-  )
-  @cyaRow(
-   messages("disposalMethod.title"),
-   Html(messages(s"disposalMethod.${answers.disposalMethod.toString}")),
-   Some(cyaChange(messages("triage.cyaChange.disposalMethod"), routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty().url))
-  )
-  @cyaRow(
-   messages("wereYouAUKResident.title"),
-   Html(messages(s"yesNo.${answers.countryOfResidence.isUk().toString}")),
-   Some(cyaChange(messages("triage.cyaChange.wereYouAUKResident"), routes.CanTheyUseOurServiceController.wereYouAUKResident().url))
-  )
-  @cyaRow(
-   messages("didYouDisposeOfResidentialProperty.title"),
-   Html(messages(s"didYouDisposeOfResidentialProperty.${answers.assetType.toString}")),
-   Some(cyaChange(messages("triage.cyaChange.propertyType"), routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty().url))
-  )
-  @cyaRow(
-   messages("disposalDate.title"),
-   Html(LocalDateUtils.govDisplayFormat(answers.disposalDate.value)),
-   Some(cyaChange(messages("triage.cyaChange.disposalDate"), routes.CanTheyUseOurServiceController.whenWasDisposalDate().url))
-  )
-  @cyaRow(
-   messages("completionDate.title"),
-   Html(LocalDateUtils.govDisplayFormat(answers.completionDate.value)),
-   Some(cyaChange(messages("triage.cyaChange.completionDate"), routes.CanTheyUseOurServiceController.whenWasCompletionDate().url))
-  )
- }
+ @summary(answers)
 
  @formWrapper(routes.CanTheyUseOurServiceController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
   @submitButton(messages("button.continue"))

@@ -62,8 +62,10 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
   val cgtLossesUrl: String                     = getString("external-url.cgt-losses")
   val annualExemptAmountUrl: String            = getString("external-url.annual-exempt-amount")
   val personalAllowanceUrl: String             = getString("external-url.personal-allowance")
+  val selfAssessmentUrl: String                = getString("external-url.sign-in-to-self-assessment")
 
   val onboardingExitSurveyUrl: String = "/feedback/CGTPD-REG"
+  val returnsExitSurveyUrl: String    = "/feedback/CGTPD-RET"
   val ggCreateAccountUrl: String =
     "/bas-gateway?" +
       "accountType=individual&" +
