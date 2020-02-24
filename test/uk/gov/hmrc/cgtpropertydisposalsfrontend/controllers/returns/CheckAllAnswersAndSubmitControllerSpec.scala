@@ -96,6 +96,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 
     val completeDraftReturn = DraftReturn(
       completeReturn.id,
+      sample[CgtReference],
       completeReturn.triageAnswers,
       Some(completeReturn.propertyAddress),
       Some(completeReturn.disposalDetails),
