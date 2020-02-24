@@ -55,7 +55,8 @@
             aspect = "left",
             unit = "£",
             assistiveText = messages("unit-input.assistive.pounds")
-        ))
+        )),
+        optionHelpText = None
     ),
     RadioOption(
         label = messages(s"taxableGainOrLoss.loss.label"),
@@ -70,11 +71,13 @@
             aspect = "left",
             unit = "£",
             assistiveText = messages("unit-input.assistive.pounds")
-        ))
+        )),
+        optionHelpText = None
     ),
     RadioOption(
         label = messages(s"taxableGainOrLoss.noLossOrGain.label"),
-        content = None
+        content = None,
+        optionHelpText = None
     )
 
 )}

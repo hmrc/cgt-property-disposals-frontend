@@ -20,5 +20,6 @@ import play.twirl.api.Html
 
 final case class RadioOption(
   label: String,
-  content: Option[Html]
+  content: Option[Html],
+  optionHelpText: Option[Html]
 )
