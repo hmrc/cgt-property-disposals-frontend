@@ -23,13 +23,13 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TriageAnswers.CompleteTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CompleteYearToDateLiabilityAnswers
 
 final case class CompleteReturn(
   id: UUID,
-  triageAnswers: CompleteTriageAnswers,
+  triageAnswers: CompleteSingleDisposalTriageAnswers,
   propertyAddress: UkAddress,
   disposalDetails: CompleteDisposalDetailsAnswers,
   acquisitionDetails: CompleteAcquisitionDetailsAnswers,
@@ -43,7 +43,7 @@ object CompleteReturn {
   def fromDraftReturn(draftReturn: DraftReturn): Option[CompleteReturn] = draftReturn match {
     case DraftReturn(
         id,
-        t: CompleteTriageAnswers,
+        t: CompleteSingleDisposalTriageAnswers,
         Some(p: UkAddress),
         Some(d: CompleteDisposalDetailsAnswers),
         Some(a: CompleteAcquisitionDetailsAnswers),
@@ -58,7 +58,7 @@ object CompleteReturn {
   }
 
   implicit val format: OFormat[CompleteReturn] = {
-    implicit val triageFormat: OFormat[CompleteTriageAnswers]                           = Json.format
+    implicit val triageFormat: OFormat[CompleteSingleDisposalTriageAnswers]             = Json.format
     implicit val ukAddressFormat: OFormat[UkAddress]                                    = Json.format
     implicit val disposalDetailsFormat: OFormat[CompleteDisposalDetailsAnswers]         = Json.format
     implicit val acquisitionDetailsFormat: OFormat[CompleteAcquisitionDetailsAnswers]   = Json.format

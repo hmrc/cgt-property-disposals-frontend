@@ -47,7 +47,7 @@
 
     @caption(messages("triage.caption"))
 
-    @formWrapper(routes.CanTheyUseOurServiceController.countryOfResidenceSubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(routes.SingleDisposalsTriageController.countryOfResidenceSubmit(), 'novalidate -> "novalidate") {
 
         @countryCode(
             countryCodeToCountryName = Country.countryCodeToCountryName,

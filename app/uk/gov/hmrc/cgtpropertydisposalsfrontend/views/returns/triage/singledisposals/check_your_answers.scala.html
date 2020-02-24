@@ -17,7 +17,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TriageAnswers.CompleteTriageAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -28,7 +28,7 @@
         summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.summary
 )
 
-@(answers: CompleteTriageAnswers, displayReturnToSummaryLink: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(answers: CompleteSingleDisposalTriageAnswers, displayReturnToSummaryLink: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @title = @{messages("triage.check-your-answers.title")}
 
@@ -38,7 +38,7 @@
 
  @summary(answers)
 
- @formWrapper(routes.CanTheyUseOurServiceController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
+ @formWrapper(routes.SingleDisposalsTriageController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
   @submitButton(messages("button.continue"))
  }
 

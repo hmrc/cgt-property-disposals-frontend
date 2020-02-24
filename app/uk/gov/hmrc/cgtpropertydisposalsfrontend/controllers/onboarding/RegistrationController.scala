@@ -229,8 +229,8 @@ class RegistrationController @Inject() (
           }
           _ <- EitherT(subscriptionResponse match {
                 case SubscriptionSuccessful(cgtReferenceNumber) =>
-                  updateSession(sessionStore, request)(_ =>
-                    SessionData.empty.copy(
+                  updateSession(sessionStore, request)(
+                    _.copy(
                       journeyStatus = Some(
                         Subscribed(
                           SubscribedDetails(

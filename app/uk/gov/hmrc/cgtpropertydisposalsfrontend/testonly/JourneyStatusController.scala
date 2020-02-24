@@ -38,7 +38,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingNewDraftReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.order
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TriageAnswers.IncompleteTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -83,7 +83,7 @@ class JourneyStatusController @Inject() (
           .fold(
             formWithErrors => BadRequest(setReturnStatePage(formWithErrors)), { state =>
               updateSession(sessionStore, request)(
-                _.copy(journeyStatus = Some(newReturn.copy(newReturnTriageAnswers = state)))
+                _.copy(journeyStatus = Some(newReturn.copy(newReturnTriageAnswers = Right(state))))
               ).map {
                 case Left(e) =>
                   logger.warn("Could not update session", e)
@@ -191,7 +191,7 @@ object JourneyStatusController {
         optionalDateFormatter.unbind(key, value.map(_.value))
     }
 
-  def returnStateForm(taxYears: List[TaxYear]): Form[IncompleteTriageAnswers] =
+  def returnStateForm(taxYears: List[TaxYear]): Form[IncompleteSingleDisposalTriageAnswers] =
     Form(
       mapping(
         "individual-user-type"             -> of(individualUserTypeFormatter),
@@ -211,7 +211,7 @@ object JourneyStatusController {
             disposalDate,
             completionDate
             ) =>
-          IncompleteTriageAnswers(
+          IncompleteSingleDisposalTriageAnswers(
             individualUserType,
             numberOfProperties,
             disposalMethod,
@@ -219,7 +219,8 @@ object JourneyStatusController {
             wasAUKResident.map(if (_) Country.uk else Country("HK", Some("Hong Kong"))),
             disposedOfResidentialProperty.map(if (_) AssetType.Residential else AssetType.NonResidential),
             disposalDate,
-            completionDate.map(CompletionDate(_))
+            completionDate.map(CompletionDate(_)),
+            None
           )
       } { i =>
         Some(

@@ -17,7 +17,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TriageAnswers.CompleteTriageAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
 
 @this(
@@ -31,42 +31,55 @@
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(answers: CompleteTriageAnswers)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(answers: CompleteSingleDisposalTriageAnswers)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @cyaSection() {
   @cyaRow(
     messages("who-are-you-reporting-for.title"),
     Html(messages(s"individualUserType.${answers.individualUserType.toString}")),
-    Some(cyaChange(messages("triage.cyaChange.individualUserType"), routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting().url))
+    Some(cyaChange(messages("triage.cyaChange.individualUserType"), routes.InitialTriageQuestionsController.whoIsIndividualRepresenting().url))
   )
   @cyaRow(
     messages("numberOfProperties.title"),
     Html(messages(s"numberOfProperties.${answers.numberOfProperties.toString}")),
-    Some(cyaChange(messages("triage.cyaChange.numberOfProperties"), routes.CanTheyUseOurServiceController.howManyProperties().url))
+    Some(cyaChange(messages("triage.cyaChange.numberOfProperties"), routes.InitialTriageQuestionsController.howManyProperties().url))
   )
   @cyaRow(
     messages("disposalMethod.title"),
     Html(messages(s"disposalMethod.${answers.disposalMethod.toString}")),
-    Some(cyaChange(messages("triage.cyaChange.disposalMethod"), routes.CanTheyUseOurServiceController.howDidYouDisposeOfProperty().url))
+    Some(cyaChange(messages("triage.cyaChange.disposalMethod"), routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty().url))
   )
   @cyaRow(
     messages("wereYouAUKResident.title"),
     Html(messages(s"yesNo.${answers.countryOfResidence.isUk().toString}")),
-    Some(cyaChange(messages("triage.cyaChange.wereYouAUKResident"), routes.CanTheyUseOurServiceController.wereYouAUKResident().url))
+    Some(cyaChange(messages("triage.cyaChange.wereYouAUKResident"), routes.SingleDisposalsTriageController.wereYouAUKResident().url))
   )
-  @cyaRow(
-    messages("didYouDisposeOfResidentialProperty.title"),
-    Html(messages(s"didYouDisposeOfResidentialProperty.${answers.assetType.toString}")),
-    Some(cyaChange(messages("triage.cyaChange.propertyType"), routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialProperty().url))
-  )
+    @if(!answers.countryOfResidence.isUk()){
+        @cyaRow(
+            messages("triage.enterCountry.title"),
+            Html(answers.countryOfResidence.name.getOrElse(answers.countryOfResidence.code)),
+            Some(cyaChange(messages("triage.cyaChange.countryOfResidence"), routes.SingleDisposalsTriageController.countryOfResidence().url))
+        )
+        @cyaRow(
+            messages("assetTypeForNonUkResidents.title"),
+            Html(messages(s"assetTypeForNonUkResidents.${answers.assetType.toString}")),
+            Some(cyaChange(messages("triage.cyaChange.assetTypeForNonUkResidents"), routes.SingleDisposalsTriageController.assetTypeForNonUkResidents().url))
+        )
+    } else {
+        @cyaRow(
+            messages("didYouDisposeOfResidentialProperty.title"),
+            Html(messages(s"didYouDisposeOfResidentialProperty.${answers.assetType.toString}")),
+            Some(cyaChange(messages("triage.cyaChange.propertyType"), routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty().url))
+        )
+    }
   @cyaRow(
     messages("disposalDate.title"),
     Html(LocalDateUtils.govDisplayFormat(answers.disposalDate.value)),
-    Some(cyaChange(messages("triage.cyaChange.disposalDate"), routes.CanTheyUseOurServiceController.whenWasDisposalDate().url))
+    Some(cyaChange(messages("triage.cyaChange.disposalDate"), routes.SingleDisposalsTriageController.whenWasDisposalDate().url))
   )
   @cyaRow(
     messages("completionDate.title"),
     Html(LocalDateUtils.govDisplayFormat(answers.completionDate.value)),
-    Some(cyaChange(messages("triage.cyaChange.completionDate"), routes.CanTheyUseOurServiceController.whenWasCompletionDate().url))
+    Some(cyaChange(messages("triage.cyaChange.completionDate"), routes.SingleDisposalsTriageController.whenWasCompletionDate().url))
   )
 }

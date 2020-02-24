@@ -16,7 +16,6 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
@@ -27,27 +26,18 @@
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
         radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group,
         backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+        yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no,
+        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(form: Form[NumberOfProperties], backLink: Call, displayReturnToSummaryLink: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
-@key = @{"numberOfProperties"}
-@title = @{messages("numberOfProperties.title")}
+@(form: Form[Boolean], backLink: Call, displayReturnToSummaryLink: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+
+@key = @{"didYouDisposeOfResidentialProperty"}
+@title = @{messages("didYouDisposeOfResidentialProperty.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@optionIndex(value: NumberOfProperties) = @{
-    value match {
-        case NumberOfProperties.One => 0
-        case NumberOfProperties.MoreThanOne => 1
-    }}
-
-@options = @{
-    List(
-        s"$key.One",
-        s"$key.MoreThanOne"
-    ).map(messageKey =>Html(messages(messageKey)))
-}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
 
@@ -57,16 +47,28 @@
         @errorSummary(form)
     }
 
-    @formWrapper(controllers.returns.triage.routes.InitialTriageQuestionsController.howManyPropertiesSubmit(), 'novalidate -> "novalidate") {
-        @radioGroup(
+    @formWrapper(controllers.returns.triage.routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialPropertySubmit(), 'novalidate -> "novalidate") {
+        @yesNo(
             fieldId = key,
-            options = options,
-            selected = form.value.map(optionIndex),
             label = pageHeading(title, Some(messages("triage.caption"))),
             labelAsHeading = true,
             errorKey = form.error(key).map(e => e.message),
             hasErrors = hasErrors,
-            helpText = Some(Html(messages("numberOfProperties.helpText")))
+            selected = form.value,
+            helpText = Some(Html(messages("didYouDisposeOfResidentialProperty.helpText")))
+        )
+
+        @details(messages("didYouDisposeOfResidentialProperty.details.summary"),
+          Html(s"""|
+                   |<p>${messages("didYouDisposeOfResidentialProperty.details.p1")}</p>
+                   |  <ul class="list-bullet">
+                   |     <li>${messages("didYouDisposeOfResidentialProperty.details.l1")}</li>
+                   |     <li>${messages("didYouDisposeOfResidentialProperty.details.l2")}</li>
+                   |     <li>${messages("didYouDisposeOfResidentialProperty.details.l3")}</li>
+                   |   </ul>
+                   |<p>${messages("didYouDisposeOfResidentialProperty.details.link", viewConfig.residentialPropertyDefinitionUrl)}</p>
+                   |""".stripMargin
+          )
         )
 
         @submitButton(messages("button.continue"))
@@ -75,3 +77,4 @@
     @returnToSummaryLink(displayReturnToSummaryLink)
 
 }
+

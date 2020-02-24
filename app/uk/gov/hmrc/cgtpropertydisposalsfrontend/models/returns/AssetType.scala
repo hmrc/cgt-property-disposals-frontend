@@ -28,6 +28,10 @@ object AssetType {
 
   case object NonResidential extends AssetType
 
+  case object IndirectDisposal extends AssetType
+
+  case object MixedUse extends AssetType
+
   implicit val eq: Eq[AssetType] = Eq.fromUniversalEquals
 
   implicit val format: OFormat[AssetType] = derived.oformat()

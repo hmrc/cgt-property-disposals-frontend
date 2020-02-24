@@ -26,7 +26,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Registratio
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, StartingNewDraftReturn, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifierAttempts
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
@@ -39,7 +39,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue.GainCalculatedTaxDue
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TriageAnswers.{CompleteTriageAnswers, IncompleteTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.OtherReliefs
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CompleteYearToDateLiabilityAnswers, IncompleteYearToDateLiabilityAnswers}
@@ -174,6 +175,11 @@ trait AddressGen extends AddressLowerPriorityGen { this: GenUtils =>
 
   implicit val postcodeGen: Gen[Postcode] = gen[Postcode]
 
+  implicit val countryGen: Gen[Country] = {
+    val countries = Country.countryCodeToCountryName.map { case (code, name) => Country(code, Some(name)) }.toList
+    Gen.oneOf(countries)
+  }
+
 }
 
 trait AddressLowerPriorityGen { this: GenUtils =>
@@ -238,13 +244,16 @@ trait UserTypeGen { this: GenUtils =>
 
 trait TriageQuestionsGen { this: GenUtils =>
 
-  implicit val individualTriageAnswersGen: Gen[TriageAnswers] = gen[TriageAnswers]
+  implicit val individualTriageAnswersGen: Gen[SingleDisposalTriageAnswers] = gen[SingleDisposalTriageAnswers]
 
-  implicit val incompleteIndividualTriageAnswersGen: Gen[IncompleteTriageAnswers] =
-    gen[IncompleteTriageAnswers]
+  implicit val incompleteSingleDisposalTriageAnswersGen: Gen[IncompleteSingleDisposalTriageAnswers] =
+    gen[IncompleteSingleDisposalTriageAnswers]
 
-  implicit val completeIndividualTriageAnswersGen: Gen[CompleteTriageAnswers] =
-    gen[CompleteTriageAnswers]
+  implicit val completeSingleDisposalTriageAnswersGen: Gen[CompleteSingleDisposalTriageAnswers] =
+    gen[CompleteSingleDisposalTriageAnswers]
+
+  implicit val completeMultipleDisposalsTriageAnswersGen: Gen[CompleteMultipleDisposalsAnswers] =
+    gen[CompleteMultipleDisposalsAnswers]
 
   implicit val individualUserTypeGen: Gen[IndividualUserType] = gen[IndividualUserType]
 

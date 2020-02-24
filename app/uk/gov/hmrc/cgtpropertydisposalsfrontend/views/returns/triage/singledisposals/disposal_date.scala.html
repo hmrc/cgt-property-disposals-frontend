@@ -14,10 +14,12 @@
  * limitations under the License.
  *@
 
+@import java.time.LocalDate
+
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompletionDate
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DisposalDate}
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -30,12 +32,12 @@ backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.component
 returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(form: Form[CompletionDate], backLink: Call, displayReturnToSummaryLink: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(form: Form[LocalDate], backLink: Call, displayReturnToSummaryLink: Boolean, assetType: AssetType)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
-@key = @{"completionDate"}
+@key = @{"disposalDate"}
 @hasErrors = @{form.hasErrors}
-@title = @{messages("completionDate.title")}
-@errorKey = @{List("completionDate-day", "completionDate-month", "completionDate-year", "completionDate").map(form.error).find(_.isDefined).flatten}
+@title = @{messages( "disposalDate.title")}
+@errorKey = @{List("disposalDate-day", "disposalDate-month", "disposalDate-year", "disposalDate").map(form.error).find(_.isDefined).flatten}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
 
@@ -45,22 +47,23 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
   @errorSummary(form)
  }
 
- @formWrapper(controllers.returns.triage.routes.CanTheyUseOurServiceController.whenWasCompletionDateSubmit(), 'novalidate -> "novalidate") {
+ @formWrapper(controllers.returns.triage.routes.SingleDisposalsTriageController.whenWasDisposalDateSubmit(), 'novalidate -> "novalidate") {
   @dateInput(
    fieldId = key,
    label = pageHeading(title, Some(messages("triage.caption"))),
-   dayValue = form.data.get("completionDate-day"),
-   monthValue = form.data.get("completionDate-month"),
-   yearValue = form.data.get("completionDate-year"),
-   helpText = Some(Html(messages("completionDate.helpText"))),
+   dayValue = form.data.get("disposalDate-day"),
+   monthValue = form.data.get("disposalDate-month"),
+   yearValue = form.data.get("disposalDate-year"),
+   helpText = Some(Html(messages("disposalDate.helpText"))),
    labelAsHeading = true,
    errorKey = errorKey.map(e => s"${e.key}.${e.message}"),
    hasErrors = hasErrors
   )
-  <p>@Html(messages("completionDate.link", viewConfig.completionDateHelp))</p>
+
+  <p>@Html(messages("disposalDate.link", viewConfig.tranferringOwnershipHelp))</p>
   @submitButton(messages("button.continue"))
  }
 
-  @returnToSummaryLink(displayReturnToSummaryLink)
+ @returnToSummaryLink(displayReturnToSummaryLink)
 
 }
