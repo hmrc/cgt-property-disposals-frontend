@@ -23,7 +23,7 @@ import play.api.{Configuration, Mode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.{ConnectorSpec, HttpSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, SubmitReturnRequest}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 
@@ -73,6 +73,17 @@ class ReturnsConnectorImplSpec extends WordSpec with Matchers with MockFactory w
         mockGet[HttpResponse](expectedUrl, Map.empty, Map.empty),
         () => connector.getDraftReturns(cgtReference)
       )
+    }
+
+    "handling request to submit a return" must {
+      val submitReturnRequest = sample[SubmitReturnRequest]
+      val expectedUrl         = s"http://host:123/return"
+
+      behave like connectorBehaviour(
+        mockPost(expectedUrl, Map.empty, submitReturnRequest),
+        () => connector.submitReturn(submitReturnRequest)
+      )
+
     }
 
   }

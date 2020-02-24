@@ -14,25 +14,18 @@
  * limitations under the License.
  *@
 
-@import cats.instances.long._
-@import cats.syntax.eq._
-
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{LocalDateUtils, MoneyUtils}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CompleteYearToDateLiabilityAnswers
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
 pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
-cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
-addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
 submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
 formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
+returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.summary
 )
 
 @(answers: CompleteYearToDateLiabilityAnswers)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
@@ -44,37 +37,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 
  @pageHeading(title, Some(messages("ytdLiability.caption")))
 
- @cyaSection() {
-         @cyaRow(
-             messages("estimatedIncome.title"),
-             Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.estimatedIncome.inPounds())),
-             Some(cyaChange(messages("ytdLiability.cyaChange.estimatedIncome"), routes.YearToDateLiabilityFirstReturnController.estimatedIncome().url))
-         )
-         @answers.personalAllowance.map { personalAllowance =>
-           @cyaRow(
-             messages("personalAllowance.title"),
-             Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(personalAllowance.inPounds())),
-             Some(cyaChange(messages("ytdLiability.cyaChange.personalAllowance"), routes.YearToDateLiabilityFirstReturnController.personalAllowance().url))
-             )
-          }
-          @cyaRow(
-             messages("hasEstimatedDetails.title"),
-             Html(messages(if(answers.hasEstimatedDetailsWithCalculatedTaxDue.hasEstimatedDetails) "generic.yes" else "generic.no")),
-            Some(cyaChange(messages("ytdLiability.cyaChange.hasEstimatedDetails"), routes.YearToDateLiabilityFirstReturnController.hasEstimatedDetails().url))
-           )
-          @cyaRow(
-            messages("taxDue.title"),
-            Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.taxDue.inPounds())),
-            Some(cyaChange(messages("ytdLiability.cyaChange.taxDue"), routes.YearToDateLiabilityFirstReturnController.taxDue().url))
-           )
-          @answers.mandatoryEvidence.map { mandatoryEvidence =>
-           @cyaRow(
-            messages("ytdLiability.cyaLabel.mandatoryEvidence"),
-            Html(mandatoryEvidence),
-            Some(cyaChange(messages("ytdLiability.cyaChange.mandatoryEvidence"), routes.YearToDateLiabilityFirstReturnController.uploadMandatoryEvidence().url))
-           )
-          }
- }
+ @summary(answers)
 
  @formWrapper(routes.YearToDateLiabilityFirstReturnController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
  @submitButton(messages("button.confirmAndContinue"))

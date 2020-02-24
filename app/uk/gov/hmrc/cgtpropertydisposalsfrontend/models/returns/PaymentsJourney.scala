@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,14 +12,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@this()
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-@(heading: Option[String] = None, classes: Option[String] = None)(rows: => Html)(implicit request: Request[_], messages: Messages)
+import play.api.libs.json.{Json, OFormat}
 
-@heading.map(h => Html(s"""<h2 class="heading-medium">$h</h2>"""))
+final case class PaymentsJourney(nextUrl: String, journeyId: String)
 
-<dl class="govuk-check-your-answers cya-questions-long@{classes.map(c => s" $c")}">
-  @rows
-</dl>
+object PaymentsJourney {
+
+  implicit val format: OFormat[PaymentsJourney] = Json.format
+
+}

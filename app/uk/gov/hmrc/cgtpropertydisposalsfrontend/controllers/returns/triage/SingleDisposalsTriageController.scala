@@ -583,7 +583,6 @@ class SingleDisposalsTriageController @Inject() (
               val newDraftReturn =
                 DraftReturn(
                   uuidGenerator.nextId(),
-                  startingNewDraftReturn.subscribedDetails.cgtReference,
                   complete,
                   None,
                   None,

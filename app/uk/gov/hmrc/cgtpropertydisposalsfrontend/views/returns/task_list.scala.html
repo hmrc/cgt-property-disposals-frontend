@@ -59,6 +59,16 @@
  }
 }
 
+ @checkAndSendReturnState = @{
+  (propertyAddressState, disposalDetailsState, acquistionDetailsState, reliefDetailsState, exemptionsAndLossesState, ytdLiabilityState) match {
+   case (TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete) =>
+    TaskListStatus.ToDo
+
+   case _ =>
+    TaskListStatus.CannotStart
+  }
+ }
+
 @mainTemplate(title = title, userType = request.userType) {
 
   @pageHeading(title)
@@ -123,9 +133,15 @@
     @messages("task-list.report-and-pay-the-tax.heading")
    </h2>
    <ul class="app-task-list__items">
+
     <li id="enterCgtLiability" class="app-task-list__item">
     @taskLink(messages("task-list.enter-cgt-liability.link"), returns.yeartodatelliability.routes.YearToDateLiabilityFirstReturnController.checkYourAnswers().url, ytdLiabilityState)
     </li>
+
+    <li id="checkAndSendReturn" class="app-task-list__item">
+    @taskLink(messages("task-list.check-and-send-return.link"), returns.routes.CheckAllAnswersAndSubmitController.checkAllAnswers().url, checkAndSendReturnState)
+    </li>
+
    </ul>
   </li>
  </ol>

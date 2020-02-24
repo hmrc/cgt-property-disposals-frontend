@@ -167,6 +167,9 @@ class StartController @Inject() (
 
     case _: StartingNewDraftReturn | _: FillingOutReturn =>
       Redirect(accounts.homepage.routes.HomePageController.homepage())
+
+    case _: JustSubmittedReturn =>
+      Redirect(controllers.returns.routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission())
   }
 
   private def handleRetrievedUserType(
