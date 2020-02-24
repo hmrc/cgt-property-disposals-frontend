@@ -43,6 +43,7 @@ object CompleteReturn {
   def fromDraftReturn(draftReturn: DraftReturn): Option[CompleteReturn] = draftReturn match {
     case DraftReturn(
         id,
+        _,
         t: CompleteSingleDisposalTriageAnswers,
         Some(p: UkAddress),
         Some(d: CompleteDisposalDetailsAnswers),
