@@ -44,7 +44,7 @@
         @errorSummary(form)
     }
 
-    @formWrapper(controllers.returns.triage.routes.CanTheyUseOurServiceController.wereYouAUKResidentSubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(controllers.returns.triage.routes.SingleDisposalsTriageController.wereYouAUKResidentSubmit(), 'novalidate -> "novalidate") {
         @yesNo(
             fieldId = key,
             label = pageHeading(title, Some(messages("triage.caption"))),

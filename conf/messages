@@ -7,6 +7,7 @@ label.beta=Private Beta
 
 button.startNow=Start now
 button.continue=Continue
+button.saveAndContinue=Save and continue
 button.confirmAndContinue=Confirm and continue
 button.createAccount=Create account
 button.resendEmail=Resend email
@@ -15,6 +16,8 @@ button.tryAgain=Try again
 button.startAgain=Start again
 button.signIn=Sign in
 button.manageAccount=Manage account
+button.acceptAndSend=Accept and send
+button.payNow=Pay now
 
 generic.warning=Warning
 generic.day=Day
@@ -490,6 +493,14 @@ triage.enterCountry.title=What was your country of residence on the day you ‘e
 triage.enterCountry.helpText=It’s usually the day you and the new owner swapped contracts and they paid a deposit. If you made an indirect disposal, it’s the day you sold the shares.
 triage.enterCountry.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>.
 
+assetTypeForNonUkResidents.title=What type of property or asset did you sell?
+assetTypeForNonUkResidents.Residential=Residential
+assetTypeForNonUkResidents.NonResidential=Non-residential
+assetTypeForNonUkResidents.MixedUse=Mixed use
+assetTypeForNonUkResidents.IndirectDisposal=Company shares - you made an indirect disposal
+assetTypeForNonUkResidents.error.required=Select the type of property or asset you sold or disposed of
+assetTypeForNonUkResidents.error.invalid=Select the type of property or asset you sold or disposed of
+
 didYouDisposeOfResidentialProperty.title=Did you sell a residential property?
 didYouDisposeOfResidentialProperty.helpText=Residential property includes houses, flats, or other dwellings, including their gardens and grounds.
 didYouDisposeOfResidentialProperty.Residential=Yes
@@ -505,6 +516,7 @@ didYouDisposeOfResidentialProperty.error.required=Select yes if you sold or disp
 didYouDisposeOfResidentialProperty.error.boolean=Select yes if you sold or disposed of a residential property
 
 disposalDate.title=What date did you ‘exchange’ contracts when selling the property?
+disposalDate.indirectDisposal.title=What date did you sell the shares?
 disposalDate.helpText=It’s when you and the buyer swapped contracts and they paid a deposit. If you sold shares not property it’s when you sold them. For example, 25 4 2020
 disposalDate.link=<a href="{0}" target="_blank">Find out what happens on the ‘exchange’ date (opens in a new window)</a>.
 disposalDate.error.required=Enter a contract exchange date
@@ -537,7 +549,26 @@ completionDate-month.error.monthAndYearRequired=Completion date must include a m
 completionDate-day.error.dayAndYearRequired=Completion date must include a day and a year
 completionDate-day.error.dayAndMonthRequired=Completion date must include a day and a month
 
+disposalDateTooEarly.non-uk.title=You cannot use this service
+disposalDateTooEarly.non-uk.p1=This is because when you sold or disposed of the property, you exchanged contracts before 6 April 2020.
+disposalDateTooEarly.non-uk.p2=If you made an indirect disposal and sold shares not property it’s because you sold the shares before 6 April 2020.
+disposalDateTooEarly.non-uk.p3=Find out how to report and pay Capital Gains Tax on <a href="{0}">UK property sales or disposals before 6 April 2020</a>.
+
+disposalDateTooEarly.uk.title=You cannot use this service
+disposalDateTooEarly.uk.p1=This is because when you sold or disposed of the property, you exchanged contracts before 6 April 2020.
+disposalDateTooEarly.uk.p2=Find out how to report and pay Capital Gains Tax on <a href="{0}">UK property sales or disposals before 6 April 2020</a>.
+
 triage.check-your-answers.title=Check your answers
+triage.cyaChange.individualUserType=who you are reporting the tax for
+triage.cyaChange.numberOfProperties=how many properties you want to include in this return
+triage.cyaChange.disposalMethod=how you sold or disposed of the property
+triage.cyaChange.wereYouAUKResident=whether you were a UK resident when you exchanged contracts when selling the property
+triage.cyaChange.countryOfResidence=your country of residence on the day you ‘exchanged’ contracts
+triage.cyaChange.assetTypeForNonUkResidents=the type of property or asset you sold
+triage.cyaChange.propertyType=whether you sold or disposed of a residential property
+triage.cyaChange.disposalDate=the date you exchanged contracts when selling the property
+triage.cyaChange.completionDate=the completion date when you sold the property
+
 
 #Months
 date.1=January
@@ -569,6 +600,7 @@ task-list.relief-details.link=Enter reliefs
 task-list.report-and-pay-the-tax.heading=Report and pay the tax
 task-list.enter-cgt-liability.link=Enter Capital Gains Tax liability so far this tax year
 task-list.ytd-liability.link=Enter Capital Gains Tax liability so far this tax year
+task-list.check-and-send-return.link=Check and send return, pay any tax due
 
 returns.property-address.caption=Property address
 enterPostcode.returns.title=Find the address of the UK property you disposed of
@@ -879,3 +911,31 @@ ytdLiability.cya.title=Check your answers
 ytdLiability.cyaLabel.mandatoryEvidence=Supporting file
 ytdLiability.cyaChange.mandatoryEvidence=your supporting file
 
+checkAllAnswers.title=Check your answers before sending the return
+checkAllAnswers.declaration=Declaration
+checkAllAnswers.declaration.p1=By continuing you are confirming that, to the best of your knowledge, the details you are providing are correct.
+checkAllAnswers.declaration.p2=You may have to pay financial penalties and face prosecution if you give incorrect information.
+
+confirmationOfSubmission.title=Return sent
+confirmationOfSubmission.taxOwed=Tax owed
+confirmationOfSubmission.returnReference=Return reference
+confirmationOfSubmission.emailSent=We have sent a confirmation email to <strong class="bold">{0}</strong>
+confirmationOfSubmission.printPage=Print or save this page as a PDF
+confirmationOfSubmission.whatNext=What you need to do next
+confirmationOfSubmission.warning=You must pay your Capital Gains Tax on UK property by {0}. You may get a penalty if your payment is late.
+confirmationOfSubmission.howToPay=You can pay online or by bank transfer. You’ll need your payment reference number: <strong class="bold">{0}</strong>.
+confirmationOfSubmission.ifSa=If you need to file a Self Assessment tax return
+confirmationOfSubmission.ifSa.p1=You’ll need to provide details from this return in your next <a href="{0}" target="_blank">Self Assessment tax return (opens in a new window)</a>.
+confirmationOfSubmission.returnToAccount=Go to your <a href="{0}">Capital Gains Tax on UK property account</a>.
+
+multiple-disposals.guidance.title=You sold or disposed of 2 or more properties
+multiple-disposals.guidance.p1=You can report all property sales (or ‘disposals’) in the same return. You can only do this if they all had:
+multiple-disposals.guidance.li1=the same ‘completion’ date
+multiple-disposals.guidance.li2=contract ‘exchange’ dates on or after 6 April 2020
+multiple-disposals.guidance.li3=contract exchange dates that were in the same tax year
+multiple-disposals.guidance.p2=The contract exchange dates can be in a different tax year to the completion date.
+multiple-disposals.guidance.p3=You must send separate returns of the contract exchange dates were in different tax years.
+multiple-disposals.guidance.details.summary=What happens on ‘exchange’ and ‘completion’ dates?
+multiple-disposals.guidance.details.p1=The ‘completion’ date is usually the day the new owner gets the key to the property,
+multiple-disposals.guidance.details.p2=Contract ‘exchange’ usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
+multiple-disposals.guidance.details.link=<a href="{0}" target="_blank">Read about ‘exchange’ and ‘completion’ (opens in a new window)</a>.

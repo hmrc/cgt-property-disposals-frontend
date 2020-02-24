@@ -21,12 +21,10 @@ import java.util.UUID
 import cats.Eq
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 
 final case class DraftReturn(
   id: UUID,
-  cgtReference: CgtReference,
-  triageAnswers: TriageAnswers,
+  triageAnswers: SingleDisposalTriageAnswers,
   propertyAddress: Option[UkAddress],
   disposalDetailsAnswers: Option[DisposalDetailsAnswers],
   acquisitionDetailsAnswers: Option[AcquisitionDetailsAnswers],

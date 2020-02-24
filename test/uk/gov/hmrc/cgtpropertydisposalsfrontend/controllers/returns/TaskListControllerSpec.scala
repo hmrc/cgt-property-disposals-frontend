@@ -36,7 +36,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TriageAnswers.{CompleteTriageAnswers, IncompleteTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CompleteYearToDateLiabilityAnswers, IncompleteYearToDateLiabilityAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -112,22 +112,22 @@ class TaskListControllerSpec
 
         "the session data indicates that they are filling in a return and the triage section is incomplete" in {
           testStateOfSection(
-            sample[DraftReturn].copy(triageAnswers = sample[IncompleteTriageAnswers])
+            sample[DraftReturn].copy(triageAnswers = sample[IncompleteSingleDisposalTriageAnswers])
           )(
             "canTheyUseOurService",
             messageFromMessageKey("task-list.triage.link"),
-            triage.routes.CanTheyUseOurServiceController.checkYourAnswers(),
+            triage.routes.SingleDisposalsTriageController.checkYourAnswers(),
             TaskListStatus.InProgress
           )
         }
 
         "the session data indicates that they are filling in a return and the triage section is complete" in {
           testStateOfSection(
-            sample[DraftReturn].copy(triageAnswers = sample[CompleteTriageAnswers])
+            sample[DraftReturn].copy(triageAnswers = sample[CompleteSingleDisposalTriageAnswers])
           )(
             "canTheyUseOurService",
             messageFromMessageKey("task-list.triage.link"),
-            triage.routes.CanTheyUseOurServiceController.checkYourAnswers(),
+            triage.routes.SingleDisposalsTriageController.checkYourAnswers(),
             TaskListStatus.Complete
           )
         }

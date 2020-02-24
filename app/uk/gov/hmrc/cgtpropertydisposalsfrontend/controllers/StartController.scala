@@ -167,6 +167,9 @@ class StartController @Inject() (
 
     case _: StartingNewDraftReturn | _: FillingOutReturn =>
       Redirect(accounts.homepage.routes.HomePageController.homepage())
+
+    case _: JustSubmittedReturn =>
+      Redirect(controllers.returns.routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission())
   }
 
   private def handleRetrievedUserType(
@@ -478,12 +481,16 @@ class StartController @Inject() (
             )
           case BuildSubscriptionDataError.AlreadySubscribedToCGT(cgtReference) =>
             updateSession(sessionStore, request)(
-              _.copy(journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount(ggCredId, Some(cgtReference))))
+              _.copy(
+                journeyStatus = Some(AlreadySubscribedWithDifferentGGAccount(ggCredId, Some(cgtReference)))
+              )
             )
         },
         subscriptionDetails =>
           updateSession(sessionStore, request)(
-            _.copy(journeyStatus = Some(SubscriptionStatus.SubscriptionReady(subscriptionDetails, ggCredId)))
+            _.copy(
+              journeyStatus = Some(SubscriptionStatus.SubscriptionReady(subscriptionDetails, ggCredId))
+            )
           )
       )
     )

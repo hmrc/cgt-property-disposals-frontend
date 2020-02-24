@@ -29,10 +29,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, Subscribed}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, StartingNewDraftReturn, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.TriageAnswers.IncompleteTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -81,7 +81,7 @@ class HomePageController @Inject() (
                   subscribed.subscribedDetails,
                   subscribed.ggCredId,
                   subscribed.agentReferenceNumber,
-                  IncompleteTriageAnswers.empty
+                  Right(IncompleteSingleDisposalTriageAnswers.empty)
                 )
               )
             )
@@ -91,7 +91,7 @@ class HomePageController @Inject() (
               errorHandler.errorResult()
 
             case Right(_) =>
-              Redirect(triage.routes.CanTheyUseOurServiceController.whoIsIndividualRepresenting())
+              Redirect(triage.routes.InitialTriageQuestionsController.whoIsIndividualRepresenting())
           }
 
         case other =>
@@ -146,6 +146,12 @@ class HomePageController @Inject() (
         }(f(s, _))
 
       case Some((s: SessionData, r: FillingOutReturn)) if withUplift =>
+        upliftToSubscribedAndThen(r, r.subscribedDetails.cgtReference) {
+          case (r, draftReturns) =>
+            Subscribed(r.subscribedDetails, r.ggCredId, r.agentReferenceNumber, draftReturns)
+        }(f(s, _))
+
+      case Some((s: SessionData, r: JustSubmittedReturn)) if withUplift =>
         upliftToSubscribedAndThen(r, r.subscribedDetails.cgtReference) {
           case (r, draftReturns) =>
             Subscribed(r.subscribedDetails, r.ggCredId, r.agentReferenceNumber, draftReturns)
