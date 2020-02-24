@@ -495,9 +495,12 @@ triage.enterCountry.link=<a href="{0}" target="_blank">Work out your residence s
 
 assetTypeForNonUkResidents.title=What type of property or asset did you sell?
 assetTypeForNonUkResidents.Residential=Residential
+assetTypeForNonUkResidents.Residential.helpText=Residential property includes houses, flats, or other dwellings, including their gardens or grounds.
 assetTypeForNonUkResidents.NonResidential=Non-residential
 assetTypeForNonUkResidents.MixedUse=Mixed use
+assetTypeForNonUkResidents.MixedUse.helpText=Part of the property was residential while you owned it.
 assetTypeForNonUkResidents.IndirectDisposal=Company shares - you made an indirect disposal
+assetTypeForNonUkResidents.IndirectDisposal.helpText=An indirect disposal is where the disposal involves rights to assets that derive at least 75% of their value from UK land.
 assetTypeForNonUkResidents.error.required=Select the type of property or asset you sold or disposed of
 assetTypeForNonUkResidents.error.invalid=Select the type of property or asset you sold or disposed of
 

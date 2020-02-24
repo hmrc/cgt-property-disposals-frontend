@@ -64,6 +64,7 @@
         <label for="@{fieldId}-@{index}">
           @option.label
         </label>
+        @option.optionHelpText.map(helpText => Html(s"""<span class="form-hint">$helpText</span>"""))
       </div>
       @option.content.map(content => Html(s"""<div id="${fieldId}-${index}-content" class="panel panel-indent js-hidden" aria-hidden="true">$content</div>"""))
     }
