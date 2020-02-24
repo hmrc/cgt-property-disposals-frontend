@@ -100,26 +100,30 @@ class CheckAllAnswersAndSubmitController @Inject() (
 
   def payReturn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withJustSubmittedReturn(request) { j =>
-      paymentsService
-        .startPaymentJourney(
-          j.subscribedDetails.cgtReference,
-          j.submissionResponse.chargeReference,
-          j.submissionResponse.amount,
-          homepage.routes.HomePageController.homepage(),
-          routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission()
-        )
-        .fold(
-          { e =>
-            logger.warn("Could not start payments journey", e)
-            errorHandler.errorResult()
-          }, { paymentsJourney =>
-            logger.info(
-              s"Payment journey started with journey id ${paymentsJourney.journeyId}. Redirecting to ${paymentsJourney.nextUrl}"
-            )
-            Redirect(paymentsJourney.nextUrl)
-          }
-        )
-
+      j.submissionResponse.charge.fold[Future[Result]] {
+        logger.warn("Could not find charge in pay return call, redirecting to homepage")
+        Redirect(homepage.routes.HomePageController.homepage())
+      } { charge =>
+        paymentsService
+          .startPaymentJourney(
+            j.subscribedDetails.cgtReference,
+            charge.chargeReference,
+            charge.amount,
+            homepage.routes.HomePageController.homepage(),
+            routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission()
+          )
+          .fold(
+            { e =>
+              logger.warn("Could not start payments journey", e)
+              errorHandler.errorResult()
+            }, { paymentsJourney =>
+              logger.info(
+                s"Payment journey started with journey id ${paymentsJourney.journeyId}. Redirecting to ${paymentsJourney.nextUrl}"
+              )
+              Redirect(paymentsJourney.nextUrl)
+            }
+          )
+      }
     }
 
   }

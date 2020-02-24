@@ -27,7 +27,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, SubmitReturnRequest, SubmitReturnResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{Charge, DraftReturn, SubmitReturnRequest, SubmitReturnResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, Error}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.GetDraftReturnResponse
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -161,8 +161,9 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
       "return an ok response" when {
 
-        "the http call came back with a 200 and the JSON " in {
-          val response = SubmitReturnResponse("charge", AmountInPence(123L), LocalDate.of(2000, 1, 2), "bundleId")
+        "the http call came back with a 200 and the JSON is valid and contains a charge " in {
+          val response =
+            SubmitReturnResponse("bundleId", Some(Charge("charge", AmountInPence(123L), LocalDate.of(2000, 1, 2))))
 
           mockSubmitReturn(submitReturnRequest)(
             Right(
@@ -170,14 +171,26 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
                 OK,
                 Some(Json.parse("""
                 |{
-                |  "chargeReference": "charge",
-                |   "amount": 123,
-                |   "dueDate": "2000-01-02",
-                |   "formBundleId": "bundleId"
+                |  "formBundleId": "bundleId",
+                |  "charge" : {
+                |    "chargeReference": "charge",
+                |    "amount": 123,
+                |    "dueDate": "2000-01-02"
+                |  }
                 |}
                 |""".stripMargin))
               )
             )
+          )
+
+          await(service.submitReturn(submitReturnRequest).value) shouldBe Right(response)
+        }
+
+        "the http call came back with a 200 and the JSON is valid and does not contain a charge " in {
+          val response = SubmitReturnResponse("bundleId", None)
+
+          mockSubmitReturn(submitReturnRequest)(
+            Right(HttpResponse(OK, Some(Json.parse("""{ "formBundleId": "bundleId"}"""))))
           )
 
           await(service.submitReturn(submitReturnRequest).value) shouldBe Right(response)
