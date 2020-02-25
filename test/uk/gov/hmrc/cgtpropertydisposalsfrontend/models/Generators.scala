@@ -65,7 +65,7 @@ object Generators
     with TriageQuestionsGen
     with ReturnGen
     with DisposalDetailsGen
-    with AmountInPenceGen
+    with MoneyGen
     with AcquisitionDetailsGen
     with ReliefDetailsAnswersGen
     with TaxYearGen
@@ -315,9 +315,11 @@ trait ReliefDetailsGen { this: GenUtils =>
 
 }
 
-trait AmountInPenceGen { this: GenUtils =>
+trait MoneyGen { this: GenUtils =>
 
   implicit val amountInPenceGen: Gen[AmountInPence] = gen[AmountInPence]
+
+  implicit val chargeGen: Gen[Charge] = gen[Charge]
 
 }
 

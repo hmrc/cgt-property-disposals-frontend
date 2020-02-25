@@ -43,7 +43,7 @@
   <span class="heading-large" style="font-weight: normal;">
     @messages(s"$key.taxOwed")
     <strong style="display:block; font-weight: bold;">
-     @{{formatAmountOfMoneyWithPoundSign(justSubmittedReturn.submissionResponse.amount.inPounds())}}
+     @{{formatAmountOfMoneyWithPoundSign(justSubmittedReturn.submissionResponse.charge.map(_.amount.inPounds()).getOrElse(BigDecimal(0)))}}
     </strong>
   </span>
   <span class="heading-large" style="font-weight: normal;">
@@ -60,16 +60,18 @@
    <a href="JavaScript: window.print();">@messages(s"$key.printPage")</a>
   </p>
 
-  <h2 class="heading-medium">@messages(s"$key.whatNext")</h2>
+  @justSubmittedReturn.submissionResponse.charge.map { charge =>
+   <h2 class="heading-medium">@messages(s"$key.whatNext")</h2>
 
-  @warning(messages(s"$key.warning", LocalDateUtils.govDisplayFormat(justSubmittedReturn.submissionResponse.dueDate)))
+   @warning(messages(s"$key.warning", LocalDateUtils.govDisplayFormat(charge.dueDate)))
 
-  <p>
-   @Html(messages(s"$key.howToPay", justSubmittedReturn.submissionResponse.chargeReference))
-  </p>
+   <p>
+   @Html(messages(s"$key.howToPay", charge.chargeReference))
+   </p>
 
-  @formWrapper(routes.CheckAllAnswersAndSubmitController.payReturn()) {
+   @formWrapper(routes.CheckAllAnswersAndSubmitController.payReturn()) {
     @submitButton(messages("button.payNow"))
+   }
   }
 
  <div class="panel panel-border-wide">
