@@ -18,7 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import cats.Eq
 import julienrf.json.derived
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{JsValue, Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, GGCredId}
@@ -70,7 +70,8 @@ object JourneyStatus {
     subscribedDetails: SubscribedDetails,
     ggCredId: GGCredId,
     agentReferenceNumber: Option[AgentReferenceNumber],
-    draftReturns: List[DraftReturn]
+    draftReturns: List[DraftReturn],
+    sentReturns: List[ReturnSummary]
   ) extends JourneyStatus
 
   final case class StartingNewDraftReturn(
@@ -93,6 +94,13 @@ object JourneyStatus {
     agentReferenceNumber: Option[AgentReferenceNumber],
     completeReturn: CompleteReturn,
     submissionResponse: SubmitReturnResponse
+  ) extends JourneyStatus
+
+  final case class ViewingReturn(
+    subscribedDetails: SubscribedDetails,
+    ggCredId: GGCredId,
+    agentReferenceNumber: Option[AgentReferenceNumber],
+    sentReturn: JsValue
   ) extends JourneyStatus
 
   final case class AlreadySubscribedWithDifferentGGAccount(ggCredId: GGCredId, cgtReference: Option[CgtReference])

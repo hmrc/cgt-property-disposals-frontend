@@ -20,11 +20,24 @@ import java.time.LocalDate
 
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AmountInPence
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 
-final case class Charge(chargeDescription: String, chargeReference: String, amount: AmountInPence, dueDate: LocalDate)
+final case class ReturnSummary(
+  submissionId: String,
+  submissionDate: LocalDate,
+  completionDate: LocalDate,
+  lastUpdatedDate: Option[LocalDate],
+  taxYear: String,
+  totalCGTLiability: AmountInPence,
+  totalOutstanding: AmountInPence,
+  propertyAddress: UkAddress,
+  charges: List[Charge]
+)
 
-object Charge {
+object ReturnSummary {
 
-  implicit val format: OFormat[Charge] = Json.format
+  implicit val ukAddressFormat: OFormat[UkAddress] = Json.format
+
+  implicit val format: OFormat[ReturnSummary] = Json.format
 
 }

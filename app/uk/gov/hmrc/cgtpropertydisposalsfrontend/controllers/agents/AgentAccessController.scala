@@ -34,6 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents.AgentAccessController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.AgentStatus.{AgentSupplyingClientDetails, VerifierMatchingDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AgentStatus, Subscribed}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{LocalDateUtils, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Country, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifierAttempts
@@ -199,9 +200,12 @@ class AgentAccessController @Inject() (
   def confirmClientSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withVerifierMatchingDetails {
       case (agentSupplyingClientDetails, verifierMatchingDetails, _) =>
+        val cgtReference = verifierMatchingDetails.clientDetails.cgtReference
         if (verifierMatchingDetails.correctVerifierSupplied) {
           val result = for {
-            draftReturns <- returnsService.getDraftReturns(verifierMatchingDetails.clientDetails.cgtReference)
+            draftReturns <- returnsService.getDraftReturns(cgtReference)
+            sentReturns <- returnsService
+                            .listReturns(cgtReference, TaxYear.thisTaxYearStartDate(), LocalDateUtils.today())
             _ <- EitherT(
                   updateSession(sessionStore, request)(
                     _.copy(
@@ -210,7 +214,8 @@ class AgentAccessController @Inject() (
                           verifierMatchingDetails.clientDetails,
                           agentSupplyingClientDetails.agentGGCredId,
                           Some(agentSupplyingClientDetails.agentReferenceNumber),
-                          draftReturns
+                          draftReturns,
+                          sentReturns
                         )
                       )
                     )
