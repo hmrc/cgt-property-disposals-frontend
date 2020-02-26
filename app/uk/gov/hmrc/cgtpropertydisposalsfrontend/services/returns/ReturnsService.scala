@@ -27,7 +27,7 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.OK
 import play.api.libs.json.{JsValue, Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, LocalDateUtils, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, ReturnSummary, SubmitReturnRequest, SubmitReturnResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{GetDraftReturnResponse, ListReturnsResponse}
@@ -47,7 +47,7 @@ trait ReturnsService {
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, SubmitReturnResponse]
 
-  def listReturns(cgtReference: CgtReference, fromDate: LocalDate, toDate: LocalDate)(
+  def listReturns(cgtReference: CgtReference)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, List[ReturnSummary]]
 
@@ -55,6 +55,10 @@ trait ReturnsService {
   def displayReturn(cgtReference: CgtReference, submissionId: String)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, JsValue]
+
+  def amendReturn(cgtReference: CgtReference, amendedReturn: JsValue)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, SubmitReturnResponse]
 
 }
 
@@ -97,9 +101,12 @@ class ReturnsServiceImpl @Inject() (connector: ReturnsConnector)(implicit ec: Ex
       }
     }
 
-  def listReturns(cgtReference: CgtReference, fromDate: LocalDate, toDate: LocalDate)(
+  def listReturns(cgtReference: CgtReference)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, List[ReturnSummary]] =
+  ): EitherT[Future, Error, List[ReturnSummary]] = {
+    val fromDate = TaxYear.thisTaxYearStartDate()
+    val toDate   = fromDate.plusYears(1L).minusDays(1L)
+
     connector.listReturns(cgtReference, fromDate, toDate).subflatMap { response =>
       if (response.status === OK) {
         response
@@ -109,6 +116,7 @@ class ReturnsServiceImpl @Inject() (connector: ReturnsConnector)(implicit ec: Ex
         Left(Error(s"call to list returns came back with status ${response.status}"))
       }
     }
+  }
 
   def displayReturn(cgtReference: CgtReference, submissionId: String)(
     implicit hc: HeaderCarrier
@@ -116,6 +124,17 @@ class ReturnsServiceImpl @Inject() (connector: ReturnsConnector)(implicit ec: Ex
     connector.displayReturn(cgtReference, submissionId).subflatMap { response =>
       if (response.status === OK) {
         response.parseJSON[JsValue]().leftMap(Error(_))
+      } else {
+        Left(Error(s"call to list returns came back with status ${response.status}"))
+      }
+    }
+
+  def amendReturn(cgtReference: CgtReference, amendedReturn: JsValue)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, SubmitReturnResponse] =
+    connector.amendReturn(cgtReference, amendedReturn).subflatMap { response =>
+      if (response.status === OK) {
+        response.parseJSON[SubmitReturnResponse]().leftMap(Error(_))
       } else {
         Left(Error(s"call to list returns came back with status ${response.status}"))
       }

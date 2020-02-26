@@ -28,7 +28,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{Charge, DraftReturn, SubmitReturnRequest, SubmitReturnResponse}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, Error}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, Error, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{GetDraftReturnResponse, ListReturnsResponse}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -220,27 +220,28 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
     "handling requests to list returns" must {
 
-      val cgtReference       = sample[CgtReference]
-      val (fromDate, toDate) = LocalDate.now().minusDays(1L) -> LocalDate.now()
+      val cgtReference = sample[CgtReference]
+      val (fromDate, toDate) = TaxYear
+        .thisTaxYearStartDate() -> TaxYear.thisTaxYearStartDate().plusYears(1L).minusDays(1L)
 
       "return an error " when {
 
         "the http call fails" in {
           mockListReturn(cgtReference, fromDate, toDate)(Left(Error("")))
 
-          await(service.listReturns(cgtReference, fromDate, toDate).value).isLeft shouldBe true
+          await(service.listReturns(cgtReference).value).isLeft shouldBe true
         }
 
         "the http call returns with a status which is not 200" in {
           mockListReturn(cgtReference, fromDate, toDate)(Right(HttpResponse(500)))
 
-          await(service.listReturns(cgtReference, fromDate, toDate).value).isLeft shouldBe true
+          await(service.listReturns(cgtReference).value).isLeft shouldBe true
         }
 
         "the response body cannot be parsed" in {
           mockListReturn(cgtReference, fromDate, toDate)(Right(HttpResponse(200, Some(JsString("Hi!")))))
 
-          await(service.listReturns(cgtReference, fromDate, toDate).value).isLeft shouldBe true
+          await(service.listReturns(cgtReference).value).isLeft shouldBe true
         }
 
       }
@@ -251,7 +252,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
           val response = sample[ListReturnsResponse]
           mockListReturn(cgtReference, fromDate, toDate)(Right(HttpResponse(200, Some(Json.toJson(response)))))
 
-          await(service.listReturns(cgtReference, fromDate, toDate).value) shouldBe Right(response.returns)
+          await(service.listReturns(cgtReference).value) shouldBe Right(response.returns)
         }
 
       }

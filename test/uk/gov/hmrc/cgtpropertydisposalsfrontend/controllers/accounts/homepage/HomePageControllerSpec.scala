@@ -87,12 +87,12 @@ trait HomePageControllerSpec
       .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockGetReturnsList(cgtReference: CgtReference, fromDate: LocalDate, toDate: LocalDate)(
+  def mockGetReturnsList(cgtReference: CgtReference)(
     response: Either[Error, List[ReturnSummary]]
   ) =
     (mockReturnsService
-      .listReturns(_: CgtReference, _: LocalDate, _: LocalDate)(_: HeaderCarrier))
-      .expects(cgtReference, fromDate, toDate, *)
+      .listReturns(_: CgtReference)(_: HeaderCarrier))
+      .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
   def mockGetFinancialData(cgtReference: String)(response: Either[Error, FinancialDataResponse]) =
@@ -236,11 +236,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
               )
             )
             mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Right(subscribed.draftReturns))
-            mockGetReturnsList(
-              subscribed.subscribedDetails.cgtReference,
-              TaxYear.thisTaxYearStartDate(),
-              LocalDate.now()
-            )(Right(subscribed.sentReturns))
+            mockGetReturnsList(subscribed.subscribedDetails.cgtReference)(Right(subscribed.sentReturns))
             mockGetFinancialData(subscribed.subscribedDetails.cgtReference.value)(Right(financialDataResponse))
             mockStoreSession(
               SessionData.empty.copy(
@@ -268,11 +264,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
                 )
               )
               mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Right(subscribed.draftReturns))
-              mockGetReturnsList(
-                subscribed.subscribedDetails.cgtReference,
-                TaxYear.thisTaxYearStartDate(),
-                LocalDate.now()
-              )(Right(subscribed.sentReturns))
+              mockGetReturnsList(subscribed.subscribedDetails.cgtReference)(Right(subscribed.sentReturns))
               mockGetFinancialData(subscribed.subscribedDetails.cgtReference.value)(Right(financialDataResponse))
               mockStoreSession(
                 SessionData.empty.copy(
@@ -312,11 +304,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
                 )
               )
               mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Right(subscribed.draftReturns))
-              mockGetReturnsList(
-                subscribed.subscribedDetails.cgtReference,
-                TaxYear.thisTaxYearStartDate(),
-                LocalDate.now()
-              )(Left(Error("")))
+              mockGetReturnsList(subscribed.subscribedDetails.cgtReference)(Left(Error("")))
             }
 
             checkIsTechnicalErrorPage(performAction())

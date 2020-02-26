@@ -206,8 +206,7 @@ class AgentAccessController @Inject() (
         if (verifierMatchingDetails.correctVerifierSupplied) {
           val result = for {
             draftReturns <- returnsService.getDraftReturns(cgtReference)
-            sentReturns <- returnsService
-                            .listReturns(cgtReference, TaxYear.thisTaxYearStartDate(), LocalDateUtils.today())
+            sentReturns <- returnsService.listReturns(cgtReference)
             financialData <- financialDataService.getFinancialData(cgtReference.value)
             _ <- EitherT(
                   updateSession(sessionStore, request)(

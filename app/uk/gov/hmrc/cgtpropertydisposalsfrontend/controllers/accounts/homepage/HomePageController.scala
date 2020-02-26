@@ -257,7 +257,7 @@ class HomePageController @Inject() (
   )()(implicit hc: HeaderCarrier, request: RequestWithSessionData[_]): Future[Result] = {
     val result = for {
       draftReturns  <- returnsService.getDraftReturns(cgtReference)
-      sentReturns   <- returnsService.listReturns(cgtReference, TaxYear.thisTaxYearStartDate(), LocalDateUtils.today())
+      sentReturns   <- returnsService.listReturns(cgtReference)
       financialData <- financialDataService.getFinancialData(cgtReference.value)
       subscribed = uplift(journey, draftReturns, sentReturns, financialData)
       _ <- EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(subscribed))))
