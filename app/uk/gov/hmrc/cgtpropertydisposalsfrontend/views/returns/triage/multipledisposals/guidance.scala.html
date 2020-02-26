@@ -1,0 +1,72 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
+
+@this(
+        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
+        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button
+)
+
+@()(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+
+@title = @{messages("multiple-disposals.guidance.title")}
+
+@mainTemplate(title = title, userType = request.userType) {
+
+    @backLinkComponent(triage.routes.InitialTriageQuestionsController.howManyProperties())
+
+    @pageHeading(title)
+    <p>
+    @messages("multiple-disposals.guidance.p1")
+    </p>
+
+    <ul class="list-bullet">
+        <li>@messages("multiple-disposals.guidance.li1")</li>
+        <li>@messages("multiple-disposals.guidance.li2")</li>
+        <li>@messages("multiple-disposals.guidance.li3")</li>
+    </ul>
+
+    <p>
+    @messages("multiple-disposals.guidance.p2")
+    </p>
+
+    <p>
+    @messages("multiple-disposals.guidance.p3")
+    </p>
+
+    @details(
+      messages("multiple-disposals.guidance.details.summary"),
+        Html(
+          s"""
+           | <p>${messages("multiple-disposals.guidance.details.p1")}</p>
+           | <p>${messages("multiple-disposals.guidance.details.p2")}</p>
+           | <p>${messages("multiple-disposals.guidance.details.link", appConfig.tranferringOwnershipHelp)}</p>
+           |""".stripMargin
+        )
+
+      )
+
+    @formWrapper(triage.routes.MultipleDisposalsTriageController.guidanceSubmit()) {
+        @submitButton(messages("button.continue"))
+    }
+}

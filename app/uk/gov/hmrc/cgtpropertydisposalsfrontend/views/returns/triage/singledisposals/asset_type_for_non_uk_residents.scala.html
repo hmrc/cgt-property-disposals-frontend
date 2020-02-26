@@ -16,7 +16,9 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.RadioOption
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -24,17 +26,50 @@
         submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
         errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+        radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional,
         backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-        yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no,
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(form: Form[Boolean], backLink: Call, displayReturnToSummaryLink: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(form: Form[AssetType], backLink: Call, displayReturnToSummaryLink: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
-@key = @{"wereYouAUKResident"}
-@title = @{messages("wereYouAUKResident.title")}
+@key = @{"assetTypeForNonUkResidents"}
+@title = @{messages(s"$key.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
+@selectedIndex = @{
+  form.data.get(key).map({
+    case "0" => 0
+    case "1" => 1
+    case "2" => 2
+    case _ => 3
+  })
+}
+
+@options = @{
+    List(
+      RadioOption(
+        label = messages(s"$key.Residential"),
+        content = None,
+        optionHelpText = Some(Html(messages(s"$key.Residential.helpText")))
+      ),
+      RadioOption(
+        label = messages(s"$key.NonResidential"),
+        content = None,
+        optionHelpText = None
+      ),
+      RadioOption(
+        label = messages(s"$key.MixedUse"),
+        content = None,
+        optionHelpText = Some(Html(messages(s"$key.MixedUse.helpText")))
+      ),
+      RadioOption(
+        label = messages(s"$key.IndirectDisposal"),
+        content = None,
+        optionHelpText = Some(Html(messages(s"$key.IndirectDisposal.helpText")))
+      )
+    )
+}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
 
@@ -44,17 +79,16 @@
         @errorSummary(form)
     }
 
-    @formWrapper(controllers.returns.triage.routes.CanTheyUseOurServiceController.wereYouAUKResidentSubmit(), 'novalidate -> "novalidate") {
-        @yesNo(
+    @formWrapper(controllers.returns.triage.routes.SingleDisposalsTriageController.assetTypeForNonUkResidentsSubmit(), 'novalidate -> "novalidate") {
+        @radioGroupConditional(
             fieldId = key,
+            options = options,
+            selected = selectedIndex,
             label = pageHeading(title, Some(messages("triage.caption"))),
             labelAsHeading = true,
-            errorKey = form.error(key).map(e => e.message),
-            hasErrors = hasErrors,
-            selected = form.value,
-            helpText = Some(Html(messages("wereYouAUKResident.helpText")))
+            error = form.error(key),
+            hasErrors = hasErrors
         )
-        <p>@Html(messages("wereYouAUKResident.link", viewConfig.workOurYouResidenceStatusUrl))</p>
 
         @submitButton(messages("button.continue"))
     }
@@ -62,4 +96,3 @@
     @returnToSummaryLink(displayReturnToSummaryLink)
 
 }
-

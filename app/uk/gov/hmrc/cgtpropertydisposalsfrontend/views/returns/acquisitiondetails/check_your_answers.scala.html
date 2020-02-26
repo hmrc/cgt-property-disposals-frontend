@@ -14,13 +14,9 @@
  * limitations under the License.
  *@
 
-@import cats.instances.long._
-@import cats.syntax.eq._
-
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{LocalDateUtils, MoneyUtils}
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionMethod
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 
@@ -28,10 +24,7 @@
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
 pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
-cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
-addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
+summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.acquisitiondetails.summary,
 submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
 formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
 returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
@@ -41,92 +34,12 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 
 
 @title = @{messages("acquisitionDetails.cya.title")}
-@acquisitionMethodValue = @{
-    answers.acquisitionMethod match {
-        case AcquisitionMethod.Bought => messages("returns.acquisitionMethod.Bought")
-        case AcquisitionMethod.Inherited => messages("returns.acquisitionMethod.Inherited")
-        case AcquisitionMethod.Gifted => messages("returns.acquisitionMethod.Gifted")
-        case AcquisitionMethod.Other(value) => value
-    }
-}
 
 @mainTemplate(title = title, userType = request.userType) {
 
     @pageHeading(title, Some(messages("acquisitionDetails.caption")))
 
-    @cyaSection() {
-        @cyaRow(
-            messages("acquisitionMethod.title"),
-            Html(acquisitionMethodValue),
-            Some(cyaChange(messages("acquisitionDetails.cyaChange.acquisitionMethod"), routes.AcquisitionDetailsController.acquisitionMethod().url))
-        )
-        @cyaRow(
-            messages("acquisitionDate.title"),
-            Html(LocalDateUtils.govDisplayFormat(answers.acquisitionDate.value)),
-            Some(cyaChange(messages("acquisitionDetails.cyaChange.acquisitionDate"), routes.AcquisitionDetailsController.acquisitionDate().url))
-        )
-        @cyaRow(
-            messages("acquisitionPrice.title"),
-            Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.acquisitionPrice.inPounds())),
-            Some(cyaChange(messages("acquisitionDetails.cyaChange.acquisitionPrice"), routes.AcquisitionDetailsController.acquisitionPrice().url))
-        )
-        @answers.rebasedAcquisitionPrice.map{ rebasedValue =>
-            @if(rebasedValue.value === 0L){
-                @cyaRow(
-                    messages("acquisitionDetails.cyaLabel.rebased"),
-                    Html(messages("generic.no")),
-                    Some(cyaChange(messages("acquisitionDetails.cyaChange.rebasedAcquisitionPrice"), routes.AcquisitionDetailsController.rebasedAcquisitionPrice().url))
-                )
-            } else {
-                @cyaRow(
-                    messages("acquisitionDetails.cyaLabel.rebased"),
-                    Html(messages("generic.yes")),
-                    Some(cyaChange(messages("acquisitionDetails.cyaChange.rebasedAcquisitionPrice"), routes.AcquisitionDetailsController.rebasedAcquisitionPrice().url))
-                )
-                @cyaRow(
-                    messages("acquisitionDetails.cyaLabel.rebasedValue"),
-                    Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(rebasedValue.inPounds())),
-                    Some(cyaChange(messages("acquisitionDetails.cyaChange.rebasedAcquisitionPrice"), routes.AcquisitionDetailsController.rebasedAcquisitionPrice().url))
-                )
-            }
-        }
-        @if(answers.improvementCosts.value === 0L){
-            @cyaRow(
-                messages("improvementCosts.title"),
-                Html(messages("generic.no")),
-                Some(cyaChange(messages("acquisitionDetails.cyaChange.improvementCosts"), routes.AcquisitionDetailsController.improvementCosts().url))
-            )
-        } else {
-            @cyaRow(
-                messages("improvementCosts.title"),
-                Html(messages("generic.yes")),
-                Some(cyaChange(messages("acquisitionDetails.cyaChange.improvementCosts"), routes.AcquisitionDetailsController.improvementCosts().url))
-            )
-            @cyaRow(
-                messages("acquisitionDetails.cyaLabel.improvementCostsValue"),
-                Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.improvementCosts.inPounds())),
-                Some(cyaChange(messages("acquisitionDetails.cyaChange.improvementCosts"), routes.AcquisitionDetailsController.improvementCosts().url))
-            )
-        }
-        @if(answers.acquisitionFees.value === 0L){
-            @cyaRow(
-                messages("acquisitionFees.title"),
-                Html(messages("generic.no")),
-                Some(cyaChange(messages("acquisitionDetails.cyaChange.acquisitionFees"), routes.AcquisitionDetailsController.acquisitionFees().url))
-            )
-        } else {
-            @cyaRow(
-                messages("acquisitionFees.title"),
-                Html(messages("generic.yes")),
-                Some(cyaChange(messages("acquisitionDetails.cyaChange.acquisitionFees"), routes.AcquisitionDetailsController.acquisitionFees().url))
-            )
-            @cyaRow(
-                messages("acquisitionDetails.cyaLabel.acquisitionFeesValue"),
-                Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.acquisitionFees.inPounds())),
-                Some(cyaChange(messages("acquisitionDetails.cyaChange.acquisitionFees"), routes.AcquisitionDetailsController.acquisitionFees().url))
-            )
-        }
-    }
+    @summary(answers)
 
     @formWrapper(routes.AcquisitionDetailsController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
         @submitButton(messages("button.confirmAndContinue"))

@@ -57,7 +57,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
         @errorSummary(form)
     }
 
-    @formWrapper(controllers.returns.triage.routes.CanTheyUseOurServiceController.howDidYouDisposeOfPropertySubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(controllers.returns.triage.routes.SingleDisposalsTriageController.howDidYouDisposeOfPropertySubmit(), 'novalidate -> "novalidate") {
         @radioGroup(
             fieldId = key,
             options = options,

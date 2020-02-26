@@ -17,18 +17,18 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import java.time.LocalDate
-import cats.syntax.order._
 
+import cats.syntax.order._
 import org.scalacheck.ScalacheckShapeless._
 import org.scalacheck.{Arbitrary, Gen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AmountInPence._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, IndividualSupplyingInformation, RegistrationReady}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, StartingNewDraftReturn, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifierAttempts
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, GGCredId, SAUTR, SapNumber}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.SubscriptionSuccessful
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.{IndividualNameMatchDetails, TrustNameMatchDetails}
@@ -39,11 +39,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue.GainCalculatedTaxDue
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.{CompleteIndividualTriageAnswers, IncompleteIndividualTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.OtherReliefs
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CompleteYearToDateLiabilityAnswers, IncompleteYearToDateLiabilityAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AcquisitionMethod, AssetType, CalculatedTaxDue, CompletionDate, DisposalDate, DraftReturn, HasEstimatedDetailsWithCalculatedTaxDue, IndividualTriageAnswers, IndividualUserType, NumberOfProperties, ReliefDetailsAnswers, ShareOfProperty, YearToDateLiabilityAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanNotifyResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanServiceResponse.{UpscanNotifyEvent, UpscanResponse}
 
@@ -64,7 +65,7 @@ object Generators
     with TriageQuestionsGen
     with ReturnGen
     with DisposalDetailsGen
-    with AmountInPenceGen
+    with MoneyGen
     with AcquisitionDetailsGen
     with ReliefDetailsAnswersGen
     with TaxYearGen
@@ -162,6 +163,8 @@ trait JourneyStatusLowerPriorityGen { this: GenUtils =>
 
   implicit val fillingOutReturnGen: Gen[FillingOutReturn] = gen[FillingOutReturn]
 
+  implicit val justSubmittedReturnGen: Gen[JustSubmittedReturn] = gen[JustSubmittedReturn]
+
 }
 
 trait AddressGen extends AddressLowerPriorityGen { this: GenUtils =>
@@ -171,6 +174,11 @@ trait AddressGen extends AddressLowerPriorityGen { this: GenUtils =>
   implicit val nonUkAddressGen: Gen[NonUkAddress] = gen[NonUkAddress]
 
   implicit val postcodeGen: Gen[Postcode] = gen[Postcode]
+
+  implicit val countryGen: Gen[Country] = {
+    val countries = Country.countryCodeToCountryName.map { case (code, name) => Country(code, Some(name)) }.toList
+    Gen.oneOf(countries)
+  }
 
 }
 
@@ -236,13 +244,16 @@ trait UserTypeGen { this: GenUtils =>
 
 trait TriageQuestionsGen { this: GenUtils =>
 
-  implicit val individualTriageAnswersGen: Gen[IndividualTriageAnswers] = gen[IndividualTriageAnswers]
+  implicit val individualTriageAnswersGen: Gen[SingleDisposalTriageAnswers] = gen[SingleDisposalTriageAnswers]
 
-  implicit val incompleteIndividualTriageAnswersGen: Gen[IncompleteIndividualTriageAnswers] =
-    gen[IncompleteIndividualTriageAnswers]
+  implicit val incompleteSingleDisposalTriageAnswersGen: Gen[IncompleteSingleDisposalTriageAnswers] =
+    gen[IncompleteSingleDisposalTriageAnswers]
 
-  implicit val completeIndividualTriageAnswersGen: Gen[CompleteIndividualTriageAnswers] =
-    gen[CompleteIndividualTriageAnswers]
+  implicit val completeSingleDisposalTriageAnswersGen: Gen[CompleteSingleDisposalTriageAnswers] =
+    gen[CompleteSingleDisposalTriageAnswers]
+
+  implicit val completeMultipleDisposalsTriageAnswersGen: Gen[CompleteMultipleDisposalsAnswers] =
+    gen[CompleteMultipleDisposalsAnswers]
 
   implicit val individualUserTypeGen: Gen[IndividualUserType] = gen[IndividualUserType]
 
@@ -259,6 +270,12 @@ trait TriageQuestionsGen { this: GenUtils =>
 trait ReturnGen { this: GenUtils =>
 
   implicit val draftReturnGen: Gen[DraftReturn] = gen[DraftReturn]
+
+  implicit val completeReturnGen: Gen[CompleteReturn] = gen[CompleteReturn]
+
+  implicit val submitReturnRequestGen: Gen[SubmitReturnRequest] = gen[SubmitReturnRequest]
+
+  implicit val submitReturnResponseGen: Gen[SubmitReturnResponse] = gen[SubmitReturnResponse]
 
 }
 
@@ -298,9 +315,11 @@ trait ReliefDetailsGen { this: GenUtils =>
 
 }
 
-trait AmountInPenceGen { this: GenUtils =>
+trait MoneyGen { this: GenUtils =>
 
   implicit val amountInPenceGen: Gen[AmountInPence] = gen[AmountInPence]
+
+  implicit val chargeGen: Gen[Charge] = gen[Charge]
 
 }
 

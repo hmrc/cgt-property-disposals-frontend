@@ -15,7 +15,7 @@
  *@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.IncompleteIndividualTriageAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.testonly.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 
@@ -28,7 +28,7 @@ errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.err
 submitButton:  uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button
 )
 
-@(form: Form[IncompleteIndividualTriageAnswers])(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[IncompleteSingleDisposalTriageAnswers])(implicit request:Request[_], messages:Messages, appConfig: ViewConfig)
 
 @title = @{ "Set journey status" }
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}

@@ -35,7 +35,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutR
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.CompleteIndividualTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CompleteYearToDateLiabilityAnswers, IncompleteYearToDateLiabilityAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
@@ -90,7 +90,7 @@ class YearToDateLiabilityFirstReturnController @Inject() (
 
   private def withCompleteJourneys(fillingOutReturn: FillingOutReturn)(
     f: (
-      CompleteIndividualTriageAnswers,
+      CompleteSingleDisposalTriageAnswers,
       CompleteDisposalDetailsAnswers,
       CompleteAcquisitionDetailsAnswers,
       CompleteReliefDetailsAnswers,
@@ -105,7 +105,7 @@ class YearToDateLiabilityFirstReturnController @Inject() (
       fillingOutReturn.draftReturn.exemptionAndLossesAnswers
     ) match {
       case (
-          t: CompleteIndividualTriageAnswers,
+          t: CompleteSingleDisposalTriageAnswers,
           Some(d: CompleteDisposalDetailsAnswers),
           Some(a: CompleteAcquisitionDetailsAnswers),
           Some(r: CompleteReliefDetailsAnswers),

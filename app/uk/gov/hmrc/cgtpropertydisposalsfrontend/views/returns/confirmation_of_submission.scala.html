@@ -1,0 +1,89 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.JustSubmittedReturn
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.MoneyUtils.formatAmountOfMoneyWithPoundSign
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => accountRoutes}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
+
+@this(
+        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+        exitSurveyLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.exit_survey,
+        warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
+)
+
+@(justSubmittedReturn: JustSubmittedReturn)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+
+@key=@{"confirmationOfSubmission"}
+@title = @{ messages(s"$key.title") }
+
+@mainTemplate(title = title, userType = request.userType) {
+
+ <div class="govuk-box-highlight">
+  <h1 class="heading-xlarge">@title</h1>
+  <span class="heading-large" style="font-weight: normal;">
+    @messages(s"$key.taxOwed")
+    <strong style="display:block; font-weight: bold;">
+     @{{formatAmountOfMoneyWithPoundSign(justSubmittedReturn.submissionResponse.charge.map(_.amount.inPounds()).getOrElse(BigDecimal(0)))}}
+    </strong>
+  </span>
+  <span class="heading-large" style="font-weight: normal;">
+   @messages(s"$key.returnReference")
+   <strong style="display:block; font-weight: bold;">@{{justSubmittedReturn.submissionResponse.formBundleId}}</strong>
+  </span>
+ </div>
+
+  <p>
+   @Html(messages(s"$key.emailSent", justSubmittedReturn.subscribedDetails.emailAddress.value))
+  </p>
+
+  <p>
+   <a href="JavaScript: window.print();">@messages(s"$key.printPage")</a>
+  </p>
+
+  @justSubmittedReturn.submissionResponse.charge.map { charge =>
+   <h2 class="heading-medium">@messages(s"$key.whatNext")</h2>
+
+   @warning(messages(s"$key.warning", LocalDateUtils.govDisplayFormat(charge.dueDate)))
+
+   <p>
+   @Html(messages(s"$key.howToPay", charge.chargeReference))
+   </p>
+
+   @formWrapper(routes.CheckAllAnswersAndSubmitController.payReturn()) {
+    @submitButton(messages("button.payNow"))
+   }
+  }
+
+ <div class="panel panel-border-wide">
+   <h2 class="heading-medium">@messages(s"$key.ifSa")</h2>
+   <p>@Html(messages(s"$key.ifSa.p1", viewConfig.selfAssessmentUrl))</p>
+ </div>
+
+  <p>
+   @Html(messages(s"$key.returnToAccount", accountRoutes.HomePageController.homepage().url))
+  </p>
+
+ @exitSurveyLink(viewConfig.returnsExitSurveyUrl)
+
+
+}

@@ -41,11 +41,13 @@
 @options = @{List(
   RadioOption(
     label = messages(s"returns.$key.Full"),
-    content = None
+    content = None,
+    optionHelpText = None
   ),
   RadioOption(
     label = messages(s"returns.$key.Half"),
-    content = None
+    content = None,
+    optionHelpText = None
   ),
   RadioOption(
     label = messages(s"returns.$key.Other"),
@@ -61,7 +63,8 @@
       aspect = "right",
       unit = "%",
       assistiveText = messages("unit-input.assistive.percent")
-    ))
+    )),
+    optionHelpText = None
   )
 )}
   @selectedIndex = @{

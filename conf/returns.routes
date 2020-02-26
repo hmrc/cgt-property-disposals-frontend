@@ -5,16 +5,22 @@
 -> /  exemptions_losses.Routes
 -> /  ytd_liability_firstreturn.Routes
 
-GET  /enter-property-address      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.enterUkAddress()
-POST /enter-property-address      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.enterUkAddressSubmit()
+GET  /enter-property-address             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.enterUkAddress()
+POST /enter-property-address             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.enterUkAddressSubmit()
 
-GET  /find-uk-property-address      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.enterPostcode()
-POST /find-uk-property-address      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.enterPostcodeSubmit()
+GET  /find-uk-property-address           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.enterPostcode()
+POST /find-uk-property-address           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.enterPostcodeSubmit()
 
-GET  /select-property-address      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.selectAddress()
-POST /select-property-address      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.selectAddressSubmit()
+GET  /select-property-address            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.selectAddress()
+POST /select-property-address            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.selectAddressSubmit()
 
-GET  /confirm-property-address      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.checkYourAnswers()
-POST /confirm-property-address      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.checkYourAnswersSubmit()
+GET  /confirm-property-address           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.checkYourAnswers()
+POST /confirm-property-address           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.checkYourAnswersSubmit()
 
-GET  /task-list        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.TaskListController.taskList()
+GET  /task-list                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.TaskListController.taskList()
+
+GET   /check-answers-accept-send         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.checkAllAnswers()
+POST  /check-answers-accept-send         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.checkAllAnswersSubmit()
+
+GET   /return-sent-confirmation          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.confirmationOfSubmission()
+POST  /return-sent-confirmation          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.payReturn()

@@ -31,7 +31,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.IncompleteIndividualTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.OtherReliefs
@@ -75,7 +75,7 @@ class ExemptionAndLossesControllerSpec
   ): (SessionData, FillingOutReturn) = {
     val journey = sample[FillingOutReturn].copy(
       draftReturn = sample[DraftReturn].copy(
-        triageAnswers = sample[IncompleteIndividualTriageAnswers].copy(
+        triageAnswers = sample[IncompleteSingleDisposalTriageAnswers].copy(
           disposalDate = disposalDate
         ),
         reliefDetailsAnswers      = reliefDetailsAnswers,

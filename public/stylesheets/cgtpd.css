@@ -88,6 +88,13 @@ input:focus, textarea:focus, select:focus, #global-header input:focus {
     width: 50%;
 }
 
+.multiple-choice .form-hint {
+    display: block;
+    float: left;
+    padding-left: 12px;
+    margin-bottom: 0;
+}
+
 .autocomplete__wrapper {
     width: 75%;
     min-width: 85px;

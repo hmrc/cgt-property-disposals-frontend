@@ -57,13 +57,15 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
   val tellHmrcChangeDetails: String            = getString("external-url.tell-hmrc-change-details")
   val workOurYouResidenceStatusUrl: String     = getString("external-url.work-out-your-residence-status")
   val residentialPropertyDefinitionUrl: String = getString("external-url.residential-property-definition")
-  val exchangeDateHelp: String                 = getString("external-url.exchange-date-help")
-  val completionDateHelp: String               = getString("external-url.completion-date-help")
+  val tranferringOwnershipHelp: String         = getString("external-url.transferring-ownership-help")
   val cgtLossesUrl: String                     = getString("external-url.cgt-losses")
   val annualExemptAmountUrl: String            = getString("external-url.annual-exempt-amount")
   val personalAllowanceUrl: String             = getString("external-url.personal-allowance")
+  val selfAssessmentUrl: String                = getString("external-url.sign-in-to-self-assessment")
+  val reportingCgtBefore6April2020: String     = getString("external-url.reporting-cgt-before-6-april-2020")
 
   val onboardingExitSurveyUrl: String = "/feedback/CGTPD-REG"
+  val returnsExitSurveyUrl: String    = "/feedback/CGTPD-RET"
   val ggCreateAccountUrl: String =
     "/bas-gateway?" +
       "accountType=individual&" +

@@ -44,15 +44,18 @@
 @options = @{List(
     RadioOption(
         label = messages(s"returns.$key.Bought"),
-        content = None
+        content = None,
+        optionHelpText = None
     ),
     RadioOption(
         label = messages(s"returns.$key.Inherited"),
-        content = None
+        content = None,
+        optionHelpText = None
     ),
     RadioOption(
         label = messages(s"returns.$key.Gifted"),
-        content = None
+        content = None,
+        optionHelpText = None
     ),
     RadioOption(
         label = messages(s"returns.$key.Other"),
@@ -67,7 +70,8 @@
             extraContent = None,
             inputType = Some("text"),
             autoComplete = AutoCompleteType.On
-        ))
+        )),
+        optionHelpText = None
     )
 )}
 @selectedIndex = @{

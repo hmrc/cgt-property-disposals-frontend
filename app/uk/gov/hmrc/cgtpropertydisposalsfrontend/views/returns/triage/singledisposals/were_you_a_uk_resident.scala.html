@@ -24,18 +24,15 @@
         submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
         errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group,
         backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
         yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no,
-        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-
 @(form: Form[Boolean], backLink: Call, displayReturnToSummaryLink: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
-@key = @{"didYouDisposeOfResidentialProperty"}
-@title = @{messages("didYouDisposeOfResidentialProperty.title")}
+@key = @{"wereYouAUKResident"}
+@title = @{messages("wereYouAUKResident.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 
@@ -47,7 +44,7 @@
         @errorSummary(form)
     }
 
-    @formWrapper(controllers.returns.triage.routes.CanTheyUseOurServiceController.didYouDisposeOfAResidentialPropertySubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(controllers.returns.triage.routes.SingleDisposalsTriageController.wereYouAUKResidentSubmit(), 'novalidate -> "novalidate") {
         @yesNo(
             fieldId = key,
             label = pageHeading(title, Some(messages("triage.caption"))),
@@ -55,21 +52,9 @@
             errorKey = form.error(key).map(e => e.message),
             hasErrors = hasErrors,
             selected = form.value,
-            helpText = Some(Html(messages("didYouDisposeOfResidentialProperty.helpText")))
+            helpText = Some(Html(messages("wereYouAUKResident.helpText")))
         )
-
-        @details(messages("didYouDisposeOfResidentialProperty.details.summary"),
-          Html(s"""|
-                   |<p>${messages("didYouDisposeOfResidentialProperty.details.p1")}</p>
-                   |  <ul class="list-bullet">
-                   |     <li>${messages("didYouDisposeOfResidentialProperty.details.l1")}</li>
-                   |     <li>${messages("didYouDisposeOfResidentialProperty.details.l2")}</li>
-                   |     <li>${messages("didYouDisposeOfResidentialProperty.details.l3")}</li>
-                   |   </ul>
-                   |<p>${messages("didYouDisposeOfResidentialProperty.details.link", viewConfig.residentialPropertyDefinitionUrl)}</p>
-                   |""".stripMargin
-          )
-        )
+        <p>@Html(messages("wereYouAUKResident.link", viewConfig.workOurYouResidenceStatusUrl))</p>
 
         @submitButton(messages("button.continue"))
     }

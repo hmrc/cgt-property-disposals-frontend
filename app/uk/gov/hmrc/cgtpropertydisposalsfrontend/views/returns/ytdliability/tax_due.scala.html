@@ -20,7 +20,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AmountInPence
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.CompleteIndividualTriageAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
@@ -42,7 +42,7 @@
 
 @(form: Form[BigDecimal],
   backLink: Call,
-  triageAnswers: CompleteIndividualTriageAnswers,
+  triageAnswers: CompleteSingleDisposalTriageAnswers,
   disposalDetails: CompleteDisposalDetailsAnswers,
   acquisitionDetails: CompleteAcquisitionDetailsAnswers,
   reliefDetails: CompleteReliefDetailsAnswers,

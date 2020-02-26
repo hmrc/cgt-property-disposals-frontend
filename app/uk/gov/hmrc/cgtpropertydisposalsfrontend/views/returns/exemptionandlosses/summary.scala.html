@@ -1,0 +1,109 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import cats.instances.long._
+@import cats.syntax.eq._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.MoneyUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
+
+
+@this(
+        cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+        cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+        cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
+)
+
+@(answers: CompleteExemptionAndLossesAnswers)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+
+@taxableGainOrLossLabelWithAmount = @{
+  answers.taxableGainOrLoss.map { amount =>
+    if(amount.value > 0)
+      "taxableGainOrLoss.gain.label" -> Some("taxableGain.label" -> MoneyUtils.formatAmountOfMoneyWithPoundSign(amount.inPounds()))
+    else if(amount.value < 0)
+      "taxableGainOrLoss.loss.label" -> Some("netLoss.label" -> MoneyUtils.formatAmountOfMoneyWithPoundSign(amount.inPounds() * -1))
+    else
+      "taxableGainOrLoss.noLossOrGain.label" -> None
+  }
+
+}
+
+@cyaSection() {
+  @if(answers.inYearLosses.value === 0L) {
+    @cyaRow(
+      messages("exemptionsAndLosses.cyaLabel.inYearLosses"),
+      Html(messages("generic.no")),
+      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.inYearLosses"), routes.ExemptionAndLossesController.inYearLosses().url))
+    )
+  } else {
+    @cyaRow(
+      messages("exemptionsAndLosses.cyaLabel.inYearLosses"),
+      Html(messages("generic.yes")),
+      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.inYearLosses"), routes.ExemptionAndLossesController.inYearLosses().url))
+    )
+    @cyaRow(
+      messages("exemptionsAndLosses.cyaLabel.inYearLossesValue"),
+      Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.inYearLosses.inPounds())),
+      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.inYearLossesValue"), routes.ExemptionAndLossesController.inYearLosses().url))
+    )
+  }
+
+  @if(answers.previousYearsLosses.value === 0L) {
+    @cyaRow(
+      messages("exemptionsAndLosses.cyaLabel.previousYearsLosses"),
+      Html(messages("generic.no")),
+      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.previousYearsLosses"), routes.ExemptionAndLossesController.previousYearsLosses().url))
+    )
+  } else {
+    @cyaRow(
+      messages("exemptionsAndLosses.cyaLabel.previousYearsLosses"),
+      Html(messages("generic.yes")),
+      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.previousYearsLosses"), routes.ExemptionAndLossesController.previousYearsLosses().url))
+    )
+    @cyaRow(
+      messages("exemptionsAndLosses.cyaLabel.previousYearsLossesValue"),
+      Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.previousYearsLosses.inPounds())),
+      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.previousYearsLossesValue"), routes.ExemptionAndLossesController.previousYearsLosses().url))
+    )
+  }
+
+  @cyaRow(
+    messages("annualExemptAmount.title"),
+    Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.annualExemptAmount.inPounds())),
+    Some(cyaChange(messages("exemptionsAndLosses.cyaChange.annualExemptAmount"), routes.ExemptionAndLossesController.annualExemptAmount().url))
+  )
+
+  @taxableGainOrLossLabelWithAmount.map( l =>
+    cyaRow(
+      messages("taxableGainOrLoss.title"),
+      Html(messages(l._1)),
+      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.taxableGainOrLoss"), routes.ExemptionAndLossesController.taxableGainOrLoss().url))
+    )
+  )
+
+  @taxableGainOrLossLabelWithAmount.flatMap(_._2).map({ case (label, amount) =>
+    cyaRow(
+      messages(label),
+      Html(amount),
+      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.taxableGainOrLoss"), routes.ExemptionAndLossesController.taxableGainOrLoss().url))
+    )
+  })
+
+
+
+}

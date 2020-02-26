@@ -32,7 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualTriageAnswers.{CompleteIndividualTriageAnswers, IncompleteIndividualTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDetailsAnswers, DisposalMethod, DraftReturn, ShareOfProperty}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -69,7 +69,7 @@ class DisposalDetailsControllerSpec
 
   def fillingOutReturn(disposalMethod: DisposalMethod): FillingOutReturn =
     sample[FillingOutReturn]
-      .copy(draftReturn = sample[DraftReturn].copy(triageAnswers = sample[CompleteIndividualTriageAnswers].copy(
+      .copy(draftReturn = sample[DraftReturn].copy(triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
         disposalMethod = disposalMethod
       )
       )
@@ -1465,7 +1465,7 @@ class DisposalDetailsControllerSpec
 
       "there is no disposal method" in {
         val draftReturn = sample[DraftReturn].copy(
-          triageAnswers = sample[IncompleteIndividualTriageAnswers].copy(disposalMethod = None)
+          triageAnswers = sample[IncompleteSingleDisposalTriageAnswers].copy(disposalMethod = None)
         )
 
         val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn = draftReturn)
@@ -1485,7 +1485,7 @@ class DisposalDetailsControllerSpec
 
       "there is no property share" in {
         val draftReturn = sample[DraftReturn].copy(
-          triageAnswers = sample[CompleteIndividualTriageAnswers],
+          triageAnswers = sample[CompleteSingleDisposalTriageAnswers],
           disposalDetailsAnswers = Some(
             IncompleteDisposalDetailsAnswers(
               None,
