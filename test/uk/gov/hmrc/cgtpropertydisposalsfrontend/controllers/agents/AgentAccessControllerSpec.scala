@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents
 
+import java.time.LocalDate
+
 import cats.data.EitherT
 import cats.instances.future._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -41,12 +43,13 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifierAttempts
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, ReturnSummary}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.agents.AgentVerifierMatchRetryStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.ListReturnsResponse
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -153,6 +156,14 @@ class AgentAccessControllerSpec
     (mockReturnsService
       .getDraftReturns(_: CgtReference)(_: HeaderCarrier))
       .expects(cgtReference, *)
+      .returning(EitherT.fromEither[Future](response))
+
+  def mockGetReturnsList(cgtReference: CgtReference, fromDate: LocalDate, toDate: LocalDate)(
+    response: Either[Error, List[ReturnSummary]]
+  ) =
+    (mockReturnsService
+      .listReturns(_: CgtReference, _: LocalDate, _: LocalDate)(_: HeaderCarrier))
+      .expects(cgtReference, fromDate, toDate, *)
       .returning(EitherT.fromEither[Future](response))
 
   "AgentAccessController" when {
@@ -982,6 +993,8 @@ class AgentAccessControllerSpec
 
       val draftReturns = List(sample[DraftReturn])
 
+      val returnsList = sample[ListReturnsResponse].returns
+
       behave like redirectToStartWhenInvalidJourney(
         performAction, {
           case AgentSupplyingClientDetails(_, _, Some(_)) => true
@@ -1030,16 +1043,38 @@ class AgentAccessControllerSpec
           checkIsTechnicalErrorPage(performAction())
         }
 
+        "there is an error getting the client's sent returns" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionData(ukClientDetails, correctVerifierSupplied = true))
+            mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(Right(None))
+            mockGetDraftReturns(ukClientDetails.cgtReference)(Right(draftReturns))
+            mockGetReturnsList(
+              ukClientDetails.cgtReference,
+              TaxYear.thisTaxYearStartDate(),
+              LocalDate.now()
+            )(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
         "the session data cannot be updated" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData(ukClientDetails, correctVerifierSupplied = true))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(Right(None))
             mockGetDraftReturns(ukClientDetails.cgtReference)(Right(draftReturns))
+            mockGetReturnsList(
+              ukClientDetails.cgtReference,
+              TaxYear.thisTaxYearStartDate(),
+              LocalDate.now()
+            )(Right(returnsList))
             mockStoreSession(
               SessionData.empty
-                .copy(journeyStatus =
-                  Some(Subscribed(ukClientDetails, agentGGCredId, Some(agentReferenceNumber), draftReturns))
+                .copy(journeyStatus = Some(
+                  Subscribed(ukClientDetails, agentGGCredId, Some(agentReferenceNumber), draftReturns, returnsList)
+                )
                 )
             )(Left(Error("")))
           }
@@ -1056,9 +1091,15 @@ class AgentAccessControllerSpec
             mockGetSession(sessionData(clientDetails, correctVerifierSupplied = true))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, clientDetails.cgtReference)(Right(None))
             mockGetDraftReturns(ukClientDetails.cgtReference)(Right(draftReturns))
+            mockGetReturnsList(
+              ukClientDetails.cgtReference,
+              TaxYear.thisTaxYearStartDate(),
+              LocalDate.now()
+            )(Right(returnsList))
             mockStoreSession(
               SessionData.empty.copy(
-                journeyStatus = Some(Subscribed(clientDetails, agentGGCredId, Some(agentReferenceNumber), draftReturns))
+                journeyStatus =
+                  Some(Subscribed(clientDetails, agentGGCredId, Some(agentReferenceNumber), draftReturns, returnsList))
               )
             )(Right(()))
           }

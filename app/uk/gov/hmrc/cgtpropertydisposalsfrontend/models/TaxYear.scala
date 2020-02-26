@@ -18,9 +18,11 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import java.time.LocalDate
 
+import cats.syntax.order._
 import configs.Configs
 import configs.syntax._
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.order
 
 final case class TaxYear(
   startDateInclusive: LocalDate,
@@ -36,6 +38,17 @@ final case class TaxYear(
 )
 
 object TaxYear {
+
+  def thisTaxYearStartDate(): LocalDate = {
+    val today = LocalDateUtils.today()
+    val startYear =
+      if (today > LocalDate.of(today.getYear, 4, 6))
+        today.getYear
+      else
+        today.getYear - 1
+
+    LocalDate.of(startYear, 4, 6)
+  }
 
   implicit val configs: Configs[TaxYear] = Configs.from {
     case (config, key) =>

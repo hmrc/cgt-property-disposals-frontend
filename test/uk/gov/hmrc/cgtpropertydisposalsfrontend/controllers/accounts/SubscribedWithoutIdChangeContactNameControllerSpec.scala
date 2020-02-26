@@ -71,6 +71,7 @@ class SubscribedWithoutIdChangeContactNameControllerSpec
     ),
     GGCredId("id"),
     None,
+    List.empty,
     List.empty
   )
 

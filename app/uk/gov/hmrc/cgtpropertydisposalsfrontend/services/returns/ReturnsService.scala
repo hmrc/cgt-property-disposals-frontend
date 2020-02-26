@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns
 
+import java.time.LocalDate
+
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.int._
@@ -23,12 +25,12 @@ import cats.syntax.either._
 import cats.syntax.eq._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.OK
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{JsValue, Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, SubmitReturnRequest, SubmitReturnResponse}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.GetDraftReturnResponse
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, ReturnSummary, SubmitReturnRequest, SubmitReturnResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{GetDraftReturnResponse, ListReturnsResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -44,6 +46,15 @@ trait ReturnsService {
   def submitReturn(submitReturnRequest: SubmitReturnRequest)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, SubmitReturnResponse]
+
+  def listReturns(cgtReference: CgtReference, fromDate: LocalDate, toDate: LocalDate)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, List[ReturnSummary]]
+
+  // TODO: convert response to complete return
+  def displayReturn(cgtReference: CgtReference, submissionId: String)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, JsValue]
 
 }
 
@@ -86,6 +97,30 @@ class ReturnsServiceImpl @Inject() (connector: ReturnsConnector)(implicit ec: Ex
       }
     }
 
+  def listReturns(cgtReference: CgtReference, fromDate: LocalDate, toDate: LocalDate)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, List[ReturnSummary]] =
+    connector.listReturns(cgtReference, fromDate, toDate).subflatMap { response =>
+      if (response.status === OK) {
+        response
+          .parseJSON[ListReturnsResponse]()
+          .bimap(Error(_), _.returns)
+      } else {
+        Left(Error(s"call to list returns came back with status ${response.status}"))
+      }
+    }
+
+  def displayReturn(cgtReference: CgtReference, submissionId: String)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, JsValue] =
+    connector.displayReturn(cgtReference, submissionId).subflatMap { response =>
+      if (response.status === OK) {
+        response.parseJSON[JsValue]().leftMap(Error(_))
+      } else {
+        Left(Error(s"call to list returns came back with status ${response.status}"))
+      }
+    }
+
 }
 
 object ReturnsServiceImpl {
@@ -95,6 +130,14 @@ object ReturnsServiceImpl {
   object GetDraftReturnResponse {
 
     implicit val format: OFormat[GetDraftReturnResponse] = Json.format[GetDraftReturnResponse]
+  }
+
+  final case class ListReturnsResponse(returns: List[ReturnSummary])
+
+  object ListReturnsResponse {
+
+    implicit val format: OFormat[ListReturnsResponse] = Json.format
+
   }
 
 }
