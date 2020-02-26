@@ -77,12 +77,12 @@ trait HomePageControllerSpec
       .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockGetReturnsList(cgtReference: CgtReference, fromDate: LocalDate, toDate: LocalDate)(
+  def mockGetReturnsList(cgtReference: CgtReference)(
     response: Either[Error, List[ReturnSummary]]
   ) =
     (mockReturnsService
-      .listReturns(_: CgtReference, _: LocalDate, _: LocalDate)(_: HeaderCarrier))
-      .expects(cgtReference, fromDate, toDate, *)
+      .listReturns(_: CgtReference)(_: HeaderCarrier))
+      .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
   def mockDisplayReturn(cgtReference: CgtReference, submissionId: String)(response: Either[Error, JsValue]) =
@@ -220,11 +220,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
               )
             )
             mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Right(subscribed.draftReturns))
-            mockGetReturnsList(
-              subscribed.subscribedDetails.cgtReference,
-              TaxYear.thisTaxYearStartDate(),
-              LocalDate.now()
-            )(Right(subscribed.sentReturns))
+            mockGetReturnsList(subscribed.subscribedDetails.cgtReference)(Right(subscribed.sentReturns))
             mockStoreSession(
               SessionData.empty.copy(
                 journeyStatus = Some(subscribed),
@@ -251,11 +247,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
                 )
               )
               mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Right(subscribed.draftReturns))
-              mockGetReturnsList(
-                subscribed.subscribedDetails.cgtReference,
-                TaxYear.thisTaxYearStartDate(),
-                LocalDate.now()
-              )(Right(subscribed.sentReturns))
+              mockGetReturnsList(subscribed.subscribedDetails.cgtReference)(Right(subscribed.sentReturns))
               mockStoreSession(
                 SessionData.empty.copy(
                   journeyStatus = Some(subscribed),
@@ -294,11 +286,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
                 )
               )
               mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Right(subscribed.draftReturns))
-              mockGetReturnsList(
-                subscribed.subscribedDetails.cgtReference,
-                TaxYear.thisTaxYearStartDate(),
-                LocalDate.now()
-              )(Left(Error("")))
+              mockGetReturnsList(subscribed.subscribedDetails.cgtReference)(Left(Error("")))
             }
 
             checkIsTechnicalErrorPage(performAction())

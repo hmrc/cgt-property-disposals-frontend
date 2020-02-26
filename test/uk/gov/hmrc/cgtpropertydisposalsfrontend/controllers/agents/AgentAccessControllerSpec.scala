@@ -158,12 +158,12 @@ class AgentAccessControllerSpec
       .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockGetReturnsList(cgtReference: CgtReference, fromDate: LocalDate, toDate: LocalDate)(
+  def mockGetReturnsList(cgtReference: CgtReference)(
     response: Either[Error, List[ReturnSummary]]
   ) =
     (mockReturnsService
-      .listReturns(_: CgtReference, _: LocalDate, _: LocalDate)(_: HeaderCarrier))
-      .expects(cgtReference, fromDate, toDate, *)
+      .listReturns(_: CgtReference)(_: HeaderCarrier))
+      .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
   "AgentAccessController" when {
@@ -1049,11 +1049,7 @@ class AgentAccessControllerSpec
             mockGetSession(sessionData(ukClientDetails, correctVerifierSupplied = true))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(Right(None))
             mockGetDraftReturns(ukClientDetails.cgtReference)(Right(draftReturns))
-            mockGetReturnsList(
-              ukClientDetails.cgtReference,
-              TaxYear.thisTaxYearStartDate(),
-              LocalDate.now()
-            )(Left(Error("")))
+            mockGetReturnsList(ukClientDetails.cgtReference)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -1065,11 +1061,7 @@ class AgentAccessControllerSpec
             mockGetSession(sessionData(ukClientDetails, correctVerifierSupplied = true))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(Right(None))
             mockGetDraftReturns(ukClientDetails.cgtReference)(Right(draftReturns))
-            mockGetReturnsList(
-              ukClientDetails.cgtReference,
-              TaxYear.thisTaxYearStartDate(),
-              LocalDate.now()
-            )(Right(returnsList))
+            mockGetReturnsList(ukClientDetails.cgtReference)(Right(returnsList))
             mockStoreSession(
               SessionData.empty
                 .copy(journeyStatus = Some(
@@ -1091,11 +1083,7 @@ class AgentAccessControllerSpec
             mockGetSession(sessionData(clientDetails, correctVerifierSupplied = true))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, clientDetails.cgtReference)(Right(None))
             mockGetDraftReturns(ukClientDetails.cgtReference)(Right(draftReturns))
-            mockGetReturnsList(
-              ukClientDetails.cgtReference,
-              TaxYear.thisTaxYearStartDate(),
-              LocalDate.now()
-            )(Right(returnsList))
+            mockGetReturnsList(ukClientDetails.cgtReference)(Right(returnsList))
             mockStoreSession(
               SessionData.empty.copy(
                 journeyStatus =
