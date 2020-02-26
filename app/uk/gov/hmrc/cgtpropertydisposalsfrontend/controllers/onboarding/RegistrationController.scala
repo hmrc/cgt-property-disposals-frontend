@@ -250,8 +250,8 @@ class RegistrationController @Inject() (
                           ggCredId,
                           None,
                           List.empty,
+                          List.empty,
                           List.empty
-                          //fd.financialTransactions
                         )
                       )
                     )

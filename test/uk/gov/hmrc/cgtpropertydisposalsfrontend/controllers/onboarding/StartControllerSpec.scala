@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding
 
+import java.time.LocalDate
+
 import cats.data.EitherT
 import cats.instances.future._
 import org.joda.time.{LocalDate => JodaLocalDate}
@@ -23,7 +25,7 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
-import play.api.libs.json.Writes
+import play.api.libs.json.{JsString, Writes}
 import play.api.mvc.{AnyContent, Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -38,7 +40,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AgentStatus, AlreadySubscribedWithDifferentGGAccount, FillingOutReturn, JustSubmittedReturn, NonGovernmentGatewayJourney, RegistrationStatus, StartingNewDraftReturn, Subscribed, SubscriptionStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AgentStatus, AlreadySubscribedWithDifferentGGAccount, FillingOutReturn, JustSubmittedReturn, NonGovernmentGatewayJourney, RegistrationStatus, StartingNewDraftReturn, Subscribed, SubscriptionStatus, ViewingReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.RetrievedUserType.Individual
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
@@ -49,12 +51,14 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{HandOff
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, BusinessPartnerRecordResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.homepage.{FinancialDataResponse, FinancialTransaction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{NeedMoreDetailsDetails, SubscribedDetails, SubscriptionDetails}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, ReturnSummary}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPartnerRecordService, SubscriptionService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPartnerRecordService, FinancialDataService, SubscriptionService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.ListReturnsResponse
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -74,6 +78,8 @@ class StartControllerSpec
 
   val mockReturnsService = mock[ReturnsService]
 
+  val mockFinancialDataService = mock[FinancialDataService]
+
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
@@ -81,7 +87,8 @@ class StartControllerSpec
       bind[BusinessPartnerRecordService].toInstance(mockBprService),
       bind[SubscriptionService].toInstance(mockSubscriptionService),
       bind[AuditService].toInstance(mockAuditService),
-      bind[ReturnsService].toInstance(mockReturnsService)
+      bind[ReturnsService].toInstance(mockReturnsService),
+      bind[FinancialDataService].toInstance(mockFinancialDataService)
     )
 
   override lazy val additionalConfig = ivConfig(useRelativeUrls = false)
@@ -126,6 +133,20 @@ class StartControllerSpec
       ))
       .expects(auditType, event, transactionName, *, *, *, *)
       .returning(())
+
+  def mockGetReturnsList(cgtReference: CgtReference, fromDate: LocalDate, toDate: LocalDate)(
+    response: Either[Error, List[ReturnSummary]]
+  ) =
+    (mockReturnsService
+      .listReturns(_: CgtReference, _: LocalDate, _: LocalDate)(_: HeaderCarrier))
+      .expects(cgtReference, fromDate, toDate, *)
+      .returning(EitherT.fromEither[Future](response))
+
+  def mockGetFinancialData(cgtReference: String)(response: Either[Error, FinancialDataResponse]) =
+    (mockFinancialDataService
+      .getFinancialData(_: String)(_: HeaderCarrier))
+      .expects(cgtReference, *)
+      .returning(EitherT.fromEither[Future](response))
 
   val nino                 = NINO("AB123456C")
   val name                 = IndividualName("forename", "surname")
@@ -769,6 +790,8 @@ class StartControllerSpec
                 ),
                 ggCredId,
                 None,
+                List.empty,
+                List.empty,
                 List.empty
               )
               val session =
@@ -1121,6 +1144,8 @@ class StartControllerSpec
                 ),
                 ggCredId,
                 None,
+                List.empty,
+                List.empty,
                 List.empty
               )
               val session =
@@ -1447,9 +1472,25 @@ class StartControllerSpec
 
         val draftReturns = List(sample[DraftReturn])
 
+        val financialTransaction = sample[FinancialTransaction]
+
+        val financialDataResponse =
+          sample[FinancialDataResponse].copy(financialTransactions = List(financialTransaction))
+
+        val sentReturns = sample[ListReturnsResponse].returns
+
         val sessionWithSubscribed = SessionData.empty.copy(
-          userType      = Some(UserType.Individual),
-          journeyStatus = Some(Subscribed(subscribedDetails, ggCredId, None, draftReturns))
+          userType = Some(UserType.Individual),
+          journeyStatus = Some(
+            Subscribed(
+              subscribedDetails,
+              ggCredId,
+              None,
+              draftReturns,
+              sentReturns,
+              financialDataResponse.financialTransactions
+            )
+          )
         )
 
         "the session data indicates they have subscribed" must {
@@ -1514,6 +1555,30 @@ class StartControllerSpec
               checkIsTechnicalErrorPage(performAction())
             }
 
+            "the call to get the list of sent returns fails" in {
+              inSequence {
+                mockAuthWithAllRetrievals(
+                  ConfidenceLevel.L200,
+                  Some(AffinityGroup.Individual),
+                  None,
+                  None,
+                  None,
+                  Set(cgtEnrolment),
+                  Some(retrievedGGCredId)
+                )
+                mockGetSession(SessionData.empty)
+                mockGetSubscribedDetails(cgtReference)(Right(subscribedDetails))
+                mockGetDraftReturns(cgtReference)(Right(draftReturns))
+                mockGetReturnsList(
+                  subscribedDetails.cgtReference,
+                  TaxYear.thisTaxYearStartDate(),
+                  LocalDate.now()
+                )(Left(Error("")))
+              }
+
+              checkIsTechnicalErrorPage(performAction())
+            }
+
             "the session cannot be updated with the subscribed details" in {
               inSequence {
                 mockAuthWithAllRetrievals(
@@ -1528,6 +1593,12 @@ class StartControllerSpec
                 mockGetSession(SessionData.empty)
                 mockGetSubscribedDetails(cgtReference)(Right(subscribedDetails))
                 mockGetDraftReturns(cgtReference)(Right(draftReturns))
+                mockGetReturnsList(
+                  subscribedDetails.cgtReference,
+                  TaxYear.thisTaxYearStartDate(),
+                  LocalDate.now()
+                )(Right(sentReturns))
+                mockGetFinancialData(cgtReference.value)(Right(financialDataResponse))
                 mockStoreSession(sessionWithSubscribed.copy(userType = Some(UserType.Individual)))(Left(Error("")))
               }
 
@@ -1551,6 +1622,12 @@ class StartControllerSpec
               mockGetSession(SessionData.empty)
               mockGetSubscribedDetails(cgtReference)(Right(subscribedDetails))
               mockGetDraftReturns(cgtReference)(Right(draftReturns))
+              mockGetReturnsList(
+                subscribedDetails.cgtReference,
+                TaxYear.thisTaxYearStartDate(),
+                LocalDate.now()
+              )(Right(sentReturns))
+              mockGetFinancialData(cgtReference.value)(Right(financialDataResponse))
               mockStoreSession(sessionWithSubscribed.copy(userType = Some(UserType.Individual)))(Right(()))
             }
 
@@ -1807,6 +1884,38 @@ class StartControllerSpec
             mockGetSession(
               SessionData.empty.copy(
                 journeyStatus = Some(sample[FillingOutReturn])
+              )
+            )
+
+            checkIsRedirect(performAction(), controllers.accounts.homepage.routes.HomePageController.homepage())
+          }
+
+        }
+      }
+
+      "the session data indicates the user is viewing a return" must {
+
+        "redirect to the account homepage screen" in {
+          inSequence {
+            mockAuthWithAllRetrievals(
+              ConfidenceLevel.L200,
+              Some(AffinityGroup.Individual),
+              None,
+              None,
+              None,
+              Set(cgtEnrolment),
+              Some(retrievedGGCredId)
+            )
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  ViewingReturn(
+                    sample[SubscribedDetails],
+                    sample[GGCredId],
+                    None,
+                    JsString("")
+                  )
+                )
               )
             )
 

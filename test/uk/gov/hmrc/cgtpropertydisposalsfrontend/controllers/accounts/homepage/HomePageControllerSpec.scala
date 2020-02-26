@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
 
+import java.time.LocalDate
 import java.util.UUID
 
 import cats.data.EitherT
@@ -25,6 +26,7 @@ import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
+import play.api.libs.json.{JsNumber, JsString, JsValue}
 import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
@@ -34,13 +36,16 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.pr
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, StartingNewDraftReturn, Subscribed}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, StartingNewDraftReturn, Subscribed, ViewingReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftReturn, SubmitReturnResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.homepage.{FinancialDataResponse, FinancialTransaction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftReturn, ReturnSummary, SubmitReturnResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TaxYear, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.FinancialDataService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.ListReturnsResponse
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -59,19 +64,47 @@ trait HomePageControllerSpec
 
   val mockReturnsService = mock[ReturnsService]
 
+  val mockFinancialDataService = mock[FinancialDataService]
+
+  val financialTransaction = sample[FinancialTransaction]
+
+  val financialDataResponse =
+    sample[FinancialDataResponse].copy(financialTransactions = List(financialTransaction))
+
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
-      bind[ReturnsService].toInstance(mockReturnsService)
+      bind[ReturnsService].toInstance(mockReturnsService),
+      bind[FinancialDataService].toInstance(mockFinancialDataService)
     )
 
-  val subscribed = sample[Subscribed]
+  val subscribed = sample[Subscribed].copy(financialTransactions = List(financialTransaction))
 
   def mockGetDraftReturns(cgtReference: CgtReference)(response: Either[Error, List[DraftReturn]]) =
     (mockReturnsService
       .getDraftReturns(_: CgtReference)(_: HeaderCarrier))
       .expects(cgtReference, *)
+      .returning(EitherT.fromEither[Future](response))
+
+  def mockGetReturnsList(cgtReference: CgtReference, fromDate: LocalDate, toDate: LocalDate)(
+    response: Either[Error, List[ReturnSummary]]
+  ) =
+    (mockReturnsService
+      .listReturns(_: CgtReference, _: LocalDate, _: LocalDate)(_: HeaderCarrier))
+      .expects(cgtReference, fromDate, toDate, *)
+      .returning(EitherT.fromEither[Future](response))
+
+  def mockGetFinancialData(cgtReference: String)(response: Either[Error, FinancialDataResponse]) =
+    (mockFinancialDataService
+      .getFinancialData(_: String)(_: HeaderCarrier))
+      .expects(cgtReference, *)
+      .returning(EitherT.fromEither[Future](response))
+
+  def mockDisplayReturn(cgtReference: CgtReference, submissionId: String)(response: Either[Error, JsValue]) =
+    (mockReturnsService
+      .displayReturn(_: CgtReference, _: String)(_: HeaderCarrier))
+      .expects(cgtReference, submissionId, *)
       .returning(EitherT.fromEither[Future](response))
 
 }
@@ -96,8 +129,10 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
 
       behave like redirectToStartWhenInvalidJourney(
         performAction, {
-          case _: Subscribed | _: StartingNewDraftReturn | _: FillingOutReturn | _: JustSubmittedReturn => true
-          case _                                                                                        => false
+          case _: Subscribed | _: StartingNewDraftReturn | _: FillingOutReturn | _: JustSubmittedReturn |
+              _: ViewingReturn =>
+            true
+          case _ => false
         }
       )
 
@@ -183,9 +218,15 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
         sample[SubmitReturnResponse]
       )
 
-      List(startingNewDraftReturn, fillingOurReturn, justSubmittedReturn).foreach { journeyStatus =>
-        s"convert a ${journeyStatus.getClass.getSimpleName} to Subscribed journey status" in {
+      val viewingReturn = ViewingReturn(
+        subscribed.subscribedDetails,
+        subscribed.ggCredId,
+        subscribed.agentReferenceNumber,
+        JsString("")
+      )
 
+      List(startingNewDraftReturn, fillingOurReturn, justSubmittedReturn, viewingReturn).foreach { journeyStatus =>
+        s"convert a ${journeyStatus.getClass.getSimpleName} to Subscribed journey status" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -195,6 +236,12 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
               )
             )
             mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Right(subscribed.draftReturns))
+            mockGetReturnsList(
+              subscribed.subscribedDetails.cgtReference,
+              TaxYear.thisTaxYearStartDate(),
+              LocalDate.now()
+            )(Right(subscribed.sentReturns))
+            mockGetFinancialData(subscribed.subscribedDetails.cgtReference.value)(Right(financialDataResponse))
             mockStoreSession(
               SessionData.empty.copy(
                 journeyStatus = Some(subscribed),
@@ -210,7 +257,8 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
 
         "show an error page" when {
 
-          s"the conversion from ${journeyStatus.getClass.getSimpleName} is unsuccessful" in {
+          s"the conversion from ${journeyStatus.getClass.getSimpleName} is successful but " +
+            "there is an error updating the session" in {
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
@@ -220,6 +268,12 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
                 )
               )
               mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Right(subscribed.draftReturns))
+              mockGetReturnsList(
+                subscribed.subscribedDetails.cgtReference,
+                TaxYear.thisTaxYearStartDate(),
+                LocalDate.now()
+              )(Right(subscribed.sentReturns))
+              mockGetFinancialData(subscribed.subscribedDetails.cgtReference.value)(Right(financialDataResponse))
               mockStoreSession(
                 SessionData.empty.copy(
                   journeyStatus = Some(subscribed),
@@ -242,6 +296,27 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
                 )
               )
               mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Left(Error("")))
+            }
+
+            checkIsTechnicalErrorPage(performAction())
+          }
+
+          s"the conversion from ${journeyStatus.getClass.getSimpleName} is successful but " +
+            "there is an error getting the list of returns" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                SessionData.empty.copy(
+                  journeyStatus = Some(journeyStatus),
+                  userType      = Some(UserType.Individual)
+                )
+              )
+              mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Right(subscribed.draftReturns))
+              mockGetReturnsList(
+                subscribed.subscribedDetails.cgtReference,
+                TaxYear.thisTaxYearStartDate(),
+                LocalDate.now()
+              )(Left(Error("")))
             }
 
             checkIsTechnicalErrorPage(performAction())
@@ -389,6 +464,95 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
           }
 
           checkIsRedirect(performAction(draftReturn.id), controllers.returns.routes.TaskListController.taskList())
+        }
+
+      }
+
+    }
+
+    "handling requests to view a return" must {
+
+      def performAction(submissionId: String): Future[Result] =
+        controller.viewSentReturn(submissionId)(FakeRequest())
+
+      val sentReturn  = sample[ReturnSummary]
+      val subscribed  = sample[Subscribed].copy(sentReturns = List(sentReturn))
+      val sessionData = SessionData.empty.copy(journeyStatus = Some(subscribed))
+
+      "return a bad request" when {
+
+        "the user does not have a return with the given submission id" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionData)
+          }
+
+          status(performAction(sentReturn.submissionId + "abc")) shouldBe NOT_FOUND
+        }
+
+      }
+
+      "show an error page" when {
+
+        "there is an error getting the return" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionData)
+            mockDisplayReturn(subscribed.subscribedDetails.cgtReference, sentReturn.submissionId)(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction(sentReturn.submissionId))
+        }
+
+        "there is an error updating the session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionData)
+            mockDisplayReturn(subscribed.subscribedDetails.cgtReference, sentReturn.submissionId)(Right(JsNumber(1)))
+            mockStoreSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  ViewingReturn(
+                    subscribed.subscribedDetails,
+                    subscribed.ggCredId,
+                    subscribed.agentReferenceNumber,
+                    JsNumber(1)
+                  )
+                )
+              )
+            )(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction(sentReturn.submissionId))
+        }
+
+      }
+
+      "redirect to the view return screen" when {
+
+        "the return is successfully retrieved and the session is updated" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionData)
+            mockDisplayReturn(subscribed.subscribedDetails.cgtReference, sentReturn.submissionId)(Right(JsNumber(1)))
+            mockStoreSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  ViewingReturn(
+                    subscribed.subscribedDetails,
+                    subscribed.ggCredId,
+                    subscribed.agentReferenceNumber,
+                    JsNumber(1)
+                  )
+                )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(sentReturn.submissionId),
+            controllers.returns.routes.ViewReturnController.displayReturn()
+          )
         }
 
       }

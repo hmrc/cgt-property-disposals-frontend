@@ -28,6 +28,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, 
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.homepage.FinancialTransaction
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import play.api.libs.json.{JsValue, Json, OFormat}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.homepage.FinancialTransaction
 
 sealed trait JourneyStatus extends Product with Serializable
 
@@ -72,6 +74,7 @@ object JourneyStatus {
     ggCredId: GGCredId,
     agentReferenceNumber: Option[AgentReferenceNumber],
     draftReturns: List[DraftReturn],
+    sentReturns: List[ReturnSummary],
     financialTransactions: List[FinancialTransaction]
   ) extends JourneyStatus
 
@@ -95,6 +98,13 @@ object JourneyStatus {
     agentReferenceNumber: Option[AgentReferenceNumber],
     completeReturn: CompleteReturn,
     submissionResponse: SubmitReturnResponse
+  ) extends JourneyStatus
+
+  final case class ViewingReturn(
+    subscribedDetails: SubscribedDetails,
+    ggCredId: GGCredId,
+    agentReferenceNumber: Option[AgentReferenceNumber],
+    sentReturn: JsValue
   ) extends JourneyStatus
 
   final case class AlreadySubscribedWithDifferentGGAccount(ggCredId: GGCredId, cgtReference: Option[CgtReference])

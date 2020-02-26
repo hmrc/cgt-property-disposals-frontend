@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import java.time.LocalDate
+import java.time.{Instant, LocalDate, LocalDateTime, ZoneId}
 
 import cats.syntax.order._
 import org.scalacheck.ScalacheckShapeless._
@@ -34,6 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionRe
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.{IndividualNameMatchDetails, TrustNameMatchDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.homepage.{FinancialDataResponse, FinancialTransaction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscribedUpdateDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue.GainCalculatedTaxDue
@@ -47,6 +48,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabili
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanNotifyResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanServiceResponse.{UpscanNotifyEvent, UpscanResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.ListReturnsResponse
 
 object Generators
     extends GenUtils
@@ -70,7 +72,8 @@ object Generators
     with ReliefDetailsAnswersGen
     with TaxYearGen
     with ExemptionAndLossesAnswersGen
-    with YearToDateLiabilityAnswersGen {
+    with YearToDateLiabilityAnswersGen
+    with FinancialDataResponseGen {
 
   implicit val booleanGen: Gen[Boolean] = Gen.oneOf(true, false)
 
@@ -97,6 +100,13 @@ sealed trait GenUtils {
   implicit val localDateArb: Arbitrary[LocalDate] = Arbitrary(
     Gen.chooseNum(0, Int.MaxValue).map(LocalDate.ofEpochDay(_))
   )
+
+  implicit val localDateTimeArb: Arbitrary[LocalDateTime] =
+    Arbitrary(
+      Gen
+        .chooseNum(0L, 10000L)
+        .map(l => LocalDateTime.ofInstant(Instant.ofEpochMilli(l), ZoneId.systemDefault()))
+    )
 
 }
 
@@ -277,6 +287,10 @@ trait ReturnGen { this: GenUtils =>
 
   implicit val submitReturnResponseGen: Gen[SubmitReturnResponse] = gen[SubmitReturnResponse]
 
+  implicit val listReturnsResponseGen: Gen[ListReturnsResponse] = gen[ListReturnsResponse]
+
+  implicit val returnSummaryGen: Gen[ReturnSummary] = gen[ReturnSummary]
+
 }
 
 trait DisposalDetailsGen { this: GenUtils =>
@@ -380,5 +394,13 @@ trait YearToDateLiabilityAnswersGen { this: GenUtils =>
   implicit val calculatedTaxDueGen: Gen[CalculatedTaxDue] = gen[CalculatedTaxDue]
 
   implicit val gainCalculatedTaxDueGen: Gen[GainCalculatedTaxDue] = gen[GainCalculatedTaxDue]
+
+}
+
+trait FinancialDataResponseGen { this: GenUtils =>
+
+  implicit val financialTransactionGen: Gen[FinancialTransaction] = gen[FinancialTransaction]
+
+  implicit val financialDataResponseGen: Gen[FinancialDataResponse] = gen[FinancialDataResponse]
 
 }

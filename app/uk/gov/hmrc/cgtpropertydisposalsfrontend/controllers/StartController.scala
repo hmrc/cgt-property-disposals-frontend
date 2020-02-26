@@ -39,7 +39,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{HandOff
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest.{IndividualBusinessPartnerRecordRequest, TrustBusinessPartnerRecordRequest}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.homepage.FinancialDataRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{NeedMoreDetailsDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
@@ -167,7 +166,7 @@ class StartController @Inject() (
     case _: AgentStatus.AgentSupplyingClientDetails =>
       Redirect(agents.routes.AgentAccessController.enterClientsCgtRef())
 
-    case _: StartingNewDraftReturn | _: FillingOutReturn =>
+    case _: StartingNewDraftReturn | _: FillingOutReturn | _: ViewingReturn =>
       Redirect(accounts.homepage.routes.HomePageController.homepage())
 
     case _: JustSubmittedReturn =>
@@ -236,13 +235,21 @@ class StartController @Inject() (
     val result = for {
       subscribedDetails <- subscriptionService.getSubscribedDetails(cgtReference)
       draftReturns      <- returnsService.getDraftReturns(cgtReference)
+      sentReturns       <- returnsService.listReturns(cgtReference, TaxYear.thisTaxYearStartDate(), LocalDateUtils.today())
       financialData     <- financialDataService.getFinancialData(cgtReference.value)
       _ <- EitherT(
             updateSession(sessionStore, request)(
               _.copy(
                 userType = request.authenticatedRequest.userType,
                 journeyStatus = Some(
-                  Subscribed(subscribedDetails, ggCredId, None, draftReturns, financialData.financialTransactions)
+                  Subscribed(
+                    subscribedDetails,
+                    ggCredId,
+                    None,
+                    draftReturns,
+                    sentReturns,
+                    financialData.financialTransactions
+                  )
                 )
               )
             )
