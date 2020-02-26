@@ -204,8 +204,7 @@ class AgentAccessController @Inject() (
         if (verifierMatchingDetails.correctVerifierSupplied) {
           val result = for {
             draftReturns <- returnsService.getDraftReturns(cgtReference)
-            sentReturns <- returnsService
-                            .listReturns(cgtReference, TaxYear.thisTaxYearStartDate(), LocalDateUtils.today())
+            sentReturns  <- returnsService.listReturns(cgtReference)
             _ <- EitherT(
                   updateSession(sessionStore, request)(
                     _.copy(

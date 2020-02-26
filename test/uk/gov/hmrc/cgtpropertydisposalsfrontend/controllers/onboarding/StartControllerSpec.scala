@@ -130,12 +130,12 @@ class StartControllerSpec
       .expects(auditType, event, transactionName, *, *, *, *)
       .returning(())
 
-  def mockGetReturnsList(cgtReference: CgtReference, fromDate: LocalDate, toDate: LocalDate)(
+  def mockGetReturnsList(cgtReference: CgtReference)(
     response: Either[Error, List[ReturnSummary]]
   ) =
     (mockReturnsService
-      .listReturns(_: CgtReference, _: LocalDate, _: LocalDate)(_: HeaderCarrier))
-      .expects(cgtReference, fromDate, toDate, *)
+      .listReturns(_: CgtReference)(_: HeaderCarrier))
+      .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
   val nino                 = NINO("AB123456C")
@@ -1543,11 +1543,7 @@ class StartControllerSpec
                 mockGetSession(SessionData.empty)
                 mockGetSubscribedDetails(cgtReference)(Right(subscribedDetails))
                 mockGetDraftReturns(cgtReference)(Right(draftReturns))
-                mockGetReturnsList(
-                  subscribedDetails.cgtReference,
-                  TaxYear.thisTaxYearStartDate(),
-                  LocalDate.now()
-                )(Left(Error("")))
+                mockGetReturnsList(subscribedDetails.cgtReference)(Left(Error("")))
               }
 
               checkIsTechnicalErrorPage(performAction())
@@ -1567,11 +1563,7 @@ class StartControllerSpec
                 mockGetSession(SessionData.empty)
                 mockGetSubscribedDetails(cgtReference)(Right(subscribedDetails))
                 mockGetDraftReturns(cgtReference)(Right(draftReturns))
-                mockGetReturnsList(
-                  subscribedDetails.cgtReference,
-                  TaxYear.thisTaxYearStartDate(),
-                  LocalDate.now()
-                )(Right(sentReturns))
+                mockGetReturnsList(subscribedDetails.cgtReference)(Right(sentReturns))
                 mockStoreSession(sessionWithSubscribed.copy(userType = Some(UserType.Individual)))(Left(Error("")))
               }
 
@@ -1595,11 +1587,7 @@ class StartControllerSpec
               mockGetSession(SessionData.empty)
               mockGetSubscribedDetails(cgtReference)(Right(subscribedDetails))
               mockGetDraftReturns(cgtReference)(Right(draftReturns))
-              mockGetReturnsList(
-                subscribedDetails.cgtReference,
-                TaxYear.thisTaxYearStartDate(),
-                LocalDate.now()
-              )(Right(sentReturns))
+              mockGetReturnsList(subscribedDetails.cgtReference)(Right(sentReturns))
               mockStoreSession(sessionWithSubscribed.copy(userType = Some(UserType.Individual)))(Right(()))
             }
 
