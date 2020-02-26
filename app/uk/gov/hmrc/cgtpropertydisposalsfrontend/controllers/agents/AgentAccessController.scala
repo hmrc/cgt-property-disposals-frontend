@@ -40,10 +40,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifi
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.audit.{AgentAccessAttempt, AgentVerifierMatchAttempt}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.homepage.FinancialDataRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.agents.AgentVerifierMatchRetryStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{FinancialDataService, SubscriptionService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
@@ -63,6 +64,7 @@ class AgentAccessController @Inject() (
   errorHandler: ErrorHandler,
   agentAccessAuditService: AuditService,
   subscriptionService: SubscriptionService,
+  financialDataService: FinancialDataService,
   returnsService: ReturnsService,
   agentVerifierMatchRetryStore: AgentVerifierMatchRetryStore,
   cc: MessagesControllerComponents,
@@ -202,6 +204,7 @@ class AgentAccessController @Inject() (
         if (verifierMatchingDetails.correctVerifierSupplied) {
           val result = for {
             draftReturns <- returnsService.getDraftReturns(verifierMatchingDetails.clientDetails.cgtReference)
+            //fd           <- financialDataService.getFinancialData()
             _ <- EitherT(
                   updateSession(sessionStore, request)(
                     _.copy(
@@ -210,7 +213,9 @@ class AgentAccessController @Inject() (
                           verifierMatchingDetails.clientDetails,
                           agentSupplyingClientDetails.agentGGCredId,
                           Some(agentSupplyingClientDetails.agentReferenceNumber),
-                          draftReturns
+                          draftReturns,
+                          List.empty
+                          //fd.financialTransactions
                         )
                       )
                     )

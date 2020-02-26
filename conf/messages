@@ -346,6 +346,9 @@ account.home.private-beta.guide=How to report capital gains on disposals made fr
 account.home.private-beta.guide.content=You will be able to use this service from 6 April 2020, to report and pay Capital Gains Tax on UK property disposals made on or after 6 April 2020. Find out how to <a href="{0}">report a capital gain on UK property disposals made before 6 April 2020</a>.
 account.home.button.start-a-new-return=Start new return
 
+account.totalLeftToPay=Total left to pay
+account.make.payment.link=Make a payment
+
 account.manageYourDetails.title=Manage account
 account.manageYourDetails.subtitle=Account number
 account.manageYourDetails.accountName=Account name

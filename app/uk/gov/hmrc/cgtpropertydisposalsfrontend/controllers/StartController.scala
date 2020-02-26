@@ -39,10 +39,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{HandOff
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest.{IndividualBusinessPartnerRecordRequest, TrustBusinessPartnerRecordRequest}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.homepage.FinancialDataRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{NeedMoreDetailsDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPartnerRecordService, SubscriptionService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPartnerRecordService, FinancialDataService, SubscriptionService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
@@ -64,6 +65,7 @@ class StartController @Inject() (
   val sessionDataAction: SessionDataAction,
   val auditService: AuditService,
   returnsService: ReturnsService,
+  financialDataService: FinancialDataService,
   val config: Configuration,
   subscriptionService: SubscriptionService,
   weNeedMoreDetailsPage: views.html.onboarding.we_need_more_details,
@@ -231,11 +233,14 @@ class StartController @Inject() (
     val result = for {
       subscribedDetails <- subscriptionService.getSubscribedDetails(cgtReference)
       draftReturns      <- returnsService.getDraftReturns(cgtReference)
+      financialData     <- financialDataService.getFinancialData(cgtReference.value)
       _ <- EitherT(
             updateSession(sessionStore, request)(
               _.copy(
-                userType      = request.authenticatedRequest.userType,
-                journeyStatus = Some(Subscribed(subscribedDetails, ggCredId, None, draftReturns))
+                userType = request.authenticatedRequest.userType,
+                journeyStatus = Some(
+                  Subscribed(subscribedDetails, ggCredId, None, draftReturns, financialData.financialTransactions)
+                )
               )
             )
           )
