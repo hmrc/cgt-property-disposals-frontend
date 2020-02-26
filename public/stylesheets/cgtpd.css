@@ -580,3 +580,11 @@ input:focus + .hmcts-currency-input__symbol.right {
     right: 0;
     font-weight: bold;
 }
+
+.due-on-account-summary {
+    margin-left: -15px;
+}
+
+.due-on-account-summary h3>span {
+    margin-bottom: 0;
+}

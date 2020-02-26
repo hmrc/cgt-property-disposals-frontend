@@ -51,18 +51,30 @@ buttonLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.butto
  }
  </ul>
 
-<div class="grid-row">
- <div class="column-two-thirds">
-  @insetPanel(Html(messages("account.home.private-beta.guide.content", appConfig.cgtLegacyUrl)))
- </div>
-</div>
-
-<div class="grid-row">
- <table border="1">
-  <th>@messages("account.totalLeftToPay")</th>
-  <th>@totalLeftToPay</th>
-  <th><a href="">@messages("account.make.payment.link")</a></th>
- </table>
+ <div class="grid-row" style="margin-bottom: 20px;">
+  <div class="column-half" style="margin-right: 0;">
+   <h2 class="heading-large" style="margin-top:10px;">
+    Sent returns
+   </h2>
+  </div>
+  <div class="column-quarter">
+   <p></p>
+  </div>
+  <div class="column-quarter">
+   <div class="due-on-account-summary">
+    <h3>
+     <span class="form-hint">
+     @messages("account.totalLeftToPay")
+     </span>
+     £@totalLeftToPay
+    </h3>
+    @if(totalLeftToPay > 0) {
+     <a href="#">
+     @messages("account.make.payment.link")
+     </a>
+    }
+   </div>
+  </div>
  </div>
 
 }
