@@ -154,7 +154,8 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
               messageFromMessageKey(
                 "account.home.subtitle.agent",
                 subscribed.subscribedDetails.makeAccountName(),
-                subscribed.subscribedDetails.cgtReference.value
+                subscribed.subscribedDetails.cgtReference.value,
+                subscribed.financialTransactions.map(t => t.outstandingAmount.inPounds).sum
               )
             )
             content should include(
