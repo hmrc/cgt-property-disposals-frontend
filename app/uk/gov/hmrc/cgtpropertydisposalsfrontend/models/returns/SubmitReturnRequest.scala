@@ -16,12 +16,15 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
+import java.util.UUID
+
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 
 final case class SubmitReturnRequest(
   completeReturn: CompleteReturn,
+  id: UUID,
   subscribedDetails: SubscribedDetails,
   agentReferenceNumber: Option[AgentReferenceNumber]
 )

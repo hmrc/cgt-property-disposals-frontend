@@ -28,7 +28,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTri
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CompleteYearToDateLiabilityAnswers
 
 final case class CompleteReturn(
-  id: UUID,
   triageAnswers: CompleteSingleDisposalTriageAnswers,
   propertyAddress: UkAddress,
   disposalDetails: CompleteDisposalDetailsAnswers,
@@ -42,7 +41,7 @@ object CompleteReturn {
 
   def fromDraftReturn(draftReturn: DraftReturn): Option[CompleteReturn] = draftReturn match {
     case DraftReturn(
-        id,
+        _,
         _,
         t: CompleteSingleDisposalTriageAnswers,
         Some(p: UkAddress),
@@ -52,7 +51,7 @@ object CompleteReturn {
         Some(e: CompleteExemptionAndLossesAnswers),
         Some(y: CompleteYearToDateLiabilityAnswers)
         ) =>
-      Some(CompleteReturn(id, t, p, d, a, r, e, y))
+      Some(CompleteReturn(t, p, d, a, r, e, y))
 
     case _ =>
       None
