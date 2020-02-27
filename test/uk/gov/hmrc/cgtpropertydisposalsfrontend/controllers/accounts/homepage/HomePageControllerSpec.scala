@@ -38,10 +38,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, StartingNewDraftReturn, Subscribed, ViewingReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.homepage.{FinancialDataResponse, FinancialTransaction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftReturn, ReturnSummary, SubmitReturnResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TaxYear, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.FinancialDataService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.ListReturnsResponse
 import uk.gov.hmrc.http.HeaderCarrier
@@ -62,14 +64,22 @@ trait HomePageControllerSpec
 
   val mockReturnsService = mock[ReturnsService]
 
+  val mockFinancialDataService = mock[FinancialDataService]
+
+  val financialTransaction = sample[FinancialTransaction]
+
+  val financialDataResponse =
+    sample[FinancialDataResponse].copy(financialTransactions = List(financialTransaction))
+
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
-      bind[ReturnsService].toInstance(mockReturnsService)
+      bind[ReturnsService].toInstance(mockReturnsService),
+      bind[FinancialDataService].toInstance(mockFinancialDataService)
     )
 
-  val subscribed = sample[Subscribed]
+  val subscribed = sample[Subscribed].copy(financialTransactions = List(financialTransaction))
 
   def mockGetDraftReturns(cgtReference: CgtReference)(response: Either[Error, List[DraftReturn]]) =
     (mockReturnsService
@@ -82,6 +92,12 @@ trait HomePageControllerSpec
   ) =
     (mockReturnsService
       .listReturns(_: CgtReference)(_: HeaderCarrier))
+      .expects(cgtReference, *)
+      .returning(EitherT.fromEither[Future](response))
+
+  def mockGetFinancialData(cgtReference: CgtReference)(response: Either[Error, List[FinancialTransaction]]) =
+    (mockFinancialDataService
+      .getFinancialData(_: CgtReference)(_: HeaderCarrier))
       .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
@@ -138,7 +154,8 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
               messageFromMessageKey(
                 "account.home.subtitle.agent",
                 subscribed.subscribedDetails.makeAccountName(),
-                subscribed.subscribedDetails.cgtReference.value
+                subscribed.subscribedDetails.cgtReference.value,
+                subscribed.financialTransactions.map(t => t.outstandingAmount.inPounds).sum
               )
             )
             content should include(
@@ -221,6 +238,9 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
             )
             mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Right(subscribed.draftReturns))
             mockGetReturnsList(subscribed.subscribedDetails.cgtReference)(Right(subscribed.sentReturns))
+            mockGetFinancialData(subscribed.subscribedDetails.cgtReference)(
+              Right(financialDataResponse.financialTransactions)
+            )
             mockStoreSession(
               SessionData.empty.copy(
                 journeyStatus = Some(subscribed),
@@ -248,6 +268,9 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
               )
               mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Right(subscribed.draftReturns))
               mockGetReturnsList(subscribed.subscribedDetails.cgtReference)(Right(subscribed.sentReturns))
+              mockGetFinancialData(subscribed.subscribedDetails.cgtReference)(
+                Right(financialDataResponse.financialTransactions)
+              )
               mockStoreSession(
                 SessionData.empty.copy(
                   journeyStatus = Some(subscribed),

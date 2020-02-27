@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding
 
-import java.time.LocalDate
-
 import cats.data.EitherT
 import cats.instances.future._
 import org.joda.time.{LocalDate => JodaLocalDate}
@@ -51,11 +49,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{HandOff
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, BusinessPartnerRecordResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.homepage.FinancialTransaction
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{NeedMoreDetailsDetails, SubscribedDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, ReturnSummary}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPartnerRecordService, SubscriptionService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPartnerRecordService, FinancialDataService, SubscriptionService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.ListReturnsResponse
 import uk.gov.hmrc.http.HeaderCarrier
@@ -77,6 +76,8 @@ class StartControllerSpec
 
   val mockReturnsService = mock[ReturnsService]
 
+  val mockFinancialDataService = mock[FinancialDataService]
+
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
@@ -84,7 +85,8 @@ class StartControllerSpec
       bind[BusinessPartnerRecordService].toInstance(mockBprService),
       bind[SubscriptionService].toInstance(mockSubscriptionService),
       bind[AuditService].toInstance(mockAuditService),
-      bind[ReturnsService].toInstance(mockReturnsService)
+      bind[ReturnsService].toInstance(mockReturnsService),
+      bind[FinancialDataService].toInstance(mockFinancialDataService)
     )
 
   override lazy val additionalConfig = ivConfig(useRelativeUrls = false)
@@ -135,6 +137,12 @@ class StartControllerSpec
   ) =
     (mockReturnsService
       .listReturns(_: CgtReference)(_: HeaderCarrier))
+      .expects(cgtReference, *)
+      .returning(EitherT.fromEither[Future](response))
+
+  def mockGetFinancialData(cgtReference: CgtReference)(response: Either[Error, List[FinancialTransaction]]) =
+    (mockFinancialDataService
+      .getFinancialData(_: CgtReference)(_: HeaderCarrier))
       .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
@@ -781,6 +789,7 @@ class StartControllerSpec
                 ggCredId,
                 None,
                 List.empty,
+                List.empty,
                 List.empty
               )
               val session =
@@ -1134,6 +1143,7 @@ class StartControllerSpec
                 ggCredId,
                 None,
                 List.empty,
+                List.empty,
                 List.empty
               )
               val session =
@@ -1460,11 +1470,22 @@ class StartControllerSpec
 
         val draftReturns = List(sample[DraftReturn])
 
+        val financialTransactions = List(sample[FinancialTransaction])
+
         val sentReturns = sample[ListReturnsResponse].returns
 
         val sessionWithSubscribed = SessionData.empty.copy(
-          userType      = Some(UserType.Individual),
-          journeyStatus = Some(Subscribed(subscribedDetails, ggCredId, None, draftReturns, sentReturns))
+          userType = Some(UserType.Individual),
+          journeyStatus = Some(
+            Subscribed(
+              subscribedDetails,
+              ggCredId,
+              None,
+              draftReturns,
+              sentReturns,
+              financialTransactions
+            )
+          )
         )
 
         "the session data indicates they have subscribed" must {
@@ -1564,6 +1585,7 @@ class StartControllerSpec
                 mockGetSubscribedDetails(cgtReference)(Right(subscribedDetails))
                 mockGetDraftReturns(cgtReference)(Right(draftReturns))
                 mockGetReturnsList(subscribedDetails.cgtReference)(Right(sentReturns))
+                mockGetFinancialData(cgtReference)(Right(financialTransactions))
                 mockStoreSession(sessionWithSubscribed.copy(userType = Some(UserType.Individual)))(Left(Error("")))
               }
 
@@ -1588,6 +1610,7 @@ class StartControllerSpec
               mockGetSubscribedDetails(cgtReference)(Right(subscribedDetails))
               mockGetDraftReturns(cgtReference)(Right(draftReturns))
               mockGetReturnsList(subscribedDetails.cgtReference)(Right(sentReturns))
+              mockGetFinancialData(cgtReference)(Right(financialTransactions))
               mockStoreSession(sessionWithSubscribed.copy(userType = Some(UserType.Individual)))(Right(()))
             }
 
