@@ -21,18 +21,19 @@ import akka.util.ByteString
 import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
-import play.api.{Configuration, Mode}
-import play.api.libs.json.JsString
+import play.api.libs.json.{JsString, Json}
 import play.api.libs.ws.ahc.AhcWSResponse
 import play.api.libs.ws.ahc.cache.{CacheableHttpResponseBodyPart, CacheableHttpResponseHeaders, CacheableHttpResponseStatus}
 import play.api.mvc.MultipartFormData
 import play.api.test.Helpers._
+import play.api.{Configuration, Mode}
 import play.shaded.ahc.io.netty.handler.codec.http.DefaultHttpHeaders
 import play.shaded.ahc.org.asynchttpclient.Response
 import play.shaded.ahc.org.asynchttpclient.uri.Uri
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UpscanFileDescriptor, UpscanInitiateReference, UpscanSnapshot}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 
@@ -86,6 +87,127 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
 
   "UpscanConnectorImpl" when {
 
+    "handling requests to get file descriptor status" must {
+      implicit val hc: HeaderCarrier = HeaderCarrier()
+
+      val upscanInitiateReference = UpscanInitiateReference("some-upscan-ref")
+      val expectedUrl             = s"http://localhost:7021/cgt-property-disposals/upscan-file-descriptor/some-upscan-ref"
+      val cgtReference            = sample[CgtReference]
+      val upscanFileDescriptor    = sample[UpscanFileDescriptor].copy(cgtReference = cgtReference)
+
+      "process unsuccessful calls from backend service" in {
+        List(
+          HttpResponse(400),
+          HttpResponse(500, Some(JsString("error")))
+        ).foreach { httpResponse =>
+          withClue(s"For http response [${httpResponse.toString}]") {
+            mockGet(expectedUrl, Map.empty)(Some(httpResponse))
+            await(connector.getFileDescriptor(cgtReference, upscanInitiateReference).value).isLeft shouldBe true
+          }
+        }
+      }
+      "process successful calls from backend service" in {
+        List(
+          HttpResponse(200, Some(Json.toJson[UpscanFileDescriptor](upscanFileDescriptor)))
+        ).foreach { httpResponse =>
+          withClue(s"For http response [${httpResponse.toString}]") {
+            mockGet(expectedUrl, Map.empty)(Some(httpResponse))
+            await(connector.getFileDescriptor(cgtReference, upscanInitiateReference).value) shouldBe Right(
+              Some(upscanFileDescriptor)
+            )
+          }
+        }
+      }
+    }
+
+    "handling requests to update file descriptor status" must {
+      implicit val hc: HeaderCarrier = HeaderCarrier()
+
+      val upscanFileDescriptor = sample[UpscanFileDescriptor]
+      val expectedUrl          = s"http://localhost:7021/cgt-property-disposals/upscan-file-descriptor/status"
+
+      "process unsuccessful calls from backend service" in {
+        List(
+          HttpResponse(400),
+          HttpResponse(500, Some(JsString("error")))
+        ).foreach { httpResponse =>
+          withClue(s"For http response [${httpResponse.toString}]") {
+            mockPut(expectedUrl, upscanFileDescriptor, Seq.empty)(Some(httpResponse))
+            await(connector.updateUpscanFileDescriptorStatus(upscanFileDescriptor).value).isLeft shouldBe true
+          }
+        }
+      }
+      "process successful calls from backend service" in {
+        List(
+          HttpResponse(200, Some(Json.toJson[UpscanFileDescriptor](upscanFileDescriptor)))
+        ).foreach { httpResponse =>
+          withClue(s"For http response [${httpResponse.toString}]") {
+            mockPut(expectedUrl, upscanFileDescriptor, Seq.empty)(Some(httpResponse))
+            await(connector.updateUpscanFileDescriptorStatus(upscanFileDescriptor).value) shouldBe Right(())
+          }
+        }
+      }
+    }
+
+    "handling requests to save upscan initiate response" must {
+      implicit val hc: HeaderCarrier = HeaderCarrier()
+
+      val upscanFileDescriptor = sample[UpscanFileDescriptor]
+      val expectedUrl          = s"http://localhost:7021/cgt-property-disposals/upscan-file-descriptor"
+
+      "process unsuccessful calls from backend service" in {
+        List(
+          HttpResponse(400),
+          HttpResponse(500, Some(JsString("error")))
+        ).foreach { httpResponse =>
+          withClue(s"For http response [${httpResponse.toString}]") {
+            mockPost(expectedUrl, Map.empty, upscanFileDescriptor)(Some(httpResponse))
+            await(connector.saveUpscanInititateResponse(upscanFileDescriptor).value).isLeft shouldBe true
+          }
+        }
+      }
+      "process successful calls from backend service" in {
+        List(
+          HttpResponse(200, Some(Json.toJson[UpscanFileDescriptor](upscanFileDescriptor)))
+        ).foreach { httpResponse =>
+          withClue(s"For http response [${httpResponse.toString}]") {
+            mockPost(expectedUrl, Map.empty, upscanFileDescriptor)(Some(httpResponse))
+            await(connector.saveUpscanInititateResponse(upscanFileDescriptor).value) shouldBe Right(())
+          }
+        }
+      }
+    }
+
+    "handling requests to get an upscan snapshot" must {
+      implicit val hc: HeaderCarrier = HeaderCarrier()
+
+      val cgtReference = sample[CgtReference]
+      val expectedUrl =
+        s"http://localhost:7021/cgt-property-disposals/upscan-snapshot-info/cgt-reference/${cgtReference.value}"
+
+      "process unsuccessful calls from backend service" in {
+        List(
+          HttpResponse(400),
+          HttpResponse(500, Some(JsString("error")))
+        ).foreach { httpResponse =>
+          withClue(s"For http response [${httpResponse.toString}]") {
+            mockGet(expectedUrl)(Some(httpResponse))
+            await(connector.getUpscanSnapshot(cgtReference).value) shouldBe Right(None)
+          }
+        }
+      }
+      "process successful calls from backend service" in {
+        List(
+          HttpResponse(200, Some(Json.toJson[UpscanSnapshot](UpscanSnapshot(1))))
+        ).foreach { httpResponse =>
+          withClue(s"For http response [${httpResponse.toString}]") {
+            mockGet(expectedUrl)(Some(httpResponse))
+            await(connector.getUpscanSnapshot(cgtReference).value) shouldBe Right(Some(UpscanSnapshot(1)))
+          }
+        }
+      }
+    }
+
     "handling upscan initiate requests" must {
 
       implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -93,7 +215,7 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
       val expectedUrl  = s"http://host:123/upscan/initiate"
       val cgtReference = sample[CgtReference]
       val callBackUrl =
-        s"http://localhost:7020/capital-gains-tax-uk-property/upscan-call-back/cgt-reference/${cgtReference.value}"
+        s"http://localhost:7021/cgt-property-disposals/upscan-call-back/cgt-reference/${cgtReference.value}"
       val expectedInitiated = UpscanInitiateRequest(callBackUrl, 0, 5242880)
 
       "process unsuccessful post calls from S3" in {
@@ -120,59 +242,59 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
         }
       }
     }
-  }
 
-  "handling file upload requests with error responses" must {
+    "handling file upload requests with error responses" must {
 
-    implicit val hc: HeaderCarrier = HeaderCarrier()
+      implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val s3Url = s"https://bucketname.s3.eu-west-2.amazonaws.com"
+      val s3Url = s"https://bucketname.s3.eu-west-2.amazonaws.com"
 
-    val parts: Source[MultipartFormData.Part[Source[ByteString, _]], _] =
-      Source.apply(Map("key" -> List("V1")).flatMap {
-        case (key, values) =>
-          values.map(value => MultipartFormData.DataPart(key, value): MultipartFormData.Part[Source[ByteString, _]])
-      })
+      val parts: Source[MultipartFormData.Part[Source[ByteString, _]], _] =
+        Source.apply(Map("key" -> List("V1")).flatMap {
+          case (key, values) =>
+            values.map(value => MultipartFormData.DataPart(key, value): MultipartFormData.Part[Source[ByteString, _]])
+        })
 
-    "process unsuccessful responses from S3" in {
-      List(
-        buildWsResponse(400),
-        buildWsResponse(500)
-      ).foreach { httpResponse =>
-        withClue(s"For http response [${httpResponse.toString}]") {
-          mockPostMultiPartForm(s3Url, parts)(Some(httpResponse))
-          await(
-            connector
-              .upload(
-                s3Url,
-                MultipartFormData(Map("key" -> List("V1")), Seq.empty, Seq.empty): MultipartFormData[
-                  Source[ByteString, _]
-                ]
-              )
-              .value
-          ) shouldBe Left(
-            Error("error body")
-          )
+      "process unsuccessful responses from S3" in {
+        List(
+          buildWsResponse(400),
+          buildWsResponse(500)
+        ).foreach { httpResponse =>
+          withClue(s"For http response [${httpResponse.toString}]") {
+            mockPostMultiPartForm(s3Url, parts)(Some(httpResponse))
+            await(
+              connector
+                .upload(
+                  s3Url,
+                  MultipartFormData(Map("key" -> List("V1")), Seq.empty, Seq.empty): MultipartFormData[
+                    Source[ByteString, _]
+                  ]
+                )
+                .value
+            ) shouldBe Left(
+              Error("error body")
+            )
+          }
         }
       }
-    }
 
-    "process successful responses from S3" in {
-      List(
-        buildWsResponse(204)
-      ).foreach { httpResponse =>
-        withClue(s"For http response [${httpResponse.toString}]") {
-          mockPostMultiPartForm(s3Url, parts)(Some(httpResponse))
-          await(
-            connector
-              .upload(
-                s3Url,
-                MultipartFormData(Map("key" -> List("V1")), Seq.empty, Seq.empty): MultipartFormData[
-                  Source[ByteString, _]
-                ]
-              )
-              .value
-          ) shouldBe Right(())
+      "process successful responses from S3" in {
+        List(
+          buildWsResponse(204)
+        ).foreach { httpResponse =>
+          withClue(s"For http response [${httpResponse.toString}]") {
+            mockPostMultiPartForm(s3Url, parts)(Some(httpResponse))
+            await(
+              connector
+                .upload(
+                  s3Url,
+                  MultipartFormData(Map("key" -> List("V1")), Seq.empty, Seq.empty): MultipartFormData[
+                    Source[ByteString, _]
+                  ]
+                )
+                .value
+            ) shouldBe Right(())
+          }
         }
       }
     }

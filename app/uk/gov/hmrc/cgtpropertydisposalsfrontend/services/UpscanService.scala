@@ -49,10 +49,6 @@ trait UpscanService {
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Unit]
 
-  def saveUpscanCallBackResponse(cgtReference: CgtReference, upscanCallBack: UpscanCallBack)(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, Unit]
-
 }
 
 @Singleton
@@ -95,11 +91,6 @@ class UpscanServiceImpl @Inject() (
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Option[UpscanFileDescriptor]] =
     upscanConnector.getFileDescriptor(cgtReference, upscanInitiateReference)
-
-  override def saveUpscanCallBackResponse(cgtReference: CgtReference, upscanCallBack: UpscanCallBack)(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, Unit] =
-    upscanConnector.saveUpscanCallBackResponse(cgtReference, upscanCallBack)
 
   override def updateUpscanFileDescriptorStatus(upscanFileDescriptor: UpscanFileDescriptor)(
     implicit hc: HeaderCarrier

@@ -7,7 +7,6 @@ GET /capital-gains-tax-uk-property/resume-draft-return/:id                uk.gov
 # UPSCAN
 GET  /capital-gains-tax-uk-property/upscan-initiate                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.upscan.UpscanController.upscan()
 POST /capital-gains-tax-uk-property/upload                                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.upscan.UpscanController.upload()
-POST /capital-gains-tax-uk-property/upscan-call-back/cgt-reference/:id      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.upscan.UpscanController.callBack(id : String)
 
 ->   /capital-gains-tax-uk-property                                         app.Routes
 ->   /capital-gains-tax-uk-property                                         accounts.Routes

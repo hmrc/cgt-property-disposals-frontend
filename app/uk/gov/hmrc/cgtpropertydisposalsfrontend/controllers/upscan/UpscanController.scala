@@ -18,28 +18,27 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.upscan
 
 import akka.stream.scaladsl.{FileIO, Source}
 import akka.util.ByteString
+import cats.data.EitherT
+import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import configs.Configs
 import configs.syntax._
 import play.api.Configuration
 import play.api.libs.Files
-import play.api.libs.json.JsValue
 import play.api.mvc.{Action, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.UpscanConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanFileDescriptor.UpscanFileDescriptorStatus.UPLOADED
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanInitiateResponse._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UpscanCallBack, UpscanInitiateReference}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UpscanFileDescriptor, UpscanInitiateReference}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views._
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
@@ -106,79 +105,52 @@ class UpscanController @Inject() (
     authenticatedActionWithSessionData(parse.multipartFormData(maxFileSize)).async { implicit request =>
       withSubscribedUser(request) { (_, subscribed) =>
         val multipart: MultipartFormData[Files.TemporaryFile] = request.body
-        multipart.dataParts
-          .get("reference")
-          .flatMap(_.headOption)
-          .fold(Future.successful(BadRequest("missing upscan file descriptor id"))) { reference =>
-            upscanService
-              .getUpscanFileDescriptor(subscribed.subscribedDetails.cgtReference, UpscanInitiateReference(reference))
-              .value
-              .flatMap {
-                case Right(maybeUpscanFileDescriptor) => {
-                  maybeUpscanFileDescriptor match {
-                    case Some(upscanFileDescriptor) => {
-                      val userFile =
-                        multipart.files
-                          .map(file => file.copy(ref = FileIO.fromPath(file.ref.path): Source[ByteString, Any]))
-                      val prepared: MultipartFormData[Source[ByteString, Any]] =
-                        multipart
-                          .copy(
-                            files = userFile,
-                            dataParts = upscanFileDescriptor.fileDescriptor.uploadRequest.fields
-                              .mapValues(fieldValue => Seq(fieldValue))
-                          )
-                      upscanConnector
-                        .upload(upscanFileDescriptor.fileDescriptor.uploadRequest.href, prepared)
-                        .value
-                        .flatMap {
-                          case Left(error) =>
-                            logger.warn(s"could not upload file to S3", error)
-                            Future.successful(errorHandler.errorResult(None))
-                          case Right(_) => {
-                            upscanConnector
-                              .updateUpscanFileDescriptorStatus(upscanFileDescriptor.copy(status = UPLOADED))
-                              .value
-                              .map {
-                                case Left(error) => {
-                                  logger.warn(s"could not update upscan initiate file descriptor upload status: $error")
-                                  InternalServerError
-                                }
-                                case Right(_) => Ok
-                              }
-                          }
-                        }
-                    }
-                    case None => {
-                      logger.warn(
-                        s"could not find upscan initiate file descriptors with parameters: " +
-                          s"CGT Reference: ${subscribed.subscribedDetails.cgtReference.value} | Upscan Reference: $reference"
+        val result = for {
+          reference <- EitherT.fromOption(
+                        multipart.dataParts.get("reference").flatMap(_.headOption),
+                        Error("missing upscan file descriptor id")
                       )
-                      BadRequest
-                    }
-                  }
-                }
-                case Left(e) => {
-                  logger.warn(s"failed to get upscan file descriptor: $e")
-                  BadRequest
-                }
-              }
-          }
+          maybeUpscanFileDescriptor <- upscanService
+                                        .getUpscanFileDescriptor(
+                                          subscribed.subscribedDetails.cgtReference,
+                                          UpscanInitiateReference(reference)
+                                        )
+          upscanFileDescriptor <- EitherT.fromOption(
+                                   maybeUpscanFileDescriptor,
+                                   Error("failed to retrieve upscan file descriptor details")
+                                 )
+          prepared <- EitherT.fromEither(handleGetFileDescriptorResult(multipart, upscanFileDescriptor))
+          _        <- upscanConnector.upload(upscanFileDescriptor.fileDescriptor.uploadRequest.href, prepared)
+          _        <- upscanConnector.updateUpscanFileDescriptorStatus(upscanFileDescriptor.copy(status = UPLOADED))
+
+        } yield ()
+
+        result.fold(
+          error => {
+            logger.warn(s"failed to upload file with error: $error")
+            errorHandler.errorResult(None)
+          },
+          _ => Ok
+        )
       }
     }
 
-  def callBack(cgtReference: String): Action[JsValue] =
-    Action.async(parse.json) { implicit request =>
-      request.body
-        .validate[UpscanCallBack]
-        .asOpt
-        .fold(Future.successful(BadRequest("failed to parse upscan call back response")))(upscanCallBack =>
-          upscanService.saveUpscanCallBackResponse(CgtReference(cgtReference), upscanCallBack).value.map {
-            case Left(error) =>
-              logger.warn("failed to save upscan call back response", error)
-              errorHandler.errorResult(None)
-            case Right(_) => NoContent
-          }
+  @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
+  private def handleGetFileDescriptorResult(
+    multipart: MultipartFormData[Files.TemporaryFile],
+    upscanFileDescriptor: UpscanFileDescriptor
+  ): Either[Error, MultipartFormData[Source[ByteString, Any]]] = {
+    val userFile =
+      multipart.files
+        .map(file => file.copy(ref = FileIO.fromPath(file.ref.path): Source[ByteString, Any]))
+    val prepared: MultipartFormData[Source[ByteString, Any]] =
+      multipart
+        .copy(
+          files = userFile,
+          dataParts = upscanFileDescriptor.fileDescriptor.uploadRequest.fields
+            .mapValues(fieldValue => Seq(fieldValue))
         )
-    }
+    Right(prepared)
+  }
 
 }
