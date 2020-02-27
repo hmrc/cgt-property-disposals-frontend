@@ -40,19 +40,11 @@
     @messages("multiple-disposals.guidance.p1")
     </p>
 
-    <ul class="list-bullet">
-        <li>@messages("multiple-disposals.guidance.li1")</li>
-        <li>@messages("multiple-disposals.guidance.li2")</li>
-        <li>@messages("multiple-disposals.guidance.li3")</li>
-    </ul>
-
     <p>
     @messages("multiple-disposals.guidance.p2")
     </p>
 
-    <p>
-    @messages("multiple-disposals.guidance.p3")
-    </p>
+
 
     @details(
       messages("multiple-disposals.guidance.details.summary"),
@@ -67,6 +59,21 @@
       )
 
     @formWrapper(triage.routes.MultipleDisposalsTriageController.guidanceSubmit()) {
+
+        @unitInput(
+        fieldId = key,
+        value = form.data.getOrElse(key, ""),
+        formError = form.error(key),
+        hasErrors = form.error(key).nonEmpty,
+        label = Html(title),
+        labelAsHeading = true,
+        helpText = Some(Html(messages(s"$key.helpText"))),
+        autoComplete = AutoCompleteType.On,
+        inputClass = Some("small"),
+        aspect = "left",
+        unit = "£",
+        assistiveText = messages("unit-input.assistive.pounds")
+        )
         @submitButton(messages("button.continue"))
     }
 }
