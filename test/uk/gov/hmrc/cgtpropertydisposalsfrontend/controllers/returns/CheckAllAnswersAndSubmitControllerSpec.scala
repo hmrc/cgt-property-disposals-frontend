@@ -25,6 +25,7 @@ import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
@@ -37,7 +38,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLosse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.IncompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.IncompleteYearToDateLiabilityAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{Charge, CompleteReturn, DraftReturn, PaymentsJourney, SubmitReturnRequest, SubmitReturnResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{PaymentsService, ReturnsService}
@@ -66,6 +67,7 @@ class CheckAllAnswersAndSubmitControllerSpec
     )
 
   lazy val controller = instanceOf[CheckAllAnswersAndSubmitController]
+  lazy val conf = instanceOf[ViewConfig]
 
   implicit val messagesApi: MessagesApi = controller.messagesApi
 
@@ -234,7 +236,12 @@ class CheckAllAnswersAndSubmitControllerSpec
           mockGetSession(sessionWitJourney(justSubmittedReturn))
         }
 
-        checkPageIsDisplayed(performAction(), messageFromMessageKey("confirmationOfSubmission.title"))
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("confirmationOfSubmission.title"), { doc =>
+            doc.select("#content > article > div > p > a").attr("href") shouldBe conf.selfAssessmentUrl
+          }
+        )
       }
 
     }
