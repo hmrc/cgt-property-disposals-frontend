@@ -34,7 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionRe
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.UnsuccessfulNameMatchAttempts.NameMatchDetails.{IndividualNameMatchDetails, TrustNameMatchDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, UnsuccessfulNameMatchAttempts}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.homepage.{FinancialDataResponse, FinancialTransaction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.homepage.{FinancialDataRequest, FinancialDataResponse, FinancialTransaction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscribedUpdateDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue.GainCalculatedTaxDue
@@ -73,7 +73,7 @@ object Generators
     with TaxYearGen
     with ExemptionAndLossesAnswersGen
     with YearToDateLiabilityAnswersGen
-    with FinancialDataResponseGen {
+    with FinancialDataGen {
 
   implicit val booleanGen: Gen[Boolean] = Gen.oneOf(true, false)
 
@@ -397,10 +397,12 @@ trait YearToDateLiabilityAnswersGen { this: GenUtils =>
 
 }
 
-trait FinancialDataResponseGen { this: GenUtils =>
+trait FinancialDataGen { this: GenUtils =>
 
   implicit val financialTransactionGen: Gen[FinancialTransaction] = gen[FinancialTransaction]
 
   implicit val financialDataResponseGen: Gen[FinancialDataResponse] = gen[FinancialDataResponse]
+
+  implicit val financialDataRequestGen: Gen[FinancialDataRequest] = gen[FinancialDataRequest]
 
 }

@@ -53,7 +53,7 @@ class FinancialDataServiceImpl @Inject() (connector: FinancialDataConnector, met
       if (response.status === OK)
         response.parseJSON[FinancialDataResponse]().leftMap(Error(_))
       else
-        Left(Error(s"Call to get subscribed details came back with status ${response.status}"))
+        Left(Error(s"Call to get financial data came back with status ${response.status}"))
     }
 
   def fromDate: String = {
@@ -64,9 +64,8 @@ class FinancialDataServiceImpl @Inject() (connector: FinancialDataConnector, met
       else
         today.getYear - 1
     LocalDate.of(startYear, 4, 6).toString
-    //.replace("-", "")
   }
 
   def toDate: String = LocalDate.now.toString
-  //.replace("-", "")
+
 }
