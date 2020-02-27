@@ -51,7 +51,11 @@ class FinancialDataServiceImpl @Inject() (connector: FinancialDataConnector, met
 
   override def getFinancialData(cgtReference: CgtReference)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, List[FinancialTransaction]] =
+  ): EitherT[Future, Error, List[FinancialTransaction]] = {
+
+    val fromDate = TaxYear.thisTaxYearStartDate()
+    val toDate   = fromDate.plusYears(1L).minusDays(1L)
+
     connector.getFinancialData(cgtReference, fromDate, toDate).subflatMap { response =>
       if (response.status === OK)
         response
@@ -61,9 +65,6 @@ class FinancialDataServiceImpl @Inject() (connector: FinancialDataConnector, met
       else
         Left(Error(s"Call to get financial data came back with status ${response.status}"))
     }
-
-  val fromDate = TaxYear.thisTaxYearStartDate()
-
-  val toDate = fromDate.plusYears(1L).minusDays(1L)
+  }
 
 }

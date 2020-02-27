@@ -17,6 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.onboarding
 
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
@@ -47,8 +48,8 @@ class FinancialDataConnectorImpl @Inject() (http: HttpClient, servicesConfig: Se
 
   def financialDataUrl(cgtReference: CgtReference, fromDate: LocalDate, toDate: LocalDate) = {
     val cgtRef = cgtReference.value
-    val from   = fromDate.toString
-    val to     = toDate.toString
+    val from   = fromDate.format(DateTimeFormatter.ISO_DATE)
+    val to     = toDate.format(DateTimeFormatter.ISO_DATE)
     s"$baseUrl/cgt-property-disposals/financial-data/$cgtRef/$from/$to"
   }
 
