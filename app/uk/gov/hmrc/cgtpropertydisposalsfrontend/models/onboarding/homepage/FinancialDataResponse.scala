@@ -16,16 +16,10 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.homepage
 
-import java.time.LocalDateTime
-
 import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AmountInPence
 
 final case class FinancialDataResponse(
-  idType: String,
-  idNumber: String,
-  regimeType: String,
-  processingDate: LocalDateTime,
   financialTransactions: List[FinancialTransaction]
 )
 object FinancialDataResponse {
