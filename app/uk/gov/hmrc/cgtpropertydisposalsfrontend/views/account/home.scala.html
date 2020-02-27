@@ -28,7 +28,8 @@ mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
 pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
 accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu,
 insetPanel: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.inset_panel,
-buttonLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.button_link
+buttonLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.button_link,
+sentReturnItem: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.components.return_list_item
 )
 
 @(details: SubscribedDetails, draftReturns: List[DraftReturn], sentReturns: List[ReturnSummary],totalLeftToPay:BigDecimal)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
@@ -78,37 +79,13 @@ buttonLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.butto
    </div>
   </div>
  </div>
+ <ul class="return-list">
+   @sentReturns.map{ sentReturn =>
+    @sentReturnItem(sentReturn)
+   }
+ </ul>
 
-<h2>Sent Returns</h2>
-<ul>
- @sentReturns.map{ sentReturn =>
- <li>
-  <ul>
-   <li>Submission id: @sentReturn.submissionId</li>
-   <li>Completion Date: @sentReturn.completionDate</li>
-   <li>Submission Date: @sentReturn.submissionDate</li>
-   <li>Last updated Date: @sentReturn.lastUpdatedDate</li>
-   <li>Property Address: @sentReturn.propertyAddress</li>
-   <li>Total CGT liability: £@sentReturn.totalCGTLiability.inPounds()</li>
-   <li>Total outstanding: £@sentReturn.totalCGTLiability.inPounds()</li>
-   <li>Tax Year: @sentReturn.taxYear</li>
-   <li>Charges:
-    <ul>
-     @sentReturn.charges.map{ charge =>
-     <li>Amount: £@charge.amount.inPounds()</li>
-     <li>Due date: @charge.dueDate</li>
-     <li>Description: @charge.chargeDescription</li>
-     <li>Charge Reference: @charge.chargeReference</li>
-     }
-    </ul>
-   </li>
-  </ul>
- </li>
- <p><a href="@{controllers.accounts.homepage.routes.HomePageController.viewSentReturn(sentReturn.submissionId)}">View return</a></p>
- <hr>
- }
-
-</ul>
+  <p>@messages("returns.paymentTakes3Days")</p>
 
 
 }
