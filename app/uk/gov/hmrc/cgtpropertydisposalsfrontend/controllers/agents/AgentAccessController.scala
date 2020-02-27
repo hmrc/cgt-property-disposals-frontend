@@ -34,7 +34,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents.AgentAccessController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.AgentStatus.{AgentSupplyingClientDetails, VerifierMatchingDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AgentStatus, Subscribed}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{LocalDateUtils, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Country, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifierAttempts
@@ -44,7 +43,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDeta
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.agents.AgentVerifierMatchRetryStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{FinancialDataService, SubscriptionService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
@@ -64,6 +63,7 @@ class AgentAccessController @Inject() (
   errorHandler: ErrorHandler,
   agentAccessAuditService: AuditService,
   subscriptionService: SubscriptionService,
+  financialDataService: FinancialDataService,
   returnsService: ReturnsService,
   agentVerifierMatchRetryStore: AgentVerifierMatchRetryStore,
   cc: MessagesControllerComponents,
@@ -203,8 +203,9 @@ class AgentAccessController @Inject() (
         val cgtReference = verifierMatchingDetails.clientDetails.cgtReference
         if (verifierMatchingDetails.correctVerifierSupplied) {
           val result = for {
-            draftReturns <- returnsService.getDraftReturns(cgtReference)
-            sentReturns  <- returnsService.listReturns(cgtReference)
+            draftReturns          <- returnsService.getDraftReturns(cgtReference)
+            sentReturns           <- returnsService.listReturns(cgtReference)
+            financialTransactions <- financialDataService.getFinancialData(cgtReference)
             _ <- EitherT(
                   updateSession(sessionStore, request)(
                     _.copy(
@@ -214,7 +215,8 @@ class AgentAccessController @Inject() (
                           agentSupplyingClientDetails.agentGGCredId,
                           Some(agentSupplyingClientDetails.agentReferenceNumber),
                           draftReturns,
-                          sentReturns
+                          sentReturns,
+                          financialTransactions
                         )
                       )
                     )

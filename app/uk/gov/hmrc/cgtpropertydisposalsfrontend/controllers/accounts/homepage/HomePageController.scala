@@ -26,20 +26,22 @@ import cats.syntax.eq._
 import com.google.inject.Inject
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, StartingNewDraftReturn, Subscribed, ViewingReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.homepage.{FinancialDataResponse, FinancialTransaction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, ReturnSummary}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{LocalDateUtils, SessionData, TaxYear, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AmountInPence._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.FinancialDataService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, models, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
@@ -51,6 +53,7 @@ class HomePageController @Inject() (
   errorHandler: ErrorHandler,
   sessionStore: SessionStore,
   returnsService: ReturnsService,
+  financialDataService: FinancialDataService,
   cc: MessagesControllerComponents,
   manageYourDetailsPage: views.html.account.manage_your_details,
   homePage: views.html.account.home,
@@ -67,7 +70,14 @@ class HomePageController @Inject() (
   def homepage(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request: RequestWithSessionData[AnyContent] =>
       withSubscribedUser { (_, subscribed) =>
-        Ok(homePage(subscribed.subscribedDetails, subscribed.draftReturns, subscribed.sentReturns))
+        Ok(
+          homePage(
+            subscribed.subscribedDetails,
+            subscribed.draftReturns,
+            subscribed.sentReturns,
+            subscribed.financialTransactions.map(_.outstandingAmount.inPounds).sum
+          )
+        )
       }(withUplift = true)
   }
 
@@ -181,26 +191,54 @@ class HomePageController @Inject() (
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((s: SessionData, r: StartingNewDraftReturn)) if withUplift =>
         upliftToSubscribedAndThen(r, r.subscribedDetails.cgtReference) {
-          case (r, draftReturns, sentReturns) =>
-            Subscribed(r.subscribedDetails, r.ggCredId, r.agentReferenceNumber, draftReturns, sentReturns)
+          case (r, draftReturns, sentReturns, financialTransactions) =>
+            Subscribed(
+              r.subscribedDetails,
+              r.ggCredId,
+              r.agentReferenceNumber,
+              draftReturns,
+              sentReturns,
+              financialTransactions
+            )
         }(f(s, _))
 
       case Some((s: SessionData, r: FillingOutReturn)) if withUplift =>
         upliftToSubscribedAndThen(r, r.subscribedDetails.cgtReference) {
-          case (r, draftReturns, sentReturns) =>
-            Subscribed(r.subscribedDetails, r.ggCredId, r.agentReferenceNumber, draftReturns, sentReturns)
+          case (r, draftReturns, sentReturns, financialTransactions) =>
+            Subscribed(
+              r.subscribedDetails,
+              r.ggCredId,
+              r.agentReferenceNumber,
+              draftReturns,
+              sentReturns,
+              financialTransactions
+            )
         }(f(s, _))
 
       case Some((s: SessionData, r: JustSubmittedReturn)) if withUplift =>
         upliftToSubscribedAndThen(r, r.subscribedDetails.cgtReference) {
-          case (r, draftReturns, sentReturns) =>
-            Subscribed(r.subscribedDetails, r.ggCredId, r.agentReferenceNumber, draftReturns, sentReturns)
+          case (r, draftReturns, sentReturns, financialTransactions) =>
+            Subscribed(
+              r.subscribedDetails,
+              r.ggCredId,
+              r.agentReferenceNumber,
+              draftReturns,
+              sentReturns,
+              financialTransactions
+            )
         }(f(s, _))
 
       case Some((s: SessionData, r: ViewingReturn)) if withUplift =>
         upliftToSubscribedAndThen(r, r.subscribedDetails.cgtReference) {
-          case (r, draftReturns, sentReturns) =>
-            Subscribed(r.subscribedDetails, r.ggCredId, r.agentReferenceNumber, draftReturns, sentReturns)
+          case (r, draftReturns, sentReturns, financialTransactions) =>
+            Subscribed(
+              r.subscribedDetails,
+              r.ggCredId,
+              r.agentReferenceNumber,
+              draftReturns,
+              sentReturns,
+              financialTransactions
+            )
         }(f(s, _))
 
       case Some((s: SessionData, r: Subscribed)) =>
@@ -211,14 +249,15 @@ class HomePageController @Inject() (
     }
 
   private def upliftToSubscribedAndThen[J](journey: J, cgtReference: CgtReference)(
-    uplift: (J, List[DraftReturn], List[ReturnSummary]) => Subscribed
+    uplift: (J, List[DraftReturn], List[ReturnSummary], List[FinancialTransaction]) => Subscribed
   )(
     f: Subscribed => Future[Result]
   )()(implicit hc: HeaderCarrier, request: RequestWithSessionData[_]): Future[Result] = {
     val result = for {
-      draftReturns <- returnsService.getDraftReturns(cgtReference)
-      sentReturns  <- returnsService.listReturns(cgtReference)
-      subscribed = uplift(journey, draftReturns, sentReturns)
+      draftReturns  <- returnsService.getDraftReturns(cgtReference)
+      sentReturns   <- returnsService.listReturns(cgtReference)
+      financialData <- financialDataService.getFinancialData(cgtReference)
+      subscribed = uplift(journey, draftReturns, sentReturns, financialData)
       _ <- EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(subscribed))))
     } yield subscribed
 

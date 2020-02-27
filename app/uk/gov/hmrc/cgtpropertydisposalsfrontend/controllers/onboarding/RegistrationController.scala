@@ -40,7 +40,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.EmailSou
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{FinancialDataService, SubscriptionService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
@@ -56,6 +56,7 @@ class RegistrationController @Inject() (
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
   subscriptionService: SubscriptionService,
+  financialDataService: FinancialDataService,
   metrics: Metrics,
   selectEntityTypePage: views.html.onboarding.registration.select_entity_type,
   wrongGGAccountForTrustPage: views.html.onboarding.wrong_gg_account_for_trust,
@@ -246,6 +247,7 @@ class RegistrationController @Inject() (
                           ),
                           ggCredId,
                           None,
+                          List.empty,
                           List.empty,
                           List.empty
                         )
