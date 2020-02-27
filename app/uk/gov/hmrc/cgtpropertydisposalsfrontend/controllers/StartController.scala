@@ -165,7 +165,7 @@ class StartController @Inject() (
     case _: AgentStatus.AgentSupplyingClientDetails =>
       Redirect(agents.routes.AgentAccessController.enterClientsCgtRef())
 
-    case _: StartingNewDraftReturn | _: FillingOutReturn =>
+    case _: StartingNewDraftReturn | _: FillingOutReturn | _: ViewingReturn =>
       Redirect(accounts.homepage.routes.HomePageController.homepage())
 
     case _: JustSubmittedReturn =>
@@ -234,11 +234,12 @@ class StartController @Inject() (
     val result = for {
       subscribedDetails <- subscriptionService.getSubscribedDetails(cgtReference)
       draftReturns      <- returnsService.getDraftReturns(cgtReference)
+      sentReturns       <- returnsService.listReturns(cgtReference)
       _ <- EitherT(
             updateSession(sessionStore, request)(
               _.copy(
                 userType      = request.authenticatedRequest.userType,
-                journeyStatus = Some(Subscribed(subscribedDetails, ggCredId, None, draftReturns))
+                journeyStatus = Some(Subscribed(subscribedDetails, ggCredId, None, draftReturns, sentReturns))
               )
             )
           )

@@ -16,15 +16,28 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import play.api.libs.json.{Json, OFormat}
+import java.time.LocalDate
 
-final case class SubmitReturnResponse(
-  formBundleId: String,
-  charge: Option[Charge]
+import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AmountInPence
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+
+final case class ReturnSummary(
+  submissionId: String,
+  submissionDate: LocalDate,
+  completionDate: LocalDate,
+  lastUpdatedDate: Option[LocalDate],
+  taxYear: String,
+  totalCGTLiability: AmountInPence,
+  totalOutstanding: AmountInPence,
+  propertyAddress: UkAddress,
+  charges: List[Charge]
 )
 
-object SubmitReturnResponse {
+object ReturnSummary {
 
-  implicit val format: OFormat[SubmitReturnResponse] = Json.format
+  implicit val ukAddressFormat: OFormat[UkAddress] = Json.format
+
+  implicit val format: OFormat[ReturnSummary] = Json.format
 
 }

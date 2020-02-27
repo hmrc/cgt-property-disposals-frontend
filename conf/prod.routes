@@ -1,8 +1,8 @@
 # Add all the application routes to the app.routes file
-GET /capital-gains-tax-uk-property/account-home                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.HomePageController.homepage()
-GET /capital-gains-tax-uk-property/start-new-return                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.HomePageController.startNewReturn()
-GET /capital-gains-tax-uk-property/resume-draft-return/:id                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.HomePageController.resumeDraftReturn(id: java.util.UUID)
-
+GET /capital-gains-tax-uk-property/account-home                            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.HomePageController.homepage()
+GET /capital-gains-tax-uk-property/start-new-return                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.HomePageController.startNewReturn()
+GET /capital-gains-tax-uk-property/resume-draft-return/:id                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.HomePageController.resumeDraftReturn(id: java.util.UUID)
+GET /capital-gains-tax-uk-property/view-sent-return/:submissionId          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.HomePageController.viewSentReturn(submissionId: String)
 
 # UPSCAN
 GET  /capital-gains-tax-uk-property/upscan-initiate                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.upscan.UpscanController.upscan()

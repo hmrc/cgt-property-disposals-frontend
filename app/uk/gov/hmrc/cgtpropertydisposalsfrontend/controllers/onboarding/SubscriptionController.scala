@@ -87,6 +87,7 @@ class SubscriptionController @Inject() (
                           ),
                           request.subscriptionReady.ggCredId,
                           None,
+                          List.empty,
                           List.empty
                         )
                       )

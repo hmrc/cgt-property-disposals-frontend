@@ -24,3 +24,9 @@ POST  /check-answers-accept-send         uk.gov.hmrc.cgtpropertydisposalsfronten
 
 GET   /return-sent-confirmation          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.confirmationOfSubmission()
 POST  /return-sent-confirmation          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.payReturn()
+
+
+GET   /return                            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ViewReturnController.displayReturn()
+
+# TODO: temporary endpoint - remove
+POST /capital-gains-tax-uk-property/amend-return                           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ViewReturnController.amendReturn()

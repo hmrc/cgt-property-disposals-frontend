@@ -18,6 +18,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.RadioOption
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -25,7 +26,7 @@
         submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
         errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group,
+        radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional,
         backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
@@ -36,21 +37,38 @@
 @title = @{messages(s"$key.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@optionIndex(value: AssetType) = @{
-    value match {
-        case AssetType.Residential => 0
-        case AssetType.NonResidential => 1
-        case AssetType.MixedUse => 2
-        case AssetType.IndirectDisposal => 3
-    }}
+@selectedIndex = @{
+  form.data.get(key).map({
+    case "0" => 0
+    case "1" => 1
+    case "2" => 2
+    case _ => 3
+  })
+}
 
 @options = @{
     List(
-        s"$key.Residential",
-        s"$key.NonResidential",
-        s"$key.MixedUse",
-        s"$key.IndirectDisposal"
-    ).map(messageKey =>Html(messages(messageKey)))
+      RadioOption(
+        label = messages(s"$key.Residential"),
+        content = None,
+        optionHelpText = Some(Html(messages(s"$key.Residential.helpText")))
+      ),
+      RadioOption(
+        label = messages(s"$key.NonResidential"),
+        content = None,
+        optionHelpText = None
+      ),
+      RadioOption(
+        label = messages(s"$key.MixedUse"),
+        content = None,
+        optionHelpText = Some(Html(messages(s"$key.MixedUse.helpText")))
+      ),
+      RadioOption(
+        label = messages(s"$key.IndirectDisposal"),
+        content = None,
+        optionHelpText = Some(Html(messages(s"$key.IndirectDisposal.helpText")))
+      )
+    )
 }
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
@@ -62,13 +80,13 @@
     }
 
     @formWrapper(controllers.returns.triage.routes.SingleDisposalsTriageController.assetTypeForNonUkResidentsSubmit(), 'novalidate -> "novalidate") {
-        @radioGroup(
+        @radioGroupConditional(
             fieldId = key,
             options = options,
-            selected = form.value.map(optionIndex),
+            selected = selectedIndex,
             label = pageHeading(title, Some(messages("triage.caption"))),
             labelAsHeading = true,
-            errorKey = form.error(key).map(e => e.message),
+            error = form.error(key),
             hasErrors = hasErrors
         )
 

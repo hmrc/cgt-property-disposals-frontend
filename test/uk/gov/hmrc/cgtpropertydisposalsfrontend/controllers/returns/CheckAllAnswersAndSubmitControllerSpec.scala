@@ -37,7 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLosse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.IncompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.IncompleteYearToDateLiabilityAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftReturn, PaymentsJourney, SubmitReturnRequest, SubmitReturnResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{Charge, CompleteReturn, DraftReturn, PaymentsJourney, SubmitReturnRequest, SubmitReturnResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{PaymentsService, ReturnsService}
@@ -96,6 +96,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 
     val completeDraftReturn = DraftReturn(
       completeReturn.id,
+      sample[CgtReference],
       completeReturn.triageAnswers,
       Some(completeReturn.propertyAddress),
       Some(completeReturn.disposalDetails),
@@ -242,6 +243,9 @@ class CheckAllAnswersAndSubmitControllerSpec
 
       def performAction(): Future[Result] = controller.payReturn()(FakeRequest())
 
+      def justSubmittedReturnWithCharge(charge: Option[Charge]): JustSubmittedReturn =
+        sample[JustSubmittedReturn].copy(submissionResponse = sample[SubmitReturnResponse].copy(charge = charge))
+
       behave like redirectToStartWhenInvalidJourney(
         performAction, {
           case _: JustSubmittedReturn => true
@@ -249,18 +253,32 @@ class CheckAllAnswersAndSubmitControllerSpec
         }
       )
 
+      "redirect to the homepage" when {
+
+        "there is no charge" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWitJourney(justSubmittedReturnWithCharge(None)))
+          }
+
+          checkIsRedirect(performAction(), homepage.routes.HomePageController.homepage())
+        }
+
+      }
+
       "show an error page" when {
 
         "there is an error starting a payments journey" in {
-          val justSubmittedReturn = sample[JustSubmittedReturn]
+          val charge              = sample[Charge]
+          val justSubmittedReturn = justSubmittedReturnWithCharge(Some(charge))
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWitJourney(justSubmittedReturn))
             mockStartPaymentJourney(
               justSubmittedReturn.subscribedDetails.cgtReference,
-              justSubmittedReturn.submissionResponse.chargeReference,
-              justSubmittedReturn.submissionResponse.amount,
+              charge.chargeReference,
+              charge.amount,
               homepage.routes.HomePageController.homepage(),
               routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission()
             )(Left(Error("")))
@@ -275,16 +293,17 @@ class CheckAllAnswersAndSubmitControllerSpec
       "redirect to the payment journey next url" when {
 
         "the payments journey has been succesfulyl started" in {
-          val justSubmittedReturn = sample[JustSubmittedReturn]
           val paymentJourney      = PaymentsJourney("/next", "id")
+          val charge              = sample[Charge]
+          val justSubmittedReturn = justSubmittedReturnWithCharge(Some(charge))
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWitJourney(justSubmittedReturn))
             mockStartPaymentJourney(
               justSubmittedReturn.subscribedDetails.cgtReference,
-              justSubmittedReturn.submissionResponse.chargeReference,
-              justSubmittedReturn.submissionResponse.amount,
+              charge.chargeReference,
+              charge.amount,
               homepage.routes.HomePageController.homepage(),
               routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission()
             )(Right(paymentJourney))

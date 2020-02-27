@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns
 
+import java.time.LocalDate
+
 import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
@@ -84,6 +86,30 @@ class ReturnsConnectorImplSpec extends WordSpec with Matchers with MockFactory w
         () => connector.submitReturn(submitReturnRequest)
       )
 
+    }
+
+    "handling requests to list returns" must {
+
+      val cgtReference       = sample[CgtReference]
+      val (fromDate, toDate) = LocalDate.of(2020, 1, 2) -> LocalDate.of(2020, 3, 4)
+      val expectedUrl        = s"http://host:123/returns/${cgtReference.value}/2020-01-02/2020-03-04"
+
+      behave like connectorBehaviour(
+        mockGet[HttpResponse](expectedUrl, Map.empty, Map.empty),
+        () => connector.listReturns(cgtReference, fromDate, toDate)
+      )
+    }
+
+    "handling requests to display a return" must {
+
+      val cgtReference = sample[CgtReference]
+      val submissionId = "id"
+      val expectedUrl  = s"http://host:123/return/${cgtReference.value}/id"
+
+      behave like connectorBehaviour(
+        mockGet[HttpResponse](expectedUrl, Map.empty, Map.empty),
+        () => connector.displayReturn(cgtReference, submissionId)
+      )
     }
 
   }

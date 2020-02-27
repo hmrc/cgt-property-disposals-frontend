@@ -46,6 +46,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTri
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CompleteYearToDateLiabilityAnswers, IncompleteYearToDateLiabilityAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{FileDescriptor, UploadRequest, UpscanFileDescriptor}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.ListReturnsResponse
 
 object Generators
     extends GenUtils
@@ -64,7 +65,7 @@ object Generators
     with ReturnGen
     with UpscanGen
     with DisposalDetailsGen
-    with AmountInPenceGen
+    with MoneyGen
     with AcquisitionDetailsGen
     with ReliefDetailsAnswersGen
     with TaxYearGen
@@ -274,6 +275,10 @@ trait ReturnGen { this: GenUtils =>
 
   implicit val submitReturnResponseGen: Gen[SubmitReturnResponse] = gen[SubmitReturnResponse]
 
+  implicit val listReturnsResponseGen: Gen[ListReturnsResponse] = gen[ListReturnsResponse]
+
+  implicit val returnSummaryGen: Gen[ReturnSummary] = gen[ReturnSummary]
+
 }
 
 trait UpscanGen {
@@ -321,9 +326,11 @@ trait ReliefDetailsGen { this: GenUtils =>
 
 }
 
-trait AmountInPenceGen { this: GenUtils =>
+trait MoneyGen { this: GenUtils =>
 
   implicit val amountInPenceGen: Gen[AmountInPence] = gen[AmountInPence]
+
+  implicit val chargeGen: Gen[Charge] = gen[Charge]
 
 }
 

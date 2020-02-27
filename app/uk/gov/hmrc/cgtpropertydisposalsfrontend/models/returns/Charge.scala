@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import play.twirl.api.Html
+import java.time.LocalDate
 
-final case class RadioOption(
-  label: String,
-  content: Option[Html],
-  optionHelpText: Option[Html]
-)
+import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AmountInPence
+
+final case class Charge(chargeDescription: String, chargeReference: String, amount: AmountInPence, dueDate: LocalDate)
+
+object Charge {
+
+  implicit val format: OFormat[Charge] = Json.format
+
+}

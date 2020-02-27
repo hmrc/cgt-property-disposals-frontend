@@ -1842,6 +1842,7 @@ class SingleDisposalsTriageControllerSpec
       val newDraftReturn =
         DraftReturn(
           uuid,
+          fillingOutReturn.subscribedDetails.cgtReference,
           completeAnswers,
           None,
           None,
