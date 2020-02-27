@@ -205,8 +205,8 @@ class AgentAccessController @Inject() (
         val cgtReference = verifierMatchingDetails.clientDetails.cgtReference
         if (verifierMatchingDetails.correctVerifierSupplied) {
           val result = for {
-            draftReturns <- returnsService.getDraftReturns(cgtReference)
-            sentReturns <- returnsService.listReturns(cgtReference)
+            draftReturns  <- returnsService.getDraftReturns(cgtReference)
+            sentReturns   <- returnsService.listReturns(cgtReference)
             financialData <- financialDataService.getFinancialData(cgtReference.value)
             _ <- EitherT(
                   updateSession(sessionStore, request)(

@@ -19,6 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.homepage
 import java.time.LocalDateTime
 
 import play.api.libs.json.{Format, Json}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AmountInPence
 
 final case class FinancialDataResponse(
   idType: String,
@@ -32,7 +33,7 @@ object FinancialDataResponse {
 }
 
 final case class FinancialTransaction(
-  outstandingAmount: BigDecimal
+  outstandingAmount: AmountInPence
 )
 object FinancialTransaction {
   implicit val financialTransactionFormat: Format[FinancialTransaction] = Json.format[FinancialTransaction]

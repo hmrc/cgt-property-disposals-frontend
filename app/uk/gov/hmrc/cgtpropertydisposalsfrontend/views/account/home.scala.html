@@ -21,6 +21,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.account.AccountMenuItem
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.MoneyUtils
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -67,7 +68,7 @@ buttonLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.butto
      <span class="form-hint">
      @messages("account.totalLeftToPay")
      </span>
-     £@totalLeftToPay
+     @MoneyUtils.formatAmountOfMoneyWithPoundSign(totalLeftToPay)
     </h3>
     @if(totalLeftToPay > 0) {
      <a href="#">

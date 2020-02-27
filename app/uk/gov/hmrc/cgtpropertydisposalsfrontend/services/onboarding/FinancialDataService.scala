@@ -49,23 +49,24 @@ class FinancialDataServiceImpl @Inject() (connector: FinancialDataConnector, met
   override def getFinancialData(cgtReference: String)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, FinancialDataResponse] =
-    connector.getFinancialData(cgtReference, dateFrom, dateTo).subflatMap { response =>
+    connector.getFinancialData(cgtReference, fromDate, toDate).subflatMap { response =>
       if (response.status === OK)
         response.parseJSON[FinancialDataResponse]().leftMap(Error(_))
       else
         Left(Error(s"Call to get subscribed details came back with status ${response.status}"))
     }
 
-  def dateFrom: String = {
+  def fromDate: String = {
     val today = LocalDate.now(Clock.systemUTC())
     val startYear =
       if (LocalDate.now().isAfter(LocalDate.of(today.getYear, 4, 6)))
         today.getYear
       else
         today.getYear - 1
-    LocalDate.of(startYear, 4, 6).toString.replace("-", "")
+    LocalDate.of(startYear, 4, 6).toString
+    //.replace("-", "")
   }
 
-  def dateTo: String =
-    LocalDate.now.toString.replace("-", "")
+  def toDate: String = LocalDate.now.toString
+  //.replace("-", "")
 }

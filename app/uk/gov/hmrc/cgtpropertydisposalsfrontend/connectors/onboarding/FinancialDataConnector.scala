@@ -29,7 +29,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[FinancialDataConnectorImpl])
 trait FinancialDataConnector {
 
-  def getFinancialData(cgtReference: String, dateFrom: String, dateTo: String)(
+  def getFinancialData(cgtReference: String, fromDate: String, toDate: String)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
@@ -42,13 +42,13 @@ class FinancialDataConnectorImpl @Inject() (http: HttpClient, servicesConfig: Se
 
   val baseUrl: String = servicesConfig.baseUrl("cgt-property-disposals")
 
-  def financialDataUrl(cgtReference: String, dateFrom: String, dateTo: String) =
-    s"$baseUrl/cgt-property-disposals/financial-data/$cgtReference/$dateFrom/$dateTo"
+  def financialDataUrl(cgtReference: String, fromDate: String, toDate: String) =
+    s"$baseUrl/cgt-property-disposals/financial-data/$cgtReference/$fromDate/$toDate"
 
-  override def getFinancialData(cgtReference: String, dateFrom: String, dateTo: String)(
+  override def getFinancialData(cgtReference: String, fromDate: String, toDate: String)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] =
-    makeCall(_.get(financialDataUrl(cgtReference, dateFrom, dateTo)))
+    makeCall(_.get(financialDataUrl(cgtReference, fromDate, toDate)))
 
   private def makeCall(call: HttpClient => Future[HttpResponse]): EitherT[Future, Error, HttpResponse] =
     EitherT[Future, Error, HttpResponse](
