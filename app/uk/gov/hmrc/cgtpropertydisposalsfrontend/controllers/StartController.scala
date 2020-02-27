@@ -233,10 +233,10 @@ class StartController @Inject() (
     implicit request: RequestWithSessionDataAndRetrievedData[_]
   ): Future[Result] = {
     val result = for {
-      subscribedDetails <- subscriptionService.getSubscribedDetails(cgtReference)
-      draftReturns      <- returnsService.getDraftReturns(cgtReference)
-      sentReturns       <- returnsService.listReturns(cgtReference)
-      financialData     <- financialDataService.getFinancialData(cgtReference.value)
+      subscribedDetails     <- subscriptionService.getSubscribedDetails(cgtReference)
+      draftReturns          <- returnsService.getDraftReturns(cgtReference)
+      sentReturns           <- returnsService.listReturns(cgtReference)
+      financialTransactions <- financialDataService.getFinancialData(cgtReference)
       _ <- EitherT(
             updateSession(sessionStore, request)(
               _.copy(
@@ -248,7 +248,7 @@ class StartController @Inject() (
                     None,
                     draftReturns,
                     sentReturns,
-                    financialData.financialTransactions
+                    financialTransactions
                   )
                 )
               )

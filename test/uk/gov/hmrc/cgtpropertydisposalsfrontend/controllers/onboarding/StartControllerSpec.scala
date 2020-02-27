@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding
 
-import java.time.LocalDate
-
 import cats.data.EitherT
 import cats.instances.future._
 import org.joda.time.{LocalDate => JodaLocalDate}
@@ -51,7 +49,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{HandOff
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecordRequest._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, BusinessPartnerRecordResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.homepage.{FinancialDataResponse, FinancialTransaction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.homepage.FinancialTransaction
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{NeedMoreDetailsDetails, SubscribedDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, ReturnSummary}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -142,9 +140,9 @@ class StartControllerSpec
       .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockGetFinancialData(cgtReference: String)(response: Either[Error, FinancialDataResponse]) =
+  def mockGetFinancialData(cgtReference: CgtReference)(response: Either[Error, List[FinancialTransaction]]) =
     (mockFinancialDataService
-      .getFinancialData(_: String)(_: HeaderCarrier))
+      .getFinancialData(_: CgtReference)(_: HeaderCarrier))
       .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
@@ -1472,10 +1470,7 @@ class StartControllerSpec
 
         val draftReturns = List(sample[DraftReturn])
 
-        val financialTransaction = sample[FinancialTransaction]
-
-        val financialDataResponse =
-          sample[FinancialDataResponse].copy(financialTransactions = List(financialTransaction))
+        val financialTransactions = List(sample[FinancialTransaction])
 
         val sentReturns = sample[ListReturnsResponse].returns
 
@@ -1488,7 +1483,7 @@ class StartControllerSpec
               None,
               draftReturns,
               sentReturns,
-              financialDataResponse.financialTransactions
+              financialTransactions
             )
           )
         )
@@ -1590,7 +1585,7 @@ class StartControllerSpec
                 mockGetSubscribedDetails(cgtReference)(Right(subscribedDetails))
                 mockGetDraftReturns(cgtReference)(Right(draftReturns))
                 mockGetReturnsList(subscribedDetails.cgtReference)(Right(sentReturns))
-                mockGetFinancialData(cgtReference.value)(Right(financialDataResponse))
+                mockGetFinancialData(cgtReference)(Right(financialTransactions))
                 mockStoreSession(sessionWithSubscribed.copy(userType = Some(UserType.Individual)))(Left(Error("")))
               }
 
@@ -1615,7 +1610,7 @@ class StartControllerSpec
               mockGetSubscribedDetails(cgtReference)(Right(subscribedDetails))
               mockGetDraftReturns(cgtReference)(Right(draftReturns))
               mockGetReturnsList(subscribedDetails.cgtReference)(Right(sentReturns))
-              mockGetFinancialData(cgtReference.value)(Right(financialDataResponse))
+              mockGetFinancialData(cgtReference)(Right(financialTransactions))
               mockStoreSession(sessionWithSubscribed.copy(userType = Some(UserType.Individual)))(Right(()))
             }
 

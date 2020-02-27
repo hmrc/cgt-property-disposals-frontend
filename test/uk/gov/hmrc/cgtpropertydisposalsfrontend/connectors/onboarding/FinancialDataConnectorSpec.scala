@@ -61,10 +61,13 @@ class FinancialDataConnectorSpec extends WordSpec with Matchers with MockFactory
   "FinancialDataConnectorImpl" when {
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
-    //val expectedHeaders            = Map("Authorization" -> s"Bearer $desBearerToken", "Environment" -> desEnvironment)
 
-    def expectedFinancialDataUrl(cgtReference: String, fromDate: String, toDate: String): String =
-      s"http://localhost:7021/cgt-property-disposals/financial-data/$cgtReference/$fromDate/$toDate"
+    def expectedFinancialDataUrl(cgtReference: CgtReference, fromDate: LocalDate, toDate: LocalDate): String = {
+      val cgtRef = cgtReference.value
+      val from   = fromDate.toString
+      val to     = toDate.toString
+      s"http://localhost:7021/cgt-property-disposals/financial-data/$cgtRef/$from/$to"
+    }
 
     val cgtReference       = sample[CgtReference]
     val (fromDate, toDate) = LocalDate.of(2020, 1, 31) -> LocalDate.of(2020, 11, 2)
@@ -84,12 +87,12 @@ class FinancialDataConnectorSpec extends WordSpec with Matchers with MockFactory
         ).foreach { httpResponse =>
           withClue(s"For http response [${httpResponse.toString}]") {
             mockGet(
-              expectedFinancialDataUrl(cgtReference.value, fromDate.toString, toDate.toString)
+              expectedFinancialDataUrl(cgtReference, fromDate, toDate)
             )(
               Some(httpResponse)
             )
 
-            await(connector.getFinancialData(cgtReference.value, fromDate.toString, toDate.toString).value) shouldBe Right(
+            await(connector.getFinancialData(cgtReference, fromDate, toDate).value) shouldBe Right(
               httpResponse
             )
           }
@@ -103,10 +106,10 @@ class FinancialDataConnectorSpec extends WordSpec with Matchers with MockFactory
 
       "the call fails" in {
         mockGet(
-          expectedFinancialDataUrl(cgtReference.value, fromDate.toString, toDate.toString)
+          expectedFinancialDataUrl(cgtReference, fromDate, toDate)
         )(None)
 
-        await(connector.getFinancialData(cgtReference.value, fromDate.toString, toDate.toString).value).isLeft shouldBe true
+        await(connector.getFinancialData(cgtReference, fromDate, toDate).value).isLeft shouldBe true
       }
     }
 

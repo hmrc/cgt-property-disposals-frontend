@@ -95,9 +95,9 @@ trait HomePageControllerSpec
       .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockGetFinancialData(cgtReference: String)(response: Either[Error, FinancialDataResponse]) =
+  def mockGetFinancialData(cgtReference: CgtReference)(response: Either[Error, List[FinancialTransaction]]) =
     (mockFinancialDataService
-      .getFinancialData(_: String)(_: HeaderCarrier))
+      .getFinancialData(_: CgtReference)(_: HeaderCarrier))
       .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
@@ -238,7 +238,9 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
             )
             mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Right(subscribed.draftReturns))
             mockGetReturnsList(subscribed.subscribedDetails.cgtReference)(Right(subscribed.sentReturns))
-            mockGetFinancialData(subscribed.subscribedDetails.cgtReference.value)(Right(financialDataResponse))
+            mockGetFinancialData(subscribed.subscribedDetails.cgtReference)(
+              Right(financialDataResponse.financialTransactions)
+            )
             mockStoreSession(
               SessionData.empty.copy(
                 journeyStatus = Some(subscribed),
@@ -266,7 +268,9 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
               )
               mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Right(subscribed.draftReturns))
               mockGetReturnsList(subscribed.subscribedDetails.cgtReference)(Right(subscribed.sentReturns))
-              mockGetFinancialData(subscribed.subscribedDetails.cgtReference.value)(Right(financialDataResponse))
+              mockGetFinancialData(subscribed.subscribedDetails.cgtReference)(
+                Right(financialDataResponse.financialTransactions)
+              )
               mockStoreSession(
                 SessionData.empty.copy(
                   journeyStatus = Some(subscribed),

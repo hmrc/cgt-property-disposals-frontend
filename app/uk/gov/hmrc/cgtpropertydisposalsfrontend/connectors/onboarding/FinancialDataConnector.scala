@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.onboarding
 
+import java.time.LocalDate
+
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
@@ -23,13 +25,14 @@ import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[FinancialDataConnectorImpl])
 trait FinancialDataConnector {
 
-  def getFinancialData(cgtReference: String, fromDate: String, toDate: String)(
+  def getFinancialData(cgtReference: CgtReference, fromDate: LocalDate, toDate: LocalDate)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
@@ -42,10 +45,14 @@ class FinancialDataConnectorImpl @Inject() (http: HttpClient, servicesConfig: Se
 
   val baseUrl: String = servicesConfig.baseUrl("cgt-property-disposals")
 
-  def financialDataUrl(cgtReference: String, fromDate: String, toDate: String) =
-    s"$baseUrl/cgt-property-disposals/financial-data/$cgtReference/$fromDate/$toDate"
+  def financialDataUrl(cgtReference: CgtReference, fromDate: LocalDate, toDate: LocalDate) = {
+    val cgtRef = cgtReference.value
+    val from   = fromDate.toString
+    val to     = toDate.toString
+    s"$baseUrl/cgt-property-disposals/financial-data/$cgtRef/$from/$to"
+  }
 
-  override def getFinancialData(cgtReference: String, fromDate: String, toDate: String)(
+  override def getFinancialData(cgtReference: CgtReference, fromDate: LocalDate, toDate: LocalDate)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] =
     makeCall(_.get(financialDataUrl(cgtReference, fromDate, toDate)))

@@ -37,7 +37,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, Contac
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.{AlreadySubscribed, SubscriptionSuccessful}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{RegistrationRequestEvent, SubscriptionRequestEvent, WrongGGAccountEvent}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.EmailSource
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.homepage.FinancialDataRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
@@ -229,7 +228,6 @@ class RegistrationController @Inject() (
               )
             subscriptionService.subscribe(subscriptionDetails)
           }
-          //fd <- financialDataService.getFinancialData()
           _ <- EitherT(subscriptionResponse match {
                 case SubscriptionSuccessful(cgtReferenceNumber) =>
                   updateSession(sessionStore, request)(

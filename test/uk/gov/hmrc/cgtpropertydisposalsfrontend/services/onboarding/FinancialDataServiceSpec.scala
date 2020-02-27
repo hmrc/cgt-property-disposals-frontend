@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding
 
-import java.time.{Clock, LocalDate}
-
+import java.time.LocalDate
 import cats.data.EitherT
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
@@ -41,74 +40,52 @@ class FinancialDataServiceSpec extends WordSpec with Matchers with MockFactory {
 
   val service = new FinancialDataServiceImpl(mockConnector, MockMetrics.metrics)
 
-  def mockGetFinancialData(cgtReference: String)(response: Either[Error, HttpResponse]) =
+  def mockGetFinancialData(cgtReference: CgtReference)(response: Either[Error, HttpResponse]) =
     (mockConnector
-      .getFinancialData(_: String, _: String, _: String)(_: HeaderCarrier))
+      .getFinancialData(_: CgtReference, _: LocalDate, _: LocalDate)(_: HeaderCarrier))
       .expects(cgtReference, fromDate, toDate, *)
       .returning(EitherT(Future.successful(response)))
 
-  val cgtReference = sample[CgtReference]
-
-  def fromDate: String = {
-    val today = LocalDate.now(Clock.systemUTC())
-    val startYear =
-      if (LocalDate.now().isAfter(LocalDate.of(today.getYear, 4, 6)))
-        today.getYear
-      else
-        today.getYear - 1
-    LocalDate.of(startYear, 4, 6).toString
-  }
-
-  def toDate: String = LocalDate.now.toString
-
-//  val (fromDate, toDate) = LocalDate.of(2020, 1, 31) -> LocalDate.of(2020, 11, 2)
+  val cgtReference       = sample[CgtReference]
+  val (fromDate, toDate) = LocalDate.of(2019, 4, 6) -> LocalDate.of(2020, 4, 5)
 
   "FinancialDataServiceImpl" when {
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
+    val financialTransactions      = List(sample[FinancialTransaction])
 
     "handling request to get financial data" must {
 
-//      val jsonBody = Json.parse(
-//        s"""
-//           |{
-//           |  "financialTransactions" : [
-//           |  "outstandingAmount":"1000.0"
-//           |  ]
-//           |}
-//           |""".stripMargin
-//      )
-
       "return an error" when {
-        val financialDataResponse = FinancialDataResponse(List(sample[FinancialTransaction]))
 
         "the http call comes back with a status other than 200 or 204" in {
-          mockGetFinancialData(cgtReference.value)(Right(HttpResponse(400, Some(Json.toJson(financialDataResponse)))))
-          await(service.getFinancialData(cgtReference.value).value).isLeft shouldBe true
+          mockGetFinancialData(cgtReference)(Right(HttpResponse(400, Some(Json.toJson(financialTransactions)))))
+          await(service.getFinancialData(cgtReference).value).isLeft shouldBe true
         }
 
         "the JSON body of the response cannot be parsed" in {
-          mockGetFinancialData(cgtReference.value)(Right(HttpResponse(200, Some(JsNumber(1)))))
+          mockGetFinancialData(cgtReference)(Right(HttpResponse(200, Some(JsNumber(1)))))
 
-          await(service.getFinancialData(cgtReference.value).value).isLeft shouldBe true
+          await(service.getFinancialData(cgtReference).value).isLeft shouldBe true
         }
 
         "the http response comes back with status 200 but the body cannot be parsed" in {
-          mockGetFinancialData(cgtReference.value)(Left(Error("")))
+          mockGetFinancialData(cgtReference)(Left(Error("")))
 
-          await(service.getFinancialData(cgtReference.value).value).isLeft shouldBe true
+          await(service.getFinancialData(cgtReference).value).isLeft shouldBe true
         }
 
       }
 
       "return an ok response" when {
-
         val financialDataResponse = FinancialDataResponse(List(sample[FinancialTransaction]))
 
         "the http call came back with a 200 and the body can be parsed" in {
-          mockGetFinancialData(cgtReference.value)(Right(HttpResponse(OK, Some(Json.toJson(financialDataResponse)))))
+          mockGetFinancialData(cgtReference)(Right(HttpResponse(OK, Some(Json.toJson(financialDataResponse)))))
 
-          await(service.getFinancialData(cgtReference.value).value) shouldBe Right(financialDataResponse)
+          await(service.getFinancialData(cgtReference).value) shouldBe Right(
+            financialDataResponse.financialTransactions
+          )
         }
 
       }

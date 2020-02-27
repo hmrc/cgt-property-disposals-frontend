@@ -43,7 +43,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifierAttempts
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.homepage.{FinancialDataResponse, FinancialTransaction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.homepage.FinancialTransaction
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, ReturnSummary}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -108,10 +108,7 @@ class AgentAccessControllerSpec
 
   val nonUkClientDetails = newClientDetails(validCgtReference, nonUkAddress)
 
-  val financialTransaction = sample[FinancialTransaction]
-
-  val financialDataResponse =
-    sample[FinancialDataResponse].copy(financialTransactions = List(financialTransaction))
+  val financialTransaction = List(sample[FinancialTransaction])
 
   def newClientDetails(cgtReference: CgtReference, address: Address): SubscribedDetails =
     sample[SubscribedDetails].copy(cgtReference = validCgtReference, address = address)
@@ -175,9 +172,9 @@ class AgentAccessControllerSpec
       .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockGetFinancialData(cgtReference: String)(response: Either[Error, FinancialDataResponse]) =
+  def mockGetFinancialData(cgtReference: CgtReference)(response: Either[Error, List[FinancialTransaction]]) =
     (mockFinancialDataService
-      .getFinancialData(_: String)(_: HeaderCarrier))
+      .getFinancialData(_: CgtReference)(_: HeaderCarrier))
       .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
@@ -1077,7 +1074,7 @@ class AgentAccessControllerSpec
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(Right(None))
             mockGetDraftReturns(ukClientDetails.cgtReference)(Right(draftReturns))
             mockGetReturnsList(ukClientDetails.cgtReference)(Right(returnsList))
-            mockGetFinancialData(ukClientDetails.cgtReference.value)(Right(financialDataResponse))
+            mockGetFinancialData(ukClientDetails.cgtReference)(Right(financialTransaction))
             mockStoreSession(
               SessionData.empty
                 .copy(journeyStatus = Some(
@@ -1087,7 +1084,7 @@ class AgentAccessControllerSpec
                     Some(agentReferenceNumber),
                     draftReturns,
                     returnsList,
-                    financialDataResponse.financialTransactions
+                    financialTransaction
                   )
                 )
                 )
@@ -1107,7 +1104,7 @@ class AgentAccessControllerSpec
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, clientDetails.cgtReference)(Right(None))
             mockGetDraftReturns(ukClientDetails.cgtReference)(Right(draftReturns))
             mockGetReturnsList(ukClientDetails.cgtReference)(Right(returnsList))
-            mockGetFinancialData(ukClientDetails.cgtReference.value)(Right(financialDataResponse))
+            mockGetFinancialData(ukClientDetails.cgtReference)(Right(financialTransaction))
             mockStoreSession(
               SessionData.empty.copy(
                 journeyStatus = Some(
@@ -1117,7 +1114,7 @@ class AgentAccessControllerSpec
                     Some(agentReferenceNumber),
                     draftReturns,
                     returnsList,
-                    financialDataResponse.financialTransactions
+                    financialTransaction
                   )
                 )
               )

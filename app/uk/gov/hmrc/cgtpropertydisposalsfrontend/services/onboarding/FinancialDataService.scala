@@ -27,17 +27,20 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.onboarding.FinancialDataConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.homepage.{FinancialDataRequest, FinancialDataResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.homepage.{FinancialDataResponse, FinancialTransaction}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import play.api.http.Status.OK
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[FinancialDataServiceImpl])
 trait FinancialDataService {
 
-  def getFinancialData(cgtReference: String)(implicit hc: HeaderCarrier): EitherT[Future, Error, FinancialDataResponse]
+  def getFinancialData(cgtReference: CgtReference)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, List[FinancialTransaction]]
 
 }
 
@@ -46,26 +49,21 @@ class FinancialDataServiceImpl @Inject() (connector: FinancialDataConnector, met
   implicit ec: ExecutionContext
 ) extends FinancialDataService {
 
-  override def getFinancialData(cgtReference: String)(
+  override def getFinancialData(cgtReference: CgtReference)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, FinancialDataResponse] =
+  ): EitherT[Future, Error, List[FinancialTransaction]] =
     connector.getFinancialData(cgtReference, fromDate, toDate).subflatMap { response =>
       if (response.status === OK)
-        response.parseJSON[FinancialDataResponse]().leftMap(Error(_))
+        response
+          .parseJSON[FinancialDataResponse]()
+          .map(_.financialTransactions)
+          .leftMap(Error(_))
       else
         Left(Error(s"Call to get financial data came back with status ${response.status}"))
     }
 
-  def fromDate: String = {
-    val today = LocalDate.now(Clock.systemUTC())
-    val startYear =
-      if (LocalDate.now().isAfter(LocalDate.of(today.getYear, 4, 6)))
-        today.getYear
-      else
-        today.getYear - 1
-    LocalDate.of(startYear, 4, 6).toString
-  }
+  val fromDate = TaxYear.thisTaxYearStartDate()
 
-  def toDate: String = LocalDate.now.toString
+  val toDate = fromDate.plusYears(1L).minusDays(1L)
 
 }

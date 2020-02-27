@@ -34,14 +34,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents.AgentAccessController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.AgentStatus.{AgentSupplyingClientDetails, VerifierMatchingDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AgentStatus, Subscribed}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{LocalDateUtils, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Country, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifierAttempts
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.audit.{AgentAccessAttempt, AgentVerifierMatchAttempt}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.homepage.FinancialDataRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.agents.AgentVerifierMatchRetryStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
@@ -205,9 +203,9 @@ class AgentAccessController @Inject() (
         val cgtReference = verifierMatchingDetails.clientDetails.cgtReference
         if (verifierMatchingDetails.correctVerifierSupplied) {
           val result = for {
-            draftReturns  <- returnsService.getDraftReturns(cgtReference)
-            sentReturns   <- returnsService.listReturns(cgtReference)
-            financialData <- financialDataService.getFinancialData(cgtReference.value)
+            draftReturns          <- returnsService.getDraftReturns(cgtReference)
+            sentReturns           <- returnsService.listReturns(cgtReference)
+            financialTransactions <- financialDataService.getFinancialData(cgtReference)
             _ <- EitherT(
                   updateSession(sessionStore, request)(
                     _.copy(
@@ -218,7 +216,7 @@ class AgentAccessController @Inject() (
                           Some(agentSupplyingClientDetails.agentReferenceNumber),
                           draftReturns,
                           sentReturns,
-                          financialData.financialTransactions
+                          financialTransactions
                         )
                       )
                     )
