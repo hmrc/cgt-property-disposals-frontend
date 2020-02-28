@@ -17,7 +17,9 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails
 
 import java.time.LocalDate
+import java.util
 
+import org.jsoup.nodes.{Document, Element}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.http.Status.BAD_REQUEST
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
@@ -35,10 +37,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServi
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, Error, LocalDateUtils, SessionData, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, Error, LocalDateUtils, MoneyUtils, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 
@@ -2416,13 +2419,11 @@ class AcquisitionDetailsControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey("acquisitionDetails.cya.title"), { doc =>
+              validateAcquisitionDetailsCheckYourAnswersPage(completeAnswers, doc)
               doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
                 .checkYourAnswersSubmit()
-                .url
-            }
-          )
+                .url })
         }
-
       }
 
     }
@@ -2514,4 +2515,37 @@ class AcquisitionDetailsControllerSpec
     )
   }
 
+  def validateAcquisitionDetailsCheckYourAnswersPage(acquisitionDetailsAnswers: CompleteAcquisitionDetailsAnswers, doc: Document): Unit = {
+    val expectedAcquisitionMethodDisplayName = acquisitionDetailsAnswers.acquisitionMethod match {
+      case AcquisitionMethod.Bought => messages("returns.acquisitionMethod.Bought")
+      case AcquisitionMethod.Inherited => messages("returns.acquisitionMethod.Inherited")
+      case AcquisitionMethod.Gifted => messages("returns.acquisitionMethod.Gifted")
+      case AcquisitionMethod.Other(value) => value
+    }
+
+    doc.select("#acquisitionMethod-answer").text() shouldBe expectedAcquisitionMethodDisplayName
+    doc.select("#acquisitionPrice-answer").text() shouldBe formatAmountOfMoneyWithPoundSign(acquisitionDetailsAnswers.acquisitionPrice.inPounds())
+
+    if(acquisitionDetailsAnswers.improvementCosts === AmountInPence.zero) {
+      doc.select("#improvementCosts-answer").text shouldBe "No"
+    } else {
+      doc.select("#improvementCosts-answer").text shouldBe "Yes"
+      doc.select("#improvementCosts-value-answer").text shouldBe formatAmountOfMoneyWithPoundSign(acquisitionDetailsAnswers.improvementCosts.inPounds())
+    }
+
+    if(acquisitionDetailsAnswers.acquisitionFees === AmountInPence.zero) {
+      doc.select("#acquisitionFees-answer").text shouldBe "No"
+    } else {
+      doc.select("#acquisitionFees-answer").text shouldBe "Yes"
+      doc.select("#acquisitionFees-value-answer").text shouldBe formatAmountOfMoneyWithPoundSign(acquisitionDetailsAnswers.acquisitionFees.inPounds())
+    }
+
+    if (acquisitionDetailsAnswers.acquisitionDate.value.isBefore(LocalDate.of(1981, 1, 3))) {
+      doc.select("#rebasedAcquisitionPrice-answer").get(0).text() match {
+        case "Yes" => doc.select("#rebasedAcquisitionPrice-answer").get(1).text() shouldBe formatAmountOfMoneyWithPoundSign(acquisitionDetailsAnswers.rebasedAcquisitionPrice.get.inPounds())
+      }
+    }
+
+    doc.select("#rebasedAcquisitionPrice-answer").get(1).text() shouldBe formatAmountOfMoneyWithPoundSign(acquisitionDetailsAnswers.rebasedAcquisitionPrice.get.inPounds())
+  }
 }

@@ -34,30 +34,35 @@
   @cyaRow(
     messages("estimatedIncome.title"),
     Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.estimatedIncome.inPounds())),
-    Some(cyaChange(messages("ytdLiability.cyaChange.estimatedIncome"), routes.YearToDateLiabilityFirstReturnController.estimatedIncome().url))
+    Some(cyaChange(messages("ytdLiability.cyaChange.estimatedIncome"), routes.YearToDateLiabilityFirstReturnController.estimatedIncome().url)),
+      "estimatedIncome"
   )
   @answers.personalAllowance.map { personalAllowance =>
     @cyaRow(
       messages("personalAllowance.title"),
       Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(personalAllowance.inPounds())),
-      Some(cyaChange(messages("ytdLiability.cyaChange.personalAllowance"), routes.YearToDateLiabilityFirstReturnController.personalAllowance().url))
+      Some(cyaChange(messages("ytdLiability.cyaChange.personalAllowance"), routes.YearToDateLiabilityFirstReturnController.personalAllowance().url)),
+        "personalAllowance"
     )
   }
   @cyaRow(
     messages("hasEstimatedDetails.title"),
     Html(messages(if(answers.hasEstimatedDetailsWithCalculatedTaxDue.hasEstimatedDetails) "generic.yes" else "generic.no")),
-    Some(cyaChange(messages("ytdLiability.cyaChange.hasEstimatedDetails"), routes.YearToDateLiabilityFirstReturnController.hasEstimatedDetails().url))
+    Some(cyaChange(messages("ytdLiability.cyaChange.hasEstimatedDetails"), routes.YearToDateLiabilityFirstReturnController.hasEstimatedDetails().url)),
+      "hasEstimatedDetails"
   )
   @cyaRow(
     messages("taxDue.title"),
     Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.taxDue.inPounds())),
-    Some(cyaChange(messages("ytdLiability.cyaChange.taxDue"), routes.YearToDateLiabilityFirstReturnController.taxDue().url))
+    Some(cyaChange(messages("ytdLiability.cyaChange.taxDue"), routes.YearToDateLiabilityFirstReturnController.taxDue().url)),
+      "taxDue"
   )
   @answers.mandatoryEvidence.map { mandatoryEvidence =>
     @cyaRow(
       messages("ytdLiability.cyaLabel.mandatoryEvidence"),
       Html(mandatoryEvidence),
-      Some(cyaChange(messages("ytdLiability.cyaChange.mandatoryEvidence"), routes.YearToDateLiabilityFirstReturnController.uploadMandatoryEvidence().url))
+      Some(cyaChange(messages("ytdLiability.cyaChange.mandatoryEvidence"), routes.YearToDateLiabilityFirstReturnController.uploadMandatoryEvidence().url)),
+        "mandatoryEvidence"
     )
   }
 }
