@@ -337,7 +337,7 @@ account.menu.home=Home
 account.menu.manageYourDetails=Manage account
 account.menu.signOut=Sign out
 account.menu.changeClient=Change client
-
+account.agent.prefix=Client:
 account.home.title=Capital Gains Tax on UK property account home
 account.home.subtitle=Account number: {0}
 account.home.subtitle.agent=Your client: {0} | Account number: {1}
