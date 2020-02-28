@@ -19,12 +19,13 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-    details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button
+        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
+        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
 @()(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
@@ -33,11 +34,13 @@
 
 @mainTemplate(title = title, userType = request.userType) {
 
-@backLinkComponent(triage.routes.InitialTriageQuestionsController.howManyProperties())
+    @backLinkComponent(triage.routes.InitialTriageQuestionsController.howManyProperties())
+
+    @caption(messages("triage.caption"))
 
     @pageHeading(title)
     <p>
-        @messages("multiple-disposals.guidance.p1")
+    @messages("multiple-disposals.guidance.p1")
     </p>
 
     <ul class="list-bullet">
@@ -47,23 +50,24 @@
     </ul>
 
     <p>
-        @messages("multiple-disposals.guidance.p2")
+    @messages("multiple-disposals.guidance.p2")
     </p>
 
     <p>
-        @messages("multiple-disposals.guidance.p3")
+    @messages("multiple-disposals.guidance.p3")
     </p>
 
     @details(
-        messages("multiple-disposals.guidance.details.summary"),
+      messages("multiple-disposals.guidance.details.summary"),
         Html(
-            s"""
-            | <p>${messages("multiple-disposals.guidance.details.p1")}</p>
-            | <p>${messages("multiple-disposals.guidance.details.p2")}</p>
-            | <p>${messages("multiple-disposals.guidance.details.link", appConfig.tranferringOwnershipHelp)}</p>
-            |""".stripMargin
+          s"""
+           | <p>${messages("multiple-disposals.guidance.details.p1")}</p>
+           | <p>${messages("multiple-disposals.guidance.details.p2")}</p>
+           | <p>${messages("multiple-disposals.guidance.details.link", appConfig.tranferringOwnershipHelp)}</p>
+           |""".stripMargin
         )
-    )
+
+      )
 
     @formWrapper(triage.routes.MultipleDisposalsTriageController.guidanceSubmit()) {
         @submitButton(messages("button.continue"))
