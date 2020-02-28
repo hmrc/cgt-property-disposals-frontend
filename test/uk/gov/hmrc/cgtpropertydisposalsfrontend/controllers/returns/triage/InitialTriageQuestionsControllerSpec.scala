@@ -394,6 +394,9 @@ class InitialTriageQuestionsControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey("numberOfProperties.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe routes.InitialTriageQuestionsController
+                .whoIsIndividualRepresenting()
+                .url
               doc
                 .select("#content > article > form")
                 .attr("action") shouldBe routes.InitialTriageQuestionsController
@@ -456,6 +459,60 @@ class InitialTriageQuestionsControllerSpec
                 .howManyPropertiesSubmit()
                 .url
               doc.select("#numberOfProperties-1").attr("checked") shouldBe "checked"
+            }
+          )
+        }
+
+        "the user is on the single disposals journey and has completed the triage section " +
+          "ut hsa not started a saved a draft return yet" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                Right(sample[CompleteSingleDisposalTriageAnswers].copy(numberOfProperties = NumberOfProperties.One))
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("numberOfProperties.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe routes.SingleDisposalsTriageController
+                .checkYourAnswers()
+                .url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.InitialTriageQuestionsController
+                .howManyPropertiesSubmit()
+                .url
+              doc.select("#numberOfProperties-0").attr("checked") shouldBe "checked"
+            }
+          )
+        }
+
+        "the user is on the single disposals journey and has completed the triage section " +
+          "ut hsa not started and has saved a draft return yet" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithFillingOutReturn(
+                sample[CompleteSingleDisposalTriageAnswers].copy(numberOfProperties = NumberOfProperties.One)
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("numberOfProperties.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe routes.SingleDisposalsTriageController
+                .checkYourAnswers()
+                .url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.InitialTriageQuestionsController
+                .howManyPropertiesSubmit()
+                .url
+              doc.select("#numberOfProperties-0").attr("checked") shouldBe "checked"
             }
           )
         }
