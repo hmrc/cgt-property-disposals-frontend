@@ -14,21 +14,14 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, ReturnSummary}
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.account.AccountMenuItem
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.MoneyUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnSummary
 
 @this(
         sentReturnItem: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.return_list_item,
         sentReturnsHeader: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.returns_list_header
 )
 
-@(sentReturns: List[ReturnSummary],totalLeftToPay:BigDecimal)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(sentReturns: List[ReturnSummary],totalLeftToPay:BigDecimal)(implicit messages:Messages)
 
 @sentReturnsHeader(totalLeftToPay)
 
