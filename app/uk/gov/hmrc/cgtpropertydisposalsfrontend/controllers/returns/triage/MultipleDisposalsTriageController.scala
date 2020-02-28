@@ -25,13 +25,15 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{MultipleDisposalsTriageAnswers, NumberOfProperties}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsAnswers, IncompleteMultipleDisposalsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.{multipledisposals => triagePages}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -54,8 +56,9 @@ class MultipleDisposalsTriageController @Inject() (
 
   def guidance(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withMultipleDisposalTriageAnswers(request) {
-      case (_, _, _) =>
-        Ok(guidancePage())
+      case (_, state, _) =>
+        val form = getNumberOfProperties(state).fold(numberOfPropertiesForm)(numberOfPropertiesForm.fill)
+        Ok(guidancePage(form))
     }
   }
 
@@ -91,12 +94,28 @@ class MultipleDisposalsTriageController @Inject() (
       case Some((session, s @ StartingNewDraftReturn(_, _, _, Left(t)))) =>
         f(session, Left(s), t)
 
+      case Some((session, r @ FillingOutReturn(_, _, _, Right(t)))) =>
+        f(session, Right(r), t)
+
       case _ =>
         Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
     }
 
+  private def getNumberOfProperties(
+    state: Either[StartingNewDraftReturn, FillingOutReturn]
+  ): Option[NumberOfProperties] =
+    state
+      .bimap(
+        _.newReturnTriageAnswers.fold(
+          _ => Some(NumberOfProperties.MoreThanOne),
+          _.fold(_.numberOfProperties, _ => Some(NumberOfProperties.One))
+        ),
+        _ => Some(NumberOfProperties.One)
+      )
+      .merge
+
 }
-object MultipleDisposalsTriageController{
+object MultipleDisposalsTriageController {
 
   val numberOfPropertiesForm: Form[NumberOfProperties] = Form(
     mapping(
