@@ -338,7 +338,8 @@ account.menu.manageYourDetails=Manage account
 account.menu.signOut=Sign out
 account.menu.changeClient=Change client
 
-account.home.title=Account home
+account.home.title=Capital Gains Tax on UK property account home
+
 account.home.subtitle=Account number: {0}
 account.home.subtitle.agent=Your client: {0} | Account number: {1}
 account.home.left.title=Capital Gains Tax liability
@@ -959,6 +960,7 @@ multiple-disposals.guidance.details.p1=The ‘completion’ date is usually the 
 multiple-disposals.guidance.details.p2=Contract ‘exchange’ usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
 multiple-disposals.guidance.details.link=<a href="{0}" target="_blank">Read about ‘exchange’ and ‘completion’ (opens in a new window)</a>.
 
+returns.list.title=Sent returns
 returns.list.ref=Return ref:
 returns.list.view=View return
 returns.list.viewAndPay=View and pay

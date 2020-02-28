@@ -14,8 +14,11 @@ legend>h1.heading-xlarge {
 h1 > span.heading-medium,
 .column-half > .heading-medium,
 .govuk-box-highlight > h1,
+.govuk-caption-xl + h1,
 .govuk-caption-xl + form h1,
-.govuk-caption-xl + form label.heading-xlarge {
+.govuk-caption-xl + form label.heading-xlarge,
+.returns-list-header h2,
+.returns-list-header h3 {
     margin-top: 0;
 }
 .govuk-box-highlight > h1 {
@@ -631,4 +634,9 @@ input:focus + .hmcts-currency-input__symbol.right {
 
 .due-on-account-summary h3>span {
     margin-bottom: 0;
+}
+
+h1 > .sub-heading {
+    font-weight: normal;
+    font-size: 19px;
 }
