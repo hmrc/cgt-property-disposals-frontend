@@ -35,4 +35,7 @@ POST /before-start/check-your-answers                       uk.gov.hmrc.cgtprope
 GET  /multiple-disposals                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.guidance()
 POST /multiple-disposals                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.guidanceSubmit()
 
+GET  /multiple-disposals/number-disposals                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.howManyDisposals()
+POST /multiple-disposals/number-disposals                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.howManyDisposalsSubmit()
+
 GET  /check-your-answers                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.checkYourAnswers()

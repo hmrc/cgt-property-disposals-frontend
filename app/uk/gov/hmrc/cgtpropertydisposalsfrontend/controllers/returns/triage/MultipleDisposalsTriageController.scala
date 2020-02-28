@@ -16,14 +16,19 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
+import cats.syntax.either._
+import play.api.data.Form
+import play.api.data.Forms.{mapping, of}
+import play.api.data.format.Formats._
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.routes
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{FormUtils, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{MultipleDisposalsTriageAnswers, NumberOfProperties}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsAnswers, IncompleteMultipleDisposalsAnswers}
@@ -47,7 +52,8 @@ class MultipleDisposalsTriageController @Inject() (
   uuidGenerator: UUIDGenerator,
   cc: MessagesControllerComponents,
   val config: Configuration,
-  guidancePage: triagePages.guidance
+  guidancePage: triagePages.guidance,
+  howManyProperties: triagePages.how_many_properties
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -56,13 +62,28 @@ class MultipleDisposalsTriageController @Inject() (
 
   def guidance(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withMultipleDisposalTriageAnswers(request) {
-      case (_, state, _) =>
-        val form = getNumberOfProperties(state).fold(numberOfPropertiesForm)(numberOfPropertiesForm.fill)
-        Ok(guidancePage(form))
+      case (_, _, _) =>
+        Ok(guidancePage())
     }
   }
 
   def guidanceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withMultipleDisposalTriageAnswers(request) {
+      case (_, _, _) =>
+        Redirect(routes.MultipleDisposalsTriageController.howManyDisposals())
+    }
+  }
+
+  def howManyDisposals(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withMultipleDisposalTriageAnswers(request) {
+      case (_, _, answers) =>
+        val numberOfDisposals = answers.fold(_.numberOfProperties, c => Some(c.numberOfProperties))
+        val form              = numberOfDisposals.fold(numberOfPropertiesForm)(numberOfPropertiesForm.fill)
+        Ok(howManyProperties(form))
+    }
+  }
+
+  def howManyDisposalsSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withMultipleDisposalTriageAnswers(request) {
       case (_, _, _) =>
         Ok("not implemented yet")
@@ -73,11 +94,14 @@ class MultipleDisposalsTriageController @Inject() (
     withMultipleDisposalTriageAnswers(request) {
       case (_, _, triageAnswers) =>
         triageAnswers match {
-          case IncompleteMultipleDisposalsAnswers(None) =>
+          case IncompleteMultipleDisposalsAnswers(None, None) =>
             Redirect(routes.InitialTriageQuestionsController.howManyProperties())
 
-          case IncompleteMultipleDisposalsAnswers(Some(_)) =>
+          case IncompleteMultipleDisposalsAnswers(Some(_), _) =>
             Redirect(routes.MultipleDisposalsTriageController.guidance())
+
+          case IncompleteMultipleDisposalsAnswers(Some(_), None) =>
+            Redirect(routes.MultipleDisposalsTriageController.howManyDisposals())
 
           case c: CompleteMultipleDisposalsAnswers =>
             Ok(s"Got $c")
@@ -94,32 +118,16 @@ class MultipleDisposalsTriageController @Inject() (
       case Some((session, s @ StartingNewDraftReturn(_, _, _, Left(t)))) =>
         f(session, Left(s), t)
 
-      case Some((session, r @ FillingOutReturn(_, _, _, Right(t)))) =>
-        f(session, Right(r), t)
-
       case _ =>
         Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
     }
 
-  private def getNumberOfProperties(
-    state: Either[StartingNewDraftReturn, FillingOutReturn]
-  ): Option[NumberOfProperties] =
-    state
-      .bimap(
-        _.newReturnTriageAnswers.fold(
-          _ => Some(NumberOfProperties.MoreThanOne),
-          _.fold(_.numberOfProperties, _ => Some(NumberOfProperties.One))
-        ),
-        _ => Some(NumberOfProperties.One)
-      )
-      .merge
-
 }
 object MultipleDisposalsTriageController {
 
-  val numberOfPropertiesForm: Form[NumberOfProperties] = Form(
+  val numberOfPropertiesForm: Form[Int] = Form(
     mapping(
-      "numberOfProperties" -> of(FormUtils.radioFormFormatter("numberOfProperties", List(One, MoreThanOne)))
+      "numberOfProperties" -> of[Int]
     )(identity)(Some(_))
   )
 
