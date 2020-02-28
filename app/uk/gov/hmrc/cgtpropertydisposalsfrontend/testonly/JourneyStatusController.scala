@@ -213,7 +213,7 @@ object JourneyStatusController {
             ) =>
           IncompleteSingleDisposalTriageAnswers(
             individualUserType,
-            if (numberOfProperties == Some(NumberOfProperties.One)) true else false,
+            if (numberOfProperties.contains(NumberOfProperties.One)) true else false,
             disposalMethod,
             wasAUKResident,
             wasAUKResident.map(if (_) Country.uk else Country("HK", Some("Hong Kong"))),
