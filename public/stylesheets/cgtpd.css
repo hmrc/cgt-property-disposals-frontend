@@ -21,6 +21,9 @@ h1 > span.heading-medium,
 .returns-list-header h3 {
     margin-top: 0;
 }
+.returns-list-header h3 {
+    font-size: 24px;
+}
 .govuk-box-highlight > h1 {
     margin-bottom: 0;
 }

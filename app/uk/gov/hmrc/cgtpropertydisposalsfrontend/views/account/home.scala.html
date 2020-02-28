@@ -43,7 +43,7 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 
   <div class="grid-row">
    <div class="column-two-thirds">
-    @caption(details.makeAccountName())
+    @caption(if(isAnAgent) { s"${messages("account.agent.prefix")} ${details.makeAccountName}" } else { details.makeAccountName()})
     @pageHeading(title, None, Some(subtitle))
    </div>
   </div>

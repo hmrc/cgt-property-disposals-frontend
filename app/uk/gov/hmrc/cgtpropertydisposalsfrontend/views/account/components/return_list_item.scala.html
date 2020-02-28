@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+@import cats.syntax.order._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnSummary
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
@@ -52,7 +53,7 @@
           <h5>
             <span class="caption">@messages("returns.list.paymentDue")</span>
             <strong class="bold">
-              @sentReturn.charges.headOption.map(c => LocalDateUtils.govShortDisplayFormat(c.dueDate))
+              @sentReturn.charges.map(_.dueDate).sortWith(LocalDateUtils.order.compare(_, _) < 0).headOption.map(LocalDateUtils.govShortDisplayFormat(_))
             </strong>
           </h5>
         }
