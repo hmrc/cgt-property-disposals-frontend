@@ -434,10 +434,31 @@ class PrivateBetaHomePageControllerSpec extends HomePageControllerSpec {
           mockGetSession(sessionData)
         }
 
-        val result = performAction()
-        status(result)          shouldBe OK
-        contentAsString(result) should include(messageFromMessageKey("account.home.title"))
-        contentAsString(result) shouldNot include(messageFromMessageKey("account.home.button.start-a-new-return"))
+        val result  = performAction()
+        val content = contentAsString(result)
+
+        status(result) shouldBe OK
+        content shouldNot include(messageFromMessageKey("account.agent.prefix"))
+        content should include(messageFromMessageKey("account.home.title"))
+        content shouldNot include(messageFromMessageKey("account.home.button.start-a-new-return"))
+      }
+
+      "display the home page for agents" in {
+        val sessionData =
+          SessionData.empty.copy(journeyStatus = Some(subscribed), userType = Some(UserType.Agent))
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionData)
+        }
+
+        val result  = performAction()
+        val content = contentAsString(result)
+
+        status(result) shouldBe OK
+        content        should include(messageFromMessageKey("account.home.title"))
+        content        should include(messageFromMessageKey("account.agent.prefix"))
+        content        should include(subscribed.subscribedDetails.makeAccountName())
       }
 
     }

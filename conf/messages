@@ -338,7 +338,7 @@ account.menu.manageYourDetails=Manage account
 account.menu.signOut=Sign out
 account.menu.changeClient=Change client
 
-account.home.title=Account home
+account.home.title=Capital Gains Tax on UK property account home
 account.home.subtitle=Account number: {0}
 account.home.subtitle.agent=Your client: {0} | Account number: {1}
 account.home.left.title=Capital Gains Tax liability
