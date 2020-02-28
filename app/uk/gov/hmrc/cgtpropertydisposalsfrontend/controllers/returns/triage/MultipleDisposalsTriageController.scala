@@ -96,3 +96,12 @@ class MultipleDisposalsTriageController @Inject() (
     }
 
 }
+object MultipleDisposalsTriageController{
+
+  val numberOfPropertiesForm: Form[NumberOfProperties] = Form(
+    mapping(
+      "numberOfProperties" -> of(FormUtils.radioFormFormatter("numberOfProperties", List(One, MoreThanOne)))
+    )(identity)(Some(_))
+  )
+
+}

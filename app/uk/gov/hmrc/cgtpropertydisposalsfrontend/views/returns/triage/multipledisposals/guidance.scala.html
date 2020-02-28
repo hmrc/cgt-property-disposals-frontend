@@ -17,18 +17,21 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
-        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button
+mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
+formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input
 )
 
-@()(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
-
+@(form: Form[NumberOfProperties])(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@key = @{ "numberOfProperties" }
 @title = @{messages("multiple-disposals.guidance.title")}
 
 @mainTemplate(title = title, userType = request.userType) {
