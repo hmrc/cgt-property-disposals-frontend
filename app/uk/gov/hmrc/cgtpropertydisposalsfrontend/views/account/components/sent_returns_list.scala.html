@@ -21,7 +21,9 @@
         sentReturnsHeader: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.returns_list_header
 )
 
-@(sentReturns: List[ReturnSummary],totalLeftToPay:BigDecimal)(implicit messages:Messages)
+@(sentReturns: List[ReturnSummary])(implicit messages:Messages)
+
+@totalLeftToPay = @{sentReturns.map(_.totalOutstanding.inPounds()).sum}
 
 @sentReturnsHeader(totalLeftToPay)
 

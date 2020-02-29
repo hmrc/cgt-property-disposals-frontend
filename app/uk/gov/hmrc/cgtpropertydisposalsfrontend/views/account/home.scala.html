@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.account.AccountMenuItem
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.MoneyUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -33,7 +33,7 @@ sentReturnsList: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.com
 caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(details: SubscribedDetails, draftReturns: List[DraftReturn], sentReturns: List[ReturnSummary],totalLeftToPay:BigDecimal)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(details: SubscribedDetails, draftReturns: List[DraftReturn], sentReturns: List[ReturnSummary])(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @isAnAgent = @{request.userType.contains(UserType.Agent)}
 @title = @{messages(s"account.home.title")}
@@ -59,7 +59,7 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
  </ul>
 
   @if(sentReturns.nonEmpty) {
-    @sentReturnsList(sentReturns, totalLeftToPay)
+    @sentReturnsList(sentReturns)
   }
 
 }

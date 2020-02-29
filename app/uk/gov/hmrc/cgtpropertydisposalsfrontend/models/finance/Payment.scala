@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance
+
+import java.time.LocalDate
 
 import play.api.libs.json.{Json, OFormat}
 
-final case class PaymentsJourney(nextUrl: String, journeyId: String)
+final case class Payment(
+  amount: AmountInPence,
+  clearingDate: LocalDate
+)
 
-object PaymentsJourney {
+object Payment {
 
-  implicit val format: OFormat[PaymentsJourney] = Json.format
+  implicit val paymentFormat: OFormat[Payment] = Json.format
 
 }

@@ -28,7 +28,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, 
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import play.api.libs.json.{JsValue, Json, OFormat}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.homepage.FinancialTransaction
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.FinancialTransaction
 
 sealed trait JourneyStatus extends Product with Serializable
 
@@ -73,8 +73,7 @@ object JourneyStatus {
     ggCredId: GGCredId,
     agentReferenceNumber: Option[AgentReferenceNumber],
     draftReturns: List[DraftReturn],
-    sentReturns: List[ReturnSummary],
-    financialTransactions: List[FinancialTransaction]
+    sentReturns: List[ReturnSummary]
   ) extends JourneyStatus
 
   final case class StartingNewDraftReturn(

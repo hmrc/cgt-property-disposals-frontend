@@ -18,8 +18,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns
 
 import cats.syntax.order._
 import com.google.inject.{ImplementedBy, Singleton}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AmountInPence
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AmountInPence._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue.{GainCalculatedTaxDue, NonGainCalculatedTaxDue}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers

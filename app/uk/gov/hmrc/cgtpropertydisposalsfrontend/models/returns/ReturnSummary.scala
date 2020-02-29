@@ -19,19 +19,18 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 import java.time.LocalDate
 
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, ChargeWithPayments}
 
 final case class ReturnSummary(
   submissionId: String,
   submissionDate: LocalDate,
   completionDate: LocalDate,
   lastUpdatedDate: Option[LocalDate],
-  taxYear: String,
   totalCGTLiability: AmountInPence,
   totalOutstanding: AmountInPence,
   propertyAddress: UkAddress,
-  charges: List[Charge]
+  chargesWithPayments: List[ChargeWithPayments]
 )
 
 object ReturnSummary {

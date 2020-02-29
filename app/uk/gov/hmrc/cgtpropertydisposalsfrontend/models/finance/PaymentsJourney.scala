@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,21 +12,16 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance
 
-@this()
+import play.api.libs.json.{Json, OFormat}
 
-@(total: AmountInPence, label: String, showGainType: Boolean)(implicit messages: Messages)
+final case class PaymentsJourney(nextUrl: String, journeyId: String)
 
-<span class="calc-total">
-  @{MoneyUtils.formatAmountOfMoneyWithPoundSign(total.abs().inPounds())}
- @if(showGainType) {
-  @{if (total.isNegative) s"(${messages("generic.loss")})" else if (!total.isZero) s"(${messages("generic.gain")})"}
- }
-</span>
-<h2 class="heading-medium">
-   @label
-</h2>
+object PaymentsJourney {
+
+  implicit val format: OFormat[PaymentsJourney] = Json.format
+
+}

@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.homepage
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance
 
 import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AmountInPence
-
-final case class FinancialDataResponse(
-  financialTransactions: List[FinancialTransaction]
-)
-object FinancialDataResponse {
-  implicit val financialDataResponseFormat: Format[FinancialDataResponse] = Json.format[FinancialDataResponse]
-}
 
 final case class FinancialTransaction(
-  outstandingAmount: AmountInPence
+  chargeReference: String,
+  originalAmount: AmountInPence,
+  outstandingAmount: AmountInPence,
+  payments: List[Payment]
 )
+
 object FinancialTransaction {
-  implicit val financialTransactionFormat: Format[FinancialTransaction] = Json.format[FinancialTransaction]
+
+  implicit val format: Format[FinancialTransaction] = Json.format
+
 }

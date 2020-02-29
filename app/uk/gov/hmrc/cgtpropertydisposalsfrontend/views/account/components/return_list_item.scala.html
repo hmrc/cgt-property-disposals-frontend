@@ -18,11 +18,21 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnSummary
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.MoneyUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence._
 
 @this()
 
 @(sentReturn: ReturnSummary)(implicit messages: Messages)
+
+@paymentDueDate = @{
+    sentReturn.chargesWithPayments
+            .filter(_.outstandingAmount() > AmountInPence.zero)
+            .map(_.dueDate)
+            .sortWith(LocalDateUtils.order.compare(_, _) < 0)
+            .headOption
+}
 
 <li class="single-return form-bundle">
   <div class="grid-row">
@@ -53,7 +63,7 @@
           <h5>
             <span class="caption">@messages("returns.list.paymentDue")</span>
             <strong class="bold">
-              @sentReturn.charges.map(_.dueDate).sortWith(LocalDateUtils.order.compare(_, _) < 0).headOption.map(LocalDateUtils.govShortDisplayFormat(_))
+              @paymentDueDate.map(LocalDateUtils.govShortDisplayFormat(_))
             </strong>
           </h5>
         }
