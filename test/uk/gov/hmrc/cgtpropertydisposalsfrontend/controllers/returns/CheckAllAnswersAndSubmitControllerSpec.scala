@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 
+import java.util.UUID
+
 import cats.data.EitherT
 import cats.instances.future._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -96,7 +98,7 @@ class CheckAllAnswersAndSubmitControllerSpec
     val completeReturn = sample[CompleteReturn]
 
     val completeDraftReturn = DraftReturn(
-      completeReturn.id,
+      UUID.randomUUID(),
       sample[CgtReference],
       completeReturn.triageAnswers,
       Some(completeReturn.propertyAddress),
@@ -161,6 +163,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 
       val submitReturnRequest = SubmitReturnRequest(
         completeReturn,
+        completeFillingOutReturn.draftReturn.id,
         completeFillingOutReturn.subscribedDetails,
         completeFillingOutReturn.agentReferenceNumber
       )
