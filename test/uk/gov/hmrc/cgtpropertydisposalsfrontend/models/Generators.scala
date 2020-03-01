@@ -45,7 +45,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTri
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.OtherReliefs
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CompleteYearToDateLiabilityAnswers, IncompleteYearToDateLiabilityAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanNotifyResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanServiceResponse.{UpscanNotifyEvent, UpscanResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FinancialDataServiceImpl.FinancialDataResponse
@@ -297,6 +297,8 @@ trait ReturnGen { this: GenUtils =>
   implicit val returnSummaryWithoutPaymentInfoGen: Gen[ReturnSummaryWithoutPaymentInfo] =
     gen[ReturnSummaryWithoutPaymentInfo]
 
+  implicit val calculateCgtTaxDueRequestGen: Gen[CalculateCgtTaxDueRequest] = gen[CalculateCgtTaxDueRequest]
+
 }
 
 trait DisposalDetailsGen { this: GenUtils =>
@@ -397,9 +399,6 @@ trait YearToDateLiabilityAnswersGen { this: GenUtils =>
         a.copy(personalAllowance = Some(AmountInPence.zero))
       case other => other
     }
-
-  implicit val hasEstimatedDetailsWithCalculatedTaxDueGen: Gen[HasEstimatedDetailsWithCalculatedTaxDue] =
-    gen[HasEstimatedDetailsWithCalculatedTaxDue]
 
   implicit val calculatedTaxDueGen: Gen[CalculatedTaxDue] = gen[CalculatedTaxDue]
 
