@@ -26,7 +26,7 @@ import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.libs.json.{JsNumber, JsString, JsValue}
-import play.api.mvc.Result
+import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.auth.core.AuthConnector
@@ -36,12 +36,13 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, StartingNewDraftReturn, Subscribed, ViewingReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, PaymentsJourney}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftReturn, ReturnSummary, SubmitReturnResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{PaymentsService, ReturnsService}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -60,11 +61,14 @@ trait HomePageControllerSpec
 
   val mockReturnsService = mock[ReturnsService]
 
+  val mockPaymentsService = mock[PaymentsService]
+
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
-      bind[ReturnsService].toInstance(mockReturnsService)
+      bind[ReturnsService].toInstance(mockReturnsService),
+      bind[PaymentsService].toInstance(mockPaymentsService)
     )
 
   val subscribed = sample[Subscribed]
@@ -87,6 +91,18 @@ trait HomePageControllerSpec
     (mockReturnsService
       .displayReturn(_: CgtReference, _: String)(_: HeaderCarrier))
       .expects(cgtReference, submissionId, *)
+      .returning(EitherT.fromEither[Future](response))
+
+  def mockStartPaymentJourney(
+    cgtReference: CgtReference,
+    chargeReference: String,
+    amount: AmountInPence,
+    returnUrl: Call,
+    backUrl: Call
+  )(response: Either[Error, PaymentsJourney]) =
+    (mockPaymentsService
+      .startPaymentJourney(_: CgtReference, _: String, _: AmountInPence, _: Call, _: Call)(_: HeaderCarrier))
+      .expects(cgtReference, chargeReference, amount, returnUrl, backUrl, *)
       .returning(EitherT.fromEither[Future](response))
 
 }
@@ -433,6 +449,13 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
       val subscribed  = sample[Subscribed].copy(sentReturns = List(sentReturn))
       val sessionData = SessionData.empty.copy(journeyStatus = Some(subscribed))
 
+      redirectToStartWhenInvalidJourney(
+        () => performAction(""), {
+          case _: Subscribed => true
+          case _             => false
+        }
+      )
+
       "return a bad request" when {
 
         "the user does not have a return with the given submission id" in {
@@ -507,6 +530,64 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
             performAction(sentReturn.submissionId),
             controllers.returns.routes.ViewReturnController.displayReturn()
           )
+        }
+
+      }
+
+    }
+
+    "handling requests to pay a return" must {
+
+      def performAction(): Future[Result] = controller.payTotalAmountLeftToPay()(FakeRequest())
+
+      redirectToStartWhenInvalidJourney(
+        performAction, {
+          case _: Subscribed => true
+          case _             => false
+        }
+      )
+
+      "show an error page" when {
+
+        "there is an error starting a payments journey" in {
+          val subscribed = sample[Subscribed]
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(SessionData.empty.copy(journeyStatus = Some(subscribed)))
+            mockStartPaymentJourney(
+              subscribed.subscribedDetails.cgtReference,
+              subscribed.subscribedDetails.cgtReference.value,
+              subscribed.totalLeftToPay(),
+              routes.HomePageController.homepage(),
+              routes.HomePageController.homepage()
+            )(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
+      }
+
+      "redirect to the payment journey" when {
+
+        "the payment journey is successfully started" in {
+          val subscribed      = sample[Subscribed]
+          val paymentsJourney = sample[PaymentsJourney]
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(SessionData.empty.copy(journeyStatus = Some(subscribed)))
+            mockStartPaymentJourney(
+              subscribed.subscribedDetails.cgtReference,
+              subscribed.subscribedDetails.cgtReference.value,
+              subscribed.totalLeftToPay(),
+              routes.HomePageController.homepage(),
+              routes.HomePageController.homepage()
+            )(Right(paymentsJourney))
+          }
+
+          checkIsRedirect(performAction(), paymentsJourney.nextUrl)
         }
 
       }

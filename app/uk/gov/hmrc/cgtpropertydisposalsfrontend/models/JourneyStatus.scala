@@ -28,7 +28,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, 
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import play.api.libs.json.{JsValue, Json, OFormat}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.FinancialTransaction
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, FinancialTransaction}
 
 sealed trait JourneyStatus extends Product with Serializable
 
@@ -75,6 +75,12 @@ object JourneyStatus {
     draftReturns: List[DraftReturn],
     sentReturns: List[ReturnSummary]
   ) extends JourneyStatus
+
+  object Subscribed {
+    implicit class SubscribedOps(private val s: Subscribed) extends AnyVal {
+      def totalLeftToPay(): AmountInPence = AmountInPence(s.sentReturns.map(_.totalOutstanding.value).sum)
+    }
+  }
 
   final case class StartingNewDraftReturn(
     subscribedDetails: SubscribedDetails,

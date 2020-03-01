@@ -14,11 +14,14 @@
  * limitations under the License.
  *@
 
+@import cats.syntax.order._
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
 @this()
 
-@(totalLeftToPay: BigDecimal)(implicit messages: Messages)
+@(totalLeftToPay: AmountInPence)(implicit messages: Messages)
 
 <div class="grid-row returns-list-header">
   <div class="column-three-quarters">
@@ -32,10 +35,10 @@
         <span class="form-hint">
         @messages("account.totalLeftToPay")
         </span>
-        @MoneyUtils.formatAmountOfMoneyWithPoundSign(totalLeftToPay)
+        @MoneyUtils.formatAmountOfMoneyWithPoundSign(totalLeftToPay.inPounds())
       </h3>
-      @if(totalLeftToPay > 0) {
-        <a href="#">
+      @if(totalLeftToPay > AmountInPence.zero) {
+        <a href="@homepage.routes.HomePageController.payTotalAmountLeftToPay()">
         @messages("account.make.payment.link")
         </a>
       }

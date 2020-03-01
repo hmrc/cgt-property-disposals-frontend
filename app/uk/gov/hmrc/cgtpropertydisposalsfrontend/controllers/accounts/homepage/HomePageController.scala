@@ -31,12 +31,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, StartingNewDraftReturn, Subscribed, ViewingReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, ReturnSummary}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FinancialDataService, ReturnsService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{PaymentsService, ReturnsService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
@@ -51,7 +50,7 @@ class HomePageController @Inject() (
   errorHandler: ErrorHandler,
   sessionStore: SessionStore,
   returnsService: ReturnsService,
-  financialDataService: FinancialDataService,
+  paymentsService: PaymentsService,
   cc: MessagesControllerComponents,
   manageYourDetailsPage: views.html.account.manage_your_details,
   homePage: views.html.account.home,
@@ -68,13 +67,7 @@ class HomePageController @Inject() (
   def homepage(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request: RequestWithSessionData[AnyContent] =>
       withSubscribedUser { (_, subscribed) =>
-        Ok(
-          homePage(
-            subscribed.subscribedDetails,
-            subscribed.draftReturns,
-            subscribed.sentReturns
-          )
-        )
+        Ok(homePage(subscribed))
       }(withUplift = true)
   }
 
@@ -180,6 +173,32 @@ class HomePageController @Inject() (
               }, _ => Redirect(returns.routes.ViewReturnController.displayReturn()))
             }
       }(withUplift = false)
+  }
+
+  def payTotalAmountLeftToPay(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withSubscribedUser {
+      case (_, subscribed) =>
+        paymentsService
+          .startPaymentJourney(
+            subscribed.subscribedDetails.cgtReference,
+            subscribed.subscribedDetails.cgtReference.value,
+            subscribed.totalLeftToPay(),
+            routes.HomePageController.homepage(),
+            routes.HomePageController.homepage()
+          )
+          .fold(
+            { e =>
+              logger.warn("Could not start payments journey to pay total amount outstanding", e)
+              errorHandler.errorResult()
+            }, { journey =>
+              logger.info(
+                s"Payment journey started with journeyId ${journey.journeyId} to pay total outstanding amount on account"
+              )
+              Redirect(journey.nextUrl)
+            }
+          )
+    }(withUplift = false)
+
   }
 
   private def withSubscribedUser(
