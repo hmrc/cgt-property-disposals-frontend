@@ -62,28 +62,6 @@ class ViewReturnController @Inject() (
     }
   }
 
-  def amendReturn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(v @ ViewingReturn(_, _, _, sentReturn)) =>
-        amendReturnForm
-          .bindFromRequest()
-          .fold[Future[Result]](
-            formWithErrors => BadRequest(viewReturnPage(sentReturn, formWithErrors)), { json =>
-              returnsService
-                .amendReturn(v.subscribedDetails.cgtReference, json)
-                .fold({ e =>
-                  logger.warn("Could not amend return", e)
-                  errorHandler.errorResult()
-                }, response => Ok(response.toString))
-            }
-          )
-
-      case _ =>
-        Redirect(baseRoutes.StartController.start())
-    }
-
-  }
-
 }
 
 object ViewReturnController {

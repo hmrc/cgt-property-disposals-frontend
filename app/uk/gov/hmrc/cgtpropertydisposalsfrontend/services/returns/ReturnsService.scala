@@ -58,10 +58,6 @@ trait ReturnsService {
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, JsValue]
 
-  def amendReturn(cgtReference: CgtReference, amendedReturn: JsValue)(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, SubmitReturnResponse]
-
 }
 
 @Singleton
@@ -136,17 +132,6 @@ class ReturnsServiceImpl @Inject() (connector: ReturnsConnector, financialDataSe
     connector.displayReturn(cgtReference, submissionId).subflatMap { response =>
       if (response.status === OK) {
         response.parseJSON[JsValue]().leftMap(Error(_))
-      } else {
-        Left(Error(s"call to list returns came back with status ${response.status}"))
-      }
-    }
-
-  def amendReturn(cgtReference: CgtReference, amendedReturn: JsValue)(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, SubmitReturnResponse] =
-    connector.amendReturn(cgtReference, amendedReturn).subflatMap { response =>
-      if (response.status === OK) {
-        response.parseJSON[SubmitReturnResponse]().leftMap(Error(_))
       } else {
         Left(Error(s"call to list returns came back with status ${response.status}"))
       }

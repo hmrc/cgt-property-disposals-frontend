@@ -549,9 +549,9 @@ class YearToDateLiabilityFirstReturnControllerSpec
         "the user had started answering questions in this section but had not completed it" in {
           val oldAnswers =
             IncompleteYearToDateLiabilityAnswers.empty.copy(
-              estimatedIncome                         = Some(AmountInPence(1L)),
-              personalAllowance                       = None,
-              hasEstimatedDetailsWithCalculatedTaxDue = Some(sample[HasEstimatedDetailsWithCalculatedTaxDue])
+              estimatedIncome     = Some(AmountInPence(1L)),
+              personalAllowance   = None,
+              hasEstimatedDetails = Some(sample[HasEstimatedDetailsWithCalculatedTaxDue])
             )
 
           val newAnswers = oldAnswers.copy(personalAllowance = Some(AmountInPence(100L)))
@@ -791,9 +791,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
           draftReturnWithCompleteJourneys,
           draftReturnWithCompleteJourneys.copy(
             yearToDateLiabilityAnswers = Some(
-              ytdAnswers.copy(hasEstimatedDetailsWithCalculatedTaxDue =
-                Some(HasEstimatedDetailsWithCalculatedTaxDue(true, calculatedTax))
-              )
+              ytdAnswers.copy(hasEstimatedDetails = Some(HasEstimatedDetailsWithCalculatedTaxDue(true, calculatedTax)))
             )
           ),
           () => performAction("hasEstimatedDetails" -> "true"),
@@ -869,7 +867,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
 
             val updatedDraftReturn = draftReturnWithCompleteJourneys.copy(
               yearToDateLiabilityAnswers = Some(
-                ytdAnswers.copy(hasEstimatedDetailsWithCalculatedTaxDue = Some(
+                ytdAnswers.copy(hasEstimatedDetails = Some(
                   HasEstimatedDetailsWithCalculatedTaxDue(true, calculatedTax)
                 )
                 )
@@ -893,11 +891,10 @@ class YearToDateLiabilityFirstReturnControllerSpec
             val draftReturn = draftReturnWithCompleteJourneys.copy(
               yearToDateLiabilityAnswers = Some(
                 CompleteYearToDateLiabilityAnswers(
-                  estimatedIncome   = AmountInPence.zero,
-                  personalAllowance = None,
-                  hasEstimatedDetailsWithCalculatedTaxDue =
-                    HasEstimatedDetailsWithCalculatedTaxDue(false, calculatedTax),
-                  taxDue = sample[AmountInPence],
+                  estimatedIncome     = AmountInPence.zero,
+                  personalAllowance   = None,
+                  hasEstimatedDetails = HasEstimatedDetailsWithCalculatedTaxDue(false, calculatedTax),
+                  taxDue              = sample[AmountInPence],
                   Some(sample[String])
                 )
               )
@@ -906,10 +903,9 @@ class YearToDateLiabilityFirstReturnControllerSpec
               draftReturnWithCompleteJourneys.copy(
                 yearToDateLiabilityAnswers = Some(
                   IncompleteYearToDateLiabilityAnswers(
-                    estimatedIncome   = Some(AmountInPence.zero),
-                    personalAllowance = None,
-                    hasEstimatedDetailsWithCalculatedTaxDue =
-                      Some(HasEstimatedDetailsWithCalculatedTaxDue(true, calculatedTax)),
+                    estimatedIncome     = Some(AmountInPence.zero),
+                    personalAllowance   = None,
+                    hasEstimatedDetails = Some(HasEstimatedDetailsWithCalculatedTaxDue(true, calculatedTax)),
                     None,
                     None
                   )
@@ -941,7 +937,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
               draftReturn = draftReturnWithCompleteJourneys.copy(
                 yearToDateLiabilityAnswers = Some(
                   ytdAnswers.copy(
-                    hasEstimatedDetailsWithCalculatedTaxDue = Some(
+                    hasEstimatedDetails = Some(
                       hasEstimatedDetailsWithCalculatedTaxDue
                     )
                   )
@@ -1242,7 +1238,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
                 IncompleteYearToDateLiabilityAnswers(
                   Some(answers.estimatedIncome),
                   answers.personalAllowance,
-                  Some(answers.hasEstimatedDetailsWithCalculatedTaxDue),
+                  Some(answers.hasEstimatedDetails),
                   Some(AmountInPence(123456L)),
                   None
                 )
@@ -1277,7 +1273,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
       val allQuestionAnswered = IncompleteYearToDateLiabilityAnswers(
         Some(completeAnswers.estimatedIncome),
         completeAnswers.personalAllowance,
-        Some(completeAnswers.hasEstimatedDetailsWithCalculatedTaxDue),
+        Some(completeAnswers.hasEstimatedDetails),
         Some(completeAnswers.taxDue),
         completeAnswers.mandatoryEvidence
       )
@@ -1332,9 +1328,9 @@ class YearToDateLiabilityFirstReturnControllerSpec
         "that question has not been answered yet" in {
           testRedirectWhenIncompleteAnswers(
             allQuestionAnswered.copy(
-              estimatedIncome                         = Some(AmountInPence.zero),
-              personalAllowance                       = None,
-              hasEstimatedDetailsWithCalculatedTaxDue = None
+              estimatedIncome     = Some(AmountInPence.zero),
+              personalAllowance   = None,
+              hasEstimatedDetails = None
             ),
             routes.YearToDateLiabilityFirstReturnController.hasEstimatedDetails()
           )
@@ -1360,7 +1356,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
         "that question hasn't been completed yet and the calculated tax due is not the same as the submitted tax due" in {
           testRedirectWhenIncompleteAnswers(
             allQuestionAnswered.copy(
-              hasEstimatedDetailsWithCalculatedTaxDue = Some(
+              hasEstimatedDetails = Some(
                 sample[HasEstimatedDetailsWithCalculatedTaxDue].copy(
                   calculatedTaxDue = sample[GainCalculatedTaxDue].copy(amountOfTaxDue = AmountInPence(100L))
                 )
@@ -1473,7 +1469,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
         "the section is complete" in {
           test(
             sample[CompleteYearToDateLiabilityAnswers].copy(
-              hasEstimatedDetailsWithCalculatedTaxDue =
+              hasEstimatedDetails =
                 sample[HasEstimatedDetailsWithCalculatedTaxDue].copy(calculatedTaxDue = calculatedTaxDue),
               taxDue = AmountInPence(200L)
             ),
@@ -1535,9 +1531,9 @@ class YearToDateLiabilityFirstReturnControllerSpec
           mockGetSession(
             sessionWithState(
               sample[IncompleteYearToDateLiabilityAnswers].copy(
-                estimatedIncome                         = None,
-                personalAllowance                       = Some(sample[AmountInPence]),
-                hasEstimatedDetailsWithCalculatedTaxDue = Some(sample[HasEstimatedDetailsWithCalculatedTaxDue])
+                estimatedIncome     = None,
+                personalAllowance   = Some(sample[AmountInPence]),
+                hasEstimatedDetails = Some(sample[HasEstimatedDetailsWithCalculatedTaxDue])
               ),
               sample[DisposalDate]
             )._1
@@ -1771,7 +1767,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
       val answers = IncompleteYearToDateLiabilityAnswers.empty.copy(
         estimatedIncome   = Some(AmountInPence(1L)),
         personalAllowance = Some(AmountInPence.zero),
-        hasEstimatedDetailsWithCalculatedTaxDue = Some(
+        hasEstimatedDetails = Some(
           sample[HasEstimatedDetailsWithCalculatedTaxDue].copy(
             calculatedTaxDue = calculatedTaxDue
           )
@@ -1802,7 +1798,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
           mockAuthWithNoRetrievals()
           mockGetSession(
             sessionWithState(
-              answers.copy(hasEstimatedDetailsWithCalculatedTaxDue = None),
+              answers.copy(hasEstimatedDetails = None),
               sample[DisposalDate]
             )._1
           )

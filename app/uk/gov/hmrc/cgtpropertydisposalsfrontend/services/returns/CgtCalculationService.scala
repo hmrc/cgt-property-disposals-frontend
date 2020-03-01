@@ -16,145 +16,45 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns
 
-import cats.syntax.order._
-import com.google.inject.{ImplementedBy, Singleton}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue.{GainCalculatedTaxDue, NonGainCalculatedTaxDue}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, CalculatedTaxDue, TaxableAmountOfMoney}
+import cats.data.EitherT
+import cats.instances.future._
+import cats.instances.int._
+import cats.syntax.either._
+import cats.syntax.eq._
+import com.google.inject.{ImplementedBy, Inject, Singleton}
+import play.api.http.Status.OK
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, CalculatedTaxDue}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
+import uk.gov.hmrc.http.HeaderCarrier
+
+import scala.concurrent.{ExecutionContext, Future}
 
 @ImplementedBy(classOf[CgtCalculationServiceImpl])
 trait CgtCalculationService {
 
   def calculateTaxDue(
-    triageAnswers: CompleteSingleDisposalTriageAnswers,
-    disposalDetails: CompleteDisposalDetailsAnswers,
-    acquisitionDetails: CompleteAcquisitionDetailsAnswers,
-    reliefDetails: CompleteReliefDetailsAnswers,
-    exemptionAndLosses: CompleteExemptionAndLossesAnswers,
-    estimatedIncome: AmountInPence,
-    personalAllowance: AmountInPence
-  ): CalculatedTaxDue
+    request: CalculateCgtTaxDueRequest
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, CalculatedTaxDue]
 
 }
 
 @Singleton
-class CgtCalculationServiceImpl extends CgtCalculationService {
+class CgtCalculationServiceImpl @Inject() (connector: ReturnsConnector)(implicit ec: ExecutionContext)
+    extends CgtCalculationService {
 
   def calculateTaxDue(
-    triageAnswers: CompleteSingleDisposalTriageAnswers,
-    disposalDetails: CompleteDisposalDetailsAnswers,
-    acquisitionDetails: CompleteAcquisitionDetailsAnswers,
-    reliefDetails: CompleteReliefDetailsAnswers,
-    exemptionAndLosses: CompleteExemptionAndLossesAnswers,
-    estimatedIncome: AmountInPence,
-    personalAllowance: AmountInPence
-  ): CalculatedTaxDue = {
-    val disposalAmountLessCosts: AmountInPence =
-      disposalDetails.disposalPrice -- disposalDetails.disposalFees
-
-    val acquisitionAmountPlusCosts: AmountInPence =
-      acquisitionDetails.rebasedAcquisitionPrice.getOrElse(acquisitionDetails.acquisitionPrice) ++
-        acquisitionDetails.improvementCosts ++
-        acquisitionDetails.acquisitionFees
-
-    val initialGainOrLoss: AmountInPence =
-      disposalAmountLessCosts -- acquisitionAmountPlusCosts
-
-    val totalReliefs: AmountInPence = {
-      val otherReliefs =
-        reliefDetails.otherReliefs.map(_.fold(_.amount, () => AmountInPence.zero)).getOrElse(AmountInPence.zero)
-      reliefDetails.privateResidentsRelief ++ reliefDetails.lettingsRelief ++ otherReliefs
+    request: CalculateCgtTaxDueRequest
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, CalculatedTaxDue] =
+    connector.calculateTaxDue(request).subflatMap { response =>
+      if (response.status === OK) {
+        response
+          .parseJSON[CalculatedTaxDue]()
+          .leftMap(Error(_))
+      } else {
+        Left(Error(s"Call to calulate cgt tax due came back with status ${response.status}"))
+      }
     }
-
-    val gainOrLossAfterReliefs: AmountInPence =
-      if (initialGainOrLoss > AmountInPence.zero)
-        (initialGainOrLoss -- totalReliefs).withFloorZero
-      else if (initialGainOrLoss < AmountInPence.zero)
-        (initialGainOrLoss ++ totalReliefs).withCeilingZero
-      else
-        AmountInPence.zero
-
-    val totalLosses: AmountInPence = {
-      val previousYearsLosses =
-        if (gainOrLossAfterReliefs < AmountInPence.zero ||
-            (gainOrLossAfterReliefs -- exemptionAndLosses.inYearLosses) < AmountInPence.zero)
-          AmountInPence.zero
-        else
-          exemptionAndLosses.previousYearsLosses
-
-      exemptionAndLosses.inYearLosses ++ previousYearsLosses
-    }
-
-    val gainOrLossAfterLosses: AmountInPence =
-      if (gainOrLossAfterReliefs >= AmountInPence.zero)
-        (gainOrLossAfterReliefs -- totalLosses).withFloorZero
-      else
-        (gainOrLossAfterReliefs ++ totalLosses).withCeilingZero
-
-    val taxableGain: AmountInPence =
-      if (gainOrLossAfterLosses > AmountInPence.zero)
-        (gainOrLossAfterLosses -- exemptionAndLosses.annualExemptAmount).withFloorZero
-      else
-        gainOrLossAfterReliefs
-
-    if (taxableGain <= AmountInPence.zero)
-      NonGainCalculatedTaxDue(
-        disposalAmountLessCosts,
-        acquisitionAmountPlusCosts,
-        initialGainOrLoss,
-        totalReliefs,
-        gainOrLossAfterReliefs,
-        totalLosses,
-        gainOrLossAfterLosses,
-        taxableGain,
-        AmountInPence.zero,
-        AmountInPence.zero
-      )
-    else {
-      val taxYear       = triageAnswers.disposalDate.taxYear
-      val taxableIncome = (estimatedIncome -- personalAllowance).withFloorZero
-      val (lowerBandRate, higherTaxRate) =
-        triageAnswers.assetType match {
-          case AssetType.Residential => taxYear.cgtRateLowerBandResidential    -> taxYear.cgtRateHigherBandResidential
-          case _                     => taxYear.cgtRateLowerBandNonResidential -> taxYear.cgtRateHigherBandNonResidential
-        }
-      val lowerBandTax = TaxableAmountOfMoney(
-        lowerBandRate,
-        AmountInPence.zero.max(
-          taxableGain.min(
-            (taxYear.incomeTaxHigherRateThreshold -- taxableIncome).withFloorZero
-          )
-        )
-      )
-      val higherBandTax = TaxableAmountOfMoney(
-        higherTaxRate,
-        (taxableGain -- lowerBandTax.taxableAmount).withFloorZero
-      )
-
-      val taxDue = lowerBandTax.taxDue() ++ higherBandTax.taxDue()
-
-      GainCalculatedTaxDue(
-        disposalAmountLessCosts,
-        acquisitionAmountPlusCosts,
-        initialGainOrLoss,
-        totalReliefs,
-        gainOrLossAfterReliefs,
-        totalLosses,
-        gainOrLossAfterLosses,
-        taxableGain,
-        taxableIncome,
-        lowerBandTax,
-        higherBandTax,
-        taxDue,
-        taxDue
-      )
-    }
-  }
 
 }

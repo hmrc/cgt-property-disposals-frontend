@@ -39,14 +39,4 @@
 
  <textarea rows="@rows" cols="@cols" style="width:auto">@json</textarea>
 
- <h2>Amend Return</h2>
- @formWrapper(routes.ViewReturnController.amendReturn()) {
-  <p>
-   <label>Return JSON</label>
-   <textarea id="amend" name="amend" rows="@rows" cols="@cols" style="width:auto">@{form.value.map(Json.prettyPrint).getOrElse("")} </textarea>
-  </p>
-
-  @submitButton(messages("Submit"))
- }
-
 }
