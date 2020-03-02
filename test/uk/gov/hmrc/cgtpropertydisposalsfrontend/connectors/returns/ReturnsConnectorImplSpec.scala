@@ -123,5 +123,15 @@ class ReturnsConnectorImplSpec extends WordSpec with Matchers with MockFactory w
       )
     }
 
+    "handling requests to get tax years" must {
+      val date        = LocalDate.of(2020, 1, 31)
+      val expectedUrl = s"http://host:123/tax-year/2020-01-31"
+
+      behave like connectorBehaviour(
+        mockGet[HttpResponse](expectedUrl, Map.empty, Map.empty),
+        () => connector.taxYear(date)
+      )
+    }
+
   }
 }

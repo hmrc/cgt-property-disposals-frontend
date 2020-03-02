@@ -55,6 +55,8 @@ trait ReturnsConnector {
     request: CalculateCgtTaxDueRequest
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
 
+  def taxYear(date: LocalDate)(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
+
 }
 
 @Singleton
@@ -145,6 +147,14 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
         .recover {
           case NonFatal(e) => Left(Error(e))
         }
+    )
+
+  def taxYear(date: LocalDate)(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
+    EitherT[Future, Error, HttpResponse](
+      http
+        .get(s"$baseUrl/tax-year/${date.format(dateFormatter)}")
+        .map(Right(_))
+        .recover { case e => Left(Error(e)) }
     )
 
   private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ISO_DATE
