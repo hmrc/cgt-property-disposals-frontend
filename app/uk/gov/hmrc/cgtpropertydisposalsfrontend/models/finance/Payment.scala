@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance
+
+import java.time.LocalDate
 
 import play.api.libs.json.{Json, OFormat}
 
-final case class HasEstimatedDetailsWithCalculatedTaxDue(
-  hasEstimatedDetails: Boolean,
-  calculatedTaxDue: CalculatedTaxDue
+final case class Payment(
+  amount: AmountInPence,
+  clearingDate: LocalDate
 )
 
-object HasEstimatedDetailsWithCalculatedTaxDue {
+object Payment {
 
-  implicit val format: OFormat[HasEstimatedDetailsWithCalculatedTaxDue] = Json.format
+  implicit val paymentFormat: OFormat[Payment] = Json.format
+
 }

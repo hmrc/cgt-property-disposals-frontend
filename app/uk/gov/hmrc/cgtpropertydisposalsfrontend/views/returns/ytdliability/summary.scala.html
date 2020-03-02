@@ -18,7 +18,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CompleteYearToDateLiabilityAnswers
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.MoneyUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 
 @this(
         cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
@@ -45,7 +45,7 @@
   }
   @cyaRow(
     messages("hasEstimatedDetails.title"),
-    Html(messages(if(answers.hasEstimatedDetailsWithCalculatedTaxDue.hasEstimatedDetails) "generic.yes" else "generic.no")),
+    Html(messages(if(answers.hasEstimatedDetails) "generic.yes" else "generic.no")),
     Some(cyaChange(messages("ytdLiability.cyaChange.hasEstimatedDetails"), routes.YearToDateLiabilityFirstReturnController.hasEstimatedDetails().url))
   )
   @cyaRow(

@@ -19,16 +19,14 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import cats.Eq
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import play.api.libs.json.{JsValue, Json, OFormat}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.homepage.FinancialTransaction
 
 sealed trait JourneyStatus extends Product with Serializable
 
@@ -73,9 +71,14 @@ object JourneyStatus {
     ggCredId: GGCredId,
     agentReferenceNumber: Option[AgentReferenceNumber],
     draftReturns: List[DraftReturn],
-    sentReturns: List[ReturnSummary],
-    financialTransactions: List[FinancialTransaction]
+    sentReturns: List[ReturnSummary]
   ) extends JourneyStatus
+
+  object Subscribed {
+    implicit class SubscribedOps(private val s: Subscribed) extends AnyVal {
+      def totalLeftToPay(): AmountInPence = AmountInPence(s.sentReturns.map(_.totalOutstanding.value).sum)
+    }
+  }
 
   final case class StartingNewDraftReturn(
     subscribedDetails: SubscribedDetails,
@@ -103,7 +106,7 @@ object JourneyStatus {
     subscribedDetails: SubscribedDetails,
     ggCredId: GGCredId,
     agentReferenceNumber: Option[AgentReferenceNumber],
-    sentReturn: JsValue
+    completeReturn: CompleteReturn
   ) extends JourneyStatus
 
   final case class AlreadySubscribedWithDifferentGGAccount(ggCredId: GGCredId, cgtReference: Option[CgtReference])

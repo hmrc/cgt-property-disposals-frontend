@@ -337,8 +337,9 @@ account.menu.home=Home
 account.menu.manageYourDetails=Manage account
 account.menu.signOut=Sign out
 account.menu.changeClient=Change client
+account.agent.prefix=Client:
+account.home.title=Capital Gains Tax on UK property account home
 
-account.home.title=Account home
 account.home.subtitle=Account number: {0}
 account.home.subtitle.agent=Your client: {0} | Account number: {1}
 account.home.left.title=Capital Gains Tax liability
@@ -589,6 +590,19 @@ date.9=September
 date.10=October
 date.11=November
 date.12=December
+
+date.short.1=Jan
+date.short.2=Feb
+date.short.3=Mar
+date.short.4=Apr
+date.short.5=May
+date.short.6=Jun
+date.short.7=Jul
+date.short.8=Aug
+date.short.9=Sept
+date.short.10=Oct
+date.short.11=Nov
+date.short.12=Dec
 
 returns.return-to-summary-link=Return to summary
 task-list.InProgress=In progress
@@ -945,3 +959,14 @@ multiple-disposals.guidance.details.summary=What happens on ‘exchange’ and �
 multiple-disposals.guidance.details.p1=The ‘completion’ date is usually the day the new owner gets the key to the property.
 multiple-disposals.guidance.details.p2=Contract ‘exchange’ usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
 multiple-disposals.guidance.details.link=<a href="{0}" target="_blank">Read about ‘exchange’ and ‘completion’ (opens in a new window)</a>.
+
+returns.list.title=Sent returns
+returns.list.ref=Return ref:
+returns.list.view=View return
+returns.list.viewAndPay=View and pay
+returns.list.paymentDue=Payment due
+returns.list.noTaxDue=You did not owe any tax for this return
+returns.list.leftToPay=Total left to pay
+returns.list.taxOwed=Tax owed for return
+returns.list.sentDate=Sent to HMRC on {0}
+returns.paymentTakes3Days=Payments may take up to 3 working days to be shown on this page
