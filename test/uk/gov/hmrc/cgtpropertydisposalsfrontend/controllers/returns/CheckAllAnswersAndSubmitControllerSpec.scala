@@ -28,14 +28,18 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.AcquisitionDetailsControllerSpec.validateAcquisitionDetailsCheckYourAnswersPage
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails.DisposalDetailsControllerSpec._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesControllerSpec.validateExemptionAndLossesCheckYourAnswersPage
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.ReliefDetailsControllerSpec.validateReliefDetailsCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.IncompleteAcquisitionDetailsAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.IncompleteDisposalDetailsAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.IncompleteExemptionAndLossesAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.IncompleteReliefDetailsAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.IncompleteYearToDateLiabilityAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
@@ -133,6 +137,26 @@ class CheckAllAnswersAndSubmitControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey("checkAllAnswers.title"), { doc =>
+              validateAcquisitionDetailsCheckYourAnswersPage(
+                completeFillingOutReturn.draftReturn.acquisitionDetailsAnswers
+                  .fold(sys.error("Error"))(_.asInstanceOf[CompleteAcquisitionDetailsAnswers]),
+                doc
+              )
+              validateDisposalDetailsCheckYourAnswersPage(
+                completeFillingOutReturn.draftReturn.disposalDetailsAnswers
+                  .fold(sys.error("Error"))(_.asInstanceOf[CompleteDisposalDetailsAnswers]),
+                doc
+              )
+              validateReliefDetailsCheckYourAnswersPage(
+                completeFillingOutReturn.draftReturn.reliefDetailsAnswers
+                  .fold(sys.error("Error"))(_.asInstanceOf[CompleteReliefDetailsAnswers]),
+                doc
+              )
+              validateExemptionAndLossesCheckYourAnswersPage(
+                completeFillingOutReturn.draftReturn.exemptionAndLossesAnswers
+                  .fold(sys.error("Error"))(_.asInstanceOf[CompleteExemptionAndLossesAnswers]),
+                doc
+              )
               doc.select("#back").attr("href") shouldBe routes.TaskListController.taskList().url
               doc.select("#content > article > form").attr("action") shouldBe routes.CheckAllAnswersAndSubmitController
                 .checkAllAnswersSubmit()

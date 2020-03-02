@@ -16,8 +16,10 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails
 
+import org.jsoup.nodes.Document
+import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.i18n.MessagesApi
+import play.api.i18n.{Lang, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.Result
@@ -28,6 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails.DisposalDetailsControllerSpec.validateDisposalDetailsCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
@@ -1351,6 +1354,7 @@ class DisposalDetailsControllerSpec
           checkPageIsDisplayed(
             result,
             messageFromMessageKey("returns.disposal-details.cya.title"), { doc =>
+              validateDisposalDetailsCheckYourAnswersPage(completeAnswers, doc)
               doc.select("#content > article > dl > div:nth-child(1) > dt").text() shouldBe messageFromMessageKey(
                 "shareOfProperty.title"
               )
@@ -1514,5 +1518,14 @@ class DisposalDetailsControllerSpec
         )
       }
     }
+}
 
+object DisposalDetailsControllerSpec extends Matchers {
+  def validateDisposalDetailsCheckYourAnswersPage(
+    disposalDetailsAnswers: CompleteDisposalDetailsAnswers,
+    doc: Document
+  )(implicit messages: MessagesApi, lang: Lang): Unit = {
+    // TODO Implement checks
+
+  }
 }

@@ -38,16 +38,19 @@
   @cyaRow(
     messages("shareOfProperty.title"),
     Html(formatPercentage(answers.shareOfProperty.percentageValue)),
-    Some(cyaChange(messages("disposalDetails.cyaChange.propertyShare"), returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwn().url))
+    Some(cyaChange(messages("disposalDetails.cyaChange.propertyShare"), returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwn().url)),
+      "propertyShare"
   )
   @cyaRow(
     disposalPriceTitle,
     Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.disposalPrice.inPounds())),
-    Some(cyaChange(messages("disposalDetails.cyaChange.disposalPrice"), returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice().url))
+    Some(cyaChange(messages("disposalDetails.cyaChange.disposalPrice"), returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice().url)),
+      "disposalPrice"
   )
   @cyaRow(
     disposalFeesTitle,
     Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.disposalFees.inPounds())),
-    Some(cyaChange(messages("disposalDetails.cyaChange.disposalFees"), returns.disposaldetails.routes.DisposalDetailsController.whatWereDisposalFees().url))
+    Some(cyaChange(messages("disposalDetails.cyaChange.disposalFees"), returns.disposaldetails.routes.DisposalDetailsController.whatWereDisposalFees().url)),
+      "disposalFees"
   )
 }

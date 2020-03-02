@@ -48,18 +48,21 @@
     @cyaRow(
       messages("exemptionsAndLosses.cyaLabel.inYearLosses"),
       Html(messages("generic.no")),
-      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.inYearLosses"), routes.ExemptionAndLossesController.inYearLosses().url))
+      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.inYearLosses"), routes.ExemptionAndLossesController.inYearLosses().url)),
+      "inYearLosses"
     )
   } else {
     @cyaRow(
       messages("exemptionsAndLosses.cyaLabel.inYearLosses"),
       Html(messages("generic.yes")),
-      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.inYearLosses"), routes.ExemptionAndLossesController.inYearLosses().url))
+      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.inYearLosses"), routes.ExemptionAndLossesController.inYearLosses().url)),
+      "inYearLosses"
     )
     @cyaRow(
       messages("exemptionsAndLosses.cyaLabel.inYearLossesValue"),
       Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.inYearLosses.inPounds())),
-      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.inYearLossesValue"), routes.ExemptionAndLossesController.inYearLosses().url))
+      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.inYearLossesValue"), routes.ExemptionAndLossesController.inYearLosses().url)),
+      "inYearLossesValue"
     )
   }
 
@@ -67,32 +70,37 @@
     @cyaRow(
       messages("exemptionsAndLosses.cyaLabel.previousYearsLosses"),
       Html(messages("generic.no")),
-      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.previousYearsLosses"), routes.ExemptionAndLossesController.previousYearsLosses().url))
+      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.previousYearsLosses"), routes.ExemptionAndLossesController.previousYearsLosses().url)),
+      "previousYearsLosses"
     )
   } else {
     @cyaRow(
       messages("exemptionsAndLosses.cyaLabel.previousYearsLosses"),
       Html(messages("generic.yes")),
-      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.previousYearsLosses"), routes.ExemptionAndLossesController.previousYearsLosses().url))
+      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.previousYearsLosses"), routes.ExemptionAndLossesController.previousYearsLosses().url)),
+      "previousYearsLosses"
     )
     @cyaRow(
       messages("exemptionsAndLosses.cyaLabel.previousYearsLossesValue"),
       Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.previousYearsLosses.inPounds())),
-      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.previousYearsLossesValue"), routes.ExemptionAndLossesController.previousYearsLosses().url))
+      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.previousYearsLossesValue"), routes.ExemptionAndLossesController.previousYearsLosses().url)),
+      "previousYearsLossesValue"
     )
   }
 
   @cyaRow(
     messages("annualExemptAmount.title"),
     Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.annualExemptAmount.inPounds())),
-    Some(cyaChange(messages("exemptionsAndLosses.cyaChange.annualExemptAmount"), routes.ExemptionAndLossesController.annualExemptAmount().url))
+    Some(cyaChange(messages("exemptionsAndLosses.cyaChange.annualExemptAmount"), routes.ExemptionAndLossesController.annualExemptAmount().url)),
+    "annualExemptAmount"
   )
 
   @taxableGainOrLossLabelWithAmount.map( l =>
     cyaRow(
       messages("taxableGainOrLoss.title"),
       Html(messages(l._1)),
-      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.taxableGainOrLoss"), routes.ExemptionAndLossesController.taxableGainOrLoss().url))
+      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.taxableGainOrLoss"), routes.ExemptionAndLossesController.taxableGainOrLoss().url)),
+      "taxableGainOrLoss"
     )
   )
 
@@ -100,7 +108,8 @@
     cyaRow(
       messages(label),
       Html(amount),
-      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.taxableGainOrLoss"), routes.ExemptionAndLossesController.taxableGainOrLoss().url))
+      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.taxableGainOrLoss"), routes.ExemptionAndLossesController.taxableGainOrLoss().url)),
+      "taxableGainOrLoss"
     )
   })
 
