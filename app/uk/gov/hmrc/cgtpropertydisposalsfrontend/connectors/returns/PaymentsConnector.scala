@@ -22,7 +22,8 @@ import play.api.libs.json.{Json, Writes}
 import play.api.mvc.Call
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.PaymentsConnectorImpl.StartPaymentJourneyRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient.HttpClientOps
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, Error}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig

@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns
 
+import java.time.LocalDate
+
 import cats.data.EitherT
 import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
@@ -24,67 +26,68 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.libs.json.{JsString, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, CalculatedTaxDue}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.TaxYearServiceImpl.TaxYearResponse
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class CgtCalculationServiceImplSpec
-    extends WordSpec
-    with Matchers
-    with ScalaCheckDrivenPropertyChecks
-    with MockFactory {
+class TaxYearServiceImplSpec extends WordSpec with Matchers with ScalaCheckDrivenPropertyChecks with MockFactory {
 
   val mockReturnsConnector = mock[ReturnsConnector]
 
-  val service = new CgtCalculationServiceImpl(mockReturnsConnector)
+  val service = new TaxYearServiceImpl(mockReturnsConnector)
 
-  def mockCalculateTaxDue(request: CalculateCgtTaxDueRequest)(response: Either[Error, HttpResponse]) =
+  def mockGetTaxYear(date: LocalDate)(response: Either[Error, HttpResponse]) =
     (mockReturnsConnector
-      .calculateTaxDue(_: CalculateCgtTaxDueRequest)(_: HeaderCarrier))
-      .expects(request, *)
+      .taxYear(_: LocalDate)(_: HeaderCarrier))
+      .expects(date, *)
       .returning(EitherT.fromEither[Future](response))
 
-  "CgtCalculationServiceImpl" when {
+  "TaxYearServiceImpl" when {
 
-    "handling requests to calculate tax due" must {
+    "handling requests to get tax years" must {
 
       implicit val hc: HeaderCarrier = HeaderCarrier()
 
-      val request = sample[CalculateCgtTaxDueRequest]
+      val date = LocalDate.now()
 
       "return an error" when {
 
         "there is an error making the http call" in {
-          mockCalculateTaxDue(request)(Left(Error("")))
+          mockGetTaxYear(date)(Left(Error("")))
 
-          await(service.calculateTaxDue(request).value).isLeft shouldBe true
+          await(service.taxYear(date).value).isLeft shouldBe true
         }
 
         "the http call comes back with a status other than 200" in {
-          mockCalculateTaxDue(request)(Right(HttpResponse(500)))
+          mockGetTaxYear(date)(Right(HttpResponse(500)))
 
-          await(service.calculateTaxDue(request).value).isLeft shouldBe true
+          await(service.taxYear(date).value).isLeft shouldBe true
         }
 
         "the http call comes back with status 200 but the body cannot be parsed" in {
-          mockCalculateTaxDue(request)(Right(HttpResponse(200, Some(JsString("hello")))))
+          mockGetTaxYear(date)(Right(HttpResponse(200, Some(JsString("hello")))))
 
-          await(service.calculateTaxDue(request).value).isLeft shouldBe true
+          await(service.taxYear(date).value).isLeft shouldBe true
         }
       }
 
       "return the calculation" when {
 
-        "the call is successful and the response body can be parsed" in {
-          val calculatedTaxDue = sample[CalculatedTaxDue]
+        "the call is successful and a tax year was found" in {
+          val taxYear = sample[TaxYear]
+          mockGetTaxYear(date)(Right(HttpResponse(200, Some(Json.toJson(TaxYearResponse(Some(taxYear)))))))
 
-          mockCalculateTaxDue(request)(Right(HttpResponse(200, Some(Json.toJson(calculatedTaxDue)))))
+          await(service.taxYear(date).value) shouldBe Right(Some(taxYear))
+        }
 
-          await(service.calculateTaxDue(request).value) shouldBe Right(calculatedTaxDue)
+        "the call is successful and a tax year was not found" in {
+          mockGetTaxYear(date)(Right(HttpResponse(200, Some(Json.toJson(TaxYearResponse(None))))))
+
+          await(service.taxYear(date).value) shouldBe Right(None)
         }
 
       }

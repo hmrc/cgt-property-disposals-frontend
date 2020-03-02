@@ -16,15 +16,9 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import cats.syntax.order._
 import julienrf.json.derived
 import play.api.libs.json.OFormat
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AmountInPence
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
 sealed trait CalculatedTaxDue extends Product with Serializable {
   val disposalAmountLessCosts: AmountInPence
@@ -35,7 +29,6 @@ sealed trait CalculatedTaxDue extends Product with Serializable {
   val totalLosses: AmountInPence
   val gainOrLossAfterLosses: AmountInPence
   val taxableGainOrNetLoss: AmountInPence
-  val yearToDateLiability: AmountInPence
   val amountOfTaxDue: AmountInPence
 }
 
@@ -50,7 +43,6 @@ object CalculatedTaxDue {
     totalLosses: AmountInPence,
     gainOrLossAfterLosses: AmountInPence,
     taxableGainOrNetLoss: AmountInPence,
-    yearToDateLiability: AmountInPence,
     amountOfTaxDue: AmountInPence
   ) extends CalculatedTaxDue
 
@@ -66,9 +58,9 @@ object CalculatedTaxDue {
     taxableIncome: AmountInPence,
     taxDueAtLowerRate: TaxableAmountOfMoney,
     taxDueAtHigherRate: TaxableAmountOfMoney,
-    yearToDateLiability: AmountInPence,
     amountOfTaxDue: AmountInPence
   ) extends CalculatedTaxDue
+
   @SuppressWarnings(Array("org,wartremover.warts.PublicInference"))
   implicit val format: OFormat[CalculatedTaxDue] = derived.oformat()
 

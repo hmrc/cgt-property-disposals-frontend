@@ -16,8 +16,8 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes
-@import play.api.libs.json.{JsValue, Json, JsObject}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn
+@import play.api.libs.json.Json
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -27,9 +27,9 @@
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
 )
 
-@(sentReturn: JsValue, form: Form[JsValue])(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(completeReturn: CompleteReturn)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
-@json = @{Json.prettyPrint(sentReturn)}
+@json = @{Json.prettyPrint(Json.toJson(completeReturn))}
 @cols = @{json.split("\n").maxBy(_.length).length}
 @rows = @{json.split("\n").length}
 
@@ -38,15 +38,5 @@
  <h1>Your return</h1>
 
  <textarea rows="@rows" cols="@cols" style="width:auto">@json</textarea>
-
- <h2>Amend Return</h2>
- @formWrapper(routes.ViewReturnController.amendReturn()) {
-  <p>
-   <label>Return JSON</label>
-   <textarea id="amend" name="amend" rows="@rows" cols="@cols" style="width:auto">@{form.value.map(Json.prettyPrint).getOrElse("")} </textarea>
-  </p>
-
-  @submitButton(messages("Submit"))
- }
 
 }

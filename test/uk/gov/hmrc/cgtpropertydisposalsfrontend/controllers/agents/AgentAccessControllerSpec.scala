@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents
 
-import java.time.LocalDate
-
 import cats.data.EitherT
 import cats.instances.future._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -43,14 +41,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifierAttempts
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.homepage.FinancialTransaction
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, ReturnSummary}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.agents.AgentVerifierMatchRetryStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{FinancialDataService, SubscriptionService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.ListReturnsResponse
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -69,8 +65,6 @@ class AgentAccessControllerSpec
 
   val mockReturnsService = mock[ReturnsService]
 
-  val mockFinancialDataService = mock[FinancialDataService]
-
   val maxVerifierMatchAttempts = 5
 
   override lazy val additionalConfig: Configuration = Configuration(
@@ -83,8 +77,7 @@ class AgentAccessControllerSpec
       bind[SessionStore].toInstance(mockSessionStore),
       bind[SubscriptionService].toInstance(mockSubscriptionService),
       bind[AgentVerifierMatchRetryStore].toInstance(mockAgentVerifierMatchRetryStore),
-      bind[ReturnsService].toInstance(mockReturnsService),
-      bind[FinancialDataService].toInstance(mockFinancialDataService)
+      bind[ReturnsService].toInstance(mockReturnsService)
     )
 
   lazy val controller = instanceOf[AgentAccessController]
@@ -107,8 +100,6 @@ class AgentAccessControllerSpec
   val ukClientDetails = newClientDetails(validCgtReference, ukAddress)
 
   val nonUkClientDetails = newClientDetails(validCgtReference, nonUkAddress)
-
-  val financialTransaction = List(sample[FinancialTransaction])
 
   def newClientDetails(cgtReference: CgtReference, address: Address): SubscribedDetails =
     sample[SubscribedDetails].copy(cgtReference = validCgtReference, address = address)
@@ -169,12 +160,6 @@ class AgentAccessControllerSpec
   ) =
     (mockReturnsService
       .listReturns(_: CgtReference)(_: HeaderCarrier))
-      .expects(cgtReference, *)
-      .returning(EitherT.fromEither[Future](response))
-
-  def mockGetFinancialData(cgtReference: CgtReference)(response: Either[Error, List[FinancialTransaction]]) =
-    (mockFinancialDataService
-      .getFinancialData(_: CgtReference)(_: HeaderCarrier))
       .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
@@ -1005,7 +990,7 @@ class AgentAccessControllerSpec
 
       val draftReturns = List(sample[DraftReturn])
 
-      val returnsList = sample[ListReturnsResponse].returns
+      val returnsList = List(sample[ReturnSummary])
 
       behave like redirectToStartWhenInvalidJourney(
         performAction, {
@@ -1074,7 +1059,6 @@ class AgentAccessControllerSpec
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(Right(None))
             mockGetDraftReturns(ukClientDetails.cgtReference)(Right(draftReturns))
             mockGetReturnsList(ukClientDetails.cgtReference)(Right(returnsList))
-            mockGetFinancialData(ukClientDetails.cgtReference)(Right(financialTransaction))
             mockStoreSession(
               SessionData.empty
                 .copy(journeyStatus = Some(
@@ -1083,8 +1067,7 @@ class AgentAccessControllerSpec
                     agentGGCredId,
                     Some(agentReferenceNumber),
                     draftReturns,
-                    returnsList,
-                    financialTransaction
+                    returnsList
                   )
                 )
                 )
@@ -1104,7 +1087,6 @@ class AgentAccessControllerSpec
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, clientDetails.cgtReference)(Right(None))
             mockGetDraftReturns(ukClientDetails.cgtReference)(Right(draftReturns))
             mockGetReturnsList(ukClientDetails.cgtReference)(Right(returnsList))
-            mockGetFinancialData(ukClientDetails.cgtReference)(Right(financialTransaction))
             mockStoreSession(
               SessionData.empty.copy(
                 journeyStatus = Some(
@@ -1113,8 +1095,7 @@ class AgentAccessControllerSpec
                     agentGGCredId,
                     Some(agentReferenceNumber),
                     draftReturns,
-                    returnsList,
-                    financialTransaction
+                    returnsList
                   )
                 )
               )

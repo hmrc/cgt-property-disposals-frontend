@@ -16,45 +16,53 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns
 
+import java.time.LocalDate
+
 import cats.data.EitherT
-import cats.instances.future._
 import cats.instances.int._
+import cats.instances.future._
+import cats.instances.string._
 import cats.syntax.either._
 import cats.syntax.eq._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import play.api.http.Status.OK
+import play.api.http.Status.{NOT_FOUND, OK}
+import play.api.libs.json.{Format, Json, OFormat, Reads}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, CalculatedTaxDue}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.TaxYearServiceImpl.TaxYearResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
-@ImplementedBy(classOf[CgtCalculationServiceImpl])
-trait CgtCalculationService {
+@ImplementedBy(classOf[TaxYearServiceImpl])
+trait TaxYearService {
 
-  def calculateTaxDue(
-    request: CalculateCgtTaxDueRequest
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, CalculatedTaxDue]
+  def taxYear(date: LocalDate)(implicit hc: HeaderCarrier): EitherT[Future, Error, Option[TaxYear]]
 
 }
 
 @Singleton
-class CgtCalculationServiceImpl @Inject() (connector: ReturnsConnector)(implicit ec: ExecutionContext)
-    extends CgtCalculationService {
+class TaxYearServiceImpl @Inject() (connector: ReturnsConnector)(implicit ec: ExecutionContext) extends TaxYearService {
 
-  def calculateTaxDue(
-    request: CalculateCgtTaxDueRequest
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, CalculatedTaxDue] =
-    connector.calculateTaxDue(request).subflatMap { response =>
+  override def taxYear(date: LocalDate)(implicit hc: HeaderCarrier): EitherT[Future, Error, Option[TaxYear]] =
+    connector.taxYear(date).subflatMap { response =>
       if (response.status === OK) {
         response
-          .parseJSON[CalculatedTaxDue]()
-          .leftMap(Error(_))
+          .parseJSON[TaxYearResponse]()
+          .bimap(Error(_), _.value)
       } else {
-        Left(Error(s"Call to calulate cgt tax due came back with status ${response.status}"))
+        Left(Error(s"Call to get tax year came back with unexpected status ${response.status}"))
       }
+
     }
+
+}
+
+object TaxYearServiceImpl {
+
+  final case class TaxYearResponse(value: Option[TaxYear])
+
+  implicit val taxYearResponseFormat: OFormat[TaxYearResponse] = Json.format
 
 }

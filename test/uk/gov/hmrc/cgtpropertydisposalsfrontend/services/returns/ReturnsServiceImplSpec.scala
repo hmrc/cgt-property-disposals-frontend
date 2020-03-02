@@ -26,10 +26,11 @@ import play.api.libs.json.{JsNumber, JsString, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{Charge, DraftReturn, SubmitReturnRequest, SubmitReturnResponse}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, Error, TaxYear}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{GetDraftReturnResponse, ListReturnsResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{GetDraftReturnResponse, ListReturnsResponse, ReturnSummaryWithoutPaymentInfo}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -38,6 +39,8 @@ import scala.concurrent.Future
 class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
   val mockConnector = mock[ReturnsConnector]
+
+  val mockFinancialDataService = mock[FinancialDataService]
 
   def mockStoreDraftReturn(draftReturn: DraftReturn)(response: Either[Error, HttpResponse]) =
     (mockConnector
@@ -71,7 +74,13 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
       .expects(cgtReference, submissionId, *)
       .returning(EitherT.fromEither[Future](response))
 
-  val service = new ReturnsServiceImpl(mockConnector)
+  def mockGetFinancialData(cgtReference: CgtReference)(response: Either[Error, List[FinancialTransaction]]) =
+    (mockFinancialDataService
+      .getFinancialData(_: CgtReference)(_: HeaderCarrier))
+      .expects(cgtReference, *)
+      .returning(EitherT.fromEither[Future](response))
+
+  val service = new ReturnsServiceImpl(mockConnector, mockFinancialDataService)
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
@@ -244,15 +253,70 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
           await(service.listReturns(cgtReference).value).isLeft shouldBe true
         }
 
+        "the call to get financial data fails" in {
+          val response = sample[ListReturnsResponse]
+
+          inSequence {
+            mockListReturn(cgtReference, fromDate, toDate)(Right(HttpResponse(200, Some(Json.toJson(response)))))
+            mockGetFinancialData(cgtReference)(Left(Error("")))
+          }
+
+          await(service.listReturns(cgtReference).value).isLeft shouldBe true
+        }
+
+        "no financial data can be found for a charge in a return" in {
+          val response = sample[ListReturnsResponse]
+
+          inSequence {
+            mockListReturn(cgtReference, fromDate, toDate)(Right(HttpResponse(200, Some(Json.toJson(response)))))
+            mockGetFinancialData(cgtReference)(Right(List.empty))
+          }
+
+          await(service.listReturns(cgtReference).value).isLeft shouldBe true
+        }
+
       }
 
       "return a list of returns" when {
 
         "the response body can be parsed and converted" in {
-          val response = sample[ListReturnsResponse]
-          mockListReturn(cgtReference, fromDate, toDate)(Right(HttpResponse(200, Some(Json.toJson(response)))))
+          val charge                          = sample[Charge]
+          val returnSummaryWithoutPaymentInfo = sample[ReturnSummaryWithoutPaymentInfo].copy(charges = List(charge))
+          val response                        = ListReturnsResponse(List(returnSummaryWithoutPaymentInfo))
+          val financialData = FinancialTransaction(
+            charge.chargeReference,
+            charge.amount,
+            sample[AmountInPence],
+            List(sample[Payment])
+          )
 
-          await(service.listReturns(cgtReference).value) shouldBe Right(response.returns)
+          inSequence {
+            mockListReturn(cgtReference, fromDate, toDate)(Right(HttpResponse(200, Some(Json.toJson(response)))))
+            mockGetFinancialData(cgtReference)(Right(List(financialData)))
+          }
+
+          await(service.listReturns(cgtReference).value) shouldBe Right(
+            List(
+              ReturnSummary(
+                returnSummaryWithoutPaymentInfo.submissionId,
+                returnSummaryWithoutPaymentInfo.submissionDate,
+                returnSummaryWithoutPaymentInfo.completionDate,
+                returnSummaryWithoutPaymentInfo.lastUpdatedDate,
+                returnSummaryWithoutPaymentInfo.totalCGTLiability,
+                returnSummaryWithoutPaymentInfo.totalOutstanding,
+                returnSummaryWithoutPaymentInfo.propertyAddress,
+                List(
+                  ChargeWithPayments(
+                    charge.chargeDescription,
+                    charge.chargeReference,
+                    charge.amount,
+                    charge.dueDate,
+                    financialData.payments
+                  )
+                )
+              )
+            )
+          )
         }
 
       }
@@ -289,10 +353,10 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
       "return a list of returns" when {
 
         "the response body can be parsed and converted" in {
-          val body = JsString("hi!")
-          mockDisplayReturn(cgtReference, submissionId)(Right(HttpResponse(200, Some(body))))
+          val completeReturn = sample[CompleteReturn]
+          mockDisplayReturn(cgtReference, submissionId)(Right(HttpResponse(200, Some(Json.toJson(completeReturn)))))
 
-          await(service.displayReturn(cgtReference, submissionId).value) shouldBe Right(body)
+          await(service.displayReturn(cgtReference, submissionId).value) shouldBe Right(completeReturn)
         }
 
       }

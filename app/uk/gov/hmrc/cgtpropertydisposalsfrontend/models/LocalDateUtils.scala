@@ -98,6 +98,9 @@ object LocalDateUtils {
   def govDisplayFormat(date: LocalDate)(implicit messages: Messages): String =
     s"""${date.getDayOfMonth()} ${messages(s"date.${date.getMonthValue()}")} ${date.getYear()}"""
 
+  def govShortDisplayFormat(date: LocalDate)(implicit messages: Messages): String =
+    s"""${date.getDayOfMonth()} ${messages(s"date.short.${date.getMonthValue()}")} ${date.getYear()}"""
+
   implicit val order: Order[LocalDate] = Order.from(_ compareTo _)
 
 }
