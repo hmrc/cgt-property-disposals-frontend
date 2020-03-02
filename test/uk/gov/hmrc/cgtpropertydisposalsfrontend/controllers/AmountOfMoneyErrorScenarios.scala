@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.MoneyUtils
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 
 object AmountOfMoneyErrorScenarios {
 

@@ -1,0 +1,76 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import java.time.LocalDate
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnSummary
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence._
+
+@this()
+
+@(sentReturn: ReturnSummary, paymentDueDate: Option[LocalDate])(implicit messages: Messages)
+
+<li class="single-return form-bundle">
+  <div class="grid-row">
+    <div class="column-three-quarters submission-summary">
+      <span class="caption">
+        @messages("returns.list.sentDate", LocalDateUtils.govShortDisplayFormat(sentReturn.submissionDate))
+      </span>
+      <h4>
+        @sentReturn.propertyAddress.line1, @sentReturn.propertyAddress.postcode.value
+      </h4>
+      <h3 class="cgt-liability">
+        <span class="caption">@messages("returns.list.taxOwed")</span>
+        @MoneyUtils.formatAmountOfMoneyWithPoundSign(sentReturn.totalCGTLiability.inPounds())
+      </h3>
+
+    </div>
+    <div class="column-one-quarter financial-summary">
+      <h4>
+        <span class="caption">@messages("returns.list.leftToPay")</span>
+        @MoneyUtils.formatAmountOfMoneyWithPoundSign(sentReturn.totalOutstanding.inPounds())
+      </h4>
+      @if(sentReturn.totalCGTLiability.isZero) {
+        <span class="caption">
+          @messages("returns.list.noTaxDue")
+        </span>
+      } else {
+        @if(!sentReturn.totalOutstanding.isZero) {
+          <h5>
+            <span class="caption">@messages("returns.list.paymentDue")</span>
+            <strong class="bold">
+              @paymentDueDate.map(LocalDateUtils.govShortDisplayFormat(_))
+            </strong>
+          </h5>
+        }
+      }
+    </div>
+    <div class="column-full">
+      <p class="caption">
+        @messages("returns.list.ref") @sentReturn.submissionId
+      </p>
+      <a href="@{controllers.accounts.homepage.routes.HomePageController.viewSentReturn(sentReturn.submissionId)}">
+        @if(!sentReturn.totalOutstanding.isZero) {
+          @messages("returns.list.viewAndPay")
+        } else {
+          @messages("returns.list.view")
+        }
+      </a>
+    </div>
+  </div>
+</li>

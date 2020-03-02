@@ -16,18 +16,19 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
-import java.time.LocalDate
+import java.time.{Instant, LocalDate, LocalDateTime, ZoneId}
 
 import cats.syntax.order._
 import org.scalacheck.ScalacheckShapeless._
 import org.scalacheck.{Arbitrary, Gen}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AmountInPence._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, IndividualSupplyingInformation, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, StartingNewDraftReturn, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifierAttempts
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, Charge, FinancialTransaction, Payment, PaymentsJourney}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.SubscriptionSuccessful
@@ -44,10 +45,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTri
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.OtherReliefs
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CompleteYearToDateLiabilityAnswers, IncompleteYearToDateLiabilityAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanNotifyResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanServiceResponse.{UpscanNotifyEvent, UpscanResponse}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.ListReturnsResponse
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FinancialDataServiceImpl.FinancialDataResponse
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{ListReturnsResponse, ReturnSummaryWithoutPaymentInfo}
 
 object Generators
     extends GenUtils
@@ -71,11 +73,14 @@ object Generators
     with ReliefDetailsAnswersGen
     with TaxYearGen
     with ExemptionAndLossesAnswersGen
-    with YearToDateLiabilityAnswersGen {
+    with YearToDateLiabilityAnswersGen
+    with FinancialDataGen {
 
   implicit val booleanGen: Gen[Boolean] = Gen.oneOf(true, false)
 
   implicit val stringGen: Gen[String] = stringArb.arbitrary
+
+  implicit def listGen[A](g: Gen[A]): Gen[List[A]] = Gen.listOf(g)
 
   def sample[A](implicit gen: Gen[A]): A =
     gen.sample.getOrElse(sys.error(s"Could not generate instance with $gen"))
@@ -98,6 +103,13 @@ sealed trait GenUtils {
   implicit val localDateArb: Arbitrary[LocalDate] = Arbitrary(
     Gen.chooseNum(0, Int.MaxValue).map(LocalDate.ofEpochDay(_))
   )
+
+  implicit val localDateTimeArb: Arbitrary[LocalDateTime] =
+    Arbitrary(
+      Gen
+        .chooseNum(0L, 10000L)
+        .map(l => LocalDateTime.ofInstant(Instant.ofEpochMilli(l), ZoneId.systemDefault()))
+    )
 
 }
 
@@ -282,6 +294,11 @@ trait ReturnGen { this: GenUtils =>
 
   implicit val returnSummaryGen: Gen[ReturnSummary] = gen[ReturnSummary]
 
+  implicit val returnSummaryWithoutPaymentInfoGen: Gen[ReturnSummaryWithoutPaymentInfo] =
+    gen[ReturnSummaryWithoutPaymentInfo]
+
+  implicit val calculateCgtTaxDueRequestGen: Gen[CalculateCgtTaxDueRequest] = gen[CalculateCgtTaxDueRequest]
+
 }
 
 trait DisposalDetailsGen { this: GenUtils =>
@@ -325,6 +342,10 @@ trait MoneyGen { this: GenUtils =>
   implicit val amountInPenceGen: Gen[AmountInPence] = gen[AmountInPence]
 
   implicit val chargeGen: Gen[Charge] = gen[Charge]
+
+  implicit val paymentGen: Gen[Payment] = gen[Payment]
+
+  implicit val paymentsJourneyGen: Gen[PaymentsJourney] = gen[PaymentsJourney]
 
 }
 
@@ -379,11 +400,16 @@ trait YearToDateLiabilityAnswersGen { this: GenUtils =>
       case other => other
     }
 
-  implicit val hasEstimatedDetailsWithCalculatedTaxDueGen: Gen[HasEstimatedDetailsWithCalculatedTaxDue] =
-    gen[HasEstimatedDetailsWithCalculatedTaxDue]
-
   implicit val calculatedTaxDueGen: Gen[CalculatedTaxDue] = gen[CalculatedTaxDue]
 
   implicit val gainCalculatedTaxDueGen: Gen[GainCalculatedTaxDue] = gen[GainCalculatedTaxDue]
+
+}
+
+trait FinancialDataGen { this: GenUtils =>
+
+  implicit val financialTransactionGen: Gen[FinancialTransaction] = gen[FinancialTransaction]
+
+  implicit val financialDataResponseGen: Gen[FinancialDataResponse] = gen[FinancialDataResponse]
 
 }

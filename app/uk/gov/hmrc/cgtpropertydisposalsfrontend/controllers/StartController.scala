@@ -238,8 +238,16 @@ class StartController @Inject() (
       _ <- EitherT(
             updateSession(sessionStore, request)(
               _.copy(
-                userType      = request.authenticatedRequest.userType,
-                journeyStatus = Some(Subscribed(subscribedDetails, ggCredId, None, draftReturns, sentReturns))
+                userType = request.authenticatedRequest.userType,
+                journeyStatus = Some(
+                  Subscribed(
+                    subscribedDetails,
+                    ggCredId,
+                    None,
+                    draftReturns,
+                    sentReturns
+                  )
+                )
               )
             )
           )
