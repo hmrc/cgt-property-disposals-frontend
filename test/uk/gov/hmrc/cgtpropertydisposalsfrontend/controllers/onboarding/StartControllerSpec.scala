@@ -1878,7 +1878,7 @@ class StartControllerSpec
                     sample[SubscribedDetails],
                     sample[GGCredId],
                     None,
-                    sample[CompleteReturn] //JsString("")
+                    sample[CompleteReturn]
                   )
                 )
               )

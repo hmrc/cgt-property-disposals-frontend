@@ -84,7 +84,28 @@ class MultipleDisposalsTriageController @Inject() (
   }
 
   def howManyDisposalsSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    Ok("not implemented yet")
+    def redirectTo(state: Either[StartingNewDraftReturn, FillingOutReturn]): Call =
+      triageAnswersFomState(state).fold(
+        _ => routes.MultipleDisposalsTriageController.checkYourAnswers(),
+        _ => routes.SingleDisposalsTriageController.checkYourAnswers()
+      )
+
+    withMultipleDisposalTriageAnswers(request) {
+      case (_, state, triageAnswers) =>
+        numberOfPropertiesForm
+          .bindFromRequest()
+          .fold(
+            formWithErrors =>
+              BadRequest(
+                howManyProperties(formWithErrors)
+              ), { numberOfProperties =>
+              val np           = getNumberOfProperties(state)
+              val updatedState = updateNumberOfProperties(state, np)
+            }
+          )
+
+        Ok("not implemented yet")
+    }
   }
 
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
@@ -104,9 +125,77 @@ class MultipleDisposalsTriageController @Inject() (
             Ok(s"Got $c")
 
         }
-
     }
   }
+
+  private def getIndividualUserType(
+    state: Either[StartingNewDraftReturn, FillingOutReturn]
+  ): Option[IndividualUserType] =
+    triageAnswersFomState(state).fold(
+      _.fold(_.individualUserType, c => Some(c.individualUserType)),
+      _.fold(_.individualUserType, c => Some(c.individualUserType))
+    )
+
+  private def updateNumberOfProperties(
+    state: Either[StartingNewDraftReturn, FillingOutReturn],
+    numberOfProperties: Option[Int]
+  ): Either[StartingNewDraftReturn, FillingOutReturn] = {
+    val individualUserType = getIndividualUserType(state)
+    numberOfProperties match {
+      case Some(1) =>
+        val newTriageAnswers =
+          IncompleteSingleDisposalTriageAnswers.empty.copy(
+            individualUserType         = individualUserType,
+            hasConfirmedSingleDisposal = true
+          )
+
+        state.bimap(
+          _.copy(newReturnTriageAnswers = Right(newTriageAnswers)),
+          fillingOutReturn =>
+            fillingOutReturn.copy(
+              draftReturn = fillingOutReturn.draftReturn.copy(
+                triageAnswers = newTriageAnswers
+              )
+            )
+        )
+
+      case Some(2) =>
+        val newTriageAnswers =
+          IncompleteMultipleDisposalsAnswers.empty.copy(
+            individualUserType = individualUserType,
+            numberOfProperties = Some(2)
+          )
+
+        state.bimap(
+          _.copy(newReturnTriageAnswers = Left(newTriageAnswers)),
+          fillingOutReturn =>
+            fillingOutReturn.copy(
+              draftReturn = fillingOutReturn.draftReturn.copy(
+                triageAnswers = newTriageAnswers
+              )
+            )
+        )
+    }
+  }
+
+  private def getNumberOfProperties(
+    state: Either[StartingNewDraftReturn, FillingOutReturn]
+  ): Option[Int] =
+    state.fold(
+      _.newReturnTriageAnswers.fold(
+        _ => Some(2),
+        _.fold(
+          incomplete => if (incomplete.hasConfirmedSingleDisposal) Some(1) else None,
+          _ => Some(1)
+        )
+      ),
+      _ => Some(1)
+    )
+
+  private def triageAnswersFomState(
+    state: Either[StartingNewDraftReturn, FillingOutReturn]
+  ): Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers] =
+    state.bimap(_.newReturnTriageAnswers, r => Right(r.draftReturn.triageAnswers)).merge
 
   private def withMultipleDisposalTriageAnswers(request: RequestWithSessionData[_])(
     f: (SessionData, Either[StartingNewDraftReturn, FillingOutReturn], MultipleDisposalsTriageAnswers) => Future[Result]
