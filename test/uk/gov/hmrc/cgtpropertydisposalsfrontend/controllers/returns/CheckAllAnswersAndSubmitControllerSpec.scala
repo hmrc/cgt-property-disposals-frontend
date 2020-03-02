@@ -67,7 +67,6 @@ class CheckAllAnswersAndSubmitControllerSpec
     )
 
   lazy val controller = instanceOf[CheckAllAnswersAndSubmitController]
-  lazy val conf = instanceOf[ViewConfig]
 
   implicit val messagesApi: MessagesApi = controller.messagesApi
 
@@ -239,7 +238,7 @@ class CheckAllAnswersAndSubmitControllerSpec
         checkPageIsDisplayed(
           performAction(),
           messageFromMessageKey("confirmationOfSubmission.title"), { doc =>
-            doc.select("#content > article > div > p > a").attr("href") shouldBe conf.selfAssessmentUrl
+            doc.select("#content > article > div > p > a").attr("href") shouldBe viewConfig.selfAssessmentUrl
           }
         )
       }
