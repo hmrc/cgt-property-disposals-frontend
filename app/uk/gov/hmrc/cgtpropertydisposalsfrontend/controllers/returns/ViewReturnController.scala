@@ -56,5 +56,3 @@ class ViewReturnController @Inject() (
   }
 
 }
-
-object ViewReturnController {}
