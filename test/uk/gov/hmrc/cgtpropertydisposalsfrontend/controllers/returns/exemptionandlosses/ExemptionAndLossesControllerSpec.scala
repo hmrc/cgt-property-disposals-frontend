@@ -17,9 +17,10 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses
 
 import org.jsoup.nodes.Document
+import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.http.Status.BAD_REQUEST
-import play.api.i18n.MessagesApi
+import play.api.i18n.{Lang, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, Result}
@@ -1676,11 +1677,11 @@ class ExemptionAndLossesControllerSpec
   }
 }
 
-object ExemptionAndLossesControllerSpec extends ExemptionAndLossesControllerSpec {
+object ExemptionAndLossesControllerSpec extends Matchers {
   def validateExemptionAndLossesCheckYourAnswersPage(
     completeExemptionAndLossesAnswers: CompleteExemptionAndLossesAnswers,
     doc: Document
-  ): Unit = {
+  )(implicit messages: MessagesApi, lang: Lang): Unit = {
     // TODO Implement checks
   }
 }

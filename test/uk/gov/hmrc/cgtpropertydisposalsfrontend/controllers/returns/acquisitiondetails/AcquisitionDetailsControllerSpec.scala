@@ -19,6 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisition
 import java.time.LocalDate
 
 import org.jsoup.nodes.Document
+import org.scalatest.{Matchers, WordSpec}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.http.Status.BAD_REQUEST
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
@@ -2522,11 +2523,12 @@ class AcquisitionDetailsControllerSpec
   }
 }
 
-object AcquisitionDetailsControllerSpec extends AcquisitionDetailsControllerSpec {
+object AcquisitionDetailsControllerSpec extends Matchers {
+
   def validateAcquisitionDetailsCheckYourAnswersPage(
     acquisitionDetailsAnswers: CompleteAcquisitionDetailsAnswers,
     doc: Document
-  ): Unit = {
+  )(implicit messages: MessagesApi, lang: Lang): Unit = {
     val expectedAcquisitionMethodDisplayName = acquisitionDetailsAnswers.acquisitionMethod match {
       case AcquisitionMethod.Bought       => messages("returns.acquisitionMethod.Bought")
       case AcquisitionMethod.Inherited    => messages("returns.acquisitionMethod.Inherited")
