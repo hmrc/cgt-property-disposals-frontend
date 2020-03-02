@@ -56,17 +56,20 @@
   @cyaRow(
    messages("subscription.cyaLabel.contactName"),
    Html(details.contactName.value),
-   Some(cyaChange(messages("subscription.cyaChange.contactName"), name.routes.SubscriptionChangeContactNameController.enterContactName().url))
+   Some(cyaChange(messages("subscription.cyaChange.contactName"), name.routes.SubscriptionChangeContactNameController.enterContactName().url)),
+     "contactName"
   )
   @cyaRow(
    messages("subscription.cyaLabel.address"),
    addressDisplay(details.address, Block),
-   Some(cyaChange(messages("subscription.cyaChange.address"), address.routes.SubscriptionAddressController.isUk().url))
+   Some(cyaChange(messages("subscription.cyaChange.address"), address.routes.SubscriptionAddressController.isUk().url)),
+   "address"
   )
   @cyaRow(
     messages("subscription.cyaLabel.email"),
     Html(details.emailAddress.value),
-    Some(cyaChange(messages("subscription.cyaChange.email"), email.routes.SubscriptionChangeEmailController.enterEmail().url))
+    Some(cyaChange(messages("subscription.cyaChange.email"), email.routes.SubscriptionChangeEmailController.enterEmail().url)),
+    "email"
    )
  }
 

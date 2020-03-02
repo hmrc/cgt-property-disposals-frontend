@@ -38,6 +38,8 @@ import scala.reflect.ClassTag
 
 trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with MockFactory {
 
+  implicit val lang: Lang = Lang.defaultLang
+
   def overrideBindings: List[GuiceableModule] = List.empty[GuiceableModule]
 
   lazy val additionalConfig = Configuration()
@@ -80,7 +82,7 @@ trait ControllerSpec extends WordSpec with Matchers with BeforeAndAfterAll with 
   }
 
   def messageFromMessageKey(messageKey: String, args: Any*)(implicit messagesApi: MessagesApi): String =
-    messagesApi(messageKey, args: _*)(Lang.defaultLang)
+    messagesApi(messageKey, args: _*)(lang)
 
   def checkIsTechnicalErrorPage(result: Future[Result])(implicit messagesApi: MessagesApi): Unit = {
     status(result)          shouldBe INTERNAL_SERVER_ERROR
