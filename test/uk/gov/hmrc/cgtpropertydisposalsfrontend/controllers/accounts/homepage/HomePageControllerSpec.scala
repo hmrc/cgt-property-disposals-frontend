@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
 
-import java.time.LocalDate
 import java.util.UUID
 
 import cats.data.EitherT
@@ -27,7 +26,7 @@ import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.libs.json.{JsNumber, JsString, JsValue}
-import play.api.mvc.Result
+import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.auth.core.AuthConnector
@@ -37,19 +36,17 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, StartingNewDraftReturn, Subscribed, ViewingReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, PaymentsJourney}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.homepage.{FinancialDataResponse, FinancialTransaction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftReturn, ReturnSummary, SubmitReturnResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TaxYear, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftReturn, ReturnSummary, SubmitReturnResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.FinancialDataService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.ListReturnsResponse
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{PaymentsService, ReturnsService}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 trait HomePageControllerSpec
     extends ControllerSpec
@@ -64,22 +61,17 @@ trait HomePageControllerSpec
 
   val mockReturnsService = mock[ReturnsService]
 
-  val mockFinancialDataService = mock[FinancialDataService]
-
-  val financialTransaction = sample[FinancialTransaction]
-
-  val financialDataResponse =
-    sample[FinancialDataResponse].copy(financialTransactions = List(financialTransaction))
+  val mockPaymentsService = mock[PaymentsService]
 
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
       bind[ReturnsService].toInstance(mockReturnsService),
-      bind[FinancialDataService].toInstance(mockFinancialDataService)
+      bind[PaymentsService].toInstance(mockPaymentsService)
     )
 
-  val subscribed = sample[Subscribed].copy(financialTransactions = List(financialTransaction))
+  val subscribed = sample[Subscribed]
 
   def mockGetDraftReturns(cgtReference: CgtReference)(response: Either[Error, List[DraftReturn]]) =
     (mockReturnsService
@@ -95,16 +87,22 @@ trait HomePageControllerSpec
       .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockGetFinancialData(cgtReference: CgtReference)(response: Either[Error, List[FinancialTransaction]]) =
-    (mockFinancialDataService
-      .getFinancialData(_: CgtReference)(_: HeaderCarrier))
-      .expects(cgtReference, *)
-      .returning(EitherT.fromEither[Future](response))
-
-  def mockDisplayReturn(cgtReference: CgtReference, submissionId: String)(response: Either[Error, JsValue]) =
+  def mockDisplayReturn(cgtReference: CgtReference, submissionId: String)(response: Either[Error, CompleteReturn]) =
     (mockReturnsService
       .displayReturn(_: CgtReference, _: String)(_: HeaderCarrier))
       .expects(cgtReference, submissionId, *)
+      .returning(EitherT.fromEither[Future](response))
+
+  def mockStartPaymentJourney(
+    cgtReference: CgtReference,
+    chargeReference: String,
+    amount: AmountInPence,
+    returnUrl: Call,
+    backUrl: Call
+  )(response: Either[Error, PaymentsJourney]) =
+    (mockPaymentsService
+      .startPaymentJourney(_: CgtReference, _: String, _: AmountInPence, _: Call, _: Call)(_: HeaderCarrier))
+      .expects(cgtReference, chargeReference, amount, returnUrl, backUrl, *)
       .returning(EitherT.fromEither[Future](response))
 
 }
@@ -151,12 +149,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
             content        should include(messageFromMessageKey("account.home.title"))
             content        should include(messageFromMessageKey("account.home.button.start-a-new-return"))
             content shouldNot include(
-              messageFromMessageKey(
-                "account.home.subtitle.agent",
-                subscribed.subscribedDetails.makeAccountName(),
-                subscribed.subscribedDetails.cgtReference.value,
-                subscribed.financialTransactions.map(t => t.outstandingAmount.inPounds).sum
-              )
+              messageFromMessageKey("account.agent.prefix")
             )
             content should include(
               messageFromMessageKey(
@@ -183,19 +176,9 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
         status(result) shouldBe OK
         content        should include(messageFromMessageKey("account.home.title"))
         content should include(
-          messageFromMessageKey(
-            "account.home.subtitle.agent",
-            subscribed.subscribedDetails.makeAccountName(),
-            subscribed.subscribedDetails.cgtReference.value
-          )
+          messageFromMessageKey("account.agent.prefix")
         )
-        content should include(
-          messageFromMessageKey(
-            "account.home.subtitle.agent",
-            subscribed.subscribedDetails.makeAccountName(),
-            subscribed.subscribedDetails.cgtReference.value
-          )
-        )
+        content should include(subscribed.subscribedDetails.makeAccountName())
       }
 
       val startingNewDraftReturn = StartingNewDraftReturn(
@@ -223,7 +206,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
         subscribed.subscribedDetails,
         subscribed.ggCredId,
         subscribed.agentReferenceNumber,
-        JsString("")
+        sample[CompleteReturn]
       )
 
       List(startingNewDraftReturn, fillingOurReturn, justSubmittedReturn, viewingReturn).foreach { journeyStatus =>
@@ -238,9 +221,6 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
             )
             mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Right(subscribed.draftReturns))
             mockGetReturnsList(subscribed.subscribedDetails.cgtReference)(Right(subscribed.sentReturns))
-            mockGetFinancialData(subscribed.subscribedDetails.cgtReference)(
-              Right(financialDataResponse.financialTransactions)
-            )
             mockStoreSession(
               SessionData.empty.copy(
                 journeyStatus = Some(subscribed),
@@ -268,9 +248,6 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
               )
               mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Right(subscribed.draftReturns))
               mockGetReturnsList(subscribed.subscribedDetails.cgtReference)(Right(subscribed.sentReturns))
-              mockGetFinancialData(subscribed.subscribedDetails.cgtReference)(
-                Right(financialDataResponse.financialTransactions)
-              )
               mockStoreSession(
                 SessionData.empty.copy(
                   journeyStatus = Some(subscribed),
@@ -472,6 +449,13 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
       val subscribed  = sample[Subscribed].copy(sentReturns = List(sentReturn))
       val sessionData = SessionData.empty.copy(journeyStatus = Some(subscribed))
 
+      redirectToStartWhenInvalidJourney(
+        () => performAction(""), {
+          case _: Subscribed => true
+          case _             => false
+        }
+      )
+
       "return a bad request" when {
 
         "the user does not have a return with the given submission id" in {
@@ -498,10 +482,12 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
         }
 
         "there is an error updating the session" in {
+          val completeReturn = sample[CompleteReturn]
+
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData)
-            mockDisplayReturn(subscribed.subscribedDetails.cgtReference, sentReturn.submissionId)(Right(JsNumber(1)))
+            mockDisplayReturn(subscribed.subscribedDetails.cgtReference, sentReturn.submissionId)(Right(completeReturn))
             mockStoreSession(
               SessionData.empty.copy(
                 journeyStatus = Some(
@@ -509,7 +495,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
                     subscribed.subscribedDetails,
                     subscribed.ggCredId,
                     subscribed.agentReferenceNumber,
-                    JsNumber(1)
+                    completeReturn
                   )
                 )
               )
@@ -524,10 +510,12 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
       "redirect to the view return screen" when {
 
         "the return is successfully retrieved and the session is updated" in {
+          val completeReturn = sample[CompleteReturn]
+
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData)
-            mockDisplayReturn(subscribed.subscribedDetails.cgtReference, sentReturn.submissionId)(Right(JsNumber(1)))
+            mockDisplayReturn(subscribed.subscribedDetails.cgtReference, sentReturn.submissionId)(Right(completeReturn))
             mockStoreSession(
               SessionData.empty.copy(
                 journeyStatus = Some(
@@ -535,7 +523,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
                     subscribed.subscribedDetails,
                     subscribed.ggCredId,
                     subscribed.agentReferenceNumber,
-                    JsNumber(1)
+                    completeReturn
                   )
                 )
               )
@@ -546,6 +534,64 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
             performAction(sentReturn.submissionId),
             controllers.returns.routes.ViewReturnController.displayReturn()
           )
+        }
+
+      }
+
+    }
+
+    "handling requests to pay a return" must {
+
+      def performAction(): Future[Result] = controller.payTotalAmountLeftToPay()(FakeRequest())
+
+      redirectToStartWhenInvalidJourney(
+        performAction, {
+          case _: Subscribed => true
+          case _             => false
+        }
+      )
+
+      "show an error page" when {
+
+        "there is an error starting a payments journey" in {
+          val subscribed = sample[Subscribed]
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(SessionData.empty.copy(journeyStatus = Some(subscribed)))
+            mockStartPaymentJourney(
+              subscribed.subscribedDetails.cgtReference,
+              subscribed.subscribedDetails.cgtReference.value,
+              subscribed.totalLeftToPay(),
+              routes.HomePageController.homepage(),
+              routes.HomePageController.homepage()
+            )(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
+      }
+
+      "redirect to the payment journey" when {
+
+        "the payment journey is successfully started" in {
+          val subscribed      = sample[Subscribed]
+          val paymentsJourney = sample[PaymentsJourney]
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(SessionData.empty.copy(journeyStatus = Some(subscribed)))
+            mockStartPaymentJourney(
+              subscribed.subscribedDetails.cgtReference,
+              subscribed.subscribedDetails.cgtReference.value,
+              subscribed.totalLeftToPay(),
+              routes.HomePageController.homepage(),
+              routes.HomePageController.homepage()
+            )(Right(paymentsJourney))
+          }
+
+          checkIsRedirect(performAction(), paymentsJourney.nextUrl)
         }
 
       }
@@ -591,10 +637,31 @@ class PrivateBetaHomePageControllerSpec extends HomePageControllerSpec {
           mockGetSession(sessionData)
         }
 
-        val result = performAction()
-        status(result)          shouldBe OK
-        contentAsString(result) should include(messageFromMessageKey("account.home.title"))
-        contentAsString(result) shouldNot include(messageFromMessageKey("account.home.button.start-a-new-return"))
+        val result  = performAction()
+        val content = contentAsString(result)
+
+        status(result) shouldBe OK
+        content shouldNot include(messageFromMessageKey("account.agent.prefix"))
+        content should include(messageFromMessageKey("account.home.title"))
+        content shouldNot include(messageFromMessageKey("account.home.button.start-a-new-return"))
+      }
+
+      "display the home page for agents" in {
+        val sessionData =
+          SessionData.empty.copy(journeyStatus = Some(subscribed), userType = Some(UserType.Agent))
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionData)
+        }
+
+        val result  = performAction()
+        val content = contentAsString(result)
+
+        status(result) shouldBe OK
+        content        should include(messageFromMessageKey("account.home.title"))
+        content        should include(messageFromMessageKey("account.agent.prefix"))
+        content        should include(subscribed.subscribedDetails.makeAccountName())
       }
 
     }

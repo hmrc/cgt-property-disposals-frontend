@@ -14,9 +14,15 @@ legend>h1.heading-xlarge {
 h1 > span.heading-medium,
 .column-half > .heading-medium,
 .govuk-box-highlight > h1,
+.govuk-caption-xl + h1,
 .govuk-caption-xl + form h1,
-.govuk-caption-xl + form label.heading-xlarge {
+.govuk-caption-xl + form label.heading-xlarge,
+.returns-list-header h2,
+.returns-list-header h3 {
     margin-top: 0;
+}
+.returns-list-header h3 {
+    font-size: 24px;
 }
 .govuk-box-highlight > h1 {
     margin-bottom: 0;
@@ -581,10 +587,59 @@ input:focus + .hmcts-currency-input__symbol.right {
     font-weight: bold;
 }
 
+.column-three-quarters {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 15px;
+}
+
+@media (min-width: 40.0625em) {
+    .column-three-quarters {
+        width: 75%;
+        float: left;
+    }
+}
+
+.return-list li {
+    margin-bottom: 20px;
+}
+
+.return-list li .caption {
+    font-size: 16px;
+    margin-bottom: 0;
+    color: #6f777b;
+    display: block;
+    font-weight: normal;
+}
+
+.return-list li h3,
+.return-list li h4,
+.return-list li h5 {
+    margin-top: 0;
+}
+
+.return-list li h3 {
+    font-size: 36px;
+}
+
+.return-list li h4 {
+    font-size: 24px;
+}
+
+.form-bundle {
+    border: 1px solid #bfc1c3;
+    padding: 20px;
+}
+
 .due-on-account-summary {
     margin-left: -15px;
 }
 
 .due-on-account-summary h3>span {
     margin-bottom: 0;
+}
+
+h1 > .sub-heading {
+    font-weight: normal;
+    font-size: 19px;
 }

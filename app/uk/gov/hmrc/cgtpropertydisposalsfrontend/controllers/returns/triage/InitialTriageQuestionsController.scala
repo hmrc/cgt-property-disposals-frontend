@@ -133,7 +133,7 @@ class InitialTriageQuestionsController @Inject() (
         Ok(
           howManyPropertiesPage(
             form,
-            routes.InitialTriageQuestionsController.whoIsIndividualRepresenting(),
+            howManyPropertiesBackLink(state),
             state.isRight
           )
         )
@@ -156,7 +156,7 @@ class InitialTriageQuestionsController @Inject() (
               BadRequest(
                 howManyPropertiesPage(
                   formWithErrors,
-                  routes.InitialTriageQuestionsController.whoIsIndividualRepresenting(),
+                  howManyPropertiesBackLink(state),
                   state.isRight
                 )
               ), { numberOfProperties =>
@@ -187,6 +187,18 @@ class InitialTriageQuestionsController @Inject() (
           )
     }
   }
+
+  private def howManyPropertiesBackLink(state: Either[StartingNewDraftReturn, FillingOutReturn]): Call =
+    triageAnswersFomState(state).fold(
+      _.fold(
+        _ => routes.InitialTriageQuestionsController.whoIsIndividualRepresenting(),
+        _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
+      ),
+      _.fold(
+        _ => routes.InitialTriageQuestionsController.whoIsIndividualRepresenting(),
+        _ => routes.SingleDisposalsTriageController.checkYourAnswers()
+      )
+    )
 
   private def updateNumberOfProperties(
     state: Either[StartingNewDraftReturn, FillingOutReturn],

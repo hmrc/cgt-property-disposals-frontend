@@ -25,7 +25,7 @@ import play.api.{Configuration, Mode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.{ConnectorSpec, HttpSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, SubmitReturnRequest}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, DraftReturn, SubmitReturnRequest}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 
@@ -109,6 +109,27 @@ class ReturnsConnectorImplSpec extends WordSpec with Matchers with MockFactory w
       behave like connectorBehaviour(
         mockGet[HttpResponse](expectedUrl, Map.empty, Map.empty),
         () => connector.displayReturn(cgtReference, submissionId)
+      )
+    }
+
+    "handling requests to calculate cgt tax due" must {
+
+      val request     = sample[CalculateCgtTaxDueRequest]
+      val expectedUrl = s"http://host:123/calculate-tax-due"
+
+      behave like connectorBehaviour(
+        mockPost(expectedUrl, Map.empty, request),
+        () => connector.calculateTaxDue(request)
+      )
+    }
+
+    "handling requests to get tax years" must {
+      val date        = LocalDate.of(2020, 1, 31)
+      val expectedUrl = s"http://host:123/tax-year/2020-01-31"
+
+      behave like connectorBehaviour(
+        mockGet[HttpResponse](expectedUrl, Map.empty, Map.empty),
+        () => connector.taxYear(date)
       )
     }
 

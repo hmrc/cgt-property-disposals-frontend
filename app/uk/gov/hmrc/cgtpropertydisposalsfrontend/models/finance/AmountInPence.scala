@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance
 
 import cats.Order
 import cats.instances.long._
@@ -47,6 +47,10 @@ object AmountInPence {
 
     def abs(): AmountInPence = if (a.isNegative) AmountInPence(-a.value) else a
 
+  }
+
+  implicit class ListOfAmountInPenceOps(private val l: List[AmountInPence]) extends AnyVal {
+    def total(): AmountInPence = AmountInPence(l.map(_.value).sum)
   }
 
   implicit val order: Order[AmountInPence] = Order.by[AmountInPence, Long](_.value)

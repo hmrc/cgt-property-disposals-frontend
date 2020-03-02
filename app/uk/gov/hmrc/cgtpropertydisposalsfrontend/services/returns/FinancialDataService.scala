@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding
-
-import java.time.{Clock, LocalDate}
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns
 
 import cats.data.EitherT
 import cats.instances.future._
@@ -24,14 +22,16 @@ import cats.instances.int._
 import cats.syntax.either._
 import cats.syntax.eq._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
+import play.api.http.Status.OK
+import play.api.libs.json.{Format, Json}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.onboarding.FinancialDataConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.homepage.{FinancialDataResponse, FinancialTransaction}
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
-import play.api.http.Status.OK
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.FinancialTransaction
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FinancialDataServiceImpl.FinancialDataResponse
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -65,6 +65,16 @@ class FinancialDataServiceImpl @Inject() (connector: FinancialDataConnector, met
       else
         Left(Error(s"Call to get financial data came back with status ${response.status}"))
     }
+  }
+
+}
+
+object FinancialDataServiceImpl {
+  final case class FinancialDataResponse(
+    financialTransactions: List[FinancialTransaction]
+  )
+  object FinancialDataResponse {
+    implicit val financialDataResponseFormat: Format[FinancialDataResponse] = Json.format[FinancialDataResponse]
   }
 
 }

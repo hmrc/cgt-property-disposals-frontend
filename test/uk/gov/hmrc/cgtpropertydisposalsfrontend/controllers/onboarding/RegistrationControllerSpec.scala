@@ -599,7 +599,7 @@ class RegistrationControllerSpec
             mockStoreSession(
               SessionData.empty
                 .copy(journeyStatus = Some(
-                  Subscribed(subscribedDetails, registrationReady.ggCredId, None, List.empty, List.empty, List.empty)
+                  Subscribed(subscribedDetails, registrationReady.ggCredId, None, List.empty, List.empty)
                 )
                 )
             )(Left(Error("")))
@@ -622,7 +622,7 @@ class RegistrationControllerSpec
             mockStoreSession(
               SessionData.empty
                 .copy(journeyStatus = Some(
-                  Subscribed(subscribedDetails, registrationReady.ggCredId, None, List.empty, List.empty, List.empty)
+                  Subscribed(subscribedDetails, registrationReady.ggCredId, None, List.empty, List.empty)
                 )
                 )
             )(Right(()))

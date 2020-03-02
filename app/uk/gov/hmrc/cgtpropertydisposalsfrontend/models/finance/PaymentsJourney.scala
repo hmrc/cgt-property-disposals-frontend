@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance
 
 import play.api.libs.json.{Json, OFormat}
 
