@@ -25,13 +25,13 @@
   <h1 class="heading-xlarge">@heading</h1>
   <p>
     @messages("viewReturn.heading.taxOwed")
-    <span class="heading-xlarge">
+    <span class="heading-xlarge" id="heading-tax-owed">
       @{MoneyUtils.formatAmountOfMoneyWithPoundSign(taxOwed.inPounds())}
     </span>
   </p>
   <p>
     @messages("viewReturn.heading.reference")
-    <span class="heading-xlarge">
+    <span class="heading-xlarge" id="heading-reference">
       @reference
     </span>
   </p>

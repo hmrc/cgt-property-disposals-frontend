@@ -16,9 +16,7 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.account.AccountMenuItem
-@import play.api.libs.json.Json
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, ReturnSummary}
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -37,14 +35,14 @@
         lossesSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.exemptionandlosses.summary
 )
 
-@(completeReturn: CompleteReturn)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(completeReturn: CompleteReturn, returnSummary: ReturnSummary)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @title = @{messages("viewReturn.title")}
 @disposalMethod= @{completeReturn.triageAnswers.disposalMethod}
 
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = false, accountMenu=Some(accountMenu(None))) {
 
-  @returnHeading(title, completeReturn.yearToDateLiabilityAnswers.taxDue, "n/a")
+  @returnHeading(title, returnSummary.totalCGTLiability.withFloorZero, returnSummary.submissionId)
 
   <p class="js-enabled">
    <a href="JavaScript: window.print()">
