@@ -27,16 +27,17 @@ backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.component
 details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
 formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
 submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input
+textInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.text_input
 )
 
 @(form: Form[Int])(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
-@key = @{ "numberOfProperties" }
+@key = @{"numberOfProperties"}
 @title = @{messages("multiple-disposals.howManyProperties.title")}
+@hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @mainTemplate(title = title, userType = request.userType) {
 
-    @backLinkComponent(triage.routes.InitialTriageQuestionsController.howManyProperties())
+    @backLinkComponent(triage.routes.MultipleDisposalsTriageController.guidance())
 
     @pageHeading(title)
     <p>
@@ -47,35 +48,31 @@ unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_i
     @messages("multiple-disposals.howManyProperties.p2")
     </p>
 
-
-    @details(
-      messages("multiple-disposals.howManyProperties.details.summary"),
-        Html(
-          s"""
-           | <p>${messages("multiple-disposals.howManyProperties.details.p1")}</p>
-           | <p>${messages("multiple-disposals.howManyProperties.details.p2")}</p>
-           | <p>${messages("multiple-disposals.howManyProperties.details.link", appConfig.tranferringOwnershipHelp)}</p>
-           |""".stripMargin
-        )
-
-      )
-
     @formWrapper(triage.routes.MultipleDisposalsTriageController.howManyDisposalsSubmit()) {
 
-        @unitInput(
-        fieldId = key,
-        value = form.data.getOrElse(key, ""),
-        formError = form.error(key),
-        hasErrors = form.error(key).nonEmpty,
-        label = Html(title),
-        labelAsHeading = true,
-        helpText = Some(Html(messages(s"$key.helpText"))),
-        autoComplete = AutoCompleteType.On,
-        inputClass = Some("small"),
-        aspect = "left",
-        unit = "£",
-        assistiveText = messages("unit-input.assistive.pounds")
+        @textInput(
+            fieldId = key,
+            label = Html(""),
+            helpText = None,
+            labelAsHeading = true,
+            errorKey = form.error(key).map(e => e.message),
+            value = form.data.getOrElse(key, ""),
+            hasErrors = hasErrors,
+            autoComplete = AutoCompleteType.On,
+            inputClass = Some("input--xsmall")
         )
+        @details(
+          messages("multiple-disposals.howManyProperties.details.summary"),
+            Html(
+              s"""
+               | <p>${messages("multiple-disposals.howManyProperties.details.p1")}</p>
+               | <p>${messages("multiple-disposals.howManyProperties.details.p2")}</p>
+               | <p>${messages("multiple-disposals.howManyProperties.details.link", appConfig.tranferringOwnershipHelp)}</p>
+               |""".stripMargin
+            )
+
+          )
+
         @submitButton(messages("button.continue"))
     }
 }

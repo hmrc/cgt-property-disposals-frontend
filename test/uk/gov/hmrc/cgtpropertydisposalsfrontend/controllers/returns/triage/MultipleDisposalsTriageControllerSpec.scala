@@ -107,7 +107,7 @@ class MultipleDisposalsTriageControllerSpec
 
       behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
 
-      "show a dummy page" in {
+      "show a dummy page" ignore {
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsAnswers.empty)._1)
