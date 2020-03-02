@@ -19,6 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import cats.Eq
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, GGCredId}
