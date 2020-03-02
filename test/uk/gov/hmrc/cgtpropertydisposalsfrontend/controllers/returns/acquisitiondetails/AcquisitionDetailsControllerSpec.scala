@@ -28,6 +28,7 @@ import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates.ukResidents
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios.amountOfMoneyErrorScenarios
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DateErrorScenarios._
@@ -741,7 +742,7 @@ class AcquisitionDetailsControllerSpec
 
         "when the user was a uk resident and is disposing of a residential property and " when {
 
-          behave like rebasingCriteriaTests(AssetType.Residential, true, RebasingCutoffDates.ukResidents)
+          behave like rebasingCriteriaTests(AssetType.Residential, true, ukResidents)
 
         }
 
@@ -1055,7 +1056,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[CompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = AcquisitionDate(RebasingCutoffDates.ukResidents)
+                  acquisitionDate = AcquisitionDate(ukResidents)
                 ),
                 AssetType.Residential,
                 true
@@ -1089,7 +1090,7 @@ class AcquisitionDetailsControllerSpec
             performAction(),
             messageFromMessageKey(
               "rebaseAcquisitionPrice.title",
-              LocalDateUtils.govDisplayFormat(RebasingCutoffDates.ukResidents)
+              LocalDateUtils.govDisplayFormat(ukResidents)
             ), { doc =>
               doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.acquisitionPrice().url
               doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
@@ -1115,7 +1116,7 @@ class AcquisitionDetailsControllerSpec
             performAction(),
             messageFromMessageKey(
               "rebaseAcquisitionPrice.title",
-              LocalDateUtils.govDisplayFormat(RebasingCutoffDates.ukResidents)
+              LocalDateUtils.govDisplayFormat(ukResidents)
             ), { doc =>
               doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.checkYourAnswers().url
               doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
@@ -1144,7 +1145,7 @@ class AcquisitionDetailsControllerSpec
             performAction(),
             messageFromMessageKey(
               "rebaseAcquisitionPrice.title",
-              LocalDateUtils.govDisplayFormat(RebasingCutoffDates.ukResidents)
+              LocalDateUtils.govDisplayFormat(ukResidents)
             ), { doc =>
               doc.select("#rebaseAcquisitionPrice-1").attr("checked") shouldBe "checked"
             }
@@ -1170,7 +1171,7 @@ class AcquisitionDetailsControllerSpec
             performAction(),
             messageFromMessageKey(
               "rebaseAcquisitionPrice.title",
-              LocalDateUtils.govDisplayFormat(RebasingCutoffDates.ukResidents)
+              LocalDateUtils.govDisplayFormat(ukResidents)
             ), { doc =>
               doc.select("#rebaseAcquisitionPrice-0").attr("checked")  shouldBe "checked"
               doc.select("#rebaseAcquisitionPriceValue").attr("value") shouldBe "0.01"
@@ -1256,7 +1257,7 @@ class AcquisitionDetailsControllerSpec
             )
           }
 
-          val formattedRebaseDate = LocalDateUtils.govDisplayFormat(RebasingCutoffDates.ukResidents)
+          val formattedRebaseDate = LocalDateUtils.govDisplayFormat(ukResidents)
           checkPageIsDisplayed(
             performAction(data: _*),
             messageFromMessageKey(
@@ -1454,7 +1455,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate  = Some(AcquisitionDate(RebasingCutoffDates.ukResidents)),
+                  acquisitionDate  = Some(AcquisitionDate(ukResidents)),
                   acquisitionPrice = None
                 ),
                 AssetType.Residential,
@@ -1479,7 +1480,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate         = Some(AcquisitionDate(RebasingCutoffDates.ukResidents.minusDays(1L))),
+                  acquisitionDate         = Some(AcquisitionDate(ukResidents.minusDays(1L))),
                   rebasedAcquisitionPrice = None
                 ),
                 AssetType.Residential,
@@ -1504,7 +1505,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate         = Some(AcquisitionDate(RebasingCutoffDates.ukResidents.minusDays(1L))),
+                  acquisitionDate         = Some(AcquisitionDate(ukResidents.minusDays(1L))),
                   rebasedAcquisitionPrice = Some(sample[AmountInPence])
                 ),
                 AssetType.Residential,
@@ -1532,7 +1533,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate         = Some(AcquisitionDate(RebasingCutoffDates.ukResidents)),
+                  acquisitionDate         = Some(AcquisitionDate(ukResidents)),
                   acquisitionPrice        = Some(sample[AmountInPence]),
                   rebasedAcquisitionPrice = Some(sample[AmountInPence])
                 ),
@@ -1559,7 +1560,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[CompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate         = AcquisitionDate(RebasingCutoffDates.ukResidents.minusDays(1L)),
+                  acquisitionDate         = AcquisitionDate(ukResidents.minusDays(1L)),
                   rebasedAcquisitionPrice = Some(sample[AmountInPence])
                 ),
                 AssetType.Residential,
@@ -1585,7 +1586,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[CompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate         = AcquisitionDate(RebasingCutoffDates.ukResidents),
+                  acquisitionDate         = AcquisitionDate(ukResidents),
                   rebasedAcquisitionPrice = Some(sample[AmountInPence])
                 ),
                 AssetType.Residential,
@@ -1611,7 +1612,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[CompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate         = AcquisitionDate(RebasingCutoffDates.ukResidents),
+                  acquisitionDate         = AcquisitionDate(ukResidents),
                   rebasedAcquisitionPrice = Some(sample[AmountInPence]),
                   improvementCosts        = AmountInPence.zero
                 ),
@@ -1638,7 +1639,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[CompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate         = AcquisitionDate(RebasingCutoffDates.ukResidents),
+                  acquisitionDate         = AcquisitionDate(ukResidents),
                   rebasedAcquisitionPrice = Some(sample[AmountInPence]),
                   improvementCosts        = AmountInPence(2L)
                 ),
@@ -1708,7 +1709,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate  = Some(AcquisitionDate(RebasingCutoffDates.ukResidents)),
+                  acquisitionDate  = Some(AcquisitionDate(ukResidents)),
                   acquisitionPrice = None
                 ),
                 AssetType.Residential,
@@ -1733,7 +1734,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate         = Some(AcquisitionDate(RebasingCutoffDates.ukResidents.minusDays(1L))),
+                  acquisitionDate         = Some(AcquisitionDate(ukResidents.minusDays(1L))),
                   rebasedAcquisitionPrice = None
                 ),
                 AssetType.Residential,
@@ -2284,7 +2285,7 @@ class AcquisitionDetailsControllerSpec
             testRedirectOnMissingData(
               sessionWithState(
                 allQuestionsAnswered.copy(
-                  acquisitionDate         = Some(AcquisitionDate(RebasingCutoffDates.ukResidents.minusDays(1L))),
+                  acquisitionDate         = Some(AcquisitionDate(ukResidents.minusDays(1L))),
                   rebasedAcquisitionPrice = None
                 ),
                 AssetType.Residential,
@@ -2551,7 +2552,7 @@ class AcquisitionDetailsControllerSpec
       )
     }
 
-    if (acquisitionDetailsAnswers.acquisitionDate.value.isBefore(LocalDate.of(1981, 1, 3))) {
+    if (acquisitionDetailsAnswers.acquisitionDate.value.isBefore(ukResidents)) {
       if (acquisitionDetailsAnswers.rebasedAcquisitionPrice === AmountInPence.zero) {
         doc.select("#rebasedAcquisitionPrice-answer").text shouldBe "No"
       } else {

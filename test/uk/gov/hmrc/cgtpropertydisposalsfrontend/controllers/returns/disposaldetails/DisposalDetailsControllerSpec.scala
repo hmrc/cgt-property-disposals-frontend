@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails
 
+import org.jsoup.nodes.Document
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
@@ -24,6 +25,7 @@ import play.api.mvc.Result
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates.ukResidents
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
@@ -32,9 +34,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDetailsAnswers, DisposalMethod, DraftReturn, ShareOfProperty}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionMethod, DisposalDetailsAnswers, DisposalMethod, DraftReturn, ShareOfProperty}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -1351,6 +1355,7 @@ class DisposalDetailsControllerSpec
           checkPageIsDisplayed(
             result,
             messageFromMessageKey("returns.disposal-details.cya.title"), { doc =>
+              validateDisposalDetailsCheckYourAnswersPage(completeAnswers, doc)
               doc.select("#content > article > dl > div:nth-child(1) > dt").text() shouldBe messageFromMessageKey(
                 "shareOfProperty.title"
               )
@@ -1515,4 +1520,11 @@ class DisposalDetailsControllerSpec
       }
     }
 
+  def validateDisposalDetailsCheckYourAnswersPage(
+    disposalDetailsAnswers: CompleteDisposalDetailsAnswers,
+    doc: Document
+  ): Unit = {
+    // TODO Implement checks
+
+  }
 }
