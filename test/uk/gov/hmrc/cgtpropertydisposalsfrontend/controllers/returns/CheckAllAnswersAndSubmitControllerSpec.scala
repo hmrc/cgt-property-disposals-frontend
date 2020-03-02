@@ -29,8 +29,8 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.{AcquisitionDetailsController, AcquisitionDetailsControllerSpec}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails.DisposalDetailsControllerSpec
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.AcquisitionDetailsControllerSpec.validateAcquisitionDetailsCheckYourAnswersPage
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails.DisposalDetailsControllerSpec._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn}
@@ -137,12 +137,12 @@ class CheckAllAnswersAndSubmitControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey("checkAllAnswers.title"), { doc =>
-              (new AcquisitionDetailsControllerSpec).validateAcquisitionDetailsCheckYourAnswersPage(
+              validateAcquisitionDetailsCheckYourAnswersPage(
                 completeFillingOutReturn.draftReturn.acquisitionDetailsAnswers
                   .fold(sys.error("Error"))(_.asInstanceOf[CompleteAcquisitionDetailsAnswers]),
                 doc
               )
-              (new DisposalDetailsControllerSpec).validateDisposalDetailsCheckYourAnswersPage(
+              validateDisposalDetailsCheckYourAnswersPage(
                 completeFillingOutReturn.draftReturn.disposalDetailsAnswers
                   .fold(sys.error("Error"))(_.asInstanceOf[CompleteDisposalDetailsAnswers]),
                 doc

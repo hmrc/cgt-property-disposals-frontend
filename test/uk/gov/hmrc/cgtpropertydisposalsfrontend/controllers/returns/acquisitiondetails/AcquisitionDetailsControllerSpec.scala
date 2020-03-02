@@ -34,6 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorSc
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DateErrorScenarios._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.AcquisitionDetailsControllerSpec.validateAcquisitionDetailsCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
@@ -49,7 +50,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import scala.concurrent.Future
 
 class AcquisitionDetailsControllerSpec
-  extends ControllerSpec
+    extends ControllerSpec
     with AuthSupport
     with SessionSupport
     with ReturnsServiceSupport
@@ -73,7 +74,7 @@ class AcquisitionDetailsControllerSpec
     redirectToStartWhenInvalidJourney(
       performAction, {
         case _: FillingOutReturn => true
-        case _ => false
+        case _                   => false
       }
     )
 
@@ -86,9 +87,9 @@ class AcquisitionDetailsControllerSpec
     val journey = sample[FillingOutReturn].copy(
       draftReturn = sample[DraftReturn].copy(
         triageAnswers = sample[IncompleteSingleDisposalTriageAnswers].copy(
-          assetType = assetType,
+          assetType      = assetType,
           wasAUKResident = wasUkResident,
-          disposalDate = disposalDate
+          disposalDate   = disposalDate
         ),
         acquisitionDetailsAnswers = answers
       )
@@ -219,7 +220,7 @@ class AcquisitionDetailsControllerSpec
       "show an error page" when {
 
         val (method, methodValue) = AcquisitionMethod.Bought -> 0
-        val (session, journey) = sessionWithState(None, None, None, None)
+        val (session, journey)    = sessionWithState(None, None, None, None)
         val updatedDraftReturn = journey.draftReturn.copy(acquisitionDetailsAnswers = Some(
           IncompleteAcquisitionDetailsAnswers.empty.copy(acquisitionMethod = Some(method))
         )
@@ -292,7 +293,7 @@ class AcquisitionDetailsControllerSpec
         "the acquisition details journey is complete and" when {
 
           def test(data: (String, String)*)(oldMethod: AcquisitionMethod, method: AcquisitionMethod): Unit = {
-            val answers = sample[CompleteAcquisitionDetailsAnswers].copy(acquisitionMethod = oldMethod)
+            val answers            = sample[CompleteAcquisitionDetailsAnswers].copy(acquisitionMethod = oldMethod)
             val (session, journey) = sessionWithState(answers, sample[AssetType], sample[Boolean])
             val updatedDraftReturn = journey.draftReturn.copy(acquisitionDetailsAnswers = Some(
               answers.copy(acquisitionMethod = method)
@@ -469,9 +470,9 @@ class AcquisitionDetailsControllerSpec
 
       def formData(date: LocalDate): List[(String, String)] =
         List(
-          "acquisitionDate-day" -> date.getDayOfMonth.toString,
+          "acquisitionDate-day"   -> date.getDayOfMonth.toString,
           "acquisitionDate-month" -> date.getMonthValue.toString,
-          "acquisitionDate-year" -> date.getYear.toString
+          "acquisitionDate-year"  -> date.getYear.toString
         )
 
       val disposalDate = DisposalDate(LocalDate.of(2020, 1, 1), sample[TaxYear])
@@ -515,13 +516,13 @@ class AcquisitionDetailsControllerSpec
 
         "the date is invalid" in {
           dateErrorScenarios("acquisitionDate").foreach {
-            case d@DateErrorScenario(dayString, monthString, yearString, expectedErrorKey) =>
+            case d @ DateErrorScenario(dayString, monthString, yearString, expectedErrorKey) =>
               withClue(s"For $d: ") {
                 val formData =
                   List(
-                    "acquisitionDate-day" -> dayString,
+                    "acquisitionDate-day"   -> dayString,
                     "acquisitionDate-month" -> monthString,
-                    "acquisitionDate-year" -> yearString
+                    "acquisitionDate-year"  -> yearString
                   ).collect { case (id, Some(input)) => id -> input }
 
                 test(formData: _*)(expectedErrorKey)
@@ -581,7 +582,7 @@ class AcquisitionDetailsControllerSpec
         ): Unit = {
           val (session, journey) = sessionWithState(oldAnswers, assetType, wasUkResident, disposalDate)
           val updatedDraftReturn = journey.draftReturn.copy(acquisitionDetailsAnswers = Some(newAnswers))
-          val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+          val updatedSession     = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -620,8 +621,8 @@ class AcquisitionDetailsControllerSpec
           "the user did satisfy the rebasing criteria and they now do not satisfy it and the acquisition " +
             "details section was incomplete" in {
             val oldAnswers = IncompleteAcquisitionDetailsAnswers.empty.copy(
-              acquisitionMethod = Some(AcquisitionMethod.Bought),
-              acquisitionDate = Some(AcquisitionDate(rebasingCutOffDate.minusDays(1L))),
+              acquisitionMethod       = Some(AcquisitionMethod.Bought),
+              acquisitionDate         = Some(AcquisitionDate(rebasingCutOffDate.minusDays(1L))),
               rebasedAcquisitionPrice = Some(sample[AmountInPence])
             )
 
@@ -638,7 +639,7 @@ class AcquisitionDetailsControllerSpec
           "the user did satisfy the rebasing criteria and they now do not satisfy it and the acquisition " +
             "details section was complete" in {
             val oldAnswers = sample[CompleteAcquisitionDetailsAnswers].copy(
-              acquisitionDate = AcquisitionDate(rebasingCutOffDate.minusDays(1L)),
+              acquisitionDate         = AcquisitionDate(rebasingCutOffDate.minusDays(1L)),
               rebasedAcquisitionPrice = Some(sample[AmountInPence])
             )
 
@@ -655,9 +656,9 @@ class AcquisitionDetailsControllerSpec
           "the user did not satisfy the rebasing criteria and they satisfy now it and the acquisition " +
             "details section was incomplete" in {
             val oldAnswers = IncompleteAcquisitionDetailsAnswers.empty.copy(
-              acquisitionMethod = Some(AcquisitionMethod.Bought),
-              acquisitionDate = Some(AcquisitionDate(rebasingCutOffDate)),
-              acquisitionPrice = Some(sample[AmountInPence]),
+              acquisitionMethod       = Some(AcquisitionMethod.Bought),
+              acquisitionDate         = Some(AcquisitionDate(rebasingCutOffDate)),
+              acquisitionPrice        = Some(sample[AmountInPence]),
               rebasedAcquisitionPrice = Some(sample[AmountInPence])
             )
 
@@ -667,8 +668,8 @@ class AcquisitionDetailsControllerSpec
               rebasingCutOffDate.minusDays(1L),
               oldAnswers,
               oldAnswers.copy(
-                acquisitionDate = Some(AcquisitionDate(rebasingCutOffDate.minusDays(1L))),
-                acquisitionPrice = None,
+                acquisitionDate         = Some(AcquisitionDate(rebasingCutOffDate.minusDays(1L))),
+                acquisitionPrice        = None,
                 rebasedAcquisitionPrice = None
               )
             )
@@ -678,8 +679,8 @@ class AcquisitionDetailsControllerSpec
           "the user did not satisfy the rebasing criteria and they satisfy now it and the acquisition " +
             "details section was complete" in {
             val oldAnswers = sample[CompleteAcquisitionDetailsAnswers].copy(
-              acquisitionDate = AcquisitionDate(rebasingCutOffDate),
-              acquisitionPrice = sample[AmountInPence],
+              acquisitionDate         = AcquisitionDate(rebasingCutOffDate),
+              acquisitionPrice        = sample[AmountInPence],
               rebasedAcquisitionPrice = Some(sample[AmountInPence])
             )
 
@@ -703,9 +704,9 @@ class AcquisitionDetailsControllerSpec
           "the user still does not satisfy the rebasing criteria and the acquisition details section " +
             "was incomplete" in {
             val oldAnswers = IncompleteAcquisitionDetailsAnswers.empty.copy(
-              acquisitionMethod = Some(AcquisitionMethod.Bought),
-              acquisitionDate = Some(AcquisitionDate(rebasingCutOffDate)),
-              acquisitionPrice = Some(sample[AmountInPence]),
+              acquisitionMethod       = Some(AcquisitionMethod.Bought),
+              acquisitionDate         = Some(AcquisitionDate(rebasingCutOffDate)),
+              acquisitionPrice        = Some(sample[AmountInPence]),
               rebasedAcquisitionPrice = Some(sample[AmountInPence])
             )
 
@@ -723,8 +724,8 @@ class AcquisitionDetailsControllerSpec
           "the user still does not satisfy the rebasing criteria and the acquisition details section " +
             "was complete" in {
             val oldAnswers = sample[CompleteAcquisitionDetailsAnswers].copy(
-              acquisitionDate = AcquisitionDate(rebasingCutOffDate),
-              acquisitionPrice = sample[AmountInPence],
+              acquisitionDate         = AcquisitionDate(rebasingCutOffDate),
+              acquisitionPrice        = sample[AmountInPence],
               rebasedAcquisitionPrice = Some(sample[AmountInPence])
             )
 
@@ -912,8 +913,8 @@ class AcquisitionDetailsControllerSpec
 
       "show an error page" when {
 
-        val price = 1.23d
-        val answers = IncompleteAcquisitionDetailsAnswers.empty.copy(acquisitionDate = Some(sample[AcquisitionDate]))
+        val price              = 1.23d
+        val answers            = IncompleteAcquisitionDetailsAnswers.empty.copy(acquisitionDate = Some(sample[AcquisitionDate]))
         val (session, journey) = sessionWithState(answers, sample[AssetType], sample[Boolean])
         val updatedDraftReturn = journey.draftReturn
           .copy(acquisitionDetailsAnswers = Some(answers.copy(acquisitionPrice = Some(AmountInPence(123L)))))
@@ -945,7 +946,7 @@ class AcquisitionDetailsControllerSpec
       "redirect to the check you answers page" when {
 
         "the price submitted is valid and the journey was incomplete" in {
-          val answers = IncompleteAcquisitionDetailsAnswers.empty.copy(acquisitionDate = Some(sample[AcquisitionDate]))
+          val answers            = IncompleteAcquisitionDetailsAnswers.empty.copy(acquisitionDate = Some(sample[AcquisitionDate]))
           val (session, journey) = sessionWithState(answers, sample[AssetType], sample[Boolean])
           val updatedDraftReturn = journey.draftReturn
             .copy(acquisitionDetailsAnswers = Some(answers.copy(acquisitionPrice = Some(AmountInPence(123400L)))))
@@ -965,7 +966,7 @@ class AcquisitionDetailsControllerSpec
         }
 
         "the price submitted is valid and the journey was complete" in {
-          val answers = sample[CompleteAcquisitionDetailsAnswers]
+          val answers            = sample[CompleteAcquisitionDetailsAnswers]
           val (session, journey) = sessionWithState(answers, sample[AssetType], sample[Boolean])
           val updatedDraftReturn = journey.draftReturn
             .copy(acquisitionDetailsAnswers = Some(answers.copy(acquisitionPrice = AmountInPence(123456L))))
@@ -1007,7 +1008,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = Some(acquisitionDate),
+                  acquisitionDate  = Some(acquisitionDate),
                   acquisitionPrice = None
                 ),
                 sample[AssetType],
@@ -1032,7 +1033,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = None,
+                  acquisitionDate  = None,
                   acquisitionPrice = Some(sample[AmountInPence])
                 ),
                 sample[AssetType],
@@ -1077,7 +1078,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = Some(acquisitionDate),
+                  acquisitionDate  = Some(acquisitionDate),
                   acquisitionPrice = Some(sample[AmountInPence])
                 ),
                 AssetType.Residential,
@@ -1132,7 +1133,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[CompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = acquisitionDate,
+                  acquisitionDate         = acquisitionDate,
                   rebasedAcquisitionPrice = Some(AmountInPence.zero)
                 ),
                 AssetType.Residential,
@@ -1158,7 +1159,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[CompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = acquisitionDate,
+                  acquisitionDate         = acquisitionDate,
                   rebasedAcquisitionPrice = Some(AmountInPence(1L))
                 ),
                 AssetType.Residential,
@@ -1173,7 +1174,7 @@ class AcquisitionDetailsControllerSpec
               "rebaseAcquisitionPrice.title",
               LocalDateUtils.govDisplayFormat(ukResidents)
             ), { doc =>
-              doc.select("#rebaseAcquisitionPrice-0").attr("checked") shouldBe "checked"
+              doc.select("#rebaseAcquisitionPrice-0").attr("checked")  shouldBe "checked"
               doc.select("#rebaseAcquisitionPriceValue").attr("value") shouldBe "0.01"
             }
           )
@@ -1202,7 +1203,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = Some(acquisitionDate),
+                  acquisitionDate  = Some(acquisitionDate),
                   acquisitionPrice = None
                 ),
                 sample[AssetType],
@@ -1227,7 +1228,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = None,
+                  acquisitionDate  = None,
                   acquisitionPrice = Some(sample[AmountInPence])
                 ),
                 sample[AssetType],
@@ -1302,7 +1303,7 @@ class AcquisitionDetailsControllerSpec
       "show an error page" when {
         val price = 1.23d
         val answers = IncompleteAcquisitionDetailsAnswers.empty.copy(
-          acquisitionDate = Some(acquisitionDate),
+          acquisitionDate  = Some(acquisitionDate),
           acquisitionPrice = Some(sample[AmountInPence])
         )
         val (session, journey) = sessionWithState(answers, AssetType.Residential, true)
@@ -1319,7 +1320,7 @@ class AcquisitionDetailsControllerSpec
 
           checkIsTechnicalErrorPage(
             performAction(
-              "rebaseAcquisitionPrice" -> "0",
+              "rebaseAcquisitionPrice"      -> "0",
               "rebaseAcquisitionPriceValue" -> price.toString
             )
           )
@@ -1335,7 +1336,7 @@ class AcquisitionDetailsControllerSpec
 
           checkIsTechnicalErrorPage(
             performAction(
-              "rebaseAcquisitionPrice" -> "0",
+              "rebaseAcquisitionPrice"      -> "0",
               "rebaseAcquisitionPriceValue" -> price.toString
             )
           )
@@ -1354,7 +1355,7 @@ class AcquisitionDetailsControllerSpec
             case (formData, expectedAmountInPence) =>
               withClue(s"For form data $formData and expected amount in pence $expectedAmountInPence: ") {
                 val answers = IncompleteAcquisitionDetailsAnswers.empty.copy(
-                  acquisitionDate = Some(acquisitionDate),
+                  acquisitionDate  = Some(acquisitionDate),
                   acquisitionPrice = Some(sample[AmountInPence])
                 )
                 val (session, journey) = sessionWithState(answers, AssetType.Residential, true)
@@ -1384,7 +1385,7 @@ class AcquisitionDetailsControllerSpec
             case (formData, expectedAmountInPence) =>
               withClue(s"For form data $formData and expected amount in pence $expectedAmountInPence: ") {
                 val answers = sample[CompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = acquisitionDate,
+                  acquisitionDate         = acquisitionDate,
                   rebasedAcquisitionPrice = Some(AmountInPence(expectedAmountInPence.value + 1L))
                 )
                 val (session, journey) = sessionWithState(answers, AssetType.Residential, true)
@@ -1455,7 +1456,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = Some(AcquisitionDate(ukResidents)),
+                  acquisitionDate  = Some(AcquisitionDate(ukResidents)),
                   acquisitionPrice = None
                 ),
                 AssetType.Residential,
@@ -1480,7 +1481,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = Some(AcquisitionDate(ukResidents.minusDays(1L))),
+                  acquisitionDate         = Some(AcquisitionDate(ukResidents.minusDays(1L))),
                   rebasedAcquisitionPrice = None
                 ),
                 AssetType.Residential,
@@ -1505,7 +1506,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = Some(AcquisitionDate(ukResidents.minusDays(1L))),
+                  acquisitionDate         = Some(AcquisitionDate(ukResidents.minusDays(1L))),
                   rebasedAcquisitionPrice = Some(sample[AmountInPence])
                 ),
                 AssetType.Residential,
@@ -1533,8 +1534,8 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = Some(AcquisitionDate(ukResidents)),
-                  acquisitionPrice = Some(sample[AmountInPence]),
+                  acquisitionDate         = Some(AcquisitionDate(ukResidents)),
+                  acquisitionPrice        = Some(sample[AmountInPence]),
                   rebasedAcquisitionPrice = Some(sample[AmountInPence])
                 ),
                 AssetType.Residential,
@@ -1560,7 +1561,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[CompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = AcquisitionDate(ukResidents.minusDays(1L)),
+                  acquisitionDate         = AcquisitionDate(ukResidents.minusDays(1L)),
                   rebasedAcquisitionPrice = Some(sample[AmountInPence])
                 ),
                 AssetType.Residential,
@@ -1586,7 +1587,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[CompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = AcquisitionDate(ukResidents),
+                  acquisitionDate         = AcquisitionDate(ukResidents),
                   rebasedAcquisitionPrice = Some(sample[AmountInPence])
                 ),
                 AssetType.Residential,
@@ -1612,9 +1613,9 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[CompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = AcquisitionDate(ukResidents),
+                  acquisitionDate         = AcquisitionDate(ukResidents),
                   rebasedAcquisitionPrice = Some(sample[AmountInPence]),
-                  improvementCosts = AmountInPence.zero
+                  improvementCosts        = AmountInPence.zero
                 ),
                 AssetType.Residential,
                 true
@@ -1639,9 +1640,9 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[CompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = AcquisitionDate(ukResidents),
+                  acquisitionDate         = AcquisitionDate(ukResidents),
                   rebasedAcquisitionPrice = Some(sample[AmountInPence]),
-                  improvementCosts = AmountInPence(2L)
+                  improvementCosts        = AmountInPence(2L)
                 ),
                 AssetType.Residential,
                 true
@@ -1655,7 +1656,7 @@ class AcquisitionDetailsControllerSpec
             messageFromMessageKey(
               "improvementCosts.title"
             ), { doc =>
-              doc.select("#improvementCosts-0").attr("checked") shouldBe "checked"
+              doc.select("#improvementCosts-0").attr("checked")  shouldBe "checked"
               doc.select("#improvementCostsValue").attr("value") shouldBe "0.02"
             }
           )
@@ -1709,7 +1710,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = Some(AcquisitionDate(ukResidents)),
+                  acquisitionDate  = Some(AcquisitionDate(ukResidents)),
                   acquisitionPrice = None
                 ),
                 AssetType.Residential,
@@ -1734,7 +1735,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = Some(AcquisitionDate(ukResidents.minusDays(1L))),
+                  acquisitionDate         = Some(AcquisitionDate(ukResidents.minusDays(1L))),
                   rebasedAcquisitionPrice = None
                 ),
                 AssetType.Residential,
@@ -1785,8 +1786,8 @@ class AcquisitionDetailsControllerSpec
       "show an error page" when {
         val price = 1.23d
         val answers = IncompleteAcquisitionDetailsAnswers.empty.copy(
-          acquisitionDate = Some(acquisitionDate),
-          acquisitionPrice = Some(sample[AmountInPence]),
+          acquisitionDate         = Some(acquisitionDate),
+          acquisitionPrice        = Some(sample[AmountInPence]),
           rebasedAcquisitionPrice = Some(sample[AmountInPence])
         )
         val (session, journey) = sessionWithState(answers, AssetType.Residential, true)
@@ -1803,7 +1804,7 @@ class AcquisitionDetailsControllerSpec
 
           checkIsTechnicalErrorPage(
             performAction(
-              "improvementCosts" -> "0",
+              "improvementCosts"      -> "0",
               "improvementCostsValue" -> price.toString
             )
           )
@@ -1819,7 +1820,7 @@ class AcquisitionDetailsControllerSpec
 
           checkIsTechnicalErrorPage(
             performAction(
-              "improvementCosts" -> "0",
+              "improvementCosts"      -> "0",
               "improvementCostsValue" -> price.toString
             )
           )
@@ -1838,8 +1839,8 @@ class AcquisitionDetailsControllerSpec
             case (formData, expectedAmountInPence) =>
               withClue(s"For form data $formData and expected amount in pence $expectedAmountInPence: ") {
                 val answers = IncompleteAcquisitionDetailsAnswers.empty.copy(
-                  acquisitionDate = Some(acquisitionDate),
-                  acquisitionPrice = Some(sample[AmountInPence]),
+                  acquisitionDate         = Some(acquisitionDate),
+                  acquisitionPrice        = Some(sample[AmountInPence]),
                   rebasedAcquisitionPrice = Some(sample[AmountInPence])
                 )
                 val (session, journey) = sessionWithState(answers, AssetType.Residential, true)
@@ -1869,9 +1870,9 @@ class AcquisitionDetailsControllerSpec
 
                 val answers = sample[CompleteAcquisitionDetailsAnswers]
                   .copy(
-                    acquisitionDate = acquisitionDate,
+                    acquisitionDate         = acquisitionDate,
                     rebasedAcquisitionPrice = Some(sample[AmountInPence]),
-                    improvementCosts = AmountInPence(expectedAmountInPence.value + 1L)
+                    improvementCosts        = AmountInPence(expectedAmountInPence.value + 1L)
                   )
                 val (session, journey) = sessionWithState(answers, AssetType.Residential, true)
                 val updatedDraftReturn = journey.draftReturn
@@ -2015,7 +2016,7 @@ class AcquisitionDetailsControllerSpec
             messageFromMessageKey(
               "acquisitionFees.title"
             ), { doc =>
-              doc.select("#acquisitionFees-0").attr("checked") shouldBe "checked"
+              doc.select("#acquisitionFees-0").attr("checked")  shouldBe "checked"
               doc.select("#acquisitionFeesValue").attr("value") shouldBe "0.03"
             }
           )
@@ -2106,7 +2107,7 @@ class AcquisitionDetailsControllerSpec
 
           checkIsTechnicalErrorPage(
             performAction(
-              "acquisitionFees" -> "0",
+              "acquisitionFees"      -> "0",
               "acquisitionFeesValue" -> price.toString
             )
           )
@@ -2122,7 +2123,7 @@ class AcquisitionDetailsControllerSpec
 
           checkIsTechnicalErrorPage(
             performAction(
-              "acquisitionFees" -> "0",
+              "acquisitionFees"      -> "0",
               "acquisitionFeesValue" -> price.toString
             )
           )
@@ -2285,7 +2286,7 @@ class AcquisitionDetailsControllerSpec
             testRedirectOnMissingData(
               sessionWithState(
                 allQuestionsAnswered.copy(
-                  acquisitionDate = Some(AcquisitionDate(ukResidents.minusDays(1L))),
+                  acquisitionDate         = Some(AcquisitionDate(ukResidents.minusDays(1L))),
                   rebasedAcquisitionPrice = None
                 ),
                 AssetType.Residential,
@@ -2361,8 +2362,8 @@ class AcquisitionDetailsControllerSpec
 
       "show an error page when the user has just answered all of the questions and" when {
         val (session, journey) = sessionWithState(allQuestionsAnswered, sample[AssetType], sample[Boolean])
-        val newDraftReturn = journey.draftReturn.copy(acquisitionDetailsAnswers = Some(completeAnswers))
-        val updatedJourney = journey.copy(draftReturn = newDraftReturn)
+        val newDraftReturn     = journey.draftReturn.copy(acquisitionDetailsAnswers = Some(completeAnswers))
+        val updatedJourney     = journey.copy(draftReturn = newDraftReturn)
         "there is an error updating the draft return" in {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -2391,8 +2392,8 @@ class AcquisitionDetailsControllerSpec
 
         "the user has just answered all the questions and all updates are successful" in {
           val (session, journey) = sessionWithState(allQuestionsAnswered, sample[AssetType], sample[Boolean])
-          val newDraftReturn = journey.draftReturn.copy(acquisitionDetailsAnswers = Some(completeAnswers))
-          val updatedJourney = journey.copy(draftReturn = newDraftReturn)
+          val newDraftReturn     = journey.draftReturn.copy(acquisitionDetailsAnswers = Some(completeAnswers))
+          val updatedJourney     = journey.copy(draftReturn = newDraftReturn)
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -2519,15 +2520,17 @@ class AcquisitionDetailsControllerSpec
       BAD_REQUEST
     )
   }
+}
 
+object AcquisitionDetailsControllerSpec extends AcquisitionDetailsControllerSpec {
   def validateAcquisitionDetailsCheckYourAnswersPage(
     acquisitionDetailsAnswers: CompleteAcquisitionDetailsAnswers,
     doc: Document
   ): Unit = {
     val expectedAcquisitionMethodDisplayName = acquisitionDetailsAnswers.acquisitionMethod match {
-      case AcquisitionMethod.Bought => messages("returns.acquisitionMethod.Bought")
-      case AcquisitionMethod.Inherited => messages("returns.acquisitionMethod.Inherited")
-      case AcquisitionMethod.Gifted => messages("returns.acquisitionMethod.Gifted")
+      case AcquisitionMethod.Bought       => messages("returns.acquisitionMethod.Bought")
+      case AcquisitionMethod.Inherited    => messages("returns.acquisitionMethod.Inherited")
+      case AcquisitionMethod.Gifted       => messages("returns.acquisitionMethod.Gifted")
       case AcquisitionMethod.Other(value) => value
     }
 
@@ -2559,7 +2562,8 @@ class AcquisitionDetailsControllerSpec
         doc.select("#rebasedAcquisitionPrice-answer").text shouldBe "No"
       } else {
         doc.select("#rebasedAcquisitionPrice-answer").text shouldBe "Yes"
-        doc.select("#rebasedAcquisitionPrice-value-answer").text shouldBe formatAmountOfMoneyWithPoundSign(rebasedAcquisitionPrice.inPounds()
+        doc.select("#rebasedAcquisitionPrice-value-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
+          rebasedAcquisitionPrice.inPounds()
         )
       }
     }
