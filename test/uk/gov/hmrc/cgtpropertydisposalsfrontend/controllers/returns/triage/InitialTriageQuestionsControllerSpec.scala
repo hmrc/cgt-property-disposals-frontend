@@ -464,12 +464,12 @@ class InitialTriageQuestionsControllerSpec
         }
 
         "the user is on the single disposals journey and has completed the triage section " +
-          "ut hsa not started a saved a draft return yet" in {
+          "it has not started a saved a draft return yet" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
-                Right(sample[CompleteSingleDisposalTriageAnswers].copy(numberOfProperties = NumberOfProperties.One))
+                Right(sample[CompleteSingleDisposalTriageAnswers])
               )._1
             )
           }
@@ -491,12 +491,12 @@ class InitialTriageQuestionsControllerSpec
         }
 
         "the user is on the single disposals journey and has completed the triage section " +
-          "ut hsa not started and has saved a draft return yet" in {
+          "it hsa not started and has saved a draft return yet" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionDataWithFillingOutReturn(
-                sample[CompleteSingleDisposalTriageAnswers].copy(numberOfProperties = NumberOfProperties.One)
+                sample[CompleteSingleDisposalTriageAnswers]
               )._1
             )
           }

@@ -119,7 +119,7 @@ class JourneyStatusController @Inject() (
   ): IncompleteSingleDisposalTriageAnswers =
     IncompleteSingleDisposalTriageAnswers(
       answers.individualUserType,
-      answers.numberOfProperties,
+      answers.numberOfProperties.isDefined,
       answers.disposalMethod,
       answers.wasAUkResident,
       answers.wasAUkResident.map(if (_) Country.uk else Country("HK", Some("Hong Kong"))),
@@ -238,7 +238,7 @@ object JourneyStatusController {
             ) =>
           Answers(
             individualUserType,
-            if (numberOfProperties.contains(NumberOfProperties.One)) true else false,
+            numberOfProperties,
             disposalMethod,
             wasAUKResident,
             disposedOfResidentialProperty,
@@ -249,7 +249,7 @@ object JourneyStatusController {
         Some(
           (
             a.individualUserType,
-            if (a.hasConfirmedSingleDisposal) Some(NumberOfProperties.One) else None,
+            a.numberOfProperties,
             a.disposalMethod,
             a.wasAUkResident,
             a.disposedOfResidentialProperty,

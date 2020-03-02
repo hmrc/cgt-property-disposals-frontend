@@ -336,7 +336,7 @@ class SingleDisposalsTriageController @Inject() (
     ): IncompleteSingleDisposalTriageAnswers =
       IncompleteSingleDisposalTriageAnswers(
         Some(c.individualUserType),
-        Some(c.numberOfProperties),
+        true,
         Some(c.disposalMethod),
         Some(c.countryOfResidence.isUk()),
         if (c.countryOfResidence.isUk()) None else Some(c.countryOfResidence),
