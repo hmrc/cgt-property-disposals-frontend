@@ -2412,20 +2412,22 @@ class AcquisitionDetailsControllerSpec
         }
 
         "the user has already answered all the questions" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(sessionWithState(completeAnswers, sample[AssetType], sample[Boolean])._1)
-          }
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey("acquisitionDetails.cya.title"), { doc =>
-              validateAcquisitionDetailsCheckYourAnswersPage(completeAnswers, doc)
-              doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
-                .checkYourAnswersSubmit()
-                .url
+          forAll { completeAnswers: CompleteAcquisitionDetailsAnswers =>
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(sessionWithState(completeAnswers, sample[AssetType], sample[Boolean])._1)
             }
-          )
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("acquisitionDetails.cya.title"), { doc =>
+                validateAcquisitionDetailsCheckYourAnswersPage(completeAnswers, doc)
+                doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                  .checkYourAnswersSubmit()
+                  .url
+              }
+            )
+          }
         }
       }
 
