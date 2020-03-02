@@ -16,26 +16,19 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 
-import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
-import play.api.data.Form
-import play.api.data.Forms.{mapping, nonEmptyText}
-import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ViewReturnController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, routes => baseRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.ViewingReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class ViewReturnController @Inject() (

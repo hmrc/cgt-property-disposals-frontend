@@ -19,16 +19,14 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import cats.Eq
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPartnerRecord
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedDetails, SubscriptionDetails}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import play.api.libs.json.{JsValue, Json, OFormat}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, FinancialTransaction}
 
 sealed trait JourneyStatus extends Product with Serializable
 

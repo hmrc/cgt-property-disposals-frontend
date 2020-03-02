@@ -26,9 +26,9 @@ import play.api.libs.json.{JsNumber, JsString, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, Charge, ChargeWithPayments, FinancialTransaction, Payment}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftReturn, ReturnSummary, SubmitReturnRequest, SubmitReturnResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{GetDraftReturnResponse, ListReturnsResponse, ReturnSummaryWithoutPaymentInfo}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
