@@ -42,7 +42,7 @@
 @title = @{messages("viewReturn.title")}
 @disposalMethod= @{completeReturn.triageAnswers.disposalMethod}
 
-@mainTemplate(title = title, userType = request.userType, accountMenu=Some(accountMenu(None))) {
+@mainTemplate(title = title, userType = request.userType, withSignOutLink = false, accountMenu=Some(accountMenu(None))) {
 
   @returnHeading(title, completeReturn.yearToDateLiabilityAnswers.taxDue, "n/a")
 
