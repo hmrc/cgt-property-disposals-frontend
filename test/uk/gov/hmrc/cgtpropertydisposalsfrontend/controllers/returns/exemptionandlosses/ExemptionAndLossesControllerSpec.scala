@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses
 
+import org.jsoup.nodes.Document
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.http.Status.BAD_REQUEST
 import play.api.i18n.MessagesApi
@@ -1672,5 +1673,14 @@ class ExemptionAndLossesControllerSpec
     }
 
     checkIsRedirect(result, routes.ExemptionAndLossesController.checkYourAnswers())
+  }
+}
+
+object ExemptionAndLossesControllerSpec extends ExemptionAndLossesControllerSpec {
+  def validateExemptionAndLossesCheckYourAnswersPage(
+    completeExemptionAndLossesAnswers: CompleteExemptionAndLossesAnswers,
+    doc: Document
+  ): Unit = {
+    // TODO Implement checks
   }
 }
