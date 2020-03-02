@@ -136,7 +136,11 @@ class CheckAllAnswersAndSubmitControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey("checkAllAnswers.title"), { doc =>
-              (new AcquisitionDetailsControllerSpec).validateAcquisitionDetailsCheckYourAnswersPage(completeFillingOutReturn.draftReturn.acquisitionDetailsAnswers.get.asInstanceOf[CompleteAcquisitionDetailsAnswers], doc)
+              (new AcquisitionDetailsControllerSpec).validateAcquisitionDetailsCheckYourAnswersPage(
+                completeFillingOutReturn.draftReturn.acquisitionDetailsAnswers
+                  .fold(sys.error("Error"))(_.asInstanceOf[CompleteAcquisitionDetailsAnswers]),
+                doc
+              )
               doc.select("#back").attr("href") shouldBe routes.TaskListController.taskList().url
               doc.select("#content > article > form").attr("action") shouldBe routes.CheckAllAnswersAndSubmitController
                 .checkAllAnswersSubmit()
