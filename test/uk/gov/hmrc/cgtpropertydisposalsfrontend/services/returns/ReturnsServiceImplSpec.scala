@@ -28,7 +28,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, Charge, ChargeWithPayments, FinancialTransaction, Payment}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, ReturnSummary, SubmitReturnRequest, SubmitReturnResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftReturn, ReturnSummary, SubmitReturnRequest, SubmitReturnResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{GetDraftReturnResponse, ListReturnsResponse, ReturnSummaryWithoutPaymentInfo}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -353,10 +353,10 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
       "return a list of returns" when {
 
         "the response body can be parsed and converted" in {
-          val body = JsString("hi!")
-          mockDisplayReturn(cgtReference, submissionId)(Right(HttpResponse(200, Some(body))))
+          val completeReturn = sample[CompleteReturn]
+          mockDisplayReturn(cgtReference, submissionId)(Right(HttpResponse(200, Some(Json.toJson(completeReturn)))))
 
-          await(service.displayReturn(cgtReference, submissionId).value) shouldBe Right(body)
+          await(service.displayReturn(cgtReference, submissionId).value) shouldBe Right(completeReturn)
         }
 
       }

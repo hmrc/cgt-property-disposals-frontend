@@ -55,7 +55,7 @@ class ViewReturnController @Inject() (
   def displayReturn(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
     request.sessionData.flatMap(_.journeyStatus) match {
       case Some(ViewingReturn(_, _, _, sentReturn)) =>
-        Ok(viewReturnPage(sentReturn, amendReturnForm))
+        Ok(viewReturnPage(sentReturn))
 
       case _ =>
         Redirect(baseRoutes.StartController.start())
@@ -64,12 +64,4 @@ class ViewReturnController @Inject() (
 
 }
 
-object ViewReturnController {
-
-  implicit val amendReturnForm: Form[JsValue] = Form(
-    mapping(
-      "amend" -> nonEmptyText.verifying("invalid JSON", s => Try(Json.parse(s)).isSuccess)
-    )(Json.parse)(j => Some(j.toString))
-  )
-
-}
+object ViewReturnController {}

@@ -87,7 +87,7 @@ trait HomePageControllerSpec
       .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockDisplayReturn(cgtReference: CgtReference, submissionId: String)(response: Either[Error, JsValue]) =
+  def mockDisplayReturn(cgtReference: CgtReference, submissionId: String)(response: Either[Error, CompleteReturn]) =
     (mockReturnsService
       .displayReturn(_: CgtReference, _: String)(_: HeaderCarrier))
       .expects(cgtReference, submissionId, *)
@@ -206,7 +206,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
         subscribed.subscribedDetails,
         subscribed.ggCredId,
         subscribed.agentReferenceNumber,
-        JsString("")
+        sample[CompleteReturn]
       )
 
       List(startingNewDraftReturn, fillingOurReturn, justSubmittedReturn, viewingReturn).foreach { journeyStatus =>
@@ -482,10 +482,12 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
         }
 
         "there is an error updating the session" in {
+          val completeReturn = sample[CompleteReturn]
+
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData)
-            mockDisplayReturn(subscribed.subscribedDetails.cgtReference, sentReturn.submissionId)(Right(JsNumber(1)))
+            mockDisplayReturn(subscribed.subscribedDetails.cgtReference, sentReturn.submissionId)(Right(completeReturn))
             mockStoreSession(
               SessionData.empty.copy(
                 journeyStatus = Some(
@@ -493,7 +495,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
                     subscribed.subscribedDetails,
                     subscribed.ggCredId,
                     subscribed.agentReferenceNumber,
-                    JsNumber(1)
+                    completeReturn
                   )
                 )
               )
@@ -508,10 +510,12 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
       "redirect to the view return screen" when {
 
         "the return is successfully retrieved and the session is updated" in {
+          val completeReturn = sample[CompleteReturn]
+
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData)
-            mockDisplayReturn(subscribed.subscribedDetails.cgtReference, sentReturn.submissionId)(Right(JsNumber(1)))
+            mockDisplayReturn(subscribed.subscribedDetails.cgtReference, sentReturn.submissionId)(Right(completeReturn))
             mockStoreSession(
               SessionData.empty.copy(
                 journeyStatus = Some(
@@ -519,7 +523,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
                     subscribed.subscribedDetails,
                     subscribed.ggCredId,
                     subscribed.agentReferenceNumber,
-                    JsNumber(1)
+                    completeReturn
                   )
                 )
               )

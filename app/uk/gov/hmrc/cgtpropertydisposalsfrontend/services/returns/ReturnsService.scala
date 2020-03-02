@@ -53,10 +53,9 @@ trait ReturnsService {
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, List[ReturnSummary]]
 
-  // TODO: convert response to complete return
   def displayReturn(cgtReference: CgtReference, submissionId: String)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, JsValue]
+  ): EitherT[Future, Error, CompleteReturn]
 
 }
 
@@ -128,10 +127,10 @@ class ReturnsServiceImpl @Inject() (connector: ReturnsConnector, financialDataSe
 
   def displayReturn(cgtReference: CgtReference, submissionId: String)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, JsValue] =
+  ): EitherT[Future, Error, CompleteReturn] =
     connector.displayReturn(cgtReference, submissionId).subflatMap { response =>
       if (response.status === OK) {
-        response.parseJSON[JsValue]().leftMap(Error(_))
+        response.parseJSON[CompleteReturn]().leftMap(Error(_))
       } else {
         Left(Error(s"call to list returns came back with status ${response.status}"))
       }
