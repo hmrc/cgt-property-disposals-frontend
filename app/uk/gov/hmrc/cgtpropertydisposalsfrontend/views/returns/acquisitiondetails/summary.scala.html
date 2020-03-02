@@ -79,7 +79,7 @@
         messages("acquisitionDetails.cyaLabel.rebasedValue"),
         Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(rebasedValue.inPounds())),
         Some(cyaChange(messages("acquisitionDetails.cyaChange.rebasedAcquisitionPrice"), routes.AcquisitionDetailsController.rebasedAcquisitionPrice().url)),
-        "rebasedAcquisitionPrice"
+        "rebasedAcquisitionPrice-value"
       )
     }
   }

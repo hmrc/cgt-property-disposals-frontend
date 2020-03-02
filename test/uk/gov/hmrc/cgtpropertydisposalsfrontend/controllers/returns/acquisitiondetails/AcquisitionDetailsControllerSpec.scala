@@ -2552,16 +2552,14 @@ class AcquisitionDetailsControllerSpec
     }
 
     if (acquisitionDetailsAnswers.acquisitionDate.value.isBefore(LocalDate.of(1981, 1, 3))) {
-      doc.select("#rebasedAcquisitionPrice-answer").get(0).text() match {
-        case "Yes" =>
-          doc.select("#rebasedAcquisitionPrice-answer").get(1).text() shouldBe formatAmountOfMoneyWithPoundSign(
-            acquisitionDetailsAnswers.rebasedAcquisitionPrice.fold(sys.error("Error"))(_.inPounds())
-          )
+      if (acquisitionDetailsAnswers.rebasedAcquisitionPrice === AmountInPence.zero) {
+        doc.select("#rebasedAcquisitionPrice-answer").text shouldBe "No"
+      } else {
+        doc.select("#rebasedAcquisitionPrice-answer").text shouldBe "Yes"
+        doc.select("#rebasedAcquisitionPrice-value-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
+          acquisitionDetailsAnswers.rebasedAcquisitionPrice.fold(sys.error("Error"))(_.inPounds())
+        )
       }
     }
-
-    doc.select("#rebasedAcquisitionPrice-answer").get(1).text() shouldBe formatAmountOfMoneyWithPoundSign(
-      acquisitionDetailsAnswers.rebasedAcquisitionPrice.fold(sys.error("Error"))(_.inPounds())
-    )
   }
 }
