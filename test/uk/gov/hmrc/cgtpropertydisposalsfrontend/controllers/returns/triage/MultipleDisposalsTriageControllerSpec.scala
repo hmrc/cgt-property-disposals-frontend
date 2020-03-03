@@ -185,6 +185,7 @@ class MultipleDisposalsTriageControllerSpec
 
       }
 
+      "user has not answered how many disposals section and " +
       "redirect to dummy page when user enters number of properties more than one" in {
         val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
           individualUserType = Some(Self)
@@ -209,8 +210,8 @@ class MultipleDisposalsTriageControllerSpec
           routes.MultipleDisposalsTriageController.checkYourAnswers()
         )
       }
-
-      "redirect to dummy page when user enters same number of properties value which is moreThanOne" in {
+      "user has not answered how many disposals section and " +
+      "redirect to dummy page when user enters number of properties value which is moreThanOne" in {
         val answers = sample[CompleteMultipleDisposalsAnswers]
 
         val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
@@ -233,8 +234,8 @@ class MultipleDisposalsTriageControllerSpec
           routes.MultipleDisposalsTriageController.checkYourAnswers()
         )
       }
-
-      "redirect to dummy page when user re-enters different number of properties value for moreThanOne" in {
+      "user has already answered how many disposals section and " +
+      "redirect to dummy page when user re-enters different number of properties value which is moreThanOne" in {
         val answers = sample[CompleteMultipleDisposalsAnswers].copy(numberOfProperties = 9)
 
         val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
@@ -258,7 +259,8 @@ class MultipleDisposalsTriageControllerSpec
         )
       }
 
-      "there is an error updating the session" in {
+      "user has  not answered how many disposals section and " +
+      "submit request without entering numberOfProperties value" in {
         val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
           individualUserType = Some(Self)
         )
