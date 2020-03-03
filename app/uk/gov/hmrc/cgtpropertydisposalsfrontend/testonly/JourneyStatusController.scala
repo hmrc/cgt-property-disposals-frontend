@@ -119,7 +119,7 @@ class JourneyStatusController @Inject() (
   ): IncompleteSingleDisposalTriageAnswers =
     IncompleteSingleDisposalTriageAnswers(
       answers.individualUserType,
-      answers.numberOfProperties,
+      answers.numberOfProperties.contains(NumberOfProperties.One),
       answers.disposalMethod,
       answers.wasAUkResident,
       answers.wasAUkResident.map(if (_) Country.uk else Country("HK", Some("Hong Kong"))),

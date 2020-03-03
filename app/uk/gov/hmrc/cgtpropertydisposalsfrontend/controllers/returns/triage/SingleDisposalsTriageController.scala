@@ -84,7 +84,7 @@ class SingleDisposalsTriageController @Inject() (
 
   def howDidYouDisposeOfProperty(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     displayTriagePage(
-      _.fold(_.numberOfProperties, c => Some(c.numberOfProperties)),
+      _.fold(incomplete => if (incomplete.hasConfirmedSingleDisposal) Some(()) else None, _ => Some(())),
       _ => routes.InitialTriageQuestionsController.howManyProperties()
     )(_ => disposalMethodForm)(
       extractField = _.fold(_.disposalMethod, c => Some(c.disposalMethod)),
@@ -102,7 +102,7 @@ class SingleDisposalsTriageController @Inject() (
   def howDidYouDisposeOfPropertySubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
       handleTriagePageSubmit(
-        _.fold(_.numberOfProperties, c => Some(c.numberOfProperties)),
+        _.fold(incomplete => if (incomplete.hasConfirmedSingleDisposal) Some(()) else None, _ => Some(())),
         _ => routes.InitialTriageQuestionsController.howManyProperties()
       )(_ => disposalMethodForm)(
         page = {
@@ -164,7 +164,7 @@ class SingleDisposalsTriageController @Inject() (
               complete =>
                 IncompleteSingleDisposalTriageAnswers(
                   Some(complete.individualUserType),
-                  Some(complete.numberOfProperties),
+                  true,
                   Some(complete.disposalMethod),
                   Some(wasAUKResident),
                   None,
@@ -336,7 +336,7 @@ class SingleDisposalsTriageController @Inject() (
     ): IncompleteSingleDisposalTriageAnswers =
       IncompleteSingleDisposalTriageAnswers(
         Some(c.individualUserType),
-        Some(c.numberOfProperties),
+        true,
         Some(c.disposalMethod),
         Some(c.countryOfResidence.isUk()),
         if (c.countryOfResidence.isUk()) None else Some(c.countryOfResidence),
@@ -474,7 +474,7 @@ class SingleDisposalsTriageController @Inject() (
                 c =>
                   IncompleteSingleDisposalTriageAnswers(
                     Some(c.individualUserType),
-                    Some(c.numberOfProperties),
+                    true,
                     Some(c.disposalMethod),
                     Some(false),
                     Some(c.countryOfResidence),
@@ -517,7 +517,7 @@ class SingleDisposalsTriageController @Inject() (
           case IncompleteSingleDisposalTriageAnswers(None, _, _, _, _, _, _, _, _) =>
             Redirect(routes.InitialTriageQuestionsController.whoIsIndividualRepresenting())
 
-          case IncompleteSingleDisposalTriageAnswers(_, None, _, _, _, _, _, _, _) =>
+          case IncompleteSingleDisposalTriageAnswers(_, false, _, _, _, _, _, _, _) =>
             Redirect(routes.InitialTriageQuestionsController.howManyProperties())
 
           case IncompleteSingleDisposalTriageAnswers(_, _, None, _, _, _, _, _, _) =>
@@ -546,7 +546,7 @@ class SingleDisposalsTriageController @Inject() (
 
           case IncompleteSingleDisposalTriageAnswers(
               Some(t),
-              Some(n),
+              true,
               Some(m),
               Some(true),
               _,
@@ -557,13 +557,13 @@ class SingleDisposalsTriageController @Inject() (
               ) =>
             updateAnswersAndShowCheckYourAnswersPage(
               state,
-              CompleteSingleDisposalTriageAnswers(t, n, m, Country.uk, r, d, c),
+              CompleteSingleDisposalTriageAnswers(t, m, Country.uk, r, d, c),
               displayReturnToSummaryLink
             )
 
           case IncompleteSingleDisposalTriageAnswers(
               Some(t),
-              Some(n),
+              true,
               Some(m),
               Some(false),
               Some(country),
@@ -574,7 +574,7 @@ class SingleDisposalsTriageController @Inject() (
               ) =>
             updateAnswersAndShowCheckYourAnswersPage(
               state,
-              CompleteSingleDisposalTriageAnswers(t, n, m, country, r, d, c),
+              CompleteSingleDisposalTriageAnswers(t, m, country, r, d, c),
               displayReturnToSummaryLink
             )
         }

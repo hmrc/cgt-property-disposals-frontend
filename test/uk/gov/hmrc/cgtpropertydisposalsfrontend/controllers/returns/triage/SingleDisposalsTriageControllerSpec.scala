@@ -126,7 +126,7 @@ class SingleDisposalsTriageControllerSpec
     "handling requests to display how did you dispose of your property page" must {
 
       val requiredPreviousAnswers =
-        IncompleteSingleDisposalTriageAnswers.empty.copy(numberOfProperties = Some(NumberOfProperties.One))
+        IncompleteSingleDisposalTriageAnswers.empty.copy(hasConfirmedSingleDisposal = true)
 
       def performAction(): Future[Result] = controller.howDidYouDisposeOfProperty()(FakeRequest())
 
@@ -136,8 +136,12 @@ class SingleDisposalsTriageControllerSpec
         performAction
       )(
         requiredPreviousAnswers,
-        routes.InitialTriageQuestionsController.howManyProperties(),
-        { case (answers, n) => answers.copy(numberOfProperties = n) }
+        routes.InitialTriageQuestionsController.howManyProperties(), {
+          case (answers, n) =>
+            answers.copy(
+              hasConfirmedSingleDisposal = if (n.contains(NumberOfProperties.One)) true else false
+            )
+        }
       )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
@@ -174,14 +178,18 @@ class SingleDisposalsTriageControllerSpec
         controller.howDidYouDisposeOfPropertySubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
 
       val requiredPreviousAnswers =
-        IncompleteSingleDisposalTriageAnswers.empty.copy(numberOfProperties = Some(NumberOfProperties.One))
+        IncompleteSingleDisposalTriageAnswers.empty.copy(hasConfirmedSingleDisposal = true)
 
       behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like redirectWhenNoPreviousAnswerBehaviour[NumberOfProperties](() => performAction())(
         requiredPreviousAnswers,
-        routes.InitialTriageQuestionsController.howManyProperties(),
-        { case (answers, n) => answers.copy(numberOfProperties = n) }
+        routes.InitialTriageQuestionsController.howManyProperties(), {
+          case (answers, n) =>
+            answers.copy(
+              hasConfirmedSingleDisposal = if (n.contains(NumberOfProperties.One)) true else false
+            )
+        }
       )
 
       "show a form error" when {
@@ -407,7 +415,7 @@ class SingleDisposalsTriageControllerSpec
               List("wereYouAUKResident" -> "true"),
               IncompleteSingleDisposalTriageAnswers(
                 Some(completeAnswers.individualUserType),
-                Some(completeAnswers.numberOfProperties),
+                true,
                 Some(completeAnswers.disposalMethod),
                 Some(true),
                 None,
@@ -428,7 +436,7 @@ class SingleDisposalsTriageControllerSpec
               List("wereYouAUKResident" -> "false"),
               IncompleteSingleDisposalTriageAnswers(
                 Some(completeAnswers.individualUserType),
-                Some(completeAnswers.numberOfProperties),
+                true,
                 Some(completeAnswers.disposalMethod),
                 Some(false),
                 None,
@@ -453,7 +461,7 @@ class SingleDisposalsTriageControllerSpec
               List("wereYouAUKResident" -> "true"),
               IncompleteSingleDisposalTriageAnswers(
                 Some(completeAnswers.individualUserType),
-                Some(completeAnswers.numberOfProperties),
+                true,
                 Some(completeAnswers.disposalMethod),
                 Some(true),
                 None,
@@ -693,11 +701,11 @@ class SingleDisposalsTriageControllerSpec
 
       val requiredPreviousAnswersUkResident =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
-          individualUserType = Some(sample[IndividualUserType]),
-          numberOfProperties = Some(NumberOfProperties.One),
-          disposalMethod     = Some(DisposalMethod.Gifted),
-          wasAUKResident     = Some(true),
-          assetType          = Some(AssetType.Residential)
+          individualUserType         = Some(sample[IndividualUserType]),
+          hasConfirmedSingleDisposal = true,
+          disposalMethod             = Some(DisposalMethod.Gifted),
+          wasAUKResident             = Some(true),
+          assetType                  = Some(AssetType.Residential)
         )
 
       val disposalDate = DisposalDate(LocalDate.of(2020, 1, 2), sample[TaxYear])
@@ -802,11 +810,11 @@ class SingleDisposalsTriageControllerSpec
 
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
-          individualUserType = Some(sample[IndividualUserType]),
-          numberOfProperties = Some(NumberOfProperties.One),
-          disposalMethod     = Some(DisposalMethod.Gifted),
-          wasAUKResident     = Some(true),
-          assetType          = Some(AssetType.Residential)
+          individualUserType         = Some(sample[IndividualUserType]),
+          hasConfirmedSingleDisposal = true,
+          disposalMethod             = Some(DisposalMethod.Gifted),
+          wasAUKResident             = Some(true),
+          assetType                  = Some(AssetType.Residential)
         )
 
       behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
@@ -902,7 +910,7 @@ class SingleDisposalsTriageControllerSpec
               formData(date),
               IncompleteSingleDisposalTriageAnswers(
                 Some(completeJourney.individualUserType),
-                Some(completeJourney.numberOfProperties),
+                true,
                 Some(completeJourney.disposalMethod),
                 Some(completeJourney.countryOfResidence.isUk()),
                 if (completeJourney.countryOfResidence.isUk()) None else Some(completeJourney.countryOfResidence),
@@ -946,7 +954,7 @@ class SingleDisposalsTriageControllerSpec
               formData(date),
               IncompleteSingleDisposalTriageAnswers(
                 Some(completeJourney.individualUserType),
-                Some(completeJourney.numberOfProperties),
+                true,
                 Some(completeJourney.disposalMethod),
                 Some(completeJourney.countryOfResidence.isUk()),
                 if (completeJourney.countryOfResidence.isUk()) None else Some(completeJourney.countryOfResidence),
@@ -993,12 +1001,12 @@ class SingleDisposalsTriageControllerSpec
 
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
-          individualUserType = Some(sample[IndividualUserType]),
-          numberOfProperties = Some(NumberOfProperties.One),
-          disposalMethod     = Some(DisposalMethod.Gifted),
-          wasAUKResident     = Some(true),
-          assetType          = Some(AssetType.Residential),
-          disposalDate       = Some(disposalDate)
+          individualUserType         = Some(sample[IndividualUserType]),
+          hasConfirmedSingleDisposal = true,
+          disposalMethod             = Some(DisposalMethod.Gifted),
+          wasAUKResident             = Some(true),
+          assetType                  = Some(AssetType.Residential),
+          disposalDate               = Some(disposalDate)
         )
 
       def performAction(): Future[Result] = controller.whenWasCompletionDate()(FakeRequest())
@@ -1076,12 +1084,12 @@ class SingleDisposalsTriageControllerSpec
 
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
-          individualUserType = Some(sample[IndividualUserType]),
-          numberOfProperties = Some(NumberOfProperties.One),
-          disposalMethod     = Some(DisposalMethod.Gifted),
-          wasAUKResident     = Some(true),
-          assetType          = Some(AssetType.Residential),
-          disposalDate       = Some(disposalDate)
+          individualUserType         = Some(sample[IndividualUserType]),
+          hasConfirmedSingleDisposal = true,
+          disposalMethod             = Some(DisposalMethod.Gifted),
+          wasAUKResident             = Some(true),
+          assetType                  = Some(AssetType.Residential),
+          disposalDate               = Some(disposalDate)
         )
 
       behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
@@ -1217,10 +1225,10 @@ class SingleDisposalsTriageControllerSpec
 
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
-          individualUserType = Some(IndividualUserType.Self),
-          numberOfProperties = Some(NumberOfProperties.One),
-          disposalMethod     = Some(DisposalMethod.Sold),
-          wasAUKResident     = Some(false)
+          individualUserType         = Some(IndividualUserType.Self),
+          hasConfirmedSingleDisposal = true,
+          disposalMethod             = Some(DisposalMethod.Sold),
+          wasAUKResident             = Some(false)
         )
 
       val (countryCode, countryName) = "HK" -> "Hong Kong"
@@ -1304,10 +1312,10 @@ class SingleDisposalsTriageControllerSpec
 
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
-          individualUserType = Some(IndividualUserType.Self),
-          numberOfProperties = Some(NumberOfProperties.One),
-          disposalMethod     = Some(DisposalMethod.Sold),
-          wasAUKResident     = Some(false)
+          individualUserType         = Some(IndividualUserType.Self),
+          hasConfirmedSingleDisposal = true,
+          disposalMethod             = Some(DisposalMethod.Sold),
+          wasAUKResident             = Some(false)
         )
 
       val (countryCode, countryName) = "HK" -> "Hong Kong"
@@ -1458,11 +1466,11 @@ class SingleDisposalsTriageControllerSpec
 
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
-          individualUserType = Some(sample[IndividualUserType]),
-          numberOfProperties = Some(NumberOfProperties.One),
-          disposalMethod     = Some(DisposalMethod.Sold),
-          wasAUKResident     = Some(false),
-          countryOfResidence = Some(sample[Country])
+          individualUserType         = Some(sample[IndividualUserType]),
+          hasConfirmedSingleDisposal = true,
+          disposalMethod             = Some(DisposalMethod.Sold),
+          wasAUKResident             = Some(false),
+          countryOfResidence         = Some(sample[Country])
         )
 
       def performAction(): Future[Result] = controller.assetTypeForNonUkResidents()(FakeRequest())
@@ -1512,11 +1520,11 @@ class SingleDisposalsTriageControllerSpec
 
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
-          individualUserType = Some(sample[IndividualUserType]),
-          numberOfProperties = Some(NumberOfProperties.One),
-          disposalMethod     = Some(DisposalMethod.Sold),
-          wasAUKResident     = Some(false),
-          countryOfResidence = Some(sample[Country])
+          individualUserType         = Some(sample[IndividualUserType]),
+          hasConfirmedSingleDisposal = true,
+          disposalMethod             = Some(DisposalMethod.Sold),
+          wasAUKResident             = Some(false),
+          countryOfResidence         = Some(sample[Country])
         )
 
       def performAction(formData: (String, String)*): Future[Result] =
@@ -1578,7 +1586,7 @@ class SingleDisposalsTriageControllerSpec
               List("assetTypeForNonUkResidents" -> "1"),
               IncompleteSingleDisposalTriageAnswers(
                 Some(completeAnswers.individualUserType),
-                Some(completeAnswers.numberOfProperties),
+                true,
                 Some(completeAnswers.disposalMethod),
                 Some(false),
                 Some(completeAnswers.countryOfResidence),
@@ -1603,7 +1611,7 @@ class SingleDisposalsTriageControllerSpec
               List("assetTypeForNonUkResidents" -> "2"),
               IncompleteSingleDisposalTriageAnswers(
                 Some(completeAnswers.individualUserType),
-                Some(completeAnswers.numberOfProperties),
+                true,
                 Some(completeAnswers.disposalMethod),
                 Some(false),
                 Some(completeAnswers.countryOfResidence),
@@ -1663,7 +1671,6 @@ class SingleDisposalsTriageControllerSpec
       val completeTriageQuestions =
         CompleteSingleDisposalTriageAnswers(
           IndividualUserType.Self,
-          NumberOfProperties.One,
           DisposalMethod.Sold,
           Country.uk,
           assetType = AssetType.Residential,
@@ -1673,7 +1680,7 @@ class SingleDisposalsTriageControllerSpec
 
       val allQuestionsAnswered = IncompleteSingleDisposalTriageAnswers(
         Some(completeTriageQuestions.individualUserType),
-        Some(completeTriageQuestions.numberOfProperties),
+        true,
         Some(completeTriageQuestions.disposalMethod),
         Some(true),
         None,
@@ -1689,7 +1696,7 @@ class SingleDisposalsTriageControllerSpec
           List(
             allQuestionsAnswered.copy(individualUserType = None) -> routes.InitialTriageQuestionsController
               .whoIsIndividualRepresenting(),
-            allQuestionsAnswered.copy(numberOfProperties = None) -> routes.InitialTriageQuestionsController
+            allQuestionsAnswered.copy(hasConfirmedSingleDisposal = false) -> routes.InitialTriageQuestionsController
               .howManyProperties(),
             allQuestionsAnswered.copy(disposalMethod = None) -> routes.SingleDisposalsTriageController
               .howDidYouDisposeOfProperty(),
@@ -1910,12 +1917,12 @@ class SingleDisposalsTriageControllerSpec
         controller.disposalDateTooEarly()(FakeRequest())
 
       val requiredPreviousAnswers = IncompleteSingleDisposalTriageAnswers.empty.copy(
-        individualUserType = Some(IndividualUserType.Self),
-        numberOfProperties = Some(NumberOfProperties.One),
-        disposalMethod     = Some(DisposalMethod.Sold),
-        wasAUKResident     = Some(true),
-        countryOfResidence = None,
-        assetType          = Some(AssetType.Residential)
+        individualUserType         = Some(IndividualUserType.Self),
+        hasConfirmedSingleDisposal = true,
+        disposalMethod             = Some(DisposalMethod.Sold),
+        wasAUKResident             = Some(true),
+        countryOfResidence         = None,
+        assetType                  = Some(AssetType.Residential)
       )
 
       "redirect to the check you answers page" when {
