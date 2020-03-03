@@ -1878,7 +1878,8 @@ class StartControllerSpec
                     sample[SubscribedDetails],
                     sample[GGCredId],
                     None,
-                    sample[CompleteReturn]
+                    sample[CompleteReturn],
+                    sample[ReturnSummary]
                   )
                 )
               )

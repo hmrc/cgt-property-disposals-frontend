@@ -47,8 +47,8 @@ class ViewReturnController @Inject() (
 
   def displayReturn(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
     request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(ViewingReturn(_, _, _, sentReturn)) =>
-        Ok(viewReturnPage(sentReturn))
+      case Some(ViewingReturn(_, _, _, sentReturn, returnSummary)) =>
+        Ok(viewReturnPage(sentReturn, returnSummary))
 
       case _ =>
         Redirect(baseRoutes.StartController.start())

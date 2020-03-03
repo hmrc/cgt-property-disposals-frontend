@@ -28,6 +28,22 @@ h1 > span.heading-medium,
     margin-bottom: 0;
 }
 
+.govuk-box-highlight--status {
+    background-color: #1d70b8;
+}
+
+.govuk-box-highlight--status > p {
+    margin: 20px 0 0 0;
+}
+
+.govuk-box-highlight--status > p > span {
+    margin: 0;
+}
+
+.return-summary .cya-change {
+    display: none;
+}
+
 .govuk-label-wrapper {
     margin: 0;
 }
