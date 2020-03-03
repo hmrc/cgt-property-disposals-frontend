@@ -412,7 +412,7 @@ class InitialTriageQuestionsControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionDataWithFillingOutReturn(
-                IncompleteSingleDisposalTriageAnswers.empty.copy(numberOfProperties = Some(NumberOfProperties.One))
+                IncompleteSingleDisposalTriageAnswers.empty.copy(hasConfirmedSingleDisposal = true)
               )._1
             )
           }
@@ -464,12 +464,12 @@ class InitialTriageQuestionsControllerSpec
         }
 
         "the user is on the single disposals journey and has completed the triage section " +
-          "ut hsa not started a saved a draft return yet" in {
+          "it has not started a saved a draft return yet" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
-                Right(sample[CompleteSingleDisposalTriageAnswers].copy(numberOfProperties = NumberOfProperties.One))
+                Right(sample[CompleteSingleDisposalTriageAnswers])
               )._1
             )
           }
@@ -491,12 +491,12 @@ class InitialTriageQuestionsControllerSpec
         }
 
         "the user is on the single disposals journey and has completed the triage section " +
-          "ut hsa not started and has saved a draft return yet" in {
+          "it hsa not started and has saved a draft return yet" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionDataWithFillingOutReturn(
-                sample[CompleteSingleDisposalTriageAnswers].copy(numberOfProperties = NumberOfProperties.One)
+                sample[CompleteSingleDisposalTriageAnswers]
               )._1
             )
           }
@@ -582,8 +582,8 @@ class InitialTriageQuestionsControllerSpec
           val updatedJourney = journey.copy(
             newReturnTriageAnswers = Right(
               IncompleteSingleDisposalTriageAnswers.empty.copy(
-                individualUserType = Some(IndividualUserType.Self),
-                numberOfProperties = Some(NumberOfProperties.One)
+                individualUserType         = Some(IndividualUserType.Self),
+                hasConfirmedSingleDisposal = true
               )
             )
           )
@@ -614,8 +614,8 @@ class InitialTriageQuestionsControllerSpec
             )(
               Right(
                 IncompleteSingleDisposalTriageAnswers.empty.copy(
-                  individualUserType = Some(IndividualUserType.Self),
-                  numberOfProperties = Some(NumberOfProperties.One)
+                  individualUserType         = Some(IndividualUserType.Self),
+                  hasConfirmedSingleDisposal = true
                 )
               ),
               routes.SingleDisposalsTriageController.checkYourAnswers()
@@ -627,8 +627,8 @@ class InitialTriageQuestionsControllerSpec
               performAction("numberOfProperties" -> "1"),
               Right(
                 IncompleteSingleDisposalTriageAnswers.empty.copy(
-                  individualUserType = Some(IndividualUserType.Self),
-                  numberOfProperties = Some(NumberOfProperties.One)
+                  individualUserType         = Some(IndividualUserType.Self),
+                  hasConfirmedSingleDisposal = true
                 )
               )
             )(
@@ -642,9 +642,8 @@ class InitialTriageQuestionsControllerSpec
           }
 
           "the user is on a single disposal journey and they have completed the triage section" in {
-            val answers = sample[CompleteSingleDisposalTriageAnswers].copy(
-              numberOfProperties = NumberOfProperties.One
-            )
+            val answers = sample[CompleteSingleDisposalTriageAnswers]
+
             testSuccessfulUpdateStartingNewDraftReturn(
               performAction("numberOfProperties" -> "1"),
               Right(answers)
@@ -669,8 +668,8 @@ class InitialTriageQuestionsControllerSpec
             )(
               Right(
                 IncompleteSingleDisposalTriageAnswers.empty.copy(
-                  individualUserType = Some(IndividualUserType.Self),
-                  numberOfProperties = Some(NumberOfProperties.One)
+                  individualUserType         = Some(IndividualUserType.Self),
+                  hasConfirmedSingleDisposal = true
                 )
               ),
               routes.SingleDisposalsTriageController.checkYourAnswers()
@@ -688,8 +687,8 @@ class InitialTriageQuestionsControllerSpec
             )(
               Right(
                 IncompleteSingleDisposalTriageAnswers.empty.copy(
-                  individualUserType = Some(answers.individualUserType),
-                  numberOfProperties = Some(NumberOfProperties.One)
+                  individualUserType         = Some(answers.individualUserType),
+                  hasConfirmedSingleDisposal = true
                 )
               ),
               routes.SingleDisposalsTriageController.checkYourAnswers()
@@ -708,8 +707,8 @@ class InitialTriageQuestionsControllerSpec
         "the user has submitted the same answer they have previously entered on the single disposal journey" in {
           val answers =
             IncompleteSingleDisposalTriageAnswers.empty.copy(
-              individualUserType = Some(IndividualUserType.Self),
-              numberOfProperties = Some(NumberOfProperties.One)
+              individualUserType         = Some(IndividualUserType.Self),
+              hasConfirmedSingleDisposal = true
             )
 
           inSequence {
