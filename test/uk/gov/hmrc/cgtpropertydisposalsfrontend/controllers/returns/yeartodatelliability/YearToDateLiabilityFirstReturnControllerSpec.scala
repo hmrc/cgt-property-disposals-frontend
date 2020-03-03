@@ -20,6 +20,8 @@ import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
+import org.jsoup.nodes.Document
+import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.http.Status.BAD_REQUEST
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
@@ -49,8 +51,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{CgtCalculationService, ReturnsService}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class YearToDateLiabilityFirstReturnControllerSpec
     extends ControllerSpec
@@ -1838,4 +1840,13 @@ class YearToDateLiabilityFirstReturnControllerSpec
 
     }
 
+}
+
+object YearToDateLiabilityFirstReturnControllerSpec extends Matchers {
+  def validateYearToDateLiabilityFirstReturnPage(
+    completeYearToDateLiabilityAnswers: CompleteYearToDateLiabilityAnswers,
+    doc: Document
+  )(implicit messages: MessagesApi, lang: Lang): Unit = {
+    // TODO Implement checks
+  }
 }

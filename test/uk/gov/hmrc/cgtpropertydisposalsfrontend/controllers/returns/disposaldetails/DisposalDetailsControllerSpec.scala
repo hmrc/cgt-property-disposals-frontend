@@ -1524,8 +1524,7 @@ object DisposalDetailsControllerSpec extends Matchers {
   def validateDisposalDetailsCheckYourAnswersPage(
     disposalDetailsAnswers: CompleteDisposalDetailsAnswers,
     doc: Document
-  )(implicit messages: MessagesApi, lang: Lang): Unit = {
-    // TODO Implement checks
+  )(implicit messages: MessagesApi, lang: Lang): Unit =
+    doc.select("")
 
-  }
 }
