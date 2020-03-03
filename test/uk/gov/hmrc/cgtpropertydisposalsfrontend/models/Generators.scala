@@ -67,6 +67,7 @@ object Generators
     with UpscanGen
     with TriageQuestionsGen
     with ReturnGen
+    with DisposalMethodGen
     with DisposalDetailsGen
     with MoneyGen
     with AcquisitionDetailsGen
@@ -300,6 +301,13 @@ trait ReturnGen { this: GenUtils =>
     gen[ReturnSummaryWithoutPaymentInfo]
 
   implicit val calculateCgtTaxDueRequestGen: Gen[CalculateCgtTaxDueRequest] = gen[CalculateCgtTaxDueRequest]
+
+}
+
+trait DisposalMethodGen { this: GenUtils =>
+
+  implicit val disposalMethod: Gen[DisposalMethod] =
+    gen[DisposalMethod]
 
 }
 
