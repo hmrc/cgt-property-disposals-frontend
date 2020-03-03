@@ -16,18 +16,20 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
+import cats.syntax.either._
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
-import play.api.data.Form
+import play.api.data.{Form, FormError}
 import play.api.data.Forms.{mapping, of}
 import play.api.data.format.Formats._
+import play.api.data.format.Formatter
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingNewDraftReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{FormUtils, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsAnswers, IncompleteMultipleDisposalsAnswers}
@@ -163,10 +165,30 @@ class MultipleDisposalsTriageController @Inject() (
 }
 object MultipleDisposalsTriageController {
 
-  val numberOfPropertiesForm: Form[Int] = Form(
-    mapping(
-      "numberOfProperties" -> of[Int]
-    )(identity)(Some(_))
-  )
+  val numberOfPropertiesForm: Form[Int] = {
+
+    val numberOfPropertiesFormatter: Formatter[Int] = {
+      def validateNumberOfProperties(i: Int): Either[FormError, Int] =
+        if (i <= 0) Left(FormError("numberOfProperties", "error.tooSmall"))
+        else if (i > 999) Left(FormError("numberOfProperties", "error.tooLong"))
+        else Right(i)
+
+      new Formatter[Int] {
+        override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Int] = {
+          val result =
+            FormUtils.readValue(key, data, _.toInt).flatMap(validateNumberOfProperties)
+          result.leftMap(Seq(_))
+        }
+        override def unbind(key: String, value: Int): Map[String, String] =
+          Map(key -> value.toString)
+      }
+    }
+
+    Form(
+      mapping(
+        "numberOfProperties" -> of(numberOfPropertiesFormatter)
+      )(identity)(Some(_))
+    )
+  }
 
 }
