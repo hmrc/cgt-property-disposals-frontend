@@ -975,3 +975,11 @@ numberOfProperties.error.invalid=Use numbers to input how many disposals you wan
 numberOfProperties.error.required=Input how many disposals you want to include in this return using numbers
 numberOfProperties.error.tooSmall=The number of properties must be 2 or more, or go back and select that you are including one property in this return
 numberOfProperties.error.tooLong=You can't include more than 999 properties in the return
+
+disposalDateMixedUseOrIndirect.title=You cannot use this service
+disposalDateMixedUseOrIndirect.p1=You cannot use this service to report Capital Gains on:
+disposalDateMixedUseOrIndirect.p1.reason1=disposals of ‘mixed use‘ UK property
+disposalDateMixedUseOrIndirect.p1.reason2=indirect disposals of UK land
+disposalDateMixedUseOrIndirect.h2=What you’ll need to do next
+disposalDateMixedUseOrIndirect.p2=You’ll need to complete a <a href="{0}">non resident: report and pay Capital Gains Tax on UK property or land form</a>.
+disposalDateMixedUseOrIndirect.p3=You have 30 days from the date of completion to report disposal and pay any tax due. You may get a penalty if your payment is late.
