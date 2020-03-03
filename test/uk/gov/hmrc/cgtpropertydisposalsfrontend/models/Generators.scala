@@ -311,8 +311,12 @@ trait DisposalDetailsGen { this: GenUtils =>
   implicit val incompleteDisposalDetailsAnswersGen: Gen[IncompleteDisposalDetailsAnswers] =
     gen[IncompleteDisposalDetailsAnswers]
 
-  implicit val shareOfPropertyGen: Gen[ShareOfProperty] = gen[ShareOfProperty]
-
+  implicit val shareOfPropertyGen: Gen[ShareOfProperty] =
+    gen[ShareOfProperty].map {
+      case a: ShareOfProperty.Other
+        if a.percentageValue > 100 => ShareOfProperty.Full
+      case other: ShareOfProperty => other
+    }
 }
 
 trait AcquisitionDetailsGen { this: GenUtils =>
