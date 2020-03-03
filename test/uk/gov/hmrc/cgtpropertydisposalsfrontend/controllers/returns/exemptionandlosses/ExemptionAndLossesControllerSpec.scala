@@ -1710,7 +1710,5 @@ object ExemptionAndLossesControllerSpec extends Matchers {
     doc.select("#annualExemptAmount-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
       completeExemptionAndLossesAnswers.annualExemptAmount.inPounds()
     )
-
-    ""
   }
 }

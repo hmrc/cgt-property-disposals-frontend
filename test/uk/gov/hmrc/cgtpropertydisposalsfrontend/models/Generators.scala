@@ -42,7 +42,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.OtherReliefs
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.{NoOtherReliefs, OtherReliefs}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CompleteYearToDateLiabilityAnswers, IncompleteYearToDateLiabilityAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, _}
@@ -370,13 +370,22 @@ trait TaxYearGen { this: GenUtils =>
 
 trait ReliefDetailsAnswersGen extends LowerPriorityReliefDetailsAnswersGen { this: GenUtils =>
 
+  override implicit val longArb: Arbitrary[Long] = Arbitrary(Gen.choose(0.toLong, 5e13.toLong))
+
+  override implicit val stringArb: Arbitrary[String] = Arbitrary("Name")
+
   implicit val reliefDetailsAnswersGen: Gen[ReliefDetailsAnswers] =
     gen[ReliefDetailsAnswers]
 
   implicit val completeReliefDetailsAnswersGen: Gen[CompleteReliefDetailsAnswers] =
-    gen[CompleteReliefDetailsAnswers]
+    gen[CompleteReliefDetailsAnswers].map {
+      case a: CompleteReliefDetailsAnswers if a.otherReliefs.isEmpty =>
+        a.copy(otherReliefs = Some(NoOtherReliefs))
+      case other => other
+    }
 
   implicit val otherReliefsGen: Gen[OtherReliefs] = gen[OtherReliefs]
+
 }
 
 trait LowerPriorityReliefDetailsAnswersGen { this: GenUtils =>
