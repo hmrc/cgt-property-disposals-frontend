@@ -1354,13 +1354,12 @@ class DisposalDetailsControllerSpec
 
         "the user has just answered all of the questions" in {
           forAll { (disposalMethod: DisposalMethod, completeAnswers: CompleteDisposalDetailsAnswers) =>
-          val incompleteAnswers = IncompleteDisposalDetailsAnswers(
-            Some(completeAnswers.shareOfProperty),
-            Some(completeAnswers.disposalPrice),
+            val incompleteAnswers = IncompleteDisposalDetailsAnswers(
+              Some(completeAnswers.shareOfProperty),
+              Some(completeAnswers.disposalPrice),
               Some(completeAnswers.disposalFees)
-          )
+            )
             val (session, journey) = sessionWithDisposalDetailsAnswers(incompleteAnswers, disposalMethod)
-
 
             inSequence {
               mockAuthWithNoRetrievals()
@@ -1493,15 +1492,11 @@ object DisposalDetailsControllerSpec extends Matchers {
     completeAnswers: CompleteDisposalDetailsAnswers,
     disposalMethod: DisposalMethod
   ): (String, String) =
-    if (disposalMethod.equals(DisposalMethod.Sold) && completeAnswers.shareOfProperty.equals(
-      ShareOfProperty.Full
-    ))
+    if (disposalMethod === DisposalMethod.Sold && completeAnswers.shareOfProperty === ShareOfProperty.Full)
       ("disposalPrice.full-share.sold-it.title", "disposalFees.full-share.sold-it.title")
-    else if (disposalMethod.equals(DisposalMethod.Sold))
+    else if (disposalMethod === DisposalMethod.Sold)
       ("disposalPrice.not-full-share.sold-it.title", "disposalFees.not-full-share.sold-it.title")
-    else if (disposalMethod.equals(DisposalMethod.Gifted) && completeAnswers.shareOfProperty.equals(
-      ShareOfProperty.Full
-    ))
+    else if (disposalMethod === DisposalMethod.Gifted && completeAnswers.shareOfProperty === ShareOfProperty.Full)
       ("disposalPrice.full-share.gifted-it.title", "disposalFees.full-share.gifted-it.title")
     else
       ("disposalPrice.not-full-share.gifted-it.title", "disposalFees.not-full-share.gifted-it.title")
