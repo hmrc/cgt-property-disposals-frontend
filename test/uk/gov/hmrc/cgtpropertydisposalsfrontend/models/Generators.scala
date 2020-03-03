@@ -375,15 +375,12 @@ trait ReliefDetailsAnswersGen extends LowerPriorityReliefDetailsAnswersGen { thi
 
   override implicit val longArb: Arbitrary[Long] = Arbitrary(Gen.choose(0.toLong, 5e13.toLong))
 
-  override implicit val stringArb: Arbitrary[String] = Arbitrary("Name")
-
   implicit val reliefDetailsAnswersGen: Gen[ReliefDetailsAnswers] =
     gen[ReliefDetailsAnswers]
 
   implicit val completeReliefDetailsAnswersGen: Gen[CompleteReliefDetailsAnswers] =
     gen[CompleteReliefDetailsAnswers].map {
-      case a: CompleteReliefDetailsAnswers if a.otherReliefs.isEmpty =>
-        a.copy(otherReliefs = Some(NoOtherReliefs))
+      case a: CompleteReliefDetailsAnswers if a.otherReliefs.isEmpty => a.copy(otherReliefs = Some(NoOtherReliefs))
       case other => other
     }
 
