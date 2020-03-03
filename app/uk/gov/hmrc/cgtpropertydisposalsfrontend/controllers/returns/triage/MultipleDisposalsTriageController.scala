@@ -143,13 +143,13 @@ class MultipleDisposalsTriageController @Inject() (
     withMultipleDisposalTriageAnswers(request) {
       case (_, _, triageAnswers) =>
         triageAnswers match {
-          case IncompleteMultipleDisposalsAnswers(None, _) =>
+          case IncompleteMultipleDisposalsAnswers(None, _, _) =>
             Redirect(routes.InitialTriageQuestionsController.howManyProperties())
 
-          case IncompleteMultipleDisposalsAnswers(Some(_), None) =>
+          case IncompleteMultipleDisposalsAnswers(Some(_), None, _) =>
             Redirect(routes.MultipleDisposalsTriageController.guidance())
 
-          case IncompleteMultipleDisposalsAnswers(_, Some(n)) =>
+          case IncompleteMultipleDisposalsAnswers(_, Some(n), _) =>
             Ok(s"Got number of disposals $n")
 
           case c: CompleteMultipleDisposalsAnswers =>
