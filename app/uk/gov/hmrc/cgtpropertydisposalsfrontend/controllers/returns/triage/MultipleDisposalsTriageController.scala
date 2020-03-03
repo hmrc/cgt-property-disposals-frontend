@@ -16,29 +16,26 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
-import cats.syntax.either._
+import com.google.inject.{Inject, Singleton}
+import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms.{mapping, of}
 import play.api.data.format.Formats._
-import com.google.inject.{Inject, Singleton}
-import play.api.Configuration
-import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.routes
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{FormUtils, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, MultipleDisposalsTriageAnswers, NumberOfProperties, SingleDisposalTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsAnswers, IncompleteMultipleDisposalsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.{multipledisposals => triagePages}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -84,14 +81,8 @@ class MultipleDisposalsTriageController @Inject() (
   }
 
   def howManyDisposalsSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    def redirectTo(state: Either[StartingNewDraftReturn, FillingOutReturn]): Call =
-      triageAnswersFomState(state).fold(
-        _ => routes.MultipleDisposalsTriageController.checkYourAnswers(),
-        _ => routes.SingleDisposalsTriageController.checkYourAnswers()
-      )
-
     withMultipleDisposalTriageAnswers(request) {
-      case (_, state, triageAnswers) =>
+      case (_, _, _) =>
         numberOfPropertiesForm
           .bindFromRequest()
           .fold(
@@ -99,12 +90,12 @@ class MultipleDisposalsTriageController @Inject() (
               BadRequest(
                 howManyProperties(formWithErrors)
               ), { numberOfProperties =>
-              val np           = getNumberOfProperties(state)
-              val updatedState = updateNumberOfProperties(state, np)
+              if (numberOfProperties > 1)
+                Ok(s"Number Of Properties: $numberOfProperties")
+              else
+                Redirect(routes.SingleDisposalsTriageController.checkYourAnswers())
             }
           )
-
-        Ok("not implemented yet")
     }
   }
 
@@ -127,75 +118,6 @@ class MultipleDisposalsTriageController @Inject() (
         }
     }
   }
-
-  private def getIndividualUserType(
-    state: Either[StartingNewDraftReturn, FillingOutReturn]
-  ): Option[IndividualUserType] =
-    triageAnswersFomState(state).fold(
-      _.fold(_.individualUserType, c => Some(c.individualUserType)),
-      _.fold(_.individualUserType, c => Some(c.individualUserType))
-    )
-
-  private def updateNumberOfProperties(
-    state: Either[StartingNewDraftReturn, FillingOutReturn],
-    numberOfProperties: Option[Int]
-  ): Either[StartingNewDraftReturn, FillingOutReturn] = {
-    val individualUserType = getIndividualUserType(state)
-    numberOfProperties match {
-      case Some(1) =>
-        val newTriageAnswers =
-          IncompleteSingleDisposalTriageAnswers.empty.copy(
-            individualUserType         = individualUserType,
-            hasConfirmedSingleDisposal = true
-          )
-
-        state.bimap(
-          _.copy(newReturnTriageAnswers = Right(newTriageAnswers)),
-          fillingOutReturn =>
-            fillingOutReturn.copy(
-              draftReturn = fillingOutReturn.draftReturn.copy(
-                triageAnswers = newTriageAnswers
-              )
-            )
-        )
-
-      case Some(2) =>
-        val newTriageAnswers =
-          IncompleteMultipleDisposalsAnswers.empty.copy(
-            individualUserType = individualUserType,
-            numberOfProperties = Some(2)
-          )
-
-        state.bimap(
-          _.copy(newReturnTriageAnswers = Left(newTriageAnswers)),
-          fillingOutReturn =>
-            fillingOutReturn.copy(
-              draftReturn = fillingOutReturn.draftReturn.copy(
-                triageAnswers = newTriageAnswers
-              )
-            )
-        )
-    }
-  }
-
-  private def getNumberOfProperties(
-    state: Either[StartingNewDraftReturn, FillingOutReturn]
-  ): Option[Int] =
-    state.fold(
-      _.newReturnTriageAnswers.fold(
-        _ => Some(2),
-        _.fold(
-          incomplete => if (incomplete.hasConfirmedSingleDisposal) Some(1) else None,
-          _ => Some(1)
-        )
-      ),
-      _ => Some(1)
-    )
-
-  private def triageAnswersFomState(
-    state: Either[StartingNewDraftReturn, FillingOutReturn]
-  ): Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers] =
-    state.bimap(_.newReturnTriageAnswers, r => Right(r.draftReturn.triageAnswers)).merge
 
   private def withMultipleDisposalTriageAnswers(request: RequestWithSessionData[_])(
     f: (SessionData, Either[StartingNewDraftReturn, FillingOutReturn], MultipleDisposalsTriageAnswers) => Future[Result]
