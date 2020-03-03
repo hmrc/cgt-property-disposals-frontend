@@ -159,7 +159,8 @@ class HomePageController @Inject() (
                               subscribed.subscribedDetails,
                               subscribed.ggCredId,
                               subscribed.agentReferenceNumber,
-                              sentReturn
+                              sentReturn,
+                              returnSummary
                             )
                           )
                         )

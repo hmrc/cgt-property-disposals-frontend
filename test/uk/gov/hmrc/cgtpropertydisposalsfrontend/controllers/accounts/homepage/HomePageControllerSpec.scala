@@ -206,7 +206,8 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
         subscribed.subscribedDetails,
         subscribed.ggCredId,
         subscribed.agentReferenceNumber,
-        sample[CompleteReturn]
+        sample[CompleteReturn],
+        sample[ReturnSummary]
       )
 
       List(startingNewDraftReturn, fillingOurReturn, justSubmittedReturn, viewingReturn).foreach { journeyStatus =>
@@ -445,9 +446,9 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
       def performAction(submissionId: String): Future[Result] =
         controller.viewSentReturn(submissionId)(FakeRequest())
 
-      val sentReturn  = sample[ReturnSummary]
-      val subscribed  = sample[Subscribed].copy(sentReturns = List(sentReturn))
-      val sessionData = SessionData.empty.copy(journeyStatus = Some(subscribed))
+      val returnSummary = sample[ReturnSummary]
+      val subscribed    = sample[Subscribed].copy(sentReturns = List(returnSummary))
+      val sessionData   = SessionData.empty.copy(journeyStatus = Some(subscribed))
 
       redirectToStartWhenInvalidJourney(
         () => performAction(""), {
@@ -464,7 +465,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
             mockGetSession(sessionData)
           }
 
-          status(performAction(sentReturn.submissionId + "abc")) shouldBe NOT_FOUND
+          status(performAction(returnSummary.submissionId + "abc")) shouldBe NOT_FOUND
         }
 
       }
@@ -475,10 +476,10 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData)
-            mockDisplayReturn(subscribed.subscribedDetails.cgtReference, sentReturn.submissionId)(Left(Error("")))
+            mockDisplayReturn(subscribed.subscribedDetails.cgtReference, returnSummary.submissionId)(Left(Error("")))
           }
 
-          checkIsTechnicalErrorPage(performAction(sentReturn.submissionId))
+          checkIsTechnicalErrorPage(performAction(returnSummary.submissionId))
         }
 
         "there is an error updating the session" in {
@@ -487,7 +488,9 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData)
-            mockDisplayReturn(subscribed.subscribedDetails.cgtReference, sentReturn.submissionId)(Right(completeReturn))
+            mockDisplayReturn(subscribed.subscribedDetails.cgtReference, returnSummary.submissionId)(
+              Right(completeReturn)
+            )
             mockStoreSession(
               SessionData.empty.copy(
                 journeyStatus = Some(
@@ -495,14 +498,15 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
                     subscribed.subscribedDetails,
                     subscribed.ggCredId,
                     subscribed.agentReferenceNumber,
-                    completeReturn
+                    completeReturn,
+                    returnSummary
                   )
                 )
               )
             )(Left(Error("")))
           }
 
-          checkIsTechnicalErrorPage(performAction(sentReturn.submissionId))
+          checkIsTechnicalErrorPage(performAction(returnSummary.submissionId))
         }
 
       }
@@ -515,7 +519,9 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData)
-            mockDisplayReturn(subscribed.subscribedDetails.cgtReference, sentReturn.submissionId)(Right(completeReturn))
+            mockDisplayReturn(subscribed.subscribedDetails.cgtReference, returnSummary.submissionId)(
+              Right(completeReturn)
+            )
             mockStoreSession(
               SessionData.empty.copy(
                 journeyStatus = Some(
@@ -523,7 +529,8 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
                     subscribed.subscribedDetails,
                     subscribed.ggCredId,
                     subscribed.agentReferenceNumber,
-                    completeReturn
+                    completeReturn,
+                    returnSummary
                   )
                 )
               )
@@ -531,7 +538,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
           }
 
           checkIsRedirect(
-            performAction(sentReturn.submissionId),
+            performAction(returnSummary.submissionId),
             controllers.returns.routes.ViewReturnController.displayReturn()
           )
         }
