@@ -107,18 +107,27 @@ class MultipleDisposalsTriageControllerSpec
 
       behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
 
-      "show a dummy page" ignore {
+      "show a dummy page" in {
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsAnswers.empty)._1)
         }
 
         val result = performAction()
-        status(result)          shouldBe OK
-        contentAsString(result) shouldBe "not implemented yet"
+        status(result) shouldBe SEE_OTHER
+        checkIsRedirect(performAction(), routes.MultipleDisposalsTriageController.howManyDisposals())
       }
 
     }
+
+    "handling requests to display the how many disposals page" must {
+
+//      def performAction(): Future[Result] =
+//        controller.howManyDisposals(FakeRequest())
+//
+//    }
+
+    "handling submits on the how many disposals page" must {}
 
     "handling requests to display the check your answers page" must {
 

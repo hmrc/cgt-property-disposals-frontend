@@ -16,12 +16,16 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
+import cats.data.EitherT
+import cats.instances.future._
+import cats.syntax.either._
+import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms.{mapping, of}
 import play.api.data.format.Formats._
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
@@ -29,7 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.Multi
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsAnswers, IncompleteMultipleDisposalsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -81,8 +85,14 @@ class MultipleDisposalsTriageController @Inject() (
   }
 
   def howManyDisposalsSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    def redirectTo(state: Either[StartingNewDraftReturn, FillingOutReturn]): Call =
+      triageAnswersFomState(state).fold(
+        _ => routes.MultipleDisposalsTriageController.checkYourAnswers(),
+        _ => routes.SingleDisposalsTriageController.checkYourAnswers()
+      )
+
     withMultipleDisposalTriageAnswers(request) {
-      case (_, _, _) =>
+      case (_, state, _) =>
         numberOfPropertiesForm
           .bindFromRequest()
           .fold(
@@ -90,10 +100,10 @@ class MultipleDisposalsTriageController @Inject() (
               BadRequest(
                 howManyProperties(formWithErrors)
               ), { numberOfProperties =>
-              if (numberOfProperties > 1)
+              if (numberOfProperties > 1) {
                 Ok(s"Number Of Properties: $numberOfProperties")
-              else
-                Redirect(routes.SingleDisposalsTriageController.checkYourAnswers())
+              } else
+                Redirect(redirectTo(state))
             }
           )
     }
@@ -119,12 +129,20 @@ class MultipleDisposalsTriageController @Inject() (
     }
   }
 
+  private def triageAnswersFomState(
+    state: Either[StartingNewDraftReturn, FillingOutReturn]
+  ): Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers] =
+    state.bimap(_.newReturnTriageAnswers, r => Right(r.draftReturn.triageAnswers)).merge
+
   private def withMultipleDisposalTriageAnswers(request: RequestWithSessionData[_])(
     f: (SessionData, Either[StartingNewDraftReturn, FillingOutReturn], MultipleDisposalsTriageAnswers) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((session, s @ StartingNewDraftReturn(_, _, _, Left(t)))) =>
         f(session, Left(s), t)
+
+//      case Some((session, r @ FillingOutReturn(_,_,_,dr))) =>
+//        f(session, Right(r), dr)
 
       case _ =>
         Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController.start())
