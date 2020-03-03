@@ -20,6 +20,7 @@ import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
+import cats.syntax.order._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.Configuration
 import play.api.i18n.MessagesApi
@@ -38,6 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, StartingNewDraftReturn, Subscribed, ViewingReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, PaymentsJourney}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftReturn, ReturnSummary, SubmitReturnResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
@@ -135,27 +137,61 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
       )
 
       "display the home page" in {
-        forAll { userType: Option[UserType] =>
+        forAll { (userType: Option[UserType], subscribed: Subscribed) =>
           whenever(!userType.contains(UserType.Agent)) {
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(subscribedSessionData.copy(userType = userType))
-            }
-
-            val result  = performAction()
-            val content = contentAsString(result)
-
-            status(result) shouldBe OK
-            content        should include(messageFromMessageKey("account.home.title"))
-            content        should include(messageFromMessageKey("account.home.button.start-a-new-return"))
-            content shouldNot include(
-              messageFromMessageKey("account.agent.prefix")
-            )
-            content should include(
-              messageFromMessageKey(
-                "account.home.subtitle",
-                subscribed.subscribedDetails.cgtReference.value
+              mockGetSession(
+                SessionData.empty.copy(
+                  userType      = userType,
+                  journeyStatus = Some(subscribed)
+                )
               )
+            }
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey(
+                "account.home.title"
+              ), { doc =>
+                doc.select("#content > article > div.form-group > a").text should include(
+                  messageFromMessageKey("account.home.button.start-a-new-return")
+                )
+                doc.select("#content > article > div:nth-child(1) > div > span").text shouldNot include(
+                  messageFromMessageKey("account.agent.prefix")
+                )
+                doc.select("h1 > p").text should include(
+                  messageFromMessageKey(
+                    "account.home.subtitle",
+                    subscribed.subscribedDetails.cgtReference.value
+                  )
+                )
+                if (subscribed.sentReturns.nonEmpty) {
+                  doc.select("h3").text should include(
+                    messageFromMessageKey(
+                      "account.totalLeftToPay"
+                    )
+                  )
+                  if (subscribed.totalLeftToPay() > AmountInPence.zero) {
+                    doc
+                      .select("#content > article > div.grid-row.returns-list-header > div.column-quarter > div > a")
+                      .attr("href") shouldBe controllers.accounts.homepage.routes.HomePageController
+                      .payTotalAmountLeftToPay()
+                      .url
+                  } else {
+                    doc.body().text() shouldNot include(
+                      controllers.accounts.homepage.routes.HomePageController
+                        .payTotalAmountLeftToPay()
+                        .url
+                    )
+                  }
+                } else {
+                  doc.body().text shouldNot include(
+                    messageFromMessageKey(
+                      "account.totalLeftToPay"
+                    )
+                  )
+                }
+              }
             )
           }
         }
@@ -169,16 +205,20 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
           mockAuthWithNoRetrievals()
           mockGetSession(sessionData)
         }
-
-        val result  = performAction()
-        val content = contentAsString(result)
-
-        status(result) shouldBe OK
-        content        should include(messageFromMessageKey("account.home.title"))
-        content should include(
-          messageFromMessageKey("account.agent.prefix")
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey(
+            "account.home.title"
+          ), { doc =>
+            doc.select("#content > article > div:nth-child(1) > div > span").text() should include(
+              messageFromMessageKey("account.agent.prefix")
+            )
+            doc.select("#content > article > div:nth-child(1) > div > span").text() should include(
+              subscribed.subscribedDetails.makeAccountName()
+            )
+          },
+          OK
         )
-        content should include(subscribed.subscribedDetails.makeAccountName())
       }
 
       val startingNewDraftReturn = StartingNewDraftReturn(

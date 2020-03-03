@@ -94,7 +94,7 @@ sealed trait GenUtils {
   def gen[A](implicit arb: Arbitrary[A]): Gen[A] = arb.arbitrary
 
   // define our own Arbitrary instance for String to generate more legible strings
-  implicit val stringArb: Arbitrary[String] = Arbitrary(Gen.alphaNumStr)
+  implicit val stringArb: Arbitrary[String] = Arbitrary(Gen.nonEmptyListOf(Gen.alphaUpperChar).map(_.mkString("")))
 
   implicit val longArb: Arbitrary[Long] = Arbitrary(Gen.choose(-5e13.toLong, 5e13.toLong))
 
