@@ -141,28 +141,23 @@ class CheckAllAnswersAndSubmitControllerSpec
             performAction(),
             messageFromMessageKey("checkAllAnswers.title"), { doc =>
               validateAcquisitionDetailsCheckYourAnswersPage(
-                completeFillingOutReturn.draftReturn.acquisitionDetailsAnswers
-                  .fold(sys.error("Error"))(_.asInstanceOf[CompleteAcquisitionDetailsAnswers]),
+                completeReturn.acquisitionDetails,
                 doc
               )
               validateDisposalDetailsCheckYourAnswersPage(
-                completeFillingOutReturn.draftReturn.disposalDetailsAnswers
-                  .fold(sys.error("Error"))(_.asInstanceOf[CompleteDisposalDetailsAnswers]),
+                completeReturn.disposalDetails,
                 doc
               )
               validateReliefDetailsCheckYourAnswersPage(
-                completeFillingOutReturn.draftReturn.reliefDetailsAnswers
-                  .fold(sys.error("Error"))(_.asInstanceOf[CompleteReliefDetailsAnswers]),
+                completeReturn.reliefDetails,
                 doc
               )
               validateExemptionAndLossesCheckYourAnswersPage(
-                completeFillingOutReturn.draftReturn.exemptionAndLossesAnswers
-                  .fold(sys.error("Error"))(_.asInstanceOf[CompleteExemptionAndLossesAnswers]),
+                completeReturn.exemptionsAndLossesDetails,
                 doc
               )
               validateYearToDateLiabilityFirstReturnPage(
-                completeFillingOutReturn.draftReturn.yearToDateLiabilityAnswers
-                  .fold(sys.error("Error"))(_.asInstanceOf[CompleteYearToDateLiabilityAnswers]),
+                completeReturn.yearToDateLiabilityAnswers,
                 doc
               )
               doc.select("#back").attr("href") shouldBe routes.TaskListController.taskList().url
