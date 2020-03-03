@@ -131,6 +131,14 @@ class MultipleDisposalsTriageController @Inject() (
     }
   }
 
+  def wereYouAUKResident(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    Ok("wereYouAUKResident")
+  }
+
+  def wereYouAUKResidentSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    Ok("wereYouAUKResidentSubmit")
+  }
+
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withMultipleDisposalTriageAnswers(request) {
       case (_, _, triageAnswers) =>

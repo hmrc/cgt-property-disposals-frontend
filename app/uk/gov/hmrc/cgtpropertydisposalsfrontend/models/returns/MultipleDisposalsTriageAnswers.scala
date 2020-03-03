@@ -25,12 +25,13 @@ object MultipleDisposalsTriageAnswers {
 
   final case class IncompleteMultipleDisposalsAnswers(
     individualUserType: Option[IndividualUserType],
-    numberOfProperties: Option[Int]
+    numberOfProperties: Option[Int],
+    wasAUKResident: Option[Boolean]
   ) extends MultipleDisposalsTriageAnswers
 
   object IncompleteMultipleDisposalsAnswers {
     val empty: IncompleteMultipleDisposalsAnswers =
-      IncompleteMultipleDisposalsAnswers(None, None)
+      IncompleteMultipleDisposalsAnswers(None, None, None)
   }
 
   final case class CompleteMultipleDisposalsAnswers(
