@@ -29,10 +29,12 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios.amountOfMoneyErrorScenarios
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesControllerSpec.validateExemptionAndLossesCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.OtherReliefs
@@ -1450,21 +1452,25 @@ class ExemptionAndLossesControllerSpec
       "display the page" when {
 
         "the user has already answered all the questions" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(updatedSession)
-          }
+          forAll { completeAnswers: CompleteExemptionAndLossesAnswers =>
+            val updatedDraftReturn = journey.draftReturn.copy(exemptionAndLossesAnswers = Some(completeAnswers))
+            val updatedSession     = session.copy(journeyStatus                         = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey("exemptionsAndLosses.cya.title"), { doc =>
-              doc.select("#content > article > form").attr("action") shouldBe routes.ExemptionAndLossesController
-                .checkYourAnswersSubmit()
-                .url
-
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(updatedSession)
             }
-          )
 
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("exemptionsAndLosses.cya.title"), { doc =>
+                validateExemptionAndLossesCheckYourAnswersPage(completeAnswers, doc)
+                doc.select("#content > article > form").attr("action") shouldBe routes.ExemptionAndLossesController
+                  .checkYourAnswersSubmit()
+                  .url
+              }
+            )
+          }
         }
 
         "the user has just answered all the questions and all updates are successful" in {
@@ -1478,12 +1484,12 @@ class ExemptionAndLossesControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey("exemptionsAndLosses.cya.title"), { doc =>
+              validateExemptionAndLossesCheckYourAnswersPage(completeAnswers, doc)
               doc.select("#content > article > form").attr("action") shouldBe routes.ExemptionAndLossesController
                 .checkYourAnswersSubmit()
                 .url
             }
           )
-
         }
 
         "the user wishes to use in year losses" in {
@@ -1682,6 +1688,29 @@ object ExemptionAndLossesControllerSpec extends Matchers {
     completeExemptionAndLossesAnswers: CompleteExemptionAndLossesAnswers,
     doc: Document
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
-    // TODO Implement checks
+
+    if (completeExemptionAndLossesAnswers.inYearLosses.isZero) {
+      doc.select("#inYearLosses-answer").text shouldBe "No"
+    } else {
+      doc.select("#inYearLosses-answer").text shouldBe "Yes"
+      doc.select("#inYearLossesValue-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
+        completeExemptionAndLossesAnswers.inYearLosses.inPounds()
+      )
+    }
+
+    if (completeExemptionAndLossesAnswers.previousYearsLosses.isZero) {
+      doc.select("#previousYearsLosses-answer").text shouldBe "No"
+    } else {
+      doc.select("#previousYearsLosses-answer").text shouldBe "Yes"
+      doc.select("#previousYearsLossesValue-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
+        completeExemptionAndLossesAnswers.previousYearsLosses.inPounds()
+      )
+    }
+
+    doc.select("#annualExemptAmount-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
+      completeExemptionAndLossesAnswers.annualExemptAmount.inPounds()
+    )
+
+    ""
   }
 }

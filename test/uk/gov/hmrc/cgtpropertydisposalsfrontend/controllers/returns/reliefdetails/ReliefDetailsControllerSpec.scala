@@ -1349,7 +1349,7 @@ object ReliefDetailsControllerSpec extends Matchers {
   def validateReliefDetailsCheckYourAnswersPage(
     reliefDetailsAnswers: CompleteReliefDetailsAnswers,
     doc: Document
-  )(implicit messages: MessagesApi, lang: Lang): Unit = {
+  )(implicit messages: MessagesApi, lang: Lang): Unit =
     // TODO Implement checks
-  }
+    ""
 }
