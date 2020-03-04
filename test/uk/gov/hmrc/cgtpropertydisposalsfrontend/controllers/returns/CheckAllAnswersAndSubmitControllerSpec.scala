@@ -44,6 +44,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.IncompleteYearToDateLiabilityAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
@@ -277,7 +278,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 
       def performAction(): Future[Result] = controller.payReturn()(FakeRequest())
 
-      def justSubmittedReturnWithCharge(charge: Option[Charge]): JustSubmittedReturn =
+      def justSubmittedReturnWithCharge(charge: Option[ReturnCharge]): JustSubmittedReturn =
         sample[JustSubmittedReturn].copy(submissionResponse = sample[SubmitReturnResponse].copy(charge = charge))
 
       behave like redirectToStartWhenInvalidJourney(
@@ -303,7 +304,7 @@ class CheckAllAnswersAndSubmitControllerSpec
       "show an error page" when {
 
         "there is an error starting a payments journey" in {
-          val charge              = sample[Charge]
+          val charge              = sample[ReturnCharge]
           val justSubmittedReturn = justSubmittedReturnWithCharge(Some(charge))
 
           inSequence {
@@ -328,7 +329,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 
         "the payments journey has been succesfulyl started" in {
           val paymentJourney      = PaymentsJourney("/next", "id")
-          val charge              = sample[Charge]
+          val charge              = sample[ReturnCharge]
           val justSubmittedReturn = justSubmittedReturnWithCharge(Some(charge))
 
           inSequence {

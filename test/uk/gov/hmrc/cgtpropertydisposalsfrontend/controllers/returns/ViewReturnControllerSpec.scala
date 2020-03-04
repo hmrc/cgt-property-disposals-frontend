@@ -84,7 +84,7 @@ class ViewReturnControllerSpec
         )
         document.select("#heading-reference").text() shouldBe viewingReturn.returnSummary.submissionId
         document.select("#heading-tax-owed").text() shouldBe MoneyUtils.formatAmountOfMoneyWithPoundSign(
-          viewingReturn.returnSummary.totalCGTLiability.withFloorZero.inPounds()
+          viewingReturn.returnSummary.mainReturnChargeAmount.withFloorZero.inPounds()
         )
       }
 

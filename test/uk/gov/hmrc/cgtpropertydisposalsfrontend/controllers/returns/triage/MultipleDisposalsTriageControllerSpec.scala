@@ -29,12 +29,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingNewDraftReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.Self
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{IncompleteMultipleDisposalsAnswers, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 
 import scala.concurrent.Future
