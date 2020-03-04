@@ -19,7 +19,6 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnSummary
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.ChargeWithPayments.ChargeWithPaymentsOps
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
 
 @this(
@@ -41,8 +40,8 @@ sentReturnsHeader: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.c
 
  @sentReturnsWithPaymentDueDate = @{
   sentReturns.map(    r =>
-      r -> r.chargesWithPayments
-           .filter(_.outstandingAmount() > AmountInPence.zero)
+      r -> r.charges
+           .filter(_.totalOutstanding() > AmountInPence.zero)
            .map(_.dueDate)
            .sortWith(LocalDateUtils.order.compare(_, _) < 0)
            .headOption

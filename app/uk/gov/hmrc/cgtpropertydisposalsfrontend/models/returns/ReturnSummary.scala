@@ -20,20 +20,30 @@ import java.time.LocalDate
 
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, ChargeWithPayments}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, Charge}
 
 final case class ReturnSummary(
   submissionId: String,
   submissionDate: LocalDate,
   completionDate: LocalDate,
   lastUpdatedDate: Option[LocalDate],
-  totalCGTLiability: AmountInPence,
-  totalOutstanding: AmountInPence,
+  taxYear: String,
+  mainReturnChargeAmount: AmountInPence,
   propertyAddress: UkAddress,
-  chargesWithPayments: List[ChargeWithPayments]
+  charges: List[Charge]
 )
 
 object ReturnSummary {
+
+  implicit class ReturnSummaryOps(private val r: ReturnSummary) extends AnyVal {
+
+    def totalCharges(): AmountInPence = AmountInPence(r.charges.map(_.amount.withFloorZero.value).sum)
+
+    def totalPaid(): AmountInPence = AmountInPence(r.charges.map(_.totalPaid().value).sum)
+
+    def totalOutstanding(): AmountInPence = totalCharges() -- totalPaid()
+
+  }
 
   implicit val ukAddressFormat: OFormat[UkAddress] = Json.format
 

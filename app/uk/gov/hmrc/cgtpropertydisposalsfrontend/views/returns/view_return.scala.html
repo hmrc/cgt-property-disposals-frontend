@@ -42,7 +42,7 @@
 
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = false, accountMenu=Some(accountMenu(None))) {
 
-  @returnHeading(title, returnSummary.totalCGTLiability.withFloorZero, returnSummary.submissionId)
+  @returnHeading(title, returnSummary.mainReturnChargeAmount.withFloorZero, returnSummary.submissionId)
 
   <p class="js-enabled">
    <a href="JavaScript: window.print()">
