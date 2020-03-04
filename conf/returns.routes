@@ -27,3 +27,5 @@ POST  /return-sent-confirmation          uk.gov.hmrc.cgtpropertydisposalsfronten
 
 
 GET   /return                            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ViewReturnController.displayReturn()
+
+GET   /return-draft-confirmation         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ConfirmDraftReturnController.confirmDraftReturn()

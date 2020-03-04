@@ -44,7 +44,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnsw
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CompleteYearToDateLiabilityAnswers, IncompleteYearToDateLiabilityAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, LocalDateUtils, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{CgtCalculationService, ReturnsService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -116,7 +116,8 @@ class YearToDateLiabilityFirstReturnControllerSpec
       Some(sample[CompleteAcquisitionDetailsAnswers]),
       Some(sample[ReliefDetailsAnswers]),
       Some(sample[CompleteExemptionAndLossesAnswers]),
-      yearToDateLiabilityAnswers
+      yearToDateLiabilityAnswers,
+      LocalDateUtils.today()
     )
 
   def mockCalculationService(
