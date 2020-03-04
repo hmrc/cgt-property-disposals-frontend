@@ -1,3 +1,19 @@
+/*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -11,29 +27,30 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, accounts, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{LocalDateUtils, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, LocalDateUtils, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
 
 import scala.concurrent.Future
 
-class ConfirmDraftReturnControllerSpec extends ControllerSpec
-  with AuthSupport
-  with SessionSupport
-  with ReturnsServiceSupport
-  with ScalaCheckDrivenPropertyChecks
-  with RedirectToStartBehaviour {
+class ConfirmDraftReturnControllerSpec
+    extends ControllerSpec
+    with AuthSupport
+    with SessionSupport
+    with ReturnsServiceSupport
+    with ScalaCheckDrivenPropertyChecks
+    with RedirectToStartBehaviour {
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
   override val overrideBindings = List[GuiceableModule](
     bind[AuthConnector].toInstance(mockAuthConnector),
     bind[SessionStore].toInstance(mockSessionStore),
-    bind[ReturnsService].toInstance(mockReturnsService),
+    bind[ReturnsService].toInstance(mockReturnsService)
   )
 
-  lazy val controller = instanceOf[ConfirmDraftReturnController]
+  lazy val controller                  = instanceOf[ConfirmDraftReturnController]
   implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
 
   private def performAction(): Future[Result] = controller.confirmDraftReturn()(FakeRequest())
@@ -71,6 +88,25 @@ class ConfirmDraftReturnControllerSpec extends ControllerSpec
       contentAsString(result) should include(messageFromMessageKey("confirmDraftReturn.message", formattedDate))
     }
 
+
+    "handling requests with session with return proper error when StoreDraftReturn service fails" in {
+
+      val fillingOutReturn = sample[FillingOutReturn]
+
+      inSequence {
+        mockAuthWithNoRetrievals()
+        mockGetSession(
+          SessionData.empty.copy(
+            journeyStatus = Some(fillingOutReturn)
+          )
+        )
+        mockStoreAnyDraftReturn()(Left(Error("Some Error")))
+      }
+
+      val result: Future[Result] = performAction()
+      status(result) shouldBe INTERNAL_SERVER_ERROR
+    }
+
     "handling requests with session with return should save the data and show the page with proper back and accounts home button and right title" in {
 
       val fillingOutReturn = sample[FillingOutReturn]
@@ -87,9 +123,8 @@ class ConfirmDraftReturnControllerSpec extends ControllerSpec
 
       checkPageIsDisplayed(
         performAction(),
-        messageFromMessageKey("confirmDraftReturn.title"),
-        { doc =>
-          doc.select("#back").attr("href") shouldBe returns.routes.TaskListController.taskList().url
+        messageFromMessageKey("confirmDraftReturn.title"), { doc =>
+          doc.select("#back").attr("href")          shouldBe returns.routes.TaskListController.taskList().url
           doc.select("#accounts_home").attr("href") shouldBe accounts.homepage.routes.HomePageController.homepage().url
         }
       )

@@ -57,11 +57,13 @@ class ConfirmDraftReturnController @Inject() (
 
         val response = returnsService.storeDraftReturn(draftReturnWithLastUpdated)
 
-        response.fold({ e =>
-          logger.error(
-            s"For cgt reference ${draftReturn.cgtReference.value}, got the following error ${e.value}")
-          errorHandler.errorResult()
-        }, _ => Ok(confirmationDraftReturnPage(draftReturnWithLastUpdated)))
+        response.fold(
+          { e =>
+            logger.error(s"For cgt reference ${draftReturn.cgtReference.value}, got the following error ${e.value}")
+            errorHandler.errorResult()
+          },
+          _ => Ok(confirmationDraftReturnPage(draftReturnWithLastUpdated))
+        )
       }
       case _ =>
         Future.successful(Redirect(baseRoutes.StartController.start()))
