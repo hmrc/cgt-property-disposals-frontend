@@ -381,7 +381,7 @@ trait ReliefDetailsAnswersGen extends LowerPriorityReliefDetailsAnswersGen { thi
   implicit val completeReliefDetailsAnswersGen: Gen[CompleteReliefDetailsAnswers] =
     gen[CompleteReliefDetailsAnswers].map {
       case a: CompleteReliefDetailsAnswers if a.otherReliefs.isEmpty => a.copy(otherReliefs = Some(NoOtherReliefs))
-      case other => other
+      case other                                                     => other
     }
 
   implicit val otherReliefsGen: Gen[OtherReliefs] = gen[OtherReliefs]

@@ -1376,10 +1376,12 @@ object ReliefDetailsControllerSpec extends Matchers {
 
     reliefDetailsAnswers.otherReliefs.getOrElse(NoOtherReliefs) match {
       case a: OtherReliefsOption.OtherReliefs =>
-        doc.select("#otherReliefs-answer").text     shouldBe "Yes"
-        doc.select("#otherReliefsName-answer").text shouldBe new String(reliefDetailsAnswers.otherReliefs.getOrElse[OtherReliefsOption](sys.error("Error")) match {
-          case a: OtherReliefs => a.name.toString
-        })
+        doc.select("#otherReliefs-answer").text shouldBe "Yes"
+        doc.select("#otherReliefsName-answer").text shouldBe new String(
+          reliefDetailsAnswers.otherReliefs.getOrElse[OtherReliefsOption](sys.error("Error")) match {
+            case a: OtherReliefs => a.name.toString
+          }
+        )
         doc.select("#otherReliefsAmount-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
           reliefDetailsAnswers.otherReliefs.getOrElse[OtherReliefsOption](sys.error("Error")) match {
             case a: OtherReliefs => a.amount.inPounds().bigDecimal
