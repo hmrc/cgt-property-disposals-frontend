@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import julienrf.json.derived
 import play.api.libs.json.OFormat
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 
 sealed trait MultipleDisposalsTriageAnswers
 
@@ -26,17 +27,19 @@ object MultipleDisposalsTriageAnswers {
   final case class IncompleteMultipleDisposalsAnswers(
     individualUserType: Option[IndividualUserType],
     numberOfProperties: Option[Int],
-    wasAUKResident: Option[Boolean]
+    wasAUKResident: Option[Boolean],
+    countryOfResidence: Option[Country]
   ) extends MultipleDisposalsTriageAnswers
 
   object IncompleteMultipleDisposalsAnswers {
     val empty: IncompleteMultipleDisposalsAnswers =
-      IncompleteMultipleDisposalsAnswers(None, None, None)
+      IncompleteMultipleDisposalsAnswers(None, None, None, None)
   }
 
   final case class CompleteMultipleDisposalsAnswers(
     individualUserType: IndividualUserType,
-    numberOfProperties: Int
+    numberOfProperties: Int,
+    countryOfResidence: Country
   ) extends MultipleDisposalsTriageAnswers
 
   implicit class MultipleDisposalsTriageAnswersOps(private val m: MultipleDisposalsTriageAnswers) extends AnyVal {
