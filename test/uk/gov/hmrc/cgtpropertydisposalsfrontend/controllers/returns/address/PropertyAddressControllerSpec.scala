@@ -206,8 +206,7 @@ class PropertyAddressControllerSpec
       ): Unit =
         checkPageIsDisplayed(
           result,
-          messageFromMessageKey(expectedTitleKey),
-          { doc =>
+          messageFromMessageKey(expectedTitleKey), { doc =>
             validatePropertyAddressPage(ukAddressDetails, doc)
           }
         )
@@ -236,7 +235,7 @@ class PropertyAddressControllerSpec
 
         testIsCheckYourAnswers(
           performAction(),
-          draftReturn.propertyAddress.get,
+          draftReturn.propertyAddress.fold(sys.error("Error"))(_.asInstanceOf[UkAddress]),
           "returns.property-address.cya.title"
         )
       }
@@ -268,10 +267,9 @@ object PropertyAddressControllerSpec extends Matchers {
   def validatePropertyAddressPage(
     ukAddress: UkAddress,
     doc: Document
-  )(implicit messages: MessagesApi, lang: Lang): Unit = {
+  )(implicit messages: MessagesApi, lang: Lang): Unit =
     doc.select("#property-address-answer").text() shouldBe
       List(Some(ukAddress.line1), ukAddress.line2, ukAddress.town, ukAddress.county, Some(ukAddress.postcode.value))
-        .collect{ case Some(s) => s }
+        .collect { case Some(s) => s }
         .mkString(" ")
-  }
 }
