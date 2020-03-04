@@ -166,11 +166,11 @@ class MultipleDisposalsTriageController @Inject() (
 object MultipleDisposalsTriageController {
 
   val numberOfPropertiesForm: Form[Int] = {
-
+    val numberOfDisposalsKey = "multipleDisposalsNumberOfProperties"
     val numberOfPropertiesFormatter: Formatter[Int] = {
       def validateNumberOfProperties(i: Int): Either[FormError, Int] =
-        if (i <= 0) Left(FormError("numberOfProperties", "error.tooSmall"))
-        else if (i > 999) Left(FormError("numberOfProperties", "error.tooLong"))
+        if (i <= 0) Left(FormError(numberOfDisposalsKey, "error.tooSmall"))
+        else if (i > 999) Left(FormError(numberOfDisposalsKey, "error.tooLong"))
         else Right(i)
 
       new Formatter[Int] {
@@ -186,7 +186,7 @@ object MultipleDisposalsTriageController {
 
     Form(
       mapping(
-        "numberOfProperties" -> of(numberOfPropertiesFormatter)
+        numberOfDisposalsKey -> of(numberOfPropertiesFormatter)
       )(identity)(Some(_))
     )
   }

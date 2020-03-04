@@ -964,18 +964,18 @@ returns.list.taxOwed=Tax owed for return
 returns.list.sentDate=Sent to HMRC on {0}
 returns.paymentTakes3Days=Payments may take up to 3 working days to be shown on this page
 
-multiple-disposals.howManyProperties.title=How many disposals are you including in this return?
-multiple-disposals.howManyProperties.p1=The property disposals must all have the same ‘completion’ date. The contract ‘exchange’ dates must all be in the same tax year.
-multiple-disposals.howManyProperties.p2=If you sold shares enter the number of companies you held the shares in. You must have sold all the shares on the same date.
-multiple-disposals.howManyProperties.details.summary=What happens on ‘exchange’ and ‘completion’ dates?
-multiple-disposals.howManyProperties.details.p1=The ‘completion’ date is usually the day the new owner gets the key to the property,
-multiple-disposals.howManyProperties.details.p2=Contract ‘exchange’ usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
-multiple-disposals.howManyProperties.details.link=<a href="{0}" target="_blank">Read about ‘exchange’ and ‘completion’ (opens in a new window)</a>.
+multipleDisposalsNumberOfProperties.title=How many disposals are you including in this return?
+multipleDisposalsNumberOfProperties.p1=The property disposals must all have the same ‘completion’ date. The contract ‘exchange’ dates must all be in the same tax year.
+multipleDisposalsNumberOfProperties.p2=If you sold shares enter the number of companies you held the shares in. You must have sold all the shares on the same date.
+multipleDisposalsNumberOfProperties.details.summary=What happens on ‘exchange’ and ‘completion’ dates?
+multipleDisposalsNumberOfProperties.details.p1=The ‘completion’ date is usually the day the new owner gets the key to the property,
+multipleDisposalsNumberOfProperties.details.p2=Contract ‘exchange’ usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
+multipleDisposalsNumberOfProperties.details.link=<a href="{0}" target="_blank">Read about ‘exchange’ and ‘completion’ (opens in a new window)</a>.
 
-numberOfProperties.error.invalid=Use numbers to input how many disposals you want to include in this return
-numberOfProperties.error.required=Input how many disposals you want to include in this return using numbers
-numberOfProperties.error.tooSmall=The number of properties must be 2 or more, or go back and select that you are including one property in this return
-numberOfProperties.error.tooLong=You can't include more than 999 properties in the return
+multipleDisposalsNumberOfProperties.error.invalid=Use numbers to input how many disposals you want to include in this return
+multipleDisposalsNumberOfProperties.error.required=Input how many disposals you want to include in this return using numbers
+multipleDisposalsNumberOfProperties.error.tooSmall=The number of properties must be 2 or more, or go back and select that you are including one property in this return
+multipleDisposalsNumberOfProperties.error.tooLong=You can't include more than 999 properties in the return
 
 disposalDateMixedUseOrIndirect.title=You cannot use this service
 disposalDateMixedUseOrIndirect.p1=You cannot use this service to report Capital Gains on:

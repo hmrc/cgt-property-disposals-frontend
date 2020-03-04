@@ -548,6 +548,7 @@ class InitialTriageQuestionsControllerSpec
             performAction(formData: _*),
             messageFromMessageKey("numberOfProperties.title"), { doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(expectedErrorKey)
+              println(doc.select("#error-summary-display > ul > li > a").text())
             },
             BAD_REQUEST
           )
