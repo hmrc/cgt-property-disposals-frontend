@@ -52,7 +52,7 @@
     @formWrapper(controllers.returns.triage.routes.MultipleDisposalsTriageController.wereYouAUKResidentSubmit(), 'novalidate -> "novalidate") {
         @yesNo(
             fieldId = key,
-            label = pageHeading(title, Some(messages("triage.caption"))),
+            label = pageHeading(title, Some(messages("multiple-disposals.triage.caption"))),
             labelAsHeading = true,
             errorKey = form.error(key).map(e => e.message),
             hasErrors = hasErrors,
