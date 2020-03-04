@@ -30,6 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.Self
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{IncompleteMultipleDisposalsAnswers, _}
@@ -181,7 +182,6 @@ class MultipleDisposalsTriageControllerSpec
               .url
           }
         )
-
       }
 
     }
@@ -299,7 +299,7 @@ class MultipleDisposalsTriageControllerSpec
         )
       }
 
-      "user has  not answered how many disposals section and " +
+      "user has not answered how many disposals section and " +
         "submit request without entering numberOfProperties value" in {
         val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
           individualUserType = Some(Self)
@@ -335,6 +335,143 @@ class MultipleDisposalsTriageControllerSpec
 
         test("numberOfProperties" -> "1000")("numberOfProperties.error.tooLong")
 
+      }
+
+    }
+
+    "handling requests to display the were uk resident page" must {
+
+      def performAction(): Future[Result] =
+        controller.wereYouAUKResident()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
+
+      "display the page" in {
+        mockAuthWithNoRetrievals()
+        mockGetSession(sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsAnswers.empty)._1)
+
+        checkPageIsDisplayed(
+          performAction,
+          messageFromMessageKey("multiple-disposals.wereYouAUKResident.title"), { doc =>
+            doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
+              .howManyDisposals()
+              .url
+            doc
+              .select("#content > article > form")
+              .attr("action") shouldBe routes.MultipleDisposalsTriageController
+              .wereYouAUKResidentSubmit()
+              .url
+          }
+        )
+      }
+
+    }
+
+    "handling submits on the were uk resident page" must {
+
+      def performAction(data: (String, String)*): Future[Result] =
+        controller.wereYouAUKResidentSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
+
+      "user has not answered were uk resident section and " +
+        "redirect to dummy page when user selects yes" in {
+        val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
+          individualUserType = Some(Self),
+          numberOfProperties = Some(2)
+        )
+        val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(session)
+          mockStoreSession(
+            session.copy(journeyStatus = Some(
+              journey.copy(
+                newReturnTriageAnswers = Left(answers.copy(wasAUKResident = Some(true)))
+              )
+            )
+            )
+          )(Right(()))
+        }
+
+        checkIsRedirect(
+          performAction("wereYouAUKResident" -> "true"),
+          routes.MultipleDisposalsTriageController.checkYourAnswers()
+        )
+      }
+
+      "user has not answered were uk resident section and " +
+        "redirect to dummy page when user selects no" in {
+        val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
+          individualUserType = Some(Self),
+          numberOfProperties = Some(2)
+        )
+        val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(session)
+          mockStoreSession(
+            session.copy(journeyStatus = Some(
+              journey.copy(
+                newReturnTriageAnswers = Left(answers.copy(wasAUKResident = Some(false)))
+              )
+            )
+            )
+          )(Right(()))
+        }
+
+        checkIsRedirect(
+          performAction("wereYouAUKResident" -> "false"),
+          routes.MultipleDisposalsTriageController.checkYourAnswers()
+        )
+      }
+
+      "user has already answered were uk resident section and " +
+        "redirect to dummy page when user re-selected different option" in {
+        val answers = sample[IncompleteMultipleDisposalsAnswers]
+          .copy(wasAUKResident = Some(true), countryOfResidence = Some(Country.uk))
+
+        val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(session)
+          mockStoreSession(
+            session.copy(journeyStatus = Some(
+              journey.copy(
+                newReturnTriageAnswers = Left(
+                  answers.copy(
+                    wasAUKResident     = Some(false),
+                    countryOfResidence = None
+                  )
+                )
+              )
+            )
+            )
+          )(Right(()))
+        }
+
+        checkIsRedirect(
+          performAction("wereYouAUKResident" -> "false"),
+          routes.MultipleDisposalsTriageController.checkYourAnswers()
+        )
+      }
+
+      "user has not answered were uk resident section and " +
+        "submit request without selecting one of wereUkResident options" in {
+        val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
+          individualUserType = Some(Self),
+          numberOfProperties = Some(2)
+        )
+        val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(session)
+        }
+
+        val result = performAction()
+        status(result) shouldBe BAD_REQUEST
       }
 
     }
