@@ -590,6 +590,20 @@ date.10=October
 date.11=November
 date.12=December
 
+date.short.1=Jan	
+date.short.2=Feb	
+date.short.3=Mar	
+date.short.4=Apr	
+date.short.5=May	
+date.short.6=Jun	
+date.short.7=Jul	
+date.short.8=Aug	
+date.short.9=Sept	
+date.short.10=Oct	
+date.short.11=Nov	
+date.short.12=Dec
+
+
 returns.return-to-summary-link=Return to summary
 task-list.InProgress=In progress
 task-list.Complete=Complete
