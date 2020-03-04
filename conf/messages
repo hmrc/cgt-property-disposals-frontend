@@ -341,7 +341,6 @@ account.agent.prefix=Client:
 account.home.title=Capital Gains Tax on UK property account home
 
 account.home.subtitle=Account number: {0}
-account.home.subtitle.agent=Your client: {0} | Account number: {1}
 account.home.left.title=Capital Gains Tax liability
 account.home.left.placeholder=Your total Capital Gains Tax liability for UK property disposals from 6 April 2020 to 5 April 2021.
 account.home.right.title=Total amount left to pay
@@ -982,3 +981,11 @@ multipleDisposalsWereYouAUKResident.title=Were you a UK resident on all of the c
 multipleDisposalsWereYouAUKResident.helpText=Contract ‘exchange’ usually happens when a buyer and seller swap contracts and the buyer pays a deposit. If you sold shares, it was the day you sold them.
 
 multipleDisposalsWereYouAUKResident.error.required=Select yes if you were a UK resident on all of the contract ‘exchange’ dates
+
+disposalDateMixedUseOrIndirect.title=You cannot use this service
+disposalDateMixedUseOrIndirect.p1=You cannot use this service to report Capital Gains on:
+disposalDateMixedUseOrIndirect.p1.reason1=disposals of ‘mixed use‘ UK property
+disposalDateMixedUseOrIndirect.p1.reason2=indirect disposals of UK land
+disposalDateMixedUseOrIndirect.h2=What you’ll need to do next
+disposalDateMixedUseOrIndirect.p2=You’ll need to complete a <a href="{0}">non resident: report and pay Capital Gains Tax on UK property or land form</a>.
+disposalDateMixedUseOrIndirect.p3=You have 30 days from the date of completion to report disposal and pay any tax due. You may get a penalty if your payment is late.

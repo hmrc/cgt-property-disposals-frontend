@@ -73,7 +73,8 @@ class SingleDisposalsTriageController @Inject() (
   completionDatePage: triagePages.completion_date,
   disposalDateTooEarlyUkResidents: triagePages.disposal_date_too_early_uk_residents,
   disposalDateTooEarlyNonUkResidents: triagePages.disposal_date_too_early_non_uk_residents,
-  checkYourAnswersPage: triagePages.check_your_answers
+  checkYourAnswersPage: triagePages.check_your_answers,
+  assetTypeNotYetImplementedPage: triagePages.asset_type_not_yet_implemented
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -413,6 +414,17 @@ class SingleDisposalsTriageController @Inject() (
     )
   }
 
+  def assetTypeNotYetImplemented(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withSingleDisposalTriageAnswers(request) {
+      case (_, _, triageAnswers) =>
+        triageAnswers.fold(_.assetType, c => Some(c.assetType)) match {
+          case Some(AssetType.MixedUse)         => Ok(assetTypeNotYetImplementedPage())
+          case Some(AssetType.IndirectDisposal) => Ok(assetTypeNotYetImplementedPage())
+          case _                                => Redirect(routes.SingleDisposalsTriageController.checkYourAnswers())
+        }
+    }
+  }
+
   def countryOfResidenceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     handleTriagePageSubmit(
       _.fold(_.wasAUKResident.filterNot(identity), c => Some(c.countryOfResidence.isUk()).filterNot(identity)),
@@ -536,7 +548,10 @@ class SingleDisposalsTriageController @Inject() (
             Redirect(routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty())
 
           case IncompleteSingleDisposalTriageAnswers(_, _, _, _, _, Some(AssetType.IndirectDisposal), _, _, _) =>
-            Ok("Indirect disposals not handled yet")
+            Redirect(routes.SingleDisposalsTriageController.assetTypeNotYetImplemented())
+
+          case IncompleteSingleDisposalTriageAnswers(_, _, _, _, _, Some(AssetType.MixedUse), _, _, _) =>
+            Redirect(routes.SingleDisposalsTriageController.assetTypeNotYetImplemented())
 
           case IncompleteSingleDisposalTriageAnswers(_, _, _, _, _, _, None, _, _) =>
             Redirect(routes.SingleDisposalsTriageController.whenWasDisposalDate())
