@@ -21,11 +21,8 @@ import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
-import cats.syntax.order._
-import com.typesafe.config.ConfigFactory
 import org.jsoup.nodes.Document
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -39,7 +36,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => r
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.order
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{NonResidential, Residential}
@@ -47,7 +43,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTri
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{SingleDisposalTriageAnswers, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{ReturnsService, TaxYearService}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -62,6 +58,8 @@ class SingleDisposalsTriageControllerSpec
 
   val mockReturnsService = mock[ReturnsService]
 
+  val mockTaxYearService = mock[TaxYearService]
+
   val mockUUIDGenerator = mock[UUIDGenerator]
 
   override val overrideBindings =
@@ -69,47 +67,11 @@ class SingleDisposalsTriageControllerSpec
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
       bind[ReturnsService].toInstance(mockReturnsService),
-      bind[UUIDGenerator].toInstance(mockUUIDGenerator)
+      bind[UUIDGenerator].toInstance(mockUUIDGenerator),
+      bind[TaxYearService].toInstance(mockTaxYearService)
     )
 
   val today = LocalDate.now(Clock.systemUTC())
-
-  val thisTaxYear = {
-    val startYear =
-      if (today > LocalDate.of(today.getYear, 4, 6))
-        today.getYear
-      else
-        today.getYear - 1
-
-    sample[TaxYear].copy(
-      startDateInclusive = LocalDate.of(startYear, 4, 6),
-      endDateExclusive   = LocalDate.of(startYear + 1, 4, 6)
-    )
-  }
-
-  override lazy val additionalConfig: Configuration = Configuration(
-    ConfigFactory.parseString(
-      s"""
-        | tax-years = [
-        |  {
-        |    start-year = ${thisTaxYear.startDateInclusive.getYear}
-        |    annual-exempt-amount {
-        |      general              = ${thisTaxYear.annualExemptAmountGeneral.inPounds()}
-        |      non-vulnerable-trust = ${thisTaxYear.annualExemptAmountNonVulnerableTrust.inPounds()}
-        |    }
-        |    personal-allowance = ${thisTaxYear.personalAllowance.inPounds()}
-        |    income-tax-higher-rate-threshold = ${thisTaxYear.incomeTaxHigherRateThreshold.inPounds()}
-        |    cgt-rates {
-        |      lower-band-residential      = ${thisTaxYear.cgtRateLowerBandResidential}
-        |      lower-band-non-residential  = ${thisTaxYear.cgtRateLowerBandNonResidential}
-        |      higher-band-residential     = ${thisTaxYear.cgtRateHigherBandResidential}
-        |      higher-band-non-residential = ${thisTaxYear.cgtRateHigherBandNonResidential}
-        |    }
-        |  }
-        | ]
-        |""".stripMargin
-    )
-  )
 
   lazy val controller = instanceOf[SingleDisposalsTriageController]
 
@@ -153,12 +115,18 @@ class SingleDisposalsTriageControllerSpec
       .expects(draftReturn, *)
       .returning(EitherT.fromEither[Future](result))
 
+  def mockGetTaxYear(date: LocalDate)(response: Either[Error, Option[TaxYear]]) =
+    (mockTaxYearService
+      .taxYear(_: LocalDate)(_: HeaderCarrier))
+      .expects(date, *)
+      .returning(EitherT.fromEither[Future](response))
+
   "The SingleDisposalsTriageController" when {
 
     "handling requests to display how did you dispose of your property page" must {
 
       val requiredPreviousAnswers =
-        IncompleteSingleDisposalTriageAnswers.empty.copy(numberOfProperties = Some(NumberOfProperties.One))
+        IncompleteSingleDisposalTriageAnswers.empty.copy(hasConfirmedSingleDisposal = true)
 
       def performAction(): Future[Result] = controller.howDidYouDisposeOfProperty()(FakeRequest())
 
@@ -168,8 +136,12 @@ class SingleDisposalsTriageControllerSpec
         performAction
       )(
         requiredPreviousAnswers,
-        routes.InitialTriageQuestionsController.howManyProperties(),
-        { case (answers, n) => answers.copy(numberOfProperties = n) }
+        routes.InitialTriageQuestionsController.howManyProperties(), {
+          case (answers, n) =>
+            answers.copy(
+              hasConfirmedSingleDisposal = if (n.contains(NumberOfProperties.One)) true else false
+            )
+        }
       )
 
       behave like displayIndividualTriagePageBehaviorIncompleteJourney(
@@ -206,14 +178,18 @@ class SingleDisposalsTriageControllerSpec
         controller.howDidYouDisposeOfPropertySubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
 
       val requiredPreviousAnswers =
-        IncompleteSingleDisposalTriageAnswers.empty.copy(numberOfProperties = Some(NumberOfProperties.One))
+        IncompleteSingleDisposalTriageAnswers.empty.copy(hasConfirmedSingleDisposal = true)
 
       behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
       behave like redirectWhenNoPreviousAnswerBehaviour[NumberOfProperties](() => performAction())(
         requiredPreviousAnswers,
-        routes.InitialTriageQuestionsController.howManyProperties(),
-        { case (answers, n) => answers.copy(numberOfProperties = n) }
+        routes.InitialTriageQuestionsController.howManyProperties(), {
+          case (answers, n) =>
+            answers.copy(
+              hasConfirmedSingleDisposal = if (n.contains(NumberOfProperties.One)) true else false
+            )
+        }
       )
 
       "show a form error" when {
@@ -439,7 +415,7 @@ class SingleDisposalsTriageControllerSpec
               List("wereYouAUKResident" -> "true"),
               IncompleteSingleDisposalTriageAnswers(
                 Some(completeAnswers.individualUserType),
-                Some(completeAnswers.numberOfProperties),
+                true,
                 Some(completeAnswers.disposalMethod),
                 Some(true),
                 None,
@@ -460,7 +436,7 @@ class SingleDisposalsTriageControllerSpec
               List("wereYouAUKResident" -> "false"),
               IncompleteSingleDisposalTriageAnswers(
                 Some(completeAnswers.individualUserType),
-                Some(completeAnswers.numberOfProperties),
+                true,
                 Some(completeAnswers.disposalMethod),
                 Some(false),
                 None,
@@ -485,7 +461,7 @@ class SingleDisposalsTriageControllerSpec
               List("wereYouAUKResident" -> "true"),
               IncompleteSingleDisposalTriageAnswers(
                 Some(completeAnswers.individualUserType),
-                Some(completeAnswers.numberOfProperties),
+                true,
                 Some(completeAnswers.disposalMethod),
                 Some(true),
                 None,
@@ -725,14 +701,14 @@ class SingleDisposalsTriageControllerSpec
 
       val requiredPreviousAnswersUkResident =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
-          individualUserType = Some(sample[IndividualUserType]),
-          numberOfProperties = Some(NumberOfProperties.One),
-          disposalMethod     = Some(DisposalMethod.Gifted),
-          wasAUKResident     = Some(true),
-          assetType          = Some(AssetType.Residential)
+          individualUserType         = Some(sample[IndividualUserType]),
+          hasConfirmedSingleDisposal = true,
+          disposalMethod             = Some(DisposalMethod.Gifted),
+          wasAUKResident             = Some(true),
+          assetType                  = Some(AssetType.Residential)
         )
 
-      val disposalDate = DisposalDate(LocalDate.of(2020, 1, 2), thisTaxYear)
+      val disposalDate = DisposalDate(LocalDate.of(2020, 1, 2), sample[TaxYear])
 
       def performAction(): Future[Result] = controller.whenWasDisposalDate()(FakeRequest())
 
@@ -830,13 +806,15 @@ class SingleDisposalsTriageControllerSpec
 
       val tomorrow = today.plusDays(1L)
 
+      val taxYear = sample[TaxYear]
+
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
-          individualUserType = Some(sample[IndividualUserType]),
-          numberOfProperties = Some(NumberOfProperties.One),
-          disposalMethod     = Some(DisposalMethod.Gifted),
-          wasAUKResident     = Some(true),
-          assetType          = Some(AssetType.Residential)
+          individualUserType         = Some(sample[IndividualUserType]),
+          hasConfirmedSingleDisposal = true,
+          disposalMethod             = Some(DisposalMethod.Gifted),
+          wasAUKResident             = Some(true),
+          assetType                  = Some(AssetType.Residential)
         )
 
       behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
@@ -848,6 +826,20 @@ class SingleDisposalsTriageControllerSpec
             answers.copy(assetType = w.map(if (_) AssetType.Residential else AssetType.NonResidential))
         }
       )
+
+      "show an error page" when {
+
+        "there is a problem getting the tax year" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionDataWithFillingOurReturn(requiredPreviousAnswers))
+            mockGetTaxYear(today)(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction(formData(today): _*))
+        }
+
+      }
 
       "show a form error" when {
 
@@ -884,7 +876,8 @@ class SingleDisposalsTriageControllerSpec
         performAction,
         requiredPreviousAnswers,
         formData(today),
-        requiredPreviousAnswers.copy(disposalDate = Some(DisposalDate(today, thisTaxYear)))
+        requiredPreviousAnswers.copy(disposalDate = Some(DisposalDate(today, taxYear))),
+        () => mockGetTaxYear(today)(Right(Some(taxYear)))
       )
 
       "handle valid dates" when {
@@ -892,37 +885,24 @@ class SingleDisposalsTriageControllerSpec
         "the user is starting in a draft return and" when {
 
           "no tax year can be found for the given disposal date" in {
-            val date = thisTaxYear.startDateInclusive.minusDays(1L)
+
             testSuccessfulUpdateStartingNewDraft(
               performAction,
               requiredPreviousAnswers,
-              formData(date),
+              formData(today),
               requiredPreviousAnswers
-                .copy(tooEarlyDisposalDate = Some(date)),
-              checkIsRedirect(_, routes.SingleDisposalsTriageController.disposalDateTooEarly())
+                .copy(tooEarlyDisposalDate = Some(today)),
+              checkIsRedirect(_, routes.SingleDisposalsTriageController.disposalDateTooEarly()),
+              () => mockGetTaxYear(today)(Right(None))
             )
 
           }
 
-          "the disposal date is on the first available tax year and the journey was incomplete" in {
-            testSuccessfulUpdateStartingNewDraft(
-              performAction,
-              requiredPreviousAnswers.copy(tooEarlyDisposalDate = Some(thisTaxYear.startDateInclusive.minusDays(1L))),
-              formData(thisTaxYear.startDateInclusive),
-              requiredPreviousAnswers
-                .copy(
-                  disposalDate         = Some(DisposalDate(thisTaxYear.startDateInclusive, thisTaxYear)),
-                  tooEarlyDisposalDate = None
-                ),
-              checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
-            )
-          }
-
-          "the disposal date is after the configured earliest disposal date and the journey was complete" in {
+          "a tax year can be found and the journey was complete" in {
             val completeJourney =
               sample[CompleteSingleDisposalTriageAnswers]
-                .copy(disposalDate = DisposalDate(thisTaxYear.startDateInclusive, thisTaxYear))
-            val date = thisTaxYear.startDateInclusive.plusDays(1L)
+                .copy(disposalDate = DisposalDate(today, taxYear))
+            val date = today.minusDays(1L)
 
             testSuccessfulUpdateStartingNewDraft(
               performAction,
@@ -930,16 +910,17 @@ class SingleDisposalsTriageControllerSpec
               formData(date),
               IncompleteSingleDisposalTriageAnswers(
                 Some(completeJourney.individualUserType),
-                Some(completeJourney.numberOfProperties),
+                true,
                 Some(completeJourney.disposalMethod),
                 Some(completeJourney.countryOfResidence.isUk()),
                 if (completeJourney.countryOfResidence.isUk()) None else Some(completeJourney.countryOfResidence),
                 Some(completeJourney.assetType),
-                Some(DisposalDate(date, thisTaxYear)),
+                Some(DisposalDate(date, taxYear)),
                 None,
                 None
               ),
-              checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
+              checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers()),
+              () => mockGetTaxYear(date)(Right(Some(taxYear)))
             )
 
           }
@@ -952,10 +933,11 @@ class SingleDisposalsTriageControllerSpec
             testSuccessfulUpdateFillingOutReturn(
               performAction,
               requiredPreviousAnswers,
-              formData(thisTaxYear.startDateInclusive),
+              formData(today),
               requiredPreviousAnswers
-                .copy(disposalDate = Some(DisposalDate(thisTaxYear.startDateInclusive, thisTaxYear))),
-              checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
+                .copy(disposalDate = Some(DisposalDate(today, taxYear))),
+              checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers()),
+              () => mockGetTaxYear(today)(Right(Some(taxYear)))
             )
 
           }
@@ -963,8 +945,8 @@ class SingleDisposalsTriageControllerSpec
           "the section is complete" in {
             val completeJourney =
               sample[CompleteSingleDisposalTriageAnswers]
-                .copy(disposalDate = DisposalDate(thisTaxYear.startDateInclusive, thisTaxYear))
-            val date = thisTaxYear.startDateInclusive.plusDays(1L)
+                .copy(disposalDate = DisposalDate(today, taxYear))
+            val date = today.minusDays(1L)
 
             testSuccessfulUpdateFillingOutReturn(
               performAction,
@@ -972,16 +954,17 @@ class SingleDisposalsTriageControllerSpec
               formData(date),
               IncompleteSingleDisposalTriageAnswers(
                 Some(completeJourney.individualUserType),
-                Some(completeJourney.numberOfProperties),
+                true,
                 Some(completeJourney.disposalMethod),
                 Some(completeJourney.countryOfResidence.isUk()),
                 if (completeJourney.countryOfResidence.isUk()) None else Some(completeJourney.countryOfResidence),
                 Some(completeJourney.assetType),
-                Some(DisposalDate(date, thisTaxYear)),
+                Some(DisposalDate(date, taxYear)),
                 None,
                 None
               ),
-              checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
+              checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers()),
+              () => mockGetTaxYear(date)(Right(Some(taxYear)))
             )
           }
         }
@@ -996,14 +979,14 @@ class SingleDisposalsTriageControllerSpec
             mockGetSession(
               sessionDataWithFillingOurReturn(
                 requiredPreviousAnswers.copy(
-                  disposalDate = Some(DisposalDate(thisTaxYear.startDateInclusive, thisTaxYear))
+                  disposalDate = Some(DisposalDate(today, taxYear))
                 )
               )
             )
           }
 
           checkIsRedirect(
-            performAction(formData(thisTaxYear.startDateInclusive): _*),
+            performAction(formData(today): _*),
             routes.SingleDisposalsTriageController.checkYourAnswers()
           )
         }
@@ -1014,16 +997,16 @@ class SingleDisposalsTriageControllerSpec
 
     "handling requests to display the when was completion date page" must {
 
-      val disposalDate = DisposalDate(today, thisTaxYear)
+      val disposalDate = DisposalDate(today, sample[TaxYear])
 
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
-          individualUserType = Some(sample[IndividualUserType]),
-          numberOfProperties = Some(NumberOfProperties.One),
-          disposalMethod     = Some(DisposalMethod.Gifted),
-          wasAUKResident     = Some(true),
-          assetType          = Some(AssetType.Residential),
-          disposalDate       = Some(disposalDate)
+          individualUserType         = Some(sample[IndividualUserType]),
+          hasConfirmedSingleDisposal = true,
+          disposalMethod             = Some(DisposalMethod.Gifted),
+          wasAUKResident             = Some(true),
+          assetType                  = Some(AssetType.Residential),
+          disposalDate               = Some(disposalDate)
         )
 
       def performAction(): Future[Result] = controller.whenWasCompletionDate()(FakeRequest())
@@ -1093,7 +1076,7 @@ class SingleDisposalsTriageControllerSpec
           "completionDate-year"  -> date.getYear().toString
         )
 
-      val disposalDate = DisposalDate(today.minusDays(5L), thisTaxYear)
+      val disposalDate = DisposalDate(today.minusDays(5L), sample[TaxYear])
 
       val tomorrow = today.plusDays(1L)
 
@@ -1101,12 +1084,12 @@ class SingleDisposalsTriageControllerSpec
 
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
-          individualUserType = Some(sample[IndividualUserType]),
-          numberOfProperties = Some(NumberOfProperties.One),
-          disposalMethod     = Some(DisposalMethod.Gifted),
-          wasAUKResident     = Some(true),
-          assetType          = Some(AssetType.Residential),
-          disposalDate       = Some(disposalDate)
+          individualUserType         = Some(sample[IndividualUserType]),
+          hasConfirmedSingleDisposal = true,
+          disposalMethod             = Some(DisposalMethod.Gifted),
+          wasAUKResident             = Some(true),
+          assetType                  = Some(AssetType.Residential),
+          disposalDate               = Some(disposalDate)
         )
 
       behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
@@ -1242,10 +1225,10 @@ class SingleDisposalsTriageControllerSpec
 
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
-          individualUserType = Some(IndividualUserType.Self),
-          numberOfProperties = Some(NumberOfProperties.One),
-          disposalMethod     = Some(DisposalMethod.Sold),
-          wasAUKResident     = Some(false)
+          individualUserType         = Some(IndividualUserType.Self),
+          hasConfirmedSingleDisposal = true,
+          disposalMethod             = Some(DisposalMethod.Sold),
+          wasAUKResident             = Some(false)
         )
 
       val (countryCode, countryName) = "HK" -> "Hong Kong"
@@ -1329,10 +1312,10 @@ class SingleDisposalsTriageControllerSpec
 
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
-          individualUserType = Some(IndividualUserType.Self),
-          numberOfProperties = Some(NumberOfProperties.One),
-          disposalMethod     = Some(DisposalMethod.Sold),
-          wasAUKResident     = Some(false)
+          individualUserType         = Some(IndividualUserType.Self),
+          hasConfirmedSingleDisposal = true,
+          disposalMethod             = Some(DisposalMethod.Sold),
+          wasAUKResident             = Some(false)
         )
 
       val (countryCode, countryName) = "HK" -> "Hong Kong"
@@ -1483,11 +1466,11 @@ class SingleDisposalsTriageControllerSpec
 
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
-          individualUserType = Some(sample[IndividualUserType]),
-          numberOfProperties = Some(NumberOfProperties.One),
-          disposalMethod     = Some(DisposalMethod.Sold),
-          wasAUKResident     = Some(false),
-          countryOfResidence = Some(sample[Country])
+          individualUserType         = Some(sample[IndividualUserType]),
+          hasConfirmedSingleDisposal = true,
+          disposalMethod             = Some(DisposalMethod.Sold),
+          wasAUKResident             = Some(false),
+          countryOfResidence         = Some(sample[Country])
         )
 
       def performAction(): Future[Result] = controller.assetTypeForNonUkResidents()(FakeRequest())
@@ -1537,11 +1520,11 @@ class SingleDisposalsTriageControllerSpec
 
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
-          individualUserType = Some(sample[IndividualUserType]),
-          numberOfProperties = Some(NumberOfProperties.One),
-          disposalMethod     = Some(DisposalMethod.Sold),
-          wasAUKResident     = Some(false),
-          countryOfResidence = Some(sample[Country])
+          individualUserType         = Some(sample[IndividualUserType]),
+          hasConfirmedSingleDisposal = true,
+          disposalMethod             = Some(DisposalMethod.Sold),
+          wasAUKResident             = Some(false),
+          countryOfResidence         = Some(sample[Country])
         )
 
       def performAction(formData: (String, String)*): Future[Result] =
@@ -1603,7 +1586,7 @@ class SingleDisposalsTriageControllerSpec
               List("assetTypeForNonUkResidents" -> "1"),
               IncompleteSingleDisposalTriageAnswers(
                 Some(completeAnswers.individualUserType),
-                Some(completeAnswers.numberOfProperties),
+                true,
                 Some(completeAnswers.disposalMethod),
                 Some(false),
                 Some(completeAnswers.countryOfResidence),
@@ -1628,7 +1611,7 @@ class SingleDisposalsTriageControllerSpec
               List("assetTypeForNonUkResidents" -> "2"),
               IncompleteSingleDisposalTriageAnswers(
                 Some(completeAnswers.individualUserType),
-                Some(completeAnswers.numberOfProperties),
+                true,
                 Some(completeAnswers.disposalMethod),
                 Some(false),
                 Some(completeAnswers.countryOfResidence),
@@ -1688,7 +1671,6 @@ class SingleDisposalsTriageControllerSpec
       val completeTriageQuestions =
         CompleteSingleDisposalTriageAnswers(
           IndividualUserType.Self,
-          NumberOfProperties.One,
           DisposalMethod.Sold,
           Country.uk,
           assetType = AssetType.Residential,
@@ -1698,7 +1680,7 @@ class SingleDisposalsTriageControllerSpec
 
       val allQuestionsAnswered = IncompleteSingleDisposalTriageAnswers(
         Some(completeTriageQuestions.individualUserType),
-        Some(completeTriageQuestions.numberOfProperties),
+        true,
         Some(completeTriageQuestions.disposalMethod),
         Some(true),
         None,
@@ -1714,7 +1696,7 @@ class SingleDisposalsTriageControllerSpec
           List(
             allQuestionsAnswered.copy(individualUserType = None) -> routes.InitialTriageQuestionsController
               .whoIsIndividualRepresenting(),
-            allQuestionsAnswered.copy(numberOfProperties = None) -> routes.InitialTriageQuestionsController
+            allQuestionsAnswered.copy(hasConfirmedSingleDisposal = false) -> routes.InitialTriageQuestionsController
               .howManyProperties(),
             allQuestionsAnswered.copy(disposalMethod = None) -> routes.SingleDisposalsTriageController
               .howDidYouDisposeOfProperty(),
@@ -1935,12 +1917,12 @@ class SingleDisposalsTriageControllerSpec
         controller.disposalDateTooEarly()(FakeRequest())
 
       val requiredPreviousAnswers = IncompleteSingleDisposalTriageAnswers.empty.copy(
-        individualUserType = Some(IndividualUserType.Self),
-        numberOfProperties = Some(NumberOfProperties.One),
-        disposalMethod     = Some(DisposalMethod.Sold),
-        wasAUKResident     = Some(true),
-        countryOfResidence = None,
-        assetType          = Some(AssetType.Residential)
+        individualUserType         = Some(IndividualUserType.Self),
+        hasConfirmedSingleDisposal = true,
+        disposalMethod             = Some(DisposalMethod.Sold),
+        wasAUKResident             = Some(true),
+        countryOfResidence         = None,
+        assetType                  = Some(AssetType.Residential)
       )
 
       "redirect to the check you answers page" when {
@@ -2153,7 +2135,8 @@ class SingleDisposalsTriageControllerSpec
     performAction: Seq[(String, String)] => Future[Result],
     currentAnswers: SingleDisposalTriageAnswers,
     formData: Seq[(String, String)],
-    updatedAnswers: SingleDisposalTriageAnswers
+    updatedAnswers: SingleDisposalTriageAnswers,
+    extraMockActions: () => Unit = () => ()
   ): Unit =
     "show an error page" when {
 
@@ -2163,6 +2146,7 @@ class SingleDisposalsTriageControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionDataWithStartingNewDraftReturn(currentAnswers))
+            extraMockActions()
             mockStoreSession(sessionDataWithStartingNewDraftReturn(updatedAnswers))(Left(Error("")))
           }
 
@@ -2182,6 +2166,7 @@ class SingleDisposalsTriageControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)))
+            extraMockActions()
             mockStoreDraftReturn(updatedDraftReturn)(Left(Error("")))
           }
 
@@ -2192,6 +2177,7 @@ class SingleDisposalsTriageControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)))
+            extraMockActions()
             mockStoreDraftReturn(updatedDraftReturn)(Right(()))
             mockStoreSession(SessionData.empty.copy(journeyStatus = Some(updatedFillingOutReturn)))(Left(Error("")))
           }
@@ -2208,11 +2194,13 @@ class SingleDisposalsTriageControllerSpec
     currentAnswers: SingleDisposalTriageAnswers,
     formData: Seq[(String, String)],
     updatedAnswers: SingleDisposalTriageAnswers,
-    checkNextResult: Future[Result] => Unit
+    checkNextResult: Future[Result] => Unit,
+    extraMockActions: () => Unit = () => ()
   ): Unit = {
     inSequence {
       mockAuthWithNoRetrievals()
       mockGetSession(sessionDataWithStartingNewDraftReturn(currentAnswers))
+      extraMockActions()
       mockStoreSession(sessionDataWithStartingNewDraftReturn(updatedAnswers))(Right(()))
     }
 
@@ -2224,7 +2212,8 @@ class SingleDisposalsTriageControllerSpec
     currentAnswers: SingleDisposalTriageAnswers,
     formData: Seq[(String, String)],
     updatedAnswers: SingleDisposalTriageAnswers,
-    checkNextResult: Future[Result] => Unit
+    checkNextResult: Future[Result] => Unit,
+    extraMockActions: () => Unit = () => ()
   ): Unit = {
     val draftReturn        = sample[DraftReturn].copy(triageAnswers = currentAnswers)
     val updatedDraftReturn = draftReturn.copy(triageAnswers         = updatedAnswers)
@@ -2235,6 +2224,7 @@ class SingleDisposalsTriageControllerSpec
     inSequence {
       mockAuthWithNoRetrievals()
       mockGetSession(SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)))
+      extraMockActions()
       mockStoreDraftReturn(updatedDraftReturn)(Right(()))
       mockStoreSession(SessionData.empty.copy(journeyStatus = Some(updatedFillingOutReturn)))(Right(()))
     }

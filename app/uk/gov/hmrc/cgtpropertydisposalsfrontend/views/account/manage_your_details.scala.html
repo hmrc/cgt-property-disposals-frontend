@@ -56,12 +56,12 @@
     @cyaRow(
       messages("account.manageYourDetails.subtitle"),
       Html(details.cgtReference.value),
-      None
+      None, "cgtReference"
     )
     @cyaRow(
       messages("account.manageYourDetails.accountName"),
       Html(fullName),
-      None
+      None, "accountName"
     )
   }
 
@@ -74,19 +74,22 @@
   @cyaRow(
     messages("subscription.cyaLabel.contactName"),
     Html(details.contactName.value),
-    Some(cyaChange(messages("subscription.cyaChange.contactName"), changeContactNameRoute))
+    Some(cyaChange(messages("subscription.cyaChange.contactName"), changeContactNameRoute)),
+      "contactName"
   )
 
   @cyaRow(
     messages("subscription.cyaLabel.email"),
     Html(details.emailAddress.value),
-    Some(cyaChange(messages("subscription.cyaChange.email"), routes.SubscribedChangeEmailController.enterEmail().url))
+    Some(cyaChange(messages("subscription.cyaChange.email"), routes.SubscribedChangeEmailController.enterEmail().url)),
+      "email"
    )
 
   @cyaRow(
    messages("subscription.cyaLabel.address"),
    addressDisplay(details.address, Block),
-   Some(cyaChange(messages("subscription.cyaChange.address"), routes.SubscribedChangeAddressController.isUk().url))
+   Some(cyaChange(messages("subscription.cyaChange.address"), routes.SubscribedChangeAddressController.isUk().url)),
+      "address"
   )
 
  }

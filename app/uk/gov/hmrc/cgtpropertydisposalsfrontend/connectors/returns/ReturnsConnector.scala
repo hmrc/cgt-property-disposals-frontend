@@ -21,11 +21,10 @@ import java.time.format.DateTimeFormatter
 
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import play.api.libs.json.JsValue
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, SubmitReturnRequest}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, DraftReturn, SubmitReturnRequest}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
@@ -52,9 +51,12 @@ trait ReturnsConnector {
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
-  def amendReturn(cgtReference: CgtReference, amendedReturn: JsValue)(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, HttpResponse]
+  def calculateTaxDue(
+    request: CalculateCgtTaxDueRequest
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
+
+  def taxYear(date: LocalDate)(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
+
 }
 
 @Singleton
@@ -69,6 +71,8 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
   def getDraftReturnsUrl(cgtReference: CgtReference): String = s"$baseUrl/draft-returns/${cgtReference.value}"
 
   val submitReturnUrl: String = s"$baseUrl/return"
+
+  val calculateCgtTaxDueUrl: String = s"$baseUrl/calculate-tax-due"
 
   override def storeDraftReturn(
     draftReturn: DraftReturn
@@ -133,18 +137,25 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
     )
   }
 
-  def amendReturn(cgtReference: CgtReference, amendedReturn: JsValue)(
-    implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, HttpResponse] = {
-    val amendReturnUrl: String = s"$baseUrl/amend-return/${cgtReference.value}"
-
+  def calculateTaxDue(
+    request: CalculateCgtTaxDueRequest
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
     EitherT[Future, Error, HttpResponse](
       http
-        .post(amendReturnUrl, amendedReturn)
+        .post(calculateCgtTaxDueUrl, request)
+        .map(Right(_))
+        .recover {
+          case NonFatal(e) => Left(Error(e))
+        }
+    )
+
+  def taxYear(date: LocalDate)(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
+    EitherT[Future, Error, HttpResponse](
+      http
+        .get(s"$baseUrl/tax-year/${date.format(dateFormatter)}")
         .map(Right(_))
         .recover { case e => Left(Error(e)) }
     )
-  }
 
   private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ISO_DATE
 

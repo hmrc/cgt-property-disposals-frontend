@@ -17,6 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import play.api.http.Status.BAD_REQUEST
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -28,10 +29,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingNewDraftReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, MultipleDisposalsTriageAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.IncompleteMultipleDisposalsAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.Self
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, _}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{IncompleteMultipleDisposalsAnswers, _}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 
 import scala.concurrent.Future
@@ -64,8 +67,45 @@ class MultipleDisposalsTriageControllerSpec
     val startingNewDraftReturn = sample[StartingNewDraftReturn].copy(
       newReturnTriageAnswers = Left(multipleDisposalsAnswers)
     )
-
     SessionData.empty.copy(journeyStatus = Some(startingNewDraftReturn)) -> startingNewDraftReturn
+  }
+
+  def sessionWithState(answers: IncompleteMultipleDisposalsAnswers, numberOfProperties: Int): SessionData = {
+    val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+    session.copy(journeyStatus = Some(
+      journey.copy(
+        newReturnTriageAnswers = Left(answers.copy(numberOfProperties = Some(numberOfProperties)))
+      )
+    )
+    )
+  }
+
+  def testFormError(
+    data: (String, String)*
+  )(
+    numberOfProperties: Int
+  )(expectedErrorMessageKey: String, errorArgs: String*)(pageTitleKey: String, titleArgs: String*)(
+    performAction: Seq[(String, String)] => Future[Result],
+    currentSession: SessionData = sessionWithState(
+      sample[IncompleteMultipleDisposalsAnswers],
+      numberOfProperties
+    )
+  ): Unit = {
+    inSequence {
+      mockAuthWithNoRetrievals()
+      mockGetSession(currentSession)
+    }
+
+    checkPageIsDisplayed(
+      performAction(data),
+      messageFromMessageKey(pageTitleKey, titleArgs), { doc =>
+        doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+          expectedErrorMessageKey,
+          errorArgs: _*
+        )
+      },
+      BAD_REQUEST
+    )
   }
 
   "MultipleDisposalsTriageController" when {
@@ -107,15 +147,194 @@ class MultipleDisposalsTriageControllerSpec
 
       behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
 
-      "show a dummy page" in {
+      "redirect to how many disposals page" in {
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsAnswers.empty)._1)
         }
+        checkIsRedirect(performAction(), routes.MultipleDisposalsTriageController.howManyDisposals())
+      }
+
+    }
+
+    "handling requests to display the how many disposals page" must {
+
+      def performAction(): Future[Result] =
+        controller.howManyDisposals()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
+
+      "display the page" in {
+        mockAuthWithNoRetrievals()
+        mockGetSession(sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsAnswers.empty)._1)
+
+        checkPageIsDisplayed(
+          performAction,
+          messageFromMessageKey("multiple-disposals.howManyProperties.title"), { doc =>
+            doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
+              .guidance()
+              .url
+            doc
+              .select("#content > article > form")
+              .attr("action") shouldBe routes.MultipleDisposalsTriageController
+              .howManyDisposalsSubmit()
+              .url
+          }
+        )
+
+      }
+
+    }
+
+    "handling submits on the how many disposals page" must {
+
+      def performAction(data: (String, String)*): Future[Result] =
+        controller.howManyDisposalsSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
+
+      "redirect to disposal method when user enters number of properties as one" in {
+        val (session, journey) = sessionDataWithStartingNewDraftReturn(
+          IncompleteMultipleDisposalsAnswers.empty.copy(
+            individualUserType = Some(Self)
+          )
+        )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(session)
+          mockStoreSession(
+            session.copy(journeyStatus = Some(
+              journey.copy(
+                newReturnTriageAnswers = Right(
+                  IncompleteSingleDisposalTriageAnswers.empty.copy(
+                    individualUserType         = Some(Self),
+                    hasConfirmedSingleDisposal = true
+                  )
+                )
+              )
+            )
+            )
+          )(Right(()))
+        }
+
+        checkIsRedirect(
+          performAction("numberOfProperties" -> "1"),
+          routes.SingleDisposalsTriageController.checkYourAnswers()
+        )
+
+      }
+
+      "user has not answered how many disposals section and " +
+        "redirect to dummy page when user enters number of properties more than one" in {
+        val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
+          individualUserType = Some(Self)
+        )
+        val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(session)
+          mockStoreSession(
+            session.copy(journeyStatus = Some(
+              journey.copy(
+                newReturnTriageAnswers = Left(answers.copy(numberOfProperties = Some(5)))
+              )
+            )
+            )
+          )(Right(()))
+        }
+
+        checkIsRedirect(
+          performAction("numberOfProperties" -> "5"),
+          routes.MultipleDisposalsTriageController.checkYourAnswers()
+        )
+      }
+
+      "user has not answered how many disposals section and " +
+        "redirect to dummy page when user enters number of properties value which is moreThanOne" in {
+        val answers = sample[CompleteMultipleDisposalsAnswers]
+
+        val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(session)
+          mockStoreSession(
+            session.copy(journeyStatus = Some(
+              journey.copy(
+                newReturnTriageAnswers = Left(answers.copy(numberOfProperties = 5))
+              )
+            )
+            )
+          )(Right(()))
+        }
+
+        checkIsRedirect(
+          performAction("numberOfProperties" -> "5"),
+          routes.MultipleDisposalsTriageController.checkYourAnswers()
+        )
+      }
+
+      "user has already answered how many disposals section and " +
+        "redirect to dummy page when user re-enters different number of properties value which is moreThanOne" in {
+        val answers = sample[CompleteMultipleDisposalsAnswers].copy(numberOfProperties = 9)
+
+        val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(session)
+          mockStoreSession(
+            session.copy(journeyStatus = Some(
+              journey.copy(
+                newReturnTriageAnswers = Left(answers.copy(numberOfProperties = 3))
+              )
+            )
+            )
+          )(Right(()))
+        }
+
+        checkIsRedirect(
+          performAction("numberOfProperties" -> "3"),
+          routes.MultipleDisposalsTriageController.checkYourAnswers()
+        )
+      }
+
+      "user has  not answered how many disposals section and " +
+        "submit request without entering numberOfProperties value" in {
+        val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
+          individualUserType = Some(Self)
+        )
+        val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(session)
+        }
 
         val result = performAction()
-        status(result)          shouldBe OK
-        contentAsString(result) shouldBe "not implemented yet"
+        status(result) shouldBe BAD_REQUEST
+      }
+
+      "display form error when user enters numberOfProperties value <= 0" in {
+
+        def test(data: (String, String)*)(expectedErrorMessageKey: String) =
+          testFormError(data: _*)(-5)(expectedErrorMessageKey)("multiple-disposals.howManyProperties.title")(
+            performAction
+          )
+
+        test("numberOfProperties" -> "-5")("numberOfProperties.error.tooSmall")
+
+      }
+
+      "display form error when user enters numberOfProperties value > 999" in {
+
+        def test(data: (String, String)*)(expectedErrorMessageKey: String) =
+          testFormError(data: _*)(1000)(expectedErrorMessageKey)("multiple-disposals.howManyProperties.title")(
+            performAction
+          )
+
+        test("numberOfProperties" -> "1000")("numberOfProperties.error.tooLong")
+
       }
 
     }

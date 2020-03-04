@@ -64,7 +64,12 @@ class CheckAllAnswersAndSubmitController @Inject() (
     withCompleteDraftReturn(request) {
       case (_, fillingOutReturn, completeReturn) =>
         val submittedReturnRequest =
-          SubmitReturnRequest(completeReturn, fillingOutReturn.subscribedDetails, fillingOutReturn.agentReferenceNumber)
+          SubmitReturnRequest(
+            completeReturn,
+            fillingOutReturn.draftReturn.id,
+            fillingOutReturn.subscribedDetails,
+            fillingOutReturn.agentReferenceNumber
+          )
         val result =
           for {
             response <- returnsService.submitReturn(submittedReturnRequest)

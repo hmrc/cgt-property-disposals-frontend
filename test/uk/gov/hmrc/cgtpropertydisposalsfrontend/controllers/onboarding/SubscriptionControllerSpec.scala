@@ -151,7 +151,8 @@ class SubscriptionControllerSpec
       )
 
       val sessionWithSubscriptionComplete =
-        SessionData.empty.copy(journeyStatus = Some(Subscribed(accountDetails, ggCredId, None, List.empty, List.empty)))
+        SessionData.empty
+          .copy(journeyStatus = Some(Subscribed(accountDetails, ggCredId, None, List.empty, List.empty)))
 
       behave like redirectToStart(performAction)
 

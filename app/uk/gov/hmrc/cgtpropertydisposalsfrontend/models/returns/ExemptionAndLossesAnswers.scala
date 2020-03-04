@@ -18,7 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import julienrf.json.derived
 import play.api.libs.json.OFormat
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AmountInPence
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
 sealed trait ExemptionAndLossesAnswers extends Product with Serializable
 

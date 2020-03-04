@@ -19,6 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.either._
+import cats.syntax.eq._
 import com.google.inject.Inject
 import play.api.Configuration
 import play.api.data.Form
@@ -127,11 +128,12 @@ class InitialTriageQuestionsController @Inject() (
   def howManyProperties(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withState(request) {
       case (_, state) =>
-        val form = getNumberOfProperties(state).fold(numberOfPropertiesForm)(numberOfPropertiesForm.fill)
+        val form =
+          getNumberOfProperties(state).fold(numberOfPropertiesForm)(numberOfPropertiesForm.fill)
         Ok(
           howManyPropertiesPage(
             form,
-            routes.InitialTriageQuestionsController.whoIsIndividualRepresenting(),
+            howManyPropertiesBackLink(state),
             state.isRight
           )
         )
@@ -154,7 +156,7 @@ class InitialTriageQuestionsController @Inject() (
               BadRequest(
                 howManyPropertiesPage(
                   formWithErrors,
-                  routes.InitialTriageQuestionsController.whoIsIndividualRepresenting(),
+                  howManyPropertiesBackLink(state),
                   state.isRight
                 )
               ), { numberOfProperties =>
@@ -186,6 +188,18 @@ class InitialTriageQuestionsController @Inject() (
     }
   }
 
+  private def howManyPropertiesBackLink(state: Either[StartingNewDraftReturn, FillingOutReturn]): Call =
+    triageAnswersFomState(state).fold(
+      _.fold(
+        _ => routes.InitialTriageQuestionsController.whoIsIndividualRepresenting(),
+        _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
+      ),
+      _.fold(
+        _ => routes.InitialTriageQuestionsController.whoIsIndividualRepresenting(),
+        _ => routes.SingleDisposalsTriageController.checkYourAnswers()
+      )
+    )
+
   private def updateNumberOfProperties(
     state: Either[StartingNewDraftReturn, FillingOutReturn],
     numberOfProperties: NumberOfProperties
@@ -195,8 +209,8 @@ class InitialTriageQuestionsController @Inject() (
       case NumberOfProperties.One =>
         val newTriageAnswers =
           IncompleteSingleDisposalTriageAnswers.empty.copy(
-            individualUserType = individualUserType,
-            numberOfProperties = Some(numberOfProperties)
+            individualUserType         = individualUserType,
+            hasConfirmedSingleDisposal = true
           )
 
         state.bimap(
@@ -274,15 +288,18 @@ class InitialTriageQuestionsController @Inject() (
   private def getNumberOfProperties(
     state: Either[StartingNewDraftReturn, FillingOutReturn]
   ): Option[NumberOfProperties] =
-    state
-      .bimap(
-        _.newReturnTriageAnswers.fold(
-          _ => Some(NumberOfProperties.MoreThanOne),
-          _.fold(_.numberOfProperties, _ => Some(NumberOfProperties.One))
-        ),
-        _ => Some(NumberOfProperties.One)
-      )
-      .merge
+    state.fold(
+      _.newReturnTriageAnswers.fold(
+        _ => Some(NumberOfProperties.MoreThanOne),
+        _.fold(
+          incomplete =>
+            if (incomplete.hasConfirmedSingleDisposal) Some(NumberOfProperties.One)
+            else None,
+          _ => Some(NumberOfProperties.One)
+        )
+      ),
+      _ => Some(NumberOfProperties.One)
+    )
 
   private def triageAnswersFomState(
     state: Either[StartingNewDraftReturn, FillingOutReturn]

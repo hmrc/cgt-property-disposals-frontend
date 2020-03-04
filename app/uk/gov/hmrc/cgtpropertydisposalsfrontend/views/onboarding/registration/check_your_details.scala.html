@@ -56,22 +56,26 @@
   @cyaRow(
     messages("registration.cyaLabel.firstName"),
     Html(details.name.firstName),
-    Some(cyaChange(messages("registration.cyaChange.firstName"), name.routes.RegistrationChangeIndividualNameController.enterIndividualName().url))
+    Some(cyaChange(messages("registration.cyaChange.firstName"), name.routes.RegistrationChangeIndividualNameController.enterIndividualName().url)),
+      "firstName"
   )
     @cyaRow(
     messages("registration.cyaLabel.lastName"),
     Html(details.name.lastName),
-    Some(cyaChange(messages("registration.cyaChange.lastName"), name.routes.RegistrationChangeIndividualNameController.enterIndividualName().url))
+    Some(cyaChange(messages("registration.cyaChange.lastName"), name.routes.RegistrationChangeIndividualNameController.enterIndividualName().url)),
+        "lastName"
   )
   @cyaRow(
    messages("registration.cyaLabel.address"),
    addressDisplay(details.address, Block),
-   Some(cyaChange(messages("registration.cyaChange.address"), address.routes.RegistrationChangeAddressController.isUk().url))
+   Some(cyaChange(messages("registration.cyaChange.address"), address.routes.RegistrationChangeAddressController.isUk().url)),
+      "address"
   )
   @cyaRow(
     messages("registration.cyaLabel.email"),
     Html(details.emailAddress.value),
-    Some(cyaChange(messages("registration.cyaChange.email"), email.routes.RegistrationChangeEmailController.enterEmail().url))
+    Some(cyaChange(messages("registration.cyaChange.email"), email.routes.RegistrationChangeEmailController.enterEmail().url)),
+      "email"
    )
  }
 

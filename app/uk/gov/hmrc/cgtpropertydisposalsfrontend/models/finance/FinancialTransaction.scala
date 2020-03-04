@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.{Format, Json}
 
-final case class PaymentsJourney(nextUrl: String, journeyId: String)
+final case class FinancialTransaction(
+  chargeReference: String,
+  originalAmount: AmountInPence,
+  outstandingAmount: AmountInPence,
+  payments: List[Payment]
+)
 
-object PaymentsJourney {
+object FinancialTransaction {
 
-  implicit val format: OFormat[PaymentsJourney] = Json.format
+  implicit val format: Format[FinancialTransaction] = Json.format
 
 }

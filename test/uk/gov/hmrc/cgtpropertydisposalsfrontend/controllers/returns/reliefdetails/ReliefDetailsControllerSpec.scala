@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails
 
+import org.jsoup.nodes.Document
+import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
 import play.api.inject.bind
@@ -31,11 +33,13 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServi
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.{NoOtherReliefs, OtherReliefs}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, ExemptionAndLossesAnswers, OtherReliefsOption, ReliefDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, Error, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 
@@ -1339,4 +1343,13 @@ class ReliefDetailsControllerSpec
     checkIsRedirect(result, routes.ReliefDetailsController.checkYourAnswers())
   }
 
+}
+
+object ReliefDetailsControllerSpec extends Matchers {
+  def validateReliefDetailsCheckYourAnswersPage(
+    reliefDetailsAnswers: CompleteReliefDetailsAnswers,
+    doc: Document
+  )(implicit messages: MessagesApi, lang: Lang): Unit = {
+    // TODO Implement checks
+  }
 }

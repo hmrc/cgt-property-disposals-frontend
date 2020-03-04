@@ -23,30 +23,28 @@ import cats.instances.future._
 import cats.syntax.either._
 import cats.syntax.order._
 import com.google.inject.{Inject, Singleton}
-import configs.syntax._
 import play.api.Configuration
-import play.api.data.Forms.{mapping, of}
 import play.api.data.Form
+import play.api.data.Forms.{mapping, of}
 import play.api.http.Writeable
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => homeRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => returnsRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.{configs, order}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{IndirectDisposal, MixedUse, NonResidential, Residential}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalMethod.{Gifted, Sold}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, FormUtils, LocalDateUtils, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{ReturnsService, TaxYearService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.{singledisposals => triagePages}
@@ -62,6 +60,7 @@ class SingleDisposalsTriageController @Inject() (
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
   returnsService: ReturnsService,
+  taxYearService: TaxYearService,
   uuidGenerator: UUIDGenerator,
   cc: MessagesControllerComponents,
   val config: Configuration,
@@ -83,12 +82,9 @@ class SingleDisposalsTriageController @Inject() (
 
   import SingleDisposalsTriageController._
 
-  val taxYears: List[TaxYear] =
-    config.underlying.get[List[TaxYear]]("tax-years").value
-
   def howDidYouDisposeOfProperty(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     displayTriagePage(
-      _.fold(_.numberOfProperties, c => Some(c.numberOfProperties)),
+      _.fold(incomplete => if (incomplete.hasConfirmedSingleDisposal) Some(()) else None, _ => Some(())),
       _ => routes.InitialTriageQuestionsController.howManyProperties()
     )(_ => disposalMethodForm)(
       extractField = _.fold(_.disposalMethod, c => Some(c.disposalMethod)),
@@ -106,7 +102,7 @@ class SingleDisposalsTriageController @Inject() (
   def howDidYouDisposeOfPropertySubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
       handleTriagePageSubmit(
-        _.fold(_.numberOfProperties, c => Some(c.numberOfProperties)),
+        _.fold(incomplete => if (incomplete.hasConfirmedSingleDisposal) Some(()) else None, _ => Some(())),
         _ => routes.InitialTriageQuestionsController.howManyProperties()
       )(_ => disposalMethodForm)(
         page = {
@@ -168,7 +164,7 @@ class SingleDisposalsTriageController @Inject() (
               complete =>
                 IncompleteSingleDisposalTriageAnswers(
                   Some(complete.individualUserType),
-                  Some(complete.numberOfProperties),
+                  true,
                   Some(complete.disposalMethod),
                   Some(wasAUKResident),
                   None,
@@ -254,7 +250,7 @@ class SingleDisposalsTriageController @Inject() (
     displayTriagePage(
       _.fold(_.assetType, c => Some(c.assetType)),
       answers => disposalDateBackLink(answers)
-    )(_ => disposalDateForm(LocalDateUtils.today(), taxYears))(
+    )(_ => disposalDateForm(LocalDateUtils.today()))(
       extractField =
         _.fold(i => i.disposalDate.map(_.value).orElse(i.tooEarlyDisposalDate), c => Some(c.disposalDate.value)),
       page = {
@@ -270,60 +266,96 @@ class SingleDisposalsTriageController @Inject() (
   }
 
   def whenWasDisposalDateSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    def taxYear(d: LocalDate): Option[TaxYear] =
-      taxYears.find(t => d < t.endDateExclusive && d >= (t.startDateInclusive))
+    withSingleDisposalTriageAnswers(request) {
+      case (_, state, triageAnswers) =>
+        triageAnswers.fold(_.assetType, c => Some(c.assetType)) match {
+          case None => Redirect(disposalDateBackLink(triageAnswers))
+          case Some(assetType) =>
+            disposalDateForm(LocalDateUtils.today())
+              .bindFromRequest()
+              .fold(
+                formWithErrors =>
+                  BadRequest(
+                    disposalDatePage(
+                      formWithErrors,
+                      disposalDateBackLink(triageAnswers),
+                      state.isRight,
+                      assetType
+                    )
+                  ), { date =>
+                  val result = triageAnswers.fold(_.disposalDate, c => Some(c.disposalDate)) match {
+                    case Some(existingDisposalDate) if (existingDisposalDate.value === date) =>
+                      EitherT.pure(Some(existingDisposalDate.taxYear))
+                    case _ =>
+                      for {
+                        taxYear <- taxYearService.taxYear(date)
+                        updatedAnswers = updateDisposalDate(date, taxYear, triageAnswers)
+                        oldJourneyStatusWithNewJourneyStatus = state.bimap(
+                          s => s -> s.copy(newReturnTriageAnswers = Right(updatedAnswers)),
+                          r => r -> r.copy(draftReturn            = r.draftReturn.copy(triageAnswers = updatedAnswers))
+                        )
+                        _ <- oldJourneyStatusWithNewJourneyStatus.fold(
+                              _ => EitherT.pure(()), {
+                                case (oldJourneyStatus, updatedJourneyStatus) =>
+                                  if (updatedJourneyStatus.draftReturn === oldJourneyStatus.draftReturn)
+                                    EitherT.pure(())
+                                  else returnsService.storeDraftReturn(updatedJourneyStatus.draftReturn)
+                              }
+                            )
+                        _ <- EitherT(
+                              updateSession(sessionStore, request)(
+                                _.copy(journeyStatus =
+                                  Some(oldJourneyStatusWithNewJourneyStatus.bimap(_._2, _._2).merge)
+                                )
+                              )
+                            )
+                      } yield taxYear
+                  }
 
-    handleTriagePageSubmit(
-      _.fold(_.assetType, c => Some(c.assetType)),
-      answers => disposalDateBackLink(answers)
-    )(_ => disposalDateForm(LocalDateUtils.today(), taxYears))(
-      page = {
-        case (currentState, form, isDraftReturn, assetType) =>
-          disposalDatePage(
-            form,
-            disposalDateBackLink(currentState),
-            isDraftReturn,
-            assetType
-          )
-      },
-      updateState = {
-        case (d, answers) =>
-          def updateCompleteAnswers(
-            c: CompleteSingleDisposalTriageAnswers,
-            date: Either[LocalDate, DisposalDate]
-          ): IncompleteSingleDisposalTriageAnswers =
-            IncompleteSingleDisposalTriageAnswers(
-              Some(c.individualUserType),
-              Some(c.numberOfProperties),
-              Some(c.disposalMethod),
-              Some(c.countryOfResidence.isUk()),
-              if (c.countryOfResidence.isUk()) None else Some(c.countryOfResidence),
-              Some(c.assetType),
-              date.toOption,
-              None,
-              date.swap.toOption
-            )
-
-          taxYear(d).fold {
-            answers.fold(
-              _.copy(disposalDate = None, tooEarlyDisposalDate = Some(d)),
-              updateCompleteAnswers(_, Left(d))
-            )
-          } { taxYear =>
-            answers.fold(
-              _.copy(disposalDate = Some(DisposalDate(d, taxYear)), tooEarlyDisposalDate = None),
-              updateCompleteAnswers(_, Right(DisposalDate(d, taxYear)))
-            )
-          }
-      },
-      nextResult = { (d, _) =>
-        if (taxYear(d).isEmpty) {
-          Redirect(routes.SingleDisposalsTriageController.disposalDateTooEarly())
-        } else {
-          Redirect(routes.SingleDisposalsTriageController.checkYourAnswers())
+                  result.fold(
+                    { e =>
+                      logger.warn("Could not update session", e)
+                      errorHandler.errorResult()
+                    },
+                    taxYear =>
+                      if (taxYear.isEmpty)
+                        Redirect(routes.SingleDisposalsTriageController.disposalDateTooEarly())
+                      else
+                        Redirect(routes.SingleDisposalsTriageController.checkYourAnswers())
+                  )
+                }
+              )
         }
-      }
-    )
+    }
+  }
+
+  private def updateDisposalDate(d: LocalDate, taxYear: Option[TaxYear], answers: SingleDisposalTriageAnswers) = {
+    def updateCompleteAnswers(
+      c: CompleteSingleDisposalTriageAnswers,
+      date: Either[LocalDate, DisposalDate]
+    ): IncompleteSingleDisposalTriageAnswers =
+      IncompleteSingleDisposalTriageAnswers(
+        Some(c.individualUserType),
+        true,
+        Some(c.disposalMethod),
+        Some(c.countryOfResidence.isUk()),
+        if (c.countryOfResidence.isUk()) None else Some(c.countryOfResidence),
+        Some(c.assetType),
+        date.toOption,
+        None,
+        date.swap.toOption
+      )
+    taxYear.fold {
+      answers.fold(
+        _.copy(disposalDate = None, tooEarlyDisposalDate = Some(d)),
+        updateCompleteAnswers(_, Left(d))
+      )
+    } { taxYear =>
+      answers.fold(
+        _.copy(disposalDate = Some(DisposalDate(d, taxYear)), tooEarlyDisposalDate = None),
+        updateCompleteAnswers(_, Right(DisposalDate(d, taxYear)))
+      )
+    }
   }
 
   def whenWasCompletionDate(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
@@ -442,7 +474,7 @@ class SingleDisposalsTriageController @Inject() (
                 c =>
                   IncompleteSingleDisposalTriageAnswers(
                     Some(c.individualUserType),
-                    Some(c.numberOfProperties),
+                    true,
                     Some(c.disposalMethod),
                     Some(false),
                     Some(c.countryOfResidence),
@@ -485,7 +517,7 @@ class SingleDisposalsTriageController @Inject() (
           case IncompleteSingleDisposalTriageAnswers(None, _, _, _, _, _, _, _, _) =>
             Redirect(routes.InitialTriageQuestionsController.whoIsIndividualRepresenting())
 
-          case IncompleteSingleDisposalTriageAnswers(_, None, _, _, _, _, _, _, _) =>
+          case IncompleteSingleDisposalTriageAnswers(_, false, _, _, _, _, _, _, _) =>
             Redirect(routes.InitialTriageQuestionsController.howManyProperties())
 
           case IncompleteSingleDisposalTriageAnswers(_, _, None, _, _, _, _, _, _) =>
@@ -514,7 +546,7 @@ class SingleDisposalsTriageController @Inject() (
 
           case IncompleteSingleDisposalTriageAnswers(
               Some(t),
-              Some(n),
+              true,
               Some(m),
               Some(true),
               _,
@@ -525,13 +557,13 @@ class SingleDisposalsTriageController @Inject() (
               ) =>
             updateAnswersAndShowCheckYourAnswersPage(
               state,
-              CompleteSingleDisposalTriageAnswers(t, n, m, Country.uk, r, d, c),
+              CompleteSingleDisposalTriageAnswers(t, m, Country.uk, r, d, c),
               displayReturnToSummaryLink
             )
 
           case IncompleteSingleDisposalTriageAnswers(
               Some(t),
-              Some(n),
+              true,
               Some(m),
               Some(false),
               Some(country),
@@ -542,7 +574,7 @@ class SingleDisposalsTriageController @Inject() (
               ) =>
             updateAnswersAndShowCheckYourAnswersPage(
               state,
-              CompleteSingleDisposalTriageAnswers(t, n, m, country, r, d, c),
+              CompleteSingleDisposalTriageAnswers(t, m, country, r, d, c),
               displayReturnToSummaryLink
             )
         }
@@ -757,7 +789,7 @@ object SingleDisposalsTriageController {
     )(identity)(Some(_))
   )
 
-  def disposalDateForm(maximumDateInclusive: LocalDate, taxYears: List[TaxYear]): Form[LocalDate] =
+  def disposalDateForm(maximumDateInclusive: LocalDate): Form[LocalDate] =
     Form(
       mapping(
         "" -> of(

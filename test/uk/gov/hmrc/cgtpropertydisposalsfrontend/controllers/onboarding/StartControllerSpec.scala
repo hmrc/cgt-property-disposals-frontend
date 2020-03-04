@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding
 
-import java.time.LocalDate
-
 import cats.data.EitherT
 import cats.instances.future._
 import org.joda.time.{LocalDate => JodaLocalDate}
@@ -52,12 +50,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPa
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, BusinessPartnerRecordResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{NeedMoreDetailsDetails, SubscribedDetails, SubscriptionDetails}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, ReturnSummary}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftReturn, ReturnSummary}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPartnerRecordService, SubscriptionService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.ListReturnsResponse
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -1460,11 +1457,19 @@ class StartControllerSpec
 
         val draftReturns = List(sample[DraftReturn])
 
-        val sentReturns = sample[ListReturnsResponse].returns
+        val sentReturns = List(sample[ReturnSummary])
 
         val sessionWithSubscribed = SessionData.empty.copy(
-          userType      = Some(UserType.Individual),
-          journeyStatus = Some(Subscribed(subscribedDetails, ggCredId, None, draftReturns, sentReturns))
+          userType = Some(UserType.Individual),
+          journeyStatus = Some(
+            Subscribed(
+              subscribedDetails,
+              ggCredId,
+              None,
+              draftReturns,
+              sentReturns
+            )
+          )
         )
 
         "the session data indicates they have subscribed" must {
@@ -1873,7 +1878,8 @@ class StartControllerSpec
                     sample[SubscribedDetails],
                     sample[GGCredId],
                     None,
-                    JsString("")
+                    sample[CompleteReturn],
+                    sample[ReturnSummary]
                   )
                 )
               )

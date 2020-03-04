@@ -31,6 +31,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{Subscri
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FinancialDataService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
@@ -41,6 +42,7 @@ import scala.concurrent.ExecutionContext
 @Singleton
 class SubscriptionController @Inject() (
   subscriptionService: SubscriptionService,
+  financialDataService: FinancialDataService,
   sessionStore: SessionStore,
   errorHandler: ErrorHandler,
   cc: MessagesControllerComponents,

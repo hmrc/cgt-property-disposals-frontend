@@ -23,15 +23,20 @@ sealed trait MultipleDisposalsTriageAnswers
 
 object MultipleDisposalsTriageAnswers {
 
-  final case class IncompleteMultipleDisposalsAnswers(individualUserType: Option[IndividualUserType])
-      extends MultipleDisposalsTriageAnswers
+  final case class IncompleteMultipleDisposalsAnswers(
+    individualUserType: Option[IndividualUserType],
+    numberOfProperties: Option[Int]
+  ) extends MultipleDisposalsTriageAnswers
 
   object IncompleteMultipleDisposalsAnswers {
-    val empty: IncompleteMultipleDisposalsAnswers = IncompleteMultipleDisposalsAnswers(None)
+    val empty: IncompleteMultipleDisposalsAnswers =
+      IncompleteMultipleDisposalsAnswers(None, None)
   }
 
-  final case class CompleteMultipleDisposalsAnswers(individualUserType: IndividualUserType)
-      extends MultipleDisposalsTriageAnswers
+  final case class CompleteMultipleDisposalsAnswers(
+    individualUserType: IndividualUserType,
+    numberOfProperties: Int
+  ) extends MultipleDisposalsTriageAnswers
 
   implicit class MultipleDisposalsTriageAnswersOps(private val m: MultipleDisposalsTriageAnswers) extends AnyVal {
     def fold[A](

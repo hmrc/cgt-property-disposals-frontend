@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.agents
 
-import java.time.LocalDate
-
 import cats.data.EitherT
 import cats.instances.future._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -44,12 +42,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifi
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, ReturnSummary}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.agents.AgentVerifierMatchRetryStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.ListReturnsResponse
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -993,7 +990,7 @@ class AgentAccessControllerSpec
 
       val draftReturns = List(sample[DraftReturn])
 
-      val returnsList = sample[ListReturnsResponse].returns
+      val returnsList = List(sample[ReturnSummary])
 
       behave like redirectToStartWhenInvalidJourney(
         performAction, {
@@ -1065,7 +1062,13 @@ class AgentAccessControllerSpec
             mockStoreSession(
               SessionData.empty
                 .copy(journeyStatus = Some(
-                  Subscribed(ukClientDetails, agentGGCredId, Some(agentReferenceNumber), draftReturns, returnsList)
+                  Subscribed(
+                    ukClientDetails,
+                    agentGGCredId,
+                    Some(agentReferenceNumber),
+                    draftReturns,
+                    returnsList
+                  )
                 )
                 )
             )(Left(Error("")))
@@ -1086,8 +1089,15 @@ class AgentAccessControllerSpec
             mockGetReturnsList(ukClientDetails.cgtReference)(Right(returnsList))
             mockStoreSession(
               SessionData.empty.copy(
-                journeyStatus =
-                  Some(Subscribed(clientDetails, agentGGCredId, Some(agentReferenceNumber), draftReturns, returnsList))
+                journeyStatus = Some(
+                  Subscribed(
+                    clientDetails,
+                    agentGGCredId,
+                    Some(agentReferenceNumber),
+                    draftReturns,
+                    returnsList
+                  )
+                )
               )
             )(Right(()))
           }

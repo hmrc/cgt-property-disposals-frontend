@@ -16,9 +16,11 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses
 
+import org.jsoup.nodes.Document
+import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.http.Status.BAD_REQUEST
-import play.api.i18n.MessagesApi
+import play.api.i18n.{Lang, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, Result}
@@ -34,6 +36,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLosse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.OtherReliefs
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -1671,5 +1674,14 @@ class ExemptionAndLossesControllerSpec
     }
 
     checkIsRedirect(result, routes.ExemptionAndLossesController.checkYourAnswers())
+  }
+}
+
+object ExemptionAndLossesControllerSpec extends Matchers {
+  def validateExemptionAndLossesCheckYourAnswersPage(
+    completeExemptionAndLossesAnswers: CompleteExemptionAndLossesAnswers,
+    doc: Document
+  )(implicit messages: MessagesApi, lang: Lang): Unit = {
+    // TODO Implement checks
   }
 }

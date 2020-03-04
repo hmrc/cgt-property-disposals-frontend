@@ -18,6 +18,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisition
 
 import java.time.LocalDate
 
+import org.jsoup.nodes.Document
+import org.scalatest.{Matchers, WordSpec}
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.http.Status.BAD_REQUEST
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
@@ -27,18 +29,22 @@ import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates.ukResidents
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios.amountOfMoneyErrorScenarios
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DateErrorScenarios._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.AcquisitionDetailsControllerSpec.validateAcquisitionDetailsCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, Error, LocalDateUtils, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 
@@ -738,7 +744,7 @@ class AcquisitionDetailsControllerSpec
 
         "when the user was a uk resident and is disposing of a residential property and " when {
 
-          behave like rebasingCriteriaTests(AssetType.Residential, true, RebasingCutoffDates.ukResidents)
+          behave like rebasingCriteriaTests(AssetType.Residential, true, ukResidents)
 
         }
 
@@ -1052,7 +1058,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[CompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = AcquisitionDate(RebasingCutoffDates.ukResidents)
+                  acquisitionDate = AcquisitionDate(ukResidents)
                 ),
                 AssetType.Residential,
                 true
@@ -1086,7 +1092,7 @@ class AcquisitionDetailsControllerSpec
             performAction(),
             messageFromMessageKey(
               "rebaseAcquisitionPrice.title",
-              LocalDateUtils.govDisplayFormat(RebasingCutoffDates.ukResidents)
+              LocalDateUtils.govDisplayFormat(ukResidents)
             ), { doc =>
               doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.acquisitionPrice().url
               doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
@@ -1112,7 +1118,7 @@ class AcquisitionDetailsControllerSpec
             performAction(),
             messageFromMessageKey(
               "rebaseAcquisitionPrice.title",
-              LocalDateUtils.govDisplayFormat(RebasingCutoffDates.ukResidents)
+              LocalDateUtils.govDisplayFormat(ukResidents)
             ), { doc =>
               doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.checkYourAnswers().url
               doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
@@ -1141,7 +1147,7 @@ class AcquisitionDetailsControllerSpec
             performAction(),
             messageFromMessageKey(
               "rebaseAcquisitionPrice.title",
-              LocalDateUtils.govDisplayFormat(RebasingCutoffDates.ukResidents)
+              LocalDateUtils.govDisplayFormat(ukResidents)
             ), { doc =>
               doc.select("#rebaseAcquisitionPrice-1").attr("checked") shouldBe "checked"
             }
@@ -1167,7 +1173,7 @@ class AcquisitionDetailsControllerSpec
             performAction(),
             messageFromMessageKey(
               "rebaseAcquisitionPrice.title",
-              LocalDateUtils.govDisplayFormat(RebasingCutoffDates.ukResidents)
+              LocalDateUtils.govDisplayFormat(ukResidents)
             ), { doc =>
               doc.select("#rebaseAcquisitionPrice-0").attr("checked")  shouldBe "checked"
               doc.select("#rebaseAcquisitionPriceValue").attr("value") shouldBe "0.01"
@@ -1253,7 +1259,7 @@ class AcquisitionDetailsControllerSpec
             )
           }
 
-          val formattedRebaseDate = LocalDateUtils.govDisplayFormat(RebasingCutoffDates.ukResidents)
+          val formattedRebaseDate = LocalDateUtils.govDisplayFormat(ukResidents)
           checkPageIsDisplayed(
             performAction(data: _*),
             messageFromMessageKey(
@@ -1451,7 +1457,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate  = Some(AcquisitionDate(RebasingCutoffDates.ukResidents)),
+                  acquisitionDate  = Some(AcquisitionDate(ukResidents)),
                   acquisitionPrice = None
                 ),
                 AssetType.Residential,
@@ -1476,7 +1482,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate         = Some(AcquisitionDate(RebasingCutoffDates.ukResidents.minusDays(1L))),
+                  acquisitionDate         = Some(AcquisitionDate(ukResidents.minusDays(1L))),
                   rebasedAcquisitionPrice = None
                 ),
                 AssetType.Residential,
@@ -1501,7 +1507,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate         = Some(AcquisitionDate(RebasingCutoffDates.ukResidents.minusDays(1L))),
+                  acquisitionDate         = Some(AcquisitionDate(ukResidents.minusDays(1L))),
                   rebasedAcquisitionPrice = Some(sample[AmountInPence])
                 ),
                 AssetType.Residential,
@@ -1529,7 +1535,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate         = Some(AcquisitionDate(RebasingCutoffDates.ukResidents)),
+                  acquisitionDate         = Some(AcquisitionDate(ukResidents)),
                   acquisitionPrice        = Some(sample[AmountInPence]),
                   rebasedAcquisitionPrice = Some(sample[AmountInPence])
                 ),
@@ -1556,7 +1562,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[CompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate         = AcquisitionDate(RebasingCutoffDates.ukResidents.minusDays(1L)),
+                  acquisitionDate         = AcquisitionDate(ukResidents.minusDays(1L)),
                   rebasedAcquisitionPrice = Some(sample[AmountInPence])
                 ),
                 AssetType.Residential,
@@ -1582,7 +1588,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[CompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate         = AcquisitionDate(RebasingCutoffDates.ukResidents),
+                  acquisitionDate         = AcquisitionDate(ukResidents),
                   rebasedAcquisitionPrice = Some(sample[AmountInPence])
                 ),
                 AssetType.Residential,
@@ -1608,7 +1614,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[CompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate         = AcquisitionDate(RebasingCutoffDates.ukResidents),
+                  acquisitionDate         = AcquisitionDate(ukResidents),
                   rebasedAcquisitionPrice = Some(sample[AmountInPence]),
                   improvementCosts        = AmountInPence.zero
                 ),
@@ -1635,7 +1641,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[CompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate         = AcquisitionDate(RebasingCutoffDates.ukResidents),
+                  acquisitionDate         = AcquisitionDate(ukResidents),
                   rebasedAcquisitionPrice = Some(sample[AmountInPence]),
                   improvementCosts        = AmountInPence(2L)
                 ),
@@ -1705,7 +1711,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate  = Some(AcquisitionDate(RebasingCutoffDates.ukResidents)),
+                  acquisitionDate  = Some(AcquisitionDate(ukResidents)),
                   acquisitionPrice = None
                 ),
                 AssetType.Residential,
@@ -1730,7 +1736,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate         = Some(AcquisitionDate(RebasingCutoffDates.ukResidents.minusDays(1L))),
+                  acquisitionDate         = Some(AcquisitionDate(ukResidents.minusDays(1L))),
                   rebasedAcquisitionPrice = None
                 ),
                 AssetType.Residential,
@@ -2281,7 +2287,7 @@ class AcquisitionDetailsControllerSpec
             testRedirectOnMissingData(
               sessionWithState(
                 allQuestionsAnswered.copy(
-                  acquisitionDate         = Some(AcquisitionDate(RebasingCutoffDates.ukResidents.minusDays(1L))),
+                  acquisitionDate         = Some(AcquisitionDate(ukResidents.minusDays(1L))),
                   rebasedAcquisitionPrice = None
                 ),
                 AssetType.Residential,
@@ -2408,21 +2414,23 @@ class AcquisitionDetailsControllerSpec
         }
 
         "the user has already answered all the questions" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(sessionWithState(completeAnswers, sample[AssetType], sample[Boolean])._1)
-          }
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey("acquisitionDetails.cya.title"), { doc =>
-              doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
-                .checkYourAnswersSubmit()
-                .url
+          forAll { completeAnswers: CompleteAcquisitionDetailsAnswers =>
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(sessionWithState(completeAnswers, sample[AssetType], sample[Boolean])._1)
             }
-          )
-        }
 
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("acquisitionDetails.cya.title"), { doc =>
+                validateAcquisitionDetailsCheckYourAnswersPage(completeAnswers, doc)
+                doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                  .checkYourAnswersSubmit()
+                  .url
+              }
+            )
+          }
+        }
       }
 
     }
@@ -2513,5 +2521,53 @@ class AcquisitionDetailsControllerSpec
       BAD_REQUEST
     )
   }
+}
 
+object AcquisitionDetailsControllerSpec extends Matchers {
+
+  def validateAcquisitionDetailsCheckYourAnswersPage(
+    acquisitionDetailsAnswers: CompleteAcquisitionDetailsAnswers,
+    doc: Document
+  )(implicit messages: MessagesApi, lang: Lang): Unit = {
+    val expectedAcquisitionMethodDisplayName = acquisitionDetailsAnswers.acquisitionMethod match {
+      case AcquisitionMethod.Bought       => messages("returns.acquisitionMethod.Bought")
+      case AcquisitionMethod.Inherited    => messages("returns.acquisitionMethod.Inherited")
+      case AcquisitionMethod.Gifted       => messages("returns.acquisitionMethod.Gifted")
+      case AcquisitionMethod.Other(value) => value
+    }
+
+    doc.select("#acquisitionMethod-answer").text() shouldBe expectedAcquisitionMethodDisplayName
+    doc.select("#acquisitionPrice-answer").text() shouldBe formatAmountOfMoneyWithPoundSign(
+      acquisitionDetailsAnswers.acquisitionPrice.inPounds()
+    )
+
+    if (acquisitionDetailsAnswers.improvementCosts === AmountInPence.zero) {
+      doc.select("#improvementCosts-answer").text shouldBe "No"
+    } else {
+      doc.select("#improvementCosts-answer").text shouldBe "Yes"
+      doc.select("#improvementCosts-value-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
+        acquisitionDetailsAnswers.improvementCosts.inPounds()
+      )
+    }
+
+    if (acquisitionDetailsAnswers.acquisitionFees === AmountInPence.zero) {
+      doc.select("#acquisitionFees-answer").text shouldBe "No"
+    } else {
+      doc.select("#acquisitionFees-answer").text shouldBe "Yes"
+      doc.select("#acquisitionFees-value-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
+        acquisitionDetailsAnswers.acquisitionFees.inPounds()
+      )
+    }
+
+    acquisitionDetailsAnswers.rebasedAcquisitionPrice.foreach { rebasedAcquisitionPrice =>
+      if (rebasedAcquisitionPrice.isZero) {
+        doc.select("#rebasedAcquisitionPrice-answer").text shouldBe "No"
+      } else {
+        doc.select("#rebasedAcquisitionPrice-answer").text shouldBe "Yes"
+        doc.select("#rebasedAcquisitionPrice-value-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
+          rebasedAcquisitionPrice.inPounds()
+        )
+      }
+    }
+  }
 }

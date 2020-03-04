@@ -23,8 +23,8 @@ import play.api.libs.json.Json
 import play.api.{Configuration, Mode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.{ConnectorSpec, HttpSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}

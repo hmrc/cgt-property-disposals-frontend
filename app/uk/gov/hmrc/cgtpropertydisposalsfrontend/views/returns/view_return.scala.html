@@ -16,37 +16,62 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes
-@import play.api.libs.json.{JsValue, Json, JsObject}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, ReturnSummary}
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+        accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu,
         pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
         taskLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.taskLink,
         submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+        returnHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_banner,
+        triageSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.summary,
+        addressSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.summary,
+        yearToDateLiabilitySummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.summary,
+        acquisitionDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.acquisitiondetails.summary,
+        disposalDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.disposaldetails.summary,
+        reliefDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.reliefdetails.summary,
+        lossesSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.exemptionandlosses.summary
 )
 
-@(sentReturn: JsValue, form: Form[JsValue])(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(completeReturn: CompleteReturn, returnSummary: ReturnSummary)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
-@json = @{Json.prettyPrint(sentReturn)}
-@cols = @{json.split("\n").maxBy(_.length).length}
-@rows = @{json.split("\n").length}
+@title = @{messages("viewReturn.title")}
+@disposalMethod= @{completeReturn.triageAnswers.disposalMethod}
 
-@mainTemplate(title = "Your return", userType = request.userType) {
+@mainTemplate(title = title, userType = request.userType, withSignOutLink = false, accountMenu=Some(accountMenu(None))) {
 
- <h1>Your return</h1>
+  @returnHeading(title, returnSummary.totalCGTLiability.withFloorZero, returnSummary.submissionId)
 
- <textarea rows="@rows" cols="@cols" style="width:auto">@json</textarea>
-
- <h2>Amend Return</h2>
- @formWrapper(routes.ViewReturnController.amendReturn()) {
-  <p>
-   <label>Return JSON</label>
-   <textarea id="amend" name="amend" rows="@rows" cols="@cols" style="width:auto">@{form.value.map(Json.prettyPrint).getOrElse("")} </textarea>
+  <p class="js-enabled">
+   <a href="JavaScript: window.print()">
+    @messages("viewReturn.printLink")
+   </a>
   </p>
 
-  @submitButton(messages("Submit"))
- }
+  <div class="return-summary">
+
+    <h2>@messages("task-list.triage.link")</h2>
+    @triageSummary(completeReturn.triageAnswers)
+
+    <h2 class="heading-medium">@messages("task-list.enter-property-address.link")</h2>
+    @addressSummary(completeReturn.propertyAddress)
+
+    <h2 class="heading-medium">@messages("task-list.disposals-details.link")</h2>
+    @disposalDetailsSummary(completeReturn.disposalDetails, disposalMethod)
+
+    <h2 class="heading-medium">@messages("task-list.acquisition-details.link")</h2>
+    @acquisitionDetailsSummary(completeReturn.acquisitionDetails)
+
+    <h2 class="heading-medium">@messages("task-list.relief-details.link")</h2>
+    @reliefDetailsSummary(completeReturn.reliefDetails)
+
+    <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
+    @lossesSummary(completeReturn.exemptionsAndLossesDetails)
+
+    <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
+    @yearToDateLiabilitySummary(completeReturn.yearToDateLiabilityAnswers)
+  </div>
 
 }

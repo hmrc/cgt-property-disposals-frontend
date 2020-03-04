@@ -25,9 +25,9 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.mvc.Call
 import play.api.http.Status.CREATED
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.PaymentsConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{AmountInPence, Error}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, PaymentsJourney}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.PaymentsJourney
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
 

@@ -29,7 +29,7 @@ object SingleDisposalTriageAnswers {
 
   final case class IncompleteSingleDisposalTriageAnswers(
     individualUserType: Option[IndividualUserType],
-    numberOfProperties: Option[NumberOfProperties],
+    hasConfirmedSingleDisposal: Boolean,
     disposalMethod: Option[DisposalMethod],
     wasAUKResident: Option[Boolean],
     countryOfResidence: Option[Country],
@@ -41,13 +41,12 @@ object SingleDisposalTriageAnswers {
 
   object IncompleteSingleDisposalTriageAnswers {
     val empty: IncompleteSingleDisposalTriageAnswers =
-      IncompleteSingleDisposalTriageAnswers(None, None, None, None, None, None, None, None, None)
+      IncompleteSingleDisposalTriageAnswers(None, false, None, None, None, None, None, None, None)
 
     implicit val format: OFormat[IncompleteSingleDisposalTriageAnswers] = Json.format
   }
   final case class CompleteSingleDisposalTriageAnswers(
     individualUserType: IndividualUserType,
-    numberOfProperties: NumberOfProperties,
     disposalMethod: DisposalMethod,
     countryOfResidence: Country,
     assetType: AssetType,

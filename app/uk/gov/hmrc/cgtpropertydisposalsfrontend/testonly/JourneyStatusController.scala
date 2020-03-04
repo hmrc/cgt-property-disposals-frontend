@@ -20,13 +20,14 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import cats.Eq
-import cats.data.OptionT
-import cats.instances.either._
+import cats.data.EitherT
+import cats.instances.future._
+import cats.instances.option._
 import cats.instances.string._
 import cats.syntax.either._
 import cats.syntax.order._
+import cats.syntax.traverse._
 import com.google.inject.Inject
-import configs.syntax._
 import play.api.Configuration
 import play.api.data.Forms.{mapping, of}
 import play.api.data.format.Formatter
@@ -36,12 +37,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingNewDraftReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.order
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{SessionData, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.TaxYearService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.testonly.JourneyStatusController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
@@ -55,6 +56,7 @@ class JourneyStatusController @Inject() (
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   config: Configuration,
+  taxYearService: TaxYearService,
   sessionStore: SessionStore,
   cc: MessagesControllerComponents,
   setReturnStatePage: views.html.testonly.set_return_state,
@@ -65,36 +67,67 @@ class JourneyStatusController @Inject() (
     with SessionUpdates
     with Logging {
 
-  val taxYears: List[TaxYear] =
-    config.underlying.get[List[TaxYear]]("tax-years").value
-
   def setReturnState(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withStartingNewReturn(request) {
       case (_, _) =>
-        Ok(setReturnStatePage((returnStateForm(taxYears))))
+        Ok(setReturnStatePage((returnStateForm)))
     }
   }
 
   def setReturnStateSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withStartingNewReturn(request) {
       case (_, newReturn) =>
-        returnStateForm(taxYears)
+        returnStateForm
           .bindFromRequest()
           .fold(
-            formWithErrors => BadRequest(setReturnStatePage(formWithErrors)), { state =>
-              updateSession(sessionStore, request)(
-                _.copy(journeyStatus = Some(newReturn.copy(newReturnTriageAnswers = Right(state))))
-              ).map {
-                case Left(e) =>
-                  logger.warn("Could not update session", e)
-                  InternalServerError(s"Could not update session: $e")
-                case Right(_) =>
-                  Ok("session updated")
-              }
+            formWithErrors => BadRequest(setReturnStatePage(formWithErrors)), { answers =>
+              val getDisposalDate =
+                answers.disposalDate
+                  .map(date =>
+                    taxYearService
+                      .taxYear(date)
+                      .subflatMap(
+                        _.fold[Either[Error, DisposalDate]](
+                          Left(Error(s"Could not find tax year for $date"))
+                        )(t => Right(DisposalDate(date, t)))
+                      )
+                  )
+                  .sequence[EitherT[Future, Error, ?], DisposalDate]
+
+              val result = for {
+                disposalDate <- getDisposalDate
+                triageAnswers = toSingleDisposalTriageAnswers(answers, disposalDate)
+                _ <- EitherT(
+                      updateSession(sessionStore, request)(
+                        _.copy(journeyStatus = Some(newReturn.copy(newReturnTriageAnswers = Right(triageAnswers))))
+                      )
+                    )
+              } yield ()
+
+              result.fold({ e =>
+                logger.warn("Could not update session", e)
+                InternalServerError(s"Could not update session: $e")
+              }, _ => Ok("session updated"))
             }
           )
     }
   }
+
+  private def toSingleDisposalTriageAnswers(
+    answers: Answers,
+    disposalDate: Option[DisposalDate]
+  ): IncompleteSingleDisposalTriageAnswers =
+    IncompleteSingleDisposalTriageAnswers(
+      answers.individualUserType,
+      answers.numberOfProperties.contains(NumberOfProperties.One),
+      answers.disposalMethod,
+      answers.wasAUkResident,
+      answers.wasAUkResident.map(if (_) Country.uk else Country("HK", Some("Hong Kong"))),
+      answers.disposedOfResidentialProperty.map(if (_) AssetType.Residential else AssetType.NonResidential),
+      disposalDate,
+      answers.completionDate.map(CompletionDate(_)),
+      None
+    )
 
   private def withStartingNewReturn(request: RequestWithSessionData[_])(
     f: (SessionData, StartingNewDraftReturn) => Future[Result]
@@ -109,6 +142,16 @@ class JourneyStatusController @Inject() (
 }
 
 object JourneyStatusController {
+
+  final case class Answers(
+    individualUserType: Option[IndividualUserType],
+    numberOfProperties: Option[NumberOfProperties],
+    disposalMethod: Option[DisposalMethod],
+    wasAUkResident: Option[Boolean],
+    disposedOfResidentialProperty: Option[Boolean],
+    disposalDate: Option[LocalDate],
+    completionDate: Option[LocalDate]
+  )
 
   val individualUserTypeFormatter: Formatter[Option[IndividualUserType]] = optionFormatter[IndividualUserType](
     Map(
@@ -173,25 +216,7 @@ object JourneyStatusController {
       value.fold(Map.empty[String, String])(d => Map(key -> d.format(DateTimeFormatter.ISO_DATE)))
   }
 
-  def disposalDateFormatter(taxYears: List[TaxYear]): Formatter[Option[DisposalDate]] =
-    new Formatter[Option[DisposalDate]] {
-      override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Option[DisposalDate]] =
-        OptionT[Either[Seq[FormError], ?], LocalDate](
-          optionalDateFormatter.bind(key, data)
-        ).semiflatMap { d =>
-          Either
-            .fromOption(
-              taxYears.find(t => d < t.endDateExclusive && d >= (t.startDateInclusive)),
-              Seq(FormError("disposal-date", "could not find tax year"))
-            )
-            .map(DisposalDate(d, _))
-        }.value
-
-      override def unbind(key: String, value: Option[DisposalDate]): Map[String, String] =
-        optionalDateFormatter.unbind(key, value.map(_.value))
-    }
-
-  def returnStateForm(taxYears: List[TaxYear]): Form[IncompleteSingleDisposalTriageAnswers] =
+  val returnStateForm: Form[Answers] =
     Form(
       mapping(
         "individual-user-type"             -> of(individualUserTypeFormatter),
@@ -199,7 +224,7 @@ object JourneyStatusController {
         "disposal-method"                  -> of(disposalMethodFormatter),
         "was-a-uk-resident"                -> of(optionalBooleanFormatter),
         "disposed-of-residential-property" -> of(optionalBooleanFormatter),
-        "disposal-date"                    -> of(disposalDateFormatter(taxYears)),
+        "disposal-date"                    -> of(optionalDateFormatter),
         "completion-date"                  -> of(optionalDateFormatter)
       ) {
         case (
@@ -211,27 +236,25 @@ object JourneyStatusController {
             disposalDate,
             completionDate
             ) =>
-          IncompleteSingleDisposalTriageAnswers(
+          Answers(
             individualUserType,
             numberOfProperties,
             disposalMethod,
             wasAUKResident,
-            wasAUKResident.map(if (_) Country.uk else Country("HK", Some("Hong Kong"))),
-            disposedOfResidentialProperty.map(if (_) AssetType.Residential else AssetType.NonResidential),
+            disposedOfResidentialProperty,
             disposalDate,
-            completionDate.map(CompletionDate(_)),
-            None
+            completionDate
           )
-      } { i =>
+      } { a =>
         Some(
           (
-            i.individualUserType,
-            i.numberOfProperties,
-            i.disposalMethod,
-            i.wasAUKResident,
-            i.assetType.map(_ === AssetType.Residential),
-            i.disposalDate,
-            i.completionDate.map(_.value)
+            a.individualUserType,
+            a.numberOfProperties,
+            a.disposalMethod,
+            a.wasAUkResident,
+            a.disposedOfResidentialProperty,
+            a.disposalDate,
+            a.completionDate
           )
         )
       }

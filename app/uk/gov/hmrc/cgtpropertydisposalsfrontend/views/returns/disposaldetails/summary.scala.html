@@ -17,7 +17,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.MoneyUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalMethod
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.disposaldetails._
@@ -38,16 +38,19 @@
   @cyaRow(
     messages("shareOfProperty.title"),
     Html(formatPercentage(answers.shareOfProperty.percentageValue)),
-    Some(cyaChange(messages("disposalDetails.cyaChange.propertyShare"), returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwn().url))
+    Some(cyaChange(messages("disposalDetails.cyaChange.propertyShare"), returns.disposaldetails.routes.DisposalDetailsController.howMuchDidYouOwn().url)),
+      "propertyShare"
   )
   @cyaRow(
     disposalPriceTitle,
     Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.disposalPrice.inPounds())),
-    Some(cyaChange(messages("disposalDetails.cyaChange.disposalPrice"), returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice().url))
+    Some(cyaChange(messages("disposalDetails.cyaChange.disposalPrice"), returns.disposaldetails.routes.DisposalDetailsController.whatWasDisposalPrice().url)),
+      "disposalPrice"
   )
   @cyaRow(
     disposalFeesTitle,
     Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.disposalFees.inPounds())),
-    Some(cyaChange(messages("disposalDetails.cyaChange.disposalFees"), returns.disposaldetails.routes.DisposalDetailsController.whatWereDisposalFees().url))
+    Some(cyaChange(messages("disposalDetails.cyaChange.disposalFees"), returns.disposaldetails.routes.DisposalDetailsController.whatWereDisposalFees().url)),
+      "disposalFees"
   )
 }
