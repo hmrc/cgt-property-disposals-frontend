@@ -346,10 +346,16 @@ trait AcquisitionDetailsGen { this: GenUtils =>
 trait ReliefDetailsGen { this: GenUtils =>
 
   implicit val completeReliefDetailsAnswersGen: Gen[CompleteReliefDetailsAnswers] =
-    gen[CompleteReliefDetailsAnswers]
+    gen[CompleteReliefDetailsAnswers].map {
+      case a: CompleteReliefDetailsAnswers if a.otherReliefs.isEmpty => a.copy(otherReliefs = Some(NoOtherReliefs))
+      case other                                                     => other
+    }
 
   implicit val incompleteReliefDetailsAnswersGen: Gen[IncompleteReliefDetailsAnswers] =
-    gen[IncompleteReliefDetailsAnswers]
+    gen[IncompleteReliefDetailsAnswers].map {
+      case a: IncompleteReliefDetailsAnswers if a.otherReliefs.isEmpty => a.copy(otherReliefs = Some(NoOtherReliefs))
+      case other                                                       => other
+    }
 
 }
 

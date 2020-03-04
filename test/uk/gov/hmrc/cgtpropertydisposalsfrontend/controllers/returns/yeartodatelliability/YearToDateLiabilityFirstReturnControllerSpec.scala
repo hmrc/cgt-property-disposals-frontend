@@ -32,10 +32,12 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnControllerSpec.validateYearToDateLiabilityFirstReturnPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AmountOfMoneyErrorScenarios, AuthSupport, ControllerSpec, SessionSupport, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
@@ -1427,15 +1429,19 @@ class YearToDateLiabilityFirstReturnControllerSpec
       "show the page" when {
 
         "the section is complete" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(sessionWithState(completeAnswers, sample[DisposalDate])._1)
-          }
+          forAll { completeAnswers: CompleteYearToDateLiabilityAnswers =>
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(sessionWithState(completeAnswers, sample[DisposalDate])._1)
+            }
 
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey("ytdLiability.cya.title")
-          )
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("ytdLiability.cya.title"), { doc =>
+                validateYearToDateLiabilityFirstReturnPage(completeAnswers, doc)
+              }
+            )
+          }
         }
 
         "the section has just been completed and all updates are successful" in {
@@ -1847,6 +1853,24 @@ object YearToDateLiabilityFirstReturnControllerSpec extends Matchers {
     completeYearToDateLiabilityAnswers: CompleteYearToDateLiabilityAnswers,
     doc: Document
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
-    // TODO Implement checks
+    doc.select("#estimatedIncome-value-answer").text() shouldBe formatAmountOfMoneyWithPoundSign(
+      completeYearToDateLiabilityAnswers.estimatedIncome.inPounds()
+    )
+
+    if (completeYearToDateLiabilityAnswers.personalAllowance.isDefined)
+      doc.select("#personalAllowance-value-answer").text() shouldBe formatAmountOfMoneyWithPoundSign(
+        completeYearToDateLiabilityAnswers.personalAllowance.getOrElse[AmountInPence](sys.error("Error")) match {
+          case a: AmountInPence => a.inPounds()
+        }
+      )
+
+    if (completeYearToDateLiabilityAnswers.hasEstimatedDetails)
+      doc.select("#hasEstimatedDetails-value-answer").text() shouldBe "Yes"
+    else
+      doc.select("#hasEstimatedDetails-value-answer").text() shouldBe "No"
+
+    doc.select("#taxDue-value-answer").text() shouldBe formatAmountOfMoneyWithPoundSign(
+      completeYearToDateLiabilityAnswers.taxDue.inPounds()
+    )
   }
 }

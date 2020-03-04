@@ -1387,7 +1387,7 @@ object ReliefDetailsControllerSpec extends Matchers {
             case a: OtherReliefs => a.amount.inPounds().bigDecimal
           }
         )
-      case _ => doc.select("#otherReliefs-answer").text shouldBe "No"
+      case _ => if (reliefDetailsAnswers.otherReliefs.isDefined) doc.select("#otherReliefs-answer").text shouldBe "No"
     }
   }
 }
