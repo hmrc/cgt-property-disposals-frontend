@@ -171,7 +171,7 @@ class MultipleDisposalsTriageControllerSpec
 
         checkPageIsDisplayed(
           performAction,
-          messageFromMessageKey("multiple-disposals.howManyProperties.title"), { doc =>
+          messageFromMessageKey("multipleDisposalsNumberOfProperties.title"), { doc =>
             doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
               .guidance()
               .url
@@ -217,7 +217,7 @@ class MultipleDisposalsTriageControllerSpec
         }
 
         checkIsRedirect(
-          performAction("numberOfProperties" -> "1"),
+          performAction("multipleDisposalsNumberOfProperties" -> "1"),
           routes.SingleDisposalsTriageController.checkYourAnswers()
         )
 
@@ -244,7 +244,7 @@ class MultipleDisposalsTriageControllerSpec
         }
 
         checkIsRedirect(
-          performAction("numberOfProperties" -> "5"),
+          performAction("multipleDisposalsNumberOfProperties" -> "5"),
           routes.MultipleDisposalsTriageController.checkYourAnswers()
         )
       }
@@ -269,7 +269,7 @@ class MultipleDisposalsTriageControllerSpec
         }
 
         checkIsRedirect(
-          performAction("numberOfProperties" -> "5"),
+          performAction("multipleDisposalsNumberOfProperties" -> "5"),
           routes.MultipleDisposalsTriageController.checkYourAnswers()
         )
       }
@@ -294,7 +294,7 @@ class MultipleDisposalsTriageControllerSpec
         }
 
         checkIsRedirect(
-          performAction("numberOfProperties" -> "3"),
+          performAction("multipleDisposalsNumberOfProperties" -> "3"),
           routes.MultipleDisposalsTriageController.checkYourAnswers()
         )
       }
@@ -318,22 +318,22 @@ class MultipleDisposalsTriageControllerSpec
       "display form error when user enters numberOfProperties value <= 0" in {
 
         def test(data: (String, String)*)(expectedErrorMessageKey: String) =
-          testFormError(data: _*)(-5)(expectedErrorMessageKey)("multiple-disposals.howManyProperties.title")(
+          testFormError(data: _*)(-5)(expectedErrorMessageKey)("multipleDisposalsNumberOfProperties.title")(
             performAction
           )
 
-        test("numberOfProperties" -> "-5")("numberOfProperties.error.tooSmall")
+        test("multipleDisposalsNumberOfProperties" -> "-5")("multipleDisposalsNumberOfProperties.error.tooSmall")
 
       }
 
       "display form error when user enters numberOfProperties value > 999" in {
 
         def test(data: (String, String)*)(expectedErrorMessageKey: String) =
-          testFormError(data: _*)(1000)(expectedErrorMessageKey)("multiple-disposals.howManyProperties.title")(
+          testFormError(data: _*)(1000)(expectedErrorMessageKey)("multipleDisposalsNumberOfProperties.title")(
             performAction
           )
 
-        test("numberOfProperties" -> "1000")("numberOfProperties.error.tooLong")
+        test("multipleDisposalsNumberOfProperties" -> "1000")("multipleDisposalsNumberOfProperties.error.tooLong")
 
       }
 
@@ -352,7 +352,7 @@ class MultipleDisposalsTriageControllerSpec
 
         checkPageIsDisplayed(
           performAction,
-          messageFromMessageKey("multiple-disposals.wereYouAUKResident.title"), { doc =>
+          messageFromMessageKey("multipleDisposalsWereYouAUKResident.title"), { doc =>
             doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
               .howManyDisposals()
               .url
@@ -394,7 +394,7 @@ class MultipleDisposalsTriageControllerSpec
         }
 
         checkIsRedirect(
-          performAction("wereYouAUKResident" -> "true"),
+          performAction("multipleDisposalsWereYouAUKResident" -> "true"),
           routes.MultipleDisposalsTriageController.checkYourAnswers()
         )
       }
@@ -421,7 +421,7 @@ class MultipleDisposalsTriageControllerSpec
         }
 
         checkIsRedirect(
-          performAction("wereYouAUKResident" -> "false"),
+          performAction("multipleDisposalsWereYouAUKResident" -> "false"),
           routes.MultipleDisposalsTriageController.checkYourAnswers()
         )
       }
@@ -452,7 +452,7 @@ class MultipleDisposalsTriageControllerSpec
         }
 
         checkIsRedirect(
-          performAction("wereYouAUKResident" -> "false"),
+          performAction("multipleDisposalsWereYouAUKResident" -> "false"),
           routes.MultipleDisposalsTriageController.checkYourAnswers()
         )
       }

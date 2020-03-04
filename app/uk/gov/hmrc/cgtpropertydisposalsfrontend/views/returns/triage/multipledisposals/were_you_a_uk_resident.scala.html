@@ -36,8 +36,8 @@
 
 @(form: Form[Boolean])(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
-@key = @{"wereYouAUKResident"}
-@title = @{messages("multiple-disposals.wereYouAUKResident.title")}
+@key = @{"multipleDisposalsWereYouAUKResident"}
+@title = @{messages(s"$key.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 
@@ -57,7 +57,7 @@
             errorKey = form.error(key).map(e => e.message),
             hasErrors = hasErrors,
             selected = form.value,
-            helpText = Some(Html(messages("multiple-disposals.wereYouAUKResident.helpText")))
+            helpText = Some(Html(messages(s"$key.helpText")))
         )
         <p>@Html(messages("wereYouAUKResident.link", viewConfig.workOurYouResidenceStatusUrl))</p>
 
