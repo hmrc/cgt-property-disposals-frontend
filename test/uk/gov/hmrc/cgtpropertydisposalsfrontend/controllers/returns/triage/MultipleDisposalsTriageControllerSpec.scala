@@ -257,33 +257,8 @@ class MultipleDisposalsTriageControllerSpec
           )
         }
 
-        "user has not answered how many disposals section and " +
-          "enters number of properties value which is more than one" in {
-          val answers = sample[CompleteMultipleDisposalsAnswers]
-
-          val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreSession(
-              session.copy(journeyStatus = Some(
-                journey.copy(
-                  newReturnTriageAnswers = Left(answers.copy(numberOfProperties = 5))
-                )
-              )
-              )
-            )(Right(()))
-          }
-
-          checkIsRedirect(
-            performAction(s"$key" -> "5"),
-            routes.MultipleDisposalsTriageController.checkYourAnswers()
-          )
-        }
-
         "user has already answered how many disposals section and " +
-          "re-enters different number of properties value which is more than one" in {
+          "re-enters different number of properties value for more than one" in {
           val answers = sample[CompleteMultipleDisposalsAnswers].copy(numberOfProperties = 9)
 
           val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
@@ -307,6 +282,28 @@ class MultipleDisposalsTriageControllerSpec
           )
         }
 
+      }
+
+      "not update the session" when {
+
+        "user has already answered how many disposals section and " +
+          "re-enters same number of properties value for more than one" in {
+          val answers = sample[CompleteMultipleDisposalsAnswers].copy(
+            numberOfProperties = 5
+          )
+
+          val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkIsRedirect(
+            performAction(s"$key" -> "5"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
       }
 
       "display form error" when {
@@ -440,7 +437,10 @@ class MultipleDisposalsTriageControllerSpec
 
         "user has already answered were uk resident section and re-selected different option" in {
           val answers = sample[IncompleteMultipleDisposalsAnswers]
-            .copy(wasAUKResident = Some(true), countryOfResidence = Some(Country.uk))
+            .copy(
+              wasAUKResident     = Some(true),
+              countryOfResidence = Some(Country.uk)
+            )
 
           val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
 
@@ -614,6 +614,27 @@ class MultipleDisposalsTriageControllerSpec
 
           checkIsRedirect(
             performAction(s"$key" -> "false"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+      }
+
+      "not update the session" when {
+
+        "user has already answered were all properties residential section and re-selected same option" in {
+          val answers = sample[IncompleteMultipleDisposalsAnswers]
+            .copy(wereAllPropertiesResidential = Some(true), assetType = Some(AssetType.Residential))
+
+          val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkIsRedirect(
+            performAction(s"$key" -> "true"),
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
         }

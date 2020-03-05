@@ -274,7 +274,7 @@ class MultipleDisposalsTriageController @Inject() (
             Redirect(routes.MultipleDisposalsTriageController.wereAllPropertiesResidential())
 
           case IncompleteMultipleDisposalsAnswers(_, _, Some(false), _, _, _) =>
-            Ok("NONUK Residents not handled yet")
+            Ok("Non-UK Residents not handled yet")
 
           case IncompleteMultipleDisposalsAnswers(_, _, _, _, Some(residentialStatus), _) =>
             Ok(s"Were All Properties residential: $residentialStatus")
