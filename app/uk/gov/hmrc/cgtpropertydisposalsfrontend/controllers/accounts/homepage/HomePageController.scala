@@ -73,31 +73,24 @@ class HomePageController @Inject() (
 
   def startNewReturn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withSubscribedUser { (_, subscribed) =>
-      request.userType match {
-        case Some(UserType.Individual) =>
-          updateSession(sessionStore, request)(
-            _.copy(
-              journeyStatus = Some(
-                StartingNewDraftReturn(
-                  subscribed.subscribedDetails,
-                  subscribed.ggCredId,
-                  subscribed.agentReferenceNumber,
-                  Right(IncompleteSingleDisposalTriageAnswers.empty)
-                )
-              )
+      updateSession(sessionStore, request)(
+        _.copy(
+          journeyStatus = Some(
+            StartingNewDraftReturn(
+              subscribed.subscribedDetails,
+              subscribed.ggCredId,
+              subscribed.agentReferenceNumber,
+              Right(IncompleteSingleDisposalTriageAnswers.empty)
             )
-          ).map {
-            case Left(e) =>
-              logger.warn("Could not update session", e)
-              errorHandler.errorResult()
-
-            case Right(_) =>
-              Redirect(triage.routes.InitialTriageQuestionsController.whoIsIndividualRepresenting())
-          }
-
-        case other =>
-          logger.warn(s"Start a new return for user type: $other is not supported")
+          )
+        )
+      ).map {
+        case Left(e) =>
+          logger.warn("Could not update session", e)
           errorHandler.errorResult()
+
+        case Right(_) =>
+          Redirect(triage.routes.InitialTriageQuestionsController.whoIsIndividualRepresenting())
       }
     }(withUplift = false)
   }
