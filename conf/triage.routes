@@ -39,4 +39,7 @@ POST /multiple-disposals                                    uk.gov.hmrc.cgtprope
 GET  /multiple-disposals/number-disposals                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.howManyDisposals()
 POST /multiple-disposals/number-disposals                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.howManyDisposalsSubmit()
 
+GET  /multiple-disposals/uk-residence-status                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.wereYouAUKResident()
+POST /multiple-disposals/uk-residence-status                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.wereYouAUKResidentSubmit()
+
 GET  /check-your-answers                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.checkYourAnswers()

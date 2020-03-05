@@ -49,7 +49,8 @@ object CompleteReturn {
         Some(a: CompleteAcquisitionDetailsAnswers),
         Some(r: CompleteReliefDetailsAnswers),
         Some(e: CompleteExemptionAndLossesAnswers),
-        Some(y: CompleteYearToDateLiabilityAnswers)
+        Some(y: CompleteYearToDateLiabilityAnswers),
+        _
         ) =>
       Some(CompleteReturn(t, p, d, a, r, e, y))
 

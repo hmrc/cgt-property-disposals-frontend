@@ -22,8 +22,9 @@ import java.util.UUID
 import cats.data.EitherT
 import cats.instances.future._
 import org.jsoup.nodes.Document
+import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.i18n.MessagesApi
+import play.api.i18n.{Lang, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, Result}
@@ -32,6 +33,7 @@ import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DateErrorScenarios.{DateErrorScenario, dateErrorScenarios}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageControllerSpec.validateSingleDisposalTriageCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => returnsRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
@@ -41,7 +43,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{IndirectDisposal, MixedUse, NonResidential, Residential}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{SingleDisposalTriageAnswers, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, LocalDateUtils, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{ReturnsService, TaxYearService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -1845,10 +1847,17 @@ class SingleDisposalsTriageControllerSpec
 
       "display the page" when {
 
-        def testIsCYAPagePage(result: Future[Result]) = {
-          status(result)          shouldBe OK
-          contentAsString(result) should include(messageFromMessageKey("triage.check-your-answers.title"))
-        }
+        def testIsCheckYourAnswers(
+          result: Future[Result],
+          completeSingleDisposalTriageAnswers: CompleteSingleDisposalTriageAnswers,
+          expectedTitleKey: String
+        ): Unit =
+          checkPageIsDisplayed(
+            result,
+            messageFromMessageKey(expectedTitleKey), { doc =>
+              validateSingleDisposalTriageCheckYourAnswersPage(completeSingleDisposalTriageAnswers, doc)
+            }
+          )
 
         "all the questions have now been answered and the session is updated when a draft return has not yet been created" in {
           inSequence {
@@ -1857,7 +1866,11 @@ class SingleDisposalsTriageControllerSpec
             mockStoreSession(sessionDataWithStartingNewDraftReturn(completeTriageQuestions))(Right(()))
           }
 
-          testIsCYAPagePage(performAction())
+          testIsCheckYourAnswers(
+            performAction(),
+            completeTriageQuestions,
+            "returns.property-address.cya.title"
+          )
         }
 
         "all the questions have now been answered and the session is updated when a draft return has been created" in {
@@ -1867,7 +1880,11 @@ class SingleDisposalsTriageControllerSpec
             mockStoreSession(sessionDataWithFillingOurReturn(completeTriageQuestions))(Right(()))
           }
 
-          testIsCYAPagePage(performAction())
+          testIsCheckYourAnswers(
+            performAction(),
+            completeTriageQuestions,
+            "returns.property-address.cya.title"
+          )
         }
 
         "all the questions have already been answered and a draft return has not yet been created" in {
@@ -1876,7 +1893,11 @@ class SingleDisposalsTriageControllerSpec
             mockGetSession(sessionDataWithStartingNewDraftReturn(completeTriageQuestions))
           }
 
-          testIsCYAPagePage(performAction())
+          testIsCheckYourAnswers(
+            performAction(),
+            completeTriageQuestions,
+            "returns.property-address.cya.title"
+          )
         }
 
         "all the questions have already been answered and a draft return has been created" in {
@@ -1885,7 +1906,11 @@ class SingleDisposalsTriageControllerSpec
             mockGetSession(sessionDataWithFillingOurReturn(completeTriageQuestions))
           }
 
-          testIsCYAPagePage(performAction())
+          testIsCheckYourAnswers(
+            performAction(),
+            completeTriageQuestions,
+            "returns.property-address.cya.title"
+          )
         }
 
       }
@@ -1911,7 +1936,8 @@ class SingleDisposalsTriageControllerSpec
           None,
           None,
           None,
-          None
+          None,
+          LocalDateUtils.today()
         )
 
       val sessionDataWithNewDraftReturn = SessionData.empty.copy(
@@ -2312,4 +2338,31 @@ class SingleDisposalsTriageControllerSpec
     checkNextResult(performAction(formData))
   }
 
+}
+
+object SingleDisposalsTriageControllerSpec extends Matchers {
+  def validateSingleDisposalTriageCheckYourAnswersPage(
+    completeSingleDisposalTriageAnswers: CompleteSingleDisposalTriageAnswers,
+    doc: Document
+  )(implicit messages: MessagesApi, lang: Lang): Unit = {
+    doc.select("#individualUserType-answer").text() shouldBe messages(
+      s"individualUserType.${completeSingleDisposalTriageAnswers.individualUserType}"
+    )
+    doc.select("#numberOfProperties-answer").text() shouldBe "One"
+    doc.select("#disposalMethod-answer").text() shouldBe messages(
+      s"disposalMethod.${completeSingleDisposalTriageAnswers.disposalMethod}"
+    )
+    if (completeSingleDisposalTriageAnswers.countryOfResidence.isUk())
+      doc.select("#wereYouAUKResident-answer").text() shouldBe "Yes"
+    else
+      doc.select("#wereYouAUKResident-answer").text() shouldBe "No"
+
+    if (completeSingleDisposalTriageAnswers.countryOfResidence.isUk())
+      completeSingleDisposalTriageAnswers.assetType match {
+        case Residential      => doc.select("#propertyType-answer").text() shouldBe "Yes"
+        case NonResidential   => doc.select("#propertyType-answer").text() shouldBe "No"
+        case IndirectDisposal => doc.select("#propertyType-answer").text() shouldBe ""
+        case MixedUse         => doc.select("#propertyType-answer").text() shouldBe ""
+      }
+  }
 }
