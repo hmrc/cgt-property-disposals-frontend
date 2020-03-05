@@ -14,7 +14,8 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, Charge}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.Charge
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 
@@ -47,7 +48,7 @@
       @if(charge.totalOutstanding().isZero) {
         @messages("viewReturn.charge.status.paid")
       } else {
-        @Html(messages("viewReturn.charge.status.payNow", "#"))
+        @Html(messages("viewReturn.charge.status.payNow", routes.ViewReturnController.payCharge(charge.chargeReference)))
       }
     </td>
   </tr>

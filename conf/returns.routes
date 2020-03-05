@@ -27,3 +27,4 @@ POST  /return-sent-confirmation          uk.gov.hmrc.cgtpropertydisposalsfronten
 
 
 GET   /return                            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ViewReturnController.displayReturn()
+GET  /pay-charge-in-return              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ViewReturnController.payCharge(chargeRefrence: String)

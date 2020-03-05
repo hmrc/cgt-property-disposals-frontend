@@ -16,19 +16,24 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 
+import cats.instances.future._
+import cats.instances.string._
+import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, routes => baseRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => homeRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.ViewingReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{PaymentsService, ReturnsService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ViewReturnController @Inject() (
@@ -37,6 +42,7 @@ class ViewReturnController @Inject() (
   errorHandler: ErrorHandler,
   sessionStore: SessionStore,
   returnsService: ReturnsService,
+  paymentsService: PaymentsService,
   cc: MessagesControllerComponents,
   viewReturnPage: views.html.returns.view_return
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
@@ -45,14 +51,53 @@ class ViewReturnController @Inject() (
     with SessionUpdates
     with Logging {
 
-  def displayReturn(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
-    request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(ViewingReturn(_, _, _, sentReturn, returnSummary)) =>
+  def displayReturn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withViewingReturn(request) {
+      case ViewingReturn(_, _, _, sentReturn, returnSummary) =>
         Ok(viewReturnPage(sentReturn, returnSummary))
-
-      case _ =>
-        Redirect(baseRoutes.StartController.start())
     }
   }
+
+  def payCharge(chargeReference: String): Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request =>
+      withViewingReturn(request) {
+        case ViewingReturn(subscribedDetails, _, _, _, returnSummary) =>
+          val cgtReference = subscribedDetails.cgtReference
+          val details =
+            s"(chargeReference, cgtReference, submissionId) = ($chargeReference, $cgtReference, ${returnSummary.submissionId})"
+
+          returnSummary.charges
+            .find(_.chargeReference === chargeReference)
+            .fold[Future[Result]] {
+              logger.warn(s"Could not find charge with charge reference '$chargeReference' for $details")
+              NotFound
+            } { charge =>
+              paymentsService
+                .startPaymentJourney(
+                  cgtReference,
+                  charge.chargeReference,
+                  charge.amount,
+                  homeRoutes.HomePageController.homepage(),
+                  routes.ViewReturnController.displayReturn()
+                )
+                .fold(
+                  { e =>
+                    logger.warn(s"Could not start payments journey for $details", e)
+                    errorHandler.errorResult()
+                  }, { paymentsJourney =>
+                    logger.info(s"Started payments journey with journey id ${paymentsJourney.journeyId} for $details}")
+                    Redirect(paymentsJourney.nextUrl)
+                  }
+                )
+            }
+
+      }
+  }
+
+  def withViewingReturn(request: RequestWithSessionData[_])(f: ViewingReturn => Future[Result]): Future[Result] =
+    request.sessionData.flatMap(_.journeyStatus) match {
+      case Some(v: ViewingReturn) => f(v)
+      case _                      => Redirect(baseRoutes.StartController.start())
+    }
 
 }
