@@ -1374,7 +1374,7 @@ object ReliefDetailsControllerSpec extends Matchers {
       )
     }
 
-    reliefDetailsAnswers.otherReliefs.getOrElse(NoOtherReliefs) match {
+    reliefDetailsAnswers.otherReliefs.foreach {
       case a: OtherReliefsOption.OtherReliefs =>
         doc.select("#otherReliefs-answer").text shouldBe "Yes"
         doc.select("#otherReliefsName-answer").text shouldBe new String(
@@ -1387,7 +1387,9 @@ object ReliefDetailsControllerSpec extends Matchers {
             case a: OtherReliefs => a.amount.inPounds().bigDecimal
           }
         )
-      case _ => if (reliefDetailsAnswers.otherReliefs.isDefined) doc.select("#otherReliefs-answer").text shouldBe "No"
+      case OtherReliefsOption.NoOtherReliefs => doc.select("#otherReliefs-answer").text shouldBe "No"
+
     }
+
   }
 }

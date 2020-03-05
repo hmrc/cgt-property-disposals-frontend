@@ -1857,12 +1857,9 @@ object YearToDateLiabilityFirstReturnControllerSpec extends Matchers {
       completeYearToDateLiabilityAnswers.estimatedIncome.inPounds()
     )
 
-    if (completeYearToDateLiabilityAnswers.personalAllowance.isDefined)
-      doc.select("#personalAllowance-value-answer").text() shouldBe formatAmountOfMoneyWithPoundSign(
-        completeYearToDateLiabilityAnswers.personalAllowance.getOrElse[AmountInPence](sys.error("Error")) match {
-          case a: AmountInPence => a.inPounds()
-        }
-      )
+    completeYearToDateLiabilityAnswers.personalAllowance.foreach(f =>
+      doc.select("#personalAllowance-value-answer").text() shouldBe formatAmountOfMoneyWithPoundSign(f.inPounds())
+    )
 
     if (completeYearToDateLiabilityAnswers.hasEstimatedDetails)
       doc.select("#hasEstimatedDetails-value-answer").text() shouldBe "Yes"

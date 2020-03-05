@@ -2356,12 +2356,12 @@ object SingleDisposalsTriageControllerSpec extends Matchers {
     else
       doc.select("#wereYouAUKResident-answer").text() shouldBe "No"
 
-    if(completeSingleDisposalTriageAnswers.countryOfResidence.isUk())
-    completeSingleDisposalTriageAnswers.assetType match {
-      case Residential        => doc.select("#propertyType-answer").text() shouldBe "Yes"
-      case NonResidential     => doc.select("#propertyType-answer").text() shouldBe "No"
-      case IndirectDisposal   => ""
-      case MixedUse           => ""
-    }
+    if (completeSingleDisposalTriageAnswers.countryOfResidence.isUk())
+      completeSingleDisposalTriageAnswers.assetType match {
+        case Residential      => doc.select("#propertyType-answer").text() shouldBe "Yes"
+        case NonResidential   => doc.select("#propertyType-answer").text() shouldBe "No"
+        case IndirectDisposal => doc.select("#propertyType-answer").text() shouldBe ""
+        case MixedUse         => doc.select("#propertyType-answer").text() shouldBe ""
+      }
   }
 }
