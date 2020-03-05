@@ -18,6 +18,7 @@ button.signIn=Sign in
 button.manageAccount=Manage account
 button.acceptAndSend=Accept and send
 button.payNow=Pay now
+button.accountHome=Account home
 
 generic.warning=Warning
 generic.day=Day
@@ -158,7 +159,9 @@ confirmEmail.verified.p2=Your email has not been updated in other government ser
 confirmEmail.resent=Confirmation email sent:
 
 confirmDraftReturn.title=Your Capital Gains Tax on UK property return will be saved for 30 days
-confirmDraftReturn.message=After {0} all the details in your Capital Gains Tax on UK property return will be deleted. After that date, you'll need to start again. We will keep a return that is 'In progress' for 30 days from the day it was last saved. We will only save uploads for 7 days from the last day they were saved.
+confirmDraftReturn.warning=After {0} all the details in your Capital Gains Tax on UK property return will be deleted.
+confirmDraftReturn.p1=After that date, you’ll need to start again.
+confirmDraftReturn.p2=We will keep a return that is ‘In progress’ for 30 days from the day it was last saved. We will only save uploads for 7 days from the last day they were saved.
 
 contactName.title=Change contact name
 contactName.extraContent=The contact name you use for other government services will not change.

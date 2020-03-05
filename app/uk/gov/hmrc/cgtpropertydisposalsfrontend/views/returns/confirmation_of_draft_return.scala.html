@@ -20,31 +20,35 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
+
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
 pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
+backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 )
 
 @(draftReturn: DraftReturn)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+
 @title = @{messages("confirmDraftReturn.title")}
-@message = @{messages("confirmDraftReturn.message", LocalDateUtils.govDisplayFormat(draftReturn.lastUpdatedDate.plusDays(29)))}
 
 @mainTemplate(title = title, userType = request.userType) {
-@backLinkComponent(returns.routes.TaskListController.taskList())
 
-@pageHeading(title)
-<div class="notice" style="margin: 30px 0;">
-    <i class="icon icon-important"></i>
-    <strong class="bold-small">
-        Your Capital Gains Tax on UK property return will be saved for 30 days
-    </strong>
-</div>
+  @backLinkComponent(returns.routes.TaskListController.taskList())
 
-<p>@messages(message)</p>
+  @pageHeading(title)
 
-<a class="button" id="accounts_home" role="button" href="@{accounts.homepage.routes.HomePageController.homepage().url}">
-    @messages("Account home")
-</a>
+  @warning(messages("confirmDraftReturn.warning",  LocalDateUtils.govDisplayFormat(draftReturn.lastUpdatedDate.plusDays(29))))
+
+  <p>
+    @messages("confirmDraftReturn.p1")
+  </p>
+
+  <p>
+    @messages("confirmDraftReturn.p2")
+  </p>
+
+  <a class="button" role="button" href="@{accounts.homepage.routes.HomePageController.homepage().url}">
+    @messages("button.accountHome")
+  </a>
 }
-
