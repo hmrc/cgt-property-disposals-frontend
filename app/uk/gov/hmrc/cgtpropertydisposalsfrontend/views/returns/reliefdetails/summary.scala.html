@@ -51,7 +51,7 @@
       messages("reliefDetails.cyaChange.privateResidentsReliefValue"),
       Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.privateResidentsRelief.inPounds())),
       Some(cyaChange(messages("reliefDetails.cyaChange.privateResidentsRelief"), routes.ReliefDetailsController.privateResidentsRelief().url)),
-      "privateResidentsRelief"
+      "privateResidentsReliefValue"
     )
   }
 
