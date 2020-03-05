@@ -225,7 +225,7 @@ class MultipleDisposalsTriageController @Inject() (
                     incomplete =>
                       incomplete.copy(
                         wereAllPropertiesResidential = Some(wereAllPropertiesResidential),
-                        assetType                    = None
+                        assetType                    = assetType(wereAllPropertiesResidential)
                       ),
                     complete =>
                       IncompleteMultipleDisposalsAnswers(
@@ -234,7 +234,7 @@ class MultipleDisposalsTriageController @Inject() (
                         wasAUKResident               = Some(true),
                         countryOfResidence           = Some(Country.uk),
                         wereAllPropertiesResidential = Some(wereAllPropertiesResidential),
-                        assetType                    = None
+                        assetType                    = assetType(wereAllPropertiesResidential)
                       )
                   )
 
@@ -285,6 +285,9 @@ class MultipleDisposalsTriageController @Inject() (
         }
     }
   }
+
+  private def assetType(isResidential: Boolean): Option[AssetType] =
+    if (isResidential) Some(AssetType.Residential) else Some(AssetType.NonResidential)
 
   private def withMultipleDisposalTriageAnswers(request: RequestWithSessionData[_])(
     f: (SessionData, StartingNewDraftReturn, MultipleDisposalsTriageAnswers) => Future[Result]

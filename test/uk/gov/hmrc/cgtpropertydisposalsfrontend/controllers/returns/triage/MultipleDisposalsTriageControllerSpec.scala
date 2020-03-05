@@ -554,7 +554,12 @@ class MultipleDisposalsTriageControllerSpec
             mockStoreSession(
               session.copy(journeyStatus = Some(
                 journey.copy(
-                  newReturnTriageAnswers = Left(answers.copy(wereAllPropertiesResidential = Some(true)))
+                  newReturnTriageAnswers = Left(
+                    answers.copy(
+                      wereAllPropertiesResidential = Some(true),
+                      assetType                    = Some(AssetType.Residential)
+                    )
+                  )
                 )
               )
               )
@@ -575,7 +580,12 @@ class MultipleDisposalsTriageControllerSpec
             mockStoreSession(
               session.copy(journeyStatus = Some(
                 journey.copy(
-                  newReturnTriageAnswers = Left(answers.copy(wereAllPropertiesResidential = Some(false)))
+                  newReturnTriageAnswers = Left(
+                    answers.copy(
+                      wereAllPropertiesResidential = Some(false),
+                      assetType                    = Some(AssetType.NonResidential)
+                    )
+                  )
                 )
               )
               )
@@ -603,7 +613,7 @@ class MultipleDisposalsTriageControllerSpec
                   newReturnTriageAnswers = Left(
                     answers.copy(
                       wereAllPropertiesResidential = Some(false),
-                      assetType                    = None
+                      assetType                    = Some(AssetType.NonResidential)
                     )
                   )
                 )
@@ -626,7 +636,7 @@ class MultipleDisposalsTriageControllerSpec
           val answers = sample[IncompleteMultipleDisposalsAnswers]
             .copy(wereAllPropertiesResidential = Some(true), assetType = Some(AssetType.Residential))
 
-          val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+          val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
 
           inSequence {
             mockAuthWithNoRetrievals()
