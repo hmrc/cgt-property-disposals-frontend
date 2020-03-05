@@ -82,7 +82,7 @@ class MultipleDisposalsTriageController @Inject() (
       case (_, _, answers) =>
         val numberOfDisposals = answers.fold(_.numberOfProperties, c => Some(c.numberOfProperties))
         val form              = numberOfDisposals.fold(numberOfPropertiesForm)(numberOfPropertiesForm.fill)
-        Ok(howManyPropertiesPage(form))
+        Ok(howManyPropertiesPage(form, routes.MultipleDisposalsTriageController.guidance()))
     }
   }
 
@@ -94,7 +94,7 @@ class MultipleDisposalsTriageController @Inject() (
           .fold(
             formWithErrors =>
               BadRequest(
-                howManyPropertiesPage(formWithErrors)
+                howManyPropertiesPage(formWithErrors, routes.MultipleDisposalsTriageController.guidance())
               ), { numberOfProperties =>
               if (answers.fold(_.numberOfProperties, c => Some(c.numberOfProperties)).contains(numberOfProperties)) {
                 Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())

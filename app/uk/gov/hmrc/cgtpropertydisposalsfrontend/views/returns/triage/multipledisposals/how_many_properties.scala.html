@@ -32,14 +32,14 @@
     caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(form: Form[Int])(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[Int], backLink: Call)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 @key = @{"multipleDisposalsNumberOfProperties"}
 @title = @{messages(s"$key.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @mainTemplate(title = title, userType = request.userType) {
 
-    @backLinkComponent(triage.routes.MultipleDisposalsTriageController.guidance())
+    @backLinkComponent(backLink)
 
     @if(hasErrors) {
         @errorSummary(form)
