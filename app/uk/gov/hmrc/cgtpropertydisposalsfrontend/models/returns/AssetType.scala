@@ -17,6 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import cats.Eq
+import cats.syntax.eq._
 import julienrf.json.derived
 import play.api.libs.json.OFormat
 
@@ -35,5 +36,9 @@ object AssetType {
   implicit val eq: Eq[AssetType] = Eq.fromUniversalEquals
 
   implicit val format: OFormat[AssetType] = derived.oformat()
+
+  implicit class AssetTypeOps(private val a: AssetType) extends AnyVal {
+    def isResidential(): Boolean = a === AssetType.Residential
+  }
 
 }

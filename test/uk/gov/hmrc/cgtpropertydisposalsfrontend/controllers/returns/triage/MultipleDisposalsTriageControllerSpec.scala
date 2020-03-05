@@ -29,13 +29,13 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingNewDraftReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.Self
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{IncompleteMultipleDisposalsAnswers, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 
 import scala.concurrent.Future
@@ -191,149 +191,159 @@ class MultipleDisposalsTriageControllerSpec
       def performAction(data: (String, String)*): Future[Result] =
         controller.howManyDisposalsSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
 
-      "redirect to disposal method when user enters number of properties as one" in {
-        val (session, journey) = sessionDataWithStartingNewDraftReturn(
-          IncompleteMultipleDisposalsAnswers.empty.copy(
-            individualUserType = Some(Self)
-          )
-        )
+      val key = "multipleDisposalsNumberOfProperties"
 
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-          mockStoreSession(
-            session.copy(journeyStatus = Some(
-              journey.copy(
-                newReturnTriageAnswers = Right(
-                  IncompleteSingleDisposalTriageAnswers.empty.copy(
-                    individualUserType         = Some(Self),
-                    hasConfirmedSingleDisposal = true
+      "redirect to single disposal cya page" when {
+
+        "user enters number of properties as one" in {
+
+          val (session, journey) = sessionDataWithStartingNewDraftReturn(
+            IncompleteMultipleDisposalsAnswers.empty.copy(
+              individualUserType = Some(Self)
+            )
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreSession(
+              session.copy(journeyStatus = Some(
+                journey.copy(
+                  newReturnTriageAnswers = Right(
+                    IncompleteSingleDisposalTriageAnswers.empty.copy(
+                      individualUserType         = Some(Self),
+                      hasConfirmedSingleDisposal = true
+                    )
                   )
                 )
               )
-            )
-            )
-          )(Right(()))
-        }
-
-        checkIsRedirect(
-          performAction("multipleDisposalsNumberOfProperties" -> "1"),
-          routes.SingleDisposalsTriageController.checkYourAnswers()
-        )
-
-      }
-
-      "user has not answered how many disposals section and " +
-        "redirect to dummy page when user enters number of properties more than one" in {
-        val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
-          individualUserType = Some(Self)
-        )
-        val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-          mockStoreSession(
-            session.copy(journeyStatus = Some(
-              journey.copy(
-                newReturnTriageAnswers = Left(answers.copy(numberOfProperties = Some(5)))
               )
-            )
-            )
-          )(Right(()))
-        }
+            )(Right(()))
+          }
 
-        checkIsRedirect(
-          performAction("multipleDisposalsNumberOfProperties" -> "5"),
-          routes.MultipleDisposalsTriageController.checkYourAnswers()
-        )
-      }
-
-      "user has not answered how many disposals section and " +
-        "redirect to dummy page when user enters number of properties value which is moreThanOne" in {
-        val answers = sample[CompleteMultipleDisposalsAnswers]
-
-        val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-          mockStoreSession(
-            session.copy(journeyStatus = Some(
-              journey.copy(
-                newReturnTriageAnswers = Left(answers.copy(numberOfProperties = 5))
-              )
-            )
-            )
-          )(Right(()))
-        }
-
-        checkIsRedirect(
-          performAction("multipleDisposalsNumberOfProperties" -> "5"),
-          routes.MultipleDisposalsTriageController.checkYourAnswers()
-        )
-      }
-
-      "user has already answered how many disposals section and " +
-        "redirect to dummy page when user re-enters different number of properties value which is moreThanOne" in {
-        val answers = sample[CompleteMultipleDisposalsAnswers].copy(numberOfProperties = 9)
-
-        val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-          mockStoreSession(
-            session.copy(journeyStatus = Some(
-              journey.copy(
-                newReturnTriageAnswers = Left(answers.copy(numberOfProperties = 3))
-              )
-            )
-            )
-          )(Right(()))
-        }
-
-        checkIsRedirect(
-          performAction("multipleDisposalsNumberOfProperties" -> "3"),
-          routes.MultipleDisposalsTriageController.checkYourAnswers()
-        )
-      }
-
-      "user has not answered how many disposals section and " +
-        "submit request without entering numberOfProperties value" in {
-        val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
-          individualUserType = Some(Self)
-        )
-        val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-        }
-
-        val result = performAction()
-        status(result) shouldBe BAD_REQUEST
-      }
-
-      "display form error when user enters numberOfProperties value <= 0" in {
-
-        def test(data: (String, String)*)(expectedErrorMessageKey: String) =
-          testFormError(data: _*)(-5)(expectedErrorMessageKey)("multipleDisposalsNumberOfProperties.title")(
-            performAction
+          checkIsRedirect(
+            performAction(key -> "1"),
+            routes.SingleDisposalsTriageController.checkYourAnswers()
           )
 
-        test("multipleDisposalsNumberOfProperties" -> "-5")("multipleDisposalsNumberOfProperties.error.tooSmall")
+        }
+      }
+
+      "redirect to cya page" when {
+
+        "user has not answered how many disposals section and " +
+          "enters number of properties more than one" in {
+          val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
+            individualUserType = Some(Self)
+          )
+          val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreSession(
+              session.copy(journeyStatus = Some(
+                journey.copy(
+                  newReturnTriageAnswers = Left(answers.copy(numberOfProperties = Some(5)))
+                )
+              )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(key -> "5"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+        "user has already answered how many disposals section and " +
+          "re-enters different number of properties value for more than one" in {
+          val answers = sample[CompleteMultipleDisposalsAnswers].copy(numberOfProperties = 9)
+
+          val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreSession(
+              session.copy(journeyStatus = Some(
+                journey.copy(
+                  newReturnTriageAnswers = Left(answers.copy(numberOfProperties = 3))
+                )
+              )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(key -> "3"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
 
       }
 
-      "display form error when user enters numberOfProperties value > 999" in {
+      "not update the session" when {
 
-        def test(data: (String, String)*)(expectedErrorMessageKey: String) =
-          testFormError(data: _*)(1000)(expectedErrorMessageKey)("multipleDisposalsNumberOfProperties.title")(
-            performAction
+        "user has already answered how many disposals section and " +
+          "re-enters same number of properties value for more than one" in {
+          val answers = sample[CompleteMultipleDisposalsAnswers].copy(
+            numberOfProperties = 5
           )
 
-        test("multipleDisposalsNumberOfProperties" -> "1000")("multipleDisposalsNumberOfProperties.error.tooLong")
+          val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkIsRedirect(
+            performAction(key -> "5"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+      }
+
+      "display form error" when {
+
+        "the user submits nothing" in {
+          val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
+            individualUserType = Some(Self)
+          )
+          val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          val result = performAction()
+          status(result) shouldBe BAD_REQUEST
+        }
+
+        "display form error when user enters numberOfProperties value <= 0" in {
+
+          def test(data: (String, String)*)(expectedErrorMessageKey: String) =
+            testFormError(data: _*)(-5)(expectedErrorMessageKey)(s"$key.title")(
+              performAction
+            )
+
+          test(key -> "-5")(s"$key.error.tooSmall")
+
+        }
+
+        "display form error when user enters numberOfProperties value > 999" in {
+
+          def test(data: (String, String)*)(expectedErrorMessageKey: String) =
+            testFormError(data: _*)(1000)(expectedErrorMessageKey)(s"$key.title")(
+              performAction
+            )
+
+          test(key -> "1000")(s"$key.error.tooLong")
+
+        }
 
       }
 
@@ -372,15 +382,18 @@ class MultipleDisposalsTriageControllerSpec
       def performAction(data: (String, String)*): Future[Result] =
         controller.wereYouAUKResidentSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
 
+      val key = "multipleDisposalsWereYouAUKResident"
+
       "redirect to redirect to cya page" when {
 
         val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
           individualUserType = Some(Self),
           numberOfProperties = Some(2)
         )
+
         val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
 
-        "user has not answered all of the were uk resident section and selects yes" in {
+        "user has not answered the were uk resident section and selects true" in {
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -396,12 +409,12 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkIsRedirect(
-            performAction("multipleDisposalsWereYouAUKResident" -> "true"),
+            performAction(key -> "true"),
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
         }
 
-        "user has not answered all of the were uk resident section and selects no" in {
+        "user has not answered the were uk resident section and selects false" in {
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -417,14 +430,17 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkIsRedirect(
-            performAction("multipleDisposalsWereYouAUKResident" -> "false"),
+            performAction(key -> "false"),
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
         }
 
         "user has already answered were uk resident section and re-selected different option" in {
           val answers = sample[IncompleteMultipleDisposalsAnswers]
-            .copy(wasAUKResident = Some(true), countryOfResidence = Some(Country.uk))
+            .copy(
+              wasAUKResident     = Some(true),
+              countryOfResidence = Some(Country.uk)
+            )
 
           val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
 
@@ -436,8 +452,10 @@ class MultipleDisposalsTriageControllerSpec
                 journey.copy(
                   newReturnTriageAnswers = Left(
                     answers.copy(
-                      wasAUKResident     = Some(false),
-                      countryOfResidence = None
+                      wasAUKResident               = Some(false),
+                      countryOfResidence           = None,
+                      wereAllPropertiesResidential = None,
+                      assetType                    = None
                     )
                   )
                 )
@@ -447,7 +465,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkIsRedirect(
-            performAction("multipleDisposalsWereYouAUKResident" -> "false"),
+            performAction(key -> "false"),
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
         }
@@ -470,9 +488,190 @@ class MultipleDisposalsTriageControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey("multipleDisposalsWereYouAUKResident.title"), { doc =>
+            messageFromMessageKey(s"$key.title"), { doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
-                "multipleDisposalsWereYouAUKResident.error.required"
+                s"$key.error.required"
+              )
+            },
+            BAD_REQUEST
+          )
+        }
+      }
+
+    }
+
+    "handling requests to display the were all properties residential page" must {
+
+      def performAction(): Future[Result] =
+        controller.wereAllPropertiesResidential()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
+
+      "display the page" in {
+        mockAuthWithNoRetrievals()
+        mockGetSession(sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsAnswers.empty)._1)
+
+        checkPageIsDisplayed(
+          performAction,
+          messageFromMessageKey("multipleDisposalsWereAllPropertiesResidential.title"), { doc =>
+            doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
+              .wereYouAUKResident()
+              .url
+            doc
+              .select("#content > article > form")
+              .attr("action") shouldBe routes.MultipleDisposalsTriageController
+              .wereAllPropertiesResidentialSubmit()
+              .url
+          }
+        )
+      }
+
+    }
+
+    "handling submits on the were all properties residential page" must {
+
+      def performAction(data: (String, String)*): Future[Result] =
+        controller.wereAllPropertiesResidentialSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
+
+      val key = "multipleDisposalsWereAllPropertiesResidential"
+
+      "redirect to redirect to cya page" when {
+
+        val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
+          individualUserType = Some(Self),
+          numberOfProperties = Some(2),
+          wasAUKResident     = Some(true),
+          countryOfResidence = Some(Country.uk)
+        )
+
+        val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+        "user has not answered the were all properties residential section and selects true" in {
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreSession(
+              session.copy(journeyStatus = Some(
+                journey.copy(
+                  newReturnTriageAnswers = Left(
+                    answers.copy(
+                      wereAllPropertiesResidential = Some(true),
+                      assetType                    = Some(AssetType.Residential)
+                    )
+                  )
+                )
+              )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(key -> "true"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+        "user has not answered the were all properties residential section and selects false" in {
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreSession(
+              session.copy(journeyStatus = Some(
+                journey.copy(
+                  newReturnTriageAnswers = Left(
+                    answers.copy(
+                      wereAllPropertiesResidential = Some(false),
+                      assetType                    = Some(AssetType.NonResidential)
+                    )
+                  )
+                )
+              )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(key -> "false"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+        "user has already answered were all properties residential section and re-selected different option" in {
+          val answers = sample[IncompleteMultipleDisposalsAnswers]
+            .copy(wereAllPropertiesResidential = Some(true), assetType = Some(AssetType.Residential))
+
+          val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreSession(
+              session.copy(journeyStatus = Some(
+                journey.copy(
+                  newReturnTriageAnswers = Left(
+                    answers.copy(
+                      wereAllPropertiesResidential = Some(false),
+                      assetType                    = Some(AssetType.NonResidential)
+                    )
+                  )
+                )
+              )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(key -> "false"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+      }
+
+      "not update the session" when {
+
+        "user has already answered were all properties residential section and re-selected same option" in {
+          val answers = sample[IncompleteMultipleDisposalsAnswers]
+            .copy(wereAllPropertiesResidential = Some(true), assetType = Some(AssetType.Residential))
+
+          val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkIsRedirect(
+            performAction(key -> "true"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+      }
+
+      "show a form error" when {
+
+        "the user submits nothing" in {
+          val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
+            individualUserType = Some(Self),
+            numberOfProperties = Some(2),
+            wasAUKResident     = Some(true),
+            countryOfResidence = Some(Country.uk)
+          )
+          val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(s"$key.title"), { doc =>
+              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+                s"$key.error.required"
               )
             },
             BAD_REQUEST

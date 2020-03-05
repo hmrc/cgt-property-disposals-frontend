@@ -988,6 +988,16 @@ multipleDisposalsWereYouAUKResident.helpText=Contract ‘exchange’ usually hap
 
 multipleDisposalsWereYouAUKResident.error.required=Select yes if you were a UK resident on all of the contract ‘exchange’ dates
 
+multipleDisposalsWereAllPropertiesResidential.title=Were all of the properties residential properties?
+multipleDisposalsWereAllPropertiesResidential.helpText=Residential property includes houses, flats, or other dwellings, including their gardens or grounds.
+multipleDisposalsWereAllPropertiesResidential.link=What residential property includes
+multipleDisposalsWereAllPropertiesResidential.details.p1=Residential property includes:
+multipleDisposalsWereAllPropertiesResidential.details.li1=a building where someone lives or could live, like a house, flat or other type of dwelling
+multipleDisposalsWereAllPropertiesResidential.details.li2=a building that is being built or changed so it can be used as a place where someone could live
+multipleDisposalsWereAllPropertiesResidential.details.li3=land that’s part of a garden or grounds of a building that’s used as a place where someone lives, or could live
+
+multipleDisposalsWereAllPropertiesResidential.error.required=Select yes if all the properties were residential properties
+
 disposalDateMixedUseOrIndirect.title=You cannot use this service
 disposalDateMixedUseOrIndirect.p1=You cannot use this service to report Capital Gains on:
 disposalDateMixedUseOrIndirect.p1.reason1=disposals of ‘mixed use’ UK property
