@@ -620,7 +620,8 @@ input:focus + .hmcts-currency-input__symbol.right {
     margin-bottom: 20px;
 }
 
-.return-list li .caption {
+.return-list li .caption,
+.charge .caption {
     font-size: 16px;
     margin-bottom: 0;
     color: #6f777b;
@@ -658,4 +659,18 @@ input:focus + .hmcts-currency-input__symbol.right {
 h1 > .sub-heading {
     font-weight: normal;
     font-size: 19px;
+}
+
+.payments-list-container {
+    margin: 0;
+}
+
+.view-return-charges td,
+.view-return-charges th,
+.payments-list li {
+    font-size: 16px;
+}
+
+.no-border td {
+    border-bottom: none;
 }
