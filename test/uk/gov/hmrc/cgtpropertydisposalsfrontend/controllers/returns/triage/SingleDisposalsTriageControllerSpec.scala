@@ -38,10 +38,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => r
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.govDisplayFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{NonResidential, Residential}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{IndirectDisposal, MixedUse, NonResidential, Residential}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{SingleDisposalTriageAnswers, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, TaxYear}
@@ -2265,17 +2264,24 @@ object SingleDisposalsTriageControllerSpec extends Matchers {
     completeSingleDisposalTriageAnswers: CompleteSingleDisposalTriageAnswers,
     doc: Document
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
-    doc.select("#individualUserType-answer").text() shouldBe messages(s"individualUserType.${completeSingleDisposalTriageAnswers.individualUserType}")
+    doc.select("#individualUserType-answer").text() shouldBe messages(
+      s"individualUserType.${completeSingleDisposalTriageAnswers.individualUserType}"
+    )
     doc.select("#numberOfProperties-answer").text() shouldBe "One"
-    doc.select("#disposalMethod-answer").text() shouldBe messages(s"disposalMethod.${completeSingleDisposalTriageAnswers.disposalMethod}")
+    doc.select("#disposalMethod-answer").text() shouldBe messages(
+      s"disposalMethod.${completeSingleDisposalTriageAnswers.disposalMethod}"
+    )
     if (completeSingleDisposalTriageAnswers.countryOfResidence.isUk())
       doc.select("#wereYouAUKResident-answer").text() shouldBe "Yes"
     else
       doc.select("#wereYouAUKResident-answer").text() shouldBe "No"
 
+    if(completeSingleDisposalTriageAnswers.countryOfResidence.isUk())
     completeSingleDisposalTriageAnswers.assetType match {
-      case Residential => doc.select("#propertyType-answer").text() shouldBe "Yes"
-      case _ => doc.select("#propertyType-answer").text() shouldBe "No"
+      case Residential        => doc.select("#propertyType-answer").text() shouldBe "Yes"
+      case NonResidential     => doc.select("#propertyType-answer").text() shouldBe "No"
+      case IndirectDisposal   => ""
+      case MixedUse           => ""
     }
   }
 }

@@ -270,6 +270,6 @@ object PropertyAddressControllerSpec extends Matchers {
   )(implicit messages: MessagesApi, lang: Lang): Unit =
     doc.select("#property-address-answer").text() shouldBe
       List(Some(ukAddress.line1), ukAddress.line2, ukAddress.town, ukAddress.county, Some(ukAddress.postcode.value))
-        .collect { case Some(s) => s }
+        .collect { case Some(s) => s.trim }
         .mkString(" ")
 }
