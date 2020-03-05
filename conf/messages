@@ -990,7 +990,7 @@ multipleDisposalsWereYouAUKResident.error.required=Select yes if you were a UK r
 
 disposalDateMixedUseOrIndirect.title=You cannot use this service
 disposalDateMixedUseOrIndirect.p1=You cannot use this service to report Capital Gains on:
-disposalDateMixedUseOrIndirect.p1.reason1=disposals of ‘mixed use‘ UK property
+disposalDateMixedUseOrIndirect.p1.reason1=disposals of ‘mixed use’ UK property
 disposalDateMixedUseOrIndirect.p1.reason2=indirect disposals of UK land
 disposalDateMixedUseOrIndirect.h2=What you’ll need to do next
 disposalDateMixedUseOrIndirect.p2=You’ll need to complete a <a href="{0}">non resident: report and pay Capital Gains Tax on UK property or land form</a>.
