@@ -952,6 +952,17 @@ viewReturn.title=Your return
 viewReturn.heading.taxOwed=Tax owed for return
 viewReturn.heading.reference=Return reference number
 viewReturn.printLink=Print or save this page for your records
+viewReturn.charges.heading=Payments
+viewReturn.chargeType.UkResidentReturn=CGT PPD Return UK Resident
+viewReturn.chargeType.NonUkResidentReturn=CGT PPD Return non UK Resident
+viewReturn.chargeType.Interest=	CGT PPD Interest
+viewReturn.chargeType.LateFilingPenalty=CGT PPD Late Filing penalty
+viewReturn.chargeType.SixMonthLateFilingPenalty=CGT PPD 6 Mth LFP
+viewReturn.chargeType.TwelveMonthLateFilingPenalty=CGT PPD 12 Mth LFP
+viewReturn.chargeType.LatePaymentPenalty=CGT PPD Late Payment Penalty
+viewReturn.chargeType.SixMonthLatePaymentPenalty=CGT PPD 6 Mth LPP
+viewReturn.chargeType.TwelveMonthLatePaymentPenalty=CGT PPD 12 Mth LPP
+viewReturn.chargeType.PenaltyInterest=CGT PPD Penalty Interest
 
 multiple-disposals.triage.caption=Reporting multiple disposals
 

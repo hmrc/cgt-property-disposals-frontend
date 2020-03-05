@@ -1,0 +1,43 @@
+
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, Charge}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
+
+@this()
+
+@(charge: Charge)(implicit messages: Messages)
+
+  <tr class="govuk-table__row no-border ">
+    <td class="govuk-table__cell">
+      <strong>
+        @messages(s"viewReturn.chargeType.${charge.chargeType.toString}")
+      </strong>
+      <br>
+      <span class="govuk-caption-m">@{charge.chargeReference}</span>
+    </td>
+    <td class="govuk-table__cell">
+      @{LocalDateUtils.govShortDisplayFormat(charge.dueDate)}
+    </td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">
+      @{MoneyUtils.formatAmountOfMoneyWithoutPoundSign(charge.amount.inPounds())}
+    </td>
+    <td class="govuk-table__cell govuk-table__cell--numeric">
+      <strong>
+        @{MoneyUtils.formatAmountOfMoneyWithoutPoundSign(charge.totalOutstanding().inPounds())}
+      </strong>
+    </td>
+    <td class="govuk-table__cell govuk-table__cell--numeric" width="80">
+      Paid
+    </td>
+  </tr>
+
+  <tr class="govuk-table__row allocations">
+    <td class="govuk-table__cell transactions-list" colspan="7">
+      <div class="govuk-inset-text" style="margin:0;">
+        <ul class="govuk-list payments-list">
+          <li>
+            <strong> £18,260</strong> payment by debit card on 20 Jun 2020
+          </li>
+        </ul>
+      </div></td>
+  </tr>
