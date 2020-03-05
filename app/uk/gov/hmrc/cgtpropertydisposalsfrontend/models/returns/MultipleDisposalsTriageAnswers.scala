@@ -29,18 +29,20 @@ object MultipleDisposalsTriageAnswers {
     numberOfProperties: Option[Int],
     wasAUKResident: Option[Boolean],
     countryOfResidence: Option[Country],
-    wereAllPropertiesResidential: Option[Boolean]
+    wereAllPropertiesResidential: Option[Boolean],
+    assetType: Option[AssetType]
   ) extends MultipleDisposalsTriageAnswers
 
   object IncompleteMultipleDisposalsAnswers {
     val empty: IncompleteMultipleDisposalsAnswers =
-      IncompleteMultipleDisposalsAnswers(None, None, None, None, None)
+      IncompleteMultipleDisposalsAnswers(None, None, None, None, None, None)
   }
 
   final case class CompleteMultipleDisposalsAnswers(
     individualUserType: IndividualUserType,
     numberOfProperties: Int,
-    countryOfResidence: Country
+    countryOfResidence: Country,
+    assetType: AssetType
   ) extends MultipleDisposalsTriageAnswers
 
   implicit class MultipleDisposalsTriageAnswersOps(private val m: MultipleDisposalsTriageAnswers) extends AnyVal {
