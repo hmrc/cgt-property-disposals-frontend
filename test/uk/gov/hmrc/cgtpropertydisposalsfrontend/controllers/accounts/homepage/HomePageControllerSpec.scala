@@ -352,21 +352,6 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
 
       "show an error page" when {
 
-        "the user type is not valid" in {
-          forAll { userType: Option[UserType] =>
-            whenever(!userType.contains(UserType.Individual)) {
-              withClue(s"For user type '$userType': ") {
-                inSequence {
-                  mockAuthWithNoRetrievals()
-                  mockGetSession(subscribedSessionData.copy(userType = userType))
-                }
-
-                checkIsTechnicalErrorPage(performAction())
-              }
-            }
-          }
-        }
-
         "there is an error updating the session" in {
           inSequence {
             mockAuthWithNoRetrievals()
