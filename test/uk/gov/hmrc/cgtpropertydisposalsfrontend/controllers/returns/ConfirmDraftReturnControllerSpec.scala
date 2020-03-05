@@ -85,9 +85,8 @@ class ConfirmDraftReturnControllerSpec
       val result: Future[Result] = performAction()
       status(result) shouldBe OK
       val formattedDate: String = LocalDateUtils.govDisplayFormat(LocalDateUtils.today().plusDays(29))
-      contentAsString(result) should include(messageFromMessageKey("confirmDraftReturn.message", formattedDate))
+      contentAsString(result) should include(messageFromMessageKey("confirmDraftReturn.warning", formattedDate))
     }
-
 
     "handling requests with session with return proper error when StoreDraftReturn service fails" in {
 
@@ -125,7 +124,7 @@ class ConfirmDraftReturnControllerSpec
         performAction(),
         messageFromMessageKey("confirmDraftReturn.title"), { doc =>
           doc.select("#back").attr("href")          shouldBe returns.routes.TaskListController.taskList().url
-          doc.select("#accounts_home").attr("href") shouldBe accounts.homepage.routes.HomePageController.homepage().url
+          doc.select(".button").attr("href") shouldBe accounts.homepage.routes.HomePageController.homepage().url
         }
       )
 
