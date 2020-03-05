@@ -41,7 +41,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue.
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsAnswers, IncompleteMultipleDisposalsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.OtherReliefs
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.{NoOtherReliefs, OtherReliefs}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CompleteYearToDateLiabilityAnswers, IncompleteYearToDateLiabilityAnswers}
@@ -67,6 +67,7 @@ object Generators
     with ReturnGen
     with UpscanGen
     with DisposalDetailsGen
+    with DisposalMethodGen
     with MoneyGen
     with AcquisitionDetailsGen
     with ReliefDetailsAnswersGen
@@ -304,6 +305,13 @@ trait UpscanGen {
 
 }
 
+trait DisposalMethodGen { this: GenUtils =>
+
+  implicit val disposalMethod: Gen[DisposalMethod] =
+    gen[DisposalMethod]
+
+}
+
 trait DisposalDetailsGen { this: GenUtils =>
 
   implicit val completeDisposalDetailsAnswersGen: Gen[CompleteDisposalDetailsAnswers] =
@@ -312,8 +320,11 @@ trait DisposalDetailsGen { this: GenUtils =>
   implicit val incompleteDisposalDetailsAnswersGen: Gen[IncompleteDisposalDetailsAnswers] =
     gen[IncompleteDisposalDetailsAnswers]
 
-  implicit val shareOfPropertyGen: Gen[ShareOfProperty] = gen[ShareOfProperty]
-
+  implicit val shareOfPropertyGen: Gen[ShareOfProperty] =
+    gen[ShareOfProperty].map {
+      case a: ShareOfProperty.Other if a.percentageValue > 100 => ShareOfProperty.Full
+      case other: ShareOfProperty                              => other
+    }
 }
 
 trait AcquisitionDetailsGen { this: GenUtils =>
@@ -333,10 +344,16 @@ trait AcquisitionDetailsGen { this: GenUtils =>
 trait ReliefDetailsGen { this: GenUtils =>
 
   implicit val completeReliefDetailsAnswersGen: Gen[CompleteReliefDetailsAnswers] =
-    gen[CompleteReliefDetailsAnswers]
+    gen[CompleteReliefDetailsAnswers].map {
+      case a: CompleteReliefDetailsAnswers if a.otherReliefs.isEmpty => a.copy(otherReliefs = Some(NoOtherReliefs))
+      case other                                                     => other
+    }
 
   implicit val incompleteReliefDetailsAnswersGen: Gen[IncompleteReliefDetailsAnswers] =
-    gen[IncompleteReliefDetailsAnswers]
+    gen[IncompleteReliefDetailsAnswers].map {
+      case a: IncompleteReliefDetailsAnswers if a.otherReliefs.isEmpty => a.copy(otherReliefs = Some(NoOtherReliefs))
+      case other                                                       => other
+    }
 
 }
 
@@ -360,13 +377,19 @@ trait TaxYearGen { this: GenUtils =>
 
 trait ReliefDetailsAnswersGen extends LowerPriorityReliefDetailsAnswersGen { this: GenUtils =>
 
+  override implicit val longArb: Arbitrary[Long] = Arbitrary(Gen.choose(0.toLong, 5e13.toLong))
+
   implicit val reliefDetailsAnswersGen: Gen[ReliefDetailsAnswers] =
     gen[ReliefDetailsAnswers]
 
   implicit val completeReliefDetailsAnswersGen: Gen[CompleteReliefDetailsAnswers] =
-    gen[CompleteReliefDetailsAnswers]
+    gen[CompleteReliefDetailsAnswers].map {
+      case a: CompleteReliefDetailsAnswers if a.otherReliefs.isEmpty => a.copy(otherReliefs = Some(NoOtherReliefs))
+      case other                                                     => other
+    }
 
   implicit val otherReliefsGen: Gen[OtherReliefs] = gen[OtherReliefs]
+
 }
 
 trait LowerPriorityReliefDetailsAnswersGen { this: GenUtils =>
