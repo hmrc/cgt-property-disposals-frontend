@@ -17,24 +17,22 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 import cats.syntax.either._
-import cats.syntax.eq._
-import cats.instances.boolean._
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
-import play.api.data.{Form, FormError}
 import play.api.data.Forms.{mapping, of}
 import play.api.data.format.Formatter
+import play.api.data.{Form, FormError}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingNewDraftReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, FormUtils, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsAnswers, IncompleteMultipleDisposalsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, FormUtils, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
@@ -110,7 +108,7 @@ class MultipleDisposalsTriageController @Inject() (
                   else
                     Right[MultipleDisposalsTriageAnswers, IncompleteSingleDisposalTriageAnswers](
                       IncompleteSingleDisposalTriageAnswers.empty.copy(
-                        individualUserType         = answers.fold(_.individualUserType, c => Some(c.individualUserType)),
+                        individualUserType         = answers.fold(_.individualUserType, _.individualUserType),
                         hasConfirmedSingleDisposal = true
                       )
                     ) -> routes.SingleDisposalsTriageController.checkYourAnswers()
@@ -163,7 +161,7 @@ class MultipleDisposalsTriageController @Inject() (
                     ),
                   complete =>
                     IncompleteMultipleDisposalsAnswers(
-                      individualUserType = Some(complete.individualUserType),
+                      individualUserType = complete.individualUserType,
                       numberOfProperties = Some(complete.numberOfProperties),
                       wasAUKResident     = Some(wereUKResident),
                       countryOfResidence = None
@@ -188,12 +186,14 @@ class MultipleDisposalsTriageController @Inject() (
 
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withMultipleDisposalTriageAnswers(request) {
-      case (_, _, triageAnswers) =>
-        triageAnswers match {
-          case IncompleteMultipleDisposalsAnswers(None, _, _, _) =>
-            Redirect(routes.InitialTriageQuestionsController.howManyProperties())
+      case (_, state, triageAnswers) =>
+        val isIndividual = state.subscribedDetails.userType().isRight
 
-          case IncompleteMultipleDisposalsAnswers(Some(_), None, _, _) =>
+        triageAnswers match {
+          case IncompleteMultipleDisposalsAnswers(None, _, _, _) if isIndividual =>
+            Redirect(routes.InitialTriageQuestionsController.whoIsIndividualRepresenting())
+
+          case IncompleteMultipleDisposalsAnswers(_, None, _, _) =>
             Redirect(routes.MultipleDisposalsTriageController.guidance())
 
           case IncompleteMultipleDisposalsAnswers(_, None, _, _) =>

@@ -40,6 +40,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{IndirectDisposal, MixedUse, NonResidential, Residential}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{SingleDisposalTriageAnswers, _}
@@ -85,28 +87,42 @@ class SingleDisposalsTriageControllerSpec
     case _                                                               => false
   }
 
-  val startingNewDraftReturn = sample[StartingNewDraftReturn]
-
-  val fillingOutReturn = sample[FillingOutReturn]
-    .copy(
-      subscribedDetails = startingNewDraftReturn.subscribedDetails,
-      startingNewDraftReturn.ggCredId,
-      startingNewDraftReturn.agentReferenceNumber
+  def sessionDataWithStartingNewDraftReturn(
+    singleDisposalTriageAnswers: SingleDisposalTriageAnswers,
+    name: Either[TrustName, IndividualName] = Right(sample[IndividualName])
+  ): (SessionData, StartingNewDraftReturn) = {
+    val startingNewDraftReturn = sample[StartingNewDraftReturn].copy(
+      subscribedDetails      = sample[SubscribedDetails].copy(name = name),
+      newReturnTriageAnswers = Right(singleDisposalTriageAnswers)
     )
 
-  val draftReturn = sample[DraftReturn]
-
-  def sessionDataWithStartingNewDraftReturn(singleDisposalTriageAnswers: SingleDisposalTriageAnswers): SessionData =
     SessionData.empty
-      .copy(journeyStatus =
-        Some(startingNewDraftReturn.copy(newReturnTriageAnswers = Right(singleDisposalTriageAnswers)))
+      .copy(journeyStatus = Some(
+        startingNewDraftReturn.copy(
+          subscribedDetails      = startingNewDraftReturn.subscribedDetails.copy(name = name),
+          newReturnTriageAnswers = Right(singleDisposalTriageAnswers)
+        )
       )
+      ) -> startingNewDraftReturn
+  }
 
-  def sessionDataWithFillingOurReturn(draftReturn: DraftReturn): SessionData =
-    SessionData.empty.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = draftReturn)))
+  def sessionDataWithFillingOurReturn(
+    draftReturn: DraftReturn,
+    name: Either[TrustName, IndividualName]
+  ): (SessionData, FillingOutReturn) = {
+    val fillingOutReturn = sample[FillingOutReturn].copy(
+      draftReturn       = draftReturn,
+      subscribedDetails = sample[SubscribedDetails].copy(name = name)
+    )
 
-  def sessionDataWithFillingOurReturn(singleDisposalTriageAnswers: SingleDisposalTriageAnswers): SessionData =
-    sessionDataWithFillingOurReturn(draftReturn.copy(triageAnswers = singleDisposalTriageAnswers))
+    SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)) -> fillingOutReturn
+  }
+
+  def sessionDataWithFillingOurReturn(
+    singleDisposalTriageAnswers: SingleDisposalTriageAnswers,
+    name: Either[TrustName, IndividualName] = Right(sample[IndividualName])
+  ): (SessionData, FillingOutReturn) =
+    sessionDataWithFillingOurReturn(sample[DraftReturn].copy(triageAnswers = singleDisposalTriageAnswers), name)
 
   def mockGetNextUUID(uuid: UUID) =
     (mockUUIDGenerator.nextId _).expects().returning(uuid)
@@ -278,7 +294,7 @@ class SingleDisposalsTriageControllerSpec
                 requiredPreviousAnswers.copy(
                   disposalMethod = Some(DisposalMethod.Sold)
                 )
-              )
+              )._1
             )
           }
 
@@ -416,7 +432,7 @@ class SingleDisposalsTriageControllerSpec
               completeAnswers.copy(countryOfResidence = Country("AB", None)),
               List("wereYouAUKResident" -> "true"),
               IncompleteSingleDisposalTriageAnswers(
-                Some(completeAnswers.individualUserType),
+                completeAnswers.individualUserType,
                 true,
                 Some(completeAnswers.disposalMethod),
                 Some(true),
@@ -437,7 +453,7 @@ class SingleDisposalsTriageControllerSpec
               completeAnswers.copy(countryOfResidence = Country.uk),
               List("wereYouAUKResident" -> "false"),
               IncompleteSingleDisposalTriageAnswers(
-                Some(completeAnswers.individualUserType),
+                completeAnswers.individualUserType,
                 true,
                 Some(completeAnswers.disposalMethod),
                 Some(false),
@@ -462,7 +478,7 @@ class SingleDisposalsTriageControllerSpec
               completeAnswers.copy(countryOfResidence = Country("AB", None)),
               List("wereYouAUKResident" -> "true"),
               IncompleteSingleDisposalTriageAnswers(
-                Some(completeAnswers.individualUserType),
+                completeAnswers.individualUserType,
                 true,
                 Some(completeAnswers.disposalMethod),
                 Some(true),
@@ -501,7 +517,7 @@ class SingleDisposalsTriageControllerSpec
                 requiredPreviousAnswers.copy(
                   wasAUKResident = Some(true)
                 )
-              )
+              )._1
             )
           }
 
@@ -685,7 +701,7 @@ class SingleDisposalsTriageControllerSpec
                 requiredPreviousAnswers.copy(
                   assetType = Some(Residential)
                 )
-              )
+              )._1
             )
           }
 
@@ -834,7 +850,7 @@ class SingleDisposalsTriageControllerSpec
         "there is a problem getting the tax year" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithFillingOurReturn(requiredPreviousAnswers))
+            mockGetSession(sessionDataWithFillingOurReturn(requiredPreviousAnswers)._1)
             mockGetTaxYear(today)(Left(Error("")))
           }
 
@@ -911,7 +927,7 @@ class SingleDisposalsTriageControllerSpec
               completeJourney,
               formData(date),
               IncompleteSingleDisposalTriageAnswers(
-                Some(completeJourney.individualUserType),
+                completeJourney.individualUserType,
                 true,
                 Some(completeJourney.disposalMethod),
                 Some(completeJourney.countryOfResidence.isUk()),
@@ -955,7 +971,7 @@ class SingleDisposalsTriageControllerSpec
               completeJourney,
               formData(date),
               IncompleteSingleDisposalTriageAnswers(
-                Some(completeJourney.individualUserType),
+                completeJourney.individualUserType,
                 true,
                 Some(completeJourney.disposalMethod),
                 Some(completeJourney.countryOfResidence.isUk()),
@@ -983,7 +999,7 @@ class SingleDisposalsTriageControllerSpec
                 requiredPreviousAnswers.copy(
                   disposalDate = Some(DisposalDate(today, taxYear))
                 )
-              )
+              )._1
             )
           }
 
@@ -1209,7 +1225,7 @@ class SingleDisposalsTriageControllerSpec
                 requiredPreviousAnswers.copy(
                   completionDate = Some(CompletionDate(disposalDate.value))
                 )
-              )
+              )._1
             )
           }
 
@@ -1256,7 +1272,7 @@ class SingleDisposalsTriageControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
-                sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers.copy(wasAUKResident = Some(true)))
+                sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers.copy(wasAUKResident = Some(true)))._1
               )
             }
 
@@ -1269,7 +1285,7 @@ class SingleDisposalsTriageControllerSpec
               mockGetSession(
                 sessionDataWithStartingNewDraftReturn(
                   sample[CompleteSingleDisposalTriageAnswers].copy(countryOfResidence = Country.uk)
-                )
+                )._1
               )
             }
 
@@ -1318,7 +1334,7 @@ class SingleDisposalsTriageControllerSpec
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
                 sample[CompleteSingleDisposalTriageAnswers].copy(assetType = MixedUse)
-              )
+              )._1
             )
           }
 
@@ -1331,7 +1347,7 @@ class SingleDisposalsTriageControllerSpec
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
                 sample[CompleteSingleDisposalTriageAnswers].copy(assetType = IndirectDisposal)
-              )
+              )._1
             )
           }
 
@@ -1347,7 +1363,7 @@ class SingleDisposalsTriageControllerSpec
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
                 sample[CompleteSingleDisposalTriageAnswers].copy(assetType = Residential)
-              )
+              )._1
             )
           }
 
@@ -1360,7 +1376,7 @@ class SingleDisposalsTriageControllerSpec
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
                 sample[CompleteSingleDisposalTriageAnswers].copy(assetType = NonResidential)
-              )
+              )._1
             )
           }
 
@@ -1403,7 +1419,7 @@ class SingleDisposalsTriageControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
-                sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers.copy(wasAUKResident = Some(true)))
+                sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers.copy(wasAUKResident = Some(true)))._1
               )
             }
 
@@ -1416,7 +1432,7 @@ class SingleDisposalsTriageControllerSpec
               mockGetSession(
                 sessionDataWithStartingNewDraftReturn(
                   sample[CompleteSingleDisposalTriageAnswers].copy(countryOfResidence = Country.uk)
-                )
+                )._1
               )
             }
 
@@ -1516,7 +1532,7 @@ class SingleDisposalsTriageControllerSpec
                 requiredPreviousAnswers.copy(
                   countryOfResidence = Some(country)
                 )
-              )
+              )._1
             )
           }
 
@@ -1651,7 +1667,7 @@ class SingleDisposalsTriageControllerSpec
               completeAnswers.copy(assetType = AssetType.Residential),
               List("assetTypeForNonUkResidents" -> "1"),
               IncompleteSingleDisposalTriageAnswers(
-                Some(completeAnswers.individualUserType),
+                completeAnswers.individualUserType,
                 true,
                 Some(completeAnswers.disposalMethod),
                 Some(false),
@@ -1676,7 +1692,7 @@ class SingleDisposalsTriageControllerSpec
               completeAnswers.copy(assetType = AssetType.Residential),
               List("assetTypeForNonUkResidents" -> "2"),
               IncompleteSingleDisposalTriageAnswers(
-                Some(completeAnswers.individualUserType),
+                completeAnswers.individualUserType,
                 true,
                 Some(completeAnswers.disposalMethod),
                 Some(false),
@@ -1715,7 +1731,7 @@ class SingleDisposalsTriageControllerSpec
                 requiredPreviousAnswers.copy(
                   assetType = Some(AssetType.Residential)
                 )
-              )
+              )._1
             )
           }
 
@@ -1736,7 +1752,7 @@ class SingleDisposalsTriageControllerSpec
 
       val completeTriageQuestions =
         CompleteSingleDisposalTriageAnswers(
-          IndividualUserType.Self,
+          Some(IndividualUserType.Self),
           DisposalMethod.Sold,
           Country.uk,
           assetType = AssetType.Residential,
@@ -1745,7 +1761,7 @@ class SingleDisposalsTriageControllerSpec
         )
 
       val allQuestionsAnswered = IncompleteSingleDisposalTriageAnswers(
-        Some(completeTriageQuestions.individualUserType),
+        completeTriageQuestions.individualUserType,
         true,
         Some(completeTriageQuestions.disposalMethod),
         Some(true),
@@ -1758,31 +1774,72 @@ class SingleDisposalsTriageControllerSpec
 
       "redirect to the correct page" when {
 
-        def test(sessionDataWith: SingleDisposalTriageAnswers => SessionData): Unit =
+        case class Scenario(
+          answers: SingleDisposalTriageAnswers,
+          name: Either[TrustName, IndividualName],
+          expectedRedirect: Call
+        )
+
+        def test(
+          sessionDataWith: (SingleDisposalTriageAnswers, Either[TrustName, IndividualName]) => SessionData
+        ): Unit =
           List(
-            allQuestionsAnswered.copy(individualUserType = None) -> routes.InitialTriageQuestionsController
-              .whoIsIndividualRepresenting(),
-            allQuestionsAnswered.copy(hasConfirmedSingleDisposal = false) -> routes.InitialTriageQuestionsController
-              .howManyProperties(),
-            allQuestionsAnswered.copy(disposalMethod = None) -> routes.SingleDisposalsTriageController
-              .howDidYouDisposeOfProperty(),
-            allQuestionsAnswered.copy(wasAUKResident = None) -> routes.SingleDisposalsTriageController
-              .wereYouAUKResident(),
-            allQuestionsAnswered.copy(assetType = None) -> routes.SingleDisposalsTriageController
-              .didYouDisposeOfAResidentialProperty(),
-            allQuestionsAnswered.copy(disposalDate = None) -> routes.SingleDisposalsTriageController
-              .whenWasDisposalDate(),
-            allQuestionsAnswered.copy(completionDate = None) -> routes.SingleDisposalsTriageController
-              .whenWasCompletionDate(),
-            allQuestionsAnswered
-              .copy(wasAUKResident = Some(false), countryOfResidence = None) -> routes.SingleDisposalsTriageController
-              .countryOfResidence()
+            Scenario(
+              allQuestionsAnswered.copy(individualUserType = None),
+              Right(sample[IndividualName]),
+              routes.InitialTriageQuestionsController.whoIsIndividualRepresenting()
+            ),
+            Scenario(
+              allQuestionsAnswered.copy(individualUserType = None, hasConfirmedSingleDisposal = false),
+              Left(sample[TrustName]),
+              routes.InitialTriageQuestionsController.howManyProperties()
+            ),
+            Scenario(
+              allQuestionsAnswered.copy(hasConfirmedSingleDisposal = false),
+              Right(sample[IndividualName]),
+              routes.InitialTriageQuestionsController.howManyProperties()
+            ),
+            Scenario(
+              allQuestionsAnswered.copy(disposalMethod = None),
+              Right(sample[IndividualName]),
+              routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()
+            ),
+            Scenario(
+              allQuestionsAnswered.copy(wasAUKResident = None),
+              Right(sample[IndividualName]),
+              routes.SingleDisposalsTriageController.wereYouAUKResident()
+            ),
+            Scenario(
+              allQuestionsAnswered.copy(assetType = None),
+              Right(sample[IndividualName]),
+              routes.SingleDisposalsTriageController
+                .didYouDisposeOfAResidentialProperty()
+            ),
+            Scenario(
+              allQuestionsAnswered.copy(disposalDate = None),
+              Right(sample[IndividualName]),
+              routes.SingleDisposalsTriageController
+                .whenWasDisposalDate()
+            ),
+            Scenario(
+              allQuestionsAnswered.copy(completionDate = None),
+              Right(sample[IndividualName]),
+              routes.SingleDisposalsTriageController
+                .whenWasCompletionDate()
+            ),
+            Scenario(
+              allQuestionsAnswered
+                .copy(wasAUKResident = Some(false), countryOfResidence = None),
+              Right(sample[IndividualName]),
+              routes.SingleDisposalsTriageController
+                .countryOfResidence()
+            )
           ).foreach {
-            case (state, expectedRedirect) =>
+            case Scenario(state, name, expectedRedirect) =>
               withClue(s"For state $state and expected redirect url ${expectedRedirect.url}: ") {
                 inSequence {
                   mockAuthWithNoRetrievals()
-                  mockGetSession(sessionDataWith(state))
+                  mockGetSession(sessionDataWith(state, name))
                 }
 
                 checkIsRedirect(performAction(), expectedRedirect)
@@ -1790,11 +1847,11 @@ class SingleDisposalsTriageControllerSpec
           }
 
         "a question has not yet been answered and a draft return has not been created" in {
-          test(sessionDataWithStartingNewDraftReturn)
+          test(sessionDataWithStartingNewDraftReturn(_, _)._1)
         }
 
         "a question has not yet been answered and a draft return has been created" in {
-          test(sessionDataWithFillingOurReturn)
+          test(sessionDataWithFillingOurReturn(_, _)._1)
         }
 
       }
@@ -1807,7 +1864,7 @@ class SingleDisposalsTriageControllerSpec
               allQuestionsAnswered.copy(
                 assetType = Some(AssetType.IndirectDisposal)
               )
-            )
+            )._1
           )
         }
 
@@ -1823,7 +1880,7 @@ class SingleDisposalsTriageControllerSpec
               allQuestionsAnswered.copy(
                 assetType = Some(AssetType.MixedUse)
               )
-            )
+            )._1
           )
         }
 
@@ -1834,11 +1891,15 @@ class SingleDisposalsTriageControllerSpec
 
       "show an error page" when {
 
-        "all the questions have now been answered but the sessino data cannot be updated" in {
+        "all the questions have now been answered but the session data cannot be updated" in {
+          val (session, journey) = sessionDataWithStartingNewDraftReturn(allQuestionsAnswered)
+          val updatedJourney     = journey.copy(newReturnTriageAnswers = Right(completeTriageQuestions))
+          val updatedSession     = session.copy(journeyStatus = Some(updatedJourney))
+
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithStartingNewDraftReturn(allQuestionsAnswered))
-            mockStoreSession(sessionDataWithStartingNewDraftReturn(completeTriageQuestions))(Left(Error("")))
+            mockGetSession(session)
+            mockStoreSession(updatedSession)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -1860,10 +1921,14 @@ class SingleDisposalsTriageControllerSpec
           )
 
         "all the questions have now been answered and the session is updated when a draft return has not yet been created" in {
+          val (session, journey) = sessionDataWithStartingNewDraftReturn(allQuestionsAnswered)
+          val updatedJourney     = journey.copy(newReturnTriageAnswers = Right(completeTriageQuestions))
+          val updatedSession     = session.copy(journeyStatus = Some(updatedJourney))
+
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithStartingNewDraftReturn(allQuestionsAnswered))
-            mockStoreSession(sessionDataWithStartingNewDraftReturn(completeTriageQuestions))(Right(()))
+            mockGetSession(session)
+            mockStoreSession(updatedSession)(Right(()))
           }
 
           testIsCheckYourAnswers(
@@ -1874,10 +1939,15 @@ class SingleDisposalsTriageControllerSpec
         }
 
         "all the questions have now been answered and the session is updated when a draft return has been created" in {
+          val (session, journey) = sessionDataWithFillingOurReturn(allQuestionsAnswered)
+          val updatedJourney =
+            journey.copy(draftReturn = journey.draftReturn.copy(triageAnswers = completeTriageQuestions))
+          val updatedSession = session.copy(journeyStatus = Some(updatedJourney))
+
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithFillingOurReturn(allQuestionsAnswered))
-            mockStoreSession(sessionDataWithFillingOurReturn(completeTriageQuestions))(Right(()))
+            mockGetSession(session)
+            mockStoreSession(updatedSession)(Right(()))
           }
 
           testIsCheckYourAnswers(
@@ -1890,7 +1960,7 @@ class SingleDisposalsTriageControllerSpec
         "all the questions have already been answered and a draft return has not yet been created" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithStartingNewDraftReturn(completeTriageQuestions))
+            mockGetSession(sessionDataWithStartingNewDraftReturn(completeTriageQuestions)._1)
           }
 
           testIsCheckYourAnswers(
@@ -1903,7 +1973,7 @@ class SingleDisposalsTriageControllerSpec
         "all the questions have already been answered and a draft return has been created" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithFillingOurReturn(completeTriageQuestions))
+            mockGetSession(sessionDataWithFillingOurReturn(completeTriageQuestions)._1)
           }
 
           testIsCheckYourAnswers(
@@ -1924,12 +1994,20 @@ class SingleDisposalsTriageControllerSpec
 
       val completeAnswers = sample[CompleteSingleDisposalTriageAnswers]
 
+      val startingNewDraftReturn = sample[StartingNewDraftReturn].copy(newReturnTriageAnswers = Right(completeAnswers))
+
+      val sessionWithCompleteStartingNewDraftReturn =
+        SessionData.empty.copy(journeyStatus = Some(startingNewDraftReturn))
+
       val uuid = UUID.randomUUID()
 
-      val newDraftReturn =
+      val fillingOutReturn = FillingOutReturn(
+        startingNewDraftReturn.subscribedDetails,
+        startingNewDraftReturn.ggCredId,
+        startingNewDraftReturn.agentReferenceNumber,
         DraftReturn(
           uuid,
-          fillingOutReturn.subscribedDetails.cgtReference,
+          startingNewDraftReturn.subscribedDetails.cgtReference,
           completeAnswers,
           None,
           None,
@@ -1939,14 +2017,9 @@ class SingleDisposalsTriageControllerSpec
           None,
           LocalDateUtils.today()
         )
-
-      val sessionDataWithNewDraftReturn = SessionData.empty.copy(
-        journeyStatus = Some(
-          fillingOutReturn.copy(
-            draftReturn = newDraftReturn
-          )
-        )
       )
+
+      val sessionDataWithFillingOutDraftReturn = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
 
       "redirect to the check your answers page" when {
 
@@ -1955,7 +2028,7 @@ class SingleDisposalsTriageControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithStartingNewDraftReturn(incompleteAnswers))
+            mockGetSession(sessionDataWithStartingNewDraftReturn(incompleteAnswers)._1)
           }
 
           checkIsRedirect(performAction(), routes.SingleDisposalsTriageController.checkYourAnswers())
@@ -1968,9 +2041,9 @@ class SingleDisposalsTriageControllerSpec
         "there is a problem storing a draft return" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithStartingNewDraftReturn(completeAnswers))
+            mockGetSession(sessionWithCompleteStartingNewDraftReturn)
             mockGetNextUUID(uuid)
-            mockStoreDraftReturn(newDraftReturn)(Left(Error("")))
+            mockStoreDraftReturn(fillingOutReturn.draftReturn)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -1979,10 +2052,10 @@ class SingleDisposalsTriageControllerSpec
         "there is a problem updating the session" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithStartingNewDraftReturn(completeAnswers))
+            mockGetSession(sessionWithCompleteStartingNewDraftReturn)
             mockGetNextUUID(uuid)
-            mockStoreDraftReturn(newDraftReturn)(Right(()))
-            mockStoreSession(sessionDataWithNewDraftReturn)(Left(Error("")))
+            mockStoreDraftReturn(fillingOutReturn.draftReturn)(Right(()))
+            mockStoreSession(sessionDataWithFillingOutDraftReturn)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -1995,10 +2068,10 @@ class SingleDisposalsTriageControllerSpec
         "the draft return is stored and the session is updated and a draft return had not already been created" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithStartingNewDraftReturn(completeAnswers))
+            mockGetSession(sessionWithCompleteStartingNewDraftReturn)
             mockGetNextUUID(uuid)
-            mockStoreDraftReturn(newDraftReturn)(Right(()))
-            mockStoreSession(sessionDataWithNewDraftReturn)(Right(()))
+            mockStoreDraftReturn(fillingOutReturn.draftReturn)(Right(()))
+            mockStoreSession(sessionDataWithFillingOutDraftReturn)(Right(()))
           }
 
           checkIsRedirect(performAction(), returnsRoutes.TaskListController.taskList())
@@ -2007,7 +2080,7 @@ class SingleDisposalsTriageControllerSpec
         "the draft return is stored and the session is updated and a draft return had already been created" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithFillingOurReturn(completeAnswers))
+            mockGetSession(sessionDataWithFillingOutDraftReturn)
           }
 
           checkIsRedirect(performAction(), returnsRoutes.TaskListController.taskList())
@@ -2044,11 +2117,11 @@ class SingleDisposalsTriageControllerSpec
 
         "the section is incomplete and the was a uk resident question has not been answered yet and" when {
           "the user is starting a new draft return and" in {
-            test(sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers.copy(wasAUKResident = None)))
+            test(sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers.copy(wasAUKResident = None))._1)
           }
 
           "the user is filling in a draft return" in {
-            test(sessionDataWithFillingOurReturn(requiredPreviousAnswers.copy(wasAUKResident = None)))
+            test(sessionDataWithFillingOurReturn(requiredPreviousAnswers.copy(wasAUKResident = None))._1)
 
           }
         }
@@ -2060,7 +2133,7 @@ class SingleDisposalsTriageControllerSpec
         "the user was a uk resident" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers))
+            mockGetSession(sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers)._1)
           }
 
           checkPageIsDisplayed(
@@ -2086,7 +2159,7 @@ class SingleDisposalsTriageControllerSpec
                   wasAUKResident     = Some(false),
                   countryOfResidence = Some(sample[Country])
                 )
-              )
+              )._1
             )
           }
 
@@ -2120,19 +2193,13 @@ class SingleDisposalsTriageControllerSpec
     s"redirect to ${redirectToPreviousAnswer.url}" when {
 
       "that question has not already answered" in {
-        List(
-          sessionDataWithStartingNewDraftReturn(setPreviousAnswer(requiredPreviousAnswers, None)),
-          sessionDataWithFillingOurReturn(setPreviousAnswer(requiredPreviousAnswers, None))
-        ).foreach { currentSession =>
-          withClue(s"For currentSession $currentSession: ") {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(sessionDataWithStartingNewDraftReturn(setPreviousAnswer(requiredPreviousAnswers, None)))
-            }
 
-            checkIsRedirect(performAction(), redirectToPreviousAnswer)
-          }
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionDataWithStartingNewDraftReturn(setPreviousAnswer(requiredPreviousAnswers, None))._1)
         }
+
+        checkIsRedirect(performAction(), redirectToPreviousAnswer)
       }
     }
 
@@ -2146,7 +2213,7 @@ class SingleDisposalsTriageControllerSpec
   ): Unit = {
     inSequence {
       mockAuthWithNoRetrievals()
-      mockGetSession(sessionDataWithStartingNewDraftReturn(currentAnswers))
+      mockGetSession(sessionDataWithStartingNewDraftReturn(currentAnswers)._1)
     }
 
     val result  = performAction(formData)
@@ -2171,19 +2238,20 @@ class SingleDisposalsTriageControllerSpec
       List(
         sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers),
         sessionDataWithFillingOurReturn(requiredPreviousAnswers)
-      ).foreach { currentSession =>
-        withClue(s"For currentSession $currentSession: ") {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(currentSession)
-          }
+      ).foreach {
+        case (currentSession, _) =>
+          withClue(s"For currentSession $currentSession: ") {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(currentSession)
+            }
 
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey(pageTitleKey),
-            checkContent
-          )
-        }
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey(pageTitleKey),
+              checkContent
+            )
+          }
       }
     }
 
@@ -2191,21 +2259,22 @@ class SingleDisposalsTriageControllerSpec
       List(
         sessionDataWithStartingNewDraftReturn(answersWithCurrentAnswer),
         sessionDataWithFillingOurReturn(answersWithCurrentAnswer)
-      ).foreach { currentSession =>
-        withClue(s"For currentSession $currentSession: ") {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(currentSession)
-          }
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey(pageTitleKey), { document =>
-              checkContent(document)
-              checkPrepopulatedContent(document)
+      ).foreach {
+        case (currentSession, _) =>
+          withClue(s"For currentSession $currentSession: ") {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(currentSession)
             }
-          )
-        }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey(pageTitleKey), { document =>
+                checkContent(document)
+                checkPrepopulatedContent(document)
+              }
+            )
+          }
       }
     }
 
@@ -2221,19 +2290,20 @@ class SingleDisposalsTriageControllerSpec
       List(
         sessionDataWithStartingNewDraftReturn(answers),
         sessionDataWithFillingOurReturn(answers)
-      ).foreach { currentSession =>
-        withClue(s"For currentSession $currentSession: ") {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(currentSession)
-          }
+      ).foreach {
+        case (currentSession, _) =>
+          withClue(s"For currentSession $currentSession: ") {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(currentSession)
+            }
 
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey(pageTitleKey),
-            checkContent
-          )
-        }
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey(pageTitleKey),
+              checkContent
+            )
+          }
       }
     }
 
@@ -2249,11 +2319,15 @@ class SingleDisposalsTriageControllerSpec
       "the user is starting a new draft return and" when {
 
         "there is an error updating the session" in {
+          val (session, journey) = sessionDataWithStartingNewDraftReturn(currentAnswers)
+          val updatedJourney     = journey.copy(newReturnTriageAnswers = Right(updatedAnswers))
+          val updatedSession     = session.copy(journeyStatus = Some(updatedJourney))
+
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithStartingNewDraftReturn(currentAnswers))
+            mockGetSession(session)
             extraMockActions()
-            mockStoreSession(sessionDataWithStartingNewDraftReturn(updatedAnswers))(Left(Error("")))
+            mockStoreSession(updatedSession)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction(formData))
@@ -2303,11 +2377,15 @@ class SingleDisposalsTriageControllerSpec
     checkNextResult: Future[Result] => Unit,
     extraMockActions: () => Unit = () => ()
   ): Unit = {
+    val (session, journey) = sessionDataWithStartingNewDraftReturn(currentAnswers)
+    val updatedJourney     = journey.copy(newReturnTriageAnswers = Right(updatedAnswers))
+    val updatedSession     = session.copy(journeyStatus = Some(updatedJourney))
+
     inSequence {
       mockAuthWithNoRetrievals()
-      mockGetSession(sessionDataWithStartingNewDraftReturn(currentAnswers))
+      mockGetSession(session)
       extraMockActions()
-      mockStoreSession(sessionDataWithStartingNewDraftReturn(updatedAnswers))(Right(()))
+      mockStoreSession(updatedSession)(Right(()))
     }
 
     checkNextResult(performAction(formData))
@@ -2345,9 +2423,12 @@ object SingleDisposalsTriageControllerSpec extends Matchers {
     completeSingleDisposalTriageAnswers: CompleteSingleDisposalTriageAnswers,
     doc: Document
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
-    doc.select("#individualUserType-answer").text() shouldBe messages(
-      s"individualUserType.${completeSingleDisposalTriageAnswers.individualUserType}"
-    )
+    completeSingleDisposalTriageAnswers.individualUserType.foreach { individualUserType =>
+      doc.select("#individualUserType-answer").text() shouldBe messages(
+        s"individualUserType.$individualUserType"
+      )
+    }
+
     doc.select("#numberOfProperties-answer").text() shouldBe "One"
     doc.select("#disposalMethod-answer").text() shouldBe messages(
       s"disposalMethod.${completeSingleDisposalTriageAnswers.disposalMethod}"

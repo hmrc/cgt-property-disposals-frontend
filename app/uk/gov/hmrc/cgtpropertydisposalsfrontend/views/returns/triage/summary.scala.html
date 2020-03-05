@@ -34,12 +34,15 @@
 @(answers: CompleteSingleDisposalTriageAnswers)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @cyaSection() {
-  @cyaRow(
-    messages("who-are-you-reporting-for.title"),
-    Html(messages(s"individualUserType.${answers.individualUserType.toString}")),
-    Some(cyaChange(messages("triage.cyaChange.individualUserType"), routes.InitialTriageQuestionsController.whoIsIndividualRepresenting().url)),
-      "individualUserType"
-  )
+  @answers.individualUserType.map{ individualUserType =>
+      @cyaRow(
+          messages("who-are-you-reporting-for.title"),
+          Html(messages(s"individualUserType.${individualUserType.toString}")),
+          Some(cyaChange(messages("triage.cyaChange.individualUserType"), routes.InitialTriageQuestionsController.whoIsIndividualRepresenting().url)),
+          "individualUserType"
+      )
+  }
+
   @cyaRow(
     messages("numberOfProperties.title"),
     Html(messages(s"numberOfProperties.One")),

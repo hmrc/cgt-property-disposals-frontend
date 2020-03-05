@@ -37,7 +37,7 @@ object MultipleDisposalsTriageAnswers {
   }
 
   final case class CompleteMultipleDisposalsAnswers(
-    individualUserType: IndividualUserType,
+    individualUserType: Option[IndividualUserType],
     numberOfProperties: Int,
     countryOfResidence: Country
   ) extends MultipleDisposalsTriageAnswers

@@ -19,7 +19,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 import cats.data.EitherT
 import cats.instances.future._
 import cats.syntax.either._
-import cats.syntax.eq._
 import com.google.inject.Inject
 import play.api.Configuration
 import play.api.data.Form
@@ -62,17 +61,25 @@ class InitialTriageQuestionsController @Inject() (
 
   import InitialTriageQuestionsController._
 
+  private def isIndividual(state: Either[StartingNewDraftReturn, FillingOutReturn]): Boolean =
+    state.fold(_.subscribedDetails.userType(), _.subscribedDetails.userType()).isRight
+
   def whoIsIndividualRepresenting(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withState(request) {
       case (_, state) =>
-        val form = getIndividualUserType(state).fold(whoAreYouReportingForForm)(whoAreYouReportingForForm.fill)
-        Ok(
-          whoAreYouReportingForPage(
-            form,
-            None,
-            state.isRight
+        if (!isIndividual(state))
+          Redirect(routes.InitialTriageQuestionsController.howManyProperties())
+        else {
+          val form = getIndividualUserType(state).fold(whoAreYouReportingForForm)(whoAreYouReportingForForm.fill)
+
+          Ok(
+            whoAreYouReportingForPage(
+              form,
+              None,
+              state.isRight
+            )
           )
-        )
+        }
     }
   }
 
@@ -80,48 +87,51 @@ class InitialTriageQuestionsController @Inject() (
     implicit request =>
       withState(request) {
         case (_, state) =>
-          whoAreYouReportingForForm
-            .bindFromRequest()
-            .fold(
-              formWithErrors => BadRequest(whoAreYouReportingForPage(formWithErrors, None, state.isRight)), {
-                individualUserType =>
-                  val answers = triageAnswersFomState(state)
-                  val oldIndividualUserType = answers.fold(
-                    _.fold(_.individualUserType, c => Some(c.individualUserType)),
-                    _.fold(_.individualUserType, c => Some(c.individualUserType))
-                  )
-                  val redirectTo = answers.fold(
-                    _ => routes.MultipleDisposalsTriageController.checkYourAnswers(),
-                    _ => routes.SingleDisposalsTriageController.checkYourAnswers()
-                  )
-
-                  if (oldIndividualUserType.contains(individualUserType)) {
-                    Redirect(redirectTo)
-                  } else {
-
-                    val updatedState = updateIndividualUserType(state, individualUserType)
-                    val result =
-                      for {
-                        _ <- updatedState.fold(
-                              _ => EitherT.pure(()),
-                              fillingOutReturn => returnsService.storeDraftReturn(fillingOutReturn.draftReturn)
-                            )
-                        _ <- EitherT(
-                              updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedState.merge)))
-                            )
-                      } yield ()
-
-                    result.fold(
-                      { e =>
-                        logger.warn("Could not perform updates", e)
-                        errorHandler.errorResult()
-                      },
-                      _ => Redirect(redirectTo)
+          if (!isIndividual(state))
+            Redirect(routes.InitialTriageQuestionsController.howManyProperties())
+          else {
+            whoAreYouReportingForForm
+              .bindFromRequest()
+              .fold(
+                formWithErrors => BadRequest(whoAreYouReportingForPage(formWithErrors, None, state.isRight)), {
+                  individualUserType =>
+                    val answers = triageAnswersFomState(state)
+                    val oldIndividualUserType = answers.fold(
+                      _.fold(_.individualUserType, c => c.individualUserType),
+                      _.fold(_.individualUserType, c => c.individualUserType)
                     )
-                  }
+                    val redirectTo = answers.fold(
+                      _ => routes.MultipleDisposalsTriageController.checkYourAnswers(),
+                      _ => routes.SingleDisposalsTriageController.checkYourAnswers()
+                    )
 
-              }
-            )
+                    if (oldIndividualUserType.contains(individualUserType)) {
+                      Redirect(redirectTo)
+                    } else {
+
+                      val updatedState = updateIndividualUserType(state, individualUserType)
+                      val result =
+                        for {
+                          _ <- updatedState.fold(
+                                _ => EitherT.pure(()),
+                                fillingOutReturn => returnsService.storeDraftReturn(fillingOutReturn.draftReturn)
+                              )
+                          _ <- EitherT(
+                                updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedState.merge)))
+                              )
+                        } yield ()
+
+                      result.fold(
+                        { e =>
+                          logger.warn("Could not perform updates", e)
+                          errorHandler.errorResult()
+                        },
+                        _ => Redirect(redirectTo)
+                      )
+                    }
+                }
+              )
+          }
       }
   }
 
@@ -188,17 +198,22 @@ class InitialTriageQuestionsController @Inject() (
     }
   }
 
-  private def howManyPropertiesBackLink(state: Either[StartingNewDraftReturn, FillingOutReturn]): Call =
-    triageAnswersFomState(state).fold(
-      _.fold(
-        _ => routes.InitialTriageQuestionsController.whoIsIndividualRepresenting(),
-        _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
-      ),
-      _.fold(
-        _ => routes.InitialTriageQuestionsController.whoIsIndividualRepresenting(),
-        _ => routes.SingleDisposalsTriageController.checkYourAnswers()
+  private def howManyPropertiesBackLink(state: Either[StartingNewDraftReturn, FillingOutReturn]): Option[Call] =
+    if (!isIndividual(state))
+      None
+    else
+      Some(
+        triageAnswersFomState(state).fold(
+          _.fold(
+            _ => routes.InitialTriageQuestionsController.whoIsIndividualRepresenting(),
+            _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
+          ),
+          _.fold(
+            _ => routes.InitialTriageQuestionsController.whoIsIndividualRepresenting(),
+            _ => routes.SingleDisposalsTriageController.checkYourAnswers()
+          )
+        )
       )
-    )
 
   private def updateNumberOfProperties(
     state: Either[StartingNewDraftReturn, FillingOutReturn],
@@ -251,11 +266,11 @@ class InitialTriageQuestionsController @Inject() (
         newReturnTriageAnswers = answers.bimap[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers](
           _.fold[MultipleDisposalsTriageAnswers](
             _.copy(individualUserType = Some(individualUserType)),
-            _.copy(individualUserType = individualUserType)
+            _.copy(individualUserType = Some(individualUserType))
           ),
           _.fold(
             _.copy(individualUserType = Some(individualUserType)),
-            _.copy(individualUserType = individualUserType)
+            _.copy(individualUserType = Some(individualUserType))
           )
         )
       ),
@@ -265,11 +280,11 @@ class InitialTriageQuestionsController @Inject() (
             triageAnswers = r.draftReturn.triageAnswers.fold(
               _.fold(
                 _.copy(individualUserType = Some(individualUserType)),
-                _.copy(individualUserType = individualUserType)
+                _.copy(individualUserType = Some(individualUserType))
               ),
               _.fold(
                 _.copy(individualUserType = Some(individualUserType)),
-                _.copy(individualUserType = individualUserType)
+                _.copy(individualUserType = Some(individualUserType))
               )
             )
           )
@@ -281,8 +296,8 @@ class InitialTriageQuestionsController @Inject() (
     state: Either[StartingNewDraftReturn, FillingOutReturn]
   ): Option[IndividualUserType] =
     triageAnswersFomState(state).fold(
-      _.fold(_.individualUserType, c => Some(c.individualUserType)),
-      _.fold(_.individualUserType, c => Some(c.individualUserType))
+      _.fold(_.individualUserType, c => c.individualUserType),
+      _.fold(_.individualUserType, c => c.individualUserType)
     )
 
   private def getNumberOfProperties(

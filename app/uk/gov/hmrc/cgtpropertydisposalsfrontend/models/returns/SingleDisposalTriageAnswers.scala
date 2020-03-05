@@ -46,7 +46,7 @@ object SingleDisposalTriageAnswers {
     implicit val format: OFormat[IncompleteSingleDisposalTriageAnswers] = Json.format
   }
   final case class CompleteSingleDisposalTriageAnswers(
-    individualUserType: IndividualUserType,
+    individualUserType: Option[IndividualUserType],
     disposalMethod: DisposalMethod,
     countryOfResidence: Country,
     assetType: AssetType,
