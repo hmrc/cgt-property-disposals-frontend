@@ -47,10 +47,10 @@ lazy val microservice = Project(appName, file("."))
   .settings(scalaVersion := "2.12.10")
   .settings(
     majorVersion := 1,
-    //  addCompilerPlugin(scalafixSemanticdb),
+    addCompilerPlugin(scalafixSemanticdb),
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test
   )
-  .settings(scalacOptions ++= Seq("-Ypartial-unification", "-Yrangepos", "-Ywarn-unused:imports"))
+  .settings(scalacOptions ++= Seq("-Ypartial-unification", "-Yrangepos", "-Ywarn-unused:imports", "-P:semanticdb:exclude:^*.scala.html$|^*.routes$"))
   .settings(publishingSettings: _*)
   .configs(IntegrationTest)
   .settings(integrationTestSettings(): _*)

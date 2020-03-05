@@ -21,15 +21,15 @@ import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
 import play.api.Configuration
-import play.api.libs.json.Json
+import play.api.libs.json.{JsString, Json}
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.UpscanConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.upscan.UpscanStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanNotifyResponse
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanServiceResponse.{UpscanDescriptor, UpscanNotifyEvent, UpscanRequest, UpscanResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanFileDescriptor.UpscanFileDescriptorStatus.READY_TO_UPLOAD
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanInitiateResponse.{FailedToGetUpscanSnapshot, UpscanInititateResponseStored}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UpscanFileDescriptor, UpscanInitiateResponse, UpscanSnapshot}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.Future
@@ -56,9 +56,8 @@ class UpscanServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
   @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
   val mockConnector: UpscanConnector = mock[UpscanConnector]
-  val mockStore: UpscanStore         = mock[UpscanStore]
 
-  val service = new UpscanServiceImpl(mockConnector, mockStore, config)
+  val service = new UpscanServiceImpl(mockConnector, config)
 
   def mockUpscanInitiate(cgtReference: CgtReference)(response: Either[Error, HttpResponse]) =
     (mockConnector
@@ -66,84 +65,74 @@ class UpscanServiceImplSpec extends WordSpec with Matchers with MockFactory {
       .expects(cgtReference, *)
       .returning(EitherT(Future.successful(response)))
 
-  def mockFileUploadCount(cgtRefence: CgtReference)(response: Either[Error, Long]) =
-    (mockStore
-      .fileUploadCount(_: CgtReference))
-      .expects(cgtRefence)
+  def mockGetUpscanSnapshot(cgtReference: CgtReference)(response: Either[Error, Option[UpscanSnapshot]]) =
+    (mockConnector
+      .getUpscanSnapshot(_: CgtReference)(_: HeaderCarrier))
+      .expects(cgtReference, *)
       .returning(EitherT(Future.successful(response)))
 
-  def mockUpscanStoreInsert(cgtReference: CgtReference, upscanNotifyResponse: UpscanNotifyResponse)(
-    response: Either[Error, Unit]
-  ) =
-    (mockStore
-      .insert(_: UpscanNotifyEvent))
-      .expects(UpscanNotifyEvent(cgtReference.value, upscanNotifyResponse))
+  def mockSaveFileDescriptor(upscanFileDescriptor: UpscanFileDescriptor)(response: Either[Error, Unit]) =
+    (mockConnector
+      .saveUpscanInititateResponse(_: UpscanFileDescriptor)(_: HeaderCarrier))
+      .expects(upscanFileDescriptor, *)
       .returning(EitherT(Future.successful(response)))
 
   "UpscanServiceImpl" when {
 
-    val cgtReference = sample[CgtReference]
+    val cgtReference         = sample[CgtReference]
+    val upscanFileDescriptor = sample[UpscanFileDescriptor]
 
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
     "handling request initiate upscan" must {
       "return an error" when {
-        "the call to mongodb fails" in {
-          mockFileUploadCount(cgtReference)(Left(Error("Some issue with mongodb")))
+        "the call to get the upscan snapshot details fails" in {
+          mockGetUpscanSnapshot(cgtReference)(Left(Error("backend service error")))
           await(service.initiate(cgtReference).value).isLeft shouldBe true
         }
-        "the http call fails" in {
-          mockFileUploadCount(cgtReference)(Right(3))
-          mockUpscanInitiate(cgtReference)(Left(Error("Some issue calling S3")))
+        "the call to get the upscan initiate fails" in {
+          inSequence {
+            mockGetUpscanSnapshot(cgtReference)(Right(Some(UpscanSnapshot(1))))
+            mockUpscanInitiate(cgtReference)(Left(Error("upscan initiate end service error")))
+          }
           await(service.initiate(cgtReference).value).isLeft shouldBe true
         }
-      }
-
-      "return the S3 descriptor if the initiate call succeeded" in {
-        val S3descriptor = Json.parse(
-          s"""
-             |{
-             |    "reference": "11370e18-6e24-453e-b45a-76d3e32ea33d",
-             |    "uploadRequest": {
-             |        "href": "https://xxxx/upscan-upload-proxy/bucketName",
-             |        "fields": {
-             |            "acl": "private"
-             |        }
-             |    }
-             |}
-             |""".stripMargin
-        )
-
-        mockFileUploadCount(cgtReference)(Right(3))
-        mockUpscanInitiate(cgtReference)(Right(HttpResponse(responseStatus = 200, responseJson = Some(S3descriptor))))
-        await(service.initiate(cgtReference).value) shouldBe Right(
-          UpscanResponse(
-            cgtReference.value,
-            UpscanDescriptor(
-              "11370e18-6e24-453e-b45a-76d3e32ea33d",
-              UpscanRequest("https://xxxx/upscan-upload-proxy/bucketName", Map("acl" -> "private"))
+        "the call to save the upscan descriptor details fails" in {
+          inSequence {
+            mockGetUpscanSnapshot(cgtReference)(Right(Some(UpscanSnapshot(1))))
+            mockUpscanInitiate(cgtReference)(
+              Right(HttpResponse(200, Some(Json.toJson[UpscanFileDescriptor](upscanFileDescriptor))))
             )
-          )
-        )
-      }
-    }
-
-    "handling request to store upscan notify event" must {
-
-      val upscanNotifyResponse =
-        UpscanNotifyResponse("UUID-1", "QUEUED", "http://s3.download", Map("field-1" -> "value-1"))
-
-      "return an error" when {
-        "the call to mongodb fails" in {
-          mockUpscanStoreInsert(cgtReference, upscanNotifyResponse)(Left(Error("Some issue with mongodb")))
-          await(service.storeNotifyEvent(cgtReference, upscanNotifyResponse).value).isLeft shouldBe true
+            mockSaveFileDescriptor(upscanFileDescriptor.copy(status = READY_TO_UPLOAD))(
+              Left(Error("backend service error"))
+            )
+          }
+          await(service.initiate(cgtReference).value).isLeft shouldBe true
         }
       }
 
-      "return successful response if upscan notify event store successfully" in {
-        mockUpscanStoreInsert(cgtReference, upscanNotifyResponse)(Right(()))
-        await(service.storeNotifyEvent(cgtReference, upscanNotifyResponse).value) shouldBe Right(())
+      "return upscan initiate reference if upscan initiate call is successful" in {
+        inSequence {
+          mockGetUpscanSnapshot(cgtReference)(Right(Some(UpscanSnapshot(1))))
+          mockUpscanInitiate(cgtReference)(
+            Right(HttpResponse(200, Some(Json.toJson[UpscanFileDescriptor](upscanFileDescriptor))))
+          )
+          mockSaveFileDescriptor(upscanFileDescriptor.copy(status = READY_TO_UPLOAD))(Right(()))
+        }
+        await(service.initiate(cgtReference).value) shouldBe Right(
+          UpscanInititateResponseStored(upscanFileDescriptor.fileDescriptor.reference)
+        )
       }
+
+      "return error if unable to get upscan snapshot info" in {
+        inSequence {
+          mockGetUpscanSnapshot(cgtReference)(Right(None))
+        }
+        await(service.initiate(cgtReference).value) shouldBe Right(
+          FailedToGetUpscanSnapshot
+        )
+      }
+
     }
   }
 }

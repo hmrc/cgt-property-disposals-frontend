@@ -18,27 +18,27 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.upscan
 
 import akka.stream.scaladsl.{FileIO, Source}
 import akka.util.ByteString
+import cats.data.EitherT
+import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import configs.Configs
 import configs.syntax._
 import play.api.Configuration
 import play.api.libs.Files
-import play.api.libs.json.JsValue
 import play.api.mvc.{Action, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.UpscanConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanFileDescriptor.UpscanFileDescriptorStatus.UPLOADED
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanInitiateResponse._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UpscanFileDescriptor, UpscanInitiateReference}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanNotifyResponse
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanServiceResponse._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views._
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
@@ -83,56 +83,74 @@ class UpscanController @Inject() (
 
   private val maxFileSize: Int = getUpscanInitiateConfig[Int]("max-uploads")
 
-  @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
-  def upload(): Action[MultipartFormData[Files.TemporaryFile]] = Action(parse.multipartFormData(maxFileSize)).async {
-    implicit request: MessagesRequest[MultipartFormData[Files.TemporaryFile]] =>
-      val multipart = request.body
-      multipart.dataParts.get("href").flatMap(_.headOption).fold(Future.successful(BadRequest("missing href"))) {
-        href =>
-          val data: Map[String, Seq[String]] = multipart.dataParts.map {
-            case (k, v) => (k.stripPrefix("upscan."), v)
-          }
-          val withSource =
-            multipart.files.map(file => file.copy(ref = FileIO.fromPath(file.ref.path): Source[ByteString, Any]))
-          val prepared = multipart.copy(files = withSource, dataParts = data)
-          upscanConnector.upload(href, prepared).value.map {
-            case Left(error) =>
-              logger.warn(s"Could not upload file to S3", error)
-              errorHandler.errorResult(None)
-            case Right(_) => Ok
-          }
-      }
-  }
-
-  def callBack(cgtReference: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    request.body
-      .validate[UpscanNotifyResponse]
-      .asOpt
-      .fold(Future.successful(BadRequest("Invalid call back response received from upscan notify")))(notifyEvent =>
-        upscanService.storeNotifyEvent(CgtReference(cgtReference), notifyEvent).value.map {
+  def upscan(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withSubscribedUser(request) { (_, subscribed) =>
+        upscanService.initiate(subscribed.subscribedDetails.cgtReference).value.map {
           case Left(error) =>
-            logger.warn("upscan notifier call back handler failed", error)
+            logger.warn(s"could not initiate upscan due to $error")
             errorHandler.errorResult(None)
-          case Right(_) =>
-            logger.info("upscan notifier call back succeeded")
-            NoContent
+          case Right(upscanInitiateResponse) =>
+            upscanInitiateResponse match {
+              case FailedToGetUpscanSnapshot                => errorHandler.errorResult(None)
+              case MaximumFileUploadReached                 => Ok(upscanLimitPage())
+              case UpscanInititateResponseStored(reference) => Ok(upscanPage(reference))
+            }
         }
-      )
-  }
-
-  def upscan(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withSubscribedUser(request) { (_, subscribed) =>
-      upscanService.initiate(subscribed.subscribedDetails.cgtReference).value.map {
-        case Left(error) =>
-          logger.warn(s"Could not initiate upscan due to $error")
-          errorHandler.errorResult(None)
-        case Right(upscanResult) =>
-          upscanResult match {
-            case MaximumFileUploadReached            => Ok(upscanLimitPage())
-            case UpscanResponse(_, upscanDescriptor) => Ok(upscanPage(upscanDescriptor))
-          }
       }
     }
+
+  @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
+  def upload(): Action[MultipartFormData[Files.TemporaryFile]] =
+    authenticatedActionWithSessionData(parse.multipartFormData(maxFileSize)).async { implicit request =>
+      withSubscribedUser(request) { (_, subscribed) =>
+        val multipart: MultipartFormData[Files.TemporaryFile] = request.body
+        val result = for {
+          reference <- EitherT.fromOption(
+                        multipart.dataParts.get("reference").flatMap(_.headOption),
+                        Error("missing upscan file descriptor id")
+                      )
+          maybeUpscanFileDescriptor <- upscanService
+                                        .getUpscanFileDescriptor(
+                                          subscribed.subscribedDetails.cgtReference,
+                                          UpscanInitiateReference(reference)
+                                        )
+          upscanFileDescriptor <- EitherT.fromOption(
+                                   maybeUpscanFileDescriptor,
+                                   Error("failed to retrieve upscan file descriptor details")
+                                 )
+          prepared <- EitherT.fromEither(handleGetFileDescriptorResult(multipart, upscanFileDescriptor))
+          _        <- upscanConnector.upload(upscanFileDescriptor.fileDescriptor.uploadRequest.href, prepared)
+          _        <- upscanConnector.updateUpscanFileDescriptorStatus(upscanFileDescriptor.copy(status = UPLOADED))
+
+        } yield ()
+
+        result.fold(
+          error => {
+            logger.warn(s"failed to upload file with error: $error")
+            errorHandler.errorResult(None)
+          },
+          _ => Ok
+        )
+      }
+    }
+
+  @SuppressWarnings(Array("org.wartremover.warts.Var", "org.wartremover.warts.Any"))
+  private def handleGetFileDescriptorResult(
+    multipart: MultipartFormData[Files.TemporaryFile],
+    upscanFileDescriptor: UpscanFileDescriptor
+  ): Either[Error, MultipartFormData[Source[ByteString, Any]]] = {
+    val userFile =
+      multipart.files
+        .map(file => file.copy(ref = FileIO.fromPath(file.ref.path): Source[ByteString, Any]))
+    val prepared: MultipartFormData[Source[ByteString, Any]] =
+      multipart
+        .copy(
+          files = userFile,
+          dataParts = upscanFileDescriptor.fileDescriptor.uploadRequest.fields
+            .mapValues(fieldValue => Seq(fieldValue))
+        )
+    Right(prepared)
   }
 
 }

@@ -1307,6 +1307,70 @@ class SingleDisposalsTriageControllerSpec
 
     }
 
+    "routing asset type submition" must {
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.assetTypeNotYetImplemented()(FakeRequest().withFormUrlEncodedBody(formData: _*))
+
+      "go to exit page" when {
+        "the result for mixed use" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                sample[CompleteSingleDisposalTriageAnswers].copy(assetType = MixedUse)
+              )
+            )
+          }
+
+          checkPageIsDisplayed(performAction(), messageFromMessageKey("disposalDateMixedUseOrIndirect.title"))
+        }
+
+        "the result for 'indirect disposal'" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                sample[CompleteSingleDisposalTriageAnswers].copy(assetType = IndirectDisposal)
+              )
+            )
+          }
+
+          checkPageIsDisplayed(performAction(), messageFromMessageKey("disposalDateMixedUseOrIndirect.title"))
+        }
+
+      }
+
+      "continue as normal" when {
+        "the result for residential" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                sample[CompleteSingleDisposalTriageAnswers].copy(assetType = Residential)
+              )
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.SingleDisposalsTriageController.checkYourAnswers())
+        }
+
+        "the result for non-residential" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                sample[CompleteSingleDisposalTriageAnswers].copy(assetType = NonResidential)
+              )
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.SingleDisposalsTriageController.checkYourAnswers())
+        }
+
+      }
+
+    }
+
     "handling submitted answers to the country of residence page" must {
 
       def performAction(formData: (String, String)*): Future[Result] =
@@ -1735,7 +1799,7 @@ class SingleDisposalsTriageControllerSpec
 
       }
 
-      "show a dummy page when a user has selected indirect disposals" in {
+      "show a exit page when a user has selected indirect disposals" in {
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(
@@ -1748,8 +1812,24 @@ class SingleDisposalsTriageControllerSpec
         }
 
         val result = performAction()
-        status(result)          shouldBe OK
-        contentAsString(result) shouldBe "Indirect disposals not handled yet"
+        checkIsRedirect(result, routes.SingleDisposalsTriageController.assetTypeNotYetImplemented())
+      }
+
+      "show a exit page when a user has selected mixed use" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionDataWithStartingNewDraftReturn(
+              allQuestionsAnswered.copy(
+                assetType = Some(AssetType.MixedUse)
+              )
+            )
+          )
+        }
+
+        val result = performAction()
+        checkIsRedirect(result, routes.SingleDisposalsTriageController.assetTypeNotYetImplemented())
+
       }
 
       "show an error page" when {

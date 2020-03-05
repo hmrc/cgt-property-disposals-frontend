@@ -146,10 +146,6 @@ class CheckAllAnswersAndSubmitControllerSpec
                 completeReturn.triageAnswers,
                 doc
               )
-              validatePropertyAddressPage(
-                completeReturn.propertyAddress,
-                doc
-              )
               validateAcquisitionDetailsCheckYourAnswersPage(
                 completeReturn.acquisitionDetails,
                 doc

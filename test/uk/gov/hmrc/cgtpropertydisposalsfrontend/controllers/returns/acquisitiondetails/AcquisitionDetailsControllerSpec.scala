@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisition
 import java.time.LocalDate
 
 import org.jsoup.nodes.Document
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.http.Status.BAD_REQUEST
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
@@ -57,15 +57,13 @@ class AcquisitionDetailsControllerSpec
     with ReturnsServiceSupport
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
-
+  lazy val controller = instanceOf[AcquisitionDetailsController]
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
       bind[ReturnsService].toInstance(mockReturnsService)
     )
-
-  lazy val controller = instanceOf[AcquisitionDetailsController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
@@ -78,6 +76,14 @@ class AcquisitionDetailsControllerSpec
         case _                   => false
       }
     )
+
+  def sessionWithState(
+    answers: AcquisitionDetailsAnswers,
+    assetType: AssetType,
+    wasUkResident: Boolean,
+    disposalDate: DisposalDate = sample[DisposalDate]
+  ): (SessionData, FillingOutReturn) =
+    sessionWithState(Some(answers), Some(assetType), Some(wasUkResident), Some(disposalDate))
 
   def sessionWithState(
     answers: Option[AcquisitionDetailsAnswers],
@@ -98,14 +104,6 @@ class AcquisitionDetailsControllerSpec
 
     SessionData.empty.copy(journeyStatus = Some(journey)) -> journey
   }
-
-  def sessionWithState(
-    answers: AcquisitionDetailsAnswers,
-    assetType: AssetType,
-    wasUkResident: Boolean,
-    disposalDate: DisposalDate = sample[DisposalDate]
-  ): (SessionData, FillingOutReturn) =
-    sessionWithState(Some(answers), Some(assetType), Some(wasUkResident), Some(disposalDate))
 
   "AcquisitionDetailsController" when {
 
