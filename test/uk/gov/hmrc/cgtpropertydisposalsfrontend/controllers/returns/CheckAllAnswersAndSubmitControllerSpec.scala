@@ -46,7 +46,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnsw
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.IncompleteYearToDateLiabilityAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, LocalDateUtils, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{PaymentsService, ReturnsService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -111,7 +111,8 @@ class CheckAllAnswersAndSubmitControllerSpec
       Some(completeReturn.acquisitionDetails),
       Some(completeReturn.reliefDetails),
       Some(completeReturn.exemptionsAndLossesDetails),
-      Some(completeReturn.yearToDateLiabilityAnswers)
+      Some(completeReturn.yearToDateLiabilityAnswers),
+      LocalDateUtils.today()
     )
 
     val completeFillingOutReturn = sample[FillingOutReturn].copy(draftReturn = completeDraftReturn)

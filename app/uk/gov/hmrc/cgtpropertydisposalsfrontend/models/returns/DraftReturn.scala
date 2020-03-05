@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
+import java.time.LocalDate
 import java.util.UUID
 
 import cats.Eq
@@ -32,7 +33,8 @@ final case class DraftReturn(
   acquisitionDetailsAnswers: Option[AcquisitionDetailsAnswers],
   reliefDetailsAnswers: Option[ReliefDetailsAnswers],
   exemptionAndLossesAnswers: Option[ExemptionAndLossesAnswers],
-  yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers]
+  yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
+  lastUpdatedDate: LocalDate
 )
 
 object DraftReturn {

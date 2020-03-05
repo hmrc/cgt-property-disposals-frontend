@@ -637,7 +637,8 @@ class SingleDisposalsTriageController @Inject() (
                   None,
                   None,
                   None,
-                  None
+                  None,
+                  LocalDateUtils.today()
                 )
               val result = for {
                 _ <- returnsService.storeDraftReturn(newDraftReturn)
