@@ -164,10 +164,11 @@ class MultipleDisposalsTriageController @Inject() (
                     ),
                   complete =>
                     IncompleteMultipleDisposalsAnswers(
-                      individualUserType = Some(complete.individualUserType),
-                      numberOfProperties = Some(complete.numberOfProperties),
-                      wasAUKResident     = Some(wereUKResident),
-                      countryOfResidence = None
+                      individualUserType           = Some(complete.individualUserType),
+                      numberOfProperties           = Some(complete.numberOfProperties),
+                      wasAUKResident               = Some(wereUKResident),
+                      countryOfResidence           = None,
+                      wereAllPropertiesResidential = None
                     )
                 )
 
@@ -191,7 +192,7 @@ class MultipleDisposalsTriageController @Inject() (
     implicit request =>
       withMultipleDisposalTriageAnswers(request) {
         case (_, _, answers) =>
-          val werePropertiesResidential = answers.fold(_.wasAllPropertiesResidential, c => Some(true)) //TODO
+          val werePropertiesResidential = answers.fold(_.wereAllPropertiesResidential, c => Some(true)) //TODO
           val form =
             werePropertiesResidential.fold(wereAllPropertiesResidentialForm)(wereAllPropertiesResidentialForm.fill)
           Ok(wereAllPropertiesResidentialPage(form))
@@ -207,20 +208,23 @@ class MultipleDisposalsTriageController @Inject() (
     withMultipleDisposalTriageAnswers(request) {
       case (_, _, triageAnswers) =>
         triageAnswers match {
-          case IncompleteMultipleDisposalsAnswers(None, _, _, _) =>
+          case IncompleteMultipleDisposalsAnswers(None, _, _, _, _) =>
             Redirect(routes.InitialTriageQuestionsController.howManyProperties())
 
-          case IncompleteMultipleDisposalsAnswers(Some(_), None, _, _) =>
+          case IncompleteMultipleDisposalsAnswers(Some(_), None, _, _, _) =>
             Redirect(routes.MultipleDisposalsTriageController.guidance())
 
-          case IncompleteMultipleDisposalsAnswers(_, None, _, _) =>
+          case IncompleteMultipleDisposalsAnswers(_, None, _, _, _) =>
             Redirect(routes.MultipleDisposalsTriageController.howManyDisposals())
 
-          case IncompleteMultipleDisposalsAnswers(_, _, None, _) =>
+          case IncompleteMultipleDisposalsAnswers(_, _, None, _, _) =>
             Redirect(routes.MultipleDisposalsTriageController.wereYouAUKResident())
 
-          case IncompleteMultipleDisposalsAnswers(_, _, Some(residentStatus), None) =>
-            Ok(s"UK resident status: $residentStatus")
+          case IncompleteMultipleDisposalsAnswers(_, _, _, _, None) =>
+            Redirect(routes.MultipleDisposalsTriageController.wereAllPropertiesResidential())
+
+          case IncompleteMultipleDisposalsAnswers(_, _, _, _, Some(residentialStatus)) =>
+            Ok(s"Were All Properties residential: $residentialStatus")
 
           case c: CompleteMultipleDisposalsAnswers =>
             Ok(s"Got $c")

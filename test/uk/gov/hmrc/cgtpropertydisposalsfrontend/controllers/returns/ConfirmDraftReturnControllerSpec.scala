@@ -123,7 +123,7 @@ class ConfirmDraftReturnControllerSpec
       checkPageIsDisplayed(
         performAction(),
         messageFromMessageKey("confirmDraftReturn.title"), { doc =>
-          doc.select("#back").attr("href")          shouldBe returns.routes.TaskListController.taskList().url
+          doc.select("#back").attr("href")   shouldBe returns.routes.TaskListController.taskList().url
           doc.select(".button").attr("href") shouldBe accounts.homepage.routes.HomePageController.homepage().url
         }
       )

@@ -990,10 +990,11 @@ multipleDisposalsWereYouAUKResident.error.required=Select yes if you were a UK r
 
 multipleDisposalsWereAllPropertiesResidential.title=Were all of the properties residential properties?
 multipleDisposalsWereAllPropertiesResidential.helpText=Residential property includes houses, flats, or other dwellings, including their gardens or grounds.
-multipleDisposalsWereAllPropertiesResidential.link=<a href="{0}" target="_blank">What residential property includes</a>.
-multipleDisposalsWereAllPropertiesResidential.details.p1=a building where someone lives or could live, like a house, flat or other type of dwelling
-multipleDisposalsWereAllPropertiesResidential.details.p2=a building that is being built or changed so it can be used as a place where someone could live
-multipleDisposalsWereAllPropertiesResidential.details.p3=land that’s part of a garden or grounds of a building that’s used as a place where someone lives, or could live
+multipleDisposalsWereAllPropertiesResidential.link=What residential property includes
+multipleDisposalsWereAllPropertiesResidential.details.p1=Residential property includes:
+multipleDisposalsWereAllPropertiesResidential.details.li1=a building where someone lives or could live, like a house, flat or other type of dwelling
+multipleDisposalsWereAllPropertiesResidential.details.li2=a building that is being built or changed so it can be used as a place where someone could live
+multipleDisposalsWereAllPropertiesResidential.details.li3=land that’s part of a garden or grounds of a building that’s used as a place where someone lives, or could live
 
 disposalDateMixedUseOrIndirect.title=You cannot use this service
 disposalDateMixedUseOrIndirect.p1=You cannot use this service to report Capital Gains on:
