@@ -30,6 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.Self
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{IncompleteMultipleDisposalsAnswers, _}
@@ -170,7 +171,7 @@ class MultipleDisposalsTriageControllerSpec
 
         checkPageIsDisplayed(
           performAction,
-          messageFromMessageKey("multiple-disposals.howManyProperties.title"), { doc =>
+          messageFromMessageKey("multipleDisposalsNumberOfProperties.title"), { doc =>
             doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
               .guidance()
               .url
@@ -181,7 +182,6 @@ class MultipleDisposalsTriageControllerSpec
               .url
           }
         )
-
       }
 
     }
@@ -217,7 +217,7 @@ class MultipleDisposalsTriageControllerSpec
         }
 
         checkIsRedirect(
-          performAction("numberOfProperties" -> "1"),
+          performAction("multipleDisposalsNumberOfProperties" -> "1"),
           routes.SingleDisposalsTriageController.checkYourAnswers()
         )
 
@@ -244,7 +244,7 @@ class MultipleDisposalsTriageControllerSpec
         }
 
         checkIsRedirect(
-          performAction("numberOfProperties" -> "5"),
+          performAction("multipleDisposalsNumberOfProperties" -> "5"),
           routes.MultipleDisposalsTriageController.checkYourAnswers()
         )
       }
@@ -269,7 +269,7 @@ class MultipleDisposalsTriageControllerSpec
         }
 
         checkIsRedirect(
-          performAction("numberOfProperties" -> "5"),
+          performAction("multipleDisposalsNumberOfProperties" -> "5"),
           routes.MultipleDisposalsTriageController.checkYourAnswers()
         )
       }
@@ -294,12 +294,12 @@ class MultipleDisposalsTriageControllerSpec
         }
 
         checkIsRedirect(
-          performAction("numberOfProperties" -> "3"),
+          performAction("multipleDisposalsNumberOfProperties" -> "3"),
           routes.MultipleDisposalsTriageController.checkYourAnswers()
         )
       }
 
-      "user has  not answered how many disposals section and " +
+      "user has not answered how many disposals section and " +
         "submit request without entering numberOfProperties value" in {
         val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
           individualUserType = Some(Self)
@@ -318,23 +318,166 @@ class MultipleDisposalsTriageControllerSpec
       "display form error when user enters numberOfProperties value <= 0" in {
 
         def test(data: (String, String)*)(expectedErrorMessageKey: String) =
-          testFormError(data: _*)(-5)(expectedErrorMessageKey)("multiple-disposals.howManyProperties.title")(
+          testFormError(data: _*)(-5)(expectedErrorMessageKey)("multipleDisposalsNumberOfProperties.title")(
             performAction
           )
 
-        test("numberOfProperties" -> "-5")("numberOfProperties.error.tooSmall")
+        test("multipleDisposalsNumberOfProperties" -> "-5")("multipleDisposalsNumberOfProperties.error.tooSmall")
 
       }
 
       "display form error when user enters numberOfProperties value > 999" in {
 
         def test(data: (String, String)*)(expectedErrorMessageKey: String) =
-          testFormError(data: _*)(1000)(expectedErrorMessageKey)("multiple-disposals.howManyProperties.title")(
+          testFormError(data: _*)(1000)(expectedErrorMessageKey)("multipleDisposalsNumberOfProperties.title")(
             performAction
           )
 
-        test("numberOfProperties" -> "1000")("numberOfProperties.error.tooLong")
+        test("multipleDisposalsNumberOfProperties" -> "1000")("multipleDisposalsNumberOfProperties.error.tooLong")
 
+      }
+
+    }
+
+    "handling requests to display the were uk resident page" must {
+
+      def performAction(): Future[Result] =
+        controller.wereYouAUKResident()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
+
+      "display the page" in {
+        mockAuthWithNoRetrievals()
+        mockGetSession(sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsAnswers.empty)._1)
+
+        checkPageIsDisplayed(
+          performAction,
+          messageFromMessageKey("multipleDisposalsWereYouAUKResident.title"), { doc =>
+            doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
+              .howManyDisposals()
+              .url
+            doc
+              .select("#content > article > form")
+              .attr("action") shouldBe routes.MultipleDisposalsTriageController
+              .wereYouAUKResidentSubmit()
+              .url
+          }
+        )
+      }
+
+    }
+
+    "handling submits on the were uk resident page" must {
+
+      def performAction(data: (String, String)*): Future[Result] =
+        controller.wereYouAUKResidentSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
+
+      "redirect to redirect to cya page" when {
+
+        val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
+          individualUserType = Some(Self),
+          numberOfProperties = Some(2)
+        )
+        val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+        "user has not answered all of the were uk resident section and selects yes" in {
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreSession(
+              session.copy(journeyStatus = Some(
+                journey.copy(
+                  newReturnTriageAnswers = Left(answers.copy(wasAUKResident = Some(true)))
+                )
+              )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction("multipleDisposalsWereYouAUKResident" -> "true"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+        "user has not answered all of the were uk resident section and selects no" in {
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreSession(
+              session.copy(journeyStatus = Some(
+                journey.copy(
+                  newReturnTriageAnswers = Left(answers.copy(wasAUKResident = Some(false)))
+                )
+              )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction("multipleDisposalsWereYouAUKResident" -> "false"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+        "user has already answered were uk resident section and re-selected different option" in {
+          val answers = sample[IncompleteMultipleDisposalsAnswers]
+            .copy(wasAUKResident = Some(true), countryOfResidence = Some(Country.uk))
+
+          val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreSession(
+              session.copy(journeyStatus = Some(
+                journey.copy(
+                  newReturnTriageAnswers = Left(
+                    answers.copy(
+                      wasAUKResident     = Some(false),
+                      countryOfResidence = None
+                    )
+                  )
+                )
+              )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction("multipleDisposalsWereYouAUKResident" -> "false"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+      }
+
+      "show a form error" when {
+
+        "the user submits nothing" in {
+          val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
+            individualUserType = Some(Self),
+            numberOfProperties = Some(2)
+          )
+          val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("multipleDisposalsWereYouAUKResident.title"), { doc =>
+              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+                "multipleDisposalsWereYouAUKResident.error.required"
+              )
+            },
+            BAD_REQUEST
+          )
+        }
       }
 
     }
