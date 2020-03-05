@@ -45,4 +45,7 @@ POST /multiple-disposals/uk-residence-status                uk.gov.hmrc.cgtprope
 GET  /multiple-disposals/were-properties-residential        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.wereAllPropertiesResidential()
 POST /multiple-disposals/were-properties-residential        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.wereAllPropertiesResidentialSubmit()
 
+GET  /multiple-disposals/country-residence                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.countryOfResidence()
+POST /multiple-disposals/country-residence                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.countryOfResidenceSubmit()
+
 GET  /check-your-answers                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.checkYourAnswers()

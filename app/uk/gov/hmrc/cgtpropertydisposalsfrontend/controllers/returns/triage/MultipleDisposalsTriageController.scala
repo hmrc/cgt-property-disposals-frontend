@@ -56,7 +56,8 @@ class MultipleDisposalsTriageController @Inject() (
   guidancePage: triagePages.guidance,
   howManyPropertiesPage: triagePages.how_many_properties,
   wereYouAUKResidentPage: triagePages.were_you_a_uk_resident,
-  wereAllPropertiesResidentialPage: triagePages.were_all_properties_residential
+  wereAllPropertiesResidentialPage: triagePages.were_all_properties_residential,
+  countryOfResidencePage: triagePages.country_of_residence
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -254,6 +255,21 @@ class MultipleDisposalsTriageController @Inject() (
       }
   }
 
+  def countryOfResidence(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withMultipleDisposalTriageAnswers(request) {
+      case (_, _, answers) =>
+        val werePropertiesResidential =
+          answers.fold(_.countryOfResidence, c => Some(c.countryOfResidence.isUk()).filterNot(identity))
+        val form =
+          werePropertiesResidential.fold(countryOfResidenceForm)(countryOfResidenceForm.fill)
+        Ok(countryOfResidencePage(form, routes.MultipleDisposalsTriageController.wereYouAUKResident()))
+    }
+  }
+
+  def countryOfResidenceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    Ok("countryOfResidenceSubmit")
+  }
+
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withMultipleDisposalTriageAnswers(request) {
       case (_, _, triageAnswers) =>
@@ -340,6 +356,12 @@ object MultipleDisposalsTriageController {
   val wereAllPropertiesResidentialForm: Form[Boolean] = Form(
     mapping(
       "multipleDisposalsWereAllPropertiesResidential" -> of(BooleanFormatter.formatter)
+    )(identity)(Some(_))
+  )
+
+  val countryOfResidenceForm: Form[Country] = Form(
+    mapping(
+      "multipleDisposalsCountryOfResidence" -> of(Country.formatter)
     )(identity)(Some(_))
   )
 
