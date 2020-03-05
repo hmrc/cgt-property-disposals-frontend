@@ -22,8 +22,9 @@ import java.util.UUID
 import cats.data.EitherT
 import cats.instances.future._
 import org.jsoup.nodes.Document
+import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.i18n.MessagesApi
+import play.api.i18n.{Lang, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, Result}
@@ -32,10 +33,14 @@ import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DateErrorScenarios.{DateErrorScenario, dateErrorScenarios}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressControllerSpec.validatePropertyAddressPage
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.routes
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageControllerSpec.validateSingleDisposalTriageCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => returnsRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{NonResidential, Residential}
@@ -1765,6 +1770,18 @@ class SingleDisposalsTriageControllerSpec
 
       "display the page" when {
 
+        def testIsCheckYourAnswers(
+          result: Future[Result],
+          completeSingleDisposalTriageAnswers: CompleteSingleDisposalTriageAnswers,
+          expectedTitleKey: String
+        ): Unit =
+          checkPageIsDisplayed(
+            result,
+            messageFromMessageKey(expectedTitleKey), { doc =>
+              validateSingleDisposalTriageCheckYourAnswersPage(completeSingleDisposalTriageAnswers, doc)
+            }
+          )
+
         def testIsCYAPagePage(result: Future[Result]) = {
           status(result)          shouldBe OK
           contentAsString(result) should include(messageFromMessageKey("triage.check-your-answers.title"))
@@ -1796,7 +1813,11 @@ class SingleDisposalsTriageControllerSpec
             mockGetSession(sessionDataWithStartingNewDraftReturn(completeTriageQuestions))
           }
 
-          testIsCYAPagePage(performAction())
+          testIsCheckYourAnswers(
+            performAction(),
+            completeTriageQuestions,
+            "returns.property-address.cya.title"
+          )
         }
 
         "all the questions have already been answered and a draft return has been created" in {
@@ -2232,4 +2253,19 @@ class SingleDisposalsTriageControllerSpec
     checkNextResult(performAction(formData))
   }
 
+}
+
+object SingleDisposalsTriageControllerSpec extends Matchers {
+  def validateSingleDisposalTriageCheckYourAnswersPage(
+    completeSingleDisposalTriageAnswers: CompleteSingleDisposalTriageAnswers,
+    doc: Document
+  )(implicit messages: MessagesApi, lang: Lang): Unit = {
+    doc.select("#individualUserType-answer").text() shouldBe messages(s"individualUserType.${completeSingleDisposalTriageAnswers.individualUserType}")
+    doc.select("#numberOfProperties-answer").text() shouldBe "One"
+    doc.select("#disposalMethod-answer").text() shouldBe completeSingleDisposalTriageAnswers.disposalMethod
+    doc.select("#wereYouAUKResident-answer").text() shouldBe completeSingleDisposalTriageAnswers
+    doc.select("#propertyType-answer").text() shouldBe completeSingleDisposalTriageAnswers.assetType
+    doc.select("#disposalDate-answer").text() shouldBe completeSingleDisposalTriageAnswers.disposalDate
+    doc.select("#completionDate-answer").text() shouldBe completeSingleDisposalTriageAnswers.completionDate
+  }
 }
