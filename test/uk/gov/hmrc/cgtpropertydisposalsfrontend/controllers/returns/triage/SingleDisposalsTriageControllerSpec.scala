@@ -33,14 +33,12 @@ import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DateErrorScenarios.{DateErrorScenario, dateErrorScenarios}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressControllerSpec.validatePropertyAddressPage
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.routes
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageControllerSpec.validateSingleDisposalTriageCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => returnsRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.govDisplayFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{NonResidential, Residential}
@@ -2262,10 +2260,15 @@ object SingleDisposalsTriageControllerSpec extends Matchers {
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
     doc.select("#individualUserType-answer").text() shouldBe messages(s"individualUserType.${completeSingleDisposalTriageAnswers.individualUserType}")
     doc.select("#numberOfProperties-answer").text() shouldBe "One"
-    doc.select("#disposalMethod-answer").text() shouldBe completeSingleDisposalTriageAnswers.disposalMethod
-    doc.select("#wereYouAUKResident-answer").text() shouldBe completeSingleDisposalTriageAnswers
-    doc.select("#propertyType-answer").text() shouldBe completeSingleDisposalTriageAnswers.assetType
-    doc.select("#disposalDate-answer").text() shouldBe completeSingleDisposalTriageAnswers.disposalDate
-    doc.select("#completionDate-answer").text() shouldBe completeSingleDisposalTriageAnswers.completionDate
+    doc.select("#disposalMethod-answer").text() shouldBe messages(s"disposalMethod.${completeSingleDisposalTriageAnswers.disposalMethod}")
+    if (completeSingleDisposalTriageAnswers.countryOfResidence.isUk())
+      doc.select("#wereYouAUKResident-answer").text() shouldBe "Yes"
+    else
+      doc.select("#wereYouAUKResident-answer").text() shouldBe "No"
+
+    completeSingleDisposalTriageAnswers.assetType match {
+      case Residential => doc.select("#propertyType-answer").text() shouldBe "Yes"
+      case _ => doc.select("#propertyType-answer").text() shouldBe "No"
+    }
   }
 }
