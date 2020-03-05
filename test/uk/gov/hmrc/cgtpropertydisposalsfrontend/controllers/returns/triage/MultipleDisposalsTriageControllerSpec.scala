@@ -372,106 +372,112 @@ class MultipleDisposalsTriageControllerSpec
       def performAction(data: (String, String)*): Future[Result] =
         controller.wereYouAUKResidentSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
 
-      "user has not answered were uk resident section and " +
-        "redirect to dummy page when user selects yes" in {
+      "redirect to redirect to cya page" when {
+
         val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
           individualUserType = Some(Self),
           numberOfProperties = Some(2)
         )
         val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
 
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-          mockStoreSession(
-            session.copy(journeyStatus = Some(
-              journey.copy(
-                newReturnTriageAnswers = Left(answers.copy(wasAUKResident = Some(true)))
+        "user has not answered all of the were uk resident section and selects yes" in {
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreSession(
+              session.copy(journeyStatus = Some(
+                journey.copy(
+                  newReturnTriageAnswers = Left(answers.copy(wasAUKResident = Some(true)))
+                )
               )
-            )
-            )
-          )(Right(()))
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction("multipleDisposalsWereYouAUKResident" -> "true"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
         }
 
-        checkIsRedirect(
-          performAction("multipleDisposalsWereYouAUKResident" -> "true"),
-          routes.MultipleDisposalsTriageController.checkYourAnswers()
-        )
-      }
+        "user has not answered all of the were uk resident section and selects no" in {
 
-      "user has not answered were uk resident section and " +
-        "redirect to dummy page when user selects no" in {
-        val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
-          individualUserType = Some(Self),
-          numberOfProperties = Some(2)
-        )
-        val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-          mockStoreSession(
-            session.copy(journeyStatus = Some(
-              journey.copy(
-                newReturnTriageAnswers = Left(answers.copy(wasAUKResident = Some(false)))
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreSession(
+              session.copy(journeyStatus = Some(
+                journey.copy(
+                  newReturnTriageAnswers = Left(answers.copy(wasAUKResident = Some(false)))
+                )
               )
-            )
-            )
-          )(Right(()))
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction("multipleDisposalsWereYouAUKResident" -> "false"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
         }
 
-        checkIsRedirect(
-          performAction("multipleDisposalsWereYouAUKResident" -> "false"),
-          routes.MultipleDisposalsTriageController.checkYourAnswers()
-        )
-      }
+        "user has already answered were uk resident section and re-selected different option" in {
+          val answers = sample[IncompleteMultipleDisposalsAnswers]
+            .copy(wasAUKResident = Some(true), countryOfResidence = Some(Country.uk))
 
-      "user has already answered were uk resident section and " +
-        "redirect to dummy page when user re-selected different option" in {
-        val answers = sample[IncompleteMultipleDisposalsAnswers]
-          .copy(wasAUKResident = Some(true), countryOfResidence = Some(Country.uk))
+          val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
 
-        val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
-          mockStoreSession(
-            session.copy(journeyStatus = Some(
-              journey.copy(
-                newReturnTriageAnswers = Left(
-                  answers.copy(
-                    wasAUKResident     = Some(false),
-                    countryOfResidence = None
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreSession(
+              session.copy(journeyStatus = Some(
+                journey.copy(
+                  newReturnTriageAnswers = Left(
+                    answers.copy(
+                      wasAUKResident     = Some(false),
+                      countryOfResidence = None
+                    )
                   )
                 )
               )
-            )
-            )
-          )(Right(()))
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction("multipleDisposalsWereYouAUKResident" -> "false"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
         }
 
-        checkIsRedirect(
-          performAction("multipleDisposalsWereYouAUKResident" -> "false"),
-          routes.MultipleDisposalsTriageController.checkYourAnswers()
-        )
       }
 
-      "user has not answered were uk resident section and " +
-        "submit request without selecting one of wereUkResident options" in {
-        val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
-          individualUserType = Some(Self),
-          numberOfProperties = Some(2)
-        )
-        val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
+      "show a form error" when {
 
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(session)
+        "the user submits nothing" in {
+          val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
+            individualUserType = Some(Self),
+            numberOfProperties = Some(2)
+          )
+          val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("multipleDisposalsWereYouAUKResident.title"), { doc =>
+              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+                "multipleDisposalsWereYouAUKResident.error.required"
+              )
+            },
+            BAD_REQUEST
+          )
         }
-
-        val result = performAction()
-        status(result) shouldBe BAD_REQUEST
       }
 
     }

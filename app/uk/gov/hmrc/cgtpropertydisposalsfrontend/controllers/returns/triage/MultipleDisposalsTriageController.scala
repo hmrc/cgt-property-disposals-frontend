@@ -152,7 +152,7 @@ class MultipleDisposalsTriageController @Inject() (
               BadRequest(
                 wereYouAUKResidentPage(formWithErrors, routes.MultipleDisposalsTriageController.howManyDisposals())
               ), { wereUKResident =>
-              if (answers.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())).exists(_ === wereUKResident)) {
+              if (answers.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())).contains(wereUKResident)) {
                 Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
               } else {
                 val updatedAnswers = answers.fold[MultipleDisposalsTriageAnswers](
