@@ -1780,11 +1780,6 @@ class SingleDisposalsTriageControllerSpec
             }
           )
 
-        def testIsCYAPagePage(result: Future[Result]) = {
-          status(result)          shouldBe OK
-          contentAsString(result) should include(messageFromMessageKey("triage.check-your-answers.title"))
-        }
-
         "all the questions have now been answered and the session is updated when a draft return has not yet been created" in {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1792,7 +1787,11 @@ class SingleDisposalsTriageControllerSpec
             mockStoreSession(sessionDataWithStartingNewDraftReturn(completeTriageQuestions))(Right(()))
           }
 
-          testIsCYAPagePage(performAction())
+          testIsCheckYourAnswers(
+            performAction(),
+            completeTriageQuestions,
+            "returns.property-address.cya.title"
+          )
         }
 
         "all the questions have now been answered and the session is updated when a draft return has been created" in {
@@ -1802,7 +1801,11 @@ class SingleDisposalsTriageControllerSpec
             mockStoreSession(sessionDataWithFillingOurReturn(completeTriageQuestions))(Right(()))
           }
 
-          testIsCYAPagePage(performAction())
+          testIsCheckYourAnswers(
+            performAction(),
+            completeTriageQuestions,
+            "returns.property-address.cya.title"
+          )
         }
 
         "all the questions have already been answered and a draft return has not yet been created" in {
@@ -1824,7 +1827,11 @@ class SingleDisposalsTriageControllerSpec
             mockGetSession(sessionDataWithFillingOurReturn(completeTriageQuestions))
           }
 
-          testIsCYAPagePage(performAction())
+          testIsCheckYourAnswers(
+            performAction(),
+            completeTriageQuestions,
+            "returns.property-address.cya.title"
+          )
         }
 
       }
