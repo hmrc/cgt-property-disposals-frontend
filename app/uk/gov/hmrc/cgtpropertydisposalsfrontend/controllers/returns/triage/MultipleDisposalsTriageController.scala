@@ -23,15 +23,13 @@ import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.data.{Form, FormError}
 import play.api.data.Forms.{mapping, of}
-import play.api.data.format.Formats._
 import play.api.data.format.Formatter
-import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingNewDraftReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, FormUtils, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers
@@ -140,7 +138,7 @@ class MultipleDisposalsTriageController @Inject() (
       case (_, _, answers) =>
         val wereYouUKResident = answers.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk()))
         val form              = wereYouUKResident.fold(wasAUkResidentForm)(wasAUkResidentForm.fill)
-        Ok(wereYouAUKResidentPage(form))
+        Ok(wereYouAUKResidentPage(form, routes.MultipleDisposalsTriageController.howManyDisposals()))
     }
   }
 
@@ -152,7 +150,7 @@ class MultipleDisposalsTriageController @Inject() (
           .fold(
             formWithErrors =>
               BadRequest(
-                wereYouAUKResidentPage(formWithErrors)
+                wereYouAUKResidentPage(formWithErrors, routes.MultipleDisposalsTriageController.howManyDisposals())
               ), { wereUKResident =>
               if (answers.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())).exists(_ === wereUKResident)) {
                 Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())

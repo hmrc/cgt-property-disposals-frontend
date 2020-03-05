@@ -30,11 +30,7 @@
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@*
-*(form: Form[Boolean], backLink: Call, displayReturnToSummaryLink: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
-*@
-
-@(form: Form[Boolean])(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(form: Form[Boolean], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"multipleDisposalsWereYouAUKResident"}
 @title = @{messages(s"$key.title")}
@@ -43,7 +39,7 @@
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
 
-    @backLinkComponent(triage.routes.MultipleDisposalsTriageController.howManyDisposals())
+    @backLinkComponent(backLink)
 
     @if(hasErrors) {
         @errorSummary(form)
@@ -63,10 +59,6 @@
 
         @submitButton(messages("button.continue"))
     }
-
-    @*
-    *returnToSummaryLink(displayReturnToSummaryLink)
-    *@
 
 }
 
