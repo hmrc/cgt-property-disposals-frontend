@@ -51,7 +51,9 @@
    </a>
   </p>
 
-  @returnCharges(messages("viewReturn.charges.heading"), returnSummary)
+  @if(returnSummary.charges.nonEmpty) {
+    @returnCharges(messages("viewReturn.charges.heading"), returnSummary)
+  }
 
   <h2 class="heading-large">
     @messages("viewReturn.summaryHeading")
