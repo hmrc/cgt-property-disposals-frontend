@@ -500,8 +500,8 @@ class TaskListControllerSpec
           doc.select("h1").text shouldBe messageFromMessageKey("service.title")
           doc
             .select("a#saveAndComeBackLater")
-            .attr("href") shouldBe uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.routes.HomePageController
-            .homepage()
+            .attr("href") shouldBe uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes.ConfirmDraftReturnController
+            .confirmDraftReturn()
             .url
         }
       }
