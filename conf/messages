@@ -981,7 +981,7 @@ multipleDisposalsNumberOfProperties.details.link=<a href="{0}" target="_blank">R
 multipleDisposalsNumberOfProperties.error.invalid=Use numbers to input how many disposals you want to include in this return
 multipleDisposalsNumberOfProperties.error.required=Input how many disposals you want to include in this return using numbers
 multipleDisposalsNumberOfProperties.error.tooSmall=The number of properties must be 2 or more, or go back and select that you are including one property in this return
-multipleDisposalsNumberOfProperties.error.tooLong=You can't include more than 999 properties in the return
+multipleDisposalsNumberOfProperties.error.tooLong=You can’t include more than 999 properties in the return
 
 multipleDisposalsWereYouAUKResident.title=Were you a UK resident on all of the contract ‘exchange’ dates?
 multipleDisposalsWereYouAUKResident.helpText=Contract ‘exchange’ usually happens when a buyer and seller swap contracts and the buyer pays a deposit. If you sold shares, it was the day you sold them.
