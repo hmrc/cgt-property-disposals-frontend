@@ -25,17 +25,17 @@
 @(heading: String, returnSummary: ReturnSummary)(implicit messages: Messages)
 
 <h2 class="heading-large">@heading</h2>
-<table class="govuk-table borders payments-table view-return-charges">
-  <thead class="govuk-table__head">
-    <tr class="govuk-table__row govuk-!-margin-bottom-9" style="vertical-align:bottom;">
-      <th scope="col" class="govuk-table__header ">Description</th>
-      <th scope="col" class="govuk-table__header">Pay by</th>
-      <th scope="col" class="govuk-table__header govuk-table__header--numeric">Amount</th>
-      <th scope="col" class="govuk-table__header govuk-table__header--numeric">Due</th>
-      <th scope="col" class="govuk-table__header govuk-table__header--numeric">Status</th>
+<table class="borders payments-table view-return-charges">
+  <thead>
+    <tr style="vertical-align:bottom;">
+      <th scope="col">@messages("viewReturn.charges.description")</th>
+      <th scope="col">@messages("viewReturn.charges.payBy")</th>
+      <th scope="col">@messages("viewReturn.charges.amount")</th>
+      <th scope="col">@messages("viewReturn.charges.due")</th>
+      <th scope="col">@messages("viewReturn.charges.status")</th>
     </tr>
   </thead>
-  <tbody class="govuk-table__body">
+  <tbody>
     @{ returnSummary.charges.map(chargeItem(_)) }
   </tbody>
 </table>

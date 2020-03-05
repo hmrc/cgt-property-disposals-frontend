@@ -47,14 +47,14 @@
       @if(charge.totalOutstanding().isZero) {
         @messages("viewReturn.charge.status.paid")
       } else {
-        @messages("viewReturn.charge.status.unpaid")
+        @Html(messages("viewReturn.charge.status.payNow", "#"))
       }
     </td>
   </tr>
 
   @if(charge.payments.nonEmpty) {
   <tr>
-    <td colspan="5">
+    <td class="allocations" colspan="5">
       <div class="panel panel-border-wide payments-list-container">
         <ul class="payments-list">
           @{charge.payments.map { payment =>

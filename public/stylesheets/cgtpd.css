@@ -669,8 +669,55 @@ h1 > .sub-heading {
 .view-return-charges th,
 .payments-list li {
     font-size: 16px;
+    vertical-align: bottom;
 }
 
 .no-border td {
     border-bottom: none;
+}
+
+@media only screen and (max-width: 641px) {
+
+    table, thead, tbody, th, td, tr, .mobile-only {
+        display: block;
+    }
+    thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    tr {
+        border: 1px solid #ccc;
+    }
+    td {
+        border: none;
+        border-bottom: 1px solid #eee;
+        position: relative;
+        padding-left: 200px;
+        margin-left: 150px;
+    }
+    td:before {
+        position: absolute;
+        top: 12px;
+        left: 6px;
+        width: 200px;
+        padding-right: 40px;
+        white-space: nowrap;
+        margin-left: -150px;
+    }
+
+    table.view-return-charges td:nth-of-type(1):before { content: "Type"; }
+    table.view-return-charges td:nth-of-type(2):before { content: "Pay by"; }
+    table.view-return-charges td:nth-of-type(3):before { content: "Amount"; }
+    table.view-return-charges td:nth-of-type(4):before { content: "Due";}
+    table.view-return-charges td:nth-of-type(5):before { content: "Status";}
+
+    .due-on-account-summary {
+        margin-left:inherit!important;
+    }
+    td.allocations:nth-of-type(1):before {
+        content: "Allocations"!important;
+    }
+
 }
