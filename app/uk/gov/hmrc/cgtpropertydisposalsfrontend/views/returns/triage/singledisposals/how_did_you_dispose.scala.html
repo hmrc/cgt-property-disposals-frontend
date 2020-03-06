@@ -40,12 +40,14 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
     value match {
         case DisposalMethod.Sold => 0
         case DisposalMethod.Gifted => 1
+        case DisposalMethod.Other => 2
     }}
 
 @options = @{
     List(
         s"$key.Sold",
-        s"$key.Gifted"
+        s"$key.Gifted",
+        s"$key.Other"
     ).map(messageKey =>Html(messages(messageKey)))
 }
 

@@ -253,36 +253,36 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
       }
 
       "display the home page when there is a charge raise and partial payment have been made for return" in {
-        val mainReturnChargeAmount: AmountInPence = AmountInPence(10000)
-        val penaltyInterestChargeAmount: AmountInPence = AmountInPence(10000)
-        val partialPaymentForUkResidentReturnChargeAmount: AmountInPence = AmountInPence(1000)
-        val returnSentDate: LocalDate = LocalDate.now()
-        val mainPaymentDueDate: LocalDate = LocalDate.now().plusMonths(1)
+        val mainReturnChargeAmount: AmountInPence                         = AmountInPence(10000)
+        val penaltyInterestChargeAmount: AmountInPence                    = AmountInPence(10000)
+        val partialPaymentForUkResidentReturnChargeAmount: AmountInPence  = AmountInPence(1000)
+        val returnSentDate: LocalDate                                     = LocalDate.now()
+        val mainPaymentDueDate: LocalDate                                 = LocalDate.now().plusMonths(1)
         val partialPaymentForUkResidentReturnChargePaymentDate: LocalDate = LocalDate.now().plusMonths(2)
 
         val penaltyInterestCharge = sample[Charge].copy(
           chargeType = ChargeType.PenaltyInterest,
-          amount = penaltyInterestChargeAmount,
-          dueDate = mainPaymentDueDate,
-          payments = List.empty
+          amount     = penaltyInterestChargeAmount,
+          dueDate    = mainPaymentDueDate,
+          payments   = List.empty
         )
 
         val partialPaymentForUkResidentReturnCharge = sample[Payment].copy(
-          amount = partialPaymentForUkResidentReturnChargeAmount,
+          amount       = partialPaymentForUkResidentReturnChargeAmount,
           clearingDate = partialPaymentForUkResidentReturnChargePaymentDate
         )
 
         val ukResidentReturnCharge = sample[Charge].copy(
           chargeType = ChargeType.UkResidentReturn,
-          amount = mainReturnChargeAmount,
-          dueDate = mainPaymentDueDate,
-          payments = List(partialPaymentForUkResidentReturnCharge)
+          amount     = mainReturnChargeAmount,
+          dueDate    = mainPaymentDueDate,
+          payments   = List(partialPaymentForUkResidentReturnCharge)
         )
         val charges = List(ukResidentReturnCharge, penaltyInterestCharge)
         val sentReturn = sample[ReturnSummary].copy(
-          charges = charges,
+          charges                = charges,
           mainReturnChargeAmount = mainReturnChargeAmount,
-          submissionDate = returnSentDate
+          submissionDate         = returnSentDate
         )
         val subscribed = sample[Subscribed].copy(sentReturns = List(sentReturn))
 
@@ -290,7 +290,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
           mockAuthWithNoRetrievals()
           mockGetSession(
             SessionData.empty.copy(
-              userType = Some(UserType.Individual),
+              userType      = Some(UserType.Individual),
               journeyStatus = Some(subscribed)
             )
           )
@@ -300,9 +300,12 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
           performAction(),
           messageFromMessageKey("account.home.title"), { doc =>
             extractAmount(doc.select(s"#leftToPay-${sentReturn.submissionId}").text) shouldBe formatAmountOfMoneyWithPoundSign(
-              mainReturnChargeAmount.inPounds() + penaltyInterestChargeAmount.inPounds() - partialPaymentForUkResidentReturnChargeAmount.inPounds()
+              mainReturnChargeAmount.inPounds() + penaltyInterestChargeAmount
+                .inPounds() - partialPaymentForUkResidentReturnChargeAmount.inPounds()
             )
-            doc.select(s"#paymentDue-${sentReturn.submissionId}").text shouldBe govShortDisplayFormat(mainPaymentDueDate)
+            doc.select(s"#paymentDue-${sentReturn.submissionId}").text shouldBe govShortDisplayFormat(
+              mainPaymentDueDate
+            )
             extractAmount(doc.select(s"#taxOwed-${sentReturn.submissionId}").text) shouldBe formatAmountOfMoneyWithPoundSign(
               mainReturnChargeAmount.inPounds()
             )
@@ -322,37 +325,37 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
       }
 
       "display the home page when there is a charge raise and full payment have been made for return" in {
-        val mainReturnChargeAmount: AmountInPence = AmountInPence(10000)
-        val penaltyInterestChargeAmount: AmountInPence = AmountInPence(10000)
-        val fullPaymentForUkResidentReturnChargeAmount: AmountInPence = AmountInPence(10000)
-        val returnSentDate: LocalDate = LocalDate.now()
-        val mainPaymentDueDate: LocalDate = LocalDate.now().plusMonths(1)
-        val penaltyInterestChargeDueDate: LocalDate = LocalDate.now().plusMonths(2)
+        val mainReturnChargeAmount: AmountInPence                      = AmountInPence(10000)
+        val penaltyInterestChargeAmount: AmountInPence                 = AmountInPence(10000)
+        val fullPaymentForUkResidentReturnChargeAmount: AmountInPence  = AmountInPence(10000)
+        val returnSentDate: LocalDate                                  = LocalDate.now()
+        val mainPaymentDueDate: LocalDate                              = LocalDate.now().plusMonths(1)
+        val penaltyInterestChargeDueDate: LocalDate                    = LocalDate.now().plusMonths(2)
         val fullPaymentForUkResidentReturnChargePaymentDate: LocalDate = LocalDate.now().plusMonths(2)
 
         val penaltyInterestCharge = sample[Charge].copy(
           chargeType = ChargeType.PenaltyInterest,
-          amount = penaltyInterestChargeAmount,
-          dueDate = penaltyInterestChargeDueDate,
-          payments = List.empty
+          amount     = penaltyInterestChargeAmount,
+          dueDate    = penaltyInterestChargeDueDate,
+          payments   = List.empty
         )
 
         val fullPaymentForUkResidentReturnCharge = sample[Payment].copy(
-          amount = fullPaymentForUkResidentReturnChargeAmount,
+          amount       = fullPaymentForUkResidentReturnChargeAmount,
           clearingDate = fullPaymentForUkResidentReturnChargePaymentDate
         )
 
         val ukResidentReturnCharge = sample[Charge].copy(
           chargeType = ChargeType.UkResidentReturn,
-          amount = mainReturnChargeAmount,
-          dueDate = mainPaymentDueDate,
-          payments = List(fullPaymentForUkResidentReturnCharge)
+          amount     = mainReturnChargeAmount,
+          dueDate    = mainPaymentDueDate,
+          payments   = List(fullPaymentForUkResidentReturnCharge)
         )
         val charges = List(ukResidentReturnCharge, penaltyInterestCharge)
         val sentReturn = sample[ReturnSummary].copy(
-          charges = charges,
+          charges                = charges,
           mainReturnChargeAmount = mainReturnChargeAmount,
-          submissionDate = returnSentDate
+          submissionDate         = returnSentDate
         )
         val subscribed = sample[Subscribed].copy(sentReturns = List(sentReturn))
 
@@ -360,7 +363,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
           mockAuthWithNoRetrievals()
           mockGetSession(
             SessionData.empty.copy(
-              userType = Some(UserType.Individual),
+              userType      = Some(UserType.Individual),
               journeyStatus = Some(subscribed)
             )
           )
@@ -370,9 +373,12 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
           performAction(),
           messageFromMessageKey("account.home.title"), { doc =>
             extractAmount(doc.select(s"#leftToPay-${sentReturn.submissionId}").text) shouldBe formatAmountOfMoneyWithPoundSign(
-              mainReturnChargeAmount.inPounds() + penaltyInterestChargeAmount.inPounds() - fullPaymentForUkResidentReturnChargeAmount.inPounds()
+              mainReturnChargeAmount.inPounds() + penaltyInterestChargeAmount
+                .inPounds() - fullPaymentForUkResidentReturnChargeAmount.inPounds()
             )
-            doc.select(s"#paymentDue-${sentReturn.submissionId}").text shouldBe govShortDisplayFormat(penaltyInterestChargeDueDate)
+            doc.select(s"#paymentDue-${sentReturn.submissionId}").text shouldBe govShortDisplayFormat(
+              penaltyInterestChargeDueDate
+            )
             extractAmount(doc.select(s"#taxOwed-${sentReturn.submissionId}").text) shouldBe formatAmountOfMoneyWithPoundSign(
               mainReturnChargeAmount.inPounds()
             )
@@ -392,46 +398,46 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
       }
 
       "display the home page when there is a charge raise and full payments have been made for return and charge raise" in {
-        val mainReturnChargeAmount: AmountInPence = AmountInPence(10000)
-        val fullPaymentForUkResidentReturnChargeAmount: AmountInPence = AmountInPence(10000)
+        val mainReturnChargeAmount: AmountInPence                      = AmountInPence(10000)
+        val fullPaymentForUkResidentReturnChargeAmount: AmountInPence  = AmountInPence(10000)
         val fullPaymentForUkResidentReturnChargePaymentDate: LocalDate = LocalDate.now().plusMonths(2)
 
-        val penaltyInterestChargeAmount: AmountInPence = AmountInPence(10000)
+        val penaltyInterestChargeAmount: AmountInPence               = AmountInPence(10000)
         val fullPaymentForPenaltyInterestChargeAmount: AmountInPence = AmountInPence(10000)
-        val penaltyInterestChargePaymentDate: LocalDate = LocalDate.now().plusMonths(2)
+        val penaltyInterestChargePaymentDate: LocalDate              = LocalDate.now().plusMonths(2)
 
-        val returnSentDate: LocalDate = LocalDate.now()
-        val mainPaymentDueDate: LocalDate = LocalDate.now().plusMonths(1)
+        val returnSentDate: LocalDate               = LocalDate.now()
+        val mainPaymentDueDate: LocalDate           = LocalDate.now().plusMonths(1)
         val penaltyInterestChargeDueDate: LocalDate = LocalDate.now().plusMonths(2)
 
         val fullPaymentForPenaltyInterestCharge = sample[Payment].copy(
-          amount = fullPaymentForPenaltyInterestChargeAmount,
+          amount       = fullPaymentForPenaltyInterestChargeAmount,
           clearingDate = penaltyInterestChargePaymentDate
         )
 
         val penaltyInterestCharge = sample[Charge].copy(
           chargeType = ChargeType.PenaltyInterest,
-          amount = penaltyInterestChargeAmount,
-          dueDate = penaltyInterestChargeDueDate,
-          payments = List(fullPaymentForPenaltyInterestCharge)
+          amount     = penaltyInterestChargeAmount,
+          dueDate    = penaltyInterestChargeDueDate,
+          payments   = List(fullPaymentForPenaltyInterestCharge)
         )
 
         val fullPaymentForUkResidentReturnCharge = sample[Payment].copy(
-          amount = fullPaymentForUkResidentReturnChargeAmount,
+          amount       = fullPaymentForUkResidentReturnChargeAmount,
           clearingDate = fullPaymentForUkResidentReturnChargePaymentDate
         )
 
         val ukResidentReturnCharge = sample[Charge].copy(
           chargeType = ChargeType.UkResidentReturn,
-          amount = mainReturnChargeAmount,
-          dueDate = mainPaymentDueDate,
-          payments = List(fullPaymentForUkResidentReturnCharge)
+          amount     = mainReturnChargeAmount,
+          dueDate    = mainPaymentDueDate,
+          payments   = List(fullPaymentForUkResidentReturnCharge)
         )
         val charges = List(ukResidentReturnCharge, penaltyInterestCharge)
         val sentReturn = sample[ReturnSummary].copy(
-          charges = charges,
+          charges                = charges,
           mainReturnChargeAmount = mainReturnChargeAmount,
-          submissionDate = returnSentDate
+          submissionDate         = returnSentDate
         )
         val subscribed = sample[Subscribed].copy(sentReturns = List(sentReturn))
 
@@ -439,7 +445,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
           mockAuthWithNoRetrievals()
           mockGetSession(
             SessionData.empty.copy(
-              userType = Some(UserType.Individual),
+              userType      = Some(UserType.Individual),
               journeyStatus = Some(subscribed)
             )
           )
@@ -449,7 +455,8 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
           performAction(),
           messageFromMessageKey("account.home.title"), { doc =>
             extractAmount(doc.select(s"#leftToPay-${sentReturn.submissionId}").text) shouldBe formatAmountOfMoneyWithPoundSign(
-              mainReturnChargeAmount.inPounds() + penaltyInterestChargeAmount.inPounds() - fullPaymentForUkResidentReturnChargeAmount.inPounds() -
+              mainReturnChargeAmount.inPounds() + penaltyInterestChargeAmount
+                .inPounds() - fullPaymentForUkResidentReturnChargeAmount.inPounds() -
                 fullPaymentForPenaltyInterestChargeAmount.inPounds()
             )
             doc.select(s"#paymentDue-${sentReturn.submissionId}").text shouldBe ""

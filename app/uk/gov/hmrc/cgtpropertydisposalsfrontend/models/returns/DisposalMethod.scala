@@ -28,6 +28,8 @@ object DisposalMethod {
 
   case object Gifted extends DisposalMethod
 
+  case object Other extends DisposalMethod
+
   implicit val eq: Eq[DisposalMethod] = Eq.fromUniversalEquals
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))

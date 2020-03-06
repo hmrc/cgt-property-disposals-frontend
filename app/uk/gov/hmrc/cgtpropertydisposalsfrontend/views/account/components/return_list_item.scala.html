@@ -14,8 +14,10 @@
  * limitations under the License.
  *@
 
+@import cats.syntax.order._
 @import java.time.LocalDate
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnSummary
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
@@ -26,6 +28,7 @@
 @(sentReturn: ReturnSummary, paymentDueDate: Option[LocalDate])(implicit messages: Messages)
 
 @totalOutstanding = @{ sentReturn.totalOutstanding() }
+@numberOfOutstandingCharges = @{ sentReturn.charges.count(_.totalOutstanding() > AmountInPence.zero) }
 
 <li class="single-return form-bundle">
   <div class="grid-row">
@@ -43,18 +46,19 @@
 
     </div>
     <div class="column-one-quarter financial-summary">
-      <h4 id="leftToPay-@sentReturn.submissionId">
-        <span class="caption">@messages("returns.list.leftToPay")</span>
-        @MoneyUtils.formatAmountOfMoneyWithPoundSign(sentReturn.totalOutstanding().inPounds())
-      </h4>
+
       @if(sentReturn.mainReturnChargeAmount.withFloorZero.isZero) {
         <span class="caption">
           @messages("returns.list.noTaxDue")
         </span>
       } else {
+        <h4 id="leftToPay-@sentReturn.submissionId">
+          <span class="caption">@messages("returns.list.leftToPay")</span>
+          @MoneyUtils.formatAmountOfMoneyWithPoundSign(sentReturn.totalOutstanding().inPounds())
+        </h4>
         @if(!totalOutstanding.isZero) {
           <h5>
-            <span class="caption">@messages("returns.list.paymentDue")</span>
+            <span class="caption">@messages(if(numberOfOutstandingCharges > 1) "returns.list.nextPaymentDue" else "returns.list.paymentDue")</span>
             <strong id="paymentDue-@sentReturn.submissionId" class="bold">
               @paymentDueDate.map(LocalDateUtils.govShortDisplayFormat(_))
             </strong>
@@ -66,7 +70,7 @@
       <p class="caption">
         @messages("returns.list.ref") @sentReturn.submissionId
       </p>
-      <a id="viewSentReturn-@sentReturn.submissionId" href="@{controllers.accounts.homepage.routes.HomePageController.viewSentReturn(sentReturn.submissionId)}">
+      <a href="@{controllers.accounts.homepage.routes.HomePageController.viewSentReturn(sentReturn.submissionId)}">
         @if(!totalOutstanding.isZero) {
           @messages("returns.list.viewAndPay")
         } else {
