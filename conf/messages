@@ -1030,6 +1030,7 @@ returns.list.ref=Return ref:
 returns.list.view=View return
 returns.list.viewAndPay=View and pay
 returns.list.paymentDue=Payment due
+returns.list.nextPaymentDue=Next payment due
 returns.list.noTaxDue=You did not owe any tax for this return
 returns.list.leftToPay=Total left to pay
 returns.list.taxOwed=Tax owed for return
