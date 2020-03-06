@@ -31,6 +31,7 @@ generic.success=Success
 generic.errorPrefix=Error:
 generic.loss=loss
 generic.gain=gain
+generic.on=on
 yesNo.true=Yes
 yesNo.false=No
 
@@ -596,6 +597,20 @@ date.10=October
 date.11=November
 date.12=December
 
+date.short.1=Jan	
+date.short.2=Feb	
+date.short.3=Mar	
+date.short.4=Apr	
+date.short.5=May	
+date.short.6=Jun	
+date.short.7=Jul	
+date.short.8=Aug	
+date.short.9=Sept	
+date.short.10=Oct	
+date.short.11=Nov	
+date.short.12=Dec
+
+
 returns.return-to-summary-link=Return to summary
 task-list.InProgress=In progress
 task-list.Complete=Complete
@@ -944,6 +959,51 @@ viewReturn.title=Your return
 viewReturn.heading.taxOwed=Tax owed for return
 viewReturn.heading.reference=Return reference number
 viewReturn.printLink=Print or save this page for your records
+viewReturn.charges.heading=Payments
+viewReturn.charges.description=Description
+viewReturn.charges.payBy=Pay by
+viewReturn.charges.amount=Amount
+viewReturn.charges.due=Due
+viewReturn.charges.status=Status
+viewReturn.chargeType.UkResidentReturn=Tax payment
+viewReturn.chargeType.NonUkResidentReturn=Tax payment
+viewReturn.chargeType.Interest=Interest on late tax payment
+viewReturn.chargeType.LateFilingPenalty=Penalty - late return
+viewReturn.chargeType.SixMonthLateFilingPenalty=Penalty - return 6 months late
+viewReturn.chargeType.TwelveMonthLateFilingPenalty=Penalty - return 12 months late
+viewReturn.chargeType.LatePaymentPenalty=Penalty - late tax payment
+viewReturn.chargeType.SixMonthLatePaymentPenalty=Penalty - payment 6 months late
+viewReturn.chargeType.TwelveMonthLatePaymentPenalty=Penalty - payment 12 months late
+viewReturn.chargeType.PenaltyInterest=Interest on penalties paid late
+viewReturn.charge.status.paid=Paid
+viewReturn.charge.status.payNow=<a href="{0}">Pay now</a>
+viewReturn.charge.paymentMethod.BACS=Bacs payment received
+viewReturn.charge.paymentMethod.CHAPS=CHAPS payment received
+viewReturn.charge.paymentMethod.Cheque=cheque received
+viewReturn.charge.paymentMethod.DebitCardByTelephone=debit card payment received
+viewReturn.charge.paymentMethod.CreditCardByTelephone=credit card payment received
+viewReturn.charge.paymentMethod.PTAOnlineWorldpayDebitCardPayment=debit card payment received
+viewReturn.charge.paymentMethod.PTAOnlineWorldpayCreditCardPayment=credit card payment received
+viewReturn.charge.paymentMethod.GIROReceipts= Bank Giro payment received
+viewReturn.charge.paymentMethod.GIROCredits= Bank Giro payment received
+viewReturn.charge.paymentMethod.ChequeReceipts=cheque received
+viewReturn.charge.paymentMethod.DirectDebit=direct debit payment received
+viewReturn.charge.paymentMethod.FasterPayment=Faster Payment received
+viewReturn.charge.paymentMethod.GiroBankReceipts=Bank Giro payment received
+viewReturn.charge.paymentMethod.GiroBankPostOffice=Bank Giro payment received
+viewReturn.charge.paymentMethod.Paymaster=PayMaster payment received
+viewReturn.charge.paymentMethod.BankLodgement=payment received
+viewReturn.charge.paymentMethod.Incentive=payment received
+viewReturn.charge.paymentMethod.LocalOfficePayment=payment received
+viewReturn.charge.paymentMethod.NilDeclarations=payment received
+viewReturn.charge.paymentMethod.OverpaymentsToDuty=payment received
+viewReturn.charge.paymentMethod.ReallocationFromOASToDuty=payment received
+viewReturn.charge.paymentMethod.PaymentNotExpected=payment received
+viewReturn.charge.paymentMethod.Reallocation=payment received
+viewReturn.charge.paymentMethod.RepaymentInterestAllocated=payment received
+viewReturn.charge.paymentMethod.VoluntaryDirectPayments=payment received
+
+viewReturn.summaryHeading=Your return
 
 multiple-disposals.triage.caption=Reporting multiple disposals
 
