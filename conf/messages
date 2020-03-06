@@ -175,7 +175,7 @@ address.postcode.helpText=For example, AB2 9WQ
 postcode.invalid=Postcode must only include letters, numbers and spaces
 address.postcodeFilter.label=Enter property name or number (optional)
 address.postcodeFilter.helpText=For example, The Mill, Flat A or 37b
-address.manual.linkText=Enter UK address manually
+address.manual.linkText=Enter the address another way
 address.lookup.linkText=Lookup UK address with postcode
 
 address.uk.title=Enter your UK contact address
@@ -636,7 +636,7 @@ address.uk.returns.title=Enter the address of the UK property you disposed of
 
 returns.property-address.cya.title=Check your answers
 returns.property-address.cyaLabel.property-address=Property address
-returns.property-address.cyaChange.property-address=your property address
+returns.property-address.cyaChange.property-address=the address of the property
 
 returns.disposal-details.caption=Sale or disposal details
 shareOfProperty.title=How much of the property did you own?
