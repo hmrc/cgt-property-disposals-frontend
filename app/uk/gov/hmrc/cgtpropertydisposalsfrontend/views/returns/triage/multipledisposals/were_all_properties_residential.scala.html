@@ -28,7 +28,8 @@
     backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
     details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
     yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
 @(form: Form[Boolean], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
@@ -45,10 +46,12 @@
         @errorSummary(form)
     }
 
+    @caption(messages("multiple-disposals.triage.caption"))
+
     @formWrapper(controllers.returns.triage.routes.MultipleDisposalsTriageController.wereAllPropertiesResidentialSubmit(), 'novalidate -> "novalidate") {
         @yesNo(
             fieldId = key,
-            label = pageHeading(title, Some(messages("multiple-disposals.triage.caption"))),
+            label = pageHeading(title),
             labelAsHeading = true,
             errorKey = form.error(key).map(e => e.message),
             hasErrors = hasErrors,

@@ -193,7 +193,7 @@ class MultipleDisposalsTriageControllerSpec
 
       val key = "multipleDisposalsNumberOfProperties"
 
-      "redirect to disposal method" when {
+      "redirect to single disposal cya page" when {
 
         "user enters number of properties as one" in {
 
@@ -222,7 +222,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkIsRedirect(
-            performAction(s"$key" -> "1"),
+            performAction(key -> "1"),
             routes.SingleDisposalsTriageController.checkYourAnswers()
           )
 
@@ -252,7 +252,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkIsRedirect(
-            performAction(s"$key" -> "5"),
+            performAction(key -> "5"),
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
         }
@@ -277,20 +277,14 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkIsRedirect(
-            performAction(s"$key" -> "3"),
+            performAction(key -> "3"),
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
         }
 
-      }
-
-      "not update the session" when {
-
-        "user has already answered how many disposals section and " +
-          "re-enters same number of properties value for more than one" in {
-          val answers = sample[CompleteMultipleDisposalsAnswers].copy(
-            numberOfProperties = 5
-          )
+      "user has already answered how many disposals section and " +
+        "redirect to dummy page when user re-enters different number of properties value which is moreThanOne" in {
+        val answers = sample[CompleteMultipleDisposalsAnswers].copy(numberOfProperties = 9)
 
           val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
 
@@ -300,7 +294,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkIsRedirect(
-            performAction(s"$key" -> "5"),
+            performAction(key -> "5"),
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
         }
@@ -330,7 +324,7 @@ class MultipleDisposalsTriageControllerSpec
               performAction
             )
 
-          test(s"$key" -> "-5")(s"$key.error.tooSmall")
+          test(key -> "-5")(s"$key.error.tooSmall")
 
         }
 
@@ -341,7 +335,7 @@ class MultipleDisposalsTriageControllerSpec
               performAction
             )
 
-          test(s"$key" -> "1000")(s"$key.error.tooLong")
+          test(key -> "1000")(s"$key.error.tooLong")
 
         }
 
@@ -409,7 +403,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkIsRedirect(
-            performAction(s"$key" -> "true"),
+            performAction(key -> "true"),
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
         }
@@ -430,7 +424,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkIsRedirect(
-            performAction(s"$key" -> "false"),
+            performAction(key -> "false"),
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
         }
@@ -465,7 +459,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkIsRedirect(
-            performAction(s"$key" -> "false"),
+            performAction(key -> "false"),
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
         }
@@ -567,7 +561,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkIsRedirect(
-            performAction(s"$key" -> "true"),
+            performAction(key -> "true"),
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
         }
@@ -593,7 +587,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkIsRedirect(
-            performAction(s"$key" -> "false"),
+            performAction(key -> "false"),
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
         }
@@ -623,7 +617,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkIsRedirect(
-            performAction(s"$key" -> "false"),
+            performAction(key -> "false"),
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
         }
@@ -644,7 +638,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkIsRedirect(
-            performAction(s"$key" -> "true"),
+            performAction(key -> "true"),
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
         }
