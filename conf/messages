@@ -472,7 +472,7 @@ agent.confirm-client.change-client=Change client
 
 triage.caption=Before you start
 
-who-are-you-reporting-for.title=Who are you reporting the tax for?
+who-are-you-reporting-for.title=Who are you completing this return for?
 
 individualUserType.Self=Yourself
 individualUserType.Capacitor=Someone else
@@ -480,24 +480,27 @@ individualUserType.PersonalRepresentative=Someone who has died
 individualUserType.error.required=Select who are you reporting the tax for
 individualUserType.error.invalid=Select who are you reporting the tax for
 
-numberOfProperties.title=How many properties do you want to include in this return?
-numberOfProperties.helpText=If you sold shares instead of property, tell us how many companies you held shares in that you want to include in this return.
+numberOfProperties.title=How many UK properties are you including in this return?
+numberOfProperties.helpText=All of the property sales or disposals must have the same completion date.
 numberOfProperties.One=One
 numberOfProperties.MoreThanOne=2 or more
-numberOfProperties.error.invalid=Select how many properties or companies you want to include in this return
-numberOfProperties.error.required=Select how many properties or companies you want to include in this return
+numberOfProperties.details.summary=What happens on the completion date?
+numberOfProperties.details.p1=<a href="{0}" target="_blank">The completion date (opens in a new window)</a> is usually the day you got the money from the sale or disposal and the new owner got the keys.
+numberOfProperties.error.invalid=Select how many UK properties you are including in this return
+numberOfProperties.error.required=Select how many UK properties you are including in this return
 
-disposalMethod.title=Did you sell the property or give it away?
+disposalMethod.title=How did you sell or dispose of the UK property?
 disposalMethod.Sold=Sold it
 disposalMethod.Gifted=Gave it away
-disposalMethod.error.required=Select if you sold it or gave it away
-disposalMethod.error.invalid=Select if you sold it or gave it away
+disposalMethod.Other=Other
+disposalMethod.error.required=Select if you sold it, gave it away or other
+disposalMethod.error.invalid=Select if you sold it, gave it away or other
 
-wereYouAUKResident.title=Were you a UK resident when you ‘exchanged’ contracts when selling the property?
-wereYouAUKResident.helpText=You ‘exchanged’ contracts when you and the buyer swapped contracts and they paid a deposit. If you sold shares, it was when you sold them.
-wereYouAUKResident.link=<a href="{0}" target="_blank">Work out your residence status (opens in a new window)</a>.
-wereYouAUKResident.error.required=Select yes if you were a UK resident when you ‘exchanged’ contracts
-wereYouAUKResident.error.boolean=Select yes if you were a UK resident when you ‘exchanged’ contracts
+wereYouAUKResident.title=Were you a UK resident when you exchanged contracts when disposing of the property?
+wereYouAUKResident.helpText=Contract exchange usually happens when you and the buyer or new owner swap contracts and the buyer pays a deposit.
+wereYouAUKResident.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>.
+wereYouAUKResident.error.required=Select yes if you were a UK resident when you exchanged contracts
+wereYouAUKResident.error.boolean=Select yes if you were a UK resident when you exchanged contracts
 
 triage.enterCountry.title=What was your country of residence on the day you ‘exchanged’ contracts?
 triage.enterCountry.helpText=It’s usually the day you and the new owner swapped contracts and they paid a deposit. If you made an indirect disposal, it’s the day you sold the shares.
@@ -514,24 +517,27 @@ assetTypeForNonUkResidents.IndirectDisposal.helpText=An indirect disposal is whe
 assetTypeForNonUkResidents.error.required=Select the type of property or asset you sold or disposed of
 assetTypeForNonUkResidents.error.invalid=Select the type of property or asset you sold or disposed of
 
-didYouDisposeOfResidentialProperty.title=Did you sell a residential property?
-didYouDisposeOfResidentialProperty.helpText=Residential property includes houses, flats, or other dwellings, including their gardens and grounds.
+didYouDisposeOfResidentialProperty.title=Did you sell or dispose of a UK residential property?
+didYouDisposeOfResidentialProperty.helpText=Residential property includes houses, flats, or other dwellings, including their gardens or grounds.
 didYouDisposeOfResidentialProperty.Residential=Yes
 didYouDisposeOfResidentialProperty.NonResidential=No
-didYouDisposeOfResidentialProperty.details.summary=How to work out if a property is residential
-didYouDisposeOfResidentialProperty.details.p1=Residential property is:
+didYouDisposeOfResidentialProperty.details.summary=What residential property includes
+didYouDisposeOfResidentialProperty.details.p1=Residential property includes:
 didYouDisposeOfResidentialProperty.details.l1=a building where someone lives or could live, like a house, flat or other type of dwelling
 didYouDisposeOfResidentialProperty.details.l2=a building that is being built or changed so it can be used as a place where someone could live
 didYouDisposeOfResidentialProperty.details.l3=land that’s part of a garden or grounds of a building that’s used as a place where someone lives, or could live
 didYouDisposeOfResidentialProperty.details.link=<a href="{0}" tabindex="-1" target="_blank">Read a definition of residential property (opens in a new window)</a>.
-
 didYouDisposeOfResidentialProperty.error.required=Select yes if you sold or disposed of a residential property
 didYouDisposeOfResidentialProperty.error.boolean=Select yes if you sold or disposed of a residential property
 
-disposalDate.title=What date did you ‘exchange’ contracts when selling the property?
+ukResidentCanOnlyReportResidential.title=You cannot use this service
+ukResidentCanOnlyReportResidential.p1=You told us you were a UK resident on the day you sold or disposed of the UK property. You can only use this service to report UK residential property.
+ukResidentCanOnlyReportResidential.p2=Find out how to report and pay Capital Gains Tax on <a href="{0}">non-residential UK property sales or disposals</a>.
+
+disposalDate.title=What date did you exchange contracts when disposing of the property?
 disposalDate.indirectDisposal.title=What date did you sell the shares?
-disposalDate.helpText=It’s when you and the buyer swapped contracts and they paid a deposit. If you sold shares not property it’s when you sold them. For example, 25 4 2020
-disposalDate.link=<a href="{0}" target="_blank">Find out what happens on the ‘exchange’ date (opens in a new window)</a>.
+disposalDate.helpText=It’s usually when you and the buyer or new owner swapped contracts and the buyer paid a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020
+disposalDate.link=<a href="{0}" target="_blank">Find out what happens on the exchange date (opens in a new window)</a>.
 disposalDate.error.required=Enter a contract exchange date
 disposalDate.error.invalid=Enter a real contract exchange date
 disposalDate.error.tooFarInFuture=The contract exchange date must be today or in the past
@@ -545,9 +551,9 @@ disposalDate-month.error.monthAndYearRequired=Contract exchange date must includ
 disposalDate-day.error.dayAndYearRequired=Contract exchange date must include a day and a year
 disposalDate-day.error.dayAndMonthRequired=Contract exchange date must include a day and a month
 
-completionDate.title=What was the ‘completion’ date when you sold the property?
-completionDate.helpText=This is when the keys are handed over and the buyer can move in. It’s when you received the money from the property sale. For example, 25 4 2020
-completionDate.link=<a href="{0}" target="_blank">Find out what happens on the ‘completion’ date (opens in a new window)</a>.
+completionDate.title=What was the completion date when you sold or disposed of the property?
+completionDate.helpText=It’s usually when you got the money from the sale or property transfer and the new owner got the keys. For example, 25 4 2020.
+completionDate.link=<a href="{0}" target="_blank">Find out what happens on the completion date (opens in a new window)</a>.
 completionDate.error.required=Enter a completion date
 completionDate.error.invalid=Enter a real completion date
 completionDate.error.tooFarInPast=Completion date must be the same as or after the contract exchange date

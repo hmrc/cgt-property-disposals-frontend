@@ -30,7 +30,6 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.AcquisitionDetailsControllerSpec.validateAcquisitionDetailsCheckYourAnswersPage
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressControllerSpec.validatePropertyAddressPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails.DisposalDetailsControllerSpec._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesControllerSpec.validateExemptionAndLossesCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.ReliefDetailsControllerSpec.validateReliefDetailsCheckYourAnswersPage
@@ -39,7 +38,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatell
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, Charge, PaymentsJourney}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, PaymentsJourney}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.IncompleteAcquisitionDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.IncompleteDisposalDetailsAnswers

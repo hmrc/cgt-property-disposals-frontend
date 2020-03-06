@@ -26,7 +26,6 @@ import play.api.Configuration
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
-import play.api.libs.json.{JsNumber, JsString, JsValue}
 import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
@@ -39,7 +38,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, StartingNewDraftReturn, Subscribed, ViewingReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, PaymentsJourney}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftReturn, ReturnSummary, SubmitReturnResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
