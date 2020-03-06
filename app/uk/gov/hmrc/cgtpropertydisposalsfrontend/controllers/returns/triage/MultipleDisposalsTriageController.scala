@@ -258,11 +258,17 @@ class MultipleDisposalsTriageController @Inject() (
   def countryOfResidence(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withMultipleDisposalTriageAnswers(request) {
       case (_, _, answers) =>
-        val werePropertiesResidential =
-          answers.fold(_.countryOfResidence, c => Some(c.countryOfResidence.isUk()).filterNot(identity))
-        val form =
-          werePropertiesResidential.fold(countryOfResidenceForm)(countryOfResidenceForm.fill)
-        Ok(countryOfResidencePage(form, routes.MultipleDisposalsTriageController.wereYouAUKResident()))
+        val wasUkResident = answers.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk()))
+
+        if (!wasUkResident.contains(false)) {
+          Redirect(routes.MultipleDisposalsTriageController.wereYouAUKResident())
+        } else {
+          val countryOfResidence =
+            answers.fold(_.countryOfResidence, c => Some(c.countryOfResidence))
+          val form =
+            countryOfResidence.fold(countryOfResidenceForm)(countryOfResidenceForm.fill)
+          Ok(countryOfResidencePage(form, routes.MultipleDisposalsTriageController.wereYouAUKResident()))
+        }
     }
   }
 
@@ -290,7 +296,7 @@ class MultipleDisposalsTriageController @Inject() (
             Redirect(routes.MultipleDisposalsTriageController.wereAllPropertiesResidential())
 
           case IncompleteMultipleDisposalsAnswers(_, _, Some(false), _, _, _) =>
-            Ok("Non-UK Residents not handled yet")
+            Redirect(routes.MultipleDisposalsTriageController.countryOfResidence())
 
           case IncompleteMultipleDisposalsAnswers(_, _, _, _, Some(residentialStatus), _) =>
             Ok(s"Were All Properties residential: $residentialStatus")
