@@ -629,10 +629,8 @@ class SingleDisposalsTriageControllerSpec
               performAction,
               completeAnswers.copy(assetType = Residential),
               List("didYouDisposeOfResidentialProperty" -> "false"),
-              completeAnswers.copy(assetType = NonResidential), { result =>
-                status(result)          shouldBe OK
-                contentAsString(result) shouldBe "individuals can only report on residential properties"
-              }
+              completeAnswers.copy(assetType = NonResidential),
+              checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
             )
           }
 

@@ -25,6 +25,7 @@ POST /before-start/date-exchanged-contracts                 uk.gov.hmrc.cgtprope
 
 GET  /exit/disposal-date-before-6-April-2020                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageController.disposalDateTooEarly()
 GET  /exit/indirect-mixed-use-cannot-use-service            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageController.assetTypeNotYetImplemented()
+GET  /exit/uk-resident-can-only-report-residential          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageController.ukResidentCanOnlyDisposeResidential()
 
 GET  /before-start/date-of-completion                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageController.whenWasCompletionDate()
 POST /before-start/date-of-completion                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageController.whenWasCompletionDateSubmit()
