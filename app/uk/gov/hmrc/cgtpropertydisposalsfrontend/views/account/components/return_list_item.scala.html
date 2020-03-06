@@ -25,6 +25,8 @@
 
 @(sentReturn: ReturnSummary, paymentDueDate: Option[LocalDate])(implicit messages: Messages)
 
+@totalOutstanding = @{ sentReturn.totalOutstanding() }
+
 <li class="single-return form-bundle">
   <div class="grid-row">
     <div class="column-three-quarters submission-summary">
@@ -36,21 +38,21 @@
       </h4>
       <h3 class="cgt-liability">
         <span class="caption">@messages("returns.list.taxOwed")</span>
-        @MoneyUtils.formatAmountOfMoneyWithPoundSign(sentReturn.totalCGTLiability.inPounds())
+        @MoneyUtils.formatAmountOfMoneyWithPoundSign(sentReturn.mainReturnChargeAmount.withFloorZero.inPounds())
       </h3>
 
     </div>
     <div class="column-one-quarter financial-summary">
       <h4>
         <span class="caption">@messages("returns.list.leftToPay")</span>
-        @MoneyUtils.formatAmountOfMoneyWithPoundSign(sentReturn.totalOutstanding.inPounds())
+        @MoneyUtils.formatAmountOfMoneyWithPoundSign(sentReturn.totalOutstanding().inPounds())
       </h4>
-      @if(sentReturn.totalCGTLiability.isZero) {
+      @if(sentReturn.mainReturnChargeAmount.withFloorZero.isZero) {
         <span class="caption">
           @messages("returns.list.noTaxDue")
         </span>
       } else {
-        @if(!sentReturn.totalOutstanding.isZero) {
+        @if(!totalOutstanding.isZero) {
           <h5>
             <span class="caption">@messages("returns.list.paymentDue")</span>
             <strong class="bold">
@@ -65,7 +67,7 @@
         @messages("returns.list.ref") @sentReturn.submissionId
       </p>
       <a href="@{controllers.accounts.homepage.routes.HomePageController.viewSentReturn(sentReturn.submissionId)}">
-        @if(!sentReturn.totalOutstanding.isZero) {
+        @if(!totalOutstanding.isZero) {
           @messages("returns.list.viewAndPay")
         } else {
           @messages("returns.list.view")

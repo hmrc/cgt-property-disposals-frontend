@@ -44,11 +44,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposals
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.{NoOtherReliefs, OtherReliefs}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CompleteYearToDateLiabilityAnswers, IncompleteYearToDateLiabilityAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{FileDescriptor, UploadRequest, UpscanFileDescriptor}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FinancialDataServiceImpl.FinancialDataResponse
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{ListReturnsResponse, ReturnSummaryWithoutPaymentInfo}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.ListReturnsResponse
 
 object Generators
     extends GenUtils
@@ -73,8 +73,7 @@ object Generators
     with ReliefDetailsAnswersGen
     with TaxYearGen
     with ExemptionAndLossesAnswersGen
-    with YearToDateLiabilityAnswersGen
-    with FinancialDataGen {
+    with YearToDateLiabilityAnswersGen {
 
   implicit val booleanGen: Gen[Boolean] = Gen.oneOf(true, false)
 
@@ -289,9 +288,6 @@ trait ReturnGen { this: GenUtils =>
 
   implicit val returnSummaryGen: Gen[ReturnSummary] = gen[ReturnSummary]
 
-  implicit val returnSummaryWithoutPaymentInfoGen: Gen[ReturnSummaryWithoutPaymentInfo] =
-    gen[ReturnSummaryWithoutPaymentInfo]
-
   implicit val calculateCgtTaxDueRequestGen: Gen[CalculateCgtTaxDueRequest] = gen[CalculateCgtTaxDueRequest]
 
 }
@@ -363,6 +359,8 @@ trait MoneyGen { this: GenUtils =>
 
   implicit val chargeGen: Gen[Charge] = gen[Charge]
 
+  implicit val returnCharge: Gen[ReturnCharge] = gen[ReturnCharge]
+
   implicit val paymentGen: Gen[Payment] = gen[Payment]
 
   implicit val paymentsJourneyGen: Gen[PaymentsJourney] = gen[PaymentsJourney]
@@ -429,13 +427,5 @@ trait YearToDateLiabilityAnswersGen { this: GenUtils =>
   implicit val calculatedTaxDueGen: Gen[CalculatedTaxDue] = gen[CalculatedTaxDue]
 
   implicit val gainCalculatedTaxDueGen: Gen[GainCalculatedTaxDue] = gen[GainCalculatedTaxDue]
-
-}
-
-trait FinancialDataGen { this: GenUtils =>
-
-  implicit val financialTransactionGen: Gen[FinancialTransaction] = gen[FinancialTransaction]
-
-  implicit val financialDataResponseGen: Gen[FinancialDataResponse] = gen[FinancialDataResponse]
 
 }
