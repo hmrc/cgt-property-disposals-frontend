@@ -664,10 +664,8 @@ class SingleDisposalsTriageControllerSpec
               performAction,
               completeAnswers.copy(assetType = Residential),
               List("didYouDisposeOfResidentialProperty" -> "false"),
-              completeAnswers.copy(assetType = NonResidential), { result =>
-                status(result)          shouldBe OK
-                contentAsString(result) shouldBe "individuals can only report on residential properties"
-              }
+              completeAnswers.copy(assetType = NonResidential),
+              checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
             )
           }
         }
@@ -1768,6 +1766,23 @@ class SingleDisposalsTriageControllerSpec
               .wereYouAUKResident(),
             allQuestionsAnswered.copy(assetType = None) -> routes.SingleDisposalsTriageController
               .didYouDisposeOfAResidentialProperty(),
+            allQuestionsAnswered
+              .copy(wasAUKResident = Some(true), assetType = Some(AssetType.NonResidential)) -> routes.SingleDisposalsTriageController
+              .ukResidentCanOnlyDisposeResidential(),
+            allQuestionsAnswered
+              .copy(
+                wasAUKResident     = Some(false),
+                countryOfResidence = Some(sample[Country]),
+                assetType          = Some(AssetType.MixedUse)
+              ) -> routes.SingleDisposalsTriageController
+              .assetTypeNotYetImplemented(),
+            allQuestionsAnswered
+              .copy(
+                wasAUKResident     = Some(false),
+                countryOfResidence = Some(sample[Country]),
+                assetType          = Some(AssetType.IndirectDisposal)
+              ) -> routes.SingleDisposalsTriageController
+              .assetTypeNotYetImplemented(),
             allQuestionsAnswered.copy(disposalDate = None) -> routes.SingleDisposalsTriageController
               .whenWasDisposalDate(),
             allQuestionsAnswered.copy(completionDate = None) -> routes.SingleDisposalsTriageController
