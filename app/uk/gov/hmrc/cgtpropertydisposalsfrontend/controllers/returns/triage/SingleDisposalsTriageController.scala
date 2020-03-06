@@ -235,7 +235,14 @@ class SingleDisposalsTriageController @Inject() (
 
   def ukResidentCanOnlyDisposeResidential(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
-      Ok(ukResidentCanOnlyDisposeResidentialPage())
+      withSingleDisposalTriageAnswers(request) {
+        case (_, _, triageAnswers) =>
+          triageAnswers.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())) ->
+            triageAnswers.fold(_.assetType, c => Some(c.assetType)) match {
+            case (Some(true), Some(AssetType.NonResidential)) => Ok(ukResidentCanOnlyDisposeResidentialPage())
+            case _                                            => Redirect(routes.SingleDisposalsTriageController.checkYourAnswers())
+          }
+      }
   }
 
   private def disposalDateBackLink(triageAnswers: SingleDisposalTriageAnswers): Call =

@@ -224,8 +224,8 @@ class SingleDisposalsTriageControllerSpec
             testSuccessfulUpdateStartingNewDraft(
               performAction,
               requiredPreviousAnswers,
-              List("disposalMethod" -> "0"),
-              requiredPreviousAnswers.copy(disposalMethod = Some(DisposalMethod.Sold)),
+              List("disposalMethod" -> "2"),
+              requiredPreviousAnswers.copy(disposalMethod = Some(DisposalMethod.Other)),
               checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
             )
           }
@@ -1303,7 +1303,7 @@ class SingleDisposalsTriageControllerSpec
 
     }
 
-    "routing asset type submition" must {
+    "routing asset type submission" must {
       def performAction(formData: (String, String)*): Future[Result] =
         controller.assetTypeNotYetImplemented()(FakeRequest().withFormUrlEncodedBody(formData: _*))
 
@@ -2119,6 +2119,89 @@ class SingleDisposalsTriageControllerSpec
             }
           )
         }
+      }
+
+    }
+
+    "handling requests to display the uk residents can only dispose residential properties page" must {
+
+      def performAction(): Future[Result] = controller.ukResidentCanOnlyDisposeResidential()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
+
+      "redirect to the check your answers page" when {
+
+        "the user was no a uk resident" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                IncompleteSingleDisposalTriageAnswers.empty.copy(
+                  individualUserType         = Some(IndividualUserType.Self),
+                  hasConfirmedSingleDisposal = true,
+                  disposalMethod             = Some(DisposalMethod.Sold),
+                  wasAUKResident             = Some(false),
+                  countryOfResidence         = Some(sample[Country]),
+                  assetType                  = Some(AssetType.NonResidential)
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.SingleDisposalsTriageController.checkYourAnswers())
+        }
+
+        "the user was a uk resident and they disposed of a residential" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                IncompleteSingleDisposalTriageAnswers.empty.copy(
+                  individualUserType         = Some(IndividualUserType.Self),
+                  hasConfirmedSingleDisposal = true,
+                  disposalMethod             = Some(DisposalMethod.Sold),
+                  wasAUKResident             = Some(true),
+                  assetType                  = Some(AssetType.Residential)
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.SingleDisposalsTriageController.checkYourAnswers())
+
+        }
+
+      }
+
+      "display the page" when {
+
+        "the user was a uk resident and they disposed of a non-residential property" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                IncompleteSingleDisposalTriageAnswers.empty.copy(
+                  individualUserType         = Some(IndividualUserType.Self),
+                  hasConfirmedSingleDisposal = true,
+                  disposalMethod             = Some(DisposalMethod.Sold),
+                  wasAUKResident             = Some(true),
+                  assetType                  = Some(AssetType.NonResidential)
+                )
+              )
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("ukResidentCanOnlyReportResidential.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe routes.SingleDisposalsTriageController
+                .didYouDisposeOfAResidentialProperty()
+                .url
+            }
+          )
+
+        }
+
       }
 
     }

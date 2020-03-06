@@ -23,7 +23,7 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
-import play.api.libs.json.{JsString, Writes}
+import play.api.libs.json.Writes
 import play.api.mvc.{AnyContent, Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
