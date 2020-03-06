@@ -282,9 +282,15 @@ class MultipleDisposalsTriageControllerSpec
           )
         }
 
-      "user has already answered how many disposals section and " +
-        "redirect to dummy page when user re-enters different number of properties value which is moreThanOne" in {
-        val answers = sample[CompleteMultipleDisposalsAnswers].copy(numberOfProperties = 9)
+      }
+
+      "not update the session" when {
+
+        "user has already answered how many disposals section and " +
+          "re-enters same number of properties value for more than one" in {
+          val answers = sample[CompleteMultipleDisposalsAnswers].copy(
+            numberOfProperties = 5
+          )
 
           val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
 
