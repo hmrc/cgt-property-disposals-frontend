@@ -30,20 +30,20 @@
 <li class="single-return form-bundle">
   <div class="grid-row">
     <div class="column-three-quarters submission-summary">
-      <span class="caption">
+      <span id="sentDate-@sentReturn.submissionId" class="caption">
         @messages("returns.list.sentDate", LocalDateUtils.govShortDisplayFormat(sentReturn.submissionDate))
       </span>
       <h4>
         @sentReturn.propertyAddress.line1, @sentReturn.propertyAddress.postcode.value
       </h4>
-      <h3 class="cgt-liability">
+      <h3 id="taxOwed-@sentReturn.submissionId" class="cgt-liability">
         <span class="caption">@messages("returns.list.taxOwed")</span>
         @MoneyUtils.formatAmountOfMoneyWithPoundSign(sentReturn.mainReturnChargeAmount.withFloorZero.inPounds())
       </h3>
 
     </div>
     <div class="column-one-quarter financial-summary">
-      <h4>
+      <h4 id="leftToPay-@sentReturn.submissionId">
         <span class="caption">@messages("returns.list.leftToPay")</span>
         @MoneyUtils.formatAmountOfMoneyWithPoundSign(sentReturn.totalOutstanding().inPounds())
       </h4>
@@ -55,7 +55,7 @@
         @if(!totalOutstanding.isZero) {
           <h5>
             <span class="caption">@messages("returns.list.paymentDue")</span>
-            <strong class="bold">
+            <strong id="paymentDue-@sentReturn.submissionId" class="bold">
               @paymentDueDate.map(LocalDateUtils.govShortDisplayFormat(_))
             </strong>
           </h5>
@@ -66,7 +66,7 @@
       <p class="caption">
         @messages("returns.list.ref") @sentReturn.submissionId
       </p>
-      <a href="@{controllers.accounts.homepage.routes.HomePageController.viewSentReturn(sentReturn.submissionId)}">
+      <a id="viewSentReturn-@sentReturn.submissionId" href="@{controllers.accounts.homepage.routes.HomePageController.viewSentReturn(sentReturn.submissionId)}">
         @if(!totalOutstanding.isZero) {
           @messages("returns.list.viewAndPay")
         } else {
