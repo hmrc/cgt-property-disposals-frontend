@@ -659,25 +659,25 @@ percentageShare.error.tooSmall=The percentage of the property you owned must be 
 percentageShare.error.tooManyDecimals=The percentage of the property you owned must have 2 decimal places or less, for example 33.33
 
 
-disposalPrice.full-share.sold-it.title=How much did you sell the property for?
-disposalPrice.full-share.gifted-it.title=What was the market value of the property when you disposed of it?
-disposalPrice.not-full-share.sold-it.title=How much did you sell your share of the property for?
-disposalPrice.not-full-share.gifted-it.title=What was the market value of your share of the property when you disposed of it?
+disposalPrice.full-share.sold-it.title=How much did you get when you sold or disposed of the property?
+disposalPrice.full-share.gifted-it.title=What was the market value of the property when you gave it away?
+disposalPrice.not-full-share.sold-it.title=How much did you get when you sold or disposed of the property?
+disposalPrice.not-full-share.gifted-it.title=What was the market value of the property when you gave it away?
 
-disposalPrice.helpText=You’ll be able to enter any selling or improvement costs, like solicitor’s or estate agent’s fees later.
-disposalPrice.error.required=Enter how much you sold the property for
+disposalPrice.helpText=If you owned part of the property, only enter the amount you got for your share. You’ll be able to enter any additional costs later.
+disposalPrice.error.required=Enter how much you sold or disposed of the property for
 disposalPrice.error.invalid=How much you sold your the property for must a number, like 160,000 or 11,200.45
 disposalPrice.error.tooSmall=How much you sold the property for must be more than 0
 disposalPrice.error.tooLarge=How much you sold the property for must be 50,000,000,000.00 or less
 disposalPrice.error.tooManyDecimals=How much you sold the property for must have 2 decimal places or less, for example 33.33
 
-disposalFees.full-share.sold-it.title=Enter your selling costs when you sold the property
-disposalFees.full-share.gifted-it.title=Enter your selling costs when you gave away the property
-disposalFees.not-full-share.sold-it.title=Enter your share of the selling costs when you sold your share of the property
-disposalFees.not-full-share.gifted-it.title=Enter your share of the selling costs when you gave away your share of the property
-disposalFees.helpText=For example, the amount you paid to an estate agent or solicitor.
-disposalFees.error.required=Enter your share of the selling costs when you sold the property
-disposalFees.error.invalid=Your share of the selling costs must be an amount of money, like 1,500 or 7,300.50
+disposalFees.full-share.sold-it.title=What were your additional costs when you sold or disposed of the property?
+disposalFees.full-share.gifted-it.title=What were your additional costs when you sold or disposed of the property?
+disposalFees.not-full-share.sold-it.title=What were your additional costs when you sold or disposed of the property?
+disposalFees.not-full-share.gifted-it.title=What were your additional costs when you sold or disposed of the property?
+disposalFees.helpText=For example, the amount you paid to an estate agent or solicitor. If you shared these costs, you can only claim your share.
+disposalFees.error.required=Enter the amount of additional costs when you sold or disposed of the property
+disposalFees.error.invalid=Your share of the additional costs must be an amount of money, like 1,500 or 7,300.50
 disposalFees.error.tooSmall=Selling costs must be 0 or more
 disposalFees.error.tooLarge=Selling costs must be 50,000,000,000.00 or less
 disposalFees.error.tooManyDecimals= Selling costs must have 2 decimal places or less, for example 33.33
