@@ -38,6 +38,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, StartingNewDraftReturn, Subscribed, ViewingReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.govShortDisplayFormat
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.ChargeType.{PenaltyInterest, UkResidentReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
@@ -139,12 +140,13 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
         }
       )
 
+      val expectedMainReturnChargeAmount: AmountInPence = AmountInPence(10000)
+
       "display the home page when there is no charge raise and no payments have been made" in {
-        val expectedMainReturnChargeAmount: AmountInPence = AmountInPence(10000)
         val expectedSentDate: LocalDate                   = LocalDate.now()
         val expectedDueDate: LocalDate                    = LocalDate.now().plusMonths(1)
         val ukResidentReturnCharge = sample[Charge].copy(
-          chargeType = ChargeType.UkResidentReturn,
+          chargeType = UkResidentReturn,
           amount     = expectedMainReturnChargeAmount,
           dueDate    = expectedDueDate,
           payments   = List.empty
@@ -198,13 +200,13 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
         val expectedSentDate: LocalDate                        = LocalDate.now()
         val expectedDueDate: LocalDate                         = LocalDate.now().plusMonths(1)
         val penaltyInterestCharge = sample[Charge].copy(
-          chargeType = ChargeType.PenaltyInterest,
+          chargeType = PenaltyInterest,
           amount     = expectedPenaltyInterestChargeAmount,
           dueDate    = expectedDueDate,
           payments   = List.empty
         )
         val ukResidentReturnCharge = sample[Charge].copy(
-          chargeType = ChargeType.UkResidentReturn,
+          chargeType = UkResidentReturn,
           amount     = expectedMainReturnChargeAmount,
           dueDate    = expectedDueDate,
           payments   = List.empty
@@ -261,7 +263,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
         val partialPaymentForUkResidentReturnChargePaymentDate: LocalDate = LocalDate.now().plusMonths(2)
 
         val penaltyInterestCharge = sample[Charge].copy(
-          chargeType = ChargeType.PenaltyInterest,
+          chargeType = PenaltyInterest,
           amount     = penaltyInterestChargeAmount,
           dueDate    = mainPaymentDueDate,
           payments   = List.empty
@@ -273,7 +275,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
         )
 
         val ukResidentReturnCharge = sample[Charge].copy(
-          chargeType = ChargeType.UkResidentReturn,
+          chargeType = UkResidentReturn,
           amount     = mainReturnChargeAmount,
           dueDate    = mainPaymentDueDate,
           payments   = List(partialPaymentForUkResidentReturnCharge)
@@ -334,7 +336,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
         val fullPaymentForUkResidentReturnChargePaymentDate: LocalDate = LocalDate.now().plusMonths(2)
 
         val penaltyInterestCharge = sample[Charge].copy(
-          chargeType = ChargeType.PenaltyInterest,
+          chargeType = PenaltyInterest,
           amount     = penaltyInterestChargeAmount,
           dueDate    = penaltyInterestChargeDueDate,
           payments   = List.empty
@@ -346,7 +348,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
         )
 
         val ukResidentReturnCharge = sample[Charge].copy(
-          chargeType = ChargeType.UkResidentReturn,
+          chargeType = UkResidentReturn,
           amount     = mainReturnChargeAmount,
           dueDate    = mainPaymentDueDate,
           payments   = List(fullPaymentForUkResidentReturnCharge)
@@ -416,7 +418,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
         )
 
         val penaltyInterestCharge = sample[Charge].copy(
-          chargeType = ChargeType.PenaltyInterest,
+          chargeType = PenaltyInterest,
           amount     = penaltyInterestChargeAmount,
           dueDate    = penaltyInterestChargeDueDate,
           payments   = List(fullPaymentForPenaltyInterestCharge)
@@ -428,7 +430,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
         )
 
         val ukResidentReturnCharge = sample[Charge].copy(
-          chargeType = ChargeType.UkResidentReturn,
+          chargeType = UkResidentReturn,
           amount     = mainReturnChargeAmount,
           dueDate    = mainPaymentDueDate,
           payments   = List(fullPaymentForUkResidentReturnCharge)
