@@ -104,7 +104,9 @@ class InitialTriageQuestionsController @Inject() (
                       for {
                         _ <- updatedState.fold(
                               _ => EitherT.pure(()),
-                              fillingOutReturn => returnsService.storeDraftReturn(fillingOutReturn.draftReturn)
+                              fillingOutReturn =>
+                                returnsService
+                                  .storeDraftReturn(fillingOutReturn.draftReturn, fillingOutReturn.agentReferenceNumber)
                             )
                         _ <- EitherT(
                               updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedState.merge)))
@@ -169,7 +171,9 @@ class InitialTriageQuestionsController @Inject() (
                   for {
                     _ <- updatedState.fold(
                           _ => EitherT.pure(()),
-                          fillingOutReturn => returnsService.storeDraftReturn(fillingOutReturn.draftReturn)
+                          fillingOutReturn =>
+                            returnsService
+                              .storeDraftReturn(fillingOutReturn.draftReturn, fillingOutReturn.agentReferenceNumber)
                         )
                     _ <- EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedState.merge))))
                   } yield ()

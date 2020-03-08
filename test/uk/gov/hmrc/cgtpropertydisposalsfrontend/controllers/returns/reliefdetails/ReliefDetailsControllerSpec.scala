@@ -211,7 +211,7 @@ class ReliefDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn)(Left(Error("")))
+            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(
@@ -223,7 +223,7 @@ class ReliefDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn)(Right(()))
+            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(
               session.copy(
                 journeyStatus = Some(
@@ -451,7 +451,7 @@ class ReliefDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn)(Left(Error("")))
+            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(
@@ -463,7 +463,7 @@ class ReliefDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn)(Right(()))
+            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(
               session.copy(journeyStatus = Some(
                 journey.copy(
@@ -785,7 +785,7 @@ class ReliefDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn)(Left(Error("")))
+            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(
@@ -803,7 +803,7 @@ class ReliefDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn)(Right(()))
+            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(
               session.copy(journeyStatus = Some(
                 journey.copy(
@@ -1176,7 +1176,8 @@ class ReliefDetailsControllerSpec
             mockStoreDraftReturn(
               journey.draftReturn.copy(
                 reliefDetailsAnswers = Some(completeAnswers)
-              )
+              ),
+              journey.agentReferenceNumber
             )(Left(Error("")))
           }
 
@@ -1192,7 +1193,8 @@ class ReliefDetailsControllerSpec
             mockStoreDraftReturn(
               journey.draftReturn.copy(
                 reliefDetailsAnswers = Some(completeAnswers)
-              )
+              ),
+              journey.agentReferenceNumber
             )(Right(()))
             mockStoreSession(
               session.copy(
@@ -1221,7 +1223,7 @@ class ReliefDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn)(Right(()))
+            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
           }
 
@@ -1336,7 +1338,7 @@ class ReliefDetailsControllerSpec
     inSequence {
       mockAuthWithNoRetrievals()
       mockGetSession(session)
-      mockStoreDraftReturn(newDraftReturn)(Right(()))
+      mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
       mockStoreSession(
         session.copy(
           journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))

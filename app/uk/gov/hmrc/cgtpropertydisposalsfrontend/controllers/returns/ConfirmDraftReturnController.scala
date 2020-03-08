@@ -52,10 +52,10 @@ class ConfirmDraftReturnController @Inject() (
 
   def confirmDraftReturn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(FillingOutReturn(_, _, _, draftReturn)) => {
+      case Some(FillingOutReturn(_, _, agentReferenceNumber, draftReturn)) => {
         val draftReturnWithLastUpdated = draftReturn.copy(lastUpdatedDate = LocalDateUtils.today())
 
-        val response = returnsService.storeDraftReturn(draftReturnWithLastUpdated)
+        val response = returnsService.storeDraftReturn(draftReturnWithLastUpdated, agentReferenceNumber)
 
         response.fold(
           { e =>

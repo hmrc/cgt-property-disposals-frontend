@@ -1456,7 +1456,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(updatedSession)(Right(()))
           }
 
@@ -1712,7 +1712,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(session)
-          mockStoreDraftReturn(updatedDraftReturn)(Left(Error("")))
+          mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
         }
 
         checkIsTechnicalErrorPage(result())
@@ -1723,7 +1723,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(session)
-          mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+          mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
           mockStoreSession(updatedSession)(Left(Error("")))
         }
 
@@ -1771,7 +1771,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
     inSequence {
       mockAuthWithNoRetrievals()
       mockGetSession(session)
-      mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+      mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
       mockStoreSession(
         session
           .copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))

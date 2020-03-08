@@ -18,13 +18,12 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 
 import cats.data.EitherT
 import cats.instances.future._
-
 import org.jsoup.Jsoup
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
-import play.api.mvc.{Call, Result}
+import play.api.mvc.{Call, Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
@@ -72,8 +71,11 @@ class ViewReturnControllerSpec
     backUrl: Call
   )(response: Either[Error, PaymentsJourney]) =
     (mockPaymentsService
-      .startPaymentJourney(_: CgtReference, _: String, _: AmountInPence, _: Call, _: Call)(_: HeaderCarrier))
-      .expects(cgtReference, chargeReference, amount, returnUrl, backUrl, *)
+      .startPaymentJourney(_: CgtReference, _: String, _: AmountInPence, _: Call, _: Call)(
+        _: HeaderCarrier,
+        _: Request[_]
+      ))
+      .expects(cgtReference, chargeReference, amount, returnUrl, backUrl, *, *)
       .returning(EitherT.fromEither[Future](response))
 
   "ViewReturnController" when {

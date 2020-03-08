@@ -27,6 +27,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.BAD_REQUEST
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
@@ -46,9 +47,8 @@ class InitialTriageQuestionsControllerSpec
     with AuthSupport
     with SessionSupport
     with ScalaCheckDrivenPropertyChecks
-    with RedirectToStartBehaviour {
-
-  val mockReturnsService = mock[ReturnsService]
+    with RedirectToStartBehaviour
+    with ReturnsServiceSupport {
 
   override val overrideBindings =
     List[GuiceableModule](
@@ -84,12 +84,6 @@ class InitialTriageQuestionsControllerSpec
     )
     SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)) -> fillingOutReturn
   }
-
-  def mockStoreDraftReturn(draftReturn: DraftReturn)(result: Either[Error, Unit]) =
-    (mockReturnsService
-      .storeDraftReturn(_: DraftReturn)(_: HeaderCarrier))
-      .expects(draftReturn, *)
-      .returning(EitherT.fromEither[Future](result))
 
   "InitialTriageQuestionsController" when {
 
@@ -242,7 +236,7 @@ class InitialTriageQuestionsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedJourney.draftReturn)(Left(Error("")))
+            mockStoreDraftReturn(updatedJourney.draftReturn, fillingOutReturn.agentReferenceNumber)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction(formData))
@@ -252,7 +246,7 @@ class InitialTriageQuestionsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedJourney.draftReturn)(Right(()))
+            mockStoreDraftReturn(updatedJourney.draftReturn, fillingOutReturn.agentReferenceNumber)(Right(()))
             mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
           }
 
@@ -775,7 +769,7 @@ class InitialTriageQuestionsControllerSpec
     inSequence {
       mockAuthWithNoRetrievals()
       mockGetSession(session)
-      mockStoreDraftReturn(updatedJourney.draftReturn)(Right(()))
+      mockStoreDraftReturn(updatedJourney.draftReturn, journey.agentReferenceNumber)(Right(()))
       mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
     }
 

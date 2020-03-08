@@ -230,7 +230,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Left(Error("")))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction("acquisitionMethod" -> methodValue.toString))
@@ -240,7 +240,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(updatedSession)(Left(Error("")))
           }
 
@@ -264,7 +264,7 @@ class AcquisitionDetailsControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+              mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
               mockStoreSession(updatedSession)(Right(()))
             }
 
@@ -303,7 +303,7 @@ class AcquisitionDetailsControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+              mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
               mockStoreSession(updatedSession)(Right(()))
             }
 
@@ -553,7 +553,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Left(Error("")))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction(formData(acquisitionDate.value): _*))
@@ -563,7 +563,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(updatedSession)(Left(Error("")))
           }
 
@@ -586,7 +586,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(updatedSession)(Right(()))
 
           }
@@ -923,7 +923,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Left(Error("")))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction("acquisitionPrice" -> price.toString))
@@ -933,7 +933,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(updatedSession)(Left(Error("")))
           }
 
@@ -954,7 +954,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(updatedSession)(Right(()))
           }
 
@@ -974,7 +974,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(updatedSession)(Right(()))
           }
 
@@ -1314,7 +1314,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Left(Error("")))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(
@@ -1329,7 +1329,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(updatedSession)(Left(Error("")))
           }
 
@@ -1367,7 +1367,7 @@ class AcquisitionDetailsControllerSpec
                 inSequence {
                   mockAuthWithNoRetrievals()
                   mockGetSession(session)
-                  mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+                  mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
                   mockStoreSession(updatedSession)(Right(()))
                 }
 
@@ -1397,7 +1397,7 @@ class AcquisitionDetailsControllerSpec
                 inSequence {
                   mockAuthWithNoRetrievals()
                   mockGetSession(session)
-                  mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+                  mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
                   mockStoreSession(updatedSession)(Right(()))
                 }
 
@@ -1798,7 +1798,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Left(Error("")))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(
@@ -1813,7 +1813,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(updatedSession)(Left(Error("")))
           }
 
@@ -1850,7 +1850,7 @@ class AcquisitionDetailsControllerSpec
                 inSequence {
                   mockAuthWithNoRetrievals()
                   mockGetSession(session)
-                  mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+                  mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
                   mockStoreSession(updatedSession)(Right(()))
                 }
 
@@ -1881,7 +1881,7 @@ class AcquisitionDetailsControllerSpec
                 inSequence {
                   mockAuthWithNoRetrievals()
                   mockGetSession(session)
-                  mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+                  mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
                   mockStoreSession(updatedSession)(Right(()))
                 }
 
@@ -2101,7 +2101,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Left(Error("")))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(
@@ -2116,7 +2116,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(updatedSession)(Left(Error("")))
           }
 
@@ -2151,7 +2151,7 @@ class AcquisitionDetailsControllerSpec
                 inSequence {
                   mockAuthWithNoRetrievals()
                   mockGetSession(session)
-                  mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+                  mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
                   mockStoreSession(updatedSession)(Right(()))
                 }
 
@@ -2178,7 +2178,7 @@ class AcquisitionDetailsControllerSpec
                 inSequence {
                   mockAuthWithNoRetrievals()
                   mockGetSession(session)
-                  mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+                  mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
                   mockStoreSession(updatedSession)(Right(()))
                 }
 
@@ -2367,7 +2367,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn)(Left(Error("")))
+            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -2378,7 +2378,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn)(Right(()))
+            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
           }
 
@@ -2397,7 +2397,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn)(Right(()))
+            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
           }
 
