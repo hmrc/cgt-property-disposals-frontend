@@ -64,6 +64,8 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
   val selfAssessmentUrl: String                = getString("external-url.sign-in-to-self-assessment")
   val reportingCgtBefore6April2020: String     = getString("external-url.reporting-cgt-before-6-april-2020")
   val nrcgtReturn: String                      = getString("external-url.nrcgtReturn")
+  val reliefsInfo: String                      = getString("external-url.reliefs-info")
+  val lettingReliefInfo: String                = getString("external-url.letting-relief-info")
 
   val onboardingExitSurveyUrl: String = "/feedback/CGTPD-REG"
   val returnsExitSurveyUrl: String    = "/feedback/CGTPD-RET"
