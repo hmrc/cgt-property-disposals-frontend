@@ -209,6 +209,7 @@ class InitialTriageQuestionsControllerSpec
             performAction(formData: _*),
             messageFromMessageKey("who-are-you-reporting-for.title"), { doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(expectedErrorKey)
+              doc.title()                                               should startWith("Error:")
             },
             BAD_REQUEST
           )
