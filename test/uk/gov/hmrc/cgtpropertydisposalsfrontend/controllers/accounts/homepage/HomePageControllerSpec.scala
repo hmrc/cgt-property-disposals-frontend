@@ -196,11 +196,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
 
       val chargesWithChargeRaiseAndFullPayment = List(ukResidentReturnChargeFullPayment, penaltyInterestCharge)
 
-      def extractAmount(s: String): String =
-        if (s.contains('-'))
-          s.substring(s.indexOf('-'))
-        else
-          s.substring(s.indexOf('£'))
+      def extractAmount(s: String): String = s.substring(s.indexOf('£'))
 
       "display the home page when there is no charge raise and no payments have been made" in {
 
