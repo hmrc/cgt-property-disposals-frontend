@@ -34,7 +34,7 @@
 @(form: Form[Country], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"countryCode"}
-@title = @{messages("multipleDisposalsCountryOfResidence.title")}
+@title = @{messages("countryCode.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @mainTemplate(title = title, hasErrors = hasErrors, userType = request.userType, withSignOutLink = true) {
@@ -56,7 +56,7 @@
             hasErrors = form.error(key).nonEmpty,
             errorKey = form.error(key).map(e => e.message),
             autoComplete = AutoCompleteType.Country,
-            helpText = Some(Html(messages(s"multipleDisposalsCountryOfResidence.helpText"))),
+            helpText = Some(Html(messages(s"countryCode.helpText"))),
             labelAsHeading = true
         )
 

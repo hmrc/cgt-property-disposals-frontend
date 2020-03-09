@@ -690,7 +690,15 @@ class MultipleDisposalsTriageControllerSpec
 
       "display the page" in {
         mockAuthWithNoRetrievals()
-        mockGetSession(sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsAnswers.empty)._1)
+        mockGetSession(
+          sessionDataWithStartingNewDraftReturn(
+            IncompleteMultipleDisposalsAnswers.empty.copy(
+              individualUserType = Some(Self),
+              numberOfProperties = Some(2),
+              wasAUKResident     = Some(false)
+            )
+          )._1
+        )
 
         checkPageIsDisplayed(
           performAction,
@@ -714,7 +722,9 @@ class MultipleDisposalsTriageControllerSpec
       def performAction(data: (String, String)*): Future[Result] =
         controller.countryOfResidenceSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
 
-      val key = "countryCode"
+      val key                        = "countryCode"
+      val (countryCode, countryName) = "HK" -> "Hong Kong"
+      val country                    = Country(countryCode, Some(countryName))
 
       "redirect to redirect to cya page" when {
 
@@ -729,9 +739,6 @@ class MultipleDisposalsTriageControllerSpec
 
         "user has not answered the country of residence section and" +
           " enters valid country" in {
-
-          val (countryCode, countryName) = "HK" -> "Hong Kong"
-          val country                    = Country(countryCode, Some(countryName))
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -751,8 +758,126 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkIsRedirect(
-            performAction(key -> "Hong Kong"),
+            performAction(key -> countryCode),
             routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+        "user has already answered the country of residence section and re-selected different option" in {
+          val answers = sample[IncompleteMultipleDisposalsAnswers]
+            .copy(
+              countryOfResidence           = Some(country),
+              wereAllPropertiesResidential = None,
+              assetType                    = None
+            )
+
+          val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+          val (newCountryCode, newCountryName) = "CH" -> "Switzerland"
+          val newCountry                       = Country(newCountryCode, Some(newCountryName))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreSession(
+              session.copy(journeyStatus = Some(
+                journey.copy(
+                  newReturnTriageAnswers = Left(
+                    answers.copy(
+                      countryOfResidence = Some(newCountry)
+                    )
+                  )
+                )
+              )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(key -> newCountryCode),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+      }
+
+      "not update the session" when {
+
+        "user has already answered country of residence section and re-selected same option" in {
+          val answers = sample[IncompleteMultipleDisposalsAnswers]
+            .copy(
+              numberOfProperties = Some(2),
+              wasAUKResident     = Some(false),
+              countryOfResidence = Some(country)
+            )
+
+          val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkIsRedirect(
+            performAction(key -> "HK"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+      }
+
+      "show a form error" when {
+
+        "the user submits nothing" in {
+          val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
+            individualUserType = Some(Self),
+            numberOfProperties = Some(2),
+            wasAUKResident     = Some(false),
+            countryOfResidence = None
+          )
+          val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(s"$key.title"), { doc =>
+              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+                s"$key.error.required"
+              )
+              doc.title() should startWith("Error:")
+            },
+            BAD_REQUEST
+          )
+        }
+
+        "the option is not recognised" in {
+          val answers = IncompleteMultipleDisposalsAnswers.empty
+            .copy(
+              numberOfProperties = Some(2),
+              wasAUKResident     = Some(false),
+              countryOfResidence = None
+            )
+
+          val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkPageIsDisplayed(
+            performAction(key -> "XX"),
+            messageFromMessageKey(s"$key.title"), { doc =>
+              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+                s"$key.error.notFound"
+              )
+              doc.title() should startWith("Error:")
+            },
+            BAD_REQUEST
           )
         }
 
