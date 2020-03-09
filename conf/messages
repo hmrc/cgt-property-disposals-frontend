@@ -658,12 +658,9 @@ percentageShare.error.tooLarge=The percentage of the property you owned must be 
 percentageShare.error.tooSmall=The percentage of the property you owned must be a number between 0 and 100, for example 25 or 33.33
 percentageShare.error.tooManyDecimals=The percentage of the property you owned must have 2 decimal places or less, for example 33.33
 
-
-disposalPrice.full-share.sold-it.title=How much did you get when you sold or disposed of the property?
-disposalPrice.full-share.gifted-it.title=What was the market value of the property when you gave it away?
-disposalPrice.not-full-share.sold-it.title=How much did you get when you sold or disposed of the property?
-disposalPrice.not-full-share.gifted-it.title=What was the market value of the property when you gave it away?
-
+disposalPrice.Sold.title=How much did you get when you sold or disposed of the property?
+disposalPrice.Gifted.title=What was the market value of the property when you gave it away?
+disposalPrice.Other.title=How much did you get when you sold or disposed of the property?
 disposalPrice.helpText=If you owned part of the property, only enter the amount you got for your share. You’ll be able to enter any additional costs later.
 disposalPrice.error.required=Enter how much you sold or disposed of the property for
 disposalPrice.error.invalid=How much you sold your the property for must a number, like 160,000 or 11,200.45
@@ -671,10 +668,9 @@ disposalPrice.error.tooSmall=How much you sold the property for must be more tha
 disposalPrice.error.tooLarge=How much you sold the property for must be 50,000,000,000.00 or less
 disposalPrice.error.tooManyDecimals=How much you sold the property for must have 2 decimal places or less, for example 33.33
 
-disposalFees.full-share.sold-it.title=What were your additional costs when you sold or disposed of the property?
-disposalFees.full-share.gifted-it.title=What were your additional costs when you sold or disposed of the property?
-disposalFees.not-full-share.sold-it.title=What were your additional costs when you sold or disposed of the property?
-disposalFees.not-full-share.gifted-it.title=What were your additional costs when you sold or disposed of the property?
+disposalFees.Sold.title=What were your additional costs when you sold or disposed of the property?
+disposalFees.Gifted.title=What were your additional costs when you sold or disposed of the property?
+disposalFees.Other.title=What were your additional costs when you sold or disposed of the property?
 disposalFees.helpText=For example, the amount you paid to an estate agent or solicitor. If you shared these costs, you can only claim your share.
 disposalFees.error.required=Enter the amount of additional costs when you sold or disposed of the property
 disposalFees.error.invalid=Your share of the additional costs must be an amount of money, like 1,500 or 7,300.50
