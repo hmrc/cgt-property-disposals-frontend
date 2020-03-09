@@ -681,6 +681,139 @@ class MultipleDisposalsTriageControllerSpec
 
     }
 
+    "handling requests to display the country of residence page" must {
+
+      def performAction(): Future[Result] =
+        controller.countryOfResidence()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
+
+      "display the page" in {
+        mockAuthWithNoRetrievals()
+        mockGetSession(sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsAnswers.empty)._1)
+
+        checkPageIsDisplayed(
+          performAction,
+          messageFromMessageKey("countryCode.title"), { doc =>
+            doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
+              .wereYouAUKResident()
+              .url
+            doc
+              .select("#content > article > form")
+              .attr("action") shouldBe routes.MultipleDisposalsTriageController
+              .countryOfResidenceSubmit()
+              .url
+          }
+        )
+      }
+
+    }
+
+    "handling submits on the country of residence page" must {
+
+      def performAction(data: (String, String)*): Future[Result] =
+        controller.countryOfResidenceSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
+
+      val key = "countryCode"
+
+      "redirect to redirect to cya page" when {
+
+        val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
+          individualUserType = Some(Self),
+          numberOfProperties = Some(2),
+          wasAUKResident     = Some(false),
+          countryOfResidence = None
+        )
+
+        val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+        "user has not answered the country of residence section and" +
+        " enters valid country" in {
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreSession(
+              session.copy(journeyStatus = Some(
+                journey.copy(
+                  newReturnTriageAnswers = Left(
+                    answers.copy(
+                      wereAllPropertiesResidential = Some(true),
+                      assetType                    = Some(AssetType.Residential)
+                    )
+                  )
+                )
+              )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(key -> "true"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+        "user has not answered the were all properties residential section and selects false" in {
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreSession(
+              session.copy(journeyStatus = Some(
+                journey.copy(
+                  newReturnTriageAnswers = Left(
+                    answers.copy(
+                      wereAllPropertiesResidential = Some(false),
+                      assetType                    = Some(AssetType.NonResidential)
+                    )
+                  )
+                )
+              )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(key -> "false"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+        "user has already answered were all properties residential section and re-selected different option" in {
+          val answers = sample[IncompleteMultipleDisposalsAnswers]
+            .copy(wereAllPropertiesResidential = Some(true), assetType = Some(AssetType.Residential))
+
+          val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreSession(
+              session.copy(journeyStatus = Some(
+                journey.copy(
+                  newReturnTriageAnswers = Left(
+                    answers.copy(
+                      wereAllPropertiesResidential = Some(false),
+                      assetType                    = Some(AssetType.NonResidential)
+                    )
+                  )
+                )
+              )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(key -> "false"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+      }
+
+    }
+
     "handling requests to display the check your answers page" must {
 
       def performAction(): Future[Result] =
