@@ -683,34 +683,34 @@ returns.disposal-details.cya.title=Check your answers
 
 acquisitionDetails.caption=Purchase or acquisition details
 
-acquisitionMethod.title=How did you get your share of the property?
+acquisitionMethod.title=How did you get the property?
 returns.acquisitionMethod.Bought=Bought it
 returns.acquisitionMethod.Inherited=Inherited it
 returns.acquisitionMethod.Gifted=Got it as a gift
 returns.acquisitionMethod.Other=Other
 returns.otherAcquisitionMethod.label=How you got the property
 
-acquisitionMethod.error.required=Select how you got your share of the property
-acquisitionMethod.error.invalid=Select how you got your share of the property
-otherAcquisitionMethod.error.required=Enter how you got your share of the property
-otherAcquisitionMethod.error.invalid=How you got your share of the property must only include letters a to z, spaces and number
-otherAcquisitionMethod.error.tooLong=How you got your share of the property must be 35 characters or less
+acquisitionMethod.error.required=Select how you got the property
+acquisitionMethod.error.invalid=Select how you got the property
+otherAcquisitionMethod.error.required=Enter how you got the property
+otherAcquisitionMethod.error.invalid=How you got the property must only include letters a to z, spaces and numbers
+otherAcquisitionMethod.error.tooLong=How you got the property must be 35 characters or less
 
 
-acquisitionDate.title=What date did you become the owner of the property?
-acquisitionDate.helpText=This is the date the property was transferred into your name. For example, 21 5 2020
-acquisitionDate.error.required=Enter the date you became the owner
-acquisitionDate.error.invalid=Enter a real date you became the owner
-acquisitionDate.error.tooFarInFuture=Date you became the owner must be before you sold the property
-acquisitionDate-day.error.required=Date you became the owner must include a day
-acquisitionDate-month.error.required=Date you became the owner must include a month
-acquisitionDate-year.error.required=Date you became the owner must include a year
-acquisitionDate-day.error.invalid=Enter a real date you became the owner
-acquisitionDate-month.error.invalid=Enter a real date you became the owner
-acquisitionDate-year.error.invalid=Enter a real date you became the owner
-acquisitionDate-month.error.monthAndYearRequired=Date you became the owner must include a month and a year
-acquisitionDate-day.error.dayAndYearRequired=Date you became the owner must include a day and a year
-acquisitionDate-day.error.dayAndMonthRequired=Date you became the owner must include a day and a month
+acquisitionDate.title=What date did you get the property?
+acquisitionDate.helpText=This is the date the property was transferred into your name. For example, 21 5 2004
+acquisitionDate.error.required=Enter the date you got the property
+acquisitionDate.error.invalid=Enter a real date you got the property
+acquisitionDate.error.tooFarInFuture=Date you got the property must be before you sold the property
+acquisitionDate-day.error.required=Date you got the property must include a day
+acquisitionDate-month.error.required=Date you got the property must include a month
+acquisitionDate-year.error.required=Date you got the property must include a year
+acquisitionDate-day.error.invalid=Enter a real date for when you got the property
+acquisitionDate-month.error.invalid=Enter a real date for when you got the property
+acquisitionDate-year.error.invalid=Enter a real date for when you got the property
+acquisitionDate-month.error.monthAndYearRequired=Date you got the property must include a month and a year
+acquisitionDate-day.error.dayAndYearRequired=Date you got the property must include a day and a year
+acquisitionDate-day.error.dayAndMonthRequired=Date you got the property must include a day and a month
 
 acquisitionPrice.title=How much did you pay for your share of the property?
 acquisitionPrice.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later.
@@ -721,7 +721,7 @@ acquisitionPrice.error.tooLarge=The amount of money must be a number between 1 a
 acquisitionPrice.error.tooManyDecimals=The amount of money must be 2 decimal places or less, for example 160,000 or 23,040.50
 
 improvementCosts.title=Do you want to claim any improvement costs?
-improvementCosts.helpText=You can only claim for your share of any costs that added value to the property. You cannot claim for mortgage interest, decorating or maintenance.
+improvementCosts.helpText=You can only claim costs that added value to the property. If you shared these costs, you can only claim your share. You cannot claim for mortgage interest, decorating or maintenance. 
 improvementCosts.error.required=Select yes if you want to claim any improvement costs
 improvementCosts.error.invalid=Select yes if you want to claim any improvement costs
 improvementCostsValue.error.invalid=The amount of money must only include numbers, for example 160,000 or 23,040.50
@@ -733,15 +733,15 @@ improvementCostsValue.label=Amount spent on improvements
 improvementCosts.details.summary=What are improvements?
 improvementCosts.details.p1=Improvement include adding an extension or replacing a basic kitchen with a luxury one.
 
-acquisitionFees.title=Do you want to claim any additional costs you paid when you bought the property?
+acquisitionFees.title=Do you want to claim any additional costs you paid when you got the property?
 acquisitionFees.helpText=For example, fees for surveyors or solicitors. If you shared these costs, you can only claim your share.
 acquisitionFees.error.required=Select yes if you have extra costs
 acquisitionFeesValue.label=Amount of additional costs
-acquisitionFeesValue.error.required=Enter how much you paid in additional purchase or acquisition costs
-acquisitionFeesValue.error.invalid=Additional purchase or acquisition costs must only include numbers, for example 1,480 or 900.50
-acquisitionFeesValue.error.tooSmall=Purchase or acquisition costs must more than 0
-acquisitionFeesValue.error.tooLarge=Purchase or acquisition costs must be 50,000,000,000.00 or less
-acquisitionFeesValue.error.tooManyDecimals=Purchase or acquisition costs must be 2 decimal places or less, for example 1,480 or 900.50
+acquisitionFeesValue.error.required=Enter how much you paid in additional costs when you got the property
+acquisitionFeesValue.error.invalid=Additional costs must only include numbers, for example 1,480 or 900.50
+acquisitionFeesValue.error.tooSmall=Additional costs must more than 0
+acquisitionFeesValue.error.tooLarge=Additional costs must be 50,000,000,000.00 or less
+acquisitionFeesValue.error.tooManyDecimals=Additional costs must be 2 decimal places or less, for example 1,480 or 900.50
 
 acquisitionDetails.cya.title=Check your answers
 acquisitionDetails.cyaLabel.rebased=Property value rebased
