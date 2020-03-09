@@ -3,12 +3,11 @@ GET /capital-gains-tax-uk-property/account-home                            uk.go
 GET /capital-gains-tax-uk-property/start-new-return                        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.HomePageController.startNewReturn()
 GET /capital-gains-tax-uk-property/resume-draft-return/:id                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.HomePageController.resumeDraftReturn(id: java.util.UUID)
 GET /capital-gains-tax-uk-property/view-sent-return/:submissionId          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.HomePageController.viewSentReturn(submissionId: String)
-GET /captial-gains-tax-uk-property/pay-total-outstanding                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.HomePageController.payTotalAmountLeftToPay()
+GET /capital-gains-tax-uk-property/pay-total-outstanding                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.HomePageController.payTotalAmountLeftToPay()
 
 # UPSCAN
 GET  /capital-gains-tax-uk-property/upscan-initiate                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.upscan.UpscanController.upscan()
 POST /capital-gains-tax-uk-property/upload                                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.upscan.UpscanController.upload()
-POST /capital-gains-tax-uk-property/upscan-call-back/cgt-reference/:id      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.upscan.UpscanController.callBack(id : String)
 
 ->   /capital-gains-tax-uk-property                                         app.Routes
 ->   /capital-gains-tax-uk-property                                         accounts.Routes

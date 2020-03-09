@@ -21,7 +21,7 @@ import cats.instances.future._
 import cats.syntax.either._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.OK
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.onboarding.CGTPropertyDisposalsConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.CGTPropertyDisposalsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecordRequest, BusinessPartnerRecordResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._

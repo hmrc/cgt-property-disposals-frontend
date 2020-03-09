@@ -38,4 +38,10 @@ trait ReturnsServiceSupport { this: ControllerSpec =>
       .expects(draftReturn, *)
       .returning(EitherT.fromEither[Future](result))
 
+  def mockStoreAnyDraftReturn()(result: Either[Error, Unit]) =
+    (mockReturnsService
+      .storeDraftReturn(_: DraftReturn)(_: HeaderCarrier))
+      .expects(*, *)
+      .returning(EitherT.fromEither[Future](result))
+
 }

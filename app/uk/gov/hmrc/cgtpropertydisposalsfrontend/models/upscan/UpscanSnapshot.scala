@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.Json
 
-final case class FinancialTransaction(
-  chargeReference: String,
-  originalAmount: AmountInPence,
-  outstandingAmount: AmountInPence,
-  payments: List[Payment]
+final case class UpscanSnapshot(
+  fileUploadCount: Int
 )
 
-object FinancialTransaction {
-
-  implicit val format: Format[FinancialTransaction] = Json.format
-
+object UpscanSnapshot {
+  implicit val format = Json.format[UpscanSnapshot]
 }

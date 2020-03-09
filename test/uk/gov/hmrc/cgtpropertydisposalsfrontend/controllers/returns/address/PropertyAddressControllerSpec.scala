@@ -18,17 +18,19 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address
 
 import cats.data.EitherT
 import cats.instances.future._
+import org.jsoup.nodes.Document
+import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.i18n.MessagesApi
+import play.api.i18n.{Lang, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.Result
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressControllerSpec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressControllerSpec.validatePropertyAddressPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.{routes => returnsAddressRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
@@ -191,6 +193,18 @@ class PropertyAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
+      def testIsCheckYourAnswers(
+        result: Future[Result],
+        ukAddressDetails: UkAddress,
+        expectedTitleKey: String
+      ): Unit =
+        checkPageIsDisplayed(
+          result,
+          messageFromMessageKey(expectedTitleKey), { doc =>
+            validatePropertyAddressPage(ukAddressDetails, doc)
+          }
+        )
+
       "redirect to the task list if there is no property address in session" in {
         inSequence {
           mockAuthWithNoRetrievals()
@@ -213,9 +227,11 @@ class PropertyAddressControllerSpec
           mockGetSession(sessionWithValidJourneyStatus)
         }
 
-        val result = performAction()
-        status(result)          shouldBe OK
-        contentAsString(result) should include(messageFromMessageKey("returns.property-address.cya.title"))
+        testIsCheckYourAnswers(
+          performAction(),
+          draftReturn.propertyAddress.fold(sys.error("Error"))(_.asInstanceOf[UkAddress]),
+          "returns.property-address.cya.title"
+        )
       }
 
     }
@@ -239,5 +255,15 @@ class PropertyAddressControllerSpec
     }
 
   }
+}
 
+object PropertyAddressControllerSpec extends Matchers {
+  def validatePropertyAddressPage(
+    ukAddress: UkAddress,
+    doc: Document
+  )(implicit messages: MessagesApi, lang: Lang): Unit =
+    doc.select("#property-address-answer").text() shouldBe
+      List(Some(ukAddress.line1), ukAddress.line2, ukAddress.town, ukAddress.county, Some(ukAddress.postcode.value))
+        .collect { case Some(s) => s.trim }
+        .mkString(" ")
 }

@@ -30,11 +30,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails.DisposalDetailsControllerSpec.validateDisposalDetailsCheckYourAnswersPage
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails.DisposalDetailsControllerSpec.{expectedTitles, validateDisposalDetailsCheckYourAnswersPage}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{disposalMethod, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDetailsAnswers, DisposalMethod, DraftReturn, ShareOfProperty}
@@ -450,12 +451,15 @@ class DisposalDetailsControllerSpec
         IncompleteDisposalDetailsAnswers.empty.copy(shareOfProperty = Some(ShareOfProperty.Full))
 
       val disposalPriceTitleScenarios = List(
-        (DisposalMethod.Sold, ShareOfProperty.Full, "disposalPrice.full-share.sold-it.title"),
-        (DisposalMethod.Sold, ShareOfProperty.Half, "disposalPrice.not-full-share.sold-it.title"),
-        (DisposalMethod.Sold, ShareOfProperty.Other(1), "disposalPrice.not-full-share.sold-it.title"),
-        (DisposalMethod.Gifted, ShareOfProperty.Full, "disposalPrice.full-share.gifted-it.title"),
-        (DisposalMethod.Gifted, ShareOfProperty.Half, "disposalPrice.not-full-share.gifted-it.title"),
-        (DisposalMethod.Gifted, ShareOfProperty.Other(1), "disposalPrice.not-full-share.gifted-it.title")
+        (DisposalMethod.Sold, ShareOfProperty.Full, "disposalPrice.Sold.title"),
+        (DisposalMethod.Sold, ShareOfProperty.Half, "disposalPrice.Sold.title"),
+        (DisposalMethod.Sold, ShareOfProperty.Other(1), "disposalPrice.Sold.title"),
+        (DisposalMethod.Gifted, ShareOfProperty.Full, "disposalPrice.Gifted.title"),
+        (DisposalMethod.Gifted, ShareOfProperty.Half, "disposalPrice.Gifted.title"),
+        (DisposalMethod.Gifted, ShareOfProperty.Other(1), "disposalPrice.Gifted.title"),
+        (DisposalMethod.Other, ShareOfProperty.Full, "disposalPrice.Other.title"),
+        (DisposalMethod.Other, ShareOfProperty.Half, "disposalPrice.Other.title"),
+        (DisposalMethod.Other, ShareOfProperty.Other(1), "disposalPrice.Other.title")
       )
 
       behave like redirectToStartBehaviour(performAction)
@@ -576,7 +580,7 @@ class DisposalDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(data),
-            messageFromMessageKey("disposalPrice.full-share.sold-it.title"), { doc =>
+            messageFromMessageKey("disposalPrice.Sold.title"), { doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               )
@@ -810,12 +814,15 @@ class DisposalDetailsControllerSpec
         .copy(shareOfProperty = Some(ShareOfProperty.Full), disposalPrice = Some(AmountInPence.fromPounds(2d)))
 
       val disposalFeesTitleScenarios = List(
-        (DisposalMethod.Sold, ShareOfProperty.Full, "disposalFees.full-share.sold-it.title"),
-        (DisposalMethod.Sold, ShareOfProperty.Half, "disposalFees.not-full-share.sold-it.title"),
-        (DisposalMethod.Sold, ShareOfProperty.Other(1), "disposalFees.not-full-share.sold-it.title"),
-        (DisposalMethod.Gifted, ShareOfProperty.Full, "disposalFees.full-share.gifted-it.title"),
-        (DisposalMethod.Gifted, ShareOfProperty.Half, "disposalFees.not-full-share.gifted-it.title"),
-        (DisposalMethod.Gifted, ShareOfProperty.Other(1), "disposalFees.not-full-share.gifted-it.title")
+        (DisposalMethod.Sold, ShareOfProperty.Full, "disposalFees.Sold.title"),
+        (DisposalMethod.Sold, ShareOfProperty.Half, "disposalFees.Sold.title"),
+        (DisposalMethod.Sold, ShareOfProperty.Other(1), "disposalFees.Sold.title"),
+        (DisposalMethod.Gifted, ShareOfProperty.Full, "disposalFees.Gifted.title"),
+        (DisposalMethod.Gifted, ShareOfProperty.Half, "disposalFees.Gifted.title"),
+        (DisposalMethod.Gifted, ShareOfProperty.Other(1), "disposalFees.Gifted.title"),
+        (DisposalMethod.Other, ShareOfProperty.Full, "disposalFees.Other.title"),
+        (DisposalMethod.Other, ShareOfProperty.Half, "disposalFees.Other.title"),
+        (DisposalMethod.Other, ShareOfProperty.Other(1), "disposalFees.Other.title")
       )
 
       behave like redirectToStartBehaviour(performAction)
@@ -977,7 +984,7 @@ class DisposalDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(data),
-            messageFromMessageKey("disposalFees.full-share.sold-it.title"), { doc =>
+            messageFromMessageKey("disposalFees.Sold.title"), { doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               )
@@ -1192,45 +1199,6 @@ class DisposalDetailsControllerSpec
         Some(completeAnswers.disposalFees)
       )
 
-      val disposalPriceAndFeesScenarios = List(
-        (
-          DisposalMethod.Sold,
-          ShareOfProperty.Full,
-          "disposalPrice.full-share.sold-it.title",
-          "disposalFees.full-share.sold-it.title"
-        ),
-        (
-          DisposalMethod.Sold,
-          ShareOfProperty.Half,
-          "disposalPrice.not-full-share.sold-it.title",
-          "disposalFees.not-full-share.sold-it.title"
-        ),
-        (
-          DisposalMethod.Sold,
-          ShareOfProperty.Other(1),
-          "disposalPrice.not-full-share.sold-it.title",
-          "disposalFees.not-full-share.sold-it.title"
-        ),
-        (
-          DisposalMethod.Gifted,
-          ShareOfProperty.Full,
-          "disposalPrice.full-share.gifted-it.title",
-          "disposalFees.full-share.gifted-it.title"
-        ),
-        (
-          DisposalMethod.Gifted,
-          ShareOfProperty.Half,
-          "disposalPrice.not-full-share.gifted-it.title",
-          "disposalFees.not-full-share.gifted-it.title"
-        ),
-        (
-          DisposalMethod.Gifted,
-          ShareOfProperty.Other(1),
-          "disposalPrice.not-full-share.gifted-it.title",
-          "disposalFees.not-full-share.gifted-it.title"
-        )
-      )
-
       behave like redirectToStartBehaviour(performAction)
 
       "redirect to the how much did you own page" when {
@@ -1347,6 +1315,7 @@ class DisposalDetailsControllerSpec
 
         def testIsCheckYourAnswers(
           result: Future[Result],
+          completeDisposalDetailsAnswers: CompleteDisposalDetailsAnswers,
           expectedTitleKey: String,
           expectedDisposalPriceTitleKey: String,
           expectedDisposalFeesTitleKey: String
@@ -1354,89 +1323,77 @@ class DisposalDetailsControllerSpec
           checkPageIsDisplayed(
             result,
             messageFromMessageKey("returns.disposal-details.cya.title"), { doc =>
-              validateDisposalDetailsCheckYourAnswersPage(completeAnswers, doc)
-              doc.select("#content > article > dl > div:nth-child(1) > dt").text() shouldBe messageFromMessageKey(
+              validateDisposalDetailsCheckYourAnswersPage(completeDisposalDetailsAnswers, doc)
+              doc.select("#propertyShare-question").text() shouldBe messageFromMessageKey(
                 "shareOfProperty.title"
               )
-              doc.select("#content > article > dl > div:nth-child(2) > dt").text() shouldBe messageFromMessageKey(
+              doc.select("#disposalPrice-question").text() shouldBe messageFromMessageKey(
                 expectedDisposalPriceTitleKey
               )
-              doc.select("#content > article > dl > div:nth-child(3) > dt").text() shouldBe messageFromMessageKey(
+              doc.select("#disposalFees-question").text() shouldBe messageFromMessageKey(
                 expectedDisposalFeesTitleKey
               )
             }
           )
 
         "the user has already answered all of the questions" in {
-          disposalPriceAndFeesScenarios.foreach {
-            case (disposalMethod, share, expectedDisposalPriceTitleKey, expectedDisposalFeesTitleKey) =>
-              withClue(
-                "For (disposalMethod, share, expectedDisposalPriceTitleKey, expectedDisposalFeesTitleKey) = " +
-                  s"($disposalMethod, $share, $expectedDisposalPriceTitleKey, $expectedDisposalFeesTitleKey): "
-              ) {
-                inSequence {
-                  mockAuthWithNoRetrievals()
-                  mockGetSession(
-                    sessionWithDisposalDetailsAnswers(
-                      completeAnswers.copy(shareOfProperty = share),
-                      disposalMethod
-                    )._1
-                  )
-                }
+          forAll { (disposalMethod: DisposalMethod, completeAnswers: CompleteDisposalDetailsAnswers) =>
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionWithDisposalDetailsAnswers(
+                  completeAnswers,
+                  disposalMethod
+                )._1
+              )
+            }
 
-                testIsCheckYourAnswers(
-                  performAction(),
-                  "returns.disposal-details.cya.title",
-                  expectedDisposalPriceTitleKey,
-                  expectedDisposalFeesTitleKey
-                )
-              }
-
+            testIsCheckYourAnswers(
+              performAction(),
+              completeAnswers,
+              "returns.disposal-details.cya.title",
+              expectedTitles(completeAnswers, disposalMethod)._1,
+              expectedTitles(completeAnswers, disposalMethod)._2
+            )
           }
-
         }
 
         "the user has just answered all of the questions" in {
+          forAll { (disposalMethod: DisposalMethod, completeAnswers: CompleteDisposalDetailsAnswers) =>
+            val incompleteAnswers = IncompleteDisposalDetailsAnswers(
+              Some(completeAnswers.shareOfProperty),
+              Some(completeAnswers.disposalPrice),
+              Some(completeAnswers.disposalFees)
+            )
+            val (session, journey) = sessionWithDisposalDetailsAnswers(incompleteAnswers, disposalMethod)
 
-          disposalPriceAndFeesScenarios.foreach {
-            case (disposalMethod, share, expectedDisposalPriceTitleKey, expectedDisposalFeesTitleKey) =>
-              withClue(
-                "For (disposalMethod, share, expectedDisposalPriceTitleKey, expectedDisposalFeesTitleKey) = " +
-                  s"($disposalMethod, $share, $expectedDisposalPriceTitleKey, $expectedDisposalFeesTitleKey): "
-              ) {
-                val (session, journey) = sessionWithDisposalDetailsAnswers(
-                  allQuestionsAnswered.copy(shareOfProperty = Some(share)),
-                  disposalMethod
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreDraftReturn(
+                journey.draftReturn.copy(
+                  disposalDetailsAnswers = Some(completeAnswers)
                 )
-                val updatedAnswers = completeAnswers.copy(shareOfProperty = share)
-
-                inSequence {
-                  mockAuthWithNoRetrievals()
-                  mockGetSession(session)
-                  mockStoreDraftReturn(
-                    journey.draftReturn.copy(
-                      disposalDetailsAnswers = Some(updatedAnswers)
+              )(Right(()))
+              mockStoreSession(
+                session.copy(
+                  journeyStatus = Some(
+                    journey.copy(draftReturn = journey.draftReturn.copy(
+                      disposalDetailsAnswers = Some(completeAnswers)
                     )
-                  )(Right(()))
-                  mockStoreSession(
-                    session.copy(
-                      journeyStatus = Some(
-                        journey.copy(draftReturn = journey.draftReturn.copy(
-                          disposalDetailsAnswers = Some(updatedAnswers)
-                        )
-                        )
-                      )
                     )
-                  )(Right(()))
-                }
-
-                testIsCheckYourAnswers(
-                  performAction(),
-                  "returns.disposal-details.cya.title",
-                  expectedDisposalPriceTitleKey,
-                  expectedDisposalFeesTitleKey
+                  )
                 )
-              }
+              )(Right(()))
+            }
+
+            testIsCheckYourAnswers(
+              performAction(),
+              completeAnswers,
+              "returns.disposal-details.cya.title",
+              expectedTitles(completeAnswers, disposalMethod)._1,
+              expectedTitles(completeAnswers, disposalMethod)._2
+            )
 
           }
         }
@@ -1525,7 +1482,21 @@ object DisposalDetailsControllerSpec extends Matchers {
     disposalDetailsAnswers: CompleteDisposalDetailsAnswers,
     doc: Document
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
-    // TODO Implement checks
-
+    doc
+      .select("#propertyShare-answer")
+      .text()
+      .stripSuffix("%") shouldBe disposalDetailsAnswers.shareOfProperty.percentageValue.toString()
+    doc.select("#disposalPrice-answer").text() shouldBe formatAmountOfMoneyWithPoundSign(
+      disposalDetailsAnswers.disposalPrice.inPounds()
+    )
+    doc.select("#disposalFees-answer").text() shouldBe formatAmountOfMoneyWithPoundSign(
+      disposalDetailsAnswers.disposalFees.inPounds()
+    )
   }
+
+  def expectedTitles(
+    completeAnswers: CompleteDisposalDetailsAnswers,
+    disposalMethod: DisposalMethod
+  ): (String, String) =
+    (s"disposalPrice.${disposalMethod.toString}.title", s"disposalFees.${disposalMethod.toString}.title")
 }

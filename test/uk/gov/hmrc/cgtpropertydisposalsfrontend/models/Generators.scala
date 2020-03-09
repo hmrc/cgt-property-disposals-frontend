@@ -21,14 +21,14 @@ import java.time.{Instant, LocalDate, LocalDateTime, ZoneId}
 import cats.syntax.order._
 import org.scalacheck.ScalacheckShapeless._
 import org.scalacheck.{Arbitrary, Gen}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualMissingEmail, IndividualSupplyingInformation, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, StartingNewDraftReturn, Subscribed, ViewingReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifierAttempts
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, Charge, FinancialTransaction, Payment, PaymentsJourney}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscriptionResponse.SubscriptionSuccessful
@@ -41,15 +41,14 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue.
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsAnswers, IncompleteMultipleDisposalsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.OtherReliefs
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.{NoOtherReliefs, OtherReliefs}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CompleteYearToDateLiabilityAnswers, IncompleteYearToDateLiabilityAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanNotifyResponse
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService.UpscanServiceResponse.{UpscanNotifyEvent, UpscanResponse}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FinancialDataServiceImpl.FinancialDataResponse
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{ListReturnsResponse, ReturnSummaryWithoutPaymentInfo}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{FileDescriptor, UploadRequest, UpscanFileDescriptor}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.ListReturnsResponse
 
 object Generators
     extends GenUtils
@@ -64,17 +63,17 @@ object Generators
     with EmailGen
     with VerifierMatchGen
     with UserTypeGen
-    with UpscanGen
     with TriageQuestionsGen
     with ReturnGen
+    with UpscanGen
     with DisposalDetailsGen
+    with DisposalMethodGen
     with MoneyGen
     with AcquisitionDetailsGen
     with ReliefDetailsAnswersGen
     with TaxYearGen
     with ExemptionAndLossesAnswersGen
-    with YearToDateLiabilityAnswersGen
-    with FinancialDataGen {
+    with YearToDateLiabilityAnswersGen {
 
   implicit val booleanGen: Gen[Boolean] = Gen.oneOf(true, false)
 
@@ -94,7 +93,7 @@ sealed trait GenUtils {
   def gen[A](implicit arb: Arbitrary[A]): Gen[A] = arb.arbitrary
 
   // define our own Arbitrary instance for String to generate more legible strings
-  implicit val stringArb: Arbitrary[String] = Arbitrary(Gen.alphaNumStr)
+  implicit val stringArb: Arbitrary[String] = Arbitrary(Gen.nonEmptyListOf(Gen.alphaUpperChar).map(_.mkString("")))
 
   implicit val longArb: Arbitrary[Long] = Arbitrary(Gen.choose(-5e13.toLong, 5e13.toLong))
 
@@ -234,16 +233,6 @@ trait EmailGen { this: GenUtils =>
   implicit val emailSourceGen: Gen[EmailSource] = gen[EmailSource]
 }
 
-trait UpscanGen { this: GenUtils =>
-
-  implicit val upscanGen: Gen[UpscanNotifyEvent] = gen[UpscanNotifyEvent]
-
-  implicit val upscanNotifyResponse: Gen[UpscanNotifyResponse] = gen[UpscanNotifyResponse]
-
-  implicit val upscanResponse: Gen[UpscanResponse] = gen[UpscanResponse]
-
-}
-
 trait VerifierMatchGen { this: GenUtils =>
 
   implicit val unsuccessfulVerifierMatchAttemptsGen: Gen[UnsuccessfulVerifierAttempts] =
@@ -299,10 +288,23 @@ trait ReturnGen { this: GenUtils =>
 
   implicit val returnSummaryGen: Gen[ReturnSummary] = gen[ReturnSummary]
 
-  implicit val returnSummaryWithoutPaymentInfoGen: Gen[ReturnSummaryWithoutPaymentInfo] =
-    gen[ReturnSummaryWithoutPaymentInfo]
-
   implicit val calculateCgtTaxDueRequestGen: Gen[CalculateCgtTaxDueRequest] = gen[CalculateCgtTaxDueRequest]
+
+}
+
+trait UpscanGen {
+  this: GenUtils =>
+
+  implicit val uploadRequestGen: Gen[UploadRequest]               = gen[UploadRequest]
+  implicit val fileDescriptorGen: Gen[FileDescriptor]             = gen[FileDescriptor]
+  implicit val upscanFileDescriptorGen: Gen[UpscanFileDescriptor] = gen[UpscanFileDescriptor]
+
+}
+
+trait DisposalMethodGen { this: GenUtils =>
+
+  implicit val disposalMethod: Gen[DisposalMethod] =
+    gen[DisposalMethod]
 
 }
 
@@ -314,8 +316,11 @@ trait DisposalDetailsGen { this: GenUtils =>
   implicit val incompleteDisposalDetailsAnswersGen: Gen[IncompleteDisposalDetailsAnswers] =
     gen[IncompleteDisposalDetailsAnswers]
 
-  implicit val shareOfPropertyGen: Gen[ShareOfProperty] = gen[ShareOfProperty]
-
+  implicit val shareOfPropertyGen: Gen[ShareOfProperty] =
+    gen[ShareOfProperty].map {
+      case a: ShareOfProperty.Other if a.percentageValue > 100 => ShareOfProperty.Full
+      case other: ShareOfProperty                              => other
+    }
 }
 
 trait AcquisitionDetailsGen { this: GenUtils =>
@@ -335,10 +340,16 @@ trait AcquisitionDetailsGen { this: GenUtils =>
 trait ReliefDetailsGen { this: GenUtils =>
 
   implicit val completeReliefDetailsAnswersGen: Gen[CompleteReliefDetailsAnswers] =
-    gen[CompleteReliefDetailsAnswers]
+    gen[CompleteReliefDetailsAnswers].map {
+      case a: CompleteReliefDetailsAnswers if a.otherReliefs.isEmpty => a.copy(otherReliefs = Some(NoOtherReliefs))
+      case other                                                     => other
+    }
 
   implicit val incompleteReliefDetailsAnswersGen: Gen[IncompleteReliefDetailsAnswers] =
-    gen[IncompleteReliefDetailsAnswers]
+    gen[IncompleteReliefDetailsAnswers].map {
+      case a: IncompleteReliefDetailsAnswers if a.otherReliefs.isEmpty => a.copy(otherReliefs = Some(NoOtherReliefs))
+      case other                                                       => other
+    }
 
 }
 
@@ -347,6 +358,8 @@ trait MoneyGen { this: GenUtils =>
   implicit val amountInPenceGen: Gen[AmountInPence] = gen[AmountInPence]
 
   implicit val chargeGen: Gen[Charge] = gen[Charge]
+
+  implicit val returnCharge: Gen[ReturnCharge] = gen[ReturnCharge]
 
   implicit val paymentGen: Gen[Payment] = gen[Payment]
 
@@ -362,13 +375,19 @@ trait TaxYearGen { this: GenUtils =>
 
 trait ReliefDetailsAnswersGen extends LowerPriorityReliefDetailsAnswersGen { this: GenUtils =>
 
+  override implicit val longArb: Arbitrary[Long] = Arbitrary(Gen.choose(0.toLong, 5e13.toLong))
+
   implicit val reliefDetailsAnswersGen: Gen[ReliefDetailsAnswers] =
     gen[ReliefDetailsAnswers]
 
   implicit val completeReliefDetailsAnswersGen: Gen[CompleteReliefDetailsAnswers] =
-    gen[CompleteReliefDetailsAnswers]
+    gen[CompleteReliefDetailsAnswers].map {
+      case a: CompleteReliefDetailsAnswers if a.otherReliefs.isEmpty => a.copy(otherReliefs = Some(NoOtherReliefs))
+      case other                                                     => other
+    }
 
   implicit val otherReliefsGen: Gen[OtherReliefs] = gen[OtherReliefs]
+
 }
 
 trait LowerPriorityReliefDetailsAnswersGen { this: GenUtils =>
@@ -408,13 +427,5 @@ trait YearToDateLiabilityAnswersGen { this: GenUtils =>
   implicit val calculatedTaxDueGen: Gen[CalculatedTaxDue] = gen[CalculatedTaxDue]
 
   implicit val gainCalculatedTaxDueGen: Gen[GainCalculatedTaxDue] = gen[GainCalculatedTaxDue]
-
-}
-
-trait FinancialDataGen { this: GenUtils =>
-
-  implicit val financialTransactionGen: Gen[FinancialTransaction] = gen[FinancialTransaction]
-
-  implicit val financialDataResponseGen: Gen[FinancialDataResponse] = gen[FinancialDataResponse]
 
 }

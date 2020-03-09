@@ -16,16 +16,17 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
 
+import java.time.LocalDate
 import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
+import cats.syntax.order._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.Configuration
-import play.api.i18n.MessagesApi
+import play.api.i18n.{I18nSupport, Messages, MessagesApi, MessagesImpl}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
-import play.api.libs.json.{JsNumber, JsString, JsValue}
 import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
@@ -36,7 +37,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, StartingNewDraftReturn, Subscribed, ViewingReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, PaymentsJourney}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.govShortDisplayFormat
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.ChargeType.{PenaltyInterest, UkResidentReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftReturn, ReturnSummary, SubmitReturnResponse}
@@ -107,7 +111,7 @@ trait HomePageControllerSpec
 
 }
 
-class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
+class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nSupport {
 
   override lazy val additionalConfig: Configuration = Configuration(
     "application.router" -> "prod.Routes"
@@ -116,6 +120,8 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
   lazy val controller = instanceOf[HomePageController]
 
   implicit val messagesApi: MessagesApi = controller.messagesApi
+
+  implicit val messages: Messages = MessagesImpl(lang, messagesApi)
 
   val subscribedSessionData = SessionData.empty.copy(journeyStatus = Some(subscribed))
 
@@ -134,28 +140,341 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
         }
       )
 
+      val ukResidentMainReturnChargeAmount: AmountInPence = AmountInPence(10000)
+      val ukResidentReturnSentDate: LocalDate             = LocalDate.now()
+      val ukResidentMainReturnChargeDueDate: LocalDate    = LocalDate.now().plusMonths(1)
+
+      val ukResidentReturnChargeNoPayments = sample[Charge].copy(
+        chargeType = UkResidentReturn,
+        amount     = ukResidentMainReturnChargeAmount,
+        dueDate    = ukResidentMainReturnChargeDueDate,
+        payments   = List.empty
+      )
+
+      val penaltyInterestChargeAmount: AmountInPence    = AmountInPence(10000)
+      val penaltyInterestChargeAmountDueDate: LocalDate = LocalDate.now().plusMonths(1)
+
+      val penaltyInterestCharge = sample[Charge].copy(
+        chargeType = PenaltyInterest,
+        amount     = penaltyInterestChargeAmount,
+        dueDate    = penaltyInterestChargeAmountDueDate,
+        payments   = List.empty
+      )
+
+      val chargesWithoutChargeRaiseAndNoPayment = List(ukResidentReturnChargeNoPayments)
+      val chargesWithChargeRaiseAndNoPayment    = List(ukResidentReturnChargeNoPayments, penaltyInterestCharge)
+
+      val partialPaymentForUkResidentMainReturnChargeAmount: AmountInPence  = AmountInPence(1000)
+      val partialPaymentForUkResidentMainReturnChargePaymentDate: LocalDate = LocalDate.now().plusMonths(2)
+
+      val partialPaymentForUkResidentReturnCharge = sample[Payment].copy(
+        amount       = partialPaymentForUkResidentMainReturnChargeAmount,
+        clearingDate = partialPaymentForUkResidentMainReturnChargePaymentDate
+      )
+
+      val ukResidentReturnChargePartialPayment = sample[Charge].copy(
+        chargeType = UkResidentReturn,
+        amount     = ukResidentMainReturnChargeAmount,
+        dueDate    = ukResidentMainReturnChargeDueDate,
+        payments   = List(partialPaymentForUkResidentReturnCharge)
+      )
+
+      val chargesWithChargeRaiseAndPartialPayment                    = List(ukResidentReturnChargePartialPayment, penaltyInterestCharge)
+      val fullPaymentForUkResidentMainReturnChargeDueDate: LocalDate = LocalDate.now().plusMonths(2)
+
+      val fullPaymentForUkResidentReturnCharge = sample[Payment].copy(
+        amount       = ukResidentMainReturnChargeAmount,
+        clearingDate = fullPaymentForUkResidentMainReturnChargeDueDate
+      )
+
+      val ukResidentReturnChargeFullPayment = sample[Charge].copy(
+        chargeType = UkResidentReturn,
+        amount     = ukResidentMainReturnChargeAmount,
+        dueDate    = ukResidentMainReturnChargeDueDate,
+        payments   = List(fullPaymentForUkResidentReturnCharge)
+      )
+
+      val chargesWithChargeRaiseAndFullPayment = List(ukResidentReturnChargeFullPayment, penaltyInterestCharge)
+
+      def extractAmount(s: String): String = s.substring(s.indexOf('£'))
+
+      "display the home page when there is no charge raise and no payments have been made" in {
+
+        val sentReturn = sample[ReturnSummary].copy(
+          charges                = chargesWithoutChargeRaiseAndNoPayment,
+          mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
+          submissionDate         = ukResidentReturnSentDate
+        )
+        val subscribed = sample[Subscribed].copy(sentReturns = List(sentReturn))
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              userType      = Some(UserType.Individual),
+              journeyStatus = Some(subscribed)
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("account.home.title"), { doc =>
+            extractAmount(doc.select(s"#leftToPay-${sentReturn.submissionId}").text) shouldBe formatAmountOfMoneyWithPoundSign(
+              ukResidentMainReturnChargeAmount.inPounds()
+            )
+            doc.select(s"#paymentDue-${sentReturn.submissionId}").text shouldBe govShortDisplayFormat(
+              ukResidentMainReturnChargeDueDate
+            )
+            extractAmount(doc.select(s"#taxOwed-${sentReturn.submissionId}").text) shouldBe formatAmountOfMoneyWithPoundSign(
+              ukResidentMainReturnChargeAmount.inPounds()
+            )
+            doc.select(s"#viewSentReturn-${sentReturn.submissionId}").text shouldBe "View and pay"
+            doc
+              .select(s"#sentDate-${sentReturn.submissionId}")
+              .text shouldBe messages("returns.list.sentDate", govShortDisplayFormat(ukResidentReturnSentDate))
+          }
+        )
+      }
+
+      "display the home page when there is a charge raise and no payments have been made" in {
+
+        val sentReturn = sample[ReturnSummary].copy(
+          charges                = chargesWithChargeRaiseAndNoPayment,
+          mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
+          submissionDate         = ukResidentReturnSentDate
+        )
+        val subscribed = sample[Subscribed].copy(sentReturns = List(sentReturn))
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              userType      = Some(UserType.Individual),
+              journeyStatus = Some(subscribed)
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("account.home.title"), { doc =>
+            extractAmount(doc.select(s"#leftToPay-${sentReturn.submissionId}").text) shouldBe formatAmountOfMoneyWithPoundSign(
+              ukResidentMainReturnChargeAmount.inPounds() + penaltyInterestChargeAmount.inPounds()
+            )
+            doc.select(s"#paymentDue-${sentReturn.submissionId}").text shouldBe govShortDisplayFormat(
+              ukResidentMainReturnChargeDueDate
+            )
+            extractAmount(doc.select(s"#taxOwed-${sentReturn.submissionId}").text) shouldBe formatAmountOfMoneyWithPoundSign(
+              ukResidentMainReturnChargeAmount.inPounds()
+            )
+            doc.select(s"#viewSentReturn-${sentReturn.submissionId}").text shouldBe "View and pay"
+            doc
+              .select(s"#sentDate-${sentReturn.submissionId}")
+              .text shouldBe messages("returns.list.sentDate", govShortDisplayFormat(ukResidentReturnSentDate))
+          }
+        )
+      }
+
+      "display the home page when there is a charge raise and partial payment have been made for return" in {
+
+        val sentReturn = sample[ReturnSummary].copy(
+          charges                = chargesWithChargeRaiseAndPartialPayment,
+          mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
+          submissionDate         = ukResidentReturnSentDate
+        )
+        val subscribed = sample[Subscribed].copy(sentReturns = List(sentReturn))
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              userType      = Some(UserType.Individual),
+              journeyStatus = Some(subscribed)
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("account.home.title"), { doc =>
+            extractAmount(doc.select(s"#leftToPay-${sentReturn.submissionId}").text) shouldBe formatAmountOfMoneyWithPoundSign(
+              ukResidentMainReturnChargeAmount.inPounds() + penaltyInterestChargeAmount
+                .inPounds() - partialPaymentForUkResidentMainReturnChargeAmount.inPounds()
+            )
+            doc.select(s"#paymentDue-${sentReturn.submissionId}").text shouldBe govShortDisplayFormat(
+              ukResidentMainReturnChargeDueDate
+            )
+            extractAmount(doc.select(s"#taxOwed-${sentReturn.submissionId}").text) shouldBe formatAmountOfMoneyWithPoundSign(
+              ukResidentMainReturnChargeAmount.inPounds()
+            )
+            doc.select(s"#viewSentReturn-${sentReturn.submissionId}").text shouldBe "View and pay"
+            doc
+              .select(s"#sentDate-${sentReturn.submissionId}")
+              .text shouldBe messages("returns.list.sentDate", govShortDisplayFormat(ukResidentReturnSentDate))
+          }
+        )
+      }
+
+      "display the home page when there is a charge raise and full payment have been made for return" in {
+
+        val sentReturn = sample[ReturnSummary].copy(
+          charges                = chargesWithChargeRaiseAndFullPayment,
+          mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
+          submissionDate         = ukResidentReturnSentDate
+        )
+        val subscribed = sample[Subscribed].copy(sentReturns = List(sentReturn))
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              userType      = Some(UserType.Individual),
+              journeyStatus = Some(subscribed)
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("account.home.title"), { doc =>
+            extractAmount(doc.select(s"#leftToPay-${sentReturn.submissionId}").text) shouldBe formatAmountOfMoneyWithPoundSign(
+              ukResidentMainReturnChargeAmount.inPounds() + penaltyInterestChargeAmount
+                .inPounds() - fullPaymentForUkResidentReturnCharge.amount.inPounds()
+            )
+            doc.select(s"#paymentDue-${sentReturn.submissionId}").text shouldBe govShortDisplayFormat(
+              penaltyInterestChargeAmountDueDate
+            )
+            extractAmount(doc.select(s"#taxOwed-${sentReturn.submissionId}").text) shouldBe formatAmountOfMoneyWithPoundSign(
+              ukResidentMainReturnChargeAmount.inPounds()
+            )
+            doc.select(s"#viewSentReturn-${sentReturn.submissionId}").text shouldBe "View and pay"
+            doc
+              .select(s"#sentDate-${sentReturn.submissionId}")
+              .text shouldBe messages("returns.list.sentDate", govShortDisplayFormat(ukResidentReturnSentDate))
+          }
+        )
+      }
+
+      "display the home page when there is a charge raise and full payments have been made for return and charge raise" in {
+
+        val fullPaymentForPenaltyInterestCharge = sample[Payment].copy(
+          amount       = penaltyInterestChargeAmount,
+          clearingDate = penaltyInterestChargeAmountDueDate
+        )
+
+        val penaltyInterestCharge = sample[Charge].copy(
+          chargeType = PenaltyInterest,
+          amount     = penaltyInterestChargeAmount,
+          dueDate    = penaltyInterestChargeAmountDueDate,
+          payments   = List(fullPaymentForPenaltyInterestCharge)
+        )
+
+        val fullPaymentForUkResidentReturnCharge = sample[Payment].copy(
+          amount       = ukResidentMainReturnChargeAmount,
+          clearingDate = ukResidentMainReturnChargeDueDate
+        )
+
+        val ukResidentReturnCharge = sample[Charge].copy(
+          chargeType = UkResidentReturn,
+          amount     = ukResidentMainReturnChargeAmount,
+          dueDate    = ukResidentMainReturnChargeDueDate,
+          payments   = List(fullPaymentForUkResidentReturnCharge)
+        )
+        val charges = List(ukResidentReturnCharge, penaltyInterestCharge)
+        val sentReturn = sample[ReturnSummary].copy(
+          charges                = charges,
+          mainReturnChargeAmount = ukResidentMainReturnChargeAmount,
+          submissionDate         = ukResidentReturnSentDate
+        )
+        val subscribed = sample[Subscribed].copy(sentReturns = List(sentReturn))
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              userType      = Some(UserType.Individual),
+              journeyStatus = Some(subscribed)
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("account.home.title"), { doc =>
+            extractAmount(doc.select(s"#leftToPay-${sentReturn.submissionId}").text) shouldBe formatAmountOfMoneyWithPoundSign(
+              ukResidentMainReturnChargeAmount.inPounds() + penaltyInterestChargeAmount
+                .inPounds() - fullPaymentForUkResidentReturnCharge.amount.inPounds() -
+                fullPaymentForPenaltyInterestCharge.amount.inPounds()
+            )
+            doc.select(s"#paymentDue-${sentReturn.submissionId}").text shouldBe ""
+            extractAmount(doc.select(s"#taxOwed-${sentReturn.submissionId}").text) shouldBe formatAmountOfMoneyWithPoundSign(
+              ukResidentMainReturnChargeAmount.inPounds()
+            )
+            doc.select(s"#viewSentReturn-${sentReturn.submissionId}").text shouldBe "View return"
+            doc
+              .select(s"#sentDate-${sentReturn.submissionId}")
+              .text shouldBe messages("returns.list.sentDate", govShortDisplayFormat(ukResidentReturnSentDate))
+          }
+        )
+      }
+
       "display the home page" in {
-        forAll { userType: Option[UserType] =>
+        forAll { (userType: Option[UserType], subscribed: Subscribed) =>
           whenever(!userType.contains(UserType.Agent)) {
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(subscribedSessionData.copy(userType = userType))
-            }
-
-            val result  = performAction()
-            val content = contentAsString(result)
-
-            status(result) shouldBe OK
-            content        should include(messageFromMessageKey("account.home.title"))
-            content        should include(messageFromMessageKey("account.home.button.start-a-new-return"))
-            content shouldNot include(
-              messageFromMessageKey("account.agent.prefix")
-            )
-            content should include(
-              messageFromMessageKey(
-                "account.home.subtitle",
-                subscribed.subscribedDetails.cgtReference.value
+              mockGetSession(
+                SessionData.empty.copy(
+                  userType      = userType,
+                  journeyStatus = Some(subscribed)
+                )
               )
+            }
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey(
+                "account.home.title"
+              ), { doc =>
+                doc.select("#content > article > div.form-group > a").text should include(
+                  messageFromMessageKey("account.home.button.start-a-new-return")
+                )
+                doc.select("#content > article > div:nth-child(1) > div > span").text shouldNot include(
+                  messageFromMessageKey("account.agent.prefix")
+                )
+                doc.select("h1 > p").text should include(
+                  messageFromMessageKey(
+                    "account.home.subtitle",
+                    subscribed.subscribedDetails.cgtReference.value
+                  )
+                )
+                if (subscribed.sentReturns.nonEmpty) {
+                  doc.select("h3").text should include(
+                    messageFromMessageKey(
+                      "account.totalLeftToPay"
+                    )
+                  )
+                  if (subscribed.totalLeftToPay() > AmountInPence.zero) {
+                    doc
+                      .select("#content > article > div.grid-row.returns-list-header > div.column-quarter > div > a")
+                      .attr("href") shouldBe controllers.accounts.homepage.routes.HomePageController
+                      .payTotalAmountLeftToPay()
+                      .url
+                  } else {
+                    doc.body().text() shouldNot include(
+                      controllers.accounts.homepage.routes.HomePageController
+                        .payTotalAmountLeftToPay()
+                        .url
+                    )
+                  }
+                } else {
+                  doc.body().text shouldNot include(
+                    messageFromMessageKey(
+                      "account.totalLeftToPay"
+                    )
+                  )
+                }
+              }
             )
           }
         }
@@ -169,16 +488,20 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
           mockAuthWithNoRetrievals()
           mockGetSession(sessionData)
         }
-
-        val result  = performAction()
-        val content = contentAsString(result)
-
-        status(result) shouldBe OK
-        content        should include(messageFromMessageKey("account.home.title"))
-        content should include(
-          messageFromMessageKey("account.agent.prefix")
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey(
+            "account.home.title"
+          ), { doc =>
+            doc.select("#content > article > div:nth-child(1) > div > span").text() should include(
+              messageFromMessageKey("account.agent.prefix")
+            )
+            doc.select("#content > article > div:nth-child(1) > div > span").text() should include(
+              subscribed.subscribedDetails.makeAccountName()
+            )
+          },
+          OK
         )
-        content should include(subscribed.subscribedDetails.makeAccountName())
       }
 
       val startingNewDraftReturn = StartingNewDraftReturn(
@@ -311,21 +634,6 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec {
       )
 
       "show an error page" when {
-
-        "the user type is not valid" in {
-          forAll { userType: Option[UserType] =>
-            whenever(!userType.contains(UserType.Individual)) {
-              withClue(s"For user type '$userType': ") {
-                inSequence {
-                  mockAuthWithNoRetrievals()
-                  mockGetSession(subscribedSessionData.copy(userType = userType))
-                }
-
-                checkIsTechnicalErrorPage(performAction())
-              }
-            }
-          }
-        }
 
         "there is an error updating the session" in {
           inSequence {

@@ -30,11 +30,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios.amountOfMoneyErrorScenarios
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.ReliefDetailsControllerSpec.validateReliefDetailsCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.{NoOtherReliefs, OtherReliefs}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
@@ -1235,19 +1236,22 @@ class ReliefDetailsControllerSpec
         }
 
         "the user has already answered all the questions" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(sessionWithReliefDetailsAnswers(completeAnswers)._1)
-          }
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey("reliefDetails.cya.title"), { doc =>
-              doc.select("#content > article > form").attr("action") shouldBe routes.ReliefDetailsController
-                .checkYourAnswersSubmit()
-                .url
+          forAll { completeAnswers: CompleteReliefDetailsAnswers =>
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(sessionWithReliefDetailsAnswers(completeAnswers)._1)
             }
-          )
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("reliefDetails.cya.title"), { doc =>
+                validateReliefDetailsCheckYourAnswersPage(completeAnswers, doc)
+                doc.select("#content > article > form").attr("action") shouldBe routes.ReliefDetailsController
+                  .checkYourAnswersSubmit()
+                  .url
+              }
+            )
+          }
         }
 
       }
@@ -1350,6 +1354,35 @@ object ReliefDetailsControllerSpec extends Matchers {
     reliefDetailsAnswers: CompleteReliefDetailsAnswers,
     doc: Document
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
-    // TODO Implement checks
+
+    if (reliefDetailsAnswers.privateResidentsRelief.isZero) {
+      doc.select("#privateResidentsRelief-answer").text shouldBe "No"
+    } else {
+      doc.select("#privateResidentsRelief-answer").text shouldBe "Yes"
+      doc.select("#privateResidentsReliefValue-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
+        reliefDetailsAnswers.privateResidentsRelief.inPounds()
+      )
+    }
+
+    if (reliefDetailsAnswers.lettingsRelief.isZero) {
+      doc.select("#lettingsRelief-answer").text shouldBe "No"
+    } else {
+      doc.select("#lettingsRelief-answer").text shouldBe "Yes"
+      doc.select("#lettingsReliefValue-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
+        reliefDetailsAnswers.lettingsRelief.inPounds()
+      )
+    }
+
+    reliefDetailsAnswers.otherReliefs.foreach {
+      case a: OtherReliefsOption.OtherReliefs =>
+        doc.select("#otherReliefs-answer").text     shouldBe "Yes"
+        doc.select("#otherReliefsName-answer").text shouldBe a.name
+        doc.select("#otherReliefsAmount-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
+          a.amount.inPounds().bigDecimal
+        )
+      case OtherReliefsOption.NoOtherReliefs => doc.select("#otherReliefs-answer").text shouldBe "No"
+
+    }
+
   }
 }

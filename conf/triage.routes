@@ -24,6 +24,8 @@ GET  /before-start/date-exchanged-contracts                 uk.gov.hmrc.cgtprope
 POST /before-start/date-exchanged-contracts                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageController.whenWasDisposalDateSubmit()
 
 GET  /exit/disposal-date-before-6-April-2020                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageController.disposalDateTooEarly()
+GET  /exit/indirect-mixed-use-cannot-use-service            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageController.assetTypeNotYetImplemented()
+GET  /exit/uk-resident-can-only-report-residential          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageController.ukResidentCanOnlyDisposeResidential()
 
 GET  /before-start/date-of-completion                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageController.whenWasCompletionDate()
 POST /before-start/date-of-completion                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageController.whenWasCompletionDateSubmit()
@@ -37,5 +39,11 @@ POST /multiple-disposals                                    uk.gov.hmrc.cgtprope
 
 GET  /multiple-disposals/number-disposals                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.howManyDisposals()
 POST /multiple-disposals/number-disposals                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.howManyDisposalsSubmit()
+
+GET  /multiple-disposals/uk-residence-status                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.wereYouAUKResident()
+POST /multiple-disposals/uk-residence-status                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.wereYouAUKResidentSubmit()
+
+GET  /multiple-disposals/were-properties-residential        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.wereAllPropertiesResidential()
+POST /multiple-disposals/were-properties-residential        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.wereAllPropertiesResidentialSubmit()
 
 GET  /check-your-answers                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.checkYourAnswers()

@@ -18,6 +18,7 @@ button.signIn=Sign in
 button.manageAccount=Manage account
 button.acceptAndSend=Accept and send
 button.payNow=Pay now
+button.accountHome=Account home
 
 generic.warning=Warning
 generic.day=Day
@@ -30,6 +31,7 @@ generic.success=Success
 generic.errorPrefix=Error:
 generic.loss=loss
 generic.gain=gain
+generic.on=on
 yesNo.true=Yes
 yesNo.false=No
 
@@ -157,6 +159,11 @@ confirmEmail.verified.p1=We’ll use this address to contact you about your Capi
 confirmEmail.verified.p2=Your email has not been updated in other government services.
 confirmEmail.resent=Confirmation email sent:
 
+confirmDraftReturn.title=Your Capital Gains Tax on UK property return will be saved for 30 days
+confirmDraftReturn.warning=After {0} all the details in your Capital Gains Tax on UK property return will be deleted.
+confirmDraftReturn.p1=After that date, you’ll need to start again.
+confirmDraftReturn.p2=We will keep a return that is ‘In progress’ for 30 days from the day it was last saved. We will only save uploads for 7 days from the last day they were saved.
+
 contactName.title=Change contact name
 contactName.extraContent=The contact name you use for other government services will not change.
 contactName.error.pattern=Contact name must only include letters, numbers, hyphens, apostrophes, commas, ampersands and spaces
@@ -168,7 +175,7 @@ address.postcode.helpText=For example, AB2 9WQ
 postcode.invalid=Postcode must only include letters, numbers and spaces
 address.postcodeFilter.label=Enter property name or number (optional)
 address.postcodeFilter.helpText=For example, The Mill, Flat A or 37b
-address.manual.linkText=Enter UK address manually
+address.manual.linkText=Enter the address another way
 address.lookup.linkText=Lookup UK address with postcode
 
 address.uk.title=Enter your UK contact address
@@ -341,7 +348,6 @@ account.agent.prefix=Client:
 account.home.title=Capital Gains Tax on UK property account home
 
 account.home.subtitle=Account number: {0}
-account.home.subtitle.agent=Your client: {0} | Account number: {1}
 account.home.left.title=Capital Gains Tax liability
 account.home.left.placeholder=Your total Capital Gains Tax liability for UK property disposals from 6 April 2020 to 5 April 2021.
 account.home.right.title=Total amount left to pay
@@ -466,7 +472,7 @@ agent.confirm-client.change-client=Change client
 
 triage.caption=Before you start
 
-who-are-you-reporting-for.title=Who are you reporting the tax for?
+who-are-you-reporting-for.title=Who are you completing this return for?
 
 individualUserType.Self=Yourself
 individualUserType.Capacitor=Someone else
@@ -474,24 +480,27 @@ individualUserType.PersonalRepresentative=Someone who has died
 individualUserType.error.required=Select who are you reporting the tax for
 individualUserType.error.invalid=Select who are you reporting the tax for
 
-numberOfProperties.title=How many properties do you want to include in this return?
-numberOfProperties.helpText=If you sold shares instead of property, tell us how many companies you held shares in that you want to include in this return.
+numberOfProperties.title=How many UK properties are you including in this return?
+numberOfProperties.helpText=All of the property sales or disposals must have the same completion date.
 numberOfProperties.One=One
 numberOfProperties.MoreThanOne=2 or more
-numberOfProperties.error.invalid=Select how many properties or companies you want to include in this return
-numberOfProperties.error.required=Select how many properties or companies you want to include in this return
+numberOfProperties.details.summary=What happens on the completion date?
+numberOfProperties.details.p1=<a href="{0}" target="_blank">The completion date (opens in a new window)</a> is usually the day you got the money from the sale or disposal and the new owner got the keys.
+numberOfProperties.error.invalid=Select how many UK properties you are including in this return
+numberOfProperties.error.required=Select how many UK properties you are including in this return
 
-disposalMethod.title=Did you sell the property or give it away?
+disposalMethod.title=How did you sell or dispose of the UK property?
 disposalMethod.Sold=Sold it
 disposalMethod.Gifted=Gave it away
-disposalMethod.error.required=Select if you sold it or gave it away
-disposalMethod.error.invalid=Select if you sold it or gave it away
+disposalMethod.Other=Other
+disposalMethod.error.required=Select if you sold it, gave it away or other
+disposalMethod.error.invalid=Select if you sold it, gave it away or other
 
-wereYouAUKResident.title=Were you a UK resident when you ‘exchanged’ contracts when selling the property?
-wereYouAUKResident.helpText=You ‘exchanged’ contracts when you and the buyer swapped contracts and they paid a deposit. If you sold shares, it was when you sold them.
-wereYouAUKResident.link=<a href="{0}" target="_blank">Work out your residence status (opens in a new window)</a>.
-wereYouAUKResident.error.required=Select yes if you were a UK resident when you ‘exchanged’ contracts
-wereYouAUKResident.error.boolean=Select yes if you were a UK resident when you ‘exchanged’ contracts
+wereYouAUKResident.title=Were you a UK resident when you exchanged contracts when disposing of the property?
+wereYouAUKResident.helpText=Contract exchange usually happens when you and the buyer or new owner swap contracts and the buyer pays a deposit.
+wereYouAUKResident.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>.
+wereYouAUKResident.error.required=Select yes if you were a UK resident when you exchanged contracts
+wereYouAUKResident.error.boolean=Select yes if you were a UK resident when you exchanged contracts
 
 triage.enterCountry.title=What was your country of residence on the day you ‘exchanged’ contracts?
 triage.enterCountry.helpText=It’s usually the day you and the new owner swapped contracts and they paid a deposit. If you made an indirect disposal, it’s the day you sold the shares.
@@ -508,24 +517,27 @@ assetTypeForNonUkResidents.IndirectDisposal.helpText=An indirect disposal is whe
 assetTypeForNonUkResidents.error.required=Select the type of property or asset you sold or disposed of
 assetTypeForNonUkResidents.error.invalid=Select the type of property or asset you sold or disposed of
 
-didYouDisposeOfResidentialProperty.title=Did you sell a residential property?
-didYouDisposeOfResidentialProperty.helpText=Residential property includes houses, flats, or other dwellings, including their gardens and grounds.
+didYouDisposeOfResidentialProperty.title=Did you sell or dispose of a UK residential property?
+didYouDisposeOfResidentialProperty.helpText=Residential property includes houses, flats, or other dwellings, including their gardens or grounds.
 didYouDisposeOfResidentialProperty.Residential=Yes
 didYouDisposeOfResidentialProperty.NonResidential=No
-didYouDisposeOfResidentialProperty.details.summary=How to work out if a property is residential
-didYouDisposeOfResidentialProperty.details.p1=Residential property is:
+didYouDisposeOfResidentialProperty.details.summary=What residential property includes
+didYouDisposeOfResidentialProperty.details.p1=Residential property includes:
 didYouDisposeOfResidentialProperty.details.l1=a building where someone lives or could live, like a house, flat or other type of dwelling
 didYouDisposeOfResidentialProperty.details.l2=a building that is being built or changed so it can be used as a place where someone could live
 didYouDisposeOfResidentialProperty.details.l3=land that’s part of a garden or grounds of a building that’s used as a place where someone lives, or could live
 didYouDisposeOfResidentialProperty.details.link=<a href="{0}" tabindex="-1" target="_blank">Read a definition of residential property (opens in a new window)</a>.
-
 didYouDisposeOfResidentialProperty.error.required=Select yes if you sold or disposed of a residential property
 didYouDisposeOfResidentialProperty.error.boolean=Select yes if you sold or disposed of a residential property
 
-disposalDate.title=What date did you ‘exchange’ contracts when selling the property?
+ukResidentCanOnlyReportResidential.title=You cannot use this service
+ukResidentCanOnlyReportResidential.p1=You told us you were a UK resident on the day you sold or disposed of the UK property. You can only use this service to report UK residential property.
+ukResidentCanOnlyReportResidential.p2=Find out how to report and pay Capital Gains Tax on <a href="{0}">non-residential UK property sales or disposals</a>.
+
+disposalDate.title=What date did you exchange contracts when disposing of the property?
 disposalDate.indirectDisposal.title=What date did you sell the shares?
-disposalDate.helpText=It’s when you and the buyer swapped contracts and they paid a deposit. If you sold shares not property it’s when you sold them. For example, 25 4 2020
-disposalDate.link=<a href="{0}" target="_blank">Find out what happens on the ‘exchange’ date (opens in a new window)</a>.
+disposalDate.helpText=It’s usually when you and the buyer or new owner swapped contracts and the buyer paid a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020
+disposalDate.link=<a href="{0}" target="_blank">Find out what happens on the exchange date (opens in a new window)</a>.
 disposalDate.error.required=Enter a contract exchange date
 disposalDate.error.invalid=Enter a real contract exchange date
 disposalDate.error.tooFarInFuture=The contract exchange date must be today or in the past
@@ -539,9 +551,9 @@ disposalDate-month.error.monthAndYearRequired=Contract exchange date must includ
 disposalDate-day.error.dayAndYearRequired=Contract exchange date must include a day and a year
 disposalDate-day.error.dayAndMonthRequired=Contract exchange date must include a day and a month
 
-completionDate.title=What was the ‘completion’ date when you sold the property?
-completionDate.helpText=This is when the keys are handed over and the buyer can move in. It’s when you received the money from the property sale. For example, 25 4 2020
-completionDate.link=<a href="{0}" target="_blank">Find out what happens on the ‘completion’ date (opens in a new window)</a>.
+completionDate.title=What was the completion date when you sold or disposed of the property?
+completionDate.helpText=It’s usually when you got the money from the sale or property transfer and the new owner got the keys. For example, 25 4 2020.
+completionDate.link=<a href="{0}" target="_blank">Find out what happens on the completion date (opens in a new window)</a>.
 completionDate.error.required=Enter a completion date
 completionDate.error.invalid=Enter a real completion date
 completionDate.error.tooFarInPast=Completion date must be the same as or after the contract exchange date
@@ -591,6 +603,20 @@ date.10=October
 date.11=November
 date.12=December
 
+date.short.1=Jan	
+date.short.2=Feb	
+date.short.3=Mar	
+date.short.4=Apr	
+date.short.5=May	
+date.short.6=Jun	
+date.short.7=Jul	
+date.short.8=Aug	
+date.short.9=Sept	
+date.short.10=Oct	
+date.short.11=Nov	
+date.short.12=Dec
+
+
 returns.return-to-summary-link=Return to summary
 task-list.InProgress=In progress
 task-list.Complete=Complete
@@ -616,7 +642,7 @@ address.uk.returns.title=Enter the address of the UK property you disposed of
 
 returns.property-address.cya.title=Check your answers
 returns.property-address.cyaLabel.property-address=Property address
-returns.property-address.cyaChange.property-address=your property address
+returns.property-address.cyaChange.property-address=the address of the property
 
 returns.disposal-details.caption=Sale or disposal details
 shareOfProperty.title=How much of the property did you own?
@@ -632,26 +658,22 @@ percentageShare.error.tooLarge=The percentage of the property you owned must be 
 percentageShare.error.tooSmall=The percentage of the property you owned must be a number between 0 and 100, for example 25 or 33.33
 percentageShare.error.tooManyDecimals=The percentage of the property you owned must have 2 decimal places or less, for example 33.33
 
-
-disposalPrice.full-share.sold-it.title=How much did you sell the property for?
-disposalPrice.full-share.gifted-it.title=What was the market value of the property when you disposed of it?
-disposalPrice.not-full-share.sold-it.title=How much did you sell your share of the property for?
-disposalPrice.not-full-share.gifted-it.title=What was the market value of your share of the property when you disposed of it?
-
-disposalPrice.helpText=You’ll be able to enter any selling or improvement costs, like solicitor’s or estate agent’s fees later.
-disposalPrice.error.required=Enter how much you sold the property for
+disposalPrice.Sold.title=How much did you get when you sold or disposed of the property?
+disposalPrice.Gifted.title=What was the market value of the property when you gave it away?
+disposalPrice.Other.title=How much did you get when you sold or disposed of the property?
+disposalPrice.helpText=If you owned part of the property, only enter the amount you got for your share. You’ll be able to enter any additional costs later.
+disposalPrice.error.required=Enter how much you sold or disposed of the property for
 disposalPrice.error.invalid=How much you sold your the property for must a number, like 160,000 or 11,200.45
 disposalPrice.error.tooSmall=How much you sold the property for must be more than 0
 disposalPrice.error.tooLarge=How much you sold the property for must be 50,000,000,000.00 or less
 disposalPrice.error.tooManyDecimals=How much you sold the property for must have 2 decimal places or less, for example 33.33
 
-disposalFees.full-share.sold-it.title=Enter your selling costs when you sold the property
-disposalFees.full-share.gifted-it.title=Enter your selling costs when you gave away the property
-disposalFees.not-full-share.sold-it.title=Enter your share of the selling costs when you sold your share of the property
-disposalFees.not-full-share.gifted-it.title=Enter your share of the selling costs when you gave away your share of the property
-disposalFees.helpText=For example, the amount you paid to an estate agent or solicitor.
-disposalFees.error.required=Enter your share of the selling costs when you sold the property
-disposalFees.error.invalid=Your share of the selling costs must be an amount of money, like 1,500 or 7,300.50
+disposalFees.Sold.title=What were your additional costs when you sold or disposed of the property?
+disposalFees.Gifted.title=What were your additional costs when you sold or disposed of the property?
+disposalFees.Other.title=What were your additional costs when you sold or disposed of the property?
+disposalFees.helpText=For example, the amount you paid to an estate agent or solicitor. If you shared these costs, you can only claim your share.
+disposalFees.error.required=Enter the amount of additional costs when you sold or disposed of the property
+disposalFees.error.invalid=Your share of the additional costs must be an amount of money, like 1,500 or 7,300.50
 disposalFees.error.tooSmall=Selling costs must be 0 or more
 disposalFees.error.tooLarge=Selling costs must be 50,000,000,000.00 or less
 disposalFees.error.tooManyDecimals= Selling costs must have 2 decimal places or less, for example 33.33
@@ -939,6 +961,53 @@ viewReturn.title=Your return
 viewReturn.heading.taxOwed=Tax owed for return
 viewReturn.heading.reference=Return reference number
 viewReturn.printLink=Print or save this page for your records
+viewReturn.charges.heading=Payments
+viewReturn.charges.description=Description
+viewReturn.charges.payBy=Pay by
+viewReturn.charges.amount=Amount
+viewReturn.charges.due=Due
+viewReturn.charges.status=Status
+viewReturn.chargeType.UkResidentReturn=Tax payment
+viewReturn.chargeType.NonUkResidentReturn=Tax payment
+viewReturn.chargeType.Interest=Interest on late tax payment
+viewReturn.chargeType.LateFilingPenalty=Penalty - late return
+viewReturn.chargeType.SixMonthLateFilingPenalty=Penalty - return 6 months late
+viewReturn.chargeType.TwelveMonthLateFilingPenalty=Penalty - return 12 months late
+viewReturn.chargeType.LatePaymentPenalty=Penalty - late tax payment
+viewReturn.chargeType.SixMonthLatePaymentPenalty=Penalty - payment 6 months late
+viewReturn.chargeType.TwelveMonthLatePaymentPenalty=Penalty - payment 12 months late
+viewReturn.chargeType.PenaltyInterest=Interest on penalties paid late
+viewReturn.charge.status.paid=Paid
+viewReturn.charge.status.payNow=<a href="{0}">Pay now</a>
+viewReturn.charge.paymentMethod.BACS=Bacs payment received
+viewReturn.charge.paymentMethod.CHAPS=CHAPS payment received
+viewReturn.charge.paymentMethod.Cheque=cheque received
+viewReturn.charge.paymentMethod.DebitCardByTelephone=debit card payment received
+viewReturn.charge.paymentMethod.CreditCardByTelephone=credit card payment received
+viewReturn.charge.paymentMethod.PTAOnlineWorldpayDebitCardPayment=debit card payment received
+viewReturn.charge.paymentMethod.PTAOnlineWorldpayCreditCardPayment=credit card payment received
+viewReturn.charge.paymentMethod.GIROReceipts= Bank Giro payment received
+viewReturn.charge.paymentMethod.GIROCredits= Bank Giro payment received
+viewReturn.charge.paymentMethod.ChequeReceipts=cheque received
+viewReturn.charge.paymentMethod.DirectDebit=direct debit payment received
+viewReturn.charge.paymentMethod.FasterPayment=Faster Payment received
+viewReturn.charge.paymentMethod.GiroBankReceipts=Bank Giro payment received
+viewReturn.charge.paymentMethod.GiroBankPostOffice=Bank Giro payment received
+viewReturn.charge.paymentMethod.Paymaster=PayMaster payment received
+viewReturn.charge.paymentMethod.BankLodgement=payment received
+viewReturn.charge.paymentMethod.Incentive=payment received
+viewReturn.charge.paymentMethod.LocalOfficePayment=payment received
+viewReturn.charge.paymentMethod.NilDeclarations=payment received
+viewReturn.charge.paymentMethod.OverpaymentsToDuty=payment received
+viewReturn.charge.paymentMethod.ReallocationFromOASToDuty=payment received
+viewReturn.charge.paymentMethod.PaymentNotExpected=payment received
+viewReturn.charge.paymentMethod.Reallocation=payment received
+viewReturn.charge.paymentMethod.RepaymentInterestAllocated=payment received
+viewReturn.charge.paymentMethod.VoluntaryDirectPayments=payment received
+
+viewReturn.summaryHeading=Your return
+
+multiple-disposals.triage.caption=Reporting multiple disposals
 
 multiple-disposals.triage.caption=Reporting multiple disposals
 
@@ -959,21 +1028,45 @@ returns.list.ref=Return ref:
 returns.list.view=View return
 returns.list.viewAndPay=View and pay
 returns.list.paymentDue=Payment due
+returns.list.nextPaymentDue=Next payment due
 returns.list.noTaxDue=You did not owe any tax for this return
 returns.list.leftToPay=Total left to pay
 returns.list.taxOwed=Tax owed for return
 returns.list.sentDate=Sent to HMRC on {0}
 returns.paymentTakes3Days=Payments may take up to 3 working days to be shown on this page
 
-multiple-disposals.howManyProperties.title=How many disposals are you including in this return?
-multiple-disposals.howManyProperties.p1=The property disposals must all have the same ‘completion’ date. The contract ‘exchange’ dates must all be in the same tax year.
-multiple-disposals.howManyProperties.p2=If you sold shares enter the number of companies you held the shares in. You must have sold all the shares on the same date.
-multiple-disposals.howManyProperties.details.summary=What happens on ‘exchange’ and ‘completion’ dates?
-multiple-disposals.howManyProperties.details.p1=The ‘completion’ date is usually the day the new owner gets the key to the property,
-multiple-disposals.howManyProperties.details.p2=Contract ‘exchange’ usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
-multiple-disposals.howManyProperties.details.link=<a href="{0}" target="_blank">Read about ‘exchange’ and ‘completion’ (opens in a new window)</a>.
+multipleDisposalsNumberOfProperties.title=How many disposals are you including in this return?
+multipleDisposalsNumberOfProperties.p1=The property disposals must all have the same ‘completion’ date. The contract ‘exchange’ dates must all be in the same tax year.
+multipleDisposalsNumberOfProperties.p2=If you sold shares enter the number of companies you held the shares in. You must have sold all the shares on the same date.
+multipleDisposalsNumberOfProperties.details.summary=What happens on ‘exchange’ and ‘completion’ dates?
+multipleDisposalsNumberOfProperties.details.p1=The ‘completion’ date is usually the day the new owner gets the key to the property,
+multipleDisposalsNumberOfProperties.details.p2=Contract ‘exchange’ usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
+multipleDisposalsNumberOfProperties.details.link=<a href="{0}" target="_blank">Read about ‘exchange’ and ‘completion’ (opens in a new window)</a>.
 
-numberOfProperties.error.invalid=Use numbers to input how many disposals you want to include in this return
-numberOfProperties.error.required=Input how many disposals you want to include in this return using numbers
-numberOfProperties.error.tooSmall=The number of properties must be 2 or more, or go back and select that you are including one property in this return
-numberOfProperties.error.tooLong=You can't include more than 999 properties in the return
+multipleDisposalsNumberOfProperties.error.invalid=Use numbers to input how many disposals you want to include in this return
+multipleDisposalsNumberOfProperties.error.required=Input how many disposals you want to include in this return using numbers
+multipleDisposalsNumberOfProperties.error.tooSmall=The number of properties must be 2 or more, or go back and select that you are including one property in this return
+multipleDisposalsNumberOfProperties.error.tooLong=You can’t include more than 999 properties in the return
+
+multipleDisposalsWereYouAUKResident.title=Were you a UK resident on all of the contract ‘exchange’ dates?
+multipleDisposalsWereYouAUKResident.helpText=Contract ‘exchange’ usually happens when a buyer and seller swap contracts and the buyer pays a deposit. If you sold shares, it was the day you sold them.
+
+multipleDisposalsWereYouAUKResident.error.required=Select yes if you were a UK resident on all of the contract ‘exchange’ dates
+
+multipleDisposalsWereAllPropertiesResidential.title=Were all of the properties residential properties?
+multipleDisposalsWereAllPropertiesResidential.helpText=Residential property includes houses, flats, or other dwellings, including their gardens or grounds.
+multipleDisposalsWereAllPropertiesResidential.link=What residential property includes
+multipleDisposalsWereAllPropertiesResidential.details.p1=Residential property includes:
+multipleDisposalsWereAllPropertiesResidential.details.li1=a building where someone lives or could live, like a house, flat or other type of dwelling
+multipleDisposalsWereAllPropertiesResidential.details.li2=a building that is being built or changed so it can be used as a place where someone could live
+multipleDisposalsWereAllPropertiesResidential.details.li3=land that’s part of a garden or grounds of a building that’s used as a place where someone lives, or could live
+
+multipleDisposalsWereAllPropertiesResidential.error.required=Select yes if all the properties were residential properties
+
+disposalDateMixedUseOrIndirect.title=You cannot use this service
+disposalDateMixedUseOrIndirect.p1=You cannot use this service to report Capital Gains on:
+disposalDateMixedUseOrIndirect.p1.reason1=disposals of ‘mixed use’ UK property
+disposalDateMixedUseOrIndirect.p1.reason2=indirect disposals of UK land
+disposalDateMixedUseOrIndirect.h2=What you’ll need to do next
+disposalDateMixedUseOrIndirect.p2=You’ll need to complete a <a href="{0}">non resident: report and pay Capital Gains Tax on UK property or land form</a>.
+disposalDateMixedUseOrIndirect.p3=You have 30 days from the date of completion to report disposal and pay any tax due. You may get a penalty if your payment is late.
