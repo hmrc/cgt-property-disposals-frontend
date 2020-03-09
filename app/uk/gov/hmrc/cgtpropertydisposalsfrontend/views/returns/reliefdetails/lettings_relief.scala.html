@@ -91,6 +91,11 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
         options = options,
         helpText = Some(Html(messages(s"$key.helpText", "")))
     )
+    <p>
+      <a href="@{appConfig.lettingReliefInfo}" target="_blank">
+        @messages(s"$key.furtherInfoLink")
+      </a>
+    </p>
     @submitButton(messages("button.continue"))
 }
 
