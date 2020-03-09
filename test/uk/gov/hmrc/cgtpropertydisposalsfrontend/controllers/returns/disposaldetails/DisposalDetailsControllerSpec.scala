@@ -1492,12 +1492,5 @@ object DisposalDetailsControllerSpec extends Matchers {
     completeAnswers: CompleteDisposalDetailsAnswers,
     disposalMethod: DisposalMethod
   ): (String, String) =
-    if (disposalMethod === DisposalMethod.Sold && completeAnswers.shareOfProperty === ShareOfProperty.Full)
-      ("disposalPrice.full-share.sold-it.title", "disposalFees.full-share.sold-it.title")
-    else if (disposalMethod === DisposalMethod.Sold)
-      ("disposalPrice.not-full-share.sold-it.title", "disposalFees.not-full-share.sold-it.title")
-    else if (completeAnswers.shareOfProperty === ShareOfProperty.Full)
-      ("disposalPrice.full-share.gifted-it.title", "disposalFees.full-share.gifted-it.title")
-    else
-      ("disposalPrice.not-full-share.gifted-it.title", "disposalFees.not-full-share.gifted-it.title")
+    (s"disposalPrice.${disposalMethod.toString}.title", s"disposalFees.${disposalMethod.toString}.title")
 }
