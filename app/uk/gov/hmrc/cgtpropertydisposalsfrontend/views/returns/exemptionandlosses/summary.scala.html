@@ -46,20 +46,20 @@
 @cyaSection() {
   @if(answers.inYearLosses.value === 0L) {
     @cyaRow(
-      messages("exemptionsAndLosses.cyaLabel.inYearLosses"),
+      messages("inYearLosses.title"),
       Html(messages("generic.no")),
       Some(cyaChange(messages("exemptionsAndLosses.cyaChange.inYearLosses"), routes.ExemptionAndLossesController.inYearLosses().url)),
       "inYearLosses"
     )
   } else {
     @cyaRow(
-      messages("exemptionsAndLosses.cyaLabel.inYearLosses"),
+      messages("inYearLosses.title"),
       Html(messages("generic.yes")),
       Some(cyaChange(messages("exemptionsAndLosses.cyaChange.inYearLosses"), routes.ExemptionAndLossesController.inYearLosses().url)),
       "inYearLosses"
     )
     @cyaRow(
-      messages("exemptionsAndLosses.cyaLabel.inYearLossesValue"),
+      messages("inYearLossesValue.label"),
       Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.inYearLosses.inPounds())),
       Some(cyaChange(messages("exemptionsAndLosses.cyaChange.inYearLossesValue"), routes.ExemptionAndLossesController.inYearLosses().url)),
       "inYearLossesValue"
@@ -68,20 +68,20 @@
 
   @if(answers.previousYearsLosses.value === 0L) {
     @cyaRow(
-      messages("exemptionsAndLosses.cyaLabel.previousYearsLosses"),
+      messages("previousYearsLosses.title"),
       Html(messages("generic.no")),
       Some(cyaChange(messages("exemptionsAndLosses.cyaChange.previousYearsLosses"), routes.ExemptionAndLossesController.previousYearsLosses().url)),
       "previousYearsLosses"
     )
   } else {
     @cyaRow(
-      messages("exemptionsAndLosses.cyaLabel.previousYearsLosses"),
+      messages("previousYearsLosses.title"),
       Html(messages("generic.yes")),
       Some(cyaChange(messages("exemptionsAndLosses.cyaChange.previousYearsLosses"), routes.ExemptionAndLossesController.previousYearsLosses().url)),
       "previousYearsLosses"
     )
     @cyaRow(
-      messages("exemptionsAndLosses.cyaLabel.previousYearsLossesValue"),
+      messages("previousYearsLossesValue.label"),
       Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.previousYearsLosses.inPounds())),
       Some(cyaChange(messages("exemptionsAndLosses.cyaChange.previousYearsLossesValue"), routes.ExemptionAndLossesController.previousYearsLosses().url)),
       "previousYearsLossesValue"

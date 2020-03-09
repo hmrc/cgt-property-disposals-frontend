@@ -603,17 +603,17 @@ date.10=October
 date.11=November
 date.12=December
 
-date.short.1=Jan	
-date.short.2=Feb	
-date.short.3=Mar	
-date.short.4=Apr	
-date.short.5=May	
-date.short.6=Jun	
-date.short.7=Jul	
-date.short.8=Aug	
-date.short.9=Sept	
-date.short.10=Oct	
-date.short.11=Nov	
+date.short.1=Jan
+date.short.2=Feb
+date.short.3=Mar
+date.short.4=Apr
+date.short.5=May
+date.short.6=Jun
+date.short.7=Jul
+date.short.8=Aug
+date.short.9=Sept
+date.short.10=Oct
+date.short.11=Nov
 date.short.12=Dec
 
 
@@ -627,7 +627,7 @@ task-list.provide-details.heading=Provide details
 task-list.enter-property-address.link=Enter property address
 task-list.disposals-details.link=Enter sale or disposal details
 task-list.acquisition-details.link=Enter purchase or acquisition details
-task-list.exemptions-and-losses.link=Enter any losses, allowances and exemptions
+task-list.exemptions-and-losses.link=Enter any losses and exemptions
 task-list.save-and-come-back.link=Save and come back later
 task-list.relief-details.link=Enter reliefs
 task-list.report-and-pay-the-tax.heading=Report and pay the tax
@@ -813,10 +813,10 @@ reliefDetails.cyaChange.otherReliefsAmount=Other reliefs amount
 
 
 
-exemptionAndLosses.caption=Losses, allowances and exemptions
+exemptionAndLosses.caption=Losses and exemptions
 
-inYearLosses.title=Do you want to include any Capital Gains Tax losses you made in this tax year?
-inYearLosses.helpText=You can include any Capital Gains Tax losses you mde on UK property sales or disposals from tax year {0} to {1} to reduce your gain
+inYearLosses.title=Do you want to include any other Capital Gains Tax losses you made in tax year 2020 to 2021?
+inYearLosses.helpText=You make a loss if the disposal amount is less than the acquisition amount. If you include any other Capital Gains Tax losses you made in this tax year it will reduce your gain. You must have made the losses before {0}
 inYearLosses.error.required=Select yes if you want to include any Capital Gains Tax losses you made in this tax year
 inYearLosses.error.invalid=Select yes if you want to include any Capital Gains Tax losses you made in this tax year
 inYearLossesValue.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
@@ -828,8 +828,8 @@ inYearLossesValue.label=Amount of losses from this tax year
 inYearLosses.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
 
 
-previousYearsLosses.title= Do you want to include any Capital Gains Tax losses you made in previous tax years?
-previousYearsLosses.helpText=You can include previous losses in this return to reduce your gain. You can only include losses you have already reported to HMRC.
+previousYearsLosses.title=Do you want to include any other Capital Gains Tax losses you made in previous tax years?
+previousYearsLosses.helpText=You can include previous losses in this return to reduce your gain. You can only include other losses you has already reported to HMRC. For example, losses on shares or other UK property.
 previousYearsLosses.error.required=Select yes if you want to include any Capital Gains Tax losses you made in previous tax years
 previousYearsLosses.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
 previousYearsLossesValue.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
@@ -877,17 +877,10 @@ taxableGainOrLoss.details.p1=Subtract the amount you sold the property for as we
 
 exemptionsAndLosses.cya.title=Check your answers
 
-exemptionsAndLosses.cyaLabel.inYearLosses=Use losses from this tax year?
 exemptionsAndLosses.cyaChange.inYearLosses=your in year losses
-
-exemptionsAndLosses.cyaLabel.inYearLossesValue=Amount of losses from this tax year used
-exemptionsAndLosses.cyaChange.inYearLossesValue=your in year losses
-
-exemptionsAndLosses.cyaLabel.previousYearsLosses=Use losses from previous tax years?
+exemptionsAndLosses.cyaChange.inYearLossesValue=the amount of in year losses
 exemptionsAndLosses.cyaChange.previousYearsLosses=your previous years losses
-
-exemptionsAndLosses.cyaLabel.previousYearsLossesValue=Amount of losses from previous tax year used
-exemptionsAndLosses.cyaChange.previousYearsLossesValue=your previous years losses
+exemptionsAndLosses.cyaChange.previousYearsLossesValue=the amount of previous years losses
 
 exemptionsAndLosses.cyaChange.annualExemptAmount=your annual exempt amount
 exemptionsAndLosses.cyaChange.taxableGainOrLoss=your taxable gain or net loss
