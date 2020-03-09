@@ -232,10 +232,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
             doc.select(s"#viewSentReturn-${sentReturn.submissionId}").text shouldBe "View and pay"
             doc
               .select(s"#sentDate-${sentReturn.submissionId}")
-              .text
-              .substring(messages("returns.list.sentDate").length - 3) shouldBe govShortDisplayFormat(
-              ukResidentReturnSentDate
-            )
+              .text shouldBe messages("returns.list.sentDate", govShortDisplayFormat(ukResidentReturnSentDate))
           }
         )
       }
@@ -274,10 +271,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
             doc.select(s"#viewSentReturn-${sentReturn.submissionId}").text shouldBe "View and pay"
             doc
               .select(s"#sentDate-${sentReturn.submissionId}")
-              .text
-              .substring(messages("returns.list.sentDate").length - 3) shouldBe govShortDisplayFormat(
-              ukResidentReturnSentDate
-            )
+              .text shouldBe messages("returns.list.sentDate", govShortDisplayFormat(ukResidentReturnSentDate))
           }
         )
       }
@@ -317,10 +311,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
             doc.select(s"#viewSentReturn-${sentReturn.submissionId}").text shouldBe "View and pay"
             doc
               .select(s"#sentDate-${sentReturn.submissionId}")
-              .text
-              .substring(messages("returns.list.sentDate").length - 3) shouldBe govShortDisplayFormat(
-              ukResidentReturnSentDate
-            )
+              .text shouldBe messages("returns.list.sentDate", govShortDisplayFormat(ukResidentReturnSentDate))
           }
         )
       }
@@ -360,10 +351,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
             doc.select(s"#viewSentReturn-${sentReturn.submissionId}").text shouldBe "View and pay"
             doc
               .select(s"#sentDate-${sentReturn.submissionId}")
-              .text
-              .substring(messages("returns.list.sentDate").length - 3) shouldBe govShortDisplayFormat(
-              ukResidentReturnSentDate
-            )
+              .text shouldBe messages("returns.list.sentDate", govShortDisplayFormat(ukResidentReturnSentDate))
           }
         )
       }
@@ -426,10 +414,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
             doc.select(s"#viewSentReturn-${sentReturn.submissionId}").text shouldBe "View return"
             doc
               .select(s"#sentDate-${sentReturn.submissionId}")
-              .text
-              .substring(messages("returns.list.sentDate").length - 3) shouldBe govShortDisplayFormat(
-              ukResidentReturnSentDate
-            )
+              .text shouldBe messages("returns.list.sentDate", govShortDisplayFormat(ukResidentReturnSentDate))
           }
         )
       }
