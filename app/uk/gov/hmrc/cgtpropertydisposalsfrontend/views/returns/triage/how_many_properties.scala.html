@@ -27,7 +27,8 @@
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
         radioGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group,
         backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
+        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
 @(form: Form[NumberOfProperties], backLink: Call, displayReturnToSummaryLink: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
@@ -69,7 +70,9 @@
             helpText = Some(Html(messages("numberOfProperties.helpText")))
         )
 
-        @submitButton(messages("button.continue"))
+        @details(messages(s"$key.details.summary"), Html(messages(s"$key.details.p1", appConfig.tranferringOwnershipHelp)))
+
+        @submitButton(messages(if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink)

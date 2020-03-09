@@ -26,6 +26,7 @@
         submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
         returnHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_banner,
+        returnCharges: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_charges,
         triageSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.summary,
         addressSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.summary,
         yearToDateLiabilitySummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.summary,
@@ -42,13 +43,21 @@
 
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = false, accountMenu=Some(accountMenu(None))) {
 
-  @returnHeading(title, returnSummary.totalCGTLiability.withFloorZero, returnSummary.submissionId)
+  @returnHeading(title, returnSummary.mainReturnChargeAmount.withFloorZero, returnSummary.submissionId)
 
   <p class="js-enabled">
    <a href="JavaScript: window.print()">
     @messages("viewReturn.printLink")
    </a>
   </p>
+
+  @if(returnSummary.charges.nonEmpty) {
+    @returnCharges(messages("viewReturn.charges.heading"), returnSummary)
+  }
+
+  <h2 class="heading-large">
+    @messages("viewReturn.summaryHeading")
+  </h2>
 
   <div class="return-summary">
 

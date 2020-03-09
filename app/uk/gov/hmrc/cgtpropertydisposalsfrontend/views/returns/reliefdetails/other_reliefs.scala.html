@@ -115,7 +115,12 @@
             options = options,
             helpText = Some(Html(messages(s"$key.helpText", "")))
         )
-        @submitButton(messages("button.continue"))
+        <p>
+            <a href="@{appConfig.reliefsInfo}" target="_blank">
+                @messages("otherReliefs.furtherInfoLink")
+            </a>
+        </p>
+        @submitButton(messages("button.saveAndContinue"))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)

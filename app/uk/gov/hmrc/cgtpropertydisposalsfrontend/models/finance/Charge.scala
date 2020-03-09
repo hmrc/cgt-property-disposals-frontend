@@ -20,9 +20,23 @@ import java.time.LocalDate
 
 import play.api.libs.json.{Json, OFormat}
 
-final case class Charge(chargeDescription: String, chargeReference: String, amount: AmountInPence, dueDate: LocalDate)
+final case class Charge(
+  chargeType: ChargeType,
+  chargeReference: String,
+  amount: AmountInPence,
+  dueDate: LocalDate,
+  payments: List[Payment]
+)
 
 object Charge {
+
+  implicit class ChargeOps(private val c: Charge) extends AnyVal {
+
+    def totalPaid(): AmountInPence = AmountInPence(c.payments.map(_.amount.value).sum)
+
+    def totalOutstanding(): AmountInPence = c.amount -- totalPaid()
+
+  }
 
   implicit val format: OFormat[Charge] = Json.format
 

@@ -37,7 +37,7 @@
 @title = @{messages(s"$key.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title, userType = request.userType) {
+@mainTemplate(title = title, hasErrors = hasErrors, userType = request.userType) {
 
     @backLinkComponent(backLink)
 

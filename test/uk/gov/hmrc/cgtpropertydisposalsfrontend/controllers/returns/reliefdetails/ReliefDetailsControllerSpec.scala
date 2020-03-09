@@ -36,11 +36,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.{NoOtherReliefs, OtherReliefs}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalMethod, DraftReturn, ExemptionAndLossesAnswers, OtherReliefsOption, ReliefDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, ExemptionAndLossesAnswers, OtherReliefsOption, ReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -1376,16 +1375,10 @@ object ReliefDetailsControllerSpec extends Matchers {
 
     reliefDetailsAnswers.otherReliefs.foreach {
       case a: OtherReliefsOption.OtherReliefs =>
-        doc.select("#otherReliefs-answer").text shouldBe "Yes"
-        doc.select("#otherReliefsName-answer").text shouldBe new String(
-          reliefDetailsAnswers.otherReliefs.getOrElse[OtherReliefsOption](sys.error("Error")) match {
-            case a: OtherReliefs => a.name.toString
-          }
-        )
+        doc.select("#otherReliefs-answer").text     shouldBe "Yes"
+        doc.select("#otherReliefsName-answer").text shouldBe a.name
         doc.select("#otherReliefsAmount-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
-          reliefDetailsAnswers.otherReliefs.getOrElse[OtherReliefsOption](sys.error("Error")) match {
-            case a: OtherReliefs => a.amount.inPounds().bigDecimal
-          }
+          a.amount.inPounds().bigDecimal
         )
       case OtherReliefsOption.NoOtherReliefs => doc.select("#otherReliefs-answer").text shouldBe "No"
 
