@@ -70,7 +70,7 @@
       <p class="caption">
         @messages("returns.list.ref") @sentReturn.submissionId
       </p>
-      <a href="@{controllers.accounts.homepage.routes.HomePageController.viewSentReturn(sentReturn.submissionId)}">
+      <a id="viewSentReturn-@sentReturn.submissionId" href="@{controllers.accounts.homepage.routes.HomePageController.viewSentReturn(sentReturn.submissionId)}">
         @if(!totalOutstanding.isZero) {
           @messages("returns.list.viewAndPay")
         } else {
