@@ -829,7 +829,7 @@ inYearLosses.link=<a href="{0}" target="_blank">Find out how losses can reduce g
 
 
 previousYearsLosses.title=Do you want to include any other Capital Gains Tax losses you made in previous tax years?
-previousYearsLosses.helpText=You can include previous losses in this return to reduce your gain. You can only include other losses you has already reported to HMRC. For example, losses on shares or other UK property.
+previousYearsLosses.helpText=You can include previous losses in this return to reduce your gain. You can only include other losses you have already reported to HMRC. For example, losses on shares or other UK property.
 previousYearsLosses.error.required=Select yes if you want to include any Capital Gains Tax losses you made in previous tax years
 previousYearsLosses.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
 previousYearsLossesValue.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
