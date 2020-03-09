@@ -72,7 +72,7 @@
 
         @details(messages(s"$key.details.summary"), Html(messages(s"$key.details.p1", appConfig.tranferringOwnershipHelp)))
 
-        @submitButton(messages("button.saveAndContinue"))
+        @submitButton(messages(if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink)
