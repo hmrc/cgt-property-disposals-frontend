@@ -728,7 +728,10 @@ class MultipleDisposalsTriageControllerSpec
         val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
 
         "user has not answered the country of residence section and" +
-        " enters valid country" in {
+          " enters valid country" in {
+
+          val (countryCode, countryName) = "HK" -> "Hong Kong"
+          val country                    = Country(countryCode, Some(countryName))
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -738,8 +741,7 @@ class MultipleDisposalsTriageControllerSpec
                 journey.copy(
                   newReturnTriageAnswers = Left(
                     answers.copy(
-                      wereAllPropertiesResidential = Some(true),
-                      assetType                    = Some(AssetType.Residential)
+                      countryOfResidence = Some(country)
                     )
                   )
                 )
@@ -749,63 +751,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkIsRedirect(
-            performAction(key -> "true"),
-            routes.MultipleDisposalsTriageController.checkYourAnswers()
-          )
-        }
-
-        "user has not answered the were all properties residential section and selects false" in {
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreSession(
-              session.copy(journeyStatus = Some(
-                journey.copy(
-                  newReturnTriageAnswers = Left(
-                    answers.copy(
-                      wereAllPropertiesResidential = Some(false),
-                      assetType                    = Some(AssetType.NonResidential)
-                    )
-                  )
-                )
-              )
-              )
-            )(Right(()))
-          }
-
-          checkIsRedirect(
-            performAction(key -> "false"),
-            routes.MultipleDisposalsTriageController.checkYourAnswers()
-          )
-        }
-
-        "user has already answered were all properties residential section and re-selected different option" in {
-          val answers = sample[IncompleteMultipleDisposalsAnswers]
-            .copy(wereAllPropertiesResidential = Some(true), assetType = Some(AssetType.Residential))
-
-          val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreSession(
-              session.copy(journeyStatus = Some(
-                journey.copy(
-                  newReturnTriageAnswers = Left(
-                    answers.copy(
-                      wereAllPropertiesResidential = Some(false),
-                      assetType                    = Some(AssetType.NonResidential)
-                    )
-                  )
-                )
-              )
-              )
-            )(Right(()))
-          }
-
-          checkIsRedirect(
-            performAction(key -> "false"),
+            performAction(key -> "Hong Kong"),
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
         }
