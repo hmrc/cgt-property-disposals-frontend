@@ -19,7 +19,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDate
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
-
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -94,14 +94,13 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
             helpText = Some(Html(
                 messages(
                     s"$key.helpText",
-                    taxYear.startDateInclusive.getYear.toString,
-                    taxYear.endDateExclusive.getYear.toString
+                    LocalDateUtils.govDisplayFormat(disposalDate.value)
                 )
             ))
         )
         <p>@Html(messages(s"$key.link", appConfig.cgtLossesUrl))</p>
 
-        @submitButton(messages("button.continue"))
+        @submitButton(messages("button.saveAndContinue"))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)
