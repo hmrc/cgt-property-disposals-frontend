@@ -111,7 +111,7 @@
       <a href="@{enterPostcode.url}">@messages("address.lookup.linkText")</a>
     </p>
 
-    @submitButton(messages("button.continue"))
+    @submitButton(messages(if(addressJourneyType.showReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
   }
 
   @returnToSummaryLink(addressJourneyType.showReturnToSummaryLink())

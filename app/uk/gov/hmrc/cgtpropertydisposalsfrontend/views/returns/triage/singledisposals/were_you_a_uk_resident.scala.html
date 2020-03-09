@@ -56,7 +56,7 @@
         )
         <p>@Html(messages("wereYouAUKResident.link", viewConfig.workOurYouResidenceStatusUrl))</p>
 
-        @submitButton(messages("button.continue"))
+        @submitButton(messages(if(displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink)

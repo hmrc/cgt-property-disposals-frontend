@@ -90,7 +90,7 @@
             hasErrors = hasErrors
         )
 
-        @submitButton(messages("button.continue"))
+        @submitButton(messages(if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink)
