@@ -165,7 +165,7 @@ class SingleDisposalsTriageController @Inject() (
               _.copy(wasAUKResident = Some(wasAUKResident), countryOfResidence = None, assetType = None),
               complete =>
                 IncompleteSingleDisposalTriageAnswers(
-                  Some(complete.individualUserType),
+                  complete.individualUserType,
                   true,
                   Some(complete.disposalMethod),
                   Some(wasAUKResident),
@@ -345,7 +345,7 @@ class SingleDisposalsTriageController @Inject() (
       date: Either[LocalDate, DisposalDate]
     ): IncompleteSingleDisposalTriageAnswers =
       IncompleteSingleDisposalTriageAnswers(
-        Some(c.individualUserType),
+        c.individualUserType,
         true,
         Some(c.disposalMethod),
         Some(c.countryOfResidence.isUk()),
@@ -494,7 +494,7 @@ class SingleDisposalsTriageController @Inject() (
                 i => i.copy(assetType = Some(assetType), disposalDate = None, completionDate = None),
                 c =>
                   IncompleteSingleDisposalTriageAnswers(
-                    Some(c.individualUserType),
+                    c.individualUserType,
                     true,
                     Some(c.disposalMethod),
                     Some(false),
@@ -530,12 +530,13 @@ class SingleDisposalsTriageController @Inject() (
     withSingleDisposalTriageAnswers(request) {
       case (_, state, triageAnswers) =>
         lazy val displayReturnToSummaryLink = state.fold(_ => false, _ => true)
+        val isIndividual                    = state.fold(_.subscribedDetails, _.subscribedDetails).userType().isRight
 
         triageAnswers match {
           case c: CompleteSingleDisposalTriageAnswers =>
             Ok(checkYourAnswersPage(c, displayReturnToSummaryLink))
 
-          case IncompleteSingleDisposalTriageAnswers(None, _, _, _, _, _, _, _, _) =>
+          case IncompleteSingleDisposalTriageAnswers(None, _, _, _, _, _, _, _, _) if isIndividual =>
             Redirect(routes.InitialTriageQuestionsController.whoIsIndividualRepresenting())
 
           case IncompleteSingleDisposalTriageAnswers(_, false, _, _, _, _, _, _, _) =>
@@ -572,7 +573,7 @@ class SingleDisposalsTriageController @Inject() (
             Redirect(routes.SingleDisposalsTriageController.whenWasCompletionDate())
 
           case IncompleteSingleDisposalTriageAnswers(
-              Some(t),
+              t,
               true,
               Some(m),
               Some(true),
@@ -589,7 +590,7 @@ class SingleDisposalsTriageController @Inject() (
             )
 
           case IncompleteSingleDisposalTriageAnswers(
-              Some(t),
+              t,
               true,
               Some(m),
               Some(false),

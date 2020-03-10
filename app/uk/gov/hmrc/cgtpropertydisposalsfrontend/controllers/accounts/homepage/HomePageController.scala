@@ -32,6 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, ret
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, StartingNewDraftReturn, Subscribed, ViewingReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, ReturnSummary}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -73,6 +74,13 @@ class HomePageController @Inject() (
 
   def startNewReturn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withSubscribedUser { (_, subscribed) =>
+      val redirectTo = subscribed.subscribedDetails
+        .userType()
+        .fold(
+          _ => triage.routes.InitialTriageQuestionsController.howManyProperties(),
+          _ => triage.routes.InitialTriageQuestionsController.whoIsIndividualRepresenting()
+        )
+
       updateSession(sessionStore, request)(
         _.copy(
           journeyStatus = Some(
@@ -90,7 +98,7 @@ class HomePageController @Inject() (
           errorHandler.errorResult()
 
         case Right(_) =>
-          Redirect(triage.routes.InitialTriageQuestionsController.whoIsIndividualRepresenting())
+          Redirect(redirectTo)
       }
     }(withUplift = false)
   }
