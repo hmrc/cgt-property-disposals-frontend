@@ -14,6 +14,22 @@
  * limitations under the License.
  */
 
+/*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 
 import org.jsoup.Jsoup.parse
@@ -30,12 +46,15 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{LocalDateUtils, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AssetType, DraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.InitialGainOrLossAnswers.CompleteInitialGainOrLossAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CompleteYearToDateLiabilityAnswers, IncompleteYearToDateLiabilityAnswers}
@@ -118,6 +137,48 @@ class TaskListControllerSpec
             messageFromMessageKey("task-list.triage.link"),
             triage.routes.SingleDisposalsTriageController.checkYourAnswers(),
             TaskListStatus.InProgress
+          )
+        }
+
+        "the session data indicates Enter initial gain or loss" in {
+          testStateOfSection(
+            sample[DraftReturn]
+              .copy(
+                triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                  .copy(assetType = AssetType.NonResidential)
+                  .copy(countryOfResidence = Country("TR", Some("Turkey"))),
+                disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
+                acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
+                  answers.copy(acquisitionDate = AcquisitionDate(LocalDateUtils.dateFromString("1/10/2018")))
+                )
+              )
+              .copy(initialGainOrLossAnswers = None)
+          )(
+            "initialGainOrLoss",
+            messageFromMessageKey("task-list.enter-initial-gain-or-loss.link"),
+            initialgainorloss.routes.InitialGainOrLossController.enterInitialGainOrLoss(),
+            TaskListStatus.ToDo
+          )
+        }
+
+        "the session data indicates Submit initial gain or loss " in {
+          testStateOfSection(
+            sample[DraftReturn]
+              .copy(
+                triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                  .copy(assetType = AssetType.NonResidential)
+                  .copy(countryOfResidence = Country("TR", Some("Turkey"))),
+                disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
+                acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
+                  answers.copy(acquisitionDate = AcquisitionDate(LocalDateUtils.dateFromString("1/10/2018")))
+                )
+              )
+              .copy(initialGainOrLossAnswers = Some(CompleteInitialGainOrLossAnswers(AmountInPence(0))))
+          )(
+            "initialGainOrLoss",
+            messageFromMessageKey("task-list.enter-initial-gain-or-loss.link"),
+            initialgainorloss.routes.InitialGainOrLossController.enterInitialGainOrLoss(),
+            TaskListStatus.Complete
           )
         }
 
@@ -480,6 +541,109 @@ class TaskListControllerSpec
             TaskListStatus.Complete
           )
         }
+      }
+
+      "display the page with the proper initial gains and losses section status" when {
+
+        def test(draftReturn: DraftReturn, expectedStatus: TaskListStatus) =
+          testStateOfSection(draftReturn)(
+            "initialGainOrLoss",
+            messageFromMessageKey("task-list.enter-initial-gain-or-loss.link"),
+            initialgainorloss.routes.InitialGainOrLossController.enterInitialGainOrLoss(),
+            expectedStatus
+          )
+
+        "the session data indicates that the country of residence is United Kingdom" in {
+          test(
+            sample[DraftReturn].copy(
+              triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                .copy(assetType = AssetType.NonResidential, countryOfResidence = Country("GB", Some("United Kingdom"))),
+              reliefDetailsAnswers = Some(sample[IncompleteReliefDetailsAnswers]),
+              acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
+                answers.copy(acquisitionDate = AcquisitionDate(LocalDateUtils.dateFromString("01/10/2014")))
+              )
+            ),
+            TaskListStatus.CannotStart
+          )
+        }
+
+        "the session data indicates that the country of residence is NOT United Kingdom and NON_RESIDENTIAL property was bought BEFORE 01/04/2019" in {
+          test(
+            sample[DraftReturn].copy(
+              triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                .copy(assetType = AssetType.NonResidential)
+                .copy(countryOfResidence = Country("TR", Some("Turkey"))),
+              disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
+                answers.copy(acquisitionDate = AcquisitionDate(LocalDateUtils.dateFromString("1/10/2018")))
+              ),
+              initialGainOrLossAnswers = None
+            ),
+            TaskListStatus.ToDo
+          )
+        }
+
+        "the session data indicates that the country of residence is NOT United Kingdom and RESIDENTIAL property was bought BEFORE 01/04/2019" in {
+          test(
+            sample[DraftReturn].copy(
+              triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                .copy(assetType = AssetType.Residential)
+                .copy(countryOfResidence = Country("TR", Some("Turkey"))),
+              disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
+                answers.copy(acquisitionDate = AcquisitionDate(LocalDateUtils.dateFromString("1/10/2014")))
+              ),
+              initialGainOrLossAnswers = None
+            ),
+            TaskListStatus.ToDo
+          )
+        }
+
+        "the session data indicates that the country of residence is NOT United Kingdom and RESIDENTIAL property was bought AFTER 01/04/2015 and BEFORE 01/04/2019" in {
+          test(
+            sample[DraftReturn].copy(
+              triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                .copy(assetType = AssetType.Residential)
+                .copy(countryOfResidence = Country("TR", Some("Turkey"))),
+              disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
+                answers.copy(acquisitionDate = AcquisitionDate(LocalDateUtils.dateFromString("1/10/2016")))
+              )
+            ),
+            TaskListStatus.CannotStart
+          )
+        }
+
+        "the session data indicates that the country of residence is NOT United Kingdom but acquisition date is AFTER 01/04/2019 for NON_RESIDANTAL property" in {
+          test(
+            sample[DraftReturn].copy(
+              triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                .copy(assetType = AssetType.NonResidential)
+                .copy(countryOfResidence = Country("TR", Some("Turkey"))),
+              disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
+                answers.copy(acquisitionDate = AcquisitionDate(LocalDateUtils.dateFromString("1/10/2020")))
+              )
+            ),
+            TaskListStatus.CannotStart
+          )
+        }
+
+        "the session data indicates that the country of residence is NOT United Kingdom but acquisition date is AFTER 01/04/2015 for RESIDANTIAL property" in {
+          test(
+            sample[DraftReturn].copy(
+              triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                .copy(assetType = AssetType.Residential)
+                .copy(countryOfResidence = Country("TR", Some("Turkey"))),
+              disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
+                answers.copy(acquisitionDate = AcquisitionDate(LocalDateUtils.dateFromString("1/10/2018")))
+              )
+            ),
+            TaskListStatus.CannotStart
+          )
+        }
+
       }
 
       "display the page with Save and come back later link" when {

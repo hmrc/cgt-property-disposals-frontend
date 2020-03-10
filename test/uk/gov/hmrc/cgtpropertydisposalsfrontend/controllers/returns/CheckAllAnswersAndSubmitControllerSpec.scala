@@ -114,6 +114,7 @@ class CheckAllAnswersAndSubmitControllerSpec
       Some(completeReturn.reliefDetails),
       Some(completeReturn.exemptionsAndLossesDetails),
       Some(completeReturn.yearToDateLiabilityAnswers),
+      Some(completeReturn.initialGainOrLossAnswers),
       LocalDateUtils.today()
     )
 
