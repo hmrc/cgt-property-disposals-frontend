@@ -40,6 +40,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue.GainCalculatedTaxDue
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.InitialGainOrLossAnswers.CompleteInitialGainOrLossAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsAnswers, IncompleteMultipleDisposalsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.{NoOtherReliefs, OtherReliefs}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
@@ -73,6 +74,7 @@ object Generators
     with ReliefDetailsAnswersGen
     with TaxYearGen
     with ExemptionAndLossesAnswersGen
+    with InitialGainOrLossAnswersGen
     with YearToDateLiabilityAnswersGen {
 
   implicit val booleanGen: Gen[Boolean] = Gen.oneOf(true, false)
@@ -404,6 +406,12 @@ trait ExemptionAndLossesAnswersGen { this: GenUtils =>
 
   implicit val incompleteExemptionAndLossesAnswersGen: Gen[IncompleteExemptionAndLossesAnswers] =
     gen[IncompleteExemptionAndLossesAnswers]
+}
+
+trait InitialGainOrLossAnswersGen { this: GenUtils =>
+
+  implicit val completeInitialGainOrLossAnswersGen: Gen[CompleteInitialGainOrLossAnswers] =
+    gen[CompleteInitialGainOrLossAnswers]
 }
 
 trait YearToDateLiabilityAnswersGen { this: GenUtils =>
