@@ -20,6 +20,7 @@ import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
+import org.jsoup.nodes.Document
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
@@ -100,6 +101,33 @@ class CheckAllAnswersAndSubmitControllerSpec
       .expects(cgtReference, chargeReference, amount, returnUrl, backUrl, *)
       .returning(EitherT.fromEither[Future](response))
 
+  def validateAllCheckYourAnswersSections(doc: Document, completeReturn: CompleteReturn): Unit = {
+    validateSingleDisposalTriageCheckYourAnswersPage(
+      completeReturn.triageAnswers,
+      doc
+    )
+    validateAcquisitionDetailsCheckYourAnswersPage(
+      completeReturn.acquisitionDetails,
+      doc
+    )
+    validateDisposalDetailsCheckYourAnswersPage(
+      completeReturn.disposalDetails,
+      doc
+    )
+    validateReliefDetailsCheckYourAnswersPage(
+      completeReturn.reliefDetails,
+      doc
+    )
+    validateExemptionAndLossesCheckYourAnswersPage(
+      completeReturn.exemptionsAndLossesDetails,
+      doc
+    )
+    validateYearToDateLiabilityFirstReturnPage(
+      completeReturn.yearToDateLiabilityAnswers,
+      doc
+    )
+  }
+
   "CheckAllAnswersAndSubmitController" when {
 
     val completeReturn = sample[CompleteReturn]
@@ -143,30 +171,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey("checkAllAnswers.title"), { doc =>
-              validateSingleDisposalTriageCheckYourAnswersPage(
-                completeReturn.triageAnswers,
-                doc
-              )
-              validateAcquisitionDetailsCheckYourAnswersPage(
-                completeReturn.acquisitionDetails,
-                doc
-              )
-              validateDisposalDetailsCheckYourAnswersPage(
-                completeReturn.disposalDetails,
-                doc
-              )
-              validateReliefDetailsCheckYourAnswersPage(
-                completeReturn.reliefDetails,
-                doc
-              )
-              validateExemptionAndLossesCheckYourAnswersPage(
-                completeReturn.exemptionsAndLossesDetails,
-                doc
-              )
-              validateYearToDateLiabilityFirstReturnPage(
-                completeReturn.yearToDateLiabilityAnswers,
-                doc
-              )
+              validateAllCheckYourAnswersSections(doc, completeReturn)
               doc.select("#back").attr("href") shouldBe routes.TaskListController.taskList().url
               doc.select("#content > article > form").attr("action") shouldBe routes.CheckAllAnswersAndSubmitController
                 .checkAllAnswersSubmit()
@@ -401,3 +406,5 @@ class CheckAllAnswersAndSubmitControllerSpec
   }
 
 }
+
+object CheckAllAnswersAndSubmitControllerSpec extends CheckAllAnswersAndSubmitControllerSpec {}

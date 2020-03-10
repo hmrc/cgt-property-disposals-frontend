@@ -21,6 +21,7 @@ import java.time.LocalDate
 import cats.data.EitherT
 import cats.instances.future._
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
 import play.api.inject.bind
@@ -130,6 +131,31 @@ class ViewReturnControllerSpec
 
       val viewingReturn = sample[ViewingReturn].copy(returnSummary = sentReturn)
 
+      def validatePaymentsSection(document: Document): Unit = {
+        val paymentDetails = document
+          .select(s"#returnPaymentDetails-${viewingReturn.returnSummary.submissionId} > tr > td")
+          .eachText()
+          .asScala
+
+        paymentDetails.headOption.fold(sys.error("Error"))(_.toString) should startWith("Tax payment")
+        paymentDetails(1)                                              shouldBe govShortDisplayFormat(ukResidentMainReturnChargeDueDate)
+        paymentDetails(2)                                              shouldBe formatAmountOfMoneyWithPoundSign(ukResidentMainReturnChargeAmount.inPounds())
+        paymentDetails(3) shouldBe formatAmountOfMoneyWithPoundSign(
+          ukResidentMainReturnChargeAmount.inPounds() - fullPaymentForUkResidentReturnCharge.amount.inPounds()
+        )
+        paymentDetails(4) shouldBe "Paid"
+
+        paymentDetails(5) shouldBe s"${formatAmountOfMoneyWithPoundSign(
+          fullPaymentForUkResidentReturnCharge.amount.inPounds()
+        )} direct debit payment received on ${govShortDisplayFormat(fullPaymentForUkResidentMainReturnChargeDueDate)}"
+
+        paymentDetails(6)  should startWith("Interest on penalties paid late")
+        paymentDetails(7)  shouldBe govShortDisplayFormat(penaltyInterestChargeAmountDueDate)
+        paymentDetails(8)  shouldBe formatAmountOfMoneyWithPoundSign(penaltyInterestChargeAmount.inPounds())
+        paymentDetails(9)  shouldBe formatAmountOfMoneyWithPoundSign(penaltyInterestChargeAmount.inPounds())
+        paymentDetails(10) shouldBe "Pay now"
+      }
+
       behave like redirectToStartWhenInvalidJourney(
         performAction, {
           case _: ViewingReturn => true
@@ -155,28 +181,10 @@ class ViewReturnControllerSpec
         document.select("#heading-tax-owed").text() shouldBe MoneyUtils.formatAmountOfMoneyWithPoundSign(
           viewingReturn.returnSummary.mainReturnChargeAmount.withFloorZero.inPounds()
         )
-        val paymentDetails = document
-          .select(s"#returnPaymentDetails-${viewingReturn.returnSummary.submissionId} > tr > td")
-          .eachText()
-          .asScala
 
-        paymentDetails.headOption.fold(sys.error("Error"))(_.toString) should startWith("Tax payment")
-        paymentDetails(1)                                              shouldBe govShortDisplayFormat(ukResidentMainReturnChargeDueDate)
-        paymentDetails(2)                                              shouldBe formatAmountOfMoneyWithPoundSign(ukResidentMainReturnChargeAmount.inPounds())
-        paymentDetails(3) shouldBe formatAmountOfMoneyWithPoundSign(
-          ukResidentMainReturnChargeAmount.inPounds() - fullPaymentForUkResidentReturnCharge.amount.inPounds()
-        )
-        paymentDetails(4) shouldBe "Paid"
-
-        paymentDetails(5) shouldBe s"${formatAmountOfMoneyWithPoundSign(
-          fullPaymentForUkResidentReturnCharge.amount.inPounds()
-        )} direct debit payment received on ${govShortDisplayFormat(fullPaymentForUkResidentMainReturnChargeDueDate)}"
-
-        paymentDetails(6)  should startWith("Interest on penalties paid late")
-        paymentDetails(7)  shouldBe govShortDisplayFormat(penaltyInterestChargeAmountDueDate)
-        paymentDetails(8)  shouldBe formatAmountOfMoneyWithPoundSign(penaltyInterestChargeAmount.inPounds())
-        paymentDetails(9)  shouldBe formatAmountOfMoneyWithPoundSign(penaltyInterestChargeAmount.inPounds())
-        paymentDetails(10) shouldBe "Pay now"
+        validatePaymentsSection(document)
+        CheckAllAnswersAndSubmitControllerSpec
+          .validateAllCheckYourAnswersSections(document, viewingReturn.completeReturn)
       }
 
     }
