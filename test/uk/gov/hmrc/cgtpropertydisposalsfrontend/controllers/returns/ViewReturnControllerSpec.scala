@@ -41,7 +41,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.format
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.PaymentMethod.DirectDebit
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnSummary
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, ReturnSummary}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.PaymentsService
@@ -129,9 +129,7 @@ class ViewReturnControllerSpec
         submissionDate         = ukResidentReturnSentDate
       )
 
-      val viewingReturn = sample[ViewingReturn].copy(returnSummary = sentReturn)
-
-      def validatePaymentsSection(document: Document): Unit = {
+      def validatePaymentsSection(document: Document, viewingReturn: ViewingReturn): Unit = {
         val paymentDetails = document
           .select(s"#returnPaymentDetails-${viewingReturn.returnSummary.submissionId} > tr > td")
           .eachText()
@@ -164,27 +162,30 @@ class ViewReturnControllerSpec
       )
 
       "display the page" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(SessionData.empty.copy(journeyStatus = Some(viewingReturn)))
+        forAll { sampleViewingReturn: ViewingReturn =>
+          val viewingReturn = sampleViewingReturn.copy(returnSummary = sentReturn)
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(SessionData.empty.copy(journeyStatus = Some(viewingReturn)))
+          }
+
+          val result   = performAction()
+          val document = Jsoup.parse(contentAsString(result))
+
+          document
+            .select("#content > article > div.govuk-box-highlight.govuk-box-highlight--status > h1")
+            .text() shouldBe messageFromMessageKey(
+            "viewReturn.title"
+          )
+          document.select("#heading-reference").text() shouldBe viewingReturn.returnSummary.submissionId
+          document.select("#heading-tax-owed").text() shouldBe MoneyUtils.formatAmountOfMoneyWithPoundSign(
+            viewingReturn.returnSummary.mainReturnChargeAmount.withFloorZero.inPounds()
+          )
+
+          validatePaymentsSection(document, viewingReturn)
+          CheckAllAnswersAndSubmitControllerSpec
+            .validateAllCheckYourAnswersSections(document, viewingReturn.completeReturn)
         }
-
-        val result   = performAction()
-        val document = Jsoup.parse(contentAsString(result))
-
-        document
-          .select("#content > article > div.govuk-box-highlight.govuk-box-highlight--status > h1")
-          .text() shouldBe messageFromMessageKey(
-          "viewReturn.title"
-        )
-        document.select("#heading-reference").text() shouldBe viewingReturn.returnSummary.submissionId
-        document.select("#heading-tax-owed").text() shouldBe MoneyUtils.formatAmountOfMoneyWithPoundSign(
-          viewingReturn.returnSummary.mainReturnChargeAmount.withFloorZero.inPounds()
-        )
-
-        validatePaymentsSection(document)
-        CheckAllAnswersAndSubmitControllerSpec
-          .validateAllCheckYourAnswersSections(document, viewingReturn.completeReturn)
       }
 
     }
