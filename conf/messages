@@ -472,7 +472,7 @@ agent.confirm-client.change-client=Change client
 
 triage.caption=Before you start
 
-who-are-you-reporting-for.title=Who are you reporting the tax for?
+who-are-you-reporting-for.title=Who are you completing this return for?
 
 individualUserType.Self=Yourself
 individualUserType.Capacitor=Someone else
@@ -480,24 +480,27 @@ individualUserType.PersonalRepresentative=Someone who has died
 individualUserType.error.required=Select who are you reporting the tax for
 individualUserType.error.invalid=Select who are you reporting the tax for
 
-numberOfProperties.title=How many properties do you want to include in this return?
-numberOfProperties.helpText=If you sold shares instead of property, tell us how many companies you held shares in that you want to include in this return.
+numberOfProperties.title=How many UK properties are you including in this return?
+numberOfProperties.helpText=All of the property sales or disposals must have the same completion date.
 numberOfProperties.One=One
 numberOfProperties.MoreThanOne=2 or more
-numberOfProperties.error.invalid=Select how many properties or companies you want to include in this return
-numberOfProperties.error.required=Select how many properties or companies you want to include in this return
+numberOfProperties.details.summary=What happens on the completion date?
+numberOfProperties.details.p1=<a href="{0}" target="_blank">The completion date (opens in a new window)</a> is usually the day you got the money from the sale or disposal and the new owner got the keys.
+numberOfProperties.error.invalid=Select how many UK properties you are including in this return
+numberOfProperties.error.required=Select how many UK properties you are including in this return
 
-disposalMethod.title=Did you sell the property or give it away?
+disposalMethod.title=How did you sell or dispose of the UK property?
 disposalMethod.Sold=Sold it
 disposalMethod.Gifted=Gave it away
-disposalMethod.error.required=Select if you sold it or gave it away
-disposalMethod.error.invalid=Select if you sold it or gave it away
+disposalMethod.Other=Other
+disposalMethod.error.required=Select if you sold it, gave it away or other
+disposalMethod.error.invalid=Select if you sold it, gave it away or other
 
-wereYouAUKResident.title=Were you a UK resident when you ‘exchanged’ contracts when selling the property?
-wereYouAUKResident.helpText=You ‘exchanged’ contracts when you and the buyer swapped contracts and they paid a deposit. If you sold shares, it was when you sold them.
-wereYouAUKResident.link=<a href="{0}" target="_blank">Work out your residence status (opens in a new window)</a>.
-wereYouAUKResident.error.required=Select yes if you were a UK resident when you ‘exchanged’ contracts
-wereYouAUKResident.error.boolean=Select yes if you were a UK resident when you ‘exchanged’ contracts
+wereYouAUKResident.title=Were you a UK resident when you exchanged contracts when disposing of the property?
+wereYouAUKResident.helpText=Contract exchange usually happens when you and the buyer or new owner swap contracts and the buyer pays a deposit.
+wereYouAUKResident.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>.
+wereYouAUKResident.error.required=Select yes if you were a UK resident when you exchanged contracts
+wereYouAUKResident.error.boolean=Select yes if you were a UK resident when you exchanged contracts
 
 triage.enterCountry.title=What was your country of residence on the day you ‘exchanged’ contracts?
 triage.enterCountry.helpText=It’s usually the day you and the new owner swapped contracts and they paid a deposit. If you made an indirect disposal, it’s the day you sold the shares.
@@ -514,24 +517,27 @@ assetTypeForNonUkResidents.IndirectDisposal.helpText=An indirect disposal is whe
 assetTypeForNonUkResidents.error.required=Select the type of property or asset you sold or disposed of
 assetTypeForNonUkResidents.error.invalid=Select the type of property or asset you sold or disposed of
 
-didYouDisposeOfResidentialProperty.title=Did you sell a residential property?
-didYouDisposeOfResidentialProperty.helpText=Residential property includes houses, flats, or other dwellings, including their gardens and grounds.
+didYouDisposeOfResidentialProperty.title=Did you sell or dispose of a UK residential property?
+didYouDisposeOfResidentialProperty.helpText=Residential property includes houses, flats, or other dwellings, including their gardens or grounds.
 didYouDisposeOfResidentialProperty.Residential=Yes
 didYouDisposeOfResidentialProperty.NonResidential=No
-didYouDisposeOfResidentialProperty.details.summary=How to work out if a property is residential
-didYouDisposeOfResidentialProperty.details.p1=Residential property is:
+didYouDisposeOfResidentialProperty.details.summary=What residential property includes
+didYouDisposeOfResidentialProperty.details.p1=Residential property includes:
 didYouDisposeOfResidentialProperty.details.l1=a building where someone lives or could live, like a house, flat or other type of dwelling
 didYouDisposeOfResidentialProperty.details.l2=a building that is being built or changed so it can be used as a place where someone could live
 didYouDisposeOfResidentialProperty.details.l3=land that’s part of a garden or grounds of a building that’s used as a place where someone lives, or could live
 didYouDisposeOfResidentialProperty.details.link=<a href="{0}" tabindex="-1" target="_blank">Read a definition of residential property (opens in a new window)</a>.
-
 didYouDisposeOfResidentialProperty.error.required=Select yes if you sold or disposed of a residential property
 didYouDisposeOfResidentialProperty.error.boolean=Select yes if you sold or disposed of a residential property
 
-disposalDate.title=What date did you ‘exchange’ contracts when selling the property?
+ukResidentCanOnlyReportResidential.title=You cannot use this service
+ukResidentCanOnlyReportResidential.p1=You told us you were a UK resident on the day you sold or disposed of the UK property. You can only use this service to report UK residential property.
+ukResidentCanOnlyReportResidential.p2=Find out how to report and pay Capital Gains Tax on <a href="{0}">non-residential UK property sales or disposals</a>.
+
+disposalDate.title=What date did you exchange contracts when disposing of the property?
 disposalDate.indirectDisposal.title=What date did you sell the shares?
-disposalDate.helpText=It’s when you and the buyer swapped contracts and they paid a deposit. If you sold shares not property it’s when you sold them. For example, 25 4 2020
-disposalDate.link=<a href="{0}" target="_blank">Find out what happens on the ‘exchange’ date (opens in a new window)</a>.
+disposalDate.helpText=It’s usually when you and the buyer or new owner swapped contracts and the buyer paid a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020
+disposalDate.link=<a href="{0}" target="_blank">Find out what happens on the exchange date (opens in a new window)</a>.
 disposalDate.error.required=Enter a contract exchange date
 disposalDate.error.invalid=Enter a real contract exchange date
 disposalDate.error.tooFarInFuture=The contract exchange date must be today or in the past
@@ -545,9 +551,9 @@ disposalDate-month.error.monthAndYearRequired=Contract exchange date must includ
 disposalDate-day.error.dayAndYearRequired=Contract exchange date must include a day and a year
 disposalDate-day.error.dayAndMonthRequired=Contract exchange date must include a day and a month
 
-completionDate.title=What was the ‘completion’ date when you sold the property?
-completionDate.helpText=This is when the keys are handed over and the buyer can move in. It’s when you received the money from the property sale. For example, 25 4 2020
-completionDate.link=<a href="{0}" target="_blank">Find out what happens on the ‘completion’ date (opens in a new window)</a>.
+completionDate.title=What was the completion date when you sold or disposed of the property?
+completionDate.helpText=It’s usually when you got the money from the sale or property transfer and the new owner got the keys. For example, 25 4 2020.
+completionDate.link=<a href="{0}" target="_blank">Find out what happens on the completion date (opens in a new window)</a>.
 completionDate.error.required=Enter a completion date
 completionDate.error.invalid=Enter a real completion date
 completionDate.error.tooFarInPast=Completion date must be the same as or after the contract exchange date
@@ -597,17 +603,17 @@ date.10=October
 date.11=November
 date.12=December
 
-date.short.1=Jan	
-date.short.2=Feb	
-date.short.3=Mar	
-date.short.4=Apr	
-date.short.5=May	
-date.short.6=Jun	
-date.short.7=Jul	
-date.short.8=Aug	
-date.short.9=Sept	
-date.short.10=Oct	
-date.short.11=Nov	
+date.short.1=Jan
+date.short.2=Feb
+date.short.3=Mar
+date.short.4=Apr
+date.short.5=May
+date.short.6=Jun
+date.short.7=Jul
+date.short.8=Aug
+date.short.9=Sept
+date.short.10=Oct
+date.short.11=Nov
 date.short.12=Dec
 
 
@@ -621,7 +627,7 @@ task-list.provide-details.heading=Provide details
 task-list.enter-property-address.link=Enter property address
 task-list.disposals-details.link=Enter sale or disposal details
 task-list.acquisition-details.link=Enter purchase or acquisition details
-task-list.exemptions-and-losses.link=Enter any losses, allowances and exemptions
+task-list.exemptions-and-losses.link=Enter losses and exemptions
 task-list.save-and-come-back.link=Save and come back later
 task-list.relief-details.link=Enter reliefs
 task-list.report-and-pay-the-tax.heading=Report and pay the tax
@@ -652,26 +658,22 @@ percentageShare.error.tooLarge=The percentage of the property you owned must be 
 percentageShare.error.tooSmall=The percentage of the property you owned must be a number between 0 and 100, for example 25 or 33.33
 percentageShare.error.tooManyDecimals=The percentage of the property you owned must have 2 decimal places or less, for example 33.33
 
-
-disposalPrice.full-share.sold-it.title=How much did you sell the property for?
-disposalPrice.full-share.gifted-it.title=What was the market value of the property when you disposed of it?
-disposalPrice.not-full-share.sold-it.title=How much did you sell your share of the property for?
-disposalPrice.not-full-share.gifted-it.title=What was the market value of your share of the property when you disposed of it?
-
-disposalPrice.helpText=You’ll be able to enter any selling or improvement costs, like solicitor’s or estate agent’s fees later.
-disposalPrice.error.required=Enter how much you sold the property for
+disposalPrice.Sold.title=How much did you get when you sold or disposed of the property?
+disposalPrice.Gifted.title=What was the market value of the property when you gave it away?
+disposalPrice.Other.title=How much did you get when you sold or disposed of the property?
+disposalPrice.helpText=If you owned part of the property, only enter the amount you got for your share. You’ll be able to enter any additional costs later.
+disposalPrice.error.required=Enter how much you sold or disposed of the property for
 disposalPrice.error.invalid=How much you sold your the property for must a number, like 160,000 or 11,200.45
 disposalPrice.error.tooSmall=How much you sold the property for must be more than 0
 disposalPrice.error.tooLarge=How much you sold the property for must be 50,000,000,000.00 or less
 disposalPrice.error.tooManyDecimals=How much you sold the property for must have 2 decimal places or less, for example 33.33
 
-disposalFees.full-share.sold-it.title=Enter your selling costs when you sold the property
-disposalFees.full-share.gifted-it.title=Enter your selling costs when you gave away the property
-disposalFees.not-full-share.sold-it.title=Enter your share of the selling costs when you sold your share of the property
-disposalFees.not-full-share.gifted-it.title=Enter your share of the selling costs when you gave away your share of the property
-disposalFees.helpText=For example, the amount you paid to an estate agent or solicitor.
-disposalFees.error.required=Enter your share of the selling costs when you sold the property
-disposalFees.error.invalid=Your share of the selling costs must be an amount of money, like 1,500 or 7,300.50
+disposalFees.Sold.title=What were your additional costs when you sold or disposed of the property?
+disposalFees.Gifted.title=What were your additional costs when you sold or disposed of the property?
+disposalFees.Other.title=What were your additional costs when you sold or disposed of the property?
+disposalFees.helpText=For example, the amount you paid to an estate agent or solicitor. If you shared these costs, you can only claim your share.
+disposalFees.error.required=Enter the amount of additional costs when you sold or disposed of the property
+disposalFees.error.invalid=Your share of the additional costs must be an amount of money, like 1,500 or 7,300.50
 disposalFees.error.tooSmall=Selling costs must be 0 or more
 disposalFees.error.tooLarge=Selling costs must be 50,000,000,000.00 or less
 disposalFees.error.tooManyDecimals= Selling costs must have 2 decimal places or less, for example 33.33
@@ -681,34 +683,34 @@ returns.disposal-details.cya.title=Check your answers
 
 acquisitionDetails.caption=Purchase or acquisition details
 
-acquisitionMethod.title=How did you get your share of the property?
+acquisitionMethod.title=How did you get the property?
 returns.acquisitionMethod.Bought=Bought it
 returns.acquisitionMethod.Inherited=Inherited it
 returns.acquisitionMethod.Gifted=Got it as a gift
 returns.acquisitionMethod.Other=Other
 returns.otherAcquisitionMethod.label=How you got the property
 
-acquisitionMethod.error.required=Select how you got your share of the property
-acquisitionMethod.error.invalid=Select how you got your share of the property
-otherAcquisitionMethod.error.required=Enter how you got your share of the property
-otherAcquisitionMethod.error.invalid=How you got your share of the property must only include letters a to z, spaces and number
-otherAcquisitionMethod.error.tooLong=How you got your share of the property must be 35 characters or less
+acquisitionMethod.error.required=Select how you got the property
+acquisitionMethod.error.invalid=Select how you got the property
+otherAcquisitionMethod.error.required=Enter how you got the property
+otherAcquisitionMethod.error.invalid=How you got the property must only include letters a to z, spaces and numbers
+otherAcquisitionMethod.error.tooLong=How you got the property must be 35 characters or less
 
 
-acquisitionDate.title=What date did you become the owner of the property?
-acquisitionDate.helpText=This is the date the property was transferred into your name. For example, 21 5 2020
-acquisitionDate.error.required=Enter the date you became the owner
-acquisitionDate.error.invalid=Enter a real date you became the owner
-acquisitionDate.error.tooFarInFuture=Date you became the owner must be before you sold the property
-acquisitionDate-day.error.required=Date you became the owner must include a day
-acquisitionDate-month.error.required=Date you became the owner must include a month
-acquisitionDate-year.error.required=Date you became the owner must include a year
-acquisitionDate-day.error.invalid=Enter a real date you became the owner
-acquisitionDate-month.error.invalid=Enter a real date you became the owner
-acquisitionDate-year.error.invalid=Enter a real date you became the owner
-acquisitionDate-month.error.monthAndYearRequired=Date you became the owner must include a month and a year
-acquisitionDate-day.error.dayAndYearRequired=Date you became the owner must include a day and a year
-acquisitionDate-day.error.dayAndMonthRequired=Date you became the owner must include a day and a month
+acquisitionDate.title=What date did you get the property?
+acquisitionDate.helpText=This is the date the property was transferred into your name. For example, 21 5 2004
+acquisitionDate.error.required=Enter the date you got the property
+acquisitionDate.error.invalid=Enter a real date you got the property
+acquisitionDate.error.tooFarInFuture=Date you got the property must be before you sold the property
+acquisitionDate-day.error.required=Date you got the property must include a day
+acquisitionDate-month.error.required=Date you got the property must include a month
+acquisitionDate-year.error.required=Date you got the property must include a year
+acquisitionDate-day.error.invalid=Enter a real date for when you got the property
+acquisitionDate-month.error.invalid=Enter a real date for when you got the property
+acquisitionDate-year.error.invalid=Enter a real date for when you got the property
+acquisitionDate-month.error.monthAndYearRequired=Date you got the property must include a month and a year
+acquisitionDate-day.error.dayAndYearRequired=Date you got the property must include a day and a year
+acquisitionDate-day.error.dayAndMonthRequired=Date you got the property must include a day and a month
 
 acquisitionPrice.title=How much did you pay for your share of the property?
 acquisitionPrice.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later.
@@ -719,7 +721,7 @@ acquisitionPrice.error.tooLarge=The amount of money must be a number between 1 a
 acquisitionPrice.error.tooManyDecimals=The amount of money must be 2 decimal places or less, for example 160,000 or 23,040.50
 
 improvementCosts.title=Do you want to claim any improvement costs?
-improvementCosts.helpText=You can only claim for your share of any costs that added value to the property. You cannot claim for mortgage interest, decorating or maintenance.
+improvementCosts.helpText=You can only claim costs that added value to the property. If you shared these costs, you can only claim your share. You cannot claim for mortgage interest, decorating or maintenance. 
 improvementCosts.error.required=Select yes if you want to claim any improvement costs
 improvementCosts.error.invalid=Select yes if you want to claim any improvement costs
 improvementCostsValue.error.invalid=The amount of money must only include numbers, for example 160,000 or 23,040.50
@@ -731,15 +733,15 @@ improvementCostsValue.label=Amount spent on improvements
 improvementCosts.details.summary=What are improvements?
 improvementCosts.details.p1=Improvement include adding an extension or replacing a basic kitchen with a luxury one.
 
-acquisitionFees.title=Do you want to claim any additional costs you paid when you bought the property?
+acquisitionFees.title=Do you want to claim any additional costs you paid when you got the property?
 acquisitionFees.helpText=For example, fees for surveyors or solicitors. If you shared these costs, you can only claim your share.
 acquisitionFees.error.required=Select yes if you have extra costs
 acquisitionFeesValue.label=Amount of additional costs
-acquisitionFeesValue.error.required=Enter how much you paid in additional purchase or acquisition costs
-acquisitionFeesValue.error.invalid=Additional purchase or acquisition costs must only include numbers, for example 1,480 or 900.50
-acquisitionFeesValue.error.tooSmall=Purchase or acquisition costs must more than 0
-acquisitionFeesValue.error.tooLarge=Purchase or acquisition costs must be 50,000,000,000.00 or less
-acquisitionFeesValue.error.tooManyDecimals=Purchase or acquisition costs must be 2 decimal places or less, for example 1,480 or 900.50
+acquisitionFeesValue.error.required=Enter how much you paid in additional costs when you got the property
+acquisitionFeesValue.error.invalid=Additional costs must only include numbers, for example 1,480 or 900.50
+acquisitionFeesValue.error.tooSmall=Additional costs must more than 0
+acquisitionFeesValue.error.tooLarge=Additional costs must be 50,000,000,000.00 or less
+acquisitionFeesValue.error.tooManyDecimals=Additional costs must be 2 decimal places or less, for example 1,480 or 900.50
 
 acquisitionDetails.cya.title=Check your answers
 acquisitionDetails.cyaLabel.rebased=Property value rebased
@@ -769,6 +771,7 @@ reliefDetails.caption=Reliefs
 privateResidentsRelief.title=Are you entitled to claim Private Residence Relief?
 privateResidentsRelief.helpText=You might qualify for this relief if the property had been your main home at some point.
 privateResidentsReliefValue.label=Amount of Private Residence Relief you are entitled to
+privateResidentsRelief.furtherInfoLink=Find out about Private Residence Relief (opens in a new window)
 
 privateResidentsRelief.error.required=Select yes if you are entitled to Private Residence Relief
 privateResidentsReliefValue.error.required=Enter an amount of Private Residence Relief, like 108 or 2,940.54
@@ -776,8 +779,8 @@ privateResidentsReliefValue.error.tooSmall=Amount of Private Residence Relief mu
 privateResidentsReliefValue.error.tooLarge=Amount of Private Residence Relief must be 50,000,000,000.00 or less
 privateResidentsReliefValue.error.invalid=Amount of Private Residence Relief must be a number, like 108 or 2,940.54
 
-lettingsRelief.title=Do you want to claim Letting Relief?
-lettingsRelief.helpText=You might be able to claim this relief if the property was your main home and they also let it our for a time.
+lettingsRelief.title=Are you entitled to claim Letting Relief?
+lettingsRelief.helpText=You might be able to claim this relief if the property was your main home and you also let it out for a time.
 lettingsReliefValue.label=Amount of Letting Relief
 
 lettingsRelief.error.required=Select yes if you are claiming Letting Relief
@@ -785,11 +788,13 @@ lettingsReliefValue.error.required=Enter an amount of Letting Relief, like 108 o
 lettingsReliefValue.error.tooSmall=Amount of Letting Relief must be more than than 0, or select no
 lettingsReliefValue.error.tooLarge=Amount of Letting Relief must be 50,000,000,000.00 or less
 lettingsReliefValue.error.invalid=Amount of Letting Relief must be a number, like 108 or 2,940.54
+lettingsRelief.furtherInfoLink=Find out about Letting Relief and how to calculate it (opens in a new window)
 
 otherReliefs.title=Do you want to claim any other reliefs?
 otherReliefs.helpText=You will need to tell us what other reliefs you are claiming and what the total amount of these is.
-otherReliefsName.label=Name(s) of the other relief(s) you are claiming
-otherReliefsAmount.label=Total amount of other relief(s) you are claiming
+otherReliefsName.label=Names of the other reliefs you are claiming
+otherReliefsAmount.label=Total amount of other reliefs you are claiming
+otherReliefs.furtherInfoLink=Find out about reliefs you might qualify for (opens in a new window)
 
 otherReliefs.error.required=Select yes if you are claiming other reliefs
 otherReliefsName.error.required=Enter the names of the other reliefs you are claiming
@@ -811,10 +816,10 @@ reliefDetails.cyaChange.otherReliefsAmount=Other reliefs amount
 
 
 
-exemptionAndLosses.caption=Losses, allowances and exemptions
+exemptionAndLosses.caption=Losses and exemptions
 
-inYearLosses.title=Do you want to include any Capital Gains Tax losses you made in this tax year?
-inYearLosses.helpText=You can include any Capital Gains Tax losses you mde on UK property sales or disposals from tax year {0} to {1} to reduce your gain
+inYearLosses.title=Do you want to include any other Capital Gains Tax losses you made in tax year 2020 to 2021?
+inYearLosses.helpText=You make a loss if the disposal amount is less than the acquisition amount. If you include any other Capital Gains Tax losses you made in this tax year it will reduce your gain. You must have made the losses before {0}
 inYearLosses.error.required=Select yes if you want to include any Capital Gains Tax losses you made in this tax year
 inYearLosses.error.invalid=Select yes if you want to include any Capital Gains Tax losses you made in this tax year
 inYearLossesValue.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
@@ -826,8 +831,8 @@ inYearLossesValue.label=Amount of losses from this tax year
 inYearLosses.link=<a href="{0}" target="_blank">Find out how losses can reduce gains (opens in a new window)</a>.
 
 
-previousYearsLosses.title= Do you want to include any Capital Gains Tax losses you made in previous tax years?
-previousYearsLosses.helpText=You can include previous losses in this return to reduce your gain. You can only include losses you have already reported to HMRC.
+previousYearsLosses.title=Do you want to include any other Capital Gains Tax losses you made in previous tax years?
+previousYearsLosses.helpText=You can include previous losses in this return to reduce your gain. You can only include other losses you have already reported to HMRC. For example, losses on shares or other UK property.
 previousYearsLosses.error.required=Select yes if you want to include any Capital Gains Tax losses you made in previous tax years
 previousYearsLosses.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
 previousYearsLossesValue.error.invalid=Amount of Capital Gains Tax losses must be a number, like 108 or 2,940.54
@@ -875,17 +880,10 @@ taxableGainOrLoss.details.p1=Subtract the amount you sold the property for as we
 
 exemptionsAndLosses.cya.title=Check your answers
 
-exemptionsAndLosses.cyaLabel.inYearLosses=Use losses from this tax year?
 exemptionsAndLosses.cyaChange.inYearLosses=your in year losses
-
-exemptionsAndLosses.cyaLabel.inYearLossesValue=Amount of losses from this tax year used
-exemptionsAndLosses.cyaChange.inYearLossesValue=your in year losses
-
-exemptionsAndLosses.cyaLabel.previousYearsLosses=Use losses from previous tax years?
+exemptionsAndLosses.cyaChange.inYearLossesValue=the amount of in year losses
 exemptionsAndLosses.cyaChange.previousYearsLosses=your previous years losses
-
-exemptionsAndLosses.cyaLabel.previousYearsLossesValue=Amount of losses from previous tax year used
-exemptionsAndLosses.cyaChange.previousYearsLossesValue=your previous years losses
+exemptionsAndLosses.cyaChange.previousYearsLossesValue=the amount of previous years losses
 
 exemptionsAndLosses.cyaChange.annualExemptAmount=your annual exempt amount
 exemptionsAndLosses.cyaChange.taxableGainOrLoss=your taxable gain or net loss
@@ -1024,6 +1022,7 @@ returns.list.ref=Return ref:
 returns.list.view=View return
 returns.list.viewAndPay=View and pay
 returns.list.paymentDue=Payment due
+returns.list.nextPaymentDue=Next payment due
 returns.list.noTaxDue=You did not owe any tax for this return
 returns.list.leftToPay=Total left to pay
 returns.list.taxOwed=Tax owed for return

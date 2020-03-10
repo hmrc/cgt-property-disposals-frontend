@@ -118,10 +118,6 @@
      returns.reliefdetails.routes.ReliefDetailsController.checkYourAnswers().url, reliefDetailsState)
     </li>
 
-    <li id="exemptionsAndLosses" class="app-task-list__item">
-    @taskLink(messages("task-list.exemptions-and-losses.link"),
-     returns.exemptionandlosses.routes.ExemptionAndLossesController.checkYourAnswers().url, exemptionsAndLossesState)
-    </li>
    </ul>
   </li>
 
@@ -133,6 +129,11 @@
     @messages("task-list.report-and-pay-the-tax.heading")
    </h2>
    <ul class="app-task-list__items">
+
+    <li id="exemptionsAndLosses" class="app-task-list__item">
+    @taskLink(messages("task-list.exemptions-and-losses.link"),
+     returns.exemptionandlosses.routes.ExemptionAndLossesController.checkYourAnswers().url, exemptionsAndLossesState)
+    </li>
 
     <li id="enterCgtLiability" class="app-task-list__item">
     @taskLink(messages("task-list.enter-cgt-liability.link"), returns.yeartodatelliability.routes.YearToDateLiabilityFirstReturnController.checkYourAnswers().url, ytdLiabilityState)

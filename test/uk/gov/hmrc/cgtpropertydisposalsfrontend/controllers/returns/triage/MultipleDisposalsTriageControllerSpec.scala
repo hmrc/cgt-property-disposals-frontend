@@ -75,11 +75,11 @@ class MultipleDisposalsTriageControllerSpec
     SessionData.empty.copy(journeyStatus = Some(startingNewDraftReturn)) -> startingNewDraftReturn
   }
 
-  def sessionWithState(answers: IncompleteMultipleDisposalsAnswers, numberOfProperties: Int): SessionData = {
+  def sessionWithState(answers: IncompleteMultipleDisposalsAnswers, numberOfProperties: Option[Int]): SessionData = {
     val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
     session.copy(journeyStatus = Some(
       journey.copy(
-        newReturnTriageAnswers = Left(answers.copy(numberOfProperties = Some(numberOfProperties)))
+        newReturnTriageAnswers = Left(answers.copy(numberOfProperties = numberOfProperties))
       )
     )
     )
@@ -87,13 +87,11 @@ class MultipleDisposalsTriageControllerSpec
 
   def testFormError(
     data: (String, String)*
-  )(
-    numberOfProperties: Int
   )(expectedErrorMessageKey: String, errorArgs: String*)(pageTitleKey: String, titleArgs: String*)(
     performAction: Seq[(String, String)] => Future[Result],
     currentSession: SessionData = sessionWithState(
       sample[IncompleteMultipleDisposalsAnswers],
-      numberOfProperties
+      Some(2)
     )
   ): Unit = {
     inSequence {
@@ -108,6 +106,7 @@ class MultipleDisposalsTriageControllerSpec
           expectedErrorMessageKey,
           errorArgs: _*
         )
+        doc.title() should startWith("Error:")
       },
       BAD_REQUEST
     )
@@ -312,6 +311,11 @@ class MultipleDisposalsTriageControllerSpec
 
       "display form error" when {
 
+        def test(data: (String, String)*)(expectedErrorMessageKey: String) =
+          testFormError(data: _*)(expectedErrorMessageKey)(s"$key.title")(
+            performAction
+          )
+
         "the user submits nothing" in {
           val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
             individualUserType = Some(Self)
@@ -328,25 +332,16 @@ class MultipleDisposalsTriageControllerSpec
         }
 
         "display form error when user enters numberOfProperties value <= 0" in {
-
-          def test(data: (String, String)*)(expectedErrorMessageKey: String) =
-            testFormError(data: _*)(-5)(expectedErrorMessageKey)(s"$key.title")(
-              performAction
-            )
-
           test(key -> "-5")(s"$key.error.tooSmall")
 
         }
 
         "display form error when user enters numberOfProperties value > 999" in {
-
-          def test(data: (String, String)*)(expectedErrorMessageKey: String) =
-            testFormError(data: _*)(1000)(expectedErrorMessageKey)(s"$key.title")(
-              performAction
-            )
-
           test(key -> "1000")(s"$key.error.tooLong")
+        }
 
+        "display form error when user enters invalid data" in {
+          test(key -> "!@£!")(s"$key.error.invalid")
         }
 
       }

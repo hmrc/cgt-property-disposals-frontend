@@ -451,12 +451,15 @@ class DisposalDetailsControllerSpec
         IncompleteDisposalDetailsAnswers.empty.copy(shareOfProperty = Some(ShareOfProperty.Full))
 
       val disposalPriceTitleScenarios = List(
-        (DisposalMethod.Sold, ShareOfProperty.Full, "disposalPrice.full-share.sold-it.title"),
-        (DisposalMethod.Sold, ShareOfProperty.Half, "disposalPrice.not-full-share.sold-it.title"),
-        (DisposalMethod.Sold, ShareOfProperty.Other(1), "disposalPrice.not-full-share.sold-it.title"),
-        (DisposalMethod.Gifted, ShareOfProperty.Full, "disposalPrice.full-share.gifted-it.title"),
-        (DisposalMethod.Gifted, ShareOfProperty.Half, "disposalPrice.not-full-share.gifted-it.title"),
-        (DisposalMethod.Gifted, ShareOfProperty.Other(1), "disposalPrice.not-full-share.gifted-it.title")
+        (DisposalMethod.Sold, ShareOfProperty.Full, "disposalPrice.Sold.title"),
+        (DisposalMethod.Sold, ShareOfProperty.Half, "disposalPrice.Sold.title"),
+        (DisposalMethod.Sold, ShareOfProperty.Other(1), "disposalPrice.Sold.title"),
+        (DisposalMethod.Gifted, ShareOfProperty.Full, "disposalPrice.Gifted.title"),
+        (DisposalMethod.Gifted, ShareOfProperty.Half, "disposalPrice.Gifted.title"),
+        (DisposalMethod.Gifted, ShareOfProperty.Other(1), "disposalPrice.Gifted.title"),
+        (DisposalMethod.Other, ShareOfProperty.Full, "disposalPrice.Other.title"),
+        (DisposalMethod.Other, ShareOfProperty.Half, "disposalPrice.Other.title"),
+        (DisposalMethod.Other, ShareOfProperty.Other(1), "disposalPrice.Other.title")
       )
 
       behave like redirectToStartBehaviour(performAction)
@@ -577,7 +580,7 @@ class DisposalDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(data),
-            messageFromMessageKey("disposalPrice.full-share.sold-it.title"), { doc =>
+            messageFromMessageKey("disposalPrice.Sold.title"), { doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               )
@@ -811,12 +814,15 @@ class DisposalDetailsControllerSpec
         .copy(shareOfProperty = Some(ShareOfProperty.Full), disposalPrice = Some(AmountInPence.fromPounds(2d)))
 
       val disposalFeesTitleScenarios = List(
-        (DisposalMethod.Sold, ShareOfProperty.Full, "disposalFees.full-share.sold-it.title"),
-        (DisposalMethod.Sold, ShareOfProperty.Half, "disposalFees.not-full-share.sold-it.title"),
-        (DisposalMethod.Sold, ShareOfProperty.Other(1), "disposalFees.not-full-share.sold-it.title"),
-        (DisposalMethod.Gifted, ShareOfProperty.Full, "disposalFees.full-share.gifted-it.title"),
-        (DisposalMethod.Gifted, ShareOfProperty.Half, "disposalFees.not-full-share.gifted-it.title"),
-        (DisposalMethod.Gifted, ShareOfProperty.Other(1), "disposalFees.not-full-share.gifted-it.title")
+        (DisposalMethod.Sold, ShareOfProperty.Full, "disposalFees.Sold.title"),
+        (DisposalMethod.Sold, ShareOfProperty.Half, "disposalFees.Sold.title"),
+        (DisposalMethod.Sold, ShareOfProperty.Other(1), "disposalFees.Sold.title"),
+        (DisposalMethod.Gifted, ShareOfProperty.Full, "disposalFees.Gifted.title"),
+        (DisposalMethod.Gifted, ShareOfProperty.Half, "disposalFees.Gifted.title"),
+        (DisposalMethod.Gifted, ShareOfProperty.Other(1), "disposalFees.Gifted.title"),
+        (DisposalMethod.Other, ShareOfProperty.Full, "disposalFees.Other.title"),
+        (DisposalMethod.Other, ShareOfProperty.Half, "disposalFees.Other.title"),
+        (DisposalMethod.Other, ShareOfProperty.Other(1), "disposalFees.Other.title")
       )
 
       behave like redirectToStartBehaviour(performAction)
@@ -978,7 +984,7 @@ class DisposalDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(data),
-            messageFromMessageKey("disposalFees.full-share.sold-it.title"), { doc =>
+            messageFromMessageKey("disposalFees.Sold.title"), { doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey
               )
@@ -1465,12 +1471,5 @@ object DisposalDetailsControllerSpec extends Matchers {
     completeAnswers: CompleteDisposalDetailsAnswers,
     disposalMethod: DisposalMethod
   ): (String, String) =
-    if (disposalMethod === DisposalMethod.Sold && completeAnswers.shareOfProperty === ShareOfProperty.Full)
-      ("disposalPrice.full-share.sold-it.title", "disposalFees.full-share.sold-it.title")
-    else if (disposalMethod === DisposalMethod.Sold)
-      ("disposalPrice.not-full-share.sold-it.title", "disposalFees.not-full-share.sold-it.title")
-    else if (disposalMethod === DisposalMethod.Gifted && completeAnswers.shareOfProperty === ShareOfProperty.Full)
-      ("disposalPrice.full-share.gifted-it.title", "disposalFees.full-share.gifted-it.title")
-    else
-      ("disposalPrice.not-full-share.gifted-it.title", "disposalFees.not-full-share.gifted-it.title")
+    (s"disposalPrice.${disposalMethod.toString}.title", s"disposalFees.${disposalMethod.toString}.title")
 }
