@@ -173,10 +173,10 @@ contactName.error.tooLong=Contact name must must be 105 characters or fewer
 address.postcode.label=Postcode
 address.postcode.helpText=For example, AB2 9WQ
 postcode.invalid=Postcode must only include letters, numbers and spaces
-address.postcodeFilter.label=Enter property name or number (optional)
-address.postcodeFilter.helpText=For example, The Mill, Flat A or 37b
+address.postcodeFilter.label=Property name or number (optional)
+address.postcodeFilter.helpText=For example, 44 or The Mill
 address.manual.linkText=Enter the address another way
-address.lookup.linkText=Lookup UK address with postcode
+address.lookup.linkText=Find address using UK postcode
 
 address.uk.title=Enter your UK contact address
 address.uk.line1.label=Building or street
