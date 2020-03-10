@@ -439,11 +439,11 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
                 "account.home.title"
               ), { doc =>
                 if (subscribed.sentReturns.isEmpty && subscribed.draftReturns.isEmpty)
-                  doc.select("#content > article > div.form-group > a").text should include(
+                  doc.select("#content > article > div > div > div > a").text should include(
                     messageFromMessageKey("account.home.button.start-a-new-return")
                   )
                 else
-                  doc.select("#content > article > p:nth-child(2) > a").text should include(
+                  doc.select("#content > article > div:nth-child(1) > div > p > a").text should include(
                     messageFromMessageKey("account.home.button.start-a-new-return")
                   )
 
