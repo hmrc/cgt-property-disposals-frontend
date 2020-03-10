@@ -2515,6 +2515,7 @@ class AcquisitionDetailsControllerSpec
           expectedErrorMessageKey,
           errorArgs: _*
         )
+        doc.title() should startWith("Error:")
       },
       BAD_REQUEST
     )

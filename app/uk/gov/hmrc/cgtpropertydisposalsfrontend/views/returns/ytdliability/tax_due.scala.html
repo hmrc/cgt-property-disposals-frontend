@@ -56,7 +56,7 @@
 @title = @{messages(s"$key.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title, userType = request.userType) {
+@mainTemplate(title = title, hasErrors = hasErrors, userType = request.userType) {
 
    @backLinkComponent(backLink)
 
@@ -103,7 +103,7 @@
             assistiveText = messages("unit-input.assistive.pounds")
         )
 
-        @submitButton(messages("button.continue"))
+        @submitButton(messages("button.saveAndContinue"))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)

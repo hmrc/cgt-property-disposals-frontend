@@ -17,8 +17,9 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding
 
 import cats.Eq
+import cats.syntax.either._
 import play.api.libs.json.{Format, Json}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TelephoneNumber
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TelephoneNumber, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName, TrustName}
@@ -41,5 +42,8 @@ object SubscribedDetails {
 
   implicit class SubscribedDetailsOps(private val details: SubscribedDetails) extends AnyVal {
     def makeAccountName(): String = details.name.fold(n => n.value, n => n.makeSingleName())
+    def userType(): Either[UserType.Organisation.type, UserType.Individual.type] =
+      details.name.bimap(_ => UserType.Organisation, _ => UserType.Individual)
+
   }
 }

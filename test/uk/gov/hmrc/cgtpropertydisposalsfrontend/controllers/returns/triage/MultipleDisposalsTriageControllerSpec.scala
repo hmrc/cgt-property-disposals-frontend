@@ -31,6 +31,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingNewDraftReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.Self
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{IncompleteMultipleDisposalsAnswers, _}
@@ -63,19 +65,21 @@ class MultipleDisposalsTriageControllerSpec
   }
 
   def sessionDataWithStartingNewDraftReturn(
-    multipleDisposalsAnswers: MultipleDisposalsTriageAnswers
+    multipleDisposalsAnswers: MultipleDisposalsTriageAnswers,
+    name: Either[TrustName, IndividualName] = Right(sample[IndividualName])
   ): (SessionData, StartingNewDraftReturn) = {
     val startingNewDraftReturn = sample[StartingNewDraftReturn].copy(
-      newReturnTriageAnswers = Left(multipleDisposalsAnswers)
+      newReturnTriageAnswers = Left(multipleDisposalsAnswers),
+      subscribedDetails      = sample[SubscribedDetails].copy(name = name)
     )
     SessionData.empty.copy(journeyStatus = Some(startingNewDraftReturn)) -> startingNewDraftReturn
   }
 
-  def sessionWithState(answers: IncompleteMultipleDisposalsAnswers, numberOfProperties: Int): SessionData = {
+  def sessionWithState(answers: IncompleteMultipleDisposalsAnswers, numberOfProperties: Option[Int]): SessionData = {
     val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
     session.copy(journeyStatus = Some(
       journey.copy(
-        newReturnTriageAnswers = Left(answers.copy(numberOfProperties = Some(numberOfProperties)))
+        newReturnTriageAnswers = Left(answers.copy(numberOfProperties = numberOfProperties))
       )
     )
     )
@@ -83,13 +87,11 @@ class MultipleDisposalsTriageControllerSpec
 
   def testFormError(
     data: (String, String)*
-  )(
-    numberOfProperties: Int
   )(expectedErrorMessageKey: String, errorArgs: String*)(pageTitleKey: String, titleArgs: String*)(
     performAction: Seq[(String, String)] => Future[Result],
     currentSession: SessionData = sessionWithState(
       sample[IncompleteMultipleDisposalsAnswers],
-      numberOfProperties
+      Some(2)
     )
   ): Unit = {
     inSequence {
@@ -104,6 +106,7 @@ class MultipleDisposalsTriageControllerSpec
           expectedErrorMessageKey,
           errorArgs: _*
         )
+        doc.title() should startWith("Error:")
       },
       BAD_REQUEST
     )
@@ -308,6 +311,11 @@ class MultipleDisposalsTriageControllerSpec
 
       "display form error" when {
 
+        def test(data: (String, String)*)(expectedErrorMessageKey: String) =
+          testFormError(data: _*)(expectedErrorMessageKey)(s"$key.title")(
+            performAction
+          )
+
         "the user submits nothing" in {
           val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
             individualUserType = Some(Self)
@@ -324,25 +332,16 @@ class MultipleDisposalsTriageControllerSpec
         }
 
         "display form error when user enters numberOfProperties value <= 0" in {
-
-          def test(data: (String, String)*)(expectedErrorMessageKey: String) =
-            testFormError(data: _*)(-5)(expectedErrorMessageKey)(s"$key.title")(
-              performAction
-            )
-
           test(key -> "-5")(s"$key.error.tooSmall")
 
         }
 
         "display form error when user enters numberOfProperties value > 999" in {
-
-          def test(data: (String, String)*)(expectedErrorMessageKey: String) =
-            testFormError(data: _*)(1000)(expectedErrorMessageKey)(s"$key.title")(
-              performAction
-            )
-
           test(key -> "1000")(s"$key.error.tooLong")
+        }
 
+        "display form error when user enters invalid data" in {
+          test(key -> "!@£!")(s"$key.error.invalid")
         }
 
       }
@@ -688,16 +687,22 @@ class MultipleDisposalsTriageControllerSpec
 
       behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
 
-      "redirect to the how many properties page when no individual user type can be found" in {
+      "redirect to the who is individual representing page when no individual user type can be found and the subscribed " +
+        "user type is individual" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsAnswers.empty)._1)
+          mockGetSession(
+            sessionDataWithStartingNewDraftReturn(
+              IncompleteMultipleDisposalsAnswers.empty,
+              Right(sample[IndividualName])
+            )._1
+          )
         }
 
-        checkIsRedirect(performAction(), routes.InitialTriageQuestionsController.howManyProperties())
+        checkIsRedirect(performAction(), routes.InitialTriageQuestionsController.whoIsIndividualRepresenting())
       }
 
-      "redirect to the multiple disposals guidance page when no individual user type can be found" in {
+      "redirect to the multiple disposals guidance page when no answer for the number of properties can be found" in {
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(

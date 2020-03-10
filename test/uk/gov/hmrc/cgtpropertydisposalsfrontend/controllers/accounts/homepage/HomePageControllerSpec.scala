@@ -35,6 +35,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.privatebeta.PrivateBetaHomePageController
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, StartingNewDraftReturn, Subscribed, ViewingReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.govShortDisplayFormat
@@ -42,6 +43,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.ChargeType.{Penal
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftReturn, ReturnSummary, SubmitReturnResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
@@ -74,8 +77,6 @@ trait HomePageControllerSpec
       bind[ReturnsService].toInstance(mockReturnsService),
       bind[PaymentsService].toInstance(mockPaymentsService)
     )
-
-  val subscribed = sample[Subscribed]
 
   def mockGetDraftReturns(cgtReference: CgtReference)(response: Either[Error, List[DraftReturn]]) =
     (mockReturnsService
@@ -126,7 +127,8 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
 
   implicit val messages: Messages = MessagesImpl(lang, messagesApi)
 
-  val subscribedSessionData = SessionData.empty.copy(journeyStatus = Some(subscribed))
+  def sessionDataWithSubscribed(subscribed: Subscribed) =
+    SessionData.empty.copy(journeyStatus = Some(subscribed))
 
   "The HomePage Controller" when {
 
@@ -430,7 +432,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
               mockGetSession(
                 SessionData.empty.copy(
                   userType      = userType,
-                  journeyStatus = Some(subscribed)
+                  journeyStatus = Some(subscribed.copy(agentReferenceNumber = None))
                 )
               )
             }
@@ -439,9 +441,15 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
               messageFromMessageKey(
                 "account.home.title"
               ), { doc =>
-                doc.select("#content > article > div.form-group > a").text should include(
-                  messageFromMessageKey("account.home.button.start-a-new-return")
-                )
+                if (subscribed.sentReturns.isEmpty && subscribed.draftReturns.isEmpty)
+                  doc.select("#content > article > div > div > div > a").text should include(
+                    messageFromMessageKey("account.home.button.start-a-new-return")
+                  )
+                else
+                  doc.select("#content > article > div:nth-child(1) > div > p > a").text should include(
+                    messageFromMessageKey("account.home.button.start-a-new-return")
+                  )
+
                 doc.select("#content > article > div:nth-child(1) > div > span").text shouldNot include(
                   messageFromMessageKey("account.agent.prefix")
                 )
@@ -484,8 +492,9 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
       }
 
       "display the home page for agents" in {
+        val subscribed = sample[Subscribed].copy(agentReferenceNumber = Some(sample[AgentReferenceNumber]))
         val sessionData =
-          SessionData.empty.copy(journeyStatus = Some(subscribed), userType = Some(UserType.Agent))
+          SessionData.empty.copy(journeyStatus = Some(subscribed))
 
         inSequence {
           mockAuthWithNoRetrievals()
@@ -507,64 +516,40 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
         )
       }
 
-      val startingNewDraftReturn = StartingNewDraftReturn(
-        subscribed.subscribedDetails,
-        subscribed.ggCredId,
-        subscribed.agentReferenceNumber,
-        Right(sample[IncompleteSingleDisposalTriageAnswers])
-      )
+      {
+        val subscribed = sample[Subscribed]
 
-      val fillingOurReturn = FillingOutReturn(
-        subscribed.subscribedDetails,
-        subscribed.ggCredId,
-        subscribed.agentReferenceNumber,
-        sample[DraftReturn]
-      )
-      val justSubmittedReturn = JustSubmittedReturn(
-        subscribed.subscribedDetails,
-        subscribed.ggCredId,
-        subscribed.agentReferenceNumber,
-        sample[CompleteReturn],
-        sample[SubmitReturnResponse]
-      )
+        val startingNewDraftReturn = StartingNewDraftReturn(
+          subscribed.subscribedDetails,
+          subscribed.ggCredId,
+          subscribed.agentReferenceNumber,
+          Right(sample[IncompleteSingleDisposalTriageAnswers])
+        )
 
-      val viewingReturn = ViewingReturn(
-        subscribed.subscribedDetails,
-        subscribed.ggCredId,
-        subscribed.agentReferenceNumber,
-        sample[CompleteReturn],
-        sample[ReturnSummary]
-      )
+        val fillingOurReturn = FillingOutReturn(
+          subscribed.subscribedDetails,
+          subscribed.ggCredId,
+          subscribed.agentReferenceNumber,
+          sample[DraftReturn]
+        )
+        val justSubmittedReturn = JustSubmittedReturn(
+          subscribed.subscribedDetails,
+          subscribed.ggCredId,
+          subscribed.agentReferenceNumber,
+          sample[CompleteReturn],
+          sample[SubmitReturnResponse]
+        )
 
-      List(startingNewDraftReturn, fillingOurReturn, justSubmittedReturn, viewingReturn).foreach { journeyStatus =>
-        s"convert a ${journeyStatus.getClass.getSimpleName} to Subscribed journey status" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              SessionData.empty.copy(
-                journeyStatus = Some(journeyStatus),
-                userType      = Some(UserType.Individual)
-              )
-            )
-            mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Right(subscribed.draftReturns))
-            mockGetReturnsList(subscribed.subscribedDetails.cgtReference)(Right(subscribed.sentReturns))
-            mockStoreSession(
-              SessionData.empty.copy(
-                journeyStatus = Some(subscribed),
-                userType      = Some(UserType.Individual)
-              )
-            )(Right(()))
-          }
+        val viewingReturn = ViewingReturn(
+          subscribed.subscribedDetails,
+          subscribed.ggCredId,
+          subscribed.agentReferenceNumber,
+          sample[CompleteReturn],
+          sample[ReturnSummary]
+        )
 
-          val result = performAction()
-          status(result)          shouldBe OK
-          contentAsString(result) should include(messageFromMessageKey("account.home.title"))
-        }
-
-        "show an error page" when {
-
-          s"the conversion from ${journeyStatus.getClass.getSimpleName} is successful but " +
-            "there is an error updating the session" in {
+        List(startingNewDraftReturn, fillingOurReturn, justSubmittedReturn, viewingReturn).foreach { journeyStatus =>
+          s"convert a ${journeyStatus.getClass.getSimpleName} to Subscribed journey status" in {
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
@@ -580,47 +565,74 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
                   journeyStatus = Some(subscribed),
                   userType      = Some(UserType.Individual)
                 )
-              )(Left(Error("")))
+              )(Right(()))
             }
 
-            checkIsTechnicalErrorPage(performAction())
+            val result = performAction()
+            status(result)          shouldBe OK
+            contentAsString(result) should include(messageFromMessageKey("account.home.title"))
           }
 
-          s"the conversion from ${journeyStatus.getClass.getSimpleName} is successful but " +
-            "there is an error getting the draft returns" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                SessionData.empty.copy(
-                  journeyStatus = Some(journeyStatus),
-                  userType      = Some(UserType.Individual)
+          "show an error page" when {
+
+            s"the conversion from ${journeyStatus.getClass.getSimpleName} is successful but " +
+              "there is an error updating the session" in {
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  SessionData.empty.copy(
+                    journeyStatus = Some(journeyStatus),
+                    userType      = Some(UserType.Individual)
+                  )
                 )
-              )
-              mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Left(Error("")))
+                mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Right(subscribed.draftReturns))
+                mockGetReturnsList(subscribed.subscribedDetails.cgtReference)(Right(subscribed.sentReturns))
+                mockStoreSession(
+                  SessionData.empty.copy(
+                    journeyStatus = Some(subscribed),
+                    userType      = Some(UserType.Individual)
+                  )
+                )(Left(Error("")))
+              }
+
+              checkIsTechnicalErrorPage(performAction())
             }
 
-            checkIsTechnicalErrorPage(performAction())
-          }
-
-          s"the conversion from ${journeyStatus.getClass.getSimpleName} is successful but " +
-            "there is an error getting the list of returns" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                SessionData.empty.copy(
-                  journeyStatus = Some(journeyStatus),
-                  userType      = Some(UserType.Individual)
+            s"the conversion from ${journeyStatus.getClass.getSimpleName} is successful but " +
+              "there is an error getting the draft returns" in {
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  SessionData.empty.copy(
+                    journeyStatus = Some(journeyStatus),
+                    userType      = Some(UserType.Individual)
+                  )
                 )
-              )
-              mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Right(subscribed.draftReturns))
-              mockGetReturnsList(subscribed.subscribedDetails.cgtReference)(Left(Error("")))
+                mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Left(Error("")))
+              }
+
+              checkIsTechnicalErrorPage(performAction())
             }
 
-            checkIsTechnicalErrorPage(performAction())
-          }
+            s"the conversion from ${journeyStatus.getClass.getSimpleName} is successful but " +
+              "there is an error getting the list of returns" in {
+              inSequence {
+                mockAuthWithNoRetrievals()
+                mockGetSession(
+                  SessionData.empty.copy(
+                    journeyStatus = Some(journeyStatus),
+                    userType      = Some(UserType.Individual)
+                  )
+                )
+                mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Right(subscribed.draftReturns))
+                mockGetReturnsList(subscribed.subscribedDetails.cgtReference)(Left(Error("")))
+              }
 
+              checkIsTechnicalErrorPage(performAction())
+            }
+
+          }
         }
-
       }
 
     }
@@ -639,11 +651,13 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
       "show an error page" when {
 
         "there is an error updating the session" in {
+          val subscribed = sample[Subscribed]
+
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(subscribedSessionData.copy(userType = Some(UserType.Individual)))
+            mockGetSession(sessionDataWithSubscribed(subscribed))
             mockStoreSession(
-              subscribedSessionData.copy(
+              SessionData.empty.copy(
                 journeyStatus = Some(
                   StartingNewDraftReturn(
                     subscribed.subscribedDetails,
@@ -651,8 +665,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
                     subscribed.agentReferenceNumber,
                     Right(IncompleteSingleDisposalTriageAnswers.empty)
                   )
-                ),
-                userType = Some(UserType.Individual)
+                )
               )
             )(Left(Error("")))
           }
@@ -663,12 +676,15 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
 
       "redirect to the who is the individual reporting for page" when {
 
-        "the user type is individual" in {
+        "the subscribed user type is individual" in {
+          val subscribed = sample[Subscribed]
+            .copy(subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])))
+
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(subscribedSessionData.copy(userType = Some(UserType.Individual)))
+            mockGetSession(sessionDataWithSubscribed(subscribed))
             mockStoreSession(
-              subscribedSessionData.copy(
+              SessionData.empty.copy(
                 journeyStatus = Some(
                   StartingNewDraftReturn(
                     subscribed.subscribedDetails,
@@ -676,8 +692,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
                     subscribed.agentReferenceNumber,
                     Right(IncompleteSingleDisposalTriageAnswers.empty)
                   )
-                ),
-                userType = Some(UserType.Individual)
+                )
               )
             )(Right(()))
           }
@@ -685,6 +700,37 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
           checkIsRedirect(
             performAction(),
             controllers.returns.triage.routes.InitialTriageQuestionsController.whoIsIndividualRepresenting()
+          )
+        }
+
+      }
+
+      "redirect to the number of disposals page" when {
+
+        "the subscribed user type is trust" in {
+          val subscribed =
+            sample[Subscribed].copy(subscribedDetails = sample[SubscribedDetails].copy(name = Left(sample[TrustName])))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionDataWithSubscribed(subscribed))
+            mockStoreSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  StartingNewDraftReturn(
+                    subscribed.subscribedDetails,
+                    subscribed.ggCredId,
+                    subscribed.agentReferenceNumber,
+                    Right(IncompleteSingleDisposalTriageAnswers.empty)
+                  )
+                )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(),
+            controllers.returns.triage.routes.InitialTriageQuestionsController.howManyProperties()
           )
         }
 
@@ -937,6 +983,8 @@ class PrivateBetaHomePageControllerSpec extends HomePageControllerSpec {
         case _             => false
       }
     )
+
+  val subscribed = sample[Subscribed]
 
   "The HomePage Controller" when {
 

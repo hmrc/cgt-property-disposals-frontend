@@ -33,23 +33,35 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 
 @(subscribed: Subscribed)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
-@isAnAgent = @{request.userType.contains(UserType.Agent)}
+@isAnAgent = @{subscribed.agentReferenceNumber.isDefined}
 @title = @{messages(s"account.home.title")}
 @subtitle = @{messages("account.home.subtitle", subscribed.subscribedDetails.cgtReference.value)}
 
 @mainTemplate(title = title, userType = request.userType, mainClass=Some("full-width"), withSignOutLink = false, accountMenu=Some(accountMenu(Some(AccountMenuItem.Home())))) {
 
-  <div class="grid-row">
-   <div class="column-two-thirds">
-    @caption(if(isAnAgent) { s"${messages("account.agent.prefix")} ${subscribed.subscribedDetails.makeAccountName}" } else { subscribed.subscribedDetails.makeAccountName()})
-    @pageHeading(title, None, Some(subtitle))
-   </div>
+ <div class="grid-row">
+  <div class="column-two-thirds account-header">
+   @caption(if(isAnAgent) {
+    s"${messages("account.agent.prefix")} ${subscribed.subscribedDetails.makeAccountName}"
+   } else {
+    subscribed.subscribedDetails.makeAccountName()
+   })
+
+   @pageHeading(title, None, Some(subtitle))
+
+   @if(subscribed.draftReturns.nonEmpty || subscribed.sentReturns.nonEmpty) {
+    <p>
+     <a href="@{controllers.accounts.homepage.routes.HomePageController.startNewReturn().url}">
+      @messages("account.home.button.start-a-new-return")
+     </a>
+    </p>
+   } else {
+      @buttonLink(messages("account.home.button.start-a-new-return"), controllers.accounts.homepage.routes.HomePageController.startNewReturn().url)
+   }
   </div>
+ </div>
 
-
- @buttonLink(messages("account.home.button.start-a-new-return"), controllers.accounts.homepage.routes.HomePageController.startNewReturn().url)
-
-  @if(subscribed.draftReturns.nonEmpty ) {
+  @if(subscribed.draftReturns.nonEmpty) {
    <h2>Draft Returns</h2>
    <ul>
    @subscribed.draftReturns.map { draftReturn =>

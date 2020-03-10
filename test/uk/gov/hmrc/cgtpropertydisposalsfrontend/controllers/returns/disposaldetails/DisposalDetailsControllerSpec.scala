@@ -1073,33 +1073,6 @@ class DisposalDetailsControllerSpec
           )
         }
 
-        "the user has not answered all of the disposal details questions " +
-          "and the draft return and session data has been successfully updated" in {
-          val currentAnswers     = sample[IncompleteDisposalDetailsAnswers].copy(disposalFees = None)
-          val (session, journey) = sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)
-
-          val newDisposalFees = 2d
-          val updatedAnswers = currentAnswers.copy(
-            disposalFees = Some(AmountInPence.fromPounds(newDisposalFees))
-          )
-          val newDraftReturn = journey.draftReturn.copy(
-            disposalDetailsAnswers = Some(updatedAnswers)
-          )
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
-            mockStoreSession(session.copy(journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))))(Right(()))
-          }
-
-          checkIsRedirect(
-            performAction(Seq("disposalFees" -> newDisposalFees.toString)),
-            controllers.returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers()
-          )
-
-        }
-
       }
 
       "redirect to the cya page" when {
