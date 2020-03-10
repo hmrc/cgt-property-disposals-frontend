@@ -32,6 +32,7 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitControllerSpec.validateAllCheckYourAnswersSections
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.ViewingReturn
@@ -41,7 +42,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.format
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.PaymentMethod.DirectDebit
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, ReturnSummary}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnSummary
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.PaymentsService
@@ -183,8 +184,7 @@ class ViewReturnControllerSpec
           )
 
           validatePaymentsSection(document, viewingReturn)
-          CheckAllAnswersAndSubmitControllerSpec
-            .validateAllCheckYourAnswersSections(document, viewingReturn.completeReturn)
+          validateAllCheckYourAnswersSections(document, viewingReturn.completeReturn)
         }
       }
 
