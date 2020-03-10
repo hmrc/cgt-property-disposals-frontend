@@ -24,8 +24,18 @@ h1 > span.heading-medium,
 .returns-list-header h3 {
     font-size: 24px;
 }
-.govuk-box-highlight > h1 {
+.govuk-box-highlight > h1,
+.account-header h1.heading-xlarge,
+.account-header .sub-heading {
     margin-bottom: 0;
+}
+
+.account-header {
+    padding-bottom: 30px;
+}
+
+.account-header .form-group {
+    margin-top: 30px;
 }
 
 .govuk-box-highlight--status {
