@@ -34,7 +34,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DateErrorScenarios.{DateErrorScenario, dateErrorScenarios}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageControllerSpec.validateSingleDisposalTriageCheckYourAnswersPage
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => returnsRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, routes => returnsRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
@@ -58,9 +58,8 @@ class SingleDisposalsTriageControllerSpec
     with AuthSupport
     with SessionSupport
     with ScalaCheckDrivenPropertyChecks
-    with RedirectToStartBehaviour {
-
-  val mockReturnsService = mock[ReturnsService]
+    with RedirectToStartBehaviour
+    with ReturnsServiceSupport {
 
   val mockTaxYearService = mock[TaxYearService]
 
@@ -126,12 +125,6 @@ class SingleDisposalsTriageControllerSpec
 
   def mockGetNextUUID(uuid: UUID) =
     (mockUUIDGenerator.nextId _).expects().returning(uuid)
-
-  def mockStoreDraftReturn(draftReturn: DraftReturn)(result: Either[Error, Unit]) =
-    (mockReturnsService
-      .storeDraftReturn(_: DraftReturn)(_: HeaderCarrier))
-      .expects(draftReturn, *)
-      .returning(EitherT.fromEither[Future](result))
 
   def mockGetTaxYear(date: LocalDate)(response: Either[Error, Option[TaxYear]]) =
     (mockTaxYearService
@@ -2067,7 +2060,7 @@ class SingleDisposalsTriageControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithCompleteStartingNewDraftReturn)
             mockGetNextUUID(uuid)
-            mockStoreDraftReturn(fillingOutReturn.draftReturn)(Left(Error("")))
+            mockStoreDraftReturn(fillingOutReturn.draftReturn, fillingOutReturn.agentReferenceNumber)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -2078,7 +2071,7 @@ class SingleDisposalsTriageControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithCompleteStartingNewDraftReturn)
             mockGetNextUUID(uuid)
-            mockStoreDraftReturn(fillingOutReturn.draftReturn)(Right(()))
+            mockStoreDraftReturn(fillingOutReturn.draftReturn, fillingOutReturn.agentReferenceNumber)(Right(()))
             mockStoreSession(sessionDataWithFillingOutDraftReturn)(Left(Error("")))
           }
 
@@ -2094,7 +2087,7 @@ class SingleDisposalsTriageControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithCompleteStartingNewDraftReturn)
             mockGetNextUUID(uuid)
-            mockStoreDraftReturn(fillingOutReturn.draftReturn)(Right(()))
+            mockStoreDraftReturn(fillingOutReturn.draftReturn, fillingOutReturn.agentReferenceNumber)(Right(()))
             mockStoreSession(sessionDataWithFillingOutDraftReturn)(Right(()))
           }
 
@@ -2454,7 +2447,7 @@ class SingleDisposalsTriageControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)))
             extraMockActions()
-            mockStoreDraftReturn(updatedDraftReturn)(Left(Error("")))
+            mockStoreDraftReturn(updatedDraftReturn, fillingOutReturn.agentReferenceNumber)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction(formData))
@@ -2465,7 +2458,7 @@ class SingleDisposalsTriageControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)))
             extraMockActions()
-            mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+            mockStoreDraftReturn(updatedDraftReturn, fillingOutReturn.agentReferenceNumber)(Right(()))
             mockStoreSession(SessionData.empty.copy(journeyStatus = Some(updatedFillingOutReturn)))(Left(Error("")))
           }
 
@@ -2516,7 +2509,7 @@ class SingleDisposalsTriageControllerSpec
       mockAuthWithNoRetrievals()
       mockGetSession(SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)))
       extraMockActions()
-      mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+      mockStoreDraftReturn(updatedDraftReturn, fillingOutReturn.agentReferenceNumber)(Right(()))
       mockStoreSession(SessionData.empty.copy(journeyStatus = Some(updatedFillingOutReturn)))(Right(()))
     }
 

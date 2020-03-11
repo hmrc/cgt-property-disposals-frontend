@@ -93,42 +93,44 @@ class InitialTriageQuestionsController @Inject() (
             whoAreYouReportingForForm
               .bindFromRequest()
               .fold(
-                formWithErrors => BadRequest(whoAreYouReportingForPage(formWithErrors, None, state.isRight)), {
-                  individualUserType =>
-                    val answers = triageAnswersFomState(state)
-                    val oldIndividualUserType = answers.fold(
-                      _.fold(_.individualUserType, c => c.individualUserType),
-                      _.fold(_.individualUserType, c => c.individualUserType)
+                formWithErrors =>
+                  BadRequest(whoAreYouReportingForPage(formWithErrors, None, state.isRight)), { individualUserType =>
+                  val answers = triageAnswersFomState(state)
+                  val oldIndividualUserType = answers.fold(
+                    _.fold(_.individualUserType, c => c.individualUserType),
+                    _.fold(_.individualUserType, c => c.individualUserType)
+                  )
+                  val redirectTo = answers.fold(
+                    _ => routes.MultipleDisposalsTriageController.checkYourAnswers(),
+                    _ => routes.SingleDisposalsTriageController.checkYourAnswers()
+                  )
+
+                  if (oldIndividualUserType.contains(individualUserType)) {
+                    Redirect(redirectTo)
+                  } else {
+
+                    val updatedState = updateIndividualUserType(state, individualUserType)
+                    val result =
+                      for {
+                        _ <- updatedState.fold(
+                              _ => EitherT.pure(()),
+                              fillingOutReturn =>
+                                returnsService
+                                  .storeDraftReturn(fillingOutReturn.draftReturn, fillingOutReturn.agentReferenceNumber)
+                            )
+                        _ <- EitherT(
+                              updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedState.merge)))
+                            )
+                      } yield ()
+
+                    result.fold(
+                      { e =>
+                        logger.warn("Could not perform updates", e)
+                        errorHandler.errorResult()
+                      },
+                      _ => Redirect(redirectTo)
                     )
-                    val redirectTo = answers.fold(
-                      _ => routes.MultipleDisposalsTriageController.checkYourAnswers(),
-                      _ => routes.SingleDisposalsTriageController.checkYourAnswers()
-                    )
-
-                    if (oldIndividualUserType.contains(individualUserType)) {
-                      Redirect(redirectTo)
-                    } else {
-
-                      val updatedState = updateIndividualUserType(state, individualUserType)
-                      val result =
-                        for {
-                          _ <- updatedState.fold(
-                                _ => EitherT.pure(()),
-                                fillingOutReturn => returnsService.storeDraftReturn(fillingOutReturn.draftReturn)
-                              )
-                          _ <- EitherT(
-                                updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedState.merge)))
-                              )
-                        } yield ()
-
-                      result.fold(
-                        { e =>
-                          logger.warn("Could not perform updates", e)
-                          errorHandler.errorResult()
-                        },
-                        _ => Redirect(redirectTo)
-                      )
-                    }
+                  }
                 }
               )
           }
@@ -179,7 +181,9 @@ class InitialTriageQuestionsController @Inject() (
                   for {
                     _ <- updatedState.fold(
                           _ => EitherT.pure(()),
-                          fillingOutReturn => returnsService.storeDraftReturn(fillingOutReturn.draftReturn)
+                          fillingOutReturn =>
+                            returnsService
+                              .storeDraftReturn(fillingOutReturn.draftReturn, fillingOutReturn.agentReferenceNumber)
                         )
                     _ <- EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedState.merge))))
                   } yield ()

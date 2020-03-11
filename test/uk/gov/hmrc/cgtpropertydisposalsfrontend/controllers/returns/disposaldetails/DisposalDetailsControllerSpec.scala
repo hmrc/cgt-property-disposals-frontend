@@ -241,7 +241,7 @@ class DisposalDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn)(Left(Error("")))
+            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction(Seq("shareOfProperty" -> "0")))
@@ -251,7 +251,7 @@ class DisposalDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn)(Right(()))
+            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(
               session.copy(
                 journeyStatus = Some(
@@ -285,7 +285,7 @@ class DisposalDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn)(Right(()))
+            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(
               session.copy(
                 journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))
@@ -314,7 +314,7 @@ class DisposalDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn)(Right(()))
+            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(
               session.copy(
                 journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))
@@ -351,7 +351,7 @@ class DisposalDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn)(Right(()))
+            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(
               session.copy(
                 journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))
@@ -400,7 +400,7 @@ class DisposalDetailsControllerSpec
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(session)
-          mockStoreDraftReturn(newDraftReturn)(Right(()))
+          mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
           mockStoreSession(
             session.copy(
               journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))
@@ -427,7 +427,7 @@ class DisposalDetailsControllerSpec
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(session)
-          mockStoreDraftReturn(newDraftReturn)(Right(()))
+          mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
           mockStoreSession(
             session.copy(
               journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))
@@ -616,7 +616,7 @@ class DisposalDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn)(Left(Error("")))
+            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction(Seq("disposalPrice" -> newDisposalPrice.inPounds().toString)))
@@ -626,7 +626,7 @@ class DisposalDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn)(Right(()))
+            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(
               session.copy(journeyStatus = Some(
                 journey.copy(
@@ -664,7 +664,7 @@ class DisposalDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn)(Right(()))
+            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(
               session.copy(journeyStatus = Some(
                 journey.copy(
@@ -698,7 +698,7 @@ class DisposalDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn)(Right(()))
+            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(
               session.copy(journeyStatus = Some(
                 journey.copy(
@@ -736,7 +736,7 @@ class DisposalDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn)(Right(()))
+            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(
               session.copy(journeyStatus = Some(
                 journey.copy(
@@ -1020,7 +1020,7 @@ class DisposalDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn)(Left(Error("")))
+            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction(Seq("disposalFees" -> newDisposalFees.inPounds().toString)))
@@ -1030,7 +1030,7 @@ class DisposalDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn)(Right(()))
+            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(session.copy(journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))))(
               Left(Error(""))
             )
@@ -1063,7 +1063,7 @@ class DisposalDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn)(Right(()))
+            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(session.copy(journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))))(Right(()))
           }
 
@@ -1093,7 +1093,7 @@ class DisposalDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn)(Right(()))
+            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(session.copy(journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))))(Right(()))
           }
 
@@ -1249,7 +1249,8 @@ class DisposalDetailsControllerSpec
             mockStoreDraftReturn(
               journey.draftReturn.copy(
                 disposalDetailsAnswers = Some(completeAnswers)
-              )
+              ),
+              journey.agentReferenceNumber
             )(Left(Error("")))
           }
 
@@ -1265,7 +1266,8 @@ class DisposalDetailsControllerSpec
             mockStoreDraftReturn(
               journey.draftReturn.copy(
                 disposalDetailsAnswers = Some(completeAnswers)
-              )
+              ),
+              journey.agentReferenceNumber
             )(Right(()))
             mockStoreSession(
               session.copy(
@@ -1346,7 +1348,8 @@ class DisposalDetailsControllerSpec
               mockStoreDraftReturn(
                 journey.draftReturn.copy(
                   disposalDetailsAnswers = Some(completeAnswers)
-                )
+                ),
+                journey.agentReferenceNumber
               )(Right(()))
               mockStoreSession(
                 session.copy(

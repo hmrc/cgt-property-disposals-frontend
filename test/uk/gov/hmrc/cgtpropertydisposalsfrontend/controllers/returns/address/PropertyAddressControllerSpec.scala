@@ -30,32 +30,30 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressControllerSpec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressControllerSpec.validatePropertyAddressPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.{routes => returnsAddressRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
-import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class PropertyAddressControllerSpec
     extends AddressControllerSpec[FillingOutReturn]
     with ScalaCheckDrivenPropertyChecks
-    with RedirectToStartBehaviour {
+    with RedirectToStartBehaviour
+    with ReturnsServiceSupport {
 
   val draftReturn: DraftReturn = sample[DraftReturn].copy(propertyAddress = Some(ukAddress(1)))
 
   val validJourneyStatus = FillingOutReturn(sample[SubscribedDetails], sample[GGCredId], None, draftReturn)
-
-  val mockReturnsService = mock[ReturnsService]
 
   override def overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](bind[ReturnsService].toInstance(mockReturnsService)) ::: super.overrideBindings
@@ -72,19 +70,11 @@ class PropertyAddressControllerSpec
   override val mockUpdateAddress: Option[(FillingOutReturn, Address, Either[Error, Unit]) => Unit] =
     Some {
       case (newDetails: FillingOutReturn, a: UkAddress, r: Either[Error, Unit]) =>
-        mockStoreDraftReturn(newDetails.draftReturn.copy(propertyAddress = Some(a)))(r)
+        mockStoreDraftReturn(newDetails.draftReturn.copy(propertyAddress = Some(a)), newDetails.agentReferenceNumber)(r)
 
       case (_, _: NonUkAddress, _) =>
         sys.error("Non UK addresses not handled in this spec")
     }
-
-  def mockStoreDraftReturn(
-    draftReturn: DraftReturn
-  )(result: Either[Error, Unit]) =
-    (mockReturnsService
-      .storeDraftReturn(_: DraftReturn)(_: HeaderCarrier))
-      .expects(draftReturn, *)
-      .returning(EitherT.fromEither[Future](result))
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
@@ -229,7 +219,7 @@ class PropertyAddressControllerSpec
 
         testIsCheckYourAnswers(
           performAction(),
-          draftReturn.propertyAddress.fold(sys.error("Error"))(_.asInstanceOf[UkAddress]),
+          draftReturn.propertyAddress.getOrElse(sys.error("Error")),
           "returns.property-address.cya.title"
         )
       }

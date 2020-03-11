@@ -16,14 +16,14 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 
-import java.time.{Clock, LocalDate}
-
+import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{routes => baseRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
@@ -31,10 +31,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
-import cats.instances.future._
-import cats.syntax.either._
-import cats.syntax._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
 
 @Singleton
 class ConfirmDraftReturnController @Inject() (
@@ -52,10 +48,10 @@ class ConfirmDraftReturnController @Inject() (
 
   def confirmDraftReturn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(FillingOutReturn(_, _, _, draftReturn)) => {
+      case Some(FillingOutReturn(_, _, agentReferenceNumber, draftReturn)) => {
         val draftReturnWithLastUpdated = draftReturn.copy(lastUpdatedDate = LocalDateUtils.today())
 
-        val response = returnsService.storeDraftReturn(draftReturnWithLastUpdated)
+        val response = returnsService.storeDraftReturn(draftReturnWithLastUpdated, agentReferenceNumber)
 
         response.fold(
           { e =>
