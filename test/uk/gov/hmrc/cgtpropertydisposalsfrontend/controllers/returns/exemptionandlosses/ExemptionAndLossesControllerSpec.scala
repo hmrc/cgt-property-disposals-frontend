@@ -128,12 +128,13 @@ class ExemptionAndLossesControllerSpec
       "display the page" when {
 
         "the exemption and losses section has not yet been started" in {
+          val disposalDate = sample[DisposalDate]
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithState(
                 None,
-                Some(sample[DisposalDate]),
+                Some(disposalDate),
                 None
               )._1
             )
@@ -142,7 +143,9 @@ class ExemptionAndLossesControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey(
-              "inYearLosses.title"
+              "inYearLosses.title",
+              disposalDate.taxYear.startDateInclusive.getYear.toString,
+              disposalDate.taxYear.endDateExclusive.getYear.toString
             ), { doc =>
               doc.select("#back").attr("href") shouldBe returns.routes.TaskListController.taskList().url
               doc.select("#content > article > form").attr("action") shouldBe routes.ExemptionAndLossesController
@@ -153,12 +156,13 @@ class ExemptionAndLossesControllerSpec
         }
 
         "the exemption and losses section has been completed" in {
+          val disposalDate = sample[DisposalDate]
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithState(
                 sample[CompleteExemptionAndLossesAnswers],
-                sample[DisposalDate],
+                disposalDate,
                 sample[CompleteReliefDetailsAnswers]
               )._1
             )
@@ -167,7 +171,9 @@ class ExemptionAndLossesControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey(
-              "inYearLosses.title"
+              "inYearLosses.title",
+              disposalDate.taxYear.startDateInclusive.getYear.toString,
+              disposalDate.taxYear.endDateExclusive.getYear.toString
             ), { doc =>
               doc.select("#back").attr("href") shouldBe routes.ExemptionAndLossesController.checkYourAnswers().url
               doc.select("#content > article > form").attr("action") shouldBe routes.ExemptionAndLossesController
@@ -178,6 +184,7 @@ class ExemptionAndLossesControllerSpec
         }
 
         "the amount in the session is zero" in {
+          val disposalDate = sample[DisposalDate]
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -185,7 +192,7 @@ class ExemptionAndLossesControllerSpec
                 sample[IncompleteExemptionAndLossesAnswers].copy(
                   inYearLosses = Some(AmountInPence.zero)
                 ),
-                sample[DisposalDate],
+                disposalDate,
                 sample[CompleteReliefDetailsAnswers]
               )._1
             )
@@ -194,7 +201,9 @@ class ExemptionAndLossesControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey(
-              "inYearLosses.title"
+              "inYearLosses.title",
+              disposalDate.taxYear.startDateInclusive.getYear.toString,
+              disposalDate.taxYear.endDateExclusive.getYear.toString
             ), { doc =>
               doc.select("#inYearLosses-1").attr("checked") shouldBe "checked"
             }
@@ -203,6 +212,7 @@ class ExemptionAndLossesControllerSpec
 
         "the amount in the session is non-zero" in {
           val amountInPence = AmountInPence(1000L)
+          val disposalDate  = sample[DisposalDate]
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -210,7 +220,7 @@ class ExemptionAndLossesControllerSpec
                 sample[IncompleteExemptionAndLossesAnswers].copy(
                   inYearLosses = Some(amountInPence)
                 ),
-                sample[DisposalDate],
+                disposalDate,
                 sample[CompleteReliefDetailsAnswers]
               )._1
             )
@@ -219,7 +229,9 @@ class ExemptionAndLossesControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey(
-              "inYearLosses.title"
+              "inYearLosses.title",
+              disposalDate.taxYear.startDateInclusive.getYear.toString,
+              disposalDate.taxYear.endDateExclusive.getYear.toString
             ), { doc =>
               doc.select("#inYearLosses-0").attr("checked")  shouldBe "checked"
               doc.select("#inYearLossesValue").attr("value") shouldBe "10"
@@ -259,8 +271,20 @@ class ExemptionAndLossesControllerSpec
 
       "show a form error" when {
 
+        val disposalDate = sample[DisposalDate]
+
+        val session = sessionWithState(
+          sample[CompleteExemptionAndLossesAnswers],
+          disposalDate,
+          sample[ReliefDetailsAnswers]
+        )._1
+
         def test(data: (String, String)*)(expectedErrorKey: String): Unit =
-          testFormError(data: _*)(expectedErrorKey)("inYearLosses.title")(performAction)
+          testFormError(data: _*)(expectedErrorKey)(
+            "inYearLosses.title",
+            disposalDate.taxYear.startDateInclusive.getYear.toString,
+            disposalDate.taxYear.endDateExclusive.getYear.toString
+          )(performAction, session)
 
         "no option has been selected" in {
           test()("inYearLosses.error.required")
@@ -303,7 +327,7 @@ class ExemptionAndLossesControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Left(Error("")))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(
@@ -315,7 +339,7 @@ class ExemptionAndLossesControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(
               session.copy(
                 journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn))
@@ -616,7 +640,7 @@ class ExemptionAndLossesControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Left(Error("")))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(
@@ -628,7 +652,7 @@ class ExemptionAndLossesControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(
               session.copy(
                 journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn))
@@ -927,7 +951,7 @@ class ExemptionAndLossesControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Left(Error("")))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(
@@ -939,7 +963,7 @@ class ExemptionAndLossesControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(
               session.copy(
                 journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn))
@@ -1227,7 +1251,7 @@ class ExemptionAndLossesControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Left(Error("")))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction("taxableGainOrLoss" -> "2"))
@@ -1237,7 +1261,7 @@ class ExemptionAndLossesControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(
               session.copy(
                 journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn))
@@ -1428,7 +1452,7 @@ class ExemptionAndLossesControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockStoreDraftReturn(updatedDraftReturn)(Left(Error("")))
+              mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
             }
 
             checkIsTechnicalErrorPage(performAction())
@@ -1438,7 +1462,7 @@ class ExemptionAndLossesControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+              mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
               mockStoreSession(updatedSession)(Left(Error("")))
             }
 
@@ -1477,7 +1501,7 @@ class ExemptionAndLossesControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(updatedSession)(Right(()))
           }
 
@@ -1648,7 +1672,7 @@ class ExemptionAndLossesControllerSpec
 
     checkPageIsDisplayed(
       performAction(data),
-      messageFromMessageKey(pageTitleKey, titleArgs), { doc =>
+      messageFromMessageKey(pageTitleKey, titleArgs: _*), { doc =>
         doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
           expectedErrorMessageKey,
           errorArgs: _*
@@ -1672,7 +1696,7 @@ class ExemptionAndLossesControllerSpec
     inSequence {
       mockAuthWithNoRetrievals()
       mockGetSession(session)
-      mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+      mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
       mockStoreSession(
         session.copy(
           journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn))

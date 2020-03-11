@@ -24,10 +24,13 @@ import cats.syntax.eq._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
 import play.api.http.Status.OK
 import play.api.libs.json.{Json, OFormat}
+import play.api.mvc.Request
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit.DraftReturnUpdated
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{ReturnSummary, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{GetDraftReturnResponse, ListReturnsResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
@@ -37,7 +40,10 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[ReturnsServiceImpl])
 trait ReturnsService {
 
-  def storeDraftReturn(draftReturn: DraftReturn)(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit]
+  def storeDraftReturn(draftReturn: DraftReturn, agentReferenceNumber: Option[AgentReferenceNumber])(
+    implicit hc: HeaderCarrier,
+    request: Request[_]
+  ): EitherT[Future, Error, Unit]
 
   def getDraftReturns(cgtReference: CgtReference)(implicit hc: HeaderCarrier): EitherT[Future, Error, List[DraftReturn]]
 
@@ -56,13 +62,25 @@ trait ReturnsService {
 }
 
 @Singleton
-class ReturnsServiceImpl @Inject() (connector: ReturnsConnector)(
+class ReturnsServiceImpl @Inject() (connector: ReturnsConnector, auditService: AuditService)(
   implicit ec: ExecutionContext
 ) extends ReturnsService {
 
-  def storeDraftReturn(draftReturn: DraftReturn)(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] =
+  def storeDraftReturn(
+    draftReturn: DraftReturn,
+    agentReferenceNumber: Option[AgentReferenceNumber]
+  )(implicit hc: HeaderCarrier, request: Request[_]): EitherT[Future, Error, Unit] =
     connector.storeDraftReturn(draftReturn).subflatMap { httpResponse =>
       if (httpResponse.status === OK) {
+        auditService.sendEvent(
+          "draftReturnUpdated",
+          DraftReturnUpdated(
+            draftReturn,
+            draftReturn.cgtReference.value,
+            agentReferenceNumber.map(_.value)
+          ),
+          "draft-return-updated"
+        )
         Right(())
       } else {
         Left(Error(s"Call to store draft return came back with status ${httpResponse.status}}"))

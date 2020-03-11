@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
-import cats.data.EitherT
-import cats.instances.future._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
@@ -27,18 +25,19 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.BAD_REQUEST
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsAnswers, IncompleteMultipleDisposalsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
-import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class InitialTriageQuestionsControllerSpec
@@ -46,9 +45,8 @@ class InitialTriageQuestionsControllerSpec
     with AuthSupport
     with SessionSupport
     with ScalaCheckDrivenPropertyChecks
-    with RedirectToStartBehaviour {
-
-  val mockReturnsService = mock[ReturnsService]
+    with RedirectToStartBehaviour
+    with ReturnsServiceSupport {
 
   override val overrideBindings =
     List[GuiceableModule](
@@ -67,29 +65,29 @@ class InitialTriageQuestionsControllerSpec
   }
 
   def sessionDataWithStartingNewDraftReturn(
-    triageAnswers: Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers]
+    triageAnswers: Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers],
+    name: Either[TrustName, IndividualName]
   ): (SessionData, StartingNewDraftReturn) = {
     val startingNewDraftReturn =
-      sample[StartingNewDraftReturn].copy(newReturnTriageAnswers = triageAnswers)
+      sample[StartingNewDraftReturn].copy(
+        subscribedDetails      = sample[SubscribedDetails].copy(name = name),
+        newReturnTriageAnswers = triageAnswers
+      )
     SessionData.empty.copy(journeyStatus = Some(startingNewDraftReturn)) -> startingNewDraftReturn
   }
 
   def sessionDataWithFillingOutReturn(
-    singleDisposalTriageAnswers: SingleDisposalTriageAnswers
+    singleDisposalTriageAnswers: SingleDisposalTriageAnswers,
+    name: Either[TrustName, IndividualName] = Right(sample[IndividualName])
   ): (SessionData, FillingOutReturn) = {
     val fillingOutReturn = sample[FillingOutReturn].copy(
       draftReturn = sample[DraftReturn].copy(
         triageAnswers = singleDisposalTriageAnswers
-      )
+      ),
+      subscribedDetails = sample[SubscribedDetails].copy(name = name)
     )
     SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)) -> fillingOutReturn
   }
-
-  def mockStoreDraftReturn(draftReturn: DraftReturn)(result: Either[Error, Unit]) =
-    (mockReturnsService
-      .storeDraftReturn(_: DraftReturn)(_: HeaderCarrier))
-      .expects(draftReturn, *)
-      .returning(EitherT.fromEither[Future](result))
 
   "InitialTriageQuestionsController" when {
 
@@ -99,6 +97,24 @@ class InitialTriageQuestionsControllerSpec
 
       behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
 
+      "redirect to the how many properties page" when {
+
+        "the user is a trust" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                Right(IncompleteSingleDisposalTriageAnswers.empty),
+                Left(sample[TrustName])
+              )._1
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.InitialTriageQuestionsController.howManyProperties())
+        }
+
+      }
+
       "display the page" when {
 
         "the user is starting a new draft return and" when {
@@ -107,7 +123,10 @@ class InitialTriageQuestionsControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
-                sessionDataWithStartingNewDraftReturn(Right(IncompleteSingleDisposalTriageAnswers.empty))._1
+                sessionDataWithStartingNewDraftReturn(
+                  Right(IncompleteSingleDisposalTriageAnswers.empty),
+                  Right(sample[IndividualName])
+                )._1
               )
             }
 
@@ -158,7 +177,8 @@ class InitialTriageQuestionsControllerSpec
                     IncompleteMultipleDisposalsAnswers.empty.copy(
                       individualUserType = Some(IndividualUserType.Capacitor)
                     )
-                  )
+                  ),
+                  Right(sample[IndividualName])
                 )._1
               )
             }
@@ -189,6 +209,24 @@ class InitialTriageQuestionsControllerSpec
 
       behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
 
+      "redirect to the how many properties page" when {
+
+        "the user is a trust" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                Right(IncompleteSingleDisposalTriageAnswers.empty),
+                Left(sample[TrustName])
+              )._1
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.InitialTriageQuestionsController.howManyProperties())
+        }
+
+      }
+
       "show a form error" when {
 
         def test(formData: (String, String)*)(expectedErrorKey: String): Unit = {
@@ -200,7 +238,8 @@ class InitialTriageQuestionsControllerSpec
                   IncompleteMultipleDisposalsAnswers.empty.copy(
                     individualUserType = Some(IndividualUserType.Capacitor)
                   )
-                )
+                ),
+                Right(sample[IndividualName])
               )._1
             )
           }
@@ -243,7 +282,7 @@ class InitialTriageQuestionsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedJourney.draftReturn)(Left(Error("")))
+            mockStoreDraftReturn(updatedJourney.draftReturn, fillingOutReturn.agentReferenceNumber)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction(formData))
@@ -253,7 +292,7 @@ class InitialTriageQuestionsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedJourney.draftReturn)(Right(()))
+            mockStoreDraftReturn(updatedJourney.draftReturn, fillingOutReturn.agentReferenceNumber)(Right(()))
             mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
           }
 
@@ -268,7 +307,8 @@ class InitialTriageQuestionsControllerSpec
           "the user had not answered any questions in the triage section yet" in {
             testSuccessfulUpdateStartingNewDraftReturn(
               performAction("individualUserType" -> "0"),
-              Right(IncompleteSingleDisposalTriageAnswers.empty)
+              Right(IncompleteSingleDisposalTriageAnswers.empty),
+              Right(sample[IndividualName])
             )(
               Right(
                 IncompleteSingleDisposalTriageAnswers.empty.copy(individualUserType = Some(IndividualUserType.Self))
@@ -282,7 +322,8 @@ class InitialTriageQuestionsControllerSpec
               performAction("individualUserType" -> "1"),
               Right(
                 IncompleteSingleDisposalTriageAnswers.empty.copy(individualUserType = Some(IndividualUserType.Self))
-              )
+              ),
+              Right(sample[IndividualName])
             )(
               Right(
                 IncompleteSingleDisposalTriageAnswers.empty
@@ -293,13 +334,15 @@ class InitialTriageQuestionsControllerSpec
           }
 
           "the user is on a single disposal journey and they have completed the triage section" in {
-            val answers = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = IndividualUserType.Self)
+            val answers =
+              sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(IndividualUserType.Self))
 
             testSuccessfulUpdateStartingNewDraftReturn(
               performAction("individualUserType" -> "2"),
-              Right(answers)
+              Right(answers),
+              Right(sample[IndividualName])
             )(
-              Right(answers.copy(individualUserType = IndividualUserType.PersonalRepresentative)),
+              Right(answers.copy(individualUserType = Some(IndividualUserType.PersonalRepresentative))),
               routes.SingleDisposalsTriageController.checkYourAnswers()
             )
           }
@@ -307,7 +350,8 @@ class InitialTriageQuestionsControllerSpec
           "the user is on a multiple disposals journey and they haven't completed the triage section" in {
             testSuccessfulUpdateStartingNewDraftReturn(
               performAction("individualUserType" -> "1"),
-              Left(IncompleteMultipleDisposalsAnswers.empty.copy(individualUserType = Some(IndividualUserType.Self)))
+              Left(IncompleteMultipleDisposalsAnswers.empty.copy(individualUserType = Some(IndividualUserType.Self))),
+              Right(sample[IndividualName])
             )(
               Left(
                 IncompleteMultipleDisposalsAnswers.empty.copy(individualUserType = Some(IndividualUserType.Capacitor))
@@ -317,13 +361,15 @@ class InitialTriageQuestionsControllerSpec
           }
 
           "the user is on a multiple disposals journey and they have completed the triage section" in {
-            val answers = sample[CompleteMultipleDisposalsAnswers].copy(individualUserType = IndividualUserType.Self)
+            val answers =
+              sample[CompleteMultipleDisposalsAnswers].copy(individualUserType = Some(IndividualUserType.Self))
 
             testSuccessfulUpdateStartingNewDraftReturn(
               performAction("individualUserType" -> "2"),
-              Left(answers)
+              Left(answers),
+              Right(sample[IndividualName])
             )(
-              Left(answers.copy(individualUserType = IndividualUserType.PersonalRepresentative)),
+              Left(answers.copy(individualUserType = Some(IndividualUserType.PersonalRepresentative))),
               routes.MultipleDisposalsTriageController.checkYourAnswers()
             )
 
@@ -343,13 +389,14 @@ class InitialTriageQuestionsControllerSpec
           }
 
           "the user is on a single disposal journey and they have completed the triage section" in {
-            val answers = sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = IndividualUserType.Self)
+            val answers =
+              sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(IndividualUserType.Self))
 
             testSuccessfulUpdateFillingOutReturn(
               performAction("individualUserType" -> "2"),
               answers
             )(
-              answers.copy(individualUserType = IndividualUserType.PersonalRepresentative),
+              answers.copy(individualUserType = Some(IndividualUserType.PersonalRepresentative)),
               routes.SingleDisposalsTriageController.checkYourAnswers()
             )
           }
@@ -365,7 +412,7 @@ class InitialTriageQuestionsControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithStartingNewDraftReturn(Right(answers))._1)
+            mockGetSession(sessionDataWithStartingNewDraftReturn(Right(answers), Right(sample[IndividualName]))._1)
           }
 
           checkIsRedirect(
@@ -389,15 +436,18 @@ class InitialTriageQuestionsControllerSpec
         "the user has not answered the question yet" in {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithStartingNewDraftReturn(Right(IncompleteSingleDisposalTriageAnswers.empty))._1)
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                Right(IncompleteSingleDisposalTriageAnswers.empty),
+                Left(sample[TrustName])
+              )._1
+            )
           }
 
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey("numberOfProperties.title"), { doc =>
-              doc.select("#back").attr("href") shouldBe routes.InitialTriageQuestionsController
-                .whoIsIndividualRepresenting()
-                .url
+              doc.select("#back").attr("href") shouldBe ""
               doc
                 .select("#content > article > form")
                 .attr("action") shouldBe routes.InitialTriageQuestionsController
@@ -441,9 +491,10 @@ class InitialTriageQuestionsControllerSpec
               sessionDataWithStartingNewDraftReturn(
                 Left(
                   IncompleteMultipleDisposalsAnswers.empty.copy(
-                    individualUserType = Some(IndividualUserType.Capacitor)
+                    individualUserType = None
                   )
-                )
+                ),
+                Left(sample[TrustName])
               )._1
             )
           }
@@ -451,9 +502,7 @@ class InitialTriageQuestionsControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey("numberOfProperties.title"), { doc =>
-              doc.select("#back").attr("href") shouldBe routes.InitialTriageQuestionsController
-                .whoIsIndividualRepresenting()
-                .url
+              doc.select("#back").attr("href") shouldBe ""
               doc
                 .select("#content > article > form")
                 .attr("action") shouldBe routes.InitialTriageQuestionsController
@@ -470,7 +519,8 @@ class InitialTriageQuestionsControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
-                Right(sample[CompleteSingleDisposalTriageAnswers])
+                Right(sample[CompleteSingleDisposalTriageAnswers]),
+                Right(sample[IndividualName])
               )._1
             )
           }
@@ -540,7 +590,8 @@ class InitialTriageQuestionsControllerSpec
                   IncompleteMultipleDisposalsAnswers.empty.copy(
                     individualUserType = Some(IndividualUserType.Capacitor)
                   )
-                )
+                ),
+                Right(sample[IndividualName])
               )._1
             )
           }
@@ -578,7 +629,8 @@ class InitialTriageQuestionsControllerSpec
               IncompleteSingleDisposalTriageAnswers.empty.copy(
                 individualUserType = Some(IndividualUserType.Self)
               )
-            )
+            ),
+            Right(sample[IndividualName])
           )
           val updatedJourney = journey.copy(
             newReturnTriageAnswers = Right(
@@ -608,14 +660,12 @@ class InitialTriageQuestionsControllerSpec
             testSuccessfulUpdateStartingNewDraftReturn(
               performAction("numberOfProperties" -> "0"),
               Right(
-                IncompleteSingleDisposalTriageAnswers.empty.copy(
-                  individualUserType = Some(IndividualUserType.Self)
-                )
-              )
+                IncompleteSingleDisposalTriageAnswers.empty
+              ),
+              Left(sample[TrustName])
             )(
               Right(
                 IncompleteSingleDisposalTriageAnswers.empty.copy(
-                  individualUserType         = Some(IndividualUserType.Self),
                   hasConfirmedSingleDisposal = true
                 )
               ),
@@ -631,7 +681,8 @@ class InitialTriageQuestionsControllerSpec
                   individualUserType         = Some(IndividualUserType.Self),
                   hasConfirmedSingleDisposal = true
                 )
-              )
+              ),
+              Right(sample[IndividualName])
             )(
               Left(
                 IncompleteMultipleDisposalsAnswers.empty.copy(
@@ -647,11 +698,12 @@ class InitialTriageQuestionsControllerSpec
 
             testSuccessfulUpdateStartingNewDraftReturn(
               performAction("numberOfProperties" -> "1"),
-              Right(answers)
+              Right(answers),
+              Right(sample[IndividualName])
             )(
               Left(
                 IncompleteMultipleDisposalsAnswers.empty.copy(
-                  individualUserType = Some(answers.individualUserType)
+                  individualUserType = answers.individualUserType
                 )
               ),
               routes.MultipleDisposalsTriageController.checkYourAnswers()
@@ -663,13 +715,14 @@ class InitialTriageQuestionsControllerSpec
               performAction("numberOfProperties" -> "0"),
               Left(
                 IncompleteMultipleDisposalsAnswers.empty.copy(
-                  individualUserType = Some(IndividualUserType.Self)
+                  individualUserType = None
                 )
-              )
+              ),
+              Left(sample[TrustName])
             )(
               Right(
                 IncompleteSingleDisposalTriageAnswers.empty.copy(
-                  individualUserType         = Some(IndividualUserType.Self),
+                  individualUserType         = None,
                   hasConfirmedSingleDisposal = true
                 )
               ),
@@ -679,16 +732,17 @@ class InitialTriageQuestionsControllerSpec
 
           "the user is on a multiple disposals journey and they have completed the triage section" in {
             val answers = sample[CompleteMultipleDisposalsAnswers].copy(
-              individualUserType = IndividualUserType.Self
+              individualUserType = Some(IndividualUserType.Self)
             )
 
             testSuccessfulUpdateStartingNewDraftReturn(
               performAction("numberOfProperties" -> "0"),
-              Left(answers)
+              Left(answers),
+              Right(sample[IndividualName])
             )(
               Right(
                 IncompleteSingleDisposalTriageAnswers.empty.copy(
-                  individualUserType         = Some(answers.individualUserType),
+                  individualUserType         = answers.individualUserType,
                   hasConfirmedSingleDisposal = true
                 )
               ),
@@ -708,13 +762,13 @@ class InitialTriageQuestionsControllerSpec
         "the user has submitted the same answer they have previously entered on the single disposal journey" in {
           val answers =
             IncompleteSingleDisposalTriageAnswers.empty.copy(
-              individualUserType         = Some(IndividualUserType.Self),
+              individualUserType         = None,
               hasConfirmedSingleDisposal = true
             )
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithStartingNewDraftReturn(Right(answers))._1)
+            mockGetSession(sessionDataWithStartingNewDraftReturn(Right(answers), Left(sample[TrustName]))._1)
           }
 
           checkIsRedirect(
@@ -731,7 +785,7 @@ class InitialTriageQuestionsControllerSpec
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithStartingNewDraftReturn(Left(answers))._1)
+            mockGetSession(sessionDataWithStartingNewDraftReturn(Left(answers), Right(sample[IndividualName]))._1)
           }
 
           checkIsRedirect(
@@ -749,12 +803,13 @@ class InitialTriageQuestionsControllerSpec
 
   def testSuccessfulUpdateStartingNewDraftReturn(
     performAction: => Future[Result],
-    answers: Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers]
+    answers: Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers],
+    name: Either[TrustName, IndividualName]
   )(
     updatedAnswers: Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers],
     expectedRedirect: Call
   ): Unit = {
-    val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+    val (session, journey) = sessionDataWithStartingNewDraftReturn(answers, name)
     val updatedJourney     = journey.copy(newReturnTriageAnswers = updatedAnswers)
 
     inSequence {
@@ -776,7 +831,7 @@ class InitialTriageQuestionsControllerSpec
     inSequence {
       mockAuthWithNoRetrievals()
       mockGetSession(session)
-      mockStoreDraftReturn(updatedJourney.draftReturn)(Right(()))
+      mockStoreDraftReturn(updatedJourney.draftReturn, journey.agentReferenceNumber)(Right(()))
       mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
     }
 

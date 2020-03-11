@@ -33,7 +33,7 @@
       <th scope="col">@messages("viewReturn.charges.status")</th>
     </tr>
   </thead>
-  <tbody>
+  <tbody id="returnPaymentDetails-@returnSummary.submissionId">
     @{ returnSummary.charges.map(chargeItem(_)) }
   </tbody>
 </table>

@@ -43,7 +43,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserTyp
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit.DraftReturnStarted
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{ReturnsService, TaxYearService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
@@ -61,6 +63,7 @@ class SingleDisposalsTriageController @Inject() (
   val errorHandler: ErrorHandler,
   returnsService: ReturnsService,
   taxYearService: TaxYearService,
+  auditService: AuditService,
   uuidGenerator: UUIDGenerator,
   cc: MessagesControllerComponents,
   val config: Configuration,
@@ -165,7 +168,7 @@ class SingleDisposalsTriageController @Inject() (
               _.copy(wasAUKResident = Some(wasAUKResident), countryOfResidence = None, assetType = None),
               complete =>
                 IncompleteSingleDisposalTriageAnswers(
-                  Some(complete.individualUserType),
+                  complete.individualUserType,
                   true,
                   Some(complete.disposalMethod),
                   Some(wasAUKResident),
@@ -309,7 +312,11 @@ class SingleDisposalsTriageController @Inject() (
                                 case (oldJourneyStatus, updatedJourneyStatus) =>
                                   if (updatedJourneyStatus.draftReturn === oldJourneyStatus.draftReturn)
                                     EitherT.pure(())
-                                  else returnsService.storeDraftReturn(updatedJourneyStatus.draftReturn)
+                                  else
+                                    returnsService.storeDraftReturn(
+                                      updatedJourneyStatus.draftReturn,
+                                      updatedJourneyStatus.agentReferenceNumber
+                                    )
                               }
                             )
                         _ <- EitherT(
@@ -345,7 +352,7 @@ class SingleDisposalsTriageController @Inject() (
       date: Either[LocalDate, DisposalDate]
     ): IncompleteSingleDisposalTriageAnswers =
       IncompleteSingleDisposalTriageAnswers(
-        Some(c.individualUserType),
+        c.individualUserType,
         true,
         Some(c.disposalMethod),
         Some(c.countryOfResidence.isUk()),
@@ -494,7 +501,7 @@ class SingleDisposalsTriageController @Inject() (
                 i => i.copy(assetType = Some(assetType), disposalDate = None, completionDate = None),
                 c =>
                   IncompleteSingleDisposalTriageAnswers(
-                    Some(c.individualUserType),
+                    c.individualUserType,
                     true,
                     Some(c.disposalMethod),
                     Some(false),
@@ -530,12 +537,13 @@ class SingleDisposalsTriageController @Inject() (
     withSingleDisposalTriageAnswers(request) {
       case (_, state, triageAnswers) =>
         lazy val displayReturnToSummaryLink = state.fold(_ => false, _ => true)
+        val isIndividual                    = state.fold(_.subscribedDetails, _.subscribedDetails).userType().isRight
 
         triageAnswers match {
           case c: CompleteSingleDisposalTriageAnswers =>
             Ok(checkYourAnswersPage(c, displayReturnToSummaryLink))
 
-          case IncompleteSingleDisposalTriageAnswers(None, _, _, _, _, _, _, _, _) =>
+          case IncompleteSingleDisposalTriageAnswers(None, _, _, _, _, _, _, _, _) if isIndividual =>
             Redirect(routes.InitialTriageQuestionsController.whoIsIndividualRepresenting())
 
           case IncompleteSingleDisposalTriageAnswers(_, false, _, _, _, _, _, _, _) =>
@@ -572,7 +580,7 @@ class SingleDisposalsTriageController @Inject() (
             Redirect(routes.SingleDisposalsTriageController.whenWasCompletionDate())
 
           case IncompleteSingleDisposalTriageAnswers(
-              Some(t),
+              t,
               true,
               Some(m),
               Some(true),
@@ -589,7 +597,7 @@ class SingleDisposalsTriageController @Inject() (
             )
 
           case IncompleteSingleDisposalTriageAnswers(
-              Some(t),
+              t,
               true,
               Some(m),
               Some(false),
@@ -653,28 +661,32 @@ class SingleDisposalsTriageController @Inject() (
                   LocalDateUtils.today()
                 )
               val result = for {
-                _ <- returnsService.storeDraftReturn(newDraftReturn)
-                _ <- EitherT(
-                      updateSession(sessionStore, request)(
-                        _.copy(journeyStatus = Some(
-                          FillingOutReturn(
-                            startingNewDraftReturn.subscribedDetails,
-                            startingNewDraftReturn.ggCredId,
-                            startingNewDraftReturn.agentReferenceNumber,
-                            newDraftReturn
-                          )
-                        )
-                        )
-                      )
-                    )
-              } yield ()
+                _ <- returnsService.storeDraftReturn(newDraftReturn, startingNewDraftReturn.agentReferenceNumber)
+                newJourney = FillingOutReturn(
+                  startingNewDraftReturn.subscribedDetails,
+                  startingNewDraftReturn.ggCredId,
+                  startingNewDraftReturn.agentReferenceNumber,
+                  newDraftReturn
+                )
+                _ <- EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newJourney))))
+              } yield newJourney
 
               result.fold(
                 e => {
                   logger.warn("Could not store draft return", e)
                   errorHandler.errorResult()
-                },
-                _ => continueToTaskList
+                }, { newJourney =>
+                  auditService.sendEvent(
+                    "draftReturnStarted",
+                    DraftReturnStarted(
+                      newDraftReturn,
+                      newJourney.subscribedDetails.cgtReference.value,
+                      newJourney.agentReferenceNumber.map(_.value)
+                    ),
+                    "draft-return-started"
+                  )
+                  continueToTaskList
+                }
               )
             }
 
@@ -719,7 +731,11 @@ class SingleDisposalsTriageController @Inject() (
                           _ => EitherT.pure(()), {
                             case (oldJourneyStatus, updatedJourneyStatus) =>
                               if (updatedJourneyStatus.draftReturn === oldJourneyStatus.draftReturn) EitherT.pure(())
-                              else returnsService.storeDraftReturn(updatedJourneyStatus.draftReturn)
+                              else
+                                returnsService.storeDraftReturn(
+                                  updatedJourneyStatus.draftReturn,
+                                  updatedJourneyStatus.agentReferenceNumber
+                                )
                           }
                         )
                     _ <- EitherT(

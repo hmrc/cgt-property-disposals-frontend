@@ -146,7 +146,7 @@ class ExemptionAndLossesController @Inject() (
 
             val result = for {
               _ <- if (newDraftReturn === currentFillingOutReturn.draftReturn) EitherT.pure(())
-                  else returnsService.storeDraftReturn(newDraftReturn)
+                  else returnsService.storeDraftReturn(newDraftReturn, currentFillingOutReturn.agentReferenceNumber)
               _ <- EitherT(
                     updateSession(sessionStore, request)(
                       _.copy(journeyStatus = Some(currentFillingOutReturn.copy(draftReturn = newDraftReturn)))
@@ -396,7 +396,7 @@ class ExemptionAndLossesController @Inject() (
               val newDraftReturn  = fillingOutReturn.draftReturn.copy(exemptionAndLossesAnswers = Some(completeAnswers))
 
               val result = for {
-                _ <- returnsService.storeDraftReturn(newDraftReturn)
+                _ <- returnsService.storeDraftReturn(newDraftReturn, fillingOutReturn.agentReferenceNumber)
                 _ <- EitherT(
                       updateSession(sessionStore, request)(
                         _.copy(journeyStatus = Some(
