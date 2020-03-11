@@ -21,7 +21,8 @@ import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsNumber, Json}
-import play.api.mvc.Call
+import play.api.mvc.{Call, Request}
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.PaymentsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
@@ -29,6 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, PaymentsJourney}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -50,9 +52,10 @@ class PaymentsServiceImplSpec extends WordSpec with Matchers with MockFactory {
       .expects(cgtReference, chargeReference, amount, returnUrl, backUrl, *)
       .returning(EitherT.fromEither[Future](response))
 
-  val service = new PaymentsServiceImpl(mockConnector)
+  val service = new PaymentsServiceImpl(mockConnector, stub[AuditService])
 
-  implicit val hc: HeaderCarrier = HeaderCarrier()
+  implicit val hc: HeaderCarrier   = HeaderCarrier()
+  implicit val request: Request[_] = FakeRequest()
 
   "PaymentsServiceImpl" when {
 

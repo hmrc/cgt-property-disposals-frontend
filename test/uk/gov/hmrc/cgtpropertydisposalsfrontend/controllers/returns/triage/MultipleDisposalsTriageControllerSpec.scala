@@ -31,6 +31,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingNewDraftReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.Self
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{IncompleteMultipleDisposalsAnswers, _}
@@ -63,10 +65,12 @@ class MultipleDisposalsTriageControllerSpec
   }
 
   def sessionDataWithStartingNewDraftReturn(
-    multipleDisposalsAnswers: MultipleDisposalsTriageAnswers
+    multipleDisposalsAnswers: MultipleDisposalsTriageAnswers,
+    name: Either[TrustName, IndividualName] = Right(sample[IndividualName])
   ): (SessionData, StartingNewDraftReturn) = {
     val startingNewDraftReturn = sample[StartingNewDraftReturn].copy(
-      newReturnTriageAnswers = Left(multipleDisposalsAnswers)
+      newReturnTriageAnswers = Left(multipleDisposalsAnswers),
+      subscribedDetails      = sample[SubscribedDetails].copy(name = name)
     )
     SessionData.empty.copy(journeyStatus = Some(startingNewDraftReturn)) -> startingNewDraftReturn
   }
@@ -887,16 +891,22 @@ class MultipleDisposalsTriageControllerSpec
 
       behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
 
-      "redirect to the how many properties page when no individual user type can be found" in {
+      "redirect to the who is individual representing page when no individual user type can be found and the subscribed " +
+        "user type is individual" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsAnswers.empty)._1)
+          mockGetSession(
+            sessionDataWithStartingNewDraftReturn(
+              IncompleteMultipleDisposalsAnswers.empty,
+              Right(sample[IndividualName])
+            )._1
+          )
         }
 
-        checkIsRedirect(performAction(), routes.InitialTriageQuestionsController.howManyProperties())
+        checkIsRedirect(performAction(), routes.InitialTriageQuestionsController.whoIsIndividualRepresenting())
       }
 
-      "redirect to the multiple disposals guidance page when no individual user type can be found" in {
+      "redirect to the multiple disposals guidance page when no answer for the number of properties can be found" in {
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(

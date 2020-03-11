@@ -23,6 +23,8 @@ import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsNumber, JsString, Json}
+import play.api.mvc.Request
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
@@ -31,6 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{GetDraftReturnResponse, ListReturnsResponse}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -73,9 +76,10 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
       .expects(cgtReference, submissionId, *)
       .returning(EitherT.fromEither[Future](response))
 
-  val service = new ReturnsServiceImpl(mockConnector)
+  val service = new ReturnsServiceImpl(mockConnector, stub[AuditService])
 
-  implicit val hc: HeaderCarrier = HeaderCarrier()
+  implicit val hc: HeaderCarrier   = HeaderCarrier()
+  implicit val request: Request[_] = FakeRequest()
 
   "ReturnsServiceImpl" when {
 
@@ -88,13 +92,13 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
         "the http call fails" in {
           mockStoreDraftReturn(draftReturn)(Left(Error("")))
 
-          await(service.storeDraftReturn(draftReturn).value).isLeft shouldBe true
+          await(service.storeDraftReturn(draftReturn, None).value).isLeft shouldBe true
         }
 
         "the http call came back with a status other than 200" in {
           mockStoreDraftReturn(draftReturn)(Right(HttpResponse(INTERNAL_SERVER_ERROR)))
 
-          await(service.storeDraftReturn(draftReturn).value).isLeft shouldBe true
+          await(service.storeDraftReturn(draftReturn, None).value).isLeft shouldBe true
         }
 
       }
@@ -104,7 +108,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
         "the http call came back with a 200" in {
           mockStoreDraftReturn(draftReturn)(Right(HttpResponse(OK)))
 
-          await(service.storeDraftReturn(draftReturn).value) shouldBe Right(())
+          await(service.storeDraftReturn(draftReturn, None).value) shouldBe Right(())
         }
 
       }

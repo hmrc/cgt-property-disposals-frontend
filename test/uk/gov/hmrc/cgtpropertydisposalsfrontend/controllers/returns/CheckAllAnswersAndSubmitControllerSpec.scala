@@ -20,15 +20,17 @@ import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
+import org.jsoup.nodes.Document
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.i18n.MessagesApi
+import play.api.i18n.{Lang, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
-import play.api.mvc.{Call, Result}
+import play.api.mvc.{Call, Request, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitControllerSpec.validateAllCheckYourAnswersSections
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.AcquisitionDetailsControllerSpec.validateAcquisitionDetailsCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails.DisposalDetailsControllerSpec._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesControllerSpec.validateExemptionAndLossesCheckYourAnswersPage
@@ -96,8 +98,11 @@ class CheckAllAnswersAndSubmitControllerSpec
     backUrl: Call
   )(response: Either[Error, PaymentsJourney]) =
     (mockPaymentsService
-      .startPaymentJourney(_: CgtReference, _: String, _: AmountInPence, _: Call, _: Call)(_: HeaderCarrier))
-      .expects(cgtReference, chargeReference, amount, returnUrl, backUrl, *)
+      .startPaymentJourney(_: CgtReference, _: String, _: AmountInPence, _: Call, _: Call)(
+        _: HeaderCarrier,
+        _: Request[_]
+      ))
+      .expects(cgtReference, chargeReference, amount, returnUrl, backUrl, *, *)
       .returning(EitherT.fromEither[Future](response))
 
   "CheckAllAnswersAndSubmitController" when {
@@ -143,30 +148,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey("checkAllAnswers.title"), { doc =>
-              validateSingleDisposalTriageCheckYourAnswersPage(
-                completeReturn.triageAnswers,
-                doc
-              )
-              validateAcquisitionDetailsCheckYourAnswersPage(
-                completeReturn.acquisitionDetails,
-                doc
-              )
-              validateDisposalDetailsCheckYourAnswersPage(
-                completeReturn.disposalDetails,
-                doc
-              )
-              validateReliefDetailsCheckYourAnswersPage(
-                completeReturn.reliefDetails,
-                doc
-              )
-              validateExemptionAndLossesCheckYourAnswersPage(
-                completeReturn.exemptionsAndLossesDetails,
-                doc
-              )
-              validateYearToDateLiabilityFirstReturnPage(
-                completeReturn.yearToDateLiabilityAnswers,
-                doc
-              )
+              validateAllCheckYourAnswersSections(doc, completeReturn)
               doc.select("#back").attr("href") shouldBe routes.TaskListController.taskList().url
               doc.select("#content > article > form").attr("action") shouldBe routes.CheckAllAnswersAndSubmitController
                 .checkAllAnswersSubmit()
@@ -400,4 +382,36 @@ class CheckAllAnswersAndSubmitControllerSpec
 
   }
 
+}
+
+object CheckAllAnswersAndSubmitControllerSpec {
+  def validateAllCheckYourAnswersSections(
+    doc: Document,
+    completeReturn: CompleteReturn
+  )(implicit messages: MessagesApi, lang: Lang): Unit = {
+    validateSingleDisposalTriageCheckYourAnswersPage(
+      completeReturn.triageAnswers,
+      doc
+    )
+    validateAcquisitionDetailsCheckYourAnswersPage(
+      completeReturn.acquisitionDetails,
+      doc
+    )
+    validateDisposalDetailsCheckYourAnswersPage(
+      completeReturn.disposalDetails,
+      doc
+    )
+    validateReliefDetailsCheckYourAnswersPage(
+      completeReturn.reliefDetails,
+      doc
+    )
+    validateExemptionAndLossesCheckYourAnswersPage(
+      completeReturn.exemptionsAndLossesDetails,
+      doc
+    )
+    validateYearToDateLiabilityFirstReturnPage(
+      completeReturn.yearToDateLiabilityAnswers,
+      doc
+    )
+  }
 }
