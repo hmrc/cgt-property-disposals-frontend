@@ -672,15 +672,45 @@ class MultipleDisposalsTriageControllerSpec
             BAD_REQUEST
           )
         }
+
       }
 
     }
 
     "handling requests to display the tax year exchanged page" must {
 
+      def performAction(): Future[Result] =
+        controller.whenWereContractsExchanged()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
+
+      "display the page" in {
+        mockAuthWithNoRetrievals()
+        mockGetSession(sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsAnswers.empty)._1)
+
+        checkPageIsDisplayed(
+          performAction,
+          messageFromMessageKey("taxYear.title"), { doc =>
+            doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
+              .wereAllPropertiesResidential()
+              .url
+            doc
+              .select("#content > article > form")
+              .attr("action") shouldBe routes.MultipleDisposalsTriageController
+              .whenWereContractsExchangedSubmit()
+              .url
+          }
+        )
+      }
     }
 
     "handling submits on the year exchanged page" must {
+
+      def performAction(data: (String, String)*): Future[Result] =
+        controller.whenWereContractsExchangedSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
+
+      val key = "taxYear"
+
 
     }
 

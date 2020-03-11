@@ -17,6 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 import cats.data.EitherT
+import cats.instances.boolean._
 import cats.instances.future._
 import cats.syntax.either._
 import com.google.inject.{Inject, Singleton}
@@ -285,35 +286,26 @@ class MultipleDisposalsTriageController @Inject() (
                     routes.MultipleDisposalsTriageController.wereAllPropertiesResidential()
                   )
                 ), { taxYearExchanged =>
-                if (answers
-                      .fold(_.taxYearAfter6April2020, c => Some(c.assetType.isResidential()))
-                      .contains(wereAllPropertiesResidential)) {
+                if (answers.fold(_.taxYearAfter6April2020, _ => Some(true)).contains(taxYearExchanged)) {
                   Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
                 } else {
 
-                  val updatedState = for {
+                  val result = for {
                     taxYear <- taxYearService.taxYear(LocalDateUtils.today())
                     multipleDisposalsTriageAnswers <- EitherT.fromEither[Future](
                                                        updateAnswers(taxYearExchanged, taxYear, answers)
                                                      )
                     newState = state.copy(newReturnTriageAnswers = Left(multipleDisposalsTriageAnswers))
-                  } yield newState
+                    _ <- EitherT(
+                          updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newState)))
+                        )
+                  } yield ()
 
-                  updatedState.fold(
-                    error => {
-                      logger.warn("Could not update session", error)
-                      errorHandler.errorResult()
-                    },
-                    successState =>
-                      updateSession(sessionStore, request)(_.copy(journeyStatus = Some(successState))).map {
-                        case Left(error) =>
-                          logger.warn("Could not update session", error)
-                          errorHandler.errorResult()
+                  result.fold({ e =>
+                    logger.warn("Could not update session", e)
+                    errorHandler.errorResult()
+                  }, _ => Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers()))
 
-                        case Right(_) =>
-                          Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
-                      }
-                  )
                 }
               }
             )
@@ -375,6 +367,9 @@ class MultipleDisposalsTriageController @Inject() (
 
           case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, _, None, _) =>
             Redirect(routes.MultipleDisposalsTriageController.whenWereContractsExchanged())
+
+          case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, _, Some(taxYear), _) =>
+            Ok(s"Were all properties contracts exchanged after 06th April, 2020: $taxYear")
 
           case c: CompleteMultipleDisposalsAnswers =>
             Ok(s"Got $c")
@@ -440,10 +435,13 @@ object MultipleDisposalsTriageController {
     )(identity)(Some(_))
   )
 
-  val taxYearExchangedForm: Form[Boolean] = Form(
-    mapping(
-      "taxYear" -> of(BooleanFormatter.formatter)
-    )(identity)(Some(_))
-  )
+  val taxYearExchangedForm: Form[Boolean] =
+    Form(
+      mapping(
+        "taxYear" -> of(
+          FormUtils.radioFormFormatter("taxYear", List(true, false))
+        )
+      )(identity)(Some(_))
+    )
 
 }
