@@ -54,10 +54,13 @@ class MultipleDisposalsTriageControllerSpec
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
+  val mockTaxYearService = mock[TaxYearService]
+
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
-      bind[SessionStore].toInstance(mockSessionStore)
+      bind[SessionStore].toInstance(mockSessionStore),
+      bind[TaxYearService].toInstance(mockTaxYearService)
     )
 
   lazy val controller = instanceOf[MultipleDisposalsTriageController]
@@ -693,11 +696,22 @@ class MultipleDisposalsTriageControllerSpec
 
       "display the page" in {
         mockAuthWithNoRetrievals()
-        mockGetSession(sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsAnswers.empty)._1)
+        mockGetSession(
+          sessionDataWithStartingNewDraftReturn(
+            IncompleteMultipleDisposalsAnswers.empty.copy(
+              individualUserType           = Some(Self),
+              numberOfProperties           = Some(2),
+              wasAUKResident               = Some(true),
+              countryOfResidence           = Some(Country.uk),
+              wereAllPropertiesResidential = Some(true),
+              assetType                    = Some(AssetType.Residential)
+            )
+          )._1
+        )
 
         checkPageIsDisplayed(
           performAction,
-          messageFromMessageKey("taxYear.title"), { doc =>
+          messageFromMessageKey("multipleDisposalsTaxYear.title"), { doc =>
             doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
               .wereAllPropertiesResidential()
               .url
@@ -713,8 +727,6 @@ class MultipleDisposalsTriageControllerSpec
 
     "handling submits on the tax year exchanged page" must {
 
-      val mockTaxYearService = mock[TaxYearService]
-
       def mockGetTaxYear(date: LocalDate)(response: Either[Error, Option[TaxYear]]) =
         (mockTaxYearService
           .taxYear(_: LocalDate)(_: HeaderCarrier))
@@ -725,7 +737,7 @@ class MultipleDisposalsTriageControllerSpec
         controller.whenWereContractsExchangedSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
 
       val today = LocalDate.now(Clock.systemUTC())
-      val key   = "taxYear"
+      val key   = "multipleDisposalsTaxYear"
 
       "redirect to redirect to cya page" when {
 
@@ -738,14 +750,14 @@ class MultipleDisposalsTriageControllerSpec
           assetType                    = Some(AssetType.Residential)
         )
 
+        val taxYear = sample[TaxYear].copy(
+          startDateInclusive = LocalDate.of(2019, 4, 6),
+          endDateExclusive   = LocalDate.of(2020, 4, 6)
+        )
+
         val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
 
-        "user has not answered the tax year exchanged section and selects true" in {
-
-          val taxYear = sample[TaxYear].copy(
-            startDateInclusive = LocalDate.of(2019, 4, 6),
-            endDateExclusive   = LocalDate.of(2020, 4, 6)
-          )
+        "user has not answered the tax year exchanged section and selects after April 06th, 2020" in {
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -768,6 +780,71 @@ class MultipleDisposalsTriageControllerSpec
 
           checkIsRedirect(
             performAction(key -> "0"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+        "user has not answered the tax year exchanged section and selects before April 06th, 2020" in {
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreSession(
+              session.copy(journeyStatus = Some(
+                journey.copy(
+                  newReturnTriageAnswers = Left(
+                    answers.copy(
+                      taxYearAfter6April2020 = Some(false),
+                      taxYear                = None
+                    )
+                  )
+                )
+              )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(key -> "1"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+        "user has already answered were all properties residential section and re-selected different option" in {
+          val answers = sample[IncompleteMultipleDisposalsAnswers]
+            .copy(
+              individualUserType           = Some(Self),
+              numberOfProperties           = Some(2),
+              wasAUKResident               = Some(true),
+              countryOfResidence           = Some(Country.uk),
+              wereAllPropertiesResidential = Some(true),
+              assetType                    = Some(AssetType.Residential),
+              taxYearAfter6April2020       = Some(true),
+              taxYear                      = Some(taxYear)
+            )
+
+          val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreSession(
+              session.copy(journeyStatus = Some(
+                journey.copy(
+                  newReturnTriageAnswers = Left(
+                    answers.copy(
+                      taxYearAfter6April2020 = Some(false),
+                      taxYear                = None
+                    )
+                  )
+                )
+              )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(key -> "1"),
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
         }
@@ -801,7 +878,7 @@ class MultipleDisposalsTriageControllerSpec
           }
 
           checkIsRedirect(
-            performAction(key -> "true"),
+            performAction(key -> "0"),
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
         }

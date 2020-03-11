@@ -34,7 +34,7 @@
 
 @(form: Form[Boolean], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
-@key = @{"taxYear"}
+@key = @{"multipleDisposalsTaxYear"}
 @title = @{messages(s"$key.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
@@ -60,7 +60,7 @@
         @errorSummary(form)
     }
 
-    @caption(messages("multiple-disposals.triage.caption"))
+    @caption(messages("triage.caption"))
 
     @formWrapper(controllers.returns.triage.routes.MultipleDisposalsTriageController.whenWereContractsExchangedSubmit(), 'novalidate -> "novalidate") {
 
@@ -76,10 +76,10 @@
         )
 
         @details(
-            messages("taxYear.link"),
+            messages(s"$key.link"),
             Html(
                 s"""
-                | <p>${messages("taxYear.details.p1", viewConfig.tranferringOwnershipHelp)}</p>
+                | <p>${messages(s"$key.details.p1", viewConfig.tranferringOwnershipHelp)}</p>
                 |""".stripMargin
             )
         )

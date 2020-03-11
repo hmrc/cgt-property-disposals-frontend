@@ -266,7 +266,7 @@ class MultipleDisposalsTriageController @Inject() (
   def whenWereContractsExchanged(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withMultipleDisposalTriageAnswers(request) {
       case (_, _, answers) =>
-        val taxYearExchanged = answers.fold(_.taxYearAfter6April2020, c => Some(true))
+        val taxYearExchanged = answers.fold(_.taxYearAfter6April2020, _ => Some(true))
         val form             = taxYearExchanged.fold(taxYearExchangedForm)(taxYearExchangedForm.fill)
         Ok(taxYearExchangedPage(form, routes.MultipleDisposalsTriageController.wereAllPropertiesResidential()))
     }
@@ -285,26 +285,31 @@ class MultipleDisposalsTriageController @Inject() (
                     formWithErrors,
                     routes.MultipleDisposalsTriageController.wereAllPropertiesResidential()
                   )
-                ), { taxYearExchanged =>
-                if (answers.fold(_.taxYearAfter6April2020, _ => Some(true)).contains(taxYearExchanged)) {
+                ), { taxYearAfter6April2020 =>
+                if (answers.fold(_.taxYearAfter6April2020, _ => Some(true)).contains(taxYearAfter6April2020)) {
                   Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
                 } else {
 
-                  val result = for {
-                    taxYear <- taxYearService.taxYear(LocalDateUtils.today())
-                    multipleDisposalsTriageAnswers <- EitherT.fromEither[Future](
-                                                       updateTaxYearToAnswers(taxYearExchanged, taxYear, answers)
-                                                     )
-                    newState = state.copy(newReturnTriageAnswers = Left(multipleDisposalsTriageAnswers))
-                    _ <- EitherT(
-                          updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newState)))
-                        )
-                  } yield ()
+                  val result =
+                    for {
+                      taxYear <- if (taxYearAfter6April2020) taxYearService.taxYear(LocalDateUtils.today())
+                                else EitherT.pure(None)
+                      answers <- EitherT.fromEither[Future](
+                                  updateTaxYearToAnswers(taxYearAfter6April2020, taxYear, answers)
+                                )
+                      newState = state.copy(newReturnTriageAnswers = Left(answers))
+                      _ <- EitherT(
+                            updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newState)))
+                          )
+                    } yield ()
 
-                  result.fold({ e =>
-                    logger.warn("Could not update session", e)
-                    errorHandler.errorResult()
-                  }, _ => Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers()))
+                  result.fold(
+                    { e =>
+                      logger.warn("Could not find tax year or update session", e)
+                      errorHandler.errorResult()
+                    },
+                    _ => Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+                  )
 
                 }
               }
@@ -313,20 +318,20 @@ class MultipleDisposalsTriageController @Inject() (
   }
 
   private def updateTaxYearToAnswers(
-    taxYearExchanged: Boolean,
+    taxYearAfter6April2020: Boolean,
     taxYear: Option[TaxYear],
     answers: MultipleDisposalsTriageAnswers
   ): Either[Error, MultipleDisposalsTriageAnswers] =
     taxYear match {
-      case None =>
+      case None if taxYearAfter6April2020 =>
         Left(Error("You cannot use this service"))
-      case Some(t) =>
+      case _ =>
         Right(
           answers.fold[MultipleDisposalsTriageAnswers](
             incomplete =>
               incomplete.copy(
-                taxYearAfter6April2020 = Some(taxYearExchanged),
-                taxYear                = Some(t)
+                taxYearAfter6April2020 = Some(taxYearAfter6April2020),
+                taxYear                = taxYear
               ),
             complete =>
               IncompleteMultipleDisposalsAnswers(
@@ -336,8 +341,8 @@ class MultipleDisposalsTriageController @Inject() (
                 countryOfResidence           = Some(complete.countryOfResidence),
                 wereAllPropertiesResidential = Some(complete.assetType.isResidential()),
                 assetType                    = Some(complete.assetType),
-                taxYearAfter6April2020       = Some(taxYearExchanged),
-                taxYear                      = Some(t)
+                taxYearAfter6April2020       = Some(taxYearAfter6April2020),
+                taxYear                      = taxYear
               )
           )
         )
@@ -368,12 +373,14 @@ class MultipleDisposalsTriageController @Inject() (
           case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, _, None, _) =>
             Redirect(routes.MultipleDisposalsTriageController.whenWereContractsExchanged())
 
-          case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, _, Some(taxYear), _) =>
-            Ok(s"Were all properties contracts exchanged after 06th April, 2020: $taxYear")
+          case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, _, Some(true), _) =>
+            Ok(s"All properties contracts were exchanged after 06th April, 2020")
+
+          case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, _, Some(false), _) =>
+            Ok(s"All properties contracts were exchanged before 06th April, 2020")
 
           case c: CompleteMultipleDisposalsAnswers =>
             Ok(s"Got $c")
-
         }
     }
   }
@@ -438,8 +445,8 @@ object MultipleDisposalsTriageController {
   val taxYearExchangedForm: Form[Boolean] =
     Form(
       mapping(
-        "taxYear" -> of(
-          FormUtils.radioFormFormatter("taxYear", List(true, false))
+        "multipleDisposalsTaxYear" -> of(
+          FormUtils.radioFormFormatter("multipleDisposalsTaxYear", List(true, false))
         )
       )(identity)(Some(_))
     )
