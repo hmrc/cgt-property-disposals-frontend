@@ -293,7 +293,7 @@ class MultipleDisposalsTriageController @Inject() (
                   val result = for {
                     taxYear <- taxYearService.taxYear(LocalDateUtils.today())
                     multipleDisposalsTriageAnswers <- EitherT.fromEither[Future](
-                                                       updateAnswers(taxYearExchanged, taxYear, answers)
+                                                       updateTaxYearToAnswers(taxYearExchanged, taxYear, answers)
                                                      )
                     newState = state.copy(newReturnTriageAnswers = Left(multipleDisposalsTriageAnswers))
                     _ <- EitherT(
@@ -312,7 +312,7 @@ class MultipleDisposalsTriageController @Inject() (
       }
   }
 
-  private def updateAnswers(
+  private def updateTaxYearToAnswers(
     taxYearExchanged: Boolean,
     taxYear: Option[TaxYear],
     answers: MultipleDisposalsTriageAnswers
