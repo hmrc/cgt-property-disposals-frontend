@@ -818,7 +818,7 @@ reliefDetails.cyaChange.otherReliefsAmount=Other reliefs amount
 
 exemptionAndLosses.caption=Losses and exemptions
 
-inYearLosses.title=Do you want to include any other Capital Gains Tax losses you made in tax year 2020 to 2021?
+inYearLosses.title=Do you want to include any other Capital Gains Tax losses you made in tax year {0} to {1}?
 inYearLosses.helpText=You make a loss if the disposal amount is less than the acquisition amount. If you include any other Capital Gains Tax losses you made in this tax year it will reduce your gain. You must have made the losses before {0}
 inYearLosses.error.required=Select yes if you want to include any Capital Gains Tax losses you made in this tax year
 inYearLosses.error.invalid=Select yes if you want to include any Capital Gains Tax losses you made in this tax year
