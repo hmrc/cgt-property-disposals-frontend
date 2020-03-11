@@ -262,7 +262,7 @@ class MultipleDisposalsTriageController @Inject() (
         val wasUkResident = answers.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk()))
 
         if (!wasUkResident.contains(false)) {
-          Redirect(routes.MultipleDisposalsTriageController.wereYouAUKResident())
+          Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
         } else {
           val countryOfResidence =
             answers.fold(_.countryOfResidence, c => Some(c.countryOfResidence))
@@ -291,23 +291,11 @@ class MultipleDisposalsTriageController @Inject() (
                     .contains(countryOfResidence)) {
                 Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
               } else {
-                val updatedAnswers = answers.fold[MultipleDisposalsTriageAnswers](
-                  incomplete =>
-                    incomplete.copy(
-                      countryOfResidence           = Some(countryOfResidence),
-                      wereAllPropertiesResidential = None,
-                      assetType                    = None
-                    ),
-                  complete =>
-                    IncompleteMultipleDisposalsAnswers(
-                      individualUserType           = complete.individualUserType,
-                      numberOfProperties           = Some(complete.numberOfProperties),
-                      wasAUKResident               = Some(complete.countryOfResidence.isUk()),
-                      countryOfResidence           = Some(complete.countryOfResidence),
-                      wereAllPropertiesResidential = None,
-                      assetType                    = None
-                    )
-                )
+                val updatedAnswers =
+                  answers.fold[MultipleDisposalsTriageAnswers](
+                    _.copy(countryOfResidence = Some(countryOfResidence)),
+                    _.copy(countryOfResidence = countryOfResidence)
+                  )
 
                 val newState = state.copy(newReturnTriageAnswers = Left(updatedAnswers))
 

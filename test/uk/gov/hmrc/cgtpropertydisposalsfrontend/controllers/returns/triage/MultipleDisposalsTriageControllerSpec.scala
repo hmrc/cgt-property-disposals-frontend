@@ -701,7 +701,7 @@ class MultipleDisposalsTriageControllerSpec
 
         checkPageIsDisplayed(
           performAction,
-          messageFromMessageKey("countryCode.title"), { doc =>
+          messageFromMessageKey("multipleDisposalsCountryOfResidence.title"), { doc =>
             doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
               .wereYouAUKResident()
               .url
@@ -711,6 +711,24 @@ class MultipleDisposalsTriageControllerSpec
               .countryOfResidenceSubmit()
               .url
           }
+        )
+      }
+
+      "redirect to the cya page" in {
+        mockAuthWithNoRetrievals()
+        mockGetSession(
+          sessionDataWithStartingNewDraftReturn(
+            IncompleteMultipleDisposalsAnswers.empty.copy(
+              individualUserType = Some(Self),
+              numberOfProperties = Some(2),
+              wasAUKResident     = Some(true)
+            )
+          )._1
+        )
+
+        checkIsRedirect(
+          performAction(),
+          routes.MultipleDisposalsTriageController.checkYourAnswers()
         )
       }
 
@@ -843,7 +861,7 @@ class MultipleDisposalsTriageControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey(s"$key.title"), { doc =>
+            messageFromMessageKey(s"multipleDisposalsCountryOfResidence.title"), { doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                 s"$key.error.required"
               )
@@ -870,7 +888,7 @@ class MultipleDisposalsTriageControllerSpec
 
           checkPageIsDisplayed(
             performAction(key -> "XX"),
-            messageFromMessageKey(s"$key.title"), { doc =>
+            messageFromMessageKey(s"multipleDisposalsCountryOfResidence.title"), { doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                 s"$key.error.notFound"
               )
