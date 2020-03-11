@@ -676,6 +676,14 @@ class MultipleDisposalsTriageControllerSpec
 
     }
 
+    "handling requests to display the tax year exchanged page" must {
+
+    }
+
+    "handling submits on the year exchanged page" must {
+
+    }
+
     "handling requests to display the check your answers page" must {
 
       def performAction(): Future[Result] =

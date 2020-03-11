@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
+import cats.data.EitherT
+import cats.instances.future._
 import cats.syntax.either._
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
@@ -29,14 +31,14 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingNewDraftReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, FormUtils, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, FormUtils, LocalDateUtils, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, MultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsAnswers, IncompleteMultipleDisposalsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{ReturnsService, TaxYearService}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.{multipledisposals => triagePages}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
@@ -50,13 +52,15 @@ class MultipleDisposalsTriageController @Inject() (
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
   returnsService: ReturnsService,
+  taxYearService: TaxYearService,
   uuidGenerator: UUIDGenerator,
   cc: MessagesControllerComponents,
   val config: Configuration,
   guidancePage: triagePages.guidance,
   howManyPropertiesPage: triagePages.how_many_properties,
   wereYouAUKResidentPage: triagePages.were_you_a_uk_resident,
-  wereAllPropertiesResidentialPage: triagePages.were_all_properties_residential
+  wereAllPropertiesResidentialPage: triagePages.were_all_properties_residential,
+  taxYearExchangedPage: triagePages.tax_year_exchanged
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -170,7 +174,9 @@ class MultipleDisposalsTriageController @Inject() (
                       wasAUKResident               = Some(wereUKResident),
                       countryOfResidence           = None,
                       wereAllPropertiesResidential = None,
-                      assetType                    = None
+                      assetType                    = None,
+                      taxYearAfter6April2020       = None,
+                      taxYear                      = None
                     )
                 )
 
@@ -234,7 +240,9 @@ class MultipleDisposalsTriageController @Inject() (
                         wasAUKResident               = Some(true),
                         countryOfResidence           = Some(Country.uk),
                         wereAllPropertiesResidential = Some(wereAllPropertiesResidential),
-                        assetType                    = Some(assetType(wereAllPropertiesResidential))
+                        assetType                    = Some(assetType(wereAllPropertiesResidential)),
+                        taxYearAfter6April2020       = None,
+                        taxYear                      = None
                       )
                   )
 
@@ -254,30 +262,119 @@ class MultipleDisposalsTriageController @Inject() (
       }
   }
 
+  def whenWereContractsExchanged(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withMultipleDisposalTriageAnswers(request) {
+      case (_, _, answers) =>
+        val taxYearExchanged = answers.fold(_.taxYearAfter6April2020, c => Some(true))
+        val form             = taxYearExchanged.fold(taxYearExchangedForm)(taxYearExchangedForm.fill)
+        Ok(taxYearExchangedPage(form, routes.MultipleDisposalsTriageController.wereAllPropertiesResidential()))
+    }
+  }
+
+  def whenWereContractsExchangedSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request =>
+      withMultipleDisposalTriageAnswers(request) {
+        case (_, state, answers) =>
+          taxYearExchangedForm
+            .bindFromRequest()
+            .fold(
+              formWithErrors =>
+                BadRequest(
+                  taxYearExchangedPage(
+                    formWithErrors,
+                    routes.MultipleDisposalsTriageController.wereAllPropertiesResidential()
+                  )
+                ), { taxYearExchanged =>
+                if (answers
+                      .fold(_.taxYearAfter6April2020, c => Some(c.assetType.isResidential()))
+                      .contains(wereAllPropertiesResidential)) {
+                  Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+                } else {
+
+                  val updatedState = for {
+                    taxYear <- taxYearService.taxYear(LocalDateUtils.today())
+                    multipleDisposalsTriageAnswers <- EitherT.fromEither[Future](
+                                                       updateAnswers(taxYearExchanged, taxYear, answers)
+                                                     )
+                    newState = state.copy(newReturnTriageAnswers = Left(multipleDisposalsTriageAnswers))
+                  } yield newState
+
+                  updatedState.fold(
+                    error => {
+                      logger.warn("Could not update session", error)
+                      errorHandler.errorResult()
+                    },
+                    successState =>
+                      updateSession(sessionStore, request)(_.copy(journeyStatus = Some(successState))).map {
+                        case Left(error) =>
+                          logger.warn("Could not update session", error)
+                          errorHandler.errorResult()
+
+                        case Right(_) =>
+                          Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+                      }
+                  )
+                }
+              }
+            )
+      }
+  }
+
+  private def updateAnswers(
+    taxYearExchanged: Boolean,
+    taxYear: Option[TaxYear],
+    answers: MultipleDisposalsTriageAnswers
+  ): Either[Error, MultipleDisposalsTriageAnswers] =
+    taxYear match {
+      case None =>
+        Left(Error("You cannot use this service"))
+      case Some(t) =>
+        Right(
+          answers.fold[MultipleDisposalsTriageAnswers](
+            incomplete =>
+              incomplete.copy(
+                taxYearAfter6April2020 = Some(taxYearExchanged),
+                taxYear                = Some(t)
+              ),
+            complete =>
+              IncompleteMultipleDisposalsAnswers(
+                individualUserType           = Some(complete.individualUserType),
+                numberOfProperties           = Some(complete.numberOfProperties),
+                wasAUKResident               = Some(complete.countryOfResidence.isUk()),
+                countryOfResidence           = Some(complete.countryOfResidence),
+                wereAllPropertiesResidential = Some(complete.assetType.isResidential()),
+                assetType                    = Some(complete.assetType),
+                taxYearAfter6April2020       = Some(taxYearExchanged),
+                taxYear                      = Some(t)
+              )
+          )
+        )
+    }
+
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withMultipleDisposalTriageAnswers(request) {
       case (_, _, triageAnswers) =>
         triageAnswers match {
-          case IncompleteMultipleDisposalsAnswers(None, _, _, _, _, _) =>
+          case IncompleteMultipleDisposalsAnswers(None, _, _, _, _, _, _, _) =>
             Redirect(routes.InitialTriageQuestionsController.howManyProperties())
 
-          case IncompleteMultipleDisposalsAnswers(Some(_), None, _, _, _, _) =>
+          case IncompleteMultipleDisposalsAnswers(Some(_), None, _, _, _, _, _, _) =>
             Redirect(routes.MultipleDisposalsTriageController.guidance())
 
-          case IncompleteMultipleDisposalsAnswers(_, None, _, _, _, _) =>
+          case IncompleteMultipleDisposalsAnswers(_, None, _, _, _, _, _, _) =>
             Redirect(routes.MultipleDisposalsTriageController.howManyDisposals())
 
-          case IncompleteMultipleDisposalsAnswers(_, _, None, _, _, _) =>
+          case IncompleteMultipleDisposalsAnswers(_, _, None, _, _, _, _, _) =>
             Redirect(routes.MultipleDisposalsTriageController.wereYouAUKResident())
 
-          case IncompleteMultipleDisposalsAnswers(_, _, Some(true), _, None, _) =>
+          case IncompleteMultipleDisposalsAnswers(_, _, Some(true), _, None, _, _, _) =>
             Redirect(routes.MultipleDisposalsTriageController.wereAllPropertiesResidential())
 
-          case IncompleteMultipleDisposalsAnswers(_, _, Some(false), _, _, _) =>
+          case IncompleteMultipleDisposalsAnswers(_, _, Some(false), _, _, _, _, _) =>
             Ok("Non-UK Residents not handled yet")
 
-          case IncompleteMultipleDisposalsAnswers(_, _, _, _, Some(residentialStatus), _) =>
-            Ok(s"Were All Properties residential: $residentialStatus")
+          case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, _, None, _) =>
+            Redirect(routes.MultipleDisposalsTriageController.whenWereContractsExchanged())
 
           case c: CompleteMultipleDisposalsAnswers =>
             Ok(s"Got $c")
@@ -340,6 +437,12 @@ object MultipleDisposalsTriageController {
   val wereAllPropertiesResidentialForm: Form[Boolean] = Form(
     mapping(
       "multipleDisposalsWereAllPropertiesResidential" -> of(BooleanFormatter.formatter)
+    )(identity)(Some(_))
+  )
+
+  val taxYearExchangedForm: Form[Boolean] = Form(
+    mapping(
+      "taxYear" -> of(BooleanFormatter.formatter)
     )(identity)(Some(_))
   )
 

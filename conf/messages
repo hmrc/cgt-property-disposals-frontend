@@ -1064,3 +1064,9 @@ disposalDateMixedUseOrIndirect.p1.reason2=indirect disposals of UK land
 disposalDateMixedUseOrIndirect.h2=What you’ll need to do next
 disposalDateMixedUseOrIndirect.p2=You’ll need to complete a <a href="{0}">non resident: report and pay Capital Gains Tax on UK property or land form</a>.
 disposalDateMixedUseOrIndirect.p3=You have 30 days from the date of completion to report disposal and pay any tax due. You may get a penalty if your payment is late.
+
+taxYear.title=When were contracts exchanged on all the properties?
+taxYear.link=What happens on the exchange date?
+taxYear.before=Before 6 April 2020
+taxYear.after=After 6 April 2020
+taxYear.details.p1=Contract <a href="{0}" target="_blank">exchange (opens in a new window)</a> usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
