@@ -1057,6 +1057,9 @@ multipleDisposalsWereAllPropertiesResidential.details.li3=land that’s part of 
 
 multipleDisposalsWereAllPropertiesResidential.error.required=Select yes if all the properties were residential properties
 
+multipleDisposalsCountryOfResidence.title=What was your country of residence on the day you ‘exchanged’ contracts?
+multipleDisposalsCountryOfResidence.helpText=It’s usually the day you and the new owner swapped contracts and they paid a deposit. If you made an indirect disposal, it’s the day you sold the shares.
+
 disposalDateMixedUseOrIndirect.title=You cannot use this service
 disposalDateMixedUseOrIndirect.p1=You cannot use this service to report Capital Gains on:
 disposalDateMixedUseOrIndirect.p1.reason1=disposals of ‘mixed use’ UK property

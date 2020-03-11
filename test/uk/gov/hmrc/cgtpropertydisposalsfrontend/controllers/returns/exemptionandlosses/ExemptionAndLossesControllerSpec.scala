@@ -212,7 +212,7 @@ class ExemptionAndLossesControllerSpec
 
         "the amount in the session is non-zero" in {
           val amountInPence = AmountInPence(1000L)
-          val disposalDate = sample[DisposalDate]
+          val disposalDate  = sample[DisposalDate]
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -271,8 +271,7 @@ class ExemptionAndLossesControllerSpec
 
       "show a form error" when {
 
-        val disposalDate  =           sample[DisposalDate]
-
+        val disposalDate = sample[DisposalDate]
 
         val session = sessionWithState(
           sample[CompleteExemptionAndLossesAnswers],
@@ -281,9 +280,11 @@ class ExemptionAndLossesControllerSpec
         )._1
 
         def test(data: (String, String)*)(expectedErrorKey: String): Unit =
-          testFormError(data: _*)(expectedErrorKey)("inYearLosses.title",
+          testFormError(data: _*)(expectedErrorKey)(
+            "inYearLosses.title",
             disposalDate.taxYear.startDateInclusive.getYear.toString,
-            disposalDate.taxYear.endDateExclusive.getYear.toString)(performAction, session)
+            disposalDate.taxYear.endDateExclusive.getYear.toString
+          )(performAction, session)
 
         "no option has been selected" in {
           test()("inYearLosses.error.required")
