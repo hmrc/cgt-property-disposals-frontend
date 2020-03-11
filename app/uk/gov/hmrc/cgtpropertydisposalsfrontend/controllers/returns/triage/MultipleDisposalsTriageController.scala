@@ -300,7 +300,7 @@ class MultipleDisposalsTriageController @Inject() (
                     ),
                   complete =>
                     IncompleteMultipleDisposalsAnswers(
-                      individualUserType           = Some(complete.individualUserType),
+                      individualUserType           = complete.individualUserType,
                       numberOfProperties           = Some(complete.numberOfProperties),
                       wasAUKResident               = Some(complete.countryOfResidence.isUk()),
                       countryOfResidence           = Some(complete.countryOfResidence),
