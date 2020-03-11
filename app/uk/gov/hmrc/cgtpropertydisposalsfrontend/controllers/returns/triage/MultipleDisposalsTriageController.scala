@@ -435,6 +435,9 @@ class MultipleDisposalsTriageController @Inject() (
           case IncompleteMultipleDisposalsAnswers(_, _, Some(false), Some(_), _, _, _, _) =>
             Ok("Non-UK Residents not handled yet")
 
+          case IncompleteMultipleDisposalsAnswers(_, _, _, _, Some(false), _, _, _) =>
+            Ok("All are not residential properties")
+
           case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, _, None, _) =>
             Redirect(routes.MultipleDisposalsTriageController.whenWereContractsExchanged())
 
