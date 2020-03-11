@@ -1671,7 +1671,7 @@ class ExemptionAndLossesControllerSpec
 
     checkPageIsDisplayed(
       performAction(data),
-      messageFromMessageKey(pageTitleKey, titleArgs), { doc =>
+      messageFromMessageKey(pageTitleKey, titleArgs: _*), { doc =>
         doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
           expectedErrorMessageKey,
           errorArgs: _*
