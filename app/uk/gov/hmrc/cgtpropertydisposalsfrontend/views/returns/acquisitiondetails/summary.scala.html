@@ -32,19 +32,19 @@
 )
 
 @(answers: CompleteAcquisitionDetailsAnswers)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
-@acquisitionMethodValue = @{
+@acquisitionMethodAndPriceTitle = @{
   answers.acquisitionMethod match {
-    case AcquisitionMethod.Bought => messages("returns.acquisitionMethod.Bought")
-    case AcquisitionMethod.Inherited => messages("returns.acquisitionMethod.Inherited")
-    case AcquisitionMethod.Gifted => messages("returns.acquisitionMethod.Gifted")
-    case AcquisitionMethod.Other(value) => value
+    case AcquisitionMethod.Bought => (messages("returns.acquisitionMethod.Bought"), messages("acquisitionPrice.bought.title"))
+    case AcquisitionMethod.Inherited => (messages("returns.acquisitionMethod.Inherited"), messages("acquisitionPrice.not-bought.title", LocalDateUtils.govDisplayFormat(answers.acquisitionDate.value)))
+    case AcquisitionMethod.Gifted => (messages("returns.acquisitionMethod.Gifted"), messages("acquisitionPrice.not-bought.title", LocalDateUtils.govDisplayFormat(answers.acquisitionDate.value)))
+    case AcquisitionMethod.Other(value) => (value, messages("acquisitionPrice.not-bought.title", LocalDateUtils.govDisplayFormat(answers.acquisitionDate.value)))
   }
 }
 
 @cyaSection() {
   @cyaRow(
     messages("acquisitionMethod.title"),
-    Html(acquisitionMethodValue),
+    Html(acquisitionMethodAndPriceTitle._1),
     Some(cyaChange(messages("acquisitionDetails.cyaChange.acquisitionMethod"), routes.AcquisitionDetailsController.acquisitionMethod().url)),
     "acquisitionMethod"
   )
@@ -55,7 +55,7 @@
     "acquisitionDate"
   )
   @cyaRow(
-    messages("acquisitionPrice.title"),
+    acquisitionMethodAndPriceTitle._2,
     Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.acquisitionPrice.inPounds())),
     Some(cyaChange(messages("acquisitionDetails.cyaChange.acquisitionPrice"), routes.AcquisitionDetailsController.acquisitionPrice().url)),
     "acquisitionPrice"
