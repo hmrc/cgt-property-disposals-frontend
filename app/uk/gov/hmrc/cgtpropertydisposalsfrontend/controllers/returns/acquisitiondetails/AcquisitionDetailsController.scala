@@ -115,7 +115,7 @@ class AcquisitionDetailsController @Inject() (
     answers
       .fold(_.acquisitionDate, c => Some(c.acquisitionDate))
       .fold[Future[Result]](
-        Redirect(routes.AcquisitionDetailsController.acquisitionDate())
+        Redirect(routes.AcquisitionDetailsController.checkYourAnswers())
       )(f)
 
   private def withAcquisitionMethod(
@@ -124,7 +124,7 @@ class AcquisitionDetailsController @Inject() (
     answers
       .fold(_.acquisitionMethod, c => Some(c.acquisitionMethod))
       .fold[Future[Result]](
-        Redirect(routes.AcquisitionDetailsController.acquisitionMethod())
+        Redirect(routes.AcquisitionDetailsController.checkYourAnswers())
       )(f)
 
   private def commonDisplayBehaviour[A, P: Writeable, R](

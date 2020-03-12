@@ -776,29 +776,9 @@ class AcquisitionDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      "redirect to the acquisition date page" when {
+      behave like missingAcquisitionDateBehaviour(performAction)
 
-        "that question hasn't been answered" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithState(
-                sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = None
-                ),
-                sample[AssetType],
-                sample[Boolean]
-              )._1
-            )
-          }
-
-          checkIsRedirect(
-            performAction(),
-            routes.AcquisitionDetailsController.acquisitionDate()
-          )
-        }
-
-      }
+      behave like missingAcquisitionMethodBehaviour(performAction)
 
       "display the page" when {
 
@@ -884,29 +864,9 @@ class AcquisitionDetailsControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction())
 
-      "redirect to the acquisition date page" when {
+      behave like missingAcquisitionDateBehaviour(() => performAction())
 
-        "that question hasn't been answered" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithState(
-                sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = None
-                ),
-                sample[AssetType],
-                sample[Boolean]
-              )._1
-            )
-          }
-
-          checkIsRedirect(
-            performAction(),
-            routes.AcquisitionDetailsController.acquisitionDate()
-          )
-        }
-
-      }
+      behave like missingAcquisitionMethodBehaviour(() => performAction())
 
       "show a form error" when {
 
@@ -1054,6 +1014,8 @@ class AcquisitionDetailsControllerSpec
 
       behave like missingAssetTypeAndResidentialStatusBehaviour(performAction)
 
+      behave like missingAcquisitionDateBehaviour(performAction)
+
       "redirect to the acquisition price page" when {
 
         "that question hasn't been answered" in {
@@ -1077,30 +1039,6 @@ class AcquisitionDetailsControllerSpec
           )
         }
 
-      }
-
-      "redirect to the acquisition date page" when {
-
-        "that question hasn't been answered" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithState(
-                sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate  = None,
-                  acquisitionPrice = Some(sample[AmountInPence])
-                ),
-                sample[AssetType],
-                sample[Boolean]
-              )._1
-            )
-          }
-
-          checkIsRedirect(
-            performAction(),
-            routes.AcquisitionDetailsController.acquisitionDate()
-          )
-        }
       }
 
       "redirect to the check your answers page" when {
@@ -1249,6 +1187,8 @@ class AcquisitionDetailsControllerSpec
 
       behave like missingAssetTypeAndResidentialStatusBehaviour(() => performAction())
 
+      behave like missingAcquisitionDateBehaviour(() => performAction())
+
       "redirect to the acquisition price page" when {
 
         "that question hasn't been answered" in {
@@ -1272,30 +1212,6 @@ class AcquisitionDetailsControllerSpec
           )
         }
 
-      }
-
-      "redirect to the acquisition date page" when {
-
-        "that question hasn't been answered" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithState(
-                sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate  = None,
-                  acquisitionPrice = Some(sample[AmountInPence])
-                ),
-                sample[AssetType],
-                sample[Boolean]
-              )._1
-            )
-          }
-
-          checkIsRedirect(
-            performAction(),
-            routes.AcquisitionDetailsController.acquisitionDate()
-          )
-        }
       }
 
       "show a form error" when {
@@ -1477,30 +1393,7 @@ class AcquisitionDetailsControllerSpec
 
       behave like missingAssetTypeAndResidentialStatusBehaviour(performAction)
 
-      "redirect to the acquisition date page" when {
-
-        "the question has not been answered" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithState(
-                sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = None
-                ),
-                sample[AssetType],
-                sample[Boolean]
-              )._1
-            )
-          }
-
-          checkIsRedirect(
-            performAction(),
-            routes.AcquisitionDetailsController.acquisitionDate()
-          )
-
-        }
-
-      }
+      behave like missingAcquisitionDateBehaviour(performAction)
 
       "redirect to the acquisition price page" when {
 
@@ -1731,30 +1624,7 @@ class AcquisitionDetailsControllerSpec
 
       behave like missingAssetTypeAndResidentialStatusBehaviour(() => performAction())
 
-      "redirect to the acquisition date page" when {
-
-        "the question has not been answered" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithState(
-                sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = None
-                ),
-                sample[AssetType],
-                sample[Boolean]
-              )._1
-            )
-          }
-
-          checkIsRedirect(
-            performAction(),
-            routes.AcquisitionDetailsController.acquisitionDate()
-          )
-
-        }
-
-      }
+      behave like missingAcquisitionDateBehaviour(() => performAction())
 
       "redirect to the acquisition price page" when {
 
@@ -2544,6 +2414,70 @@ class AcquisitionDetailsControllerSpec
         }
 
         checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+      }
+
+    }
+
+  def missingAcquisitionDateBehaviour(performAction: () => Future[Result]) =
+    "redirect to the check you answers page" when {
+
+      "there is no acquisition date" in {
+        val completeAcquisitionDetailsAnswers = sample[CompleteAcquisitionDetailsAnswers]
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionWithState(
+              Some(
+                IncompleteAcquisitionDetailsAnswers(
+                  Some(completeAcquisitionDetailsAnswers.acquisitionMethod),
+                  None,
+                  Some(completeAcquisitionDetailsAnswers.acquisitionPrice),
+                  completeAcquisitionDetailsAnswers.rebasedAcquisitionPrice,
+                  Some(completeAcquisitionDetailsAnswers.improvementCosts),
+                  Some(completeAcquisitionDetailsAnswers.acquisitionFees)
+                )
+              ),
+              Some(sample[AssetType]),
+              Some(sample[Boolean]),
+              Some(sample[DisposalDate])
+            )._1
+          )
+        }
+
+        checkIsRedirect(performAction(), routes.AcquisitionDetailsController.checkYourAnswers())
+      }
+
+    }
+
+  def missingAcquisitionMethodBehaviour(performAction: () => Future[Result]) =
+    "redirect to the check you answers page" when {
+
+      "there is no acquisition method" in {
+        val completeAcquisitionDetailsAnswers = sample[CompleteAcquisitionDetailsAnswers]
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionWithState(
+              Some(
+                IncompleteAcquisitionDetailsAnswers(
+                  None,
+                  Some(completeAcquisitionDetailsAnswers.acquisitionDate),
+                  Some(completeAcquisitionDetailsAnswers.acquisitionPrice),
+                  completeAcquisitionDetailsAnswers.rebasedAcquisitionPrice,
+                  Some(completeAcquisitionDetailsAnswers.improvementCosts),
+                  Some(completeAcquisitionDetailsAnswers.acquisitionFees)
+                )
+              ),
+              Some(sample[AssetType]),
+              Some(sample[Boolean]),
+              Some(sample[DisposalDate])
+            )._1
+          )
+        }
+
+        checkIsRedirect(performAction(), routes.AcquisitionDetailsController.checkYourAnswers())
       }
 
     }
