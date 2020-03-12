@@ -86,8 +86,8 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
     .signedOut()
     .url
   val gaUserTypeDimension: String = getString("google-analytics.user-type-dimension")
-  val hmrcTelephone: String = getString("telephone-numbers.hmrc-helpline")
-  val outsideUkPhone: String = getString("telephone-numbers.outside-uk")
-  val agentDedicatedLine: String = getString("telephone-numbers.agent-dedicated-line")
+  val hmrcTelephone: String       = getString("telephone-numbers.hmrc-helpline")
+  val outsideUkPhone: String      = getString("telephone-numbers.outside-uk")
+  val agentDedicatedLine: String  = getString("telephone-numbers.agent-dedicated-line")
 
 }
