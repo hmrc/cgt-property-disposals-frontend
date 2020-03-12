@@ -20,19 +20,32 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 
 object AmountOfMoneyErrorScenarios {
 
-  final case class AmountOfMoneyErrorScenario(key: String, input: Option[String], expectedErrorMessageKey: String) {
+  final case class AmountOfMoneyErrorScenario(
+    key: String,
+    input: Option[String],
+    expectedErrorMessageKey: String,
+    errorContext: Option[String] = None
+  ) {
     val formData: List[(String, String)] =
       List(input).collect { case Some(v) => key -> v }
   }
 
-  def amountOfMoneyErrorScenarios(key: String, maximumAmountInclusive: BigDecimal = MoneyUtils.maxAmountOfPounds) =
+  def amountOfMoneyErrorScenarios(
+    key: String,
+    maximumAmountInclusive: BigDecimal = MoneyUtils.maxAmountOfPounds,
+    errorContext: Option[String]       = None
+  ) =
     List(
-      AmountOfMoneyErrorScenario(key, None, s"$key.error.required"),
-      AmountOfMoneyErrorScenario(key, Some(""), s"$key.error.required"),
-      AmountOfMoneyErrorScenario(key, Some("-1"), s"$key.error.tooSmall"),
-      AmountOfMoneyErrorScenario(key, Some((maximumAmountInclusive + 1).toString), s"$key.error.tooLarge"),
-      AmountOfMoneyErrorScenario(key, Some("1.234"), s"$key.error.tooManyDecimals"),
-      AmountOfMoneyErrorScenario(key, Some("abc"), s"$key.error.invalid")
+      AmountOfMoneyErrorScenario(key, None, s"${errorContext.getOrElse(key)}.error.required"),
+      AmountOfMoneyErrorScenario(key, Some(""), s"${errorContext.getOrElse(key)}.error.required"),
+      AmountOfMoneyErrorScenario(key, Some("-1"), s"${errorContext.getOrElse(key)}.error.tooSmall"),
+      AmountOfMoneyErrorScenario(
+        key,
+        Some((maximumAmountInclusive + 1).toString),
+        s"${errorContext.getOrElse(key)}.error.tooLarge"
+      ),
+      AmountOfMoneyErrorScenario(key, Some("1.234"), s"${errorContext.getOrElse(key)}.error.tooManyDecimals"),
+      AmountOfMoneyErrorScenario(key, Some("abc"), s"${errorContext.getOrElse(key)}.error.invalid")
     )
 
 }

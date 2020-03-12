@@ -28,6 +28,7 @@ accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.acco
 insetPanel: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.inset_panel,
 buttonLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.button_link,
 sentReturnsList: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.sent_returns_list,
+draftReturnsList: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.account.components.draft_returns_list,
 caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
@@ -62,16 +63,7 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
  </div>
 
   @if(subscribed.draftReturns.nonEmpty) {
-   <h2>Draft Returns</h2>
-   <ul>
-   @subscribed.draftReturns.map { draftReturn =>
-    <li><a href="@{
-     controllers.accounts.homepage.routes.HomePageController.resumeDraftReturn(draftReturn.id)
-    }">@{
-     draftReturn.id
-    }</a></li>
-   }
-   </ul>
+   @draftReturnsList(subscribed.draftReturns)
   }
 
   @if(subscribed.sentReturns.nonEmpty) {

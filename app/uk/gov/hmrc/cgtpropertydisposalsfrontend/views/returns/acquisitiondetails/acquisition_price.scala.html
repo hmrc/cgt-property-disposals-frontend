@@ -18,6 +18,9 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionMethod
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDate
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -31,18 +34,21 @@
         caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(form: Form[BigDecimal], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[BigDecimal], backLink: Call, acquisitionMethod: AcquisitionMethod, acquisitionDate: AcquisitionDate)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+
 @key = @{ "acquisitionPrice" }
-@title = @{messages("acquisitionPrice.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@titleWithHelpTextAndContext = @{acquisitionMethod match {
+  case AcquisitionMethod.Bought => (messages(s"${key}Bought.title"), Html(messages(s"${key}Bought.helpText")), "acquisitionPriceBought")
+  case _ => (messages(s"${key}NotBought.title", LocalDateUtils.govDisplayFormat(acquisitionDate.value)), Html(messages(s"${key}NotBought.helpText")), "acquisitionPriceNotBought")
+}}
 
-
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
+@mainTemplate(title = titleWithHelpTextAndContext._1, userType = request.userType, hasErrors = hasErrors) {
 
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
-        @errorSummary(form)
+        @errorSummary(form, Some(titleWithHelpTextAndContext._3))
     }
 
     @caption(messages("acquisitionDetails.caption"))
@@ -53,14 +59,15 @@
             value = form.data.getOrElse(key, ""),
             formError = form.error(key),
             hasErrors = form.error(key).nonEmpty,
-            label = Html(title),
+            label = Html(titleWithHelpTextAndContext._1),
             labelAsHeading = true,
-            helpText = Some(Html(messages(s"$key.helpText"))),
+            helpText = Some(titleWithHelpTextAndContext._2),
             autoComplete = AutoCompleteType.On,
             inputClass = Some("small"),
             aspect = "left",
             unit = "£",
-            assistiveText = messages("unit-input.assistive.pounds")
+            assistiveText = messages("unit-input.assistive.pounds"),
+            customErrorKey = Some(titleWithHelpTextAndContext._3)
         )
 
         @submitButton(messages("button.saveAndContinue"))
