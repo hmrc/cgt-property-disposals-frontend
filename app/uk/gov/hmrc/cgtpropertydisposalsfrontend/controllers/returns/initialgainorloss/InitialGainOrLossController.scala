@@ -58,14 +58,13 @@ class InitialGainOrLossController @Inject() (
     with Logging {
 
   def enterInitialGainOrLoss: Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAnswers(request) {
-      case (_, answer) => {
-        display(
-          answer
-        )(answer => answer.fold(initialGainOrLossForm)(value => initialGainOrLossForm.fill(value.inPounds())))(page =
-          initialGainOrLossesPage(_, _)
-        )(getBackLink(answer))
-      }
+    withFillingOutReturnAndAnswers(request) { (_, answer) =>
+      Ok(
+        initialGainOrLossesPage(
+          answer.fold(initialGainOrLossForm)(value => initialGainOrLossForm.fill(value.inPounds())),
+          getBackLink(answer)
+        )
+      )
     }
   }
 
@@ -75,7 +74,7 @@ class InitialGainOrLossController @Inject() (
         submit(
           fillingOutReturn
         )(form = initialGainOrLossForm)(
-          page = initialGainOrLossesPage(_, controllers.returns.routes.TaskListController.taskList())
+          page = initialGainOrLossesPage(_, getBackLink(fillingOutReturn.draftReturn.initialGainOrLoss))
         )(amount => AmountInPence.fromPounds(amount))
       }
       case _ =>
@@ -116,13 +115,6 @@ class InitialGainOrLossController @Inject() (
 
       case _ => Redirect(controllers.routes.StartController.start())
     }
-
-  private def display[A, P: Writeable, R](
-    initialGainOrLoss: Option[AmountInPence]
-  )(form: Option[AmountInPence] => Form[A])(
-    page: (Form[A], Call) => P
-  )(backLink: Call): Future[Result] =
-    Ok(page(form(initialGainOrLoss), backLink))
 
   private def submit[A, P: Writeable, R](
     fillingOutReturn: FillingOutReturn
