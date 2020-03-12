@@ -34,6 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingNew
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, FormUtils, LocalDateUtils, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, MultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsAnswers, IncompleteMultipleDisposalsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
@@ -63,7 +64,8 @@ class MultipleDisposalsTriageController @Inject() (
   wereYouAUKResidentPage: triagePages.were_you_a_uk_resident,
   wereAllPropertiesResidentialPage: triagePages.were_all_properties_residential,
   countryOfResidencePage: triagePages.country_of_residence,
-  taxYearExchangedPage: triagePages.tax_year_exchanged
+  taxYearExchangedPage: triagePages.tax_year_exchanged,
+  assetTypeForNonUkResidentsPage: triagePages.asset_type_for_non_uk_residents
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -377,6 +379,20 @@ class MultipleDisposalsTriageController @Inject() (
       }
   }
 
+  def assetTypeForNonUkResidents(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withMultipleDisposalTriageAnswers(request) {
+      case (_, _, answers) =>
+        val assetType = answers.fold(_.assetType, c => Some(c.assetType))
+        val form      = assetType.fold(assetTypeForNonUkResidentsForm)(assetTypeForNonUkResidentsForm.fill)
+        Ok(assetTypeForNonUkResidentsPage(form, routes.MultipleDisposalsTriageController.countryOfResidence()))
+    }
+  }
+
+  def assetTypeForNonUkResidentsSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request =>
+      ???
+  }
+
   private def updateTaxYearToAnswers(
     taxYearAfter6April2020: Boolean,
     taxYear: Option[TaxYear],
@@ -433,7 +449,7 @@ class MultipleDisposalsTriageController @Inject() (
             Redirect(routes.MultipleDisposalsTriageController.countryOfResidence())
 
           case IncompleteMultipleDisposalsAnswers(_, _, Some(false), Some(_), _, _, _, _) =>
-            Ok("Non-UK Residents not handled yet")
+            Redirect(routes.MultipleDisposalsTriageController.assetTypeForNonUkResidents())
 
           case IncompleteMultipleDisposalsAnswers(_, _, _, _, Some(false), _, _, _) =>
             Ok("All are not residential properties")
@@ -528,5 +544,16 @@ object MultipleDisposalsTriageController {
         )
       )(identity)(Some(_))
     )
+
+  val assetTypeForNonUkResidentsForm: Form[AssetType] = Form(
+    mapping(
+      "assetTypeForNonUkResidents" -> of(
+        FormUtils.radioFormFormatter(
+          "assetTypeForNonUkResidents",
+          List(Residential, NonResidential, MixedUse, IndirectDisposal)
+        )
+      )
+    )(identity)(Some(_))
+  )
 
 }
