@@ -1165,6 +1165,45 @@ class MultipleDisposalsTriageControllerSpec
         checkIsRedirect(performAction(), routes.InitialTriageQuestionsController.whoIsIndividualRepresenting())
       }
 
+      "redirect to the capacitors and personal representatives not handled page" when {
+
+        "an individual user type of capacitor is found" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                IncompleteMultipleDisposalsAnswers.empty.copy(individualUserType = Some(IndividualUserType.Capacitor)),
+                Some(2)
+              )
+            )
+          }
+
+          checkIsRedirect(
+            performAction(),
+            routes.InitialTriageQuestionsController.capacitorsAndPersonalRepresentativesNotHandled()
+          )
+        }
+
+        "an individual user type of personal representative is found" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                IncompleteMultipleDisposalsAnswers.empty
+                  .copy(individualUserType = Some(IndividualUserType.PersonalRepresentative)),
+                Some(2)
+              )
+            )
+          }
+
+          checkIsRedirect(
+            performAction(),
+            routes.InitialTriageQuestionsController.capacitorsAndPersonalRepresentativesNotHandled()
+          )
+        }
+
+      }
+
       "redirect to the multiple disposals guidance page when no answer for the number of properties can be found" in {
         inSequence {
           mockAuthWithNoRetrievals()

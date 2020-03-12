@@ -203,9 +203,22 @@ class InitialTriageQuestionsController @Inject() (
     }
   }
 
-  def capacitorsAndPersonalRepresentativesNotHandled(): Action[AnyContent] = authenticatedActionWithSessionData {
+  def capacitorsAndPersonalRepresentativesNotHandled(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
-      Ok(capacitorsAndPersonalRepresentativesNotHandledPage())
+      withState(request) {
+        case (_, state) =>
+          val individualUserType = getIndividualUserType(state)
+          if (individualUserType.contains(IndividualUserType.Capacitor) || individualUserType
+                .contains(IndividualUserType.PersonalRepresentative))
+            Ok(capacitorsAndPersonalRepresentativesNotHandledPage())
+          else
+            Redirect(
+              triageAnswersFomState(state).fold(
+                _ => routes.MultipleDisposalsTriageController.checkYourAnswers(),
+                _ => routes.SingleDisposalsTriageController.checkYourAnswers()
+              )
+            )
+      }
   }
 
   private def howManyPropertiesBackLink(state: Either[StartingNewDraftReturn, FillingOutReturn]): Option[Call] =

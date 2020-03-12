@@ -1850,6 +1850,16 @@ class SingleDisposalsTriageControllerSpec
               Right(sample[IndividualName]),
               routes.SingleDisposalsTriageController
                 .assetTypeNotYetImplemented()
+            ),
+            Scenario(
+              allQuestionsAnswered.copy(individualUserType = Some(IndividualUserType.Capacitor)),
+              Right(sample[IndividualName]),
+              routes.InitialTriageQuestionsController.capacitorsAndPersonalRepresentativesNotHandled
+            ),
+            Scenario(
+              allQuestionsAnswered.copy(individualUserType = Some(IndividualUserType.PersonalRepresentative)),
+              Right(sample[IndividualName]),
+              routes.InitialTriageQuestionsController.capacitorsAndPersonalRepresentativesNotHandled
             )
           ).foreach {
             case Scenario(state, name, expectedRedirect) =>
