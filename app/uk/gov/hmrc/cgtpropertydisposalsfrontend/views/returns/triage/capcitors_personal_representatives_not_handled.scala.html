@@ -31,8 +31,77 @@
 
 @mainTemplate(title = title, userType = request.userType) {
 
-    @backLinkComponent(triage.routes.InitialTriageQuestionsController.whoIsIndividualRepresenting())
+ @backLinkComponent(triage.routes.InitialTriageQuestionsController.whoIsIndividualRepresenting())
 
-    @pageHeading(title)
+ @pageHeading(title)
+
+ <p>
+  @messages(s"$key.cannotUse")
+ </p>
+
+ <ul class="bullet">
+  <li>@messages(s"$key.cannotUse.bullet1")</li>
+  <li>@messages(s"$key.cannotUse.bullet2")</li>
+ </ul>
+
+ <p>
+  @messages(s"$key.youNeedTo")
+ </p>
+
+ <ul class="bullet">
+  <li>@messages(s"$key.youNeedTo.bullet1")</li>
+  <li>@messages(s"$key.youNeedTo.bullet2")</li>
+ </ul>
+
+ <h2 class="heading-medium">
+  @messages(s"$key.phoneHeading")
+ </h2>
+
+ <p>
+  @messages(s"$key.phoneHmrc")<br>
+  <strong class="bold">
+   @appConfig.hmrcTelephone
+  </strong>
+ </p>
+
+ <p>
+  @messages(s"$key.phoneOutsideUk")<br>
+  <strong class="bold">
+   @appConfig.outsideUkPhone
+  </strong>
+ </p>
+
+ <p>
+  @messages(s"$key.phoneAgent")<br>
+  <strong class="bold">
+   @appConfig.agentDedicatedLine
+  </strong>
+ </p>
+
+ <p>
+  @messages(s"$key.openingTimes")
+ </p>
+
+ <p>
+  @messages(s"$key.openingTimes.monToFri")
+ </p>
+
+ <p>
+  @messages(s"$key.openingTimes.saturday")
+ </p>
+
+ <p>
+  @messages(s"$key.openingTimes.sunBankHols")
+ </p>
+
+  <p>
+   @Html(messages(s"$key.getHelp", appConfig.additionalNeedsUrl))
+  </p>
+
+  <p>
+   <a href="@{appConfig.callChargesUrl}">
+    @messages(s"$key.callChargesLink")
+   </a>
+  </p>
 
 }
