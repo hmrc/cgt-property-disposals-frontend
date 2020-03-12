@@ -28,11 +28,10 @@
 
 @key = @{draftReturn.id}
 @completionDate =  @{draftReturn.triageAnswers.fold(
-  _ => None,
+  _.completionDate.map(_.value),
   c => Some(c.completionDate.value)
 )}
 @dueDate = @{completionDate.map(d => d.plusDays(30L))}
-
 
 <li class="single-return form-bundle">
   <div class="grid-row">
@@ -40,23 +39,22 @@
       <span id="sentDate-@key" class="caption">
         @messages("drafts.list.lastUpdated", LocalDateUtils.govShortDisplayFormat(draftReturn.lastUpdatedDate))
       </span>
-      @if(completionDate.nonEmpty) {
-        <h4>
-          @if(draftReturn.propertyAddress.nonEmpty) {
-            @draftReturn.propertyAddress.map(a => s"${a.line1}, ${a.postcode.value}")
-          } else {
-            @completionDate.map(f => LocalDateUtils.govShortDisplayFormat(f))
-          }
-        </h4>
-      }
+      @completionDate.map(f => {
+          <h4>
+          {draftReturn.propertyAddress.fold(
+            LocalDateUtils.govShortDisplayFormat(f))(
+            a => s"${a.line1}, ${a.postcode.value}"
+          )}
+          </h4>
+      })
     </div>
     <div class="column-one-quarter financial-summary">
-      @if(completionDate.nonEmpty) {
+      @dueDate.map(f => {
         <h4 id="sendAndPayBy-@key">
-          <span class="caption">@messages("drafts.list.sendAndPayBy")</span>
-          @dueDate.map(f => LocalDateUtils.govShortDisplayFormat(f))
+          <span class="caption">{messages("drafts.list.sendAndPayBy")}</span>
+          {LocalDateUtils.govShortDisplayFormat(f)}
         </h4>
-      }
+      })
     </div>
     <div class="column-full">
       <a id="resumeDraftReturn-@key" href="@{controllers.accounts.homepage.routes.HomePageController.resumeDraftReturn(key)}">
