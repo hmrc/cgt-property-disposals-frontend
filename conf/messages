@@ -712,13 +712,20 @@ acquisitionDate-month.error.monthAndYearRequired=Date you got the property must 
 acquisitionDate-day.error.dayAndYearRequired=Date you got the property must include a day and a year
 acquisitionDate-day.error.dayAndMonthRequired=Date you got the property must include a day and a month
 
-acquisitionPrice.title=How much did you pay for your share of the property?
-acquisitionPrice.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later.
-acquisitionPrice.error.required=Enter how much you paid for your share of the property
-acquisitionPrice.error.invalid=The amount of money must only include numbers, for example 160,000 or 23,040.50
-acquisitionPrice.error.tooSmall=The amount of money must be a number between 1 and 50,000,000,000.00
-acquisitionPrice.error.tooLarge=The amount of money must be a number between 1 and 50,000,000,000.00
-acquisitionPrice.error.tooManyDecimals=The amount of money must be 2 decimal places or less, for example 160,000 or 23,040.50
+acquisitionPriceBought.title=How much did you pay for the property?
+acquisitionPriceNotBought.title=What was the market value of the property on {0}?
+acquisitionPriceBought.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter your share.
+acquisitionPriceNotBought.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of your share.
+acquisitionPriceBought.error.required=Enter how much you paid for your share of the property
+acquisitionPriceNotBought.error.required=Enter the market value of the property on the date you got it
+acquisitionPriceBought.error.invalid=The amount of money must only include numbers, for example 160,000 or 23,040.50
+acquisitionPriceNotBought.error.invalid=The market value must be an amount of money, for example 160,000 or 23,040.50
+acquisitionPriceBought.error.tooSmall=The amount of money must be a number between 1 and 50,000,000,000.00
+acquisitionPriceNotBought.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000.00
+acquisitionPriceBought.error.tooLarge=The amount of money must be a number between 1 and 50,000,000,000.00
+acquisitionPriceNotBought.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000.00
+acquisitionPriceBought.error.tooManyDecimals=The amount of money must be 2 decimal places or less, for example 160,000 or 23,040.50
+acquisitionPriceNotBought.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, for example 160,000 or 23,040.50
 
 improvementCosts.title=Do you want to claim any improvement costs?
 improvementCosts.helpText=You can only claim costs that added value to the property. If you shared these costs, you can only claim your share. You cannot claim for mortgage interest, decorating or maintenance. 

@@ -115,7 +115,16 @@ class AcquisitionDetailsController @Inject() (
     answers
       .fold(_.acquisitionDate, c => Some(c.acquisitionDate))
       .fold[Future[Result]](
-        Redirect(routes.AcquisitionDetailsController.acquisitionDate())
+        Redirect(routes.AcquisitionDetailsController.checkYourAnswers())
+      )(f)
+
+  private def withAcquisitionMethod(
+    answers: AcquisitionDetailsAnswers
+  )(f: AcquisitionMethod => Future[Result]): Future[Result] =
+    answers
+      .fold(_.acquisitionMethod, c => Some(c.acquisitionMethod))
+      .fold[Future[Result]](
+        Redirect(routes.AcquisitionDetailsController.checkYourAnswers())
       )(f)
 
   private def commonDisplayBehaviour[A, P: Writeable, R](
@@ -308,46 +317,54 @@ class AcquisitionDetailsController @Inject() (
   def acquisitionPrice(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
       case (_, _, answers) =>
-        commonDisplayBehaviour(answers)(
-          form = _.fold(
-            _.acquisitionPrice.fold(acquisitionPriceForm)(p => acquisitionPriceForm.fill(p.inPounds)),
-            c => acquisitionPriceForm.fill(c.acquisitionPrice.inPounds())
-          )
-        )(
-          page = acquisitionPricePage(_, _)
-        )(
-          requiredPreviousAnswer = _.fold(
-            _.acquisitionDate,
-            c => Some(c.acquisitionDate)
-          ),
-          redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionDate()
-        )
+        withAcquisitionDate(answers) { acquisitionDate =>
+          withAcquisitionMethod(answers) { acquisitionMethod =>
+            commonDisplayBehaviour(answers)(
+              form = _.fold(
+                _.acquisitionPrice.fold(acquisitionPriceForm)(p => acquisitionPriceForm.fill(p.inPounds)),
+                c => acquisitionPriceForm.fill(c.acquisitionPrice.inPounds())
+              )
+            )(
+              page = acquisitionPricePage(_, _, acquisitionMethod, acquisitionDate)
+            )(
+              requiredPreviousAnswer = _.fold(
+                _.acquisitionDate,
+                c => Some(c.acquisitionDate)
+              ),
+              redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionDate()
+            )
+          }
+        }
     }
   }
 
   def acquisitionPriceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
       case (_, fillingOutReturn, answers) =>
-        commonSubmitBehaviour(
-          fillingOutReturn,
-          answers
-        )(
-          acquisitionPriceForm
-        )(page = acquisitionPricePage(_, _))(
-          requiredPreviousAnswer = _.fold(
-            _.acquisitionDate,
-            c => Some(c.acquisitionDate)
-          ),
-          redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionDate()
-        )(
-          updateAnswers = {
-            case (p, answers) =>
-              answers.fold(
-                _.copy(acquisitionPrice = Some(AmountInPence.fromPounds(p))),
-                _.copy(acquisitionPrice = AmountInPence.fromPounds(p))
-              )
+        withAcquisitionDate(answers) { acquisitionDate =>
+          withAcquisitionMethod(answers) { acquisitionMethod =>
+            commonSubmitBehaviour(
+              fillingOutReturn,
+              answers
+            )(
+              acquisitionPriceForm
+            )(page = acquisitionPricePage(_, _, acquisitionMethod, acquisitionDate))(
+              requiredPreviousAnswer = _.fold(
+                _.acquisitionDate,
+                c => Some(c.acquisitionDate)
+              ),
+              redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionDate()
+            )(
+              updateAnswers = {
+                case (p, answers) =>
+                  answers.fold(
+                    _.copy(acquisitionPrice = Some(AmountInPence.fromPounds(p))),
+                    _.copy(acquisitionPrice = AmountInPence.fromPounds(p))
+                  )
+              }
+            )
           }
-        )
+        }
     }
   }
 
