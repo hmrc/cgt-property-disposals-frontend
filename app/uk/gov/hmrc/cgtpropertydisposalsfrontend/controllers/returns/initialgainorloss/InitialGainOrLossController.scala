@@ -32,7 +32,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.Inn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.validateAmountOfMoney
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.InitialGainOrLossAnswers.CompleteInitialGainOrLossAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, FormUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -58,29 +57,16 @@ class InitialGainOrLossController @Inject() (
     with SessionUpdates
     with Logging {
 
-  def changeInitialGainOrLoss: Action[AnyContent] = {
-    val checkYourAnswersBackLink = routes.InitialGainOrLossController.checkYourAnswers()
-    enterOrChangeInitialGainOrLoss(checkYourAnswersBackLink)
-  }
-
-  def enterInitialGainOrLoss: Action[AnyContent] = {
-    val taskListBackLink = controllers.returns.routes.TaskListController.taskList()
-    enterOrChangeInitialGainOrLoss(taskListBackLink)
-  }
-
-  def enterOrChangeInitialGainOrLoss(backLink: Call): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request =>
-      withFillingOutReturnAndAnswers(request) {
-        case (_, answers) => {
-          display(
-            answers
-          )(answers =>
-            answers.fold(initialGainOrLossForm)(answers =>
-              initialGainOrLossForm.fill(answers.initialGainOrLoss.inPounds())
-            )
-          )(page = initialGainOrLossesPage(_, _))(backLink)
-        }
+  def enterInitialGainOrLoss: Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withFillingOutReturnAndAnswers(request) {
+      case (_, answer) => {
+        display(
+          answer
+        )(answer => answer.fold(initialGainOrLossForm)(value => initialGainOrLossForm.fill(value.inPounds())))(page =
+          initialGainOrLossesPage(_, _)
+        )(getBackLink(answer))
       }
+    }
   }
 
   def submitInitialGainOrLoss: Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
@@ -90,7 +76,7 @@ class InitialGainOrLossController @Inject() (
           fillingOutReturn
         )(form = initialGainOrLossForm)(
           page = initialGainOrLossesPage(_, controllers.returns.routes.TaskListController.taskList())
-        )(amount => CompleteInitialGainOrLossAnswers(AmountInPence.fromPounds(amount)))
+        )(amount => AmountInPence.fromPounds(amount))
       }
       case _ =>
         Redirect(routes.InitialGainOrLossController.enterInitialGainOrLoss())
@@ -115,44 +101,49 @@ class InitialGainOrLossController @Inject() (
     Redirect(controllers.returns.routes.TaskListController.taskList())
   }
 
+  private def getBackLink(initialGainOrLoss: Option[AmountInPence]): Call =
+    initialGainOrLoss.fold(controllers.returns.routes.TaskListController.taskList())(_ =>
+      routes.InitialGainOrLossController.checkYourAnswers()
+    )
+
   private def withFillingOutReturnAndAnswers(request: RequestWithSessionData[_])(
-    processReturnAndAnswersIntoResult: (FillingOutReturn, Option[CompleteInitialGainOrLossAnswers]) => Future[Result]
+    processReturnAndAnswersIntoResult: (FillingOutReturn, Option[AmountInPence]) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
 
       case Some(fillingOutReturn: FillingOutReturn) =>
-        processReturnAndAnswersIntoResult(fillingOutReturn, fillingOutReturn.draftReturn.initialGainOrLossAnswers)
+        processReturnAndAnswersIntoResult(fillingOutReturn, fillingOutReturn.draftReturn.initialGainOrLoss)
 
       case _ => Redirect(controllers.routes.StartController.start())
     }
 
   private def display[A, P: Writeable, R](
-    answers: Option[CompleteInitialGainOrLossAnswers]
-  )(form: Option[CompleteInitialGainOrLossAnswers] => Form[A])(
+    initialGainOrLoss: Option[AmountInPence]
+  )(form: Option[AmountInPence] => Form[A])(
     page: (Form[A], Call) => P
   )(backLink: Call): Future[Result] =
-    Ok(page(form(answers), backLink))
+    Ok(page(form(initialGainOrLoss), backLink))
 
   private def submit[A, P: Writeable, R](
     fillingOutReturn: FillingOutReturn
   )(form: Form[A])(
     page: Form[A] => P
   )(
-    convertValueToAnswer: A => CompleteInitialGainOrLossAnswers
+    convertValueToAnswer: A => AmountInPence
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     form
       .bindFromRequest()
       .fold(
         formWithErrors => BadRequest(page(formWithErrors)), { value =>
-          val newAnswers: CompleteInitialGainOrLossAnswers = convertValueToAnswer(value)
-          val newDraftReturn                               = fillingOutReturn.draftReturn.copy(initialGainOrLossAnswers = Some(newAnswers))
+          val newAnswer: AmountInPence = convertValueToAnswer(value)
+          val updatedDraftReturn       = fillingOutReturn.draftReturn.copy(initialGainOrLoss = Some(newAnswer))
 
           val result = for {
-            _ <- if (newDraftReturn === fillingOutReturn.draftReturn) EitherT.pure(())
-                else returnsService.storeDraftReturn(newDraftReturn)
+            _ <- if (updatedDraftReturn === fillingOutReturn.draftReturn) EitherT.pure(())
+                else returnsService.storeDraftReturn(updatedDraftReturn)
             _ <- EitherT(
                   updateSession(sessionStore, request)(
-                    _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
+                    _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = updatedDraftReturn)))
                   )
                 )
           } yield ()

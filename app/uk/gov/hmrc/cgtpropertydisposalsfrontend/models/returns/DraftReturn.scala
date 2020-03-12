@@ -22,8 +22,8 @@ import java.util.UUID
 import cats.Eq
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.InitialGainOrLossAnswers.CompleteInitialGainOrLossAnswers
 
 final case class DraftReturn(
   id: UUID,
@@ -35,7 +35,7 @@ final case class DraftReturn(
   reliefDetailsAnswers: Option[ReliefDetailsAnswers],
   exemptionAndLossesAnswers: Option[ExemptionAndLossesAnswers],
   yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
-  initialGainOrLossAnswers: Option[CompleteInitialGainOrLossAnswers],
+  initialGainOrLoss: Option[AmountInPence],
   lastUpdatedDate: LocalDate
 )
 

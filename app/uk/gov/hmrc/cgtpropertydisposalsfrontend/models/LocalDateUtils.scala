@@ -17,7 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import java.time.{Clock, LocalDate}
-import java.time.format.{DateTimeFormatter, DateTimeParseException}
+import java.time.format.{DateTimeFormatter}
 
 import cats.Order
 import cats.syntax.either._
@@ -38,14 +38,6 @@ object LocalDateUtils {
   val clock: Clock = Clock.systemUTC()
 
   def today(): LocalDate = LocalDate.now(clock)
-
-  def dateFromString(
-    dateInString: String,
-    formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d/MM/yyyy")
-  ): LocalDate = {
-    val formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d/MM/yyyy")
-    LocalDate.parse(dateInString, formatter)
-  }
 
   def dateFormatter(
     maximumDateInclusive: Option[LocalDate],

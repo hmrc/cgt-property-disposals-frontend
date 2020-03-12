@@ -17,8 +17,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.initialgainorloss.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.InitialGainOrLossAnswers.CompleteInitialGainOrLossAnswers
-
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -29,8 +28,7 @@
         summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.initialgainorloss.summary
 )
 
-@(answers: CompleteInitialGainOrLossAnswers)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
-
+@(answers: AmountInPence)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @title = @{
     messages("initialGainOrLoss.cya.title")
