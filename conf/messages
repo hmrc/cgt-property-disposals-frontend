@@ -1003,8 +1003,6 @@ viewReturn.charge.paymentMethod.VoluntaryDirectPayments=payment received
 
 viewReturn.summaryHeading=Your return
 
-multiple-disposals.triage.caption=Reporting multiple disposals
-
 multiple-disposals.guidance.title=You sold or disposed of 2 or more properties
 multiple-disposals.guidance.p1=You can report all property sales (or ‘disposals’) in the same return. You can only do this if they all had:
 multiple-disposals.guidance.li1=the same ‘completion’ date
@@ -1067,3 +1065,10 @@ disposalDateMixedUseOrIndirect.p1.reason2=indirect disposals of UK land
 disposalDateMixedUseOrIndirect.h2=What you’ll need to do next
 disposalDateMixedUseOrIndirect.p2=You’ll need to complete a <a href="{0}">non resident: report and pay Capital Gains Tax on UK property or land form</a>.
 disposalDateMixedUseOrIndirect.p3=You have 30 days from the date of completion to report disposal and pay any tax due. You may get a penalty if your payment is late.
+
+multipleDisposalsTaxYear.title=When were contracts exchanged on all the properties?
+multipleDisposalsTaxYear.link=What happens on the exchange date?
+multipleDisposalsTaxYear.before=Before 6 April 2020
+multipleDisposalsTaxYear.after=After 6 April 2020
+multipleDisposalsTaxYear.details.p1=Contract <a href="{0}" target="_blank">exchange (opens in a new window)</a> usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
+multipleDisposalsTaxYear.error.required=Select when the contracts were exchanged on all the properties

@@ -49,4 +49,7 @@ POST /multiple-disposals/were-properties-residential        uk.gov.hmrc.cgtprope
 GET  /multiple-disposals/country-residence                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.countryOfResidence()
 POST /multiple-disposals/country-residence                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.countryOfResidenceSubmit()
 
+GET  /multiple-disposals/tax-year-exchanged                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.whenWereContractsExchanged()
+POST /multiple-disposals/tax-year-exchanged                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.whenWereContractsExchangedSubmit()
+
 GET  /check-your-answers                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.checkYourAnswers()
