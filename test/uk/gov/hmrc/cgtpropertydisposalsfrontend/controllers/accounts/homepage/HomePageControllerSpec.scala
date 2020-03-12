@@ -100,13 +100,13 @@ trait HomePageControllerSpec
 
   def mockStartPaymentJourney(
     cgtReference: CgtReference,
-    chargeReference: String,
+    chargeReference: Option[String],
     amount: AmountInPence,
     returnUrl: Call,
     backUrl: Call
   )(response: Either[Error, PaymentsJourney]) =
     (mockPaymentsService
-      .startPaymentJourney(_: CgtReference, _: String, _: AmountInPence, _: Call, _: Call)(
+      .startPaymentJourney(_: CgtReference, _: Option[String], _: AmountInPence, _: Call, _: Call)(
         _: HeaderCarrier,
         _: Request[_]
       ))
@@ -925,7 +925,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
             mockGetSession(SessionData.empty.copy(journeyStatus = Some(subscribed)))
             mockStartPaymentJourney(
               subscribed.subscribedDetails.cgtReference,
-              subscribed.subscribedDetails.cgtReference.value,
+              None,
               subscribed.totalLeftToPay(),
               routes.HomePageController.homepage(),
               routes.HomePageController.homepage()
@@ -948,7 +948,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
             mockGetSession(SessionData.empty.copy(journeyStatus = Some(subscribed)))
             mockStartPaymentJourney(
               subscribed.subscribedDetails.cgtReference,
-              subscribed.subscribedDetails.cgtReference.value,
+              None,
               subscribed.totalLeftToPay(),
               routes.HomePageController.homepage(),
               routes.HomePageController.homepage()

@@ -20,7 +20,7 @@ import play.api.libs.json.{Json, OFormat}
 
 final case class PaymentInitiated(
   cgtReference: String,
-  chargeReference: String,
+  chargeReference: Option[String],
   amount: BigDecimal
 )
 
