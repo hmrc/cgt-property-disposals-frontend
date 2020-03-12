@@ -420,9 +420,6 @@ class MultipleDisposalsTriageController @Inject() (
           case IncompleteMultipleDisposalsAnswers(_, None, _, _, _, _, _, _) =>
             Redirect(routes.MultipleDisposalsTriageController.guidance())
 
-          case IncompleteMultipleDisposalsAnswers(_, None, _, _, _, _, _, _) =>
-            Redirect(routes.MultipleDisposalsTriageController.howManyDisposals())
-
           case IncompleteMultipleDisposalsAnswers(_, _, None, _, _, _, _, _) =>
             Redirect(routes.MultipleDisposalsTriageController.wereYouAUKResident())
 

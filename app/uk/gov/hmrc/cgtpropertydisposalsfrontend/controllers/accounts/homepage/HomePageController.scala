@@ -182,7 +182,7 @@ class HomePageController @Inject() (
         paymentsService
           .startPaymentJourney(
             subscribed.subscribedDetails.cgtReference,
-            subscribed.subscribedDetails.cgtReference.value,
+            None,
             subscribed.totalLeftToPay(),
             routes.HomePageController.homepage(),
             routes.HomePageController.homepage()
