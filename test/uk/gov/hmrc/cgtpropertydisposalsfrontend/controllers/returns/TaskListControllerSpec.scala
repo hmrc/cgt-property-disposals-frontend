@@ -128,6 +128,28 @@ class TaskListControllerSpec
         )
       }
 
+      def testSectionNonExistent(draftReturn: DraftReturn)(
+        sectionLinkId: String
+      ): Unit = {
+        val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              journeyStatus = Some(fillingOutReturn)
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("service.title"), { doc =>
+            doc.select(s"li#$sectionLinkId > span").isEmpty shouldBe true
+          }
+        )
+      }
+
       "display the page with the proper triage section status" when {
 
         "the session data indicates that they are filling in a return and the triage section is incomplete" in {
@@ -150,7 +172,7 @@ class TaskListControllerSpec
                   .copy(countryOfResidence = Country("TR", Some("Turkey"))),
                 disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
                 acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers])
-                  .map(answers => answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2018, 10, 1))))
+                  .map(answers => answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2010, 10, 1))))
               )
               .copy(initialGainOrLoss = None)
           )(
@@ -170,7 +192,7 @@ class TaskListControllerSpec
                   .copy(countryOfResidence = Country("TR", Some("Turkey"))),
                 disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
                 acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers])
-                  .map(answers => answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2018, 10, 1))))
+                  .map(answers => answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2010, 10, 1))))
               )
               .copy(initialGainOrLoss = Some(AmountInPence(0)))
           )(
@@ -553,7 +575,8 @@ class TaskListControllerSpec
           )
 
         "the session data indicates that the country of residence is United Kingdom" in {
-          test(
+
+          testSectionNonExistent(
             sample[DraftReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
                 .copy(assetType = AssetType.NonResidential, countryOfResidence = Country("GB", Some("United Kingdom"))),
@@ -561,32 +584,17 @@ class TaskListControllerSpec
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
                 answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2014, 10, 1)))
               )
-            ),
-            TaskListStatus.CannotStart
+            )
+          )(
+            "initialGainOrLoss"
           )
         }
 
-        "the session data indicates that the country of residence is NOT United Kingdom and NON_RESIDENTIAL property was bought BEFORE 01/04/2019" in {
+        "the session data indicates that the country of residence is NOT United Kingdom and NON_RESIDENTIAL property was bought BEFORE 01/04/2015" in {
           test(
             sample[DraftReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
                 .copy(assetType = AssetType.NonResidential)
-                .copy(countryOfResidence = Country("TR", Some("Turkey"))),
-              disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
-              acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
-                answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2018, 10, 1)))
-              ),
-              initialGainOrLoss = None
-            ),
-            TaskListStatus.ToDo
-          )
-        }
-
-        "the session data indicates that the country of residence is NOT United Kingdom and RESIDENTIAL property was bought BEFORE 01/04/2019" in {
-          test(
-            sample[DraftReturn].copy(
-              triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                .copy(assetType = AssetType.Residential)
                 .copy(countryOfResidence = Country("TR", Some("Turkey"))),
               disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
@@ -598,23 +606,23 @@ class TaskListControllerSpec
           )
         }
 
-        "the session data indicates that the country of residence is NOT United Kingdom and RESIDENTIAL property was bought AFTER 01/04/2015 and BEFORE 01/04/2019" in {
-          test(
+        "the session data indicates that the country of residence is NOT United Kingdom and RESIDENTIAL property was bought" in {
+          testSectionNonExistent(
             sample[DraftReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
                 .copy(assetType = AssetType.Residential)
                 .copy(countryOfResidence = Country("TR", Some("Turkey"))),
               disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
-                answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2016, 10, 1)))
-              )
-            ),
-            TaskListStatus.CannotStart
-          )
+                answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2014, 10, 1)))
+              ),
+              initialGainOrLoss = None
+            )
+          )("initialGainOrLoss")
         }
 
-        "the session data indicates that the country of residence is NOT United Kingdom but acquisition date is AFTER 01/04/2019 for NON_RESIDANTAL property" in {
-          test(
+        "the session data indicates that the country of residence is NOT United Kingdom but acquisition date is AFTER 01/04/2015 for NON_RESIDANTAL property" in {
+          testSectionNonExistent(
             sample[DraftReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
                 .copy(assetType = AssetType.NonResidential)
@@ -623,26 +631,9 @@ class TaskListControllerSpec
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
                 answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2020, 10, 1)))
               )
-            ),
-            TaskListStatus.CannotStart
-          )
+            )
+          )("initialGainOrLoss")
         }
-
-        "the session data indicates that the country of residence is NOT United Kingdom but acquisition date is AFTER 01/04/2015 for RESIDANTIAL property" in {
-          test(
-            sample[DraftReturn].copy(
-              triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                .copy(assetType = AssetType.Residential)
-                .copy(countryOfResidence = Country("TR", Some("Turkey"))),
-              disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
-              acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
-                answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2018, 10, 1)))
-              )
-            ),
-            TaskListStatus.CannotStart
-          )
-        }
-
       }
 
       "display the page with Save and come back later link" when {
