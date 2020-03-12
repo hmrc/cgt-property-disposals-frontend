@@ -390,7 +390,40 @@ class MultipleDisposalsTriageController @Inject() (
 
   def assetTypeForNonUkResidentsSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
-      ???
+      withMultipleDisposalTriageAnswers(request) {
+        case (_, state, answers) =>
+          assetTypeForNonUkResidentsForm
+            .bindFromRequest()
+            .fold(
+              formWithErrors =>
+                BadRequest(
+                  assetTypeForNonUkResidentsPage(
+                    formWithErrors,
+                    routes.MultipleDisposalsTriageController.countryOfResidence()
+                  )
+                ), { assetType =>
+                if (answers.fold(_.assetType, c => Some(c.assetType)).contains(assetType)) {
+                  Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+                } else {
+                  val updatedAnswers =
+                    answers.fold[MultipleDisposalsTriageAnswers](
+                      _.copy(assetType = Some(assetType)),
+                      _.copy(assetType = assetType)
+                    )
+                  val newState = state.copy(newReturnTriageAnswers = Left(updatedAnswers))
+
+                  updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newState))).map {
+                    case Left(e) =>
+                      logger.warn("Could not update session", e)
+                      errorHandler.errorResult()
+
+                    case Right(_) =>
+                      Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+                  }
+                }
+              }
+            )
+      }
   }
 
   private def updateTaxYearToAnswers(
@@ -448,7 +481,7 @@ class MultipleDisposalsTriageController @Inject() (
           case IncompleteMultipleDisposalsAnswers(_, _, Some(false), None, _, _, _, _) =>
             Redirect(routes.MultipleDisposalsTriageController.countryOfResidence())
 
-          case IncompleteMultipleDisposalsAnswers(_, _, Some(false), Some(_), _, _, _, _) =>
+          case IncompleteMultipleDisposalsAnswers(_, _, Some(false), Some(_), _, None, _, _) =>
             Redirect(routes.MultipleDisposalsTriageController.assetTypeForNonUkResidents())
 
           case IncompleteMultipleDisposalsAnswers(_, _, _, _, Some(false), _, _, _) =>
@@ -466,6 +499,9 @@ class MultipleDisposalsTriageController @Inject() (
 
           case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, _, Some(false), _) =>
             Ok(s"All properties contracts were exchanged before 06th April, 2020")
+
+          case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, Some(_), _, _) =>
+            Ok(s"Non-UK asset types")
 
           case c: CompleteMultipleDisposalsAnswers =>
             Ok(s"Got $c")
@@ -547,9 +583,9 @@ object MultipleDisposalsTriageController {
 
   val assetTypeForNonUkResidentsForm: Form[AssetType] = Form(
     mapping(
-      "assetTypeForNonUkResidents" -> of(
+      "multipleDisposalsAssetTypeForNonUkResidents" -> of(
         FormUtils.radioFormFormatter(
-          "assetTypeForNonUkResidents",
+          "multipleDisposalsAssetTypeForNonUkResidents",
           List(Residential, NonResidential, MixedUse, IndirectDisposal)
         )
       )

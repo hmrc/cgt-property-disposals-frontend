@@ -28,6 +28,7 @@
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
         radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional,
         backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
@@ -79,12 +80,14 @@
         @errorSummary(form)
     }
 
+    @caption(messages("triage.caption"))
+
     @formWrapper(triage.routes.MultipleDisposalsTriageController.assetTypeForNonUkResidentsSubmit(), 'novalidate -> "novalidate") {
         @radioGroupConditional(
             fieldId = key,
             options = options,
             selected = selectedIndex,
-            label = pageHeading(title, Some(messages("triage.caption"))),
+            label = pageHeading(title),
             labelAsHeading = true,
             error = form.error(key),
             hasErrors = hasErrors,
