@@ -52,7 +52,8 @@ class InitialTriageQuestionsController @Inject() (
   cc: MessagesControllerComponents,
   val config: Configuration,
   whoAreYouReportingForPage: triagePages.who_are_you_reporting_for,
-  howManyPropertiesPage: triagePages.how_many_properties
+  howManyPropertiesPage: triagePages.how_many_properties,
+  capacitorsAndPersonalRepresentativesNotHandledPage: triagePages.capcitors_personal_representatives_not_handled
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -200,6 +201,11 @@ class InitialTriageQuestionsController @Inject() (
             }
           )
     }
+  }
+
+  def capacitorsAndPersonalRepresentativesNotHandled(): Action[AnyContent] = authenticatedActionWithSessionData {
+    implicit request =>
+      Ok(capacitorsAndPersonalRepresentativesNotHandledPage())
   }
 
   private def howManyPropertiesBackLink(state: Either[StartingNewDraftReturn, FillingOutReturn]): Option[Call] =
