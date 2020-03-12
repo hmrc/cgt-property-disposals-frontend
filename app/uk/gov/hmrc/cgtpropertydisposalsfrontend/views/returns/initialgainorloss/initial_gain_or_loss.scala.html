@@ -92,7 +92,7 @@
 @title = @{messages(s"$key.title")}
 
 @mainTemplate(title = title, userType = request.userType) {
-@backLinkComponent(backLink)x
+@backLinkComponent(backLink)
 @caption(messages("initialGainOrLoss.caption"))
 @if(hasErrors) {
     @errorSummary(form)

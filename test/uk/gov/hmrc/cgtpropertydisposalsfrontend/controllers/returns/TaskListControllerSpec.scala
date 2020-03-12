@@ -32,6 +32,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 
+import java.time.LocalDate
+
 import org.jsoup.Jsoup.parse
 import org.jsoup.nodes.Document
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -54,7 +56,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AssetType, DraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.InitialGainOrLossAnswers.CompleteInitialGainOrLossAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CompleteYearToDateLiabilityAnswers, IncompleteYearToDateLiabilityAnswers}
@@ -148,11 +149,10 @@ class TaskListControllerSpec
                   .copy(assetType = AssetType.NonResidential)
                   .copy(countryOfResidence = Country("TR", Some("Turkey"))),
                 disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
-                acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
-                  answers.copy(acquisitionDate = AcquisitionDate(LocalDateUtils.dateFromString("1/10/2018")))
-                )
+                acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers])
+                  .map(answers => answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2018, 10, 1))))
               )
-              .copy(initialGainOrLossAnswers = None)
+              .copy(initialGainOrLoss = None)
           )(
             "initialGainOrLoss",
             messageFromMessageKey("task-list.enter-initial-gain-or-loss.link"),
@@ -169,11 +169,10 @@ class TaskListControllerSpec
                   .copy(assetType = AssetType.NonResidential)
                   .copy(countryOfResidence = Country("TR", Some("Turkey"))),
                 disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
-                acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
-                  answers.copy(acquisitionDate = AcquisitionDate(LocalDateUtils.dateFromString("1/10/2018")))
-                )
+                acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers])
+                  .map(answers => answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2018, 10, 1))))
               )
-              .copy(initialGainOrLossAnswers = Some(CompleteInitialGainOrLossAnswers(AmountInPence(0))))
+              .copy(initialGainOrLoss = Some(AmountInPence(0)))
           )(
             "initialGainOrLoss",
             messageFromMessageKey("task-list.enter-initial-gain-or-loss.link"),
@@ -543,7 +542,7 @@ class TaskListControllerSpec
         }
       }
 
-      "display the page with the proper initial gains and losses section status" when {
+      "display the page with the PROPER initial gains and losses section STATUS" when {
 
         def test(draftReturn: DraftReturn, expectedStatus: TaskListStatus) =
           testStateOfSection(draftReturn)(
@@ -560,7 +559,7 @@ class TaskListControllerSpec
                 .copy(assetType = AssetType.NonResidential, countryOfResidence = Country("GB", Some("United Kingdom"))),
               reliefDetailsAnswers = Some(sample[IncompleteReliefDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
-                answers.copy(acquisitionDate = AcquisitionDate(LocalDateUtils.dateFromString("01/10/2014")))
+                answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2014, 10, 1)))
               )
             ),
             TaskListStatus.CannotStart
@@ -575,9 +574,9 @@ class TaskListControllerSpec
                 .copy(countryOfResidence = Country("TR", Some("Turkey"))),
               disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
-                answers.copy(acquisitionDate = AcquisitionDate(LocalDateUtils.dateFromString("1/10/2018")))
+                answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2018, 10, 1)))
               ),
-              initialGainOrLossAnswers = None
+              initialGainOrLoss = None
             ),
             TaskListStatus.ToDo
           )
@@ -591,9 +590,9 @@ class TaskListControllerSpec
                 .copy(countryOfResidence = Country("TR", Some("Turkey"))),
               disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
-                answers.copy(acquisitionDate = AcquisitionDate(LocalDateUtils.dateFromString("1/10/2014")))
+                answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2014, 10, 1)))
               ),
-              initialGainOrLossAnswers = None
+              initialGainOrLoss = None
             ),
             TaskListStatus.ToDo
           )
@@ -607,7 +606,7 @@ class TaskListControllerSpec
                 .copy(countryOfResidence = Country("TR", Some("Turkey"))),
               disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
-                answers.copy(acquisitionDate = AcquisitionDate(LocalDateUtils.dateFromString("1/10/2016")))
+                answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2016, 10, 1)))
               )
             ),
             TaskListStatus.CannotStart
@@ -622,7 +621,7 @@ class TaskListControllerSpec
                 .copy(countryOfResidence = Country("TR", Some("Turkey"))),
               disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
-                answers.copy(acquisitionDate = AcquisitionDate(LocalDateUtils.dateFromString("1/10/2020")))
+                answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2020, 10, 1)))
               )
             ),
             TaskListStatus.CannotStart
@@ -637,7 +636,7 @@ class TaskListControllerSpec
                 .copy(countryOfResidence = Country("TR", Some("Turkey"))),
               disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
-                answers.copy(acquisitionDate = AcquisitionDate(LocalDateUtils.dateFromString("1/10/2018")))
+                answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2018, 10, 1)))
               )
             ),
             TaskListStatus.CannotStart
@@ -671,5 +670,4 @@ class TaskListControllerSpec
       }
     }
   }
-
 }

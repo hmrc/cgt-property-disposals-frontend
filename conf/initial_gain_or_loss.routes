@@ -2,4 +2,3 @@ GET     /initial-gain-or-loss/enter-initial-gain-or-loss        uk.gov.hmrc.cgtp
 POST    /initial-gain-or-loss/enter-initial-gain-or-loss        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.initialgainorloss.InitialGainOrLossController.submitInitialGainOrLoss()
 GET     /initial-gain-or-loss/check-you-answers                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.initialgainorloss.InitialGainOrLossController.checkYourAnswers()
 POST    /initial-gain-or-loss/check-you-answers                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.initialgainorloss.InitialGainOrLossController.checkYourAnswersSubmit()
-GET     /change-initial-gain-or-loss                            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.initialgainorloss.InitialGainOrLossController.changeInitialGainOrLoss

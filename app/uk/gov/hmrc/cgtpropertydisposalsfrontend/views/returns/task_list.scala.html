@@ -25,15 +25,20 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDate
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
+@import java.time.LocalDate
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        taskLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.taskLink
+mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+taskLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.taskLink
 )
 
 @(draftReturn: DraftReturn)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers
 @title = @{messages("service.title")}
 @triageState = @{ draftReturn.triageAnswers.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete) }
 @propertyAddressState = @{ draftReturn.propertyAddress.fold[TaskListStatus](TaskListStatus.ToDo)(_ => TaskListStatus.Complete) }
@@ -41,29 +46,29 @@
 @acquistionDetailsState = @{ draftReturn.acquisitionDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress,_ => TaskListStatus.Complete)) }
 
 @initialGainOrLossState = @{
+     def checkTriple(countryOfResidence: Country, assetType: AssetType, acquisitionDetailsAnswers: Option[AcquisitionDetailsAnswers]) = {
+         val residentialBeforeDate = LocalDate.of(2015, 4, 1)
+         val nonResidentialBeforeDate = LocalDate.of(2019, 4, 1)
+         (countryOfResidence, assetType, acquisitionDetailsAnswers) match {
+             case (_, _, _) if countryOfResidence.isUk() => false
+             case (_, AssetType.NonResidential, Some(CompleteAcquisitionDetailsAnswers(_, AcquisitionDate(acquisitionDate), _, _, _, _)))
+              if acquisitionDate.isBefore(nonResidentialBeforeDate) => true
+             case (_, AssetType.Residential, Some(CompleteAcquisitionDetailsAnswers(_, AcquisitionDate(acquisitionDate), _, _, _, _)))
+              if acquisitionDate.isBefore(residentialBeforeDate) => true
+             case (_, _, _) => false
+
+      }
+     }
     def canUseService = {
-        val residentialBeforeDate = LocalDateUtils.dateFromString("1/04/2015")
-        val nonResidentialBeforeDate = LocalDateUtils.dateFromString("1/04/2019")
-        (triageState) match {
-            case (TaskListStatus.Complete) => {
-                val CompleteSingleDisposalTriageAnswers(_, _, countryOfResidence, assetType, _, _) = draftReturn.triageAnswers
-
-                (countryOfResidence, assetType, draftReturn.acquisitionDetailsAnswers) match {
-                    case (_, _, _) if countryOfResidence.isUk() => false
-                    case (_, AssetType.NonResidential, Some(CompleteAcquisitionDetailsAnswers(_, AcquisitionDate(acquisitionDate), _, _, _, _)))
-                        if (acquisitionDate.isBefore(nonResidentialBeforeDate)) => true
-                    case (_, AssetType.Residential, Some(CompleteAcquisitionDetailsAnswers(_, AcquisitionDate(acquisitionDate), _, _, _, _)))
-                        if(acquisitionDate.isBefore(residentialBeforeDate)) => true
-                    case (_, _, _) => false
-
-                }
-            }
+        (draftReturn.triageAnswers) match {
+            case IncompleteSingleDisposalTriageAnswers(_, _, _, _, Some(countryOfResidence), Some(assetType), _, _, _) => checkTriple(countryOfResidence, assetType, draftReturn.acquisitionDetailsAnswers)
+            case CompleteSingleDisposalTriageAnswers(_, _, countryOfResidence, assetType, _, _) => checkTriple(countryOfResidence, assetType, draftReturn.acquisitionDetailsAnswers)
             case _ => false
         }
     }
 
     if (canUseService)
-        draftReturn.initialGainOrLossAnswers match {
+        draftReturn.initialGainOrLoss match {
          case(Some(_)) => TaskListStatus.Complete
             case _ => TaskListStatus.ToDo
         }

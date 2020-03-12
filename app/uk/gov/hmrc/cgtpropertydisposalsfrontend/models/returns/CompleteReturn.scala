@@ -23,10 +23,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.InitialGainOrLossAnswers.CompleteInitialGainOrLossAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CompleteYearToDateLiabilityAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
 final case class CompleteReturn(
   triageAnswers: CompleteSingleDisposalTriageAnswers,
@@ -36,7 +36,7 @@ final case class CompleteReturn(
   reliefDetails: CompleteReliefDetailsAnswers,
   exemptionsAndLossesDetails: CompleteExemptionAndLossesAnswers,
   yearToDateLiabilityAnswers: CompleteYearToDateLiabilityAnswers,
-  initialGainOrLossAnswers: CompleteInitialGainOrLossAnswers
+  initialGainOrLoss: AmountInPence
 )
 
 object CompleteReturn {
@@ -52,7 +52,7 @@ object CompleteReturn {
         Some(r: CompleteReliefDetailsAnswers),
         Some(e: CompleteExemptionAndLossesAnswers),
         Some(y: CompleteYearToDateLiabilityAnswers),
-        Some(i: CompleteInitialGainOrLossAnswers),
+        Some(i: AmountInPence),
         _
         ) =>
       Some(CompleteReturn(t, p, d, a, r, e, y, i))
@@ -69,7 +69,6 @@ object CompleteReturn {
     implicit val reliefDetailsFormat: OFormat[CompleteReliefDetailsAnswers]             = Json.format
     implicit val exemptionAndLossesFormat: OFormat[CompleteExemptionAndLossesAnswers]   = Json.format
     implicit val yearToDateLiabilityFormat: OFormat[CompleteYearToDateLiabilityAnswers] = Json.format
-    implicit val initialGainAndLossesFormat: OFormat[CompleteInitialGainOrLossAnswers]  = Json.format
     Json.format
   }
 
