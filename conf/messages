@@ -1034,6 +1034,11 @@ returns.list.taxOwed=Tax owed for return
 returns.list.sentDate=Sent to HMRC on {0}
 returns.paymentTakes3Days=Payments may take up to 3 working days to be shown on this page
 
+drafts.list.title=Draft returns
+drafts.list.lastUpdated=Last saved on {0}
+drafts.list.sendAndPayBy=Send and pay by
+drafts.list.resume=Complete return
+
 multipleDisposalsNumberOfProperties.title=How many disposals are you including in this return?
 multipleDisposalsNumberOfProperties.p1=The property disposals must all have the same ‘completion’ date. The contract ‘exchange’ dates must all be in the same tax year.
 multipleDisposalsNumberOfProperties.p2=If you sold shares enter the number of companies you held the shares in. You must have sold all the shares on the same date.
