@@ -34,10 +34,10 @@
 @(answers: CompleteAcquisitionDetailsAnswers)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 @acquisitionMethodAndPriceTitle = @{
   answers.acquisitionMethod match {
-    case AcquisitionMethod.Bought => (messages("returns.acquisitionMethod.Bought"), messages("acquisitionPrice.bought.title"))
-    case AcquisitionMethod.Inherited => (messages("returns.acquisitionMethod.Inherited"), messages("acquisitionPrice.not-bought.title", LocalDateUtils.govDisplayFormat(answers.acquisitionDate.value)))
-    case AcquisitionMethod.Gifted => (messages("returns.acquisitionMethod.Gifted"), messages("acquisitionPrice.not-bought.title", LocalDateUtils.govDisplayFormat(answers.acquisitionDate.value)))
-    case AcquisitionMethod.Other(value) => (value, messages("acquisitionPrice.not-bought.title", LocalDateUtils.govDisplayFormat(answers.acquisitionDate.value)))
+    case AcquisitionMethod.Bought => (messages("returns.acquisitionMethod.Bought"), messages("acquisitionPriceBought.title"))
+    case AcquisitionMethod.Inherited => (messages("returns.acquisitionMethod.Inherited"), messages("acquisitionPriceNotBought.title", LocalDateUtils.govDisplayFormat(answers.acquisitionDate.value)))
+    case AcquisitionMethod.Gifted => (messages("returns.acquisitionMethod.Gifted"), messages("acquisitionPriceNotBought.title", LocalDateUtils.govDisplayFormat(answers.acquisitionDate.value)))
+    case AcquisitionMethod.Other(value) => (value, messages("acquisitionPriceNotBought.title", LocalDateUtils.govDisplayFormat(answers.acquisitionDate.value)))
   }
 }
 
