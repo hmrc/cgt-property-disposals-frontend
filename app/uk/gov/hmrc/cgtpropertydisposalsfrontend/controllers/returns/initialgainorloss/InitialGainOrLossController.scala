@@ -96,8 +96,10 @@ class InitialGainOrLossController @Inject() (
     }
   }
 
-  def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { _ =>
-    Redirect(controllers.returns.routes.TaskListController.taskList())
+  def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withFillingOutReturnAndAnswers(request) { (_, _) =>
+      Redirect(controllers.returns.routes.TaskListController.taskList())
+    }
   }
 
   private def getBackLink(initialGainOrLoss: Option[AmountInPence]): Call =
