@@ -384,7 +384,7 @@ class MultipleDisposalsTriageController @Inject() (
   ): Either[Error, MultipleDisposalsTriageAnswers] =
     taxYear match {
       case None if taxYearAfter6April2020 =>
-        Left(Error("You cannot use this service"))
+        Left(Error("Could not find tax year"))
       case _ =>
         Right(
           answers.fold[MultipleDisposalsTriageAnswers](
@@ -441,8 +441,12 @@ class MultipleDisposalsTriageController @Inject() (
           case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, _, None, _) =>
             Redirect(routes.MultipleDisposalsTriageController.whenWereContractsExchanged())
 
-          case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, _, Some(true), _) =>
+          case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, _, Some(true), Some(_)) =>
             Ok(s"All properties contracts were exchanged after 06th April, 2020")
+
+          case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, _, Some(true), None) =>
+            logger.warn("No tax year was found when we expected one")
+            errorHandler.errorResult()
 
           case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, _, Some(false), _) =>
             Ok(s"All properties contracts were exchanged before 06th April, 2020")
