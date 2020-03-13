@@ -134,7 +134,7 @@ class InitialGainOrLossController @Inject() (
 
           val result = for {
             _ <- if (updatedDraftReturn === fillingOutReturn.draftReturn) EitherT.pure(())
-                else returnsService.storeDraftReturn(updatedDraftReturn, None)
+                else returnsService.storeDraftReturn(updatedDraftReturn, fillingOutReturn.agentReferenceNumber)
             _ <- EitherT(
                   updateSession(sessionStore, request)(
                     _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = updatedDraftReturn)))
