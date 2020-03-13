@@ -76,8 +76,8 @@ class HomePageController @Inject() (
       val redirectTo = subscribed.subscribedDetails
         .userType()
         .fold(
-          _ => triage.routes.InitialTriageQuestionsController.howManyProperties(),
-          _ => triage.routes.InitialTriageQuestionsController.whoIsIndividualRepresenting()
+          _ => triage.routes.CommonTriageQuestionsController.howManyProperties(),
+          _ => triage.routes.CommonTriageQuestionsController.whoIsIndividualRepresenting()
         )
 
       updateSession(sessionStore, request)(
@@ -182,7 +182,7 @@ class HomePageController @Inject() (
         paymentsService
           .startPaymentJourney(
             subscribed.subscribedDetails.cgtReference,
-            subscribed.subscribedDetails.cgtReference.value,
+            None,
             subscribed.totalLeftToPay(),
             routes.HomePageController.homepage(),
             routes.HomePageController.homepage()

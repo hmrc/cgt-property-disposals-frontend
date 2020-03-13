@@ -16,10 +16,15 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDate
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -27,127 +32,184 @@
         taskLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.taskLink
 )
 
-@(draftReturn: DraftReturn)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(draftReturn: DraftReturn)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
-@title = @{messages("service.title")}
-@triageState = @{ draftReturn.triageAnswers.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete) }
-@propertyAddressState = @{ draftReturn.propertyAddress.fold[TaskListStatus](TaskListStatus.ToDo)(_ => TaskListStatus.Complete) }
-@disposalDetailsState = @{ draftReturn.disposalDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress,_ => TaskListStatus.Complete)) }
-@acquistionDetailsState = @{ draftReturn.acquisitionDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress,_ => TaskListStatus.Complete)) }
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers
+@title = @{
+    messages("service.title")
+}
+@triageState = @{
+    draftReturn.triageAnswers.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete)
+}
+@propertyAddressState = @{
+    draftReturn.propertyAddress.fold[TaskListStatus](TaskListStatus.ToDo)(_ => TaskListStatus.Complete)
+}
+@disposalDetailsState = @{
+    draftReturn.disposalDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))
+}
+@acquistionDetailsState = @{
+    draftReturn.acquisitionDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))
+}
+
+@initialGainOrLossState = @{
+    def shouldSeeSection(countryOfResidence: Country, assetType: AssetType, acquisitionDetailsAnswers: Option[AcquisitionDetailsAnswers]) = {
+        val nonResidentialBeforeDate = RebasingCutoffDates.nonUkResidentsResidentialProperty
+
+        (countryOfResidence, assetType, acquisitionDetailsAnswers) match {
+            case (_, _, _) if countryOfResidence.isUk() => false
+            case (_, AssetType.NonResidential, Some(CompleteAcquisitionDetailsAnswers(_, AcquisitionDate(acquisitionDate), _, _, _, _)))
+                if acquisitionDate.isBefore(nonResidentialBeforeDate) => true
+            case (_, _, _) => false
+
+        }
+    }
+
+    def canUseService = {
+        (draftReturn.triageAnswers) match {
+            case IncompleteSingleDisposalTriageAnswers(_, _, _, _, Some(countryOfResidence), Some(assetType), _, _, _) => shouldSeeSection(countryOfResidence, assetType, draftReturn.acquisitionDetailsAnswers)
+            case CompleteSingleDisposalTriageAnswers(_, _, countryOfResidence, assetType, _, _) => shouldSeeSection(countryOfResidence, assetType, draftReturn.acquisitionDetailsAnswers)
+            case _ => false
+        }
+    }
+
+    if(canUseService)
+        draftReturn.initialGainOrLoss match {
+            case (Some(_)) => TaskListStatus.Complete
+            case _ => TaskListStatus.ToDo
+        }
+    else
+        TaskListStatus.CannotStart
+
+}
+
 @reliefDetailsState = @{
- (propertyAddressState, disposalDetailsState, acquistionDetailsState) match {
-     case (TaskListStatus.Complete,TaskListStatus.Complete,TaskListStatus.Complete) =>
-         draftReturn.reliefDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress,_ => TaskListStatus.Complete))
-     case _ => TaskListStatus.CannotStart
-  }
+    (propertyAddressState, disposalDetailsState, acquistionDetailsState) match {
+        case (TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete) =>
+            draftReturn.reliefDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))
+        case _ => TaskListStatus.CannotStart
+    }
 }
 @exemptionsAndLossesState = @{
-  reliefDetailsState match {
-   case TaskListStatus.Complete =>
-    draftReturn.exemptionAndLossesAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress,_ => TaskListStatus.Complete))
-   case _ =>
-      TaskListStatus.CannotStart
-  }
+    reliefDetailsState match {
+        case TaskListStatus.Complete =>
+            draftReturn.exemptionAndLossesAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))
+        case _ =>
+            TaskListStatus.CannotStart
+    }
 }
 @ytdLiabilityState = @{
- (propertyAddressState, disposalDetailsState, acquistionDetailsState, reliefDetailsState, exemptionsAndLossesState) match {
-  case (TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete) =>
-   draftReturn.yearToDateLiabilityAnswers.fold[TaskListStatus] (TaskListStatus.ToDo) (_.fold (_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete) )
+    (propertyAddressState, disposalDetailsState, acquistionDetailsState, reliefDetailsState, exemptionsAndLossesState) match {
+        case (TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete) =>
+            draftReturn.yearToDateLiabilityAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))
 
-  case _ =>
-     TaskListStatus.CannotStart
- }
+        case _ =>
+            TaskListStatus.CannotStart
+    }
 }
 
- @checkAndSendReturnState = @{
-  (propertyAddressState, disposalDetailsState, acquistionDetailsState, reliefDetailsState, exemptionsAndLossesState, ytdLiabilityState) match {
-   case (TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete) =>
-    TaskListStatus.ToDo
+@checkAndSendReturnState = @{
+    (propertyAddressState, disposalDetailsState, acquistionDetailsState, reliefDetailsState, exemptionsAndLossesState, ytdLiabilityState) match {
+        case (TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete) =>
+            TaskListStatus.ToDo
 
-   case _ =>
-    TaskListStatus.CannotStart
-  }
- }
+        case _ =>
+            TaskListStatus.CannotStart
+    }
+}
 
 @mainTemplate(title = title, userType = request.userType) {
 
-  @pageHeading(title)
+    @pageHeading(title)
 
- <ol class="app-task-list">
-  <li>
-   <h2 class="app-task-list__section">
-    <span class="app-task-list__section-number">
-     1.
-    </span>
-    @messages("triage.caption")
-   </h2>
-   <ul class="app-task-list__items">
-    <li id="canTheyUseOurService" class="app-task-list__item">
-     @taskLink(messages("task-list.triage.link"), returns.triage.routes.SingleDisposalsTriageController.checkYourAnswers().url, triageState)
-    </li>
-   </ul>
-  </li>
+    <ol class="app-task-list">
+        <li>
+            <h2 class="app-task-list__section">
+                <span class="app-task-list__section-number">
+                    1.
+                </span>
+                @messages("triage.caption")
+            </h2>
+            <ul class="app-task-list__items">
+                <li id="canTheyUseOurService" class="app-task-list__item">
+                @taskLink(messages("task-list.triage.link"), returns.triage.routes.SingleDisposalsTriageController.checkYourAnswers().url, triageState)
+                </li>
+            </ul>
+        </li>
 
-  <li>
-   <h2 class="app-task-list__section">
-    <span class="app-task-list__section-number">
-     2.
-    </span>
-    @messages("task-list.provide-details.heading")
-   </h2>
-   <ul class="app-task-list__items">
-    <li id="propertyAddress" class="app-task-list__item">
-    @taskLink(messages("task-list.enter-property-address.link"),
-     draftReturn.propertyAddress.fold(
-       returns.address.routes.PropertyAddressController.enterPostcode().url
-     ) (_ => returns.address.routes.PropertyAddressController.checkYourAnswers().url), propertyAddressState)
-    </li>
+        <li>
+            <h2 class="app-task-list__section">
+                <span class="app-task-list__section-number">
+                    2.
+                </span>
+                @messages("task-list.provide-details.heading")
+            </h2>
+            <ul class="app-task-list__items">
+                <li id="propertyAddress" class="app-task-list__item">
+                @taskLink(messages("task-list.enter-property-address.link"),
+                    draftReturn.propertyAddress.fold(
+                        returns.address.routes.PropertyAddressController.enterPostcode().url
+                    )(_ => returns.address.routes.PropertyAddressController.checkYourAnswers().url), propertyAddressState)
+                </li>
 
-    <li id="disposalDetails" class="app-task-list__item">
-    @taskLink(messages("task-list.disposals-details.link"),
-     returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers().url, disposalDetailsState)
-    </li>
+                <li id="disposalDetails" class="app-task-list__item">
+                @taskLink(messages("task-list.disposals-details.link"),
+                    returns.disposaldetails.routes.DisposalDetailsController.checkYourAnswers().url, disposalDetailsState)
+                </li>
 
-    <li id="acquisitionDetails" class="app-task-list__item">
-    @taskLink(messages("task-list.acquisition-details.link"),
-     returns.acquisitiondetails.routes.AcquisitionDetailsController.checkYourAnswers().url, acquistionDetailsState)
-    </li>
+                <li id="acquisitionDetails" class="app-task-list__item">
+                @taskLink(messages("task-list.acquisition-details.link"),
+                    returns.acquisitiondetails.routes.AcquisitionDetailsController.checkYourAnswers().url, acquistionDetailsState)
+                </li>
 
-    <li id="reliefDetails" class="app-task-list__item">
-     @taskLink(messages("task-list.relief-details.link"),
-     returns.reliefdetails.routes.ReliefDetailsController.checkYourAnswers().url, reliefDetailsState)
-    </li>
+                <li id="reliefDetails" class="app-task-list__item">
+                @taskLink(messages("task-list.relief-details.link"),
+                    returns.reliefdetails.routes.ReliefDetailsController.checkYourAnswers().url, reliefDetailsState)
+                </li>
 
-   </ul>
-  </li>
 
-  <li>
-   <h2 class="app-task-list__section">
-    <span class="app-task-list__section-number">
-     3.
-    </span>
-    @messages("task-list.report-and-pay-the-tax.heading")
-   </h2>
-   <ul class="app-task-list__items">
+                @initialGainOrLossState match {
+                    case TaskListStatus.CannotStart => {}
+                    case _ => {
+                        <li id="initialGainOrLoss" class="app-task-list__item">
+                        @taskLink(messages("task-list.enter-initial-gain-or-loss.link"),
+                            returns.initialgainorloss.routes.InitialGainOrLossController.enterInitialGainOrLoss().url, initialGainOrLossState)
 
-    <li id="exemptionsAndLosses" class="app-task-list__item">
-    @taskLink(messages("task-list.exemptions-and-losses.link"),
-     returns.exemptionandlosses.routes.ExemptionAndLossesController.checkYourAnswers().url, exemptionsAndLossesState)
-    </li>
+                        </li>
+                    }
+                }
+            </ul>
+        </li>
 
-    <li id="enterCgtLiability" class="app-task-list__item">
-    @taskLink(messages("task-list.enter-cgt-liability.link"), returns.yeartodatelliability.routes.YearToDateLiabilityFirstReturnController.checkYourAnswers().url, ytdLiabilityState)
-    </li>
+        <li>
+            <h2 class="app-task-list__section">
+                <span class="app-task-list__section-number">
+                    3.
+                </span>
+                @messages("task-list.report-and-pay-the-tax.heading")
+            </h2>
+            <ul class="app-task-list__items">
 
-    <li id="checkAndSendReturn" class="app-task-list__item">
-    @taskLink(messages("task-list.check-and-send-return.link"), returns.routes.CheckAllAnswersAndSubmitController.checkAllAnswers().url, checkAndSendReturnState)
-    </li>
+                <li id="exemptionsAndLosses" class="app-task-list__item">
+                @taskLink(messages("task-list.exemptions-and-losses.link"),
+                    returns.exemptionandlosses.routes.ExemptionAndLossesController.checkYourAnswers().url, exemptionsAndLossesState)
+                </li>
 
-   </ul>
-  </li>
- </ol>
+                <li id="enterCgtLiability" class="app-task-list__item">
+                @taskLink(messages("task-list.enter-cgt-liability.link"), returns.yeartodatelliability.routes.YearToDateLiabilityFirstReturnController.checkYourAnswers().url, ytdLiabilityState)
+                </li>
 
-  <p><a id="saveAndComeBackLater" href="@{returns.routes.ConfirmDraftReturnController.confirmDraftReturn()}">@messages("task-list.save-and-come-back.link")</a></p>
+                <li id="checkAndSendReturn" class="app-task-list__item">
+                @taskLink(messages("task-list.check-and-send-return.link"), returns.routes.CheckAllAnswersAndSubmitController.checkAllAnswers().url, checkAndSendReturnState)
+                </li>
+
+            </ul>
+        </li>
+    </ol>
+
+    <p><a id="saveAndComeBackLater" href="@{
+        returns.routes.ConfirmDraftReturnController.confirmDraftReturn()
+    }">@messages("task-list.save-and-come-back.link")</a></p>
 
 }
 

@@ -140,7 +140,7 @@ class MultipleDisposalsTriageControllerSpec
         checkPageIsDisplayed(
           performAction,
           messageFromMessageKey("multiple-disposals.guidance.title"), { doc =>
-            doc.select("#back").attr("href") shouldBe triage.routes.InitialTriageQuestionsController
+            doc.select("#back").attr("href") shouldBe triage.routes.CommonTriageQuestionsController
               .howManyProperties()
               .url
             doc
@@ -1162,7 +1162,7 @@ class MultipleDisposalsTriageControllerSpec
           )
         }
 
-        checkIsRedirect(performAction(), routes.InitialTriageQuestionsController.whoIsIndividualRepresenting())
+        checkIsRedirect(performAction(), routes.CommonTriageQuestionsController.whoIsIndividualRepresenting())
       }
 
       "redirect to the capacitors and personal representatives not handled page" when {
@@ -1180,7 +1180,7 @@ class MultipleDisposalsTriageControllerSpec
 
           checkIsRedirect(
             performAction(),
-            routes.InitialTriageQuestionsController.capacitorsAndPersonalRepresentativesNotHandled()
+            routes.CommonTriageQuestionsController.capacitorsAndPersonalRepresentativesNotHandled()
           )
         }
 
@@ -1198,7 +1198,7 @@ class MultipleDisposalsTriageControllerSpec
 
           checkIsRedirect(
             performAction(),
-            routes.InitialTriageQuestionsController.capacitorsAndPersonalRepresentativesNotHandled()
+            routes.CommonTriageQuestionsController.capacitorsAndPersonalRepresentativesNotHandled()
           )
         }
 

@@ -58,7 +58,7 @@
         @errorSummary(form)
     }
 
-    @formWrapper(controllers.returns.triage.routes.InitialTriageQuestionsController.howManyPropertiesSubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(controllers.returns.triage.routes.CommonTriageQuestionsController.howManyPropertiesSubmit(), 'novalidate -> "novalidate") {
         @radioGroup(
             fieldId = key,
             options = options,

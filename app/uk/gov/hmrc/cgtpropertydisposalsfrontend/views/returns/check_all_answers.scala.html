@@ -40,6 +40,7 @@
 
 @title = @{ messages("checkAllAnswers.title") }
 @disposalMethod= @{draftReturn.triageAnswers.disposalMethod}
+@disposalDate = @{draftReturn.triageAnswers.disposalDate}
 
 
 @mainTemplate(title = title, userType = request.userType) {
@@ -64,7 +65,7 @@
  @reliefDetailsSummary(draftReturn.reliefDetails)
 
  <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
- @lossesSummary(draftReturn.exemptionsAndLossesDetails)
+ @lossesSummary(draftReturn.exemptionsAndLossesDetails, disposalDate)
 
  <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
  @yearToDateLiabilitySummary(draftReturn.yearToDateLiabilityAnswers)

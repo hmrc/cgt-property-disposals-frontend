@@ -642,6 +642,7 @@ task-list.CannotStart=Cannot start
 task-list.ToDo=To do
 task-list.triage.link=Check if you can use this service
 task-list.provide-details.heading=Provide details
+task-list.enter-initial-gain-or-loss.link=Enter initial gain or loss
 task-list.enter-property-address.link=Enter property address
 task-list.disposals-details.link=Enter sale or disposal details
 task-list.acquisition-details.link=Enter purchase or acquisition details
@@ -1096,9 +1097,42 @@ disposalDateMixedUseOrIndirect.h2=What you’ll need to do next
 disposalDateMixedUseOrIndirect.p2=You’ll need to complete a <a href="{0}">non resident: report and pay Capital Gains Tax on UK property or land form</a>.
 disposalDateMixedUseOrIndirect.p3=You have 30 days from the date of completion to report disposal and pay any tax due. You may get a penalty if your payment is late.
 
+
+initialGainOrLoss.title=Did you make an initial gain or loss?
+initialGainOrLoss.caption=Initial gain or loss
+initialGainOrLoss.error.required=Select if you made a gain, loss, or no gain or loss
+initialGainOrLoss.error.invalid=Select if you made a gain, loss, or no gain or loss
+initialGainOrLoss.gain.label=Gain
+initialGainOrLoss.loss.label=Loss
+initialGainOrLoss.details.summary=How to work out your initial gain or loss
+
+initialGainOrLoss.cya.title=Check your answers
+
+initialGainOrLoss.details.olTitle=To work out your initial gain:
+initialGainOrLoss.details.li1=1. Subtract the amount you purchased, or acquired, the property for from the amount you sold, or disposed of, it for.
+initialGainOrLoss.details.li2=2. Subtract any money you spent on buying or acquiring the property.
+initialGainOrLoss.details.li3=3. Then subtract any money you spent on making improvements to the property.
+initialGainOrLoss.details.li4=4. Then subtract any money you spent on selling the property, such as on legal fees or for estate agents.
+initialGainOrLoss.details.li5=5. This will give you the amount of the initial gain or loss.
+initialGainOrLoss.details.example.title=Example
+initialGainOrLoss.details.example.details=You inherited a property. The market value of the property when you got it was £120,000. You paid £5,000 in legal fees when you got it. You spent £10,000 on making improvements to it. After 10 years, you sold the property for £150,000. You paid £5,000 for legal and estate agent's fees. This gave you an initial gain of £10,000.
+initialGainOrLoss.noLossOrGain.label=No initial gain, no initial loss
+initialGainOrLoss.summary.hint="Click on the link to change your answers"
+
+gain.error.required=Enter the initial gain amount
+gain.error.invalid=Initial gain amount must only include numbers, like 2,908 or 740.50
+gain.error.tooLarge=Initial gain amount must be a number greater than 0 and less than 50,000,000,000.00, or select no gain or loss
+gain.error.tooManyDecimals=Initial gain amount must have 2 decimal places or less, like 2,908 or 740.50
+
+loss.error.required=Enter the initial loss amount
+loss.error.invalid=Initial loss amount must only include numbers, like 2,908 or 740.50
+loss.error.tooLarge=Initial loss amount must be a number greater than 0 and less than 50,000,000,000.00, or select no gain or loss
+loss.error.tooManyDecimals=Initial loss amount must have 2 decimal places or less, like 2,908 or 740.50
+
 multipleDisposalsTaxYear.title=When were contracts exchanged on all the properties?
 multipleDisposalsTaxYear.link=What happens on the exchange date?
 multipleDisposalsTaxYear.before=Before 6 April 2020
 multipleDisposalsTaxYear.after=After 6 April 2020
 multipleDisposalsTaxYear.details.p1=Contract <a href="{0}" target="_blank">exchange (opens in a new window)</a> usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
 multipleDisposalsTaxYear.error.required=Select when the contracts were exchanged on all the properties
+

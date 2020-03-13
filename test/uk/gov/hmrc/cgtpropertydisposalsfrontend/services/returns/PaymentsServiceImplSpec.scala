@@ -42,13 +42,13 @@ class PaymentsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
   def mockStartPaymentJourney(
     cgtReference: CgtReference,
-    chargeReference: String,
+    chargeReference: Option[String],
     amount: AmountInPence,
     returnUrl: Call,
     backUrl: Call
   )(response: Either[Error, HttpResponse]) =
     (mockConnector
-      .startPaymentJourney(_: CgtReference, _: String, _: AmountInPence, _: Call, _: Call)(_: HeaderCarrier))
+      .startPaymentJourney(_: CgtReference, _: Option[String], _: AmountInPence, _: Call, _: Call)(_: HeaderCarrier))
       .expects(cgtReference, chargeReference, amount, returnUrl, backUrl, *)
       .returning(EitherT.fromEither[Future](response))
 
@@ -62,7 +62,7 @@ class PaymentsServiceImplSpec extends WordSpec with Matchers with MockFactory {
     "handling requests to start a payments journey" must {
 
       val cgtReference    = sample[CgtReference]
-      val chargeReference = sample[String]
+      val chargeReference = Some(sample[String])
       val amount          = sample[AmountInPence]
       val returnCall      = controllers.routes.StartController.start()
       val backCall        = controllers.routes.EmailWhitelistingController.thereIsAProblem()
