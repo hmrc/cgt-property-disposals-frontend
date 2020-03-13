@@ -34,7 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingNew
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, FormUtils, LocalDateUtils, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, MultipleDisposalsTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, IndividualUserType, MultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsAnswers, IncompleteMultipleDisposalsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, FormUtils, SessionData}
@@ -416,6 +416,21 @@ class MultipleDisposalsTriageController @Inject() (
         triageAnswers match {
           case IncompleteMultipleDisposalsAnswers(None, _, _, _, _, _, _, _) if isIndividual =>
             Redirect(routes.CommonTriageQuestionsController.whoIsIndividualRepresenting())
+
+          case IncompleteMultipleDisposalsAnswers(Some(IndividualUserType.Capacitor), _, _, _, _, _, _, _) =>
+            Redirect(routes.CommonTriageQuestionsController.capacitorsAndPersonalRepresentativesNotHandled())
+
+          case IncompleteMultipleDisposalsAnswers(
+              Some(IndividualUserType.PersonalRepresentative),
+              _,
+              _,
+              _,
+              _,
+              _,
+              _,
+              _
+              ) =>
+            Redirect(routes.CommonTriageQuestionsController.capacitorsAndPersonalRepresentativesNotHandled())
 
           case IncompleteMultipleDisposalsAnswers(_, None, _, _, _, _, _, _) =>
             Redirect(routes.MultipleDisposalsTriageController.guidance())

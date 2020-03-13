@@ -507,6 +507,22 @@ class SingleDisposalsTriageController @Inject() (
           case IncompleteSingleDisposalTriageAnswers(None, _, _, _, _, _, _, _, _) if isIndividual =>
             Redirect(routes.CommonTriageQuestionsController.whoIsIndividualRepresenting())
 
+          case IncompleteSingleDisposalTriageAnswers(Some(IndividualUserType.Capacitor), _, _, _, _, _, _, _, _) =>
+            Redirect(routes.CommonTriageQuestionsController.capacitorsAndPersonalRepresentativesNotHandled())
+
+          case IncompleteSingleDisposalTriageAnswers(
+              Some(IndividualUserType.PersonalRepresentative),
+              _,
+              _,
+              _,
+              _,
+              _,
+              _,
+              _,
+              _
+              ) =>
+            Redirect(routes.CommonTriageQuestionsController.capacitorsAndPersonalRepresentativesNotHandled())
+
           case IncompleteSingleDisposalTriageAnswers(_, false, _, _, _, _, _, _, _) =>
             Redirect(routes.CommonTriageQuestionsController.howManyProperties())
 

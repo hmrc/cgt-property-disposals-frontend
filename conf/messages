@@ -480,6 +480,24 @@ individualUserType.PersonalRepresentative=Someone who has died
 individualUserType.error.required=Select who are you reporting the tax for
 individualUserType.error.invalid=Select who are you reporting the tax for
 
+capacitorsPersonalRepresentativesNotHandled.title=You cannot use this service
+capacitorsPersonalRepresentativesNotHandled.cannotUse=You cannot use this online service to report Capital Gains Tax on UK property for:
+capacitorsPersonalRepresentativesNotHandled.cannotUse.bullet1=someone else
+capacitorsPersonalRepresentativesNotHandled.cannotUse.bullet2=someone who has died
+capacitorsPersonalRepresentativesNotHandled.youNeedTo=You’ll need to:
+capacitorsPersonalRepresentativesNotHandled.youNeedTo.bullet1=contact HMRC and ask for a paper version of the return to be posted to you
+capacitorsPersonalRepresentativesNotHandled.youNeedTo.bullet2=provide your National Insurance number or Self Assessment Unique Taxpayer Reference if you have one
+capacitorsPersonalRepresentativesNotHandled.phoneHeading=Phone
+capacitorsPersonalRepresentativesNotHandled.phoneHmrc=Telephone:
+capacitorsPersonalRepresentativesNotHandled.phoneOutsideUk=Outside UK:
+capacitorsPersonalRepresentativesNotHandled.phoneAgent=Agent Dedicated Line:
+capacitorsPersonalRepresentativesNotHandled.openingTimes=Opening times:
+capacitorsPersonalRepresentativesNotHandled.openingTimes.monToFri=10am to 8pm, Monday to Friday
+capacitorsPersonalRepresentativesNotHandled.openingTimes.saturday=8am to 4pm, Saturday
+capacitorsPersonalRepresentativesNotHandled.openingTimes.sunBankHols=Closed Sundays and bank holidays
+capacitorsPersonalRepresentativesNotHandled.getHelp=Get help <a href="{0}">dealing with HMRC if you have additional needs</a>.
+capacitorsPersonalRepresentativesNotHandled.callChargesLink=<a href="{0}">Find out about call charges</a>
+
 numberOfProperties.title=How many UK properties are you including in this return?
 numberOfProperties.helpText=All of the property sales or disposals must have the same completion date.
 numberOfProperties.One=One
@@ -631,6 +649,7 @@ task-list.acquisition-details.link=Enter purchase or acquisition details
 task-list.exemptions-and-losses.link=Enter losses and exemptions
 task-list.save-and-come-back.link=Save and come back later
 task-list.relief-details.link=Enter reliefs
+
 task-list.report-and-pay-the-tax.heading=Report and pay the tax
 task-list.enter-cgt-liability.link=Enter Capital Gains Tax liability so far this tax year
 task-list.ytd-liability.link=Enter Capital Gains Tax liability so far this tax year

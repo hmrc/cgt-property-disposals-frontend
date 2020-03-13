@@ -33,7 +33,8 @@
         acquisitionDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.acquisitiondetails.summary,
         disposalDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.disposaldetails.summary,
         reliefDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.reliefdetails.summary,
-        lossesSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.exemptionandlosses.summary
+        lossesSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.exemptionandlosses.summary,
+        initialGainOrLossSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.initialgainorloss.summary
 )
 
 @(draftReturn: CompleteReturn)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
@@ -63,6 +64,11 @@
 
  <h2 class="heading-medium">@messages("task-list.relief-details.link")</h2>
  @reliefDetailsSummary(draftReturn.reliefDetails)
+
+  @draftReturn.initialGainOrLoss.map{ initialGainOrLoss =>
+   <h2 class="heading-medium">@messages("task-list.enter-initial-gain-or-loss.link")</h2>
+   @initialGainOrLossSummary(initialGainOrLoss)
+}
 
  <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
  @lossesSummary(draftReturn.exemptionsAndLossesDetails, disposalDate)
