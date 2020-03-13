@@ -35,7 +35,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.privatebeta.PrivateBetaHomePageController
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, StartingNewDraftReturn, Subscribed, ViewingReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.govShortDisplayFormat
@@ -43,11 +42,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.ChargeType.{PenaltyInterest, UkResidentReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, CompletionDate, DraftReturn, ReturnSummary, SubmitReturnResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{PaymentsService, ReturnsService}
@@ -254,8 +253,8 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
         val subscribed = sample[Subscribed].copy(draftReturns = List(sampleDraftReturn))
 
         val completionDate: LocalDate = sampleDraftReturn.triageAnswers match {
-          case a: CompleteSingleDisposalTriageAnswers   => a.completionDate.value
-          case b: IncompleteSingleDisposalTriageAnswers => b.completionDate.fold(sys.error("Error"))(_.value)
+          case a: CompleteSingleDisposalTriageAnswers => a.completionDate.value
+          case _                                      => sys.error("Error")
         }
 
         val expectedDraftReturnSendAndPayBy = completionDate.plusDays(30)
@@ -280,6 +279,42 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
             doc
               .select(s"#draftReturn-${sampleDraftReturn.id} > h4")
               .text() shouldBe propertyAddress.line1 + ", " + propertyAddress.postcode.value
+          }
+        )
+      }
+
+      "display draft returns on the home page when there is no completion date" in {
+        val propertyAddress = sample[UkAddress]
+        val triageAnswers   = sample[IncompleteSingleDisposalTriageAnswers].copy(completionDate = None)
+        val sampleDraftReturn = sample[DraftReturn].copy(
+          triageAnswers   = triageAnswers,
+          lastUpdatedDate = LocalDate.now(),
+          propertyAddress = Some(propertyAddress)
+        )
+        val subscribed = sample[Subscribed].copy(draftReturns = List(sampleDraftReturn))
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              userType      = Some(UserType.Individual),
+              journeyStatus = Some(subscribed)
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("account.home.title"), { doc =>
+            doc.select(s"#resumeDraftReturn-${sampleDraftReturn.id}").text() shouldBe "Complete return"
+            doc.select(s"#draftReturnLastUpdatedDate-${sampleDraftReturn.id}").text() shouldBe
+              messages("drafts.list.lastUpdated", govShortDisplayFormat(sampleDraftReturn.lastUpdatedDate))
+            doc
+              .select(s"#draftReturnsendAndPayBy-${sampleDraftReturn.id} > h4")
+              .text() shouldBe empty
+            doc
+              .select(s"#draftReturn-${sampleDraftReturn.id} > h4")
+              .text() shouldBe empty
           }
         )
       }
