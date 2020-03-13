@@ -33,6 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, DraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -86,8 +87,11 @@ class InitialGainOrLossControllerSpec
   val (session, journey) = sessionWithState(allQuestionsAnswered, sample[DisposalDate])
   val updatedDraftReturn =
     journey.draftReturn.copy(initialGainOrLoss = Some(AmountInPence(0)))
-  val updatedSession         = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
-  val fillingOutReturnSample = sample[FillingOutReturn]
+  val updatedSession = session.copy(journeyStatus =
+    Some(journey.copy(agentReferenceNumber = Some(AgentReferenceNumber("EUYJVJMK")), draftReturn = updatedDraftReturn))
+  )
+  val fillingOutReturnSample =
+    sample[FillingOutReturn].copy(agentReferenceNumber = Some(AgentReferenceNumber("EUYJVJMK")))
 
   "Check Your Answers" when {
 
@@ -102,7 +106,7 @@ class InitialGainOrLossControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               SessionData.empty.copy(
-                journeyStatus = Some(fillingOutReturnSample)
+                journeyStatus = Some(fillingOutReturnSample.copy(draftReturn = updatedDraftReturn))
               )
             )
           }
@@ -257,21 +261,28 @@ class InitialGainOrLossControllerSpec
       "show a technical error page" when {
 
         "there is an error updating the draft return in return service " in {
+          val initialJourneyStatus: FillingOutReturn =
+            fillingOutReturnSample.copy(draftReturn = updatedDraftReturn.copy(initialGainOrLoss = None))
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Left(Error("")))
+            mockGetSession(updatedSession.copy(journeyStatus = Some(initialJourneyStatus)))
+            mockStoreDraftReturn(updatedDraftReturn, fillingOutReturnSample.agentReferenceNumber)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction("initialGainOrLoss" -> "2", "gain" -> "", "loss" -> ""))
         }
 
         "there is an error updating the session" in {
+          val initialJourneyStatus: FillingOutReturn =
+            fillingOutReturnSample.copy(draftReturn = updatedDraftReturn.copy(initialGainOrLoss = None))
+          val finalJourneyStatus: FillingOutReturn = fillingOutReturnSample.copy(draftReturn =
+            updatedDraftReturn.copy(initialGainOrLoss = Some(AmountInPence(0)))
+          )
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Right(()))
-            mockStoreSession(updatedSession)(Left(Error("")))
+            mockGetSession(updatedSession.copy(journeyStatus = Some(initialJourneyStatus)))
+            mockStoreDraftReturn(updatedDraftReturn, fillingOutReturnSample.agentReferenceNumber)(Right(()))
+            mockStoreSession(updatedSession.copy(journeyStatus = Some(finalJourneyStatus)))(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction("initialGainOrLoss" -> "2", "gain" -> "", "loss" -> ""))
@@ -331,7 +342,8 @@ class InitialGainOrLossControllerSpec
               )
             )
             mockStoreDraftReturn(
-              newDraftReturn
+              newDraftReturn,
+              fillingOutReturnSample.agentReferenceNumber
             )(Right(()))
             mockStoreSession(
               SessionData.empty.copy(

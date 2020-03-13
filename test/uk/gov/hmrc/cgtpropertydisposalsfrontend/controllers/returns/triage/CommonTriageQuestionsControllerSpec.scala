@@ -29,6 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServi
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsAnswers, IncompleteMultipleDisposalsAnswers}
@@ -40,7 +41,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 
 import scala.concurrent.Future
 
-class InitialTriageQuestionsControllerSpec
+class CommonTriageQuestionsControllerSpec
     extends ControllerSpec
     with AuthSupport
     with SessionSupport
@@ -55,7 +56,7 @@ class InitialTriageQuestionsControllerSpec
       bind[ReturnsService].toInstance(mockReturnsService)
     )
 
-  lazy val controller = instanceOf[InitialTriageQuestionsController]
+  lazy val controller = instanceOf[CommonTriageQuestionsController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
@@ -89,7 +90,7 @@ class InitialTriageQuestionsControllerSpec
     SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)) -> fillingOutReturn
   }
 
-  "InitialTriageQuestionsController" when {
+  "CommonTriageQuestionsController" when {
 
     "handling requests to display the who is individual representing page" must {
 
@@ -110,7 +111,7 @@ class InitialTriageQuestionsControllerSpec
             )
           }
 
-          checkIsRedirect(performAction(), routes.InitialTriageQuestionsController.howManyProperties())
+          checkIsRedirect(performAction(), routes.CommonTriageQuestionsController.howManyProperties())
         }
 
       }
@@ -135,7 +136,7 @@ class InitialTriageQuestionsControllerSpec
               messageFromMessageKey("who-are-you-reporting-for.title"), { doc =>
                 doc
                   .select("#content > article > form")
-                  .attr("action") shouldBe routes.InitialTriageQuestionsController
+                  .attr("action") shouldBe routes.CommonTriageQuestionsController
                   .whoIsIndividualRepresentingSubmit()
                   .url
 
@@ -160,7 +161,7 @@ class InitialTriageQuestionsControllerSpec
               messageFromMessageKey("who-are-you-reporting-for.title"), { doc =>
                 doc
                   .select("#content > article > form")
-                  .attr("action") shouldBe routes.InitialTriageQuestionsController
+                  .attr("action") shouldBe routes.CommonTriageQuestionsController
                   .whoIsIndividualRepresentingSubmit()
                   .url
                 doc.select("#individualUserType-0").attr("checked") shouldBe "checked"
@@ -188,7 +189,7 @@ class InitialTriageQuestionsControllerSpec
               messageFromMessageKey("who-are-you-reporting-for.title"), { doc =>
                 doc
                   .select("#content > article > form")
-                  .attr("action") shouldBe routes.InitialTriageQuestionsController
+                  .attr("action") shouldBe routes.CommonTriageQuestionsController
                   .whoIsIndividualRepresentingSubmit()
                   .url
                 doc.select("#individualUserType-1").attr("checked") shouldBe "checked"
@@ -222,7 +223,7 @@ class InitialTriageQuestionsControllerSpec
             )
           }
 
-          checkIsRedirect(performAction(), routes.InitialTriageQuestionsController.howManyProperties())
+          checkIsRedirect(performAction(), routes.CommonTriageQuestionsController.howManyProperties())
         }
 
       }
@@ -450,7 +451,7 @@ class InitialTriageQuestionsControllerSpec
               doc.select("#back").attr("href") shouldBe ""
               doc
                 .select("#content > article > form")
-                .attr("action") shouldBe routes.InitialTriageQuestionsController
+                .attr("action") shouldBe routes.CommonTriageQuestionsController
                 .howManyPropertiesSubmit()
                 .url
 
@@ -471,12 +472,12 @@ class InitialTriageQuestionsControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey("numberOfProperties.title"), { doc =>
-              doc.select("#back").attr("href") shouldBe routes.InitialTriageQuestionsController
+              doc.select("#back").attr("href") shouldBe routes.CommonTriageQuestionsController
                 .whoIsIndividualRepresenting()
                 .url
               doc
                 .select("#content > article > form")
-                .attr("action") shouldBe routes.InitialTriageQuestionsController
+                .attr("action") shouldBe routes.CommonTriageQuestionsController
                 .howManyPropertiesSubmit()
                 .url
               doc.select("#numberOfProperties-0").attr("checked") shouldBe "checked"
@@ -505,7 +506,7 @@ class InitialTriageQuestionsControllerSpec
               doc.select("#back").attr("href") shouldBe ""
               doc
                 .select("#content > article > form")
-                .attr("action") shouldBe routes.InitialTriageQuestionsController
+                .attr("action") shouldBe routes.CommonTriageQuestionsController
                 .howManyPropertiesSubmit()
                 .url
               doc.select("#numberOfProperties-1").attr("checked") shouldBe "checked"
@@ -533,7 +534,7 @@ class InitialTriageQuestionsControllerSpec
                 .url
               doc
                 .select("#content > article > form")
-                .attr("action") shouldBe routes.InitialTriageQuestionsController
+                .attr("action") shouldBe routes.CommonTriageQuestionsController
                 .howManyPropertiesSubmit()
                 .url
               doc.select("#numberOfProperties-0").attr("checked") shouldBe "checked"
@@ -560,7 +561,7 @@ class InitialTriageQuestionsControllerSpec
                 .url
               doc
                 .select("#content > article > form")
-                .attr("action") shouldBe routes.InitialTriageQuestionsController
+                .attr("action") shouldBe routes.CommonTriageQuestionsController
                 .howManyPropertiesSubmit()
                 .url
               doc.select("#numberOfProperties-0").attr("checked") shouldBe "checked"
@@ -792,6 +793,494 @@ class InitialTriageQuestionsControllerSpec
             performAction("numberOfProperties" -> "1"),
             routes.MultipleDisposalsTriageController.checkYourAnswers()
           )
+
+        }
+
+      }
+
+    }
+
+    "handling requests to display the disposal date too early page" must {
+
+      def performAction(): Future[Result] =
+        controller.disposalDateTooEarly()(FakeRequest())
+
+      val singleDisposalRequiredPreviousAnswers = IncompleteSingleDisposalTriageAnswers.empty.copy(
+        individualUserType         = Some(IndividualUserType.Self),
+        hasConfirmedSingleDisposal = true,
+        disposalMethod             = Some(DisposalMethod.Sold),
+        wasAUKResident             = Some(true),
+        countryOfResidence         = None,
+        assetType                  = Some(AssetType.Residential)
+      )
+
+      val multipleDisposalsRequiredPreviousAnswers = IncompleteMultipleDisposalsAnswers.empty.copy(
+        individualUserType           = Some(IndividualUserType.Self),
+        numberOfProperties           = Some(2),
+        wasAUKResident               = Some(true),
+        countryOfResidence           = None,
+        assetType                    = Some(AssetType.Residential),
+        wereAllPropertiesResidential = Some(true),
+        taxYearAfter6April2020       = Some(false)
+      )
+
+      "redirect to the relevant check you answers endpoint" when {
+
+        def test(sessionData: SessionData, expectedRedirect: Call): Unit = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionData)
+          }
+
+          checkIsRedirect(performAction(), expectedRedirect)
+        }
+
+        "the section is incomplete and the was a uk resident question has not been answered yet and" when {
+
+          "the user is starting a new draft return and they are on a single disposal journey" in {
+            test(
+              sessionDataWithStartingNewDraftReturn(
+                Right(singleDisposalRequiredPreviousAnswers.copy(wasAUKResident = None)),
+                Right(sample[IndividualName])
+              )._1,
+              routes.SingleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
+          "the user is filling in a draft return and they are on a single disposal journey" in {
+            test(
+              sessionDataWithFillingOutReturn(
+                singleDisposalRequiredPreviousAnswers.copy(wasAUKResident = None),
+                Right(sample[IndividualName])
+              )._1,
+              routes.SingleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
+          "the user is starting a new draft return and they are on a multiple disposals journey" in {
+            test(
+              sessionDataWithStartingNewDraftReturn(
+                Left(multipleDisposalsRequiredPreviousAnswers.copy(wasAUKResident = None)),
+                Right(sample[IndividualName])
+              )._1,
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
+        }
+
+      }
+
+      "display the page" when {
+
+        "the user was a uk resident and" when {
+
+          def test(result: Future[Result], expectedBackLink: Call): Unit =
+            checkPageIsDisplayed(
+              result,
+              messageFromMessageKey("disposalDateTooEarly.uk.title"), { doc =>
+                doc.select("#back").attr("href") shouldBe expectedBackLink.url
+                doc.select("#content > article > p:nth-child(3)").text() shouldBe messageFromMessageKey(
+                  "disposalDateTooEarly.uk.p1"
+                )
+                doc.select("#content > article > p:nth-child(4)").html() shouldBe messageFromMessageKey(
+                  "disposalDateTooEarly.uk.p2",
+                  viewConfig.reportingCgtBefore6April2020
+                )
+              }
+            )
+
+          "they are on a single disposal journey" in {
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Right(singleDisposalRequiredPreviousAnswers),
+                  Right(sample[IndividualName])
+                )._1
+              )
+            }
+
+            test(performAction(), routes.SingleDisposalsTriageController.whenWasDisposalDate())
+          }
+
+          "they are on a mutliple disposals journey" in {
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Left(multipleDisposalsRequiredPreviousAnswers),
+                  Right(sample[IndividualName])
+                )._1
+              )
+            }
+
+            test(performAction(), routes.MultipleDisposalsTriageController.whenWereContractsExchanged())
+          }
+        }
+
+        "the user was not a uk resident and" when {
+
+          def test(result: Future[Result], expectedBackLink: Call): Unit =
+            checkPageIsDisplayed(
+              result,
+              messageFromMessageKey("disposalDateTooEarly.non-uk.title"), { doc =>
+                doc.select("#back").attr("href") shouldBe expectedBackLink.url
+                doc.select("#content > article > p:nth-child(3)").text() shouldBe messageFromMessageKey(
+                  "disposalDateTooEarly.non-uk.p1"
+                )
+                doc.select("#content > article > p:nth-child(4)").text() shouldBe messageFromMessageKey(
+                  "disposalDateTooEarly.non-uk.p2"
+                )
+                doc.select("#content > article > p:nth-child(5)").html() shouldBe messageFromMessageKey(
+                  "disposalDateTooEarly.non-uk.p3",
+                  viewConfig.reportingCgtBefore6April2020
+                )
+              }
+            )
+
+          "they are on a single disposal journey" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Right(
+                    singleDisposalRequiredPreviousAnswers.copy(
+                      wasAUKResident     = Some(false),
+                      countryOfResidence = Some(sample[Country])
+                    )
+                  ),
+                  Right(sample[IndividualName])
+                )._1
+              )
+            }
+
+            test(performAction(), routes.SingleDisposalsTriageController.whenWasDisposalDate())
+          }
+
+          "they are on a multiple disposals journey" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Left(
+                    multipleDisposalsRequiredPreviousAnswers.copy(
+                      wasAUKResident     = Some(false),
+                      countryOfResidence = Some(sample[Country])
+                    )
+                  ),
+                  Right(sample[IndividualName])
+                )._1
+              )
+            }
+
+            test(performAction(), routes.MultipleDisposalsTriageController.whenWereContractsExchanged())
+          }
+
+        }
+      }
+
+    }
+
+    "handling requests to display the uk residents can only dispose residential properties page" must {
+
+      def performAction(): Future[Result] = controller.ukResidentCanOnlyDisposeResidential()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
+
+      "redirect to the check your answers page" when {
+
+        "the user was not a uk resident and" when {
+
+          "the user is on a single disposal journey" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Right(
+                    IncompleteSingleDisposalTriageAnswers.empty.copy(
+                      individualUserType         = Some(IndividualUserType.Self),
+                      hasConfirmedSingleDisposal = true,
+                      disposalMethod             = Some(DisposalMethod.Sold),
+                      wasAUKResident             = Some(false),
+                      countryOfResidence         = Some(sample[Country]),
+                      assetType                  = Some(AssetType.NonResidential)
+                    )
+                  ),
+                  Right(sample[IndividualName])
+                )._1
+              )
+            }
+
+            checkIsRedirect(performAction(), routes.SingleDisposalsTriageController.checkYourAnswers())
+          }
+
+          "the user is on a multiple disposals journey" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Left(
+                    IncompleteMultipleDisposalsAnswers.empty.copy(
+                      individualUserType = Some(IndividualUserType.Self),
+                      numberOfProperties = Some(2),
+                      wasAUKResident     = Some(false),
+                      countryOfResidence = Some(sample[Country]),
+                      assetType          = Some(AssetType.NonResidential)
+                    )
+                  ),
+                  Right(sample[IndividualName])
+                )._1
+              )
+            }
+
+            checkIsRedirect(performAction(), routes.MultipleDisposalsTriageController.checkYourAnswers())
+          }
+        }
+
+        "the user was a uk resident and they disposed of a residential and" when {
+
+          "the user is on a single disposal journey" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Right(
+                    IncompleteSingleDisposalTriageAnswers.empty.copy(
+                      individualUserType         = Some(IndividualUserType.Self),
+                      hasConfirmedSingleDisposal = true,
+                      disposalMethod             = Some(DisposalMethod.Sold),
+                      wasAUKResident             = Some(true),
+                      assetType                  = Some(AssetType.Residential)
+                    )
+                  ),
+                  Right(sample[IndividualName])
+                )._1
+              )
+            }
+
+            checkIsRedirect(performAction(), routes.SingleDisposalsTriageController.checkYourAnswers())
+          }
+
+          "the user is on a multiple disposals journey" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Left(
+                    IncompleteMultipleDisposalsAnswers.empty.copy(
+                      individualUserType = Some(IndividualUserType.Self),
+                      numberOfProperties = Some(2),
+                      wasAUKResident     = Some(true),
+                      assetType          = Some(AssetType.Residential)
+                    )
+                  ),
+                  Right(sample[IndividualName])
+                )._1
+              )
+            }
+
+            checkIsRedirect(performAction(), routes.MultipleDisposalsTriageController.checkYourAnswers())
+          }
+
+        }
+
+      }
+
+      "display the page" when {
+
+        "the user was a uk resident and they disposed of a non-residential property and" when {
+
+          "the user is on a single disposal journey" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Right(
+                    IncompleteSingleDisposalTriageAnswers.empty.copy(
+                      individualUserType         = Some(IndividualUserType.Self),
+                      hasConfirmedSingleDisposal = true,
+                      disposalMethod             = Some(DisposalMethod.Sold),
+                      wasAUKResident             = Some(true),
+                      assetType                  = Some(AssetType.NonResidential)
+                    )
+                  ),
+                  Right(sample[IndividualName])
+                )._1
+              )
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("ukResidentCanOnlyReportResidential.title"), { doc =>
+                doc.select("#back").attr("href") shouldBe routes.SingleDisposalsTriageController
+                  .didYouDisposeOfAResidentialProperty()
+                  .url
+              }
+            )
+          }
+
+          "the user is on a multiple disposals journey" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Left(
+                    IncompleteMultipleDisposalsAnswers.empty.copy(
+                      individualUserType           = Some(IndividualUserType.Self),
+                      numberOfProperties           = Some(3),
+                      wasAUKResident               = Some(true),
+                      assetType                    = Some(AssetType.NonResidential),
+                      wereAllPropertiesResidential = Some(false)
+                    )
+                  ),
+                  Right(sample[IndividualName])
+                )._1
+              )
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("ukResidentCanOnlyReportResidential.title"), { doc =>
+                doc.select("#back").attr("href") shouldBe routes.MultipleDisposalsTriageController
+                  .wereAllPropertiesResidential()
+                  .url
+              }
+            )
+          }
+        }
+
+      }
+
+    }
+
+    "handling requests to display the asset type not yet implemented page" must {
+      def performAction(): Future[Result] =
+        controller.assetTypeNotYetImplemented()(FakeRequest())
+
+      "display the page" when {
+
+        "the user is on a single disposal journey and" when {
+
+          def test(assetType: AssetType): Unit = {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Right(sample[CompleteSingleDisposalTriageAnswers].copy(assetType = assetType)),
+                  Right(sample[IndividualName])
+                )._1
+              )
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("disposalDateMixedUseOrIndirect.title"), { doc =>
+                doc.select("#back").attr("href") shouldBe routes.SingleDisposalsTriageController
+                  .assetTypeForNonUkResidents()
+                  .url
+              }
+            )
+          }
+
+          "the asset type is mixed use" in {
+            test(AssetType.MixedUse)
+          }
+
+          "the asset type is indirect disposal" in {
+            test(AssetType.IndirectDisposal)
+          }
+
+        }
+
+        "the user is on a multiple disposals journey and" when {
+
+          def test(assetType: AssetType): Unit = {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Left(sample[CompleteMultipleDisposalsAnswers].copy(assetType = assetType)),
+                  Right(sample[IndividualName])
+                )._1
+              )
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("disposalDateMixedUseOrIndirect.title"), { doc =>
+                doc.select("#back").attr("href") shouldBe routes.MultipleDisposalsTriageController
+                  .howManyDisposals()
+                  .url
+              }
+            )
+          }
+
+          "the asset type is mixed use" in {
+            test(AssetType.MixedUse)
+          }
+
+          "the asset type is indirect disposal" in {
+            test(AssetType.IndirectDisposal)
+          }
+
+        }
+
+      }
+
+      "redirect to the relevant check your answers page" when {
+
+        "the user is on a single disposal journey and" when {
+
+          def test(assetType: AssetType): Unit = {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Right(sample[CompleteSingleDisposalTriageAnswers].copy(assetType = assetType)),
+                  Right(sample[IndividualName])
+                )._1
+              )
+            }
+
+            checkIsRedirect(performAction(), routes.SingleDisposalsTriageController.checkYourAnswers())
+          }
+
+          "the asset type is residential" in {
+            test(AssetType.Residential)
+          }
+
+          "the result for non-residential" in {
+            test(AssetType.NonResidential)
+          }
+
+        }
+
+        "the user is on a multiple disposals journey and" when {
+
+          def test(assetType: AssetType): Unit = {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  Left(sample[CompleteMultipleDisposalsAnswers].copy(assetType = assetType)),
+                  Right(sample[IndividualName])
+                )._1
+              )
+            }
+
+            checkIsRedirect(performAction(), routes.MultipleDisposalsTriageController.checkYourAnswers())
+          }
+
+          "the asset type is residential" in {
+            test(AssetType.Residential)
+          }
+
+          "the result for non-residential" in {
+            test(AssetType.NonResidential)
+          }
 
         }
 

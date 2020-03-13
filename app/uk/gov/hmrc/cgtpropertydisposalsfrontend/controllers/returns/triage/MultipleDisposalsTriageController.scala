@@ -415,7 +415,7 @@ class MultipleDisposalsTriageController @Inject() (
 
         triageAnswers match {
           case IncompleteMultipleDisposalsAnswers(None, _, _, _, _, _, _, _) if isIndividual =>
-            Redirect(routes.InitialTriageQuestionsController.whoIsIndividualRepresenting())
+            Redirect(routes.CommonTriageQuestionsController.whoIsIndividualRepresenting())
 
           case IncompleteMultipleDisposalsAnswers(_, None, _, _, _, _, _, _) =>
             Redirect(routes.MultipleDisposalsTriageController.guidance())
@@ -432,8 +432,8 @@ class MultipleDisposalsTriageController @Inject() (
           case IncompleteMultipleDisposalsAnswers(_, _, Some(false), Some(_), _, _, _, _) =>
             Ok("Non-UK Residents not handled yet")
 
-          case IncompleteMultipleDisposalsAnswers(_, _, _, _, Some(false), _, _, _) =>
-            Ok("All are not residential properties")
+          case IncompleteMultipleDisposalsAnswers(_, _, Some(true), _, Some(false), _, _, _) =>
+            Redirect(routes.CommonTriageQuestionsController.ukResidentCanOnlyDisposeResidential())
 
           case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, _, None, _) =>
             Redirect(routes.MultipleDisposalsTriageController.whenWereContractsExchanged())
@@ -446,7 +446,7 @@ class MultipleDisposalsTriageController @Inject() (
             errorHandler.errorResult()
 
           case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, _, Some(false), _) =>
-            Ok(s"All properties contracts were exchanged before 06th April, 2020")
+            Redirect(routes.CommonTriageQuestionsController.disposalDateTooEarly())
 
           case c: CompleteMultipleDisposalsAnswers =>
             Ok(s"Got $c")

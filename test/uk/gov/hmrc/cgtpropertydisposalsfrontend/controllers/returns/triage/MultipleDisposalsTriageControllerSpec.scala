@@ -140,7 +140,7 @@ class MultipleDisposalsTriageControllerSpec
         checkPageIsDisplayed(
           performAction,
           messageFromMessageKey("multiple-disposals.guidance.title"), { doc =>
-            doc.select("#back").attr("href") shouldBe triage.routes.InitialTriageQuestionsController
+            doc.select("#back").attr("href") shouldBe triage.routes.CommonTriageQuestionsController
               .howManyProperties()
               .url
             doc
@@ -1162,7 +1162,7 @@ class MultipleDisposalsTriageControllerSpec
           )
         }
 
-        checkIsRedirect(performAction(), routes.InitialTriageQuestionsController.whoIsIndividualRepresenting())
+        checkIsRedirect(performAction(), routes.CommonTriageQuestionsController.whoIsIndividualRepresenting())
       }
 
       "redirect to the multiple disposals guidance page when no answer for the number of properties can be found" in {

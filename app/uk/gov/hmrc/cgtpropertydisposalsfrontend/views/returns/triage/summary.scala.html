@@ -38,7 +38,7 @@
       @cyaRow(
           messages("who-are-you-reporting-for.title"),
           Html(messages(s"individualUserType.${individualUserType.toString}")),
-          Some(cyaChange(messages("triage.cyaChange.individualUserType"), routes.InitialTriageQuestionsController.whoIsIndividualRepresenting().url)),
+          Some(cyaChange(messages("triage.cyaChange.individualUserType"), routes.CommonTriageQuestionsController.whoIsIndividualRepresenting().url)),
           "individualUserType"
       )
   }
@@ -46,7 +46,7 @@
   @cyaRow(
     messages("numberOfProperties.title"),
     Html(messages(s"numberOfProperties.One")),
-    Some(cyaChange(messages("triage.cyaChange.numberOfProperties"), routes.InitialTriageQuestionsController.howManyProperties().url)),
+    Some(cyaChange(messages("triage.cyaChange.numberOfProperties"), routes.CommonTriageQuestionsController.howManyProperties().url)),
       "numberOfProperties"
   )
   @cyaRow(

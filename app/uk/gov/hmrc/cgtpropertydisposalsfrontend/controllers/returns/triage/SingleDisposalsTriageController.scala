@@ -72,13 +72,9 @@ class SingleDisposalsTriageController @Inject() (
   countryOfResidencePage: triagePages.country_of_residence,
   assetTypeForNonUkResidentsPage: triagePages.asset_type_for_non_uk_residents,
   didYouDisposeOfResidentialPropertyPage: triagePages.did_you_dispose_of_residential_property,
-  ukResidentCanOnlyDisposeResidentialPage: triagePages.uk_resident_can_only_dispose_residential,
   disposalDatePage: triagePages.disposal_date,
   completionDatePage: triagePages.completion_date,
-  disposalDateTooEarlyUkResidents: triagePages.disposal_date_too_early_uk_residents,
-  disposalDateTooEarlyNonUkResidents: triagePages.disposal_date_too_early_non_uk_residents,
-  checkYourAnswersPage: triagePages.check_your_answers,
-  assetTypeNotYetImplementedPage: triagePages.asset_type_not_yet_implemented
+  checkYourAnswersPage: triagePages.check_your_answers
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -90,14 +86,14 @@ class SingleDisposalsTriageController @Inject() (
   def howDidYouDisposeOfProperty(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     displayTriagePage(
       _.fold(incomplete => if (incomplete.hasConfirmedSingleDisposal) Some(()) else None, _ => Some(())),
-      _ => routes.InitialTriageQuestionsController.howManyProperties()
+      _ => routes.CommonTriageQuestionsController.howManyProperties()
     )(_ => disposalMethodForm)(
       extractField = _.fold(_.disposalMethod, c => Some(c.disposalMethod)),
       page = {
         case (currentState, form, isDraftReturn, _) =>
           disposalMethodPage(
             form,
-            backLink(currentState, routes.InitialTriageQuestionsController.howManyProperties()),
+            backLink(currentState, routes.CommonTriageQuestionsController.howManyProperties()),
             isDraftReturn
           )
       }
@@ -108,13 +104,13 @@ class SingleDisposalsTriageController @Inject() (
     implicit request =>
       handleTriagePageSubmit(
         _.fold(incomplete => if (incomplete.hasConfirmedSingleDisposal) Some(()) else None, _ => Some(())),
-        _ => routes.InitialTriageQuestionsController.howManyProperties()
+        _ => routes.CommonTriageQuestionsController.howManyProperties()
       )(_ => disposalMethodForm)(
         page = {
           case (currentState, form, isDraftReturn, _) =>
             disposalMethodPage(
               form,
-              backLink(currentState, routes.InitialTriageQuestionsController.howManyProperties()),
+              backLink(currentState, routes.CommonTriageQuestionsController.howManyProperties()),
               isDraftReturn
             )
         },
@@ -236,18 +232,6 @@ class SingleDisposalsTriageController @Inject() (
       )
   }
 
-  def ukResidentCanOnlyDisposeResidential(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request =>
-      withSingleDisposalTriageAnswers(request) {
-        case (_, _, triageAnswers) =>
-          triageAnswers.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())) ->
-            triageAnswers.fold(_.assetType, c => Some(c.assetType)) match {
-            case (Some(true), Some(AssetType.NonResidential)) => Ok(ukResidentCanOnlyDisposeResidentialPage())
-            case _                                            => Redirect(routes.SingleDisposalsTriageController.checkYourAnswers())
-          }
-      }
-  }
-
   private def disposalDateBackLink(triageAnswers: SingleDisposalTriageAnswers): Call =
     triageAnswers.fold(
       { incomplete =>
@@ -336,7 +320,7 @@ class SingleDisposalsTriageController @Inject() (
                     },
                     taxYear =>
                       if (taxYear.isEmpty)
-                        Redirect(routes.SingleDisposalsTriageController.disposalDateTooEarly())
+                        Redirect(routes.CommonTriageQuestionsController.disposalDateTooEarly())
                       else
                         Redirect(routes.SingleDisposalsTriageController.checkYourAnswers())
                   )
@@ -430,17 +414,6 @@ class SingleDisposalsTriageController @Inject() (
     )
   }
 
-  def assetTypeNotYetImplemented(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withSingleDisposalTriageAnswers(request) {
-      case (_, _, triageAnswers) =>
-        triageAnswers.fold(_.assetType, c => Some(c.assetType)) match {
-          case Some(AssetType.MixedUse)         => Ok(assetTypeNotYetImplementedPage())
-          case Some(AssetType.IndirectDisposal) => Ok(assetTypeNotYetImplementedPage())
-          case _                                => Redirect(routes.SingleDisposalsTriageController.checkYourAnswers())
-        }
-    }
-  }
-
   def countryOfResidenceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     handleTriagePageSubmit(
       _.fold(_.wasAUKResident.filterNot(identity), c => Some(c.countryOfResidence.isUk()).filterNot(identity)),
@@ -521,18 +494,6 @@ class SingleDisposalsTriageController @Inject() (
       )
   }
 
-  def disposalDateTooEarly(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withSingleDisposalTriageAnswers(request) {
-      case (_, _, triageAnswers) =>
-        triageAnswers.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())) match {
-          case None => Redirect(routes.SingleDisposalsTriageController.checkYourAnswers())
-          case Some(wasUk) =>
-            if (wasUk) Ok(disposalDateTooEarlyUkResidents())
-            else Ok(disposalDateTooEarlyNonUkResidents())
-        }
-    }
-  }
-
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withSingleDisposalTriageAnswers(request) {
       case (_, state, triageAnswers) =>
@@ -544,10 +505,10 @@ class SingleDisposalsTriageController @Inject() (
             Ok(checkYourAnswersPage(c, displayReturnToSummaryLink))
 
           case IncompleteSingleDisposalTriageAnswers(None, _, _, _, _, _, _, _, _) if isIndividual =>
-            Redirect(routes.InitialTriageQuestionsController.whoIsIndividualRepresenting())
+            Redirect(routes.CommonTriageQuestionsController.whoIsIndividualRepresenting())
 
           case IncompleteSingleDisposalTriageAnswers(_, false, _, _, _, _, _, _, _) =>
-            Redirect(routes.InitialTriageQuestionsController.howManyProperties())
+            Redirect(routes.CommonTriageQuestionsController.howManyProperties())
 
           case IncompleteSingleDisposalTriageAnswers(_, _, None, _, _, _, _, _, _) =>
             Redirect(routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty())
@@ -565,13 +526,13 @@ class SingleDisposalsTriageController @Inject() (
             Redirect(routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty())
 
           case IncompleteSingleDisposalTriageAnswers(_, _, _, Some(true), _, Some(NonResidential), _, _, _) =>
-            Redirect(routes.SingleDisposalsTriageController.ukResidentCanOnlyDisposeResidential())
+            Redirect(routes.CommonTriageQuestionsController.ukResidentCanOnlyDisposeResidential())
 
           case IncompleteSingleDisposalTriageAnswers(_, _, _, _, _, Some(AssetType.IndirectDisposal), _, _, _) =>
-            Redirect(routes.SingleDisposalsTriageController.assetTypeNotYetImplemented())
+            Redirect(routes.CommonTriageQuestionsController.assetTypeNotYetImplemented())
 
           case IncompleteSingleDisposalTriageAnswers(_, _, _, _, _, Some(AssetType.MixedUse), _, _, _) =>
-            Redirect(routes.SingleDisposalsTriageController.assetTypeNotYetImplemented())
+            Redirect(routes.CommonTriageQuestionsController.assetTypeNotYetImplemented())
 
           case IncompleteSingleDisposalTriageAnswers(_, _, _, _, _, _, None, _, _) =>
             Redirect(routes.SingleDisposalsTriageController.whenWasDisposalDate())

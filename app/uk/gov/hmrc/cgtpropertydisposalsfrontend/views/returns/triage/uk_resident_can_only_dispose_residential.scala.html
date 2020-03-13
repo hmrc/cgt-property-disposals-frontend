@@ -24,14 +24,14 @@
         backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@()(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(backLink: Call)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"ukResidentCanOnlyReportResidential"}
 @title = @{messages(s"$key.title")}
 
 @mainTemplate(title = title, userType = request.userType) {
 
-  @backLinkComponent(triage.routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty())
+  @backLinkComponent(backLink))
 
   @pageHeading(title)
 
