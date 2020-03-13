@@ -127,16 +127,15 @@ class InitialGainOrLossControllerSpec
       def performAction(): Future[Result] = controller.checkYourAnswersSubmit()(FakeRequest())
       behave like redirectToStartBehaviour(performAction)
       "redirect to taskList" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              SessionData.empty.copy(
-                journeyStatus = Some(fillingOutReturnSample)
-              )
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              journeyStatus = Some(fillingOutReturnSample)
             )
-          }
-          checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+          )
         }
+        checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
       }
     }
   }
