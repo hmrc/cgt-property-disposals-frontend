@@ -713,13 +713,20 @@ acquisitionDate-month.error.monthAndYearRequired=Date you got the property must 
 acquisitionDate-day.error.dayAndYearRequired=Date you got the property must include a day and a year
 acquisitionDate-day.error.dayAndMonthRequired=Date you got the property must include a day and a month
 
-acquisitionPrice.title=How much did you pay for your share of the property?
-acquisitionPrice.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later.
-acquisitionPrice.error.required=Enter how much you paid for your share of the property
-acquisitionPrice.error.invalid=The amount of money must only include numbers, for example 160,000 or 23,040.50
-acquisitionPrice.error.tooSmall=The amount of money must be a number between 1 and 50,000,000,000.00
-acquisitionPrice.error.tooLarge=The amount of money must be a number between 1 and 50,000,000,000.00
-acquisitionPrice.error.tooManyDecimals=The amount of money must be 2 decimal places or less, for example 160,000 or 23,040.50
+acquisitionPriceBought.title=How much did you pay for the property?
+acquisitionPriceNotBought.title=What was the market value of the property on {0}?
+acquisitionPriceBought.helpText=You’ll be able to enter any buying costs, like solicitor’s or surveyor’s fees later. If the ownership of the property was shared only enter your share.
+acquisitionPriceNotBought.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the property was shared, only enter the market value of your share.
+acquisitionPriceBought.error.required=Enter how much you paid for your share of the property
+acquisitionPriceNotBought.error.required=Enter the market value of the property on the date you got it
+acquisitionPriceBought.error.invalid=The amount of money must only include numbers, for example 160,000 or 23,040.50
+acquisitionPriceNotBought.error.invalid=The market value must be an amount of money, for example 160,000 or 23,040.50
+acquisitionPriceBought.error.tooSmall=The amount of money must be a number between 1 and 50,000,000,000.00
+acquisitionPriceNotBought.error.tooSmall=The market value must be an amount of money between 1 and 50,000,000,000.00
+acquisitionPriceBought.error.tooLarge=The amount of money must be a number between 1 and 50,000,000,000.00
+acquisitionPriceNotBought.error.tooLarge=The market value must be an amount of money between 1 and 50,000,000,000.00
+acquisitionPriceBought.error.tooManyDecimals=The amount of money must be 2 decimal places or less, for example 160,000 or 23,040.50
+acquisitionPriceNotBought.error.tooManyDecimals=The market value must be an amount of money with pence as 2 decimal places or less, for example 160,000 or 23,040.50
 
 improvementCosts.title=Do you want to claim any improvement costs?
 improvementCosts.helpText=You can only claim costs that added value to the property. If you shared these costs, you can only claim your share. You cannot claim for mortgage interest, decorating or maintenance. 
@@ -819,7 +826,7 @@ reliefDetails.cyaChange.otherReliefsAmount=Other reliefs amount
 
 exemptionAndLosses.caption=Losses and exemptions
 
-inYearLosses.title=Do you want to include any other Capital Gains Tax losses you made in tax year 2020 to 2021?
+inYearLosses.title=Do you want to include any other Capital Gains Tax losses you made in tax year {0} to {1}?
 inYearLosses.helpText=You make a loss if the disposal amount is less than the acquisition amount. If you include any other Capital Gains Tax losses you made in this tax year it will reduce your gain. You must have made the losses before {0}
 inYearLosses.error.required=Select yes if you want to include any Capital Gains Tax losses you made in this tax year
 inYearLosses.error.invalid=Select yes if you want to include any Capital Gains Tax losses you made in this tax year
@@ -1004,8 +1011,6 @@ viewReturn.charge.paymentMethod.VoluntaryDirectPayments=payment received
 
 viewReturn.summaryHeading=Your return
 
-multiple-disposals.triage.caption=Reporting multiple disposals
-
 multiple-disposals.guidance.title=You sold or disposed of 2 or more properties
 multiple-disposals.guidance.p1=You can report all property sales (or ‘disposals’) in the same return. You can only do this if they all had:
 multiple-disposals.guidance.li1=the same ‘completion’ date
@@ -1029,6 +1034,11 @@ returns.list.leftToPay=Total left to pay
 returns.list.taxOwed=Tax owed for return
 returns.list.sentDate=Sent to HMRC on {0}
 returns.paymentTakes3Days=Payments may take up to 3 working days to be shown on this page
+
+drafts.list.title=Draft returns
+drafts.list.lastUpdated=Last saved on {0}
+drafts.list.sendAndPayBy=Send and pay by
+drafts.list.resume=Complete return
 
 multipleDisposalsNumberOfProperties.title=How many disposals are you including in this return?
 multipleDisposalsNumberOfProperties.p1=The property disposals must all have the same ‘completion’ date. The contract ‘exchange’ dates must all be in the same tax year.
@@ -1058,6 +1068,9 @@ multipleDisposalsWereAllPropertiesResidential.details.li3=land that’s part of 
 
 multipleDisposalsWereAllPropertiesResidential.error.required=Select yes if all the properties were residential properties
 
+multipleDisposalsCountryOfResidence.title=What was your country of residence on the day you ‘exchanged’ contracts?
+multipleDisposalsCountryOfResidence.helpText=It’s usually the day you and the new owner swapped contracts and they paid a deposit. If you made an indirect disposal, it’s the day you sold the shares.
+
 disposalDateMixedUseOrIndirect.title=You cannot use this service
 disposalDateMixedUseOrIndirect.p1=You cannot use this service to report Capital Gains on:
 disposalDateMixedUseOrIndirect.p1.reason1=disposals of ‘mixed use’ UK property
@@ -1065,6 +1078,7 @@ disposalDateMixedUseOrIndirect.p1.reason2=indirect disposals of UK land
 disposalDateMixedUseOrIndirect.h2=What you’ll need to do next
 disposalDateMixedUseOrIndirect.p2=You’ll need to complete a <a href="{0}">non resident: report and pay Capital Gains Tax on UK property or land form</a>.
 disposalDateMixedUseOrIndirect.p3=You have 30 days from the date of completion to report disposal and pay any tax due. You may get a penalty if your payment is late.
+
 
 initialGainOrLoss.title=Did you make an initial gain or loss?
 initialGainOrLoss.caption=Initial gain or loss
@@ -1096,3 +1110,11 @@ loss.error.required=Enter the initial loss amount
 loss.error.invalid=Initial loss amount must only include numbers, like 2,908 or 740.50
 loss.error.tooLarge=Initial loss amount must be a number greater than 0 and less than 50,000,000,000.00, or select no gain or loss
 loss.error.tooManyDecimals=Initial loss amount must have 2 decimal places or less, like 2,908 or 740.50
+
+multipleDisposalsTaxYear.title=When were contracts exchanged on all the properties?
+multipleDisposalsTaxYear.link=What happens on the exchange date?
+multipleDisposalsTaxYear.before=Before 6 April 2020
+multipleDisposalsTaxYear.after=After 6 April 2020
+multipleDisposalsTaxYear.details.p1=Contract <a href="{0}" target="_blank">exchange (opens in a new window)</a> usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
+multipleDisposalsTaxYear.error.required=Select when the contracts were exchanged on all the properties
+

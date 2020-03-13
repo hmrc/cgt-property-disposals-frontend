@@ -22,12 +22,14 @@ import cats.instances.int._
 import cats.syntax.either._
 import cats.syntax.eq._
 import com.google.inject.{ImplementedBy, Inject, Singleton}
-import play.api.mvc.Call
 import play.api.http.Status.CREATED
+import play.api.mvc.{Call, Request}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.PaymentsConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, PaymentsJourney}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, PaymentsJourney}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit.PaymentInitiated
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -38,32 +40,47 @@ trait PaymentsService {
 
   def startPaymentJourney(
     cgtReference: CgtReference,
-    chargeReference: String,
+    chargeReference: Option[String],
     amount: AmountInPence,
     returnUrl: Call,
     backUrl: Call
-  )(implicit headerCarrier: HeaderCarrier): EitherT[Future, Error, PaymentsJourney]
+  )(implicit headerCarrier: HeaderCarrier, request: Request[_]): EitherT[Future, Error, PaymentsJourney]
 
 }
 
 @Singleton
-class PaymentsServiceImpl @Inject() (connector: PaymentsConnector)(implicit ec: ExecutionContext)
-    extends PaymentsService {
+class PaymentsServiceImpl @Inject() (connector: PaymentsConnector, auditService: AuditService)(
+  implicit ec: ExecutionContext
+) extends PaymentsService {
 
   def startPaymentJourney(
     cgtReference: CgtReference,
-    chargeReference: String,
+    chargeReference: Option[String],
     amount: AmountInPence,
     returnUrl: Call,
     backUrl: Call
-  )(implicit headerCarrier: HeaderCarrier): EitherT[Future, Error, PaymentsJourney] =
+  )(implicit headerCarrier: HeaderCarrier, request: Request[_]): EitherT[Future, Error, PaymentsJourney] =
     connector.startPaymentJourney(cgtReference, chargeReference, amount, returnUrl, backUrl).subflatMap { response =>
       if (response.status =!= CREATED) {
         Left(
           Error(s"Call to start payments journey came back with status other than 201 (CREATED): ${response.status}")
         )
       } else {
-        response.parseJSON[PaymentsJourney]().leftMap(Error(_))
+        response
+          .parseJSON[PaymentsJourney]()
+          .leftMap(Error(_))
+          .map { journey =>
+            auditService.sendEvent(
+              "paymentInitiated",
+              PaymentInitiated(
+                cgtReference.value,
+                chargeReference,
+                amount.inPounds()
+              ),
+              "payment-initiated"
+            )
+            journey
+          }
       }
     }
 

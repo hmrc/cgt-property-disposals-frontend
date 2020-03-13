@@ -85,7 +85,9 @@ class PropertyAddressController @Inject() (
           EitherT.pure(journey)
         else {
           val updatedDraftReturn = journey.draftReturn.copy(propertyAddress = Some(a))
-          returnsService.storeDraftReturn(updatedDraftReturn).map(_ => journey.copy(draftReturn = updatedDraftReturn))
+          returnsService
+            .storeDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)
+            .map(_ => journey.copy(draftReturn = updatedDraftReturn))
         }
     }
 

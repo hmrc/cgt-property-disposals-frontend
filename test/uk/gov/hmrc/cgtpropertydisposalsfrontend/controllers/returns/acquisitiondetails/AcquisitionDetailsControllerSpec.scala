@@ -230,7 +230,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Left(Error("")))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction("acquisitionMethod" -> methodValue.toString))
@@ -240,7 +240,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(updatedSession)(Left(Error("")))
           }
 
@@ -264,7 +264,7 @@ class AcquisitionDetailsControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+              mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
               mockStoreSession(updatedSession)(Right(()))
             }
 
@@ -303,7 +303,7 @@ class AcquisitionDetailsControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+              mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
               mockStoreSession(updatedSession)(Right(()))
             }
 
@@ -553,7 +553,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Left(Error("")))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction(formData(acquisitionDate.value): _*))
@@ -563,7 +563,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(updatedSession)(Left(Error("")))
           }
 
@@ -586,7 +586,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(updatedSession)(Right(()))
 
           }
@@ -776,72 +776,76 @@ class AcquisitionDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      "redirect to the acquisition date page" when {
+      behave like missingAcquisitionDateBehaviour(performAction)
 
-        "that question hasn't been answered" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithState(
-                sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = None
-                ),
-                sample[AssetType],
-                sample[Boolean]
-              )._1
-            )
-          }
-
-          checkIsRedirect(
-            performAction(),
-            routes.AcquisitionDetailsController.acquisitionDate()
-          )
-        }
-
-      }
+      behave like missingAcquisitionMethodBehaviour(performAction)
 
       "display the page" when {
 
         "the acquisition details section has not yet been completed" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithState(
-                sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = Some(sample[AcquisitionDate])
-                ),
-                sample[AssetType],
-                sample[Boolean]
-              )._1
+          forAll { acquisitionMethod: AcquisitionMethod =>
+            val acquisitionDate = sample[AcquisitionDate]
+            val answers = sample[IncompleteAcquisitionDetailsAnswers].copy(
+              acquisitionMethod = Some(acquisitionMethod),
+              acquisitionDate   = Some(acquisitionDate)
+            )
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionWithState(
+                  answers,
+                  sample[AssetType],
+                  sample[Boolean]
+                )._1
+              )
+            }
+
+            val pricePageTitle = acquisitionMethod match {
+              case AcquisitionMethod.Bought => messageFromMessageKey("acquisitionPriceBought.title")
+              case _ =>
+                messageFromMessageKey(
+                  "acquisitionPriceNotBought.title",
+                  LocalDateUtils.govDisplayFormat(acquisitionDate.value)
+                )
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              pricePageTitle, { doc =>
+                doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.acquisitionDate().url
+                doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                  .acquisitionPriceSubmit()
+                  .url
+              }
             )
           }
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey("acquisitionPrice.title"), { doc =>
-              doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.acquisitionDate().url
-              doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
-                .acquisitionPriceSubmit()
-                .url
-            }
-          )
         }
 
         "the acquisition details section has been completed" in {
+          val answers = sample[CompleteAcquisitionDetailsAnswers]
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithState(
-                sample[CompleteAcquisitionDetailsAnswers],
+                answers,
                 sample[AssetType],
                 sample[Boolean]
               )._1
             )
           }
 
+          val pricePageTitle = answers.acquisitionMethod match {
+            case AcquisitionMethod.Bought => messageFromMessageKey("acquisitionPriceBought.title")
+            case _ =>
+              messageFromMessageKey(
+                "acquisitionPriceNotBought.title",
+                LocalDateUtils.govDisplayFormat(answers.acquisitionDate.value)
+              )
+          }
+
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey("acquisitionPrice.title"), { doc =>
+            pricePageTitle, { doc =>
               doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.checkYourAnswers().url
               doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
                 .acquisitionPriceSubmit()
@@ -860,60 +864,70 @@ class AcquisitionDetailsControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction())
 
-      "redirect to the acquisition date page" when {
+      behave like missingAcquisitionDateBehaviour(() => performAction())
 
-        "that question hasn't been answered" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithState(
-                sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = None
-                ),
-                sample[AssetType],
-                sample[Boolean]
-              )._1
-            )
-          }
-
-          checkIsRedirect(
-            performAction(),
-            routes.AcquisitionDetailsController.acquisitionDate()
-          )
-        }
-
-      }
+      behave like missingAcquisitionMethodBehaviour(() => performAction())
 
       "show a form error" when {
 
         "the data is invalid" in {
-          amountOfMoneyErrorScenarios("acquisitionPrice").foreach { scenario =>
-            withClue(s"For $scenario: ") {
-              testFormError(scenario.formData: _*)(scenario.expectedErrorMessageKey)(
-                "acquisitionPrice.title"
-              )(
-                performAction
-              )
+          forAll { answers: CompleteAcquisitionDetailsAnswers =>
+            val scenarioSession = sessionWithState(
+              answers,
+              sample[AssetType],
+              sample[Boolean]
+            )._1
+
+            val contextKey = answers.acquisitionMethod match {
+              case AcquisitionMethod.Bought => "acquisitionPriceBought"
+              case _                        => "acquisitionPriceNotBought"
+            }
+
+            amountOfMoneyErrorScenarios("acquisitionPrice", errorContext = Some(contextKey)).foreach { scenario =>
+              withClue(s"For $scenario: ") {
+                testFormError(scenario.formData: _*)(scenario.expectedErrorMessageKey)(
+                  s"$contextKey.title",
+                  LocalDateUtils.govDisplayFormat(answers.acquisitionDate.value)
+                )(
+                  performAction,
+                  scenarioSession
+                )
+              }
             }
           }
         }
 
         "the amount of money is zero" in {
-          testFormError("acquisitionPrice" -> "0")(
-            "acquisitionPrice.error.tooSmall"
-          )(
-            "acquisitionPrice.title"
-          )(
-            performAction
-          )
+          forAll { answers: CompleteAcquisitionDetailsAnswers =>
+            val scenarioSession = sessionWithState(
+              answers,
+              sample[AssetType],
+              sample[Boolean]
+            )._1
+
+            val contextKey = answers.acquisitionMethod match {
+              case AcquisitionMethod.Bought => "acquisitionPriceBought"
+              case _                        => "acquisitionPriceNotBought"
+            }
+            testFormError("acquisitionPrice" -> "0")(
+              s"$contextKey.error.tooSmall"
+            )(
+              s"$contextKey.title",
+              LocalDateUtils.govDisplayFormat(answers.acquisitionDate.value)
+            )(
+              performAction,
+              scenarioSession
+            )
+          }
         }
 
       }
 
       "show an error page" when {
 
-        val price              = 1.23d
-        val answers            = IncompleteAcquisitionDetailsAnswers.empty.copy(acquisitionDate = Some(sample[AcquisitionDate]))
+        val price = 1.23d
+        val answers = IncompleteAcquisitionDetailsAnswers.empty
+          .copy(acquisitionMethod = Some(AcquisitionMethod.Bought), acquisitionDate = Some(sample[AcquisitionDate]))
         val (session, journey) = sessionWithState(answers, sample[AssetType], sample[Boolean])
         val updatedDraftReturn = journey.draftReturn
           .copy(acquisitionDetailsAnswers = Some(answers.copy(acquisitionPrice = Some(AmountInPence(123L)))))
@@ -923,7 +937,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Left(Error("")))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction("acquisitionPrice" -> price.toString))
@@ -933,7 +947,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(updatedSession)(Left(Error("")))
           }
 
@@ -945,7 +959,8 @@ class AcquisitionDetailsControllerSpec
       "redirect to the check you answers page" when {
 
         "the price submitted is valid and the journey was incomplete" in {
-          val answers            = IncompleteAcquisitionDetailsAnswers.empty.copy(acquisitionDate = Some(sample[AcquisitionDate]))
+          val answers = IncompleteAcquisitionDetailsAnswers.empty
+            .copy(acquisitionMethod = Some(sample[AcquisitionMethod]), acquisitionDate = Some(sample[AcquisitionDate]))
           val (session, journey) = sessionWithState(answers, sample[AssetType], sample[Boolean])
           val updatedDraftReturn = journey.draftReturn
             .copy(acquisitionDetailsAnswers = Some(answers.copy(acquisitionPrice = Some(AmountInPence(123400L)))))
@@ -954,7 +969,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(updatedSession)(Right(()))
           }
 
@@ -974,7 +989,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(updatedSession)(Right(()))
           }
 
@@ -999,6 +1014,8 @@ class AcquisitionDetailsControllerSpec
 
       behave like missingAssetTypeAndResidentialStatusBehaviour(performAction)
 
+      behave like missingAcquisitionDateBehaviour(performAction)
+
       "redirect to the acquisition price page" when {
 
         "that question hasn't been answered" in {
@@ -1022,30 +1039,6 @@ class AcquisitionDetailsControllerSpec
           )
         }
 
-      }
-
-      "redirect to the acquisition date page" when {
-
-        "that question hasn't been answered" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithState(
-                sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate  = None,
-                  acquisitionPrice = Some(sample[AmountInPence])
-                ),
-                sample[AssetType],
-                sample[Boolean]
-              )._1
-            )
-          }
-
-          checkIsRedirect(
-            performAction(),
-            routes.AcquisitionDetailsController.acquisitionDate()
-          )
-        }
       }
 
       "redirect to the check your answers page" when {
@@ -1194,6 +1187,8 @@ class AcquisitionDetailsControllerSpec
 
       behave like missingAssetTypeAndResidentialStatusBehaviour(() => performAction())
 
+      behave like missingAcquisitionDateBehaviour(() => performAction())
+
       "redirect to the acquisition price page" when {
 
         "that question hasn't been answered" in {
@@ -1217,30 +1212,6 @@ class AcquisitionDetailsControllerSpec
           )
         }
 
-      }
-
-      "redirect to the acquisition date page" when {
-
-        "that question hasn't been answered" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithState(
-                sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate  = None,
-                  acquisitionPrice = Some(sample[AmountInPence])
-                ),
-                sample[AssetType],
-                sample[Boolean]
-              )._1
-            )
-          }
-
-          checkIsRedirect(
-            performAction(),
-            routes.AcquisitionDetailsController.acquisitionDate()
-          )
-        }
       }
 
       "show a form error" when {
@@ -1314,7 +1285,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Left(Error("")))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(
@@ -1329,7 +1300,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(updatedSession)(Left(Error("")))
           }
 
@@ -1367,7 +1338,7 @@ class AcquisitionDetailsControllerSpec
                 inSequence {
                   mockAuthWithNoRetrievals()
                   mockGetSession(session)
-                  mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+                  mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
                   mockStoreSession(updatedSession)(Right(()))
                 }
 
@@ -1397,7 +1368,7 @@ class AcquisitionDetailsControllerSpec
                 inSequence {
                   mockAuthWithNoRetrievals()
                   mockGetSession(session)
-                  mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+                  mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
                   mockStoreSession(updatedSession)(Right(()))
                 }
 
@@ -1422,30 +1393,7 @@ class AcquisitionDetailsControllerSpec
 
       behave like missingAssetTypeAndResidentialStatusBehaviour(performAction)
 
-      "redirect to the acquisition date page" when {
-
-        "the question has not been answered" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithState(
-                sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = None
-                ),
-                sample[AssetType],
-                sample[Boolean]
-              )._1
-            )
-          }
-
-          checkIsRedirect(
-            performAction(),
-            routes.AcquisitionDetailsController.acquisitionDate()
-          )
-
-        }
-
-      }
+      behave like missingAcquisitionDateBehaviour(performAction)
 
       "redirect to the acquisition price page" when {
 
@@ -1676,30 +1624,7 @@ class AcquisitionDetailsControllerSpec
 
       behave like missingAssetTypeAndResidentialStatusBehaviour(() => performAction())
 
-      "redirect to the acquisition date page" when {
-
-        "the question has not been answered" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithState(
-                sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = None
-                ),
-                sample[AssetType],
-                sample[Boolean]
-              )._1
-            )
-          }
-
-          checkIsRedirect(
-            performAction(),
-            routes.AcquisitionDetailsController.acquisitionDate()
-          )
-
-        }
-
-      }
+      behave like missingAcquisitionDateBehaviour(() => performAction())
 
       "redirect to the acquisition price page" when {
 
@@ -1798,7 +1723,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Left(Error("")))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(
@@ -1813,7 +1738,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(updatedSession)(Left(Error("")))
           }
 
@@ -1850,7 +1775,7 @@ class AcquisitionDetailsControllerSpec
                 inSequence {
                   mockAuthWithNoRetrievals()
                   mockGetSession(session)
-                  mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+                  mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
                   mockStoreSession(updatedSession)(Right(()))
                 }
 
@@ -1881,7 +1806,7 @@ class AcquisitionDetailsControllerSpec
                 inSequence {
                   mockAuthWithNoRetrievals()
                   mockGetSession(session)
-                  mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+                  mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
                   mockStoreSession(updatedSession)(Right(()))
                 }
 
@@ -2101,7 +2026,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Left(Error("")))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(
@@ -2116,7 +2041,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(updatedSession)(Left(Error("")))
           }
 
@@ -2151,7 +2076,7 @@ class AcquisitionDetailsControllerSpec
                 inSequence {
                   mockAuthWithNoRetrievals()
                   mockGetSession(session)
-                  mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+                  mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
                   mockStoreSession(updatedSession)(Right(()))
                 }
 
@@ -2178,7 +2103,7 @@ class AcquisitionDetailsControllerSpec
                 inSequence {
                   mockAuthWithNoRetrievals()
                   mockGetSession(session)
-                  mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+                  mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
                   mockStoreSession(updatedSession)(Right(()))
                 }
 
@@ -2367,7 +2292,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn)(Left(Error("")))
+            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -2378,7 +2303,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn)(Right(()))
+            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
           }
 
@@ -2397,7 +2322,7 @@ class AcquisitionDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn)(Right(()))
+            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
             mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
           }
 
@@ -2493,6 +2418,70 @@ class AcquisitionDetailsControllerSpec
 
     }
 
+  def missingAcquisitionDateBehaviour(performAction: () => Future[Result]) =
+    "redirect to the check you answers page" when {
+
+      "there is no acquisition date" in {
+        val completeAcquisitionDetailsAnswers = sample[CompleteAcquisitionDetailsAnswers]
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionWithState(
+              Some(
+                IncompleteAcquisitionDetailsAnswers(
+                  Some(completeAcquisitionDetailsAnswers.acquisitionMethod),
+                  None,
+                  Some(completeAcquisitionDetailsAnswers.acquisitionPrice),
+                  completeAcquisitionDetailsAnswers.rebasedAcquisitionPrice,
+                  Some(completeAcquisitionDetailsAnswers.improvementCosts),
+                  Some(completeAcquisitionDetailsAnswers.acquisitionFees)
+                )
+              ),
+              Some(sample[AssetType]),
+              Some(sample[Boolean]),
+              Some(sample[DisposalDate])
+            )._1
+          )
+        }
+
+        checkIsRedirect(performAction(), routes.AcquisitionDetailsController.checkYourAnswers())
+      }
+
+    }
+
+  def missingAcquisitionMethodBehaviour(performAction: () => Future[Result]) =
+    "redirect to the check you answers page" when {
+
+      "there is no acquisition method" in {
+        val completeAcquisitionDetailsAnswers = sample[CompleteAcquisitionDetailsAnswers]
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionWithState(
+              Some(
+                IncompleteAcquisitionDetailsAnswers(
+                  None,
+                  Some(completeAcquisitionDetailsAnswers.acquisitionDate),
+                  Some(completeAcquisitionDetailsAnswers.acquisitionPrice),
+                  completeAcquisitionDetailsAnswers.rebasedAcquisitionPrice,
+                  Some(completeAcquisitionDetailsAnswers.improvementCosts),
+                  Some(completeAcquisitionDetailsAnswers.acquisitionFees)
+                )
+              ),
+              Some(sample[AssetType]),
+              Some(sample[Boolean]),
+              Some(sample[DisposalDate])
+            )._1
+          )
+        }
+
+        checkIsRedirect(performAction(), routes.AcquisitionDetailsController.checkYourAnswers())
+      }
+
+    }
+
   def testFormError(
     data: (String, String)*
   )(expectedErrorMessageKey: String, errorArgs: String*)(pageTitleKey: String, titleArgs: String*)(
@@ -2510,7 +2499,7 @@ class AcquisitionDetailsControllerSpec
 
     checkPageIsDisplayed(
       performAction(data),
-      messageFromMessageKey(pageTitleKey, titleArgs), { doc =>
+      messageFromMessageKey(pageTitleKey, titleArgs: _*), { doc =>
         doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
           expectedErrorMessageKey,
           errorArgs: _*

@@ -27,7 +27,7 @@ import play.api.Configuration
 import play.api.i18n.{I18nSupport, Messages, MessagesApi, MessagesImpl}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
-import play.api.mvc.{Call, Result}
+import play.api.mvc.{Call, Request, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.{contentAsString, _}
 import uk.gov.hmrc.auth.core.AuthConnector
@@ -100,14 +100,17 @@ trait HomePageControllerSpec
 
   def mockStartPaymentJourney(
     cgtReference: CgtReference,
-    chargeReference: String,
+    chargeReference: Option[String],
     amount: AmountInPence,
     returnUrl: Call,
     backUrl: Call
   )(response: Either[Error, PaymentsJourney]) =
     (mockPaymentsService
-      .startPaymentJourney(_: CgtReference, _: String, _: AmountInPence, _: Call, _: Call)(_: HeaderCarrier))
-      .expects(cgtReference, chargeReference, amount, returnUrl, backUrl, *)
+      .startPaymentJourney(_: CgtReference, _: Option[String], _: AmountInPence, _: Call, _: Call)(
+        _: HeaderCarrier,
+        _: Request[_]
+      ))
+      .expects(cgtReference, chargeReference, amount, returnUrl, backUrl, *, *)
       .returning(EitherT.fromEither[Future](response))
 
 }
@@ -922,7 +925,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
             mockGetSession(SessionData.empty.copy(journeyStatus = Some(subscribed)))
             mockStartPaymentJourney(
               subscribed.subscribedDetails.cgtReference,
-              subscribed.subscribedDetails.cgtReference.value,
+              None,
               subscribed.totalLeftToPay(),
               routes.HomePageController.homepage(),
               routes.HomePageController.homepage()
@@ -945,7 +948,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
             mockGetSession(SessionData.empty.copy(journeyStatus = Some(subscribed)))
             mockStartPaymentJourney(
               subscribed.subscribedDetails.cgtReference,
-              subscribed.subscribedDetails.cgtReference.value,
+              None,
               subscribed.totalLeftToPay(),
               routes.HomePageController.homepage(),
               routes.HomePageController.homepage()

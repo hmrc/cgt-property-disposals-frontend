@@ -37,7 +37,7 @@
 @title = @{messages(s"$key.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title, hasErrors = hasErrors, userType = request.userType) {
+@mainTemplate(title = title, hasErrors = hasErrors, userType = request.userType, withSignOutLink = true) {
 
     @backLinkComponent(backLink)
 
@@ -45,7 +45,7 @@
         @errorSummary(form)
     }
 
-    @caption(messages("multiple-disposals.triage.caption"))
+    @caption(messages("triage.caption"))
 
     @formWrapper(triage.routes.MultipleDisposalsTriageController.howManyDisposalsSubmit()) {
 

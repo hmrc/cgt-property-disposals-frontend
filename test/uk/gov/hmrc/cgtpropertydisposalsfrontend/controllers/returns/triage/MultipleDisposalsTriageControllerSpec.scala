@@ -16,6 +16,10 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
+import java.time.{Clock, LocalDate}
+
+import cats.instances.future._
+import cats.data.EitherT
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.http.Status.BAD_REQUEST
 import play.api.i18n.MessagesApi
@@ -37,9 +41,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserTyp
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{IncompleteMultipleDisposalsAnswers, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{JourneyStatus, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.TaxYearService
+import uk.gov.hmrc.http.HeaderCarrier
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class MultipleDisposalsTriageControllerSpec
@@ -49,10 +56,13 @@ class MultipleDisposalsTriageControllerSpec
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
 
+  val mockTaxYearService = mock[TaxYearService]
+
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
-      bind[SessionStore].toInstance(mockSessionStore)
+      bind[SessionStore].toInstance(mockSessionStore),
+      bind[TaxYearService].toInstance(mockTaxYearService)
     )
 
   lazy val controller = instanceOf[MultipleDisposalsTriageController]
@@ -676,6 +686,459 @@ class MultipleDisposalsTriageControllerSpec
             BAD_REQUEST
           )
         }
+
+      }
+
+    }
+
+    "handling requests to display the tax year exchanged page" must {
+
+      def performAction(): Future[Result] =
+        controller.whenWereContractsExchanged()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
+
+      "display the page" in {
+        mockAuthWithNoRetrievals()
+        mockGetSession(
+          sessionDataWithStartingNewDraftReturn(
+            IncompleteMultipleDisposalsAnswers.empty.copy(
+              individualUserType           = Some(Self),
+              numberOfProperties           = Some(2),
+              wasAUKResident               = Some(true),
+              countryOfResidence           = Some(Country.uk),
+              wereAllPropertiesResidential = Some(true),
+              assetType                    = Some(AssetType.Residential)
+            )
+          )._1
+        )
+
+        checkPageIsDisplayed(
+          performAction,
+          messageFromMessageKey("multipleDisposalsTaxYear.title"), { doc =>
+            doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
+              .wereAllPropertiesResidential()
+              .url
+            doc
+              .select("#content > article > form")
+              .attr("action") shouldBe routes.MultipleDisposalsTriageController
+              .whenWereContractsExchangedSubmit()
+              .url
+          }
+        )
+      }
+    }
+
+    "handling submits on the tax year exchanged page" must {
+
+      def mockGetTaxYear(date: LocalDate)(response: Either[Error, Option[TaxYear]]) =
+        (mockTaxYearService
+          .taxYear(_: LocalDate)(_: HeaderCarrier))
+          .expects(date, *)
+          .returning(EitherT.fromEither[Future](response))
+
+      def performAction(data: (String, String)*): Future[Result] =
+        controller.whenWereContractsExchangedSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
+
+      val today = LocalDate.now(Clock.systemUTC())
+      val key   = "multipleDisposalsTaxYear"
+
+      "redirect to redirect to cya page" when {
+
+        val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
+          individualUserType           = Some(Self),
+          numberOfProperties           = Some(2),
+          wasAUKResident               = Some(true),
+          countryOfResidence           = Some(Country.uk),
+          wereAllPropertiesResidential = Some(true),
+          assetType                    = Some(AssetType.Residential)
+        )
+
+        val taxYear = sample[TaxYear].copy(
+          startDateInclusive = LocalDate.of(2019, 4, 6),
+          endDateExclusive   = LocalDate.of(2020, 4, 6)
+        )
+
+        val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+        "user has not answered the tax year exchanged section and selects after April 06th, 2020" in {
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockGetTaxYear(today)(Right(Some(taxYear)))
+            mockStoreSession(
+              session.copy(journeyStatus = Some(
+                journey.copy(
+                  newReturnTriageAnswers = Left(
+                    answers.copy(
+                      taxYearAfter6April2020 = Some(true),
+                      taxYear                = Some(taxYear)
+                    )
+                  )
+                )
+              )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(key -> "0"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+        "user has not answered the tax year exchanged section and selects before April 06th, 2020" in {
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreSession(
+              session.copy(journeyStatus = Some(
+                journey.copy(
+                  newReturnTriageAnswers = Left(
+                    answers.copy(
+                      taxYearAfter6April2020 = Some(false),
+                      taxYear                = None
+                    )
+                  )
+                )
+              )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(key -> "1"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+        "user has already answered were all properties residential section and re-selected different option" in {
+          val answers = sample[IncompleteMultipleDisposalsAnswers]
+            .copy(
+              individualUserType           = Some(Self),
+              numberOfProperties           = Some(2),
+              wasAUKResident               = Some(true),
+              countryOfResidence           = Some(Country.uk),
+              wereAllPropertiesResidential = Some(true),
+              assetType                    = Some(AssetType.Residential),
+              taxYearAfter6April2020       = Some(true),
+              taxYear                      = Some(taxYear)
+            )
+
+          val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreSession(
+              session.copy(journeyStatus = Some(
+                journey.copy(
+                  newReturnTriageAnswers = Left(
+                    answers.copy(
+                      taxYearAfter6April2020 = Some(false),
+                      taxYear                = None
+                    )
+                  )
+                )
+              )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(key -> "1"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+      }
+
+      "not update the session" when {
+
+        "user has already answered the tax year exchanged section and re-selected same option" in {
+          val taxYear = sample[TaxYear].copy(
+            startDateInclusive = LocalDate.of(2019, 4, 6),
+            endDateExclusive   = LocalDate.of(2020, 4, 6)
+          )
+          val answers = sample[IncompleteMultipleDisposalsAnswers]
+            .copy(
+              individualUserType           = Some(Self),
+              numberOfProperties           = Some(2),
+              wasAUKResident               = Some(true),
+              countryOfResidence           = Some(Country.uk),
+              wereAllPropertiesResidential = Some(true),
+              assetType                    = Some(AssetType.Residential),
+              taxYearAfter6April2020       = Some(true),
+              taxYear                      = Some(taxYear)
+            )
+
+          val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkIsRedirect(
+            performAction(key -> "0"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+      }
+
+      "show a form error" when {
+
+        "the user submits nothing" in {
+          val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
+            individualUserType           = Some(Self),
+            numberOfProperties           = Some(2),
+            wasAUKResident               = Some(true),
+            countryOfResidence           = Some(Country.uk),
+            wereAllPropertiesResidential = Some(true)
+          )
+          val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(s"$key.title"), { doc =>
+              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+                s"$key.error.required"
+              )
+              doc.title() should startWith("Error:")
+            },
+            BAD_REQUEST
+          )
+        }
+
+      }
+    }
+
+    "handling requests to display the country of residence page" must {
+
+      def performAction(): Future[Result] =
+        controller.countryOfResidence()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
+
+      "display the page" in {
+        mockAuthWithNoRetrievals()
+        mockGetSession(
+          sessionDataWithStartingNewDraftReturn(
+            IncompleteMultipleDisposalsAnswers.empty.copy(
+              individualUserType = Some(Self),
+              numberOfProperties = Some(2),
+              wasAUKResident     = Some(false)
+            )
+          )._1
+        )
+
+        checkPageIsDisplayed(
+          performAction,
+          messageFromMessageKey("multipleDisposalsCountryOfResidence.title"), { doc =>
+            doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
+              .wereYouAUKResident()
+              .url
+            doc
+              .select("#content > article > form")
+              .attr("action") shouldBe routes.MultipleDisposalsTriageController
+              .countryOfResidenceSubmit()
+              .url
+          }
+        )
+      }
+
+      "redirect to the cya page" in {
+        mockAuthWithNoRetrievals()
+        mockGetSession(
+          sessionDataWithStartingNewDraftReturn(
+            IncompleteMultipleDisposalsAnswers.empty.copy(
+              individualUserType = Some(Self),
+              numberOfProperties = Some(2),
+              wasAUKResident     = Some(true)
+            )
+          )._1
+        )
+
+        checkIsRedirect(
+          performAction(),
+          routes.MultipleDisposalsTriageController.checkYourAnswers()
+        )
+      }
+
+    }
+
+    "handling submits on the country of residence page" must {
+
+      def performAction(data: (String, String)*): Future[Result] =
+        controller.countryOfResidenceSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
+
+      val key                        = "countryCode"
+      val (countryCode, countryName) = "HK" -> "Hong Kong"
+      val country                    = Country(countryCode, Some(countryName))
+
+      "redirect to redirect to cya page" when {
+
+        val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
+          individualUserType = Some(Self),
+          numberOfProperties = Some(2),
+          wasAUKResident     = Some(false),
+          countryOfResidence = None
+        )
+
+        val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+        "user has not answered the country of residence section and" +
+          " enters valid country" in {
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreSession(
+              session.copy(journeyStatus = Some(
+                journey.copy(
+                  newReturnTriageAnswers = Left(
+                    answers.copy(
+                      countryOfResidence = Some(country)
+                    )
+                  )
+                )
+              )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(key -> countryCode),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+        "user has already answered the country of residence section and re-selected different option" in {
+          val answers = sample[IncompleteMultipleDisposalsAnswers]
+            .copy(
+              countryOfResidence           = Some(country),
+              wereAllPropertiesResidential = None,
+              assetType                    = None
+            )
+
+          val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+          val (newCountryCode, newCountryName) = "CH" -> "Switzerland"
+          val newCountry                       = Country(newCountryCode, Some(newCountryName))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreSession(
+              session.copy(journeyStatus = Some(
+                journey.copy(
+                  newReturnTriageAnswers = Left(
+                    answers.copy(
+                      countryOfResidence = Some(newCountry)
+                    )
+                  )
+                )
+              )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(key -> newCountryCode),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+      }
+
+      "not update the session" when {
+
+        "user has already answered country of residence section and re-selected same option" in {
+          val answers = sample[IncompleteMultipleDisposalsAnswers]
+            .copy(
+              numberOfProperties = Some(2),
+              wasAUKResident     = Some(false),
+              countryOfResidence = Some(country)
+            )
+
+          val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkIsRedirect(
+            performAction(key -> "HK"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+      }
+
+      "show a form error" when {
+
+        "the user submits nothing" in {
+          val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
+            individualUserType = Some(Self),
+            numberOfProperties = Some(2),
+            wasAUKResident     = Some(false),
+            countryOfResidence = None
+          )
+          val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(s"multipleDisposalsCountryOfResidence.title"), { doc =>
+              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+                s"$key.error.required"
+              )
+              doc.title() should startWith("Error:")
+            },
+            BAD_REQUEST
+          )
+        }
+
+        "the option is not recognised" in {
+          val answers = IncompleteMultipleDisposalsAnswers.empty
+            .copy(
+              numberOfProperties = Some(2),
+              wasAUKResident     = Some(false),
+              countryOfResidence = None
+            )
+
+          val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkPageIsDisplayed(
+            performAction(key -> "XX"),
+            messageFromMessageKey(s"multipleDisposalsCountryOfResidence.title"), { doc =>
+              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+                s"$key.error.notFound"
+              )
+              doc.title() should startWith("Error:")
+            },
+            BAD_REQUEST
+          )
+        }
+
       }
 
     }

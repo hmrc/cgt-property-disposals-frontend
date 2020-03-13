@@ -18,9 +18,10 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 
 import cats.data.EitherT
 import cats.instances.future._
-
+import play.api.mvc.Request
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.ControllerSpec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -30,18 +31,14 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 trait ReturnsServiceSupport { this: ControllerSpec =>
 
-  val mockReturnsService = mock[ReturnsService]
+  val mockReturnsService: ReturnsService = mock[ReturnsService]
 
-  def mockStoreDraftReturn(draftReturn: DraftReturn)(result: Either[Error, Unit]) =
+  def mockStoreDraftReturn(draftReturn: DraftReturn, agentReferenceNumber: Option[AgentReferenceNumber])(
+    result: Either[Error, Unit]
+  ) =
     (mockReturnsService
-      .storeDraftReturn(_: DraftReturn)(_: HeaderCarrier))
-      .expects(draftReturn, *)
-      .returning(EitherT.fromEither[Future](result))
-
-  def mockStoreAnyDraftReturn()(result: Either[Error, Unit]) =
-    (mockReturnsService
-      .storeDraftReturn(_: DraftReturn)(_: HeaderCarrier))
-      .expects(*, *)
+      .storeDraftReturn(_: DraftReturn, _: Option[AgentReferenceNumber])(_: HeaderCarrier, _: Request[_]))
+      .expects(draftReturn, agentReferenceNumber, *, *)
       .returning(EitherT.fromEither[Future](result))
 
 }

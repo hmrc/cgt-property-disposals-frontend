@@ -34,7 +34,8 @@
         formError: Option[FormError] = None,
         extraContent: Option[Html] = None,
         inputClass: Option[String] = None,
-        labelClass: Option[String] = None
+        labelClass: Option[String] = None,
+        customErrorKey: Option[String] = None
 )(implicit messages: Messages)
 
 @classBuilder(s: Option[String]*) = @{s.toList.collect{case Some(s) => s}.mkString(" ")}
@@ -85,7 +86,7 @@
     @assistiveText
   </div>
   @errorIdWithError.map { case (id, error) =>
-    @errorInline(id, messages(s"$fieldId.${error.message}", error.args: _*))
+    @errorInline(id, messages(s"${customErrorKey.getOrElse(fieldId)}.${error.message}", error.args: _*))
   }
   <div class="hmcts-currency-input custom-input-wrapper @inputClass @aspect">
     <input

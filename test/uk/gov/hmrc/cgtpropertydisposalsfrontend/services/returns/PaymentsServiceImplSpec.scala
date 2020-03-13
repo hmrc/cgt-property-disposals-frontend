@@ -21,7 +21,8 @@ import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
 import play.api.libs.json.{JsNumber, Json}
-import play.api.mvc.Call
+import play.api.mvc.{Call, Request}
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.PaymentsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
@@ -29,6 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, PaymentsJourney}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -40,26 +42,27 @@ class PaymentsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
   def mockStartPaymentJourney(
     cgtReference: CgtReference,
-    chargeReference: String,
+    chargeReference: Option[String],
     amount: AmountInPence,
     returnUrl: Call,
     backUrl: Call
   )(response: Either[Error, HttpResponse]) =
     (mockConnector
-      .startPaymentJourney(_: CgtReference, _: String, _: AmountInPence, _: Call, _: Call)(_: HeaderCarrier))
+      .startPaymentJourney(_: CgtReference, _: Option[String], _: AmountInPence, _: Call, _: Call)(_: HeaderCarrier))
       .expects(cgtReference, chargeReference, amount, returnUrl, backUrl, *)
       .returning(EitherT.fromEither[Future](response))
 
-  val service = new PaymentsServiceImpl(mockConnector)
+  val service = new PaymentsServiceImpl(mockConnector, stub[AuditService])
 
-  implicit val hc: HeaderCarrier = HeaderCarrier()
+  implicit val hc: HeaderCarrier   = HeaderCarrier()
+  implicit val request: Request[_] = FakeRequest()
 
   "PaymentsServiceImpl" when {
 
     "handling requests to start a payments journey" must {
 
       val cgtReference    = sample[CgtReference]
-      val chargeReference = sample[String]
+      val chargeReference = Some(sample[String])
       val amount          = sample[AmountInPence]
       val returnCall      = controllers.routes.StartController.start()
       val backCall        = controllers.routes.EmailWhitelistingController.thereIsAProblem()

@@ -38,6 +38,10 @@ h1 > span.heading-medium,
     margin-top: 30px;
 }
 
+.drafts-list {
+    margin-bottom: 50px;
+}
+
 .govuk-box-highlight--status {
     background-color: #1d70b8;
 }
