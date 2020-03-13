@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit
 
-import play.api.libs.json.{Format, Json}
+import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 
-final case class FinancialTransaction(
-  chargeReference: String,
-  originalAmount: AmountInPence,
-  outstandingAmount: AmountInPence,
-  payments: List[Payment]
+final case class DraftReturnUpdated(
+  draftReturn: DraftReturn,
+  cgtReference: String,
+  agentReferenceNumber: Option[String]
 )
 
-object FinancialTransaction {
+object DraftReturnUpdated {
 
-  implicit val format: Format[FinancialTransaction] = Json.format
+  implicit val format: OFormat[DraftReturnUpdated] = Json.format
 
 }

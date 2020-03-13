@@ -112,7 +112,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
         paymentsService
           .startPaymentJourney(
             j.subscribedDetails.cgtReference,
-            charge.chargeReference,
+            Some(charge.chargeReference),
             charge.amount,
             homepage.routes.HomePageController.homepage(),
             routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission()

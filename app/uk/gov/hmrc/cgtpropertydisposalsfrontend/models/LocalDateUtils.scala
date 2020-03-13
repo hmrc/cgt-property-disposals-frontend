@@ -17,7 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import java.time.{Clock, LocalDate}
-import java.time.format.DateTimeFormatter
+import java.time.format.{DateTimeFormatter}
 
 import cats.Order
 import cats.syntax.either._

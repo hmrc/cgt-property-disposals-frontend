@@ -18,6 +18,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import julienrf.json.derived
 import play.api.libs.json.OFormat
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TaxYear
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 
 sealed trait MultipleDisposalsTriageAnswers
 
@@ -25,17 +27,26 @@ object MultipleDisposalsTriageAnswers {
 
   final case class IncompleteMultipleDisposalsAnswers(
     individualUserType: Option[IndividualUserType],
-    numberOfProperties: Option[Int]
+    numberOfProperties: Option[Int],
+    wasAUKResident: Option[Boolean],
+    countryOfResidence: Option[Country],
+    wereAllPropertiesResidential: Option[Boolean],
+    assetType: Option[AssetType],
+    taxYearAfter6April2020: Option[Boolean],
+    taxYear: Option[TaxYear]
   ) extends MultipleDisposalsTriageAnswers
 
   object IncompleteMultipleDisposalsAnswers {
     val empty: IncompleteMultipleDisposalsAnswers =
-      IncompleteMultipleDisposalsAnswers(None, None)
+      IncompleteMultipleDisposalsAnswers(None, None, None, None, None, None, None, None)
   }
 
   final case class CompleteMultipleDisposalsAnswers(
-    individualUserType: IndividualUserType,
-    numberOfProperties: Int
+    individualUserType: Option[IndividualUserType],
+    numberOfProperties: Int,
+    countryOfResidence: Country,
+    assetType: AssetType,
+    taxYear: TaxYear
   ) extends MultipleDisposalsTriageAnswers
 
   implicit class MultipleDisposalsTriageAnswersOps(private val m: MultipleDisposalsTriageAnswers) extends AnyVal {

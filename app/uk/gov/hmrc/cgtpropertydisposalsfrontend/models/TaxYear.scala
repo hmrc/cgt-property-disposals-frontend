@@ -19,8 +19,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import java.time.LocalDate
 
 import cats.syntax.order._
-import configs.Configs
-import configs.syntax._
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.order
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence

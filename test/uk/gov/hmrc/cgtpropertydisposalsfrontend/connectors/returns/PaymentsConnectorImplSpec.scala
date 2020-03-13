@@ -83,7 +83,7 @@ class PaymentsConnectorImplSpec extends WordSpec with Matchers with MockFactory 
               |""".stripMargin
           )
         ),
-        () => connector.startPaymentJourney(cgtReference, chargeReference, amount, returnCall, backCall)
+        () => connector.startPaymentJourney(cgtReference, Some(chargeReference), amount, returnCall, backCall)
       )
 
     }

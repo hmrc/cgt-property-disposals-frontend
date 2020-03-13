@@ -61,7 +61,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
   )
 
   <p>@Html(messages("disposalDate.link", viewConfig.tranferringOwnershipHelp))</p>
-  @submitButton(messages("button.continue"))
+  @submitButton(messages(if(displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
  }
 
  @returnToSummaryLink(displayReturnToSummaryLink)

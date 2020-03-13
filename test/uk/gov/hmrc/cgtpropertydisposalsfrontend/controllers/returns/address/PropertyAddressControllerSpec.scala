@@ -18,42 +18,42 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address
 
 import cats.data.EitherT
 import cats.instances.future._
+import org.jsoup.nodes.Document
+import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.i18n.MessagesApi
+import play.api.i18n.{Lang, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.Result
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressControllerSpec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressControllerSpec.validatePropertyAddressPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.{routes => returnsAddressRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
-import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class PropertyAddressControllerSpec
     extends AddressControllerSpec[FillingOutReturn]
     with ScalaCheckDrivenPropertyChecks
-    with RedirectToStartBehaviour {
+    with RedirectToStartBehaviour
+    with ReturnsServiceSupport {
 
   val draftReturn: DraftReturn = sample[DraftReturn].copy(propertyAddress = Some(ukAddress(1)))
 
   val validJourneyStatus = FillingOutReturn(sample[SubscribedDetails], sample[GGCredId], None, draftReturn)
-
-  val mockReturnsService = mock[ReturnsService]
 
   override def overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](bind[ReturnsService].toInstance(mockReturnsService)) ::: super.overrideBindings
@@ -70,19 +70,11 @@ class PropertyAddressControllerSpec
   override val mockUpdateAddress: Option[(FillingOutReturn, Address, Either[Error, Unit]) => Unit] =
     Some {
       case (newDetails: FillingOutReturn, a: UkAddress, r: Either[Error, Unit]) =>
-        mockStoreDraftReturn(newDetails.draftReturn.copy(propertyAddress = Some(a)))(r)
+        mockStoreDraftReturn(newDetails.draftReturn.copy(propertyAddress = Some(a)), newDetails.agentReferenceNumber)(r)
 
       case (_, _: NonUkAddress, _) =>
         sys.error("Non UK addresses not handled in this spec")
     }
-
-  def mockStoreDraftReturn(
-    draftReturn: DraftReturn
-  )(result: Either[Error, Unit]) =
-    (mockReturnsService
-      .storeDraftReturn(_: DraftReturn)(_: HeaderCarrier))
-      .expects(draftReturn, *)
-      .returning(EitherT.fromEither[Future](result))
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
@@ -191,6 +183,18 @@ class PropertyAddressControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
+      def testIsCheckYourAnswers(
+        result: Future[Result],
+        ukAddressDetails: UkAddress,
+        expectedTitleKey: String
+      ): Unit =
+        checkPageIsDisplayed(
+          result,
+          messageFromMessageKey(expectedTitleKey), { doc =>
+            validatePropertyAddressPage(ukAddressDetails, doc)
+          }
+        )
+
       "redirect to the task list if there is no property address in session" in {
         inSequence {
           mockAuthWithNoRetrievals()
@@ -213,9 +217,11 @@ class PropertyAddressControllerSpec
           mockGetSession(sessionWithValidJourneyStatus)
         }
 
-        val result = performAction()
-        status(result)          shouldBe OK
-        contentAsString(result) should include(messageFromMessageKey("returns.property-address.cya.title"))
+        testIsCheckYourAnswers(
+          performAction(),
+          draftReturn.propertyAddress.getOrElse(sys.error("Error")),
+          "returns.property-address.cya.title"
+        )
       }
 
     }
@@ -239,5 +245,15 @@ class PropertyAddressControllerSpec
     }
 
   }
+}
 
+object PropertyAddressControllerSpec extends Matchers {
+  def validatePropertyAddressPage(
+    ukAddress: UkAddress,
+    doc: Document
+  )(implicit messages: MessagesApi, lang: Lang): Unit =
+    doc.select("#property-address-answer").text() shouldBe
+      List(Some(ukAddress.line1), ukAddress.line2, ukAddress.town, ukAddress.county, Some(ukAddress.postcode.value))
+        .collect { case Some(s) => s.trim }
+        .mkString(" ")
 }

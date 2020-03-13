@@ -14,7 +14,25 @@
  * limitations under the License.
  */
 
+/*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
+
+import java.time.LocalDate
 
 import org.jsoup.Jsoup.parse
 import org.jsoup.nodes.Document
@@ -30,11 +48,13 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{LocalDateUtils, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AssetType, DraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
@@ -108,6 +128,28 @@ class TaskListControllerSpec
         )
       }
 
+      def testSectionNonExistent(draftReturn: DraftReturn)(
+        sectionLinkId: String
+      ): Unit = {
+        val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              journeyStatus = Some(fillingOutReturn)
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("service.title"), { doc =>
+            doc.select(s"li#$sectionLinkId > span").isEmpty shouldBe true
+          }
+        )
+      }
+
       "display the page with the proper triage section status" when {
 
         "the session data indicates that they are filling in a return and the triage section is incomplete" in {
@@ -118,6 +160,46 @@ class TaskListControllerSpec
             messageFromMessageKey("task-list.triage.link"),
             triage.routes.SingleDisposalsTriageController.checkYourAnswers(),
             TaskListStatus.InProgress
+          )
+        }
+
+        "the session data indicates Enter initial gain or loss" in {
+          testStateOfSection(
+            sample[DraftReturn]
+              .copy(
+                triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                  .copy(assetType = AssetType.NonResidential)
+                  .copy(countryOfResidence = Country("TR", Some("Turkey"))),
+                disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
+                acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers])
+                  .map(answers => answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2010, 10, 1))))
+              )
+              .copy(initialGainOrLoss = None)
+          )(
+            "initialGainOrLoss",
+            messageFromMessageKey("task-list.enter-initial-gain-or-loss.link"),
+            initialgainorloss.routes.InitialGainOrLossController.enterInitialGainOrLoss(),
+            TaskListStatus.ToDo
+          )
+        }
+
+        "the session data indicates Submit initial gain or loss " in {
+          testStateOfSection(
+            sample[DraftReturn]
+              .copy(
+                triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                  .copy(assetType = AssetType.NonResidential)
+                  .copy(countryOfResidence = Country("TR", Some("Turkey"))),
+                disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
+                acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers])
+                  .map(answers => answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2010, 10, 1))))
+              )
+              .copy(initialGainOrLoss = Some(AmountInPence(0)))
+          )(
+            "initialGainOrLoss",
+            messageFromMessageKey("task-list.enter-initial-gain-or-loss.link"),
+            initialgainorloss.routes.InitialGainOrLossController.enterInitialGainOrLoss(),
+            TaskListStatus.Complete
           )
         }
 
@@ -482,6 +564,78 @@ class TaskListControllerSpec
         }
       }
 
+      "display the page with the PROPER initial gains and losses section STATUS" when {
+
+        def test(draftReturn: DraftReturn, expectedStatus: TaskListStatus) =
+          testStateOfSection(draftReturn)(
+            "initialGainOrLoss",
+            messageFromMessageKey("task-list.enter-initial-gain-or-loss.link"),
+            initialgainorloss.routes.InitialGainOrLossController.enterInitialGainOrLoss(),
+            expectedStatus
+          )
+
+        "the session data indicates that the country of residence is United Kingdom" in {
+
+          testSectionNonExistent(
+            sample[DraftReturn].copy(
+              triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                .copy(assetType = AssetType.NonResidential, countryOfResidence = Country("GB", Some("United Kingdom"))),
+              reliefDetailsAnswers = Some(sample[IncompleteReliefDetailsAnswers]),
+              acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
+                answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2014, 10, 1)))
+              )
+            )
+          )(
+            "initialGainOrLoss"
+          )
+        }
+
+        "the session data indicates that the country of residence is NOT United Kingdom and NON_RESIDENTIAL property was bought BEFORE 01/04/2015" in {
+          test(
+            sample[DraftReturn].copy(
+              triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                .copy(assetType = AssetType.NonResidential)
+                .copy(countryOfResidence = Country("TR", Some("Turkey"))),
+              disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
+                answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2014, 10, 1)))
+              ),
+              initialGainOrLoss = None
+            ),
+            TaskListStatus.ToDo
+          )
+        }
+
+        "the session data indicates that the country of residence is NOT United Kingdom and RESIDENTIAL property was bought" in {
+          testSectionNonExistent(
+            sample[DraftReturn].copy(
+              triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                .copy(assetType = AssetType.Residential)
+                .copy(countryOfResidence = Country("TR", Some("Turkey"))),
+              disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
+                answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2014, 10, 1)))
+              ),
+              initialGainOrLoss = None
+            )
+          )("initialGainOrLoss")
+        }
+
+        "the session data indicates that the country of residence is NOT United Kingdom but acquisition date is AFTER 01/04/2015 for NON_RESIDANTAL property" in {
+          testSectionNonExistent(
+            sample[DraftReturn].copy(
+              triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+                .copy(assetType = AssetType.NonResidential)
+                .copy(countryOfResidence = Country("TR", Some("Turkey"))),
+              disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
+              acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
+                answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2020, 10, 1)))
+              )
+            )
+          )("initialGainOrLoss")
+        }
+      }
+
       "display the page with Save and come back later link" when {
         "the session data indicates that they are filling in a return" in {
           inSequence {
@@ -507,5 +661,4 @@ class TaskListControllerSpec
       }
     }
   }
-
 }

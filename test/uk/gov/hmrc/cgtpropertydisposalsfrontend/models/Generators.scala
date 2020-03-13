@@ -41,14 +41,14 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue.
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsAnswers, IncompleteMultipleDisposalsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.OtherReliefs
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.{NoOtherReliefs, OtherReliefs}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CompleteYearToDateLiabilityAnswers, IncompleteYearToDateLiabilityAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{FileDescriptor, UploadRequest, UpscanFileDescriptor, UpscanInitiateRawResponse}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FinancialDataServiceImpl.FinancialDataResponse
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{ListReturnsResponse, ReturnSummaryWithoutPaymentInfo}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.ListReturnsResponse
 
 object Generators
     extends GenUtils
@@ -67,13 +67,13 @@ object Generators
     with ReturnGen
     with UpscanGen
     with DisposalDetailsGen
+    with DisposalMethodGen
     with MoneyGen
     with AcquisitionDetailsGen
     with ReliefDetailsAnswersGen
     with TaxYearGen
     with ExemptionAndLossesAnswersGen
-    with YearToDateLiabilityAnswersGen
-    with FinancialDataGen {
+    with YearToDateLiabilityAnswersGen {
 
   implicit val booleanGen: Gen[Boolean] = Gen.oneOf(true, false)
 
@@ -288,9 +288,6 @@ trait ReturnGen { this: GenUtils =>
 
   implicit val returnSummaryGen: Gen[ReturnSummary] = gen[ReturnSummary]
 
-  implicit val returnSummaryWithoutPaymentInfoGen: Gen[ReturnSummaryWithoutPaymentInfo] =
-    gen[ReturnSummaryWithoutPaymentInfo]
-
   implicit val calculateCgtTaxDueRequestGen: Gen[CalculateCgtTaxDueRequest] = gen[CalculateCgtTaxDueRequest]
 
 }
@@ -305,6 +302,13 @@ trait UpscanGen {
 
 }
 
+trait DisposalMethodGen { this: GenUtils =>
+
+  implicit val disposalMethod: Gen[DisposalMethod] =
+    gen[DisposalMethod]
+
+}
+
 trait DisposalDetailsGen { this: GenUtils =>
 
   implicit val completeDisposalDetailsAnswersGen: Gen[CompleteDisposalDetailsAnswers] =
@@ -313,8 +317,11 @@ trait DisposalDetailsGen { this: GenUtils =>
   implicit val incompleteDisposalDetailsAnswersGen: Gen[IncompleteDisposalDetailsAnswers] =
     gen[IncompleteDisposalDetailsAnswers]
 
-  implicit val shareOfPropertyGen: Gen[ShareOfProperty] = gen[ShareOfProperty]
-
+  implicit val shareOfPropertyGen: Gen[ShareOfProperty] =
+    gen[ShareOfProperty].map {
+      case a: ShareOfProperty.Other if a.percentageValue > 100 => ShareOfProperty.Full
+      case other: ShareOfProperty                              => other
+    }
 }
 
 trait AcquisitionDetailsGen { this: GenUtils =>
@@ -334,10 +341,16 @@ trait AcquisitionDetailsGen { this: GenUtils =>
 trait ReliefDetailsGen { this: GenUtils =>
 
   implicit val completeReliefDetailsAnswersGen: Gen[CompleteReliefDetailsAnswers] =
-    gen[CompleteReliefDetailsAnswers]
+    gen[CompleteReliefDetailsAnswers].map {
+      case a: CompleteReliefDetailsAnswers if a.otherReliefs.isEmpty => a.copy(otherReliefs = Some(NoOtherReliefs))
+      case other                                                     => other
+    }
 
   implicit val incompleteReliefDetailsAnswersGen: Gen[IncompleteReliefDetailsAnswers] =
-    gen[IncompleteReliefDetailsAnswers]
+    gen[IncompleteReliefDetailsAnswers].map {
+      case a: IncompleteReliefDetailsAnswers if a.otherReliefs.isEmpty => a.copy(otherReliefs = Some(NoOtherReliefs))
+      case other                                                       => other
+    }
 
 }
 
@@ -346,6 +359,8 @@ trait MoneyGen { this: GenUtils =>
   implicit val amountInPenceGen: Gen[AmountInPence] = gen[AmountInPence]
 
   implicit val chargeGen: Gen[Charge] = gen[Charge]
+
+  implicit val returnCharge: Gen[ReturnCharge] = gen[ReturnCharge]
 
   implicit val paymentGen: Gen[Payment] = gen[Payment]
 
@@ -361,13 +376,19 @@ trait TaxYearGen { this: GenUtils =>
 
 trait ReliefDetailsAnswersGen extends LowerPriorityReliefDetailsAnswersGen { this: GenUtils =>
 
+  override implicit val longArb: Arbitrary[Long] = Arbitrary(Gen.choose(0.toLong, 5e13.toLong))
+
   implicit val reliefDetailsAnswersGen: Gen[ReliefDetailsAnswers] =
     gen[ReliefDetailsAnswers]
 
   implicit val completeReliefDetailsAnswersGen: Gen[CompleteReliefDetailsAnswers] =
-    gen[CompleteReliefDetailsAnswers]
+    gen[CompleteReliefDetailsAnswers].map {
+      case a: CompleteReliefDetailsAnswers if a.otherReliefs.isEmpty => a.copy(otherReliefs = Some(NoOtherReliefs))
+      case other                                                     => other
+    }
 
   implicit val otherReliefsGen: Gen[OtherReliefs] = gen[OtherReliefs]
+
 }
 
 trait LowerPriorityReliefDetailsAnswersGen { this: GenUtils =>
@@ -407,13 +428,5 @@ trait YearToDateLiabilityAnswersGen { this: GenUtils =>
   implicit val calculatedTaxDueGen: Gen[CalculatedTaxDue] = gen[CalculatedTaxDue]
 
   implicit val gainCalculatedTaxDueGen: Gen[GainCalculatedTaxDue] = gen[GainCalculatedTaxDue]
-
-}
-
-trait FinancialDataGen { this: GenUtils =>
-
-  implicit val financialTransactionGen: Gen[FinancialTransaction] = gen[FinancialTransaction]
-
-  implicit val financialDataResponseGen: Gen[FinancialDataResponse] = gen[FinancialDataResponse]
 
 }

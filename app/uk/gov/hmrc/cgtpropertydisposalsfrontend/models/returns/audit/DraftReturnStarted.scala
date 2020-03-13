@@ -14,28 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit
 
-import java.time.LocalDate
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence._
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 
-final case class ChargeWithPayments(
-  chargeDescription: String,
-  chargeReference: String,
-  amount: AmountInPence,
-  dueDate: LocalDate,
-  payments: List[Payment]
+final case class DraftReturnStarted(
+  draftReturn: DraftReturn,
+  cgtReference: String,
+  agentReferenceNumber: Option[String]
 )
 
-object ChargeWithPayments {
+object DraftReturnStarted {
 
-  implicit class ChargeWithPaymentsOps(private val c: ChargeWithPayments) extends AnyVal {
-
-    def outstandingAmount(): AmountInPence = c.amount -- c.payments.map(_.amount).total
-
-  }
-
-  implicit val format: OFormat[ChargeWithPayments] = Json.format
+  implicit val format: OFormat[DraftReturnStarted] = Json.format
 
 }

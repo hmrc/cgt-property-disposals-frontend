@@ -70,7 +70,8 @@ class ConfirmDraftReturnControllerSpec
 
     "handling requests with session with return should save the data and show proper text" in {
 
-      val fillingOutReturn = sample[FillingOutReturn]
+      val fillingOutReturn   = sample[FillingOutReturn]
+      val updatedDraftReturn = fillingOutReturn.draftReturn.copy(lastUpdatedDate = LocalDateUtils.today())
 
       inSequence {
         mockAuthWithNoRetrievals()
@@ -79,18 +80,19 @@ class ConfirmDraftReturnControllerSpec
             journeyStatus = Some(fillingOutReturn)
           )
         )
-        mockStoreAnyDraftReturn()(Right(()))
+        mockStoreDraftReturn(updatedDraftReturn, fillingOutReturn.agentReferenceNumber)(Right(()))
       }
 
       val result: Future[Result] = performAction()
       status(result) shouldBe OK
       val formattedDate: String = LocalDateUtils.govDisplayFormat(LocalDateUtils.today().plusDays(29))
-      contentAsString(result) should include(messageFromMessageKey("confirmDraftReturn.message", formattedDate))
+      contentAsString(result) should include(messageFromMessageKey("confirmDraftReturn.warning", formattedDate))
     }
 
     "handling requests with session with return proper error when StoreDraftReturn service fails" in {
 
-      val fillingOutReturn = sample[FillingOutReturn]
+      val fillingOutReturn   = sample[FillingOutReturn]
+      val updatedDraftReturn = fillingOutReturn.draftReturn.copy(lastUpdatedDate = LocalDateUtils.today())
 
       inSequence {
         mockAuthWithNoRetrievals()
@@ -99,7 +101,9 @@ class ConfirmDraftReturnControllerSpec
             journeyStatus = Some(fillingOutReturn)
           )
         )
-        mockStoreAnyDraftReturn()(Left(Error("Some Error")))
+        mockStoreDraftReturn(updatedDraftReturn, fillingOutReturn.agentReferenceNumber)(
+          Left(Error("Some Error"))
+        )
       }
 
       val result: Future[Result] = performAction()
@@ -108,7 +112,8 @@ class ConfirmDraftReturnControllerSpec
 
     "handling requests with session with return should save the data and show the page with proper back and accounts home button and right title" in {
 
-      val fillingOutReturn = sample[FillingOutReturn]
+      val fillingOutReturn   = sample[FillingOutReturn]
+      val updatedDraftReturn = fillingOutReturn.draftReturn.copy(lastUpdatedDate = LocalDateUtils.today())
 
       inSequence {
         mockAuthWithNoRetrievals()
@@ -117,14 +122,14 @@ class ConfirmDraftReturnControllerSpec
             journeyStatus = Some(fillingOutReturn)
           )
         )
-        mockStoreAnyDraftReturn()(Right(()))
+        mockStoreDraftReturn(updatedDraftReturn, fillingOutReturn.agentReferenceNumber)(Right(()))
       }
 
       checkPageIsDisplayed(
         performAction(),
         messageFromMessageKey("confirmDraftReturn.title"), { doc =>
-          doc.select("#back").attr("href")          shouldBe returns.routes.TaskListController.taskList().url
-          doc.select("#accounts_home").attr("href") shouldBe accounts.homepage.routes.HomePageController.homepage().url
+          doc.select("#back").attr("href")   shouldBe returns.routes.TaskListController.taskList().url
+          doc.select(".button").attr("href") shouldBe accounts.homepage.routes.HomePageController.homepage().url
         }
       )
 

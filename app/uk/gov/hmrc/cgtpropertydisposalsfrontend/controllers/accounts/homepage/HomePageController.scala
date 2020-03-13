@@ -73,31 +73,31 @@ class HomePageController @Inject() (
 
   def startNewReturn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withSubscribedUser { (_, subscribed) =>
-      request.userType match {
-        case Some(UserType.Individual) =>
-          updateSession(sessionStore, request)(
-            _.copy(
-              journeyStatus = Some(
-                StartingNewDraftReturn(
-                  subscribed.subscribedDetails,
-                  subscribed.ggCredId,
-                  subscribed.agentReferenceNumber,
-                  Right(IncompleteSingleDisposalTriageAnswers.empty)
-                )
-              )
+      val redirectTo = subscribed.subscribedDetails
+        .userType()
+        .fold(
+          _ => triage.routes.InitialTriageQuestionsController.howManyProperties(),
+          _ => triage.routes.InitialTriageQuestionsController.whoIsIndividualRepresenting()
+        )
+
+      updateSession(sessionStore, request)(
+        _.copy(
+          journeyStatus = Some(
+            StartingNewDraftReturn(
+              subscribed.subscribedDetails,
+              subscribed.ggCredId,
+              subscribed.agentReferenceNumber,
+              Right(IncompleteSingleDisposalTriageAnswers.empty)
             )
-          ).map {
-            case Left(e) =>
-              logger.warn("Could not update session", e)
-              errorHandler.errorResult()
-
-            case Right(_) =>
-              Redirect(triage.routes.InitialTriageQuestionsController.whoIsIndividualRepresenting())
-          }
-
-        case other =>
-          logger.warn(s"Start a new return for user type: $other is not supported")
+          )
+        )
+      ).map {
+        case Left(e) =>
+          logger.warn("Could not update session", e)
           errorHandler.errorResult()
+
+        case Right(_) =>
+          Redirect(redirectTo)
       }
     }(withUplift = false)
   }
@@ -182,7 +182,7 @@ class HomePageController @Inject() (
         paymentsService
           .startPaymentJourney(
             subscribed.subscribedDetails.cgtReference,
-            subscribed.subscribedDetails.cgtReference.value,
+            None,
             subscribed.totalLeftToPay(),
             routes.HomePageController.homepage(),
             routes.HomePageController.homepage()

@@ -20,8 +20,6 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalMethod
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.disposaldetails._
-
 
 @this(
         cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
@@ -31,8 +29,8 @@
 
 @(answers: CompleteDisposalDetailsAnswers, disposalMethod: DisposalMethod)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 @formatPercentage(p: BigDecimal) = @{s"${p.toString.stripSuffix(".0")}%"}
-@disposalPriceTitle = @{messages(disposalPriceTitleKey(disposalMethod, answers.shareOfProperty))}
-@disposalFeesTitle = @{messages(disposalFeesTitleKey(disposalMethod, answers.shareOfProperty))}
+@disposalPriceTitle =@{messages(s"disposalPrice.${disposalMethod.toString}.title")}
+@disposalFeesTitle = @{messages(s"disposalFees.${disposalMethod.toString}.title")}
 
 @cyaSection() {
   @cyaRow(

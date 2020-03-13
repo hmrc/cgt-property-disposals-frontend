@@ -226,6 +226,7 @@ class AgentAccessControllerSpec
           status(result)          shouldBe BAD_REQUEST
           contentAsString(result) should include(messageFromMessageKey("agent.enter-client-cgt-ref.title"))
           contentAsString(result) should include(messageFromMessageKey(errorMessageKey))
+
         }
 
         "the submitted value is more than 15 characters long" in {

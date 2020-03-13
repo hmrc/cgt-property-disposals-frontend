@@ -20,30 +20,34 @@ import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
+import org.jsoup.nodes.Document
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import play.api.i18n.MessagesApi
+import play.api.i18n.{Lang, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
-import play.api.mvc.{Call, Result}
+import play.api.mvc.{Call, Request, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitControllerSpec.validateAllCheckYourAnswersSections
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.AcquisitionDetailsControllerSpec.validateAcquisitionDetailsCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails.DisposalDetailsControllerSpec._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesControllerSpec.validateExemptionAndLossesCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.ReliefDetailsControllerSpec.validateReliefDetailsCheckYourAnswersPage
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageControllerSpec.validateSingleDisposalTriageCheckYourAnswersPage
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnControllerSpec._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, PaymentsJourney}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, Charge, PaymentsJourney}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.IncompleteAcquisitionDetailsAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.IncompleteDisposalDetailsAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.IncompleteExemptionAndLossesAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.IncompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.IncompleteYearToDateLiabilityAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, LocalDateUtils, SessionData}
@@ -88,14 +92,17 @@ class CheckAllAnswersAndSubmitControllerSpec
 
   def mockStartPaymentJourney(
     cgtReference: CgtReference,
-    chargeReference: String,
+    chargeReference: Option[String],
     amount: AmountInPence,
     returnUrl: Call,
     backUrl: Call
   )(response: Either[Error, PaymentsJourney]) =
     (mockPaymentsService
-      .startPaymentJourney(_: CgtReference, _: String, _: AmountInPence, _: Call, _: Call)(_: HeaderCarrier))
-      .expects(cgtReference, chargeReference, amount, returnUrl, backUrl, *)
+      .startPaymentJourney(_: CgtReference, _: Option[String], _: AmountInPence, _: Call, _: Call)(
+        _: HeaderCarrier,
+        _: Request[_]
+      ))
+      .expects(cgtReference, chargeReference, amount, returnUrl, backUrl, *, *)
       .returning(EitherT.fromEither[Future](response))
 
   "CheckAllAnswersAndSubmitController" when {
@@ -112,6 +119,7 @@ class CheckAllAnswersAndSubmitControllerSpec
       Some(completeReturn.reliefDetails),
       Some(completeReturn.exemptionsAndLossesDetails),
       Some(completeReturn.yearToDateLiabilityAnswers),
+      Some(completeReturn.initialGainOrLoss),
       LocalDateUtils.today()
     )
 
@@ -141,26 +149,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey("checkAllAnswers.title"), { doc =>
-              validateAcquisitionDetailsCheckYourAnswersPage(
-                completeFillingOutReturn.draftReturn.acquisitionDetailsAnswers
-                  .fold(sys.error("Error"))(_.asInstanceOf[CompleteAcquisitionDetailsAnswers]),
-                doc
-              )
-              validateDisposalDetailsCheckYourAnswersPage(
-                completeFillingOutReturn.draftReturn.disposalDetailsAnswers
-                  .fold(sys.error("Error"))(_.asInstanceOf[CompleteDisposalDetailsAnswers]),
-                doc
-              )
-              validateReliefDetailsCheckYourAnswersPage(
-                completeFillingOutReturn.draftReturn.reliefDetailsAnswers
-                  .fold(sys.error("Error"))(_.asInstanceOf[CompleteReliefDetailsAnswers]),
-                doc
-              )
-              validateExemptionAndLossesCheckYourAnswersPage(
-                completeFillingOutReturn.draftReturn.exemptionAndLossesAnswers
-                  .fold(sys.error("Error"))(_.asInstanceOf[CompleteExemptionAndLossesAnswers]),
-                doc
-              )
+              validateAllCheckYourAnswersSections(doc, completeReturn)
               doc.select("#back").attr("href") shouldBe routes.TaskListController.taskList().url
               doc.select("#content > article > form").attr("action") shouldBe routes.CheckAllAnswersAndSubmitController
                 .checkAllAnswersSubmit()
@@ -278,7 +267,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 
       def performAction(): Future[Result] = controller.payReturn()(FakeRequest())
 
-      def justSubmittedReturnWithCharge(charge: Option[Charge]): JustSubmittedReturn =
+      def justSubmittedReturnWithCharge(charge: Option[ReturnCharge]): JustSubmittedReturn =
         sample[JustSubmittedReturn].copy(submissionResponse = sample[SubmitReturnResponse].copy(charge = charge))
 
       behave like redirectToStartWhenInvalidJourney(
@@ -304,7 +293,7 @@ class CheckAllAnswersAndSubmitControllerSpec
       "show an error page" when {
 
         "there is an error starting a payments journey" in {
-          val charge              = sample[Charge]
+          val charge              = sample[ReturnCharge]
           val justSubmittedReturn = justSubmittedReturnWithCharge(Some(charge))
 
           inSequence {
@@ -312,7 +301,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             mockGetSession(sessionWitJourney(justSubmittedReturn))
             mockStartPaymentJourney(
               justSubmittedReturn.subscribedDetails.cgtReference,
-              charge.chargeReference,
+              Some(charge.chargeReference),
               charge.amount,
               homepage.routes.HomePageController.homepage(),
               routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission()
@@ -329,7 +318,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 
         "the payments journey has been succesfulyl started" in {
           val paymentJourney      = PaymentsJourney("/next", "id")
-          val charge              = sample[Charge]
+          val charge              = sample[ReturnCharge]
           val justSubmittedReturn = justSubmittedReturnWithCharge(Some(charge))
 
           inSequence {
@@ -337,7 +326,7 @@ class CheckAllAnswersAndSubmitControllerSpec
             mockGetSession(sessionWitJourney(justSubmittedReturn))
             mockStartPaymentJourney(
               justSubmittedReturn.subscribedDetails.cgtReference,
-              charge.chargeReference,
+              Some(charge.chargeReference),
               charge.amount,
               homepage.routes.HomePageController.homepage(),
               routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission()
@@ -394,4 +383,36 @@ class CheckAllAnswersAndSubmitControllerSpec
 
   }
 
+}
+
+object CheckAllAnswersAndSubmitControllerSpec {
+  def validateAllCheckYourAnswersSections(
+    doc: Document,
+    completeReturn: CompleteReturn
+  )(implicit messages: MessagesApi, lang: Lang): Unit = {
+    validateSingleDisposalTriageCheckYourAnswersPage(
+      completeReturn.triageAnswers,
+      doc
+    )
+    validateAcquisitionDetailsCheckYourAnswersPage(
+      completeReturn.acquisitionDetails,
+      doc
+    )
+    validateDisposalDetailsCheckYourAnswersPage(
+      completeReturn.disposalDetails,
+      doc
+    )
+    validateReliefDetailsCheckYourAnswersPage(
+      completeReturn.reliefDetails,
+      doc
+    )
+    validateExemptionAndLossesCheckYourAnswersPage(
+      completeReturn.exemptionsAndLossesDetails,
+      doc
+    )
+    validateYearToDateLiabilityFirstReturnPage(
+      completeReturn.yearToDateLiabilityAnswers,
+      doc
+    )
+  }
 }

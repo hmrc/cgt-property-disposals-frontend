@@ -61,7 +61,7 @@
         )
 
         <p>@Html(messages("triage.enterCountry.link", appConfig.workOurYouResidenceStatusUrl))</p>
-        @submitButton(messages("button.continue"))
+        @submitButton(messages(if(displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink)
