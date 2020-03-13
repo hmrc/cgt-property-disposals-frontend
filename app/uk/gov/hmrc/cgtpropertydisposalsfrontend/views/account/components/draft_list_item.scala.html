@@ -35,8 +35,8 @@
 
 <li class="single-return form-bundle">
   <div class="grid-row">
-    <div class="column-three-quarters submission-summary">
-      <span id="sentDate-@key" class="caption">
+    <div id="draftReturn-@key" class="column-three-quarters submission-summary">
+      <span id="draftReturnLastUpdatedDate-@key" class="caption">
         @messages("drafts.list.lastUpdated", LocalDateUtils.govShortDisplayFormat(draftReturn.lastUpdatedDate))
       </span>
       @completionDate.map(f => {
@@ -48,9 +48,9 @@
           </h4>
       })
     </div>
-    <div class="column-one-quarter financial-summary">
+    <div id="draftReturnsendAndPayBy-@key" class="column-one-quarter financial-summary">
       @dueDate.map(f => {
-        <h4 id="sendAndPayBy-@key">
+        <h4>
           <span class="caption">{messages("drafts.list.sendAndPayBy")}</span>
           {LocalDateUtils.govShortDisplayFormat(f)}
         </h4>
