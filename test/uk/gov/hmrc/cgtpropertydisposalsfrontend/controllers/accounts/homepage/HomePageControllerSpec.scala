@@ -39,6 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, StartingNewDraftReturn, Subscribed, ViewingReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.govShortDisplayFormat
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.ChargeType.{PenaltyInterest, UkResidentReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
@@ -203,13 +204,57 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
 
       def extractAmount(s: String): String = s.substring(s.indexOf('£'))
 
-      "display draft returns on the home page when there are any" in {
-        val triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(completionDate = CompletionDate(LocalDate.now().minusMonths(1)))
-        val sampleDraftReturn = sample[DraftReturn].copy(triageAnswers = triageAnswers, lastUpdatedDate = LocalDate.now())
+      "display draft returns on the home page when there is no property address" in {
+        val triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+          .copy(completionDate = CompletionDate(LocalDate.now().minusMonths(1)))
+        val sampleDraftReturn = sample[DraftReturn]
+          .copy(triageAnswers = triageAnswers, lastUpdatedDate = LocalDate.now(), propertyAddress = None)
         val subscribed = sample[Subscribed].copy(draftReturns = List(sampleDraftReturn))
 
         val completionDate: LocalDate = sampleDraftReturn.triageAnswers match {
           case a: CompleteSingleDisposalTriageAnswers => a.completionDate.value
+          case _                                      => sys.error("Error")
+        }
+
+        val expectedDraftReturnSendAndPayBy = completionDate.plusDays(30)
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              userType      = Some(UserType.Individual),
+              journeyStatus = Some(subscribed)
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("account.home.title"), { doc =>
+            doc.select(s"#draftReturnLastUpdatedDate-${sampleDraftReturn.id}").text() shouldBe
+              messages("drafts.list.lastUpdated", govShortDisplayFormat(sampleDraftReturn.lastUpdatedDate))
+            doc.select(s"#draftReturnsendAndPayBy-${sampleDraftReturn.id} > h4").text() shouldBe
+              messages("drafts.list.sendAndPayBy") + " " + govShortDisplayFormat(expectedDraftReturnSendAndPayBy)
+            doc.select(s"#draftReturn-${sampleDraftReturn.id} > h4").text() shouldBe govShortDisplayFormat(
+              completionDate
+            )
+          }
+        )
+      }
+
+      "display draft returns on the home page when there is property address" in {
+        val propertyAddress = sample[UkAddress]
+        val triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+          .copy(completionDate = CompletionDate(LocalDate.now().minusMonths(1)))
+        val sampleDraftReturn = sample[DraftReturn].copy(
+          triageAnswers   = triageAnswers,
+          lastUpdatedDate = LocalDate.now(),
+          propertyAddress = Some(propertyAddress)
+        )
+        val subscribed = sample[Subscribed].copy(draftReturns = List(sampleDraftReturn))
+
+        val completionDate: LocalDate = sampleDraftReturn.triageAnswers match {
+          case a: CompleteSingleDisposalTriageAnswers   => a.completionDate.value
           case b: IncompleteSingleDisposalTriageAnswers => b.completionDate.fold(sys.error("Error"))(_.value)
         }
 
@@ -232,6 +277,9 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
               messages("drafts.list.lastUpdated", govShortDisplayFormat(sampleDraftReturn.lastUpdatedDate))
             doc.select(s"#draftReturnsendAndPayBy-${sampleDraftReturn.id} > h4").text() shouldBe
               messages("drafts.list.sendAndPayBy") + " " + govShortDisplayFormat(expectedDraftReturnSendAndPayBy)
+            doc
+              .select(s"#draftReturn-${sampleDraftReturn.id} > h4")
+              .text() shouldBe propertyAddress.line1 + ", " + propertyAddress.postcode.value
           }
         )
       }
