@@ -56,6 +56,8 @@ trait CGTPropertyDisposalsConnector {
   def updateSubscribedDetails(subscribedAndVerifierDetails: SubscribedUpdateDetails)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
+
+  def testSubmitToDms(cgtReference: CgtReference)(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
 }
 
 @Singleton
@@ -106,6 +108,11 @@ class CGTPropertyDisposalsConnectorImpl @Inject() (http: HttpClient, servicesCon
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] =
     makeCall(_.put(subscriptionUpdateUrl, subscribedUpdateDetails))
+
+  override def testSubmitToDms(
+    cgtReference: CgtReference
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
+    makeCall(_.get(baseUrl + "/dms-test"))
 
   private def makeCall(call: HttpClient => Future[HttpResponse]): EitherT[Future, Error, HttpResponse] =
     EitherT[Future, Error, HttpResponse](

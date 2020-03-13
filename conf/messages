@@ -654,6 +654,7 @@ task-list.report-and-pay-the-tax.heading=Report and pay the tax
 task-list.enter-cgt-liability.link=Enter Capital Gains Tax liability so far this tax year
 task-list.ytd-liability.link=Enter Capital Gains Tax liability so far this tax year
 task-list.check-and-send-return.link=Check and send return, pay any tax due
+task-list.supporting-evidence.link=Upload Your Supporting Documents
 
 returns.property-address.caption=Property address
 enterPostcode.returns.title=Find the address of the UK property you disposed of
