@@ -642,6 +642,7 @@ task-list.InProgress=In progress
 task-list.Complete=Complete
 task-list.CannotStart=Cannot start
 task-list.ToDo=To do
+task-list.incompleteTriage=You cannot continue until you have finished this section. If you have saved other data it may be preserved however, this depends on how you complete this section.
 task-list.triage.link=Check if you can use this service
 task-list.provide-details.heading=Provide details
 task-list.enter-initial-gain-or-loss.link=Enter initial gain or loss

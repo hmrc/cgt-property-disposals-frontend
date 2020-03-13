@@ -29,6 +29,7 @@
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
 pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning,
 taskLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.taskLink
 )
 
@@ -136,7 +137,7 @@ TaskListStatus.CannotStart
             </li>
         </ul>
     </li>
-
+@if(triageState.isComplete) {
     <li>
         <h2 class="app-task-list__section">
                 <span class="app-task-list__section-number">
@@ -206,6 +207,12 @@ TaskListStatus.CannotStart
         </ul>
     </li>
 </ol>
+} else {
+</ol>
+
+@warning(messages("task-list.incompleteTriage"))
+
+}
 
 <p><a id="saveAndComeBackLater" href="@{
         returns.routes.ConfirmDraftReturnController.confirmDraftReturn()

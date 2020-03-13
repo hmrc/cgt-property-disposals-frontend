@@ -16,6 +16,9 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns
 
+import cats.Eq
+import cats.syntax.eq._
+
 sealed trait TaskListStatus extends Product with Serializable
 
 object TaskListStatus {
@@ -27,5 +30,11 @@ object TaskListStatus {
   case object CannotStart extends TaskListStatus
 
   case object ToDo extends TaskListStatus
+
+  implicit val eq: Eq[TaskListStatus] = Eq.fromUniversalEquals[TaskListStatus]
+
+  implicit class TaskListStatusOps(private val a: TaskListStatus) extends AnyVal {
+    def isComplete(): Boolean = a === Complete
+  }
 
 }
