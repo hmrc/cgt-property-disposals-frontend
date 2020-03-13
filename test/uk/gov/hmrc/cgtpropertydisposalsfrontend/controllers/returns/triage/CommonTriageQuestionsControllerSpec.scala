@@ -819,7 +819,7 @@ class CommonTriageQuestionsControllerSpec
         numberOfProperties           = Some(2),
         wasAUKResident               = Some(true),
         countryOfResidence           = None,
-        assetType                    = Some(AssetType.Residential),
+        assetType                    = Some(List(AssetType.Residential)),
         wereAllPropertiesResidential = Some(true),
         taxYearAfter6April2020       = Some(false)
       )
@@ -1028,7 +1028,7 @@ class CommonTriageQuestionsControllerSpec
                       numberOfProperties = Some(2),
                       wasAUKResident     = Some(false),
                       countryOfResidence = Some(sample[Country]),
-                      assetType          = Some(AssetType.NonResidential)
+                      assetType          = Some(List(AssetType.NonResidential))
                     )
                   ),
                   Right(sample[IndividualName])
@@ -1074,7 +1074,7 @@ class CommonTriageQuestionsControllerSpec
                       individualUserType = Some(IndividualUserType.Self),
                       numberOfProperties = Some(2),
                       wasAUKResident     = Some(true),
-                      assetType          = Some(AssetType.Residential)
+                      assetType          = Some(List(AssetType.Residential))
                     )
                   ),
                   Right(sample[IndividualName])
@@ -1132,7 +1132,7 @@ class CommonTriageQuestionsControllerSpec
                       individualUserType           = Some(IndividualUserType.Self),
                       numberOfProperties           = Some(3),
                       wasAUKResident               = Some(true),
-                      assetType                    = Some(AssetType.NonResidential),
+                      assetType                    = Some(List(AssetType.NonResidential)),
                       wereAllPropertiesResidential = Some(false)
                     )
                   ),
@@ -1202,7 +1202,7 @@ class CommonTriageQuestionsControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(
                 sessionDataWithStartingNewDraftReturn(
-                  Left(sample[CompleteMultipleDisposalsAnswers].copy(assetType = assetType)),
+                  Left(sample[CompleteMultipleDisposalsAnswers].copy(assetType = List(assetType))),
                   Right(sample[IndividualName])
                 )._1
               )
@@ -1212,7 +1212,7 @@ class CommonTriageQuestionsControllerSpec
               performAction(),
               messageFromMessageKey("disposalDateMixedUseOrIndirect.title"), { doc =>
                 doc.select("#back").attr("href") shouldBe routes.MultipleDisposalsTriageController
-                  .howManyDisposals()
+                  .assetTypeForNonUkResidents()
                   .url
               }
             )
@@ -1265,7 +1265,7 @@ class CommonTriageQuestionsControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(
                 sessionDataWithStartingNewDraftReturn(
-                  Left(sample[CompleteMultipleDisposalsAnswers].copy(assetType = assetType)),
+                  Left(sample[CompleteMultipleDisposalsAnswers].copy(assetType = List(assetType))),
                   Right(sample[IndividualName])
                 )._1
               )
