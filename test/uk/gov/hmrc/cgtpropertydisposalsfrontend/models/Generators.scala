@@ -46,7 +46,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnsw
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CompleteYearToDateLiabilityAnswers, IncompleteYearToDateLiabilityAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{FileDescriptor, UploadRequest, UpscanFileDescriptor}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{FileDescriptor, UploadRequest, UpscanFileDescriptor, UpscanInitiateRawResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FinancialDataServiceImpl.FinancialDataResponse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{ListReturnsResponse, ReturnSummaryWithoutPaymentInfo}
 
@@ -298,9 +298,10 @@ trait ReturnGen { this: GenUtils =>
 trait UpscanGen {
   this: GenUtils =>
 
-  implicit val uploadRequestGen: Gen[UploadRequest]               = gen[UploadRequest]
-  implicit val fileDescriptorGen: Gen[FileDescriptor]             = gen[FileDescriptor]
-  implicit val upscanFileDescriptorGen: Gen[UpscanFileDescriptor] = gen[UpscanFileDescriptor]
+  implicit val uploadRequestGen: Gen[UploadRequest]                         = gen[UploadRequest]
+  implicit val fileDescriptorGen: Gen[FileDescriptor]                       = gen[FileDescriptor]
+  implicit val upscanFileDescriptorGen: Gen[UpscanFileDescriptor]           = gen[UpscanFileDescriptor]
+  implicit val upscanInitiateRawResponseGen: Gen[UpscanInitiateRawResponse] = gen[UpscanInitiateRawResponse]
 
 }
 

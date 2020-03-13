@@ -18,6 +18,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.upscan
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus
 
@@ -122,6 +123,12 @@
     @taskLink(messages("task-list.exemptions-and-losses.link"),
      returns.exemptionandlosses.routes.ExemptionAndLossesController.checkYourAnswers().url, exemptionsAndLossesState)
     </li>
+
+    <li id="supportingEvidence" class="app-task-list__item">
+     @taskLink(messages("task-list.supporting-evidence.link"),
+     upscan.routes.UpscanController.upscan().url, TaskListStatus.ToDo)
+    </li>
+
    </ul>
   </li>
 

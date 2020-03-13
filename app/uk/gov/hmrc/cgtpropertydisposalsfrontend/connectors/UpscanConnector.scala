@@ -23,11 +23,11 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import configs.Configs
 import configs.syntax._
 import play.api.Configuration
-import play.api.libs.json.{JsObject, JsValue, Json, OFormat}
+import play.api.http.HeaderNames.USER_AGENT
+import play.api.libs.json.{JsError, JsSuccess, Json, OFormat}
 import play.api.libs.ws.WSClient
 import play.api.mvc.MultipartFormData
 import play.mvc.Http.Status
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan._
@@ -55,13 +55,13 @@ trait UpscanConnector {
 
   def getUpscanSnapshot(cgtReference: CgtReference)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, Option[UpscanSnapshot]]
+  ): EitherT[Future, Error, UpscanSnapshot]
 
   def initiate(cgtReference: CgtReference)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
-  def saveUpscanInititateResponse(upscanFileDescriptor: UpscanFileDescriptor)(
+  def saveUpscanFileDescriptors(upscanFileDescriptor: UpscanFileDescriptor)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Unit]
 
@@ -110,12 +110,17 @@ class UpscanConnectorImpl @Inject() (
 
   override def getUpscanSnapshot(
     cgtReference: CgtReference
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, Option[UpscanSnapshot]] = {
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, UpscanSnapshot] = {
     val url = baseUrl + s"/cgt-property-disposals/upscan-snapshot-info/cgt-reference/${cgtReference.value}"
-    EitherT[Future, Error, Option[UpscanSnapshot]](
+    EitherT[Future, Error, UpscanSnapshot](
       http
         .get(url)
-        .map(httpResponse => Right(Json.fromJson[UpscanSnapshot](httpResponse.json).asOpt))
+        .map { httpResponse =>
+          Json.fromJson[UpscanSnapshot](httpResponse.json) match {
+            case JsSuccess(upscanSnapshot, _) => Right(upscanSnapshot)
+            case JsError(errors)              => Left(Error(s"failed to get upscan snapshot: $errors"))
+          }
+        }
         .recover {
           case NonFatal(e) => Left(Error(e))
         }
@@ -132,11 +137,12 @@ class UpscanConnectorImpl @Inject() (
     )
     EitherT[Future, Error, HttpResponse](
       http
-        .post[UpscanInitiateRequest](url, payload)
+        .post[UpscanInitiateRequest](url, payload, Map(USER_AGENT -> "cgt-property-disposals-frontend"))
         .map[Either[Error, HttpResponse]] { response =>
           if (response.status != Status.OK) {
             Left(Error("S3 did not return 200 status code"))
           } else {
+            logger.warn("")
             Right(response)
           }
         }
@@ -144,7 +150,7 @@ class UpscanConnectorImpl @Inject() (
     )
   }
 
-  override def saveUpscanInititateResponse(upscanFileDescriptor: UpscanFileDescriptor)(
+  override def saveUpscanFileDescriptors(upscanFileDescriptor: UpscanFileDescriptor)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, Unit] = {
     val url = baseUrl + s"/cgt-property-disposals/upscan-file-descriptor"
@@ -216,16 +222,10 @@ class UpscanConnectorImpl @Inject() (
         .map { response =>
           response.status match {
             case 204 => Right(())
-            case status if (is4xx(status) || is5xx(status)) =>
-              logger.warn(s"S3 file upload failed due to ${response.body}")
-              Left(Error(response.body))
-            case _ => Left(Error("Invalid HTTP response status from S3"))
+            case _ =>
+              Left(Error(s"S3 file upload failed due to: ${response.body} with http status: ${response.status}"))
           }
         }
     )
   }
-
-  private def is4xx(status: Int): Boolean = status >= 400 && status < 500
-
-  private def is5xx(status: Int): Boolean = status >= 500 && status < 600
 }

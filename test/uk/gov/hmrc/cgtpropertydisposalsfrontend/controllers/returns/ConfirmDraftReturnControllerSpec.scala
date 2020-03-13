@@ -88,7 +88,6 @@ class ConfirmDraftReturnControllerSpec
       contentAsString(result) should include(messageFromMessageKey("confirmDraftReturn.message", formattedDate))
     }
 
-
     "handling requests with session with return proper error when StoreDraftReturn service fails" in {
 
       val fillingOutReturn = sample[FillingOutReturn]

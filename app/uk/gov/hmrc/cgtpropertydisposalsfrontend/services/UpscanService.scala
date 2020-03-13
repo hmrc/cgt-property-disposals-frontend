@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services
 
+import java.time.LocalDateTime
+
 import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.{ImplementedBy, Singleton}
@@ -27,8 +29,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.UpscanConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanFileDescriptor.UpscanFileDescriptorStatus.READY_TO_UPLOAD
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanInitiateResponse.{FailedToGetUpscanSnapshot, MaximumFileUploadReached, UpscanInititateResponseStored}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UpscanCallBack, UpscanFileDescriptor, UpscanInitiateReference, UpscanInitiateResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanInitiateResponse.UpscanInititateResponseStored
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.http.HeaderCarrier
 
@@ -65,27 +67,67 @@ class UpscanServiceImpl @Inject() (
 
   private val maxUploads: Int = getUpscanInitiateConfig[Int]("max-uploads")
 
-  override def initiate(
-    cgtReference: CgtReference
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, UpscanInitiateResponse] =
-    upscanConnector.getUpscanSnapshot(cgtReference).flatMap {
-      case Some(upscanSnapshot) => {
-        if (upscanSnapshot.fileUploadCount > maxUploads) {
-          EitherT.rightT(MaximumFileUploadReached)
-        } else {
-          for {
-            response <- upscanConnector.initiate(cgtReference)
-            upscanFileDescriptor <- EitherT.fromOption(
-                                     response.json.validate[UpscanFileDescriptor].asOpt,
-                                     Error("S3 Json payload structure is not as expected")
-                                   )
-            _ <- upscanConnector
-                  .saveUpscanInititateResponse(upscanFileDescriptor.copy(status = READY_TO_UPLOAD))
-          } yield UpscanInititateResponseStored(upscanFileDescriptor.fileDescriptor.reference)
-        }
-      }
-      case None => EitherT.rightT(FailedToGetUpscanSnapshot)
+  private def hasReachedMaxFileUpload(upscanSnapshot: UpscanSnapshot): Either[Error, Unit] =
+    if (upscanSnapshot.fileUploadCount >= maxUploads) {
+      Left(Error("maximum number of file uploads has been exceeded"))
+    } else {
+      Right(())
     }
+
+  private def augmentUpscanInitiateResponse(
+    cgtReference: CgtReference,
+    upscanInitiateRawResponse: UpscanInitiateRawResponse
+  ): Either[Error, UpscanFileDescriptor] =
+    Right(
+      UpscanFileDescriptor(
+        key            = upscanInitiateRawResponse.reference,
+        cgtReference   = cgtReference,
+        fileDescriptor = FileDescriptor(upscanInitiateRawResponse.reference, upscanInitiateRawResponse.uploadRequest),
+        status         = READY_TO_UPLOAD
+      )
+    )
+
+  override def initiate(
+    cgtReference: CgtReference //FIXME: should the draft return id
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, UpscanInitiateResponse] =
+    for {
+      snapshot     <- upscanConnector.getUpscanSnapshot(cgtReference)
+      _            <- EitherT.fromEither(hasReachedMaxFileUpload(snapshot))
+      httpResponse <- upscanConnector.initiate(cgtReference)
+      upscanInitiateRawResponse <- EitherT.fromOption(
+                                    httpResponse.json.validate[UpscanInitiateRawResponse].asOpt,
+                                    Error("could not parse upscan initiate response")
+                                  )
+      upscanFileDescriptor <- EitherT.fromEither(augmentUpscanInitiateResponse(cgtReference, upscanInitiateRawResponse))
+      _                    <- upscanConnector.saveUpscanFileDescriptors(upscanFileDescriptor) //FIXME: I don't think we need a status here because at this point all we know is that the storage is primed
+    } yield UpscanInititateResponseStored(upscanFileDescriptor.fileDescriptor.reference)
+
+  //FIXME if the call to getUpscanSnapshot brings back nothing it could be the first time it has been called for this user and so
+  // it should not return a FailedToGetUpscanSnapshot value ie the None return type
+  /*
+    The logic should be:
+      1. if there is are no snapshots to get then we just allow them to upload more documents
+      but the issue now is that this should be keyed against the draft return.
+      The semantics now are: if there this draft return has any uploaded files against it and the number
+      does not breach the threshold, then allow more files to be uploaded otherwise block them
+   */
+  //FIXME change cgtreference to draftreturnid
+  // upscanConnector.getUpscanSnapshot(cgtReference).map {
+
+//      case Some(upscanSnapshot) => {
+//        if (upscanSnapshot.fileUploadCount > maxUploads) {
+//          EitherT.rightT(MaximumFileUploadReached)
+//        } else {
+//          makeGetUpscanSnapshotCall(cgtReference)
+//        }
+//      }
+//      case None => {
+//        logger.warn("----- I am here -----: failed to get snapshot information")
+//        makeGetUpscanSnapshotCall(cgtReference)
+//        //EitherT.rightT(FailedToGetUpscanSnapshot) //FIXME: this is wrong as we need to allow them to upload if we can nothing from snapshots
+//      }
+
+  //}
 
   override def getUpscanFileDescriptor(cgtReference: CgtReference, upscanInitiateReference: UpscanInitiateReference)(
     implicit hc: HeaderCarrier
