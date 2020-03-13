@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.dms
+package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan
 
-/*
-  This is called when we have made a successful submission
-  and we have the formbundle id and have html and have all
-  the files
- */
-trait DmsSubmissionService {
-  def submitToDms(): Unit
+import play.api.libs.json.Json
 
+final case class UpscanInitiateRawResponse(
+  reference: String,
+  uploadRequest: UploadRequest
+)
+
+object UpscanInitiateRawResponse {
+  implicit val format = Json.format[UpscanInitiateRawResponse]
 }
-
-class DefaultDmsSubmissionService {}

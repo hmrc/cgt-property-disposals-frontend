@@ -119,7 +119,7 @@ class CheckAllAnswersAndSubmitControllerSpec
       Some(completeReturn.reliefDetails),
       Some(completeReturn.exemptionsAndLossesDetails),
       Some(completeReturn.yearToDateLiabilityAnswers),
-      Some(completeReturn.initialGainOrLoss),
+      completeReturn.initialGainOrLoss,
       LocalDateUtils.today()
     )
 

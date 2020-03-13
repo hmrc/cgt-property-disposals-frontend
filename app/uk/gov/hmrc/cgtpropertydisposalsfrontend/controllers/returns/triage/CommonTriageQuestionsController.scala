@@ -56,6 +56,7 @@ class CommonTriageQuestionsController @Inject() (
   val config: Configuration,
   whoAreYouReportingForPage: triagePages.who_are_you_reporting_for,
   howManyPropertiesPage: triagePages.how_many_properties,
+  capacitorsAndPersonalRepresentativesNotHandledPage: triagePages.capcitors_personal_representatives_not_handled,
   ukResidentCanOnlyDisposeResidentialPage: triagePages.uk_resident_can_only_dispose_residential,
   disposalDateTooEarlyUkResidents: triagePages.disposal_date_too_early_uk_residents,
   disposalDateTooEarlyNonUkResidents: triagePages.disposal_date_too_early_non_uk_residents,
@@ -277,6 +278,24 @@ class CommonTriageQuestionsController @Inject() (
       _ => routes.MultipleDisposalsTriageController.checkYourAnswers(),
       _ => routes.SingleDisposalsTriageController.checkYourAnswers()
     )
+
+  def capacitorsAndPersonalRepresentativesNotHandled(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request =>
+      withState(request) {
+        case (_, state) =>
+          val individualUserType = getIndividualUserType(state)
+          if (individualUserType.contains(IndividualUserType.Capacitor) || individualUserType
+                .contains(IndividualUserType.PersonalRepresentative))
+            Ok(capacitorsAndPersonalRepresentativesNotHandledPage())
+          else
+            Redirect(
+              triageAnswersFomState(state).fold(
+                _ => routes.MultipleDisposalsTriageController.checkYourAnswers(),
+                _ => routes.SingleDisposalsTriageController.checkYourAnswers()
+              )
+            )
+      }
+  }
 
   private def howManyPropertiesBackLink(state: Either[StartingNewDraftReturn, FillingOutReturn]): Option[Call] =
     if (!isIndividual(state))

@@ -21,6 +21,7 @@ import akka.util.ByteString
 import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
+import play.api.http.HeaderNames.USER_AGENT
 import play.api.libs.json.{JsString, Json}
 import play.api.libs.ws.ahc.AhcWSResponse
 import play.api.libs.ws.ahc.cache.{CacheableHttpResponseBodyPart, CacheableHttpResponseHeaders, CacheableHttpResponseStatus}
@@ -162,7 +163,7 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
         ).foreach { httpResponse =>
           withClue(s"For http response [${httpResponse.toString}]") {
             mockPost(expectedUrl, Map.empty, upscanFileDescriptor)(Some(httpResponse))
-            await(connector.saveUpscanInititateResponse(upscanFileDescriptor).value).isLeft shouldBe true
+            await(connector.saveUpscanFileDescriptors(upscanFileDescriptor).value).isLeft shouldBe true
           }
         }
       }
@@ -172,7 +173,7 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
         ).foreach { httpResponse =>
           withClue(s"For http response [${httpResponse.toString}]") {
             mockPost(expectedUrl, Map.empty, upscanFileDescriptor)(Some(httpResponse))
-            await(connector.saveUpscanInititateResponse(upscanFileDescriptor).value) shouldBe Right(())
+            await(connector.saveUpscanFileDescriptors(upscanFileDescriptor).value) shouldBe Right(())
           }
         }
       }
@@ -192,7 +193,7 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
         ).foreach { httpResponse =>
           withClue(s"For http response [${httpResponse.toString}]") {
             mockGet(expectedUrl)(Some(httpResponse))
-            await(connector.getUpscanSnapshot(cgtReference).value) shouldBe Right(None)
+            await(connector.getUpscanSnapshot(cgtReference).value).isLeft shouldBe true
           }
         }
       }
@@ -202,7 +203,7 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
         ).foreach { httpResponse =>
           withClue(s"For http response [${httpResponse.toString}]") {
             mockGet(expectedUrl)(Some(httpResponse))
-            await(connector.getUpscanSnapshot(cgtReference).value) shouldBe Right(Some(UpscanSnapshot(1)))
+            await(connector.getUpscanSnapshot(cgtReference).value) shouldBe Right(UpscanSnapshot(1))
           }
         }
       }
@@ -224,7 +225,9 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
           HttpResponse(500, Some(JsString("error")))
         ).foreach { httpResponse =>
           withClue(s"For http response [${httpResponse.toString}]") {
-            mockPost(expectedUrl, Map.empty, expectedInitiated)(Some(httpResponse))
+            mockPost(expectedUrl, Map(USER_AGENT -> "cgt-property-disposals-frontend"), expectedInitiated)(
+              Some(httpResponse)
+            )
             await(connector.initiate(cgtReference).value) shouldBe Left(Error("S3 did not return 200 status code"))
           }
         }
@@ -236,7 +239,9 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
           HttpResponse(200, Some(JsString("hi")))
         ).foreach { httpResponse =>
           withClue(s"For http response [${httpResponse.toString}]") {
-            mockPost(expectedUrl, Map.empty, expectedInitiated)(Some(httpResponse))
+            mockPost(expectedUrl, Map(USER_AGENT -> "cgt-property-disposals-frontend"), expectedInitiated)(
+              Some(httpResponse)
+            )
             await(connector.initiate(cgtReference).value) shouldBe Right(httpResponse)
           }
         }
@@ -272,7 +277,7 @@ class UpscanConnectorSpec extends WordSpec with Matchers with MockFactory with H
                 )
                 .value
             ) shouldBe Left(
-              Error("error body")
+              Error(s"S3 file upload failed due to: ${httpResponse.body} with http status: ${httpResponse.status}")
             )
           }
         }
