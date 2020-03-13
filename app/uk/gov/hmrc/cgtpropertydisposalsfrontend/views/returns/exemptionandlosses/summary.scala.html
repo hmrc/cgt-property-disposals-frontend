@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
-
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDate
 
 @this(
         cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
@@ -29,7 +29,7 @@
         cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
 )
 
-@(answers: CompleteExemptionAndLossesAnswers)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(answers: CompleteExemptionAndLossesAnswers, disposalDate: DisposalDate)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @taxableGainOrLossLabelWithAmount = @{
   answers.taxableGainOrLoss.map { amount =>
@@ -46,14 +46,22 @@
 @cyaSection() {
   @if(answers.inYearLosses.value === 0L) {
     @cyaRow(
-      messages("inYearLosses.title"),
+      messages(
+        "inYearLosses.title",
+        disposalDate.taxYear.startDateInclusive.getYear.toString,
+        disposalDate.taxYear.endDateExclusive.getYear.toString
+      ),
       Html(messages("generic.no")),
       Some(cyaChange(messages("exemptionsAndLosses.cyaChange.inYearLosses"), routes.ExemptionAndLossesController.inYearLosses().url)),
       "inYearLosses"
     )
   } else {
     @cyaRow(
-      messages("inYearLosses.title"),
+      messages(
+        "inYearLosses.title",
+        disposalDate.taxYear.startDateInclusive.getYear.toString,
+        disposalDate.taxYear.endDateExclusive.getYear.toString
+      ),
       Html(messages("generic.yes")),
       Some(cyaChange(messages("exemptionsAndLosses.cyaChange.inYearLosses"), routes.ExemptionAndLossesController.inYearLosses().url)),
       "inYearLosses"

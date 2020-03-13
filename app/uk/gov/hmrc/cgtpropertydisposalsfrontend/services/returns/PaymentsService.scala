@@ -40,7 +40,7 @@ trait PaymentsService {
 
   def startPaymentJourney(
     cgtReference: CgtReference,
-    chargeReference: String,
+    chargeReference: Option[String],
     amount: AmountInPence,
     returnUrl: Call,
     backUrl: Call
@@ -55,7 +55,7 @@ class PaymentsServiceImpl @Inject() (connector: PaymentsConnector, auditService:
 
   def startPaymentJourney(
     cgtReference: CgtReference,
-    chargeReference: String,
+    chargeReference: Option[String],
     amount: AmountInPence,
     returnUrl: Call,
     backUrl: Call

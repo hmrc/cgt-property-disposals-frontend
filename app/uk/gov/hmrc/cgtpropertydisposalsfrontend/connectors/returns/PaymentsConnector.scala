@@ -37,7 +37,7 @@ trait PaymentsConnector {
 
   def startPaymentJourney(
     cgtReference: CgtReference,
-    chargeReference: String,
+    chargeReference: Option[String],
     amount: AmountInPence,
     returnUrl: Call,
     backUrl: Call
@@ -57,7 +57,7 @@ class PaymentsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Service
 
   override def startPaymentJourney(
     cgtReference: CgtReference,
-    chargeReference: String,
+    chargeReference: Option[String],
     amount: AmountInPence,
     returnUrl: Call,
     backUrl: Call
@@ -90,7 +90,7 @@ object PaymentsConnectorImpl {
 
   final case class StartPaymentJourneyRequest(
     cgtReference: String,
-    chargeReference: String,
+    chargeReference: Option[String],
     amountInPence: Long,
     returnUrl: String,
     backUrl: String

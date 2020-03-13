@@ -16,9 +16,8 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDate
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.initialgainorloss.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -26,24 +25,24 @@
         submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-        summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.exemptionandlosses.summary
+        summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.initialgainorloss.summary,
+        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-
-@(answers: CompleteExemptionAndLossesAnswers, disposalDate: DisposalDate)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
-
+@(answers: AmountInPence)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @title = @{
-    messages("exemptionsAndLosses.cya.title")
+    messages("initialGainOrLoss.cya.title")
 }
 
 @mainTemplate(title = title, userType = request.userType) {
+    @caption(messages("returns.disposal-details.caption"))
 
-    @pageHeading(title, Some(messages("exemptionAndLosses.caption")))
+    @pageHeading(title, None)
 
-    @summary(answers, disposalDate)
+    @summary(answers)
 
-    @formWrapper(routes.ExemptionAndLossesController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(routes.InitialGainOrLossController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
         @submitButton(messages("button.confirmAndContinue"))
     }
 

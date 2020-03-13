@@ -40,6 +40,7 @@
 
 @title = @{messages("viewReturn.title")}
 @disposalMethod= @{completeReturn.triageAnswers.disposalMethod}
+@disposalDate = @{completeReturn.triageAnswers.disposalDate}
 
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = false, accountMenu=Some(accountMenu(None))) {
 
@@ -77,7 +78,7 @@
     @reliefDetailsSummary(completeReturn.reliefDetails)
 
     <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
-    @lossesSummary(completeReturn.exemptionsAndLossesDetails)
+    @lossesSummary(completeReturn.exemptionsAndLossesDetails, disposalDate)
 
     <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
     @yearToDateLiabilitySummary(completeReturn.yearToDateLiabilityAnswers)

@@ -1,8 +1,8 @@
-GET  /before-start/who-reporting-tax-for                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.InitialTriageQuestionsController.whoIsIndividualRepresenting()
-POST /before-start/who-reporting-tax-for                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.InitialTriageQuestionsController.whoIsIndividualRepresentingSubmit()
+GET  /before-start/who-reporting-tax-for                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.whoIsIndividualRepresenting()
+POST /before-start/who-reporting-tax-for                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.whoIsIndividualRepresentingSubmit()
 
-GET  /before-start/properties-in-return                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.InitialTriageQuestionsController.howManyProperties()
-POST /before-start/properties-in-return                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.InitialTriageQuestionsController.howManyPropertiesSubmit()
+GET  /before-start/properties-in-return                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.howManyProperties()
+POST /before-start/properties-in-return                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.howManyPropertiesSubmit()
 
 # Single disposals
 GET  /before-start/how-disposed-of-property                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageController.howDidYouDisposeOfProperty()
@@ -23,9 +23,9 @@ POST /before-start/did-sell-dispose-residential-property    uk.gov.hmrc.cgtprope
 GET  /before-start/date-exchanged-contracts                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageController.whenWasDisposalDate()
 POST /before-start/date-exchanged-contracts                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageController.whenWasDisposalDateSubmit()
 
-GET  /exit/disposal-date-before-6-April-2020                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageController.disposalDateTooEarly()
-GET  /exit/indirect-mixed-use-cannot-use-service            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageController.assetTypeNotYetImplemented()
-GET  /exit/uk-resident-can-only-report-residential          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageController.ukResidentCanOnlyDisposeResidential()
+GET  /exit/disposal-date-before-6-April-2020                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.disposalDateTooEarly()
+GET  /exit/indirect-mixed-use-cannot-use-service            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.assetTypeNotYetImplemented()
+GET  /exit/uk-resident-can-only-report-residential          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.CommonTriageQuestionsController.ukResidentCanOnlyDisposeResidential()
 
 GET  /before-start/date-of-completion                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageController.whenWasCompletionDate()
 POST /before-start/date-of-completion                       uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageController.whenWasCompletionDateSubmit()

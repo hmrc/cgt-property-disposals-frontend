@@ -147,7 +147,7 @@ class SingleDisposalsTriageControllerSpec
         performAction
       )(
         requiredPreviousAnswers,
-        routes.InitialTriageQuestionsController.howManyProperties(), {
+        routes.CommonTriageQuestionsController.howManyProperties(), {
           case (answers, n) =>
             answers.copy(
               hasConfirmedSingleDisposal = if (n.contains(NumberOfProperties.One)) true else false
@@ -159,7 +159,7 @@ class SingleDisposalsTriageControllerSpec
         performAction
       )(requiredPreviousAnswers, requiredPreviousAnswers.copy(disposalMethod = Some(DisposalMethod.Sold)))(
         "disposalMethod.title",
-        checkContent(_, routes.InitialTriageQuestionsController.howManyProperties()),
+        checkContent(_, routes.CommonTriageQuestionsController.howManyProperties()),
         _.select("#disposalMethod-0").attr("checked") shouldBe "checked"
       )
 
@@ -195,7 +195,7 @@ class SingleDisposalsTriageControllerSpec
 
       behave like redirectWhenNoPreviousAnswerBehaviour[NumberOfProperties](() => performAction())(
         requiredPreviousAnswers,
-        routes.InitialTriageQuestionsController.howManyProperties(), {
+        routes.CommonTriageQuestionsController.howManyProperties(), {
           case (answers, n) =>
             answers.copy(
               hasConfirmedSingleDisposal = if (n.contains(NumberOfProperties.One)) true else false
@@ -899,7 +899,7 @@ class SingleDisposalsTriageControllerSpec
               formData(today),
               requiredPreviousAnswers
                 .copy(tooEarlyDisposalDate = Some(today)),
-              checkIsRedirect(_, routes.SingleDisposalsTriageController.disposalDateTooEarly()),
+              checkIsRedirect(_, routes.CommonTriageQuestionsController.disposalDateTooEarly()),
               () => mockGetTaxYear(today)(Right(None))
             )
 
@@ -1312,70 +1312,6 @@ class SingleDisposalsTriageControllerSpec
 
     }
 
-    "routing asset type submission" must {
-      def performAction(formData: (String, String)*): Future[Result] =
-        controller.assetTypeNotYetImplemented()(FakeRequest().withFormUrlEncodedBody(formData: _*))
-
-      "go to exit page" when {
-        "the result for mixed use" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionDataWithStartingNewDraftReturn(
-                sample[CompleteSingleDisposalTriageAnswers].copy(assetType = MixedUse)
-              )._1
-            )
-          }
-
-          checkPageIsDisplayed(performAction(), messageFromMessageKey("disposalDateMixedUseOrIndirect.title"))
-        }
-
-        "the result for 'indirect disposal'" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionDataWithStartingNewDraftReturn(
-                sample[CompleteSingleDisposalTriageAnswers].copy(assetType = IndirectDisposal)
-              )._1
-            )
-          }
-
-          checkPageIsDisplayed(performAction(), messageFromMessageKey("disposalDateMixedUseOrIndirect.title"))
-        }
-
-      }
-
-      "continue as normal" when {
-        "the result for residential" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionDataWithStartingNewDraftReturn(
-                sample[CompleteSingleDisposalTriageAnswers].copy(assetType = Residential)
-              )._1
-            )
-          }
-
-          checkIsRedirect(performAction(), routes.SingleDisposalsTriageController.checkYourAnswers())
-        }
-
-        "the result for non-residential" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionDataWithStartingNewDraftReturn(
-                sample[CompleteSingleDisposalTriageAnswers].copy(assetType = NonResidential)
-              )._1
-            )
-          }
-
-          checkIsRedirect(performAction(), routes.SingleDisposalsTriageController.checkYourAnswers())
-        }
-
-      }
-
-    }
-
     "handling submitted answers to the country of residence page" must {
 
       def performAction(formData: (String, String)*): Future[Result] =
@@ -1776,17 +1712,17 @@ class SingleDisposalsTriageControllerSpec
             Scenario(
               allQuestionsAnswered.copy(individualUserType = None),
               Right(sample[IndividualName]),
-              routes.InitialTriageQuestionsController.whoIsIndividualRepresenting()
+              routes.CommonTriageQuestionsController.whoIsIndividualRepresenting()
             ),
             Scenario(
               allQuestionsAnswered.copy(individualUserType = None, hasConfirmedSingleDisposal = false),
               Left(sample[TrustName]),
-              routes.InitialTriageQuestionsController.howManyProperties()
+              routes.CommonTriageQuestionsController.howManyProperties()
             ),
             Scenario(
               allQuestionsAnswered.copy(hasConfirmedSingleDisposal = false),
               Right(sample[IndividualName]),
-              routes.InitialTriageQuestionsController.howManyProperties()
+              routes.CommonTriageQuestionsController.howManyProperties()
             ),
             Scenario(
               allQuestionsAnswered.copy(disposalMethod = None),
@@ -1827,7 +1763,7 @@ class SingleDisposalsTriageControllerSpec
               allQuestionsAnswered
                 .copy(wasAUKResident = Some(true), assetType = Some(AssetType.NonResidential)),
               Right(sample[IndividualName]),
-              routes.SingleDisposalsTriageController.ukResidentCanOnlyDisposeResidential()
+              routes.CommonTriageQuestionsController.ukResidentCanOnlyDisposeResidential()
             ),
             Scenario(
               allQuestionsAnswered
@@ -1837,7 +1773,7 @@ class SingleDisposalsTriageControllerSpec
                   assetType          = Some(AssetType.MixedUse)
                 ),
               Right(sample[IndividualName]),
-              routes.SingleDisposalsTriageController
+              routes.CommonTriageQuestionsController
                 .assetTypeNotYetImplemented()
             ),
             Scenario(
@@ -1848,7 +1784,7 @@ class SingleDisposalsTriageControllerSpec
                   assetType          = Some(AssetType.IndirectDisposal)
                 ),
               Right(sample[IndividualName]),
-              routes.SingleDisposalsTriageController
+              routes.CommonTriageQuestionsController
                 .assetTypeNotYetImplemented()
             )
           ).foreach {
@@ -1886,7 +1822,7 @@ class SingleDisposalsTriageControllerSpec
         }
 
         val result = performAction()
-        checkIsRedirect(result, routes.SingleDisposalsTriageController.assetTypeNotYetImplemented())
+        checkIsRedirect(result, routes.CommonTriageQuestionsController.assetTypeNotYetImplemented())
       }
 
       "show a exit page when a user has selected mixed use" in {
@@ -1902,7 +1838,7 @@ class SingleDisposalsTriageControllerSpec
         }
 
         val result = performAction()
-        checkIsRedirect(result, routes.SingleDisposalsTriageController.assetTypeNotYetImplemented())
+        checkIsRedirect(result, routes.CommonTriageQuestionsController.assetTypeNotYetImplemented())
 
       }
 
@@ -2032,6 +1968,7 @@ class SingleDisposalsTriageControllerSpec
           None,
           None,
           None,
+          None,
           LocalDateUtils.today()
         )
       )
@@ -2101,182 +2038,6 @@ class SingleDisposalsTriageControllerSpec
           }
 
           checkIsRedirect(performAction(), returnsRoutes.TaskListController.taskList())
-        }
-
-      }
-
-    }
-
-    "handling requests to display the disposal date too early page" must {
-
-      def performAction(): Future[Result] =
-        controller.disposalDateTooEarly()(FakeRequest())
-
-      val requiredPreviousAnswers = IncompleteSingleDisposalTriageAnswers.empty.copy(
-        individualUserType         = Some(IndividualUserType.Self),
-        hasConfirmedSingleDisposal = true,
-        disposalMethod             = Some(DisposalMethod.Sold),
-        wasAUKResident             = Some(true),
-        countryOfResidence         = None,
-        assetType                  = Some(AssetType.Residential)
-      )
-
-      "redirect to the check you answers page" when {
-
-        def test(sessionData: SessionData): Unit = {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(sessionData)
-          }
-
-          checkIsRedirect(performAction(), routes.SingleDisposalsTriageController.checkYourAnswers())
-        }
-
-        "the section is incomplete and the was a uk resident question has not been answered yet and" when {
-          "the user is starting a new draft return and" in {
-            test(sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers.copy(wasAUKResident = None))._1)
-          }
-
-          "the user is filling in a draft return" in {
-            test(sessionDataWithFillingOurReturn(requiredPreviousAnswers.copy(wasAUKResident = None))._1)
-
-          }
-        }
-
-      }
-
-      "display the page" when {
-
-        "the user was a uk resident" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers)._1)
-          }
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey("disposalDateTooEarly.uk.title"), { doc =>
-              doc.select("#content > article > p:nth-child(3)").text() shouldBe messageFromMessageKey(
-                "disposalDateTooEarly.uk.p1"
-              )
-              doc.select("#content > article > p:nth-child(4)").html() shouldBe messageFromMessageKey(
-                "disposalDateTooEarly.uk.p2",
-                viewConfig.reportingCgtBefore6April2020
-              )
-            }
-          )
-        }
-
-        "the user was not a uk resident" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionDataWithStartingNewDraftReturn(
-                requiredPreviousAnswers.copy(
-                  wasAUKResident     = Some(false),
-                  countryOfResidence = Some(sample[Country])
-                )
-              )._1
-            )
-          }
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey("disposalDateTooEarly.non-uk.title"), { doc =>
-              doc.select("#content > article > p:nth-child(3)").text() shouldBe messageFromMessageKey(
-                "disposalDateTooEarly.non-uk.p1"
-              )
-              doc.select("#content > article > p:nth-child(4)").text() shouldBe messageFromMessageKey(
-                "disposalDateTooEarly.non-uk.p2"
-              )
-              doc.select("#content > article > p:nth-child(5)").html() shouldBe messageFromMessageKey(
-                "disposalDateTooEarly.non-uk.p3",
-                viewConfig.reportingCgtBefore6April2020
-              )
-            }
-          )
-        }
-      }
-
-    }
-
-    "handling requests to display the uk residents can only dispose residential properties page" must {
-
-      def performAction(): Future[Result] = controller.ukResidentCanOnlyDisposeResidential()(FakeRequest())
-
-      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
-
-      "redirect to the check your answers page" when {
-
-        "the user was no a uk resident" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionDataWithStartingNewDraftReturn(
-                IncompleteSingleDisposalTriageAnswers.empty.copy(
-                  individualUserType         = Some(IndividualUserType.Self),
-                  hasConfirmedSingleDisposal = true,
-                  disposalMethod             = Some(DisposalMethod.Sold),
-                  wasAUKResident             = Some(false),
-                  countryOfResidence         = Some(sample[Country]),
-                  assetType                  = Some(AssetType.NonResidential)
-                )
-              )._1
-            )
-          }
-
-          checkIsRedirect(performAction(), routes.SingleDisposalsTriageController.checkYourAnswers())
-        }
-
-        "the user was a uk resident and they disposed of a residential" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionDataWithStartingNewDraftReturn(
-                IncompleteSingleDisposalTriageAnswers.empty.copy(
-                  individualUserType         = Some(IndividualUserType.Self),
-                  hasConfirmedSingleDisposal = true,
-                  disposalMethod             = Some(DisposalMethod.Sold),
-                  wasAUKResident             = Some(true),
-                  assetType                  = Some(AssetType.Residential)
-                )
-              )._1
-            )
-          }
-
-          checkIsRedirect(performAction(), routes.SingleDisposalsTriageController.checkYourAnswers())
-
-        }
-
-      }
-
-      "display the page" when {
-
-        "the user was a uk resident and they disposed of a non-residential property" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionDataWithStartingNewDraftReturn(
-                IncompleteSingleDisposalTriageAnswers.empty.copy(
-                  individualUserType         = Some(IndividualUserType.Self),
-                  hasConfirmedSingleDisposal = true,
-                  disposalMethod             = Some(DisposalMethod.Sold),
-                  wasAUKResident             = Some(true),
-                  assetType                  = Some(AssetType.NonResidential)
-                )
-              )._1
-            )
-          }
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey("ukResidentCanOnlyReportResidential.title"), { doc =>
-              doc.select("#back").attr("href") shouldBe routes.SingleDisposalsTriageController
-                .didYouDisposeOfAResidentialProperty()
-                .url
-            }
-          )
-
         }
 
       }

@@ -121,6 +121,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
       Some(sample[ReliefDetailsAnswers]),
       Some(sample[CompleteExemptionAndLossesAnswers]),
       yearToDateLiabilityAnswers,
+      Some(sample[AmountInPence]),
       LocalDateUtils.today()
     )
 

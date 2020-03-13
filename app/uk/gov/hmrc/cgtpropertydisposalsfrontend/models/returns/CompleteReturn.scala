@@ -26,6 +26,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLosse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CompleteYearToDateLiabilityAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
 final case class CompleteReturn(
   triageAnswers: CompleteSingleDisposalTriageAnswers,
@@ -34,7 +35,8 @@ final case class CompleteReturn(
   acquisitionDetails: CompleteAcquisitionDetailsAnswers,
   reliefDetails: CompleteReliefDetailsAnswers,
   exemptionsAndLossesDetails: CompleteExemptionAndLossesAnswers,
-  yearToDateLiabilityAnswers: CompleteYearToDateLiabilityAnswers
+  yearToDateLiabilityAnswers: CompleteYearToDateLiabilityAnswers,
+  initialGainOrLoss: AmountInPence
 )
 
 object CompleteReturn {
@@ -50,9 +52,10 @@ object CompleteReturn {
         Some(r: CompleteReliefDetailsAnswers),
         Some(e: CompleteExemptionAndLossesAnswers),
         Some(y: CompleteYearToDateLiabilityAnswers),
+        Some(i: AmountInPence),
         _
         ) =>
-      Some(CompleteReturn(t, p, d, a, r, e, y))
+      Some(CompleteReturn(t, p, d, a, r, e, y, i))
 
     case _ =>
       None

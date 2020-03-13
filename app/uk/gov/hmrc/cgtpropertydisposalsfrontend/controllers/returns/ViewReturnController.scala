@@ -75,7 +75,7 @@ class ViewReturnController @Inject() (
               paymentsService
                 .startPaymentJourney(
                   cgtReference,
-                  charge.chargeReference,
+                  Some(charge.chargeReference),
                   charge.amount,
                   homeRoutes.HomePageController.homepage(),
                   routes.ViewReturnController.displayReturn()
