@@ -374,45 +374,49 @@ class ExemptionAndLossesController @Inject() (
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAnswers(request) {
       case (_, fillingOutReturn, answers) =>
-        withOtherReliefsOption(fillingOutReturn) { otherReliefsOption =>
-          (answers, otherReliefsOption) match {
-            case (c: CompleteExemptionAndLossesAnswers, _) =>
-              Ok(checkYourAnswersPage(c))
+        withDisposalDate(fillingOutReturn) { disposalDate =>
+          withOtherReliefsOption(fillingOutReturn) { otherReliefsOption =>
+            (answers, otherReliefsOption) match {
+              case (c: CompleteExemptionAndLossesAnswers, _) =>
+                Ok(checkYourAnswersPage(c, disposalDate))
 
-            case (IncompleteExemptionAndLossesAnswers(None, _, _, _), _) =>
-              Redirect(routes.ExemptionAndLossesController.inYearLosses())
+              case (IncompleteExemptionAndLossesAnswers(None, _, _, _), _) =>
+                Redirect(routes.ExemptionAndLossesController.inYearLosses())
 
-            case (IncompleteExemptionAndLossesAnswers(_, None, _, _), _) =>
-              Redirect(routes.ExemptionAndLossesController.previousYearsLosses())
+              case (IncompleteExemptionAndLossesAnswers(_, None, _, _), _) =>
+                Redirect(routes.ExemptionAndLossesController.previousYearsLosses())
 
-            case (IncompleteExemptionAndLossesAnswers(_, _, None, _), _) =>
-              Redirect(routes.ExemptionAndLossesController.annualExemptAmount())
+              case (IncompleteExemptionAndLossesAnswers(_, _, None, _), _) =>
+                Redirect(routes.ExemptionAndLossesController.annualExemptAmount())
 
-            case (IncompleteExemptionAndLossesAnswers(_, _, _, None), Some(_: OtherReliefsOption.OtherReliefs)) =>
-              Redirect(routes.ExemptionAndLossesController.taxableGainOrLoss())
+              case (IncompleteExemptionAndLossesAnswers(_, _, _, None), Some(_: OtherReliefsOption.OtherReliefs)) =>
+                Redirect(routes.ExemptionAndLossesController.taxableGainOrLoss())
 
-            case (IncompleteExemptionAndLossesAnswers(Some(i), Some(p), Some(a), t), _) =>
-              val completeAnswers = CompleteExemptionAndLossesAnswers(i, p, a, t)
-              val newDraftReturn  = fillingOutReturn.draftReturn.copy(exemptionAndLossesAnswers = Some(completeAnswers))
+              case (IncompleteExemptionAndLossesAnswers(Some(i), Some(p), Some(a), t), _) =>
+                val completeAnswers = CompleteExemptionAndLossesAnswers(i, p, a, t)
+                val newDraftReturn =
+                  fillingOutReturn.draftReturn.copy(exemptionAndLossesAnswers = Some(completeAnswers))
 
-              val result = for {
-                _ <- returnsService.storeDraftReturn(newDraftReturn, fillingOutReturn.agentReferenceNumber)
-                _ <- EitherT(
-                      updateSession(sessionStore, request)(
-                        _.copy(journeyStatus = Some(
-                          fillingOutReturn.copy(draftReturn = newDraftReturn)
-                        )
+                val result = for {
+                  _ <- returnsService.storeDraftReturn(newDraftReturn, fillingOutReturn.agentReferenceNumber)
+                  _ <- EitherT(
+                        updateSession(sessionStore, request)(
+                          _.copy(journeyStatus = Some(
+                            fillingOutReturn.copy(draftReturn = newDraftReturn)
+                          )
+                          )
                         )
                       )
-                    )
-              } yield ()
+                } yield ()
 
-              result.fold({ e =>
-                logger.warn("Could not update the session", e)
-                errorHandler.errorResult()
-              }, _ => Ok(checkYourAnswersPage(completeAnswers)))
+                result.fold({ e =>
+                  logger.warn("Could not update the session", e)
+                  errorHandler.errorResult()
+                }, _ => Ok(checkYourAnswersPage(completeAnswers, disposalDate)))
+            }
           }
         }
+
     }
   }
 
