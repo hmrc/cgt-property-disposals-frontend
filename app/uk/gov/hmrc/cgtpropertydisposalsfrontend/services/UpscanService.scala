@@ -99,35 +99,8 @@ class UpscanServiceImpl @Inject() (
                                     Error("could not parse upscan initiate response")
                                   )
       upscanFileDescriptor <- EitherT.fromEither(augmentUpscanInitiateResponse(cgtReference, upscanInitiateRawResponse))
-      _                    <- upscanConnector.saveUpscanFileDescriptors(upscanFileDescriptor) //FIXME: I don't think we need a status here because at this point all we know is that the storage is primed
+      _                    <- upscanConnector.saveUpscanFileDescriptors(upscanFileDescriptor) 
     } yield UpscanInititateResponseStored(upscanFileDescriptor.fileDescriptor.reference)
-
-  //FIXME if the call to getUpscanSnapshot brings back nothing it could be the first time it has been called for this user and so
-  // it should not return a FailedToGetUpscanSnapshot value ie the None return type
-  /*
-    The logic should be:
-      1. if there is are no snapshots to get then we just allow them to upload more documents
-      but the issue now is that this should be keyed against the draft return.
-      The semantics now are: if there this draft return has any uploaded files against it and the number
-      does not breach the threshold, then allow more files to be uploaded otherwise block them
-   */
-  //FIXME change cgtreference to draftreturnid
-  // upscanConnector.getUpscanSnapshot(cgtReference).map {
-
-//      case Some(upscanSnapshot) => {
-//        if (upscanSnapshot.fileUploadCount > maxUploads) {
-//          EitherT.rightT(MaximumFileUploadReached)
-//        } else {
-//          makeGetUpscanSnapshotCall(cgtReference)
-//        }
-//      }
-//      case None => {
-//        logger.warn("----- I am here -----: failed to get snapshot information")
-//        makeGetUpscanSnapshotCall(cgtReference)
-//        //EitherT.rightT(FailedToGetUpscanSnapshot) //FIXME: this is wrong as we need to allow them to upload if we can nothing from snapshots
-//      }
-
-  //}
 
   override def getUpscanFileDescriptor(cgtReference: CgtReference, upscanInitiateReference: UpscanInitiateReference)(
     implicit hc: HeaderCarrier
