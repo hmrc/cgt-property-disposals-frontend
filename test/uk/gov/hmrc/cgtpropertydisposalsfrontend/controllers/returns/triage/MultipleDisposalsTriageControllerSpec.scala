@@ -566,7 +566,7 @@ class MultipleDisposalsTriageControllerSpec
                   newReturnTriageAnswers = Left(
                     answers.copy(
                       wereAllPropertiesResidential = Some(true),
-                      assetType                    = Some(AssetType.Residential)
+                      assetType                    = Some(List(AssetType.Residential))
                     )
                   )
                 )
@@ -592,7 +592,7 @@ class MultipleDisposalsTriageControllerSpec
                   newReturnTriageAnswers = Left(
                     answers.copy(
                       wereAllPropertiesResidential = Some(false),
-                      assetType                    = Some(AssetType.NonResidential)
+                      assetType                    = Some(List(AssetType.NonResidential))
                     )
                   )
                 )
@@ -609,7 +609,10 @@ class MultipleDisposalsTriageControllerSpec
 
         "user has already answered were all properties residential section and re-selected different option" in {
           val answers = sample[IncompleteMultipleDisposalsAnswers]
-            .copy(wereAllPropertiesResidential = Some(true), assetType = Some(AssetType.Residential))
+            .copy(
+              wereAllPropertiesResidential = Some(true),
+              assetType                    = Some(List(AssetType.Residential))
+            )
 
           val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
 
@@ -622,7 +625,7 @@ class MultipleDisposalsTriageControllerSpec
                   newReturnTriageAnswers = Left(
                     answers.copy(
                       wereAllPropertiesResidential = Some(false),
-                      assetType                    = Some(AssetType.NonResidential)
+                      assetType                    = Some(List(AssetType.NonResidential))
                     )
                   )
                 )
@@ -643,7 +646,10 @@ class MultipleDisposalsTriageControllerSpec
 
         "user has already answered were all properties residential section and re-selected same option" in {
           val answers = sample[IncompleteMultipleDisposalsAnswers]
-            .copy(wereAllPropertiesResidential = Some(true), assetType = Some(AssetType.Residential))
+            .copy(
+              wereAllPropertiesResidential = Some(true),
+              assetType                    = Some(List(AssetType.Residential))
+            )
 
           val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
 
@@ -708,7 +714,7 @@ class MultipleDisposalsTriageControllerSpec
               wasAUKResident               = Some(true),
               countryOfResidence           = Some(Country.uk),
               wereAllPropertiesResidential = Some(true),
-              assetType                    = Some(AssetType.Residential)
+              assetType                    = Some(List(AssetType.Residential))
             )
           )._1
         )
@@ -751,7 +757,7 @@ class MultipleDisposalsTriageControllerSpec
           wasAUKResident               = Some(true),
           countryOfResidence           = Some(Country.uk),
           wereAllPropertiesResidential = Some(true),
-          assetType                    = Some(AssetType.Residential)
+          assetType                    = Some(List(AssetType.Residential))
         )
 
         val taxYear = sample[TaxYear].copy(
@@ -822,7 +828,7 @@ class MultipleDisposalsTriageControllerSpec
               wasAUKResident               = Some(true),
               countryOfResidence           = Some(Country.uk),
               wereAllPropertiesResidential = Some(true),
-              assetType                    = Some(AssetType.Residential),
+              assetType                    = Some(List(AssetType.Residential)),
               taxYearAfter6April2020       = Some(true),
               taxYear                      = Some(taxYear)
             )
@@ -869,7 +875,7 @@ class MultipleDisposalsTriageControllerSpec
               wasAUKResident               = Some(true),
               countryOfResidence           = Some(Country.uk),
               wereAllPropertiesResidential = Some(true),
-              assetType                    = Some(AssetType.Residential),
+              assetType                    = Some(List(AssetType.Residential)),
               taxYearAfter6April2020       = Some(true),
               taxYear                      = Some(taxYear)
             )
