@@ -45,8 +45,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftReturn, ReturnSummary, SubmitReturnResponse}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, CompletionDate, DraftReturn, ReturnSummary, SubmitReturnResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{PaymentsService, ReturnsService}
@@ -203,7 +203,40 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
 
       def extractAmount(s: String): String = s.substring(s.indexOf('£'))
 
-      "display the home page when there is no charge raise and no payments have been made" in {
+      "display draft returns on the home page when there are any" in {
+        val triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(completionDate = CompletionDate(LocalDate.now().minusMonths(1)))
+        val sampleDraftReturn = sample[DraftReturn].copy(triageAnswers = triageAnswers, lastUpdatedDate = LocalDate.now())
+        val subscribed = sample[Subscribed].copy(draftReturns = List(sampleDraftReturn))
+
+        val completionDate: LocalDate = sampleDraftReturn.triageAnswers match {
+          case a: CompleteSingleDisposalTriageAnswers => a.completionDate.value
+          case b: IncompleteSingleDisposalTriageAnswers => b.completionDate.fold(sys.error("Error"))(_.value)
+        }
+
+        val expectedDraftReturnSendAndPayBy = completionDate.plusDays(30)
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              userType      = Some(UserType.Individual),
+              journeyStatus = Some(subscribed)
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey("account.home.title"), { doc =>
+            doc.select(s"#draftReturnLastUpdatedDate-${sampleDraftReturn.id}").text() shouldBe
+              messages("drafts.list.lastUpdated", govShortDisplayFormat(sampleDraftReturn.lastUpdatedDate))
+            doc.select(s"#draftReturnsendAndPayBy-${sampleDraftReturn.id} > h4").text() shouldBe
+              messages("drafts.list.sendAndPayBy") + " " + govShortDisplayFormat(expectedDraftReturnSendAndPayBy)
+          }
+        )
+      }
+
+      "display sent returns on the home page when there is no charge raise and no payments have been made" in {
 
         val sentReturn = sample[ReturnSummary].copy(
           charges                = chargesWithoutChargeRaiseAndNoPayment,
@@ -242,7 +275,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
         )
       }
 
-      "display the home page when there is a charge raise and no payments have been made" in {
+      "display sent returns on the home page when there is a charge raise and no payments have been made" in {
 
         val sentReturn = sample[ReturnSummary].copy(
           charges                = chargesWithChargeRaiseAndNoPayment,
@@ -281,7 +314,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
         )
       }
 
-      "display the home page when there is a charge raise and partial payment have been made for return" in {
+      "display sent returns on the home page when there is a charge raise and partial payment have been made for return" in {
 
         val sentReturn = sample[ReturnSummary].copy(
           charges                = chargesWithChargeRaiseAndPartialPayment,
@@ -321,7 +354,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
         )
       }
 
-      "display the home page when there is a charge raise and full payment have been made for return" in {
+      "display sent returns on the home page when there is a charge raise and full payment have been made for return" in {
 
         val sentReturn = sample[ReturnSummary].copy(
           charges                = chargesWithChargeRaiseAndFullPayment,
@@ -361,7 +394,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
         )
       }
 
-      "display the home page when there is a charge raise and full payments have been made for return and charge raise" in {
+      "display sent returns on the home page when there is a charge raise and full payments have been made for return and charge raise" in {
 
         val fullPaymentForPenaltyInterestCharge = sample[Payment].copy(
           amount       = penaltyInterestChargeAmount,
