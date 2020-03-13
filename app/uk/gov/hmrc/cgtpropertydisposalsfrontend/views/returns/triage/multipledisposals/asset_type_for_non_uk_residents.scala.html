@@ -39,13 +39,13 @@
 @title = @{messages(s"$key.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@selectedIndex = @{
-  form.data.get(key).map({
-    case "0" => 0
-    case "1" => 1
-    case "2" => 2
-    case _ => 3
-  })
+@toIndex(assetType: AssetType) = @{
+  assetType match {
+    case AssetType.Residential => 0
+    case AssetType.NonResidential => 1
+    case AssetType.MixedUse => 2
+    case AssetType.IndirectDisposal => 3
+  }
 }
 
 @options = @{
@@ -88,7 +88,7 @@
         @checkboxGroup(
             fieldId = key,
             options = options,
-            selected = List(),
+            selected = form.value.map(_.map(toIndex)).getOrElse(List.empty),
             helpText = Some(Html(messages(s"$key.helpText"))),
             label = pageHeading(title),
             labelAsHeading = true,

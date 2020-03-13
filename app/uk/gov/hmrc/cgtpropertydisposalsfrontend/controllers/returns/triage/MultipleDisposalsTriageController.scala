@@ -484,9 +484,6 @@ class MultipleDisposalsTriageController @Inject() (
           case IncompleteMultipleDisposalsAnswers(_, _, Some(true), _, Some(false), _, _, _) =>
             Redirect(routes.CommonTriageQuestionsController.ukResidentCanOnlyDisposeResidential())
 
-          case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, _, None, _) =>
-            Redirect(routes.MultipleDisposalsTriageController.whenWereContractsExchanged())
-
           case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, _, Some(true), Some(_)) =>
             Ok(s"All properties contracts were exchanged after 06th April, 2020")
 
@@ -497,8 +494,16 @@ class MultipleDisposalsTriageController @Inject() (
           case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, _, Some(false), _) =>
             Redirect(routes.CommonTriageQuestionsController.disposalDateTooEarly())
 
-          case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, Some(_), _, _) =>
-            Ok(s"Non-UK asset types")
+          case IncompleteMultipleDisposalsAnswers(_, _, Some(false), _, _, Some(assetTypes), _, _) =>
+            assetTypes match {
+              case List(AssetType.Residential) | List(AssetType.NonResidential) =>
+                Redirect(routes.MultipleDisposalsTriageController.whenWereContractsExchanged())
+              case _ =>
+                Redirect(routes.CommonTriageQuestionsController.assetTypeNotYetImplemented())
+            }
+
+          case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, _, None, _) =>
+            Redirect(routes.MultipleDisposalsTriageController.whenWereContractsExchanged())
 
           case c: CompleteMultipleDisposalsAnswers =>
             Ok(s"Got $c")
