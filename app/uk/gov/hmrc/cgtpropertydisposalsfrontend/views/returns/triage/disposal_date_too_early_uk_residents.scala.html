@@ -24,22 +24,19 @@
         backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
-@()(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(backLink: Call)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
-@title = @{messages("disposalDateTooEarly.non-uk.title")}
+@title = @{messages("disposalDateTooEarly.uk.title")}
 
 @mainTemplate(title = title, userType = request.userType) {
 
-    @backLinkComponent(triage.routes.SingleDisposalsTriageController.whenWasDisposalDate())
+    @backLinkComponent(backLink)
 
     @pageHeading(title)
     <p>
-    @messages("disposalDateTooEarly.non-uk.p1")
+    @messages("disposalDateTooEarly.uk.p1")
     </p>
     <p>
-    @messages("disposalDateTooEarly.non-uk.p2")
-    </p>
-    <p>
-    @Html(messages("disposalDateTooEarly.non-uk.p3", appConfig.reportingCgtBefore6April2020))
+    @Html(messages("disposalDateTooEarly.uk.p2", appConfig.reportingCgtBefore6April2020))
     </p>
 }

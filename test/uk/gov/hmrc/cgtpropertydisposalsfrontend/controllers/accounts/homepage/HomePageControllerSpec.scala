@@ -699,7 +699,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
 
           checkIsRedirect(
             performAction(),
-            controllers.returns.triage.routes.InitialTriageQuestionsController.whoIsIndividualRepresenting()
+            controllers.returns.triage.routes.CommonTriageQuestionsController.whoIsIndividualRepresenting()
           )
         }
 
@@ -730,7 +730,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
 
           checkIsRedirect(
             performAction(),
-            controllers.returns.triage.routes.InitialTriageQuestionsController.howManyProperties()
+            controllers.returns.triage.routes.CommonTriageQuestionsController.howManyProperties()
           )
         }
 

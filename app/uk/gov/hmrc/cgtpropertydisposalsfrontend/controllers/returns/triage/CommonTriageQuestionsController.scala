@@ -32,7 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserTyp
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.IncompleteMultipleDisposalsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, MultipleDisposalsTriageAnswers, NumberOfProperties, SingleDisposalTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, IndividualUserType, MultipleDisposalsTriageAnswers, NumberOfProperties, SingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{FormUtils, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -43,7 +43,7 @@ import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class InitialTriageQuestionsController @Inject() (
+class CommonTriageQuestionsController @Inject() (
   val authenticatedAction: AuthenticatedAction,
   val sessionDataAction: SessionDataAction,
   val sessionStore: SessionStore,
@@ -52,14 +52,18 @@ class InitialTriageQuestionsController @Inject() (
   cc: MessagesControllerComponents,
   val config: Configuration,
   whoAreYouReportingForPage: triagePages.who_are_you_reporting_for,
-  howManyPropertiesPage: triagePages.how_many_properties
+  howManyPropertiesPage: triagePages.how_many_properties,
+  ukResidentCanOnlyDisposeResidentialPage: triagePages.uk_resident_can_only_dispose_residential,
+  disposalDateTooEarlyUkResidents: triagePages.disposal_date_too_early_uk_residents,
+  disposalDateTooEarlyNonUkResidents: triagePages.disposal_date_too_early_non_uk_residents,
+  assetTypeNotYetImplementedPage: triagePages.asset_type_not_yet_implemented
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with Logging
     with SessionUpdates {
 
-  import InitialTriageQuestionsController._
+  import CommonTriageQuestionsController._
 
   private def isIndividual(state: Either[StartingNewDraftReturn, FillingOutReturn]): Boolean =
     state.fold(_.subscribedDetails.userType(), _.subscribedDetails.userType()).isRight
@@ -68,7 +72,7 @@ class InitialTriageQuestionsController @Inject() (
     withState(request) {
       case (_, state) =>
         if (!isIndividual(state))
-          Redirect(routes.InitialTriageQuestionsController.howManyProperties())
+          Redirect(routes.CommonTriageQuestionsController.howManyProperties())
         else {
           val form = getIndividualUserType(state).fold(whoAreYouReportingForForm)(whoAreYouReportingForForm.fill)
 
@@ -88,21 +92,19 @@ class InitialTriageQuestionsController @Inject() (
       withState(request) {
         case (_, state) =>
           if (!isIndividual(state))
-            Redirect(routes.InitialTriageQuestionsController.howManyProperties())
+            Redirect(routes.CommonTriageQuestionsController.howManyProperties())
           else {
             whoAreYouReportingForForm
               .bindFromRequest()
               .fold(
                 formWithErrors =>
                   BadRequest(whoAreYouReportingForPage(formWithErrors, None, state.isRight)), { individualUserType =>
-                  val answers = triageAnswersFomState(state)
+                  val answers    = triageAnswersFomState(state)
+                  val redirectTo = redirectToCheckYourAnswers(state)
+
                   val oldIndividualUserType = answers.fold(
                     _.fold(_.individualUserType, c => c.individualUserType),
                     _.fold(_.individualUserType, c => c.individualUserType)
-                  )
-                  val redirectTo = answers.fold(
-                    _ => routes.MultipleDisposalsTriageController.checkYourAnswers(),
-                    _ => routes.SingleDisposalsTriageController.checkYourAnswers()
                   )
 
                   if (oldIndividualUserType.contains(individualUserType)) {
@@ -153,12 +155,6 @@ class InitialTriageQuestionsController @Inject() (
   }
 
   def howManyPropertiesSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    def redirectTo(state: Either[StartingNewDraftReturn, FillingOutReturn]): Call =
-      triageAnswersFomState(state).fold(
-        _ => routes.MultipleDisposalsTriageController.checkYourAnswers(),
-        _ => routes.SingleDisposalsTriageController.checkYourAnswers()
-      )
-
     withState(request) {
       case (_, state) =>
         numberOfPropertiesForm
@@ -173,7 +169,7 @@ class InitialTriageQuestionsController @Inject() (
                 )
               ), { numberOfProperties =>
               if (getNumberOfProperties(state).contains(numberOfProperties)) {
-                Redirect(redirectTo(state))
+                Redirect(redirectToCheckYourAnswers(state))
               } else {
                 val updatedState = updateNumberOfProperties(state, numberOfProperties)
 
@@ -193,7 +189,7 @@ class InitialTriageQuestionsController @Inject() (
                     logger.warn("Could not perform updates", e)
                     errorHandler.errorResult()
                   },
-                  _ => Redirect(redirectTo(updatedState))
+                  _ => Redirect(redirectToCheckYourAnswers(updatedState))
                 )
               }
 
@@ -202,6 +198,78 @@ class InitialTriageQuestionsController @Inject() (
     }
   }
 
+  def ukResidentCanOnlyDisposeResidential(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request =>
+      withState(request) {
+        case (_, state) =>
+          val triageAnswers = triageAnswersFomState(state)
+          val assetType = triageAnswers.fold(
+            _.fold(_.assetType, c => Some(c.assetType)),
+            _.fold(_.assetType, c => Some(c.assetType))
+          )
+          val wasUkResident = triageAnswers.fold(
+            _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())),
+            _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk()))
+          )
+          lazy val backLink = triageAnswers.fold(
+            _ => routes.MultipleDisposalsTriageController.wereAllPropertiesResidential(),
+            _ => routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty()
+          )
+
+          (wasUkResident, assetType) match {
+            case (Some(true), Some(AssetType.NonResidential)) => Ok(ukResidentCanOnlyDisposeResidentialPage(backLink))
+            case _                                            => Redirect(redirectToCheckYourAnswers(state))
+          }
+      }
+  }
+
+  def disposalDateTooEarly(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withState(request) {
+      case (_, state) =>
+        val triageAnswers = triageAnswersFomState(state)
+        lazy val backLink = triageAnswers.fold(
+          _ => routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
+          _ => routes.SingleDisposalsTriageController.whenWasDisposalDate()
+        )
+
+        triageAnswers.fold(
+          _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())),
+          _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk()))
+        ) match {
+          case None => Redirect(redirectToCheckYourAnswers(state))
+          case Some(wasUk) =>
+            if (wasUk) Ok(disposalDateTooEarlyUkResidents(backLink))
+            else Ok(disposalDateTooEarlyNonUkResidents(backLink))
+        }
+    }
+  }
+
+  def assetTypeNotYetImplemented(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withState(request) {
+      case (_, state) =>
+        val triageAnswers = triageAnswersFomState(state)
+        lazy val backLink = triageAnswers.fold(
+          // TODO: fix multiple disposals back link when the page is available
+          _ => routes.MultipleDisposalsTriageController.howManyDisposals(),
+          _ => routes.SingleDisposalsTriageController.assetTypeForNonUkResidents()
+        )
+
+        triageAnswers.fold(
+          _.fold(_.assetType, c => Some(c.assetType)),
+          _.fold(_.assetType, c => Some(c.assetType))
+        ) match {
+          case Some(AssetType.MixedUse | AssetType.IndirectDisposal) => Ok(assetTypeNotYetImplementedPage(backLink))
+          case _                                                     => Redirect(redirectToCheckYourAnswers(state))
+        }
+    }
+  }
+
+  private def redirectToCheckYourAnswers(state: Either[StartingNewDraftReturn, FillingOutReturn]): Call =
+    triageAnswersFomState(state).fold(
+      _ => routes.MultipleDisposalsTriageController.checkYourAnswers(),
+      _ => routes.SingleDisposalsTriageController.checkYourAnswers()
+    )
+
   private def howManyPropertiesBackLink(state: Either[StartingNewDraftReturn, FillingOutReturn]): Option[Call] =
     if (!isIndividual(state))
       None
@@ -209,11 +277,11 @@ class InitialTriageQuestionsController @Inject() (
       Some(
         triageAnswersFomState(state).fold(
           _.fold(
-            _ => routes.InitialTriageQuestionsController.whoIsIndividualRepresenting(),
+            _ => routes.CommonTriageQuestionsController.whoIsIndividualRepresenting(),
             _ => routes.MultipleDisposalsTriageController.checkYourAnswers()
           ),
           _.fold(
-            _ => routes.InitialTriageQuestionsController.whoIsIndividualRepresenting(),
+            _ => routes.CommonTriageQuestionsController.whoIsIndividualRepresenting(),
             _ => routes.SingleDisposalsTriageController.checkYourAnswers()
           )
         )
@@ -340,7 +408,7 @@ class InitialTriageQuestionsController @Inject() (
     }
 
 }
-object InitialTriageQuestionsController {
+object CommonTriageQuestionsController {
 
   val whoAreYouReportingForForm: Form[IndividualUserType] = Form(
     mapping(

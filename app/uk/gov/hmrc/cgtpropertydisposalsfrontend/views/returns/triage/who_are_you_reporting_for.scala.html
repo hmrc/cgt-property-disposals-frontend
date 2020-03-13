@@ -59,7 +59,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
         @errorSummary(form)
     }
 
-    @formWrapper(controllers.returns.triage.routes.InitialTriageQuestionsController.whoIsIndividualRepresentingSubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(controllers.returns.triage.routes.CommonTriageQuestionsController.whoIsIndividualRepresentingSubmit(), 'novalidate -> "novalidate") {
         @radioGroup(
             fieldId = key,
             options = options,
