@@ -102,7 +102,7 @@ class InitialGainOrLossControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               SessionData.empty.copy(
-                journeyStatus = Some(fillingOutReturnSample)
+                journeyStatus = Some(fillingOutReturnSample.copy(draftReturn = updatedDraftReturn))
               )
             )
           }
@@ -260,7 +260,7 @@ class InitialGainOrLossControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Left(Error("")))
+            mockStoreDraftReturn(updatedDraftReturn, None)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction("initialGainOrLoss" -> "2", "gain" -> "", "loss" -> ""))
@@ -270,7 +270,7 @@ class InitialGainOrLossControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn)(Right(()))
+            mockStoreDraftReturn(updatedDraftReturn, None)(Right(()))
             mockStoreSession(updatedSession)(Left(Error("")))
           }
 
@@ -331,7 +331,8 @@ class InitialGainOrLossControllerSpec
               )
             )
             mockStoreDraftReturn(
-              newDraftReturn
+              newDraftReturn,
+              None
             )(Right(()))
             mockStoreSession(
               SessionData.empty.copy(
