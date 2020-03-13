@@ -24,7 +24,7 @@ import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.data.Forms.{mapping, of}
 import play.api.data.format.Formatter
-import play.api.data.{Form, FormError}
+import play.api.data.{Form, FormError, Forms}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
@@ -228,7 +228,7 @@ class MultipleDisposalsTriageController @Inject() (
                   )
                 ), { wereAllPropertiesResidential =>
                 if (answers
-                      .fold(_.wereAllPropertiesResidential, c => Some(c.assetType.isResidential()))
+                      .fold(_.wereAllPropertiesResidential, c => Some(isResidentialAssetType(c.assetType)))
                       .contains(wereAllPropertiesResidential)) {
                   Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
                 } else {
@@ -448,7 +448,7 @@ class MultipleDisposalsTriageController @Inject() (
                 numberOfProperties           = Some(complete.numberOfProperties),
                 wasAUKResident               = Some(complete.countryOfResidence.isUk()),
                 countryOfResidence           = Some(complete.countryOfResidence),
-                wereAllPropertiesResidential = Some(complete.assetType.isResidential()),
+                wereAllPropertiesResidential = Some(isResidentialAssetType(complete.assetType)),
                 assetType                    = Some(complete.assetType),
                 taxYearAfter6April2020       = Some(taxYearAfter6April2020),
                 taxYear                      = taxYear
@@ -509,8 +509,14 @@ class MultipleDisposalsTriageController @Inject() (
     }
   }
 
-  private def assetType(isResidential: Boolean): AssetType =
-    if (isResidential) AssetType.Residential else AssetType.NonResidential
+  private def isResidentialAssetType(assetType: List[AssetType]): Boolean =
+    assetType match {
+      case AssetType.Residential :: Nil => true
+      case _                            => false
+    }
+
+  private def assetType(isResidential: Boolean): List[AssetType] =
+    if (isResidential) List(AssetType.Residential) else List(AssetType.NonResidential)
 
   private def withMultipleDisposalTriageAnswers(request: RequestWithSessionData[_])(
     f: (SessionData, StartingNewDraftReturn, MultipleDisposalsTriageAnswers) => Future[Result]
@@ -581,15 +587,12 @@ object MultipleDisposalsTriageController {
       )(identity)(Some(_))
     )
 
-  val assetTypeForNonUkResidentsForm: Form[AssetType] = Form(
-    mapping(
-      "multipleDisposalsAssetTypeForNonUkResidents" -> of(
-        FormUtils.radioFormFormatter(
-          "multipleDisposalsAssetTypeForNonUkResidents",
-          List(Residential, NonResidential, MixedUse, IndirectDisposal)
-        )
-      )
-    )(identity)(Some(_))
-  )
+  val assetTypeForNonUkResidentsForm: Form[List[AssetType]] = {
+    Form(
+      mapping(
+        "multipleDisposalsAssetTypeForNonUkResidents" -> Forms.list(of(FormUtils.checkBoxAssetTypeFormFormatter))
+      )(identity)(Some(_))
+    )
+  }
 
 }

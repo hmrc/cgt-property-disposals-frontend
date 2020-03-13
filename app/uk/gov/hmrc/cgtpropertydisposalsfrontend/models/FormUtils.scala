@@ -22,6 +22,7 @@ import cats.syntax.eq._
 import cats.syntax.either._
 import play.api.data.FormError
 import play.api.data.format.Formatter
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
 
 import scala.util.Try
 
@@ -60,4 +61,23 @@ object FormUtils {
         .find(_._1 === value)
         .fold(Map.empty[String, String]) { case (_, i) => Map(key -> i.toString) }
   }
+
+  def checkBoxAssetTypeFormFormatter: Formatter[AssetType] = new Formatter[AssetType] {
+
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], AssetType] =
+      readValue(key, data, identity)
+        .flatMap {
+          case "0" => Right(AssetType.Residential)
+          case "1" => Right(AssetType.NonResidential)
+          case "2" => Right(AssetType.MixedUse)
+          case "3" => Right(AssetType.IndirectDisposal)
+          case _   => Left(FormError(key, "error.invalid"))
+        }
+        .leftMap(Seq(_))
+
+    override def unbind(key: String, value: AssetType): Map[String, String] =
+      Map(key -> value.toString)
+
+  }
+
 }

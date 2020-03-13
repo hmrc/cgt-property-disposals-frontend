@@ -21,18 +21,19 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.RadioOption
 
 @this(
-        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-        errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional,
-        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
-        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
+    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+    radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional,
+    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+    checkboxGroup: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.checkbox_group,
+    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(form: Form[AssetType], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[List[AssetType]], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"multipleDisposalsAssetTypeForNonUkResidents"}
 @title = @{messages(s"$key.title")}
@@ -83,15 +84,15 @@
     @caption(messages("triage.caption"))
 
     @formWrapper(triage.routes.MultipleDisposalsTriageController.assetTypeForNonUkResidentsSubmit(), 'novalidate -> "novalidate") {
-        @radioGroupConditional(
+
+        @checkboxGroup(
             fieldId = key,
             options = options,
-            selected = selectedIndex,
+            selected = List(),
+            helpText = Some(Html(messages(s"$key.helpText"))),
             label = pageHeading(title),
             labelAsHeading = true,
-            error = form.error(key),
-            hasErrors = hasErrors,
-            helpText = Some(Html(messages(s"$key.helpText")))
+            hasErrors = hasErrors
         )
 
         @submitButton(messages("button.continue"))

@@ -31,7 +31,7 @@ object MultipleDisposalsTriageAnswers {
     wasAUKResident: Option[Boolean],
     countryOfResidence: Option[Country],
     wereAllPropertiesResidential: Option[Boolean],
-    assetType: Option[AssetType],
+    assetType: Option[List[AssetType]],
     taxYearAfter6April2020: Option[Boolean],
     taxYear: Option[TaxYear]
   ) extends MultipleDisposalsTriageAnswers
@@ -45,7 +45,7 @@ object MultipleDisposalsTriageAnswers {
     individualUserType: Option[IndividualUserType],
     numberOfProperties: Int,
     countryOfResidence: Country,
-    assetType: AssetType,
+    assetType: List[AssetType],
     taxYear: TaxYear
   ) extends MultipleDisposalsTriageAnswers
 
