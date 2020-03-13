@@ -99,9 +99,7 @@
   </p>
 
   <p>
-   <a href="@{appConfig.callChargesUrl}">
-    @messages(s"$key.callChargesLink")
-   </a>
+   @Html(messages(s"$key.callChargesLink", appConfig.callChargesUrl))
   </p>
 
 }

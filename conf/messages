@@ -496,7 +496,7 @@ capacitorsPersonalRepresentativesNotHandled.openingTimes.monToFri=10am to 8pm, M
 capacitorsPersonalRepresentativesNotHandled.openingTimes.saturday=8am to 4pm, Saturday
 capacitorsPersonalRepresentativesNotHandled.openingTimes.sunBankHols=Closed Sundays and bank holidays
 capacitorsPersonalRepresentativesNotHandled.getHelp=Get help <a href="{0}">dealing with HMRC if you have additional needs</a>.
-capacitorsPersonalRepresentativesNotHandled.callChargesLink=Find out about call charges
+capacitorsPersonalRepresentativesNotHandled.callChargesLink=<a href="{0}">Find out about call charges</a>
 
 numberOfProperties.title=How many UK properties are you including in this return?
 numberOfProperties.helpText=All of the property sales or disposals must have the same completion date.
