@@ -126,9 +126,7 @@ class InitialGainOrLossControllerSpec
     "submitting the page" must {
       def performAction(): Future[Result] = controller.checkYourAnswersSubmit()(FakeRequest())
       behave like redirectToStartBehaviour(performAction)
-      "redirect to taskList" when {
-
-        "" in {
+      "redirect to taskList" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
