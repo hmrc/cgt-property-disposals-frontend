@@ -57,12 +57,14 @@ class AcquisitionDetailsControllerSpec
     with ReturnsServiceSupport
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
-  lazy val controller = instanceOf[AcquisitionDetailsController]
+  lazy val controller  = instanceOf[AcquisitionDetailsController]
+  val mockRebasingUtil = new RebasingEligabilityUtil()
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
-      bind[ReturnsService].toInstance(mockReturnsService)
+      bind[ReturnsService].toInstance(mockReturnsService),
+      bind[RebasingEligabilityUtil].toInstance(mockRebasingUtil)
     )
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
@@ -563,8 +565,9 @@ class AcquisitionDetailsControllerSpec
         val acquisitionDate = AcquisitionDate(disposalDate.value)
         val answers = sample[CompleteAcquisitionDetailsAnswers]
           .copy(acquisitionDate = AcquisitionDate(acquisitionDate.value.plusDays(1L)))
+        val wasUkResident = sample[Boolean]
         val (session, journey, draftReturn) =
-          sessionWithState(answers, sample[AssetType], sample[Boolean], disposalDate)
+          sessionWithState(answers, sample[AssetType], wasUkResident, disposalDate)
         val updatedDraftReturn = draftReturn.copy(acquisitionDetailsAnswers = Some(
           answers.copy(acquisitionDate = acquisitionDate)
         )
@@ -1068,7 +1071,8 @@ class AcquisitionDetailsControllerSpec
 
       "redirect to the acquisition price page" when {
 
-        "that question hasn't been answered" in {
+        "that question hasn't been answered for eligable rebase from non uk resident" in {
+
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -1078,7 +1082,7 @@ class AcquisitionDetailsControllerSpec
                   acquisitionPrice = None
                 ),
                 sample[AssetType],
-                sample[Boolean]
+                false
               )._1
             )
           }
@@ -1089,6 +1093,27 @@ class AcquisitionDetailsControllerSpec
           )
         }
 
+      }
+
+      "that question hasn't been answered for eligable rebase from uk resident" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionWithState(
+              sample[IncompleteAcquisitionDetailsAnswers].copy(
+                acquisitionDate   = Some(acquisitionDate),
+                acquisitionMethod = None
+              ),
+              sample[AssetType],
+              true
+            )._1
+          )
+        }
+
+        checkIsRedirect(
+          performAction(),
+          routes.AcquisitionDetailsController.acquisitionDate()
+        )
       }
 
       "redirect to the check your answers page" when {
@@ -1105,6 +1130,7 @@ class AcquisitionDetailsControllerSpec
                 true
               )._1
             )
+            mockRebaseEligabilityCheckForUKResident(true)
           }
           checkIsRedirect(performAction(), routes.AcquisitionDetailsController.checkYourAnswers())
 
@@ -1114,7 +1140,36 @@ class AcquisitionDetailsControllerSpec
 
       "display the page" when {
 
-        "the acquisition details section has not yet been completed" in {
+        "the acquisition details section has not yet been completed for non uk resident" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate  = Some(AcquisitionDate(RebasingCutoffDates.nonUkResidentsResidentialProperty.plusDays(1))),
+                  acquisitionPrice = Some(sample[AmountInPence])
+                ),
+                AssetType.Residential,
+                false
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(
+              "rebaseAcquisitionPrice.title",
+              LocalDateUtils.govDisplayFormat(ukResidents)
+            ), { doc =>
+              doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.acquisitionPrice().url
+              doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                .rebasedAcquisitionPriceSubmit()
+                .url
+            }
+          )
+        }
+
+        "the acquisition details section has not yet been completed for uk resident" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -1124,7 +1179,7 @@ class AcquisitionDetailsControllerSpec
                   acquisitionPrice = Some(sample[AmountInPence])
                 ),
                 AssetType.Residential,
-                true
+                false
               )._1
             )
           }

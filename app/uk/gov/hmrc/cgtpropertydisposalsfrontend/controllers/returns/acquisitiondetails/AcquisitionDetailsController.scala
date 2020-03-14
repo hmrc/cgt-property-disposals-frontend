@@ -58,6 +58,7 @@ class AcquisitionDetailsController @Inject() (
   returnsService: ReturnsService,
   cc: MessagesControllerComponents,
   val config: Configuration,
+  val rebasingEligabilityUtil: RebasingEligabilityUtil,
   acquisitionMethodPage: pages.acquisition_method,
   acquisitionDatePage: pages.acquisition_date,
   acquisitionPricePage: pages.acquisition_price,
@@ -287,10 +288,12 @@ class AcquisitionDetailsController @Inject() (
                     val didMeetRebasingCriteria =
                       answers
                         .fold(_.acquisitionDate, c => Some(c.acquisitionDate))
-                        .exists(date => rebasingCutOffDate(date, assetType, wasUkResident).isDefined)
+                        .exists(date =>
+                          rebasingEligabilityUtil.rebasingCutOffDate(date, assetType, wasUkResident).isDefined
+                        )
 
                     val nowMeetsRebasingCriteria =
-                      rebasingCutOffDate(d, assetType, wasUkResident).isDefined
+                      rebasingEligabilityUtil.rebasingCutOffDate(d, assetType, wasUkResident).isDefined
 
                     if (didMeetRebasingCriteria && !nowMeetsRebasingCriteria) {
                       answers.fold(
@@ -384,28 +387,29 @@ class AcquisitionDetailsController @Inject() (
         withAssetTypeAndResidentialStatus(draftReturn, answers) {
           case (assetType, wasUkResident) =>
             withAcquisitionDate(answers) { acquisitionDate =>
-              rebasingCutOffDate(acquisitionDate, assetType, wasUkResident).fold[Future[Result]](
-                Redirect(routes.AcquisitionDetailsController.checkYourAnswers())
-              ) { rebaseDate =>
-                commonDisplayBehaviour(answers)(
-                  form = _.fold(
-                    _.rebasedAcquisitionPrice.fold(rebasedAcquisitionPriceForm)(a =>
-                      rebasedAcquisitionPriceForm.fill(a.inPounds())
-                    ),
-                    _.rebasedAcquisitionPrice.fold(rebasedAcquisitionPriceForm)(a =>
-                      rebasedAcquisitionPriceForm.fill(a.inPounds())
+              rebasingEligabilityUtil
+                .rebasingCutOffDate(acquisitionDate, assetType, wasUkResident)
+                .fold[Future[Result]](
+                  Redirect(routes.AcquisitionDetailsController.checkYourAnswers())
+                ) { rebaseDate =>
+                  commonDisplayBehaviour(answers)(
+                    form = _.fold(
+                      _.rebasedAcquisitionPrice
+                        .fold(rebasedAcquisitionPriceForm)(a => rebasedAcquisitionPriceForm.fill(a.inPounds())),
+                      _.rebasedAcquisitionPrice
+                        .fold(rebasedAcquisitionPriceForm)(a => rebasedAcquisitionPriceForm.fill(a.inPounds()))
                     )
+                  )(
+                    page = rebasedAcquisitionPricePage(_, _, rebaseDate)
+                  )(
+                    requiredPreviousAnswer =
+                      if (wasUkResident) _.fold(_.acquisitionMethod, c => Some(c.acquisitionMethod))
+                      else _.fold(_.acquisitionMethod, c => Some(c.acquisitionMethod)),
+                    redirectToIfNoRequiredPreviousAnswer =
+                      if (wasUkResident) routes.AcquisitionDetailsController.acquisitionDate()
+                      else routes.AcquisitionDetailsController.acquisitionPrice()
                   )
-                )(
-                  page = rebasedAcquisitionPricePage(_, _, rebaseDate)
-                )(
-                  requiredPreviousAnswer = _.fold(
-                    _.acquisitionPrice,
-                    c => Some(c.acquisitionPrice)
-                  ),
-                  redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionPrice()
-                )
-              }
+                }
             }
         }
     }
@@ -418,35 +422,37 @@ class AcquisitionDetailsController @Inject() (
           withAssetTypeAndResidentialStatus(draftReturn, answers) {
             case (assetType, wasUkResident) =>
               withAcquisitionDate(answers) { acquisitionDate =>
-                rebasingCutOffDate(acquisitionDate, assetType, wasUkResident).fold[Future[Result]](
-                  Redirect(routes.AcquisitionDetailsController.checkYourAnswers())
-                ) { rebaseDate =>
-                  commonSubmitBehaviour(fillingOutReturn, draftReturn, answers)(
-                    form = rebasedAcquisitionPriceForm
-                  )(
-                    page = {
-                      case (form, backLink) =>
-                        val p = form.copy(errors =
-                          form.errors.map(_.copy(args = Seq(LocalDateUtils.govDisplayFormat(rebaseDate))))
-                        )
-                        rebasedAcquisitionPricePage(p, backLink, rebaseDate)
-                    }
-                  )(
-                    requiredPreviousAnswer = _.fold(
-                      _.acquisitionPrice,
-                      c => Some(c.acquisitionPrice)
-                    ),
-                    redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionPrice()
-                  )(
-                    updateAnswers = {
-                      case (p, answers) =>
-                        answers.fold(
-                          _.copy(rebasedAcquisitionPrice = Some(AmountInPence.fromPounds(p))),
-                          _.copy(rebasedAcquisitionPrice = Some(AmountInPence.fromPounds(p)))
-                        )
-                    }
-                  )
-                }
+                rebasingEligabilityUtil
+                  .rebasingCutOffDate(acquisitionDate, assetType, wasUkResident)
+                  .fold[Future[Result]](
+                    Redirect(routes.AcquisitionDetailsController.checkYourAnswers())
+                  ) { rebaseDate =>
+                    commonSubmitBehaviour(fillingOutReturn, draftReturn, answers)(
+                      form = rebasedAcquisitionPriceForm
+                    )(
+                      page = {
+                        case (form, backLink) =>
+                          val p = form.copy(errors =
+                            form.errors.map(_.copy(args = Seq(LocalDateUtils.govDisplayFormat(rebaseDate))))
+                          )
+                          rebasedAcquisitionPricePage(p, backLink, rebaseDate)
+                      }
+                    )(
+                      requiredPreviousAnswer = _.fold(
+                        _.acquisitionPrice,
+                        c => Some(c.acquisitionPrice)
+                      ),
+                      redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionPrice()
+                    )(
+                      updateAnswers = {
+                        case (p, answers) =>
+                          answers.fold(
+                            _.copy(rebasedAcquisitionPrice = Some(AmountInPence.fromPounds(p))),
+                            _.copy(rebasedAcquisitionPrice = Some(AmountInPence.fromPounds(p)))
+                          )
+                      }
+                    )
+                  }
               }
           }
       }
@@ -458,7 +464,7 @@ class AcquisitionDetailsController @Inject() (
         withAssetTypeAndResidentialStatus(draftReturn, answers) {
           case (assetType, wasUkResident) =>
             withAcquisitionDate(answers) { acquisitionDate =>
-              val rebaseDate = rebasingCutOffDate(acquisitionDate, assetType, wasUkResident)
+              val rebaseDate = rebasingEligabilityUtil.rebasingCutOffDate(acquisitionDate, assetType, wasUkResident)
               commonDisplayBehaviour(answers)(
                 form = _.fold(
                   _.improvementCosts.fold(improvementCostsForm)(p => improvementCostsForm.fill(p.inPounds())),
@@ -491,7 +497,7 @@ class AcquisitionDetailsController @Inject() (
         withAssetTypeAndResidentialStatus(draftReturn, answers) {
           case (assetType, wasUkResident) =>
             withAcquisitionDate(answers) { acquisitionDate =>
-              val rebaseDate = rebasingCutOffDate(acquisitionDate, assetType, wasUkResident)
+              val rebaseDate = rebasingEligabilityUtil.rebasingCutOffDate(acquisitionDate, assetType, wasUkResident)
 
               commonSubmitBehaviour(
                 fillingOutReturn,
@@ -588,11 +594,12 @@ class AcquisitionDetailsController @Inject() (
               case IncompleteAcquisitionDetailsAnswers(_, None, _, _, _, _) =>
                 Redirect(routes.AcquisitionDetailsController.acquisitionDate())
 
-              case IncompleteAcquisitionDetailsAnswers(_, _, None, _, _, _) =>
+              case IncompleteAcquisitionDetailsAnswers(_, Some(date), None, _, _, _)
+                  if (rebasingEligabilityUtil.isEligableForPrice(wasAUkResident, assetType, date.value)) =>
                 Redirect(routes.AcquisitionDetailsController.acquisitionPrice())
 
               case IncompleteAcquisitionDetailsAnswers(_, Some(date), _, None, _, _)
-                  if (rebasingCutOffDate(date, assetType, wasAUkResident).isDefined) =>
+                  if (rebasingEligabilityUtil.isEligableForRebase(wasAUkResident, assetType, date.value)) =>
                 Redirect(routes.AcquisitionDetailsController.rebasedAcquisitionPrice())
 
               case IncompleteAcquisitionDetailsAnswers(_, _, _, _, None, _) =>
@@ -630,21 +637,6 @@ class AcquisitionDetailsController @Inject() (
 
   def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
     Redirect(controllers.returns.routes.TaskListController.taskList())
-  }
-
-  private def rebasingCutOffDate(
-    acquisitionDate: AcquisitionDate,
-    assetType: AssetType,
-    wasUkResident: Boolean
-  ): Option[LocalDate] = {
-    val cutoffDate =
-      if (wasUkResident)
-        RebasingCutoffDates.ukResidents
-      else if (assetType === AssetType.Residential)
-        RebasingCutoffDates.nonUkResidentsResidentialProperty
-      else RebasingCutoffDates.nonUkResidentsNonResidentialProperty
-
-    Some(cutoffDate).filter(acquisitionDate.value.isBefore)
   }
 
 }
