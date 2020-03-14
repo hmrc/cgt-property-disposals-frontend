@@ -41,7 +41,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, PaymentsJourney}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.IncompleteAcquisitionDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.IncompleteDisposalDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.IncompleteExemptionAndLossesAnswers
@@ -50,7 +50,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTri
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.IncompleteYearToDateLiabilityAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, LocalDateUtils, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, LocalDateUtils, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{PaymentsService, ReturnsService}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -149,7 +149,29 @@ class CheckAllAnswersAndSubmitControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey("checkAllAnswers.title"), { doc =>
-              validateAllCheckYourAnswersSections(doc, completeReturn)
+              validateAllCheckYourAnswersSections(doc, completeReturn, None)
+              doc.select("#back").attr("href") shouldBe routes.TaskListController.taskList().url
+              doc.select("#content > article > form").attr("action") shouldBe routes.CheckAllAnswersAndSubmitController
+                .checkAllAnswersSubmit()
+                .url
+            }
+          )
+        }
+
+        "the return is complete and the user is an agent" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWitJourney(
+                completeFillingOutReturn.copy(agentReferenceNumber = Some(sample[AgentReferenceNumber]))
+              ).copy(userType = Some(UserType.Agent))
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("checkAllAnswers.title"), { doc =>
+              validateAllCheckYourAnswersSections(doc, completeReturn, Some(UserType.Agent))
               doc.select("#back").attr("href") shouldBe routes.TaskListController.taskList().url
               doc.select("#content > article > form").attr("action") shouldBe routes.CheckAllAnswersAndSubmitController
                 .checkAllAnswersSubmit()
@@ -388,10 +410,12 @@ class CheckAllAnswersAndSubmitControllerSpec
 object CheckAllAnswersAndSubmitControllerSpec {
   def validateAllCheckYourAnswersSections(
     doc: Document,
-    completeReturn: CompleteReturn
+    completeReturn: CompleteReturn,
+    userType: Option[UserType]
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
     validateSingleDisposalTriageCheckYourAnswersPage(
       completeReturn.triageAnswers,
+      userType,
       doc
     )
     validateAcquisitionDetailsCheckYourAnswersPage(

@@ -477,6 +477,8 @@ who-are-you-reporting-for.title=Who are you completing this return for?
 individualUserType.Self=Yourself
 individualUserType.Capacitor=Someone else
 individualUserType.PersonalRepresentative=Someone who has died
+individualUserType.agent.Self=Your client
+individualUserType.agent.PersonalRepresentative=Someone who has died
 individualUserType.error.required=Select who are you reporting the tax for
 individualUserType.error.invalid=Select who are you reporting the tax for
 
