@@ -16,15 +16,20 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
+import cats.syntax.eq._
 import julienrf.json.derived
+import monocle.Lens
+import monocle.macros.Lenses
 import play.api.libs.json.OFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TaxYear
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 
 sealed trait MultipleDisposalsTriageAnswers
 
+@SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
 object MultipleDisposalsTriageAnswers {
 
+  @Lenses
   final case class IncompleteMultipleDisposalsAnswers(
     individualUserType: Option[IndividualUserType],
     numberOfProperties: Option[Int],
@@ -39,6 +44,19 @@ object MultipleDisposalsTriageAnswers {
   object IncompleteMultipleDisposalsAnswers {
     val empty: IncompleteMultipleDisposalsAnswers =
       IncompleteMultipleDisposalsAnswers(None, None, None, None, None, None, None, None)
+
+    def fromCompleteAnswers(c: CompleteMultipleDisposalsAnswers): IncompleteMultipleDisposalsAnswers =
+      IncompleteMultipleDisposalsAnswers(
+        c.individualUserType,
+        Some(c.numberOfProperties),
+        Some(c.countryOfResidence.isUk()),
+        if (c.countryOfResidence.isUk()) None else Some(c.countryOfResidence),
+        if (c.countryOfResidence.isUk()) Some(c.assetType === AssetType.Residential) else None,
+        Some(c.assetType),
+        Some(true),
+        Some(c.taxYear)
+      )
+
   }
 
   final case class CompleteMultipleDisposalsAnswers(
@@ -57,6 +75,13 @@ object MultipleDisposalsTriageAnswers {
       case i: IncompleteMultipleDisposalsAnswers => ifIncomplete(i)
       case c: CompleteMultipleDisposalsAnswers   => ifComplete(c)
     }
+
+    def unset[A](
+      fieldLens: Lens[IncompleteMultipleDisposalsAnswers, Option[A]]
+    ): IncompleteMultipleDisposalsAnswers =
+      fieldLens.set(None)(
+        fold(identity, IncompleteMultipleDisposalsAnswers.fromCompleteAnswers)
+      )
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))

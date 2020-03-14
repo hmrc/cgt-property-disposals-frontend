@@ -20,13 +20,17 @@ import java.time.LocalDate
 
 import cats.Eq
 import julienrf.json.derived
+import monocle.Lens
+import monocle.macros.Lenses
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 
 sealed trait SingleDisposalTriageAnswers extends Product with Serializable
 
+@SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
 object SingleDisposalTriageAnswers {
 
+  @Lenses
   final case class IncompleteSingleDisposalTriageAnswers(
     individualUserType: Option[IndividualUserType],
     hasConfirmedSingleDisposal: Boolean,
@@ -42,6 +46,19 @@ object SingleDisposalTriageAnswers {
   object IncompleteSingleDisposalTriageAnswers {
     val empty: IncompleteSingleDisposalTriageAnswers =
       IncompleteSingleDisposalTriageAnswers(None, false, None, None, None, None, None, None, None)
+
+    def fromCompleteAnswers(c: CompleteSingleDisposalTriageAnswers): IncompleteSingleDisposalTriageAnswers =
+      IncompleteSingleDisposalTriageAnswers(
+        c.individualUserType,
+        true,
+        Some(c.disposalMethod),
+        Some(c.countryOfResidence.isUk()),
+        if (c.countryOfResidence.isUk()) None else Some(c.countryOfResidence),
+        Some(c.assetType),
+        Some(c.disposalDate),
+        Some(c.completionDate),
+        None
+      )
 
     implicit val format: OFormat[IncompleteSingleDisposalTriageAnswers] = Json.format
   }
@@ -68,6 +85,13 @@ object SingleDisposalTriageAnswers {
       case incomplete: IncompleteSingleDisposalTriageAnswers => ifIncomplete(incomplete)
       case complete: CompleteSingleDisposalTriageAnswers     => ifComplete(complete)
     }
+
+    def unset[A](
+      fieldLens: Lens[IncompleteSingleDisposalTriageAnswers, Option[A]]
+    ): IncompleteSingleDisposalTriageAnswers =
+      fieldLens.set(None)(
+        fold(identity, IncompleteSingleDisposalTriageAnswers.fromCompleteAnswers)
+      )
 
   }
 

@@ -17,13 +17,17 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import julienrf.json.derived
+import monocle.Lens
+import monocle.macros.Lenses
 import play.api.libs.json.OFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
 sealed trait YearToDateLiabilityAnswers extends Product with Serializable
 
+@SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
 object YearToDateLiabilityAnswers {
 
+  @Lenses
   final case class IncompleteYearToDateLiabilityAnswers(
     estimatedIncome: Option[AmountInPence],
     personalAllowance: Option[AmountInPence],
@@ -36,6 +40,16 @@ object YearToDateLiabilityAnswers {
   object IncompleteYearToDateLiabilityAnswers {
     val empty: IncompleteYearToDateLiabilityAnswers =
       IncompleteYearToDateLiabilityAnswers(None, None, None, None, None, None)
+
+    def fromCompleteAnswers(c: CompleteYearToDateLiabilityAnswers): IncompleteYearToDateLiabilityAnswers =
+      IncompleteYearToDateLiabilityAnswers(
+        Some(c.estimatedIncome),
+        c.personalAllowance,
+        Some(c.hasEstimatedDetails),
+        Some(c.calculatedTaxDue),
+        Some(c.taxDue),
+        c.mandatoryEvidence
+      )
   }
 
   final case class CompleteYearToDateLiabilityAnswers(
@@ -56,6 +70,13 @@ object YearToDateLiabilityAnswers {
       case i: IncompleteYearToDateLiabilityAnswers => ifIncomplete(i)
       case c: CompleteYearToDateLiabilityAnswers   => ifComplete(c)
     }
+
+    def unset[A](
+      fieldLens: Lens[IncompleteYearToDateLiabilityAnswers, Option[A]]
+    ): IncompleteYearToDateLiabilityAnswers =
+      fieldLens.set(None)(
+        fold(identity, IncompleteYearToDateLiabilityAnswers.fromCompleteAnswers)
+      )
 
   }
 

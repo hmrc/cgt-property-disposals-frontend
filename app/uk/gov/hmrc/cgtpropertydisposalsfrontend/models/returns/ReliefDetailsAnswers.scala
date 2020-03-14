@@ -17,13 +17,17 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import julienrf.json.derived
+import monocle.Lens
+import monocle.macros.Lenses
 import play.api.libs.json.OFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
 sealed trait ReliefDetailsAnswers extends Product with Serializable
 
+@SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
 object ReliefDetailsAnswers {
 
+  @Lenses
   final case class IncompleteReliefDetailsAnswers(
     privateResidentsRelief: Option[AmountInPence],
     lettingsRelief: Option[AmountInPence],
@@ -33,6 +37,9 @@ object ReliefDetailsAnswers {
   object IncompleteReliefDetailsAnswers {
     val empty: IncompleteReliefDetailsAnswers =
       IncompleteReliefDetailsAnswers(None, None, None)
+
+    def fromCompleteAnswers(c: CompleteReliefDetailsAnswers): IncompleteReliefDetailsAnswers =
+      IncompleteReliefDetailsAnswers(Some(c.privateResidentsRelief), Some(c.lettingsRelief), c.otherReliefs)
   }
 
   final case class CompleteReliefDetailsAnswers(
@@ -50,6 +57,13 @@ object ReliefDetailsAnswers {
       case i: IncompleteReliefDetailsAnswers => ifIncomplete(i)
       case c: CompleteReliefDetailsAnswers   => ifComplete(c)
     }
+
+    def unset[A](
+      fieldLens: Lens[IncompleteReliefDetailsAnswers, Option[A]]
+    ): IncompleteReliefDetailsAnswers =
+      fieldLens.set(None)(
+        fold(identity, IncompleteReliefDetailsAnswers.fromCompleteAnswers)
+      )
 
   }
 
