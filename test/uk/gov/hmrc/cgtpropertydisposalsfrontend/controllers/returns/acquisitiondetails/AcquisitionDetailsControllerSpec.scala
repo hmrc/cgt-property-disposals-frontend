@@ -29,7 +29,7 @@ import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates.ukResidents
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios.amountOfMoneyErrorScenarios
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DateErrorScenarios._
@@ -1130,7 +1130,6 @@ class AcquisitionDetailsControllerSpec
                 true
               )._1
             )
-            mockRebaseEligabilityCheckForUKResident(true)
           }
           checkIsRedirect(performAction(), routes.AcquisitionDetailsController.checkYourAnswers())
 
@@ -1146,7 +1145,8 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate  = Some(AcquisitionDate(RebasingCutoffDates.nonUkResidentsResidentialProperty.plusDays(1))),
+                  acquisitionDate =
+                    Some(AcquisitionDate(RebasingCutoffDates.nonUkResidentsResidentialProperty.plusDays(1))),
                   acquisitionPrice = Some(sample[AmountInPence])
                 ),
                 AssetType.Residential,
@@ -1179,7 +1179,7 @@ class AcquisitionDetailsControllerSpec
                   acquisitionPrice = Some(sample[AmountInPence])
                 ),
                 AssetType.Residential,
-                false
+                true
               )._1
             )
           }
@@ -1189,6 +1189,35 @@ class AcquisitionDetailsControllerSpec
             messageFromMessageKey(
               "rebaseAcquisitionPrice.title",
               LocalDateUtils.govDisplayFormat(ukResidents)
+            ), { doc =>
+              doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.acquisitionPrice().url
+              doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                .rebasedAcquisitionPriceSubmit()
+                .url
+            }
+          )
+        }
+
+        "the acquisition details section has not yet been completed for non uk non resident" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate  = Some(acquisitionDate),
+                  acquisitionPrice = Some(sample[AmountInPence])
+                ),
+                AssetType.Residential,
+                false
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(
+              "rebaseAcquisitionPrice.title",
+              LocalDateUtils.govDisplayFormat(nonUkResidentsResidentialProperty)
             ), { doc =>
               doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.acquisitionPrice().url
               doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
@@ -1224,32 +1253,6 @@ class AcquisitionDetailsControllerSpec
           )
         }
 
-        "the amount in the session is zero" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithState(
-                sample[CompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate         = acquisitionDate,
-                  rebasedAcquisitionPrice = Some(AmountInPence.zero)
-                ),
-                AssetType.Residential,
-                true
-              )._1
-            )
-          }
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey(
-              "rebaseAcquisitionPrice.title",
-              LocalDateUtils.govDisplayFormat(ukResidents)
-            ), { doc =>
-              doc.select("#rebaseAcquisitionPrice-1").attr("checked") shouldBe "checked"
-            }
-          )
-        }
-
         "the amount in the session is non-zero" in {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1271,8 +1274,7 @@ class AcquisitionDetailsControllerSpec
               "rebaseAcquisitionPrice.title",
               LocalDateUtils.govDisplayFormat(ukResidents)
             ), { doc =>
-              doc.select("#rebaseAcquisitionPrice-0").attr("checked")  shouldBe "checked"
-              doc.select("#rebaseAcquisitionPriceValue").attr("value") shouldBe "0.01"
+              doc.select("#rebaseAcquisitionPrice").attr("value") shouldBe "0.01"
             }
           )
         }
@@ -1349,27 +1351,9 @@ class AcquisitionDetailsControllerSpec
           )
         }
 
-        "no option has been selected" in {
-          test()("rebaseAcquisitionPrice.error.required")
-        }
-
-        "the option selected is not valid" in {
-          test("rebaseAcquisitionPrice" -> "2")("rebaseAcquisitionPrice.error.invalid")
-        }
-
-        "the amount of money is invalid" in {
-          amountOfMoneyErrorScenarios("rebaseAcquisitionPriceValue").foreach { scenario =>
-            withClue(s"For $scenario: ") {
-              val data =
-                ("rebaseAcquisitionPrice" -> "0") :: scenario.formData
-              test(data: _*)(scenario.expectedErrorMessageKey)
-            }
-          }
-        }
-
         "the amount of money is zero" in {
-          test("rebaseAcquisitionPrice" -> "0", "rebaseAcquisitionPriceValue" -> "0")(
-            "rebaseAcquisitionPriceValue.error.tooSmall"
+          test("rebaseAcquisitionPrice" -> "0")(
+            "rebaseAcquisitionPrice.error.tooSmall"
           )
         }
 
@@ -1399,8 +1383,7 @@ class AcquisitionDetailsControllerSpec
 
           checkIsTechnicalErrorPage(
             performAction(
-              "rebaseAcquisitionPrice"      -> "0",
-              "rebaseAcquisitionPriceValue" -> price.toString
+              "rebaseAcquisitionPrice" -> price.toString
             )
           )
         }
@@ -1419,8 +1402,8 @@ class AcquisitionDetailsControllerSpec
 
           checkIsTechnicalErrorPage(
             performAction(
-              "rebaseAcquisitionPrice"      -> "0",
-              "rebaseAcquisitionPriceValue" -> price.toString
+              "rebaseAcquisitionPrice"      -> "£1",
+              "rebaseAcquisitionPrice" -> price.toString
             )
           )
         }
@@ -1429,7 +1412,7 @@ class AcquisitionDetailsControllerSpec
 
       "redirect to the check you answers page" when {
         val scenarios = List(
-          List("rebaseAcquisitionPrice" -> "0", "rebaseAcquisitionPriceValue" -> "£1,234") -> AmountInPence(123400L),
+          List("rebaseAcquisitionPrice" ->  "£1,234") -> AmountInPence(123400L),
           List("rebaseAcquisitionPrice" -> "1") -> AmountInPence.zero
         )
 

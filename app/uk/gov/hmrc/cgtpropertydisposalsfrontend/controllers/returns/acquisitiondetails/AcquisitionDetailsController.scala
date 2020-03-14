@@ -400,7 +400,11 @@ class AcquisitionDetailsController @Inject() (
                         .fold(rebasedAcquisitionPriceForm)(a => rebasedAcquisitionPriceForm.fill(a.inPounds()))
                     )
                   )(
-                    page = rebasedAcquisitionPricePage(_, _, rebaseDate)
+                    page = rebasedAcquisitionPricePage(
+                      _,
+                      _,
+                      rebasingEligabilityUtil.getRebasingCutOffDate(acquisitionDate, assetType, wasUkResident)
+                    )
                   )(
                     requiredPreviousAnswer =
                       if (wasUkResident) _.fold(_.acquisitionMethod, c => Some(c.acquisitionMethod))
@@ -706,7 +710,11 @@ object AcquisitionDetailsController {
     )
 
   val rebasedAcquisitionPriceForm: Form[BigDecimal] =
-    MoneyUtils.amountInPoundsYesNoForm("rebaseAcquisitionPrice", "rebaseAcquisitionPriceValue")
+    Form(
+      mapping(
+        "rebaseAcquisitionPrice" -> of(MoneyUtils.amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds))
+      )(identity)(Some(_))
+    )
 
   val improvementCostsForm: Form[BigDecimal] =
     MoneyUtils.amountInPoundsYesNoForm("improvementCosts", "improvementCostsValue")

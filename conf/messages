@@ -808,13 +808,12 @@ acquisitionDetails.cyaChange.acquisitionFees=your acquisition fees
 
 rebaseAcquisitionPrice.title=Are you rebasing your share of the property to its market value on {0}?
 rebaseAcquisitionPrice.helpText=You can work out your gain or loss by including the property’s market value on {0} in your calculation.
-rebaseAcquisitionPrice.error.required=Select yes if you rebasing the property to its market value on {0}
-rebaseAcquisitionPriceValue.label=Property’s market value on {0}
-rebaseAcquisitionPriceValue.error.required=Enter the property’s market value on {0}
-rebaseAcquisitionPriceValue.error.invalid=The amount of money must only include numbers, for example 160,000 or 23,040.50
-rebaseAcquisitionPriceValue.error.tooSmall=The amount of money must be a number between 1 and 50,000,000,000.00
-rebaseAcquisitionPriceValue.error.tooLarge=The amount of money must be a number between 1 and 50,000,000,000.00
-rebaseAcquisitionPriceValue.error.tooManyDecimals=The amount of money must be 2 decimal places or less, for example £160,000 or £23,040.50
+rebaseAcquisitionPrice.label=Property’s market value on {0}
+rebaseAcquisitionPrice.error.required=Enter the property’s market value on {0}
+rebaseAcquisitionPrice.error.invalid=The amount of money must only include numbers, for example 160,000 or 23,040.50
+rebaseAcquisitionPrice.error.tooSmall=The amount of money must be a number between 1 and 50,000,000,000.00
+rebaseAcquisitionPrice.error.tooLarge=The amount of money must be a number between 1 and 50,000,000,000.00
+rebaseAcquisitionPrice.error.tooManyDecimals=The amount of money must be 2 decimal places or less, for example £160,000 or £23,040.50
 
 
 reliefDetails.caption=Reliefs

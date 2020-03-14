@@ -69,4 +69,15 @@ class RebasingEligabilityUtil {
     Some(cutoffDate).filter(acquisitionDate.value.isBefore)
   }
 
+  def getRebasingCutOffDate(
+    acquisitionDate: AcquisitionDate,
+    assetType: AssetType,
+    wasUkResident: Boolean
+  ): LocalDate =
+    if (wasUkResident)
+      RebasingCutoffDates.ukResidents
+    else if (assetType === AssetType.Residential)
+      RebasingCutoffDates.nonUkResidentsResidentialProperty
+    else RebasingCutoffDates.nonUkResidentsNonResidentialProperty
+
 }
