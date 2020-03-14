@@ -19,7 +19,9 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 import cats.data.EitherT
 import cats.instances.boolean._
 import cats.instances.future._
+import cats.instances.list._
 import cats.syntax.either._
+import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.data.Forms.{mapping, of}
@@ -360,7 +362,7 @@ class MultipleDisposalsTriageController @Inject() (
                   val result =
                     for {
                       taxYear <- if (taxYearAfter6April2020) taxYearService.taxYear(LocalDateUtils.today())
-                                else EitherT.pure(None)
+                                else EitherT.pure[Future, Error](None)
                       answers <- EitherT.fromEither[Future](
                                   updateTaxYearToAnswers(taxYearAfter6April2020, taxYear, answers)
                                 )
@@ -492,17 +494,27 @@ class MultipleDisposalsTriageController @Inject() (
           case IncompleteMultipleDisposalsAnswers(_, _, None, _, _, _, _, _) =>
             Redirect(routes.MultipleDisposalsTriageController.wereYouAUKResident())
 
-          case IncompleteMultipleDisposalsAnswers(_, _, Some(true), _, None, _, _, _) =>
-            Redirect(routes.MultipleDisposalsTriageController.wereAllPropertiesResidential())
-
           case IncompleteMultipleDisposalsAnswers(_, _, Some(false), None, _, _, _, _) =>
             Redirect(routes.MultipleDisposalsTriageController.countryOfResidence())
 
-          case IncompleteMultipleDisposalsAnswers(_, _, Some(false), Some(_), _, None, _, _) =>
+          case IncompleteMultipleDisposalsAnswers(_, _, Some(false), _, _, None, _, _) =>
             Redirect(routes.MultipleDisposalsTriageController.assetTypeForNonUkResidents())
+
+          case IncompleteMultipleDisposalsAnswers(_, _, Some(false), _, _, Some(assetTypes), _, _)
+              if (assetTypes =!= List(AssetType.Residential) && assetTypes =!= List(AssetType.NonResidential)) =>
+            Redirect(routes.CommonTriageQuestionsController.assetTypeNotYetImplemented())
+
+          case IncompleteMultipleDisposalsAnswers(_, _, Some(true), _, None, _, _, _) =>
+            Redirect(routes.MultipleDisposalsTriageController.wereAllPropertiesResidential())
 
           case IncompleteMultipleDisposalsAnswers(_, _, Some(true), _, Some(false), _, _, _) =>
             Redirect(routes.CommonTriageQuestionsController.ukResidentCanOnlyDisposeResidential())
+
+          case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, _, None, _) =>
+            Redirect(routes.MultipleDisposalsTriageController.whenWereContractsExchanged())
+
+          case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, _, Some(false), _) =>
+            Redirect(routes.CommonTriageQuestionsController.disposalDateTooEarly())
 
           case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, _, Some(true), Some(_)) =>
             Ok(s"All properties contracts were exchanged after 06th April, 2020")
@@ -510,20 +522,6 @@ class MultipleDisposalsTriageController @Inject() (
           case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, _, Some(true), None) =>
             logger.warn("No tax year was found when we expected one")
             errorHandler.errorResult()
-
-          case IncompleteMultipleDisposalsAnswers(_, _, Some(false), _, _, Some(assetTypes), _, _) =>
-            assetTypes match {
-              case List(AssetType.Residential) | List(AssetType.NonResidential) =>
-                Redirect(routes.MultipleDisposalsTriageController.whenWereContractsExchanged())
-              case _ =>
-                Redirect(routes.CommonTriageQuestionsController.assetTypeNotYetImplemented())
-            }
-
-          case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, _, None, _) =>
-            Redirect(routes.MultipleDisposalsTriageController.whenWereContractsExchanged())
-
-          case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, _, Some(false), _) =>
-            Redirect(routes.CommonTriageQuestionsController.disposalDateTooEarly())
 
           case c: CompleteMultipleDisposalsAnswers =>
             Ok(s"Got $c")
