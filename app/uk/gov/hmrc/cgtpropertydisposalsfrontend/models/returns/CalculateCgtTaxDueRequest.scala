@@ -31,7 +31,8 @@ final case class CalculateCgtTaxDueRequest(
   reliefDetails: CompleteReliefDetailsAnswers,
   exemptionAndLosses: CompleteExemptionAndLossesAnswers,
   estimatedIncome: AmountInPence,
-  personalAllowance: AmountInPence
+  personalAllowance: AmountInPence,
+  initialGainOrLoss: Option[AmountInPence]
 )
 
 object CalculateCgtTaxDueRequest {

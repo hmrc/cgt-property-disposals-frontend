@@ -33,7 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalDraftReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AmountInPenceWithSource, SingleDisposalDraftReturn, Source}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -68,7 +68,7 @@ class InitialGainOrLossControllerSpec
   implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
 
   def sessionWithState(
-    initialGainOrLoss: Option[AmountInPence]
+    initialGainOrLoss: Option[AmountInPenceWithSource]
   ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) = {
     val draftReturn = sample[SingleDisposalDraftReturn].copy(initialGainOrLoss = initialGainOrLoss)
     val journey     = sample[FillingOutReturn].copy(draftReturn                = draftReturn)
@@ -121,8 +121,9 @@ class InitialGainOrLossControllerSpec
       "display the page with backlink to check your answers" when {
 
         "initialGainOrLoss is present in returnDraft" in {
-          val draftReturn      = sample[SingleDisposalDraftReturn].copy(initialGainOrLoss = Some(AmountInPence(300L)))
-          val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn                = draftReturn)
+          val draftReturn = sample[SingleDisposalDraftReturn]
+            .copy(initialGainOrLoss = Some(AmountInPenceWithSource(AmountInPence(300L), Source.UserSupplied)))
+          val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn = draftReturn)
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -162,8 +163,10 @@ class InitialGainOrLossControllerSpec
       "show a technical error page" when {
 
         "there is an error updating the draft return in return service " in {
-          val (session, journey, draftReturn) = sessionWithState(Some(AmountInPence(1L)))
-          val updatedDraftReturn              = draftReturn.copy(initialGainOrLoss = Some(AmountInPence(0L)))
+          val (session, journey, draftReturn) =
+            sessionWithState(Some(AmountInPenceWithSource(AmountInPence(1L), Source.UserSupplied)))
+          val updatedDraftReturn =
+            draftReturn.copy(initialGainOrLoss = Some(AmountInPenceWithSource(AmountInPence(0L), Source.UserSupplied)))
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -180,8 +183,9 @@ class InitialGainOrLossControllerSpec
 
         "there is an error updating the session" in {
           val (session, journey, draftReturn) = sessionWithState(None)
-          val updatedDraftReturn              = draftReturn.copy(initialGainOrLoss = Some(AmountInPence(0L)))
-          val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
+          val updatedDraftReturn =
+            draftReturn.copy(initialGainOrLoss = Some(AmountInPenceWithSource(AmountInPence(0L), Source.UserSupplied)))
+          val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -274,9 +278,11 @@ class InitialGainOrLossControllerSpec
       "redirect to check your answers" when {
 
         "initial gain or loss has been entered correctly" in {
-          val (session, journey, draftReturn) = sessionWithState(Some(AmountInPence(500L)))
-          val newDraftReturn                  = draftReturn.copy(initialGainOrLoss = Some(AmountInPence(600)))
-          val updatedJourney                  = journey.copy(draftReturn = newDraftReturn)
+          val (session, journey, draftReturn) =
+            sessionWithState(Some(AmountInPenceWithSource(AmountInPence(500L), Source.UserSupplied)))
+          val newDraftReturn =
+            draftReturn.copy(initialGainOrLoss = Some(AmountInPenceWithSource(AmountInPence(600), Source.UserSupplied)))
+          val updatedJourney = journey.copy(draftReturn = newDraftReturn)
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -298,7 +304,8 @@ class InitialGainOrLossControllerSpec
 
       "should not call returnService" when {
         "the same amount of initialGainOrLoss as in the session draftReturn is entered" in {
-          val (session, _, _) = sessionWithState(Some(AmountInPence(600L)))
+          val (session, _, _) =
+            sessionWithState(Some(AmountInPenceWithSource(AmountInPence(600L), Source.UserSupplied)))
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -333,7 +340,7 @@ class InitialGainOrLossControllerSpec
       "have proper contents" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(sessionWithState(Some(AmountInPence(1L)))._1)
+          mockGetSession(sessionWithState(Some(AmountInPenceWithSource(AmountInPence(1L), Source.UserSupplied)))._1)
         }
 
         checkPageIsDisplayed(
@@ -358,7 +365,7 @@ class InitialGainOrLossControllerSpec
       "redirect to taskList" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(sessionWithState(Some(AmountInPence(1L)))._1)
+          mockGetSession(sessionWithState(Some(AmountInPenceWithSource(AmountInPence(1L), Source.UserSupplied)))._1)
         }
         checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
       }
