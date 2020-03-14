@@ -58,7 +58,7 @@ class AcquisitionDetailsController @Inject() (
   returnsService: ReturnsService,
   cc: MessagesControllerComponents,
   val config: Configuration,
-  val rebasingEligabilityUtil: RebasingEligabilityUtil,
+  val rebasingEligabilityUtil: RebasingEligibilityUtil,
   acquisitionMethodPage: pages.acquisition_method,
   acquisitionDatePage: pages.acquisition_date,
   acquisitionPricePage: pages.acquisition_price,
@@ -135,10 +135,10 @@ class AcquisitionDetailsController @Inject() (
   )(form: AcquisitionDetailsAnswers => Form[A])(
     page: (Form[A], Call) => P
   )(
-    requiredPreviousAnswer: AcquisitionDetailsAnswers => Option[R],
+    requiredPreviousAnswer: AcquisitionDetailsAnswers => Boolean,
     redirectToIfNoRequiredPreviousAnswer: Call
   ): Future[Result] =
-    if (requiredPreviousAnswer(currentAnswers).isDefined) {
+    if (requiredPreviousAnswer(currentAnswers)) {
       val backLink = currentAnswers.fold(
         _ => redirectToIfNoRequiredPreviousAnswer,
         _ => routes.AcquisitionDetailsController.checkYourAnswers()
@@ -156,14 +156,14 @@ class AcquisitionDetailsController @Inject() (
   )(form: Form[A])(
     page: (Form[A], Call) => P
   )(
-    requiredPreviousAnswer: AcquisitionDetailsAnswers => Option[R],
+    requiredPreviousAnswer: AcquisitionDetailsAnswers => Boolean,
     redirectToIfNoRequiredPreviousAnswer: Call
   )(
     updateAnswers: (A, AcquisitionDetailsAnswers) => AcquisitionDetailsAnswers
   )(
     implicit request: RequestWithSessionData[_]
   ): Future[Result] =
-    if (requiredPreviousAnswer(currentAnswers).isDefined) {
+    if (requiredPreviousAnswer(currentAnswers)) {
       lazy val backLink = currentAnswers.fold(
         _ => redirectToIfNoRequiredPreviousAnswer,
         _ => routes.AcquisitionDetailsController.checkYourAnswers()
@@ -211,7 +211,7 @@ class AcquisitionDetailsController @Inject() (
         )(
           page = acquisitionMethodPage(_, _)
         )(
-          requiredPreviousAnswer = _ => Some(()),
+          requiredPreviousAnswer = _ => Some(()).isDefined,
           controllers.returns.routes.TaskListController.taskList()
         )
     }
@@ -227,7 +227,7 @@ class AcquisitionDetailsController @Inject() (
         )(
           acquisitionMethodForm
         )(acquisitionMethodPage(_, _))(
-          requiredPreviousAnswer = _ => Some(()),
+          requiredPreviousAnswer = _ => noAnswersRequired,
           controllers.returns.routes.TaskListController.taskList()
         )(
           updateAnswers = {
@@ -258,7 +258,7 @@ class AcquisitionDetailsController @Inject() (
             requiredPreviousAnswer = _.fold(
               _.acquisitionMethod,
               c => Some(c.acquisitionMethod)
-            ),
+            ).isDefined,
             redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionMethod()
           )
         }
@@ -281,7 +281,7 @@ class AcquisitionDetailsController @Inject() (
                 requiredPreviousAnswer = _.fold(
                   _.acquisitionMethod,
                   c => Some(c.acquisitionMethod)
-                ),
+                ).isDefined,
                 redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionMethod()
               )(
                 updateAnswers = {
@@ -344,7 +344,7 @@ class AcquisitionDetailsController @Inject() (
               requiredPreviousAnswer = _.fold(
                 _.acquisitionDate,
                 c => Some(c.acquisitionDate)
-              ),
+              ).isDefined,
               redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionDate()
             )
           }
@@ -367,7 +367,7 @@ class AcquisitionDetailsController @Inject() (
               requiredPreviousAnswer = _.fold(
                 _.acquisitionDate,
                 c => Some(c.acquisitionDate)
-              ),
+              ).isDefined,
               redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionDate()
             )(
               updateAnswers = {
@@ -390,7 +390,7 @@ class AcquisitionDetailsController @Inject() (
           case (assetType, wasUkResident) =>
             withAcquisitionDate(answers) { acquisitionDate =>
               rebasingEligabilityUtil
-                .rebasingCutOffDate(acquisitionDate, assetType, wasUkResident)
+                .invalidForRebasing(acquisitionDate, assetType, wasUkResident)
                 .fold[Future[Result]](
                   Redirect(routes.AcquisitionDetailsController.checkYourAnswers())
                 ) { rebaseDate =>
@@ -408,9 +408,9 @@ class AcquisitionDetailsController @Inject() (
                       rebasingEligabilityUtil.getRebasingCutOffDate(assetType, wasUkResident)
                     )
                   )(
-                    requiredPreviousAnswer =
-                      if (wasUkResident) _.fold(_.acquisitionMethod, c => Some(c.acquisitionMethod))
-                      else _.fold(_.acquisitionMethod, c => Some(c.acquisitionMethod)),
+                    requiredPreviousAnswer = answers =>
+                      rebasingEligabilityUtil
+                        .shouldRedirect(wasUkResident, assetType, answers, acquisitionDate),
                     redirectToIfNoRequiredPreviousAnswer =
                       if (wasUkResident) routes.AcquisitionDetailsController.acquisitionDate()
                       else routes.AcquisitionDetailsController.acquisitionPrice()
@@ -429,7 +429,7 @@ class AcquisitionDetailsController @Inject() (
             case (assetType, wasUkResident) =>
               withAcquisitionDate(answers) { acquisitionDate =>
                 rebasingEligabilityUtil
-                  .rebasingCutOffDate(acquisitionDate, assetType, wasUkResident)
+                  .invalidForRebasing(acquisitionDate, assetType, wasUkResident)
                   .fold[Future[Result]](
                     Redirect(routes.AcquisitionDetailsController.checkYourAnswers())
                   ) { rebaseDate =>
@@ -438,24 +438,39 @@ class AcquisitionDetailsController @Inject() (
                     )(
                       page = {
                         case (form, backLink) =>
-                          val p = form.copy(errors =
-                            form.errors.map(_.copy(args = Seq(LocalDateUtils.govDisplayFormat(rebaseDate))))
+                          val p = form.copy(errors = form.errors
+                            .map(_.copy(args = Seq(LocalDateUtils.govDisplayFormat(rebaseDate))))
                           )
                           rebasedAcquisitionPricePage(p, backLink, rebaseDate)
                       }
                     )(
-                      requiredPreviousAnswer = _.fold(
-                        _.acquisitionDate,
-                        c => Some(c.acquisitionDate)
-                      ),
-                      redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionDate()
+                      requiredPreviousAnswer = answers => {
+                        if (wasUkResident) noAnswersRequired
+                        else answers.fold(_.acquisitionPrice, c => Some(c.acquisitionPrice)).isDefined
+                      },
+                      redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionPrice()
                     )(
                       updateAnswers = {
                         case (p, answers) =>
-                          answers.fold(
-                            _.copy(rebasedAcquisitionPrice = Some(AmountInPence.fromPounds(p))),
-                            _.copy(rebasedAcquisitionPrice = Some(AmountInPence.fromPounds(p)))
-                          )
+                          if (wasUkResident) {
+                            answers.fold(
+                              _.copy(
+                                rebasedAcquisitionPrice = Some(AmountInPence.fromPounds(p)),
+                                shouldUseRebase         = Some(true),
+                                acquisitionPrice        = Some(AmountInPence.fromPounds(p))
+                              ),
+                              _.copy(
+                                rebasedAcquisitionPrice = Some(AmountInPence.fromPounds(p)),
+                                shouldUseRebase         = true,
+                                acquisitionPrice        = AmountInPence.fromPounds(p)
+                              )
+                            )
+                          } else {
+                            answers.fold(
+                              _.copy(rebasedAcquisitionPrice = Some(AmountInPence.fromPounds(p))),
+                              _.copy(rebasedAcquisitionPrice = Some(AmountInPence.fromPounds(p)))
+                            )
+                          }
                       }
                     )
                   }
@@ -481,9 +496,9 @@ class AcquisitionDetailsController @Inject() (
               )(
                 requiredPreviousAnswer = { a =>
                   if (rebaseDate.isDefined)
-                    a.fold(_.rebasedAcquisitionPrice, _.rebasedAcquisitionPrice)
+                    a.fold(_.rebasedAcquisitionPrice, _.rebasedAcquisitionPrice).isDefined
                   else
-                    a.fold(_.acquisitionPrice, c => Some(c.acquisitionPrice))
+                    a.fold(_.acquisitionPrice, c => Some(c.acquisitionPrice)).isDefined
                 },
                 redirectToIfNoRequiredPreviousAnswer = {
                   if (rebaseDate.isDefined)
@@ -504,7 +519,6 @@ class AcquisitionDetailsController @Inject() (
           case (assetType, wasUkResident) =>
             withAcquisitionDate(answers) { acquisitionDate =>
               val rebaseDate = rebasingEligabilityUtil.rebasingCutOffDate(acquisitionDate, assetType, wasUkResident)
-
               commonSubmitBehaviour(
                 fillingOutReturn,
                 draftReturn,
@@ -514,9 +528,9 @@ class AcquisitionDetailsController @Inject() (
               )(page = improvementCostsPage(_, _))(
                 requiredPreviousAnswer = { answers =>
                   if (rebaseDate.isDefined)
-                    answers.fold(_.rebasedAcquisitionPrice, _.rebasedAcquisitionPrice)
+                    answers.fold(_.rebasedAcquisitionPrice, _.rebasedAcquisitionPrice).isDefined
                   else
-                    answers.fold(_.acquisitionPrice, c => Some(c.acquisitionPrice))
+                    answers.fold(_.acquisitionPrice, c => Some(c.acquisitionPrice)).isDefined
                 },
                 redirectToIfNoRequiredPreviousAnswer = {
                   if (rebaseDate.isDefined)
@@ -540,8 +554,8 @@ class AcquisitionDetailsController @Inject() (
 
   def shouldUseRebase(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
-      case (_, fillingOutReturn, answers) =>
-        withAssetTypeAndResidentialStatus(fillingOutReturn, answers) {
+      case (_, _, draftReturn, answers) =>
+        withAssetTypeAndResidentialStatus(draftReturn, answers) {
           case (assetType, wasAUkResident) =>
             Ok(
               shouldUseRebasePage(
@@ -556,28 +570,40 @@ class AcquisitionDetailsController @Inject() (
 
   def shouldUseRebaseSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
-      case (_, fillingOutReturn, answers) =>
-        commonSubmitBehaviour(
-          fillingOutReturn,
-          answers
-        )(
-          shouldUseRebaseForm
-        )(page = shouldUseRebasePage(_, _, LocalDate.now()))( //remove
-          requiredPreviousAnswer               = _ => Some(()),
-          redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.shouldUseRebase()
-        )(
-          updateAnswers = {
-            case (p, answers) =>
-              answers.fold(
-                _.copy(
-                  shouldUseRebase = Some(p)
-                ),
-                _.copy(
-                  shouldUseRebase = p
-                )
-              )
-          }
-        )
+      case (_, fillingOutReturn, draftReturn, answers) =>
+        withAssetTypeAndResidentialStatus(draftReturn, answers) {
+          case (assetType, wasUkResident) =>
+            withAcquisitionDate(answers) { acquisitionDate =>
+              rebasingEligabilityUtil
+                .invalidForRebasing(acquisitionDate, assetType, wasUkResident)
+                .fold[Future[Result]](
+                  Redirect(routes.AcquisitionDetailsController.checkYourAnswers())
+                ) { rebaseDate =>
+                  commonSubmitBehaviour(
+                    fillingOutReturn,
+                    draftReturn,
+                    answers
+                  )(
+                    shouldUseRebaseForm
+                  )(page = shouldUseRebasePage(_, _, rebaseDate))(
+                    requiredPreviousAnswer               = _ => noAnswersRequired,
+                    redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.shouldUseRebase()
+                  )(
+                    updateAnswers = {
+                      case (p, answers) =>
+                        answers.fold(
+                          _.copy(
+                            shouldUseRebase = Some(p)
+                          ),
+                          _.copy(
+                            shouldUseRebase = p
+                          )
+                        )
+                    }
+                  )
+                }
+            }
+        }
     }
   }
 
@@ -595,7 +621,7 @@ class AcquisitionDetailsController @Inject() (
           requiredPreviousAnswer = _.fold(
             _.improvementCosts,
             c => Some(c.improvementCosts)
-          ),
+          ).isDefined,
           redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.improvementCosts()
         )
     }
@@ -614,7 +640,7 @@ class AcquisitionDetailsController @Inject() (
           requiredPreviousAnswer = _.fold(
             _.improvementCosts,
             c => Some(c.improvementCosts)
-          ),
+          ).isDefined,
           redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.improvementCosts()
         )(
           updateAnswers = {
@@ -635,7 +661,14 @@ class AcquisitionDetailsController @Inject() (
           case (assetType, wasAUkResident) =>
             answers match {
               case c: CompleteAcquisitionDetailsAnswers =>
-                Ok(checkYouAnswersPage(c))
+                Ok(
+                  checkYouAnswersPage(
+                    c,
+                    rebasingEligabilityUtil.getRebasingCutOffDate(assetType, wasAUkResident),
+                    wasAUkResident,
+                    rebasingEligabilityUtil.isEligibleForRebase(wasAUkResident, assetType, c.acquisitionDate.value)
+                  )
+                )
 
               case IncompleteAcquisitionDetailsAnswers(None, _, _, _, _, _, _) =>
                 Redirect(routes.AcquisitionDetailsController.acquisitionMethod())
@@ -644,17 +677,17 @@ class AcquisitionDetailsController @Inject() (
                 Redirect(routes.AcquisitionDetailsController.acquisitionDate())
 
               case IncompleteAcquisitionDetailsAnswers(_, Some(date), None, _, _, _, _)
-                  if (rebasingEligabilityUtil.isEligableForPrice(wasAUkResident, assetType, date.value)) =>
+                  if (rebasingEligabilityUtil.isEligibleForAcquisitionPrice(wasAUkResident, assetType, date.value)) =>
                 Redirect(routes.AcquisitionDetailsController.acquisitionPrice())
 
               case IncompleteAcquisitionDetailsAnswers(_, Some(date), _, None, _, _, _)
                   if (rebasingEligabilityUtil
-                    .isEligableForRebase(wasAUkResident, assetType, date.value)) => //logic here
+                    .isEligibleForRebase(wasAUkResident, assetType, date.value)) => //logic here
                 Redirect(routes.AcquisitionDetailsController.rebasedAcquisitionPrice())
 
               case IncompleteAcquisitionDetailsAnswers(_, Some(date), _, _, _, _, None)
                   if (!wasAUkResident && rebasingEligabilityUtil
-                    .isEligableForRebase(wasAUkResident, assetType, date.value)) =>
+                    .isEligibleForRebase(wasAUkResident, assetType, date.value)) =>
                 Redirect(routes.AcquisitionDetailsController.shouldUseRebase())
 
               case IncompleteAcquisitionDetailsAnswers(_, _, _, _, None, _, _) =>
@@ -663,8 +696,9 @@ class AcquisitionDetailsController @Inject() (
               case IncompleteAcquisitionDetailsAnswers(_, _, _, _, _, None, _) =>
                 Redirect(routes.AcquisitionDetailsController.acquisitionFees())
 
-              case IncompleteAcquisitionDetailsAnswers(Some(m), Some(d), Some(p), r, Some(i), Some(f), Some(b)) =>
-                val completeAnswers = CompleteAcquisitionDetailsAnswers(m, d, p, r, i, f, b)
+              case IncompleteAcquisitionDetailsAnswers(Some(m), Some(d), p, r, Some(i), Some(f), b) =>
+                val completeAnswers =
+                  CompleteAcquisitionDetailsAnswers(m, d, p.getOrElse(i), r, i, f, b.getOrElse(false))
                 val newDraftReturn =
                   draftReturn.copy(acquisitionDetailsAnswers = Some(completeAnswers))
 
@@ -681,10 +715,22 @@ class AcquisitionDetailsController @Inject() (
                       )
                 } yield ()
 
-                result.fold({ e =>
-                  logger.warn("Could not update session", e)
-                  errorHandler.errorResult()
-                }, _ => Ok(checkYouAnswersPage(completeAnswers)))
+                result.fold(
+                  { e =>
+                    logger.warn("Could not update session", e)
+                    errorHandler.errorResult()
+                  },
+                  _ =>
+                    Ok(
+                      checkYouAnswersPage(
+                        completeAnswers,
+                        rebasingEligabilityUtil.getRebasingCutOffDate(assetType, wasAUkResident),
+                        wasAUkResident,
+                        rebasingEligabilityUtil
+                          .isEligibleForRebase(wasAUkResident, assetType, completeAnswers.acquisitionDate.value)
+                      )
+                    )
+                )
             }
         }
     }
@@ -697,6 +743,8 @@ class AcquisitionDetailsController @Inject() (
 }
 
 object AcquisitionDetailsController {
+
+  val noAnswersRequired = true
 
   val acquisitionMethodForm: Form[AcquisitionMethod] = {
     val formatter: Formatter[AcquisitionMethod] = {
