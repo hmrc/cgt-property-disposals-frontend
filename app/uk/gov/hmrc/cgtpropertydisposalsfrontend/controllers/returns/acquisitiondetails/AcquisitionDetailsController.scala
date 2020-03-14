@@ -65,7 +65,8 @@ class AcquisitionDetailsController @Inject() (
   improvementCostsPage: pages.improvement_costs,
   acquisitionFeesPage: pages.acquisition_fees,
   rebasedAcquisitionPricePage: pages.rebased_acquisition_price,
-  checkYouAnswersPage: pages.check_your_answers
+  checkYouAnswersPage: pages.check_your_answers,
+  shouldUseRebasePage: pages.should_use_rebase
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -310,7 +311,8 @@ class AcquisitionDetailsController @Inject() (
                             None,
                             None,
                             Some(c.improvementCosts),
-                            Some(c.acquisitionFees)
+                            Some(c.acquisitionFees),
+                            Some(c.shouldUseRebase)
                           )
                       )
                     } else {
@@ -403,7 +405,7 @@ class AcquisitionDetailsController @Inject() (
                     page = rebasedAcquisitionPricePage(
                       _,
                       _,
-                      rebasingEligabilityUtil.getRebasingCutOffDate(acquisitionDate, assetType, wasUkResident)
+                      rebasingEligabilityUtil.getRebasingCutOffDate(assetType, wasUkResident)
                     )
                   )(
                     requiredPreviousAnswer =
@@ -443,10 +445,10 @@ class AcquisitionDetailsController @Inject() (
                       }
                     )(
                       requiredPreviousAnswer = _.fold(
-                        _.acquisitionPrice,
-                        c => Some(c.acquisitionPrice)
+                        _.acquisitionDate,
+                        c => Some(c.acquisitionDate)
                       ),
-                      redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionPrice()
+                      redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionDate()
                     )(
                       updateAnswers = {
                         case (p, answers) =>
@@ -536,6 +538,49 @@ class AcquisitionDetailsController @Inject() (
     }
   }
 
+  def shouldUseRebase(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
+      case (_, fillingOutReturn, answers) =>
+        withAssetTypeAndResidentialStatus(fillingOutReturn, answers) {
+          case (assetType, wasAUkResident) =>
+            Ok(
+              shouldUseRebasePage(
+                shouldUseRebaseForm,
+                routes.AcquisitionDetailsController.rebasedAcquisitionPrice(),
+                rebasingEligabilityUtil.getRebasingCutOffDate(assetType, wasAUkResident)
+              )
+            )
+        }
+    }
+  }
+
+  def shouldUseRebaseSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
+      case (_, fillingOutReturn, answers) =>
+        commonSubmitBehaviour(
+          fillingOutReturn,
+          answers
+        )(
+          shouldUseRebaseForm
+        )(page = shouldUseRebasePage(_, _, LocalDate.now()))( //remove
+          requiredPreviousAnswer               = _ => Some(()),
+          redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.shouldUseRebase()
+        )(
+          updateAnswers = {
+            case (p, answers) =>
+              answers.fold(
+                _.copy(
+                  shouldUseRebase = Some(p)
+                ),
+                _.copy(
+                  shouldUseRebase = p
+                )
+              )
+          }
+        )
+    }
+  }
+
   def acquisitionFees(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
       case (_, _, _, answers) =>
@@ -592,28 +637,34 @@ class AcquisitionDetailsController @Inject() (
               case c: CompleteAcquisitionDetailsAnswers =>
                 Ok(checkYouAnswersPage(c))
 
-              case IncompleteAcquisitionDetailsAnswers(None, _, _, _, _, _) =>
+              case IncompleteAcquisitionDetailsAnswers(None, _, _, _, _, _, _) =>
                 Redirect(routes.AcquisitionDetailsController.acquisitionMethod())
 
-              case IncompleteAcquisitionDetailsAnswers(_, None, _, _, _, _) =>
+              case IncompleteAcquisitionDetailsAnswers(_, None, _, _, _, _, _) =>
                 Redirect(routes.AcquisitionDetailsController.acquisitionDate())
 
-              case IncompleteAcquisitionDetailsAnswers(_, Some(date), None, _, _, _)
+              case IncompleteAcquisitionDetailsAnswers(_, Some(date), None, _, _, _, _)
                   if (rebasingEligabilityUtil.isEligableForPrice(wasAUkResident, assetType, date.value)) =>
                 Redirect(routes.AcquisitionDetailsController.acquisitionPrice())
 
-              case IncompleteAcquisitionDetailsAnswers(_, Some(date), _, None, _, _)
-                  if (rebasingEligabilityUtil.isEligableForRebase(wasAUkResident, assetType, date.value)) =>
+              case IncompleteAcquisitionDetailsAnswers(_, Some(date), _, None, _, _, _)
+                  if (rebasingEligabilityUtil
+                    .isEligableForRebase(wasAUkResident, assetType, date.value)) => //logic here
                 Redirect(routes.AcquisitionDetailsController.rebasedAcquisitionPrice())
 
-              case IncompleteAcquisitionDetailsAnswers(_, _, _, _, None, _) =>
+              case IncompleteAcquisitionDetailsAnswers(_, Some(date), _, _, _, _, None)
+                  if (!wasAUkResident && rebasingEligabilityUtil
+                    .isEligableForRebase(wasAUkResident, assetType, date.value)) =>
+                Redirect(routes.AcquisitionDetailsController.shouldUseRebase())
+
+              case IncompleteAcquisitionDetailsAnswers(_, _, _, _, None, _, _) =>
                 Redirect(routes.AcquisitionDetailsController.improvementCosts())
 
-              case IncompleteAcquisitionDetailsAnswers(_, _, _, _, _, None) =>
+              case IncompleteAcquisitionDetailsAnswers(_, _, _, _, _, None, _) =>
                 Redirect(routes.AcquisitionDetailsController.acquisitionFees())
 
-              case IncompleteAcquisitionDetailsAnswers(Some(m), Some(d), Some(p), r, Some(i), Some(f)) =>
-                val completeAnswers = CompleteAcquisitionDetailsAnswers(m, d, p, r, i, f)
+              case IncompleteAcquisitionDetailsAnswers(Some(m), Some(d), Some(p), r, Some(i), Some(f), Some(b)) =>
+                val completeAnswers = CompleteAcquisitionDetailsAnswers(m, d, p, r, i, f, b)
                 val newDraftReturn =
                   draftReturn.copy(acquisitionDetailsAnswers = Some(completeAnswers))
 
@@ -715,6 +766,12 @@ object AcquisitionDetailsController {
         "rebaseAcquisitionPrice" -> of(MoneyUtils.amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds))
       )(identity)(Some(_))
     )
+
+  val shouldUseRebaseForm: Form[Boolean] = Form(
+    mapping(
+      "shouldUseRebase" -> of(BooleanFormatter.formatter)
+    )(identity)(Some(_))
+  )
 
   val improvementCostsForm: Form[BigDecimal] =
     MoneyUtils.amountInPoundsYesNoForm("improvementCosts", "improvementCostsValue")

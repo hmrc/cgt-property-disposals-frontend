@@ -731,7 +731,8 @@ class AcquisitionDetailsControllerSpec
                 None,
                 None,
                 Some(oldAnswers.improvementCosts),
-                Some(oldAnswers.acquisitionFees)
+                Some(oldAnswers.acquisitionFees),
+                Some(oldAnswers.shouldUseRebase)
               )
             )
 
@@ -1402,7 +1403,7 @@ class AcquisitionDetailsControllerSpec
 
           checkIsTechnicalErrorPage(
             performAction(
-              "rebaseAcquisitionPrice"      -> "£1",
+              "rebaseAcquisitionPrice" -> "£1",
               "rebaseAcquisitionPrice" -> price.toString
             )
           )
@@ -1412,8 +1413,8 @@ class AcquisitionDetailsControllerSpec
 
       "redirect to the check you answers page" when {
         val scenarios = List(
-          List("rebaseAcquisitionPrice" ->  "£1,234") -> AmountInPence(123400L),
-          List("rebaseAcquisitionPrice" -> "1") -> AmountInPence.zero
+          List("rebaseAcquisitionPrice" -> "£1,234") -> AmountInPence(123400L),
+          List("rebaseAcquisitionPrice" -> "1")      -> AmountInPence.zero
         )
 
         "the price submitted is valid and the journey was incomplete" in {
@@ -2255,6 +2256,87 @@ class AcquisitionDetailsControllerSpec
 
     }
 
+    "handling requests to display the should use rebase page" must {
+
+      def performAction(): Future[Result] = controller.shouldUseRebase()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+      "display the page" when {
+
+        "the user is non uk, residential and acquisition date before rebasing date" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  improvementCosts = Some(sample[AmountInPence])
+                ),
+                AssetType.Residential,
+                false
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(
+              "shouldUseRebase.title",
+              LocalDateUtils.govDisplayFormat(nonUkResidentsResidentialProperty)
+            )
+          )
+
+        }
+
+        "the user is uk and residential asset type" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  improvementCosts = Some(sample[AmountInPence])
+                ),
+                AssetType.Residential,
+                true
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("shouldUseRebase.title", LocalDateUtils.govDisplayFormat(ukResidents))
+          )
+
+        }
+
+        "the user is non uk and residential asset type" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  improvementCosts = Some(sample[AmountInPence])
+                ),
+                AssetType.NonResidential,
+                false
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(
+              "shouldUseRebase.title",
+              LocalDateUtils.govDisplayFormat(nonUkResidentsNonResidentialProperty)
+            )
+          )
+
+        }
+
+      }
+
+    }
+
     "handling requests to display the check your answers page" must {
 
       def performAction(): Future[Result] = controller.checkYourAnswers()(FakeRequest())
@@ -2265,7 +2347,8 @@ class AcquisitionDetailsControllerSpec
         sample[AmountInPence],
         Some(sample[AmountInPence]),
         sample[AmountInPence],
-        sample[AmountInPence]
+        sample[AmountInPence],
+        sample[Boolean]
       )
 
       val allQuestionsAnswered = IncompleteAcquisitionDetailsAnswers(
@@ -2274,7 +2357,8 @@ class AcquisitionDetailsControllerSpec
         Some(completeAnswers.acquisitionPrice),
         completeAnswers.rebasedAcquisitionPrice,
         Some(completeAnswers.improvementCosts),
-        Some(completeAnswers.acquisitionFees)
+        Some(completeAnswers.acquisitionFees),
+        Some(completeAnswers.shouldUseRebase)
       )
 
       behave like redirectToStartBehaviour(performAction)
@@ -2578,7 +2662,8 @@ class AcquisitionDetailsControllerSpec
                   Some(completeAcquisitionDetailsAnswers.acquisitionPrice),
                   completeAcquisitionDetailsAnswers.rebasedAcquisitionPrice,
                   Some(completeAcquisitionDetailsAnswers.improvementCosts),
-                  Some(completeAcquisitionDetailsAnswers.acquisitionFees)
+                  Some(completeAcquisitionDetailsAnswers.acquisitionFees),
+                  Some(completeAcquisitionDetailsAnswers.shouldUseRebase)
                 )
               ),
               Some(sample[AssetType]),
@@ -2610,7 +2695,8 @@ class AcquisitionDetailsControllerSpec
                   Some(completeAcquisitionDetailsAnswers.acquisitionPrice),
                   completeAcquisitionDetailsAnswers.rebasedAcquisitionPrice,
                   Some(completeAcquisitionDetailsAnswers.improvementCosts),
-                  Some(completeAcquisitionDetailsAnswers.acquisitionFees)
+                  Some(completeAcquisitionDetailsAnswers.acquisitionFees),
+                  Some(completeAcquisitionDetailsAnswers.shouldUseRebase)
                 )
               ),
               Some(sample[AssetType]),

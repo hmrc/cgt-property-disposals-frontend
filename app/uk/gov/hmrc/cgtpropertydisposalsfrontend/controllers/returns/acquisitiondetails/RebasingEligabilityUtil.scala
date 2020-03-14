@@ -31,19 +31,19 @@ class RebasingEligabilityUtil {
   def isEligableForPrice(wasAUkResident: Boolean, assetType: AssetType, purchaseDate: LocalDate): Boolean = {
     val rebaseQuery = RebaseQuery(wasAUkResident, assetType, purchaseDate)
     rebaseQuery match {
-      case RebaseQuery(true, AssetType.Residential, date) => date.isAfter(RebasingCutoffDates.ukResidents)
-      case _                                              => true
+      case RebaseQuery(true, _, date) => date.isAfter(RebasingCutoffDates.ukResidents)
+      case _                          => true
     }
   }
 
   def isEligableForRebase(wasAUkResident: Boolean, assetType: AssetType, purchaseDate: LocalDate): Boolean = {
     val rebaseQuery = RebaseQuery(wasAUkResident, assetType, purchaseDate)
     rebaseQuery match {
+      case RebaseQuery(true, AssetType.Residential, date) => date.isBefore(RebasingCutoffDates.ukResidents)
       case RebaseQuery(false, AssetType.Residential, date) =>
         date.isBefore(RebasingCutoffDates.nonUkResidentsResidentialProperty)
       case RebaseQuery(false, AssetType.NonResidential, date) =>
         date.isBefore(RebasingCutoffDates.nonUkResidentsNonResidentialProperty)
-      case RebaseQuery(true, AssetType.Residential, date) => date.isBefore(RebasingCutoffDates.ukResidents)
     }
   }
 
@@ -70,7 +70,6 @@ class RebasingEligabilityUtil {
   }
 
   def getRebasingCutOffDate(
-    acquisitionDate: AcquisitionDate,
     assetType: AssetType,
     wasUkResident: Boolean
   ): LocalDate =
