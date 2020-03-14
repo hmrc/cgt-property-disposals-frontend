@@ -1001,8 +1001,8 @@ class MultipleDisposalsTriageControllerSpec
 
         val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
 
-        "user has not answered the country of residence section and" +
-          " enters valid country" in {
+        "user has not answered the country of residence section and " +
+          "enters valid country" in {
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1027,7 +1027,8 @@ class MultipleDisposalsTriageControllerSpec
           )
         }
 
-        "user has already answered the country of residence section and re-selected different option" in {
+        "user has already answered the country of residence section and " +
+          "re-selected different option" in {
           val answers = sample[IncompleteMultipleDisposalsAnswers]
             .copy(
               countryOfResidence           = Some(country),
@@ -1067,7 +1068,8 @@ class MultipleDisposalsTriageControllerSpec
 
       "not update the session" when {
 
-        "user has already answered country of residence section and re-selected same option" in {
+        "user has already answered country of residence section and" +
+          "re-selected same option" in {
           val answers = sample[IncompleteMultipleDisposalsAnswers]
             .copy(
               numberOfProperties = Some(2),
@@ -1138,6 +1140,242 @@ class MultipleDisposalsTriageControllerSpec
             messageFromMessageKey(s"multipleDisposalsCountryOfResidence.title"), { doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
                 s"$key.error.notFound"
+              )
+              doc.title() should startWith("Error:")
+            },
+            BAD_REQUEST
+          )
+        }
+
+      }
+
+    }
+
+    "handling requests to display the asset type for non-uk residents page" must {
+
+      val (countryCode, countryName) = "HK" -> "Hong Kong"
+      val country                    = Country(countryCode, Some(countryName))
+
+      def performAction(): Future[Result] =
+        controller.assetTypeForNonUkResidents()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
+
+      "display the page" in {
+        mockAuthWithNoRetrievals()
+        mockGetSession(
+          sessionDataWithStartingNewDraftReturn(
+            IncompleteMultipleDisposalsAnswers.empty.copy(
+              individualUserType = Some(Self),
+              numberOfProperties = Some(2),
+              wasAUKResident     = Some(false),
+              countryOfResidence = Some(country)
+            )
+          )._1
+        )
+
+        checkPageIsDisplayed(
+          performAction,
+          messageFromMessageKey("multipleDisposalsAssetTypeForNonUkResidents.title"), { doc =>
+            doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
+              .countryOfResidence()
+              .url
+            doc
+              .select("#content > article > form")
+              .attr("action") shouldBe routes.MultipleDisposalsTriageController
+              .assetTypeForNonUkResidentsSubmit()
+              .url
+          }
+        )
+      }
+
+    }
+
+    "handling submits on the asset type for non-uk residents page" must {
+
+      def performAction(data: (String, String)*): Future[Result] =
+        controller.assetTypeForNonUkResidentsSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
+
+      val (countryCode, countryName) = "HK" -> "Hong Kong"
+      val country                    = Country(countryCode, Some(countryName))
+
+      val key = "multipleDisposalsAssetTypeForNonUkResidents"
+
+      "redirect to redirect to cya page" when {
+
+        val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
+          individualUserType = Some(Self),
+          numberOfProperties = Some(2),
+          wasAUKResident     = Some(false),
+          countryOfResidence = Some(country)
+        )
+
+        val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+        "user has not answered the asset type for non-uk residents section and " +
+          "selects residential checkbox" in {
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreSession(
+              session.copy(journeyStatus = Some(
+                journey.copy(
+                  newReturnTriageAnswers = Left(
+                    answers.copy(
+                      assetType = Some(List(AssetType.Residential))
+                    )
+                  )
+                )
+              )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(s"$key[]" -> "0"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+        "user has not answered the asset type for non-uk residents section and " +
+          "selects mixed use checkbox" in {
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreSession(
+              session.copy(journeyStatus = Some(
+                journey.copy(
+                  newReturnTriageAnswers = Left(
+                    answers.copy(
+                      assetType = Some(List(AssetType.MixedUse))
+                    )
+                  )
+                )
+              )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(s"$key[]" -> "2"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+        "user has not answered the asset type for non-uk residents section and " +
+          "selects more than one asset type checkboxes" in {
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreSession(
+              session.copy(journeyStatus = Some(
+                journey.copy(
+                  newReturnTriageAnswers = Left(
+                    answers.copy(
+                      assetType = Some(List(AssetType.Residential, AssetType.MixedUse))
+                    )
+                  )
+                )
+              )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(s"$key[]" -> "0", s"$key[]" -> "2"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+        "user has already answered the asset type for non-uk residents section and " +
+          "re-selected different asset type" in {
+          val answers = sample[IncompleteMultipleDisposalsAnswers]
+            .copy(
+              individualUserType = Some(Self),
+              numberOfProperties = Some(2),
+              wasAUKResident     = Some(false),
+              assetType          = Some(List(AssetType.Residential))
+            )
+
+          val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreSession(
+              session.copy(journeyStatus = Some(
+                journey.copy(
+                  newReturnTriageAnswers = Left(
+                    answers.copy(
+                      assetType = Some(List(AssetType.NonResidential))
+                    )
+                  )
+                )
+              )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(
+            performAction(s"$key[]" -> "1"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+      }
+
+      "not update the session" when {
+
+        "user has already answered the asset type for non-uk residents section and " +
+          "re-selected same asset type" in {
+          val answers = sample[IncompleteMultipleDisposalsAnswers]
+            .copy(
+              individualUserType = Some(Self),
+              numberOfProperties = Some(2),
+              wasAUKResident     = Some(false),
+              assetType          = Some(List(AssetType.Residential))
+            )
+
+          val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkIsRedirect(
+            performAction(s"$key[]" -> "0"),
+            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          )
+        }
+
+      }
+
+      "show a form error" when {
+
+        "the user submits nothing" in {
+          val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
+            individualUserType = Some(Self),
+            numberOfProperties = Some(2),
+            wasAUKResident     = Some(false),
+            countryOfResidence = Some(country),
+            assetType          = None
+          )
+          val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(s"multipleDisposalsAssetTypeForNonUkResidents.title"), { doc =>
+              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+                s"$key.error.required"
               )
               doc.title() should startWith("Error:")
             },

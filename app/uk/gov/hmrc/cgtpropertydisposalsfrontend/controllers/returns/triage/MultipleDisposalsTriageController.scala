@@ -25,7 +25,7 @@ import play.api.Configuration
 import play.api.data.Forms.{mapping, of}
 import play.api.data.format.Formatter
 import play.api.data.{Form, FormError, Forms}
-import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, Call, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
@@ -330,7 +330,12 @@ class MultipleDisposalsTriageController @Inject() (
       case (_, _, answers) =>
         val taxYearExchanged = answers.fold(_.taxYearAfter6April2020, _ => Some(true))
         val form             = taxYearExchanged.fold(taxYearExchangedForm)(taxYearExchangedForm.fill)
-        Ok(taxYearExchangedPage(form, routes.MultipleDisposalsTriageController.wereAllPropertiesResidential()))
+        Ok(
+          taxYearExchangedPage(
+            form,
+            taxYearBackLink(answers.fold(_.wasAUKResident.contains(true), _.countryOfResidence.isUk()))
+          )
+        )
     }
   }
 
@@ -506,9 +511,6 @@ class MultipleDisposalsTriageController @Inject() (
             logger.warn("No tax year was found when we expected one")
             errorHandler.errorResult()
 
-          case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, _, Some(false), _) =>
-            Redirect(routes.CommonTriageQuestionsController.disposalDateTooEarly())
-
           case IncompleteMultipleDisposalsAnswers(_, _, Some(false), _, _, Some(assetTypes), _, _) =>
             assetTypes match {
               case List(AssetType.Residential) | List(AssetType.NonResidential) =>
@@ -520,11 +522,18 @@ class MultipleDisposalsTriageController @Inject() (
           case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, _, None, _) =>
             Redirect(routes.MultipleDisposalsTriageController.whenWereContractsExchanged())
 
+          case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, _, Some(false), _) =>
+            Redirect(routes.CommonTriageQuestionsController.disposalDateTooEarly())
+
           case c: CompleteMultipleDisposalsAnswers =>
             Ok(s"Got $c")
         }
     }
   }
+
+  private def taxYearBackLink(wasAUKResident: Boolean): Call =
+    if (wasAUKResident) routes.MultipleDisposalsTriageController.wereAllPropertiesResidential()
+    else routes.MultipleDisposalsTriageController.assetTypeForNonUkResidents()
 
   private def isResidentialAssetType(assetType: List[AssetType]): Boolean =
     assetType match {
@@ -607,7 +616,9 @@ object MultipleDisposalsTriageController {
   val assetTypeForNonUkResidentsForm: Form[List[AssetType]] = {
     Form(
       mapping(
-        "multipleDisposalsAssetTypeForNonUkResidents" -> Forms.list(of(FormUtils.checkBoxAssetTypeFormFormatter))
+        "multipleDisposalsAssetTypeForNonUkResidents" -> Forms
+          .list(of(FormUtils.checkBoxAssetTypeFormFormatter))
+          .verifying("error.required", _.nonEmpty)
       )(identity)(Some(_))
     )
   }
