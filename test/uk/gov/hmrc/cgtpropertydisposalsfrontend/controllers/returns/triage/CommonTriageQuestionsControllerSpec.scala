@@ -30,12 +30,13 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsAnswers, IncompleteMultipleDisposalsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 
@@ -195,6 +196,60 @@ class CommonTriageQuestionsControllerSpec
                 doc.select("#individualUserType-1").attr("checked") shouldBe "checked"
               }
             )
+          }
+
+          "the user is an agent representing an individual" in {
+            List(
+              IndividualUserType.Self,
+              IndividualUserType.PersonalRepresentative
+            ).zipWithIndex.foreach {
+              case (value, index) =>
+                val (session, journey) =
+                  sessionDataWithStartingNewDraftReturn(
+                    Right(
+                      IncompleteSingleDisposalTriageAnswers.empty
+                    ),
+                    Right(sample[IndividualName])
+                  )
+
+                inSequence {
+                  mockAuthWithNoRetrievals()
+                  mockGetSession(
+                    session.copy(
+                      userType = Some(UserType.Agent),
+                      journeyStatus = Some(
+                        journey.copy(
+                          agentReferenceNumber = Some(sample[AgentReferenceNumber]),
+                          newReturnTriageAnswers = Right(
+                            IncompleteSingleDisposalTriageAnswers.empty.copy(
+                              individualUserType = Some(value)
+                            )
+                          )
+                        )
+                      )
+                    )
+                  )
+                }
+
+                checkPageIsDisplayed(
+                  performAction(),
+                  messageFromMessageKey("who-are-you-reporting-for.title"), { doc =>
+                    doc
+                      .select("#content > article > form")
+                      .attr("action") shouldBe routes.CommonTriageQuestionsController
+                      .whoIsIndividualRepresentingSubmit()
+                      .url
+
+                    doc.select(s"#individualUserType-$index").attr("checked") shouldBe "checked"
+                    doc.select("#individualUserType > div:nth-child(2) > label").text() shouldBe messageFromMessageKey(
+                      s"individualUserType.agent.${IndividualUserType.Self}"
+                    )
+                    doc.select("#individualUserType > div:nth-child(3) > label").text() shouldBe messageFromMessageKey(
+                      s"individualUserType.agent.${IndividualUserType.PersonalRepresentative}"
+                    )
+                  }
+                )
+            }
           }
 
         }

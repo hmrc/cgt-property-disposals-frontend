@@ -16,6 +16,7 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
@@ -32,23 +33,32 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 
 @(form: Form[IndividualUserType], backLink: Option[Call], displayReturnToSummaryLink: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
+@isAgent = @{ request.userType.contains(UserType.Agent) }
 @key = @{"individualUserType"}
 @title = @{messages("who-are-you-reporting-for.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+
 
 @optionIndex(value: IndividualUserType) = @{
     value match {
         case IndividualUserType.Self => 0
         case IndividualUserType.Capacitor => 1
-        case IndividualUserType.PersonalRepresentative => 2
+        case IndividualUserType.PersonalRepresentative => if(isAgent) 1 else 2
     }}
 
 @options = @{
-    List(
-        s"$key.Self",
-        s"$key.Capacitor",
-        s"$key.PersonalRepresentative"
-    ).map(messageKey =>Html(messages(messageKey)))
+   val messageKeys = if(isAgent)
+       List(
+           s"$key.agent.Self",
+           s"$key.agent.PersonalRepresentative"
+       )
+   else
+       List(
+           s"$key.Self",
+           s"$key.Capacitor",
+           s"$key.PersonalRepresentative"
+       )
+   messageKeys.map(messageKey =>Html(messages(messageKey)))
 }
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {

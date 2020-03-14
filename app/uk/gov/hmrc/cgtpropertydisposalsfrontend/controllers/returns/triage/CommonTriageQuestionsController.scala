@@ -36,7 +36,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposals
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, IndividualUserType, MultipleDisposalsTriageAnswers, NumberOfProperties, SingleDisposalTriageAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{FormUtils, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{FormUtils, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
@@ -78,7 +78,10 @@ class CommonTriageQuestionsController @Inject() (
         if (!isIndividual(state))
           Redirect(routes.CommonTriageQuestionsController.howManyProperties())
         else {
-          val form = getIndividualUserType(state).fold(whoAreYouReportingForForm)(whoAreYouReportingForForm.fill)
+          val form = {
+            val f = whoAreYouReportingForForm(request.userType.contains(UserType.Agent))
+            getIndividualUserType(state).fold(f)(f.fill)
+          }
 
           Ok(
             whoAreYouReportingForPage(
@@ -98,11 +101,17 @@ class CommonTriageQuestionsController @Inject() (
           if (!isIndividual(state))
             Redirect(routes.CommonTriageQuestionsController.howManyProperties())
           else {
-            whoAreYouReportingForForm
+            whoAreYouReportingForForm(request.userType.contains(UserType.Agent))
               .bindFromRequest()
               .fold(
                 formWithErrors =>
-                  BadRequest(whoAreYouReportingForPage(formWithErrors, None, state.isRight)), { individualUserType =>
+                  BadRequest(
+                    whoAreYouReportingForPage(
+                      formWithErrors,
+                      None,
+                      state.isRight
+                    )
+                  ), { individualUserType =>
                   val answers    = triageAnswersFomState(state)
                   val redirectTo = redirectToCheckYourAnswers(state)
 
@@ -437,10 +446,14 @@ class CommonTriageQuestionsController @Inject() (
 }
 object CommonTriageQuestionsController {
 
-  val whoAreYouReportingForForm: Form[IndividualUserType] = Form(
+  def whoAreYouReportingForForm(isAgent: Boolean): Form[IndividualUserType] = Form(
     mapping(
       "individualUserType" -> of(
-        FormUtils.radioFormFormatter("individualUserType", List(Self, Capacitor, PersonalRepresentative))
+        FormUtils.radioFormFormatter(
+          "individualUserType",
+          if (isAgent) List(Self, PersonalRepresentative)
+          else List(Self, Capacitor, PersonalRepresentative)
+        )
       )
     )(identity)(Some(_))
   )
