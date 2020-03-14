@@ -34,11 +34,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingNewDraftReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, FormUtils, LocalDateUtils, SessionData, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, LocalDateUtils, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, IndividualUserType, MultipleDisposalsTriageAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsAnswers, IncompleteMultipleDisposalsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, FormUtils, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -172,7 +172,7 @@ class MultipleDisposalsTriageController @Inject() (
                       wasAUKResident               = Some(wereUKResident),
                       countryOfResidence           = None,
                       wereAllPropertiesResidential = None,
-                      assetType                    = None
+                      assetTypes                   = None
                     ),
                   complete =>
                     IncompleteMultipleDisposalsAnswers(
@@ -181,7 +181,7 @@ class MultipleDisposalsTriageController @Inject() (
                       wasAUKResident               = Some(wereUKResident),
                       countryOfResidence           = None,
                       wereAllPropertiesResidential = None,
-                      assetType                    = None,
+                      assetTypes                   = None,
                       taxYearAfter6April2020       = None,
                       taxYear                      = None
                     )
@@ -208,7 +208,7 @@ class MultipleDisposalsTriageController @Inject() (
       withMultipleDisposalTriageAnswers(request) {
         case (_, _, answers) =>
           val werePropertiesResidential =
-            answers.fold(_.wereAllPropertiesResidential, c => Some(c.assetType == AssetType.Residential))
+            answers.fold(_.wereAllPropertiesResidential, c => Some(c.assetTypes == AssetType.Residential))
           val form =
             werePropertiesResidential.fold(wereAllPropertiesResidentialForm)(wereAllPropertiesResidentialForm.fill)
           Ok(wereAllPropertiesResidentialPage(form, routes.MultipleDisposalsTriageController.wereYouAUKResident()))
@@ -230,7 +230,7 @@ class MultipleDisposalsTriageController @Inject() (
                   )
                 ), { wereAllPropertiesResidential =>
                 if (answers
-                      .fold(_.wereAllPropertiesResidential, c => Some(isResidentialAssetType(c.assetType)))
+                      .fold(_.wereAllPropertiesResidential, c => Some(isResidentialAssetType(c.assetTypes)))
                       .contains(wereAllPropertiesResidential)) {
                   Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
                 } else {
@@ -238,7 +238,7 @@ class MultipleDisposalsTriageController @Inject() (
                     incomplete =>
                       incomplete.copy(
                         wereAllPropertiesResidential = Some(wereAllPropertiesResidential),
-                        assetType                    = Some(assetType(wereAllPropertiesResidential))
+                        assetTypes                   = Some(assetType(wereAllPropertiesResidential))
                       ),
                     complete =>
                       IncompleteMultipleDisposalsAnswers(
@@ -247,7 +247,7 @@ class MultipleDisposalsTriageController @Inject() (
                         wasAUKResident               = Some(true),
                         countryOfResidence           = Some(Country.uk),
                         wereAllPropertiesResidential = Some(wereAllPropertiesResidential),
-                        assetType                    = Some(assetType(wereAllPropertiesResidential)),
+                        assetTypes                   = Some(assetType(wereAllPropertiesResidential)),
                         taxYearAfter6April2020       = None,
                         taxYear                      = None
                       )
@@ -389,7 +389,7 @@ class MultipleDisposalsTriageController @Inject() (
   def assetTypeForNonUkResidents(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withMultipleDisposalTriageAnswers(request) {
       case (_, _, answers) =>
-        val assetType = answers.fold(_.assetType, c => Some(c.assetType))
+        val assetType = answers.fold(_.assetTypes, c => Some(c.assetTypes))
         val form      = assetType.fold(assetTypeForNonUkResidentsForm)(assetTypeForNonUkResidentsForm.fill)
         Ok(assetTypeForNonUkResidentsPage(form, routes.MultipleDisposalsTriageController.countryOfResidence()))
     }
@@ -409,13 +409,13 @@ class MultipleDisposalsTriageController @Inject() (
                     routes.MultipleDisposalsTriageController.countryOfResidence()
                   )
                 ), { assetType =>
-                if (answers.fold(_.assetType, c => Some(c.assetType)).contains(assetType)) {
+                if (answers.fold(_.assetTypes, c => Some(c.assetTypes)).contains(assetType)) {
                   Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
                 } else {
                   val updatedAnswers =
                     answers.fold[MultipleDisposalsTriageAnswers](
-                      _.copy(assetType = Some(assetType)),
-                      _.copy(assetType = assetType)
+                      _.copy(assetTypes = Some(assetType)),
+                      _.copy(assetTypes = assetType)
                     )
                   val newState = state.copy(newReturnTriageAnswers = Left(updatedAnswers))
 
@@ -455,8 +455,8 @@ class MultipleDisposalsTriageController @Inject() (
                 numberOfProperties           = Some(complete.numberOfProperties),
                 wasAUKResident               = Some(complete.countryOfResidence.isUk()),
                 countryOfResidence           = Some(complete.countryOfResidence),
-                wereAllPropertiesResidential = Some(isResidentialAssetType(complete.assetType)),
-                assetType                    = Some(complete.assetType),
+                wereAllPropertiesResidential = Some(isResidentialAssetType(complete.assetTypes)),
+                assetTypes                   = Some(complete.assetTypes),
                 taxYearAfter6April2020       = Some(taxYearAfter6April2020),
                 taxYear                      = taxYear
               )
@@ -615,7 +615,7 @@ object MultipleDisposalsTriageController {
     Form(
       mapping(
         "multipleDisposalsAssetTypeForNonUkResidents" -> Forms
-          .list(of(FormUtils.checkBoxAssetTypeFormFormatter))
+          .list(of(checkBoxAssetTypeFormFormatter))
           .verifying("error.required", _.nonEmpty)
       )(identity)(Some(_))
     )

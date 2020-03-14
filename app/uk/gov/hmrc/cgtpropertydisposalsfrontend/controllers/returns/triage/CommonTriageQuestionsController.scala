@@ -217,7 +217,7 @@ class CommonTriageQuestionsController @Inject() (
         case (_, state) =>
           val triageAnswers = triageAnswersFomState(state)
           val isAssetTypeNonResidential: Boolean = triageAnswers.fold(
-            _.fold(_.wereAllPropertiesResidential.contains(false), _.assetType === List(AssetType.NonResidential)),
+            _.fold(_.wereAllPropertiesResidential.contains(false), _.assetTypes === List(AssetType.NonResidential)),
             _.fold(_.assetType.contains(AssetType.NonResidential), _.assetType === AssetType.NonResidential)
           )
           val wasUkResident = triageAnswers.fold(
@@ -270,7 +270,7 @@ class CommonTriageQuestionsController @Inject() (
           assetTypes === List(AssetType.Residential) || assetTypes === List(AssetType.NonResidential)
 
         triageAnswers.fold[Option[List[AssetType]]](
-          _.fold(_.assetType, c => Some(c.assetType)),
+          _.fold(_.assetTypes, c => Some(c.assetTypes)),
           _.fold(
             i => i.assetType.map(a => List(a)),
             c => Some(List(c.assetType))

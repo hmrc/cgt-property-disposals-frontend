@@ -464,7 +464,7 @@ class MultipleDisposalsTriageControllerSpec
                       wasAUKResident               = Some(false),
                       countryOfResidence           = None,
                       wereAllPropertiesResidential = None,
-                      assetType                    = None
+                      assetTypes                   = None
                     )
                   )
                 )
@@ -566,7 +566,7 @@ class MultipleDisposalsTriageControllerSpec
                   newReturnTriageAnswers = Left(
                     answers.copy(
                       wereAllPropertiesResidential = Some(true),
-                      assetType                    = Some(List(AssetType.Residential))
+                      assetTypes                   = Some(List(AssetType.Residential))
                     )
                   )
                 )
@@ -592,7 +592,7 @@ class MultipleDisposalsTriageControllerSpec
                   newReturnTriageAnswers = Left(
                     answers.copy(
                       wereAllPropertiesResidential = Some(false),
-                      assetType                    = Some(List(AssetType.NonResidential))
+                      assetTypes                   = Some(List(AssetType.NonResidential))
                     )
                   )
                 )
@@ -611,7 +611,7 @@ class MultipleDisposalsTriageControllerSpec
           val answers = sample[IncompleteMultipleDisposalsAnswers]
             .copy(
               wereAllPropertiesResidential = Some(true),
-              assetType                    = Some(List(AssetType.Residential))
+              assetTypes                   = Some(List(AssetType.Residential))
             )
 
           val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
@@ -625,7 +625,7 @@ class MultipleDisposalsTriageControllerSpec
                   newReturnTriageAnswers = Left(
                     answers.copy(
                       wereAllPropertiesResidential = Some(false),
-                      assetType                    = Some(List(AssetType.NonResidential))
+                      assetTypes                   = Some(List(AssetType.NonResidential))
                     )
                   )
                 )
@@ -648,7 +648,7 @@ class MultipleDisposalsTriageControllerSpec
           val answers = sample[IncompleteMultipleDisposalsAnswers]
             .copy(
               wereAllPropertiesResidential = Some(true),
-              assetType                    = Some(List(AssetType.Residential))
+              assetTypes                   = Some(List(AssetType.Residential))
             )
 
           val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
@@ -714,7 +714,7 @@ class MultipleDisposalsTriageControllerSpec
               wasAUKResident               = Some(true),
               countryOfResidence           = Some(Country.uk),
               wereAllPropertiesResidential = Some(true),
-              assetType                    = Some(List(AssetType.Residential))
+              assetTypes                   = Some(List(AssetType.Residential))
             )
           )._1
         )
@@ -757,7 +757,7 @@ class MultipleDisposalsTriageControllerSpec
           wasAUKResident               = Some(true),
           countryOfResidence           = Some(Country.uk),
           wereAllPropertiesResidential = Some(true),
-          assetType                    = Some(List(AssetType.Residential))
+          assetTypes                   = Some(List(AssetType.Residential))
         )
 
         val taxYear = sample[TaxYear].copy(
@@ -828,7 +828,7 @@ class MultipleDisposalsTriageControllerSpec
               wasAUKResident               = Some(true),
               countryOfResidence           = Some(Country.uk),
               wereAllPropertiesResidential = Some(true),
-              assetType                    = Some(List(AssetType.Residential)),
+              assetTypes                   = Some(List(AssetType.Residential)),
               taxYearAfter6April2020       = Some(true),
               taxYear                      = Some(taxYear)
             )
@@ -875,7 +875,7 @@ class MultipleDisposalsTriageControllerSpec
               wasAUKResident               = Some(true),
               countryOfResidence           = Some(Country.uk),
               wereAllPropertiesResidential = Some(true),
-              assetType                    = Some(List(AssetType.Residential)),
+              assetTypes                   = Some(List(AssetType.Residential)),
               taxYearAfter6April2020       = Some(true),
               taxYear                      = Some(taxYear)
             )
@@ -1033,7 +1033,7 @@ class MultipleDisposalsTriageControllerSpec
             .copy(
               countryOfResidence           = Some(country),
               wereAllPropertiesResidential = None,
-              assetType                    = None
+              assetTypes                   = None
             )
 
           val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
@@ -1223,7 +1223,7 @@ class MultipleDisposalsTriageControllerSpec
                 journey.copy(
                   newReturnTriageAnswers = Left(
                     answers.copy(
-                      assetType = Some(List(AssetType.Residential))
+                      assetTypes = Some(List(AssetType.Residential))
                     )
                   )
                 )
@@ -1249,7 +1249,7 @@ class MultipleDisposalsTriageControllerSpec
                 journey.copy(
                   newReturnTriageAnswers = Left(
                     answers.copy(
-                      assetType = Some(List(AssetType.MixedUse))
+                      assetTypes = Some(List(AssetType.MixedUse))
                     )
                   )
                 )
@@ -1275,7 +1275,7 @@ class MultipleDisposalsTriageControllerSpec
                 journey.copy(
                   newReturnTriageAnswers = Left(
                     answers.copy(
-                      assetType = Some(List(AssetType.Residential, AssetType.MixedUse))
+                      assetTypes = Some(List(AssetType.Residential, AssetType.MixedUse))
                     )
                   )
                 )
@@ -1297,7 +1297,7 @@ class MultipleDisposalsTriageControllerSpec
               individualUserType = Some(Self),
               numberOfProperties = Some(2),
               wasAUKResident     = Some(false),
-              assetType          = Some(List(AssetType.Residential))
+              assetTypes         = Some(List(AssetType.Residential))
             )
 
           val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
@@ -1310,7 +1310,7 @@ class MultipleDisposalsTriageControllerSpec
                 journey.copy(
                   newReturnTriageAnswers = Left(
                     answers.copy(
-                      assetType = Some(List(AssetType.NonResidential))
+                      assetTypes = Some(List(AssetType.NonResidential))
                     )
                   )
                 )
@@ -1336,7 +1336,7 @@ class MultipleDisposalsTriageControllerSpec
               individualUserType = Some(Self),
               numberOfProperties = Some(2),
               wasAUKResident     = Some(false),
-              assetType          = Some(List(AssetType.Residential))
+              assetTypes         = Some(List(AssetType.Residential))
             )
 
           val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
@@ -1362,7 +1362,7 @@ class MultipleDisposalsTriageControllerSpec
             numberOfProperties = Some(2),
             wasAUKResident     = Some(false),
             countryOfResidence = Some(country),
-            assetType          = None
+            assetTypes         = None
           )
           val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
 
