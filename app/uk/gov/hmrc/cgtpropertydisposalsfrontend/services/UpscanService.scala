@@ -99,7 +99,7 @@ class UpscanServiceImpl @Inject() (
                                     Error("could not parse upscan initiate response")
                                   )
       upscanFileDescriptor <- EitherT.fromEither(augmentUpscanInitiateResponse(cgtReference, upscanInitiateRawResponse))
-      _                    <- upscanConnector.saveUpscanFileDescriptors(upscanFileDescriptor) 
+      _                    <- upscanConnector.saveUpscanFileDescriptors(upscanFileDescriptor)
     } yield UpscanInititateResponseStored(upscanFileDescriptor.fileDescriptor.reference)
 
   override def getUpscanFileDescriptor(cgtReference: CgtReference, upscanInitiateReference: UpscanInitiateReference)(

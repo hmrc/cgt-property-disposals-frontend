@@ -43,7 +43,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.PaymentMethod.Dir
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnSummary
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.PaymentsService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -168,9 +168,10 @@ class ViewReturnControllerSpec
       "display the page" in {
         forAll { sampleViewingReturn: ViewingReturn =>
           val viewingReturn = sampleViewingReturn.copy(returnSummary = sentReturn)
+          val userType      = if (sampleViewingReturn.agentReferenceNumber.isDefined) Some(UserType.Agent) else None
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(SessionData.empty.copy(journeyStatus = Some(viewingReturn)))
+            mockGetSession(SessionData.empty.copy(journeyStatus = Some(viewingReturn), userType = userType))
           }
 
           val result   = performAction()
@@ -187,7 +188,7 @@ class ViewReturnControllerSpec
           )
 
           validatePaymentsSection(document, viewingReturn)
-          validateAllCheckYourAnswersSections(document, viewingReturn.completeReturn)
+          validateAllCheckYourAnswersSections(document, viewingReturn.completeReturn, userType)
         }
       }
 
