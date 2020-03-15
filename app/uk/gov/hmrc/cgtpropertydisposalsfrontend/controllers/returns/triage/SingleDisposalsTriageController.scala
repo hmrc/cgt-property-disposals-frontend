@@ -301,6 +301,7 @@ class SingleDisposalsTriageController @Inject() (
                                   else
                                     returnsService.storeDraftReturn(
                                       updatedJourneyStatus.draftReturn,
+                                      updatedJourneyStatus.subscribedDetails.cgtReference,
                                       updatedJourneyStatus.agentReferenceNumber
                                     )
                               }
@@ -630,7 +631,6 @@ class SingleDisposalsTriageController @Inject() (
               val newDraftReturn =
                 SingleDisposalDraftReturn(
                   uuidGenerator.nextId(),
-                  state.fold(_.subscribedDetails.cgtReference, _._2.subscribedDetails.cgtReference),
                   complete,
                   None,
                   None,
@@ -642,7 +642,11 @@ class SingleDisposalsTriageController @Inject() (
                   LocalDateUtils.today()
                 )
               val result = for {
-                _ <- returnsService.storeDraftReturn(newDraftReturn, startingNewDraftReturn.agentReferenceNumber)
+                _ <- returnsService.storeDraftReturn(
+                      newDraftReturn,
+                      startingNewDraftReturn.subscribedDetails.cgtReference,
+                      startingNewDraftReturn.agentReferenceNumber
+                    )
                 newJourney = FillingOutReturn(
                   startingNewDraftReturn.subscribedDetails,
                   startingNewDraftReturn.ggCredId,
@@ -716,6 +720,7 @@ class SingleDisposalsTriageController @Inject() (
                               else
                                 returnsService.storeDraftReturn(
                                   updatedJourneyStatus.draftReturn,
+                                  updatedJourneyStatus.subscribedDetails.cgtReference,
                                   updatedJourneyStatus.agentReferenceNumber
                                 )
                           }

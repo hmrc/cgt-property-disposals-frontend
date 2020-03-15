@@ -333,7 +333,11 @@ class ExemptionAndLossesControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(
@@ -345,7 +349,11 @@ class ExemptionAndLossesControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Right(()))
             mockStoreSession(
               session.copy(
                 journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn))
@@ -647,7 +655,11 @@ class ExemptionAndLossesControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(
@@ -659,7 +671,11 @@ class ExemptionAndLossesControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Right(()))
             mockStoreSession(
               session.copy(
                 journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn))
@@ -959,7 +975,11 @@ class ExemptionAndLossesControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(
@@ -971,7 +991,11 @@ class ExemptionAndLossesControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Right(()))
             mockStoreSession(
               session.copy(
                 journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn))
@@ -1260,7 +1284,11 @@ class ExemptionAndLossesControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction("taxableGainOrLoss" -> "2"))
@@ -1270,7 +1298,11 @@ class ExemptionAndLossesControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Right(()))
             mockStoreSession(
               session.copy(
                 journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn))
@@ -1461,7 +1493,11 @@ class ExemptionAndLossesControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
+              mockStoreDraftReturn(
+                updatedDraftReturn,
+                journey.subscribedDetails.cgtReference,
+                journey.agentReferenceNumber
+              )(Left(Error("")))
             }
 
             checkIsTechnicalErrorPage(performAction())
@@ -1471,7 +1507,11 @@ class ExemptionAndLossesControllerSpec
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
-              mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
+              mockStoreDraftReturn(
+                updatedDraftReturn,
+                journey.subscribedDetails.cgtReference,
+                journey.agentReferenceNumber
+              )(Right(()))
               mockStoreSession(updatedSession)(Left(Error("")))
             }
 
@@ -1510,7 +1550,11 @@ class ExemptionAndLossesControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Right(()))
             mockStoreSession(updatedSession)(Right(()))
           }
 
@@ -1704,7 +1748,9 @@ class ExemptionAndLossesControllerSpec
     inSequence {
       mockAuthWithNoRetrievals()
       mockGetSession(session)
-      mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
+      mockStoreDraftReturn(updatedDraftReturn, journey.subscribedDetails.cgtReference, journey.agentReferenceNumber)(
+        Right(())
+      )
       mockStoreSession(
         session.copy(
           journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn))

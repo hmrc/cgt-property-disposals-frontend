@@ -343,7 +343,11 @@ class CommonTriageQuestionsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedJourney.draftReturn, fillingOutReturn.agentReferenceNumber)(Left(Error("")))
+            mockStoreDraftReturn(
+              updatedJourney.draftReturn,
+              fillingOutReturn.subscribedDetails.cgtReference,
+              fillingOutReturn.agentReferenceNumber
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction(formData))
@@ -353,7 +357,11 @@ class CommonTriageQuestionsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedJourney.draftReturn, fillingOutReturn.agentReferenceNumber)(Right(()))
+            mockStoreDraftReturn(
+              updatedJourney.draftReturn,
+              fillingOutReturn.subscribedDetails.cgtReference,
+              fillingOutReturn.agentReferenceNumber
+            )(Right(()))
             mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
           }
 
@@ -1474,7 +1482,11 @@ class CommonTriageQuestionsControllerSpec
     inSequence {
       mockAuthWithNoRetrievals()
       mockGetSession(session)
-      mockStoreDraftReturn(updatedJourney.draftReturn, journey.agentReferenceNumber)(Right(()))
+      mockStoreDraftReturn(
+        updatedJourney.draftReturn,
+        journey.subscribedDetails.cgtReference,
+        journey.agentReferenceNumber
+      )(Right(()))
       mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
     }
 

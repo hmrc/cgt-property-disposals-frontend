@@ -130,7 +130,11 @@ class CommonTriageQuestionsController @Inject() (
                               _ => EitherT.pure[Future, Error](()),
                               fillingOutReturn =>
                                 returnsService
-                                  .storeDraftReturn(fillingOutReturn.draftReturn, fillingOutReturn.agentReferenceNumber)
+                                  .storeDraftReturn(
+                                    fillingOutReturn.draftReturn,
+                                    fillingOutReturn.subscribedDetails.cgtReference,
+                                    fillingOutReturn.agentReferenceNumber
+                                  )
                             )
                         _ <- EitherT(
                               updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedState.merge)))
@@ -191,7 +195,11 @@ class CommonTriageQuestionsController @Inject() (
                           _ => EitherT.pure[Future, Error](()),
                           fillingOutReturn =>
                             returnsService
-                              .storeDraftReturn(fillingOutReturn.draftReturn, fillingOutReturn.agentReferenceNumber)
+                              .storeDraftReturn(
+                                fillingOutReturn.draftReturn,
+                                fillingOutReturn.subscribedDetails.cgtReference,
+                                fillingOutReturn.agentReferenceNumber
+                              )
                         )
                     _ <- EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedState.merge))))
                   } yield ()
@@ -341,7 +349,6 @@ class CommonTriageQuestionsController @Inject() (
             fillingOutReturn.copy(
               draftReturn = SingleDisposalDraftReturn(
                 fillingOutReturn.draftReturn.id,
-                fillingOutReturn.draftReturn.cgtReference,
                 newTriageAnswers,
                 None,
                 None,
@@ -367,7 +374,6 @@ class CommonTriageQuestionsController @Inject() (
             fillingOutReturn.copy(
               draftReturn = MultipleDisposalsDraftReturn(
                 fillingOutReturn.draftReturn.id,
-                fillingOutReturn.draftReturn.cgtReference,
                 newTriageAnswers,
                 LocalDateUtils.today()
               )

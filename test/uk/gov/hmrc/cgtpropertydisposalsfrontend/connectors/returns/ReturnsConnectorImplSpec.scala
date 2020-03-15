@@ -57,12 +57,13 @@ class ReturnsConnectorImplSpec extends WordSpec with Matchers with MockFactory w
 
     "handling requests to store a draft return" must {
 
-      val expectedUrl = s"http://host:123/draft-return"
-      val draftReturn = sample[DraftReturn]
+      val draftReturn  = sample[DraftReturn]
+      val cgtReference = sample[CgtReference]
+      val expectedUrl  = s"http://host:123/draft-return/${cgtReference.value}"
 
       behave like connectorBehaviour(
         mockPost(expectedUrl, Map.empty, draftReturn),
-        () => connector.storeDraftReturn(draftReturn)
+        () => connector.storeDraftReturn(draftReturn, cgtReference)
       )
     }
 

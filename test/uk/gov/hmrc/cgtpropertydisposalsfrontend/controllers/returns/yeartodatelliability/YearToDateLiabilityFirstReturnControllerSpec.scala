@@ -116,7 +116,6 @@ class YearToDateLiabilityFirstReturnControllerSpec
   ) =
     SingleDisposalDraftReturn(
       UUID.randomUUID(),
-      sample[CgtReference],
       sample[CompleteSingleDisposalTriageAnswers].copy(disposalDate = disposalDate),
       Some(sample[UkAddress]),
       Some(sample[CompleteDisposalDetailsAnswers]),
@@ -1462,7 +1461,11 @@ class YearToDateLiabilityFirstReturnControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Right(()))
             mockStoreSession(updatedSession)(Right(()))
           }
 
@@ -1718,7 +1721,11 @@ class YearToDateLiabilityFirstReturnControllerSpec
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(session)
-          mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
+          mockStoreDraftReturn(
+            updatedDraftReturn,
+            journey.subscribedDetails.cgtReference,
+            journey.agentReferenceNumber
+          )(Left(Error("")))
         }
 
         checkIsTechnicalErrorPage(result())
@@ -1729,7 +1736,11 @@ class YearToDateLiabilityFirstReturnControllerSpec
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(session)
-          mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
+          mockStoreDraftReturn(
+            updatedDraftReturn,
+            journey.subscribedDetails.cgtReference,
+            journey.agentReferenceNumber
+          )(Right(()))
           mockStoreSession(updatedSession)(Left(Error("")))
         }
 
@@ -1778,7 +1789,9 @@ class YearToDateLiabilityFirstReturnControllerSpec
     inSequence {
       mockAuthWithNoRetrievals()
       mockGetSession(session)
-      mockStoreDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)(Right(()))
+      mockStoreDraftReturn(updatedDraftReturn, journey.subscribedDetails.cgtReference, journey.agentReferenceNumber)(
+        Right(())
+      )
       mockStoreSession(
         session
           .copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))

@@ -83,7 +83,11 @@ class ConfirmDraftReturnControllerSpec
             journeyStatus = Some(fillingOutReturn)
           )
         )
-        mockStoreDraftReturn(updatedDraftReturn, fillingOutReturn.agentReferenceNumber)(Right(()))
+        mockStoreDraftReturn(
+          updatedDraftReturn,
+          fillingOutReturn.subscribedDetails.cgtReference,
+          fillingOutReturn.agentReferenceNumber
+        )(Right(()))
       }
 
       val result: Future[Result] = performAction()
@@ -107,7 +111,11 @@ class ConfirmDraftReturnControllerSpec
             journeyStatus = Some(fillingOutReturn)
           )
         )
-        mockStoreDraftReturn(updatedDraftReturn, fillingOutReturn.agentReferenceNumber)(
+        mockStoreDraftReturn(
+          updatedDraftReturn,
+          fillingOutReturn.subscribedDetails.cgtReference,
+          fillingOutReturn.agentReferenceNumber
+        )(
           Left(Error("Some Error"))
         )
       }
@@ -131,7 +139,11 @@ class ConfirmDraftReturnControllerSpec
             journeyStatus = Some(fillingOutReturn)
           )
         )
-        mockStoreDraftReturn(updatedDraftReturn, fillingOutReturn.agentReferenceNumber)(Right(()))
+        mockStoreDraftReturn(
+          updatedDraftReturn,
+          fillingOutReturn.subscribedDetails.cgtReference,
+          fillingOutReturn.agentReferenceNumber
+        )(Right(()))
       }
 
       checkPageIsDisplayed(

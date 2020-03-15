@@ -1999,7 +1999,6 @@ class SingleDisposalsTriageControllerSpec
         startingNewDraftReturn.agentReferenceNumber,
         SingleDisposalDraftReturn(
           uuid,
-          startingNewDraftReturn.subscribedDetails.cgtReference,
           completeAnswers,
           None,
           None,
@@ -2036,7 +2035,11 @@ class SingleDisposalsTriageControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithCompleteStartingNewDraftReturn)
             mockGetNextUUID(uuid)
-            mockStoreDraftReturn(fillingOutReturn.draftReturn, fillingOutReturn.agentReferenceNumber)(Left(Error("")))
+            mockStoreDraftReturn(
+              fillingOutReturn.draftReturn,
+              fillingOutReturn.subscribedDetails.cgtReference,
+              fillingOutReturn.agentReferenceNumber
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -2047,7 +2050,11 @@ class SingleDisposalsTriageControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithCompleteStartingNewDraftReturn)
             mockGetNextUUID(uuid)
-            mockStoreDraftReturn(fillingOutReturn.draftReturn, fillingOutReturn.agentReferenceNumber)(Right(()))
+            mockStoreDraftReturn(
+              fillingOutReturn.draftReturn,
+              fillingOutReturn.subscribedDetails.cgtReference,
+              fillingOutReturn.agentReferenceNumber
+            )(Right(()))
             mockStoreSession(sessionDataWithFillingOutDraftReturn)(Left(Error("")))
           }
 
@@ -2063,7 +2070,11 @@ class SingleDisposalsTriageControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWithCompleteStartingNewDraftReturn)
             mockGetNextUUID(uuid)
-            mockStoreDraftReturn(fillingOutReturn.draftReturn, fillingOutReturn.agentReferenceNumber)(Right(()))
+            mockStoreDraftReturn(
+              fillingOutReturn.draftReturn,
+              fillingOutReturn.subscribedDetails.cgtReference,
+              fillingOutReturn.agentReferenceNumber
+            )(Right(()))
             mockStoreSession(sessionDataWithFillingOutDraftReturn)(Right(()))
           }
 
@@ -2244,7 +2255,11 @@ class SingleDisposalsTriageControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)))
             extraMockActions()
-            mockStoreDraftReturn(updatedDraftReturn, fillingOutReturn.agentReferenceNumber)(Left(Error("")))
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              fillingOutReturn.subscribedDetails.cgtReference,
+              fillingOutReturn.agentReferenceNumber
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction(formData))
@@ -2255,7 +2270,11 @@ class SingleDisposalsTriageControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)))
             extraMockActions()
-            mockStoreDraftReturn(updatedDraftReturn, fillingOutReturn.agentReferenceNumber)(Right(()))
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              fillingOutReturn.subscribedDetails.cgtReference,
+              fillingOutReturn.agentReferenceNumber
+            )(Right(()))
             mockStoreSession(SessionData.empty.copy(journeyStatus = Some(updatedFillingOutReturn)))(Left(Error("")))
           }
 
@@ -2306,7 +2325,11 @@ class SingleDisposalsTriageControllerSpec
       mockAuthWithNoRetrievals()
       mockGetSession(SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)))
       extraMockActions()
-      mockStoreDraftReturn(updatedDraftReturn, fillingOutReturn.agentReferenceNumber)(Right(()))
+      mockStoreDraftReturn(
+        updatedDraftReturn,
+        fillingOutReturn.subscribedDetails.cgtReference,
+        fillingOutReturn.agentReferenceNumber
+      )(Right(()))
       mockStoreSession(SessionData.empty.copy(journeyStatus = Some(updatedFillingOutReturn)))(Right(()))
     }
 

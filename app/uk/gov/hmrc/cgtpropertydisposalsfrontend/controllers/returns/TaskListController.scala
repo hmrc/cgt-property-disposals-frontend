@@ -35,7 +35,8 @@ class TaskListController @Inject() (
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
   cc: MessagesControllerComponents,
-  singleDisposalTaskListPage: views.html.returns.single_disposal_task_list
+  singleDisposalTaskListPage: views.html.returns.single_disposal_task_list,
+  multipleDisposalsTaskListPage: views.html.returns.multiple_disposals_task_list
 )(implicit viewConfig: ViewConfig)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -43,11 +44,11 @@ class TaskListController @Inject() (
 
   def taskList(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
     request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(FillingOutReturn(_, _, _, draftReturn: SingleDisposalDraftReturn)) =>
-        Ok(singleDisposalTaskListPage(draftReturn))
+      case Some(FillingOutReturn(_, _, _, s: SingleDisposalDraftReturn)) =>
+        Ok(singleDisposalTaskListPage(s))
 
-      case Some(FillingOutReturn(_, _, _, draftReturn: MultipleDisposalsDraftReturn)) =>
-        sys.error("multiple disposals not handled yet")
+      case Some(FillingOutReturn(_, _, _, m: MultipleDisposalsDraftReturn)) =>
+        Ok(multipleDisposalsTaskListPage(m))
 
       case _ =>
         Redirect(baseRoutes.StartController.start())

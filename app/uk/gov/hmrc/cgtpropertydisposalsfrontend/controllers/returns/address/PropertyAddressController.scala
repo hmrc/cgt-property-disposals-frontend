@@ -91,7 +91,11 @@ class PropertyAddressController @Inject() (
             else {
               val updatedDraftReturn = d.copy(propertyAddress = Some(a))
               returnsService
-                .storeDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)
+                .storeDraftReturn(
+                  updatedDraftReturn,
+                  journey.subscribedDetails.cgtReference,
+                  journey.agentReferenceNumber
+                )
                 .map(_ => journey.copy(draftReturn = updatedDraftReturn))
             }
         }

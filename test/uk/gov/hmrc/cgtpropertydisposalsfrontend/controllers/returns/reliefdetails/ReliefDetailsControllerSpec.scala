@@ -215,7 +215,9 @@ class ReliefDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
+            mockStoreDraftReturn(newDraftReturn, journey.subscribedDetails.cgtReference, journey.agentReferenceNumber)(
+              Left(Error(""))
+            )
           }
 
           checkIsTechnicalErrorPage(
@@ -227,7 +229,9 @@ class ReliefDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
+            mockStoreDraftReturn(newDraftReturn, journey.subscribedDetails.cgtReference, journey.agentReferenceNumber)(
+              Right(())
+            )
             mockStoreSession(
               session.copy(
                 journeyStatus = Some(
@@ -455,7 +459,9 @@ class ReliefDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
+            mockStoreDraftReturn(newDraftReturn, journey.subscribedDetails.cgtReference, journey.agentReferenceNumber)(
+              Left(Error(""))
+            )
           }
 
           checkIsTechnicalErrorPage(
@@ -467,7 +473,9 @@ class ReliefDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
+            mockStoreDraftReturn(newDraftReturn, journey.subscribedDetails.cgtReference, journey.agentReferenceNumber)(
+              Right(())
+            )
             mockStoreSession(
               session.copy(journeyStatus = Some(
                 journey.copy(
@@ -789,7 +797,9 @@ class ReliefDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
+            mockStoreDraftReturn(newDraftReturn, journey.subscribedDetails.cgtReference, journey.agentReferenceNumber)(
+              Left(Error(""))
+            )
           }
 
           checkIsTechnicalErrorPage(
@@ -807,7 +817,9 @@ class ReliefDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
+            mockStoreDraftReturn(newDraftReturn, journey.subscribedDetails.cgtReference, journey.agentReferenceNumber)(
+              Right(())
+            )
             mockStoreSession(
               session.copy(journeyStatus = Some(
                 journey.copy(
@@ -1181,6 +1193,7 @@ class ReliefDetailsControllerSpec
               draftReturn.copy(
                 reliefDetailsAnswers = Some(completeAnswers)
               ),
+              journey.subscribedDetails.cgtReference,
               journey.agentReferenceNumber
             )(Left(Error("")))
           }
@@ -1198,6 +1211,7 @@ class ReliefDetailsControllerSpec
               draftReturn.copy(
                 reliefDetailsAnswers = Some(completeAnswers)
               ),
+              journey.subscribedDetails.cgtReference,
               journey.agentReferenceNumber
             )(Right(()))
             mockStoreSession(
@@ -1227,7 +1241,9 @@ class ReliefDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
+            mockStoreDraftReturn(newDraftReturn, journey.subscribedDetails.cgtReference, journey.agentReferenceNumber)(
+              Right(())
+            )
             mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
           }
 
@@ -1342,7 +1358,9 @@ class ReliefDetailsControllerSpec
     inSequence {
       mockAuthWithNoRetrievals()
       mockGetSession(session)
-      mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
+      mockStoreDraftReturn(newDraftReturn, journey.subscribedDetails.cgtReference, journey.agentReferenceNumber)(
+        Right(())
+      )
       mockStoreSession(
         session.copy(
           journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))

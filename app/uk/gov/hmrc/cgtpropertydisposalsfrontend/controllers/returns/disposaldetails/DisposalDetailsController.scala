@@ -152,7 +152,12 @@ class DisposalDetailsController @Inject() (
 
             val result = for {
               _ <- if (newDraftReturn === draftReturn) EitherT.pure(())
-                  else returnsService.storeDraftReturn(newDraftReturn, fillingOutReturn.agentReferenceNumber)
+                  else
+                    returnsService.storeDraftReturn(
+                      newDraftReturn,
+                      fillingOutReturn.subscribedDetails.cgtReference,
+                      fillingOutReturn.agentReferenceNumber
+                    )
               _ <- EitherT(
                     updateSession(sessionStore, request)(
                       _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
@@ -336,7 +341,11 @@ class DisposalDetailsController @Inject() (
                   draftReturn.copy(disposalDetailsAnswers = Some(completeAnswers))
 
                 val result = for {
-                  _ <- returnsService.storeDraftReturn(updatedDraftReturn, fillingOutReturn.agentReferenceNumber)
+                  _ <- returnsService.storeDraftReturn(
+                        updatedDraftReturn,
+                        fillingOutReturn.subscribedDetails.cgtReference,
+                        fillingOutReturn.agentReferenceNumber
+                      )
                   _ <- EitherT(
                         updateSession(sessionStore, request)(
                           _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = updatedDraftReturn)))

@@ -111,7 +111,6 @@ class CheckAllAnswersAndSubmitControllerSpec
 
     val completeDraftReturn = SingleDisposalDraftReturn(
       UUID.randomUUID(),
-      sample[CgtReference],
       completeReturn.triageAnswers,
       Some(completeReturn.propertyAddress),
       Some(completeReturn.disposalDetails),

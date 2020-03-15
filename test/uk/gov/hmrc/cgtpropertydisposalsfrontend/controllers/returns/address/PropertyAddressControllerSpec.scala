@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address
 
-import cats.data.EitherT
-import cats.instances.future._
 import org.jsoup.nodes.Document
 import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -37,7 +35,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, GGCredId}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalDraftReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
@@ -71,7 +69,11 @@ class PropertyAddressControllerSpec
   override val mockUpdateAddress: Option[(FillingOutReturn, Address, Either[Error, Unit]) => Unit] =
     Some {
       case (newDetails: FillingOutReturn, a: UkAddress, r: Either[Error, Unit]) =>
-        mockStoreDraftReturn(draftReturn.copy(propertyAddress = Some(a)), newDetails.agentReferenceNumber)(r)
+        mockStoreDraftReturn(
+          draftReturn.copy(propertyAddress = Some(a)),
+          newDetails.subscribedDetails.cgtReference,
+          newDetails.agentReferenceNumber
+        )(r)
 
       case (_, _: NonUkAddress, _) =>
         sys.error("Non UK addresses not handled in this spec")

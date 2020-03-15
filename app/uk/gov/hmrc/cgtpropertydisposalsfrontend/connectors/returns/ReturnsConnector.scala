@@ -24,7 +24,7 @@ import com.google.inject.{ImplementedBy, Inject, Singleton}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, DraftReturn, SingleDisposalDraftReturn, SubmitReturnRequest}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, DraftReturn, SubmitReturnRequest}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
@@ -35,7 +35,7 @@ import scala.util.control.NonFatal
 @ImplementedBy(classOf[ReturnsConnectorImpl])
 trait ReturnsConnector {
 
-  def storeDraftReturn(draftReturn: DraftReturn)(
+  def storeDraftReturn(draftReturn: DraftReturn, cgtReference: CgtReference)(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
@@ -68,8 +68,6 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
 
   val baseUrl: String = servicesConfig.baseUrl("cgt-property-disposals")
 
-  val storeDraftReturnUrl: String = s"$baseUrl/draft-return"
-
   def getDraftReturnsUrl(cgtReference: CgtReference): String = s"$baseUrl/draft-returns/${cgtReference.value}"
 
   val submitReturnUrl: String = s"$baseUrl/return"
@@ -77,8 +75,11 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
   val calculateCgtTaxDueUrl: String = s"$baseUrl/calculate-tax-due"
 
   override def storeDraftReturn(
-    draftReturn: DraftReturn
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
+    draftReturn: DraftReturn,
+    cgtReference: CgtReference
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] = {
+    val storeDraftReturnUrl: String = s"$baseUrl/draft-return/${cgtReference.value}"
+
     EitherT[Future, Error, HttpResponse](
       http
         .post(storeDraftReturnUrl, draftReturn)
@@ -87,6 +88,7 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
           case NonFatal(e) => Left(Error(e))
         }
     )
+  }
 
   override def getDraftReturns(
     cgtReference: CgtReference

@@ -132,7 +132,12 @@ class ReliefDetailsController @Inject() (
 
             val result = for {
               _ <- if (newDraftReturn === currentDraftReturn) EitherT.pure(())
-                  else returnsService.storeDraftReturn(newDraftReturn, currentFillingOutReturn.agentReferenceNumber)
+                  else
+                    returnsService.storeDraftReturn(
+                      newDraftReturn,
+                      currentFillingOutReturn.subscribedDetails.cgtReference,
+                      currentFillingOutReturn.agentReferenceNumber
+                    )
               _ <- EitherT(
                     updateSession(sessionStore, request)(
                       _.copy(journeyStatus = Some(currentFillingOutReturn.copy(draftReturn = newDraftReturn)))
@@ -377,7 +382,11 @@ class ReliefDetailsController @Inject() (
               draftReturn.copy(reliefDetailsAnswers = Some(completeAnswers))
 
             val result = for {
-              _ <- returnsService.storeDraftReturn(newDraftReturn, fillingOutReturn.agentReferenceNumber)
+              _ <- returnsService.storeDraftReturn(
+                    newDraftReturn,
+                    fillingOutReturn.subscribedDetails.cgtReference,
+                    fillingOutReturn.agentReferenceNumber
+                  )
               _ <- EitherT(
                     updateSession(sessionStore, request)(
                       _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))

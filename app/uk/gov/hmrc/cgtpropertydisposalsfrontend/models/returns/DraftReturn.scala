@@ -24,13 +24,14 @@ import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 
-sealed trait DraftReturn extends Product with Serializable
+sealed trait DraftReturn extends Product with Serializable {
+  val id: UUID
+  val lastUpdatedDate: LocalDate
+}
 
 final case class SingleDisposalDraftReturn(
   id: UUID,
-  cgtReference: CgtReference,
   triageAnswers: SingleDisposalTriageAnswers,
   propertyAddress: Option[UkAddress],
   disposalDetailsAnswers: Option[DisposalDetailsAnswers],
@@ -50,7 +51,6 @@ object SingleDisposalDraftReturn {
 
 final case class MultipleDisposalsDraftReturn(
   id: UUID,
-  cgtReference: CgtReference,
   triageAnswers: MultipleDisposalsTriageAnswers,
   lastUpdatedDate: LocalDate
 ) extends DraftReturn
@@ -64,9 +64,6 @@ object DraftReturn {
         case s: SingleDisposalDraftReturn    => whenSingle(s)
       }
 
-    def id: UUID                   = fold(_.id, _.id)
-    def cgtReference: CgtReference = fold(_.cgtReference, _.cgtReference)
-    def lastUpdatedDate: LocalDate = fold(_.lastUpdatedDate, _.lastUpdatedDate)
   }
 
   implicit val eq: Eq[DraftReturn] = Eq.fromUniversalEquals

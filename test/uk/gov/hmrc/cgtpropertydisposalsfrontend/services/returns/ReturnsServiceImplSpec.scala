@@ -44,10 +44,12 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
   val mockConnector = mock[ReturnsConnector]
 
-  def mockStoreDraftReturn(draftReturn: DraftReturn)(response: Either[Error, HttpResponse]) =
+  def mockStoreDraftReturn(draftReturn: DraftReturn, cgtReference: CgtReference)(
+    response: Either[Error, HttpResponse]
+  ) =
     (mockConnector
-      .storeDraftReturn(_: DraftReturn)(_: HeaderCarrier))
-      .expects(draftReturn, *)
+      .storeDraftReturn(_: DraftReturn, _: CgtReference)(_: HeaderCarrier))
+      .expects(draftReturn, cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
   def mockGetDraftReturns(cgtReference: CgtReference)(response: Either[Error, HttpResponse]) =
@@ -85,20 +87,21 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
     "handling requests to store draft returns" must {
 
-      val draftReturn = sample[SingleDisposalDraftReturn]
+      val draftReturn  = sample[SingleDisposalDraftReturn]
+      val cgtReference = sample[CgtReference]
 
       "return an error" when {
 
         "the http call fails" in {
-          mockStoreDraftReturn(draftReturn)(Left(Error("")))
+          mockStoreDraftReturn(draftReturn, cgtReference)(Left(Error("")))
 
-          await(service.storeDraftReturn(draftReturn, None).value).isLeft shouldBe true
+          await(service.storeDraftReturn(draftReturn, cgtReference, None).value).isLeft shouldBe true
         }
 
         "the http call came back with a status other than 200" in {
-          mockStoreDraftReturn(draftReturn)(Right(HttpResponse(INTERNAL_SERVER_ERROR)))
+          mockStoreDraftReturn(draftReturn, cgtReference)(Right(HttpResponse(INTERNAL_SERVER_ERROR)))
 
-          await(service.storeDraftReturn(draftReturn, None).value).isLeft shouldBe true
+          await(service.storeDraftReturn(draftReturn, cgtReference, None).value).isLeft shouldBe true
         }
 
       }
@@ -106,9 +109,9 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
       "return an ok response" when {
 
         "the http call came back with a 200" in {
-          mockStoreDraftReturn(draftReturn)(Right(HttpResponse(OK)))
+          mockStoreDraftReturn(draftReturn, cgtReference)(Right(HttpResponse(OK)))
 
-          await(service.storeDraftReturn(draftReturn, None).value) shouldBe Right(())
+          await(service.storeDraftReturn(draftReturn, cgtReference, None).value) shouldBe Right(())
         }
 
       }
