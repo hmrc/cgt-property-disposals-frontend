@@ -276,7 +276,9 @@ trait TriageQuestionsGen { this: GenUtils =>
 
 trait ReturnGen { this: GenUtils =>
 
-  implicit val draftReturnGen: Gen[SingleDisposalDraftReturn] = gen[SingleDisposalDraftReturn]
+  implicit val draftReturnGen: Gen[DraftReturn] = gen[DraftReturn]
+
+  implicit val singleDisposalDraftReturnGen: Gen[SingleDisposalDraftReturn] = gen[SingleDisposalDraftReturn]
 
   implicit val completeReturnGen: Gen[CompleteReturn] = gen[CompleteReturn]
 

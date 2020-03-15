@@ -81,14 +81,19 @@ class CommonTriageQuestionsControllerSpec
   def sessionDataWithFillingOutReturn(
     singleDisposalTriageAnswers: SingleDisposalTriageAnswers,
     name: Either[TrustName, IndividualName] = Right(sample[IndividualName])
-  ): (SessionData, FillingOutReturn) = {
+  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) = {
+    val draftReturn = sample[SingleDisposalDraftReturn].copy(
+      triageAnswers = singleDisposalTriageAnswers
+    )
     val fillingOutReturn = sample[FillingOutReturn].copy(
-      draftReturn = sample[SingleDisposalDraftReturn].copy(
-        triageAnswers = singleDisposalTriageAnswers
-      ),
+      draftReturn       = draftReturn,
       subscribedDetails = sample[SubscribedDetails].copy(name = name)
     )
-    SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)) -> fillingOutReturn
+    (
+      SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)),
+      fillingOutReturn,
+      draftReturn
+    )
   }
 
   "CommonTriageQuestionsController" when {
@@ -323,11 +328,11 @@ class CommonTriageQuestionsControllerSpec
       "show an error page" when {
 
         val formData = "individualUserType" -> "0"
-        val (session, fillingOutReturn) = sessionDataWithFillingOutReturn(
+        val (session, fillingOutReturn, draftReturn) = sessionDataWithFillingOutReturn(
           IncompleteSingleDisposalTriageAnswers.empty
         )
         val updatedJourney = fillingOutReturn.copy(
-          draftReturn = fillingOutReturn.draftReturn.copy(
+          draftReturn = draftReturn.copy(
             triageAnswers = IncompleteSingleDisposalTriageAnswers.empty.copy(
               individualUserType = Some(IndividualUserType.Self)
             )
@@ -1463,8 +1468,8 @@ class CommonTriageQuestionsControllerSpec
     updatedAnswers: SingleDisposalTriageAnswers,
     expectedRedirect: Call
   ): Unit = {
-    val (session, journey) = sessionDataWithFillingOutReturn(answers)
-    val updatedJourney     = journey.copy(draftReturn = journey.draftReturn.copy(triageAnswers = updatedAnswers))
+    val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+    val updatedJourney                  = journey.copy(draftReturn = draftReturn.copy(triageAnswers = updatedAnswers))
 
     inSequence {
       mockAuthWithNoRetrievals()

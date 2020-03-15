@@ -72,35 +72,34 @@ class DisposalDetailsControllerSpec
       }
     )
 
-  def fillingOutReturn(disposalMethod: DisposalMethod): FillingOutReturn =
-    sample[FillingOutReturn]
-      .copy(draftReturn = sample[SingleDisposalDraftReturn].copy(triageAnswers =
-        sample[CompleteSingleDisposalTriageAnswers].copy(
-          disposalMethod = disposalMethod
-        )
+  def fillingOutReturn(disposalMethod: DisposalMethod): (FillingOutReturn, SingleDisposalDraftReturn) = {
+    val draftReturn = sample[SingleDisposalDraftReturn].copy(triageAnswers =
+      sample[CompleteSingleDisposalTriageAnswers].copy(
+        disposalMethod = disposalMethod
       )
-      )
+    )
+    sample[FillingOutReturn].copy(draftReturn = draftReturn) -> draftReturn
+  }
 
   def sessionWithDisposalDetailsAnswers(
     answers: Option[DisposalDetailsAnswers],
     disposalMethod: DisposalMethod
-  ): (SessionData, FillingOutReturn) = {
-    val journey = fillingOutReturn(disposalMethod)
-    SessionData.empty.copy(
-      journeyStatus = Some(
-        journey.copy(
-          draftReturn = journey.draftReturn.copy(
-            disposalDetailsAnswers = answers
-          )
-        )
-      )
-    ) -> journey
+  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) = {
+    val (journey, draftReturn) = fillingOutReturn(disposalMethod)
+    val updatedDraftReturn     = draftReturn.copy(disposalDetailsAnswers = answers)
+    val updatedJourney         = journey.copy(draftReturn = updatedDraftReturn)
+    (
+      SessionData.empty.copy(journeyStatus = Some(updatedJourney)),
+      updatedJourney,
+      updatedDraftReturn
+    )
+
   }
 
   def sessionWithDisposalDetailsAnswers(
     answers: DisposalDetailsAnswers,
     disposalMethod: DisposalMethod
-  ): (SessionData, FillingOutReturn) =
+  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) =
     sessionWithDisposalDetailsAnswers(Some(answers), disposalMethod)
 
   "DisposalDetailsController" when {
@@ -226,10 +225,10 @@ class DisposalDetailsControllerSpec
 
       "show an error page" when {
 
-        val currentAnswers     = sample[CompleteDisposalDetailsAnswers].copy(shareOfProperty = ShareOfProperty.Half)
-        val (session, journey) = sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)
-        val newShare           = ShareOfProperty.Full
-        val newDraftReturn = journey.draftReturn.copy(
+        val currentAnswers                  = sample[CompleteDisposalDetailsAnswers].copy(shareOfProperty = ShareOfProperty.Half)
+        val (session, journey, draftReturn) = sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)
+        val newShare                        = ShareOfProperty.Full
+        val newDraftReturn = draftReturn.copy(
           disposalDetailsAnswers = Some(
             currentAnswers.copy(
               shareOfProperty = newShare
@@ -274,12 +273,12 @@ class DisposalDetailsControllerSpec
 
         "the user hasn't ever answered the disposal details question " +
           "and the draft return and session data has been successfully updated" in {
-          val (session, journey)        = sessionWithDisposalDetailsAnswers(None, DisposalMethod.Sold)
-          val (newShare, newShareValue) = ShareOfProperty.Full -> "0"
+          val (session, journey, draftReturn) = sessionWithDisposalDetailsAnswers(None, DisposalMethod.Sold)
+          val (newShare, newShareValue)       = ShareOfProperty.Full -> "0"
           val updatedAnswers = IncompleteDisposalDetailsAnswers.empty.copy(
             shareOfProperty = Some(newShare)
           )
-          val newDraftReturn = journey.draftReturn.copy(
+          val newDraftReturn = draftReturn.copy(
             disposalDetailsAnswers = Some(updatedAnswers)
           )
 
@@ -302,13 +301,13 @@ class DisposalDetailsControllerSpec
 
         "the user has not answered all of the disposal details questions " +
           "and the draft return and session data has been successfully updated" in {
-          val currentAnswers            = sample[IncompleteDisposalDetailsAnswers].copy(shareOfProperty = None)
-          val (session, journey)        = sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)
-          val (newShare, newShareValue) = ShareOfProperty.Half -> "1"
+          val currentAnswers                  = sample[IncompleteDisposalDetailsAnswers].copy(shareOfProperty = None)
+          val (session, journey, draftReturn) = sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)
+          val (newShare, newShareValue)       = ShareOfProperty.Half -> "1"
           val updatedAnswers = currentAnswers.copy(
             shareOfProperty = Some(newShare)
           )
-          val newDraftReturn = journey.draftReturn.copy(
+          val newDraftReturn = draftReturn.copy(
             disposalDetailsAnswers = Some(updatedAnswers)
           )
 
@@ -339,10 +338,10 @@ class DisposalDetailsControllerSpec
           val percentage = 40.23
           val currentAnswers =
             sample[CompleteDisposalDetailsAnswers].copy(shareOfProperty = ShareOfProperty.Full)
-          val (session, journey) = sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)
+          val (session, journey, draftReturn) = sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)
 
           val (newShare, newShareValue) = ShareOfProperty.Other(percentage) -> "2"
-          val newDraftReturn = journey.draftReturn.copy(
+          val newDraftReturn = draftReturn.copy(
             disposalDetailsAnswers = Some(
               currentAnswers.copy(
                 shareOfProperty = newShare
@@ -389,12 +388,12 @@ class DisposalDetailsControllerSpec
       }
 
       "convert a submitted option of 'Other' with value 100 to the 'Full' option" in {
-        val (session, journey) = sessionWithDisposalDetailsAnswers(None, DisposalMethod.Sold)
+        val (session, journey, draftReturn) = sessionWithDisposalDetailsAnswers(None, DisposalMethod.Sold)
 
         val updatedAnswers = IncompleteDisposalDetailsAnswers.empty.copy(
           shareOfProperty = Some(ShareOfProperty.Full)
         )
-        val newDraftReturn = journey.draftReturn.copy(
+        val newDraftReturn = draftReturn.copy(
           disposalDetailsAnswers = Some(updatedAnswers)
         )
 
@@ -416,12 +415,12 @@ class DisposalDetailsControllerSpec
       }
 
       "convert a submitted option of 'Other' with value 50 to the 'Half' option" in {
-        val (session, journey) = sessionWithDisposalDetailsAnswers(None, DisposalMethod.Sold)
+        val (session, journey, draftReturn) = sessionWithDisposalDetailsAnswers(None, DisposalMethod.Sold)
 
         val updatedAnswers = IncompleteDisposalDetailsAnswers.empty.copy(
           shareOfProperty = Some(ShareOfProperty.Half)
         )
-        val newDraftReturn = journey.draftReturn.copy(
+        val newDraftReturn = draftReturn.copy(
           disposalDetailsAnswers = Some(updatedAnswers)
         )
 
@@ -601,10 +600,10 @@ class DisposalDetailsControllerSpec
 
       "show an error page" when {
 
-        val currentAnswers     = sample[CompleteDisposalDetailsAnswers].copy(disposalPrice = AmountInPence.fromPounds(1d))
-        val (session, journey) = sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)
-        val newDisposalPrice   = AmountInPence.fromPounds(2d)
-        val newDraftReturn = journey.draftReturn.copy(
+        val currentAnswers                  = sample[CompleteDisposalDetailsAnswers].copy(disposalPrice = AmountInPence.fromPounds(1d))
+        val (session, journey, draftReturn) = sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)
+        val newDisposalPrice                = AmountInPence.fromPounds(2d)
+        val newDraftReturn = draftReturn.copy(
           disposalDetailsAnswers = Some(
             currentAnswers.copy(
               disposalPrice = newDisposalPrice
@@ -651,14 +650,14 @@ class DisposalDetailsControllerSpec
 
           val incompleteDisposalDetailsAnswers =
             IncompleteDisposalDetailsAnswers(Some(ShareOfProperty.Full), None, None)
-          val (session, journey) =
+          val (session, journey, draftReturn) =
             sessionWithDisposalDetailsAnswers(incompleteDisposalDetailsAnswers, DisposalMethod.Sold)
 
           val newDisposalPrice = 2d
           val updatedAnswers = incompleteDisposalDetailsAnswers.copy(
             disposalPrice = Some(AmountInPence.fromPounds(newDisposalPrice))
           )
-          val newDraftReturn = journey.draftReturn.copy(
+          val newDraftReturn = draftReturn.copy(
             disposalDetailsAnswers = Some(updatedAnswers)
           )
 
@@ -686,13 +685,13 @@ class DisposalDetailsControllerSpec
           "and the draft return and session data has been successfully updated" in {
           val currentAnswers = sample[IncompleteDisposalDetailsAnswers]
             .copy(shareOfProperty = Some(sample[ShareOfProperty]), disposalPrice = None)
-          val (session, journey) = sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)
+          val (session, journey, draftReturn) = sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)
 
           val newDisposalPrice = 2d
           val updatedAnswers = currentAnswers.copy(
             disposalPrice = Some(AmountInPence.fromPounds(newDisposalPrice))
           )
-          val newDraftReturn = journey.draftReturn.copy(
+          val newDraftReturn = draftReturn.copy(
             disposalDetailsAnswers = Some(updatedAnswers)
           )
 
@@ -723,11 +722,11 @@ class DisposalDetailsControllerSpec
 
         "the user has answered all of the disposal details questions " +
           "and the draft return and session data has been successfully updated" in {
-          val currentAnswers     = sample[CompleteDisposalDetailsAnswers].copy(disposalPrice = AmountInPence.fromPounds(1d))
-          val (session, journey) = sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)
+          val currentAnswers                  = sample[CompleteDisposalDetailsAnswers].copy(disposalPrice = AmountInPence.fromPounds(1d))
+          val (session, journey, draftReturn) = sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)
 
           val newDisposalPrice = 2d
-          val newDraftReturn = journey.draftReturn.copy(
+          val newDraftReturn = draftReturn.copy(
             disposalDetailsAnswers = Some(
               currentAnswers.copy(
                 disposalPrice = AmountInPence.fromPounds(newDisposalPrice)
@@ -1004,11 +1003,11 @@ class DisposalDetailsControllerSpec
 
       "show an error page" when {
 
-        val currentAnswers     = sample[CompleteDisposalDetailsAnswers].copy(disposalFees = AmountInPence.fromPounds(1d))
-        val (session, journey) = sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)
+        val currentAnswers                  = sample[CompleteDisposalDetailsAnswers].copy(disposalFees = AmountInPence.fromPounds(1d))
+        val (session, journey, draftReturn) = sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)
 
         val newDisposalFees = AmountInPence.fromPounds(2d)
-        val newDraftReturn = journey.draftReturn.copy(
+        val newDraftReturn = draftReturn.copy(
           disposalDetailsAnswers = Some(
             currentAnswers.copy(
               disposalFees = newDisposalFees
@@ -1050,14 +1049,14 @@ class DisposalDetailsControllerSpec
           val incompleteDisposalDetailsAnswers =
             IncompleteDisposalDetailsAnswers(Some(ShareOfProperty.Full), Some(AmountInPence.fromPounds(1d)), None)
 
-          val (session, journey) =
+          val (session, journey, draftReturn) =
             sessionWithDisposalDetailsAnswers(incompleteDisposalDetailsAnswers, DisposalMethod.Sold)
 
           val newDisposalFees = 2d
           val updatedAnswers = incompleteDisposalDetailsAnswers.copy(
             disposalFees = Some(AmountInPence.fromPounds(newDisposalFees))
           )
-          val newDraftReturn = journey.draftReturn.copy(
+          val newDraftReturn = draftReturn.copy(
             disposalDetailsAnswers = Some(updatedAnswers)
           )
 
@@ -1080,11 +1079,11 @@ class DisposalDetailsControllerSpec
 
         "the user has answered all of the disposal details questions " +
           "and the draft return and session data has been successfully updated" in {
-          val currentAnswers     = sample[CompleteDisposalDetailsAnswers].copy(disposalFees = AmountInPence.fromPounds(1d))
-          val (session, journey) = sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)
+          val currentAnswers                  = sample[CompleteDisposalDetailsAnswers].copy(disposalFees = AmountInPence.fromPounds(1d))
+          val (session, journey, draftReturn) = sessionWithDisposalDetailsAnswers(currentAnswers, DisposalMethod.Sold)
 
           val newDisposalFees = 2d
-          val newDraftReturn = journey.draftReturn.copy(
+          val newDraftReturn = draftReturn.copy(
             disposalDetailsAnswers = Some(
               currentAnswers.copy(
                 disposalFees = AmountInPence.fromPounds(newDisposalFees)
@@ -1242,13 +1241,14 @@ class DisposalDetailsControllerSpec
       "show an error page" when {
 
         "there is an error updating the draft return" in {
-          val (session, journey) = sessionWithDisposalDetailsAnswers(allQuestionsAnswered, DisposalMethod.Sold)
+          val (session, journey, draftReturn) =
+            sessionWithDisposalDetailsAnswers(allQuestionsAnswered, DisposalMethod.Sold)
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
             mockStoreDraftReturn(
-              journey.draftReturn.copy(
+              draftReturn.copy(
                 disposalDetailsAnswers = Some(completeAnswers)
               ),
               journey.agentReferenceNumber
@@ -1259,13 +1259,14 @@ class DisposalDetailsControllerSpec
         }
 
         "there is an error updating the session" in {
-          val (session, journey) = sessionWithDisposalDetailsAnswers(allQuestionsAnswered, DisposalMethod.Sold)
+          val (session, journey, draftReturn) =
+            sessionWithDisposalDetailsAnswers(allQuestionsAnswered, DisposalMethod.Sold)
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
             mockStoreDraftReturn(
-              journey.draftReturn.copy(
+              draftReturn.copy(
                 disposalDetailsAnswers = Some(completeAnswers)
               ),
               journey.agentReferenceNumber
@@ -1273,7 +1274,7 @@ class DisposalDetailsControllerSpec
             mockStoreSession(
               session.copy(
                 journeyStatus = Some(
-                  journey.copy(draftReturn = journey.draftReturn.copy(
+                  journey.copy(draftReturn = draftReturn.copy(
                     disposalDetailsAnswers = Some(completeAnswers)
                   )
                   )
@@ -1341,13 +1342,13 @@ class DisposalDetailsControllerSpec
               Some(completeAnswers.disposalPrice),
               Some(completeAnswers.disposalFees)
             )
-            val (session, journey) = sessionWithDisposalDetailsAnswers(incompleteAnswers, disposalMethod)
+            val (session, journey, draftReturn) = sessionWithDisposalDetailsAnswers(incompleteAnswers, disposalMethod)
 
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
               mockStoreDraftReturn(
-                journey.draftReturn.copy(
+                draftReturn.copy(
                   disposalDetailsAnswers = Some(completeAnswers)
                 ),
                 journey.agentReferenceNumber
@@ -1355,7 +1356,7 @@ class DisposalDetailsControllerSpec
               mockStoreSession(
                 session.copy(
                   journeyStatus = Some(
-                    journey.copy(draftReturn = journey.draftReturn.copy(
+                    journey.copy(draftReturn = draftReturn.copy(
                       disposalDetailsAnswers = Some(completeAnswers)
                     )
                     )
@@ -1435,7 +1436,7 @@ class DisposalDetailsControllerSpec
         )
 
         val sessionData = SessionData.empty.copy(journeyStatus = Some(
-          fillingOutReturn(DisposalMethod.Sold).copy(
+          fillingOutReturn(DisposalMethod.Sold)._1.copy(
             draftReturn = draftReturn
           )
         )

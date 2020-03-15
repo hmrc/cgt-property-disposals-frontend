@@ -64,14 +64,14 @@ class PropertyAddressControllerSpec
   lazy implicit val messagesApi: MessagesApi = controller.messagesApi
 
   override def updateAddress(journey: FillingOutReturn, address: Address): FillingOutReturn = address match {
-    case a: UkAddress    => journey.copy(draftReturn = journey.draftReturn.copy(propertyAddress = Some(a)))
+    case a: UkAddress    => journey.copy(draftReturn = draftReturn.copy(propertyAddress = Some(a)))
     case _: NonUkAddress => journey
   }
 
   override val mockUpdateAddress: Option[(FillingOutReturn, Address, Either[Error, Unit]) => Unit] =
     Some {
       case (newDetails: FillingOutReturn, a: UkAddress, r: Either[Error, Unit]) =>
-        mockStoreDraftReturn(newDetails.draftReturn.copy(propertyAddress = Some(a)), newDetails.agentReferenceNumber)(r)
+        mockStoreDraftReturn(draftReturn.copy(propertyAddress = Some(a)), newDetails.agentReferenceNumber)(r)
 
       case (_, _: NonUkAddress, _) =>
         sys.error("Non UK addresses not handled in this spec")

@@ -120,11 +120,16 @@ class SingleDisposalsTriageControllerSpec
   def sessionDataWithFillingOutReturn(
     singleDisposalTriageAnswers: SingleDisposalTriageAnswers,
     name: Either[TrustName, IndividualName] = Right(sample[IndividualName])
-  ): (SessionData, FillingOutReturn) =
-    sessionDataWithFillingOurReturn(
-      sample[SingleDisposalDraftReturn].copy(triageAnswers = singleDisposalTriageAnswers),
+  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) = {
+    val draftReturn =
+      sample[SingleDisposalDraftReturn].copy(triageAnswers = singleDisposalTriageAnswers)
+
+    val (session, journey) = sessionDataWithFillingOurReturn(
+      draftReturn,
       name
     )
+    (session, journey, draftReturn)
+  }
 
   def mockGetNextUUID(uuid: UUID) =
     (mockUUIDGenerator.nextId _).expects().returning(uuid)
@@ -1907,9 +1912,9 @@ class SingleDisposalsTriageControllerSpec
         }
 
         "all the questions have now been answered and the session is updated when a draft return has been created" in {
-          val (session, journey) = sessionDataWithFillingOutReturn(allQuestionsAnswered)
+          val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(allQuestionsAnswered)
           val updatedJourney =
-            journey.copy(draftReturn = journey.draftReturn.copy(triageAnswers = completeTriageQuestions))
+            journey.copy(draftReturn = draftReturn.copy(triageAnswers = completeTriageQuestions))
           val updatedSession = session.copy(journeyStatus = Some(updatedJourney))
 
           inSequence {
@@ -2131,45 +2136,43 @@ class SingleDisposalsTriageControllerSpec
     val scenarioDescription = description.map(_ + " and when ").getOrElse("")
     s"display the page when ${scenarioDescription}no option has been selected before" in {
       List(
-        sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers),
-        sessionDataWithFillingOutReturn(requiredPreviousAnswers)
-      ).foreach {
-        case (currentSession, _) =>
-          withClue(s"For currentSession $currentSession: ") {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(currentSession)
-            }
-
-            checkPageIsDisplayed(
-              performAction(),
-              messageFromMessageKey(pageTitleKey),
-              checkContent
-            )
+        sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers)._1,
+        sessionDataWithFillingOutReturn(requiredPreviousAnswers)._1
+      ).foreach { currentSession =>
+        withClue(s"For currentSession $currentSession: ") {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(currentSession)
           }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(pageTitleKey),
+            checkContent
+          )
+        }
       }
     }
 
     s"display the page when ${scenarioDescription}an option has been selected before" in {
       List(
-        sessionDataWithStartingNewDraftReturn(answersWithCurrentAnswer),
-        sessionDataWithFillingOutReturn(answersWithCurrentAnswer)
-      ).foreach {
-        case (currentSession, _) =>
-          withClue(s"For currentSession $currentSession: ") {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(currentSession)
-            }
-
-            checkPageIsDisplayed(
-              performAction(),
-              messageFromMessageKey(pageTitleKey), { document =>
-                checkContent(document)
-                checkPrepopulatedContent(document)
-              }
-            )
+        sessionDataWithStartingNewDraftReturn(answersWithCurrentAnswer)._1,
+        sessionDataWithFillingOutReturn(answersWithCurrentAnswer)._1
+      ).foreach { currentSession =>
+        withClue(s"For currentSession $currentSession: ") {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(currentSession)
           }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(pageTitleKey), { document =>
+              checkContent(document)
+              checkPrepopulatedContent(document)
+            }
+          )
+        }
       }
     }
 
@@ -2183,22 +2186,21 @@ class SingleDisposalsTriageControllerSpec
   ): Unit =
     "display the page when the journey has already been completed" in {
       List(
-        sessionDataWithStartingNewDraftReturn(answers),
-        sessionDataWithFillingOutReturn(answers)
-      ).foreach {
-        case (currentSession, _) =>
-          withClue(s"For currentSession $currentSession: ") {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(currentSession)
-            }
-
-            checkPageIsDisplayed(
-              performAction(),
-              messageFromMessageKey(pageTitleKey),
-              checkContent
-            )
+        sessionDataWithStartingNewDraftReturn(answers)._1,
+        sessionDataWithFillingOutReturn(answers)._1
+      ).foreach { currentSession =>
+        withClue(s"For currentSession $currentSession: ") {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(currentSession)
           }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(pageTitleKey),
+            checkContent
+          )
+        }
       }
     }
 

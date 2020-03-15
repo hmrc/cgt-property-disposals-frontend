@@ -91,20 +91,23 @@ class YearToDateLiabilityFirstReturnControllerSpec
   def sessionWithState(
     ytdLiabilityAnswers: Option[YearToDateLiabilityAnswers],
     disposalDate: Option[DisposalDate]
-  ): (SessionData, FillingOutReturn) = {
-    val journey = sample[FillingOutReturn].copy(
-      draftReturn = sample[SingleDisposalDraftReturn].copy(
-        triageAnswers              = sample[IncompleteSingleDisposalTriageAnswers].copy(disposalDate = disposalDate),
-        yearToDateLiabilityAnswers = ytdLiabilityAnswers
-      )
+  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) = {
+    val draftReturn = sample[SingleDisposalDraftReturn].copy(
+      triageAnswers              = sample[IncompleteSingleDisposalTriageAnswers].copy(disposalDate = disposalDate),
+      yearToDateLiabilityAnswers = ytdLiabilityAnswers
     )
-    SessionData.empty.copy(journeyStatus = Some(journey)) -> journey
+    val journey = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+    (
+      SessionData.empty.copy(journeyStatus = Some(journey)),
+      journey,
+      draftReturn
+    )
   }
 
   def sessionWithState(
     ytdLiabilityAnswers: YearToDateLiabilityAnswers,
     disposalDate: DisposalDate
-  ): (SessionData, FillingOutReturn) =
+  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) =
     sessionWithState(Some(ytdLiabilityAnswers), Some(disposalDate))
 
   def draftReturnWithCompleteJourneys(
@@ -1012,8 +1015,9 @@ class YearToDateLiabilityFirstReturnControllerSpec
 
           val calculateCgtTaxDueRequest = calculateRequest(AmountInPence(1L), AmountInPence(2L))
           val calculatedTaxDue          = sample[CalculatedTaxDue]
-          val fillingOutReturn          = sample[FillingOutReturn].copy(draftReturn = draftReturnWithAnswers(answers))
-          val updatedFillingOutReturn = fillingOutReturn.copy(draftReturn = fillingOutReturn.draftReturn.copy(
+          val draftReturn               = draftReturnWithAnswers(answers)
+          val fillingOutReturn          = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+          val updatedFillingOutReturn = fillingOutReturn.copy(draftReturn = draftReturn.copy(
             yearToDateLiabilityAnswers = Some(answers.copy(calculatedTaxDue = Some(calculatedTaxDue)))
           )
           )
@@ -1034,7 +1038,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
 
         def test(
           answers: YearToDateLiabilityAnswers,
-          mockCalculateTaxDue: FillingOutReturn => Unit,
+          mockCalculateTaxDue: (FillingOutReturn, SingleDisposalDraftReturn) => Unit,
           backLink: Call
         ): Unit = {
           val draftReturn = draftReturnWithAnswers(answers)
@@ -1046,7 +1050,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockCalculateTaxDue(fillingOutReturn)
+            mockCalculateTaxDue(fillingOutReturn, draftReturn)
           }
 
           checkPageIsDisplayed(
@@ -1075,22 +1079,23 @@ class YearToDateLiabilityFirstReturnControllerSpec
           val calculatedTaxDue = sample[CalculatedTaxDue]
 
           test(
-            answers, { fillingOutReturn =>
-              mockCalculationService(calculateRequest(AmountInPence.zero, AmountInPence.zero))(
-                Right(calculatedTaxDue)
-              )
-              mockStoreSession(
-                SessionData.empty.copy(
-                  journeyStatus = Some(
-                    fillingOutReturn.copy(draftReturn = fillingOutReturn.draftReturn.copy(
-                      yearToDateLiabilityAnswers = Some(
-                        answers.copy(calculatedTaxDue = Some(calculatedTaxDue))
+            answers, {
+              case (fillingOutReturn, draftReturn) =>
+                mockCalculationService(calculateRequest(AmountInPence.zero, AmountInPence.zero))(
+                  Right(calculatedTaxDue)
+                )
+                mockStoreSession(
+                  SessionData.empty.copy(
+                    journeyStatus = Some(
+                      fillingOutReturn.copy(draftReturn = draftReturn.copy(
+                        yearToDateLiabilityAnswers = Some(
+                          answers.copy(calculatedTaxDue = Some(calculatedTaxDue))
+                        )
+                      )
                       )
                     )
-                    )
                   )
-                )
-              )(Right(()))
+                )(Right(()))
             },
             routes.YearToDateLiabilityFirstReturnController.hasEstimatedDetails()
           )
@@ -1108,7 +1113,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
 
           test(
             answers,
-            _ => (),
+            { case (_, _) => () },
             routes.YearToDateLiabilityFirstReturnController.hasEstimatedDetails()
           )
         }
@@ -1117,7 +1122,7 @@ class YearToDateLiabilityFirstReturnControllerSpec
           val answers = sample[CompleteYearToDateLiabilityAnswers]
           test(
             answers,
-            _ => (),
+            { case (_, _) => () },
             routes.YearToDateLiabilityFirstReturnController.checkYourAnswers()
           )
         }
@@ -1447,8 +1452,8 @@ class YearToDateLiabilityFirstReturnControllerSpec
         }
 
         "the section has just been completed and all updates are successful" in {
-          val (session, journey) = sessionWithState(allQuestionAnswered, sample[DisposalDate])
-          val updatedDraftReturn = journey.draftReturn.copy(yearToDateLiabilityAnswers = Some(completeAnswers))
+          val (session, journey, draftReturn) = sessionWithState(allQuestionAnswered, sample[DisposalDate])
+          val updatedDraftReturn              = draftReturn.copy(yearToDateLiabilityAnswers = Some(completeAnswers))
           val updatedSession = session.copy(journeyStatus = Some(
             journey.copy(draftReturn = updatedDraftReturn)
           )
@@ -1682,13 +1687,13 @@ class YearToDateLiabilityFirstReturnControllerSpec
     updatedAnswers: YearToDateLiabilityAnswers,
     result: () => Future[Result]
   ): Unit = {
-    val journey = sessionWithState(
+    val (_, _, draftReturn) = sessionWithState(
       currentAnswers,
       sample[DisposalDate].copy(taxYear = sample[TaxYear].copy(personalAllowance = AmountInPence(Long.MaxValue)))
-    )._2
+    )
     unsuccessfulUpdateBehaviour(
-      journey.draftReturn,
-      journey.draftReturn.copy(yearToDateLiabilityAnswers = Some(updatedAnswers)),
+      draftReturn,
+      draftReturn.copy(yearToDateLiabilityAnswers = Some(updatedAnswers)),
       result
     )
   }

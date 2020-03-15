@@ -646,7 +646,7 @@ class TaskListControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               SessionData.empty.copy(
-                journeyStatus = Some(sample[FillingOutReturn])
+                journeyStatus = Some(sample[FillingOutReturn].copy(draftReturn = sample[SingleDisposalDraftReturn]))
               )
             )
           }

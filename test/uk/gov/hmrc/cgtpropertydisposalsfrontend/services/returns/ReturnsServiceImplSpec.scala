@@ -44,9 +44,9 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
   val mockConnector = mock[ReturnsConnector]
 
-  def mockStoreDraftReturn(draftReturn: SingleDisposalDraftReturn)(response: Either[Error, HttpResponse]) =
+  def mockStoreDraftReturn(draftReturn: DraftReturn)(response: Either[Error, HttpResponse]) =
     (mockConnector
-      .storeDraftReturn(_: SingleDisposalDraftReturn)(_: HeaderCarrier))
+      .storeDraftReturn(_: DraftReturn)(_: HeaderCarrier))
       .expects(draftReturn, *)
       .returning(EitherT.fromEither[Future](response))
 

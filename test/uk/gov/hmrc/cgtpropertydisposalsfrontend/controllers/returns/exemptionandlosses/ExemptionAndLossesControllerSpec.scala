@@ -77,25 +77,30 @@ class ExemptionAndLossesControllerSpec
     answers: Option[ExemptionAndLossesAnswers],
     disposalDate: Option[DisposalDate],
     reliefDetailsAnswers: Option[ReliefDetailsAnswers]
-  ): (SessionData, FillingOutReturn) = {
-    val journey = sample[FillingOutReturn].copy(
-      draftReturn = sample[SingleDisposalDraftReturn].copy(
+  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) = {
+    val draftReturn =
+      sample[SingleDisposalDraftReturn].copy(
         triageAnswers = sample[IncompleteSingleDisposalTriageAnswers].copy(
           disposalDate = disposalDate
         ),
         reliefDetailsAnswers      = reliefDetailsAnswers,
         exemptionAndLossesAnswers = answers
       )
-    )
 
-    SessionData.empty.copy(journeyStatus = Some(journey)) -> journey
+    val journey = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+
+    (
+      SessionData.empty.copy(journeyStatus = Some(journey)),
+      journey,
+      draftReturn
+    )
   }
 
   def sessionWithState(
     answers: ExemptionAndLossesAnswers,
     disposalDate: DisposalDate,
     reliefDetailsAnswers: ReliefDetailsAnswers
-  ): (SessionData, FillingOutReturn) =
+  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) =
     sessionWithState(Some(answers), Some(disposalDate), Some(reliefDetailsAnswers))
 
   "AcquisitionDetailsController" when {
@@ -317,8 +322,9 @@ class ExemptionAndLossesControllerSpec
         val newAmount = AmountInPence(123L)
         val answers: CompleteExemptionAndLossesAnswers =
           sample[CompleteExemptionAndLossesAnswers].copy(inYearLosses = AmountInPence(newAmount.value + 1L))
-        val (session, journey) = sessionWithState(answers, sample[DisposalDate], sample[CompleteReliefDetailsAnswers])
-        val updatedDraftReturn = journey.draftReturn.copy(exemptionAndLossesAnswers = Some(
+        val (session, journey, draftReturn) =
+          sessionWithState(answers, sample[DisposalDate], sample[CompleteReliefDetailsAnswers])
+        val updatedDraftReturn = draftReturn.copy(exemptionAndLossesAnswers = Some(
           answers.copy(inYearLosses = newAmount)
         )
         )
@@ -630,8 +636,9 @@ class ExemptionAndLossesControllerSpec
         val newAmount = AmountInPence(123L)
         val answers: CompleteExemptionAndLossesAnswers =
           sample[CompleteExemptionAndLossesAnswers].copy(previousYearsLosses = AmountInPence(newAmount.value + 1L))
-        val (session, journey) = sessionWithState(answers, sample[DisposalDate], sample[CompleteReliefDetailsAnswers])
-        val updatedDraftReturn = journey.draftReturn.copy(exemptionAndLossesAnswers = Some(
+        val (session, journey, draftReturn) =
+          sessionWithState(answers, sample[DisposalDate], sample[CompleteReliefDetailsAnswers])
+        val updatedDraftReturn = draftReturn.copy(exemptionAndLossesAnswers = Some(
           answers.copy(previousYearsLosses = newAmount)
         )
         )
@@ -941,8 +948,9 @@ class ExemptionAndLossesControllerSpec
         val newAmount = AmountInPence(123L)
         val answers: CompleteExemptionAndLossesAnswers =
           sample[CompleteExemptionAndLossesAnswers].copy(annualExemptAmount = AmountInPence(newAmount.value + 1L))
-        val (session, journey) = sessionWithState(answers, disposalDate, sample[CompleteReliefDetailsAnswers])
-        val updatedDraftReturn = journey.draftReturn.copy(exemptionAndLossesAnswers = Some(
+        val (session, journey, draftReturn) =
+          sessionWithState(answers, disposalDate, sample[CompleteReliefDetailsAnswers])
+        val updatedDraftReturn = draftReturn.copy(exemptionAndLossesAnswers = Some(
           answers.copy(annualExemptAmount = newAmount)
         )
         )
@@ -1241,8 +1249,9 @@ class ExemptionAndLossesControllerSpec
 
         val answers: CompleteExemptionAndLossesAnswers =
           sample[CompleteExemptionAndLossesAnswers].copy(taxableGainOrLoss = None)
-        val (session, journey) = sessionWithState(answers, sample[DisposalDate], reliefsAnswersWithOtherReliefs)
-        val updatedDraftReturn = journey.draftReturn.copy(exemptionAndLossesAnswers = Some(
+        val (session, journey, draftReturn) =
+          sessionWithState(answers, sample[DisposalDate], reliefsAnswersWithOtherReliefs)
+        val updatedDraftReturn = draftReturn.copy(exemptionAndLossesAnswers = Some(
           answers.copy(taxableGainOrLoss = Some(AmountInPence.zero))
         )
         )
@@ -1379,10 +1388,10 @@ class ExemptionAndLossesControllerSpec
         Some(taxableGainOrLoss)
       )
 
-      val (session, journey) =
+      val (session, journey, draftReturn) =
         sessionWithState(allQuestionsAnswered, sample[DisposalDate], sample[ReliefDetailsAnswers])
-      val updatedDraftReturn = journey.draftReturn.copy(exemptionAndLossesAnswers = Some(completeAnswers))
-      val updatedSession     = session.copy(journeyStatus                         = Some(journey.copy(draftReturn = updatedDraftReturn)))
+      val updatedDraftReturn = draftReturn.copy(exemptionAndLossesAnswers = Some(completeAnswers))
+      val updatedSession     = session.copy(journeyStatus                 = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
       behave like redirectToStartBehaviour(performAction)
 
@@ -1477,8 +1486,8 @@ class ExemptionAndLossesControllerSpec
 
         "the user has already answered all the questions" in {
           forAll { completeAnswers: CompleteExemptionAndLossesAnswers =>
-            val updatedDraftReturn = journey.draftReturn.copy(exemptionAndLossesAnswers = Some(completeAnswers))
-            val updatedSession     = session.copy(journeyStatus                         = Some(journey.copy(draftReturn = updatedDraftReturn)))
+            val updatedDraftReturn = draftReturn.copy(exemptionAndLossesAnswers = Some(completeAnswers))
+            val updatedSession     = session.copy(journeyStatus                 = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
             inSequence {
               mockAuthWithNoRetrievals()
@@ -1689,9 +1698,8 @@ class ExemptionAndLossesControllerSpec
     disposalDate: DisposalDate                 = sample[DisposalDate],
     reliefDetailsAnswers: ReliefDetailsAnswers = sample[ReliefDetailsAnswers]
   ): Unit = {
-    val (session, journey) = sessionWithState(oldAnswers, disposalDate, reliefDetailsAnswers)
-    val updatedDraftReturn =
-      journey.draftReturn.copy(exemptionAndLossesAnswers = Some(newAnswers))
+    val (session, journey, draftReturn) = sessionWithState(oldAnswers, disposalDate, reliefDetailsAnswers)
+    val updatedDraftReturn              = draftReturn.copy(exemptionAndLossesAnswers = Some(newAnswers))
 
     inSequence {
       mockAuthWithNoRetrievals()

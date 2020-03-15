@@ -82,7 +82,7 @@ class AcquisitionDetailsControllerSpec
     assetType: AssetType,
     wasUkResident: Boolean,
     disposalDate: DisposalDate = sample[DisposalDate]
-  ): (SessionData, FillingOutReturn) =
+  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) =
     sessionWithState(Some(answers), Some(assetType), Some(wasUkResident), Some(disposalDate))
 
   def sessionWithState(
@@ -90,9 +90,9 @@ class AcquisitionDetailsControllerSpec
     assetType: Option[AssetType],
     wasUkResident: Option[Boolean],
     disposalDate: Option[DisposalDate]
-  ): (SessionData, FillingOutReturn) = {
-    val journey = sample[FillingOutReturn].copy(
-      draftReturn = sample[SingleDisposalDraftReturn].copy(
+  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) = {
+    val draftReturn =
+      sample[SingleDisposalDraftReturn].copy(
         triageAnswers = sample[IncompleteSingleDisposalTriageAnswers].copy(
           assetType      = assetType,
           wasAUKResident = wasUkResident,
@@ -100,9 +100,14 @@ class AcquisitionDetailsControllerSpec
         ),
         acquisitionDetailsAnswers = answers
       )
-    )
 
-    SessionData.empty.copy(journeyStatus = Some(journey)) -> journey
+    val journey = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+
+    (
+      SessionData.empty.copy(journeyStatus = Some(journey)),
+      journey,
+      draftReturn
+    )
   }
 
   "AcquisitionDetailsController" when {
@@ -218,9 +223,9 @@ class AcquisitionDetailsControllerSpec
 
       "show an error page" when {
 
-        val (method, methodValue) = AcquisitionMethod.Bought -> 0
-        val (session, journey)    = sessionWithState(None, None, None, None)
-        val updatedDraftReturn = journey.draftReturn.copy(acquisitionDetailsAnswers = Some(
+        val (method, methodValue)           = AcquisitionMethod.Bought -> 0
+        val (session, journey, draftReturn) = sessionWithState(None, None, None, None)
+        val updatedDraftReturn = draftReturn.copy(acquisitionDetailsAnswers = Some(
           IncompleteAcquisitionDetailsAnswers.empty.copy(acquisitionMethod = Some(method))
         )
         )
@@ -254,8 +259,8 @@ class AcquisitionDetailsControllerSpec
         "the acquisition details journey is incomplete and" when {
 
           def test(data: (String, String)*)(method: AcquisitionMethod): Unit = {
-            val (session, journey) = sessionWithState(None, None, None, None)
-            val updatedDraftReturn = journey.draftReturn.copy(acquisitionDetailsAnswers = Some(
+            val (session, journey, draftReturn) = sessionWithState(None, None, None, None)
+            val updatedDraftReturn = draftReturn.copy(acquisitionDetailsAnswers = Some(
               IncompleteAcquisitionDetailsAnswers.empty.copy(acquisitionMethod = Some(method))
             )
             )
@@ -292,9 +297,9 @@ class AcquisitionDetailsControllerSpec
         "the acquisition details journey is complete and" when {
 
           def test(data: (String, String)*)(oldMethod: AcquisitionMethod, method: AcquisitionMethod): Unit = {
-            val answers            = sample[CompleteAcquisitionDetailsAnswers].copy(acquisitionMethod = oldMethod)
-            val (session, journey) = sessionWithState(answers, sample[AssetType], sample[Boolean])
-            val updatedDraftReturn = journey.draftReturn.copy(acquisitionDetailsAnswers = Some(
+            val answers                         = sample[CompleteAcquisitionDetailsAnswers].copy(acquisitionMethod = oldMethod)
+            val (session, journey, draftReturn) = sessionWithState(answers, sample[AssetType], sample[Boolean])
+            val updatedDraftReturn = draftReturn.copy(acquisitionDetailsAnswers = Some(
               answers.copy(acquisitionMethod = method)
             )
             )
@@ -542,8 +547,9 @@ class AcquisitionDetailsControllerSpec
         val acquisitionDate = AcquisitionDate(disposalDate.value)
         val answers = sample[CompleteAcquisitionDetailsAnswers]
           .copy(acquisitionDate = AcquisitionDate(acquisitionDate.value.plusDays(1L)))
-        val (session, journey) = sessionWithState(answers, sample[AssetType], sample[Boolean], disposalDate)
-        val updatedDraftReturn = journey.draftReturn.copy(acquisitionDetailsAnswers = Some(
+        val (session, journey, draftReturn) =
+          sessionWithState(answers, sample[AssetType], sample[Boolean], disposalDate)
+        val updatedDraftReturn = draftReturn.copy(acquisitionDetailsAnswers = Some(
           answers.copy(acquisitionDate = acquisitionDate)
         )
         )
@@ -579,9 +585,9 @@ class AcquisitionDetailsControllerSpec
           oldAnswers: AcquisitionDetailsAnswers,
           newAnswers: AcquisitionDetailsAnswers
         ): Unit = {
-          val (session, journey) = sessionWithState(oldAnswers, assetType, wasUkResident, disposalDate)
-          val updatedDraftReturn = journey.draftReturn.copy(acquisitionDetailsAnswers = Some(newAnswers))
-          val updatedSession     = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+          val (session, journey, draftReturn) = sessionWithState(oldAnswers, assetType, wasUkResident, disposalDate)
+          val updatedDraftReturn              = draftReturn.copy(acquisitionDetailsAnswers = Some(newAnswers))
+          val updatedSession                  = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -928,8 +934,8 @@ class AcquisitionDetailsControllerSpec
         val price = 1.23d
         val answers = IncompleteAcquisitionDetailsAnswers.empty
           .copy(acquisitionMethod = Some(AcquisitionMethod.Bought), acquisitionDate = Some(sample[AcquisitionDate]))
-        val (session, journey) = sessionWithState(answers, sample[AssetType], sample[Boolean])
-        val updatedDraftReturn = journey.draftReturn
+        val (session, journey, draftReturn) = sessionWithState(answers, sample[AssetType], sample[Boolean])
+        val updatedDraftReturn = draftReturn
           .copy(acquisitionDetailsAnswers = Some(answers.copy(acquisitionPrice = Some(AmountInPence(123L)))))
         val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
@@ -961,8 +967,8 @@ class AcquisitionDetailsControllerSpec
         "the price submitted is valid and the journey was incomplete" in {
           val answers = IncompleteAcquisitionDetailsAnswers.empty
             .copy(acquisitionMethod = Some(sample[AcquisitionMethod]), acquisitionDate = Some(sample[AcquisitionDate]))
-          val (session, journey) = sessionWithState(answers, sample[AssetType], sample[Boolean])
-          val updatedDraftReturn = journey.draftReturn
+          val (session, journey, draftReturn) = sessionWithState(answers, sample[AssetType], sample[Boolean])
+          val updatedDraftReturn = draftReturn
             .copy(acquisitionDetailsAnswers = Some(answers.copy(acquisitionPrice = Some(AmountInPence(123400L)))))
           val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
@@ -980,9 +986,9 @@ class AcquisitionDetailsControllerSpec
         }
 
         "the price submitted is valid and the journey was complete" in {
-          val answers            = sample[CompleteAcquisitionDetailsAnswers]
-          val (session, journey) = sessionWithState(answers, sample[AssetType], sample[Boolean])
-          val updatedDraftReturn = journey.draftReturn
+          val answers                         = sample[CompleteAcquisitionDetailsAnswers]
+          val (session, journey, draftReturn) = sessionWithState(answers, sample[AssetType], sample[Boolean])
+          val updatedDraftReturn = draftReturn
             .copy(acquisitionDetailsAnswers = Some(answers.copy(acquisitionPrice = AmountInPence(123456L))))
           val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
@@ -1276,8 +1282,8 @@ class AcquisitionDetailsControllerSpec
           acquisitionDate  = Some(acquisitionDate),
           acquisitionPrice = Some(sample[AmountInPence])
         )
-        val (session, journey) = sessionWithState(answers, AssetType.Residential, true)
-        val updatedDraftReturn = journey.draftReturn
+        val (session, journey, draftReturn) = sessionWithState(answers, AssetType.Residential, true)
+        val updatedDraftReturn = draftReturn
           .copy(acquisitionDetailsAnswers = Some(answers.copy(rebasedAcquisitionPrice = Some(AmountInPence(123L)))))
         val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
@@ -1328,8 +1334,8 @@ class AcquisitionDetailsControllerSpec
                   acquisitionDate  = Some(acquisitionDate),
                   acquisitionPrice = Some(sample[AmountInPence])
                 )
-                val (session, journey) = sessionWithState(answers, AssetType.Residential, true)
-                val updatedDraftReturn = journey.draftReturn
+                val (session, journey, draftReturn) = sessionWithState(answers, AssetType.Residential, true)
+                val updatedDraftReturn = draftReturn
                   .copy(acquisitionDetailsAnswers =
                     Some(answers.copy(rebasedAcquisitionPrice = Some(expectedAmountInPence)))
                   )
@@ -1358,8 +1364,8 @@ class AcquisitionDetailsControllerSpec
                   acquisitionDate         = acquisitionDate,
                   rebasedAcquisitionPrice = Some(AmountInPence(expectedAmountInPence.value + 1L))
                 )
-                val (session, journey) = sessionWithState(answers, AssetType.Residential, true)
-                val updatedDraftReturn = journey.draftReturn
+                val (session, journey, draftReturn) = sessionWithState(answers, AssetType.Residential, true)
+                val updatedDraftReturn = draftReturn
                   .copy(acquisitionDetailsAnswers =
                     Some(answers.copy(rebasedAcquisitionPrice = Some(expectedAmountInPence)))
                   )
@@ -1714,8 +1720,8 @@ class AcquisitionDetailsControllerSpec
           acquisitionPrice        = Some(sample[AmountInPence]),
           rebasedAcquisitionPrice = Some(sample[AmountInPence])
         )
-        val (session, journey) = sessionWithState(answers, AssetType.Residential, true)
-        val updatedDraftReturn = journey.draftReturn
+        val (session, journey, draftReturn) = sessionWithState(answers, AssetType.Residential, true)
+        val updatedDraftReturn = draftReturn
           .copy(acquisitionDetailsAnswers = Some(answers.copy(improvementCosts = Some(AmountInPence(123L)))))
         val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
@@ -1767,8 +1773,8 @@ class AcquisitionDetailsControllerSpec
                   acquisitionPrice        = Some(sample[AmountInPence]),
                   rebasedAcquisitionPrice = Some(sample[AmountInPence])
                 )
-                val (session, journey) = sessionWithState(answers, AssetType.Residential, true)
-                val updatedDraftReturn = journey.draftReturn
+                val (session, journey, draftReturn) = sessionWithState(answers, AssetType.Residential, true)
+                val updatedDraftReturn = draftReturn
                   .copy(acquisitionDetailsAnswers = Some(answers.copy(improvementCosts = Some(expectedAmountInPence))))
                 val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
@@ -1798,8 +1804,8 @@ class AcquisitionDetailsControllerSpec
                     rebasedAcquisitionPrice = Some(sample[AmountInPence]),
                     improvementCosts        = AmountInPence(expectedAmountInPence.value + 1L)
                   )
-                val (session, journey) = sessionWithState(answers, AssetType.Residential, true)
-                val updatedDraftReturn = journey.draftReturn
+                val (session, journey, draftReturn) = sessionWithState(answers, AssetType.Residential, true)
+                val updatedDraftReturn = draftReturn
                   .copy(acquisitionDetailsAnswers = Some(answers.copy(improvementCosts = expectedAmountInPence)))
                 val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
@@ -2017,8 +2023,8 @@ class AcquisitionDetailsControllerSpec
         val answers = IncompleteAcquisitionDetailsAnswers.empty.copy(
           improvementCosts = Some(sample[AmountInPence])
         )
-        val (session, journey) = sessionWithState(answers, sample[AssetType], sample[Boolean])
-        val updatedDraftReturn = journey.draftReturn
+        val (session, journey, draftReturn) = sessionWithState(answers, sample[AssetType], sample[Boolean])
+        val updatedDraftReturn = draftReturn
           .copy(acquisitionDetailsAnswers = Some(answers.copy(acquisitionFees = Some(AmountInPence(123L)))))
         val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
@@ -2068,8 +2074,8 @@ class AcquisitionDetailsControllerSpec
               withClue(s"For form data $formData and expected amount in pence $expectedAmountInPence: ") {
                 val answers =
                   IncompleteAcquisitionDetailsAnswers.empty.copy(improvementCosts = Some(sample[AmountInPence]))
-                val (session, journey) = sessionWithState(answers, sample[AssetType], sample[Boolean])
-                val updatedDraftReturn = journey.draftReturn
+                val (session, journey, draftReturn) = sessionWithState(answers, sample[AssetType], sample[Boolean])
+                val updatedDraftReturn = draftReturn
                   .copy(acquisitionDetailsAnswers = Some(answers.copy(acquisitionFees = Some(expectedAmountInPence))))
                 val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
@@ -2095,8 +2101,8 @@ class AcquisitionDetailsControllerSpec
                 val answers =
                   sample[CompleteAcquisitionDetailsAnswers]
                     .copy(acquisitionFees = AmountInPence(expectedAmountInPence.value + 1L))
-                val (session, journey) = sessionWithState(answers, sample[AssetType], sample[Boolean])
-                val updatedDraftReturn = journey.draftReturn
+                val (session, journey, draftReturn) = sessionWithState(answers, sample[AssetType], sample[Boolean])
+                val updatedDraftReturn = draftReturn
                   .copy(acquisitionDetailsAnswers = Some(answers.copy(acquisitionFees = expectedAmountInPence)))
                 val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
@@ -2285,9 +2291,9 @@ class AcquisitionDetailsControllerSpec
       }
 
       "show an error page when the user has just answered all of the questions and" when {
-        val (session, journey) = sessionWithState(allQuestionsAnswered, sample[AssetType], sample[Boolean])
-        val newDraftReturn     = journey.draftReturn.copy(acquisitionDetailsAnswers = Some(completeAnswers))
-        val updatedJourney     = journey.copy(draftReturn = newDraftReturn)
+        val (session, journey, draftReturn) = sessionWithState(allQuestionsAnswered, sample[AssetType], sample[Boolean])
+        val newDraftReturn                  = draftReturn.copy(acquisitionDetailsAnswers = Some(completeAnswers))
+        val updatedJourney                  = journey.copy(draftReturn = newDraftReturn)
         "there is an error updating the draft return" in {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -2315,9 +2321,10 @@ class AcquisitionDetailsControllerSpec
       "show the page" when {
 
         "the user has just answered all the questions and all updates are successful" in {
-          val (session, journey) = sessionWithState(allQuestionsAnswered, sample[AssetType], sample[Boolean])
-          val newDraftReturn     = journey.draftReturn.copy(acquisitionDetailsAnswers = Some(completeAnswers))
-          val updatedJourney     = journey.copy(draftReturn = newDraftReturn)
+          val (session, journey, draftReturn) =
+            sessionWithState(allQuestionsAnswered, sample[AssetType], sample[Boolean])
+          val newDraftReturn = draftReturn.copy(acquisitionDetailsAnswers = Some(completeAnswers))
+          val updatedJourney = journey.copy(draftReturn                   = newDraftReturn)
 
           inSequence {
             mockAuthWithNoRetrievals()

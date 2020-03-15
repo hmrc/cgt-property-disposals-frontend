@@ -78,20 +78,24 @@ class ReliefDetailsControllerSpec
   def sessionWithReliefDetailsAnswers(
     reliefDetailsAnswers: Option[ReliefDetailsAnswers],
     exemptionAndLossesAnswers: Option[ExemptionAndLossesAnswers]
-  ): (SessionData, FillingOutReturn) = {
-    val journey = sample[FillingOutReturn].copy(
-      draftReturn = sample[SingleDisposalDraftReturn].copy(
-        reliefDetailsAnswers      = reliefDetailsAnswers,
-        exemptionAndLossesAnswers = exemptionAndLossesAnswers
-      )
+  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) = {
+    val draftReturn = sample[SingleDisposalDraftReturn].copy(
+      reliefDetailsAnswers      = reliefDetailsAnswers,
+      exemptionAndLossesAnswers = exemptionAndLossesAnswers
     )
-    SessionData.empty.copy(journeyStatus = Some(journey)) -> journey
+
+    val journey = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+    (
+      SessionData.empty.copy(journeyStatus = Some(journey)),
+      journey,
+      draftReturn
+    )
   }
 
   def sessionWithReliefDetailsAnswers(
     reliefDetailsAnswers: ReliefDetailsAnswers,
     exemptionAndLossesAnswers: Option[ExemptionAndLossesAnswers] = None
-  ): (SessionData, FillingOutReturn) =
+  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) =
     sessionWithReliefDetailsAnswers(Some(reliefDetailsAnswers), exemptionAndLossesAnswers)
 
   "ReliefDetailsController" when {
@@ -196,9 +200,9 @@ class ReliefDetailsControllerSpec
 
         val currentAnswers =
           sample[CompleteReliefDetailsAnswers].copy(privateResidentsRelief = AmountInPence.fromPounds(1d))
-        val (session, journey)        = sessionWithReliefDetailsAnswers(currentAnswers)
-        val newprivateResidentsRelief = AmountInPence.fromPounds(10d)
-        val newDraftReturn = journey.draftReturn.copy(
+        val (session, journey, draftReturn) = sessionWithReliefDetailsAnswers(currentAnswers)
+        val newprivateResidentsRelief       = AmountInPence.fromPounds(10d)
+        val newDraftReturn = draftReturn.copy(
           reliefDetailsAnswers = Some(
             currentAnswers.copy(
               privateResidentsRelief = newprivateResidentsRelief
@@ -435,10 +439,10 @@ class ReliefDetailsControllerSpec
 
       "show an error page" when {
 
-        val currentAnswers     = sample[CompleteReliefDetailsAnswers].copy(lettingsRelief = AmountInPence.fromPounds(1d))
-        val (session, journey) = sessionWithReliefDetailsAnswers(currentAnswers)
-        val newLettingsRelief  = AmountInPence.fromPounds(2d)
-        val newDraftReturn = journey.draftReturn.copy(
+        val currentAnswers                  = sample[CompleteReliefDetailsAnswers].copy(lettingsRelief = AmountInPence.fromPounds(1d))
+        val (session, journey, draftReturn) = sessionWithReliefDetailsAnswers(currentAnswers)
+        val newLettingsRelief               = AmountInPence.fromPounds(2d)
+        val newDraftReturn = draftReturn.copy(
           reliefDetailsAnswers = Some(
             currentAnswers.copy(
               lettingsRelief = newLettingsRelief
@@ -769,10 +773,10 @@ class ReliefDetailsControllerSpec
 
       "show an error page" when {
 
-        val currentAnswers     = sample[CompleteReliefDetailsAnswers].copy(otherReliefs = Some(otherReliefs))
-        val (session, journey) = sessionWithReliefDetailsAnswers(currentAnswers)
-        val newOtherReliefs    = OtherReliefs("ReliefName", AmountInPence.fromPounds(2))
-        val newDraftReturn = journey.draftReturn.copy(
+        val currentAnswers                  = sample[CompleteReliefDetailsAnswers].copy(otherReliefs = Some(otherReliefs))
+        val (session, journey, draftReturn) = sessionWithReliefDetailsAnswers(currentAnswers)
+        val newOtherReliefs                 = OtherReliefs("ReliefName", AmountInPence.fromPounds(2))
+        val newDraftReturn = draftReturn.copy(
           reliefDetailsAnswers = Some(
             currentAnswers.copy(
               otherReliefs = Some(newOtherReliefs)
@@ -1168,13 +1172,13 @@ class ReliefDetailsControllerSpec
       "show an error page" when {
 
         "there is an error updating the draft return" in {
-          val (session, journey) = sessionWithReliefDetailsAnswers(allQuestionsAnswered)
+          val (session, journey, draftReturn) = sessionWithReliefDetailsAnswers(allQuestionsAnswered)
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
             mockStoreDraftReturn(
-              journey.draftReturn.copy(
+              draftReturn.copy(
                 reliefDetailsAnswers = Some(completeAnswers)
               ),
               journey.agentReferenceNumber
@@ -1185,13 +1189,13 @@ class ReliefDetailsControllerSpec
         }
 
         "there is an error updating the session" in {
-          val (session, journey) = sessionWithReliefDetailsAnswers(allQuestionsAnswered)
+          val (session, journey, draftReturn) = sessionWithReliefDetailsAnswers(allQuestionsAnswered)
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
             mockStoreDraftReturn(
-              journey.draftReturn.copy(
+              draftReturn.copy(
                 reliefDetailsAnswers = Some(completeAnswers)
               ),
               journey.agentReferenceNumber
@@ -1199,7 +1203,7 @@ class ReliefDetailsControllerSpec
             mockStoreSession(
               session.copy(
                 journeyStatus = Some(
-                  journey.copy(draftReturn = journey.draftReturn.copy(
+                  journey.copy(draftReturn = draftReturn.copy(
                     reliefDetailsAnswers = Some(completeAnswers)
                   )
                   )
@@ -1216,9 +1220,9 @@ class ReliefDetailsControllerSpec
       "show the page" when {
 
         "the user has just answered all the questions and all updates are successful" in {
-          val (session, journey) = sessionWithReliefDetailsAnswers(allQuestionsAnswered)
-          val newDraftReturn     = journey.draftReturn.copy(reliefDetailsAnswers = Some(completeAnswers))
-          val updatedJourney     = journey.copy(draftReturn = newDraftReturn)
+          val (session, journey, draftReturn) = sessionWithReliefDetailsAnswers(allQuestionsAnswered)
+          val newDraftReturn                  = draftReturn.copy(reliefDetailsAnswers = Some(completeAnswers))
+          val updatedJourney                  = journey.copy(draftReturn = newDraftReturn)
 
           inSequence {
             mockAuthWithNoRetrievals()
