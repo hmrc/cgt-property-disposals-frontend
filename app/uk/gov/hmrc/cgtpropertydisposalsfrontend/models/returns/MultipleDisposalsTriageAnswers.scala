@@ -16,8 +16,12 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
+import cats.syntax.either._
 import julienrf.json.derived
+import play.api.data.FormError
+import play.api.data.format.Formatter
 import play.api.libs.json.OFormat
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.FormUtils.readValue
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TaxYear
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 
@@ -31,7 +35,7 @@ object MultipleDisposalsTriageAnswers {
     wasAUKResident: Option[Boolean],
     countryOfResidence: Option[Country],
     wereAllPropertiesResidential: Option[Boolean],
-    assetType: Option[AssetType],
+    assetTypes: Option[List[AssetType]],
     taxYearAfter6April2020: Option[Boolean],
     taxYear: Option[TaxYear]
   ) extends MultipleDisposalsTriageAnswers
@@ -45,7 +49,7 @@ object MultipleDisposalsTriageAnswers {
     individualUserType: Option[IndividualUserType],
     numberOfProperties: Int,
     countryOfResidence: Country,
-    assetType: AssetType,
+    assetTypes: List[AssetType],
     taxYear: TaxYear
   ) extends MultipleDisposalsTriageAnswers
 
@@ -57,6 +61,24 @@ object MultipleDisposalsTriageAnswers {
       case i: IncompleteMultipleDisposalsAnswers => ifIncomplete(i)
       case c: CompleteMultipleDisposalsAnswers   => ifComplete(c)
     }
+  }
+
+  def checkBoxAssetTypeFormFormatter: Formatter[AssetType] = new Formatter[AssetType] {
+
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], AssetType] =
+      readValue(key, data, identity)
+        .flatMap {
+          case "0" => Right(AssetType.Residential)
+          case "1" => Right(AssetType.NonResidential)
+          case "2" => Right(AssetType.MixedUse)
+          case "3" => Right(AssetType.IndirectDisposal)
+          case _   => Left(FormError(key, "error.invalid"))
+        }
+        .leftMap(Seq(_))
+
+    override def unbind(key: String, value: AssetType): Map[String, String] =
+      Map(key -> value.toString)
+
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))

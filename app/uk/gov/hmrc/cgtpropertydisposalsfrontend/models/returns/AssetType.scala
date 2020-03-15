@@ -37,8 +37,4 @@ object AssetType {
 
   implicit val format: OFormat[AssetType] = derived.oformat()
 
-  implicit class AssetTypeOps(private val a: AssetType) extends AnyVal {
-    def isResidential(): Boolean = a === AssetType.Residential
-  }
-
 }
