@@ -51,7 +51,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 
   @cyaRow(
     messages("numberOfProperties.title"),
-    Html(messages(s"numberOfProperties.MoreThanOne")),
+    Html(messages("numberOfProperties.MoreThanOne")),
     Some(cyaChange(messages("triage.cyaChange.numberOfProperties"), routes.CommonTriageQuestionsController.howManyProperties().url)),
       "numberOfProperties"
   )

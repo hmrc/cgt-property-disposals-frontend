@@ -20,12 +20,16 @@ import java.time.{Clock, LocalDate}
 
 import cats.data.EitherT
 import cats.instances.future._
+import cats.instances.list._
+import cats.syntax.eq._
+import org.jsoup.nodes.Document
+import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.http.Status.BAD_REQUEST
-import play.api.i18n.MessagesApi
+import play.api.i18n.{Lang, MessagesApi, MessagesImpl}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
-import play.api.mvc.Result
+import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
@@ -35,13 +39,14 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingNewDraftReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.Self
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{IncompleteMultipleDisposalsAnswers, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, _}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, LocalDateUtils, SessionData, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, LocalDateUtils, SessionData, TaxYear, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.TaxYearService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -76,13 +81,19 @@ class MultipleDisposalsTriageControllerSpec
 
   def sessionDataWithStartingNewDraftReturn(
     multipleDisposalsAnswers: MultipleDisposalsTriageAnswers,
-    name: Either[TrustName, IndividualName] = Right(sample[IndividualName])
+    name: Either[TrustName, IndividualName] = Right(sample[IndividualName]),
+    isAgent: Boolean                        = false
   ): (SessionData, StartingNewDraftReturn) = {
     val startingNewDraftReturn = sample[StartingNewDraftReturn].copy(
       newReturnTriageAnswers = Left(multipleDisposalsAnswers),
-      subscribedDetails      = sample[SubscribedDetails].copy(name = name)
+      subscribedDetails      = sample[SubscribedDetails].copy(name = name),
+      agentReferenceNumber   = if (isAgent) Some(sample[AgentReferenceNumber]) else None
     )
-    SessionData.empty.copy(journeyStatus = Some(startingNewDraftReturn)) -> startingNewDraftReturn
+    SessionData.empty.copy(
+      journeyStatus = Some(startingNewDraftReturn),
+      userType      = if (isAgent) Some(UserType.Agent) else None
+    ) -> startingNewDraftReturn
+
   }
 
   def testFormError(
@@ -165,23 +176,46 @@ class MultipleDisposalsTriageControllerSpec
 
       behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
 
-      "display the page" in {
-        mockAuthWithNoRetrievals()
-        mockGetSession(sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsAnswers.empty)._1)
+      "display the page" when {
 
-        checkPageIsDisplayed(
-          performAction,
-          messageFromMessageKey("multipleDisposalsNumberOfProperties.title"), { doc =>
-            doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
-              .guidance()
-              .url
-            doc
-              .select("#content > article > form")
-              .attr("action") shouldBe routes.MultipleDisposalsTriageController
-              .howManyDisposalsSubmit()
-              .url
-          }
-        )
+        "the journey is incomplete" in {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsAnswers.empty)._1)
+
+          checkPageIsDisplayed(
+            performAction,
+            messageFromMessageKey("multipleDisposalsNumberOfProperties.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
+                .guidance()
+                .url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.MultipleDisposalsTriageController
+                .howManyDisposalsSubmit()
+                .url
+            }
+          )
+        }
+
+        "the journey is complete" in {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsAnswers])._1)
+
+          checkPageIsDisplayed(
+            performAction,
+            messageFromMessageKey("multipleDisposalsNumberOfProperties.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
+                .checkYourAnswers()
+                .url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.MultipleDisposalsTriageController
+                .howManyDisposalsSubmit()
+                .url
+            }
+          )
+        }
+
       }
 
     }
@@ -196,7 +230,6 @@ class MultipleDisposalsTriageControllerSpec
       "redirect to single disposal cya page" when {
 
         "user enters number of properties as one" in {
-
           val (session, journey) = sessionDataWithStartingNewDraftReturn(
             IncompleteMultipleDisposalsAnswers.empty.copy(
               individualUserType = Some(Self)
@@ -352,23 +385,46 @@ class MultipleDisposalsTriageControllerSpec
 
       behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
 
-      "display the page" in {
-        mockAuthWithNoRetrievals()
-        mockGetSession(sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsAnswers.empty)._1)
+      "display the page" when {
 
-        checkPageIsDisplayed(
-          performAction,
-          messageFromMessageKey("multipleDisposalsWereYouAUKResident.title"), { doc =>
-            doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
-              .howManyDisposals()
-              .url
-            doc
-              .select("#content > article > form")
-              .attr("action") shouldBe routes.MultipleDisposalsTriageController
-              .wereYouAUKResidentSubmit()
-              .url
-          }
-        )
+        "the journey is incomplete " in {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsAnswers.empty)._1)
+
+          checkPageIsDisplayed(
+            performAction,
+            messageFromMessageKey("multipleDisposalsWereYouAUKResident.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
+                .howManyDisposals()
+                .url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.MultipleDisposalsTriageController
+                .wereYouAUKResidentSubmit()
+                .url
+            }
+          )
+        }
+
+        "the journey is complete" in {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsAnswers])._1)
+
+          checkPageIsDisplayed(
+            performAction,
+            messageFromMessageKey("multipleDisposalsWereYouAUKResident.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
+                .checkYourAnswers()
+                .url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.MultipleDisposalsTriageController
+                .wereYouAUKResidentSubmit()
+                .url
+            }
+          )
+        }
+
       }
 
     }
@@ -503,23 +559,46 @@ class MultipleDisposalsTriageControllerSpec
 
       behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
 
-      "display the page" in {
-        mockAuthWithNoRetrievals()
-        mockGetSession(sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsAnswers.empty)._1)
+      "display the page" when {
 
-        checkPageIsDisplayed(
-          performAction,
-          messageFromMessageKey("multipleDisposalsWereAllPropertiesResidential.title"), { doc =>
-            doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
-              .wereYouAUKResident()
-              .url
-            doc
-              .select("#content > article > form")
-              .attr("action") shouldBe routes.MultipleDisposalsTriageController
-              .wereAllPropertiesResidentialSubmit()
-              .url
-          }
-        )
+        "the journey is incomplete" in {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsAnswers.empty)._1)
+
+          checkPageIsDisplayed(
+            performAction,
+            messageFromMessageKey("multipleDisposalsWereAllPropertiesResidential.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
+                .wereYouAUKResident()
+                .url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.MultipleDisposalsTriageController
+                .wereAllPropertiesResidentialSubmit()
+                .url
+            }
+          )
+        }
+
+        "the journey is complete" in {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsAnswers])._1)
+
+          checkPageIsDisplayed(
+            performAction,
+            messageFromMessageKey("multipleDisposalsWereAllPropertiesResidential.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
+                .checkYourAnswers()
+                .url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.MultipleDisposalsTriageController
+                .wereAllPropertiesResidentialSubmit()
+                .url
+            }
+          )
+        }
+
       }
 
     }
@@ -691,34 +770,59 @@ class MultipleDisposalsTriageControllerSpec
 
       behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
 
-      "display the page" in {
-        mockAuthWithNoRetrievals()
-        mockGetSession(
-          sessionDataWithStartingNewDraftReturn(
-            IncompleteMultipleDisposalsAnswers.empty.copy(
-              individualUserType           = Some(Self),
-              numberOfProperties           = Some(2),
-              wasAUKResident               = Some(true),
-              countryOfResidence           = Some(Country.uk),
-              wereAllPropertiesResidential = Some(true),
-              assetTypes                   = Some(List(AssetType.Residential))
-            )
-          )._1
-        )
+      "display the page" when {
 
-        checkPageIsDisplayed(
-          performAction,
-          messageFromMessageKey("multipleDisposalsTaxYear.title"), { doc =>
-            doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
-              .wereAllPropertiesResidential()
-              .url
-            doc
-              .select("#content > article > form")
-              .attr("action") shouldBe routes.MultipleDisposalsTriageController
-              .whenWereContractsExchangedSubmit()
-              .url
+        "the journeu is incomplete" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                IncompleteMultipleDisposalsAnswers.empty.copy(
+                  individualUserType           = Some(Self),
+                  numberOfProperties           = Some(2),
+                  wasAUKResident               = Some(true),
+                  countryOfResidence           = Some(Country.uk),
+                  wereAllPropertiesResidential = Some(true),
+                  assetTypes                   = Some(List(AssetType.Residential))
+                )
+              )._1
+            )
           }
-        )
+
+          checkPageIsDisplayed(
+            performAction,
+            messageFromMessageKey("multipleDisposalsTaxYear.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
+                .wereAllPropertiesResidential()
+                .url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.MultipleDisposalsTriageController
+                .whenWereContractsExchangedSubmit()
+                .url
+            }
+          )
+        }
+
+        "the journey is complete" in {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsAnswers])._1)
+
+          checkPageIsDisplayed(
+            performAction,
+            messageFromMessageKey("multipleDisposalsTaxYear.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
+                .checkYourAnswers()
+                .url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.MultipleDisposalsTriageController
+                .whenWereContractsExchangedSubmit()
+                .url
+            }
+          )
+        }
+
       }
     }
 
@@ -921,31 +1025,56 @@ class MultipleDisposalsTriageControllerSpec
 
       behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
 
-      "display the page" in {
-        mockAuthWithNoRetrievals()
-        mockGetSession(
-          sessionDataWithStartingNewDraftReturn(
-            IncompleteMultipleDisposalsAnswers.empty.copy(
-              individualUserType = Some(Self),
-              numberOfProperties = Some(2),
-              wasAUKResident     = Some(false)
-            )
-          )._1
-        )
+      "display the page" when {
 
-        checkPageIsDisplayed(
-          performAction,
-          messageFromMessageKey("multipleDisposalsCountryOfResidence.title"), { doc =>
-            doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
-              .wereYouAUKResident()
-              .url
-            doc
-              .select("#content > article > form")
-              .attr("action") shouldBe routes.MultipleDisposalsTriageController
-              .countryOfResidenceSubmit()
-              .url
+        "the journey is incomplete" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                IncompleteMultipleDisposalsAnswers.empty.copy(
+                  individualUserType = Some(Self),
+                  numberOfProperties = Some(2),
+                  wasAUKResident     = Some(false)
+                )
+              )._1
+            )
           }
-        )
+
+          checkPageIsDisplayed(
+            performAction,
+            messageFromMessageKey("multipleDisposalsCountryOfResidence.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
+                .wereYouAUKResident()
+                .url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.MultipleDisposalsTriageController
+                .countryOfResidenceSubmit()
+                .url
+            }
+          )
+        }
+
+        "the journey is complete" in {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsAnswers])._1)
+
+          checkPageIsDisplayed(
+            performAction,
+            messageFromMessageKey("multipleDisposalsCountryOfResidence.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
+                .checkYourAnswers()
+                .url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.MultipleDisposalsTriageController
+                .countryOfResidenceSubmit()
+                .url
+            }
+          )
+        }
+
       }
 
       "redirect to the cya page" in {
@@ -1148,32 +1277,57 @@ class MultipleDisposalsTriageControllerSpec
 
       behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
 
-      "display the page" in {
-        mockAuthWithNoRetrievals()
-        mockGetSession(
-          sessionDataWithStartingNewDraftReturn(
-            IncompleteMultipleDisposalsAnswers.empty.copy(
-              individualUserType = Some(Self),
-              numberOfProperties = Some(2),
-              wasAUKResident     = Some(false),
-              countryOfResidence = Some(country)
-            )
-          )._1
-        )
+      "display the page" when {
 
-        checkPageIsDisplayed(
-          performAction,
-          messageFromMessageKey("multipleDisposalsAssetTypeForNonUkResidents.title"), { doc =>
-            doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
-              .countryOfResidence()
-              .url
-            doc
-              .select("#content > article > form")
-              .attr("action") shouldBe routes.MultipleDisposalsTriageController
-              .assetTypeForNonUkResidentsSubmit()
-              .url
+        "the journey is incomplete" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                IncompleteMultipleDisposalsAnswers.empty.copy(
+                  individualUserType = Some(Self),
+                  numberOfProperties = Some(2),
+                  wasAUKResident     = Some(false),
+                  countryOfResidence = Some(country)
+                )
+              )._1
+            )
           }
-        )
+
+          checkPageIsDisplayed(
+            performAction,
+            messageFromMessageKey("multipleDisposalsAssetTypeForNonUkResidents.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
+                .countryOfResidence()
+                .url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.MultipleDisposalsTriageController
+                .assetTypeForNonUkResidentsSubmit()
+                .url
+            }
+          )
+        }
+
+        "the journey is complete" in {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsAnswers])._1)
+
+          checkPageIsDisplayed(
+            performAction,
+            messageFromMessageKey("multipleDisposalsAssetTypeForNonUkResidents.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
+                .checkYourAnswers()
+                .url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.MultipleDisposalsTriageController
+                .assetTypeForNonUkResidentsSubmit()
+                .url
+            }
+          )
+        }
+
       }
 
     }
@@ -1430,7 +1584,7 @@ class MultipleDisposalsTriageControllerSpec
               performAction(),
               messageFromMessageKey("multipleDisposalsCompletionDate.title"), { doc =>
                 doc.select("#back").attr("href") shouldBe routes.MultipleDisposalsTriageController
-                  .whenWereContractsExchanged()
+                  .checkYourAnswers()
                   .url
                 doc
                   .select("#content > article > form")
@@ -1612,7 +1766,7 @@ class MultipleDisposalsTriageControllerSpec
       def performAction(): Future[Result] =
         controller.checkYourAnswers()(FakeRequest())
 
-      val completeAnswers = CompleteMultipleDisposalsAnswers(
+      val completeAnswersUk = CompleteMultipleDisposalsAnswers(
         Some(IndividualUserType.Self),
         2,
         Country.uk,
@@ -1621,86 +1775,388 @@ class MultipleDisposalsTriageControllerSpec
         sample[CompletionDate]
       )
 
-      val allQuestionsAnswered = IncompleteMultipleDisposalsAnswers(
-        completeAnswers.individualUserType,
-        Some(completeAnswers.numberOfProperties),
+      val allQuestionsAnsweredUk = IncompleteMultipleDisposalsAnswers(
+        completeAnswersUk.individualUserType,
+        Some(completeAnswersUk.numberOfProperties),
         Some(true),
         None,
         Some(true),
-        Some(completeAnswers.assetTypes),
+        Some(completeAnswersUk.assetTypes),
         Some(true),
-        Some(completeAnswers.taxYear),
-        Some(completeAnswers.completionDate)
+        Some(completeAnswersUk.taxYear),
+        Some(completeAnswersUk.completionDate)
       )
 
-      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
+      val completeAnswersNonUk = CompleteMultipleDisposalsAnswers(
+        Some(IndividualUserType.Self),
+        2,
+        sample[Country],
+        List(AssetType.Residential),
+        sample[TaxYear],
+        sample[CompletionDate]
+      )
 
-      "redirect to the who is individual representing page when no individual user type can be found and the subscribed " +
-        "user type is individual" in {
+      val allQuestionsAnsweredNonUk = IncompleteMultipleDisposalsAnswers(
+        completeAnswersNonUk.individualUserType,
+        Some(completeAnswersNonUk.numberOfProperties),
+        Some(false),
+        Some(completeAnswersNonUk.countryOfResidence),
+        None,
+        Some(completeAnswersNonUk.assetTypes),
+        Some(true),
+        Some(completeAnswersNonUk.taxYear),
+        Some(completeAnswersNonUk.completionDate)
+      )
+
+      def testRedirectWhenIncomplete(answers: IncompleteMultipleDisposalsAnswers, expectedRedirect: Call): Unit = {
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(
             sessionDataWithStartingNewDraftReturn(
-              IncompleteMultipleDisposalsAnswers.empty,
+              answers,
               Right(sample[IndividualName])
             )._1
           )
         }
 
-        checkIsRedirect(performAction(), routes.CommonTriageQuestionsController.whoIsIndividualRepresenting())
+        checkIsRedirect(performAction(), expectedRedirect)
+
+      }
+
+      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
+
+      "redirect to the who is individual representing page when no individual user type can be found and the subscribed " +
+        "user type is individual" in {
+        testRedirectWhenIncomplete(
+          IncompleteMultipleDisposalsAnswers.empty,
+          routes.CommonTriageQuestionsController.whoIsIndividualRepresenting()
+        )
       }
 
       "redirect to the capacitors and personal representatives not handled page" when {
 
         "an individual user type of capacitor is found" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionDataWithStartingNewDraftReturn(
-                allQuestionsAnswered.copy(individualUserType = Some(IndividualUserType.Capacitor))
-              )._1
-            )
-          }
-
-          checkIsRedirect(
-            performAction(),
+          testRedirectWhenIncomplete(
+            allQuestionsAnsweredUk.copy(individualUserType = Some(IndividualUserType.Capacitor)),
             routes.CommonTriageQuestionsController.capacitorsAndPersonalRepresentativesNotHandled()
           )
         }
 
         "an individual user type of personal representative is found" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionDataWithStartingNewDraftReturn(
-                allQuestionsAnswered.copy(individualUserType = Some(IndividualUserType.PersonalRepresentative))
-              )._1
-            )
-          }
-
-          checkIsRedirect(
-            performAction(),
+          testRedirectWhenIncomplete(
+            allQuestionsAnsweredUk.copy(individualUserType = Some(IndividualUserType.PersonalRepresentative)),
             routes.CommonTriageQuestionsController.capacitorsAndPersonalRepresentativesNotHandled()
           )
+
         }
 
       }
 
       "redirect to the multiple disposals guidance page when no answer for the number of properties can be found" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            sessionDataWithStartingNewDraftReturn(
-              allQuestionsAnswered.copy(numberOfProperties = None)
-            )._1
+        testRedirectWhenIncomplete(
+          allQuestionsAnsweredUk.copy(numberOfProperties = None),
+          routes.MultipleDisposalsTriageController.guidance()
+        )
+      }
+
+      "redirect the were you a uk resident page" when {
+
+        "the user has not answered that question" in {
+          testRedirectWhenIncomplete(
+            allQuestionsAnsweredUk.copy(wasAUKResident = None),
+            routes.MultipleDisposalsTriageController.wereYouAUKResident()
           )
         }
 
-        checkIsRedirect(performAction(), routes.MultipleDisposalsTriageController.guidance())
       }
 
+      "redirect to the country of residence page" when {
+
+        "the user was not a non uk resident and they have not selected a country yet" in {
+          testRedirectWhenIncomplete(
+            allQuestionsAnsweredNonUk.copy(countryOfResidence = None),
+            routes.MultipleDisposalsTriageController.countryOfResidence()
+          )
+        }
+
+      }
+
+      "redirect to the asset type for non uk residents page" when {
+
+        "the user was not a non uk resident and they have not selected asset types yet" in {
+          testRedirectWhenIncomplete(
+            allQuestionsAnsweredNonUk.copy(assetTypes = None),
+            routes.MultipleDisposalsTriageController.assetTypeForNonUkResidents()
+          )
+        }
+
+      }
+
+      "redirect to the asset types not implemented page" when {
+
+        "the user was not a non uk resident and they have selected asset types that are not supported" in {
+          forAll { assetTypes: List[AssetType] =>
+            whenever(assetTypes =!= List(AssetType.Residential) && assetTypes =!= List(AssetType.NonResidential)) {
+
+              testRedirectWhenIncomplete(
+                allQuestionsAnsweredNonUk.copy(assetTypes = Some(assetTypes)),
+                routes.CommonTriageQuestionsController.assetTypeNotYetImplemented()
+              )
+            }
+          }
+        }
+
+      }
+
+      "redirect to the were all properties residential page" when {
+
+        "the user was a uk resident and they have not answered the question yet" in {
+          testRedirectWhenIncomplete(
+            allQuestionsAnsweredUk.copy(wereAllPropertiesResidential = None),
+            routes.MultipleDisposalsTriageController.wereAllPropertiesResidential()
+          )
+        }
+      }
+
+      "redirect to uk residents can only dispose of residential properties page" when {
+
+        "the user was a uk resident and they said not all properties were residential" in {
+          testRedirectWhenIncomplete(
+            allQuestionsAnsweredUk.copy(wereAllPropertiesResidential = Some(false)),
+            routes.CommonTriageQuestionsController.ukResidentCanOnlyDisposeResidential()
+          )
+        }
+
+      }
+
+      "redirect to the tax year page" when {
+
+        "the question has not been answered yet" in {
+          testRedirectWhenIncomplete(
+            allQuestionsAnsweredUk.copy(taxYearAfter6April2020 = None, taxYear = None),
+            routes.MultipleDisposalsTriageController.whenWereContractsExchanged()
+          )
+        }
+
+      }
+
+      "redirect to the tax year too early page" when {
+
+        "the user indicated that the tax year was before 6th Aprial 2020" in {
+          testRedirectWhenIncomplete(
+            allQuestionsAnsweredUk.copy(taxYearAfter6April2020 = Some(false)),
+            routes.CommonTriageQuestionsController.disposalDateTooEarly()
+          )
+        }
+
+      }
+
+      "show an error page" when {
+
+        "no tax year can be found when one is expected" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(
+                allQuestionsAnsweredUk.copy(taxYearAfter6April2020 = Some(true), taxYear = None),
+                Right(sample[IndividualName])
+              )._1
+            )
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
+      }
+
+      "redirect to the completion date page" when {
+
+        "the question has not been answered yet" in {
+          testRedirectWhenIncomplete(
+            allQuestionsAnsweredUk.copy(completionDate = None),
+            routes.MultipleDisposalsTriageController.completionDate()
+          )
+        }
+
+      }
+
+      "show an error page" when {
+
+        "there is an error updating the session when converting from inomplete answers to " +
+          "complete answers" in {
+          val (session, journey) = sessionDataWithStartingNewDraftReturn(allQuestionsAnsweredUk)
+          val updatedJourney     = journey.copy(newReturnTriageAnswers = Left(completeAnswersUk))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+
+        }
+
+      }
+
+      "show the page" when {
+
+        "the user has already completed the section and " when {
+
+          "they were a uk resident" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(sessionDataWithStartingNewDraftReturn(completeAnswersUk)._1)
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("multipleDisposals.triage.cya.title"), { doc =>
+                MultipleDisposalsTriageControllerSpec.validateSingleDisposalTriageCheckYourAnswersPage(
+                  completeAnswersUk,
+                  None,
+                  doc
+                )
+              }
+            )
+
+          }
+
+          "they were a not a uk resident" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(sessionDataWithStartingNewDraftReturn(completeAnswersNonUk)._1)
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("multipleDisposals.triage.cya.title"), { doc =>
+                MultipleDisposalsTriageControllerSpec.validateSingleDisposalTriageCheckYourAnswersPage(
+                  completeAnswersNonUk,
+                  None,
+                  doc
+                )
+              }
+            )
+
+          }
+
+          "they user is an agent" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(sessionDataWithStartingNewDraftReturn(completeAnswersNonUk, isAgent = true)._1)
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("multipleDisposals.triage.cya.title"), { doc =>
+                MultipleDisposalsTriageControllerSpec.validateSingleDisposalTriageCheckYourAnswersPage(
+                  completeAnswersNonUk,
+                  Some(UserType.Agent),
+                  doc
+                )
+              }
+            )
+
+          }
+
+        }
+
+        "the user has just answered all the question in the section and" when {
+
+          "all updated are successful when the user was a uk resident" in {
+            val (session, journey) = sessionDataWithStartingNewDraftReturn(allQuestionsAnsweredUk)
+            val updatedJourney     = journey.copy(newReturnTriageAnswers = Left(completeAnswersUk))
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("multipleDisposals.triage.cya.title"), { doc =>
+                MultipleDisposalsTriageControllerSpec.validateSingleDisposalTriageCheckYourAnswersPage(
+                  completeAnswersUk,
+                  None,
+                  doc
+                )
+              }
+            )
+
+          }
+
+          "all updated are successful when the user was a not uk resident" in {
+            val (session, journey) = sessionDataWithStartingNewDraftReturn(allQuestionsAnsweredNonUk)
+            val updatedJourney     = journey.copy(newReturnTriageAnswers = Left(completeAnswersNonUk))
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("multipleDisposals.triage.cya.title"), { doc =>
+                MultipleDisposalsTriageControllerSpec.validateSingleDisposalTriageCheckYourAnswersPage(
+                  completeAnswersNonUk,
+                  None,
+                  doc
+                )
+              }
+            )
+
+          }
+        }
+
+      }
     }
 
+  }
+
+}
+
+object MultipleDisposalsTriageControllerSpec extends Matchers {
+
+  def validateSingleDisposalTriageCheckYourAnswersPage(
+    answers: CompleteMultipleDisposalsAnswers,
+    userType: Option[UserType],
+    doc: Document
+  )(implicit messagesApi: MessagesApi, lang: Lang): Unit = {
+    implicit val messages = MessagesImpl(lang, messagesApi)
+
+    answers.individualUserType.foreach { individualUserType =>
+      doc.select("#individualUserType-answer").text() shouldBe messages(
+        if (userType.contains(UserType.Agent)) s"individualUserType.agent.$individualUserType"
+        else s"individualUserType.$individualUserType"
+      )
+    }
+
+    doc.select("#numberOfProperties-answer").text() shouldBe messages("numberOfProperties.MoreThanOne")
+
+    doc.select("#multipleDisposalsNumberOfProperties-answer").text() shouldBe answers.numberOfProperties.toString
+
+    if (answers.countryOfResidence.isUk())
+      doc.select("#wereYouAUKResident-answer").text() shouldBe "Yes"
+    else
+      doc.select("#wereYouAUKResident-answer").text() shouldBe "No"
+
+    if (answers.countryOfResidence.isUk())
+      doc.select("#wereAllPropertiesResidential-answer").text() shouldBe "Yes"
+    else {
+      doc.select("#countryOfResidence-answer").text() shouldBe answers.countryOfResidence.name
+        .getOrElse(answers.countryOfResidence.code)
+      doc.select("#assetTypeForNonUkResidents-answer").text() shouldBe answers.assetTypes
+        .map(assetType => messages(s"multipleDisposalsAssetTypeForNonUkResidents.${assetType.toString}"))
+        .mkString(", ")
+    }
+
+    doc
+      .select("#taxYear-answer")
+      .text()                                   shouldBe s"${answers.taxYear.startDateInclusive.getYear}/${answers.taxYear.endDateExclusive.getYear}"
+    doc.select("#completionDate-answer").text() shouldBe LocalDateUtils.govDisplayFormat(answers.completionDate.value)
   }
 
 }
