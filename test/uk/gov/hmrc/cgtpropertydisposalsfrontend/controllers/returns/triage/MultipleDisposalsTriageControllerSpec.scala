@@ -17,6 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 import java.time.{Clock, LocalDate}
+import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
@@ -33,13 +34,14 @@ import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, triage}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, DateErrorScenarios, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingNewDraftReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.Self
@@ -48,7 +50,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTri
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, LocalDateUtils, SessionData, TaxYear, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.TaxYearService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{ReturnsService, TaxYearService}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -59,15 +61,20 @@ class MultipleDisposalsTriageControllerSpec
     with AuthSupport
     with SessionSupport
     with ScalaCheckDrivenPropertyChecks
-    with RedirectToStartBehaviour {
+    with RedirectToStartBehaviour
+    with ReturnsServiceSupport {
 
   val mockTaxYearService = mock[TaxYearService]
+
+  val mockUUIDGenerator = mock[UUIDGenerator]
 
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
-      bind[TaxYearService].toInstance(mockTaxYearService)
+      bind[TaxYearService].toInstance(mockTaxYearService),
+      bind[UUIDGenerator].toInstance(mockUUIDGenerator),
+      bind[ReturnsService].toInstance(mockReturnsService)
     )
 
   lazy val controller = instanceOf[MultipleDisposalsTriageController]
@@ -119,6 +126,11 @@ class MultipleDisposalsTriageControllerSpec
       BAD_REQUEST
     )
   }
+
+  def mockGenerateUUID(uuid: UUID): Unit =
+    (mockUUIDGenerator.nextId _)
+      .expects()
+      .returning(uuid)
 
   "MultipleDisposalsTriageController" when {
 
@@ -2112,6 +2124,83 @@ class MultipleDisposalsTriageControllerSpec
         }
 
       }
+    }
+
+    "handling submits on the check your answers page" when {
+      def performAction(): Future[Result] = controller.checkYourAnswersSubmit()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
+
+      "the user has not started a new draft return yet" must {
+
+        val completeAnswers    = sample[CompleteMultipleDisposalsAnswers]
+        val (session, journey) = sessionDataWithStartingNewDraftReturn(completeAnswers)
+        val draftId            = UUID.randomUUID()
+        val newDraftReturn     = MultipleDisposalsDraftReturn(draftId, completeAnswers, LocalDateUtils.today())
+        val newJourney = FillingOutReturn(
+          journey.subscribedDetails,
+          journey.ggCredId,
+          journey.agentReferenceNumber,
+          newDraftReturn
+        )
+
+        "show an error page" when {
+
+          "there is an error storing the new draft return" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockGenerateUUID(draftId)
+              mockStoreDraftReturn(
+                newDraftReturn,
+                journey.subscribedDetails.cgtReference,
+                journey.agentReferenceNumber
+              )(Left(Error("")))
+            }
+
+            checkIsTechnicalErrorPage(performAction())
+          }
+
+          "there is an error updating the session" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockGenerateUUID(draftId)
+              mockStoreDraftReturn(
+                newDraftReturn,
+                journey.subscribedDetails.cgtReference,
+                journey.agentReferenceNumber
+              )(Right(()))
+              mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(Left(Error("")))
+            }
+
+            checkIsTechnicalErrorPage(performAction())
+          }
+
+        }
+
+        "redirect to the task list page" when {
+
+          "a new draft return is created and saved" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockGenerateUUID(draftId)
+              mockStoreDraftReturn(
+                newDraftReturn,
+                journey.subscribedDetails.cgtReference,
+                journey.agentReferenceNumber
+              )(Right(()))
+              mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(Right(()))
+            }
+
+            checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+          }
+
+        }
+
+      }
+
     }
 
   }

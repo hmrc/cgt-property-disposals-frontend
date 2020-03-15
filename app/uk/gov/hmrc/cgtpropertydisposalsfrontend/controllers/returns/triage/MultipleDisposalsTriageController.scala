@@ -683,17 +683,13 @@ class MultipleDisposalsTriageController @Inject() (
 
   def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withMultipleDisposalTriageAnswers(request) {
-      case (session, journey, answers) =>
+      case (_, journey, answers) =>
         answers match {
           case _: IncompleteMultipleDisposalsAnswers =>
             Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
 
           case c: CompleteMultipleDisposalsAnswers =>
-            val newDraftReturn = MultipleDisposalsDraftReturn(
-              UUID.randomUUID(),
-              answers,
-              LocalDateUtils.today()
-            )
+            val newDraftReturn = MultipleDisposalsDraftReturn(uuidGenerator.nextId(), c, LocalDateUtils.today())
             val newJourney = FillingOutReturn(
               journey.subscribedDetails,
               journey.ggCredId,
