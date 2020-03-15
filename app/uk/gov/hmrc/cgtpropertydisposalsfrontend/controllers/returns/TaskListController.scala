@@ -22,6 +22,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{routes => baseRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{MultipleDisposalsDraftReturn, SingleDisposalDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -34,7 +35,7 @@ class TaskListController @Inject() (
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
   cc: MessagesControllerComponents,
-  taskListPage: views.html.returns.task_list
+  singleDisposalTaskListPage: views.html.returns.single_disposal_task_list
 )(implicit viewConfig: ViewConfig)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -42,8 +43,12 @@ class TaskListController @Inject() (
 
   def taskList(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
     request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(FillingOutReturn(_, _, _, draftReturn)) =>
-        Ok(taskListPage(draftReturn))
+      case Some(FillingOutReturn(_, _, _, draftReturn: SingleDisposalDraftReturn)) =>
+        Ok(singleDisposalTaskListPage(draftReturn))
+
+      case Some(FillingOutReturn(_, _, _, draftReturn: MultipleDisposalsDraftReturn)) =>
+        sys.error("multiple disposals not handled yet")
+
       case _ =>
         Redirect(baseRoutes.StartController.start())
 

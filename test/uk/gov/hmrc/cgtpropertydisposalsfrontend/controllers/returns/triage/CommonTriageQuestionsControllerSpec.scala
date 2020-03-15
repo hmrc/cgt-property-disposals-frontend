@@ -83,7 +83,7 @@ class CommonTriageQuestionsControllerSpec
     name: Either[TrustName, IndividualName] = Right(sample[IndividualName])
   ): (SessionData, FillingOutReturn) = {
     val fillingOutReturn = sample[FillingOutReturn].copy(
-      draftReturn = sample[DraftReturn].copy(
+      draftReturn = sample[SingleDisposalDraftReturn].copy(
         triageAnswers = singleDisposalTriageAnswers
       ),
       subscribedDetails = sample[SubscribedDetails].copy(name = name)

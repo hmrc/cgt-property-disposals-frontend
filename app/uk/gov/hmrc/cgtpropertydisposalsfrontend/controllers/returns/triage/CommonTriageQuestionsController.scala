@@ -29,14 +29,13 @@ import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, FormUtils, LocalDateUtils, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.IncompleteMultipleDisposalsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, IndividualUserType, MultipleDisposalsTriageAnswers, NumberOfProperties, SingleDisposalTriageAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{FormUtils, SessionData, UserType}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DraftReturn, IndividualUserType, MultipleDisposalsDraftReturn, MultipleDisposalsTriageAnswers, NumberOfProperties, SingleDisposalDraftReturn, SingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
@@ -340,8 +339,18 @@ class CommonTriageQuestionsController @Inject() (
           _.copy(newReturnTriageAnswers = Right(newTriageAnswers)),
           fillingOutReturn =>
             fillingOutReturn.copy(
-              draftReturn = fillingOutReturn.draftReturn.copy(
-                triageAnswers = newTriageAnswers
+              draftReturn = SingleDisposalDraftReturn(
+                fillingOutReturn.draftReturn.id,
+                fillingOutReturn.draftReturn.cgtReference,
+                newTriageAnswers,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                LocalDateUtils.today()
               )
             )
         )
@@ -356,8 +365,11 @@ class CommonTriageQuestionsController @Inject() (
           _.copy(newReturnTriageAnswers = Left(newTriageAnswers)),
           fillingOutReturn =>
             fillingOutReturn.copy(
-              draftReturn = fillingOutReturn.draftReturn.copy(
-                triageAnswers = sys.error("not handled yet")
+              draftReturn = MultipleDisposalsDraftReturn(
+                fillingOutReturn.draftReturn.id,
+                fillingOutReturn.draftReturn.cgtReference,
+                newTriageAnswers,
+                LocalDateUtils.today()
               )
             )
         )
@@ -384,17 +396,21 @@ class CommonTriageQuestionsController @Inject() (
       ),
       r =>
         r.copy(
-          draftReturn = r.draftReturn.copy(
-            triageAnswers = r.draftReturn.triageAnswers.fold(
-              _.fold(
-                _.copy(individualUserType = Some(individualUserType)),
-                _.copy(individualUserType = Some(individualUserType))
+          draftReturn = r.draftReturn.fold[DraftReturn](
+            m =>
+              m.copy(
+                triageAnswers = m.triageAnswers.fold[MultipleDisposalsTriageAnswers](
+                  _.copy(individualUserType = Some(individualUserType)),
+                  _.copy(individualUserType = Some(individualUserType))
+                )
               ),
-              _.fold(
-                _.copy(individualUserType = Some(individualUserType)),
-                _.copy(individualUserType = Some(individualUserType))
+            s =>
+              s.copy(
+                triageAnswers = s.triageAnswers.fold[SingleDisposalTriageAnswers](
+                  _.copy(individualUserType = Some(individualUserType)),
+                  _.copy(individualUserType = Some(individualUserType))
+                )
               )
-            )
           )
         )
     )
@@ -427,7 +443,16 @@ class CommonTriageQuestionsController @Inject() (
   private def triageAnswersFomState(
     state: Either[StartingNewDraftReturn, FillingOutReturn]
   ): Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers] =
-    state.bimap(_.newReturnTriageAnswers, r => Right(r.draftReturn.triageAnswers)).merge
+    state
+      .bimap(
+        _.newReturnTriageAnswers,
+        r =>
+          r.draftReturn.fold(
+            m => Left(m.triageAnswers),
+            s => Right(s.triageAnswers)
+          )
+      )
+      .merge
 
   private def withState(request: RequestWithSessionData[_])(
     f: (SessionData, Either[StartingNewDraftReturn, FillingOutReturn]) => Future[Result]

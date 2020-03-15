@@ -109,7 +109,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 
     val completeReturn = sample[CompleteReturn]
 
-    val completeDraftReturn = DraftReturn(
+    val completeDraftReturn = SingleDisposalDraftReturn(
       UUID.randomUUID(),
       sample[CgtReference],
       completeReturn.triageAnswers,
@@ -365,8 +365,11 @@ class CheckAllAnswersAndSubmitControllerSpec
 
   }
 
-  def incompleteJourneyBehaviour(performAction: () => Future[Result], completeDraftReturn: DraftReturn) = {
-    val makeIncompleteFunctions = List[DraftReturn => DraftReturn](
+  def incompleteJourneyBehaviour(
+    performAction: () => Future[Result],
+    completeDraftReturn: SingleDisposalDraftReturn
+  ) = {
+    val makeIncompleteFunctions = List[SingleDisposalDraftReturn => SingleDisposalDraftReturn](
       _.copy(triageAnswers              = sample[IncompleteSingleDisposalTriageAnswers]),
       _.copy(propertyAddress            = None),
       _.copy(disposalDetailsAnswers     = Some(sample[IncompleteDisposalDetailsAnswers])),

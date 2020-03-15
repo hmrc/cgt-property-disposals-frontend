@@ -34,7 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, DraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, SingleDisposalDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -74,7 +74,7 @@ class InitialGainOrLossControllerSpec
     disposalDate: DisposalDate
   ): (SessionData, FillingOutReturn) = {
     val journey = sample[FillingOutReturn].copy(
-      draftReturn = sample[DraftReturn].copy(
+      draftReturn = sample[SingleDisposalDraftReturn].copy(
         initialGainOrLoss = Some(initialGainOrLoss)
       )
     )

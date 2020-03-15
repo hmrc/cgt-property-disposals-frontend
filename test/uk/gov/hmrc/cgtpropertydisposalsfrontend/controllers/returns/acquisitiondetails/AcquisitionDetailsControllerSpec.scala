@@ -92,7 +92,7 @@ class AcquisitionDetailsControllerSpec
     disposalDate: Option[DisposalDate]
   ): (SessionData, FillingOutReturn) = {
     val journey = sample[FillingOutReturn].copy(
-      draftReturn = sample[DraftReturn].copy(
+      draftReturn = sample[SingleDisposalDraftReturn].copy(
         triageAnswers = sample[IncompleteSingleDisposalTriageAnswers].copy(
           assetType      = assetType,
           wasAUKResident = wasUkResident,

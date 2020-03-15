@@ -75,14 +75,15 @@ class ReliefDetailsController @Inject() (
     f: (
       SessionData,
       FillingOutReturn,
+      SingleDisposalDraftReturn,
       ReliefDetailsAnswers
     ) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((s, r: FillingOutReturn)) =>
-        r.draftReturn.reliefDetailsAnswers.fold[Future[Result]](
-          f(s, r, IncompleteReliefDetailsAnswers.empty)
-        )(f(s, r, _))
+      case Some((s, r @ FillingOutReturn(_, _, _, d: SingleDisposalDraftReturn))) =>
+        d.reliefDetailsAnswers.fold[Future[Result]](
+          f(s, r, d, IncompleteReliefDetailsAnswers.empty)
+        )(f(s, r, d, _))
       case _ => Redirect(controllers.routes.StartController.start())
     }
 
@@ -106,6 +107,7 @@ class ReliefDetailsController @Inject() (
 
   private def commonSubmitBehaviour[A, P: Writeable, R](
     currentFillingOutReturn: FillingOutReturn,
+    currentDraftReturn: SingleDisposalDraftReturn,
     currentAnswers: ReliefDetailsAnswers
   )(form: Form[A])(
     page: (Form[A], Call) => P
@@ -113,7 +115,7 @@ class ReliefDetailsController @Inject() (
     requiredPreviousAnswer: ReliefDetailsAnswers => Option[R],
     redirectToIfNoRequiredPreviousAnswer: Call
   )(
-    updateAnswers: (A, DraftReturn) => DraftReturn
+    updateAnswers: (A, SingleDisposalDraftReturn) => SingleDisposalDraftReturn
   )(
     implicit request: RequestWithSessionData[_]
   ): Future[Result] =
@@ -126,10 +128,10 @@ class ReliefDetailsController @Inject() (
         .bindFromRequest()
         .fold(
           formWithErrors => BadRequest(page(formWithErrors, backLink)), { value =>
-            val newDraftReturn = updateAnswers(value, currentFillingOutReturn.draftReturn)
+            val newDraftReturn = updateAnswers(value, currentDraftReturn)
 
             val result = for {
-              _ <- if (newDraftReturn === currentFillingOutReturn.draftReturn) EitherT.pure(())
+              _ <- if (newDraftReturn === currentDraftReturn) EitherT.pure(())
                   else returnsService.storeDraftReturn(newDraftReturn, currentFillingOutReturn.agentReferenceNumber)
               _ <- EitherT(
                     updateSession(sessionStore, request)(
@@ -150,7 +152,7 @@ class ReliefDetailsController @Inject() (
 
   def privateResidentsRelief(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndReliefDetailsAnswers(request) {
-      case (_, _, answers) =>
+      case (_, _, _, answers) =>
         commonDisplayBehaviour(answers)(
           form = _.fold(
             _.privateResidentsRelief.fold(privateResidentsReliefForm)(a => privateResidentsReliefForm.fill(a.inPounds())
@@ -169,8 +171,8 @@ class ReliefDetailsController @Inject() (
   def privateResidentsReliefSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
       withFillingOutReturnAndReliefDetailsAnswers(request) {
-        case (_, fillingOutReturn, answers) =>
-          commonSubmitBehaviour(fillingOutReturn, answers)(
+        case (_, fillingOutReturn, draftReturn, answers) =>
+          commonSubmitBehaviour(fillingOutReturn, draftReturn, answers)(
             form = privateResidentsReliefForm
           )(
             page = {
@@ -198,7 +200,7 @@ class ReliefDetailsController @Inject() (
 
   def lettingsRelief(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndReliefDetailsAnswers(request) {
-      case (_, _, answers) =>
+      case (_, _, _, answers) =>
         commonDisplayBehaviour(answers)(
           form = _.fold(
             _.lettingsRelief.fold(lettingsReliefForm)(a => lettingsReliefForm.fill(a.inPounds())),
@@ -218,8 +220,8 @@ class ReliefDetailsController @Inject() (
 
   def lettingsReliefSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndReliefDetailsAnswers(request) {
-      case (_, fillingOutReturn, answers) =>
-        commonSubmitBehaviour(fillingOutReturn, answers)(
+      case (_, fillingOutReturn, draftReturn, answers) =>
+        commonSubmitBehaviour(fillingOutReturn, draftReturn, answers)(
           form = lettingsReliefForm
         )(page = lettingsReliefPage(_, _))(
           requiredPreviousAnswer = _.fold(
@@ -245,7 +247,7 @@ class ReliefDetailsController @Inject() (
 
   def otherReliefs(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndReliefDetailsAnswers(request) {
-      case (_, _, answers) =>
+      case (_, _, _, answers) =>
         commonDisplayBehaviour(answers)(
           form = _.fold(
             _.otherReliefs.fold(otherReliefsForm)(
@@ -276,8 +278,8 @@ class ReliefDetailsController @Inject() (
 
   def otherReliefsSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndReliefDetailsAnswers(request) {
-      case (_, fillingOutReturn, answers) =>
-        commonSubmitBehaviour(fillingOutReturn, answers)(
+      case (_, fillingOutReturn, draftReturn, answers) =>
+        commonSubmitBehaviour(fillingOutReturn, draftReturn, answers)(
           form = otherReliefsForm
         )(page = otherReliefsPage(_, _))(
           requiredPreviousAnswer = _.fold(
@@ -297,7 +299,7 @@ class ReliefDetailsController @Inject() (
 
               val updatedExemptionAndLossesAnswers =
                 changeExemptionsAndLossesAnswersState(
-                  fillingOutReturn.draftReturn.exemptionAndLossesAnswers,
+                  draftReturn.exemptionAndLossesAnswers,
                   answers,
                   otherReliefs
                 )
@@ -355,7 +357,7 @@ class ReliefDetailsController @Inject() (
 
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndReliefDetailsAnswers(request) {
-      case (_, fillingOutReturn, answers) =>
+      case (_, fillingOutReturn, draftReturn, answers) =>
         answers match {
           case c: CompleteReliefDetailsAnswers =>
             Ok(checkYouAnswersPage(c))
@@ -372,7 +374,7 @@ class ReliefDetailsController @Inject() (
           case IncompleteReliefDetailsAnswers(Some(prr), Some(lr), or) =>
             val completeAnswers = CompleteReliefDetailsAnswers(prr, lr, or)
             val newDraftReturn =
-              fillingOutReturn.draftReturn.copy(reliefDetailsAnswers = Some(completeAnswers))
+              draftReturn.copy(reliefDetailsAnswers = Some(completeAnswers))
 
             val result = for {
               _ <- returnsService.storeDraftReturn(newDraftReturn, fillingOutReturn.agentReferenceNumber)

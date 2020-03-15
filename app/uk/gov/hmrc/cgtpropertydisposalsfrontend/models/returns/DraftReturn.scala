@@ -20,12 +20,15 @@ import java.time.LocalDate
 import java.util.UUID
 
 import cats.Eq
+import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 
-final case class DraftReturn(
+sealed trait DraftReturn extends Product with Serializable
+
+final case class SingleDisposalDraftReturn(
   id: UUID,
   cgtReference: CgtReference,
   triageAnswers: SingleDisposalTriageAnswers,
@@ -37,14 +40,40 @@ final case class DraftReturn(
   yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
   initialGainOrLoss: Option[AmountInPence],
   lastUpdatedDate: LocalDate
-)
+) extends DraftReturn
+
+object SingleDisposalDraftReturn {
+
+  implicit val eq: Eq[SingleDisposalDraftReturn] = Eq.fromUniversalEquals[SingleDisposalDraftReturn]
+
+}
+
+final case class MultipleDisposalsDraftReturn(
+  id: UUID,
+  cgtReference: CgtReference,
+  triageAnswers: MultipleDisposalsTriageAnswers,
+  lastUpdatedDate: LocalDate
+) extends DraftReturn
 
 object DraftReturn {
 
-  implicit val eq: Eq[DraftReturn] = Eq.fromUniversalEquals[DraftReturn]
+  implicit class DraftReturnOps(private val d: DraftReturn) extends AnyVal {
+    def fold[A](whenMultiple: MultipleDisposalsDraftReturn => A, whenSingle: SingleDisposalDraftReturn => A): A =
+      d match {
+        case m: MultipleDisposalsDraftReturn => whenMultiple(m)
+        case s: SingleDisposalDraftReturn    => whenSingle(s)
+      }
+
+    def id: UUID                   = fold(_.id, _.id)
+    def cgtReference: CgtReference = fold(_.cgtReference, _.cgtReference)
+    def lastUpdatedDate: LocalDate = fold(_.lastUpdatedDate, _.lastUpdatedDate)
+  }
+
+  implicit val eq: Eq[DraftReturn] = Eq.fromUniversalEquals
 
   implicit val ukAddressFormat: OFormat[UkAddress] = Json.format[UkAddress]
 
-  implicit val format: OFormat[DraftReturn] = Json.format[DraftReturn]
+  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
+  implicit val format: OFormat[DraftReturn] = derived.oformat()
 
 }

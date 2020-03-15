@@ -106,7 +106,7 @@ class SingleDisposalsTriageControllerSpec
   }
 
   def sessionDataWithFillingOurReturn(
-    draftReturn: DraftReturn,
+    draftReturn: SingleDisposalDraftReturn,
     name: Either[TrustName, IndividualName]
   ): (SessionData, FillingOutReturn) = {
     val fillingOutReturn = sample[FillingOutReturn].copy(
@@ -121,7 +121,10 @@ class SingleDisposalsTriageControllerSpec
     singleDisposalTriageAnswers: SingleDisposalTriageAnswers,
     name: Either[TrustName, IndividualName] = Right(sample[IndividualName])
   ): (SessionData, FillingOutReturn) =
-    sessionDataWithFillingOurReturn(sample[DraftReturn].copy(triageAnswers = singleDisposalTriageAnswers), name)
+    sessionDataWithFillingOurReturn(
+      sample[SingleDisposalDraftReturn].copy(triageAnswers = singleDisposalTriageAnswers),
+      name
+    )
 
   def mockGetNextUUID(uuid: UUID) =
     (mockUUIDGenerator.nextId _).expects().returning(uuid)
@@ -1989,7 +1992,7 @@ class SingleDisposalsTriageControllerSpec
         startingNewDraftReturn.subscribedDetails,
         startingNewDraftReturn.ggCredId,
         startingNewDraftReturn.agentReferenceNumber,
-        DraftReturn(
+        SingleDisposalDraftReturn(
           uuid,
           startingNewDraftReturn.subscribedDetails.cgtReference,
           completeAnswers,
@@ -2228,8 +2231,8 @@ class SingleDisposalsTriageControllerSpec
       }
 
       "the user is filling in a draft return and" when {
-        val draftReturn        = sample[DraftReturn].copy(triageAnswers = currentAnswers)
-        val updatedDraftReturn = draftReturn.copy(triageAnswers         = updatedAnswers)
+        val draftReturn        = sample[SingleDisposalDraftReturn].copy(triageAnswers = currentAnswers)
+        val updatedDraftReturn = draftReturn.copy(triageAnswers                       = updatedAnswers)
 
         val fillingOutReturn        = sample[FillingOutReturn].copy(draftReturn = draftReturn)
         val updatedFillingOutReturn = fillingOutReturn.copy(draftReturn         = updatedDraftReturn)
@@ -2291,8 +2294,8 @@ class SingleDisposalsTriageControllerSpec
     checkNextResult: Future[Result] => Unit,
     extraMockActions: () => Unit = () => ()
   ): Unit = {
-    val draftReturn        = sample[DraftReturn].copy(triageAnswers = currentAnswers)
-    val updatedDraftReturn = draftReturn.copy(triageAnswers         = updatedAnswers)
+    val draftReturn        = sample[SingleDisposalDraftReturn].copy(triageAnswers = currentAnswers)
+    val updatedDraftReturn = draftReturn.copy(triageAnswers                       = updatedAnswers)
 
     val fillingOutReturn        = sample[FillingOutReturn].copy(draftReturn = draftReturn)
     val updatedFillingOutReturn = fillingOutReturn.copy(draftReturn         = updatedDraftReturn)

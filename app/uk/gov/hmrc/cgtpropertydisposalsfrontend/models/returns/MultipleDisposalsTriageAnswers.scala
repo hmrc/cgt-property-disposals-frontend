@@ -16,12 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import cats.syntax.either._
 import julienrf.json.derived
-import play.api.data.FormError
-import play.api.data.format.Formatter
 import play.api.libs.json.OFormat
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.FormUtils.readValue
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TaxYear
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 

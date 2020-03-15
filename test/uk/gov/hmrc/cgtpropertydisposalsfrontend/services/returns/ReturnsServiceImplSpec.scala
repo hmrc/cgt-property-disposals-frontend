@@ -44,9 +44,9 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
   val mockConnector = mock[ReturnsConnector]
 
-  def mockStoreDraftReturn(draftReturn: DraftReturn)(response: Either[Error, HttpResponse]) =
+  def mockStoreDraftReturn(draftReturn: SingleDisposalDraftReturn)(response: Either[Error, HttpResponse]) =
     (mockConnector
-      .storeDraftReturn(_: DraftReturn)(_: HeaderCarrier))
+      .storeDraftReturn(_: SingleDisposalDraftReturn)(_: HeaderCarrier))
       .expects(draftReturn, *)
       .returning(EitherT.fromEither[Future](response))
 
@@ -85,7 +85,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
     "handling requests to store draft returns" must {
 
-      val draftReturn = sample[DraftReturn]
+      val draftReturn = sample[SingleDisposalDraftReturn]
 
       "return an error" when {
 
@@ -137,7 +137,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
       "return an ok response" when {
 
-        val draftReturnsResponse = GetDraftReturnResponse(List(sample[DraftReturn]))
+        val draftReturnsResponse = GetDraftReturnResponse(List(sample[SingleDisposalDraftReturn]))
 
         "the http call came back with a 200 and the body can be parsed" in {
           mockGetDraftReturns(cgtReference)(Right(HttpResponse(OK, Some(Json.toJson(draftReturnsResponse)))))

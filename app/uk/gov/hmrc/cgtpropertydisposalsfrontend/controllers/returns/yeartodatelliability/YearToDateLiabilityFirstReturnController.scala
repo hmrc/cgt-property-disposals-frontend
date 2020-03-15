@@ -78,14 +78,15 @@ class YearToDateLiabilityFirstReturnController @Inject() (
     f: (
       SessionData,
       FillingOutReturn,
+      SingleDisposalDraftReturn,
       YearToDateLiabilityAnswers
     ) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((s, r: FillingOutReturn)) =>
-        r.draftReturn.yearToDateLiabilityAnswers.fold[Future[Result]](
-          f(s, r, IncompleteYearToDateLiabilityAnswers.empty)
-        )(f(s, r, _))
+      case Some((s, r @ FillingOutReturn(_, _, _, d: SingleDisposalDraftReturn))) =>
+        d.yearToDateLiabilityAnswers.fold[Future[Result]](
+          f(s, r, d, IncompleteYearToDateLiabilityAnswers.empty)
+        )(f(s, r, d, _))
       case _ => Redirect(controllers.routes.StartController.start())
     }
 
@@ -99,7 +100,8 @@ class YearToDateLiabilityFirstReturnController @Inject() (
     estimatedIncome: AmountInPence,
     personalAllowance: AmountInPence,
     calculateIfMissing: Boolean,
-    fillingOutReturn: FillingOutReturn
+    fillingOutReturn: FillingOutReturn,
+    draftReturn: SingleDisposalDraftReturn
   )(f: CalculatedTaxDue => Future[Result])(implicit request: RequestWithSessionData[_]): Future[Result] =
     answers match {
       case complete: CompleteYearToDateLiabilityAnswers => f(complete.calculatedTaxDue)
@@ -130,11 +132,10 @@ class YearToDateLiabilityFirstReturnController @Inject() (
                       updateSession(sessionStore, request)(
                         _.copy(
                           journeyStatus = Some(
-                            fillingOutReturn.copy(draftReturn =
-                              fillingOutReturn.draftReturn.copy(yearToDateLiabilityAnswers = Some(
-                                incomplete.copy(calculatedTaxDue = Some(calculatedTaxDue))
-                              )
-                              )
+                            fillingOutReturn.copy(draftReturn = draftReturn.copy(yearToDateLiabilityAnswers = Some(
+                              incomplete.copy(calculatedTaxDue = Some(calculatedTaxDue))
+                            )
+                            )
                             )
                           )
                         )
@@ -152,7 +153,7 @@ class YearToDateLiabilityFirstReturnController @Inject() (
 
     }
 
-  private def withCompleteJourneys(fillingOutReturn: FillingOutReturn)(
+  private def withCompleteJourneys(draftReturn: SingleDisposalDraftReturn)(
     f: (
       CompleteSingleDisposalTriageAnswers,
       CompleteDisposalDetailsAnswers,
@@ -162,11 +163,11 @@ class YearToDateLiabilityFirstReturnController @Inject() (
     ) => Future[Result]
   ): Future[Result] =
     (
-      fillingOutReturn.draftReturn.triageAnswers,
-      fillingOutReturn.draftReturn.disposalDetailsAnswers,
-      fillingOutReturn.draftReturn.acquisitionDetailsAnswers,
-      fillingOutReturn.draftReturn.reliefDetailsAnswers,
-      fillingOutReturn.draftReturn.exemptionAndLossesAnswers
+      draftReturn.triageAnswers,
+      draftReturn.disposalDetailsAnswers,
+      draftReturn.acquisitionDetailsAnswers,
+      draftReturn.reliefDetailsAnswers,
+      draftReturn.exemptionAndLossesAnswers
     ) match {
       case (
           t: CompleteSingleDisposalTriageAnswers,
@@ -182,9 +183,9 @@ class YearToDateLiabilityFirstReturnController @Inject() (
     }
 
   private def withDisposalDate(
-    fillingOutReturn: FillingOutReturn
+    draftReturn: SingleDisposalDraftReturn
   )(f: DisposalDate => Future[Result]): Future[Result] =
-    fillingOutReturn.draftReturn.triageAnswers
+    draftReturn.triageAnswers
       .fold(_.disposalDate, c => Some(c.disposalDate))
       .fold[Future[Result]](
         Redirect(controllers.returns.routes.TaskListController.taskList())
@@ -252,6 +253,7 @@ class YearToDateLiabilityFirstReturnController @Inject() (
 
   private def commonSubmitBehaviour[A, P: Writeable, R](
     currentFillingOutReturn: FillingOutReturn,
+    currentDraftReturn: SingleDisposalDraftReturn,
     currentAnswers: YearToDateLiabilityAnswers
   )(form: Form[A])(
     page: (Form[A], Call) => P
@@ -259,7 +261,7 @@ class YearToDateLiabilityFirstReturnController @Inject() (
     requiredPreviousAnswer: YearToDateLiabilityAnswers => Option[R],
     redirectToIfNoRequiredPreviousAnswer: Call
   )(
-    updateAnswers: (A, DraftReturn) => DraftReturn
+    updateAnswers: (A, SingleDisposalDraftReturn) => SingleDisposalDraftReturn
   )(
     implicit request: RequestWithSessionData[_]
   ): Future[Result] =
@@ -272,10 +274,10 @@ class YearToDateLiabilityFirstReturnController @Inject() (
         .bindFromRequest()
         .fold(
           formWithErrors => BadRequest(page(formWithErrors, backLink)), { value =>
-            val newDraftReturn = updateAnswers(value, currentFillingOutReturn.draftReturn)
+            val newDraftReturn = updateAnswers(value, currentDraftReturn)
 
             val result = for {
-              _ <- if (newDraftReturn === currentFillingOutReturn.draftReturn) EitherT.pure(())
+              _ <- if (newDraftReturn === currentDraftReturn) EitherT.pure(())
                   else returnsService.storeDraftReturn(newDraftReturn, currentFillingOutReturn.agentReferenceNumber)
               _ <- EitherT(
                     updateSession(sessionStore, request)(
@@ -299,8 +301,8 @@ class YearToDateLiabilityFirstReturnController @Inject() (
 
   def estimatedIncome(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndYTDLiabilityAnswers(request) {
-      case (_, fillingOutReturn, answers) =>
-        withDisposalDate(fillingOutReturn) { disposalDate =>
+      case (_, fillingOutReturn, draftReturn, answers) =>
+        withDisposalDate(draftReturn) { disposalDate =>
           commonDisplayBehaviour(answers)(
             form = _.fold(
               _.estimatedIncome.fold(estimatedIncomeForm)(a => estimatedIncomeForm.fill(a.inPounds())),
@@ -318,9 +320,9 @@ class YearToDateLiabilityFirstReturnController @Inject() (
 
   def estimatedIncomeSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndYTDLiabilityAnswers(request) {
-      case (_, fillingOutReturn, answers) =>
-        withDisposalDate(fillingOutReturn) { disposalDate =>
-          commonSubmitBehaviour(fillingOutReturn, answers)(
+      case (_, fillingOutReturn, draftReturn, answers) =>
+        withDisposalDate(draftReturn) { disposalDate =>
+          commonSubmitBehaviour(fillingOutReturn, draftReturn, answers)(
             form = estimatedIncomeForm
           )(
             page = {
@@ -362,8 +364,8 @@ class YearToDateLiabilityFirstReturnController @Inject() (
 
   def personalAllowance(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndYTDLiabilityAnswers(request) {
-      case (_, fillingOutReturn, answers) =>
-        withDisposalDate(fillingOutReturn) { disposalDate =>
+      case (_, _, draftReturn, answers) =>
+        withDisposalDate(draftReturn) { disposalDate =>
           withEstimatedIncome(answers) { estimatedIncome =>
             if (estimatedIncome.value > 0L) {
               commonDisplayBehaviour(answers)(
@@ -390,11 +392,11 @@ class YearToDateLiabilityFirstReturnController @Inject() (
 
   def personalAllowanceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndYTDLiabilityAnswers(request) {
-      case (_, fillingOutReturn, answers) =>
-        withDisposalDate(fillingOutReturn) { disposalDate =>
+      case (_, fillingOutReturn, draftReturn, answers) =>
+        withDisposalDate(draftReturn) { disposalDate =>
           withEstimatedIncome(answers) { estimatedIncome =>
             if (estimatedIncome.value > 0L) {
-              commonSubmitBehaviour(fillingOutReturn, answers)(
+              commonSubmitBehaviour(fillingOutReturn, draftReturn, answers)(
                 form = personalAllowanceForm(disposalDate)
               )(page = {
                 case (form, backLink) =>
@@ -443,7 +445,7 @@ class YearToDateLiabilityFirstReturnController @Inject() (
 
   def hasEstimatedDetails(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndYTDLiabilityAnswers(request) {
-      case (_, _, answers) =>
+      case (_, _, _, answers) =>
         withEstimatedIncome(answers) { estimatedIncome =>
           commonDisplayBehaviour(answers)(
             form = _.fold(
@@ -471,9 +473,9 @@ class YearToDateLiabilityFirstReturnController @Inject() (
 
   def hasEstimatedDetailsSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndYTDLiabilityAnswers(request) {
-      case (_, fillingOutReturn, answers) =>
+      case (_, fillingOutReturn, draftReturn, answers) =>
         withEstimatedIncome(answers) { estimatedIncome =>
-          commonSubmitBehaviour(fillingOutReturn, answers)(
+          commonSubmitBehaviour(fillingOutReturn, draftReturn, answers)(
             form = hasEstimatedDetailsForm
           )(
             page = hasEstimatedDetailsPage(_, _)
@@ -522,11 +524,11 @@ class YearToDateLiabilityFirstReturnController @Inject() (
 
   def taxDue(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndYTDLiabilityAnswers(request) {
-      case (_, fillingOutReturn, answers) =>
+      case (_, fillingOutReturn, draftReturn, answers) =>
         withEstimatedIncome(answers) { estimatedIncome =>
           withPersonalAllowance(answers) { personalAllowance =>
             withHasEstimatedDetails(answers) { _ =>
-              withCompleteJourneys(fillingOutReturn) {
+              withCompleteJourneys(draftReturn) {
                 case (triage, disposalDetails, acquisitionDetails, reliefDetails, exemptionsAndLossesDetails) =>
                   withCalculatedTaxDue(
                     answers,
@@ -538,7 +540,8 @@ class YearToDateLiabilityFirstReturnController @Inject() (
                     estimatedIncome,
                     personalAllowance,
                     calculateIfMissing = true,
-                    fillingOutReturn
+                    fillingOutReturn,
+                    draftReturn
                   ) { calculatedTaxDue =>
                     commonDisplayBehaviour(answers)(
                       form = _.fold(
@@ -574,11 +577,11 @@ class YearToDateLiabilityFirstReturnController @Inject() (
 
   def taxDueSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndYTDLiabilityAnswers(request) {
-      case (_, fillingOutReturn, answers) =>
+      case (_, fillingOutReturn, draftReturn, answers) =>
         withEstimatedIncome(answers) { estimatedIncome =>
           withPersonalAllowance(answers) { personalAllowance =>
             withHasEstimatedDetails(answers) { _ =>
-              withCompleteJourneys(fillingOutReturn) {
+              withCompleteJourneys(draftReturn) {
                 case (triage, disposalDetails, acquisitionDetails, reliefDetails, exemptionsAndLossesDetails) =>
                   withCalculatedTaxDue(
                     answers,
@@ -590,9 +593,10 @@ class YearToDateLiabilityFirstReturnController @Inject() (
                     estimatedIncome,
                     personalAllowance,
                     calculateIfMissing = false,
-                    fillingOutReturn
+                    fillingOutReturn,
+                    draftReturn
                   ) { calculatedTaxDue =>
-                    commonSubmitBehaviour(fillingOutReturn, answers)(
+                    commonSubmitBehaviour(fillingOutReturn, draftReturn, answers)(
                       form = taxDueForm
                     )(page = taxDuePage(
                       _,
@@ -616,7 +620,7 @@ class YearToDateLiabilityFirstReturnController @Inject() (
                       case (t, draftReturn) =>
                         val taxDue = AmountInPence.fromPounds(t)
                         if (answers.fold(_.taxDue, c => Some(c.taxDue)).contains(taxDue)) {
-                          fillingOutReturn.draftReturn
+                          draftReturn
                         } else {
                           val updatedAnswers =
                             answers.fold(
@@ -644,7 +648,7 @@ class YearToDateLiabilityFirstReturnController @Inject() (
 
   def uploadMandatoryEvidence(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndYTDLiabilityAnswers(request) {
-      case (_, _, answers) =>
+      case (_, _, _, answers) =>
         withTaxDueAndCalculatedTaxDue(answers) { (taxDue, calculatedTaxDue) =>
           if (calculatedTaxDue.amountOfTaxDue === taxDue) {
             Redirect(routes.YearToDateLiabilityFirstReturnController.checkYourAnswers())
@@ -667,7 +671,7 @@ class YearToDateLiabilityFirstReturnController @Inject() (
   def uploadMandatoryEvidenceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
       withFillingOutReturnAndYTDLiabilityAnswers(request) {
-        case (_, fillingOutReturn, answers) =>
+        case (_, fillingOutReturn, draftReturn, answers) =>
           withTaxDueAndCalculatedTaxDue(answers) { (taxDue, calculatedTaxDue) =>
             if (calculatedTaxDue.amountOfTaxDue === taxDue) {
               Redirect(routes.YearToDateLiabilityFirstReturnController.checkYourAnswers())
@@ -680,7 +684,7 @@ class YearToDateLiabilityFirstReturnController @Inject() (
                 .bindFromRequest()
                 .fold(
                   formWithErrors => BadRequest(mandatoryEvidencePage(formWithErrors, backLink)), { s =>
-                    val updatedDraftReturn = fillingOutReturn.draftReturn.copy(
+                    val updatedDraftReturn = draftReturn.copy(
                       yearToDateLiabilityAnswers = Some(
                         answers.fold(
                           _.copy(mandatoryEvidence = Some(s)),
@@ -716,7 +720,7 @@ class YearToDateLiabilityFirstReturnController @Inject() (
 
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndYTDLiabilityAnswers(request) {
-      case (_, fillingOutReturn, answers) =>
+      case (_, fillingOutReturn, draftReturn, answers) =>
         answers match {
           case c: CompleteYearToDateLiabilityAnswers =>
             Ok(checkYouAnswersPage(c))
@@ -749,7 +753,7 @@ class YearToDateLiabilityFirstReturnController @Inject() (
           case IncompleteYearToDateLiabilityAnswers(Some(e), p, Some(h), Some(c), Some(t), m) =>
             val completeAnswers = CompleteYearToDateLiabilityAnswers(e, p, h, c, t, m)
             val newDraftReturn =
-              fillingOutReturn.draftReturn.copy(yearToDateLiabilityAnswers = Some(completeAnswers))
+              draftReturn.copy(yearToDateLiabilityAnswers = Some(completeAnswers))
 
             val result = for {
               _ <- returnsService.storeDraftReturn(newDraftReturn, fillingOutReturn.agentReferenceNumber)

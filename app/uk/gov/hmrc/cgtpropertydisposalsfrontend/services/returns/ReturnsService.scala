@@ -45,7 +45,9 @@ trait ReturnsService {
     request: Request[_]
   ): EitherT[Future, Error, Unit]
 
-  def getDraftReturns(cgtReference: CgtReference)(implicit hc: HeaderCarrier): EitherT[Future, Error, List[DraftReturn]]
+  def getDraftReturns(cgtReference: CgtReference)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, List[DraftReturn]]
 
   def submitReturn(submitReturnRequest: SubmitReturnRequest)(
     implicit hc: HeaderCarrier

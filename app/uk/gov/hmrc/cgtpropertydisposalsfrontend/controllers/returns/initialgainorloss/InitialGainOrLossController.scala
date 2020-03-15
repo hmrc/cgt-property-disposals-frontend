@@ -32,6 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.Inn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.validateAmountOfMoney
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalDraftReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, FormUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -58,7 +59,7 @@ class InitialGainOrLossController @Inject() (
     with Logging {
 
   def enterInitialGainOrLoss: Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAnswers(request) { (_, answer) =>
+    withFillingOutReturnAndAnswers(request) { (_, _, answer) =>
       Ok(
         initialGainOrLossesPage(
           answer.fold(initialGainOrLossForm)(value => initialGainOrLossForm.fill(value.inPounds())),
@@ -70,11 +71,12 @@ class InitialGainOrLossController @Inject() (
 
   def submitInitialGainOrLoss: Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAnswers(request) {
-      case (fillingOutReturn, _) => {
+      case (fillingOutReturn, draftReturn, _) => {
         submit(
+          draftReturn,
           fillingOutReturn
         )(form = initialGainOrLossForm)(
-          page = initialGainOrLossesPage(_, getBackLink(fillingOutReturn.draftReturn.initialGainOrLoss))
+          page = initialGainOrLossesPage(_, getBackLink(draftReturn.initialGainOrLoss))
         )(amount => AmountInPence.fromPounds(amount))
       }
       case _ =>
@@ -85,7 +87,7 @@ class InitialGainOrLossController @Inject() (
 
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAnswers(request) {
-      case (_, answers) =>
+      case (_, _, answers) =>
         answers match {
           case Some(completeInitialGainOrLossAnswers) =>
             Ok(checkYourAnswersPage(completeInitialGainOrLossAnswers))
@@ -97,7 +99,7 @@ class InitialGainOrLossController @Inject() (
   }
 
   def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAnswers(request) { (_, _) =>
+    withFillingOutReturnAndAnswers(request) { (_, _, _) =>
       Redirect(controllers.returns.routes.TaskListController.taskList())
     }
   }
@@ -108,17 +110,22 @@ class InitialGainOrLossController @Inject() (
     )
 
   private def withFillingOutReturnAndAnswers(request: RequestWithSessionData[_])(
-    processReturnAndAnswersIntoResult: (FillingOutReturn, Option[AmountInPence]) => Future[Result]
+    processReturnAndAnswersIntoResult: (
+      FillingOutReturn,
+      SingleDisposalDraftReturn,
+      Option[AmountInPence]
+    ) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
 
-      case Some(fillingOutReturn: FillingOutReturn) =>
-        processReturnAndAnswersIntoResult(fillingOutReturn, fillingOutReturn.draftReturn.initialGainOrLoss)
+      case Some(fillingOutReturn @ FillingOutReturn(_, _, _, d: SingleDisposalDraftReturn)) =>
+        processReturnAndAnswersIntoResult(fillingOutReturn, d, d.initialGainOrLoss)
 
       case _ => Redirect(controllers.routes.StartController.start())
     }
 
   private def submit[A, P: Writeable, R](
+    draftReturn: SingleDisposalDraftReturn,
     fillingOutReturn: FillingOutReturn
   )(form: Form[A])(
     page: Form[A] => P
@@ -130,10 +137,10 @@ class InitialGainOrLossController @Inject() (
       .fold(
         formWithErrors => BadRequest(page(formWithErrors)), { value =>
           val newAnswer: AmountInPence = convertValueToAnswer(value)
-          val updatedDraftReturn       = fillingOutReturn.draftReturn.copy(initialGainOrLoss = Some(newAnswer))
+          val updatedDraftReturn       = draftReturn.copy(initialGainOrLoss = Some(newAnswer))
 
           val result = for {
-            _ <- if (updatedDraftReturn === fillingOutReturn.draftReturn) EitherT.pure(())
+            _ <- if (updatedDraftReturn === draftReturn) EitherT.pure(())
                 else returnsService.storeDraftReturn(updatedDraftReturn, fillingOutReturn.agentReferenceNumber)
             _ <- EitherT(
                   updateSession(sessionStore, request)(

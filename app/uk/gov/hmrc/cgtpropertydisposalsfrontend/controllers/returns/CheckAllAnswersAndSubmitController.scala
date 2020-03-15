@@ -26,7 +26,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, rou
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, SubmitReturnRequest}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, MultipleDisposalsDraftReturn, SingleDisposalDraftReturn, SubmitReturnRequest}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{PaymentsService, ReturnsService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
@@ -145,12 +145,16 @@ class CheckAllAnswersAndSubmitController @Inject() (
     request: RequestWithSessionData[_]
   )(f: (SessionData, FillingOutReturn, CompleteReturn) => Future[Result]): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((s, r @ FillingOutReturn(_, _, _, draftReturn))) =>
+      case Some((s, r @ FillingOutReturn(_, _, _, draftReturn: SingleDisposalDraftReturn))) =>
         CompleteReturn
           .fromDraftReturn(draftReturn)
           .fold[Future[Result]](
             Redirect(routes.TaskListController.taskList())
           )(f(s, r, _))
+
+      case Some((_, _ @FillingOutReturn(_, _, _, _: MultipleDisposalsDraftReturn))) =>
+        // TODO: implement when ready
+        sys.error("multiple disposals not handled yet")
 
       case _ =>
         Redirect(baseRoutes.StartController.start())

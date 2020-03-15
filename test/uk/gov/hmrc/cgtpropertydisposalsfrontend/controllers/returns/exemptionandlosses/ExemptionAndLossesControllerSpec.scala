@@ -79,7 +79,7 @@ class ExemptionAndLossesControllerSpec
     reliefDetailsAnswers: Option[ReliefDetailsAnswers]
   ): (SessionData, FillingOutReturn) = {
     val journey = sample[FillingOutReturn].copy(
-      draftReturn = sample[DraftReturn].copy(
+      draftReturn = sample[SingleDisposalDraftReturn].copy(
         triageAnswers = sample[IncompleteSingleDisposalTriageAnswers].copy(
           disposalDate = disposalDate
         ),

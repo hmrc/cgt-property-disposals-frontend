@@ -288,8 +288,10 @@ class SingleDisposalsTriageController @Inject() (
                         taxYear <- taxYearService.taxYear(date)
                         updatedAnswers = updateDisposalDate(date, taxYear, triageAnswers)
                         oldJourneyStatusWithNewJourneyStatus = state.bimap(
-                          s => s -> s.copy(newReturnTriageAnswers = Right(updatedAnswers)),
-                          r => r -> r.copy(draftReturn            = r.draftReturn.copy(triageAnswers = updatedAnswers))
+                          s => s -> s.copy(newReturnTriageAnswers = Right(updatedAnswers)), {
+                            case (d, r) =>
+                              r -> r.copy(draftReturn = d.copy(triageAnswers = updatedAnswers))
+                          }
                         )
                         _ <- oldJourneyStatusWithNewJourneyStatus.fold(
                               _ => EitherT.pure(()), {
@@ -498,7 +500,7 @@ class SingleDisposalsTriageController @Inject() (
     withSingleDisposalTriageAnswers(request) {
       case (_, state, triageAnswers) =>
         lazy val displayReturnToSummaryLink = state.fold(_ => false, _ => true)
-        val isIndividual                    = state.fold(_.subscribedDetails, _.subscribedDetails).userType().isRight
+        val isIndividual                    = state.fold(_.subscribedDetails, _._2.subscribedDetails).userType().isRight
 
         triageAnswers match {
           case c: CompleteSingleDisposalTriageAnswers =>
@@ -594,13 +596,14 @@ class SingleDisposalsTriageController @Inject() (
   }
 
   private def updateAnswersAndShowCheckYourAnswersPage(
-    state: Either[StartingNewDraftReturn, FillingOutReturn],
+    state: Either[StartingNewDraftReturn, (SingleDisposalDraftReturn, FillingOutReturn)],
     newCompleteTriageAnswers: CompleteSingleDisposalTriageAnswers,
     displayReturnToSummaryLink: Boolean
   )(implicit request: RequestWithSessionData[_], hc: HeaderCarrier): Future[Result] = {
     val updatedJourney = state.fold(
-      _.copy(newReturnTriageAnswers = Right(newCompleteTriageAnswers)),
-      r => r.copy(draftReturn = r.draftReturn.copy(triageAnswers = newCompleteTriageAnswers))
+      _.copy(newReturnTriageAnswers = Right(newCompleteTriageAnswers)), {
+        case (d, r) => r.copy(draftReturn = d.copy(triageAnswers = newCompleteTriageAnswers))
+      }
     )
 
     updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedJourney))).map {
@@ -625,9 +628,9 @@ class SingleDisposalsTriageController @Inject() (
 
             def toFillingOurNewReturn(startingNewDraftReturn: StartingNewDraftReturn): Future[Result] = {
               val newDraftReturn =
-                DraftReturn(
+                SingleDisposalDraftReturn(
                   uuidGenerator.nextId(),
-                  state.fold(_.subscribedDetails.cgtReference, _.subscribedDetails.cgtReference),
+                  state.fold(_.subscribedDetails.cgtReference, _._2.subscribedDetails.cgtReference),
                   complete,
                   None,
                   None,
@@ -700,8 +703,9 @@ class SingleDisposalsTriageController @Inject() (
                   val updatedAnswers = updateState(value, triageAnswers)
                   lazy val oldJourneyStatusWithNewJourneyStatus =
                     state.bimap(
-                      s => s -> s.copy(newReturnTriageAnswers = Right(updatedAnswers)),
-                      r => r -> r.copy(draftReturn            = r.draftReturn.copy(triageAnswers = updatedAnswers))
+                      s => s -> s.copy(newReturnTriageAnswers = Right(updatedAnswers)), {
+                        case (d, r) => r -> r.copy(draftReturn = d.copy(triageAnswers = updatedAnswers))
+                      }
                     )
 
                   val result = for {
@@ -759,14 +763,18 @@ class SingleDisposalsTriageController @Inject() (
     }
 
   private def withSingleDisposalTriageAnswers(request: RequestWithSessionData[_])(
-    f: (SessionData, Either[StartingNewDraftReturn, FillingOutReturn], SingleDisposalTriageAnswers) => Future[Result]
+    f: (
+      SessionData,
+      Either[StartingNewDraftReturn, (SingleDisposalDraftReturn, FillingOutReturn)],
+      SingleDisposalTriageAnswers
+    ) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((session, s @ StartingNewDraftReturn(_, _, _, Right(t)))) =>
         f(session, Left(s), t)
 
-      case Some((session, r @ FillingOutReturn(_, _, _, d))) =>
-        f(session, Right(r), d.triageAnswers)
+      case Some((session, r @ FillingOutReturn(_, _, _, d: SingleDisposalDraftReturn))) =>
+        f(session, Right(d -> r), d.triageAnswers)
 
       case _ =>
         Redirect(uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes.StartController.start())

@@ -37,7 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDetailsAnswers, DisposalMethod, ShareOfProperty}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDetailsAnswers, DisposalMethod, ShareOfProperty, SingleDisposalDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, FormUtils, NumberUtils, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -74,29 +74,33 @@ class DisposalDetailsController @Inject() (
     f: (
       SessionData,
       FillingOutReturn,
+      SingleDisposalDraftReturn,
       DisposalDetailsAnswers
     ) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((s, r: FillingOutReturn)) =>
-        r.draftReturn.disposalDetailsAnswers
-          .fold[Future[Result]](f(s, r, IncompleteDisposalDetailsAnswers.empty))(f(s, r, _))
+      case Some((s, r @ FillingOutReturn(_, _, _, d: SingleDisposalDraftReturn))) =>
+        d.disposalDetailsAnswers
+          .fold[Future[Result]](f(s, r, d, IncompleteDisposalDetailsAnswers.empty))(f(s, r, d, _))
 
       case _ => Redirect(controllers.routes.StartController.start())
     }
 
-  private def withDisposalMethod(fillingOutReturn: FillingOutReturn)(
+  private def withDisposalMethod(draftReturn: SingleDisposalDraftReturn)(
     f: DisposalMethod => Future[Result]
   ): Future[Result] =
-    fillingOutReturn.draftReturn.triageAnswers.fold(_.disposalMethod, c => Some(c.disposalMethod)) match {
+    draftReturn.triageAnswers.fold(_.disposalMethod, c => Some(c.disposalMethod)) match {
       case Some(method) => f(method)
       case _            => Redirect(controllers.routes.StartController.start())
     }
 
-  private def withDisposalMethodAndShareOfProperty(fillingOutReturn: FillingOutReturn, answers: DisposalDetailsAnswers)(
+  private def withDisposalMethodAndShareOfProperty(
+    draftReturn: SingleDisposalDraftReturn,
+    answers: DisposalDetailsAnswers
+  )(
     f: (DisposalMethod, ShareOfProperty) => Future[Result]
   ): Future[Result] =
-    withDisposalMethod(fillingOutReturn) { method =>
+    withDisposalMethod(draftReturn) { method =>
       answers.fold(_.shareOfProperty, c => Some(c.shareOfProperty)) match {
         case Some(share) => f(method, share)
         case _           => Redirect(routes.DisposalDetailsController.howMuchDidYouOwn())
@@ -120,7 +124,11 @@ class DisposalDetailsController @Inject() (
       Redirect(redirectToIfNoRequiredPreviousAnswer)
     }
 
-  private def submitBehaviour[A, P: Writeable, R](fillingOutReturn: FillingOutReturn, answers: DisposalDetailsAnswers)(
+  private def submitBehaviour[A, P: Writeable, R](
+    fillingOutReturn: FillingOutReturn,
+    draftReturn: SingleDisposalDraftReturn,
+    answers: DisposalDetailsAnswers
+  )(
     form: Form[A]
   )(
     page: (Form[A], Call) => P
@@ -140,10 +148,10 @@ class DisposalDetailsController @Inject() (
         .fold(
           formWithErrors => BadRequest(page(formWithErrors, backLink)), { value =>
             val newAnswers     = updateAnswers(value, answers)
-            val newDraftReturn = fillingOutReturn.draftReturn.copy(disposalDetailsAnswers = Some(newAnswers))
+            val newDraftReturn = draftReturn.copy(disposalDetailsAnswers = Some(newAnswers))
 
             val result = for {
-              _ <- if (newDraftReturn === fillingOutReturn.draftReturn) EitherT.pure(())
+              _ <- if (newDraftReturn === draftReturn) EitherT.pure(())
                   else returnsService.storeDraftReturn(newDraftReturn, fillingOutReturn.agentReferenceNumber)
               _ <- EitherT(
                     updateSession(sessionStore, request)(
@@ -164,7 +172,7 @@ class DisposalDetailsController @Inject() (
 
   def howMuchDidYouOwn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndDisposalDetailsAnswers(request) {
-      case (_, _, answers) =>
+      case (_, _, _, answers) =>
         displayPage(answers)(
           form = _.fold(
             _.shareOfProperty.fold(shareOfPropertyForm)(shareOfPropertyForm.fill),
@@ -181,8 +189,8 @@ class DisposalDetailsController @Inject() (
 
   def howMuchDidYouOwnSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndDisposalDetailsAnswers(request) {
-      case (_, fillingOutReturn, answers) =>
-        submitBehaviour(fillingOutReturn, answers)(
+      case (_, fillingOutReturn, draftReturn, answers) =>
+        submitBehaviour(fillingOutReturn, draftReturn, answers)(
           form = shareOfPropertyForm
         )(
           page = howMuchDidYouOwnPage(_, _)
@@ -207,8 +215,8 @@ class DisposalDetailsController @Inject() (
 
   def whatWasDisposalPrice(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndDisposalDetailsAnswers(request) {
-      case (_, fillingOutReturn, answers) =>
-        withDisposalMethodAndShareOfProperty(fillingOutReturn, answers) {
+      case (_, _, draftReturn, answers) =>
+        withDisposalMethodAndShareOfProperty(draftReturn, answers) {
           case (disposalMethod, shareOfProperty) =>
             displayPage(answers)(
               form = _.fold(
@@ -228,10 +236,10 @@ class DisposalDetailsController @Inject() (
 
   def whatWasDisposalPriceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndDisposalDetailsAnswers(request) {
-      case (_, fillingOutReturn, answers) =>
-        withDisposalMethodAndShareOfProperty(fillingOutReturn, answers) {
+      case (_, fillingOutReturn, draftReturn, answers) =>
+        withDisposalMethodAndShareOfProperty(draftReturn, answers) {
           case (disposalMethod, shareOfProperty) =>
-            submitBehaviour(fillingOutReturn, answers)(
+            submitBehaviour(fillingOutReturn, draftReturn, answers)(
               form = disposalPriceForm
             )(
               page = disposalPricePage(_, _, disposalMethod, shareOfProperty)
@@ -258,8 +266,8 @@ class DisposalDetailsController @Inject() (
 
   def whatWereDisposalFees(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndDisposalDetailsAnswers(request) {
-      case (_, fillingOutReturn, answers) =>
-        withDisposalMethodAndShareOfProperty(fillingOutReturn, answers) {
+      case (_, _, draftReturn, answers) =>
+        withDisposalMethodAndShareOfProperty(draftReturn, answers) {
           case (disposalMethod, shareOfProperty) =>
             displayPage(answers)(
               form = _.fold(
@@ -279,10 +287,10 @@ class DisposalDetailsController @Inject() (
 
   def whatWereDisposalFeesSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndDisposalDetailsAnswers(request) {
-      case (_, fillingOutReturn, answers) =>
-        withDisposalMethodAndShareOfProperty(fillingOutReturn, answers) {
+      case (_, fillingOutReturn, draftReturn, answers) =>
+        withDisposalMethodAndShareOfProperty(draftReturn, answers) {
           case (disposalMethod, shareOfProperty) =>
-            submitBehaviour(fillingOutReturn, answers)(
+            submitBehaviour(fillingOutReturn, draftReturn, answers)(
               form = disposalFeesForm
             )(
               page = disposalFeesPage(_, _, disposalMethod, shareOfProperty)
@@ -309,8 +317,8 @@ class DisposalDetailsController @Inject() (
 
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndDisposalDetailsAnswers(request) {
-      case (_, fillingOutReturn, answers) =>
-        withDisposalMethod(fillingOutReturn) {
+      case (_, fillingOutReturn, draftReturn, answers) =>
+        withDisposalMethod(draftReturn) {
           case (disposalMethod) =>
             answers match {
               case IncompleteDisposalDetailsAnswers(None, _, _) =>
@@ -325,7 +333,7 @@ class DisposalDetailsController @Inject() (
               case IncompleteDisposalDetailsAnswers(Some(share), Some(price), Some(fees)) =>
                 val completeAnswers = CompleteDisposalDetailsAnswers(share, price, fees)
                 val updatedDraftReturn =
-                  fillingOutReturn.draftReturn.copy(disposalDetailsAnswers = Some(completeAnswers))
+                  draftReturn.copy(disposalDetailsAnswers = Some(completeAnswers))
 
                 val result = for {
                   _ <- returnsService.storeDraftReturn(updatedDraftReturn, fillingOutReturn.agentReferenceNumber)
