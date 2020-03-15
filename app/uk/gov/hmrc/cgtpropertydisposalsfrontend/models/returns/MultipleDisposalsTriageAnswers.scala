@@ -37,12 +37,13 @@ object MultipleDisposalsTriageAnswers {
     wereAllPropertiesResidential: Option[Boolean],
     assetTypes: Option[List[AssetType]],
     taxYearAfter6April2020: Option[Boolean],
-    taxYear: Option[TaxYear]
+    taxYear: Option[TaxYear],
+    completionDate: Option[CompletionDate]
   ) extends MultipleDisposalsTriageAnswers
 
   object IncompleteMultipleDisposalsAnswers {
     val empty: IncompleteMultipleDisposalsAnswers =
-      IncompleteMultipleDisposalsAnswers(None, None, None, None, None, None, None, None)
+      IncompleteMultipleDisposalsAnswers(None, None, None, None, None, None, None, None, None)
   }
 
   final case class CompleteMultipleDisposalsAnswers(
@@ -50,7 +51,8 @@ object MultipleDisposalsTriageAnswers {
     numberOfProperties: Int,
     countryOfResidence: Country,
     assetTypes: List[AssetType],
-    taxYear: TaxYear
+    taxYear: TaxYear,
+    completionDate: CompletionDate
   ) extends MultipleDisposalsTriageAnswers
 
   implicit class MultipleDisposalsTriageAnswersOps(private val m: MultipleDisposalsTriageAnswers) extends AnyVal {
@@ -61,24 +63,6 @@ object MultipleDisposalsTriageAnswers {
       case i: IncompleteMultipleDisposalsAnswers => ifIncomplete(i)
       case c: CompleteMultipleDisposalsAnswers   => ifComplete(c)
     }
-  }
-
-  def checkBoxAssetTypeFormFormatter: Formatter[AssetType] = new Formatter[AssetType] {
-
-    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], AssetType] =
-      readValue(key, data, identity)
-        .flatMap {
-          case "0" => Right(AssetType.Residential)
-          case "1" => Right(AssetType.NonResidential)
-          case "2" => Right(AssetType.MixedUse)
-          case "3" => Right(AssetType.IndirectDisposal)
-          case _   => Left(FormError(key, "error.invalid"))
-        }
-        .leftMap(Seq(_))
-
-    override def unbind(key: String, value: AssetType): Map[String, String] =
-      Map(key -> value.toString)
-
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
