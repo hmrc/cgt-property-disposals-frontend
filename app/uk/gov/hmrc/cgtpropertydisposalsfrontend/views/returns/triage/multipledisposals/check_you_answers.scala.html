@@ -24,19 +24,20 @@ pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page
 details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
 formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
 submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
+caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.multipledisposals.summary
 )
 
 @(answers: CompleteMultipleDisposalsAnswers)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
-@title = @{messages("multipleDisposals.cya.title")}
+@title = @{messages("multipleDisposals.triage.cya.title")}
 
 @mainTemplate(title = title, userType = request.userType, withSignOutLink = true) {
 
-    @caption(messages("triage.caption"))
+ @caption(messages("triage.caption"))
 
-  <p>Got @answers</p>
+ @pageHeading(title)
 
-    @pageHeading(title)
+ @summary(answers)
 
 }

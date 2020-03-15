@@ -578,14 +578,54 @@ class MultipleDisposalsTriageController @Inject() (
           case IncompleteMultipleDisposalsAnswers(_, _, _, _, _, _, _, _, None) =>
             Redirect(routes.MultipleDisposalsTriageController.completionDate())
 
-          case c: IncompleteMultipleDisposalsAnswers =>
-            Ok(s"Got $c")
+          case IncompleteMultipleDisposalsAnswers(
+              i,
+              Some(n),
+              Some(true),
+              _,
+              Some(true),
+              Some(a),
+              Some(true),
+              Some(t),
+              Some(d)
+              ) =>
+            val completeAnswers = CompleteMultipleDisposalsAnswers(i, n, Country.uk, a, t, d)
+            storeCompleteAnswersAndDisplayCheckYourAnswers(completeAnswers, state)
+
+          case IncompleteMultipleDisposalsAnswers(
+              i,
+              Some(n),
+              Some(false),
+              Some(c),
+              _,
+              Some(a),
+              Some(true),
+              Some(t),
+              Some(d)
+              ) =>
+            val completeAnswers = CompleteMultipleDisposalsAnswers(i, n, c, a, t, d)
+            storeCompleteAnswersAndDisplayCheckYourAnswers(completeAnswers, state)
 
           case c: CompleteMultipleDisposalsAnswers =>
             Ok(checkYourAnswersPage(c))
         }
     }
   }
+
+  private def storeCompleteAnswersAndDisplayCheckYourAnswers(
+    answers: CompleteMultipleDisposalsAnswers,
+    state: StartingNewDraftReturn
+  )(implicit request: RequestWithSessionData[_]): Future[Result] =
+    updateSession(sessionStore, request)(
+      _.copy(journeyStatus = Some(state.copy(newReturnTriageAnswers = Left(answers))))
+    ).map {
+      case Left(e) =>
+        logger.warn("Could not update session", e)
+        errorHandler.errorResult()
+
+      case Right(_) =>
+        Ok(checkYourAnswersPage(answers))
+    }
 
   private def taxYearBackLink(wasAUKResident: Boolean): Call =
     if (wasAUKResident) routes.MultipleDisposalsTriageController.wereAllPropertiesResidential()

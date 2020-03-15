@@ -1151,3 +1151,29 @@ multipleDisposalsAssetTypeForNonUkResidents.IndirectDisposal=Company shares - yo
 multipleDisposalsAssetTypeForNonUkResidents.IndirectDisposal.helpText=An indirect disposal is where the disposal involves rights to assets that derive at least 75% of their value from UK land.
 multipleDisposalsAssetTypeForNonUkResidents.error.required=Select the type of property or asset you sold or disposed of
 multipleDisposalsAssetTypeForNonUkResidents.error.invalid=Select the type of property or asset you sold or disposed of
+
+multipleDisposalsCompletionDate.title=What was the ‘completion’ date for all the properties?
+multipleDisposalsCompletionDate.helpText=For example, 25, 4, 2020.
+multipleDisposalsCompletionDate.details.summary=What happens on the ‘completion’ date?
+multipleDisposalsCompletionDate.details.p1=The <a href="{0}" target=_blank>‘completion’ date (opens in a new window)</a> is usually the day the new owner gets the keys to the property.
+multipleDisposalsCompletionDate.error.required=Enter a completion date
+multipleDisposalsCompletionDate.error.invalid=Enter a real completion date
+multipleDisposalsCompletionDate.error.tooFarInFuture=Completion date must be today or in the past
+multipleDisposalsCompletionDate-day.error.required=Completion date must include a day
+multipleDisposalsCompletionDate-month.error.required=Completion date must include a month
+multipleDisposalsCompletionDate-year.error.required=Completion date must include a year
+multipleDisposalsCompletionDate-day.error.invalid=Enter a real completion date
+multipleDisposalsCompletionDate-month.error.invalid=Enter a real completion date
+multipleDisposalsCompletionDate-year.error.invalid=Enter a real completion date
+multipleDisposalsCompletionDate-month.error.monthAndYearRequired=Completion date must include a month and a year
+multipleDisposalsCompletionDate-day.error.dayAndYearRequired=Completion date must include a day and a year
+multipleDisposalsCompletionDate-day.error.dayAndMonthRequired=Completion date must include a day and a month
+
+multipleDisposals.triage.cya.title=Check your answers
+multipleDisposals.triage.cyaChange.numberOfProperties=the number of properties exchanges in the same tax year
+multipleDisposals.triage.cyaChange.wereYouAUKResident=whether you were a UK resident on all the dates when you exchanged contracts
+multipleDisposals.triage.cyaChange.countryOfResidence=your country of residence
+multipleDisposals.triage.cyaChange.assetTypes=the types of property included in this return
+multipleDisposals.triage.cyaChange.wereAllPropertiesResidential=whether all the properties were residential properties
+multipleDisposals.triage.cyaChange.taxYear=when the contracts were exchanged on all the properties
+multipleDisposals.triage.cyaChange.completionDate=the completion date for all the properties
