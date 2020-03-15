@@ -1039,7 +1039,7 @@ multiple-disposals.guidance.li1=the same ‘completion’ date
 multiple-disposals.guidance.li2=contract ‘exchange’ dates on or after 6 April 2020
 multiple-disposals.guidance.li3=contract exchange dates that were in the same tax year
 multiple-disposals.guidance.p2=The contract exchange dates can be in a different tax year to the completion date.
-multiple-disposals.guidance.p3=You must send separate returns of the contract exchange dates were in different tax years.
+multiple-disposals.guidance.p3=You must send separate returns if the contract exchange dates were in different tax years.
 multiple-disposals.guidance.details.summary=What happens on ‘exchange’ and ‘completion’ dates?
 multiple-disposals.guidance.details.p1=The ‘completion’ date is usually the day the new owner gets the key to the property.
 multiple-disposals.guidance.details.p2=Contract ‘exchange’ usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
@@ -1070,10 +1070,10 @@ multipleDisposalsNumberOfProperties.details.p1=The ‘completion’ date is usua
 multipleDisposalsNumberOfProperties.details.p2=Contract ‘exchange’ usually happens when the buyer and seller exchange contracts. It’s usually when the new owner pays a deposit.
 multipleDisposalsNumberOfProperties.details.link=<a href="{0}" target="_blank">Read about ‘exchange’ and ‘completion’ (opens in a new window)</a>.
 
-multipleDisposalsNumberOfProperties.error.invalid=Use numbers to input how many disposals you want to include in this return
-multipleDisposalsNumberOfProperties.error.required=Input how many disposals you want to include in this return using numbers
-multipleDisposalsNumberOfProperties.error.tooSmall=The number of properties must be 2 or more, or go back and select that you are including one property in this return
-multipleDisposalsNumberOfProperties.error.tooLong=You can’t include more than 999 properties in the return
+multipleDisposalsNumberOfProperties.error.invalid=Amount of disposals must be a number
+multipleDisposalsNumberOfProperties.error.required=Enter the number of disposals you are including in this return
+multipleDisposalsNumberOfProperties.error.tooSmall=Number of disposals must be 2 or more
+multipleDisposalsNumberOfProperties.error.tooLong=Number of disposals must be 999 or less
 
 multipleDisposalsWereYouAUKResident.title=Were you a UK resident on all of the contract ‘exchange’ dates?
 multipleDisposalsWereYouAUKResident.helpText=Contract ‘exchange’ usually happens when a buyer and seller swap contracts and the buyer pays a deposit. If you sold shares, it was the day you sold them.
@@ -1111,7 +1111,6 @@ initialGainOrLoss.loss.label=Loss
 initialGainOrLoss.details.summary=How to work out your initial gain or loss
 
 initialGainOrLoss.cya.title=Check your answers
-initialGainOrLoss.cya.hint=your initial gain or loss
 
 initialGainOrLoss.details.olTitle=To work out your initial gain:
 initialGainOrLoss.details.li1=1. Subtract the amount you purchased, or acquired, the property for from the amount you sold, or disposed of, it for.
@@ -1122,6 +1121,7 @@ initialGainOrLoss.details.li5=5. This will give you the amount of the initial ga
 initialGainOrLoss.details.example.title=Example
 initialGainOrLoss.details.example.details=You inherited a property. The market value of the property when you got it was £120,000. You paid £5,000 in legal fees when you got it. You spent £10,000 on making improvements to it. After 10 years, you sold the property for £150,000. You paid £5,000 for legal and estate agent's fees. This gave you an initial gain of £10,000.
 initialGainOrLoss.noLossOrGain.label=No initial gain, no initial loss
+initialGainOrLoss.summary.hint="Click on the link to change your answers"
 
 gain.error.required=Enter the initial gain amount
 gain.error.invalid=Initial gain amount must only include numbers, like 2,908 or 740.50
@@ -1151,20 +1151,3 @@ multipleDisposalsAssetTypeForNonUkResidents.IndirectDisposal=Company shares - yo
 multipleDisposalsAssetTypeForNonUkResidents.IndirectDisposal.helpText=An indirect disposal is where the disposal involves rights to assets that derive at least 75% of their value from UK land.
 multipleDisposalsAssetTypeForNonUkResidents.error.required=Select the type of property or asset you sold or disposed of
 multipleDisposalsAssetTypeForNonUkResidents.error.invalid=Select the type of property or asset you sold or disposed of
-
-multipleDisposalsCompletionDate.title=What was the ‘completion’ date for all the properties?
-multipleDisposalsCompletionDate.helpText=For example, 25, 4, 2020.
-multipleDisposalsCompletionDate.details.summary=What happens on the ‘completion’ date?
-multipleDisposalsCompletionDate.details.p1=The <a href="{0}" target=_blank>‘completion’ date (opens in a new window)</a> is usually the day the new owner gets the keys to the property.
-multipleDisposalsCompletionDate.error.required=Enter a completion date
-multipleDisposalsCompletionDate.error.invalid=Enter a real completion date
-multipleDisposalsCompletionDate.error.tooFarInFuture=Completion date must be today or in the past
-multipleDisposalsCompletionDate-day.error.required=Completion date must include a day
-multipleDisposalsCompletionDate-month.error.required=Completion date must include a month
-multipleDisposalsCompletionDate-year.error.required=Completion date must include a year
-multipleDisposalsCompletionDate-day.error.invalid=Enter a real completion date
-multipleDisposalsCompletionDate-month.error.invalid=Enter a real completion date
-multipleDisposalsCompletionDate-year.error.invalid=Enter a real completion date
-multipleDisposalsCompletionDate-month.error.monthAndYearRequired=Completion date must include a month and a year
-multipleDisposalsCompletionDate-day.error.dayAndYearRequired=Completion date must include a day and a year
-multipleDisposalsCompletionDate-day.error.dayAndMonthRequired=Completion date must include a day and a month
