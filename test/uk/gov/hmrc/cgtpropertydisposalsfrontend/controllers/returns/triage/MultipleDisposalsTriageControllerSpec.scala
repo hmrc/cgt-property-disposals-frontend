@@ -18,8 +18,8 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 import java.time.{Clock, LocalDate}
 
-import cats.instances.future._
 import cats.data.EitherT
+import cats.instances.future._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.http.Status.BAD_REQUEST
 import play.api.i18n.MessagesApi
@@ -31,17 +31,17 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, DateErrorScenarios, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingNewDraftReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.Self
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{IncompleteMultipleDisposalsAnswers, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, _}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, LocalDateUtils, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.TaxYearService
 import uk.gov.hmrc.http.HeaderCarrier
@@ -85,24 +85,11 @@ class MultipleDisposalsTriageControllerSpec
     SessionData.empty.copy(journeyStatus = Some(startingNewDraftReturn)) -> startingNewDraftReturn
   }
 
-  def sessionWithState(answers: IncompleteMultipleDisposalsAnswers, numberOfProperties: Option[Int]): SessionData = {
-    val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
-    session.copy(journeyStatus = Some(
-      journey.copy(
-        newReturnTriageAnswers = Left(answers.copy(numberOfProperties = numberOfProperties))
-      )
-    )
-    )
-  }
-
   def testFormError(
     data: (String, String)*
   )(expectedErrorMessageKey: String, errorArgs: String*)(pageTitleKey: String, titleArgs: String*)(
     performAction: Seq[(String, String)] => Future[Result],
-    currentSession: SessionData = sessionWithState(
-      sample[IncompleteMultipleDisposalsAnswers],
-      Some(2)
-    )
+    currentSession: SessionData = sessionDataWithStartingNewDraftReturn(sample[IncompleteMultipleDisposalsAnswers])._1
   ): Unit = {
     inSequence {
       mockAuthWithNoRetrievals()
@@ -1387,10 +1374,264 @@ class MultipleDisposalsTriageControllerSpec
 
     }
 
+    "handling requests to display the completion date page" must {
+
+      def performAction(): Future[Result] = controller.completionDate()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
+
+      "display the page" when {
+
+        "the user is starting s new draft return and" when {
+
+          "they have not answered the question before" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                sessionDataWithStartingNewDraftReturn(
+                  IncompleteMultipleDisposalsAnswers.empty.copy(
+                    Some(sample[IndividualUserType]),
+                    Some(2),
+                    Some(true),
+                    None,
+                    Some(true),
+                    Some(List(AssetType.Residential)),
+                    Some(true),
+                    Some(sample[TaxYear]),
+                    None
+                  )
+                )._1
+              )
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("multipleDisposalsCompletionDate.title"), { doc =>
+                doc.select("#back").attr("href") shouldBe routes.MultipleDisposalsTriageController
+                  .whenWereContractsExchanged()
+                  .url
+                doc
+                  .select("#content > article > form")
+                  .attr("action") shouldBe routes.MultipleDisposalsTriageController
+                  .completionDateSubmit()
+                  .url
+              }
+            )
+          }
+
+          "they have answered the question before" in {
+            val answers = sample[CompleteMultipleDisposalsAnswers]
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(sessionDataWithStartingNewDraftReturn(answers)._1)
+            }
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("multipleDisposalsCompletionDate.title"), { doc =>
+                doc.select("#back").attr("href") shouldBe routes.MultipleDisposalsTriageController
+                  .whenWereContractsExchanged()
+                  .url
+                doc
+                  .select("#content > article > form")
+                  .attr("action") shouldBe routes.MultipleDisposalsTriageController
+                  .completionDateSubmit()
+                  .url
+                doc
+                  .select("#multipleDisposalsCompletionDate-day")
+                  .attr("value") shouldBe s"${answers.completionDate.value.getDayOfMonth()}"
+                doc
+                  .select("#multipleDisposalsCompletionDate-month")
+                  .attr("value") shouldBe s"${answers.completionDate.value.getMonthValue()}"
+                doc
+                  .select("#multipleDisposalsCompletionDate-year")
+                  .attr("value") shouldBe s"${answers.completionDate.value.getYear()}"
+              }
+            )
+          }
+
+        }
+
+      }
+
+    }
+
+    "handling submitted completion dates" must {
+
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.completionDateSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
+
+      def formData(d: LocalDate): List[(String, String)] =
+        List(
+          "multipleDisposalsCompletionDate-day"   -> d.getDayOfMonth.toString,
+          "multipleDisposalsCompletionDate-month" -> d.getMonthValue.toString,
+          "multipleDisposalsCompletionDate-year"  -> d.getYear.toString
+        )
+
+      behave like redirectToStartWhenInvalidJourney(() => performAction(), isValidJourney)
+
+      "show a form error" when {
+
+        def testFormError(formData: List[(String, String)])(expectedErrorMessageKey: String) = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsAnswers])._1)
+          }
+
+          checkPageIsDisplayed(
+            performAction(formData: _*),
+            messageFromMessageKey("multipleDisposalsCompletionDate.title"), { doc =>
+              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+                expectedErrorMessageKey
+              )
+            },
+            BAD_REQUEST
+          )
+        }
+
+        "the date entered is invalid" in {
+          DateErrorScenarios
+            .dateErrorScenarios(
+              "multipleDisposalsCompletionDate"
+            )
+            .foreach { scenario =>
+              withClue(s"For date error scenario $scenario: ") {
+                val data = List(
+                  "multipleDisposalsCompletionDate-day"   -> scenario.dayInput,
+                  "multipleDisposalsCompletionDate-month" -> scenario.monthInput,
+                  "multipleDisposalsCompletionDate-year"  -> scenario.yearInput
+                ).collect { case (key, Some(value)) => key -> value }
+
+                testFormError(data)(scenario.expectedErrorMessageKey)
+              }
+            }
+        }
+
+        "the date entered is later than today" in {
+          testFormError(formData(LocalDateUtils.today().plusDays(1L)))(
+            "multipleDisposalsCompletionDate.error.tooFarInFuture"
+          )
+        }
+      }
+
+      "show an error page" when {
+
+        "there is an error updating the session" in {
+          val answers =
+            sample[CompleteMultipleDisposalsAnswers].copy(completionDate = CompletionDate(LocalDateUtils.today()))
+          val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+          val newCompletionDate = CompletionDate(answers.completionDate.value.minusDays(1L))
+          val updatedJourney =
+            journey.copy(newReturnTriageAnswers = Left(answers.copy(completionDate = newCompletionDate)))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction(formData(newCompletionDate.value): _*))
+        }
+
+      }
+
+      "redirect to the check your answers page" when {
+
+        "the user submits a valid value and" when {
+
+          "the user has not answered the question before" in {
+            val answers            = IncompleteMultipleDisposalsAnswers.empty
+            val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+            val newCompletionDate = CompletionDate(LocalDateUtils.today())
+            val updatedJourney =
+              journey.copy(newReturnTriageAnswers = Left(answers.copy(completionDate = Some(newCompletionDate))))
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(formData(newCompletionDate.value): _*),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
+          "the user has already answered the question" in {
+            val answers =
+              sample[CompleteMultipleDisposalsAnswers].copy(completionDate = CompletionDate(LocalDateUtils.today()))
+            val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+            val newCompletionDate = CompletionDate(answers.completionDate.value.minusDays(1L))
+            val updatedJourney =
+              journey.copy(newReturnTriageAnswers = Left(answers.copy(completionDate = newCompletionDate)))
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(formData(newCompletionDate.value): _*),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
+        }
+
+        "not perform any updates" when {
+
+          "the date submitted is the same as one that already exists in session" in {
+            val answers =
+              sample[CompleteMultipleDisposalsAnswers].copy(completionDate = CompletionDate(LocalDateUtils.today()))
+            val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+            }
+
+            checkIsRedirect(
+              performAction(formData(answers.completionDate.value): _*),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
+        }
+
+      }
+
+    }
+
     "handling requests to display the check your answers page" must {
 
       def performAction(): Future[Result] =
         controller.checkYourAnswers()(FakeRequest())
+
+      val completeAnswers = CompleteMultipleDisposalsAnswers(
+        Some(IndividualUserType.Self),
+        2,
+        Country.uk,
+        List(AssetType.Residential),
+        sample[TaxYear],
+        sample[CompletionDate]
+      )
+
+      val allQuestionsAnswered = IncompleteMultipleDisposalsAnswers(
+        completeAnswers.individualUserType,
+        Some(completeAnswers.numberOfProperties),
+        Some(true),
+        None,
+        Some(true),
+        Some(completeAnswers.assetTypes),
+        Some(true),
+        Some(completeAnswers.taxYear),
+        Some(completeAnswers.completionDate)
+      )
 
       behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
 
@@ -1415,10 +1656,9 @@ class MultipleDisposalsTriageControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              sessionWithState(
-                IncompleteMultipleDisposalsAnswers.empty.copy(individualUserType = Some(IndividualUserType.Capacitor)),
-                Some(2)
-              )
+              sessionDataWithStartingNewDraftReturn(
+                allQuestionsAnswered.copy(individualUserType = Some(IndividualUserType.Capacitor))
+              )._1
             )
           }
 
@@ -1432,11 +1672,9 @@ class MultipleDisposalsTriageControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              sessionWithState(
-                IncompleteMultipleDisposalsAnswers.empty
-                  .copy(individualUserType = Some(IndividualUserType.PersonalRepresentative)),
-                Some(2)
-              )
+              sessionDataWithStartingNewDraftReturn(
+                allQuestionsAnswered.copy(individualUserType = Some(IndividualUserType.PersonalRepresentative))
+              )._1
             )
           }
 
@@ -1453,7 +1691,7 @@ class MultipleDisposalsTriageControllerSpec
           mockAuthWithNoRetrievals()
           mockGetSession(
             sessionDataWithStartingNewDraftReturn(
-              IncompleteMultipleDisposalsAnswers.empty.copy(individualUserType = Some(IndividualUserType.Self))
+              allQuestionsAnswered.copy(numberOfProperties = None)
             )._1
           )
         }

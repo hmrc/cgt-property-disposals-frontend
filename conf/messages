@@ -1111,6 +1111,7 @@ initialGainOrLoss.loss.label=Loss
 initialGainOrLoss.details.summary=How to work out your initial gain or loss
 
 initialGainOrLoss.cya.title=Check your answers
+initialGainOrLoss.cya.hint=your initial gain or loss
 
 initialGainOrLoss.details.olTitle=To work out your initial gain:
 initialGainOrLoss.details.li1=1. Subtract the amount you purchased, or acquired, the property for from the amount you sold, or disposed of, it for.
@@ -1121,7 +1122,6 @@ initialGainOrLoss.details.li5=5. This will give you the amount of the initial ga
 initialGainOrLoss.details.example.title=Example
 initialGainOrLoss.details.example.details=You inherited a property. The market value of the property when you got it was £120,000. You paid £5,000 in legal fees when you got it. You spent £10,000 on making improvements to it. After 10 years, you sold the property for £150,000. You paid £5,000 for legal and estate agent's fees. This gave you an initial gain of £10,000.
 initialGainOrLoss.noLossOrGain.label=No initial gain, no initial loss
-initialGainOrLoss.summary.hint="Click on the link to change your answers"
 
 gain.error.required=Enter the initial gain amount
 gain.error.invalid=Initial gain amount must only include numbers, like 2,908 or 740.50
@@ -1151,3 +1151,20 @@ multipleDisposalsAssetTypeForNonUkResidents.IndirectDisposal=Company shares - yo
 multipleDisposalsAssetTypeForNonUkResidents.IndirectDisposal.helpText=An indirect disposal is where the disposal involves rights to assets that derive at least 75% of their value from UK land.
 multipleDisposalsAssetTypeForNonUkResidents.error.required=Select the type of property or asset you sold or disposed of
 multipleDisposalsAssetTypeForNonUkResidents.error.invalid=Select the type of property or asset you sold or disposed of
+
+multipleDisposalsCompletionDate.title=What was the ‘completion’ date for all the properties?
+multipleDisposalsCompletionDate.helpText=For example, 25, 4, 2020.
+multipleDisposalsCompletionDate.details.summary=What happens on the ‘completion’ date?
+multipleDisposalsCompletionDate.details.p1=The <a href="{0}" target=_blank>‘completion’ date (opens in a new window)</a> is usually the day the new owner gets the keys to the property.
+multipleDisposalsCompletionDate.error.required=Enter a completion date
+multipleDisposalsCompletionDate.error.invalid=Enter a real completion date
+multipleDisposalsCompletionDate.error.tooFarInFuture=Completion date must be today or in the past
+multipleDisposalsCompletionDate-day.error.required=Completion date must include a day
+multipleDisposalsCompletionDate-month.error.required=Completion date must include a month
+multipleDisposalsCompletionDate-year.error.required=Completion date must include a year
+multipleDisposalsCompletionDate-day.error.invalid=Enter a real completion date
+multipleDisposalsCompletionDate-month.error.invalid=Enter a real completion date
+multipleDisposalsCompletionDate-year.error.invalid=Enter a real completion date
+multipleDisposalsCompletionDate-month.error.monthAndYearRequired=Completion date must include a month and a year
+multipleDisposalsCompletionDate-day.error.dayAndYearRequired=Completion date must include a day and a year
+multipleDisposalsCompletionDate-day.error.dayAndMonthRequired=Completion date must include a day and a month
