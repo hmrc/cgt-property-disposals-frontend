@@ -139,6 +139,8 @@ class InitialGainOrLossControllerSpec
             ), { doc =>
               doc.select(".govuk-caption-xl").html()  should include("Initial gain or loss")
               doc.select("#initialGainOrLoss").html() should include("Did you make an initial gain or loss?")
+              doc.select("#initialGainOrLoss").html() should include("Initial gain amount")
+              doc.select("#initialGainOrLoss").html() should include("Initial loss amount")
               doc.select("#back").attr("href")        shouldBe routes.InitialGainOrLossController.checkYourAnswers().url
               doc.select("#content > article > form").attr("action") shouldBe routes.InitialGainOrLossController
                 .submitInitialGainOrLoss()

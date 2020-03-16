@@ -45,7 +45,7 @@
         content = Some(unitInput(
             fieldId = gainKey,
             value = form.data.getOrElse(gainKey, ""),
-            label = Html(""),
+            label = Html(messages(s"$gainKey.label")),
             formError = form.error(gainKey),
             hasErrors = false,
             autoComplete = AutoCompleteType.On,
@@ -61,7 +61,7 @@
         content = Some(unitInput(
             fieldId = lossKey,
             value = form.data.getOrElse(lossKey, ""),
-            label = Html(""),
+            label = Html(messages(s"$lossKey.label")),
             formError = form.error(lossKey),
             hasErrors = false,
             autoComplete = AutoCompleteType.On,
