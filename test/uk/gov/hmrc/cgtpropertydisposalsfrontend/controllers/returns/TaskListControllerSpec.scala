@@ -168,7 +168,7 @@ class TaskListControllerSpec
             sample[SingleDisposalDraftReturn]
               .copy(
                 triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                  .copy(assetType = AssetType.NonResidential)
+                  .copy(assetType = AssetType.Residential)
                   .copy(countryOfResidence = Country("TR", Some("Turkey"))),
                 disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
                 acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers])
@@ -188,7 +188,7 @@ class TaskListControllerSpec
             sample[SingleDisposalDraftReturn]
               .copy(
                 triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                  .copy(assetType = AssetType.NonResidential)
+                  .copy(assetType = AssetType.Residential)
                   .copy(countryOfResidence = Country("TR", Some("Turkey"))),
                 disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
                 acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers])
@@ -583,7 +583,7 @@ class TaskListControllerSpec
           testSectionNonExistent(
             sample[SingleDisposalDraftReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                .copy(assetType = AssetType.NonResidential, countryOfResidence = Country("GB", Some("United Kingdom"))),
+                .copy(assetType = AssetType.Residential, countryOfResidence = Country("GB", Some("United Kingdom"))),
               reliefDetailsAnswers = Some(sample[IncompleteReliefDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
                 answers.copy(acquisitionDate = AcquisitionDate(LocalDate.of(2014, 10, 1)))
@@ -594,11 +594,11 @@ class TaskListControllerSpec
           )
         }
 
-        "the session data indicates that the country of residence is NOT United Kingdom and NON_RESIDENTIAL property was bought BEFORE 01/04/2015" in {
+        "the session data indicates that the country of residence is NOT United Kingdom and RESIDENTIAL property was bought BEFORE 01/04/2015" in {
           test(
             sample[SingleDisposalDraftReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                .copy(assetType = AssetType.NonResidential)
+                .copy(assetType = AssetType.Residential)
                 .copy(countryOfResidence = Country("TR", Some("Turkey"))),
               disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
@@ -610,11 +610,11 @@ class TaskListControllerSpec
           )
         }
 
-        "the session data indicates that the country of residence is NOT United Kingdom and RESIDENTIAL property was bought" in {
+        "the session data indicates that the country of residence is NOT United Kingdom and NON-RESIDENTIAL property was bought" in {
           testSectionNonExistent(
             sample[SingleDisposalDraftReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                .copy(assetType = AssetType.Residential)
+                .copy(assetType = AssetType.NonResidential)
                 .copy(countryOfResidence = Country("TR", Some("Turkey"))),
               disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
@@ -625,11 +625,11 @@ class TaskListControllerSpec
           )("initialGainOrLoss")
         }
 
-        "the session data indicates that the country of residence is NOT United Kingdom but acquisition date is AFTER 01/04/2015 for NON_RESIDANTAL property" in {
+        "the session data indicates that the country of residence is NOT United Kingdom but acquisition date is AFTER 01/04/2015 for RESIDANTAL property" in {
           testSectionNonExistent(
             sample[SingleDisposalDraftReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-                .copy(assetType = AssetType.NonResidential)
+                .copy(assetType = AssetType.Residential)
                 .copy(countryOfResidence = Country("TR", Some("Turkey"))),
               disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]).map(answers =>
