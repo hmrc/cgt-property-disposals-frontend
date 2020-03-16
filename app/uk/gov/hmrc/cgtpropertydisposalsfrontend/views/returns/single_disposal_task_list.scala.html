@@ -54,12 +54,12 @@ draftReturn.acquisitionDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(
 
 @initialGainOrLossState = @{
 def shouldSeeSection(countryOfResidence: Country, assetType: AssetType, acquisitionDetailsAnswers: Option[AcquisitionDetailsAnswers]) = {
-val nonResidentialBeforeDate = RebasingCutoffDates.nonUkResidentsResidentialProperty
+val residentialBeforeDate = RebasingCutoffDates.nonUkResidentsResidentialProperty
 
 (countryOfResidence, assetType, acquisitionDetailsAnswers) match {
 case (_, _, _) if countryOfResidence.isUk() => false
-case (_, AssetType.NonResidential, Some(CompleteAcquisitionDetailsAnswers(_, AcquisitionDate(acquisitionDate), _, _, _, _)))
-if acquisitionDate.isBefore(nonResidentialBeforeDate) => true
+case (_, AssetType.Residential, Some(CompleteAcquisitionDetailsAnswers(_, AcquisitionDate(acquisitionDate), _, _, _, _)))
+if acquisitionDate.isBefore(residentialBeforeDate) => true
 case (_, _, _) => false
 
 }
