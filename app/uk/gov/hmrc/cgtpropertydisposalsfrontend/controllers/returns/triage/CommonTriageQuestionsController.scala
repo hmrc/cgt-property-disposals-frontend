@@ -17,8 +17,10 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 import cats.data.EitherT
+import cats.instances.list._
 import cats.instances.future._
 import cats.syntax.either._
+import cats.syntax.order._
 import com.google.inject.Inject
 import play.api.Configuration
 import play.api.data.Form
@@ -27,6 +29,7 @@ import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.IncompleteMultipleDisposalsAnswers
@@ -125,7 +128,7 @@ class CommonTriageQuestionsController @Inject() (
                     val result =
                       for {
                         _ <- updatedState.fold(
-                              _ => EitherT.pure(()),
+                              _ => EitherT.pure[Future, Error](()),
                               fillingOutReturn =>
                                 returnsService
                                   .storeDraftReturn(fillingOutReturn.draftReturn, fillingOutReturn.agentReferenceNumber)
@@ -186,7 +189,7 @@ class CommonTriageQuestionsController @Inject() (
                 val result =
                   for {
                     _ <- updatedState.fold(
-                          _ => EitherT.pure(()),
+                          _ => EitherT.pure[Future, Error](()),
                           fillingOutReturn =>
                             returnsService
                               .storeDraftReturn(fillingOutReturn.draftReturn, fillingOutReturn.agentReferenceNumber)
@@ -213,9 +216,9 @@ class CommonTriageQuestionsController @Inject() (
       withState(request) {
         case (_, state) =>
           val triageAnswers = triageAnswersFomState(state)
-          val assetType = triageAnswers.fold(
-            _.fold(_.assetType, c => Some(c.assetType)),
-            _.fold(_.assetType, c => Some(c.assetType))
+          val isAssetTypeNonResidential: Boolean = triageAnswers.fold(
+            _.fold(_.wereAllPropertiesResidential.contains(false), _.assetTypes === List(AssetType.NonResidential)),
+            _.fold(_.assetType.contains(AssetType.NonResidential), _.assetType === AssetType.NonResidential)
           )
           val wasUkResident = triageAnswers.fold(
             _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())),
@@ -226,9 +229,9 @@ class CommonTriageQuestionsController @Inject() (
             _ => routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty()
           )
 
-          (wasUkResident, assetType) match {
-            case (Some(true), Some(AssetType.NonResidential)) => Ok(ukResidentCanOnlyDisposeResidentialPage(backLink))
-            case _                                            => Redirect(redirectToCheckYourAnswers(state))
+          wasUkResident match {
+            case Some(true) if isAssetTypeNonResidential => Ok(ukResidentCanOnlyDisposeResidentialPage(backLink))
+            case _                                       => Redirect(redirectToCheckYourAnswers(state))
           }
       }
   }
@@ -259,17 +262,22 @@ class CommonTriageQuestionsController @Inject() (
       case (_, state) =>
         val triageAnswers = triageAnswersFomState(state)
         lazy val backLink = triageAnswers.fold(
-          // TODO: fix multiple disposals back link when the page is available
-          _ => routes.MultipleDisposalsTriageController.howManyDisposals(),
+          _ => routes.MultipleDisposalsTriageController.assetTypeForNonUkResidents(),
           _ => routes.SingleDisposalsTriageController.assetTypeForNonUkResidents()
         )
 
-        triageAnswers.fold(
-          _.fold(_.assetType, c => Some(c.assetType)),
-          _.fold(_.assetType, c => Some(c.assetType))
+        def hasSupportedAssetType(assetTypes: List[AssetType]): Boolean =
+          assetTypes === List(AssetType.Residential) || assetTypes === List(AssetType.NonResidential)
+
+        triageAnswers.fold[Option[List[AssetType]]](
+          _.fold(_.assetTypes, c => Some(c.assetTypes)),
+          _.fold(
+            i => i.assetType.map(a => List(a)),
+            c => Some(List(c.assetType))
+          )
         ) match {
-          case Some(AssetType.MixedUse | AssetType.IndirectDisposal) => Ok(assetTypeNotYetImplementedPage(backLink))
-          case _                                                     => Redirect(redirectToCheckYourAnswers(state))
+          case Some(assetTypes) if !hasSupportedAssetType(assetTypes) => Ok(assetTypeNotYetImplementedPage(backLink))
+          case _                                                      => Redirect(redirectToCheckYourAnswers(state))
         }
     }
   }

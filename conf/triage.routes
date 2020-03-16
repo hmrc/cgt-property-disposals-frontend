@@ -53,4 +53,10 @@ POST /multiple-disposals/country-residence                  uk.gov.hmrc.cgtprope
 GET  /multiple-disposals/tax-year-exchanged                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.whenWereContractsExchanged()
 POST /multiple-disposals/tax-year-exchanged                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.whenWereContractsExchangedSubmit()
 
+GET  /multiple-disposals/property-types                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.assetTypeForNonUkResidents()
+POST /multiple-disposals/property-types                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.assetTypeForNonUkResidentsSubmit()
+
+GET  /multiple-disposals/completion-date                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.completionDate()
+POST /multiple-disposals/completion-date                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.completionDateSubmit()
+
 GET  /check-your-answers                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.checkYourAnswers()

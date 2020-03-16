@@ -22,7 +22,6 @@ import cats.syntax.eq._
 import cats.syntax.either._
 import play.api.data.FormError
 import play.api.data.format.Formatter
-
 import scala.util.Try
 
 object FormUtils {
@@ -60,4 +59,5 @@ object FormUtils {
         .find(_._1 === value)
         .fold(Map.empty[String, String]) { case (_, i) => Map(key -> i.toString) }
   }
+
 }

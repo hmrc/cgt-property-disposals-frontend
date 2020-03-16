@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
+import cats.instances.list._
 import cats.syntax.eq._
 import julienrf.json.derived
 import monocle.Lens
@@ -36,14 +37,15 @@ object MultipleDisposalsTriageAnswers {
     wasAUKResident: Option[Boolean],
     countryOfResidence: Option[Country],
     wereAllPropertiesResidential: Option[Boolean],
-    assetType: Option[AssetType],
+    assetTypes: Option[List[AssetType]],
     taxYearAfter6April2020: Option[Boolean],
-    taxYear: Option[TaxYear]
+    taxYear: Option[TaxYear],
+    completionDate: Option[CompletionDate]
   ) extends MultipleDisposalsTriageAnswers
 
   object IncompleteMultipleDisposalsAnswers {
     val empty: IncompleteMultipleDisposalsAnswers =
-      IncompleteMultipleDisposalsAnswers(None, None, None, None, None, None, None, None)
+      IncompleteMultipleDisposalsAnswers(None, None, None, None, None, None, None, None, None)
 
     def fromCompleteAnswers(c: CompleteMultipleDisposalsAnswers): IncompleteMultipleDisposalsAnswers =
       IncompleteMultipleDisposalsAnswers(
@@ -51,10 +53,11 @@ object MultipleDisposalsTriageAnswers {
         Some(c.numberOfProperties),
         Some(c.countryOfResidence.isUk()),
         if (c.countryOfResidence.isUk()) None else Some(c.countryOfResidence),
-        if (c.countryOfResidence.isUk()) Some(c.assetType === AssetType.Residential) else None,
-        Some(c.assetType),
+        if (c.countryOfResidence.isUk()) Some(c.assetTypes === List(AssetType.Residential)) else None,
+        Some(c.assetTypes),
         Some(true),
-        Some(c.taxYear)
+        Some(c.taxYear),
+        Some(c.completionDate)
       )
 
   }
@@ -63,8 +66,9 @@ object MultipleDisposalsTriageAnswers {
     individualUserType: Option[IndividualUserType],
     numberOfProperties: Int,
     countryOfResidence: Country,
-    assetType: AssetType,
-    taxYear: TaxYear
+    assetTypes: List[AssetType],
+    taxYear: TaxYear,
+    completionDate: CompletionDate
   ) extends MultipleDisposalsTriageAnswers
 
   implicit class MultipleDisposalsTriageAnswersOps(private val m: MultipleDisposalsTriageAnswers) extends AnyVal {
