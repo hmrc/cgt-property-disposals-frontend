@@ -1170,6 +1170,7 @@ multipleDisposalsCompletionDate-day.error.dayAndYearRequired=Completion date mus
 multipleDisposalsCompletionDate-day.error.dayAndMonthRequired=Completion date must include a day and a month
 
 multipleDisposals.triage.cya.title=Check your answers
+multipleDisposals.triage.cya.guidanceLink=Help completing this section
 multipleDisposals.triage.cyaChange.numberOfProperties=the number of properties exchanges in the same tax year
 multipleDisposals.triage.cyaChange.wereYouAUKResident=whether you were a UK resident on all the dates when you exchanged contracts
 multipleDisposals.triage.cyaChange.countryOfResidence=your country of residence

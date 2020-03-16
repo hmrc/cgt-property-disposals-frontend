@@ -33,7 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsAnswers, IncompleteMultipleDisposalsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData, UserType}
@@ -181,7 +181,7 @@ class CommonTriageQuestionsControllerSpec
               mockGetSession(
                 sessionDataWithStartingNewDraftReturn(
                   Left(
-                    IncompleteMultipleDisposalsAnswers.empty.copy(
+                    IncompleteMultipleDisposalsTriageAnswers.empty.copy(
                       individualUserType = Some(IndividualUserType.Capacitor)
                     )
                   ),
@@ -296,7 +296,7 @@ class CommonTriageQuestionsControllerSpec
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
                 Left(
-                  IncompleteMultipleDisposalsAnswers.empty.copy(
+                  IncompleteMultipleDisposalsTriageAnswers.empty.copy(
                     individualUserType = Some(IndividualUserType.Capacitor)
                   )
                 ),
@@ -419,11 +419,14 @@ class CommonTriageQuestionsControllerSpec
           "the user is on a multiple disposals journey and they haven't completed the triage section" in {
             testSuccessfulUpdateStartingNewDraftReturn(
               performAction("individualUserType" -> "1"),
-              Left(IncompleteMultipleDisposalsAnswers.empty.copy(individualUserType = Some(IndividualUserType.Self))),
+              Left(
+                IncompleteMultipleDisposalsTriageAnswers.empty.copy(individualUserType = Some(IndividualUserType.Self))
+              ),
               Right(sample[IndividualName])
             )(
               Left(
-                IncompleteMultipleDisposalsAnswers.empty.copy(individualUserType = Some(IndividualUserType.Capacitor))
+                IncompleteMultipleDisposalsTriageAnswers.empty
+                  .copy(individualUserType = Some(IndividualUserType.Capacitor))
               ),
               routes.MultipleDisposalsTriageController.checkYourAnswers()
             )
@@ -431,7 +434,7 @@ class CommonTriageQuestionsControllerSpec
 
           "the user is on a multiple disposals journey and they have completed the triage section" in {
             val answers =
-              sample[CompleteMultipleDisposalsAnswers].copy(individualUserType = Some(IndividualUserType.Self))
+              sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(IndividualUserType.Self))
 
             testSuccessfulUpdateStartingNewDraftReturn(
               performAction("individualUserType" -> "2"),
@@ -559,7 +562,7 @@ class CommonTriageQuestionsControllerSpec
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
                 Left(
-                  IncompleteMultipleDisposalsAnswers.empty.copy(
+                  IncompleteMultipleDisposalsTriageAnswers.empty.copy(
                     individualUserType = None
                   )
                 ),
@@ -656,7 +659,7 @@ class CommonTriageQuestionsControllerSpec
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
                 Left(
-                  IncompleteMultipleDisposalsAnswers.empty.copy(
+                  IncompleteMultipleDisposalsTriageAnswers.empty.copy(
                     individualUserType = Some(IndividualUserType.Capacitor)
                   )
                 ),
@@ -754,7 +757,7 @@ class CommonTriageQuestionsControllerSpec
               Right(sample[IndividualName])
             )(
               Left(
-                IncompleteMultipleDisposalsAnswers.empty.copy(
+                IncompleteMultipleDisposalsTriageAnswers.empty.copy(
                   individualUserType = Some(IndividualUserType.Self)
                 )
               ),
@@ -771,7 +774,7 @@ class CommonTriageQuestionsControllerSpec
               Right(sample[IndividualName])
             )(
               Left(
-                IncompleteMultipleDisposalsAnswers.empty.copy(
+                IncompleteMultipleDisposalsTriageAnswers.empty.copy(
                   individualUserType = answers.individualUserType
                 )
               ),
@@ -783,7 +786,7 @@ class CommonTriageQuestionsControllerSpec
             testSuccessfulUpdateStartingNewDraftReturn(
               performAction("numberOfProperties" -> "0"),
               Left(
-                IncompleteMultipleDisposalsAnswers.empty.copy(
+                IncompleteMultipleDisposalsTriageAnswers.empty.copy(
                   individualUserType = None
                 )
               ),
@@ -800,7 +803,7 @@ class CommonTriageQuestionsControllerSpec
           }
 
           "the user is on a multiple disposals journey and they have completed the triage section" in {
-            val answers = sample[CompleteMultipleDisposalsAnswers].copy(
+            val answers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
               individualUserType = Some(IndividualUserType.Self)
             )
 
@@ -848,7 +851,7 @@ class CommonTriageQuestionsControllerSpec
 
         "the user has submitted the same answer they have previously entered on the multiple disposals journey" in {
           val answers =
-            IncompleteMultipleDisposalsAnswers.empty.copy(
+            IncompleteMultipleDisposalsTriageAnswers.empty.copy(
               individualUserType = Some(IndividualUserType.Self)
             )
 
@@ -882,7 +885,7 @@ class CommonTriageQuestionsControllerSpec
         assetType                  = Some(AssetType.Residential)
       )
 
-      val multipleDisposalsRequiredPreviousAnswers = IncompleteMultipleDisposalsAnswers.empty.copy(
+      val multipleDisposalsRequiredPreviousAnswers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
         individualUserType           = Some(IndividualUserType.Self),
         numberOfProperties           = Some(2),
         wasAUKResident               = Some(true),
@@ -1091,7 +1094,7 @@ class CommonTriageQuestionsControllerSpec
               mockGetSession(
                 sessionDataWithStartingNewDraftReturn(
                   Left(
-                    IncompleteMultipleDisposalsAnswers.empty.copy(
+                    IncompleteMultipleDisposalsTriageAnswers.empty.copy(
                       individualUserType = Some(IndividualUserType.Self),
                       numberOfProperties = Some(2),
                       wasAUKResident     = Some(false),
@@ -1138,7 +1141,7 @@ class CommonTriageQuestionsControllerSpec
               mockGetSession(
                 sessionDataWithStartingNewDraftReturn(
                   Left(
-                    IncompleteMultipleDisposalsAnswers.empty.copy(
+                    IncompleteMultipleDisposalsTriageAnswers.empty.copy(
                       individualUserType = Some(IndividualUserType.Self),
                       numberOfProperties = Some(2),
                       wasAUKResident     = Some(true),
@@ -1196,7 +1199,7 @@ class CommonTriageQuestionsControllerSpec
               mockGetSession(
                 sessionDataWithStartingNewDraftReturn(
                   Left(
-                    IncompleteMultipleDisposalsAnswers.empty.copy(
+                    IncompleteMultipleDisposalsTriageAnswers.empty.copy(
                       individualUserType           = Some(IndividualUserType.Self),
                       numberOfProperties           = Some(3),
                       wasAUKResident               = Some(true),
@@ -1270,7 +1273,7 @@ class CommonTriageQuestionsControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(
                 sessionDataWithStartingNewDraftReturn(
-                  Left(sample[CompleteMultipleDisposalsAnswers].copy(assetTypes = List(assetType))),
+                  Left(sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(assetType))),
                   Right(sample[IndividualName])
                 )._1
               )
@@ -1333,7 +1336,7 @@ class CommonTriageQuestionsControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(
                 sessionDataWithStartingNewDraftReturn(
-                  Left(sample[CompleteMultipleDisposalsAnswers].copy(assetTypes = List(assetType))),
+                  Left(sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(assetType))),
                   Right(sample[IndividualName])
                 )._1
               )
@@ -1388,7 +1391,7 @@ class CommonTriageQuestionsControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
-                Left(IncompleteMultipleDisposalsAnswers.empty),
+                Left(IncompleteMultipleDisposalsTriageAnswers.empty),
                 Right(sample[IndividualName])
               )._1
             )
@@ -1428,7 +1431,7 @@ class CommonTriageQuestionsControllerSpec
             mockGetSession(
               sessionDataWithStartingNewDraftReturn(
                 Left(
-                  IncompleteMultipleDisposalsAnswers.empty
+                  IncompleteMultipleDisposalsTriageAnswers.empty
                     .copy(individualUserType = Some(IndividualUserType.PersonalRepresentative))
                 ),
                 Right(sample[IndividualName])

@@ -32,7 +32,7 @@
     caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(form: Form[Boolean], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(form: Form[Boolean], backLink: Call, hasCreatedDraftReturn: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"multipleDisposalsWereAllPropertiesResidential"}
 @title = @{messages(s"$key.title")}
@@ -72,7 +72,9 @@
             )
         )
 
-        @submitButton(messages("button.continue"))
+        @submitButton(messages(if (hasCreatedDraftReturn) "button.saveAndContinue" else "button.continue"))
     }
+
+    @returnToSummaryLink(hasCreatedDraftReturn)
 
 }

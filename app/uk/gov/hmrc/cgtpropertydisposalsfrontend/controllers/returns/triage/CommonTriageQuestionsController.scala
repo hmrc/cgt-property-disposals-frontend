@@ -32,7 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, FormUtils, LocalDateUtils, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.IncompleteMultipleDisposalsAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.IncompleteMultipleDisposalsTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DraftReturn, IndividualUserType, MultipleDisposalsDraftReturn, MultipleDisposalsTriageAnswers, NumberOfProperties, SingleDisposalDraftReturn, SingleDisposalTriageAnswers}
@@ -364,7 +364,7 @@ class CommonTriageQuestionsController @Inject() (
 
       case NumberOfProperties.MoreThanOne =>
         val newTriageAnswers =
-          IncompleteMultipleDisposalsAnswers.empty.copy(
+          IncompleteMultipleDisposalsTriageAnswers.empty.copy(
             individualUserType = individualUserType
           )
 
@@ -443,7 +443,10 @@ class CommonTriageQuestionsController @Inject() (
           _ => Some(NumberOfProperties.One)
         )
       ),
-      _ => Some(NumberOfProperties.One)
+      _.draftReturn.fold(
+        _ => Some(NumberOfProperties.MoreThanOne),
+        _ => Some(NumberOfProperties.One)
+      )
     )
 
   private def triageAnswersFomState(
