@@ -98,7 +98,8 @@ class TaskListControllerSpec
         sectionLinkId: String,
         sectionLinkText: String,
         sectionLinkHref: Call,
-        sectionsStatus: TaskListStatus
+        sectionsStatus: TaskListStatus,
+        extraChecks: Document => Unit = _ => ()
       ): Unit = {
         val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn = draftReturn)
 
@@ -124,6 +125,7 @@ class TaskListControllerSpec
             }
 
             doc.select(s"li#$sectionLinkId > strong").text shouldBe messageFromMessageKey(s"task-list.$sectionsStatus")
+            extraChecks(doc)
           }
         )
       }
@@ -153,14 +155,18 @@ class TaskListControllerSpec
       "display the page with the proper triage section status" when {
 
         "the session data indicates that they are filling in a return and the triage section is incomplete" in {
-          testStateOfSection(
+          val incompleteTriage =
             sample[SingleDisposalDraftReturn].copy(triageAnswers = sample[IncompleteSingleDisposalTriageAnswers])
+          testStateOfSection(
+            incompleteTriage
           )(
             "canTheyUseOurService",
             messageFromMessageKey("task-list.triage.link"),
             triage.routes.SingleDisposalsTriageController.checkYourAnswers(),
-            TaskListStatus.InProgress
+            TaskListStatus.InProgress,
+            _.select("div.notice").contains(messageFromMessageKey("task-list.incompleteTriage"))
           )
+
         }
 
         "the session data indicates Enter initial gain or loss" in {
@@ -219,7 +225,8 @@ class TaskListControllerSpec
 
         "the session data indicates that they are filling in a return and enter property address is todo" in {
           testStateOfSection(
-            sample[SingleDisposalDraftReturn].copy(propertyAddress = None)
+            sample[SingleDisposalDraftReturn]
+              .copy(triageAnswers = sample[CompleteSingleDisposalTriageAnswers], propertyAddress = None)
           )(
             "propertyAddress",
             messageFromMessageKey("task-list.enter-property-address.link"),
@@ -230,7 +237,10 @@ class TaskListControllerSpec
 
         "the session data indicates that they are filling in a return and enter property address is complete" in {
           testStateOfSection(
-            sample[SingleDisposalDraftReturn].copy(propertyAddress = Some(sample[UkAddress]))
+            sample[SingleDisposalDraftReturn].copy(
+              triageAnswers   = sample[CompleteSingleDisposalTriageAnswers],
+              propertyAddress = Some(sample[UkAddress])
+            )
           )(
             "propertyAddress",
             messageFromMessageKey("task-list.enter-property-address.link"),
@@ -244,7 +254,8 @@ class TaskListControllerSpec
 
         "the session data indicates that they are filling in a return and the section has not been started yet is todo" in {
           testStateOfSection(
-            sample[SingleDisposalDraftReturn].copy(disposalDetailsAnswers = None)
+            sample[SingleDisposalDraftReturn]
+              .copy(triageAnswers = sample[CompleteSingleDisposalTriageAnswers], disposalDetailsAnswers = None)
           )(
             "disposalDetails",
             messageFromMessageKey("task-list.disposals-details.link"),
@@ -256,7 +267,10 @@ class TaskListControllerSpec
         "the session data indicates that they are filling in a return and they have started the section but not complete it yet" in {
           testStateOfSection(
             sample[SingleDisposalDraftReturn]
-              .copy(disposalDetailsAnswers = Some(sample[IncompleteDisposalDetailsAnswers]))
+              .copy(
+                triageAnswers          = sample[CompleteSingleDisposalTriageAnswers],
+                disposalDetailsAnswers = Some(sample[IncompleteDisposalDetailsAnswers])
+              )
           )(
             "disposalDetails",
             messageFromMessageKey("task-list.disposals-details.link"),
@@ -267,7 +281,9 @@ class TaskListControllerSpec
 
         "the session data indicates that they are filling in a return and they have completed the section" in {
           testStateOfSection(
-            sample[SingleDisposalDraftReturn].copy(disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers])
+            sample[SingleDisposalDraftReturn].copy(
+              triageAnswers          = sample[CompleteSingleDisposalTriageAnswers],
+              disposalDetailsAnswers = Some(sample[CompleteDisposalDetailsAnswers])
             )
           )(
             "disposalDetails",
@@ -282,7 +298,8 @@ class TaskListControllerSpec
 
         "the session data indicates that they are filling in a return and the section has not been started yet is todo" in {
           testStateOfSection(
-            sample[SingleDisposalDraftReturn].copy(acquisitionDetailsAnswers = None)
+            sample[SingleDisposalDraftReturn]
+              .copy(triageAnswers = sample[CompleteSingleDisposalTriageAnswers], acquisitionDetailsAnswers = None)
           )(
             "acquisitionDetails",
             messageFromMessageKey("task-list.acquisition-details.link"),
@@ -294,7 +311,10 @@ class TaskListControllerSpec
         "the session data indicates that they are filling in a return and they have started the section but not complete it yet" in {
           testStateOfSection(
             sample[SingleDisposalDraftReturn]
-              .copy(acquisitionDetailsAnswers = Some(sample[IncompleteAcquisitionDetailsAnswers]))
+              .copy(
+                triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
+                acquisitionDetailsAnswers = Some(sample[IncompleteAcquisitionDetailsAnswers])
+              )
           )(
             "acquisitionDetails",
             messageFromMessageKey("task-list.acquisition-details.link"),
@@ -306,7 +326,10 @@ class TaskListControllerSpec
         "the session data indicates that they are filling in a return and they have completed the section" in {
           testStateOfSection(
             sample[SingleDisposalDraftReturn]
-              .copy(acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]))
+              .copy(
+                triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
+                acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers])
+              )
           )(
             "acquisitionDetails",
             messageFromMessageKey("task-list.acquisition-details.link"),
@@ -329,6 +352,7 @@ class TaskListControllerSpec
         "the session data indicates that the property address has not been entered in" in {
           test(
             sample[SingleDisposalDraftReturn].copy(
+              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
               propertyAddress           = None,
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -343,6 +367,7 @@ class TaskListControllerSpec
           List(None, Some(sample[IncompleteDisposalDetailsAnswers])).foreach { disposalDetailsState =>
             test(
               sample[SingleDisposalDraftReturn].copy(
+                triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
                 propertyAddress           = Some(sample[UkAddress]),
                 disposalDetailsAnswers    = disposalDetailsState,
                 acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -358,6 +383,7 @@ class TaskListControllerSpec
           List(None, Some(sample[IncompleteAcquisitionDetailsAnswers])).foreach { acquisitionDetailsAnswers =>
             test(
               sample[SingleDisposalDraftReturn].copy(
+                triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
                 propertyAddress           = Some(sample[UkAddress]),
                 disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
                 acquisitionDetailsAnswers = acquisitionDetailsAnswers,
@@ -373,6 +399,7 @@ class TaskListControllerSpec
           "been completed and the reliefs section has not been started yet" in {
           test(
             sample[SingleDisposalDraftReturn].copy(
+              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
               propertyAddress           = Some(sample[UkAddress]),
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -387,6 +414,7 @@ class TaskListControllerSpec
           "been completed and the reliefs section has been started but not completed yet" in {
           test(
             sample[SingleDisposalDraftReturn].copy(
+              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
               propertyAddress           = Some(sample[UkAddress]),
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -400,6 +428,7 @@ class TaskListControllerSpec
         "the session data indicates that they are filling in a return and they have completed the section" in {
           test(
             sample[SingleDisposalDraftReturn].copy(
+              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
               propertyAddress           = Some(sample[UkAddress]),
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -424,6 +453,7 @@ class TaskListControllerSpec
         "the session data indicates that the reliefs section is has not yet been started" in {
           test(
             sample[SingleDisposalDraftReturn].copy(
+              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
               propertyAddress           = Some(sample[UkAddress]),
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -437,6 +467,7 @@ class TaskListControllerSpec
         "the session data indicates that the reliefs section is has not yet been completed" in {
           test(
             sample[SingleDisposalDraftReturn].copy(
+              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
               propertyAddress           = Some(sample[UkAddress]),
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -450,6 +481,7 @@ class TaskListControllerSpec
         "the reliefs section has been completed and the section has not been started yet" in {
           test(
             sample[SingleDisposalDraftReturn].copy(
+              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
               propertyAddress           = Some(sample[UkAddress]),
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -463,6 +495,7 @@ class TaskListControllerSpec
         "the session data indicates that they are filling in a return and they have started the section but not complete it yet" in {
           test(
             sample[SingleDisposalDraftReturn].copy(
+              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
               propertyAddress           = Some(sample[UkAddress]),
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -476,6 +509,7 @@ class TaskListControllerSpec
         "the session data indicates that they are filling in a return and they have completed the section" in {
           test(
             sample[SingleDisposalDraftReturn].copy(
+              triageAnswers             = sample[CompleteSingleDisposalTriageAnswers],
               propertyAddress           = Some(sample[UkAddress]),
               disposalDetailsAnswers    = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -500,6 +534,7 @@ class TaskListControllerSpec
         "the session data indicates that the exemptions and losses section has not yet been started" in {
           test(
             sample[SingleDisposalDraftReturn].copy(
+              triageAnswers              = sample[CompleteSingleDisposalTriageAnswers],
               propertyAddress            = Some(sample[UkAddress]),
               disposalDetailsAnswers     = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -514,6 +549,7 @@ class TaskListControllerSpec
         "the session data indicates that the reliefs section is has not yet been completed" in {
           test(
             sample[SingleDisposalDraftReturn].copy(
+              triageAnswers              = sample[CompleteSingleDisposalTriageAnswers],
               propertyAddress            = Some(sample[UkAddress]),
               disposalDetailsAnswers     = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -528,6 +564,7 @@ class TaskListControllerSpec
         "the reliefs section has been completed and the section has not been started yet" in {
           test(
             sample[SingleDisposalDraftReturn].copy(
+              triageAnswers              = sample[CompleteSingleDisposalTriageAnswers],
               propertyAddress            = Some(sample[UkAddress]),
               disposalDetailsAnswers     = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -542,6 +579,7 @@ class TaskListControllerSpec
         "the session data indicates that they are filling in a return and they have started the section but not complete it yet" in {
           test(
             sample[SingleDisposalDraftReturn].copy(
+              triageAnswers              = sample[CompleteSingleDisposalTriageAnswers],
               propertyAddress            = Some(sample[UkAddress]),
               disposalDetailsAnswers     = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
@@ -556,6 +594,7 @@ class TaskListControllerSpec
         "the session data indicates that they are filling in a return and they have completed the section" in {
           test(
             sample[SingleDisposalDraftReturn].copy(
+              triageAnswers              = sample[CompleteSingleDisposalTriageAnswers],
               propertyAddress            = Some(sample[UkAddress]),
               disposalDetailsAnswers     = Some(sample[CompleteDisposalDetailsAnswers]),
               acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
