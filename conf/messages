@@ -1127,11 +1127,13 @@ gain.error.required=Enter the initial gain amount
 gain.error.invalid=Initial gain amount must only include numbers, like 2,908 or 740.50
 gain.error.tooLarge=Initial gain amount must be a number greater than 0 and less than 50,000,000,000.00, or select no gain or loss
 gain.error.tooManyDecimals=Initial gain amount must have 2 decimal places or less, like 2,908 or 740.50
+gain.error.tooSmall=The initial gain must be a number more than 0 and less than 50,000,000,000
 
 loss.error.required=Enter the initial loss amount
 loss.error.invalid=Initial loss amount must only include numbers, like 2,908 or 740.50
 loss.error.tooLarge=Initial loss amount must be a number greater than 0 and less than 50,000,000,000.00, or select no gain or loss
 loss.error.tooManyDecimals=Initial loss amount must have 2 decimal places or less, like 2,908 or 740.50
+loss.error.tooSmall=The initial loss must be a number more than 0 and less than 50,000,000,000
 
 multipleDisposalsTaxYear.title=When were contracts exchanged on all the properties?
 multipleDisposalsTaxYear.link=What happens on the exchange date?

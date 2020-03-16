@@ -198,11 +198,19 @@ class InitialGainOrLossControllerSpec
 
       "show a form error" when {
 
+        def checkIfValueExistsForKey(expectedErrorMessageKey: String) = {
+          (messages(expectedErrorMessageKey) === expectedErrorMessageKey) shouldBe false
+          messages(expectedErrorMessageKey).trim().isEmpty                shouldBe false
+        }
+
         def testFormError(
           data: (String, String)*
         )(expectedErrorMessageKey: String, errorArgs: String*)(pageTitleKey: String, titleArgs: String*)(
           performAction: Seq[(String, String)] => Future[Result]
         ): Unit = {
+
+          checkIfValueExistsForKey(expectedErrorMessageKey)
+
           val session = sessionWithState(None)._1
 
           inSequence {
