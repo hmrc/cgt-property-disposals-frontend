@@ -16,6 +16,7 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsAnswers
 
 @this(
@@ -39,5 +40,9 @@ summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.mult
  @pageHeading(title)
 
  @summary(answers)
+
+ @formWrapper(routes.MultipleDisposalsTriageController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
+  @submitButton(messages("button.confirmAndContinue"))
+ }
 
 }

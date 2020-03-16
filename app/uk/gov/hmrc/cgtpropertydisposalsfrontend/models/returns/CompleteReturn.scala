@@ -41,9 +41,8 @@ final case class CompleteReturn(
 
 object CompleteReturn {
 
-  def fromDraftReturn(draftReturn: DraftReturn): Option[CompleteReturn] = draftReturn match {
-    case DraftReturn(
-        _,
+  def fromDraftReturn(draftReturn: SingleDisposalDraftReturn): Option[CompleteReturn] = draftReturn match {
+    case SingleDisposalDraftReturn(
         _,
         t: CompleteSingleDisposalTriageAnswers,
         Some(p: UkAddress),

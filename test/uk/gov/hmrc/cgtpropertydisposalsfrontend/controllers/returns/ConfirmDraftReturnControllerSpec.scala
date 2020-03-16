@@ -70,8 +70,11 @@ class ConfirmDraftReturnControllerSpec
 
     "handling requests with session with return should save the data and show proper text" in {
 
-      val fillingOutReturn   = sample[FillingOutReturn]
-      val updatedDraftReturn = fillingOutReturn.draftReturn.copy(lastUpdatedDate = LocalDateUtils.today())
+      val fillingOutReturn = sample[FillingOutReturn]
+      val updatedDraftReturn = fillingOutReturn.draftReturn.fold(
+        _.copy(lastUpdatedDate = LocalDateUtils.today()),
+        _.copy(lastUpdatedDate = LocalDateUtils.today())
+      )
 
       inSequence {
         mockAuthWithNoRetrievals()
@@ -80,7 +83,11 @@ class ConfirmDraftReturnControllerSpec
             journeyStatus = Some(fillingOutReturn)
           )
         )
-        mockStoreDraftReturn(updatedDraftReturn, fillingOutReturn.agentReferenceNumber)(Right(()))
+        mockStoreDraftReturn(
+          updatedDraftReturn,
+          fillingOutReturn.subscribedDetails.cgtReference,
+          fillingOutReturn.agentReferenceNumber
+        )(Right(()))
       }
 
       val result: Future[Result] = performAction()
@@ -91,8 +98,11 @@ class ConfirmDraftReturnControllerSpec
 
     "handling requests with session with return proper error when StoreDraftReturn service fails" in {
 
-      val fillingOutReturn   = sample[FillingOutReturn]
-      val updatedDraftReturn = fillingOutReturn.draftReturn.copy(lastUpdatedDate = LocalDateUtils.today())
+      val fillingOutReturn = sample[FillingOutReturn]
+      val updatedDraftReturn = fillingOutReturn.draftReturn.fold(
+        _.copy(lastUpdatedDate = LocalDateUtils.today()),
+        _.copy(lastUpdatedDate = LocalDateUtils.today())
+      )
 
       inSequence {
         mockAuthWithNoRetrievals()
@@ -101,7 +111,11 @@ class ConfirmDraftReturnControllerSpec
             journeyStatus = Some(fillingOutReturn)
           )
         )
-        mockStoreDraftReturn(updatedDraftReturn, fillingOutReturn.agentReferenceNumber)(
+        mockStoreDraftReturn(
+          updatedDraftReturn,
+          fillingOutReturn.subscribedDetails.cgtReference,
+          fillingOutReturn.agentReferenceNumber
+        )(
           Left(Error("Some Error"))
         )
       }
@@ -112,8 +126,11 @@ class ConfirmDraftReturnControllerSpec
 
     "handling requests with session with return should save the data and show the page with proper back and accounts home button and right title" in {
 
-      val fillingOutReturn   = sample[FillingOutReturn]
-      val updatedDraftReturn = fillingOutReturn.draftReturn.copy(lastUpdatedDate = LocalDateUtils.today())
+      val fillingOutReturn = sample[FillingOutReturn]
+      val updatedDraftReturn = fillingOutReturn.draftReturn.fold(
+        _.copy(lastUpdatedDate = LocalDateUtils.today()),
+        _.copy(lastUpdatedDate = LocalDateUtils.today())
+      )
 
       inSequence {
         mockAuthWithNoRetrievals()
@@ -122,7 +139,11 @@ class ConfirmDraftReturnControllerSpec
             journeyStatus = Some(fillingOutReturn)
           )
         )
-        mockStoreDraftReturn(updatedDraftReturn, fillingOutReturn.agentReferenceNumber)(Right(()))
+        mockStoreDraftReturn(
+          updatedDraftReturn,
+          fillingOutReturn.subscribedDetails.cgtReference,
+          fillingOutReturn.agentReferenceNumber
+        )(Right(()))
       }
 
       checkPageIsDisplayed(

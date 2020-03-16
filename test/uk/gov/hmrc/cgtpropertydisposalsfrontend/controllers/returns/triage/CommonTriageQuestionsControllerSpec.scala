@@ -81,14 +81,19 @@ class CommonTriageQuestionsControllerSpec
   def sessionDataWithFillingOutReturn(
     singleDisposalTriageAnswers: SingleDisposalTriageAnswers,
     name: Either[TrustName, IndividualName] = Right(sample[IndividualName])
-  ): (SessionData, FillingOutReturn) = {
+  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) = {
+    val draftReturn = sample[SingleDisposalDraftReturn].copy(
+      triageAnswers = singleDisposalTriageAnswers
+    )
     val fillingOutReturn = sample[FillingOutReturn].copy(
-      draftReturn = sample[DraftReturn].copy(
-        triageAnswers = singleDisposalTriageAnswers
-      ),
+      draftReturn       = draftReturn,
       subscribedDetails = sample[SubscribedDetails].copy(name = name)
     )
-    SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)) -> fillingOutReturn
+    (
+      SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)),
+      fillingOutReturn,
+      draftReturn
+    )
   }
 
   "CommonTriageQuestionsController" when {
@@ -323,11 +328,11 @@ class CommonTriageQuestionsControllerSpec
       "show an error page" when {
 
         val formData = "individualUserType" -> "0"
-        val (session, fillingOutReturn) = sessionDataWithFillingOutReturn(
+        val (session, fillingOutReturn, draftReturn) = sessionDataWithFillingOutReturn(
           IncompleteSingleDisposalTriageAnswers.empty
         )
         val updatedJourney = fillingOutReturn.copy(
-          draftReturn = fillingOutReturn.draftReturn.copy(
+          draftReturn = draftReturn.copy(
             triageAnswers = IncompleteSingleDisposalTriageAnswers.empty.copy(
               individualUserType = Some(IndividualUserType.Self)
             )
@@ -338,7 +343,11 @@ class CommonTriageQuestionsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedJourney.draftReturn, fillingOutReturn.agentReferenceNumber)(Left(Error("")))
+            mockStoreDraftReturn(
+              updatedJourney.draftReturn,
+              fillingOutReturn.subscribedDetails.cgtReference,
+              fillingOutReturn.agentReferenceNumber
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction(formData))
@@ -348,7 +357,11 @@ class CommonTriageQuestionsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(updatedJourney.draftReturn, fillingOutReturn.agentReferenceNumber)(Right(()))
+            mockStoreDraftReturn(
+              updatedJourney.draftReturn,
+              fillingOutReturn.subscribedDetails.cgtReference,
+              fillingOutReturn.agentReferenceNumber
+            )(Right(()))
             mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
           }
 
@@ -1463,13 +1476,17 @@ class CommonTriageQuestionsControllerSpec
     updatedAnswers: SingleDisposalTriageAnswers,
     expectedRedirect: Call
   ): Unit = {
-    val (session, journey) = sessionDataWithFillingOutReturn(answers)
-    val updatedJourney     = journey.copy(draftReturn = journey.draftReturn.copy(triageAnswers = updatedAnswers))
+    val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+    val updatedJourney                  = journey.copy(draftReturn = draftReturn.copy(triageAnswers = updatedAnswers))
 
     inSequence {
       mockAuthWithNoRetrievals()
       mockGetSession(session)
-      mockStoreDraftReturn(updatedJourney.draftReturn, journey.agentReferenceNumber)(Right(()))
+      mockStoreDraftReturn(
+        updatedJourney.draftReturn,
+        journey.subscribedDetails.cgtReference,
+        journey.agentReferenceNumber
+      )(Right(()))
       mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
     }
 

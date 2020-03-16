@@ -40,12 +40,18 @@ import scala.concurrent.{ExecutionContext, Future}
 @ImplementedBy(classOf[ReturnsServiceImpl])
 trait ReturnsService {
 
-  def storeDraftReturn(draftReturn: DraftReturn, agentReferenceNumber: Option[AgentReferenceNumber])(
+  def storeDraftReturn(
+    draftReturn: DraftReturn,
+    cgtReference: CgtReference,
+    agentReferenceNumber: Option[AgentReferenceNumber]
+  )(
     implicit hc: HeaderCarrier,
     request: Request[_]
   ): EitherT[Future, Error, Unit]
 
-  def getDraftReturns(cgtReference: CgtReference)(implicit hc: HeaderCarrier): EitherT[Future, Error, List[DraftReturn]]
+  def getDraftReturns(cgtReference: CgtReference)(
+    implicit hc: HeaderCarrier
+  ): EitherT[Future, Error, List[DraftReturn]]
 
   def submitReturn(submitReturnRequest: SubmitReturnRequest)(
     implicit hc: HeaderCarrier
@@ -68,15 +74,16 @@ class ReturnsServiceImpl @Inject() (connector: ReturnsConnector, auditService: A
 
   def storeDraftReturn(
     draftReturn: DraftReturn,
+    cgtReference: CgtReference,
     agentReferenceNumber: Option[AgentReferenceNumber]
   )(implicit hc: HeaderCarrier, request: Request[_]): EitherT[Future, Error, Unit] =
-    connector.storeDraftReturn(draftReturn).subflatMap { httpResponse =>
+    connector.storeDraftReturn(draftReturn, cgtReference).subflatMap { httpResponse =>
       if (httpResponse.status === OK) {
         auditService.sendEvent(
           "draftReturnUpdated",
           DraftReturnUpdated(
             draftReturn,
-            draftReturn.cgtReference.value,
+            cgtReference.value,
             agentReferenceNumber.map(_.value)
           ),
           "draft-return-updated"

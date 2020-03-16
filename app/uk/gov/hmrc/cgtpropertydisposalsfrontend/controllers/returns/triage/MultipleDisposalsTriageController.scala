@@ -17,6 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 import java.time.LocalDate
+import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.boolean._
@@ -31,17 +32,18 @@ import play.api.data.format.Formatter
 import play.api.data.{Form, FormError, Forms}
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.FormUtils.readValue
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingNewDraftReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, CompletionDate, IndividualUserType, MultipleDisposalsTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, FormUtils, LocalDateUtils, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{ReturnsService, TaxYearService}
@@ -677,6 +679,44 @@ class MultipleDisposalsTriageController @Inject() (
             Ok(checkYourAnswersPage(c))
         }
     }
+  }
+
+  def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withMultipleDisposalTriageAnswers(request) {
+      case (_, journey, answers) =>
+        answers match {
+          case _: IncompleteMultipleDisposalsAnswers =>
+            Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
+
+          case c: CompleteMultipleDisposalsAnswers =>
+            val newDraftReturn = MultipleDisposalsDraftReturn(uuidGenerator.nextId(), c, LocalDateUtils.today())
+            val newJourney = FillingOutReturn(
+              journey.subscribedDetails,
+              journey.ggCredId,
+              journey.agentReferenceNumber,
+              newDraftReturn
+            )
+
+            val result = for {
+              _ <- returnsService.storeDraftReturn(
+                    newDraftReturn,
+                    journey.subscribedDetails.cgtReference,
+                    journey.agentReferenceNumber
+                  )
+              _ <- EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newJourney))))
+            } yield ()
+
+            result.fold(
+              { e =>
+                logger.warn("Could not create new draft return", e)
+                errorHandler.errorResult()
+              },
+              _ => Redirect(controllers.returns.routes.TaskListController.taskList())
+            )
+        }
+
+    }
+
   }
 
   private def storeCompleteAnswersAndDisplayCheckYourAnswers(

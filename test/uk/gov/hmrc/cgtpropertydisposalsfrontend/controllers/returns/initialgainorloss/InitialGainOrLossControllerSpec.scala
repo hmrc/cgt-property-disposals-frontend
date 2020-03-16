@@ -23,7 +23,7 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.Result
 import play.api.test.FakeRequest
-import play.api.test.Helpers.{contentAsString, status, _}
+import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios.amountOfMoneyErrorScenarios
@@ -33,8 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, DraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalDraftReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -67,95 +66,33 @@ class InitialGainOrLossControllerSpec
 
   lazy val controller                  = instanceOf[InitialGainOrLossController]
   implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
-  val initialGainOrLosses              = sample[AmountInPence].copy(value = 2)
 
   def sessionWithState(
-    initialGainOrLoss: AmountInPence,
-    disposalDate: DisposalDate
-  ): (SessionData, FillingOutReturn) = {
-    val journey = sample[FillingOutReturn].copy(
-      draftReturn = sample[DraftReturn].copy(
-        initialGainOrLoss = Some(initialGainOrLoss)
-      )
+    initialGainOrLoss: Option[AmountInPence]
+  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) = {
+    val draftReturn = sample[SingleDisposalDraftReturn].copy(initialGainOrLoss = initialGainOrLoss)
+    val journey     = sample[FillingOutReturn].copy(draftReturn                = draftReturn)
+
+    (
+      SessionData.empty.copy(journeyStatus = Some(journey)),
+      journey,
+      draftReturn
     )
-
-    SessionData.empty.copy(journeyStatus = Some(journey)) -> journey
-  }
-
-  val allQuestionsAnswered: AmountInPence = initialGainOrLosses
-
-  val (session, journey) = sessionWithState(allQuestionsAnswered, sample[DisposalDate])
-  val updatedDraftReturn =
-    journey.draftReturn.copy(initialGainOrLoss = Some(AmountInPence(0)))
-  val updatedSession = session.copy(journeyStatus =
-    Some(journey.copy(agentReferenceNumber = Some(AgentReferenceNumber("EUYJVJMK")), draftReturn = updatedDraftReturn))
-  )
-  val fillingOutReturnSample =
-    sample[FillingOutReturn].copy(agentReferenceNumber = Some(AgentReferenceNumber("EUYJVJMK")))
-
-  "Check Your Answers" when {
-
-    "displaying the page" must {
-      def performAction(): Future[Result] = controller.checkYourAnswers()(FakeRequest())
-
-      behave like redirectToStartBehaviour(() => performAction())
-      "have proper contents" when {
-
-        "loading" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              SessionData.empty.copy(
-                journeyStatus = Some(fillingOutReturnSample.copy(draftReturn = updatedDraftReturn))
-              )
-            )
-          }
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey(
-              "initialGainOrLoss.cya.title"
-            ), { doc =>
-              doc.select("body").html() should include(Messages("initialGainOrLoss.cya.title"))
-              doc.select("#content > article > form").attr("action") shouldBe routes.InitialGainOrLossController
-                .checkYourAnswersSubmit()
-                .url
-            },
-            OK
-          )
-        }
-      }
-    }
-
-    "submitting the page" must {
-      def performAction(): Future[Result] = controller.checkYourAnswersSubmit()(FakeRequest())
-      behave like redirectToStartBehaviour(performAction)
-      "redirect to taskList" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            SessionData.empty.copy(
-              journeyStatus = Some(fillingOutReturnSample)
-            )
-          )
-        }
-        checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
-      }
-    }
   }
 
   "InitialGainOrLossController" when {
 
-    "displaying the form" must {
+    "handling requests to display the initial gain or loss page" must {
       def performAction(): Future[Result] = controller.enterInitialGainOrLoss()(FakeRequest())
 
       behave like redirectToStartBehaviour(performAction)
 
-      val fillingOutReturn =
-        fillingOutReturnSample.copy(draftReturn = fillingOutReturnSample.draftReturn.copy(initialGainOrLoss = None))
-
       "display the page with backlink to tasklist" when {
+
         "initialGainOrLoss is not present in draftReturn" in {
+          val draftReturn      = sample[SingleDisposalDraftReturn].copy(initialGainOrLoss = None)
+          val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn                = draftReturn)
+
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -182,17 +119,16 @@ class InitialGainOrLossControllerSpec
       }
 
       "display the page with backlink to check your answers" when {
-        val fillingOutReturnWithGain =
-          fillingOutReturnSample.copy(draftReturn =
-            fillingOutReturnSample.draftReturn.copy(initialGainOrLoss = Some(AmountInPence(300)))
-          )
 
         "initialGainOrLoss is present in returnDraft" in {
+          val draftReturn      = sample[SingleDisposalDraftReturn].copy(initialGainOrLoss = Some(AmountInPence(300L)))
+          val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn                = draftReturn)
+
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               SessionData.empty.copy(
-                journeyStatus = Some(fillingOutReturnWithGain)
+                journeyStatus = Some(fillingOutReturn)
               )
             )
           }
@@ -207,8 +143,7 @@ class InitialGainOrLossControllerSpec
               doc.select("#content > article > form").attr("action") shouldBe routes.InitialGainOrLossController
                 .submitInitialGainOrLoss()
                 .url
-            },
-            OK
+            }
           )
         }
       }
@@ -216,80 +151,82 @@ class InitialGainOrLossControllerSpec
     }
 
     "submitting initial gain or loss" must {
+
       def performAction(data: (String, String)*): Future[Result] =
         controller.submitInitialGainOrLoss()(FakeRequest().withFormUrlEncodedBody(data: _*))
 
       behave like redirectToStartBehaviour(() => performAction())
 
-      val currentSession =
-        sessionWithState(
-          AmountInPence(5),
-          sample[DisposalDate]
-        )._1
-
-      def testFormError(
-        data: (String, String)*
-      )(expectedErrorMessageKey: String, errorArgs: String*)(pageTitleKey: String, titleArgs: String*)(
-        performAction: Seq[(String, String)] => Future[Result],
-        currentSession: SessionData = sessionWithState(
-          sample[AmountInPence],
-          sample[DisposalDate]
-        )._1
-      ): Unit = {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(currentSession)
-        }
-
-        checkPageIsDisplayed(
-          performAction(data),
-          messageFromMessageKey(pageTitleKey, titleArgs), { doc =>
-            doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
-              expectedErrorMessageKey,
-              errorArgs: _*
-            )
-          },
-          BAD_REQUEST
-        )
-      }
-
-      def test(data: (String, String)*)(expectedErrorKey: String): Unit =
-        testFormError(data: _*)(
-          expectedErrorKey
-        )("initialGainOrLoss.title")(performAction, currentSession)
-
       "show a technical error page" when {
 
         "there is an error updating the draft return in return service " in {
-          val initialJourneyStatus: FillingOutReturn =
-            fillingOutReturnSample.copy(draftReturn = updatedDraftReturn.copy(initialGainOrLoss = None))
+          val (session, journey, draftReturn) = sessionWithState(Some(AmountInPence(1L)))
+          val updatedDraftReturn              = draftReturn.copy(initialGainOrLoss = Some(AmountInPence(0L)))
+
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(updatedSession.copy(journeyStatus = Some(initialJourneyStatus)))
-            mockStoreDraftReturn(updatedDraftReturn, fillingOutReturnSample.agentReferenceNumber)(Left(Error("")))
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Left(Error("")))
           }
 
-          checkIsTechnicalErrorPage(performAction("initialGainOrLoss" -> "2", "gain" -> "", "loss" -> ""))
+          checkIsTechnicalErrorPage(performAction("initialGainOrLoss" -> "2"))
         }
 
         "there is an error updating the session" in {
-          val initialJourneyStatus: FillingOutReturn =
-            fillingOutReturnSample.copy(draftReturn = updatedDraftReturn.copy(initialGainOrLoss = None))
-          val finalJourneyStatus: FillingOutReturn = fillingOutReturnSample.copy(draftReturn =
-            updatedDraftReturn.copy(initialGainOrLoss = Some(AmountInPence(0)))
-          )
+          val (session, journey, draftReturn) = sessionWithState(None)
+          val updatedDraftReturn              = draftReturn.copy(initialGainOrLoss = Some(AmountInPence(0L)))
+          val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
+
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(updatedSession.copy(journeyStatus = Some(initialJourneyStatus)))
-            mockStoreDraftReturn(updatedDraftReturn, fillingOutReturnSample.agentReferenceNumber)(Right(()))
-            mockStoreSession(updatedSession.copy(journeyStatus = Some(finalJourneyStatus)))(Left(Error("")))
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Right(()))
+            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
           }
 
-          checkIsTechnicalErrorPage(performAction("initialGainOrLoss" -> "2", "gain" -> "", "loss" -> ""))
+          checkIsTechnicalErrorPage(performAction("initialGainOrLoss" -> "2"))
         }
       }
 
-      "show required error" when {
+      "show a form error" when {
+
+        def testFormError(
+          data: (String, String)*
+        )(expectedErrorMessageKey: String, errorArgs: String*)(pageTitleKey: String, titleArgs: String*)(
+          performAction: Seq[(String, String)] => Future[Result]
+        ): Unit = {
+          val session = sessionWithState(None)._1
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkPageIsDisplayed(
+            performAction(data),
+            messageFromMessageKey(pageTitleKey, titleArgs), { doc =>
+              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+                expectedErrorMessageKey,
+                errorArgs: _*
+              )
+            },
+            BAD_REQUEST
+          )
+        }
+
+        def test(data: (String, String)*)(expectedErrorKey: String): Unit =
+          testFormError(data: _*)(
+            expectedErrorKey
+          )("initialGainOrLoss.title")(performAction)
+
         "no option is selected" in {
           test(
             "initialGainOrLoss" -> "",
@@ -325,31 +262,21 @@ class InitialGainOrLossControllerSpec
       }
 
       "redirect to check your answers" when {
-        val fillingOutReturnSample = sample[FillingOutReturn]
 
         "initial gain or loss has been entered correctly" in {
-          val fillingOutReturn =
-            fillingOutReturnSample.copy(draftReturn =
-              fillingOutReturnSample.draftReturn.copy(initialGainOrLoss = Some(AmountInPence(500)))
-            )
-          val sampleDraftReturn = fillingOutReturnSample.draftReturn
-          val newDraftReturn    = sampleDraftReturn.copy(initialGainOrLoss = Some(AmountInPence(600)))
+          val (session, journey, draftReturn) = sessionWithState(Some(AmountInPence(500L)))
+          val newDraftReturn                  = draftReturn.copy(initialGainOrLoss = Some(AmountInPence(600)))
+          val updatedJourney                  = journey.copy(draftReturn = newDraftReturn)
+
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              SessionData.empty.copy(
-                journeyStatus = Some(fillingOutReturn)
-              )
-            )
+            mockGetSession(session)
             mockStoreDraftReturn(
               newDraftReturn,
-              fillingOutReturnSample.agentReferenceNumber
+              updatedJourney.subscribedDetails.cgtReference,
+              updatedJourney.agentReferenceNumber
             )(Right(()))
-            mockStoreSession(
-              SessionData.empty.copy(
-                journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn))
-              )
-            )(Right(()))
+            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
           }
           checkIsRedirect(
             performAction("initialGainOrLoss" -> "0", "loss" -> "", "gain" -> "6"),
@@ -361,24 +288,69 @@ class InitialGainOrLossControllerSpec
 
       "should not call returnService" when {
         "the same amount of initialGainOrLoss as in the session draftReturn is entered" in {
-          val fillingOutReturn =
-            fillingOutReturnSample.copy(draftReturn =
-              fillingOutReturnSample.draftReturn.copy(initialGainOrLoss = Some(AmountInPence(600)))
-            )
+          val (session, _, _) = sessionWithState(Some(AmountInPence(600L)))
 
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              SessionData.empty.copy(
-                journeyStatus = Some(fillingOutReturn)
-              )
-            )
+            mockGetSession(session)
           }
           checkIsRedirect(
             performAction("initialGainOrLoss" -> "0", "loss" -> "", "gain" -> "6"),
             routes.InitialGainOrLossController.checkYourAnswers()
           )
         }
+      }
+    }
+
+    "handling requests to display the check you answers page" must {
+
+      def performAction(): Future[Result] = controller.checkYourAnswers()(FakeRequest())
+
+      behave like redirectToStartBehaviour(() => performAction())
+
+      "redirect to the initial gain or loss page" when {
+
+        "the question has not been answered yet" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithState(None)._1)
+          }
+
+          checkIsRedirect(performAction(), routes.InitialGainOrLossController.enterInitialGainOrLoss())
+        }
+      }
+
+      "have proper contents" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionWithState(Some(AmountInPence(1L)))._1)
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey(
+            "initialGainOrLoss.cya.title"
+          ), { doc =>
+            doc.select("body").html() should include(Messages("initialGainOrLoss.cya.title"))
+            doc.select("#content > article > form").attr("action") shouldBe routes.InitialGainOrLossController
+              .checkYourAnswersSubmit()
+              .url
+          }
+        )
+      }
+    }
+
+    "handling submits on the check your answers page" must {
+      def performAction(): Future[Result] = controller.checkYourAnswersSubmit()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+      "redirect to taskList" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(sessionWithState(Some(AmountInPence(1L)))._1)
+        }
+        checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
       }
     }
   }
