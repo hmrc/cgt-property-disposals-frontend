@@ -34,6 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.Subscription
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, UKAddressLookupService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.ManagingSubscription.SubscribedAddressJourney
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
@@ -61,7 +62,7 @@ class SubscribedChangeAddressController @Inject() (
     with SessionUpdates
     with AddressController[Subscribed] {
 
-  override val addressJourneyType: AddressJourneyType = AddressJourneyType.ManagingSubscription
+  override val toAddressJourneyType: Subscribed => SubscribedAddressJourney = SubscribedAddressJourney.apply
 
   def validJourney(
     request: RequestWithSessionData[_]

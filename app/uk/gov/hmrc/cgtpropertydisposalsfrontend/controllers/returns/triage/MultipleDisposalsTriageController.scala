@@ -715,7 +715,8 @@ class MultipleDisposalsTriageController @Inject() (
                 Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
 
               case c: CompleteMultipleDisposalsTriageAnswers =>
-                val newDraftReturn = MultipleDisposalsDraftReturn(uuidGenerator.nextId(), c, LocalDateUtils.today())
+                val newDraftReturn =
+                  MultipleDisposalsDraftReturn(uuidGenerator.nextId(), c, None, LocalDateUtils.today())
                 val newJourney = FillingOutReturn(
                   startingNewDraftReturn.subscribedDetails,
                   startingNewDraftReturn.ggCredId,

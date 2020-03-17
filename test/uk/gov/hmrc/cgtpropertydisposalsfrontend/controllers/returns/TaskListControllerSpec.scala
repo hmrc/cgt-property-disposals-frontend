@@ -230,7 +230,7 @@ class TaskListControllerSpec
           )(
             "propertyAddress",
             messageFromMessageKey("task-list.enter-property-address.link"),
-            address.routes.PropertyAddressController.enterPostcode(),
+            address.routes.PropertyDetailsController.checkYourAnswers(),
             TaskListStatus.ToDo
           )
         }
@@ -244,7 +244,7 @@ class TaskListControllerSpec
           )(
             "propertyAddress",
             messageFromMessageKey("task-list.enter-property-address.link"),
-            address.routes.PropertyAddressController.checkYourAnswers(),
+            address.routes.PropertyDetailsController.checkYourAnswers(),
             TaskListStatus.Complete
           )
         }

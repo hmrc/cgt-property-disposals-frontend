@@ -31,6 +31,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, UKAddressLookupService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Onboarding.RegistrationReadyAddressJourney
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
@@ -58,7 +59,8 @@ class RegistrationChangeAddressController @Inject() (
     with SessionUpdates
     with AddressController[RegistrationReady] {
 
-  override val addressJourneyType: AddressJourneyType = AddressJourneyType.Onboarding
+  override val toAddressJourneyType: RegistrationReady => RegistrationReadyAddressJourney =
+    RegistrationReadyAddressJourney.apply
 
   def validJourney(
     request: RequestWithSessionData[_]

@@ -148,9 +148,8 @@ TaskListStatus.CannotStart
         <ul class="app-task-list__items">
             <li id="propertyAddress" class="app-task-list__item">
                 @taskLink(messages("task-list.enter-property-address.link"),
-                draftReturn.propertyAddress.fold(
-                returns.address.routes.PropertyAddressController.enterPostcode().url
-                )(_ => returns.address.routes.PropertyAddressController.checkYourAnswers().url), propertyAddressState)
+                    returns.address.routes.PropertyDetailsController.checkYourAnswers().url,
+                    propertyAddressState)
             </li>
 
             <li id="disposalDetails" class="app-task-list__item">
