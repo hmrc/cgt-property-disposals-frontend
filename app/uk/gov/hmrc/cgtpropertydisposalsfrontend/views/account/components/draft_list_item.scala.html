@@ -27,10 +27,17 @@
 @(draftReturn: DraftReturn)(implicit messages: Messages)
 
 @key = @{draftReturn.id}
-@completionDate =  @{draftReturn.triageAnswers.fold(
+@completionDate =  @{draftReturn.fold(
+    _.triageAnswers.fold(
   _.completionDate.map(_.value),
   c => Some(c.completionDate.value)
-)}
+),
+    _.triageAnswers.fold(
+        _.completionDate.map(_.value),
+        c => Some(c.completionDate.value)
+    )
+)
+}
 @dueDate = @{completionDate.map(d => d.plusDays(30L))}
 
 <li class="single-return form-bundle">
@@ -41,10 +48,14 @@
       </span>
       @completionDate.map(f => {
           <h4>
-          {draftReturn.propertyAddress.fold(
-            LocalDateUtils.govShortDisplayFormat(f))(
-            a => s"${a.line1}, ${a.postcode.value}"
-          )}
+          {draftReturn.fold(
+            _ => "not handled yet",
+            _.propertyAddress.fold(
+                LocalDateUtils.govShortDisplayFormat(f))(
+                a => s"${a.line1}, ${a.postcode.value}"
+            )
+          )
+          }
           </h4>
       })
     </div>

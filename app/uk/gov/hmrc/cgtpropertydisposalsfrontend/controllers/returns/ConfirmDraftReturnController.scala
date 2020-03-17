@@ -48,14 +48,20 @@ class ConfirmDraftReturnController @Inject() (
 
   def confirmDraftReturn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(FillingOutReturn(_, _, agentReferenceNumber, draftReturn)) => {
-        val draftReturnWithLastUpdated = draftReturn.copy(lastUpdatedDate = LocalDateUtils.today())
+      case Some(FillingOutReturn(subscribedDetails, _, agentReferenceNumber, draftReturn)) => {
+        val draftReturnWithLastUpdated = draftReturn.fold(
+          _.copy(lastUpdatedDate = LocalDateUtils.today()),
+          _.copy(lastUpdatedDate = LocalDateUtils.today())
+        )
 
-        val response = returnsService.storeDraftReturn(draftReturnWithLastUpdated, agentReferenceNumber)
+        val response = returnsService
+          .storeDraftReturn(draftReturnWithLastUpdated, subscribedDetails.cgtReference, agentReferenceNumber)
 
         response.fold(
           { e =>
-            logger.error(s"For cgt reference ${draftReturn.cgtReference.value}, got the following error ${e.value}")
+            logger.error(
+              s"For cgt reference ${subscribedDetails.cgtReference.value}, got the following error ${e.value}"
+            )
             errorHandler.errorResult()
           },
           _ => Ok(confirmationDraftReturnPage(draftReturnWithLastUpdated))

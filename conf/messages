@@ -642,6 +642,7 @@ task-list.InProgress=In progress
 task-list.Complete=Complete
 task-list.CannotStart=Cannot start
 task-list.ToDo=To do
+task-list.incompleteTriage=You must complete this section to continue. Some of the details you entered may have been saved as a draft.
 task-list.triage.link=Check if you can use this service
 task-list.provide-details.heading=Provide details
 task-list.enter-initial-gain-or-loss.link=Enter initial gain or loss
@@ -1170,6 +1171,7 @@ multipleDisposalsCompletionDate-day.error.dayAndYearRequired=Completion date mus
 multipleDisposalsCompletionDate-day.error.dayAndMonthRequired=Completion date must include a day and a month
 
 multipleDisposals.triage.cya.title=Check your answers
+multipleDisposals.triage.cya.guidanceLink=Help completing this section
 multipleDisposals.triage.cyaChange.numberOfProperties=the number of properties exchanges in the same tax year
 multipleDisposals.triage.cyaChange.wereYouAUKResident=whether you were a UK resident on all the dates when you exchanged contracts
 multipleDisposals.triage.cyaChange.countryOfResidence=your country of residence

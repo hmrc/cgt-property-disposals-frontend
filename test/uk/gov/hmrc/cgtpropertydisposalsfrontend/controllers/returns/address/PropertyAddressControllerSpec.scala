@@ -16,8 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address
 
-import cats.data.EitherT
-import cats.instances.future._
 import org.jsoup.nodes.Document
 import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -37,9 +35,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, GGCredId}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalDraftReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 
@@ -51,7 +49,8 @@ class PropertyAddressControllerSpec
     with RedirectToStartBehaviour
     with ReturnsServiceSupport {
 
-  val draftReturn: DraftReturn = sample[DraftReturn].copy(propertyAddress = Some(ukAddress(1)))
+  val draftReturn: SingleDisposalDraftReturn =
+    sample[SingleDisposalDraftReturn].copy(propertyAddress = Some(ukAddress(1)))
 
   val validJourneyStatus = FillingOutReturn(sample[SubscribedDetails], sample[GGCredId], None, draftReturn)
 
@@ -63,14 +62,18 @@ class PropertyAddressControllerSpec
   lazy implicit val messagesApi: MessagesApi = controller.messagesApi
 
   override def updateAddress(journey: FillingOutReturn, address: Address): FillingOutReturn = address match {
-    case a: UkAddress    => journey.copy(draftReturn = journey.draftReturn.copy(propertyAddress = Some(a)))
+    case a: UkAddress    => journey.copy(draftReturn = draftReturn.copy(propertyAddress = Some(a)))
     case _: NonUkAddress => journey
   }
 
   override val mockUpdateAddress: Option[(FillingOutReturn, Address, Either[Error, Unit]) => Unit] =
     Some {
       case (newDetails: FillingOutReturn, a: UkAddress, r: Either[Error, Unit]) =>
-        mockStoreDraftReturn(newDetails.draftReturn.copy(propertyAddress = Some(a)), newDetails.agentReferenceNumber)(r)
+        mockStoreDraftReturn(
+          draftReturn.copy(propertyAddress = Some(a)),
+          newDetails.subscribedDetails.cgtReference,
+          newDetails.agentReferenceNumber
+        )(r)
 
       case (_, _: NonUkAddress, _) =>
         sys.error("Non UK addresses not handled in this spec")

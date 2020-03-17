@@ -29,10 +29,10 @@ import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, FormUtils, LocalDateUtils, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.IncompleteMultipleDisposalsAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.IncompleteMultipleDisposalsTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
@@ -131,7 +131,11 @@ class CommonTriageQuestionsController @Inject() (
                               _ => EitherT.pure[Future, Error](()),
                               fillingOutReturn =>
                                 returnsService
-                                  .storeDraftReturn(fillingOutReturn.draftReturn, fillingOutReturn.agentReferenceNumber)
+                                  .storeDraftReturn(
+                                    fillingOutReturn.draftReturn,
+                                    fillingOutReturn.subscribedDetails.cgtReference,
+                                    fillingOutReturn.agentReferenceNumber
+                                  )
                             )
                         _ <- EitherT(
                               updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedState.merge)))
@@ -192,7 +196,11 @@ class CommonTriageQuestionsController @Inject() (
                           _ => EitherT.pure[Future, Error](()),
                           fillingOutReturn =>
                             returnsService
-                              .storeDraftReturn(fillingOutReturn.draftReturn, fillingOutReturn.agentReferenceNumber)
+                              .storeDraftReturn(
+                                fillingOutReturn.draftReturn,
+                                fillingOutReturn.subscribedDetails.cgtReference,
+                                fillingOutReturn.agentReferenceNumber
+                              )
                         )
                     _ <- EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedState.merge))))
                   } yield ()
@@ -340,21 +348,24 @@ class CommonTriageQuestionsController @Inject() (
           _.copy(newReturnTriageAnswers = Right(newTriageAnswers)),
           fillingOutReturn =>
             fillingOutReturn.copy(
-              draftReturn = fillingOutReturn.draftReturn.copy(
-                triageAnswers              = newTriageAnswers,
-                propertyAddress            = None,
-                disposalDetailsAnswers     = None,
-                acquisitionDetailsAnswers  = None,
-                reliefDetailsAnswers       = None,
-                yearToDateLiabilityAnswers = None,
-                initialGainOrLoss          = None
+              draftReturn = SingleDisposalDraftReturn(
+                fillingOutReturn.draftReturn.id,
+                newTriageAnswers,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                LocalDateUtils.today()
               )
             )
         )
 
       case NumberOfProperties.MoreThanOne =>
         val newTriageAnswers =
-          IncompleteMultipleDisposalsAnswers.empty.copy(
+          IncompleteMultipleDisposalsTriageAnswers.empty.copy(
             individualUserType = individualUserType
           )
 
@@ -362,14 +373,10 @@ class CommonTriageQuestionsController @Inject() (
           _.copy(newReturnTriageAnswers = Left(newTriageAnswers)),
           fillingOutReturn =>
             fillingOutReturn.copy(
-              draftReturn = fillingOutReturn.draftReturn.copy(
-                triageAnswers              = sys.error("not handled yet"),
-                propertyAddress            = None,
-                disposalDetailsAnswers     = None,
-                acquisitionDetailsAnswers  = None,
-                reliefDetailsAnswers       = None,
-                yearToDateLiabilityAnswers = None,
-                initialGainOrLoss          = None
+              draftReturn = MultipleDisposalsDraftReturn(
+                fillingOutReturn.draftReturn.id,
+                newTriageAnswers,
+                LocalDateUtils.today()
               )
             )
         )
@@ -385,9 +392,9 @@ class CommonTriageQuestionsController @Inject() (
         .unset(IncompleteSingleDisposalTriageAnswers.countryOfResidence)
         .copy(individualUserType = Some(individualUserType))
 
-    def updateMultipleDisposalAnswers(i: MultipleDisposalsTriageAnswers): IncompleteMultipleDisposalsAnswers =
-      i.unset(IncompleteMultipleDisposalsAnswers.wasAUKResident)
-        .unset(IncompleteMultipleDisposalsAnswers.countryOfResidence)
+    def updateMultipleDisposalAnswers(i: MultipleDisposalsTriageAnswers): IncompleteMultipleDisposalsTriageAnswers =
+      i.unset(IncompleteMultipleDisposalsTriageAnswers.wasAUKResident)
+        .unset(IncompleteMultipleDisposalsTriageAnswers.countryOfResidence)
         .copy(individualUserType = Some(individualUserType))
 
     val answers = triageAnswersFomState(state)
@@ -401,9 +408,12 @@ class CommonTriageQuestionsController @Inject() (
       ),
       r =>
         r.copy(
-          draftReturn = r.draftReturn.copy(
-            triageAnswers              = updateSingleDisposalAnswers(r.draftReturn.triageAnswers),
-            yearToDateLiabilityAnswers = None
+          draftReturn = r.draftReturn.fold[DraftReturn](
+            m =>
+              m.copy(
+                triageAnswers = updateMultipleDisposalAnswers(m.triageAnswers)
+              ),
+            s => s.copy(triageAnswers = updateSingleDisposalAnswers(s.triageAnswers), yearToDateLiabilityAnswers = None)
           )
         )
     )
@@ -430,13 +440,25 @@ class CommonTriageQuestionsController @Inject() (
           _ => Some(NumberOfProperties.One)
         )
       ),
-      _ => Some(NumberOfProperties.One)
+      _.draftReturn.fold(
+        _ => Some(NumberOfProperties.MoreThanOne),
+        _ => Some(NumberOfProperties.One)
+      )
     )
 
   private def triageAnswersFomState(
     state: Either[StartingNewDraftReturn, FillingOutReturn]
   ): Either[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers] =
-    state.bimap(_.newReturnTriageAnswers, r => Right(r.draftReturn.triageAnswers)).merge
+    state
+      .bimap(
+        _.newReturnTriageAnswers,
+        r =>
+          r.draftReturn.fold(
+            m => Left(m.triageAnswers),
+            s => Right(s.triageAnswers)
+          )
+      )
+      .merge
 
   private def withState(request: RequestWithSessionData[_])(
     f: (SessionData, Either[StartingNewDraftReturn, FillingOutReturn]) => Future[Result]

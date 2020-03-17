@@ -60,3 +60,4 @@ GET  /multiple-disposals/completion-date                    uk.gov.hmrc.cgtprope
 POST /multiple-disposals/completion-date                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.completionDateSubmit()
 
 GET  /check-your-answers                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.checkYourAnswers()
+POST /check-your-answers                                    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.MultipleDisposalsTriageController.checkYourAnswersSubmit()

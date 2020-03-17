@@ -25,7 +25,7 @@ import play.api.{Configuration, Mode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.{ConnectorSpec, HttpSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, DraftReturn, SubmitReturnRequest}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, DraftReturn, SingleDisposalDraftReturn, SubmitReturnRequest}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 
@@ -57,12 +57,13 @@ class ReturnsConnectorImplSpec extends WordSpec with Matchers with MockFactory w
 
     "handling requests to store a draft return" must {
 
-      val expectedUrl = s"http://host:123/draft-return"
-      val draftReturn = sample[DraftReturn]
+      val draftReturn  = sample[DraftReturn]
+      val cgtReference = sample[CgtReference]
+      val expectedUrl  = s"http://host:123/draft-return/${cgtReference.value}"
 
       behave like connectorBehaviour(
         mockPost(expectedUrl, Map.empty, draftReturn),
-        () => connector.storeDraftReturn(draftReturn)
+        () => connector.storeDraftReturn(draftReturn, cgtReference)
       )
     }
 

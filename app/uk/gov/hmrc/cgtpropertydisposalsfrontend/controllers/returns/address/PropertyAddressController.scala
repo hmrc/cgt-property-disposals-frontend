@@ -28,6 +28,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, 
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{MultipleDisposalsDraftReturn, SingleDisposalDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
@@ -69,8 +70,8 @@ class PropertyAddressController @Inject() (
     request: RequestWithSessionData[_]
   ): Either[Result, (SessionData, FillingOutReturn)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((sessionData, r: FillingOutReturn)) => Right(sessionData -> r)
-      case _                                        => Left(Redirect(controllers.routes.StartController.start()))
+      case Some((sessionData, r @ FillingOutReturn(_, _, _, _: SingleDisposalDraftReturn))) => Right(sessionData -> r)
+      case _                                                                                => Left(Redirect(controllers.routes.StartController.start()))
     }
 
   def updateAddress(journey: FillingOutReturn, address: Address, isManuallyEnteredAddress: Boolean)(
@@ -81,14 +82,24 @@ class PropertyAddressController @Inject() (
       case _: NonUkAddress =>
         EitherT.leftT[Future, FillingOutReturn](Error("Got non uk address in returns journey but expected uk address"))
       case a: UkAddress =>
-        if (journey.draftReturn.propertyAddress.contains(a))
-          EitherT.pure(journey)
-        else {
-          val updatedDraftReturn = journey.draftReturn.copy(propertyAddress = Some(a))
-          returnsService
-            .storeDraftReturn(updatedDraftReturn, journey.agentReferenceNumber)
-            .map(_ => journey.copy(draftReturn = updatedDraftReturn))
+        journey.draftReturn match {
+          case _: MultipleDisposalsDraftReturn =>
+            EitherT.leftT[Future, FillingOutReturn](Error("multiple disposals draft return not handled"))
+          case d: SingleDisposalDraftReturn =>
+            if (d.propertyAddress.contains(a))
+              EitherT.pure(journey)
+            else {
+              val updatedDraftReturn = d.copy(propertyAddress = Some(a))
+              returnsService
+                .storeDraftReturn(
+                  updatedDraftReturn,
+                  journey.subscribedDetails.cgtReference,
+                  journey.agentReferenceNumber
+                )
+                .map(_ => journey.copy(draftReturn = updatedDraftReturn))
+            }
         }
+
     }
 
   protected lazy val enterUkAddressCall: Call       = addressRoutes.PropertyAddressController.enterUkAddress()
@@ -101,16 +112,21 @@ class PropertyAddressController @Inject() (
   protected lazy val continueCall: Call            = addressRoutes.PropertyAddressController.checkYourAnswers()
 
   override protected val enterPostcodePageBackLink: FillingOutReturn => Call =
-    _.draftReturn.propertyAddress.fold(
-      returnsRoutes.TaskListController.taskList()
-    )(_ => addressRoutes.PropertyAddressController.checkYourAnswers())
+    _.draftReturn.fold(
+      _ => sys.error("multiple disposals not handled"),
+      _.propertyAddress.fold(
+        returnsRoutes.TaskListController.taskList()
+      )(_ => addressRoutes.PropertyAddressController.checkYourAnswers())
+    )
 
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) {
       case (_, r) =>
-        r.draftReturn.propertyAddress.fold(
-          Redirect(returnsRoutes.TaskListController.taskList())
-        )(address => Ok(checkYourAnswersPage(address)))
+        withSingleDisposalsDraftReturn(r) { d =>
+          d.propertyAddress.fold(
+            Redirect(returnsRoutes.TaskListController.taskList())
+          )(address => Ok(checkYourAnswersPage(address)))
+        }
     }
   }
 
@@ -127,5 +143,13 @@ class PropertyAddressController @Inject() (
   protected lazy val enterNonUkAddressCall: Call       = enterPostcodeCall
   protected lazy val enterNonUkAddressSubmitCall: Call = enterPostcodeCall
   protected lazy val backLinkCall: Call                = enterPostcodeCall
+
+  private def withSingleDisposalsDraftReturn(
+    fillingOutReturn: FillingOutReturn
+  )(f: SingleDisposalDraftReturn => Future[Result]): Future[Result] =
+    fillingOutReturn.draftReturn match {
+      case s: SingleDisposalDraftReturn => f(s)
+      case _                            => Redirect(controllers.returns.routes.TaskListController.taskList())
+    }
 
 }

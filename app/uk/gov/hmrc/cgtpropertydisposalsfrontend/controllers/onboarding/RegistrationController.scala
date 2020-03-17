@@ -30,7 +30,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.TryingToGetIndividualsFootprint
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, RegistrationStatus, Subscribed}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.AddressSource
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, SapNumber}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, ContactNameSource}

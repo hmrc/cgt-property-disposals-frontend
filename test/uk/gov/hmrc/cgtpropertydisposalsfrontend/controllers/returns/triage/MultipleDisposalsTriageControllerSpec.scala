@@ -17,6 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 import java.time.{Clock, LocalDate}
+import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
@@ -33,22 +34,23 @@ import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, triage}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, DateErrorScenarios, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.StartingNewDraftReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.Self
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{IncompleteMultipleDisposalsAnswers, _}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{IncompleteMultipleDisposalsTriageAnswers, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{IndividualUserType, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, LocalDateUtils, SessionData, TaxYear, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.TaxYearService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{ReturnsService, TaxYearService}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -59,15 +61,20 @@ class MultipleDisposalsTriageControllerSpec
     with AuthSupport
     with SessionSupport
     with ScalaCheckDrivenPropertyChecks
-    with RedirectToStartBehaviour {
+    with RedirectToStartBehaviour
+    with ReturnsServiceSupport {
 
   val mockTaxYearService = mock[TaxYearService]
+
+  val mockUUIDGenerator = mock[UUIDGenerator]
 
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
-      bind[TaxYearService].toInstance(mockTaxYearService)
+      bind[TaxYearService].toInstance(mockTaxYearService),
+      bind[UUIDGenerator].toInstance(mockUUIDGenerator),
+      bind[ReturnsService].toInstance(mockReturnsService)
     )
 
   lazy val controller = instanceOf[MultipleDisposalsTriageController]
@@ -76,6 +83,7 @@ class MultipleDisposalsTriageControllerSpec
 
   def isValidJourney(journeyStatus: JourneyStatus): Boolean = journeyStatus match {
     case r: StartingNewDraftReturn if (r.newReturnTriageAnswers.isLeft) => true
+    case FillingOutReturn(_, _, _, _: MultipleDisposalsDraftReturn)     => true
     case _                                                              => false
   }
 
@@ -93,14 +101,26 @@ class MultipleDisposalsTriageControllerSpec
       journeyStatus = Some(startingNewDraftReturn),
       userType      = if (isAgent) Some(UserType.Agent) else None
     ) -> startingNewDraftReturn
+  }
 
+  def sessionDataWithFillingOutReturn(
+    multipleDisposalsAnswers: MultipleDisposalsTriageAnswers
+  ): (SessionData, FillingOutReturn, MultipleDisposalsDraftReturn) = {
+    val draftReturn = sample[MultipleDisposalsDraftReturn].copy(triageAnswers = multipleDisposalsAnswers)
+    val journey     = sample[FillingOutReturn].copy(draftReturn               = draftReturn)
+    val session = SessionData.empty.copy(
+      journeyStatus = Some(journey)
+    )
+    (session, journey, draftReturn)
   }
 
   def testFormError(
     data: (String, String)*
   )(expectedErrorMessageKey: String, errorArgs: String*)(pageTitleKey: String, titleArgs: String*)(
     performAction: Seq[(String, String)] => Future[Result],
-    currentSession: SessionData = sessionDataWithStartingNewDraftReturn(sample[IncompleteMultipleDisposalsAnswers])._1
+    currentSession: SessionData = sessionDataWithStartingNewDraftReturn(
+      sample[IncompleteMultipleDisposalsTriageAnswers]
+    )._1
   ): Unit = {
     inSequence {
       mockAuthWithNoRetrievals()
@@ -120,6 +140,11 @@ class MultipleDisposalsTriageControllerSpec
     )
   }
 
+  def mockGenerateUUID(uuid: UUID): Unit =
+    (mockUUIDGenerator.nextId _)
+      .expects()
+      .returning(uuid)
+
   "MultipleDisposalsTriageController" when {
 
     "handling requests to display the guidance page" must {
@@ -129,27 +154,61 @@ class MultipleDisposalsTriageControllerSpec
 
       behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
 
-      "display the page" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsAnswers.empty)._1)
+      "display the page" when {
+
+        def test(
+          session: SessionData,
+          expectedBackLink: Call,
+          expectReturnToSummaryLink: Boolean
+        ): Unit =
+          testPageIsDisplayed(
+            performAction,
+            session,
+            "multiple-disposals.guidance.title",
+            routes.MultipleDisposalsTriageController.guidanceSubmit(),
+            expectedBackLink,
+            "button.continue",
+            expectReturnToSummaryLink
+          )
+
+        "the user has not started a draft return yet and" when {
+
+          "the section is incomplete" in {
+            test(
+              sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsTriageAnswers.empty)._1,
+              triage.routes.CommonTriageQuestionsController.howManyProperties(),
+              expectReturnToSummaryLink = false
+            )
+          }
+
+          "the section is complete" in {
+            test(
+              sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsTriageAnswers])._1,
+              triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              expectReturnToSummaryLink = false
+            )
+          }
         }
 
-        checkPageIsDisplayed(
-          performAction,
-          messageFromMessageKey("multiple-disposals.guidance.title"), { doc =>
-            doc.select("#back").attr("href") shouldBe triage.routes.CommonTriageQuestionsController
-              .howManyProperties()
-              .url
-            doc
-              .select("#content > article > form")
-              .attr("action") shouldBe routes.MultipleDisposalsTriageController
-              .guidanceSubmit()
-              .url
-          }
-        )
-      }
+        "the user has started a draft return yet and" when {
 
+          "the section is incomplete" in {
+            test(
+              sessionDataWithFillingOutReturn(IncompleteMultipleDisposalsTriageAnswers.empty)._1,
+              triage.routes.CommonTriageQuestionsController.howManyProperties(),
+              expectReturnToSummaryLink = true
+            )
+          }
+
+          "the section is complete" in {
+            test(
+              sessionDataWithFillingOutReturn(sample[CompleteMultipleDisposalsTriageAnswers])._1,
+              triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              expectReturnToSummaryLink = true
+            )
+          }
+        }
+      }
     }
 
     "handling submits on the guidance page" must {
@@ -159,12 +218,29 @@ class MultipleDisposalsTriageControllerSpec
 
       behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
 
-      "redirect to how many disposals page" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsAnswers.empty)._1)
+      "redirect to how many disposals page" when {
+
+        "the user has not completed the section" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsTriageAnswers.empty)._1)
+          }
+
+          checkIsRedirect(performAction(), routes.MultipleDisposalsTriageController.howManyDisposals())
         }
-        checkIsRedirect(performAction(), routes.MultipleDisposalsTriageController.howManyDisposals())
+
+      }
+
+      "redirect to check your answers page" when {
+
+        "the user has completed the section" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsTriageAnswers])._1)
+          }
+
+          checkIsRedirect(performAction(), routes.MultipleDisposalsTriageController.checkYourAnswers())
+        }
       }
 
     }
@@ -178,42 +254,63 @@ class MultipleDisposalsTriageControllerSpec
 
       "display the page" when {
 
-        "the journey is incomplete" in {
-          mockAuthWithNoRetrievals()
-          mockGetSession(sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsAnswers.empty)._1)
-
-          checkPageIsDisplayed(
+        def test(
+          session: SessionData,
+          expectedBackLink: Call,
+          expectedButtonMessageKey: String,
+          expectReturnToSummaryLink: Boolean
+        ): Unit =
+          testPageIsDisplayed(
             performAction,
-            messageFromMessageKey("multipleDisposalsNumberOfProperties.title"), { doc =>
-              doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
-                .guidance()
-                .url
-              doc
-                .select("#content > article > form")
-                .attr("action") shouldBe routes.MultipleDisposalsTriageController
-                .howManyDisposalsSubmit()
-                .url
-            }
+            session,
+            "multipleDisposalsNumberOfProperties.title",
+            routes.MultipleDisposalsTriageController.howManyDisposalsSubmit(),
+            expectedBackLink,
+            expectedButtonMessageKey,
+            expectReturnToSummaryLink
           )
+
+        "the user has not started a new draft return and" when {
+
+          "the journey is incomplete" in {
+            test(
+              sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsTriageAnswers.empty)._1,
+              triage.routes.MultipleDisposalsTriageController.guidance(),
+              "button.continue",
+              expectReturnToSummaryLink = false
+            )
+          }
+
+          "the journey is complete" in {
+            test(
+              sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsTriageAnswers])._1,
+              triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              "button.continue",
+              expectReturnToSummaryLink = false
+            )
+          }
+
         }
 
-        "the journey is complete" in {
-          mockAuthWithNoRetrievals()
-          mockGetSession(sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsAnswers])._1)
+        "the user has started a new draft return and" when {
 
-          checkPageIsDisplayed(
-            performAction,
-            messageFromMessageKey("multipleDisposalsNumberOfProperties.title"), { doc =>
-              doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
-                .checkYourAnswers()
-                .url
-              doc
-                .select("#content > article > form")
-                .attr("action") shouldBe routes.MultipleDisposalsTriageController
-                .howManyDisposalsSubmit()
-                .url
-            }
-          )
+          "the journey is incomplete" in {
+            test(
+              sessionDataWithFillingOutReturn(IncompleteMultipleDisposalsTriageAnswers.empty)._1,
+              triage.routes.MultipleDisposalsTriageController.guidance(),
+              "button.saveAndContinue",
+              expectReturnToSummaryLink = true
+            )
+          }
+
+          "the journey is complete" in {
+            test(
+              sessionDataWithFillingOutReturn(sample[CompleteMultipleDisposalsTriageAnswers])._1,
+              triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              "button.saveAndContinue",
+              expectReturnToSummaryLink = true
+            )
+          }
         }
 
       }
@@ -231,7 +328,7 @@ class MultipleDisposalsTriageControllerSpec
 
         "user enters number of properties as one" in {
           val (session, journey) = sessionDataWithStartingNewDraftReturn(
-            IncompleteMultipleDisposalsAnswers.empty.copy(
+            IncompleteMultipleDisposalsTriageAnswers.empty.copy(
               individualUserType = Some(Self)
             )
           )
@@ -264,55 +361,94 @@ class MultipleDisposalsTriageControllerSpec
 
       "redirect to cya page" when {
 
-        "user has not answered how many disposals section and " +
-          "enters number of properties more than one" in {
-          val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
-            individualUserType = Some(Self)
-          )
-          val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+        "the user has not started a draft return and" when {
 
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreSession(
-              session.copy(journeyStatus = Some(
-                journey.copy(
-                  newReturnTriageAnswers = Left(answers.copy(numberOfProperties = Some(5)))
+          "they have not answered how many disposals section and " +
+            "enters number of properties more than one" in {
+            val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+              individualUserType = Some(Self)
+            )
+            val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreSession(
+                session.copy(journeyStatus = Some(
+                  journey.copy(
+                    newReturnTriageAnswers = Left(answers.copy(numberOfProperties = Some(5)))
+                  )
                 )
-              )
-              )
-            )(Right(()))
+                )
+              )(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(key -> "5"),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
           }
 
-          checkIsRedirect(
-            performAction(key -> "5"),
-            routes.MultipleDisposalsTriageController.checkYourAnswers()
-          )
+          "they have already completed the section and " +
+            "re-enters different number of properties value for more than one" in {
+            val answers = sample[CompleteMultipleDisposalsTriageAnswers].copy(numberOfProperties = 9)
+
+            val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreSession(
+                session.copy(journeyStatus = Some(
+                  journey.copy(
+                    newReturnTriageAnswers = Left(answers.copy(numberOfProperties = 3))
+                  )
+                )
+                )
+              )(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(key -> "3"),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
         }
 
-        "user has already answered how many disposals section and " +
-          "re-enters different number of properties value for more than one" in {
-          val answers = sample[CompleteMultipleDisposalsAnswers].copy(numberOfProperties = 9)
+        "the user has started a draft return and" when {
 
-          val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+          "they have not completed the section and they enter a figure which is " +
+            "different than one they have already entered" in {
+            val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+              individualUserType = Some(Self),
+              numberOfProperties = Some(2)
+            )
+            val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+            val updatedDraftReturn = draftReturn.copy(
+              triageAnswers = answers.copy(numberOfProperties = Some(5))
+            )
+            val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
 
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreSession(
-              session.copy(journeyStatus = Some(
-                journey.copy(
-                  newReturnTriageAnswers = Left(answers.copy(numberOfProperties = 3))
-                )
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreDraftReturn(
+                updatedDraftReturn,
+                journey.subscribedDetails.cgtReference,
+                journey.agentReferenceNumber
+              )(
+                Right(())
               )
-              )
-            )(Right(()))
+              mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(key -> "5"),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
           }
 
-          checkIsRedirect(
-            performAction(key -> "3"),
-            routes.MultipleDisposalsTriageController.checkYourAnswers()
-          )
         }
 
       }
@@ -321,7 +457,7 @@ class MultipleDisposalsTriageControllerSpec
 
         "user has already answered how many disposals section and " +
           "re-enters same number of properties value for more than one" in {
-          val answers = sample[CompleteMultipleDisposalsAnswers].copy(
+          val answers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
             numberOfProperties = 5
           )
 
@@ -347,7 +483,7 @@ class MultipleDisposalsTriageControllerSpec
           )
 
         "the user submits nothing" in {
-          val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
+          val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
             individualUserType = Some(Self)
           )
           val (session, _) = sessionDataWithStartingNewDraftReturn(answers)
@@ -376,6 +512,54 @@ class MultipleDisposalsTriageControllerSpec
 
       }
 
+      "show a technical error page" when {
+
+        val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+          individualUserType = Some(Self),
+          numberOfProperties = None
+        )
+        val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+        val updatedDraftReturn = draftReturn.copy(
+          triageAnswers = answers.copy(numberOfProperties = Some(5))
+        )
+        val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
+
+        "there is an error storing the draft return" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(
+              Left(Error(""))
+            )
+          }
+
+          checkIsTechnicalErrorPage(performAction(key -> "5"))
+        }
+
+        "there is an error updating the session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(
+              Right(())
+            )
+            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction(key -> "5"))
+
+        }
+
+      }
+
     }
 
     "handling requests to display the were uk resident page" must {
@@ -387,42 +571,63 @@ class MultipleDisposalsTriageControllerSpec
 
       "display the page" when {
 
-        "the journey is incomplete " in {
-          mockAuthWithNoRetrievals()
-          mockGetSession(sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsAnswers.empty)._1)
-
-          checkPageIsDisplayed(
+        def test(
+          session: SessionData,
+          expectedBackLink: Call,
+          expectedButtonMessageKey: String,
+          expectReturnToSummaryLink: Boolean
+        ): Unit =
+          testPageIsDisplayed(
             performAction,
-            messageFromMessageKey("multipleDisposalsWereYouAUKResident.title"), { doc =>
-              doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
-                .howManyDisposals()
-                .url
-              doc
-                .select("#content > article > form")
-                .attr("action") shouldBe routes.MultipleDisposalsTriageController
-                .wereYouAUKResidentSubmit()
-                .url
-            }
+            session,
+            "multipleDisposalsWereYouAUKResident.title",
+            routes.MultipleDisposalsTriageController.wereYouAUKResidentSubmit(),
+            expectedBackLink,
+            expectedButtonMessageKey,
+            expectReturnToSummaryLink
           )
+
+        "the user has not started a new draft return and" when {
+
+          "the journey is incomplete" in {
+            test(
+              sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsTriageAnswers.empty)._1,
+              triage.routes.MultipleDisposalsTriageController.howManyDisposals(),
+              "button.continue",
+              expectReturnToSummaryLink = false
+            )
+          }
+
+          "the journey is complete" in {
+            test(
+              sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsTriageAnswers])._1,
+              triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              "button.continue",
+              expectReturnToSummaryLink = false
+            )
+          }
+
         }
 
-        "the journey is complete" in {
-          mockAuthWithNoRetrievals()
-          mockGetSession(sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsAnswers])._1)
+        "the user has started a new draft return and" when {
 
-          checkPageIsDisplayed(
-            performAction,
-            messageFromMessageKey("multipleDisposalsWereYouAUKResident.title"), { doc =>
-              doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
-                .checkYourAnswers()
-                .url
-              doc
-                .select("#content > article > form")
-                .attr("action") shouldBe routes.MultipleDisposalsTriageController
-                .wereYouAUKResidentSubmit()
-                .url
-            }
-          )
+          "the journey is incomplete" in {
+            test(
+              sessionDataWithFillingOutReturn(IncompleteMultipleDisposalsTriageAnswers.empty)._1,
+              triage.routes.MultipleDisposalsTriageController.howManyDisposals(),
+              "button.saveAndContinue",
+              expectReturnToSummaryLink = true
+            )
+          }
+
+          "the journey is complete" in {
+            test(
+              sessionDataWithFillingOutReturn(sample[CompleteMultipleDisposalsTriageAnswers])._1,
+              triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              "button.saveAndContinue",
+              expectReturnToSummaryLink = true
+            )
+          }
         }
 
       }
@@ -438,88 +643,134 @@ class MultipleDisposalsTriageControllerSpec
 
       "redirect to redirect to cya page" when {
 
-        val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
+        val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
           individualUserType = Some(Self),
           numberOfProperties = Some(2)
         )
 
-        val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
-
-        "user has not answered the were uk resident section and selects true" in {
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreSession(
-              session.copy(journeyStatus = Some(
-                journey.copy(
-                  newReturnTriageAnswers = Left(answers.copy(wasAUKResident = Some(true)))
-                )
-              )
-              )
-            )(Right(()))
-          }
-
-          checkIsRedirect(
-            performAction(key -> "true"),
-            routes.MultipleDisposalsTriageController.checkYourAnswers()
-          )
-        }
-
-        "user has not answered the were uk resident section and selects false" in {
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreSession(
-              session.copy(journeyStatus = Some(
-                journey.copy(
-                  newReturnTriageAnswers = Left(answers.copy(wasAUKResident = Some(false)))
-                )
-              )
-              )
-            )(Right(()))
-          }
-
-          checkIsRedirect(
-            performAction(key -> "false"),
-            routes.MultipleDisposalsTriageController.checkYourAnswers()
-          )
-        }
-
-        "user has already answered were uk resident section and re-selected different option" in {
-          val answers = sample[IncompleteMultipleDisposalsAnswers]
-            .copy(
-              wasAUKResident     = Some(true),
-              countryOfResidence = Some(Country.uk)
-            )
+        "the user has not started a draft return and" when {
 
           val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
 
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreSession(
-              session.copy(journeyStatus = Some(
-                journey.copy(
-                  newReturnTriageAnswers = Left(
-                    answers.copy(
-                      wasAUKResident               = Some(false),
-                      countryOfResidence           = None,
-                      wereAllPropertiesResidential = None,
-                      assetTypes                   = None
+          "they have not answered the were uk resident question and selects true" in {
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreSession(
+                session.copy(journeyStatus = Some(
+                  journey.copy(
+                    newReturnTriageAnswers = Left(answers.copy(wasAUKResident = Some(true)))
+                  )
+                )
+                )
+              )(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(key -> "true"),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
+          "they have not answered the were uk resident question and selects false" in {
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreSession(
+                session.copy(journeyStatus = Some(
+                  journey.copy(
+                    newReturnTriageAnswers = Left(answers.copy(wasAUKResident = Some(false)))
+                  )
+                )
+                )
+              )(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(key -> "false"),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
+          "they have already answered were uk resident section and re-selected different option" in {
+            val answers = sample[IncompleteMultipleDisposalsTriageAnswers]
+              .copy(
+                wasAUKResident     = Some(true),
+                countryOfResidence = Some(Country.uk)
+              )
+
+            val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreSession(
+                session.copy(journeyStatus = Some(
+                  journey.copy(
+                    newReturnTriageAnswers = Left(
+                      answers.copy(
+                        wasAUKResident               = Some(false),
+                        countryOfResidence           = None,
+                        wereAllPropertiesResidential = None,
+                        assetTypes                   = None
+                      )
                     )
                   )
                 )
-              )
-              )
-            )(Right(()))
+                )
+              )(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(key -> "false"),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
           }
 
-          checkIsRedirect(
-            performAction(key -> "false"),
-            routes.MultipleDisposalsTriageController.checkYourAnswers()
-          )
+        }
+
+        "the user has started a draft return and" when {
+
+          "have completed the section and they enter a figure which is " +
+            "different than one they have already entered" in {
+            val answers                         = sample[CompleteMultipleDisposalsTriageAnswers].copy(countryOfResidence = sample[Country])
+            val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+
+            val updatedAnswers = IncompleteMultipleDisposalsTriageAnswers(
+              individualUserType           = answers.individualUserType,
+              numberOfProperties           = Some(answers.numberOfProperties),
+              wasAUKResident               = Some(true),
+              countryOfResidence           = None,
+              wereAllPropertiesResidential = None,
+              assetTypes                   = None,
+              taxYearAfter6April2020       = None,
+              taxYear                      = None,
+              completionDate               = Some(answers.completionDate)
+            )
+            val updatedDraftReturn = draftReturn.copy(triageAnswers = updatedAnswers)
+            val updatedJourney     = journey.copy(draftReturn       = updatedDraftReturn)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreDraftReturn(
+                updatedDraftReturn,
+                journey.subscribedDetails.cgtReference,
+                journey.agentReferenceNumber
+              )(
+                Right(())
+              )
+              mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(key -> "true"),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
         }
 
       }
@@ -527,7 +778,7 @@ class MultipleDisposalsTriageControllerSpec
       "show a form error" when {
 
         "the user submits nothing" in {
-          val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
+          val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
             individualUserType = Some(Self),
             numberOfProperties = Some(2)
           )
@@ -550,6 +801,60 @@ class MultipleDisposalsTriageControllerSpec
         }
       }
 
+      "show an error page" when {
+
+        val answers                         = sample[CompleteMultipleDisposalsTriageAnswers].copy(countryOfResidence = sample[Country])
+        val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+
+        val updatedAnswers = IncompleteMultipleDisposalsTriageAnswers(
+          individualUserType           = answers.individualUserType,
+          numberOfProperties           = Some(answers.numberOfProperties),
+          wasAUKResident               = Some(true),
+          countryOfResidence           = None,
+          wereAllPropertiesResidential = None,
+          assetTypes                   = None,
+          taxYearAfter6April2020       = None,
+          taxYear                      = None,
+          completionDate               = Some(answers.completionDate)
+        )
+        val updatedDraftReturn = draftReturn.copy(triageAnswers = updatedAnswers)
+        val updatedJourney     = journey.copy(draftReturn       = updatedDraftReturn)
+
+        "there is an error updating the draft return" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(
+              Left(Error(""))
+            )
+          }
+
+          checkIsTechnicalErrorPage(performAction(key -> "true"))
+        }
+
+        "there is an error updating the session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(
+              Right(())
+            )
+            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction(key -> "true"))
+        }
+
+      }
+
     }
 
     "handling requests to display the were all properties residential page" must {
@@ -561,42 +866,63 @@ class MultipleDisposalsTriageControllerSpec
 
       "display the page" when {
 
-        "the journey is incomplete" in {
-          mockAuthWithNoRetrievals()
-          mockGetSession(sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsAnswers.empty)._1)
-
-          checkPageIsDisplayed(
+        def test(
+          session: SessionData,
+          expectedBackLink: Call,
+          expectedButtonMessageKey: String,
+          expectReturnToSummaryLink: Boolean
+        ): Unit =
+          testPageIsDisplayed(
             performAction,
-            messageFromMessageKey("multipleDisposalsWereAllPropertiesResidential.title"), { doc =>
-              doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
-                .wereYouAUKResident()
-                .url
-              doc
-                .select("#content > article > form")
-                .attr("action") shouldBe routes.MultipleDisposalsTriageController
-                .wereAllPropertiesResidentialSubmit()
-                .url
-            }
+            session,
+            "multipleDisposalsWereAllPropertiesResidential.title",
+            routes.MultipleDisposalsTriageController.wereAllPropertiesResidentialSubmit(),
+            expectedBackLink,
+            expectedButtonMessageKey,
+            expectReturnToSummaryLink
           )
+
+        "the user has not started a new draft return and" when {
+
+          "the journey is incomplete" in {
+            test(
+              sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsTriageAnswers.empty)._1,
+              triage.routes.MultipleDisposalsTriageController.wereYouAUKResident(),
+              "button.continue",
+              expectReturnToSummaryLink = false
+            )
+          }
+
+          "the journey is complete" in {
+            test(
+              sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsTriageAnswers])._1,
+              triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              "button.continue",
+              expectReturnToSummaryLink = false
+            )
+          }
+
         }
 
-        "the journey is complete" in {
-          mockAuthWithNoRetrievals()
-          mockGetSession(sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsAnswers])._1)
+        "the user has started a new draft return and" when {
 
-          checkPageIsDisplayed(
-            performAction,
-            messageFromMessageKey("multipleDisposalsWereAllPropertiesResidential.title"), { doc =>
-              doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
-                .checkYourAnswers()
-                .url
-              doc
-                .select("#content > article > form")
-                .attr("action") shouldBe routes.MultipleDisposalsTriageController
-                .wereAllPropertiesResidentialSubmit()
-                .url
-            }
-          )
+          "the journey is incomplete" in {
+            test(
+              sessionDataWithFillingOutReturn(IncompleteMultipleDisposalsTriageAnswers.empty)._1,
+              triage.routes.MultipleDisposalsTriageController.wereYouAUKResident(),
+              "button.saveAndContinue",
+              expectReturnToSummaryLink = true
+            )
+          }
+
+          "the journey is complete" in {
+            test(
+              sessionDataWithFillingOutReturn(sample[CompleteMultipleDisposalsTriageAnswers])._1,
+              triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              "button.saveAndContinue",
+              expectReturnToSummaryLink = true
+            )
+          }
         }
 
       }
@@ -612,98 +938,146 @@ class MultipleDisposalsTriageControllerSpec
 
       "redirect to redirect to cya page" when {
 
-        val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
+        val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
           individualUserType = Some(Self),
           numberOfProperties = Some(2),
           wasAUKResident     = Some(true),
           countryOfResidence = Some(Country.uk)
         )
 
-        val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
-
-        "user has not answered the were all properties residential section and selects true" in {
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreSession(
-              session.copy(journeyStatus = Some(
-                journey.copy(
-                  newReturnTriageAnswers = Left(
-                    answers.copy(
-                      wereAllPropertiesResidential = Some(true),
-                      assetTypes                   = Some(List(AssetType.Residential))
-                    )
-                  )
-                )
-              )
-              )
-            )(Right(()))
-          }
-
-          checkIsRedirect(
-            performAction(key -> "true"),
-            routes.MultipleDisposalsTriageController.checkYourAnswers()
-          )
-        }
-
-        "user has not answered the were all properties residential section and selects false" in {
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreSession(
-              session.copy(journeyStatus = Some(
-                journey.copy(
-                  newReturnTriageAnswers = Left(
-                    answers.copy(
-                      wereAllPropertiesResidential = Some(false),
-                      assetTypes                   = Some(List(AssetType.NonResidential))
-                    )
-                  )
-                )
-              )
-              )
-            )(Right(()))
-          }
-
-          checkIsRedirect(
-            performAction(key -> "false"),
-            routes.MultipleDisposalsTriageController.checkYourAnswers()
-          )
-        }
-
-        "user has already answered were all properties residential section and re-selected different option" in {
-          val answers = sample[IncompleteMultipleDisposalsAnswers]
-            .copy(
-              wereAllPropertiesResidential = Some(true),
-              assetTypes                   = Some(List(AssetType.Residential))
-            )
+        "the user has not started a draft return and" when {
 
           val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
 
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreSession(
-              session.copy(journeyStatus = Some(
-                journey.copy(
-                  newReturnTriageAnswers = Left(
-                    answers.copy(
-                      wereAllPropertiesResidential = Some(false),
-                      assetTypes                   = Some(List(AssetType.NonResidential))
+          "user has not answered the were all properties residential section and selects true" in {
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreSession(
+                session.copy(journeyStatus = Some(
+                  journey.copy(
+                    newReturnTriageAnswers = Left(
+                      answers.copy(
+                        wereAllPropertiesResidential = Some(true),
+                        assetTypes                   = Some(List(AssetType.Residential))
+                      )
                     )
                   )
                 )
-              )
-              )
-            )(Right(()))
+                )
+              )(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(key -> "true"),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
           }
 
-          checkIsRedirect(
-            performAction(key -> "false"),
-            routes.MultipleDisposalsTriageController.checkYourAnswers()
-          )
+          "user has not answered the were all properties residential section and selects false" in {
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreSession(
+                session.copy(journeyStatus = Some(
+                  journey.copy(
+                    newReturnTriageAnswers = Left(
+                      answers.copy(
+                        wereAllPropertiesResidential = Some(false),
+                        assetTypes                   = Some(List(AssetType.NonResidential))
+                      )
+                    )
+                  )
+                )
+                )
+              )(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(key -> "false"),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
+          "user has already answered were all properties residential section and re-selected different option" in {
+            val answers = sample[IncompleteMultipleDisposalsTriageAnswers]
+              .copy(
+                wereAllPropertiesResidential = Some(true),
+                assetTypes                   = Some(List(AssetType.Residential))
+              )
+
+            val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreSession(
+                session.copy(journeyStatus = Some(
+                  journey.copy(
+                    newReturnTriageAnswers = Left(
+                      answers.copy(
+                        wereAllPropertiesResidential = Some(false),
+                        assetTypes                   = Some(List(AssetType.NonResidential))
+                      )
+                    )
+                  )
+                )
+                )
+              )(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(key -> "false"),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+        }
+
+        "the user has started a draft return and" when {
+
+          "have completed the section and they enter a figure which is " +
+            "different than one they have already entered" in {
+            val answers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+              countryOfResidence = Country.uk,
+              assetTypes         = List(AssetType.Residential)
+            )
+            val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+
+            val updatedAnswers = IncompleteMultipleDisposalsTriageAnswers(
+              individualUserType           = answers.individualUserType,
+              numberOfProperties           = Some(answers.numberOfProperties),
+              wasAUKResident               = Some(true),
+              countryOfResidence           = Some(Country.uk),
+              wereAllPropertiesResidential = Some(false),
+              assetTypes                   = Some(List(AssetType.NonResidential)),
+              taxYearAfter6April2020       = None,
+              taxYear                      = None,
+              completionDate               = None
+            )
+            val updatedDraftReturn = draftReturn.copy(triageAnswers = updatedAnswers)
+            val updatedJourney     = journey.copy(draftReturn       = updatedDraftReturn)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreDraftReturn(
+                updatedDraftReturn,
+                journey.subscribedDetails.cgtReference,
+                journey.agentReferenceNumber
+              )(
+                Right(())
+              )
+              mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(key -> "false"),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
         }
 
       }
@@ -711,7 +1085,7 @@ class MultipleDisposalsTriageControllerSpec
       "not update the session" when {
 
         "user has already answered were all properties residential section and re-selected same option" in {
-          val answers = sample[IncompleteMultipleDisposalsAnswers]
+          val answers = sample[IncompleteMultipleDisposalsTriageAnswers]
             .copy(
               wereAllPropertiesResidential = Some(true),
               assetTypes                   = Some(List(AssetType.Residential))
@@ -735,7 +1109,7 @@ class MultipleDisposalsTriageControllerSpec
       "show a form error" when {
 
         "the user submits nothing" in {
-          val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
+          val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
             individualUserType = Some(Self),
             numberOfProperties = Some(2),
             wasAUKResident     = Some(true),
@@ -761,6 +1135,63 @@ class MultipleDisposalsTriageControllerSpec
 
       }
 
+      "show a error page" when {
+
+        val answers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+          countryOfResidence = Country.uk,
+          assetTypes         = List(AssetType.Residential)
+        )
+        val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+
+        val updatedAnswers = IncompleteMultipleDisposalsTriageAnswers(
+          individualUserType           = answers.individualUserType,
+          numberOfProperties           = Some(answers.numberOfProperties),
+          wasAUKResident               = Some(true),
+          countryOfResidence           = Some(Country.uk),
+          wereAllPropertiesResidential = Some(false),
+          assetTypes                   = Some(List(AssetType.NonResidential)),
+          taxYearAfter6April2020       = None,
+          taxYear                      = None,
+          completionDate               = None
+        )
+        val updatedDraftReturn = draftReturn.copy(triageAnswers = updatedAnswers)
+        val updatedJourney     = journey.copy(draftReturn       = updatedDraftReturn)
+
+        "there is an error updating the draft return" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(
+              Left(Error(""))
+            )
+          }
+
+          checkIsTechnicalErrorPage(performAction(key -> "false"))
+        }
+
+        "there is an error updating the session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(
+              Right(())
+            )
+            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction(key -> "false"))
+        }
+
+      }
+
     }
 
     "handling requests to display the tax year exchanged page" must {
@@ -772,55 +1203,73 @@ class MultipleDisposalsTriageControllerSpec
 
       "display the page" when {
 
-        "the journeu is incomplete" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionDataWithStartingNewDraftReturn(
-                IncompleteMultipleDisposalsAnswers.empty.copy(
-                  individualUserType           = Some(Self),
-                  numberOfProperties           = Some(2),
-                  wasAUKResident               = Some(true),
-                  countryOfResidence           = Some(Country.uk),
-                  wereAllPropertiesResidential = Some(true),
-                  assetTypes                   = Some(List(AssetType.Residential))
-                )
-              )._1
+        def test(
+          session: SessionData,
+          expectedBackLink: Call,
+          expectedButtonMessageKey: String,
+          expectReturnToSummaryLink: Boolean
+        ): Unit =
+          testPageIsDisplayed(
+            performAction,
+            session,
+            "multipleDisposalsTaxYear.title",
+            routes.MultipleDisposalsTriageController.whenWereContractsExchangedSubmit(),
+            expectedBackLink,
+            expectedButtonMessageKey,
+            expectReturnToSummaryLink
+          )
+
+        val incompleteAnswers =
+          IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+            individualUserType           = Some(Self),
+            numberOfProperties           = Some(2),
+            wasAUKResident               = Some(true),
+            countryOfResidence           = Some(Country.uk),
+            wereAllPropertiesResidential = Some(true),
+            assetTypes                   = Some(List(AssetType.Residential))
+          )
+
+        "the user has not started a new draft return and" when {
+
+          "the journey is incomplete" in {
+            test(
+              sessionDataWithStartingNewDraftReturn(incompleteAnswers)._1,
+              triage.routes.MultipleDisposalsTriageController.wereAllPropertiesResidential(),
+              "button.continue",
+              expectReturnToSummaryLink = false
             )
           }
 
-          checkPageIsDisplayed(
-            performAction,
-            messageFromMessageKey("multipleDisposalsTaxYear.title"), { doc =>
-              doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
-                .wereAllPropertiesResidential()
-                .url
-              doc
-                .select("#content > article > form")
-                .attr("action") shouldBe routes.MultipleDisposalsTriageController
-                .whenWereContractsExchangedSubmit()
-                .url
-            }
-          )
+          "the journey is complete" in {
+            test(
+              sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsTriageAnswers])._1,
+              triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              "button.continue",
+              expectReturnToSummaryLink = false
+            )
+          }
+
         }
 
-        "the journey is complete" in {
-          mockAuthWithNoRetrievals()
-          mockGetSession(sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsAnswers])._1)
+        "the user has started a new draft return and" when {
 
-          checkPageIsDisplayed(
-            performAction,
-            messageFromMessageKey("multipleDisposalsTaxYear.title"), { doc =>
-              doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
-                .checkYourAnswers()
-                .url
-              doc
-                .select("#content > article > form")
-                .attr("action") shouldBe routes.MultipleDisposalsTriageController
-                .whenWereContractsExchangedSubmit()
-                .url
-            }
-          )
+          "the journey is incomplete" in {
+            test(
+              sessionDataWithFillingOutReturn(incompleteAnswers)._1,
+              triage.routes.MultipleDisposalsTriageController.wereAllPropertiesResidential(),
+              "button.saveAndContinue",
+              expectReturnToSummaryLink = true
+            )
+          }
+
+          "the journey is complete" in {
+            test(
+              sessionDataWithFillingOutReturn(sample[CompleteMultipleDisposalsTriageAnswers])._1,
+              triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              "button.saveAndContinue",
+              expectReturnToSummaryLink = true
+            )
+          }
         }
 
       }
@@ -842,7 +1291,7 @@ class MultipleDisposalsTriageControllerSpec
 
       "redirect to redirect to cya page" when {
 
-        val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
+        val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
           individualUserType           = Some(Self),
           numberOfProperties           = Some(2),
           wasAUKResident               = Some(true),
@@ -856,100 +1305,146 @@ class MultipleDisposalsTriageControllerSpec
           endDateExclusive   = LocalDate.of(2020, 4, 6)
         )
 
-        val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
-
-        "user has not answered the tax year exchanged section and selects after April 06th, 2020" in {
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockGetTaxYear(today)(Right(Some(taxYear)))
-            mockStoreSession(
-              session.copy(journeyStatus = Some(
-                journey.copy(
-                  newReturnTriageAnswers = Left(
-                    answers.copy(
-                      taxYearAfter6April2020 = Some(true),
-                      taxYear                = Some(taxYear)
-                    )
-                  )
-                )
-              )
-              )
-            )(Right(()))
-          }
-
-          checkIsRedirect(
-            performAction(key -> "0"),
-            routes.MultipleDisposalsTriageController.checkYourAnswers()
-          )
-        }
-
-        "user has not answered the tax year exchanged section and selects before April 06th, 2020" in {
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreSession(
-              session.copy(journeyStatus = Some(
-                journey.copy(
-                  newReturnTriageAnswers = Left(
-                    answers.copy(
-                      taxYearAfter6April2020 = Some(false),
-                      taxYear                = None
-                    )
-                  )
-                )
-              )
-              )
-            )(Right(()))
-          }
-
-          checkIsRedirect(
-            performAction(key -> "1"),
-            routes.MultipleDisposalsTriageController.checkYourAnswers()
-          )
-        }
-
-        "user has already answered were all properties residential section and re-selected different option" in {
-          val answers = sample[IncompleteMultipleDisposalsAnswers]
-            .copy(
-              individualUserType           = Some(Self),
-              numberOfProperties           = Some(2),
-              wasAUKResident               = Some(true),
-              countryOfResidence           = Some(Country.uk),
-              wereAllPropertiesResidential = Some(true),
-              assetTypes                   = Some(List(AssetType.Residential)),
-              taxYearAfter6April2020       = Some(true),
-              taxYear                      = Some(taxYear)
-            )
+        "the user has not started a draft return and" when {
 
           val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
 
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreSession(
-              session.copy(journeyStatus = Some(
-                journey.copy(
-                  newReturnTriageAnswers = Left(
-                    answers.copy(
-                      taxYearAfter6April2020 = Some(false),
-                      taxYear                = None
+          "user has not answered the tax year exchanged section and selects after April 06th, 2020" in {
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockGetTaxYear(today)(Right(Some(taxYear)))
+              mockStoreSession(
+                session.copy(journeyStatus = Some(
+                  journey.copy(
+                    newReturnTriageAnswers = Left(
+                      answers.copy(
+                        taxYearAfter6April2020 = Some(true),
+                        taxYear                = Some(taxYear)
+                      )
                     )
                   )
                 )
-              )
-              )
-            )(Right(()))
+                )
+              )(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(key -> "0"),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
           }
 
-          checkIsRedirect(
-            performAction(key -> "1"),
-            routes.MultipleDisposalsTriageController.checkYourAnswers()
-          )
+          "user has not answered the tax year exchanged section and selects before April 06th, 2020" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreSession(
+                session.copy(journeyStatus = Some(
+                  journey.copy(
+                    newReturnTriageAnswers = Left(
+                      answers.copy(
+                        taxYearAfter6April2020 = Some(false),
+                        taxYear                = None
+                      )
+                    )
+                  )
+                )
+                )
+              )(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(key -> "1"),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
+          "user has already answered were all properties residential section and re-selected different option" in {
+            val answers = sample[IncompleteMultipleDisposalsTriageAnswers]
+              .copy(
+                individualUserType           = Some(Self),
+                numberOfProperties           = Some(2),
+                wasAUKResident               = Some(true),
+                countryOfResidence           = Some(Country.uk),
+                wereAllPropertiesResidential = Some(true),
+                assetTypes                   = Some(List(AssetType.Residential)),
+                taxYearAfter6April2020       = Some(true),
+                taxYear                      = Some(taxYear)
+              )
+
+            val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreSession(
+                session.copy(journeyStatus = Some(
+                  journey.copy(
+                    newReturnTriageAnswers = Left(
+                      answers.copy(
+                        taxYearAfter6April2020 = Some(false),
+                        taxYear                = None
+                      )
+                    )
+                  )
+                )
+                )
+              )(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(key -> "1"),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+          }
         }
 
+        "the user has started a draft return and" when {
+
+          "have completed the section and they enter a figure which is " +
+            "different than one they have already entered" in {
+            val answers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+              assetTypes = List(AssetType.Residential),
+              taxYear    = taxYear
+            )
+            val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+
+            val updatedAnswers = IncompleteMultipleDisposalsTriageAnswers(
+              individualUserType           = answers.individualUserType,
+              numberOfProperties           = Some(answers.numberOfProperties),
+              wasAUKResident               = Some(answers.countryOfResidence.isUk()),
+              countryOfResidence           = Some(answers.countryOfResidence),
+              wereAllPropertiesResidential = Some(true),
+              assetTypes                   = Some(answers.assetTypes),
+              taxYearAfter6April2020       = Some(false),
+              taxYear                      = None,
+              completionDate               = Some(answers.completionDate)
+            )
+            val updatedDraftReturn = draftReturn.copy(triageAnswers = updatedAnswers)
+            val updatedJourney     = journey.copy(draftReturn       = updatedDraftReturn)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreDraftReturn(
+                updatedDraftReturn,
+                journey.subscribedDetails.cgtReference,
+                journey.agentReferenceNumber
+              )(
+                Right(())
+              )
+              mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(key -> "1"),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
+        }
       }
 
       "not update the session" when {
@@ -959,7 +1454,7 @@ class MultipleDisposalsTriageControllerSpec
             startDateInclusive = LocalDate.of(2019, 4, 6),
             endDateExclusive   = LocalDate.of(2020, 4, 6)
           )
-          val answers = sample[IncompleteMultipleDisposalsAnswers]
+          val answers = sample[IncompleteMultipleDisposalsTriageAnswers]
             .copy(
               individualUserType           = Some(Self),
               numberOfProperties           = Some(2),
@@ -989,7 +1484,7 @@ class MultipleDisposalsTriageControllerSpec
       "show a form error" when {
 
         "the user submits nothing" in {
-          val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
+          val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
             individualUserType           = Some(Self),
             numberOfProperties           = Some(2),
             wasAUKResident               = Some(true),
@@ -1016,6 +1511,83 @@ class MultipleDisposalsTriageControllerSpec
         }
 
       }
+
+      "show an error page" when {
+
+        val answers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+          assetTypes = List(AssetType.Residential),
+          taxYear    = sample[TaxYear]
+        )
+        val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+
+        val updatedAnswers = IncompleteMultipleDisposalsTriageAnswers(
+          individualUserType           = answers.individualUserType,
+          numberOfProperties           = Some(answers.numberOfProperties),
+          wasAUKResident               = Some(answers.countryOfResidence.isUk()),
+          countryOfResidence           = Some(answers.countryOfResidence),
+          wereAllPropertiesResidential = Some(true),
+          assetTypes                   = Some(answers.assetTypes),
+          taxYearAfter6April2020       = Some(false),
+          taxYear                      = None,
+          completionDate               = Some(answers.completionDate)
+        )
+        val updatedDraftReturn = draftReturn.copy(triageAnswers = updatedAnswers)
+        val updatedJourney     = journey.copy(draftReturn       = updatedDraftReturn)
+
+        "there is an error updating the draft return" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(
+              Left(Error(""))
+            )
+          }
+
+          checkIsTechnicalErrorPage(performAction(key -> "1"))
+        }
+
+        "there is an error updating the session data" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(
+              Right(())
+            )
+            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction(key -> "1"))
+        }
+
+        "a tax year cannot be found when the user selects after April 2020" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionDataWithFillingOutReturn(IncompleteMultipleDisposalsTriageAnswers.empty)._1)
+            mockGetTaxYear(LocalDateUtils.today())(Right(None))
+          }
+
+          checkIsTechnicalErrorPage(performAction(key -> "0"))
+        }
+
+        "there is an error while getting the tax year when the user selects after April 2020" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionDataWithFillingOutReturn(IncompleteMultipleDisposalsTriageAnswers.empty)._1)
+            mockGetTaxYear(LocalDateUtils.today())(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction(key -> "0"))
+        }
+
+      }
     }
 
     "handling requests to display the country of residence page" must {
@@ -1027,52 +1599,69 @@ class MultipleDisposalsTriageControllerSpec
 
       "display the page" when {
 
-        "the journey is incomplete" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionDataWithStartingNewDraftReturn(
-                IncompleteMultipleDisposalsAnswers.empty.copy(
-                  individualUserType = Some(Self),
-                  numberOfProperties = Some(2),
-                  wasAUKResident     = Some(false)
-                )
-              )._1
+        def test(
+          session: SessionData,
+          expectedBackLink: Call,
+          expectedButtonMessageKey: String,
+          expectReturnToSummaryLink: Boolean
+        ): Unit =
+          testPageIsDisplayed(
+            performAction,
+            session,
+            "multipleDisposalsCountryOfResidence.title",
+            routes.MultipleDisposalsTriageController.countryOfResidenceSubmit(),
+            expectedBackLink,
+            expectedButtonMessageKey,
+            expectReturnToSummaryLink
+          )
+
+        val incompleteAnswers =
+          IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+            individualUserType = Some(Self),
+            numberOfProperties = Some(2),
+            wasAUKResident     = Some(false)
+          )
+        "the user has not started a new draft return and" when {
+
+          "the journey is incomplete" in {
+            test(
+              sessionDataWithStartingNewDraftReturn(incompleteAnswers)._1,
+              triage.routes.MultipleDisposalsTriageController.wereYouAUKResident(),
+              "button.continue",
+              expectReturnToSummaryLink = false
             )
           }
 
-          checkPageIsDisplayed(
-            performAction,
-            messageFromMessageKey("multipleDisposalsCountryOfResidence.title"), { doc =>
-              doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
-                .wereYouAUKResident()
-                .url
-              doc
-                .select("#content > article > form")
-                .attr("action") shouldBe routes.MultipleDisposalsTriageController
-                .countryOfResidenceSubmit()
-                .url
-            }
-          )
+          "the journey is complete" in {
+            test(
+              sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsTriageAnswers])._1,
+              triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              "button.continue",
+              expectReturnToSummaryLink = false
+            )
+          }
+
         }
 
-        "the journey is complete" in {
-          mockAuthWithNoRetrievals()
-          mockGetSession(sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsAnswers])._1)
+        "the user has started a new draft return and" when {
 
-          checkPageIsDisplayed(
-            performAction,
-            messageFromMessageKey("multipleDisposalsCountryOfResidence.title"), { doc =>
-              doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
-                .checkYourAnswers()
-                .url
-              doc
-                .select("#content > article > form")
-                .attr("action") shouldBe routes.MultipleDisposalsTriageController
-                .countryOfResidenceSubmit()
-                .url
-            }
-          )
+          "the journey is incomplete" in {
+            test(
+              sessionDataWithFillingOutReturn(incompleteAnswers)._1,
+              triage.routes.MultipleDisposalsTriageController.wereYouAUKResident(),
+              "button.saveAndContinue",
+              expectReturnToSummaryLink = true
+            )
+          }
+
+          "the journey is complete" in {
+            test(
+              sessionDataWithFillingOutReturn(sample[CompleteMultipleDisposalsTriageAnswers])._1,
+              triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              "button.saveAndContinue",
+              expectReturnToSummaryLink = true
+            )
+          }
         }
 
       }
@@ -1081,7 +1670,7 @@ class MultipleDisposalsTriageControllerSpec
         mockAuthWithNoRetrievals()
         mockGetSession(
           sessionDataWithStartingNewDraftReturn(
-            IncompleteMultipleDisposalsAnswers.empty.copy(
+            IncompleteMultipleDisposalsTriageAnswers.empty.copy(
               individualUserType = Some(Self),
               numberOfProperties = Some(2),
               wasAUKResident     = Some(true)
@@ -1108,76 +1697,114 @@ class MultipleDisposalsTriageControllerSpec
 
       "redirect to redirect to cya page" when {
 
-        val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
+        val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
           individualUserType = Some(Self),
           numberOfProperties = Some(2),
           wasAUKResident     = Some(false),
           countryOfResidence = None
         )
 
-        val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
-
-        "user has not answered the country of residence section and " +
-          "enters valid country" in {
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreSession(
-              session.copy(journeyStatus = Some(
-                journey.copy(
-                  newReturnTriageAnswers = Left(
-                    answers.copy(
-                      countryOfResidence = Some(country)
-                    )
-                  )
-                )
-              )
-              )
-            )(Right(()))
-          }
-
-          checkIsRedirect(
-            performAction(key -> countryCode),
-            routes.MultipleDisposalsTriageController.checkYourAnswers()
-          )
-        }
-
-        "user has already answered the country of residence section and " +
-          "re-selected different option" in {
-          val answers = sample[IncompleteMultipleDisposalsAnswers]
-            .copy(
-              countryOfResidence           = Some(country),
-              wereAllPropertiesResidential = None,
-              assetTypes                   = None
-            )
+        "the user has not started a draft return and" when {
 
           val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
 
-          val (newCountryCode, newCountryName) = "CH" -> "Switzerland"
-          val newCountry                       = Country(newCountryCode, Some(newCountryName))
+          "user has not answered the country of residence section and " +
+            "enters valid country" in {
 
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreSession(
-              session.copy(journeyStatus = Some(
-                journey.copy(
-                  newReturnTriageAnswers = Left(
-                    answers.copy(
-                      countryOfResidence = Some(newCountry)
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreSession(
+                session.copy(journeyStatus = Some(
+                  journey.copy(
+                    newReturnTriageAnswers = Left(
+                      answers.copy(
+                        countryOfResidence = Some(country)
+                      )
                     )
                   )
                 )
-              )
-              )
-            )(Right(()))
+                )
+              )(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(key -> countryCode),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
           }
 
-          checkIsRedirect(
-            performAction(key -> newCountryCode),
-            routes.MultipleDisposalsTriageController.checkYourAnswers()
-          )
+          "user has already answered the country of residence section and " +
+            "re-selected different option" in {
+            val answers = sample[IncompleteMultipleDisposalsTriageAnswers]
+              .copy(
+                countryOfResidence           = Some(country),
+                wereAllPropertiesResidential = None,
+                assetTypes                   = None
+              )
+
+            val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+            val (newCountryCode, newCountryName) = "CH" -> "Switzerland"
+            val newCountry                       = Country(newCountryCode, Some(newCountryName))
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreSession(
+                session.copy(journeyStatus = Some(
+                  journey.copy(
+                    newReturnTriageAnswers = Left(
+                      answers.copy(
+                        countryOfResidence = Some(newCountry)
+                      )
+                    )
+                  )
+                )
+                )
+              )(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(key -> newCountryCode),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
+        }
+
+        "the user has started a draft return and" when {
+
+          "have completed the section and they enter a figure which is " +
+            "different than one they have already entered" in {
+            val answers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+              countryOfResidence = sample[Country]
+            )
+            val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+
+            val updatedAnswers     = answers.copy(countryOfResidence = country)
+            val updatedDraftReturn = draftReturn.copy(triageAnswers  = updatedAnswers)
+            val updatedJourney     = journey.copy(draftReturn        = updatedDraftReturn)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreDraftReturn(
+                updatedDraftReturn,
+                journey.subscribedDetails.cgtReference,
+                journey.agentReferenceNumber
+              )(
+                Right(())
+              )
+              mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(key -> country.code),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
         }
 
       }
@@ -1186,7 +1813,7 @@ class MultipleDisposalsTriageControllerSpec
 
         "user has already answered country of residence section and" +
           "re-selected same option" in {
-          val answers = sample[IncompleteMultipleDisposalsAnswers]
+          val answers = sample[IncompleteMultipleDisposalsTriageAnswers]
             .copy(
               numberOfProperties = Some(2),
               wasAUKResident     = Some(false),
@@ -1211,7 +1838,7 @@ class MultipleDisposalsTriageControllerSpec
       "show a form error" when {
 
         "the user submits nothing" in {
-          val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
+          val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
             individualUserType = Some(Self),
             numberOfProperties = Some(2),
             wasAUKResident     = Some(false),
@@ -1237,7 +1864,7 @@ class MultipleDisposalsTriageControllerSpec
         }
 
         "the option is not recognised" in {
-          val answers = IncompleteMultipleDisposalsAnswers.empty
+          val answers = IncompleteMultipleDisposalsTriageAnswers.empty
             .copy(
               numberOfProperties = Some(2),
               wasAUKResident     = Some(false),
@@ -1265,6 +1892,52 @@ class MultipleDisposalsTriageControllerSpec
 
       }
 
+      "show an error page" when {
+
+        val answers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+          countryOfResidence = sample[Country]
+        )
+        val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+
+        val updatedAnswers     = answers.copy(countryOfResidence = country)
+        val updatedDraftReturn = draftReturn.copy(triageAnswers  = updatedAnswers)
+        val updatedJourney     = journey.copy(draftReturn        = updatedDraftReturn)
+
+        "there is an error updating the draft return" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(
+              Left(Error(""))
+            )
+          }
+
+          checkIsTechnicalErrorPage(performAction(key -> country.code))
+        }
+
+        "there is an error updating the session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(
+              Right(())
+            )
+            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction(key -> country.code))
+        }
+
+      }
+
     }
 
     "handling requests to display the asset type for non-uk residents page" must {
@@ -1279,53 +1952,63 @@ class MultipleDisposalsTriageControllerSpec
 
       "display the page" when {
 
-        "the journey is incomplete" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionDataWithStartingNewDraftReturn(
-                IncompleteMultipleDisposalsAnswers.empty.copy(
-                  individualUserType = Some(Self),
-                  numberOfProperties = Some(2),
-                  wasAUKResident     = Some(false),
-                  countryOfResidence = Some(country)
-                )
-              )._1
+        def test(
+          session: SessionData,
+          expectedBackLink: Call,
+          expectedButtonMessageKey: String,
+          expectReturnToSummaryLink: Boolean
+        ): Unit =
+          testPageIsDisplayed(
+            performAction,
+            session,
+            "multipleDisposalsAssetTypeForNonUkResidents.title",
+            routes.MultipleDisposalsTriageController.assetTypeForNonUkResidentsSubmit(),
+            expectedBackLink,
+            expectedButtonMessageKey,
+            expectReturnToSummaryLink
+          )
+
+        "the user has not started a new draft return and" when {
+
+          "the journey is incomplete" in {
+            test(
+              sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsTriageAnswers.empty)._1,
+              triage.routes.MultipleDisposalsTriageController.countryOfResidence(),
+              "button.continue",
+              expectReturnToSummaryLink = false
             )
           }
 
-          checkPageIsDisplayed(
-            performAction,
-            messageFromMessageKey("multipleDisposalsAssetTypeForNonUkResidents.title"), { doc =>
-              doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
-                .countryOfResidence()
-                .url
-              doc
-                .select("#content > article > form")
-                .attr("action") shouldBe routes.MultipleDisposalsTriageController
-                .assetTypeForNonUkResidentsSubmit()
-                .url
-            }
-          )
+          "the journey is complete" in {
+            test(
+              sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsTriageAnswers])._1,
+              triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              "button.continue",
+              expectReturnToSummaryLink = false
+            )
+          }
+
         }
 
-        "the journey is complete" in {
-          mockAuthWithNoRetrievals()
-          mockGetSession(sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsAnswers])._1)
+        "the user has started a new draft return and" when {
 
-          checkPageIsDisplayed(
-            performAction,
-            messageFromMessageKey("multipleDisposalsAssetTypeForNonUkResidents.title"), { doc =>
-              doc.select("#back").attr("href") shouldBe triage.routes.MultipleDisposalsTriageController
-                .checkYourAnswers()
-                .url
-              doc
-                .select("#content > article > form")
-                .attr("action") shouldBe routes.MultipleDisposalsTriageController
-                .assetTypeForNonUkResidentsSubmit()
-                .url
-            }
-          )
+          "the journey is incomplete" in {
+            test(
+              sessionDataWithFillingOutReturn(IncompleteMultipleDisposalsTriageAnswers.empty)._1,
+              triage.routes.MultipleDisposalsTriageController.countryOfResidence(),
+              "button.saveAndContinue",
+              expectReturnToSummaryLink = true
+            )
+          }
+
+          "the journey is complete" in {
+            test(
+              sessionDataWithFillingOutReturn(sample[CompleteMultipleDisposalsTriageAnswers])._1,
+              triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              "button.saveAndContinue",
+              expectReturnToSummaryLink = true
+            )
+          }
         }
 
       }
@@ -1344,126 +2027,176 @@ class MultipleDisposalsTriageControllerSpec
 
       "redirect to redirect to cya page" when {
 
-        val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
-          individualUserType = Some(Self),
-          numberOfProperties = Some(2),
-          wasAUKResident     = Some(false),
-          countryOfResidence = Some(country)
-        )
+        "the user has not started a draft return and" when {
 
-        val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
-
-        "user has not answered the asset type for non-uk residents section and " +
-          "selects residential checkbox" in {
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreSession(
-              session.copy(journeyStatus = Some(
-                journey.copy(
-                  newReturnTriageAnswers = Left(
-                    answers.copy(
-                      assetTypes = Some(List(AssetType.Residential))
-                    )
-                  )
-                )
-              )
-              )
-            )(Right(()))
-          }
-
-          checkIsRedirect(
-            performAction(s"$key[]" -> "0"),
-            routes.MultipleDisposalsTriageController.checkYourAnswers()
+          val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
+            individualUserType = Some(Self),
+            numberOfProperties = Some(2),
+            wasAUKResident     = Some(false),
+            countryOfResidence = Some(country)
           )
-        }
-
-        "user has not answered the asset type for non-uk residents section and " +
-          "selects mixed use checkbox" in {
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreSession(
-              session.copy(journeyStatus = Some(
-                journey.copy(
-                  newReturnTriageAnswers = Left(
-                    answers.copy(
-                      assetTypes = Some(List(AssetType.MixedUse))
-                    )
-                  )
-                )
-              )
-              )
-            )(Right(()))
-          }
-
-          checkIsRedirect(
-            performAction(s"$key[]" -> "2"),
-            routes.MultipleDisposalsTriageController.checkYourAnswers()
-          )
-        }
-
-        "user has not answered the asset type for non-uk residents section and " +
-          "selects more than one asset type checkboxes" in {
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreSession(
-              session.copy(journeyStatus = Some(
-                journey.copy(
-                  newReturnTriageAnswers = Left(
-                    answers.copy(
-                      assetTypes = Some(List(AssetType.Residential, AssetType.MixedUse))
-                    )
-                  )
-                )
-              )
-              )
-            )(Right(()))
-          }
-
-          checkIsRedirect(
-            performAction(s"$key[]" -> "0", s"$key[]" -> "2"),
-            routes.MultipleDisposalsTriageController.checkYourAnswers()
-          )
-        }
-
-        "user has already answered the asset type for non-uk residents section and " +
-          "re-selected different asset type" in {
-          val answers = sample[IncompleteMultipleDisposalsAnswers]
-            .copy(
-              individualUserType = Some(Self),
-              numberOfProperties = Some(2),
-              wasAUKResident     = Some(false),
-              assetTypes         = Some(List(AssetType.Residential))
-            )
 
           val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
 
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreSession(
-              session.copy(journeyStatus = Some(
-                journey.copy(
-                  newReturnTriageAnswers = Left(
-                    answers.copy(
-                      assetTypes = Some(List(AssetType.NonResidential))
+          "user has not answered the asset type for non-uk residents section and " +
+            "selects residential checkbox" in {
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreSession(
+                session.copy(journeyStatus = Some(
+                  journey.copy(
+                    newReturnTriageAnswers = Left(
+                      answers.copy(
+                        assetTypes = Some(List(AssetType.Residential))
+                      )
                     )
                   )
                 )
-              )
-              )
-            )(Right(()))
+                )
+              )(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(s"$key[]" -> "0"),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
           }
 
-          checkIsRedirect(
-            performAction(s"$key[]" -> "1"),
-            routes.MultipleDisposalsTriageController.checkYourAnswers()
-          )
+          "user has not answered the asset type for non-uk residents section and " +
+            "selects mixed use checkbox" in {
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreSession(
+                session.copy(journeyStatus = Some(
+                  journey.copy(
+                    newReturnTriageAnswers = Left(
+                      answers.copy(
+                        assetTypes = Some(List(AssetType.MixedUse))
+                      )
+                    )
+                  )
+                )
+                )
+              )(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(s"$key[]" -> "2"),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
+          "user has not answered the asset type for non-uk residents section and " +
+            "selects more than one asset type checkboxes" in {
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreSession(
+                session.copy(journeyStatus = Some(
+                  journey.copy(
+                    newReturnTriageAnswers = Left(
+                      answers.copy(
+                        assetTypes = Some(List(AssetType.Residential, AssetType.MixedUse))
+                      )
+                    )
+                  )
+                )
+                )
+              )(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(s"$key[]" -> "0", s"$key[]" -> "2"),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
+          "user has already answered the asset type for non-uk residents section and " +
+            "re-selected different asset type" in {
+            val answers = sample[IncompleteMultipleDisposalsTriageAnswers]
+              .copy(
+                individualUserType = Some(Self),
+                numberOfProperties = Some(2),
+                wasAUKResident     = Some(false),
+                assetTypes         = Some(List(AssetType.Residential))
+              )
+
+            val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreSession(
+                session.copy(journeyStatus = Some(
+                  journey.copy(
+                    newReturnTriageAnswers = Left(
+                      answers.copy(
+                        assetTypes = Some(List(AssetType.NonResidential))
+                      )
+                    )
+                  )
+                )
+                )
+              )(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(s"$key[]" -> "1"),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
+        }
+
+        "the user has started a draft return and" when {
+
+          "have completed the section and they enter a figure which is " +
+            "different than one they have already entered" in {
+            val answers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+              countryOfResidence = sample[Country],
+              assetTypes         = List(AssetType.Residential)
+            )
+            val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+
+            val updatedAnswers =
+              IncompleteMultipleDisposalsTriageAnswers(
+                answers.individualUserType,
+                Some(answers.numberOfProperties),
+                Some(false),
+                Some(answers.countryOfResidence),
+                None,
+                Some(List(AssetType.NonResidential)),
+                Some(true),
+                Some(answers.taxYear),
+                Some(answers.completionDate)
+              )
+            val updatedDraftReturn = draftReturn.copy(triageAnswers = updatedAnswers)
+            val updatedJourney     = journey.copy(draftReturn       = updatedDraftReturn)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreDraftReturn(
+                updatedDraftReturn,
+                journey.subscribedDetails.cgtReference,
+                journey.agentReferenceNumber
+              )(
+                Right(())
+              )
+              mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(s"$key[]" -> "1"),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
         }
 
       }
@@ -1472,7 +2205,7 @@ class MultipleDisposalsTriageControllerSpec
 
         "user has already answered the asset type for non-uk residents section and " +
           "re-selected same asset type" in {
-          val answers = sample[IncompleteMultipleDisposalsAnswers]
+          val answers = sample[IncompleteMultipleDisposalsTriageAnswers]
             .copy(
               individualUserType = Some(Self),
               numberOfProperties = Some(2),
@@ -1498,7 +2231,7 @@ class MultipleDisposalsTriageControllerSpec
       "show a form error" when {
 
         "the user submits nothing" in {
-          val answers = IncompleteMultipleDisposalsAnswers.empty.copy(
+          val answers = IncompleteMultipleDisposalsTriageAnswers.empty.copy(
             individualUserType = Some(Self),
             numberOfProperties = Some(2),
             wasAUKResident     = Some(false),
@@ -1526,6 +2259,64 @@ class MultipleDisposalsTriageControllerSpec
 
       }
 
+      "show an error page" when {
+
+        val answers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+          countryOfResidence = sample[Country],
+          assetTypes         = List(AssetType.Residential)
+        )
+        val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+
+        val updatedAnswers =
+          IncompleteMultipleDisposalsTriageAnswers(
+            answers.individualUserType,
+            Some(answers.numberOfProperties),
+            Some(false),
+            Some(answers.countryOfResidence),
+            None,
+            Some(List(AssetType.NonResidential)),
+            Some(true),
+            Some(answers.taxYear),
+            Some(answers.completionDate)
+          )
+        val updatedDraftReturn = draftReturn.copy(triageAnswers = updatedAnswers)
+        val updatedJourney     = journey.copy(draftReturn       = updatedDraftReturn)
+
+        "there is an error updating the draft return" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(
+              Left(Error(""))
+            )
+          }
+
+          checkIsTechnicalErrorPage(performAction(s"$key[]" -> "1"))
+        }
+
+        "there is an error updating the session" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(
+              Right(())
+            )
+            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction(s"$key[]" -> "1"))
+        }
+
+      }
+
     }
 
     "handling requests to display the completion date page" must {
@@ -1536,74 +2327,63 @@ class MultipleDisposalsTriageControllerSpec
 
       "display the page" when {
 
-        "the user is starting s new draft return and" when {
+        def test(
+          session: SessionData,
+          expectedBackLink: Call,
+          expectedButtonMessageKey: String,
+          expectReturnToSummaryLink: Boolean
+        ): Unit =
+          testPageIsDisplayed(
+            performAction,
+            session,
+            "multipleDisposalsCompletionDate.title",
+            routes.MultipleDisposalsTriageController.completionDateSubmit(),
+            expectedBackLink,
+            expectedButtonMessageKey,
+            expectReturnToSummaryLink
+          )
 
-          "they have not answered the question before" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                sessionDataWithStartingNewDraftReturn(
-                  IncompleteMultipleDisposalsAnswers.empty.copy(
-                    Some(sample[IndividualUserType]),
-                    Some(2),
-                    Some(true),
-                    None,
-                    Some(true),
-                    Some(List(AssetType.Residential)),
-                    Some(true),
-                    Some(sample[TaxYear]),
-                    None
-                  )
-                )._1
-              )
-            }
+        "the user has not started a new draft return and" when {
 
-            checkPageIsDisplayed(
-              performAction(),
-              messageFromMessageKey("multipleDisposalsCompletionDate.title"), { doc =>
-                doc.select("#back").attr("href") shouldBe routes.MultipleDisposalsTriageController
-                  .whenWereContractsExchanged()
-                  .url
-                doc
-                  .select("#content > article > form")
-                  .attr("action") shouldBe routes.MultipleDisposalsTriageController
-                  .completionDateSubmit()
-                  .url
-              }
+          "the journey is incomplete" in {
+            test(
+              sessionDataWithStartingNewDraftReturn(IncompleteMultipleDisposalsTriageAnswers.empty)._1,
+              triage.routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
+              "button.continue",
+              expectReturnToSummaryLink = false
             )
           }
 
-          "they have answered the question before" in {
-            val answers = sample[CompleteMultipleDisposalsAnswers]
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(sessionDataWithStartingNewDraftReturn(answers)._1)
-            }
-
-            checkPageIsDisplayed(
-              performAction(),
-              messageFromMessageKey("multipleDisposalsCompletionDate.title"), { doc =>
-                doc.select("#back").attr("href") shouldBe routes.MultipleDisposalsTriageController
-                  .checkYourAnswers()
-                  .url
-                doc
-                  .select("#content > article > form")
-                  .attr("action") shouldBe routes.MultipleDisposalsTriageController
-                  .completionDateSubmit()
-                  .url
-                doc
-                  .select("#multipleDisposalsCompletionDate-day")
-                  .attr("value") shouldBe s"${answers.completionDate.value.getDayOfMonth()}"
-                doc
-                  .select("#multipleDisposalsCompletionDate-month")
-                  .attr("value") shouldBe s"${answers.completionDate.value.getMonthValue()}"
-                doc
-                  .select("#multipleDisposalsCompletionDate-year")
-                  .attr("value") shouldBe s"${answers.completionDate.value.getYear()}"
-              }
+          "the journey is complete" in {
+            test(
+              sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsTriageAnswers])._1,
+              triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              "button.continue",
+              expectReturnToSummaryLink = false
             )
           }
 
+        }
+
+        "the user has started a new draft return and" when {
+
+          "the journey is incomplete" in {
+            test(
+              sessionDataWithFillingOutReturn(IncompleteMultipleDisposalsTriageAnswers.empty)._1,
+              triage.routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
+              "button.saveAndContinue",
+              expectReturnToSummaryLink = true
+            )
+          }
+
+          "the journey is complete" in {
+            test(
+              sessionDataWithFillingOutReturn(sample[CompleteMultipleDisposalsTriageAnswers])._1,
+              triage.routes.MultipleDisposalsTriageController.checkYourAnswers(),
+              "button.saveAndContinue",
+              expectReturnToSummaryLink = true
+            )
+          }
         }
 
       }
@@ -1629,7 +2409,7 @@ class MultipleDisposalsTriageControllerSpec
         def testFormError(formData: List[(String, String)])(expectedErrorMessageKey: String) = {
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsAnswers])._1)
+            mockGetSession(sessionDataWithStartingNewDraftReturn(sample[CompleteMultipleDisposalsTriageAnswers])._1)
           }
 
           checkPageIsDisplayed(
@@ -1670,9 +2450,33 @@ class MultipleDisposalsTriageControllerSpec
 
       "show an error page" when {
 
+        "there is an error updating the draft return" in {
+          val answers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+            completionDate = CompletionDate(LocalDateUtils.today().minusDays(1L))
+          )
+          val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+
+          val updatedAnswers     = answers.copy(completionDate    = CompletionDate(LocalDateUtils.today()))
+          val updatedDraftReturn = draftReturn.copy(triageAnswers = updatedAnswers)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(
+              Left(Error(""))
+            )
+          }
+
+          checkIsTechnicalErrorPage(performAction(formData(LocalDateUtils.today()): _*))
+        }
+
         "there is an error updating the session" in {
           val answers =
-            sample[CompleteMultipleDisposalsAnswers].copy(completionDate = CompletionDate(LocalDateUtils.today()))
+            sample[CompleteMultipleDisposalsTriageAnswers].copy(completionDate = CompletionDate(LocalDateUtils.today()))
           val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
 
           val newCompletionDate = CompletionDate(answers.completionDate.value.minusDays(1L))
@@ -1692,10 +2496,10 @@ class MultipleDisposalsTriageControllerSpec
 
       "redirect to the check your answers page" when {
 
-        "the user submits a valid value and" when {
+        "the user has not started a draft return and" when {
 
           "the user has not answered the question before" in {
-            val answers            = IncompleteMultipleDisposalsAnswers.empty
+            val answers            = IncompleteMultipleDisposalsTriageAnswers.empty
             val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
 
             val newCompletionDate = CompletionDate(LocalDateUtils.today())
@@ -1716,7 +2520,8 @@ class MultipleDisposalsTriageControllerSpec
 
           "the user has already answered the question" in {
             val answers =
-              sample[CompleteMultipleDisposalsAnswers].copy(completionDate = CompletionDate(LocalDateUtils.today()))
+              sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(completionDate = CompletionDate(LocalDateUtils.today()))
             val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
 
             val newCompletionDate = CompletionDate(answers.completionDate.value.minusDays(1L))
@@ -1737,11 +2542,46 @@ class MultipleDisposalsTriageControllerSpec
 
         }
 
+        "the user has started a draft return and" when {
+
+          "have completed the section and they enter a figure which is " +
+            "different than one they have already entered" in {
+            val answers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+              completionDate = CompletionDate(LocalDateUtils.today().minusDays(1L))
+            )
+            val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(answers)
+
+            val updatedAnswers     = answers.copy(completionDate    = CompletionDate(LocalDateUtils.today()))
+            val updatedDraftReturn = draftReturn.copy(triageAnswers = updatedAnswers)
+            val updatedJourney     = journey.copy(draftReturn       = updatedDraftReturn)
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockStoreDraftReturn(
+                updatedDraftReturn,
+                journey.subscribedDetails.cgtReference,
+                journey.agentReferenceNumber
+              )(
+                Right(())
+              )
+              mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
+            }
+
+            checkIsRedirect(
+              performAction(formData(LocalDateUtils.today()): _*),
+              routes.MultipleDisposalsTriageController.checkYourAnswers()
+            )
+          }
+
+        }
+
         "not perform any updates" when {
 
           "the date submitted is the same as one that already exists in session" in {
             val answers =
-              sample[CompleteMultipleDisposalsAnswers].copy(completionDate = CompletionDate(LocalDateUtils.today()))
+              sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(completionDate = CompletionDate(LocalDateUtils.today()))
             val (session, journey) = sessionDataWithStartingNewDraftReturn(answers)
 
             inSequence {
@@ -1766,7 +2606,7 @@ class MultipleDisposalsTriageControllerSpec
       def performAction(): Future[Result] =
         controller.checkYourAnswers()(FakeRequest())
 
-      val completeAnswersUk = CompleteMultipleDisposalsAnswers(
+      val completeAnswersUk = CompleteMultipleDisposalsTriageAnswers(
         Some(IndividualUserType.Self),
         2,
         Country.uk,
@@ -1775,7 +2615,7 @@ class MultipleDisposalsTriageControllerSpec
         sample[CompletionDate]
       )
 
-      val allQuestionsAnsweredUk = IncompleteMultipleDisposalsAnswers(
+      val allQuestionsAnsweredUk = IncompleteMultipleDisposalsTriageAnswers(
         completeAnswersUk.individualUserType,
         Some(completeAnswersUk.numberOfProperties),
         Some(true),
@@ -1787,7 +2627,7 @@ class MultipleDisposalsTriageControllerSpec
         Some(completeAnswersUk.completionDate)
       )
 
-      val completeAnswersNonUk = CompleteMultipleDisposalsAnswers(
+      val completeAnswersNonUk = CompleteMultipleDisposalsTriageAnswers(
         Some(IndividualUserType.Self),
         2,
         sample[Country],
@@ -1796,7 +2636,7 @@ class MultipleDisposalsTriageControllerSpec
         sample[CompletionDate]
       )
 
-      val allQuestionsAnsweredNonUk = IncompleteMultipleDisposalsAnswers(
+      val allQuestionsAnsweredNonUk = IncompleteMultipleDisposalsTriageAnswers(
         completeAnswersNonUk.individualUserType,
         Some(completeAnswersNonUk.numberOfProperties),
         Some(false),
@@ -1808,7 +2648,10 @@ class MultipleDisposalsTriageControllerSpec
         Some(completeAnswersNonUk.completionDate)
       )
 
-      def testRedirectWhenIncomplete(answers: IncompleteMultipleDisposalsAnswers, expectedRedirect: Call): Unit = {
+      def testRedirectWhenIncomplete(
+        answers: IncompleteMultipleDisposalsTriageAnswers,
+        expectedRedirect: Call
+      ): Unit = {
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(
@@ -1828,7 +2671,7 @@ class MultipleDisposalsTriageControllerSpec
       "redirect to the who is individual representing page when no individual user type can be found and the subscribed " +
         "user type is individual" in {
         testRedirectWhenIncomplete(
-          IncompleteMultipleDisposalsAnswers.empty,
+          IncompleteMultipleDisposalsTriageAnswers.empty,
           routes.CommonTriageQuestionsController.whoIsIndividualRepresenting()
         )
       }
@@ -1967,6 +2810,25 @@ class MultipleDisposalsTriageControllerSpec
           checkIsTechnicalErrorPage(performAction())
         }
 
+        "there is an error storing a draft return" in {
+          val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(allQuestionsAnsweredUk)
+          val updatedDraftReturn              = draftReturn.copy(triageAnswers = completeAnswersUk)
+          val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(Right(()))
+            mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
       }
 
       "redirect to the completion date page" when {
@@ -2006,13 +2868,20 @@ class MultipleDisposalsTriageControllerSpec
           "they were a uk resident" in {
             inSequence {
               mockAuthWithNoRetrievals()
-              mockGetSession(sessionDataWithStartingNewDraftReturn(completeAnswersUk)._1)
+              mockGetSession(sessionDataWithFillingOutReturn(completeAnswersUk)._1)
             }
 
             checkPageIsDisplayed(
               performAction(),
               messageFromMessageKey("multipleDisposals.triage.cya.title"), { doc =>
-                MultipleDisposalsTriageControllerSpec.validateSingleDisposalTriageCheckYourAnswersPage(
+                doc.select("#guidanceLink").attr("href") shouldBe routes.MultipleDisposalsTriageController
+                  .guidance()
+                  .url
+                doc.select("#guidanceLink").text shouldBe messageFromMessageKey(
+                  "multipleDisposals.triage.cya.guidanceLink"
+                )
+
+                MultipleDisposalsTriageControllerSpec.validateMultipleDisposalsTriageCheckYourAnswersPage(
                   completeAnswersUk,
                   None,
                   doc
@@ -2031,7 +2900,14 @@ class MultipleDisposalsTriageControllerSpec
             checkPageIsDisplayed(
               performAction(),
               messageFromMessageKey("multipleDisposals.triage.cya.title"), { doc =>
-                MultipleDisposalsTriageControllerSpec.validateSingleDisposalTriageCheckYourAnswersPage(
+                doc.select("#guidanceLink").attr("href") shouldBe routes.MultipleDisposalsTriageController
+                  .guidance()
+                  .url
+                doc.select("#guidanceLink").text shouldBe messageFromMessageKey(
+                  "multipleDisposals.triage.cya.guidanceLink"
+                )
+
+                MultipleDisposalsTriageControllerSpec.validateMultipleDisposalsTriageCheckYourAnswersPage(
                   completeAnswersNonUk,
                   None,
                   doc
@@ -2050,7 +2926,14 @@ class MultipleDisposalsTriageControllerSpec
             checkPageIsDisplayed(
               performAction(),
               messageFromMessageKey("multipleDisposals.triage.cya.title"), { doc =>
-                MultipleDisposalsTriageControllerSpec.validateSingleDisposalTriageCheckYourAnswersPage(
+                doc.select("#guidanceLink").attr("href") shouldBe routes.MultipleDisposalsTriageController
+                  .guidance()
+                  .url
+                doc.select("#guidanceLink").text shouldBe messageFromMessageKey(
+                  "multipleDisposals.triage.cya.guidanceLink"
+                )
+
+                MultipleDisposalsTriageControllerSpec.validateMultipleDisposalsTriageCheckYourAnswersPage(
                   completeAnswersNonUk,
                   Some(UserType.Agent),
                   doc
@@ -2065,19 +2948,32 @@ class MultipleDisposalsTriageControllerSpec
         "the user has just answered all the question in the section and" when {
 
           "all updated are successful when the user was a uk resident" in {
-            val (session, journey) = sessionDataWithStartingNewDraftReturn(allQuestionsAnsweredUk)
-            val updatedJourney     = journey.copy(newReturnTriageAnswers = Left(completeAnswersUk))
+            val (session, journey, draftReturn) = sessionDataWithFillingOutReturn(allQuestionsAnsweredUk)
+            val updatedDraftReturn              = draftReturn.copy(triageAnswers = completeAnswersUk)
+            val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
 
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(session)
+              mockStoreDraftReturn(
+                updatedDraftReturn,
+                journey.subscribedDetails.cgtReference,
+                journey.agentReferenceNumber
+              )(Right(()))
               mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
             }
 
             checkPageIsDisplayed(
               performAction(),
               messageFromMessageKey("multipleDisposals.triage.cya.title"), { doc =>
-                MultipleDisposalsTriageControllerSpec.validateSingleDisposalTriageCheckYourAnswersPage(
+                doc.select("#guidanceLink").attr("href") shouldBe routes.MultipleDisposalsTriageController
+                  .guidance()
+                  .url
+                doc.select("#guidanceLink").text shouldBe messageFromMessageKey(
+                  "multipleDisposals.triage.cya.guidanceLink"
+                )
+
+                MultipleDisposalsTriageControllerSpec.validateMultipleDisposalsTriageCheckYourAnswersPage(
                   completeAnswersUk,
                   None,
                   doc
@@ -2100,7 +2996,14 @@ class MultipleDisposalsTriageControllerSpec
             checkPageIsDisplayed(
               performAction(),
               messageFromMessageKey("multipleDisposals.triage.cya.title"), { doc =>
-                MultipleDisposalsTriageControllerSpec.validateSingleDisposalTriageCheckYourAnswersPage(
+                doc.select("#guidanceLink").attr("href") shouldBe routes.MultipleDisposalsTriageController
+                  .guidance()
+                  .url
+                doc.select("#guidanceLink").text shouldBe messageFromMessageKey(
+                  "multipleDisposals.triage.cya.guidanceLink"
+                )
+
+                MultipleDisposalsTriageControllerSpec.validateMultipleDisposalsTriageCheckYourAnswersPage(
                   completeAnswersNonUk,
                   None,
                   doc
@@ -2114,14 +3017,134 @@ class MultipleDisposalsTriageControllerSpec
       }
     }
 
+    "handling submits on the check your answers page" when {
+      def performAction(): Future[Result] = controller.checkYourAnswersSubmit()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(performAction, isValidJourney)
+
+      "the user has not started a new draft return yet" must {
+
+        val completeAnswers    = sample[CompleteMultipleDisposalsTriageAnswers]
+        val (session, journey) = sessionDataWithStartingNewDraftReturn(completeAnswers)
+        val draftId            = UUID.randomUUID()
+        val newDraftReturn     = MultipleDisposalsDraftReturn(draftId, completeAnswers, LocalDateUtils.today())
+        val newJourney = FillingOutReturn(
+          journey.subscribedDetails,
+          journey.ggCredId,
+          journey.agentReferenceNumber,
+          newDraftReturn
+        )
+
+        "show an error page" when {
+
+          "there is an error storing the new draft return" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockGenerateUUID(draftId)
+              mockStoreDraftReturn(
+                newDraftReturn,
+                journey.subscribedDetails.cgtReference,
+                journey.agentReferenceNumber
+              )(Left(Error("")))
+            }
+
+            checkIsTechnicalErrorPage(performAction())
+          }
+
+          "there is an error updating the session" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockGenerateUUID(draftId)
+              mockStoreDraftReturn(
+                newDraftReturn,
+                journey.subscribedDetails.cgtReference,
+                journey.agentReferenceNumber
+              )(Right(()))
+              mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(Left(Error("")))
+            }
+
+            checkIsTechnicalErrorPage(performAction())
+          }
+
+        }
+
+        "redirect to the task list page" when {
+
+          "a new draft return is created and saved" in {
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(session)
+              mockGenerateUUID(draftId)
+              mockStoreDraftReturn(
+                newDraftReturn,
+                journey.subscribedDetails.cgtReference,
+                journey.agentReferenceNumber
+              )(Right(()))
+              mockStoreSession(session.copy(journeyStatus = Some(newJourney)))(Right(()))
+            }
+
+            checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+          }
+
+        }
+
+      }
+
+      "the user has already started a new draft return" must {
+
+        "redirect to the task list page" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionDataWithFillingOutReturn(sample[CompleteMultipleDisposalsTriageAnswers])._1)
+          }
+
+          checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+        }
+
+      }
+
+    }
+
+  }
+
+  def testPageIsDisplayed(
+    performAction: () => Future[Result],
+    session: SessionData,
+    expectedPageTitleMessageKey: String,
+    expectedSubmit: Call,
+    expectedBackLink: Call,
+    expectedButtonMessageKey: String,
+    expectReturnToSummaryLink: Boolean
+  ): Unit = {
+    inSequence {
+      mockAuthWithNoRetrievals()
+      mockGetSession(session)
+    }
+
+    checkPageIsDisplayed(
+      performAction(),
+      messageFromMessageKey(expectedPageTitleMessageKey), { doc =>
+        doc.select("#back").attr("href") shouldBe expectedBackLink.url
+        doc
+          .select("#content > article > form")
+          .attr("action")                  shouldBe expectedSubmit.url
+        doc.select("#submitButton").text() shouldBe messageFromMessageKey(expectedButtonMessageKey)
+        doc.select("#returnToSummaryLink").text() shouldBe (
+          if (expectReturnToSummaryLink) messageFromMessageKey("returns.return-to-summary-link")
+          else ""
+        )
+      }
+    )
   }
 
 }
 
 object MultipleDisposalsTriageControllerSpec extends Matchers {
 
-  def validateSingleDisposalTriageCheckYourAnswersPage(
-    answers: CompleteMultipleDisposalsAnswers,
+  def validateMultipleDisposalsTriageCheckYourAnswersPage(
+    answers: CompleteMultipleDisposalsTriageAnswers,
     userType: Option[UserType],
     doc: Document
   )(implicit messagesApi: MessagesApi, lang: Lang): Unit = {

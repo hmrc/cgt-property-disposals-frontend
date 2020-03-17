@@ -17,7 +17,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalDraftReturn
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
@@ -29,10 +29,11 @@
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
 pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning,
 taskLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.taskLink
 )
 
-@(draftReturn: DraftReturn)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(draftReturn: SingleDisposalDraftReturn)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers
@@ -54,12 +55,12 @@ draftReturn.acquisitionDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(
 
 @initialGainOrLossState = @{
 def shouldSeeSection(countryOfResidence: Country, assetType: AssetType, acquisitionDetailsAnswers: Option[AcquisitionDetailsAnswers]) = {
-val nonResidentialBeforeDate = RebasingCutoffDates.nonUkResidentsResidentialProperty
+val residentialBeforeDate = RebasingCutoffDates.nonUkResidentsResidentialProperty
 
 (countryOfResidence, assetType, acquisitionDetailsAnswers) match {
 case (_, _, _) if countryOfResidence.isUk() => false
-case (_, AssetType.NonResidential, Some(CompleteAcquisitionDetailsAnswers(_, AcquisitionDate(acquisitionDate), _, _, _, _)))
-if acquisitionDate.isBefore(nonResidentialBeforeDate) => true
+case (_, AssetType.Residential, Some(CompleteAcquisitionDetailsAnswers(_, AcquisitionDate(acquisitionDate), _, _, _, _)))
+if acquisitionDate.isBefore(residentialBeforeDate) => true
 case (_, _, _) => false
 
 }
@@ -136,7 +137,7 @@ TaskListStatus.CannotStart
             </li>
         </ul>
     </li>
-
+@if(triageState.isComplete) {
     <li>
         <h2 class="app-task-list__section">
                 <span class="app-task-list__section-number">
@@ -206,6 +207,12 @@ TaskListStatus.CannotStart
         </ul>
     </li>
 </ol>
+} else {
+</ol>
+
+@warning(messages("task-list.incompleteTriage"))
+
+}
 
 <p><a id="saveAndComeBackLater" href="@{
         returns.routes.ConfirmDraftReturnController.confirmDraftReturn()

@@ -31,7 +31,7 @@ sealed trait MultipleDisposalsTriageAnswers
 object MultipleDisposalsTriageAnswers {
 
   @Lenses
-  final case class IncompleteMultipleDisposalsAnswers(
+  final case class IncompleteMultipleDisposalsTriageAnswers(
     individualUserType: Option[IndividualUserType],
     numberOfProperties: Option[Int],
     wasAUKResident: Option[Boolean],
@@ -43,12 +43,12 @@ object MultipleDisposalsTriageAnswers {
     completionDate: Option[CompletionDate]
   ) extends MultipleDisposalsTriageAnswers
 
-  object IncompleteMultipleDisposalsAnswers {
-    val empty: IncompleteMultipleDisposalsAnswers =
-      IncompleteMultipleDisposalsAnswers(None, None, None, None, None, None, None, None, None)
+  object IncompleteMultipleDisposalsTriageAnswers {
+    val empty: IncompleteMultipleDisposalsTriageAnswers =
+      IncompleteMultipleDisposalsTriageAnswers(None, None, None, None, None, None, None, None, None)
 
-    def fromCompleteAnswers(c: CompleteMultipleDisposalsAnswers): IncompleteMultipleDisposalsAnswers =
-      IncompleteMultipleDisposalsAnswers(
+    def fromCompleteAnswers(c: CompleteMultipleDisposalsTriageAnswers): IncompleteMultipleDisposalsTriageAnswers =
+      IncompleteMultipleDisposalsTriageAnswers(
         c.individualUserType,
         Some(c.numberOfProperties),
         Some(c.countryOfResidence.isUk()),
@@ -62,7 +62,7 @@ object MultipleDisposalsTriageAnswers {
 
   }
 
-  final case class CompleteMultipleDisposalsAnswers(
+  final case class CompleteMultipleDisposalsTriageAnswers(
     individualUserType: Option[IndividualUserType],
     numberOfProperties: Int,
     countryOfResidence: Country,
@@ -73,18 +73,18 @@ object MultipleDisposalsTriageAnswers {
 
   implicit class MultipleDisposalsTriageAnswersOps(private val m: MultipleDisposalsTriageAnswers) extends AnyVal {
     def fold[A](
-      ifIncomplete: IncompleteMultipleDisposalsAnswers => A,
-      ifComplete: CompleteMultipleDisposalsAnswers => A
+      ifIncomplete: IncompleteMultipleDisposalsTriageAnswers => A,
+      ifComplete: CompleteMultipleDisposalsTriageAnswers => A
     ): A = m match {
-      case i: IncompleteMultipleDisposalsAnswers => ifIncomplete(i)
-      case c: CompleteMultipleDisposalsAnswers   => ifComplete(c)
+      case i: IncompleteMultipleDisposalsTriageAnswers => ifIncomplete(i)
+      case c: CompleteMultipleDisposalsTriageAnswers   => ifComplete(c)
     }
 
     def unset[A](
-      fieldLens: Lens[IncompleteMultipleDisposalsAnswers, Option[A]]
-    ): IncompleteMultipleDisposalsAnswers =
+      fieldLens: Lens[IncompleteMultipleDisposalsTriageAnswers, Option[A]]
+    ): IncompleteMultipleDisposalsTriageAnswers =
       fieldLens.set(None)(
-        fold(identity, IncompleteMultipleDisposalsAnswers.fromCompleteAnswers)
+        fold(identity, IncompleteMultipleDisposalsTriageAnswers.fromCompleteAnswers)
       )
   }
 

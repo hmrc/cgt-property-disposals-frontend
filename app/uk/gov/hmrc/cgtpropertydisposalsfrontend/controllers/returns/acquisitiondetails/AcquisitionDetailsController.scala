@@ -77,22 +77,23 @@ class AcquisitionDetailsController @Inject() (
     f: (
       SessionData,
       FillingOutReturn,
+      SingleDisposalDraftReturn,
       AcquisitionDetailsAnswers
     ) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((s, r: FillingOutReturn)) =>
-        r.draftReturn.acquisitionDetailsAnswers.fold[Future[Result]](
-          f(s, r, IncompleteAcquisitionDetailsAnswers.empty)
-        )(f(s, r, _))
+      case Some((s, r @ FillingOutReturn(_, _, _, d: SingleDisposalDraftReturn))) =>
+        d.acquisitionDetailsAnswers.fold[Future[Result]](
+          f(s, r, d, IncompleteAcquisitionDetailsAnswers.empty)
+        )(f(s, r, d, _))
       case _ => Redirect(controllers.routes.StartController.start())
     }
 
   private def withAssetTypeAndResidentialStatus(
-    fillingOutReturn: FillingOutReturn,
+    draftReturn: SingleDisposalDraftReturn,
     answers: AcquisitionDetailsAnswers
   )(f: (AssetType, Boolean) => Future[Result]): Future[Result] =
-    fillingOutReturn.draftReturn.triageAnswers.fold(
+    draftReturn.triageAnswers.fold(
       i => i.assetType       -> i.wasAUKResident,
       c => Some(c.assetType) -> Some(c.countryOfResidence.isUk())
     ) match {
@@ -101,9 +102,9 @@ class AcquisitionDetailsController @Inject() (
     }
 
   private def withDisposalDate(
-    fillingOutReturn: FillingOutReturn
+    draftReturn: SingleDisposalDraftReturn
   )(f: DisposalDate => Future[Result]): Future[Result] =
-    fillingOutReturn.draftReturn.triageAnswers
+    draftReturn.triageAnswers
       .fold(_.disposalDate, c => Some(c.disposalDate))
       .fold[Future[Result]](
         Redirect(controllers.returns.routes.TaskListController.taskList())
@@ -148,6 +149,7 @@ class AcquisitionDetailsController @Inject() (
 
   private def commonSubmitBehaviour[A, P: Writeable, R](
     currentFillingOutReturn: FillingOutReturn,
+    currentDraftReturn: SingleDisposalDraftReturn,
     currentAnswers: AcquisitionDetailsAnswers
   )(form: Form[A])(
     page: (Form[A], Call) => P
@@ -169,11 +171,16 @@ class AcquisitionDetailsController @Inject() (
         .fold(
           formWithErrors => BadRequest(page(formWithErrors, backLink)), { value =>
             val newAnswers     = updateAnswers(value, currentAnswers)
-            val newDraftReturn = currentFillingOutReturn.draftReturn.copy(acquisitionDetailsAnswers = Some(newAnswers))
+            val newDraftReturn = currentDraftReturn.copy(acquisitionDetailsAnswers = Some(newAnswers))
 
             val result = for {
-              _ <- if (newDraftReturn === currentFillingOutReturn.draftReturn) EitherT.pure(())
-                  else returnsService.storeDraftReturn(newDraftReturn, currentFillingOutReturn.agentReferenceNumber)
+              _ <- if (newDraftReturn === currentDraftReturn) EitherT.pure(())
+                  else
+                    returnsService.storeDraftReturn(
+                      newDraftReturn,
+                      currentFillingOutReturn.subscribedDetails.cgtReference,
+                      currentFillingOutReturn.agentReferenceNumber
+                    )
               _ <- EitherT(
                     updateSession(sessionStore, request)(
                       _.copy(journeyStatus = Some(currentFillingOutReturn.copy(draftReturn = newDraftReturn)))
@@ -193,7 +200,7 @@ class AcquisitionDetailsController @Inject() (
 
   def acquisitionMethod(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
-      case (_, _, answers) =>
+      case (_, _, _, answers) =>
         commonDisplayBehaviour(answers)(
           form = _.fold(
             _.acquisitionMethod.fold(acquisitionMethodForm)(acquisitionMethodForm.fill),
@@ -210,9 +217,10 @@ class AcquisitionDetailsController @Inject() (
 
   def acquisitionMethodSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
-      case (_, fillingOutReturn, answers) =>
+      case (_, fillingOutReturn, draftReturn, answers) =>
         commonSubmitBehaviour(
           fillingOutReturn,
+          draftReturn,
           answers
         )(
           acquisitionMethodForm
@@ -233,8 +241,8 @@ class AcquisitionDetailsController @Inject() (
 
   def acquisitionDate(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
-      case (_, fillingOutReturn, answers) =>
-        withDisposalDate(fillingOutReturn) { disposalDate =>
+      case (_, _, draftReturn, answers) =>
+        withDisposalDate(draftReturn) { disposalDate =>
           val form = acquisitionDateForm(disposalDate.value)
 
           commonDisplayBehaviour(answers)(
@@ -257,12 +265,13 @@ class AcquisitionDetailsController @Inject() (
 
   def acquisitionDateSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
-      case (_, fillingOutReturn, answers) =>
-        withDisposalDate(fillingOutReturn) { disposalDate =>
-          withAssetTypeAndResidentialStatus(fillingOutReturn, answers) {
+      case (_, fillingOutReturn, draftReturn, answers) =>
+        withDisposalDate(draftReturn) { disposalDate =>
+          withAssetTypeAndResidentialStatus(draftReturn, answers) {
             case (assetType, wasUkResident) =>
               commonSubmitBehaviour(
                 fillingOutReturn,
+                draftReturn,
                 answers
               )(
                 form = acquisitionDateForm(disposalDate.value)
@@ -316,7 +325,7 @@ class AcquisitionDetailsController @Inject() (
 
   def acquisitionPrice(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
-      case (_, _, answers) =>
+      case (_, _, _, answers) =>
         withAcquisitionDate(answers) { acquisitionDate =>
           withAcquisitionMethod(answers) { acquisitionMethod =>
             commonDisplayBehaviour(answers)(
@@ -340,11 +349,12 @@ class AcquisitionDetailsController @Inject() (
 
   def acquisitionPriceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
-      case (_, fillingOutReturn, answers) =>
+      case (_, fillingOutReturn, draftReturn, answers) =>
         withAcquisitionDate(answers) { acquisitionDate =>
           withAcquisitionMethod(answers) { acquisitionMethod =>
             commonSubmitBehaviour(
               fillingOutReturn,
+              draftReturn,
               answers
             )(
               acquisitionPriceForm
@@ -370,8 +380,8 @@ class AcquisitionDetailsController @Inject() (
 
   def rebasedAcquisitionPrice(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
-      case (_, fillingOutReturn, answers) =>
-        withAssetTypeAndResidentialStatus(fillingOutReturn, answers) {
+      case (_, _, draftReturn, answers) =>
+        withAssetTypeAndResidentialStatus(draftReturn, answers) {
           case (assetType, wasUkResident) =>
             withAcquisitionDate(answers) { acquisitionDate =>
               rebasingCutOffDate(acquisitionDate, assetType, wasUkResident).fold[Future[Result]](
@@ -404,14 +414,14 @@ class AcquisitionDetailsController @Inject() (
   def rebasedAcquisitionPriceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
       withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
-        case (_, fillingOutReturn, answers) =>
-          withAssetTypeAndResidentialStatus(fillingOutReturn, answers) {
+        case (_, fillingOutReturn, draftReturn, answers) =>
+          withAssetTypeAndResidentialStatus(draftReturn, answers) {
             case (assetType, wasUkResident) =>
               withAcquisitionDate(answers) { acquisitionDate =>
                 rebasingCutOffDate(acquisitionDate, assetType, wasUkResident).fold[Future[Result]](
                   Redirect(routes.AcquisitionDetailsController.checkYourAnswers())
                 ) { rebaseDate =>
-                  commonSubmitBehaviour(fillingOutReturn, answers)(
+                  commonSubmitBehaviour(fillingOutReturn, draftReturn, answers)(
                     form = rebasedAcquisitionPriceForm
                   )(
                     page = {
@@ -444,8 +454,8 @@ class AcquisitionDetailsController @Inject() (
 
   def improvementCosts(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
-      case (_, fillingOutReturn, answers) =>
-        withAssetTypeAndResidentialStatus(fillingOutReturn, answers) {
+      case (_, _, draftReturn, answers) =>
+        withAssetTypeAndResidentialStatus(draftReturn, answers) {
           case (assetType, wasUkResident) =>
             withAcquisitionDate(answers) { acquisitionDate =>
               val rebaseDate = rebasingCutOffDate(acquisitionDate, assetType, wasUkResident)
@@ -477,14 +487,15 @@ class AcquisitionDetailsController @Inject() (
 
   def improvementCostsSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
-      case (_, fillingOutReturn, answers) =>
-        withAssetTypeAndResidentialStatus(fillingOutReturn, answers) {
+      case (_, fillingOutReturn, draftReturn, answers) =>
+        withAssetTypeAndResidentialStatus(draftReturn, answers) {
           case (assetType, wasUkResident) =>
             withAcquisitionDate(answers) { acquisitionDate =>
               val rebaseDate = rebasingCutOffDate(acquisitionDate, assetType, wasUkResident)
 
               commonSubmitBehaviour(
                 fillingOutReturn,
+                draftReturn,
                 answers
               )(
                 improvementCostsForm
@@ -517,7 +528,7 @@ class AcquisitionDetailsController @Inject() (
 
   def acquisitionFees(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
-      case (_, _, answers) =>
+      case (_, _, _, answers) =>
         commonDisplayBehaviour(answers)(
           form = _.fold(
             _.acquisitionFees.fold(acquisitionFeesForm)(p => acquisitionFeesForm.fill(p.inPounds)),
@@ -537,9 +548,10 @@ class AcquisitionDetailsController @Inject() (
 
   def acquisitionFeesSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
-      case (_, fillingOutReturn, answers) =>
+      case (_, fillingOutReturn, draftReturn, answers) =>
         commonSubmitBehaviour(
           fillingOutReturn,
+          draftReturn,
           answers
         )(
           acquisitionFeesForm
@@ -563,8 +575,8 @@ class AcquisitionDetailsController @Inject() (
 
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAcquisitionDetailsAnswers(request) {
-      case (_, fillingOutReturn, answers) =>
-        withAssetTypeAndResidentialStatus(fillingOutReturn, answers) {
+      case (_, fillingOutReturn, draftReturn, answers) =>
+        withAssetTypeAndResidentialStatus(draftReturn, answers) {
           case (assetType, wasAUkResident) =>
             answers match {
               case c: CompleteAcquisitionDetailsAnswers =>
@@ -592,10 +604,14 @@ class AcquisitionDetailsController @Inject() (
               case IncompleteAcquisitionDetailsAnswers(Some(m), Some(d), Some(p), r, Some(i), Some(f)) =>
                 val completeAnswers = CompleteAcquisitionDetailsAnswers(m, d, p, r, i, f)
                 val newDraftReturn =
-                  fillingOutReturn.draftReturn.copy(acquisitionDetailsAnswers = Some(completeAnswers))
+                  draftReturn.copy(acquisitionDetailsAnswers = Some(completeAnswers))
 
                 val result = for {
-                  _ <- returnsService.storeDraftReturn(newDraftReturn, fillingOutReturn.agentReferenceNumber)
+                  _ <- returnsService.storeDraftReturn(
+                        newDraftReturn,
+                        fillingOutReturn.subscribedDetails.cgtReference,
+                        fillingOutReturn.agentReferenceNumber
+                      )
                   _ <- EitherT(
                         updateSession(sessionStore, request)(
                           _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))

@@ -31,7 +31,7 @@
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(form: Form[Country], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[Country], backLink: Call, hasCreatedDraftReturn: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"countryCode"}
 @title = @{messages("multipleDisposalsCountryOfResidence.title")}
@@ -61,8 +61,10 @@
         )
 
         <p>@Html(messages("triage.enterCountry.link", appConfig.workOurYouResidenceStatusUrl))</p>
-        @submitButton(messages("button.continue"))
+        @submitButton(messages(if (hasCreatedDraftReturn) "button.saveAndContinue" else "button.continue"))
     }
+
+    @returnToSummaryLink(hasCreatedDraftReturn)
 
 }
 

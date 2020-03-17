@@ -39,7 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.format
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.{NoOtherReliefs, OtherReliefs}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, ExemptionAndLossesAnswers, OtherReliefsOption, ReliefDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{ExemptionAndLossesAnswers, OtherReliefsOption, ReliefDetailsAnswers, SingleDisposalDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -78,20 +78,24 @@ class ReliefDetailsControllerSpec
   def sessionWithReliefDetailsAnswers(
     reliefDetailsAnswers: Option[ReliefDetailsAnswers],
     exemptionAndLossesAnswers: Option[ExemptionAndLossesAnswers]
-  ): (SessionData, FillingOutReturn) = {
-    val journey = sample[FillingOutReturn].copy(
-      draftReturn = sample[DraftReturn].copy(
-        reliefDetailsAnswers      = reliefDetailsAnswers,
-        exemptionAndLossesAnswers = exemptionAndLossesAnswers
-      )
+  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) = {
+    val draftReturn = sample[SingleDisposalDraftReturn].copy(
+      reliefDetailsAnswers      = reliefDetailsAnswers,
+      exemptionAndLossesAnswers = exemptionAndLossesAnswers
     )
-    SessionData.empty.copy(journeyStatus = Some(journey)) -> journey
+
+    val journey = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+    (
+      SessionData.empty.copy(journeyStatus = Some(journey)),
+      journey,
+      draftReturn
+    )
   }
 
   def sessionWithReliefDetailsAnswers(
     reliefDetailsAnswers: ReliefDetailsAnswers,
     exemptionAndLossesAnswers: Option[ExemptionAndLossesAnswers] = None
-  ): (SessionData, FillingOutReturn) =
+  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) =
     sessionWithReliefDetailsAnswers(Some(reliefDetailsAnswers), exemptionAndLossesAnswers)
 
   "ReliefDetailsController" when {
@@ -196,9 +200,9 @@ class ReliefDetailsControllerSpec
 
         val currentAnswers =
           sample[CompleteReliefDetailsAnswers].copy(privateResidentsRelief = AmountInPence.fromPounds(1d))
-        val (session, journey)        = sessionWithReliefDetailsAnswers(currentAnswers)
-        val newprivateResidentsRelief = AmountInPence.fromPounds(10d)
-        val newDraftReturn = journey.draftReturn.copy(
+        val (session, journey, draftReturn) = sessionWithReliefDetailsAnswers(currentAnswers)
+        val newprivateResidentsRelief       = AmountInPence.fromPounds(10d)
+        val newDraftReturn = draftReturn.copy(
           reliefDetailsAnswers = Some(
             currentAnswers.copy(
               privateResidentsRelief = newprivateResidentsRelief
@@ -211,7 +215,9 @@ class ReliefDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
+            mockStoreDraftReturn(newDraftReturn, journey.subscribedDetails.cgtReference, journey.agentReferenceNumber)(
+              Left(Error(""))
+            )
           }
 
           checkIsTechnicalErrorPage(
@@ -223,7 +229,9 @@ class ReliefDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
+            mockStoreDraftReturn(newDraftReturn, journey.subscribedDetails.cgtReference, journey.agentReferenceNumber)(
+              Right(())
+            )
             mockStoreSession(
               session.copy(
                 journeyStatus = Some(
@@ -248,7 +256,7 @@ class ReliefDetailsControllerSpec
         "the user hasn't ever answered the relief details question " +
           "and the draft return and session data has been successfully updated" in {
           val (newPrivateResidentsRelief, newPrivateResidentsReliefValue) = "0" -> 10d
-          val oldDraftReturn = sample[DraftReturn].copy(
+          val oldDraftReturn = sample[SingleDisposalDraftReturn].copy(
             reliefDetailsAnswers = None
           )
           val newDraftReturn =
@@ -277,7 +285,7 @@ class ReliefDetailsControllerSpec
           val (newPrivateResidentsRelief, newPrivateResidentsReliefValue) = "0" -> 1d
           val oldAnswers                                                  = sample[IncompleteReliefDetailsAnswers].copy(privateResidentsRelief = None)
 
-          val oldDraftReturn = sample[DraftReturn].copy(reliefDetailsAnswers = Some(oldAnswers))
+          val oldDraftReturn = sample[SingleDisposalDraftReturn].copy(reliefDetailsAnswers = Some(oldAnswers))
           val newDraftReturn =
             oldDraftReturn.copy(
               reliefDetailsAnswers = Some(
@@ -435,10 +443,10 @@ class ReliefDetailsControllerSpec
 
       "show an error page" when {
 
-        val currentAnswers     = sample[CompleteReliefDetailsAnswers].copy(lettingsRelief = AmountInPence.fromPounds(1d))
-        val (session, journey) = sessionWithReliefDetailsAnswers(currentAnswers)
-        val newLettingsRelief  = AmountInPence.fromPounds(2d)
-        val newDraftReturn = journey.draftReturn.copy(
+        val currentAnswers                  = sample[CompleteReliefDetailsAnswers].copy(lettingsRelief = AmountInPence.fromPounds(1d))
+        val (session, journey, draftReturn) = sessionWithReliefDetailsAnswers(currentAnswers)
+        val newLettingsRelief               = AmountInPence.fromPounds(2d)
+        val newDraftReturn = draftReturn.copy(
           reliefDetailsAnswers = Some(
             currentAnswers.copy(
               lettingsRelief = newLettingsRelief
@@ -451,7 +459,9 @@ class ReliefDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
+            mockStoreDraftReturn(newDraftReturn, journey.subscribedDetails.cgtReference, journey.agentReferenceNumber)(
+              Left(Error(""))
+            )
           }
 
           checkIsTechnicalErrorPage(
@@ -463,7 +473,9 @@ class ReliefDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
+            mockStoreDraftReturn(newDraftReturn, journey.subscribedDetails.cgtReference, journey.agentReferenceNumber)(
+              Right(())
+            )
             mockStoreSession(
               session.copy(journeyStatus = Some(
                 journey.copy(
@@ -490,7 +502,7 @@ class ReliefDetailsControllerSpec
             .copy(privateResidentsRelief = Some(sample[AmountInPence]), lettingsRelief = None)
           val newLettingsRelief = 2d
 
-          val oldDraftReturn = sample[DraftReturn].copy(reliefDetailsAnswers = Some(currentAnswers))
+          val oldDraftReturn = sample[SingleDisposalDraftReturn].copy(reliefDetailsAnswers = Some(currentAnswers))
 
           val newDraftReturn =
             oldDraftReturn.copy(
@@ -512,7 +524,7 @@ class ReliefDetailsControllerSpec
           "and the draft return and session data has been successfully updated" in {
           val currentAnswers    = sample[CompleteReliefDetailsAnswers].copy(lettingsRelief = AmountInPence.fromPounds(1d))
           val newLettingsRelief = 2d
-          val oldDraftReturn    = sample[DraftReturn].copy(reliefDetailsAnswers = Some(currentAnswers))
+          val oldDraftReturn    = sample[SingleDisposalDraftReturn].copy(reliefDetailsAnswers = Some(currentAnswers))
 
           val newDraftReturn =
             oldDraftReturn.copy(
@@ -769,10 +781,10 @@ class ReliefDetailsControllerSpec
 
       "show an error page" when {
 
-        val currentAnswers     = sample[CompleteReliefDetailsAnswers].copy(otherReliefs = Some(otherReliefs))
-        val (session, journey) = sessionWithReliefDetailsAnswers(currentAnswers)
-        val newOtherReliefs    = OtherReliefs("ReliefName", AmountInPence.fromPounds(2))
-        val newDraftReturn = journey.draftReturn.copy(
+        val currentAnswers                  = sample[CompleteReliefDetailsAnswers].copy(otherReliefs = Some(otherReliefs))
+        val (session, journey, draftReturn) = sessionWithReliefDetailsAnswers(currentAnswers)
+        val newOtherReliefs                 = OtherReliefs("ReliefName", AmountInPence.fromPounds(2))
+        val newDraftReturn = draftReturn.copy(
           reliefDetailsAnswers = Some(
             currentAnswers.copy(
               otherReliefs = Some(newOtherReliefs)
@@ -785,7 +797,9 @@ class ReliefDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Left(Error("")))
+            mockStoreDraftReturn(newDraftReturn, journey.subscribedDetails.cgtReference, journey.agentReferenceNumber)(
+              Left(Error(""))
+            )
           }
 
           checkIsTechnicalErrorPage(
@@ -803,7 +817,9 @@ class ReliefDetailsControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
+            mockStoreDraftReturn(newDraftReturn, journey.subscribedDetails.cgtReference, journey.agentReferenceNumber)(
+              Right(())
+            )
             mockStoreSession(
               session.copy(journeyStatus = Some(
                 journey.copy(
@@ -843,7 +859,7 @@ class ReliefDetailsControllerSpec
             otherReliefs = Some(newOtherReliefs)
           )
 
-          val oldDraftReturn = sample[DraftReturn].copy(
+          val oldDraftReturn = sample[SingleDisposalDraftReturn].copy(
             reliefDetailsAnswers      = Some(currentAnswers),
             exemptionAndLossesAnswers = None
           )
@@ -872,7 +888,7 @@ class ReliefDetailsControllerSpec
             currentAnswers.copy(
               otherReliefs = Some(newOtherReliefs)
             )
-          val oldDraftReturn = sample[DraftReturn].copy(
+          val oldDraftReturn = sample[SingleDisposalDraftReturn].copy(
             reliefDetailsAnswers      = Some(currentAnswers),
             exemptionAndLossesAnswers = None
           )
@@ -974,7 +990,7 @@ class ReliefDetailsControllerSpec
           newReliefAnswers: ReliefDetailsAnswers,
           newExemptionAndLossesAnswers: ExemptionAndLossesAnswers
         )(formData: (String, String)*) = {
-          val oldDraftReturn = sample[DraftReturn].copy(
+          val oldDraftReturn = sample[SingleDisposalDraftReturn].copy(
             reliefDetailsAnswers      = Some(oldReliefAnswers),
             exemptionAndLossesAnswers = Some(oldExemptionAndLossesAnswers)
           )
@@ -1168,15 +1184,16 @@ class ReliefDetailsControllerSpec
       "show an error page" when {
 
         "there is an error updating the draft return" in {
-          val (session, journey) = sessionWithReliefDetailsAnswers(allQuestionsAnswered)
+          val (session, journey, draftReturn) = sessionWithReliefDetailsAnswers(allQuestionsAnswered)
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
             mockStoreDraftReturn(
-              journey.draftReturn.copy(
+              draftReturn.copy(
                 reliefDetailsAnswers = Some(completeAnswers)
               ),
+              journey.subscribedDetails.cgtReference,
               journey.agentReferenceNumber
             )(Left(Error("")))
           }
@@ -1185,21 +1202,22 @@ class ReliefDetailsControllerSpec
         }
 
         "there is an error updating the session" in {
-          val (session, journey) = sessionWithReliefDetailsAnswers(allQuestionsAnswered)
+          val (session, journey, draftReturn) = sessionWithReliefDetailsAnswers(allQuestionsAnswered)
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
             mockStoreDraftReturn(
-              journey.draftReturn.copy(
+              draftReturn.copy(
                 reliefDetailsAnswers = Some(completeAnswers)
               ),
+              journey.subscribedDetails.cgtReference,
               journey.agentReferenceNumber
             )(Right(()))
             mockStoreSession(
               session.copy(
                 journeyStatus = Some(
-                  journey.copy(draftReturn = journey.draftReturn.copy(
+                  journey.copy(draftReturn = draftReturn.copy(
                     reliefDetailsAnswers = Some(completeAnswers)
                   )
                   )
@@ -1216,14 +1234,16 @@ class ReliefDetailsControllerSpec
       "show the page" when {
 
         "the user has just answered all the questions and all updates are successful" in {
-          val (session, journey) = sessionWithReliefDetailsAnswers(allQuestionsAnswered)
-          val newDraftReturn     = journey.draftReturn.copy(reliefDetailsAnswers = Some(completeAnswers))
-          val updatedJourney     = journey.copy(draftReturn = newDraftReturn)
+          val (session, journey, draftReturn) = sessionWithReliefDetailsAnswers(allQuestionsAnswered)
+          val newDraftReturn                  = draftReturn.copy(reliefDetailsAnswers = Some(completeAnswers))
+          val updatedJourney                  = journey.copy(draftReturn = newDraftReturn)
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
-            mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
+            mockStoreDraftReturn(newDraftReturn, journey.subscribedDetails.cgtReference, journey.agentReferenceNumber)(
+              Right(())
+            )
             mockStoreSession(session.copy(journeyStatus = Some(updatedJourney)))(Right(()))
           }
 
@@ -1329,8 +1349,8 @@ class ReliefDetailsControllerSpec
 
   def testSuccessfulUpdatesAfterSubmit(
     result: => Future[Result],
-    oldDraftReturn: DraftReturn,
-    newDraftReturn: DraftReturn
+    oldDraftReturn: SingleDisposalDraftReturn,
+    newDraftReturn: SingleDisposalDraftReturn
   ): Unit = {
     val journey = sample[FillingOutReturn].copy(draftReturn = oldDraftReturn)
     val session = SessionData.empty.copy(journeyStatus      = Some(journey))
@@ -1338,7 +1358,9 @@ class ReliefDetailsControllerSpec
     inSequence {
       mockAuthWithNoRetrievals()
       mockGetSession(session)
-      mockStoreDraftReturn(newDraftReturn, journey.agentReferenceNumber)(Right(()))
+      mockStoreDraftReturn(newDraftReturn, journey.subscribedDetails.cgtReference, journey.agentReferenceNumber)(
+        Right(())
+      )
       mockStoreSession(
         session.copy(
           journeyStatus = Some(journey.copy(draftReturn = newDraftReturn))

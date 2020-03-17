@@ -50,7 +50,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.BusinessPa
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr.{BusinessPartnerRecord, BusinessPartnerRecordRequest, BusinessPartnerRecordResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{NeedMoreDetailsDetails, SubscribedDetails, SubscriptionDetails}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, DraftReturn, ReturnSummary}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, ReturnSummary, SingleDisposalDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPartnerRecordService, SubscriptionService}
@@ -110,7 +110,7 @@ class StartControllerSpec
       .expects(cgtReference, *)
       .returning(EitherT(Future.successful(response)))
 
-  def mockGetDraftReturns(cgtReference: CgtReference)(response: Either[Error, List[DraftReturn]]) =
+  def mockGetDraftReturns(cgtReference: CgtReference)(response: Either[Error, List[SingleDisposalDraftReturn]]) =
     (mockReturnsService
       .getDraftReturns(_: CgtReference)(_: HeaderCarrier))
       .expects(cgtReference, *)
@@ -1455,7 +1455,7 @@ class StartControllerSpec
 
         val subscribedDetails = sample[SubscribedDetails].copy(cgtReference = cgtReference)
 
-        val draftReturns = List(sample[DraftReturn])
+        val draftReturns = List(sample[SingleDisposalDraftReturn])
 
         val sentReturns = List(sample[ReturnSummary])
 
