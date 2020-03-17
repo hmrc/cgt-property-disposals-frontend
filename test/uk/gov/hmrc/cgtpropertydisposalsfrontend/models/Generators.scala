@@ -40,7 +40,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue.GainCalculatedTaxDue
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsAnswers, IncompleteMultipleDisposalsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.{NoOtherReliefs, OtherReliefs}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
@@ -256,11 +256,11 @@ trait TriageQuestionsGen { this: GenUtils =>
   implicit val completeSingleDisposalTriageAnswersGen: Gen[CompleteSingleDisposalTriageAnswers] =
     gen[CompleteSingleDisposalTriageAnswers]
 
-  implicit val completeMultipleDisposalsTriageAnswersGen: Gen[CompleteMultipleDisposalsAnswers] =
-    gen[CompleteMultipleDisposalsAnswers]
+  implicit val completeMultipleDisposalsTriageAnswersGen: Gen[CompleteMultipleDisposalsTriageAnswers] =
+    gen[CompleteMultipleDisposalsTriageAnswers]
 
-  implicit val incompleteMultipleDisposalsTriageAnswersGen: Gen[IncompleteMultipleDisposalsAnswers] =
-    gen[IncompleteMultipleDisposalsAnswers]
+  implicit val incompleteMultipleDisposalsTriageAnswersGen: Gen[IncompleteMultipleDisposalsTriageAnswers] =
+    gen[IncompleteMultipleDisposalsTriageAnswers]
 
   implicit val individualUserTypeGen: Gen[IndividualUserType] = gen[IndividualUserType]
 
@@ -274,7 +274,7 @@ trait TriageQuestionsGen { this: GenUtils =>
 
 }
 
-trait ReturnGen { this: GenUtils =>
+trait ReturnGen extends LowerPriorityReturnGen { this: GenUtils =>
 
   implicit val draftReturnGen: Gen[DraftReturn] = gen[DraftReturn]
 
@@ -294,8 +294,13 @@ trait ReturnGen { this: GenUtils =>
 
 }
 
-trait UpscanGen {
-  this: GenUtils =>
+trait LowerPriorityReturnGen { this: GenUtils =>
+
+  implicit val multipleDisposalDraftReturnGen: Gen[MultipleDisposalsDraftReturn] = gen[MultipleDisposalsDraftReturn]
+
+}
+
+trait UpscanGen { this: GenUtils =>
 
   implicit val uploadRequestGen: Gen[UploadRequest]                         = gen[UploadRequest]
   implicit val fileDescriptorGen: Gen[FileDescriptor]                       = gen[FileDescriptor]

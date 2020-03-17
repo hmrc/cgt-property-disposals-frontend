@@ -31,7 +31,7 @@
         caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(form: Form[Boolean], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(form: Form[Boolean], backLink: Call, hasCreatedDraftReturn: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"multipleDisposalsWereYouAUKResident"}
 @title = @{messages(s"$key.title")}
@@ -60,8 +60,10 @@
         )
         <p>@Html(messages("wereYouAUKResident.link", viewConfig.workOurYouResidenceStatusUrl))</p>
 
-        @submitButton(messages("button.continue"))
+        @submitButton(messages(if (hasCreatedDraftReturn) "button.saveAndContinue" else "button.continue"))
     }
+
+    @returnToSummaryLink(hasCreatedDraftReturn)
 
 }
 

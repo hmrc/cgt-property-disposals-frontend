@@ -21,7 +21,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsTriageAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
 
 @this(
@@ -35,7 +35,7 @@ formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
 returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(answers: CompleteMultipleDisposalsAnswers)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(answers: CompleteMultipleDisposalsTriageAnswers)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 
