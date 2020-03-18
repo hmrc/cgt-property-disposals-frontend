@@ -659,12 +659,31 @@ task-list.ytd-liability.link=Enter Capital Gains Tax liability so far this tax y
 task-list.check-and-send-return.link=Check and send return, pay any tax due
 task-list.supporting-evidence.link=Upload Your Supporting Documents
 
-returns.property-address.caption=Property address
-enterPostcode.returns.title=Find the address of the UK property you disposed of
-address-select.returns.title=Select the address of the UK property you disposed of
-address.uk.returns.title=Enter the address of the UK property you disposed of
+task-list.enter-example-property-address.link=Enter details of one property
+
+returns.property-address.singleDisposal.caption=Property address
+returns.property-details.multipleDisposals.caption=Details of one property disposal
+
+property-details.multiple-disposals.guidance.title=You’ll need to enter details for one of the property disposals
+property-details.multiple-disposals.guidance.p1=You should enter the details of the property that gave you the largest gain or the smallest loss.
+property-details.multiple-disposals.guidance.p2=For that one property, you’ll need to enter:
+property-details.multiple-disposals.guidance.li1=property’s UK address
+property-details.multiple-disposals.guidance.li2=contract exchange date
+property-details.multiple-disposals.guidance.li3=disposal amount, less disposal costs
+property-details.multiple-disposals.guidance.li4=acquisition amount, plus improvement and acquisition costs
+property-details.multiple-disposals.guidance.p3=Contract exchange usually happens when you and the buyer or new owner swap contracts and the buyer pays a deposit.
+property-details.multiple-disposals.guidance.p4=You’ll also need to upload a document later providing details of the other properties you’re including in this return.
+
+enterPostcode.returns.singleDisposal.title=Find the address of the UK property you disposed of
+address-select.returns.singleDisposal.title=Select the address of the UK property you disposed of
+address.uk.returns.singleDisposal.title=Enter the address of the UK property you disposed of
+
+enterPostcode.returns.multipleDisposals.title=Find the address of one of the UK properties you disposed of
+address-select.returns.multipleDisposals.title=Select the address of one of the UK properties you disposed of
+address.uk.returns.multipleDisposals.title=Enter the address of one of the UK properties you disposed of
 
 returns.property-address.cya.title=Check your answers
+returns.property-details.multiple-disposals.cya.guidanceLink=Help completing this section
 returns.property-address.cyaLabel.property-address=Property address
 returns.property-address.cyaChange.property-address=the address of the property
 

@@ -48,8 +48,14 @@
       </span>
       @completionDate.map(f => {
           <h4>
-          {draftReturn.fold(
-            _ => "not handled yet",
+          {
+          draftReturn.fold(
+              _.examplePropertyDetailsAnswers.flatMap(
+                  _.fold(_.address, c => Some(c.address))
+              ).fold(
+                  LocalDateUtils.govShortDisplayFormat(f))(
+                  a => s"${a.line1}, ${a.postcode.value}"
+              ),
             _.propertyAddress.fold(
                 LocalDateUtils.govShortDisplayFormat(f))(
                 a => s"${a.line1}, ${a.postcode.value}"

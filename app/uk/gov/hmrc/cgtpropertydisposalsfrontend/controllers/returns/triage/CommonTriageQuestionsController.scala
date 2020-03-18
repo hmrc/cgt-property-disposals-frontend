@@ -375,6 +375,7 @@ class CommonTriageQuestionsController @Inject() (
               draftReturn = MultipleDisposalsDraftReturn(
                 fillingOutReturn.draftReturn.id,
                 newTriageAnswers,
+                None,
                 LocalDateUtils.today()
               )
             )

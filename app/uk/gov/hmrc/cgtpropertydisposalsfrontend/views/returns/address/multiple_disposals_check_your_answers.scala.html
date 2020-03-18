@@ -1,0 +1,52 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsExamplePropertyDetailsAnswers.CompleteMultipleDisposalsExamplePropertyDetailsAnswers
+
+@this(
+mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.multiple_disposals_summary
+)
+
+@(answers: CompleteMultipleDisposalsExamplePropertyDetailsAnswers)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+
+
+@title = @{messages("returns.property-address.cya.title")}
+
+@mainTemplate(title = title, userType = request.userType) {
+
+    @pageHeading(title, Some(messages("returns.property-details.multipleDisposals.caption")))
+
+    <p>
+        <a href="@routes.PropertyDetailsController.multipleDisposalsGuidance()" id="guidanceLink">@messages("returns.property-details.multiple-disposals.cya.guidanceLink")</a>
+    </p>
+
+    @summary(answers)
+
+    @formWrapper(routes.PropertyDetailsController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
+        @submitButton(messages("button.confirmAndContinue"))
+    }
+
+    @returnToSummaryLink(displayReturnToSummaryLink = true)
+
+}

@@ -35,6 +35,14 @@ messages("service.title")
     draftReturn.triageAnswers.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete)
 }
 
+@examplePropertyDetailsState = @{
+    draftReturn.examplePropertyDetailsAnswers.fold[TaskListStatus](
+        TaskListStatus.ToDo
+    )(
+        _.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete)
+    )
+}
+
 @mainTemplate(title = title, userType = request.userType) {
 
 @pageHeading(title)
@@ -50,6 +58,25 @@ messages("service.title")
         <ul class="app-task-list__items">
             <li id="canTheyUseOurService" class="app-task-list__item">
                 @taskLink(messages("task-list.triage.link"), returns.triage.routes.MultipleDisposalsTriageController.checkYourAnswers().url, triageState)
+            </li>
+        </ul>
+    </li>
+
+
+    <li>
+        <h2 class="app-task-list__section">
+            <span class="app-task-list__section-number">
+                2.
+            </span>
+            @messages("task-list.provide-details.heading")
+        </h2>
+        <ul class="app-task-list__items">
+            <li id="examplePropertyDetails" class="app-task-list__item">
+            @taskLink(
+                messages("task-list.enter-example-property-address.link"),
+                returns.address.routes.PropertyDetailsController.checkYourAnswers().url,
+                examplePropertyDetailsState
+            )
             </li>
         </ul>
     </li>

@@ -36,12 +36,16 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
         backLink: Call,
         submit: Call,
         enterUkAddress: Call,
-        addressJourneyType: AddressJourneyType)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+        addressJourneyType: AddressJourneyType[_])(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"postcode"}
 @postcodeFilterKey = @{"filter"}
 @title = @{ addressJourneyType match {
- case AddressJourneyType.Returns => messages("enterPostcode.returns.title")
+ case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
+  f.journey.draftReturn.fold(
+    _ => messages("enterPostcode.returns.multipleDisposals.title"),
+   _ => messages("enterPostcode.returns.singleDisposal.title")
+  )
  case _ => messages("enterPostcode.title")
 }}
 
