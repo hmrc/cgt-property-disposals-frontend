@@ -15,7 +15,7 @@
  *@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.routes
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.{AutoCompleteType, RadioOption}
 
@@ -100,7 +100,7 @@
 
     @caption(messages("exemptionAndLosses.caption"))
 
-    @formWrapper(routes.ExemptionAndLossesController.taxableGainOrLossSubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(routes.YearToDateLiabilityController.taxableGainOrLossSubmit(), 'novalidate -> "novalidate") {
         @radioGroupConditional(
             fieldId = key,
             label = pageHeading(title),

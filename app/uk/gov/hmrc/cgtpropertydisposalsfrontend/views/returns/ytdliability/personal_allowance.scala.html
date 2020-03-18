@@ -52,7 +52,7 @@
 
     @caption(messages("ytdLiability.caption"))
 
-    @formWrapper(routes.YearToDateLiabilityFirstReturnController.personalAllowanceSubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(routes.YearToDateLiabilityController.personalAllowanceSubmit(), 'novalidate -> "novalidate") {
         @unitInput(
             fieldId = key,
             value = form.data.getOrElse(key, ""),

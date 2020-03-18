@@ -16,17 +16,15 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import java.util.UUID
-
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CompleteYearToDateLiabilityAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYearToDateLiabilityAnswers.CompleteCalculatedYearToDateLiabilityAnswers
 
 final case class CompleteReturn(
   triageAnswers: CompleteSingleDisposalTriageAnswers,
@@ -35,7 +33,7 @@ final case class CompleteReturn(
   acquisitionDetails: CompleteAcquisitionDetailsAnswers,
   reliefDetails: CompleteReliefDetailsAnswers,
   exemptionsAndLossesDetails: CompleteExemptionAndLossesAnswers,
-  yearToDateLiabilityAnswers: CompleteYearToDateLiabilityAnswers,
+  yearToDateLiabilityAnswers: CompleteCalculatedYearToDateLiabilityAnswers,
   initialGainOrLoss: Option[AmountInPence]
 )
 
@@ -50,7 +48,7 @@ object CompleteReturn {
         Some(a: CompleteAcquisitionDetailsAnswers),
         Some(r: CompleteReliefDetailsAnswers),
         Some(e: CompleteExemptionAndLossesAnswers),
-        Some(y: CompleteYearToDateLiabilityAnswers),
+        Some(y: CompleteCalculatedYearToDateLiabilityAnswers),
         i,
         _
         ) =>
@@ -61,13 +59,13 @@ object CompleteReturn {
   }
 
   implicit val format: OFormat[CompleteReturn] = {
-    implicit val triageFormat: OFormat[CompleteSingleDisposalTriageAnswers]             = Json.format
-    implicit val ukAddressFormat: OFormat[UkAddress]                                    = Json.format
-    implicit val disposalDetailsFormat: OFormat[CompleteDisposalDetailsAnswers]         = Json.format
-    implicit val acquisitionDetailsFormat: OFormat[CompleteAcquisitionDetailsAnswers]   = Json.format
-    implicit val reliefDetailsFormat: OFormat[CompleteReliefDetailsAnswers]             = Json.format
-    implicit val exemptionAndLossesFormat: OFormat[CompleteExemptionAndLossesAnswers]   = Json.format
-    implicit val yearToDateLiabilityFormat: OFormat[CompleteYearToDateLiabilityAnswers] = Json.format
+    implicit val triageFormat: OFormat[CompleteSingleDisposalTriageAnswers]                       = Json.format
+    implicit val ukAddressFormat: OFormat[UkAddress]                                              = Json.format
+    implicit val disposalDetailsFormat: OFormat[CompleteDisposalDetailsAnswers]                   = Json.format
+    implicit val acquisitionDetailsFormat: OFormat[CompleteAcquisitionDetailsAnswers]             = Json.format
+    implicit val reliefDetailsFormat: OFormat[CompleteReliefDetailsAnswers]                       = Json.format
+    implicit val exemptionAndLossesFormat: OFormat[CompleteExemptionAndLossesAnswers]             = Json.format
+    implicit val yearToDateLiabilityFormat: OFormat[CompleteCalculatedYearToDateLiabilityAnswers] = Json.format
     Json.format
   }
 

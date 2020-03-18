@@ -46,7 +46,7 @@
 
     @caption(messages("ytdLiability.caption"))
 
-    @formWrapper(routes.YearToDateLiabilityFirstReturnController.hasEstimatedDetailsSubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(routes.YearToDateLiabilityController.hasEstimatedDetailsSubmit(), 'novalidate -> "novalidate") {
         @yesNo(
             fieldId = key,
             label = pageHeading(title),

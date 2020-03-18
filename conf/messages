@@ -935,9 +935,6 @@ exemptionsAndLosses.cyaChange.inYearLossesValue=the amount of in year losses
 exemptionsAndLosses.cyaChange.previousYearsLosses=your previous years losses
 exemptionsAndLosses.cyaChange.previousYearsLossesValue=the amount of previous years losses
 
-exemptionsAndLosses.cyaChange.annualExemptAmount=your annual exempt amount
-exemptionsAndLosses.cyaChange.taxableGainOrLoss=your taxable gain or net loss
-
 ytdLiability.caption=Tax amount owed
 
 estimatedIncome.title=What is your estimated income liable for UK tax in this tax year?
@@ -985,6 +982,9 @@ mandatoryEvidence.helpText=Upload one or more documents (maximum file size 5MB) 
 ytdLiability.cya.title=Check your answers
 ytdLiability.cyaLabel.mandatoryEvidence=Supporting file
 ytdLiability.cyaChange.mandatoryEvidence=your supporting file
+
+ytdLiability.cyaChange.annualExemptAmount=your annual exempt amount
+ytdLiability.cyaChange.taxableGainOrLoss=your taxable gain or net loss
 
 checkAllAnswers.title=Check your answers before sending the return
 checkAllAnswers.declaration=Declaration
