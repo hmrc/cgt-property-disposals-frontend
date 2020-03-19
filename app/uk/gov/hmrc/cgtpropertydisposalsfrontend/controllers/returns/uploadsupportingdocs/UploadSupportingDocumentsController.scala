@@ -29,10 +29,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController.hasSupportingDocsToUploadForm
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingDocuments.IncompleteUploadSupportingDocuments
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{SingleDisposalDraftReturn, UploadSupportingDocuments}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, MultipleDisposalsDraftReturn, SingleDisposalDraftReturn, UploadSupportingDocuments}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{uploadsupportingdocs => pages}
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
@@ -59,16 +59,23 @@ class UploadSupportingDocumentsController @Inject() (
     f: (
       SessionData,
       FillingOutReturn,
-      SingleDisposalDraftReturn,
+      DraftReturn,
       UploadSupportingDocuments
     ) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((s, r @ FillingOutReturn(_, _, _, d: SingleDisposalDraftReturn))) =>
-        d.uploadSupportingDocuments.fold[Future[Result]](
-          f(s, r, d, IncompleteUploadSupportingDocuments.empty)
-        )(f(s, r, d, _))
-      case _ => Future.successful(Redirect(controllers.routes.StartController.start()))
+      case Some((s, r @ FillingOutReturn(_, _, _, d: DraftReturn))) =>
+        d match {
+          case SingleDisposalDraftReturn(_, _, _, _, _, _, _, _, _, uploadSupportingDocuments, _) =>
+            uploadSupportingDocuments.fold[Future[Result]](
+              f(s, r, d, IncompleteUploadSupportingDocuments.empty)
+            )(f(s, r, d, _))
+          case MultipleDisposalsDraftReturn(_, _, _, _, uploadSupportingDocuments, _) =>
+            uploadSupportingDocuments.fold[Future[Result]](
+              f(s, r, d, IncompleteUploadSupportingDocuments.empty)
+            )(f(s, r, d, _))
+        }
+      case _ => Redirect(controllers.routes.StartController.start())
     }
 
   private def withSupportingDocsAnswers(
@@ -93,9 +100,9 @@ class UploadSupportingDocumentsController @Inject() (
         _ => redirectToIfNoRequiredPreviousAnswer,
         _ => routes.UploadSupportingDocumentsController.checkYourAnswers()
       )
-      Future.successful(Ok(page(form(currentAnswers), backLink)))
+      Ok(page(form(currentAnswers), backLink))
     } else {
-      Future.successful(Redirect(redirectToIfNoRequiredPreviousAnswer))
+      Redirect(redirectToIfNoRequiredPreviousAnswer)
     }
 
   def hasSupportingDocsToUpload() = authenticatedActionWithSessionData.async { implicit request =>
@@ -110,10 +117,10 @@ class UploadSupportingDocumentsController @Inject() (
           )(
             page = hasSupportingDocsToUploadPage(_, _)
           )(
-            requiredPreviousAnswer = { a =>
-              a.fold(_.hasSupportingDocuments, c => Some(c.hasSupportingDocuments))
+            requiredPreviousAnswer = { _ =>
+              Some(())
             },
-            redirectToIfNoRequiredPreviousAnswer = routes.UploadSupportingDocumentsController.checkYourAnswers()
+            redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
           )
         }
     }

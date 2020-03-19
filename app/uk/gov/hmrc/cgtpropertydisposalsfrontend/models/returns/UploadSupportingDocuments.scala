@@ -23,12 +23,6 @@ sealed trait UploadSupportingDocuments extends Product with Serializable
 
 object UploadSupportingDocuments {
 
-  final case class SupportingDocument(upscanReference: String)
-
-  object SupportingDocument {
-    implicit val format = Json.format[SupportingDocument]
-  }
-
   final case class IncompleteUploadSupportingDocuments(
     hasSupportingDocuments: Option[Boolean]
   ) extends UploadSupportingDocuments
