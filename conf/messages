@@ -136,7 +136,7 @@ registration.cyaLabel.email=Contact email address
 registration.cyaChange.email=your email address
 
 enterPostcode.title=Find your UK contact address
-enterPostcode.label=Enter postcode
+
 
 email.title=Enter a contact email address
 email.amend.title=Enter a contact email address
@@ -179,8 +179,8 @@ address.manual.linkText=Enter the address another way
 address.lookup.linkText=Find address using UK postcode
 
 address.uk.title=Enter your UK contact address
-address.uk.line1.label=Building or street
-address.uk.line2.label=Building or street line 2 (optional)
+address.uk.line1.label=Building and street
+address.uk.line2.label=Building and street line 2 (optional)
 address.uk.line3.label=Town or city (optional)
 address.uk.line4.label=County (optional)
 address-line1.error.required=Enter the building or street
