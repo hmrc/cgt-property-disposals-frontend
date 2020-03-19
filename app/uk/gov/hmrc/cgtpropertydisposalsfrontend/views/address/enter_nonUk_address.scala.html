@@ -37,7 +37,7 @@
 @(form: Form[NonUkAddress],
         backLink: Call,
         submit: Call,
-        addressJourneyType: AddressJourneyType
+        addressJourneyType: AddressJourneyType[_]
     )(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"nonUkAddress"}

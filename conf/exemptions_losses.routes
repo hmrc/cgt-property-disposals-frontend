@@ -7,8 +7,5 @@ POST /losses-allowances-exemptions/losses-previous-tax-years     uk.gov.hmrc.cgt
 GET  /losses-allowances-exemptions/annual-exempt-amount-used     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesController.annualExemptAmount()
 POST /losses-allowances-exemptions/annual-exempt-amount-used     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesController.annualExemptAmountSubmit()
 
-GET  /losses-allowances-exemptions/taxable-gain                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesController.taxableGainOrLoss()
-POST /losses-allowances-exemptions/taxable-gain                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesController.taxableGainOrLossSubmit()
-
 GET  /losses-allowances-exemptions/check-you-answers             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesController.checkYourAnswers()
 POST /losses-allowances-exemptions/check-you-answers             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesController.checkYourAnswersSubmit()

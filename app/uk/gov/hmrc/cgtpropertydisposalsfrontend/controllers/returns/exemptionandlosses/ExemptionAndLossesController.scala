@@ -18,7 +18,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionan
 
 import cats.data.EitherT
 import cats.instances.future._
-import cats.syntax.either._
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
@@ -31,13 +30,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesController._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.InnerOption
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.validateAmountOfMoney
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, ExemptionAndLossesAnswers, OtherReliefsOption, SingleDisposalDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, ExemptionAndLossesAnswers, SingleDisposalDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
@@ -59,7 +56,6 @@ class ExemptionAndLossesController @Inject() (
   inYearLossesPage: pages.in_year_losses,
   previousYearsLossesPage: pages.previous_years_losses,
   annualExemptAmountPage: pages.annual_exempt_amount,
-  taxableGainOrLossPage: pages.taxable_gain_or_loss,
   checkYourAnswersPage: pages.check_your_answers
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
@@ -88,19 +84,6 @@ class ExemptionAndLossesController @Inject() (
       case Some(d) => f(d)
       case None    => Redirect(controllers.returns.routes.TaskListController.taskList())
     }
-
-  private def withOtherReliefsOption(
-    draftReturn: SingleDisposalDraftReturn
-  )(f: Option[OtherReliefsOption] => Future[Result]): Future[Result] =
-    draftReturn.reliefDetailsAnswers
-      .fold[Future[Result]](
-        Redirect(controllers.returns.routes.TaskListController.taskList())
-      )(
-        _.fold(
-          _ => Redirect(controllers.returns.routes.TaskListController.taskList()),
-          c => f(c.otherReliefs)
-        )
-      )
 
   private def commonDisplayBehaviour[A, P: Writeable, R](
     currentAnswers: ExemptionAndLossesAnswers
@@ -327,109 +310,48 @@ class ExemptionAndLossesController @Inject() (
     }
   }
 
-  def taxableGainOrLoss(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAnswers(request) {
-      case (_, _, draftReturn, answers) =>
-        withOtherReliefsOption(draftReturn) {
-          case Some(_: OtherReliefsOption.OtherReliefs) =>
-            commonDisplayBehaviour(
-              answers
-            )(form = _.fold(
-              _.taxableGainOrLoss.fold(taxableGainOrLossForm)(a => taxableGainOrLossForm.fill(a.inPounds())),
-              _.taxableGainOrLoss.fold(taxableGainOrLossForm)(a => taxableGainOrLossForm.fill(a.inPounds()))
-            )
-            )(
-              page = taxableGainOrLossPage(_, _)
-            )(
-              requiredPreviousAnswer = _.fold(
-                _.annualExemptAmount,
-                c => Some(c.annualExemptAmount)
-              ),
-              redirectToIfNoRequiredPreviousAnswer = routes.ExemptionAndLossesController.annualExemptAmount()
-            )
-
-          case _ =>
-            Redirect(routes.ExemptionAndLossesController.checkYourAnswers())
-        }
-    }
-  }
-  def taxableGainOrLossSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndAnswers(request) {
-      case (_, fillingOutReturn, draftReturn, answers) =>
-        withOtherReliefsOption(draftReturn) {
-          case Some(_: OtherReliefsOption.OtherReliefs) =>
-            commonSubmitBehaviour(
-              fillingOutReturn,
-              draftReturn,
-              answers
-            )(form = taxableGainOrLossForm)(
-              page = taxableGainOrLossPage(_, _)
-            )(
-              requiredPreviousAnswer = _.fold(
-                _.annualExemptAmount,
-                c => Some(c.annualExemptAmount)
-              ),
-              redirectToIfNoRequiredPreviousAnswer = routes.ExemptionAndLossesController.annualExemptAmount()
-            ) {
-              case (amount, answers) =>
-                answers.fold(
-                  _.copy(taxableGainOrLoss = Some(AmountInPence.fromPounds(amount))),
-                  _.copy(taxableGainOrLoss = Some(AmountInPence.fromPounds(amount)))
-                )
-            }
-          case _ =>
-            Redirect(routes.ExemptionAndLossesController.checkYourAnswers())
-        }
-    }
-  }
-
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndAnswers(request) {
       case (_, fillingOutReturn, draftReturn, answers) =>
         withDisposalDate(draftReturn) { disposalDate =>
-          withOtherReliefsOption(draftReturn) { otherReliefsOption =>
-            (answers, otherReliefsOption) match {
-              case (c: CompleteExemptionAndLossesAnswers, _) =>
-                Ok(checkYourAnswersPage(c, disposalDate))
+          answers match {
+            case c: CompleteExemptionAndLossesAnswers =>
+              Ok(checkYourAnswersPage(c, disposalDate))
 
-              case (IncompleteExemptionAndLossesAnswers(None, _, _, _), _) =>
-                Redirect(routes.ExemptionAndLossesController.inYearLosses())
+            case IncompleteExemptionAndLossesAnswers(None, _, _) =>
+              Redirect(routes.ExemptionAndLossesController.inYearLosses())
 
-              case (IncompleteExemptionAndLossesAnswers(_, None, _, _), _) =>
-                Redirect(routes.ExemptionAndLossesController.previousYearsLosses())
+            case IncompleteExemptionAndLossesAnswers(_, None, _) =>
+              Redirect(routes.ExemptionAndLossesController.previousYearsLosses())
 
-              case (IncompleteExemptionAndLossesAnswers(_, _, None, _), _) =>
-                Redirect(routes.ExemptionAndLossesController.annualExemptAmount())
+            case IncompleteExemptionAndLossesAnswers(_, _, None) =>
+              Redirect(routes.ExemptionAndLossesController.annualExemptAmount())
 
-              case (IncompleteExemptionAndLossesAnswers(_, _, _, None), Some(_: OtherReliefsOption.OtherReliefs)) =>
-                Redirect(routes.ExemptionAndLossesController.taxableGainOrLoss())
+            case IncompleteExemptionAndLossesAnswers(Some(i), Some(p), Some(a)) =>
+              val completeAnswers = CompleteExemptionAndLossesAnswers(i, p, a)
+              val newDraftReturn =
+                draftReturn.copy(exemptionAndLossesAnswers = Some(completeAnswers))
 
-              case (IncompleteExemptionAndLossesAnswers(Some(i), Some(p), Some(a), t), _) =>
-                val completeAnswers = CompleteExemptionAndLossesAnswers(i, p, a, t)
-                val newDraftReturn =
-                  draftReturn.copy(exemptionAndLossesAnswers = Some(completeAnswers))
-
-                val result = for {
-                  _ <- returnsService.storeDraftReturn(
-                        newDraftReturn,
-                        fillingOutReturn.subscribedDetails.cgtReference,
-                        fillingOutReturn.agentReferenceNumber
-                      )
-                  _ <- EitherT(
-                        updateSession(sessionStore, request)(
-                          _.copy(journeyStatus = Some(
-                            fillingOutReturn.copy(draftReturn = newDraftReturn)
-                          )
-                          )
+              val result = for {
+                _ <- returnsService.storeDraftReturn(
+                      newDraftReturn,
+                      fillingOutReturn.subscribedDetails.cgtReference,
+                      fillingOutReturn.agentReferenceNumber
+                    )
+                _ <- EitherT(
+                      updateSession(sessionStore, request)(
+                        _.copy(journeyStatus = Some(
+                          fillingOutReturn.copy(draftReturn = newDraftReturn)
+                        )
                         )
                       )
-                } yield ()
+                    )
+              } yield ()
 
-                result.fold({ e =>
-                  logger.warn("Could not update the session", e)
-                  errorHandler.errorResult()
-                }, _ => Ok(checkYourAnswersPage(completeAnswers, disposalDate)))
-            }
+              result.fold({ e =>
+                logger.warn("Could not update the session", e)
+                errorHandler.errorResult()
+              }, _ => Ok(checkYourAnswersPage(completeAnswers, disposalDate)))
           }
         }
 
@@ -459,44 +381,5 @@ object ExemptionAndLossesController {
         "annualExemptAmount" -> of(MoneyUtils.amountInPoundsFormatter(_ < 0, _ > maximumAnnualExemptAmount.inPounds()))
       )(identity)(Some(_))
     )
-
-  val taxableGainOrLossForm: Form[BigDecimal] = {
-    val (outerId, gainId, lossId) = ("taxableGainOrLoss", "taxableGain", "netLoss")
-
-    def innerOption(id: String): InnerOption[BigDecimal] =
-      InnerOption { data =>
-        FormUtils
-          .readValue(id, data, identity)
-          .flatMap(
-            validateAmountOfMoney(
-              id,
-              _ <= 0,
-              _ > MoneyUtils.maxAmountOfPounds
-            )(_)
-          )
-          .leftMap(Seq(_))
-      }
-
-    val formatter = ConditionalRadioUtils.formatter("taxableGainOrLoss")(
-      List(
-        Left(innerOption(gainId)),
-        Left(innerOption(lossId).map(_ * -1)),
-        Right(BigDecimal(0))
-      )
-    ) { d =>
-      if (d > 0)
-        Map(outerId -> "0", gainId -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign(d))
-      else if (d < 0)
-        Map(outerId -> "1", lossId -> MoneyUtils.formatAmountOfMoneyWithoutPoundSign((d * -1)))
-      else
-        Map(outerId -> "2")
-    }
-
-    Form(
-      mapping(
-        "" -> of(formatter)
-      )(identity)(Some(_))
-    )
-  }
 
 }

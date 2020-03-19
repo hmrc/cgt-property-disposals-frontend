@@ -40,13 +40,15 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue.GainCalculatedTaxDue
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsExamplePropertyDetailsAnswers.{CompleteMultipleDisposalsExamplePropertyDetailsAnswers, IncompleteMultipleDisposalsExamplePropertyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.{NoOtherReliefs, OtherReliefs}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingDocuments.CompleteUploadSupportingDocuments
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CompleteYearToDateLiabilityAnswers, IncompleteYearToDateLiabilityAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYearToDateLiabilityAnswers._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYearToDateLiabilityAnswers.CompleteNonCalculatedYearToDateLiabilityAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{FileDescriptor, UploadRequest, UpscanFileDescriptor, UpscanInitiateRawResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.ListReturnsResponse
@@ -74,7 +76,8 @@ object Generators
     with ReliefDetailsAnswersGen
     with TaxYearGen
     with ExemptionAndLossesAnswersGen
-    with YearToDateLiabilityAnswersGen {
+    with YearToDateLiabilityAnswersGen
+    with MultipleDisposalsExamplePropertyDetailsAnswersGen {
 
   implicit val booleanGen: Gen[Boolean] = Gen.oneOf(true, false)
 
@@ -416,20 +419,14 @@ trait ExemptionAndLossesAnswersGen { this: GenUtils =>
     gen[IncompleteExemptionAndLossesAnswers]
 }
 
-trait YearToDateLiabilityAnswersGen { this: GenUtils =>
+trait YearToDateLiabilityAnswersGen extends LowerPriorityYearToDateLiabilityAnswersGen { this: GenUtils =>
 
-  implicit val completeYTDLiabilityAnswersGen: Gen[CompleteYearToDateLiabilityAnswers] =
-    gen[CompleteYearToDateLiabilityAnswers].map {
-      case a: CompleteYearToDateLiabilityAnswers
+  implicit val ytdLiabilityAnswersGen: Gen[YearToDateLiabilityAnswers] = gen[YearToDateLiabilityAnswers]
+
+  implicit val completeCalculatedYTDLiabilityAnswersGen: Gen[CompleteCalculatedYearToDateLiabilityAnswers] =
+    gen[CompleteCalculatedYearToDateLiabilityAnswers].map {
+      case a: CompleteCalculatedYearToDateLiabilityAnswers
           if a.estimatedIncome > AmountInPence.zero && a.personalAllowance.isEmpty =>
-        a.copy(personalAllowance = Some(AmountInPence.zero))
-      case other => other
-    }
-
-  implicit val incompleteYTDLiabilityAnswersGen: Gen[IncompleteYearToDateLiabilityAnswers] =
-    gen[IncompleteYearToDateLiabilityAnswers].map {
-      case a: IncompleteYearToDateLiabilityAnswers
-          if a.estimatedIncome.exists(_ > AmountInPence.zero) && a.personalAllowance.isEmpty =>
         a.copy(personalAllowance = Some(AmountInPence.zero))
       case other => other
     }
@@ -437,5 +434,32 @@ trait YearToDateLiabilityAnswersGen { this: GenUtils =>
   implicit val calculatedTaxDueGen: Gen[CalculatedTaxDue] = gen[CalculatedTaxDue]
 
   implicit val gainCalculatedTaxDueGen: Gen[GainCalculatedTaxDue] = gen[GainCalculatedTaxDue]
+
+}
+
+trait LowerPriorityYearToDateLiabilityAnswersGen { this: GenUtils =>
+
+  implicit val incompleteCalculatedYTDLiabilityAnswersGen: Gen[IncompleteCalculatedYearToDateLiabilityAnswers] =
+    gen[IncompleteCalculatedYearToDateLiabilityAnswers].map {
+      case a: IncompleteCalculatedYearToDateLiabilityAnswers
+          if a.estimatedIncome.exists(_ > AmountInPence.zero) && a.personalAllowance.isEmpty =>
+        a.copy(personalAllowance = Some(AmountInPence.zero))
+      case other => other
+    }
+
+  implicit val completeNonCalculatedYTDLiabilityAnswersGen: Gen[CompleteNonCalculatedYearToDateLiabilityAnswers] =
+    gen[CompleteNonCalculatedYearToDateLiabilityAnswers]
+
+}
+
+trait MultipleDisposalsExamplePropertyDetailsAnswersGen { this: GenUtils =>
+
+  implicit val incompleteMultipleDisposalsExamplePropertyDetailsAnswersGen
+    : Gen[IncompleteMultipleDisposalsExamplePropertyDetailsAnswers] =
+    gen[IncompleteMultipleDisposalsExamplePropertyDetailsAnswers]
+
+  implicit val completeMultipleDisposalsExamplePropertyDetailsAnswersGen
+    : Gen[CompleteMultipleDisposalsExamplePropertyDetailsAnswers] =
+    gen[CompleteMultipleDisposalsExamplePropertyDetailsAnswers]
 
 }

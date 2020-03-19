@@ -25,6 +25,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers._
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -103,13 +104,15 @@ TaskListStatus.CannotStart
 }
 }
 @ytdLiabilityState = @{
-(propertyAddressState, disposalDetailsState, acquistionDetailsState, reliefDetailsState, exemptionsAndLossesState) match {
-case (TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete) =>
-draftReturn.yearToDateLiabilityAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))
+  (propertyAddressState, disposalDetailsState, acquistionDetailsState, reliefDetailsState, exemptionsAndLossesState) match {
+    case (TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete) =>
+      draftReturn.yearToDateLiabilityAnswers.fold[TaskListStatus](TaskListStatus.ToDo) {
+          case c: CalculatedYearToDateLiabilityAnswers    => c.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete)
+          case n: NonCalculatedYearToDateLiabilityAnswers => n.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete)
+      }
 
-case _ =>
-TaskListStatus.CannotStart
-}
+      case _ => TaskListStatus.CannotStart
+  }
 }
 
 @checkAndSendReturnState = @{
@@ -151,9 +154,8 @@ TaskListStatus.CannotStart
         <ul class="app-task-list__items">
             <li id="propertyAddress" class="app-task-list__item">
                 @taskLink(messages("task-list.enter-property-address.link"),
-                draftReturn.propertyAddress.fold(
-                returns.address.routes.PropertyAddressController.enterPostcode().url
-                )(_ => returns.address.routes.PropertyAddressController.checkYourAnswers().url), propertyAddressState)
+                    returns.address.routes.PropertyDetailsController.checkYourAnswers().url,
+                    propertyAddressState)
             </li>
 
             <li id="disposalDetails" class="app-task-list__item">
@@ -200,7 +202,7 @@ TaskListStatus.CannotStart
             </li>
 
             <li id="enterCgtLiability" class="app-task-list__item">
-                @taskLink(messages("task-list.enter-cgt-liability.link"), returns.yeartodatelliability.routes.YearToDateLiabilityFirstReturnController.checkYourAnswers().url, ytdLiabilityState)
+                @taskLink(messages("task-list.enter-cgt-liability.link"), returns.yeartodatelliability.routes.YearToDateLiabilityController.checkYourAnswers().url, ytdLiabilityState)
             </li>
 
             <li id="uploadSupportingDocs" class="app-task-list__item">

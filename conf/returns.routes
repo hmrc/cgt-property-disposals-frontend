@@ -5,19 +5,8 @@
 -> /  exemptions_losses.Routes
 -> /  ytd_liability_firstreturn.Routes
 -> /  initial_gain_or_loss.Routes
+-> /  property_details.Routes
 -> /  upload_supporting_docs.Routes
-
-GET  /enter-property-address             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.enterUkAddress()
-POST /enter-property-address             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.enterUkAddressSubmit()
-
-GET  /find-uk-property-address           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.enterPostcode()
-POST /find-uk-property-address           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.enterPostcodeSubmit()
-
-GET  /select-property-address            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.selectAddress()
-POST /select-property-address            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.selectAddressSubmit()
-
-GET  /confirm-property-address           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.checkYourAnswers()
-POST /confirm-property-address           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressController.checkYourAnswersSubmit()
 
 GET  /task-list                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.TaskListController.taskList()
 
@@ -27,9 +16,7 @@ POST  /check-answers-accept-send         uk.gov.hmrc.cgtpropertydisposalsfronten
 GET   /return-sent-confirmation          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.confirmationOfSubmission()
 POST  /return-sent-confirmation          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.payReturn()
 
-
 GET   /return                            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ViewReturnController.displayReturn()
-GET  /pay-charge-in-return              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ViewReturnController.payCharge(chargeRefrence: String)
+GET   /pay-charge-in-return              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ViewReturnController.payCharge(chargeRefrence: String)
 
 GET   /return-draft-confirmation         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ConfirmDraftReturnController.confirmDraftReturn()
-

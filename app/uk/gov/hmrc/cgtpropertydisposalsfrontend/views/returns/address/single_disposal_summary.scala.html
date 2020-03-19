@@ -33,7 +33,7 @@
   @cyaRow(
     messages("returns.property-address.cyaLabel.property-address"),
     addressDisplay(propertyAddress, DisplayFormat.Block),
-    Some(cyaChange(messages("returns.property-address.cyaChange.property-address"), returns.address.routes.PropertyAddressController.enterPostcode().url)),
+    Some(cyaChange(messages("returns.property-address.cyaChange.property-address"), returns.address.routes.PropertyDetailsController.enterPostcode().url)),
       "property-address"
   )
 }

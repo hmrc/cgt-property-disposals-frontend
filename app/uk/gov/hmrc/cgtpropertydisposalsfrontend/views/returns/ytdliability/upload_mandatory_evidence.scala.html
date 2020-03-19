@@ -49,7 +49,7 @@
 
     @caption(messages("ytdLiability.caption"))
 
-    @formWrapper(routes.YearToDateLiabilityFirstReturnController.uploadMandatoryEvidenceSubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(routes.YearToDateLiabilityController.uploadMandatoryEvidenceSubmit(), 'novalidate -> "novalidate") {
         @textInput(
             fieldId = key,
             value = form.data.getOrElse(key, ""),

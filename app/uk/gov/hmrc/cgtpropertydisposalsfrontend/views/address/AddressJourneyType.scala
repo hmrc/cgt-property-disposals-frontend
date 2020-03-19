@@ -17,34 +17,73 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address
 
 import cats.Eq
-import cats.syntax.eq._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualSupplyingInformation, RegistrationReady}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, Subscribed}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.FillingOutReturnAddressJourney
 
-sealed trait AddressJourneyType extends Product with Serializable
+sealed trait AddressJourneyType[J <: JourneyStatus] extends Product with Serializable {
+  val journey: J
+}
 
 object AddressJourneyType {
 
   // user is entering/editing an address to subscribe with
-  case object Onboarding extends AddressJourneyType
+  sealed trait Onboarding[J <: JourneyStatus] extends AddressJourneyType[J]
 
   // user has subscribed and is managing their subscription address
-  case object ManagingSubscription extends AddressJourneyType
+  sealed trait ManagingSubscription[J <: JourneyStatus] extends AddressJourneyType[J]
 
   // user is entering address they want to report cgt for
-  case object Returns extends AddressJourneyType
+  sealed trait Returns[J <: JourneyStatus] extends AddressJourneyType[J]
 
-  implicit val eq: Eq[AddressJourneyType] = Eq.fromUniversalEquals[AddressJourneyType]
+  object Onboarding {
 
-  implicit class AddressJourneyTypeOps(private val a: AddressJourneyType) extends AnyVal {
+    final case class RegistrationReadyAddressJourney(journey: RegistrationReady) extends Onboarding[RegistrationReady]
 
-    def showAccountMenu(): Boolean = a === ManagingSubscription
+    final case class IndividualSupplyingInformationAddressJourney(journey: IndividualSupplyingInformation)
+        extends Onboarding[IndividualSupplyingInformation]
 
+    final case class SubscriptionReadyAddressJourney(journey: SubscriptionReady) extends Onboarding[SubscriptionReady]
+
+  }
+
+  object ManagingSubscription {
+
+    final case class SubscribedAddressJourney(journey: Subscribed) extends ManagingSubscription[Subscribed]
+
+  }
+
+  object Returns {
+
+    final case class FillingOutReturnAddressJourney(journey: FillingOutReturn) extends Returns[FillingOutReturn]
+
+  }
+
+  implicit def eq[J <: JourneyStatus]: Eq[AddressJourneyType[J]] = Eq.fromUniversalEquals[AddressJourneyType[J]]
+
+  implicit class AddressJourneyTypeOps(private val a: AddressJourneyType[_]) extends AnyVal {
+
+    def showAccountMenu(): Boolean = a match {
+      case _: ManagingSubscription[_] => true
+      case _                          => false
+    }
     def captionMessageKey(): String = a match {
-      case Onboarding           => "subscription.caption"
-      case ManagingSubscription => "account.caption"
-      case Returns              => "returns.property-address.caption"
+      case _: Onboarding[_]           => "subscription.caption"
+      case _: ManagingSubscription[_] => "account.caption"
+      case f: FillingOutReturnAddressJourney =>
+        f.journey.draftReturn.fold(
+          _ => "returns.property-details.multipleDisposals.caption",
+          _ => "returns.property-address.singleDisposal.caption"
+        )
     }
 
-    def showReturnToSummaryLink(): Boolean = a === Returns
+    def showReturnToSummaryLink(): Boolean =
+      a match {
+        case _: Returns[_] => true
+        case _             => false
+      }
   }
 
 }

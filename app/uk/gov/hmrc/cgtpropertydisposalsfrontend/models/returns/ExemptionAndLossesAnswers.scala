@@ -27,21 +27,19 @@ object ExemptionAndLossesAnswers {
   final case class IncompleteExemptionAndLossesAnswers(
     inYearLosses: Option[AmountInPence],
     previousYearsLosses: Option[AmountInPence],
-    annualExemptAmount: Option[AmountInPence],
-    taxableGainOrLoss: Option[AmountInPence]
+    annualExemptAmount: Option[AmountInPence]
   ) extends ExemptionAndLossesAnswers
 
   object IncompleteExemptionAndLossesAnswers {
 
-    val empty: IncompleteExemptionAndLossesAnswers = IncompleteExemptionAndLossesAnswers(None, None, None, None)
+    val empty: IncompleteExemptionAndLossesAnswers = IncompleteExemptionAndLossesAnswers(None, None, None)
 
   }
 
   final case class CompleteExemptionAndLossesAnswers(
     inYearLosses: AmountInPence,
     previousYearsLosses: AmountInPence,
-    annualExemptAmount: AmountInPence,
-    taxableGainOrLoss: Option[AmountInPence]
+    annualExemptAmount: AmountInPence
   ) extends ExemptionAndLossesAnswers
 
   implicit class ExemptionAndLossesAnswersOps(private val a: ExemptionAndLossesAnswers) extends AnyVal {
