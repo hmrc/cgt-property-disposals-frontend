@@ -34,8 +34,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutR
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsExamplePropertyDetailsAnswers.{CompleteMultipleDisposalsExamplePropertyDetailsAnswers, IncompleteMultipleDisposalsExamplePropertyDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{MultipleDisposalsDraftReturn, MultipleDisposalsExamplePropertyDetailsAnswers, SingleDisposalDraftReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, LocalDateUtils, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, MultipleDisposalsDraftReturn, MultipleDisposalsExamplePropertyDetailsAnswers, SingleDisposalDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, LocalDateUtils, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -194,20 +194,22 @@ class PropertyDetailsController @Inject() (
       }
   }
 
+  private def disposalDateBackLink(answers: Option[MultipleDisposalsExamplePropertyDetailsAnswers]): Call =
+    answers
+      .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty) // TODO: required?
+      .fold(
+        _ => routes.PropertyDetailsController.enterUkAddress(),
+        _ => routes.PropertyDetailsController.checkYourAnswers()
+      )
+
   def disposalDate(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) {
       case (_, r) =>
         r.draftReturn match {
           case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
           case m: MultipleDisposalsDraftReturn =>
-            val answers = m.examplePropertyDetailsAnswers
-            val backLink = answers
-              .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
-              .fold(
-                _ => routes.PropertyDetailsController.enterUkAddress(),
-                _ => routes.PropertyDetailsController.checkYourAnswers()
-              )
-
+            val answers  = m.examplePropertyDetailsAnswers
+            val backLink = disposalDateBackLink(answers)
             val disposalDate = answers
               .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
               .fold(_.disposalDate, c => Some(c.disposalDate))
@@ -221,7 +223,62 @@ class PropertyDetailsController @Inject() (
   }
 
   def disposalDateSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    Ok("Not yet implemented")
+    withValidJourney(request) {
+      case (_, r) =>
+        r.draftReturn match {
+          case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          case m: MultipleDisposalsDraftReturn =>
+            val answers  = m.examplePropertyDetailsAnswers
+            val backLink = disposalDateBackLink(answers)
+
+            disposalDateForm(LocalDateUtils.today())
+              .bindFromRequest()
+              .fold(
+                formWithErrors =>
+                  BadRequest(
+                    multipleDisposalsDisposalDatePage(formWithErrors, backLink, false)
+                  ), { date =>
+                  m.triageAnswers.fold(_.taxYear, c => Some(c.taxYear)) match {
+                    case Some(taxYear) =>
+                      val disposalDate = DisposalDate(date, taxYear) // TODO: write logic
+
+                      if (answers
+                            .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
+                            .fold(_.disposalDate, c => Some(c.disposalDate))
+                            .contains(disposalDate)) {
+                        Redirect(routes.PropertyDetailsController.checkYourAnswers())
+                      } else {
+                        val updatedAnswers =
+                          answers
+                            .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
+                            .fold(
+                              _.copy(disposalDate = Some(disposalDate)),
+                              _.copy(disposalDate = disposalDate)
+                            )
+                        val updatedDraftReturn = m.copy(examplePropertyDetailsAnswers = Some(updatedAnswers))
+                        val result = for {
+                          _ <- EitherT(
+                                updateSession(sessionStore, request)(
+                                  _.copy(journeyStatus = Some(r.copy(draftReturn = updatedDraftReturn)))
+                                )
+                              )
+                        } yield ()
+
+                        result.fold(
+                          { e =>
+                            logger.warn("Could not update draft return", e)
+                            errorHandler.errorResult()
+                          },
+                          _ => Redirect(routes.PropertyDetailsController.checkYourAnswers())
+                        )
+
+                      }
+                    case None => Redirect(controllers.returns.routes.TaskListController.taskList())
+                  }
+                }
+              )
+        }
+    }
   }
 
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
