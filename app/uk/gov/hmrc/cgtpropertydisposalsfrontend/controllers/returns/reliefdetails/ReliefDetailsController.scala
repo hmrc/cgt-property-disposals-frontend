@@ -115,7 +115,7 @@ class ReliefDetailsController @Inject() (
     requiredPreviousAnswer: ReliefDetailsAnswers => Option[R],
     redirectToIfNoRequiredPreviousAnswer: Call
   )(
-    updateAnswers: (A, SingleDisposalDraftReturn) => SingleDisposalDraftReturn
+    updateDraftReturn: (A, SingleDisposalDraftReturn) => SingleDisposalDraftReturn
   )(
     implicit request: RequestWithSessionData[_]
   ): Future[Result] =
@@ -128,7 +128,7 @@ class ReliefDetailsController @Inject() (
         .bindFromRequest()
         .fold(
           formWithErrors => BadRequest(page(formWithErrors, backLink)), { value =>
-            val newDraftReturn = updateAnswers(value, currentDraftReturn)
+            val newDraftReturn = updateDraftReturn(value, currentDraftReturn)
 
             val result = for {
               _ <- if (newDraftReturn === currentDraftReturn) EitherT.pure(())
@@ -188,7 +188,7 @@ class ReliefDetailsController @Inject() (
             requiredPreviousAnswer               = _ => Some(()),
             redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
           )(
-            updateAnswers = {
+            updateDraftReturn = {
               case (p, draftReturn) =>
                 draftReturn.copy(
                   reliefDetailsAnswers = Some(
@@ -235,7 +235,7 @@ class ReliefDetailsController @Inject() (
           ),
           redirectToIfNoRequiredPreviousAnswer = routes.ReliefDetailsController.privateResidentsRelief()
         )(
-          updateAnswers = {
+          updateDraftReturn = {
             case (p, draftReturn) =>
               draftReturn.copy(
                 reliefDetailsAnswers = Some(
@@ -293,7 +293,7 @@ class ReliefDetailsController @Inject() (
           ),
           redirectToIfNoRequiredPreviousAnswer = routes.ReliefDetailsController.lettingsRelief()
         )(
-          updateAnswers = {
+          updateDraftReturn = {
             case (maybeOtherReliefs, draftReturn) =>
               val otherReliefs = maybeOtherReliefs
                 .bimap({
@@ -302,62 +302,23 @@ class ReliefDetailsController @Inject() (
                 }, _ => OtherReliefsOption.NoOtherReliefs)
                 .merge
 
-              val updatedExemptionAndLossesAnswers =
-                changeExemptionsAndLossesAnswersState(
-                  draftReturn.exemptionAndLossesAnswers,
-                  answers,
-                  otherReliefs
+              val updatedReliefDetailsAnswers =
+                answers.fold(
+                  _.copy(otherReliefs = Some(otherReliefs)),
+                  _.copy(otherReliefs = Some(otherReliefs))
                 )
 
-              val updatedReliefDetailsAnswers =
-                answers.fold(_.copy(otherReliefs = Some(otherReliefs)), _.copy(otherReliefs = Some(otherReliefs)))
-
-              draftReturn.copy(
-                reliefDetailsAnswers      = Some(updatedReliefDetailsAnswers),
-                exemptionAndLossesAnswers = updatedExemptionAndLossesAnswers
-              )
+              if (answers === updatedReliefDetailsAnswers) {
+                draftReturn
+              } else {
+                draftReturn.copy(
+                  reliefDetailsAnswers       = Some(updatedReliefDetailsAnswers),
+                  yearToDateLiabilityAnswers = None
+                )
+              }
           }
         )
     }
-  }
-
-  private def changeExemptionsAndLossesAnswersState(
-    existingExemptionAndLossesAnswers: Option[ExemptionAndLossesAnswers],
-    existingReliefDetailsAnswers: ReliefDetailsAnswers,
-    newOtherReliefsOption: OtherReliefsOption
-  ): Option[ExemptionAndLossesAnswers] = {
-    def hasEnteredOtherReliefs(option: Option[OtherReliefsOption]): Boolean =
-      option match {
-        case Some(_: OtherReliefsOption.OtherReliefs) => true
-        case _                                        => false
-      }
-
-    val (hadEnteredOtherReliefs, hasNowEnteredOtherReliefs) =
-      hasEnteredOtherReliefs(existingReliefDetailsAnswers.fold(_.otherReliefs, _.otherReliefs)) ->
-        hasEnteredOtherReliefs(Some(newOtherReliefsOption))
-
-    if (hadEnteredOtherReliefs && !hasNowEnteredOtherReliefs)
-      existingExemptionAndLossesAnswers.map(
-        _.fold(
-          _.copy(taxableGainOrLoss = None),
-          _.copy(taxableGainOrLoss = None)
-        )
-      )
-    else if (!hadEnteredOtherReliefs && hasNowEnteredOtherReliefs)
-      existingExemptionAndLossesAnswers.map(
-        _.fold(
-          _.copy(taxableGainOrLoss = None),
-          complete =>
-            IncompleteExemptionAndLossesAnswers(
-              Some(complete.inYearLosses),
-              Some(complete.previousYearsLosses),
-              Some(complete.annualExemptAmount),
-              None
-            )
-        )
-      )
-    else
-      existingExemptionAndLossesAnswers
   }
 
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>

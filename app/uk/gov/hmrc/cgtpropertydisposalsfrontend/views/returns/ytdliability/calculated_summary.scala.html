@@ -17,51 +17,50 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CompleteYearToDateLiabilityAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYearToDateLiabilityAnswers.CompleteCalculatedYearToDateLiabilityAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 
 @this(
-        cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
-        cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-        cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
-        addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
+cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change,
+addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
 )
 
-
-@(answers: CompleteYearToDateLiabilityAnswers)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(answers: CompleteCalculatedYearToDateLiabilityAnswers)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @cyaSection() {
     @cyaRow(
         messages("estimatedIncome.title"),
         Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.estimatedIncome.inPounds())),
-        Some(cyaChange(messages("ytdLiability.cyaChange.estimatedIncome"), routes.YearToDateLiabilityFirstReturnController.estimatedIncome().url)),
+        Some(cyaChange(messages("ytdLiability.cyaChange.estimatedIncome"), routes.YearToDateLiabilityController.estimatedIncome().url)),
         "estimatedIncome-value"
     )
     @answers.personalAllowance.map { personalAllowance =>
         @cyaRow(
             messages("personalAllowance.title"),
             Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(personalAllowance.inPounds())),
-            Some(cyaChange(messages("ytdLiability.cyaChange.personalAllowance"), routes.YearToDateLiabilityFirstReturnController.personalAllowance().url)),
+            Some(cyaChange(messages("ytdLiability.cyaChange.personalAllowance"), routes.YearToDateLiabilityController.personalAllowance().url)),
             "personalAllowance-value"
         )
     }
     @cyaRow(
         messages("hasEstimatedDetails.title"),
         Html(messages(if(answers.hasEstimatedDetails) "generic.yes" else "generic.no")),
-        Some(cyaChange(messages("ytdLiability.cyaChange.hasEstimatedDetails"), routes.YearToDateLiabilityFirstReturnController.hasEstimatedDetails().url)),
+        Some(cyaChange(messages("ytdLiability.cyaChange.hasEstimatedDetails"), routes.YearToDateLiabilityController.hasEstimatedDetails().url)),
         "hasEstimatedDetails-value"
     )
     @cyaRow(
         messages("taxDue.title"),
         Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.taxDue.inPounds())),
-        Some(cyaChange(messages("ytdLiability.cyaChange.taxDue"), routes.YearToDateLiabilityFirstReturnController.taxDue().url)),
+        Some(cyaChange(messages("ytdLiability.cyaChange.taxDue"), routes.YearToDateLiabilityController.taxDue().url)),
         "taxDue-value"
     )
     @answers.mandatoryEvidence.map { mandatoryEvidence =>
         @cyaRow(
             messages("ytdLiability.cyaLabel.mandatoryEvidence"),
             Html(mandatoryEvidence),
-            Some(cyaChange(messages("ytdLiability.cyaChange.mandatoryEvidence"), routes.YearToDateLiabilityFirstReturnController.uploadMandatoryEvidence().url)),
+            Some(cyaChange(messages("ytdLiability.cyaChange.mandatoryEvidence"), routes.YearToDateLiabilityController.uploadMandatoryEvidence().url)),
             "mandatoryEvidence-value"
         )
     }

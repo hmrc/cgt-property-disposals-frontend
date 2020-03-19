@@ -3027,7 +3027,7 @@ class MultipleDisposalsTriageControllerSpec
         val completeAnswers    = sample[CompleteMultipleDisposalsTriageAnswers]
         val (session, journey) = sessionDataWithStartingNewDraftReturn(completeAnswers)
         val draftId            = UUID.randomUUID()
-        val newDraftReturn     = MultipleDisposalsDraftReturn(draftId, completeAnswers, None, LocalDateUtils.today())
+        val newDraftReturn     = MultipleDisposalsDraftReturn.newDraftReturn(draftId, completeAnswers)
         val newJourney = FillingOutReturn(
           journey.subscribedDetails,
           journey.ggCredId,

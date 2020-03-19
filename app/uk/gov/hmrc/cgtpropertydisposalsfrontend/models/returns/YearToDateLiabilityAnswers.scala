@@ -24,37 +24,71 @@ sealed trait YearToDateLiabilityAnswers extends Product with Serializable
 
 object YearToDateLiabilityAnswers {
 
-  final case class IncompleteYearToDateLiabilityAnswers(
-    estimatedIncome: Option[AmountInPence],
-    personalAllowance: Option[AmountInPence],
-    hasEstimatedDetails: Option[Boolean],
-    calculatedTaxDue: Option[CalculatedTaxDue],
-    taxDue: Option[AmountInPence],
-    mandatoryEvidence: Option[String]
-  ) extends YearToDateLiabilityAnswers
+  sealed trait CalculatedYearToDateLiabilityAnswers extends YearToDateLiabilityAnswers
 
-  object IncompleteYearToDateLiabilityAnswers {
-    val empty: IncompleteYearToDateLiabilityAnswers =
-      IncompleteYearToDateLiabilityAnswers(None, None, None, None, None, None)
+  sealed trait NonCalculatedYearToDateLiabilityAnswers extends YearToDateLiabilityAnswers
+
+  object NonCalculatedYearToDateLiabilityAnswers {
+
+    final case class IncompleteNonCalculatedYearToDateLiabilityAnswers(taxableGainOrLoss: Option[AmountInPence])
+        extends NonCalculatedYearToDateLiabilityAnswers
+
+    object IncompleteNonCalculatedYearToDateLiabilityAnswers {
+      val empty: IncompleteNonCalculatedYearToDateLiabilityAnswers =
+        IncompleteNonCalculatedYearToDateLiabilityAnswers(None)
+    }
+
+    final case class CompleteNonCalculatedYearToDateLiabilityAnswers(taxableGainOrLoss: AmountInPence)
+        extends NonCalculatedYearToDateLiabilityAnswers
+
+    implicit class NonCalculatedYTDLiabilityAnswersOps(private val a: NonCalculatedYearToDateLiabilityAnswers)
+        extends AnyVal {
+
+      def fold[A](
+        ifIncomplete: IncompleteNonCalculatedYearToDateLiabilityAnswers => A,
+        ifComplete: CompleteNonCalculatedYearToDateLiabilityAnswers => A
+      ): A = a match {
+        case i: IncompleteNonCalculatedYearToDateLiabilityAnswers => ifIncomplete(i)
+        case c: CompleteNonCalculatedYearToDateLiabilityAnswers   => ifComplete(c)
+      }
+    }
+
   }
 
-  final case class CompleteYearToDateLiabilityAnswers(
-    estimatedIncome: AmountInPence,
-    personalAllowance: Option[AmountInPence],
-    hasEstimatedDetails: Boolean,
-    calculatedTaxDue: CalculatedTaxDue,
-    taxDue: AmountInPence,
-    mandatoryEvidence: Option[String]
-  ) extends YearToDateLiabilityAnswers
+  object CalculatedYearToDateLiabilityAnswers {
+    final case class IncompleteCalculatedYearToDateLiabilityAnswers(
+      estimatedIncome: Option[AmountInPence],
+      personalAllowance: Option[AmountInPence],
+      hasEstimatedDetails: Option[Boolean],
+      calculatedTaxDue: Option[CalculatedTaxDue],
+      taxDue: Option[AmountInPence],
+      mandatoryEvidence: Option[String]
+    ) extends CalculatedYearToDateLiabilityAnswers
 
-  implicit class YTDLiabilityAnswersOps(private val a: YearToDateLiabilityAnswers) extends AnyVal {
+    object IncompleteCalculatedYearToDateLiabilityAnswers {
+      val empty: IncompleteCalculatedYearToDateLiabilityAnswers =
+        IncompleteCalculatedYearToDateLiabilityAnswers(None, None, None, None, None, None)
+    }
 
-    def fold[A](
-      ifIncomplete: IncompleteYearToDateLiabilityAnswers => A,
-      ifComplete: CompleteYearToDateLiabilityAnswers => A
-    ): A = a match {
-      case i: IncompleteYearToDateLiabilityAnswers => ifIncomplete(i)
-      case c: CompleteYearToDateLiabilityAnswers   => ifComplete(c)
+    final case class CompleteCalculatedYearToDateLiabilityAnswers(
+      estimatedIncome: AmountInPence,
+      personalAllowance: Option[AmountInPence],
+      hasEstimatedDetails: Boolean,
+      calculatedTaxDue: CalculatedTaxDue,
+      taxDue: AmountInPence,
+      mandatoryEvidence: Option[String]
+    ) extends CalculatedYearToDateLiabilityAnswers
+
+    implicit class CalculatedYTDLiabilityAnswersOps(private val a: CalculatedYearToDateLiabilityAnswers)
+        extends AnyVal {
+
+      def fold[A](
+        ifIncomplete: IncompleteCalculatedYearToDateLiabilityAnswers => A,
+        ifComplete: CompleteCalculatedYearToDateLiabilityAnswers => A
+      ): A = a match {
+        case i: IncompleteCalculatedYearToDateLiabilityAnswers => ifIncomplete(i)
+        case c: CompleteCalculatedYearToDateLiabilityAnswers   => ifComplete(c)
+      }
     }
 
   }

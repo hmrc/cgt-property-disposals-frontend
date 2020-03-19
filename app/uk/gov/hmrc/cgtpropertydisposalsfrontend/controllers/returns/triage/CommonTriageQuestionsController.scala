@@ -372,12 +372,8 @@ class CommonTriageQuestionsController @Inject() (
           _.copy(newReturnTriageAnswers = Left(newTriageAnswers)),
           fillingOutReturn =>
             fillingOutReturn.copy(
-              draftReturn = MultipleDisposalsDraftReturn(
-                fillingOutReturn.draftReturn.id,
-                newTriageAnswers,
-                None,
-                LocalDateUtils.today()
-              )
+              draftReturn =
+                MultipleDisposalsDraftReturn.newDraftReturn(fillingOutReturn.draftReturn.id, newTriageAnswers)
             )
         )
     }
