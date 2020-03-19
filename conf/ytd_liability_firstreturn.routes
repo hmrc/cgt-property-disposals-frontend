@@ -16,7 +16,8 @@ POST /tax-amount/add-showing-workings                 uk.gov.hmrc.cgtpropertydis
 GET  /tax-amount/taxable-gain                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.taxableGainOrLoss()
 POST /tax-amount/taxable-gain                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.taxableGainOrLossSubmit()
 
-
+GET  /tax-amount/own-calculation-enter-cgt-due        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.nonCalculatedEnterTaxDue()
+POST /tax-amount/own-calculation-enter-cgt-due        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.nonCalculatedEnterTaxDueSubmit()
 
 GET    /tax-amount/check-answers                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.checkYourAnswers()
 POST   /tax-amount/check-answers                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.checkYourAnswersSubmit()
