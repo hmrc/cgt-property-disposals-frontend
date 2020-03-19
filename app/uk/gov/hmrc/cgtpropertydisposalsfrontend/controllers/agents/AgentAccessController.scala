@@ -80,6 +80,8 @@ class AgentAccessController @Inject() (
   private val maxVerifierNameMatchAttempts: Int =
     config.underlying.getInt("agent-verifier-match.max-retries")
 
+  val getDraftAndSentReturns: Boolean = config.underlying.getBoolean("get-draft-and-sent-returns")
+
   private val authorisedFunctions: AuthorisedFunctions = new AuthorisedFunctions {
     override def authConnector: AuthConnector = self.authConnector
   }
@@ -202,8 +204,10 @@ class AgentAccessController @Inject() (
         val cgtReference = verifierMatchingDetails.clientDetails.cgtReference
         if (verifierMatchingDetails.correctVerifierSupplied) {
           val result = for {
-            draftReturns <- returnsService.getDraftReturns(cgtReference)
-            sentReturns  <- returnsService.listReturns(cgtReference)
+            draftReturns <- if (getDraftAndSentReturns) returnsService.getDraftReturns(cgtReference)
+                           else EitherT.pure(List.empty)
+            sentReturns <- if (getDraftAndSentReturns) returnsService.listReturns(cgtReference)
+                          else EitherT.pure(List.empty)
             _ <- EitherT(
                   updateSession(sessionStore, request)(
                     _.copy(
