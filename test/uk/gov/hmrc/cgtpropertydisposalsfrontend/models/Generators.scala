@@ -46,6 +46,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOptio
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingDocuments.CompleteUploadSupportingDocuments
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYearToDateLiabilityAnswers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYearToDateLiabilityAnswers.CompleteNonCalculatedYearToDateLiabilityAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, _}
@@ -67,7 +68,7 @@ object Generators
     with UserTypeGen
     with TriageQuestionsGen
     with ReturnGen
-    with UpscanGen
+    with FileUploadGen
     with DisposalDetailsGen
     with DisposalMethodGen
     with MoneyGen
@@ -303,8 +304,9 @@ trait LowerPriorityReturnGen { this: GenUtils =>
 
 }
 
-trait UpscanGen { this: GenUtils =>
-
+trait FileUploadGen { this: GenUtils =>
+  implicit val completeUploadSupportingDocuments: Gen[CompleteUploadSupportingDocuments] =
+    gen[CompleteUploadSupportingDocuments]
   implicit val uploadRequestGen: Gen[UploadRequest]                         = gen[UploadRequest]
   implicit val fileDescriptorGen: Gen[FileDescriptor]                       = gen[FileDescriptor]
   implicit val upscanFileDescriptorGen: Gen[UpscanFileDescriptor]           = gen[UpscanFileDescriptor]

@@ -24,6 +24,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingDocuments.CompleteUploadSupportingDocuments
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYearToDateLiabilityAnswers.CompleteCalculatedYearToDateLiabilityAnswers
 
 final case class CompleteReturn(
@@ -34,6 +35,7 @@ final case class CompleteReturn(
   reliefDetails: CompleteReliefDetailsAnswers,
   exemptionsAndLossesDetails: CompleteExemptionAndLossesAnswers,
   yearToDateLiabilityAnswers: CompleteCalculatedYearToDateLiabilityAnswers,
+  uploadSupportingDocuments: CompleteUploadSupportingDocuments,
   initialGainOrLoss: Option[AmountInPence]
 )
 
@@ -50,9 +52,10 @@ object CompleteReturn {
         Some(e: CompleteExemptionAndLossesAnswers),
         Some(y: CompleteCalculatedYearToDateLiabilityAnswers),
         i,
+        Some(u: CompleteUploadSupportingDocuments),
         _
         ) =>
-      Some(CompleteReturn(t, p, d, a, r, e, y, i))
+      Some(CompleteReturn(t, p, d, a, r, e, y, u, i))
 
     case _ =>
       None
@@ -66,6 +69,7 @@ object CompleteReturn {
     implicit val reliefDetailsFormat: OFormat[CompleteReliefDetailsAnswers]                       = Json.format
     implicit val exemptionAndLossesFormat: OFormat[CompleteExemptionAndLossesAnswers]             = Json.format
     implicit val yearToDateLiabilityFormat: OFormat[CompleteCalculatedYearToDateLiabilityAnswers] = Json.format
+    implicit val uploadSupportingDocuments: OFormat[CompleteUploadSupportingDocuments]            = Json.format
     Json.format
   }
 

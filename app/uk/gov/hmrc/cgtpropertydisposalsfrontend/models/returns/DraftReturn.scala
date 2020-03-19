@@ -25,7 +25,6 @@ import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.CompleteMultipleDisposalsTriageAnswers
 
 sealed trait DraftReturn extends Product with Serializable {
   val id: UUID
@@ -42,6 +41,7 @@ final case class SingleDisposalDraftReturn(
   exemptionAndLossesAnswers: Option[ExemptionAndLossesAnswers],
   yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
   initialGainOrLoss: Option[AmountInPence],
+  uploadSupportingDocuments: Option[UploadSupportingDocuments],
   lastUpdatedDate: LocalDate
 ) extends DraftReturn
 
@@ -56,13 +56,14 @@ final case class MultipleDisposalsDraftReturn(
   triageAnswers: MultipleDisposalsTriageAnswers,
   examplePropertyDetailsAnswers: Option[MultipleDisposalsExamplePropertyDetailsAnswers],
   yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
+  uploadSupportingDocuments: Option[UploadSupportingDocuments],
   lastUpdatedDate: LocalDate
 ) extends DraftReturn
 
 object MultipleDisposalsDraftReturn {
 
   def newDraftReturn(id: UUID, triageAnswers: MultipleDisposalsTriageAnswers) =
-    MultipleDisposalsDraftReturn(id, triageAnswers, None, None, LocalDateUtils.today())
+    MultipleDisposalsDraftReturn(id, triageAnswers, None, None, None, LocalDateUtils.today())
 
 }
 
