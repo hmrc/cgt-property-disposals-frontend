@@ -40,7 +40,7 @@ object DisposalDetailsAnswers {
     disposalFees: AmountInPence
   ) extends DisposalDetailsAnswers
 
-  implicit class DisposalDetailsAnswersOps(val i: DisposalDetailsAnswers) extends AnyVal {
+  implicit class DisposalDetailsAnswersOps(private val i: DisposalDetailsAnswers) extends AnyVal {
 
     def fold[A](
       ifIncomplete: IncompleteDisposalDetailsAnswers => A,

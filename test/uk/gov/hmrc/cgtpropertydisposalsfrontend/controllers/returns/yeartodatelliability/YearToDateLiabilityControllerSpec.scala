@@ -45,6 +45,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingDocuments.CompleteUploadSupportingDocuments
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYearToDateLiabilityAnswers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYearToDateLiabilityAnswers.{CompleteNonCalculatedYearToDateLiabilityAnswers, IncompleteNonCalculatedYearToDateLiabilityAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
@@ -148,6 +149,7 @@ class YearToDateLiabilityControllerSpec
       Some(sample[CompleteExemptionAndLossesAnswers]),
       yearToDateLiabilityAnswers,
       Some(sample[AmountInPence]),
+      Some(sample[CompleteUploadSupportingDocuments]),
       LocalDateUtils.today()
     )
 

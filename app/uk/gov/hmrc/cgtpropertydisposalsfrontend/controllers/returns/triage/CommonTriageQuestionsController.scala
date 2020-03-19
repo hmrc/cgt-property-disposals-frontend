@@ -357,6 +357,7 @@ class CommonTriageQuestionsController @Inject() (
                 None,
                 None,
                 None,
+                None,
                 LocalDateUtils.today()
               )
             )

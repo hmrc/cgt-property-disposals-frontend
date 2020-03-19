@@ -38,7 +38,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.Inn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.IncompleteExemptionAndLossesAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{ReliefDetailsAnswers, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore

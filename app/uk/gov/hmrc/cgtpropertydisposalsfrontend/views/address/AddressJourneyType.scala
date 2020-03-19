@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address
 
 import cats.Eq
-import cats.syntax.eq._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.{IndividualSupplyingInformation, RegistrationReady}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, Subscribed}

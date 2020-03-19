@@ -29,7 +29,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, UKAddressLookupService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Onboarding.IndividualSupplyingInformationAddressJourney
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
