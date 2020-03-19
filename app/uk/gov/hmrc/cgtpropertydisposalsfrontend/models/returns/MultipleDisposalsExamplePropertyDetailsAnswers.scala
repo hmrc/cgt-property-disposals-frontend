@@ -24,16 +24,20 @@ sealed trait MultipleDisposalsExamplePropertyDetailsAnswers extends Product with
 
 object MultipleDisposalsExamplePropertyDetailsAnswers {
 
-  final case class IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(address: Option[UkAddress])
-      extends MultipleDisposalsExamplePropertyDetailsAnswers
+  final case class IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(
+    address: Option[UkAddress],
+    disposalDate: Option[DisposalDate]
+  ) extends MultipleDisposalsExamplePropertyDetailsAnswers
 
   object IncompleteMultipleDisposalsExamplePropertyDetailsAnswers {
     val empty: IncompleteMultipleDisposalsExamplePropertyDetailsAnswers =
-      IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(None)
+      IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(None, None)
   }
 
-  final case class CompleteMultipleDisposalsExamplePropertyDetailsAnswers(address: UkAddress)
-      extends MultipleDisposalsExamplePropertyDetailsAnswers
+  final case class CompleteMultipleDisposalsExamplePropertyDetailsAnswers(
+    address: UkAddress,
+    disposalDate: DisposalDate
+  ) extends MultipleDisposalsExamplePropertyDetailsAnswers
 
   implicit class MultipleDisposalsExamplePropertyDetailsAnswersOps(
     private val m: MultipleDisposalsExamplePropertyDetailsAnswers

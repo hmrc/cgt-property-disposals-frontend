@@ -10,5 +10,8 @@ POST /find-uk-property-address           uk.gov.hmrc.cgtpropertydisposalsfronten
 GET  /select-property-address            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.selectAddress()
 POST /select-property-address            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.selectAddressSubmit()
 
+GET  /disposal-date                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.disposalDate()
+POST /disposal-date                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.disposalDateSubmit()
+
 GET  /confirm-property-address           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.checkYourAnswers()
 POST /confirm-property-address           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.checkYourAnswersSubmit()

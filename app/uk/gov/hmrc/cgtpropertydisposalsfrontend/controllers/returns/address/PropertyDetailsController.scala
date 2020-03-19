@@ -16,21 +16,26 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address
 
+import java.time.LocalDate
+
 import cats.data.EitherT
 import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
+import play.api.data.Form
+import play.api.data.Forms.{mapping, of}
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.{routes => addressRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => returnsRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, SessionUpdates}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsExamplePropertyDetailsAnswers.{CompleteMultipleDisposalsExamplePropertyDetailsAnswers, IncompleteMultipleDisposalsExamplePropertyDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{MultipleDisposalsDraftReturn, SingleDisposalDraftReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{MultipleDisposalsDraftReturn, MultipleDisposalsExamplePropertyDetailsAnswers, SingleDisposalDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, LocalDateUtils, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -59,6 +64,7 @@ class PropertyDetailsController @Inject() (
   val enterNonUkAddressPage: views.html.address.enter_nonUk_address,
   val isUkPage: views.html.address.isUk,
   multipleDisposalsGuidancePage: views.html.returns.address.multiple_disposals_guidance,
+  multipleDisposalsDisposalDatePage: views.html.returns.address.disposal_date,
   singleDisposalCheckYourAnswersPage: views.html.returns.address.single_disposal_check_your_answers,
   multipleDisposalsCheckYourAnswersPage: views.html.returns.address.multiple_disposals_check_your_answers
 )(implicit val viewConfig: ViewConfig, val ec: ExecutionContext)
@@ -93,7 +99,12 @@ class PropertyDetailsController @Inject() (
               EitherT.pure(journey)
             else {
               val updatedDraftReturn = m.copy(
-                examplePropertyDetailsAnswers = Some(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(Some(a)))
+                examplePropertyDetailsAnswers = Some(
+                  IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(
+                    Some(a),
+                    None
+                  )
+                )
               )
               returnsService
                 .storeDraftReturn(
@@ -183,6 +194,36 @@ class PropertyDetailsController @Inject() (
       }
   }
 
+  def disposalDate(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withValidJourney(request) {
+      case (_, r) =>
+        r.draftReturn match {
+          case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          case m: MultipleDisposalsDraftReturn =>
+            val answers = m.examplePropertyDetailsAnswers
+            val backLink = answers
+              .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
+              .fold(
+                _ => routes.PropertyDetailsController.enterUkAddress(),
+                _ => routes.PropertyDetailsController.checkYourAnswers()
+              )
+
+            val disposalDate = answers
+              .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
+              .fold(_.disposalDate, c => Some(c.disposalDate))
+
+            val today = LocalDateUtils.today()
+            val form  = disposalDate.fold(disposalDateForm(today))(c => disposalDateForm(today).fill(c.value))
+
+            Ok(multipleDisposalsDisposalDatePage(form, backLink, false))
+        }
+    }
+  }
+
+  def disposalDateSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    Ok("Not yet implemented")
+  }
+
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) {
       case (_, r) =>
@@ -191,11 +232,14 @@ class PropertyDetailsController @Inject() (
             m.examplePropertyDetailsAnswers.fold[Future[Result]](
               Redirect(routes.PropertyDetailsController.multipleDisposalsGuidance())
             ) {
-              case IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(None) =>
+              case IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(None, _) =>
                 Redirect(routes.PropertyDetailsController.multipleDisposalsGuidance())
 
-              case IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(Some(a)) =>
-                val completeAnswers    = CompleteMultipleDisposalsExamplePropertyDetailsAnswers(a)
+              case IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(_, None) =>
+                Redirect(routes.PropertyDetailsController.disposalDate())
+
+              case IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(Some(a), Some(d)) =>
+                val completeAnswers    = CompleteMultipleDisposalsExamplePropertyDetailsAnswers(a, d)
                 val updatedDraftReturn = m.copy(examplePropertyDetailsAnswers = Some(completeAnswers))
                 val result = for {
                   _ <- returnsService.storeDraftReturn(
@@ -244,5 +288,27 @@ class PropertyDetailsController @Inject() (
   protected lazy val enterNonUkAddressCall: Call       = enterPostcodeCall
   protected lazy val enterNonUkAddressSubmitCall: Call = enterPostcodeCall
   protected lazy val backLinkCall: Call                = enterPostcodeCall
+
+}
+
+object PropertyDetailsController {
+
+  def disposalDateForm(maximumDateInclusive: LocalDate): Form[LocalDate] =
+    // TODO: use it
+    //  def disposalDateForm(minimumDateInclusive: LocalDate, maximumDateInclusive: LocalDate): Form[LocalDate] =
+    Form(
+      mapping(
+        "" -> of(
+          LocalDateUtils.dateFormatter(
+            Some(maximumDateInclusive), // eariest of [today, End of the tax year]
+            None, //TODO: use it Some(minimumDateInclusive), // start of the tax year
+            "disposalDate-day",
+            "disposalDate-month",
+            "disposalDate-year",
+            "disposalDate"
+          )
+        )
+      )(identity)(Some(_))
+    )
 
 }
