@@ -74,7 +74,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
    )
    @textInput(
     fieldId = key,
-    label = Html(messages("enterPostcode.label")),
+    label = Html(messages("address.postcode.label")),
     helpText = Some(Html(messages("address.postcode.helpText"))),
     errorKey = form.error(key).map(e => e.message),
     value = form.data.getOrElse(key, ""),
