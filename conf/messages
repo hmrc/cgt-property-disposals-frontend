@@ -657,7 +657,8 @@ task-list.report-and-pay-the-tax.heading=Report and pay the tax
 task-list.enter-cgt-liability.link=Enter Capital Gains Tax liability so far this tax year
 task-list.ytd-liability.link=Enter Capital Gains Tax liability so far this tax year
 task-list.check-and-send-return.link=Check and send return, pay any tax due
-task-list.supporting-evidence.link=Upload Your Supporting Documents
+task-list.upload-supporting-docs.link=Upload Your Supporting Documents
+
 
 returns.property-address.caption=Property address
 enterPostcode.returns.title=Find the address of the UK property you disposed of
@@ -1179,3 +1180,7 @@ multipleDisposals.triage.cyaChange.assetTypes=the types of property included in 
 multipleDisposals.triage.cyaChange.wereAllPropertiesResidential=whether all the properties were residential properties
 multipleDisposals.triage.cyaChange.taxYear=when the contracts were exchanged on all the properties
 multipleDisposals.triage.cyaChange.completionDate=the completion date for all the properties
+
+hasSupportingDocsToUpload.title=Do you want to upload any supporting docs?
+hasSupportingDocsToUpload.error.required=Select yes if you want to upload any supporting documents
+hasSupportingDocsToUpload.error.boolean=Select yes if you want to upload any supporting documents

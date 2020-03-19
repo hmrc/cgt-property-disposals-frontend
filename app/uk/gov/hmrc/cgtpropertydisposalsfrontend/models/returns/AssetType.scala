@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import cats.Eq
-import cats.syntax.eq._
 import julienrf.json.derived
 import play.api.libs.json.OFormat
 

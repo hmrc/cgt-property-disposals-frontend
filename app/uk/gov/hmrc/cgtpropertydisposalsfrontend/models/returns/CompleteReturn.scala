@@ -16,17 +16,16 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import java.util.UUID
-
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingDocuments.CompleteUploadSupportingDocuments
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CompleteYearToDateLiabilityAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
 final case class CompleteReturn(
   triageAnswers: CompleteSingleDisposalTriageAnswers,
@@ -36,6 +35,7 @@ final case class CompleteReturn(
   reliefDetails: CompleteReliefDetailsAnswers,
   exemptionsAndLossesDetails: CompleteExemptionAndLossesAnswers,
   yearToDateLiabilityAnswers: CompleteYearToDateLiabilityAnswers,
+  uploadSupportingDocuments: CompleteUploadSupportingDocuments,
   initialGainOrLoss: Option[AmountInPence]
 )
 
@@ -52,9 +52,10 @@ object CompleteReturn {
         Some(e: CompleteExemptionAndLossesAnswers),
         Some(y: CompleteYearToDateLiabilityAnswers),
         i,
+        Some(u: CompleteUploadSupportingDocuments),
         _
         ) =>
-      Some(CompleteReturn(t, p, d, a, r, e, y, i))
+      Some(CompleteReturn(t, p, d, a, r, e, y, u, i))
 
     case _ =>
       None
@@ -68,6 +69,7 @@ object CompleteReturn {
     implicit val reliefDetailsFormat: OFormat[CompleteReliefDetailsAnswers]             = Json.format
     implicit val exemptionAndLossesFormat: OFormat[CompleteExemptionAndLossesAnswers]   = Json.format
     implicit val yearToDateLiabilityFormat: OFormat[CompleteYearToDateLiabilityAnswers] = Json.format
+    implicit val uploadSupportingDocuments: OFormat[CompleteUploadSupportingDocuments]  = Json.format
     Json.format
   }
 
