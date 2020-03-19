@@ -986,6 +986,7 @@ ytdLiability.cyaChange.mandatoryEvidence=your supporting file
 
 ytdLiability.cyaChange.annualExemptAmount=your annual exempt amount
 ytdLiability.cyaChange.taxableGainOrLoss=your taxable gain or net loss
+ytdLiability.cyaChange.nonCalculatedTaxDue=your tax due
 
 checkAllAnswers.title=Check your answers before sending the return
 checkAllAnswers.declaration=Declaration
@@ -1203,6 +1204,9 @@ multipleDisposals.triage.cyaChange.assetTypes=the types of property included in 
 multipleDisposals.triage.cyaChange.wereAllPropertiesResidential=whether all the properties were residential properties
 multipleDisposals.triage.cyaChange.taxYear=when the contracts were exchanged on all the properties
 multipleDisposals.triage.cyaChange.completionDate=the completion date for all the properties
+
+nonCalculatedTaxDue.title=Enter the amount of Capital Gains Tax due for this return
+nonCalculatedTaxDue.helpText=You’ll need to work out and enter the amount.
 
 hasSupportingDocsToUpload.title=Do you want to upload any supporting docs?
 hasSupportingDocsToUpload.error.required=Select yes if you want to upload any supporting documents

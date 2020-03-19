@@ -57,4 +57,18 @@ addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.a
             "taxableGainOrLossAmount"
         )
     }
+
+    @cyaRow(
+        messages("hasEstimatedDetails.title"),
+        Html(messages(if(answers.hasEstimatedDetails) "generic.yes" else "generic.no")),
+        Some(cyaChange(messages("ytdLiability.cyaChange.hasEstimatedDetails"), routes.YearToDateLiabilityController.hasEstimatedDetails().url)),
+        "hasEstimatedDetails-value"
+    )
+
+    @cyaRow(
+        messages("nonCalculatedTaxDue.title"),
+        Html( MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.taxDue.inPounds())),
+        Some(cyaChange(messages("ytdLiability.cyaChange.nonCalculatedTaxDue"), routes.YearToDateLiabilityController.nonCalculatedEnterTaxDue().url)),
+        "nonCalculatedTaxDue-value"
+    )
 }
