@@ -39,7 +39,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.FormUtils.readValue
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
@@ -171,6 +170,7 @@ class MultipleDisposalsTriageController @Inject() (
               SingleDisposalDraftReturn(
                 d.id,
                 incompleteSingleDisposalTriageAnswers,
+                None,
                 None,
                 None,
                 None,
@@ -715,8 +715,7 @@ class MultipleDisposalsTriageController @Inject() (
                 Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
 
               case c: CompleteMultipleDisposalsTriageAnswers =>
-                val newDraftReturn =
-                  MultipleDisposalsDraftReturn(uuidGenerator.nextId(), c, None, LocalDateUtils.today())
+                val newDraftReturn = MultipleDisposalsDraftReturn.newDraftReturn(uuidGenerator.nextId(), c)
                 val newJourney = FillingOutReturn(
                   startingNewDraftReturn.subscribedDetails,
                   startingNewDraftReturn.ggCredId,

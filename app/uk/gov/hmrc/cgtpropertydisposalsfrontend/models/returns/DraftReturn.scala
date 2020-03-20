@@ -22,6 +22,7 @@ import java.util.UUID
 import cats.Eq
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
@@ -40,6 +41,7 @@ final case class SingleDisposalDraftReturn(
   exemptionAndLossesAnswers: Option[ExemptionAndLossesAnswers],
   yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
   initialGainOrLoss: Option[AmountInPence],
+  uploadSupportingDocuments: Option[UploadSupportingDocuments],
   lastUpdatedDate: LocalDate
 ) extends DraftReturn
 
@@ -53,8 +55,17 @@ final case class MultipleDisposalsDraftReturn(
   id: UUID,
   triageAnswers: MultipleDisposalsTriageAnswers,
   examplePropertyDetailsAnswers: Option[MultipleDisposalsExamplePropertyDetailsAnswers],
+  yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
+  uploadSupportingDocuments: Option[UploadSupportingDocuments],
   lastUpdatedDate: LocalDate
 ) extends DraftReturn
+
+object MultipleDisposalsDraftReturn {
+
+  def newDraftReturn(id: UUID, triageAnswers: MultipleDisposalsTriageAnswers) =
+    MultipleDisposalsDraftReturn(id, triageAnswers, None, None, None, LocalDateUtils.today())
+
+}
 
 object DraftReturn {
 

@@ -136,7 +136,7 @@ registration.cyaLabel.email=Contact email address
 registration.cyaChange.email=your email address
 
 enterPostcode.title=Find your UK contact address
-enterPostcode.label=Enter postcode
+
 
 email.title=Enter a contact email address
 email.amend.title=Enter a contact email address
@@ -179,8 +179,8 @@ address.manual.linkText=Enter the address another way
 address.lookup.linkText=Find address using UK postcode
 
 address.uk.title=Enter your UK contact address
-address.uk.line1.label=Building or street
-address.uk.line2.label=Building or street line 2 (optional)
+address.uk.line1.label=Building and street
+address.uk.line2.label=Building and street line 2 (optional)
 address.uk.line3.label=Town or city (optional)
 address.uk.line4.label=County (optional)
 address-line1.error.required=Enter the building or street
@@ -657,7 +657,8 @@ task-list.report-and-pay-the-tax.heading=Report and pay the tax
 task-list.enter-cgt-liability.link=Enter Capital Gains Tax liability so far this tax year
 task-list.ytd-liability.link=Enter Capital Gains Tax liability so far this tax year
 task-list.check-and-send-return.link=Check and send return, pay any tax due
-task-list.supporting-evidence.link=Upload Your Supporting Documents
+task-list.upload-supporting-docs.link=Upload Your Supporting Documents
+
 
 task-list.enter-example-property-address.link=Enter details of one property
 
@@ -935,9 +936,6 @@ exemptionsAndLosses.cyaChange.inYearLossesValue=the amount of in year losses
 exemptionsAndLosses.cyaChange.previousYearsLosses=your previous years losses
 exemptionsAndLosses.cyaChange.previousYearsLossesValue=the amount of previous years losses
 
-exemptionsAndLosses.cyaChange.annualExemptAmount=your annual exempt amount
-exemptionsAndLosses.cyaChange.taxableGainOrLoss=your taxable gain or net loss
-
 ytdLiability.caption=Tax amount owed
 
 estimatedIncome.title=What is your estimated income liable for UK tax in this tax year?
@@ -985,6 +983,10 @@ mandatoryEvidence.helpText=Upload one or more documents (maximum file size 5MB) 
 ytdLiability.cya.title=Check your answers
 ytdLiability.cyaLabel.mandatoryEvidence=Supporting file
 ytdLiability.cyaChange.mandatoryEvidence=your supporting file
+
+ytdLiability.cyaChange.annualExemptAmount=your annual exempt amount
+ytdLiability.cyaChange.taxableGainOrLoss=your taxable gain or net loss
+ytdLiability.cyaChange.nonCalculatedTaxDue=your tax due
 
 checkAllAnswers.title=Check your answers before sending the return
 checkAllAnswers.declaration=Declaration
@@ -1202,3 +1204,10 @@ multipleDisposals.triage.cyaChange.assetTypes=the types of property included in 
 multipleDisposals.triage.cyaChange.wereAllPropertiesResidential=whether all the properties were residential properties
 multipleDisposals.triage.cyaChange.taxYear=when the contracts were exchanged on all the properties
 multipleDisposals.triage.cyaChange.completionDate=the completion date for all the properties
+
+nonCalculatedTaxDue.title=Enter the amount of Capital Gains Tax due for this return
+nonCalculatedTaxDue.helpText=You’ll need to work out and enter the amount.
+
+hasSupportingDocsToUpload.title=Do you want to upload any supporting docs?
+hasSupportingDocsToUpload.error.required=Select yes if you want to upload any supporting documents
+hasSupportingDocsToUpload.error.boolean=Select yes if you want to upload any supporting documents

@@ -46,7 +46,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOptio
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CompleteYearToDateLiabilityAnswers, IncompleteYearToDateLiabilityAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingDocuments.CompleteUploadSupportingDocuments
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYearToDateLiabilityAnswers._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYearToDateLiabilityAnswers.CompleteNonCalculatedYearToDateLiabilityAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CalculateCgtTaxDueRequest, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{FileDescriptor, UploadRequest, UpscanFileDescriptor, UpscanInitiateRawResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.ListReturnsResponse
@@ -66,7 +68,7 @@ object Generators
     with UserTypeGen
     with TriageQuestionsGen
     with ReturnGen
-    with UpscanGen
+    with FileUploadGen
     with DisposalDetailsGen
     with DisposalMethodGen
     with MoneyGen
@@ -302,8 +304,9 @@ trait LowerPriorityReturnGen { this: GenUtils =>
 
 }
 
-trait UpscanGen { this: GenUtils =>
-
+trait FileUploadGen { this: GenUtils =>
+  implicit val completeUploadSupportingDocuments: Gen[CompleteUploadSupportingDocuments] =
+    gen[CompleteUploadSupportingDocuments]
   implicit val uploadRequestGen: Gen[UploadRequest]                         = gen[UploadRequest]
   implicit val fileDescriptorGen: Gen[FileDescriptor]                       = gen[FileDescriptor]
   implicit val upscanFileDescriptorGen: Gen[UpscanFileDescriptor]           = gen[UpscanFileDescriptor]
@@ -416,20 +419,14 @@ trait ExemptionAndLossesAnswersGen { this: GenUtils =>
     gen[IncompleteExemptionAndLossesAnswers]
 }
 
-trait YearToDateLiabilityAnswersGen { this: GenUtils =>
+trait YearToDateLiabilityAnswersGen extends LowerPriorityYearToDateLiabilityAnswersGen { this: GenUtils =>
 
-  implicit val completeYTDLiabilityAnswersGen: Gen[CompleteYearToDateLiabilityAnswers] =
-    gen[CompleteYearToDateLiabilityAnswers].map {
-      case a: CompleteYearToDateLiabilityAnswers
+  implicit val ytdLiabilityAnswersGen: Gen[YearToDateLiabilityAnswers] = gen[YearToDateLiabilityAnswers]
+
+  implicit val completeCalculatedYTDLiabilityAnswersGen: Gen[CompleteCalculatedYearToDateLiabilityAnswers] =
+    gen[CompleteCalculatedYearToDateLiabilityAnswers].map {
+      case a: CompleteCalculatedYearToDateLiabilityAnswers
           if a.estimatedIncome > AmountInPence.zero && a.personalAllowance.isEmpty =>
-        a.copy(personalAllowance = Some(AmountInPence.zero))
-      case other => other
-    }
-
-  implicit val incompleteYTDLiabilityAnswersGen: Gen[IncompleteYearToDateLiabilityAnswers] =
-    gen[IncompleteYearToDateLiabilityAnswers].map {
-      case a: IncompleteYearToDateLiabilityAnswers
-          if a.estimatedIncome.exists(_ > AmountInPence.zero) && a.personalAllowance.isEmpty =>
         a.copy(personalAllowance = Some(AmountInPence.zero))
       case other => other
     }
@@ -437,6 +434,21 @@ trait YearToDateLiabilityAnswersGen { this: GenUtils =>
   implicit val calculatedTaxDueGen: Gen[CalculatedTaxDue] = gen[CalculatedTaxDue]
 
   implicit val gainCalculatedTaxDueGen: Gen[GainCalculatedTaxDue] = gen[GainCalculatedTaxDue]
+
+}
+
+trait LowerPriorityYearToDateLiabilityAnswersGen { this: GenUtils =>
+
+  implicit val incompleteCalculatedYTDLiabilityAnswersGen: Gen[IncompleteCalculatedYearToDateLiabilityAnswers] =
+    gen[IncompleteCalculatedYearToDateLiabilityAnswers].map {
+      case a: IncompleteCalculatedYearToDateLiabilityAnswers
+          if a.estimatedIncome.exists(_ > AmountInPence.zero) && a.personalAllowance.isEmpty =>
+        a.copy(personalAllowance = Some(AmountInPence.zero))
+      case other => other
+    }
+
+  implicit val completeNonCalculatedYTDLiabilityAnswersGen: Gen[CompleteNonCalculatedYearToDateLiabilityAnswers] =
+    gen[CompleteNonCalculatedYearToDateLiabilityAnswers]
 
 }
 

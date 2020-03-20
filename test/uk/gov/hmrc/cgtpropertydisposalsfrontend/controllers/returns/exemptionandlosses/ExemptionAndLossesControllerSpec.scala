@@ -37,8 +37,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.OtherReliefs
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -75,15 +73,13 @@ class ExemptionAndLossesControllerSpec
 
   def sessionWithState(
     answers: Option[ExemptionAndLossesAnswers],
-    disposalDate: Option[DisposalDate],
-    reliefDetailsAnswers: Option[ReliefDetailsAnswers]
+    disposalDate: Option[DisposalDate]
   ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) = {
     val draftReturn =
       sample[SingleDisposalDraftReturn].copy(
         triageAnswers = sample[IncompleteSingleDisposalTriageAnswers].copy(
           disposalDate = disposalDate
         ),
-        reliefDetailsAnswers      = reliefDetailsAnswers,
         exemptionAndLossesAnswers = answers
       )
 
@@ -98,10 +94,9 @@ class ExemptionAndLossesControllerSpec
 
   def sessionWithState(
     answers: ExemptionAndLossesAnswers,
-    disposalDate: DisposalDate,
-    reliefDetailsAnswers: ReliefDetailsAnswers
+    disposalDate: DisposalDate
   ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) =
-    sessionWithState(Some(answers), Some(disposalDate), Some(reliefDetailsAnswers))
+    sessionWithState(Some(answers), Some(disposalDate))
 
   "AcquisitionDetailsController" when {
 
@@ -119,7 +114,6 @@ class ExemptionAndLossesControllerSpec
             mockGetSession(
               sessionWithState(
                 Some(sample[CompleteExemptionAndLossesAnswers]),
-                None,
                 None
               )._1
             )
@@ -139,8 +133,7 @@ class ExemptionAndLossesControllerSpec
             mockGetSession(
               sessionWithState(
                 None,
-                Some(disposalDate),
-                None
+                Some(disposalDate)
               )._1
             )
           }
@@ -167,8 +160,7 @@ class ExemptionAndLossesControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[CompleteExemptionAndLossesAnswers],
-                disposalDate,
-                sample[CompleteReliefDetailsAnswers]
+                disposalDate
               )._1
             )
           }
@@ -197,8 +189,7 @@ class ExemptionAndLossesControllerSpec
                 sample[IncompleteExemptionAndLossesAnswers].copy(
                   inYearLosses = Some(AmountInPence.zero)
                 ),
-                disposalDate,
-                sample[CompleteReliefDetailsAnswers]
+                disposalDate
               )._1
             )
           }
@@ -225,8 +216,7 @@ class ExemptionAndLossesControllerSpec
                 sample[IncompleteExemptionAndLossesAnswers].copy(
                   inYearLosses = Some(amountInPence)
                 ),
-                disposalDate,
-                sample[CompleteReliefDetailsAnswers]
+                disposalDate
               )._1
             )
           }
@@ -263,8 +253,7 @@ class ExemptionAndLossesControllerSpec
             mockGetSession(
               sessionWithState(
                 Some(sample[CompleteExemptionAndLossesAnswers]),
-                None,
-                Some(sample[CompleteReliefDetailsAnswers])
+                None
               )._1
             )
           }
@@ -280,8 +269,7 @@ class ExemptionAndLossesControllerSpec
 
         val session = sessionWithState(
           sample[CompleteExemptionAndLossesAnswers],
-          disposalDate,
-          sample[ReliefDetailsAnswers]
+          disposalDate
         )._1
 
         def test(data: (String, String)*)(expectedErrorKey: String): Unit =
@@ -323,7 +311,7 @@ class ExemptionAndLossesControllerSpec
         val answers: CompleteExemptionAndLossesAnswers =
           sample[CompleteExemptionAndLossesAnswers].copy(inYearLosses = AmountInPence(newAmount.value + 1L))
         val (session, journey, draftReturn) =
-          sessionWithState(answers, sample[DisposalDate], sample[CompleteReliefDetailsAnswers])
+          sessionWithState(answers, sample[DisposalDate])
         val updatedDraftReturn = draftReturn.copy(exemptionAndLossesAnswers = Some(
           answers.copy(inYearLosses = newAmount)
         )
@@ -431,7 +419,7 @@ class ExemptionAndLossesControllerSpec
         "the value submitted hasn't changed" in {
           val answers =
             sample[CompleteExemptionAndLossesAnswers].copy(inYearLosses = AmountInPence.zero)
-          val session = sessionWithState(answers, sample[DisposalDate], sample[CompleteReliefDetailsAnswers])._1
+          val session = sessionWithState(answers, sample[DisposalDate])._1
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -463,8 +451,7 @@ class ExemptionAndLossesControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteExemptionAndLossesAnswers].copy(inYearLosses = None),
-                sample[DisposalDate],
-                sample[CompleteReliefDetailsAnswers]
+                sample[DisposalDate]
               )._1
             )
           }
@@ -482,8 +469,7 @@ class ExemptionAndLossesControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteExemptionAndLossesAnswers].copy(inYearLosses = Some(sample[AmountInPence])),
-                sample[DisposalDate],
-                sample[CompleteReliefDetailsAnswers]
+                sample[DisposalDate]
               )._1
             )
           }
@@ -507,8 +493,7 @@ class ExemptionAndLossesControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[CompleteExemptionAndLossesAnswers],
-                sample[DisposalDate],
-                sample[CompleteReliefDetailsAnswers]
+                sample[DisposalDate]
               )._1
             )
           }
@@ -535,8 +520,7 @@ class ExemptionAndLossesControllerSpec
                   inYearLosses        = Some(sample[AmountInPence]),
                   previousYearsLosses = Some(AmountInPence.zero)
                 ),
-                sample[DisposalDate],
-                sample[CompleteReliefDetailsAnswers]
+                sample[DisposalDate]
               )._1
             )
           }
@@ -561,8 +545,7 @@ class ExemptionAndLossesControllerSpec
                   inYearLosses        = Some(sample[AmountInPence]),
                   previousYearsLosses = Some(amountInPence)
                 ),
-                sample[DisposalDate],
-                sample[CompleteReliefDetailsAnswers]
+                sample[DisposalDate]
               )._1
             )
           }
@@ -597,8 +580,7 @@ class ExemptionAndLossesControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteExemptionAndLossesAnswers].copy(inYearLosses = None),
-                sample[DisposalDate],
-                sample[CompleteReliefDetailsAnswers]
+                sample[DisposalDate]
               )._1
             )
           }
@@ -645,7 +627,7 @@ class ExemptionAndLossesControllerSpec
         val answers: CompleteExemptionAndLossesAnswers =
           sample[CompleteExemptionAndLossesAnswers].copy(previousYearsLosses = AmountInPence(newAmount.value + 1L))
         val (session, journey, draftReturn) =
-          sessionWithState(answers, sample[DisposalDate], sample[CompleteReliefDetailsAnswers])
+          sessionWithState(answers, sample[DisposalDate])
         val updatedDraftReturn = draftReturn.copy(exemptionAndLossesAnswers = Some(
           answers.copy(previousYearsLosses = newAmount)
         )
@@ -760,7 +742,7 @@ class ExemptionAndLossesControllerSpec
         "the value submitted hasn't changed" in {
           val answers =
             sample[CompleteExemptionAndLossesAnswers].copy(previousYearsLosses = AmountInPence(1L))
-          val session = sessionWithState(answers, sample[DisposalDate], sample[CompleteReliefDetailsAnswers])._1
+          val session = sessionWithState(answers, sample[DisposalDate])._1
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -794,8 +776,7 @@ class ExemptionAndLossesControllerSpec
             mockGetSession(
               sessionWithState(
                 Some(sample[CompleteExemptionAndLossesAnswers]),
-                None,
-                Some(sample[CompleteReliefDetailsAnswers])
+                None
               )._1
             )
           }
@@ -814,8 +795,7 @@ class ExemptionAndLossesControllerSpec
               sessionWithState(
                 sample[IncompleteExemptionAndLossesAnswers]
                   .copy(previousYearsLosses = None),
-                sample[DisposalDate],
-                sample[CompleteReliefDetailsAnswers]
+                sample[DisposalDate]
               )._1
             )
           }
@@ -834,8 +814,7 @@ class ExemptionAndLossesControllerSpec
               sessionWithState(
                 sample[IncompleteExemptionAndLossesAnswers]
                   .copy(previousYearsLosses = Some(sample[AmountInPence]), annualExemptAmount = None),
-                sample[DisposalDate],
-                sample[CompleteReliefDetailsAnswers]
+                sample[DisposalDate]
               )._1
             )
           }
@@ -859,8 +838,7 @@ class ExemptionAndLossesControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[CompleteExemptionAndLossesAnswers].copy(annualExemptAmount = amount),
-                sample[DisposalDate],
-                sample[CompleteReliefDetailsAnswers]
+                sample[DisposalDate]
               )._1
             )
           }
@@ -903,8 +881,7 @@ class ExemptionAndLossesControllerSpec
             mockGetSession(
               sessionWithState(
                 Some(sample[CompleteExemptionAndLossesAnswers]),
-                None,
-                Some(sample[CompleteReliefDetailsAnswers])
+                None
               )._1
             )
           }
@@ -923,8 +900,7 @@ class ExemptionAndLossesControllerSpec
               sessionWithState(
                 sample[IncompleteExemptionAndLossesAnswers]
                   .copy(previousYearsLosses = None),
-                sample[DisposalDate],
-                sample[CompleteReliefDetailsAnswers]
+                sample[DisposalDate]
               )._1
             )
           }
@@ -939,8 +915,7 @@ class ExemptionAndLossesControllerSpec
         val currentSession =
           sessionWithState(
             sample[CompleteExemptionAndLossesAnswers],
-            disposalDate,
-            sample[CompleteReliefDetailsAnswers]
+            disposalDate
           )._1
 
         def test(data: (String, String)*)(expectedErrorKey: String): Unit =
@@ -965,7 +940,7 @@ class ExemptionAndLossesControllerSpec
         val answers: CompleteExemptionAndLossesAnswers =
           sample[CompleteExemptionAndLossesAnswers].copy(annualExemptAmount = AmountInPence(newAmount.value + 1L))
         val (session, journey, draftReturn) =
-          sessionWithState(answers, disposalDate, sample[CompleteReliefDetailsAnswers])
+          sessionWithState(answers, disposalDate)
         val updatedDraftReturn = draftReturn.copy(exemptionAndLossesAnswers = Some(
           answers.copy(annualExemptAmount = newAmount)
         )
@@ -1060,7 +1035,7 @@ class ExemptionAndLossesControllerSpec
         "the value submitted hasn't changed" in {
           val answers =
             sample[CompleteExemptionAndLossesAnswers].copy(annualExemptAmount = AmountInPence(1L))
-          val session = sessionWithState(answers, disposalDate, sample[CompleteReliefDetailsAnswers])._1
+          val session = sessionWithState(answers, disposalDate)._1
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1079,365 +1054,33 @@ class ExemptionAndLossesControllerSpec
       }
     }
 
-    "handling requests to display the taxable gain or loss page" must {
-
-      def performAction(): Future[Result] = controller.taxableGainOrLoss()(FakeRequest())
-
-      val reliefsAnswersWithOtherReliefs =
-        sample[CompleteReliefDetailsAnswers].copy(otherReliefs = Some(sample[OtherReliefs]))
-
-      behave like redirectToStartBehaviour(performAction)
-
-      behave like commonTaxableGainOrLossBehaviour(performAction)
-
-      "display the page" when {
-
-        def mockActions(answers: ExemptionAndLossesAnswers): Unit =
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithState(
-                answers,
-                sample[DisposalDate],
-                reliefsAnswersWithOtherReliefs
-              )._1
-            )
-          }
-
-        "the exemption and losses section has not yet been completed" in {
-          mockActions(
-            sample[IncompleteExemptionAndLossesAnswers]
-              .copy(
-                annualExemptAmount = Some(sample[AmountInPence]),
-                taxableGainOrLoss  = None
-              )
-          )
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey(
-              "taxableGainOrLoss.title"
-            ), { doc =>
-              doc.select("#back").attr("href") shouldBe routes.ExemptionAndLossesController.annualExemptAmount().url
-              doc.select("#content > article > form").attr("action") shouldBe routes.ExemptionAndLossesController
-                .taxableGainOrLossSubmit()
-                .url
-            }
-          )
-        }
-
-        "the exemption and losses section has been completed" in {
-          val amount = AmountInPence(-1000L)
-          mockActions(
-            sample[CompleteExemptionAndLossesAnswers].copy(taxableGainOrLoss = Some(amount))
-          )
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey(
-              "taxableGainOrLoss.title"
-            ), { doc =>
-              doc.select("#back").attr("href") shouldBe routes.ExemptionAndLossesController.checkYourAnswers().url
-              doc.select("#content > article > form").attr("action") shouldBe routes.ExemptionAndLossesController
-                .taxableGainOrLossSubmit()
-                .url
-
-              doc.select("#taxableGainOrLoss-1").attr("checked") shouldBe "checked"
-              doc.select("#netLoss").attr("value")               shouldBe "10"
-            }
-          )
-        }
-
-        "the amount answered previouly is a gain" in {
-          val amount = AmountInPence(1000L)
-
-          mockActions(
-            sample[CompleteExemptionAndLossesAnswers].copy(taxableGainOrLoss = Some(amount))
-          )
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey(
-              "taxableGainOrLoss.title"
-            ), { doc =>
-              doc.select("#taxableGainOrLoss-0").attr("checked") shouldBe "checked"
-              doc.select("#taxableGain").attr("value")           shouldBe "10"
-            }
-          )
-        }
-
-        "the amount answered previously is a loss" in {
-          val amount = AmountInPence(-1000L)
-
-          mockActions(
-            sample[CompleteExemptionAndLossesAnswers].copy(taxableGainOrLoss = Some(amount))
-          )
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey(
-              "taxableGainOrLoss.title"
-            ), { doc =>
-              doc.select("#taxableGainOrLoss-1").attr("checked") shouldBe "checked"
-              doc.select("#netLoss").attr("value")               shouldBe "10"
-            }
-          )
-        }
-
-        "the amount answered previously is neither a gain or loss" in {
-          val amount = AmountInPence.zero
-
-          mockActions(
-            sample[CompleteExemptionAndLossesAnswers].copy(taxableGainOrLoss = Some(amount))
-          )
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey(
-              "taxableGainOrLoss.title"
-            ), { doc =>
-              doc.select("#taxableGainOrLoss-2").attr("checked") shouldBe "checked"
-            }
-          )
-        }
-
-      }
-
-    }
-
-    "handling submitted taxable gain or loss values" must {
-
-      def performAction(data: (String, String)*): Future[Result] =
-        controller.taxableGainOrLossSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
-
-      val reliefsAnswersWithOtherReliefs =
-        sample[CompleteReliefDetailsAnswers].copy(otherReliefs = Some(sample[OtherReliefs]))
-
-      behave like redirectToStartBehaviour(() => performAction())
-
-      behave like commonTaxableGainOrLossBehaviour(() => performAction())
-
-      "show a form error" when {
-
-        val currentSession =
-          sessionWithState(
-            sample[CompleteExemptionAndLossesAnswers].copy(taxableGainOrLoss = None),
-            sample[DisposalDate],
-            reliefsAnswersWithOtherReliefs
-          )._1
-
-        def test(data: (String, String)*)(expectedErrorKey: String): Unit =
-          testFormError(data: _*)(
-            expectedErrorKey
-          )("taxableGainOrLoss.title")(performAction, currentSession)
-
-        "no option is selected" in {
-          test()("taxableGainOrLoss.error.required")
-        }
-
-        "the amount of gain is invalid" in {
-          amountOfMoneyErrorScenarios("taxableGain").foreach { scenario =>
-            withClue(s"For $scenario: ") {
-              val data = ("taxableGainOrLoss" -> "0") :: scenario.formData
-              test(data: _*)(scenario.expectedErrorMessageKey)
-            }
-          }
-        }
-
-        "the amount of gain is zero" in {
-          test(
-            "taxableGainOrLoss" -> "0",
-            "taxableGain"       -> "0"
-          )("taxableGain.error.tooSmall")
-        }
-
-        "the amount of loss is invalid" in {
-          amountOfMoneyErrorScenarios("netLoss").foreach { scenario =>
-            withClue(s"For $scenario: ") {
-              val data = ("taxableGainOrLoss" -> "1") :: scenario.formData
-              test(data: _*)(scenario.expectedErrorMessageKey)
-            }
-          }
-        }
-
-        "the amount of loss is zero" in {
-          test(
-            "taxableGainOrLoss" -> "1",
-            "netLoss"           -> "0"
-          )("netLoss.error.tooSmall")
-        }
-
-      }
-
-      "show an error page" when {
-
-        val answers: CompleteExemptionAndLossesAnswers =
-          sample[CompleteExemptionAndLossesAnswers].copy(taxableGainOrLoss = None)
-        val (session, journey, draftReturn) =
-          sessionWithState(answers, sample[DisposalDate], reliefsAnswersWithOtherReliefs)
-        val updatedDraftReturn = draftReturn.copy(exemptionAndLossesAnswers = Some(
-          answers.copy(taxableGainOrLoss = Some(AmountInPence.zero))
-        )
-        )
-
-        "there is an error updating the draft return" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(Left(Error("")))
-          }
-
-          checkIsTechnicalErrorPage(performAction("taxableGainOrLoss" -> "2"))
-        }
-
-        "there is an error updating the session" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-            mockStoreDraftReturn(
-              updatedDraftReturn,
-              journey.subscribedDetails.cgtReference,
-              journey.agentReferenceNumber
-            )(Right(()))
-            mockStoreSession(
-              session.copy(
-                journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn))
-              )
-            )(Left(Error("")))
-          }
-
-          checkIsTechnicalErrorPage(performAction("taxableGainOrLoss" -> "2"))
-
-        }
-
-      }
-
-      "redirect to the task list page" when {
-
-        "all updates are successful and" when {
-
-          "the journey was incomplete" in {
-            val newAmount = AmountInPence(3000L)
-            val answers =
-              sample[IncompleteExemptionAndLossesAnswers].copy(
-                annualExemptAmount = Some(sample[AmountInPence]),
-                taxableGainOrLoss  = None
-              )
-
-            testSuccessfulUpdatesAfterSubmit(
-              performAction(
-                "taxableGainOrLoss" -> "0",
-                "taxableGain"       -> "30"
-              )
-            )(
-              answers,
-              answers.copy(taxableGainOrLoss = Some(newAmount)),
-              reliefDetailsAnswers = reliefsAnswersWithOtherReliefs
-            )
-          }
-
-          "the journey was complete" in {
-            val newAmount = AmountInPence(-2000L)
-            val answers =
-              sample[CompleteExemptionAndLossesAnswers].copy(
-                taxableGainOrLoss = None
-              )
-
-            testSuccessfulUpdatesAfterSubmit(
-              performAction(
-                "taxableGainOrLoss" -> "1",
-                "netLoss"           -> "20"
-              )
-            )(
-              answers,
-              answers.copy(taxableGainOrLoss = Some(newAmount)),
-              reliefDetailsAnswers = reliefsAnswersWithOtherReliefs
-            )
-          }
-
-          "no gain or loss was selected" in {
-            val answers =
-              sample[CompleteExemptionAndLossesAnswers].copy(
-                taxableGainOrLoss = None
-              )
-
-            testSuccessfulUpdatesAfterSubmit(
-              performAction(
-                "taxableGainOrLoss" -> "2"
-              )
-            )(
-              answers,
-              answers.copy(taxableGainOrLoss = Some(AmountInPence.zero)),
-              reliefDetailsAnswers = reliefsAnswersWithOtherReliefs
-            )
-          }
-
-        }
-
-      }
-
-      "not do any updates" when {
-
-        "the value submitted hasn't changed" in {
-          val answers =
-            sample[CompleteExemptionAndLossesAnswers].copy(taxableGainOrLoss = Some(AmountInPence(1L)))
-          val session = sessionWithState(answers, sample[DisposalDate], reliefsAnswersWithOtherReliefs)._1
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(session)
-          }
-
-          checkIsRedirect(
-            performAction(
-              "taxableGainOrLoss" -> "0",
-              "taxableGain"       -> "0.01"
-            ),
-            routes.ExemptionAndLossesController.checkYourAnswers()
-          )
-
-        }
-
-      }
-    }
-
     "handling requests to display the cya page" must {
 
       def performAction(): Future[Result] = controller.checkYourAnswers()(FakeRequest())
 
-      val taxableGainOrLoss = sample[AmountInPence]
-
-      val completeAnswers = sample[CompleteExemptionAndLossesAnswers].copy(taxableGainOrLoss = Some(taxableGainOrLoss))
+      val completeAnswers = sample[CompleteExemptionAndLossesAnswers]
 
       val allQuestionsAnswered = IncompleteExemptionAndLossesAnswers(
         Some(completeAnswers.inYearLosses),
         Some(completeAnswers.previousYearsLosses),
-        Some(completeAnswers.annualExemptAmount),
-        Some(taxableGainOrLoss)
+        Some(completeAnswers.annualExemptAmount)
       )
 
       val (session, journey, draftReturn) =
-        sessionWithState(allQuestionsAnswered, sample[DisposalDate], sample[ReliefDetailsAnswers])
+        sessionWithState(allQuestionsAnswered, sample[DisposalDate])
       val updatedDraftReturn = draftReturn.copy(exemptionAndLossesAnswers = Some(completeAnswers))
       val updatedSession     = session.copy(journeyStatus                 = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like missingCompleteReliefAnswersBehaviour(performAction)
-
       def testIsRedirectWhenMissingAnswer(
         answers: IncompleteExemptionAndLossesAnswers,
-        expectedRedirect: Call,
-        reliefDetailsAnswers: ReliefDetailsAnswers = sample[ReliefDetailsAnswers]
+        expectedRedirect: Call
       ): Unit = {
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(
-            sessionWithState(answers, sample[DisposalDate], reliefDetailsAnswers)._1
+            sessionWithState(answers, sample[DisposalDate])._1
           )
         }
 
@@ -1470,17 +1113,6 @@ class ExemptionAndLossesControllerSpec
           testIsRedirectWhenMissingAnswer(
             allQuestionsAnswered.copy(annualExemptAmount = None),
             routes.ExemptionAndLossesController.annualExemptAmount()
-          )
-        }
-      }
-
-      "redirect to the taxable gain or loss page" when {
-
-        "that question has not been answered and the user chose to enter other reliefs" in {
-          testIsRedirectWhenMissingAnswer(
-            allQuestionsAnswered.copy(taxableGainOrLoss = None),
-            routes.ExemptionAndLossesController.taxableGainOrLoss(),
-            sample[CompleteReliefDetailsAnswers].copy(otherReliefs = Some(sample[OtherReliefs]))
           )
         }
       }
@@ -1601,8 +1233,7 @@ class ExemptionAndLossesControllerSpec
           mockGetSession(
             sessionWithState(
               sample[CompleteExemptionAndLossesAnswers],
-              sample[DisposalDate],
-              sample[ReliefDetailsAnswers]
+              sample[DisposalDate]
             )._1
           )
         }
@@ -1612,100 +1243,6 @@ class ExemptionAndLossesControllerSpec
 
     }
 
-  }
-
-  def missingCompleteReliefAnswersBehaviour(performAction: () => Future[Result]): Unit =
-    "redirect to the task list page" when {
-
-      "there is no reliefs answers" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            sessionWithState(
-              Some(sample[CompleteExemptionAndLossesAnswers]),
-              Some(sample[DisposalDate]),
-              None
-            )._1
-          )
-        }
-
-        checkIsRedirect(performAction(), returns.routes.TaskListController.taskList())
-      }
-
-      "the reliefs answers are incomplete" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            sessionWithState(
-              Some(sample[CompleteExemptionAndLossesAnswers]),
-              Some(sample[DisposalDate]),
-              Some(sample[IncompleteReliefDetailsAnswers])
-            )._1
-          )
-        }
-
-        checkIsRedirect(performAction(), returns.routes.TaskListController.taskList())
-      }
-
-    }
-
-  def commonTaxableGainOrLossBehaviour(performAction: () => Future[Result]): Unit = {
-    missingCompleteReliefAnswersBehaviour(performAction)
-
-    "redirect to the cya page" when {
-
-      "the reliefs answers are complete but the user did not have the option to enter in other reliefs" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            sessionWithState(
-              Some(sample[CompleteExemptionAndLossesAnswers]),
-              Some(sample[DisposalDate]),
-              Some(sample[CompleteReliefDetailsAnswers].copy(otherReliefs = None))
-            )._1
-          )
-        }
-
-        checkIsRedirect(performAction(), routes.ExemptionAndLossesController.checkYourAnswers())
-
-      }
-
-      "the reliefs answers are complete but the user chose not to enter in other reliefs" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            sessionWithState(
-              Some(sample[CompleteExemptionAndLossesAnswers]),
-              Some(sample[DisposalDate]),
-              Some(sample[CompleteReliefDetailsAnswers].copy(otherReliefs = Some(OtherReliefsOption.NoOtherReliefs)))
-            )._1
-          )
-        }
-
-        checkIsRedirect(performAction(), routes.ExemptionAndLossesController.checkYourAnswers())
-      }
-
-    }
-
-    "redirect to the annual exempt amount page" when {
-
-      "that question has not been answered yet" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            sessionWithState(
-              sample[IncompleteExemptionAndLossesAnswers]
-                .copy(annualExemptAmount = None),
-              sample[DisposalDate],
-              sample[CompleteReliefDetailsAnswers].copy(otherReliefs = Some(sample[OtherReliefs]))
-            )._1
-          )
-        }
-
-        checkIsRedirect(performAction(), routes.ExemptionAndLossesController.annualExemptAmount())
-      }
-
-    }
   }
 
   def testFormError(
@@ -1714,8 +1251,7 @@ class ExemptionAndLossesControllerSpec
     performAction: Seq[(String, String)] => Future[Result],
     currentSession: SessionData = sessionWithState(
       sample[CompleteExemptionAndLossesAnswers],
-      sample[DisposalDate],
-      sample[ReliefDetailsAnswers]
+      sample[DisposalDate]
     )._1
   ): Unit = {
     inSequence {
@@ -1739,10 +1275,9 @@ class ExemptionAndLossesControllerSpec
   def testSuccessfulUpdatesAfterSubmit(result: => Future[Result])(
     oldAnswers: ExemptionAndLossesAnswers,
     newAnswers: ExemptionAndLossesAnswers,
-    disposalDate: DisposalDate                 = sample[DisposalDate],
-    reliefDetailsAnswers: ReliefDetailsAnswers = sample[ReliefDetailsAnswers]
+    disposalDate: DisposalDate = sample[DisposalDate]
   ): Unit = {
-    val (session, journey, draftReturn) = sessionWithState(oldAnswers, disposalDate, reliefDetailsAnswers)
+    val (session, journey, draftReturn) = sessionWithState(oldAnswers, disposalDate)
     val updatedDraftReturn              = draftReturn.copy(exemptionAndLossesAnswers = Some(newAnswers))
 
     inSequence {

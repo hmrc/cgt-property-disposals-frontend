@@ -6,6 +6,7 @@
 -> /  ytd_liability_firstreturn.Routes
 -> /  initial_gain_or_loss.Routes
 -> /  property_details.Routes
+-> /  upload_supporting_docs.Routes
 
 GET  /task-list                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.TaskListController.taskList()
 
@@ -15,8 +16,7 @@ POST  /check-answers-accept-send         uk.gov.hmrc.cgtpropertydisposalsfronten
 GET   /return-sent-confirmation          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.confirmationOfSubmission()
 POST  /return-sent-confirmation          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.payReturn()
 
-
 GET   /return                            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ViewReturnController.displayReturn()
-GET  /pay-charge-in-return              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ViewReturnController.payCharge(chargeRefrence: String)
+GET   /pay-charge-in-return              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ViewReturnController.payCharge(chargeRefrence: String)
 
 GET   /return-draft-confirmation         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ConfirmDraftReturnController.confirmDraftReturn()

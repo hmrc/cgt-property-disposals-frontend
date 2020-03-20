@@ -1,18 +1,24 @@
-GET    /tax-amount/estimated-income                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnController.estimatedIncome()
-POST   /tax-amount/estimated-income                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnController.estimatedIncomeSubmit()
+GET    /tax-amount/estimated-income                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.estimatedIncome()
+POST   /tax-amount/estimated-income                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.estimatedIncomeSubmit()
 
-GET    /tax-amount/personal-allowance                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnController.personalAllowance()
-POST   /tax-amount/personal-allowance                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnController.personalAllowanceSubmit()
+GET    /tax-amount/personal-allowance                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.personalAllowance()
+POST   /tax-amount/personal-allowance                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.personalAllowanceSubmit()
 
-GET    /tax-amount/estimates                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnController.hasEstimatedDetails()
-POST   /tax-amount/estimates                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnController.hasEstimatedDetailsSubmit()
+GET    /tax-amount/estimates                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.hasEstimatedDetails()
+POST   /tax-amount/estimates                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.hasEstimatedDetailsSubmit()
 
-GET   /tax-amount/check-calculation-enter-cgt-due     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnController.taxDue()
-POST  /tax-amount/check-calculation-enter-cgt-due     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnController.taxDueSubmit()
+GET   /tax-amount/check-calculation-enter-cgt-due     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.taxDue()
+POST  /tax-amount/check-calculation-enter-cgt-due     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.taxDueSubmit()
 
-GET  /tax-amount/add-showing-workings                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnController.uploadMandatoryEvidence()
-POST /tax-amount/add-showing-workings                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnController.uploadMandatoryEvidenceSubmit()
+GET  /tax-amount/add-showing-workings                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.uploadMandatoryEvidence()
+POST /tax-amount/add-showing-workings                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.uploadMandatoryEvidenceSubmit()
 
-GET    /tax-amount/check-answers                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnController.checkYourAnswers()
-POST   /tax-amount/check-answers                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnController.checkYourAnswersSubmit()
+GET  /tax-amount/taxable-gain                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.taxableGainOrLoss()
+POST /tax-amount/taxable-gain                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.taxableGainOrLossSubmit()
+
+GET  /tax-amount/own-calculation-enter-cgt-due        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.nonCalculatedEnterTaxDue()
+POST /tax-amount/own-calculation-enter-cgt-due        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.nonCalculatedEnterTaxDueSubmit()
+
+GET    /tax-amount/check-answers                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.checkYourAnswers()
+POST   /tax-amount/check-answers                      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.checkYourAnswersSubmit()
 

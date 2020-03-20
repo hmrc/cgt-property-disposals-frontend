@@ -36,7 +36,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldeta
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesControllerSpec.validateExemptionAndLossesCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.ReliefDetailsControllerSpec.validateReliefDetailsCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.SingleDisposalsTriageControllerSpec.validateSingleDisposalTriageCheckYourAnswersPage
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityFirstReturnControllerSpec._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityControllerSpec._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn}
@@ -48,7 +48,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLosse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.IncompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.IncompleteYearToDateLiabilityAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYearToDateLiabilityAnswers.IncompleteCalculatedYearToDateLiabilityAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, LocalDateUtils, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -119,6 +119,7 @@ class CheckAllAnswersAndSubmitControllerSpec
       Some(completeReturn.exemptionsAndLossesDetails),
       Some(completeReturn.yearToDateLiabilityAnswers),
       completeReturn.initialGainOrLoss,
+      Some(completeReturn.uploadSupportingDocuments),
       LocalDateUtils.today()
     )
 
@@ -379,7 +380,7 @@ class CheckAllAnswersAndSubmitControllerSpec
       _.copy(reliefDetailsAnswers       = None),
       _.copy(exemptionAndLossesAnswers  = Some(sample[IncompleteExemptionAndLossesAnswers])),
       _.copy(exemptionAndLossesAnswers  = None),
-      _.copy(yearToDateLiabilityAnswers = Some(sample[IncompleteYearToDateLiabilityAnswers])),
+      _.copy(yearToDateLiabilityAnswers = Some(sample[IncompleteCalculatedYearToDateLiabilityAnswers])),
       _.copy(yearToDateLiabilityAnswers = None)
     )
 
@@ -436,7 +437,7 @@ object CheckAllAnswersAndSubmitControllerSpec {
       completeReturn.exemptionsAndLossesDetails,
       doc
     )
-    validateYearToDateLiabilityFirstReturnPage(
+    validateCalculatedYearToDateLiabilityPage(
       completeReturn.yearToDateLiabilityAnswers,
       doc
     )

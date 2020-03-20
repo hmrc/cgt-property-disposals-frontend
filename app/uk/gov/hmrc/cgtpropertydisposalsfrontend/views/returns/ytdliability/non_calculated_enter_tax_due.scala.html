@@ -30,19 +30,17 @@
         backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
         unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
-        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
+        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
-@(form: Form[BigDecimal], backLink: Call, disposalDate: DisposalDate)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
-@key = @{ "personalAllowance" }
-@taxYearStartYear = @{disposalDate.taxYear.startDateInclusive.getYear.toString}
-@taxYearEndYear = @{disposalDate.taxYear.endDateExclusive.getYear.toString}
-@personalAllowance = @{ MoneyUtils.formatAmountOfMoneyWithPoundSign(disposalDate.taxYear.personalAllowance.inPounds())}
+@(form: Form[BigDecimal], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@key = @{ "nonCalculatedTaxDue" }
 
-@title = @{messages(s"$key.title", taxYearStartYear, taxYearEndYear)}
+@title = @{messages(s"$key.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
+@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
 
     @backLinkComponent(backLink)
 
@@ -52,7 +50,7 @@
 
     @caption(messages("ytdLiability.caption"))
 
-    @formWrapper(routes.YearToDateLiabilityController.personalAllowanceSubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(routes.YearToDateLiabilityController.nonCalculatedEnterTaxDueSubmit(), 'novalidate -> "novalidate") {
         @unitInput(
             fieldId = key,
             value = form.data.getOrElse(key, ""),
@@ -60,7 +58,7 @@
             hasErrors = form.error(key).nonEmpty,
             label = Html(title),
             labelAsHeading = true,
-            helpText = Some(Html(messages(s"$key.helpText", taxYearStartYear, taxYearEndYear, personalAllowance))),
+            helpText = Some(Html(messages(s"$key.helpText"))),
             autoComplete = AutoCompleteType.On,
             inputClass = Some("small"),
             aspect = "left",
@@ -68,7 +66,6 @@
             assistiveText = messages("unit-input.assistive.pounds")
         )
 
-        <p>@Html(messages(s"$key.link", viewConfig.personalAllowanceUrl))</p>
         @submitButton(messages("button.saveAndContinue"))
     }
 

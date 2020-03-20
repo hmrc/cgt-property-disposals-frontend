@@ -252,6 +252,9 @@ class CommonTriageQuestionsControllerSpec
                     doc.select("#individualUserType > div:nth-child(3) > label").text() shouldBe messageFromMessageKey(
                       s"individualUserType.agent.${IndividualUserType.PersonalRepresentative}"
                     )
+                    doc.body().text() shouldNot include(
+                      messageFromMessageKey(s"individualUserType.${IndividualUserType.Capacitor}")
+                    )
                   }
                 )
             }

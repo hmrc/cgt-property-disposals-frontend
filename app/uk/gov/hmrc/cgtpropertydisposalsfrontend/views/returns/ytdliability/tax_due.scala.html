@@ -86,7 +86,7 @@
       </li>
     </ul>
 
-    @formWrapper(routes.YearToDateLiabilityFirstReturnController.taxDueSubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(routes.YearToDateLiabilityController.taxDueSubmit(), 'novalidate -> "novalidate") {
         @unitInput(
             fieldId = key,
             value = form.data.getOrElse(key, ""),
