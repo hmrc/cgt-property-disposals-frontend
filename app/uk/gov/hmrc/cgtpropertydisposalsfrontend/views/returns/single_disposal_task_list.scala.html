@@ -116,7 +116,7 @@ TaskListStatus.CannotStart
 }
 
 @checkAndSendReturnState = @{
-(propertyAddressState, disposalDetailsState, acquistionDetailsState, reliefDetailsState, exemptionsAndLossesState, ytdLiabilityState, uploadSupportingDocsState) match {
+(propertyAddressState, disposalDetailsState, acquistionDetailsState, reliefDetailsState, exemptionsAndLossesState, ytdLiabilityState) match {
 case (TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete) =>
 TaskListStatus.ToDo
 
