@@ -68,7 +68,7 @@ class InitialGainOrLossControllerSpec
   implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
 
   def sessionWithState(
-    initialGainOrLoss: Option[AmountInPenceWithSource]
+    initialGainOrLoss: Option[AmountInPence]
   ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) = {
     val draftReturn = sample[SingleDisposalDraftReturn].copy(initialGainOrLoss = initialGainOrLoss)
     val journey     = sample[FillingOutReturn].copy(draftReturn                = draftReturn)
@@ -122,7 +122,7 @@ class InitialGainOrLossControllerSpec
 
         "initialGainOrLoss is present in returnDraft" in {
           val draftReturn = sample[SingleDisposalDraftReturn]
-            .copy(initialGainOrLoss = Some(AmountInPenceWithSource(AmountInPence(300L), Source.UserSupplied)))
+            .copy(initialGainOrLoss = Some(AmountInPence(300L)))
           val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn = draftReturn)
 
           inSequence {
@@ -164,9 +164,9 @@ class InitialGainOrLossControllerSpec
 
         "there is an error updating the draft return in return service " in {
           val (session, journey, draftReturn) =
-            sessionWithState(Some(AmountInPenceWithSource(AmountInPence(1L), Source.UserSupplied)))
+            sessionWithState(Some(AmountInPence(1L)))
           val updatedDraftReturn =
-            draftReturn.copy(initialGainOrLoss = Some(AmountInPenceWithSource(AmountInPence(0L), Source.UserSupplied)))
+            draftReturn.copy(initialGainOrLoss = Some(AmountInPence(0L)))
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -184,7 +184,7 @@ class InitialGainOrLossControllerSpec
         "there is an error updating the session" in {
           val (session, journey, draftReturn) = sessionWithState(None)
           val updatedDraftReturn =
-            draftReturn.copy(initialGainOrLoss = Some(AmountInPenceWithSource(AmountInPence(0L), Source.UserSupplied)))
+            draftReturn.copy(initialGainOrLoss = Some(AmountInPence(0L)))
           val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
 
           inSequence {
@@ -279,9 +279,9 @@ class InitialGainOrLossControllerSpec
 
         "initial gain or loss has been entered correctly" in {
           val (session, journey, draftReturn) =
-            sessionWithState(Some(AmountInPenceWithSource(AmountInPence(500L), Source.UserSupplied)))
+            sessionWithState(Some(AmountInPence(500L)))
           val newDraftReturn =
-            draftReturn.copy(initialGainOrLoss = Some(AmountInPenceWithSource(AmountInPence(600), Source.UserSupplied)))
+            draftReturn.copy(initialGainOrLoss = Some(AmountInPence(600)))
           val updatedJourney = journey.copy(draftReturn = newDraftReturn)
 
           inSequence {
@@ -305,7 +305,7 @@ class InitialGainOrLossControllerSpec
       "should not call returnService" when {
         "the same amount of initialGainOrLoss as in the session draftReturn is entered" in {
           val (session, _, _) =
-            sessionWithState(Some(AmountInPenceWithSource(AmountInPence(600L), Source.UserSupplied)))
+            sessionWithState(Some(AmountInPence(600L)))
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -340,7 +340,7 @@ class InitialGainOrLossControllerSpec
       "have proper contents" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(sessionWithState(Some(AmountInPenceWithSource(AmountInPence(1L), Source.UserSupplied)))._1)
+          mockGetSession(sessionWithState(Some(AmountInPence(1L)))._1)
         }
 
         checkPageIsDisplayed(
@@ -365,7 +365,7 @@ class InitialGainOrLossControllerSpec
       "redirect to taskList" in {
         inSequence {
           mockAuthWithNoRetrievals()
-          mockGetSession(sessionWithState(Some(AmountInPenceWithSource(AmountInPence(1L), Source.UserSupplied)))._1)
+          mockGetSession(sessionWithState(Some(AmountInPence(1L)))._1)
         }
         checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
       }

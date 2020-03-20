@@ -35,9 +35,9 @@
 @initialGainOrLossLabelWithAmount = @{
   Some(answers).map { answer =>
     if(answer > AmountInPence.zero)
-      "initialGainOrLoss.gain.label" -> Some("taxableGain.label" -> MoneyUtils.formatAmountOfMoneyWithPoundSign(answer.inPounds()))
+      "initialGainOrLoss.gain.label" -> Some("gain.label" -> MoneyUtils.formatAmountOfMoneyWithPoundSign(answer.inPounds()))
     else if(answer < AmountInPence.zero)
-      "initialGainOrLoss.loss.label" -> Some("netLoss.label" -> MoneyUtils.formatAmountOfMoneyWithPoundSign(answer.inPounds() * -1))
+      "initialGainOrLoss.loss.label" -> Some("loss.label" -> MoneyUtils.formatAmountOfMoneyWithPoundSign(answer.inPounds() * -1))
     else
       "initialGainOrLoss.noLossOrGain.label" -> None
   }
