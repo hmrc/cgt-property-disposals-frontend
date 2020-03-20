@@ -27,7 +27,7 @@ import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.{routes => addressRoutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.{disposalDateForm, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => returnsRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, SessionUpdates}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
@@ -196,7 +196,7 @@ class PropertyDetailsController @Inject() (
 
   private def disposalDateBackLink(answers: Option[MultipleDisposalsExamplePropertyDetailsAnswers]): Call =
     answers
-      .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty) // TODO: required?
+      .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
       .fold(
         _ => routes.PropertyDetailsController.enterUkAddress(),
         _ => routes.PropertyDetailsController.checkYourAnswers()
@@ -214,12 +214,26 @@ class PropertyDetailsController @Inject() (
               .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
               .fold(_.disposalDate, c => Some(c.disposalDate))
 
-            val today = LocalDateUtils.today()
-            val form  = disposalDate.fold(disposalDateForm(today))(c => disposalDateForm(today).fill(c.value))
+            m.triageAnswers.fold(_.taxYear, c => Some(c.taxYear)) match {
+              case Some(taxYear) =>
+                val form =
+                  disposalDate.fold(getDisposalDateFrom(taxYear))(c => getDisposalDateFrom(taxYear).fill(c.value))
+                Ok(multipleDisposalsDisposalDatePage(form, backLink, false))
 
-            Ok(multipleDisposalsDisposalDatePage(form, backLink, false))
+              case None => Redirect(controllers.returns.routes.TaskListController.taskList())
+            }
         }
     }
+  }
+
+  private def getDisposalDateFrom(taxYear: TaxYear): Form[LocalDate] = {
+    val today              = LocalDateUtils.today()
+    val startDateOfTaxYear = taxYear.startDateInclusive
+    val endDateOfTaxYear   = taxYear.endDateExclusive
+
+    val maximumDateInclusive = if (endDateOfTaxYear.isBefore(today)) endDateOfTaxYear else today
+
+    disposalDateForm(maximumDateInclusive, startDateOfTaxYear)
   }
 
   def disposalDateSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
@@ -230,17 +244,16 @@ class PropertyDetailsController @Inject() (
           case m: MultipleDisposalsDraftReturn =>
             val answers  = m.examplePropertyDetailsAnswers
             val backLink = disposalDateBackLink(answers)
-
-            disposalDateForm(LocalDateUtils.today())
-              .bindFromRequest()
-              .fold(
-                formWithErrors =>
-                  BadRequest(
-                    multipleDisposalsDisposalDatePage(formWithErrors, backLink, false)
-                  ), { date =>
-                  m.triageAnswers.fold(_.taxYear, c => Some(c.taxYear)) match {
-                    case Some(taxYear) =>
-                      val disposalDate = DisposalDate(date, taxYear) // TODO: write logic
+            m.triageAnswers.fold(_.taxYear, c => Some(c.taxYear)) match {
+              case Some(taxYear) =>
+                getDisposalDateFrom(taxYear)
+                  .bindFromRequest()
+                  .fold(
+                    formWithErrors =>
+                      BadRequest(
+                        multipleDisposalsDisposalDatePage(formWithErrors, backLink, false)
+                      ), { date =>
+                      val disposalDate = DisposalDate(date, taxYear)
 
                       if (answers
                             .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
@@ -273,10 +286,12 @@ class PropertyDetailsController @Inject() (
                         )
 
                       }
-                    case None => Redirect(controllers.returns.routes.TaskListController.taskList())
-                  }
-                }
-              )
+
+                    }
+                  )
+
+              case None => Redirect(controllers.returns.routes.TaskListController.taskList())
+            }
         }
     }
   }
@@ -350,15 +365,13 @@ class PropertyDetailsController @Inject() (
 
 object PropertyDetailsController {
 
-  def disposalDateForm(maximumDateInclusive: LocalDate): Form[LocalDate] =
-    // TODO: use it
-    //  def disposalDateForm(minimumDateInclusive: LocalDate, maximumDateInclusive: LocalDate): Form[LocalDate] =
+  def disposalDateForm(maximumDateInclusive: LocalDate, minimumDateInclusive: LocalDate): Form[LocalDate] =
     Form(
       mapping(
         "" -> of(
           LocalDateUtils.dateFormatter(
-            Some(maximumDateInclusive), // eariest of [today, End of the tax year]
-            None, //TODO: use it Some(minimumDateInclusive), // start of the tax year
+            Some(maximumDateInclusive), // earliest of [Today, End of the tax year]
+            Some(minimumDateInclusive), // start of the tax year
             "disposalDate-day",
             "disposalDate-month",
             "disposalDate-year",

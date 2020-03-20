@@ -349,6 +349,89 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
+      "redirect to the check your answers page" when {
+
+        "the user is on a single disposal journey" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = sample[SingleDisposalDraftReturn]
+                  )
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.PropertyDetailsController.checkYourAnswers())
+        }
+
+      }
+
+      "display the page" when {
+
+        def test(draftReturn: MultipleDisposalsDraftReturn, expectedBackLink: Call): Unit = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = draftReturn
+                  )
+                )
+              )
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("multipleDisposalsDisposalDate.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe expectedBackLink.url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.PropertyDetailsController
+                .disposalDateSubmit()
+                .url
+            }
+          )
+        }
+
+        "the user has not started this section before" in {
+          test(
+            sample[MultipleDisposalsDraftReturn].copy(
+              examplePropertyDetailsAnswers = None
+            ),
+            routes.PropertyDetailsController.enterUkAddress()
+          )
+        }
+
+        "the user has started but not completed this section" in {
+          test(
+            sample[MultipleDisposalsDraftReturn].copy(
+              examplePropertyDetailsAnswers = Some(
+                sample[IncompleteMultipleDisposalsExamplePropertyDetailsAnswers].copy(
+                  disposalDate = None
+                )
+              )
+            ),
+            routes.PropertyDetailsController.enterUkAddress()
+          )
+        }
+
+        "the user has completed this section" in {
+          test(
+            sample[MultipleDisposalsDraftReturn].copy(
+              examplePropertyDetailsAnswers = Some(sample[CompleteMultipleDisposalsExamplePropertyDetailsAnswers])
+            ),
+            routes.PropertyDetailsController.checkYourAnswers()
+          )
+        }
+
+      }
+
     }
 
     "handling disposal date submits" must {
@@ -367,10 +450,10 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      val address = sample[UkAddress]
+      val address      = sample[UkAddress]
       val disposalDate = sample[DisposalDate]
 
-      val completeAnswers      = CompleteMultipleDisposalsExamplePropertyDetailsAnswers(address, disposalDate)
+      val completeAnswers = CompleteMultipleDisposalsExamplePropertyDetailsAnswers(address, disposalDate)
       val allQuestionsAnswered = IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(
         Some(completeAnswers.address),
         Some(completeAnswers.disposalDate)

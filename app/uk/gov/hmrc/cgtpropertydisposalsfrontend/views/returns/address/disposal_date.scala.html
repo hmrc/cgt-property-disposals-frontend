@@ -34,9 +34,9 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 
 @(form: Form[LocalDate], backLink: Call, displayReturnToSummaryLink: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
-@key = @{"disposalDate"}
+@key = @{"multipleDisposalsDisposalDate"}
 @hasErrors = @{form.hasErrors}
-@title = @{messages( "disposalDate.title")}
+@title = @{messages(s"$key.title")}
 @errorKey = @{List("disposalDate-day", "disposalDate-month", "disposalDate-year", "disposalDate").map(form.error).find(_.isDefined).flatten}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
@@ -54,13 +54,13 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
    dayValue = form.data.get("disposalDate-day"),
    monthValue = form.data.get("disposalDate-month"),
    yearValue = form.data.get("disposalDate-year"),
-   helpText = Some(Html(messages("disposalDate.helpText"))),
+   helpText = Some(Html(messages(s"$key.helpText"))),
    labelAsHeading = true,
    errorKey = errorKey.map(e => s"${e.key}.${e.message}"),
    hasErrors = hasErrors
   )
 
-  <p>@Html(messages("disposalDate.link", viewConfig.tranferringOwnershipHelp))</p>
+  <p>@Html(messages(s"$key.link", viewConfig.tranferringOwnershipHelp))</p>
   @submitButton(messages(if(displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
  }
 
