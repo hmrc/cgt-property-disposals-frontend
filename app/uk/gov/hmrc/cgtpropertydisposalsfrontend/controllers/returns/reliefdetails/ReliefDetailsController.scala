@@ -39,6 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutR
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{ReliefDetailsAnswers, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -192,8 +193,16 @@ class ReliefDetailsController @Inject() (
                 draftReturn.copy(
                   reliefDetailsAnswers = Some(
                     answers.fold(
-                      _.copy(privateResidentsRelief = Some(AmountInPence.fromPounds(p))),
-                      _.copy(privateResidentsRelief = AmountInPence.fromPounds(p))
+                      _.copy(privateResidentsRelief = Some(AmountInPence.fromPounds(p)), lettingsRelief = None),
+                      c =>
+                        if (c.privateResidentsRelief === AmountInPence.fromPounds(p))
+                          c.copy(privateResidentsRelief = AmountInPence.fromPounds(p))
+                        else
+                          IncompleteReliefDetailsAnswers(
+                            Some(AmountInPence.fromPounds(p)),
+                            None,
+                            c.otherReliefs
+                          )
                     )
                   )
                 )
@@ -204,51 +213,147 @@ class ReliefDetailsController @Inject() (
 
   def lettingsRelief(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndReliefDetailsAnswers(request) {
-      case (_, _, _, answers) =>
-        commonDisplayBehaviour(answers)(
-          form = _.fold(
-            _.lettingsRelief.fold(lettingsReliefForm)(a => lettingsReliefForm.fill(a.inPounds())),
-            c => lettingsReliefForm.fill(c.lettingsRelief.inPounds())
-          )
-        )(
-          page = lettingsReliefPage(_, _)
-        )(
-          requiredPreviousAnswer = _.fold(
-            _.privateResidentsRelief,
-            c => Some(c.privateResidentsRelief)
-          ),
-          routes.ReliefDetailsController.privateResidentsRelief()
-        )
+      lettingsPreBehaviour {
+        lettingsDisplayBehaviour
+      }
     }
   }
 
   def lettingsReliefSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndReliefDetailsAnswers(request) {
-      case (_, fillingOutReturn, draftReturn, answers) =>
-        commonSubmitBehaviour(fillingOutReturn, draftReturn, answers)(
-          form = lettingsReliefForm
-        )(page = lettingsReliefPage(_, _))(
-          requiredPreviousAnswer = _.fold(
-            _.privateResidentsRelief,
-            c => Some(c.privateResidentsRelief)
-          ),
-          redirectToIfNoRequiredPreviousAnswer = routes.ReliefDetailsController.privateResidentsRelief()
-        )(
-          updateDraftReturn = {
-            case (p, draftReturn) =>
-              draftReturn.copy(
-                reliefDetailsAnswers = Some(
-                  answers.fold(
-                    _.copy(lettingsRelief = Some(AmountInPence.fromPounds(p))),
-                    _.copy(lettingsRelief = AmountInPence.fromPounds(p))
-                  )
-                )
-              )
-          }
-        )
+      lettingsPreBehaviour {
+        lettingsSubmitBehaviour
+      }
     }
   }
 
+  def lettingsDisplayBehaviour(
+    fillingOutReturn: FillingOutReturn,
+    draftReturn: SingleDisposalDraftReturn,
+    answers: ReliefDetailsAnswers,
+    lettingsReliefLimit: AmountInPence
+  )(implicit request: RequestWithSessionData[_]): Future[Result] =
+    commonDisplayBehaviour(answers)(
+      form = _.fold(
+        _.lettingsRelief.fold(
+          lettingsReliefForm(answers, lettingsReliefLimit)
+        )(a => lettingsReliefForm(answers, lettingsReliefLimit).fill(a.inPounds())),
+        c => lettingsReliefForm(answers, lettingsReliefLimit).fill(c.lettingsRelief.inPounds())
+      )
+    )(
+      page = lettingsReliefPage(_, _)
+    )(
+      requiredPreviousAnswer = _.fold(
+        _.privateResidentsRelief,
+        c => Some(c.privateResidentsRelief)
+      ),
+      routes.ReliefDetailsController.privateResidentsRelief()
+    )
+
+  private def lettingsPreBehaviour(
+    lettingsPostBehaviour: (
+      FillingOutReturn,
+      SingleDisposalDraftReturn,
+      ReliefDetailsAnswers,
+      AmountInPence
+    ) => Future[Result]
+  )(
+    sessionData: SessionData,
+    fillingOutReturn: FillingOutReturn,
+    draftReturn: SingleDisposalDraftReturn,
+    answers: ReliefDetailsAnswers
+  )(
+    implicit request: RequestWithSessionData[_]
+  ): Future[Result] =
+    (sessionData, fillingOutReturn, draftReturn, answers) match {
+      case (
+          _,
+          _,
+          SingleDisposalDraftReturn(
+            _,
+            IncompleteSingleDisposalTriageAnswers(_, _, _, _, _, _, None, _, _),
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _
+          ),
+          _
+          ) =>
+        Redirect(controllers.returns.routes.TaskListController.taskList())
+      case (
+          _,
+          fillingOutReturn,
+          draftReturn @ SingleDisposalDraftReturn(
+            _,
+            IncompleteSingleDisposalTriageAnswers(_, _, _, _, _, _, Some(disposalDate), _, _),
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _
+          ),
+          answers
+          ) =>
+        lettingsPostBehaviour(fillingOutReturn, draftReturn, answers, disposalDate.taxYear.maxLettingsReliefAmount)
+      case (
+          _,
+          fillingOutReturn,
+          draftReturn @ SingleDisposalDraftReturn(
+            _,
+            CompleteSingleDisposalTriageAnswers(_, _, _, _, disposalDate, _),
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _,
+            _
+          ),
+          answers
+          ) =>
+        lettingsPostBehaviour(fillingOutReturn, draftReturn, answers, disposalDate.taxYear.maxLettingsReliefAmount)
+      case _ => {
+        Redirect(controllers.returns.routes.TaskListController.taskList())
+      }
+    }
+  private def lettingsSubmitBehaviour(
+    fillingOutReturn: FillingOutReturn,
+    draftReturn: SingleDisposalDraftReturn,
+    answers: ReliefDetailsAnswers,
+    lettingsReliefLimit: AmountInPence
+  )(implicit request: RequestWithSessionData[_]) =
+    commonSubmitBehaviour(fillingOutReturn, draftReturn, answers)(
+      form = lettingsReliefForm(answers, lettingsReliefLimit)
+    )(page = lettingsReliefPage(_, _))(
+      requiredPreviousAnswer = _.fold(
+        _.privateResidentsRelief,
+        c => Some(c.privateResidentsRelief)
+      ),
+      redirectToIfNoRequiredPreviousAnswer = routes.ReliefDetailsController.privateResidentsRelief()
+    )(
+      updateDraftReturn = {
+        case (p, draftReturn) =>
+          draftReturn.copy(
+            reliefDetailsAnswers = Some(
+              answers.fold(
+                _.copy(lettingsRelief = Some(AmountInPence.fromPounds(p))),
+                _.copy(lettingsRelief = AmountInPence.fromPounds(p))
+              )
+            )
+          )
+      }
+    )
   def otherReliefs(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndReliefDetailsAnswers(request) {
       case (_, _, _, answers) =>
@@ -376,8 +481,44 @@ object ReliefDetailsController {
   val privateResidentsReliefForm: Form[BigDecimal] =
     MoneyUtils.amountInPoundsYesNoForm("privateResidentsRelief", "privateResidentsReliefValue")
 
-  val lettingsReliefForm: Form[BigDecimal] =
-    MoneyUtils.amountInPoundsYesNoForm("lettingsRelief", "lettingsReliefValue")
+  def innerOption(privateResidencyRelief: AmountInPence, lettingsReliefLimit: AmountInPence) = InnerOption { data =>
+    FormUtils
+      .readValue("lettingsReliefValue", data, identity)
+      .flatMap(
+        MoneyUtils.validateAmountOfMoney(
+          "lettingsReliefValue",
+          _ <= 0,
+          _ > MoneyUtils.maxAmountOfPounds
+        )(_)
+      )
+      .flatMap(value =>
+        MoneyUtils.validateLimit(
+          "lettingsRelief",
+          value => (lettingsReliefLimit -- AmountInPence.fromPounds(value)).isNegative
+        )(value.toString())
+      )
+      .flatMap { value =>
+        MoneyUtils.validateLimitLessThanOther(
+          "lettingsRelief",
+          "amountOverPrivateResidenceRelief",
+          value => AmountInPence.fromPounds(value).value > privateResidencyRelief.value
+        )(
+          value.toString()
+        )
+      }
+      .leftMap(Seq(_))
+  }
+
+  def lettingsReliefForm(answers: ReliefDetailsAnswers, lettingsReliefLimit: AmountInPence): Form[BigDecimal] = {
+    val reliefAmount =
+      answers.fold[AmountInPence](_.privateResidentsRelief.fold(AmountInPence(0L))(identity), _.privateResidentsRelief)
+    MoneyUtils
+      .amountInPoundsYesNoForm(
+        "lettingsRelief",
+        "lettingsReliefValue",
+        Some(innerOption(reliefAmount, lettingsReliefLimit))
+      )
+  }
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val otherReliefsForm: Form[Either[(String, BigDecimal), Unit]] = {

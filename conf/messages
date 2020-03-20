@@ -851,7 +851,8 @@ lettingsReliefValue.error.tooSmall=Amount of Letting Relief must be more than th
 lettingsReliefValue.error.tooLarge=Amount of Letting Relief must be 50,000,000,000.00 or less
 lettingsReliefValue.error.invalid=Amount of Letting Relief must be a number, like 108 or 2,940.54
 lettingsRelief.furtherInfoLink=Find out about Letting Relief and how to calculate it (opens in a new window)
-
+lettingsRelief.error.amountOverLimit=Amount of Letting Relief must be 40,000 or less
+lettingsRelief.error.amountOverPrivateResidenceRelief=Amount of Lettings Relief cannot be higher than private residence relief
 otherReliefs.title=Do you want to claim any other reliefs?
 otherReliefs.helpText=You will need to tell us what other reliefs you are claiming and what the total amount of these is.
 otherReliefsName.label=Names of the other reliefs you are claiming

@@ -54,6 +54,26 @@ object MoneyUtils {
         else Right(d)
       }
 
+  def validateLimit(key: String, exceedsLimit: BigDecimal => Boolean)(
+    s: String
+  ): Either[FormError, BigDecimal] =
+    Try(BigDecimal(cleanupAmountOfMoneyString(s))).toEither
+      .leftMap(_ => FormError(key, "error.invalid"))
+      .flatMap { d =>
+        if (exceedsLimit(d)) Left(FormError(key, "error.amountOverLimit"))
+        else Right(d)
+      }
+
+  def validateLimitLessThanOther(key: String, comparedOtherKey: String, exceedsLimit: BigDecimal => Boolean)(
+    s: String
+  ): Either[FormError, BigDecimal] =
+    Try(BigDecimal(cleanupAmountOfMoneyString(s))).toEither
+      .leftMap(_ => FormError(key, "error.invalid"))
+      .flatMap { d =>
+        if (exceedsLimit(d)) Left(FormError(key, s"error.$comparedOtherKey"))
+        else Right(d)
+      }
+
   def amountInPoundsFormatter(
     isTooSmall: BigDecimal => Boolean,
     isTooLarge: BigDecimal => Boolean
@@ -71,8 +91,12 @@ object MoneyUtils {
 
   // form for yes/no radio page with no mapping to £0 and yes expecting an amount of money
   // to be submitted
-  def amountInPoundsYesNoForm(optionId: String, valueId: String): Form[BigDecimal] = {
-    val innerOption = InnerOption { data =>
+  def amountInPoundsYesNoForm(
+    optionId: String,
+    valueId: String,
+    maybeInnerOption: Option[InnerOption[BigDecimal]] = None
+  ): Form[BigDecimal] = {
+    val innerOption = maybeInnerOption.getOrElse(InnerOption { data =>
       FormUtils
         .readValue(valueId, data, identity)
         .flatMap(
@@ -83,7 +107,7 @@ object MoneyUtils {
           )(_)
         )
         .leftMap(Seq(_))
-    }
+    })
 
     val formatter =
       ConditionalRadioUtils.formatter(optionId)(

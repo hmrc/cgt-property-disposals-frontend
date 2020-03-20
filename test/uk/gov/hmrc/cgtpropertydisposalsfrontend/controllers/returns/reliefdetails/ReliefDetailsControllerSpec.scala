@@ -38,8 +38,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.OtherReliefs
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{OtherReliefsOption, ReliefDetailsAnswers, SingleDisposalDraftReturn, YearToDateLiabilityAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, ExemptionAndLossesAnswers, OtherReliefsOption, ReliefDetailsAnswers, SingleDisposalDraftReturn, YearToDateLiabilityAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 
@@ -78,10 +79,38 @@ class ReliefDetailsControllerSpec
     reliefDetailsAnswers: Option[ReliefDetailsAnswers]
   ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) = {
     val draftReturn = sample[SingleDisposalDraftReturn].copy(
-      reliefDetailsAnswers = reliefDetailsAnswers
+      reliefDetailsAnswers = reliefDetailsAnswers,
+      triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(disposalDate = sample[DisposalDate]
+        .copy(taxYear = sample[TaxYear].copy(maxLettingsReliefAmount = AmountInPence.fromPounds(40000)))
+      )
     )
 
     val journey = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+    (
+      SessionData.empty.copy(journeyStatus = Some(journey)),
+      journey,
+      draftReturn
+    )
+  }
+
+  def sessionWithReliefDetailsAnswers(
+    fillingOutReturn: FillingOutReturn,
+    singleDisposalDraftReturn: SingleDisposalDraftReturn,
+    reliefDetailsAnswers: Option[ReliefDetailsAnswers],
+    exemptionAndLossesAnswers: Option[ExemptionAndLossesAnswers],
+    disposalDate: DisposalDate,
+    completeSingleDisposalTriageAnswers: CompleteSingleDisposalTriageAnswers,
+    taxYear: TaxYear
+  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) = {
+    val draftReturn = singleDisposalDraftReturn.copy(
+      reliefDetailsAnswers      = reliefDetailsAnswers,
+      exemptionAndLossesAnswers = exemptionAndLossesAnswers,
+      triageAnswers = completeSingleDisposalTriageAnswers.copy(disposalDate = disposalDate
+        .copy(taxYear = taxYear.copy(maxLettingsReliefAmount = AmountInPence.fromPounds(40000)))
+      )
+    )
+
+    val journey = fillingOutReturn.copy(draftReturn = draftReturn)
     (
       SessionData.empty.copy(journeyStatus = Some(journey)),
       journey,
@@ -200,9 +229,7 @@ class ReliefDetailsControllerSpec
         val newprivateResidentsRelief       = AmountInPence.fromPounds(10d)
         val newDraftReturn = draftReturn.copy(
           reliefDetailsAnswers = Some(
-            currentAnswers.copy(
-              privateResidentsRelief = newprivateResidentsRelief
-            )
+            IncompleteReliefDetailsAnswers(Some(newprivateResidentsRelief), None, currentAnswers.otherReliefs)
           )
         )
 
@@ -286,7 +313,8 @@ class ReliefDetailsControllerSpec
             oldDraftReturn.copy(
               reliefDetailsAnswers = Some(
                 oldAnswers.copy(
-                  privateResidentsRelief = Some(AmountInPence.fromPounds(newPrivateResidentsReliefValue))
+                  privateResidentsRelief = Some(AmountInPence.fromPounds(newPrivateResidentsReliefValue)),
+                  lettingsRelief         = None
                 )
               )
             )
@@ -323,6 +351,60 @@ class ReliefDetailsControllerSpec
 
         }
 
+        "the lettings is reset" when {
+          "the private residents relief value changes" in {
+            val completeAnswers =
+              sample[CompleteReliefDetailsAnswers].copy(privateResidentsRelief = AmountInPence.fromPounds(5))
+            val fillingOutReturn          = sample[FillingOutReturn]
+            val singleDisposalDraftReturn = sample[SingleDisposalDraftReturn]
+            val disposalDate              = sample[DisposalDate]
+            val triageAnswers             = sample[CompleteSingleDisposalTriageAnswers]
+            val taxYear                   = sample[TaxYear]
+
+            val session = sessionWithReliefDetailsAnswers(
+              fillingOutReturn,
+              singleDisposalDraftReturn,
+              Some(completeAnswers),
+              None,
+              disposalDate,
+              triageAnswers,
+              taxYear
+            )._1
+
+            val updatedSession = sessionWithReliefDetailsAnswers(
+              fillingOutReturn,
+              singleDisposalDraftReturn,
+              Some(
+                IncompleteReliefDetailsAnswers(
+                  Some(AmountInPence.fromPounds(1)),
+                  None,
+                  completeAnswers.otherReliefs
+                )
+              ),
+              None,
+              disposalDate,
+              triageAnswers,
+              taxYear
+            )._1
+
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(
+                session
+              )
+              val Some(FillingOutReturn(subscribedDetails, _, agentReferenceNumber, updatedDraftReturn)) =
+                updatedSession.journeyStatus
+              mockStoreDraftReturn(updatedDraftReturn, subscribedDetails.cgtReference, agentReferenceNumber)(Right(()))
+              mockStoreSession(updatedSession)(Right())
+            }
+
+            checkIsRedirect(
+              performAction(Seq("privateResidentsRelief" -> "0", "privateResidentsReliefValue" -> "1")),
+              controllers.returns.reliefdetails.routes.ReliefDetailsController.checkYourAnswers()
+            )
+
+          }
+        }
       }
     }
 
@@ -427,6 +509,29 @@ class ReliefDetailsControllerSpec
           )
         }
 
+        def testWithResidentsRelief(residentsRelief: AmountInPence, data: (String, String)*)(
+          expectedErrorMessageKey: String
+        ) = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithReliefDetailsAnswers(
+                sample[CompleteReliefDetailsAnswers].copy(privateResidentsRelief = residentsRelief)
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(data),
+            messageFromMessageKey("lettingsRelief.title"), { doc =>
+              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+                expectedErrorMessageKey
+              )
+            },
+            BAD_REQUEST
+          )
+        }
+
         "the data is invalid" in {
           amountOfMoneyErrorScenarios("lettingsReliefValue").foreach { scenario =>
             withClue(s"For $scenario: ") {
@@ -434,6 +539,21 @@ class ReliefDetailsControllerSpec
               test(data: _*)(scenario.expectedErrorMessageKey)
             }
           }
+        }
+
+        "the data is more than lettings relief limit" in {
+          test(
+            "lettingsRelief"      -> "0",
+            "lettingsReliefValue" -> "50000"
+          )("lettingsRelief.error.amountOverLimit")
+
+        }
+
+        "the data is more than private residence relief limit" in {
+          testWithResidentsRelief(AmountInPence.fromPounds(5), "lettingsRelief" -> "0", "lettingsReliefValue" -> "10")(
+            "lettingsRelief.error.amountOverPrivateResidenceRelief"
+          )
+
         }
       }
 
