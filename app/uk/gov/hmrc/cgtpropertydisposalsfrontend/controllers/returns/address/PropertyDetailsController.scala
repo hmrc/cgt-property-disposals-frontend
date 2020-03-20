@@ -33,6 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, 
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsExamplePropertyDetailsAnswers.{CompleteMultipleDisposalsExamplePropertyDetailsAnswers, IncompleteMultipleDisposalsExamplePropertyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, MultipleDisposalsDraftReturn, MultipleDisposalsExamplePropertyDetailsAnswers, SingleDisposalDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, LocalDateUtils, SessionData, TaxYear}
@@ -65,6 +66,8 @@ class PropertyDetailsController @Inject() (
   val isUkPage: views.html.address.isUk,
   multipleDisposalsGuidancePage: views.html.returns.address.multiple_disposals_guidance,
   multipleDisposalsDisposalDatePage: views.html.returns.address.disposal_date,
+  multipleDisposalsDisposalPricePage: views.html.returns.address.disposal_price,
+  multipleDisposalsAcquisitionPricePage: views.html.returns.address.acquisition_price,
   singleDisposalCheckYourAnswersPage: views.html.returns.address.single_disposal_check_your_answers,
   multipleDisposalsCheckYourAnswersPage: views.html.returns.address.multiple_disposals_check_your_answers
 )(implicit val viewConfig: ViewConfig, val ec: ExecutionContext)
@@ -102,6 +105,8 @@ class PropertyDetailsController @Inject() (
                 examplePropertyDetailsAnswers = Some(
                   IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(
                     Some(a),
+                    None,
+                    None,
                     None
                   )
                 )
@@ -278,6 +283,150 @@ class PropertyDetailsController @Inject() (
     }
   }
 
+  def disposalPrice(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withValidJourney(request) {
+      case (_, r) =>
+        r.draftReturn match {
+          case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          case m: MultipleDisposalsDraftReturn =>
+            val answers  = m.examplePropertyDetailsAnswers
+            val backLink = disposalPriceBackLink(answers)
+
+            val disposalPrice = answers
+              .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
+              .fold(_.disposalPrice, c => Some(c.disposalPrice))
+
+            val form = disposalPrice.fold(disposalPriceForm)(c => disposalPriceForm.fill(c.inPounds))
+
+            Ok(multipleDisposalsDisposalPricePage(form, backLink))
+        }
+    }
+  }
+
+  def disposalPriceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withValidJourney(request) {
+      case (_, r) =>
+        r.draftReturn match {
+          case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          case m: MultipleDisposalsDraftReturn =>
+            val answers  = m.examplePropertyDetailsAnswers
+            val backLink = disposalPriceBackLink(answers)
+
+            disposalPriceForm
+              .bindFromRequest()
+              .fold(
+                formWithErrors =>
+                  BadRequest(
+                    multipleDisposalsDisposalPricePage(formWithErrors, backLink)
+                  ), { disposalPrice =>
+                  if (answers
+                        .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
+                        .fold(_.disposalPrice, c => Some(c.disposalPrice))
+                        .contains(AmountInPence.fromPounds(disposalPrice))) {
+                    Redirect(routes.PropertyDetailsController.checkYourAnswers())
+                  } else {
+                    val updatedAnswers =
+                      answers
+                        .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
+                        .fold(
+                          _.copy(disposalPrice = Some(AmountInPence.fromPounds(disposalPrice))),
+                          _.copy(disposalPrice = AmountInPence.fromPounds(disposalPrice))
+                        )
+                    val updatedDraftReturn = m.copy(examplePropertyDetailsAnswers = Some(updatedAnswers))
+                    val result = for {
+                      _ <- EitherT(
+                            updateSession(sessionStore, request)(
+                              _.copy(journeyStatus = Some(r.copy(draftReturn = updatedDraftReturn)))
+                            )
+                          )
+                    } yield ()
+
+                    result.fold(
+                      { e =>
+                        logger.warn("Could not update draft return", e)
+                        errorHandler.errorResult()
+                      },
+                      _ => Redirect(routes.PropertyDetailsController.checkYourAnswers())
+                    )
+                  }
+                }
+              )
+        }
+    }
+  }
+
+  def acquisitionPrice(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withValidJourney(request) {
+      case (_, r) =>
+        r.draftReturn match {
+          case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          case m: MultipleDisposalsDraftReturn =>
+            val answers  = m.examplePropertyDetailsAnswers
+            val backLink = acquisitionPriceBackLink(answers)
+
+            val acquisitionPrice = answers
+              .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
+              .fold(_.acquisitionPrice, c => Some(c.acquisitionPrice))
+
+            val form = acquisitionPrice.fold(acquisitionPriceForm)(c => acquisitionPriceForm.fill(c.inPounds))
+
+            Ok(multipleDisposalsAcquisitionPricePage(form, backLink))
+        }
+    }
+  }
+
+  def acquisitionPriceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withValidJourney(request) {
+      case (_, r) =>
+        r.draftReturn match {
+          case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          case m: MultipleDisposalsDraftReturn =>
+            val answers  = m.examplePropertyDetailsAnswers
+            val backLink = acquisitionPriceBackLink(answers)
+
+            acquisitionPriceForm
+              .bindFromRequest()
+              .fold(
+                formWithErrors =>
+                  BadRequest(
+                    multipleDisposalsDisposalPricePage(formWithErrors, backLink)
+                  ), { acquisitionPrice =>
+                  if (answers
+                        .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
+                        .fold(_.acquisitionPrice, c => Some(c.acquisitionPrice))
+                        .contains(AmountInPence.fromPounds(acquisitionPrice))) {
+                    Redirect(routes.PropertyDetailsController.checkYourAnswers())
+                  } else {
+                    val updatedAnswers =
+                      answers
+                        .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
+                        .fold(
+                          _.copy(acquisitionPrice = Some(AmountInPence.fromPounds(acquisitionPrice))),
+                          _.copy(acquisitionPrice = AmountInPence.fromPounds(acquisitionPrice))
+                        )
+                    val updatedDraftReturn = m.copy(examplePropertyDetailsAnswers = Some(updatedAnswers))
+                    val result = for {
+                      _ <- EitherT(
+                            updateSession(sessionStore, request)(
+                              _.copy(journeyStatus = Some(r.copy(draftReturn = updatedDraftReturn)))
+                            )
+                          )
+                    } yield ()
+
+                    result.fold(
+                      { e =>
+                        logger.warn("Could not update draft return", e)
+                        errorHandler.errorResult()
+                      },
+                      _ => Redirect(routes.PropertyDetailsController.checkYourAnswers())
+                    )
+                  }
+                }
+              )
+        }
+    }
+  }
+
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) {
       case (_, r) =>
@@ -286,14 +435,20 @@ class PropertyDetailsController @Inject() (
             m.examplePropertyDetailsAnswers.fold[Future[Result]](
               Redirect(routes.PropertyDetailsController.multipleDisposalsGuidance())
             ) {
-              case IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(None, _) =>
+              case IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(None, _, _, _) =>
                 Redirect(routes.PropertyDetailsController.multipleDisposalsGuidance())
 
-              case IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(_, None) =>
+              case IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(_, None, _, _) =>
                 Redirect(routes.PropertyDetailsController.disposalDate())
 
-              case IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(Some(a), Some(d)) =>
-                val completeAnswers    = CompleteMultipleDisposalsExamplePropertyDetailsAnswers(a, d)
+              case IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(_, _, None, _) =>
+                Redirect(routes.PropertyDetailsController.disposalPrice())
+
+              case IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(_, _, _, None) =>
+                Redirect(routes.PropertyDetailsController.acquisitionPrice())
+
+              case IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(Some(a), Some(dd), Some(dp), Some(ap)) =>
+                val completeAnswers    = CompleteMultipleDisposalsExamplePropertyDetailsAnswers(a, dd, dp, ap)
                 val updatedDraftReturn = m.copy(examplePropertyDetailsAnswers = Some(completeAnswers))
                 val result = for {
                   _ <- returnsService.storeDraftReturn(
@@ -354,6 +509,22 @@ class PropertyDetailsController @Inject() (
         _ => routes.PropertyDetailsController.checkYourAnswers()
       )
 
+  private def disposalPriceBackLink(answers: Option[MultipleDisposalsExamplePropertyDetailsAnswers]): Call =
+    answers
+      .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty) // TODO: required?
+      .fold(
+        _ => routes.PropertyDetailsController.disposalDate(),
+        _ => routes.PropertyDetailsController.checkYourAnswers()
+      )
+
+  private def acquisitionPriceBackLink(answers: Option[MultipleDisposalsExamplePropertyDetailsAnswers]): Call =
+    answers
+      .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty) // TODO: required?
+      .fold(
+        _ => routes.PropertyDetailsController.disposalPrice(),
+        _ => routes.PropertyDetailsController.checkYourAnswers()
+      )
+
   // the following aren't used for the returns journey - the returns journey only handles uk addresses
   protected lazy val isUkCall: Call                    = enterPostcodeCall
   protected lazy val isUkSubmitCall: Call              = enterPostcodeCall
@@ -383,5 +554,19 @@ object PropertyDetailsController {
       )(identity)(Some(_))
     )
   }
+
+  val disposalPriceForm: Form[BigDecimal] =
+    Form(
+      mapping(
+        "disposalPrice" -> of(MoneyUtils.amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds))
+      )(identity)(Some(_))
+    )
+
+  val acquisitionPriceForm: Form[BigDecimal] =
+    Form(
+      mapping(
+        "acquisitionPrice" -> of(MoneyUtils.amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds))
+      )(identity)(Some(_))
+    )
 
 }
