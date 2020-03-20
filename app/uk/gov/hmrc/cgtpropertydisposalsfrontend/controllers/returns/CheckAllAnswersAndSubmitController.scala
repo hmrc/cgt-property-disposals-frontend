@@ -24,9 +24,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, routes => baseRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, MultipleDisposalsDraftReturn, SingleDisposalDraftReturn, SubmitReturnRequest}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, SubmitReturnFailed, Subscribed}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, MultipleDisposalsDraftReturn, SingleDisposalDraftReturn, SubmitReturnRequest, SubmitReturnResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{PaymentsService, ReturnsService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
@@ -46,7 +46,8 @@ class CheckAllAnswersAndSubmitController @Inject() (
   paymentsService: PaymentsService,
   cc: MessagesControllerComponents,
   checkAllAnswersPage: pages.check_all_answers,
-  confirmationOfSubmissionPage: pages.confirmation_of_submission
+  confirmationOfSubmissionPage: pages.confirmation_of_submission,
+  submitReturnFailedPage: pages.submit_return_error
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -72,30 +73,60 @@ class CheckAllAnswersAndSubmitController @Inject() (
           )
         val result =
           for {
-            response <- returnsService.submitReturn(submittedReturnRequest)
+            response <- returnsService
+                         .submitReturn(submittedReturnRequest)
+                         .map(Right(_))
+                         .leftFlatMap[Either[Error, SubmitReturnResponse], Error](e => EitherT.pure(Left(e)))
+            newJourneyStatus = response.fold(
+              _ =>
+                SubmitReturnFailed(
+                  fillingOutReturn.subscribedDetails,
+                  fillingOutReturn.ggCredId,
+                  fillingOutReturn.agentReferenceNumber
+                ),
+              submitReturnResponse =>
+                JustSubmittedReturn(
+                  fillingOutReturn.subscribedDetails,
+                  fillingOutReturn.ggCredId,
+                  fillingOutReturn.agentReferenceNumber,
+                  completeReturn,
+                  submitReturnResponse
+                )
+            )
             _ <- EitherT(
                   updateSession(sessionStore, request)(
-                    _.copy(journeyStatus = Some(
-                      JustSubmittedReturn(
-                        fillingOutReturn.subscribedDetails,
-                        fillingOutReturn.ggCredId,
-                        fillingOutReturn.agentReferenceNumber,
-                        completeReturn,
-                        response
-                      )
-                    )
-                    )
+                    _.copy(journeyStatus = Some(newJourneyStatus))
                   )
                 )
-          } yield ()
+          } yield response
 
         result.fold(
           { e =>
-            logger.warn("Error while try to submit return and udpate session", e)
+            logger.warn("Error while trying to update session", e)
             errorHandler.errorResult()
           },
-          _ => Redirect(routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission())
+          _.fold(
+            { e =>
+              logger.warn(s"Could not submit return}", e)
+              Redirect(routes.CheckAllAnswersAndSubmitController.submissionError())
+            }, { r =>
+              logger.info(s"Successfully submitted return with submission id ${r.formBundleId}")
+              Redirect(routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission())
+            }
+          )
         )
+    }
+  }
+
+  def submissionError(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withSubmitReturnFailesOrSubscribed(request) { _ =>
+      Ok(submitReturnFailedPage())
+    }
+  }
+
+  def submissionErrorSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    withSubmitReturnFailesOrSubscribed(request) { _ =>
+      Redirect(homepage.routes.HomePageController.homepage())
     }
   }
 
@@ -139,6 +170,15 @@ class CheckAllAnswersAndSubmitController @Inject() (
     request.sessionData.flatMap(_.journeyStatus) match {
       case Some(j: JustSubmittedReturn) => f(j)
       case _                            => Redirect(baseRoutes.StartController.start())
+    }
+
+  private def withSubmitReturnFailesOrSubscribed(
+    request: RequestWithSessionData[_]
+  )(f: Either[SubmitReturnFailed, Subscribed] => Future[Result]): Future[Result] =
+    request.sessionData.flatMap(_.journeyStatus) match {
+      case Some(s: SubmitReturnFailed) => f(Left(s))
+      case Some(s: Subscribed)         => f(Right(s))
+      case _                           => Redirect(baseRoutes.StartController.start())
     }
 
   private def withCompleteDraftReturn(

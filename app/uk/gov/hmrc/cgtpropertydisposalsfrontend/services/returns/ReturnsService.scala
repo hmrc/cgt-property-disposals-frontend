@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns
 
+import java.util.UUID
+
 import cats.data.EitherT
 import cats.instances.future._
 import cats.instances.int._
@@ -33,6 +35,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{GetDraftReturnResponse, ListReturnsResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.HttpResponseOps._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -49,7 +53,7 @@ trait ReturnsService {
     request: Request[_]
   ): EitherT[Future, Error, Unit]
 
-  def getDraftReturns(cgtReference: CgtReference)(
+  def getDraftReturns(cgtReference: CgtReference, sentReturns: List[ReturnSummary])(
     implicit hc: HeaderCarrier
   ): EitherT[Future, Error, List[DraftReturn]]
 
@@ -70,7 +74,8 @@ trait ReturnsService {
 @Singleton
 class ReturnsServiceImpl @Inject() (connector: ReturnsConnector, auditService: AuditService)(
   implicit ec: ExecutionContext
-) extends ReturnsService {
+) extends ReturnsService
+    with Logging {
 
   def storeDraftReturn(
     draftReturn: DraftReturn,
@@ -94,19 +99,70 @@ class ReturnsServiceImpl @Inject() (connector: ReturnsConnector, auditService: A
       }
     }
 
-  def getDraftReturns(
-    cgtReference: CgtReference
-  )(implicit hc: HeaderCarrier): EitherT[Future, Error, List[DraftReturn]] =
-    connector.getDraftReturns(cgtReference).subflatMap { httpResponse =>
-      if (httpResponse.status === OK) {
-        httpResponse
-          .parseJSON[GetDraftReturnResponse]()
-          .leftMap(Error(_))
-          .map(_.draftReturns)
-      } else {
-        Left(Error(s"Call to get draft returns came back with status ${httpResponse.status}}"))
-      }
+  def deleteDraftReturns(draftReturnIds: List[UUID])(implicit hc: HeaderCarrier): EitherT[Future, Error, Unit] =
+    connector.deleteDraftReturns(draftReturnIds).subflatMap { httpResponse =>
+      if (httpResponse.status === OK)
+        Right(())
+      else
+        Left(Error(s"Call to delete draft returns came back with status ${httpResponse.status}"))
     }
+
+  def getDraftReturns(
+    cgtReference: CgtReference,
+    sentReturns: List[ReturnSummary]
+  )(implicit hc: HeaderCarrier): EitherT[Future, Error, List[DraftReturn]] =
+    for {
+      httpResponse <- connector
+                       .getDraftReturns(cgtReference)
+                       .subflatMap(r =>
+                         if (r.status === OK) Right(r)
+                         else Left(Error(s"Call to get draft returns came back with status ${r.status}}"))
+                       )
+      draftReturns <- EitherT.fromEither(
+                       httpResponse
+                         .parseJSON[GetDraftReturnResponse]()
+                         .leftMap(Error(_))
+                         .map(_.draftReturns)
+                     )
+      (sentDraftReturns, unsentDraftReturns) = draftReturns.partition(hasBeenSent(sentReturns))
+      _ <- if (sentDraftReturns.nonEmpty) EitherT.liftF[Future, Error, Unit](deleteSentDraftReturns(sentDraftReturns))
+          else EitherT.rightT[Future, Error](())
+    } yield unsentDraftReturns
+
+  private def deleteSentDraftReturns(sentDraftReturns: List[DraftReturn])(implicit hc: HeaderCarrier): Future[Unit] = {
+    val ids = sentDraftReturns.map(_.id)
+    logger.info(s"Deleting draft returns that have been sent: ${ids.mkString(", ")}")
+    deleteDraftReturns(ids).fold(
+      e => logger.warn(s"Could not delete draft returns with ids [${ids.mkString(" ")}]", e),
+      _ => logger.info(s"Deleted draft returns with ids [${ids.mkString(" ")}] ")
+    )
+  }
+
+  private def hasBeenSent(sentReturns: List[ReturnSummary])(draftReturn: DraftReturn): Boolean = {
+    val (draftReturnTaxYear, draftReturnCompletionDate) = draftReturn.fold(
+      _.triageAnswers.fold(
+        i => i.taxYear       -> i.completionDate,
+        c => Some(c.taxYear) -> Some(c.completionDate)
+      ),
+      _.triageAnswers.fold(
+        i => i.disposalDate.map(_.taxYear) -> i.completionDate,
+        c => Some(c.disposalDate.taxYear)  -> Some(c.completionDate)
+      )
+    )
+
+    val draftReturnPostcode = draftReturn.fold(
+      _.examplePropertyDetailsAnswers.flatMap(
+        _.fold(_.address.map(_.postcode), c => Some(c.address.postcode))
+      ),
+      _.propertyAddress.map(_.postcode)
+    )
+
+    sentReturns.exists { r =>
+      draftReturnTaxYear.map(_.startDateInclusive.getYear.toString).contains(r.taxYear) &&
+      draftReturnCompletionDate.map(_.value).contains(r.completionDate) &&
+      draftReturnPostcode.contains(r.propertyAddress.postcode)
+    }
+  }
 
   def submitReturn(
     submitReturnRequest: SubmitReturnRequest
