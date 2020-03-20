@@ -36,7 +36,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, MultipleDisposalsDraftReturn, SingleDisposalDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, DraftReturn, MultipleDisposalsDraftReturn, SingleDisposalDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsExamplePropertyDetailsAnswers.{CompleteMultipleDisposalsExamplePropertyDetailsAnswers, IncompleteMultipleDisposalsExamplePropertyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -342,6 +342,24 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
     }
 
+    "handling requests to display the disposal date page" must {
+
+      def performAction(): Future[Result] =
+        controller.disposalDate()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+    }
+
+    "handling disposal date submits" must {
+
+      def performAction(): Future[Result] =
+        controller.disposalDateSubmit()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+    }
+
     "handling requests to display the check your answers page" must {
 
       def performAction(): Future[Result] =
@@ -350,9 +368,13 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       behave like redirectToStartBehaviour(performAction)
 
       val address = sample[UkAddress]
+      val disposalDate = sample[DisposalDate]
 
-      val completeAnswers      = CompleteMultipleDisposalsExamplePropertyDetailsAnswers(address)
-      val allQuestionsAnswered = IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(Some(completeAnswers.address))
+      val completeAnswers      = CompleteMultipleDisposalsExamplePropertyDetailsAnswers(address, disposalDate)
+      val allQuestionsAnswered = IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(
+        Some(completeAnswers.address),
+        Some(completeAnswers.disposalDate)
+      )
       val currentDraftReturn =
         sample[MultipleDisposalsDraftReturn].copy(examplePropertyDetailsAnswers = Some(allQuestionsAnswered))
       val currentJourney     = sample[FillingOutReturn].copy(draftReturn             = currentDraftReturn)
