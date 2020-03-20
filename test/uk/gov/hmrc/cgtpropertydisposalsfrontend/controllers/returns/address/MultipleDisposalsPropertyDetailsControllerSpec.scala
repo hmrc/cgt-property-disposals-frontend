@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address
 
+import java.time.LocalDate
+
 import org.jsoup.nodes.Document
 import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -25,11 +27,13 @@ import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, Result}
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
+import play.api.test.Helpers.BAD_REQUEST
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressControllerSpec
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressControllerSpec, DateErrorScenarios}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.{routes => returnsAddressRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.routes
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
@@ -38,7 +42,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, DraftReturn, MultipleDisposalsDraftReturn, SingleDisposalDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsExamplePropertyDetailsAnswers.{CompleteMultipleDisposalsExamplePropertyDetailsAnswers, IncompleteMultipleDisposalsExamplePropertyDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, LocalDateUtils, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 
 import scala.concurrent.Future
@@ -424,7 +428,12 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "the user has completed this section" in {
           test(
             sample[MultipleDisposalsDraftReturn].copy(
-              examplePropertyDetailsAnswers = Some(sample[CompleteMultipleDisposalsExamplePropertyDetailsAnswers])
+              examplePropertyDetailsAnswers = Some(
+                sample[CompleteMultipleDisposalsExamplePropertyDetailsAnswers].copy(
+                  address      = sample[UkAddress],
+                  disposalDate = sample[DisposalDate].copy(value = LocalDateUtils.today())
+                )
+              )
             ),
             routes.PropertyDetailsController.checkYourAnswers()
           )
@@ -434,12 +443,123 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
     }
 
-    "handling disposal date submits" must {
+    "handling submitted answers to the disposal date page" must {
 
-      def performAction(): Future[Result] =
-        controller.disposalDateSubmit()(FakeRequest())
+      val key = "multipleDisposalsDisposalDate"
 
-      behave like redirectToStartBehaviour(performAction)
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.disposalDateSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken)
+
+      def formData(d: LocalDate): List[(String, String)] =
+        List(
+          s"$key-day"   -> d.getDayOfMonth.toString,
+          s"$key-month" -> d.getMonthValue.toString,
+          s"$key-year"  -> d.getYear.toString
+        )
+
+      behave like redirectToStartBehaviour(() => performAction())
+
+      "not update the session" when {
+        "the date submitted is the same as one that already exists in session" in {
+
+          val disposalDate = sample[DisposalDate].copy(value = LocalDateUtils.today())
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+                      examplePropertyDetailsAnswers = Some(
+                        sample[IncompleteMultipleDisposalsExamplePropertyDetailsAnswers].copy(
+                          disposalDate = Some(disposalDate)
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(
+            performAction(formData(disposalDate.value): _*),
+            routes.PropertyDetailsController.checkYourAnswers()
+          )
+        }
+
+      }
+
+      "show a form error" when {
+
+        def testFormError(formData: List[(String, String)])(expectedErrorMessageKey: String) = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithValidJourneyStatus.copy(
+                journeyStatus = Some(sample[JourneyStatus])
+              )
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(formData: _*),
+            messageFromMessageKey(s"$key.title"), { doc =>
+              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+                expectedErrorMessageKey
+              )
+            },
+            BAD_REQUEST
+          )
+        }
+
+        "the date entered is invalid" in {
+          DateErrorScenarios
+            .dateErrorScenarios(key)
+            .foreach { scenario =>
+              withClue(s"For date error scenario $scenario: ") {
+                val data = List(
+                  s"$key-day"   -> scenario.dayInput,
+                  s"$key-month" -> scenario.monthInput,
+                  s"$key-year"  -> scenario.yearInput
+                ).collect { case (key, Some(value)) => key -> value }
+
+                testFormError(data)(scenario.expectedErrorMessageKey)
+              }
+            }
+        }
+
+        "the date entered is too far in future" in {
+          testFormError(formData(LocalDateUtils.today().plusDays(365L)))(
+            s"$key.error.tooFarInFuture"
+          )
+        }
+
+        "the date entered is too far in past" in {
+          testFormError(formData(LocalDateUtils.today().minusDays(365L)))(
+            s"$key.error.tooFarInPast"
+          )
+        }
+
+      }
+
+      "redirect to the check your answers page" when {
+
+        "the user has not started a draft return and" when {
+
+          "the user has not answered the question before" in {}
+
+          "the user has already answered the question" in {}
+
+        }
+
+        "the user has started a draft return and" when {
+
+          "have completed the section and they enter a figure which is " +
+            "different than one they have already entered" in {}
+        }
+      }
 
     }
 

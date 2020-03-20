@@ -194,14 +194,6 @@ class PropertyDetailsController @Inject() (
       }
   }
 
-  private def disposalDateBackLink(answers: Option[MultipleDisposalsExamplePropertyDetailsAnswers]): Call =
-    answers
-      .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
-      .fold(
-        _ => routes.PropertyDetailsController.enterUkAddress(),
-        _ => routes.PropertyDetailsController.checkYourAnswers()
-      )
-
   def disposalDate(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) {
       case (_, r) =>
@@ -224,16 +216,6 @@ class PropertyDetailsController @Inject() (
             }
         }
     }
-  }
-
-  private def getDisposalDateFrom(taxYear: TaxYear): Form[LocalDate] = {
-    val today              = LocalDateUtils.today()
-    val startDateOfTaxYear = taxYear.startDateInclusive
-    val endDateOfTaxYear   = taxYear.endDateExclusive
-
-    val maximumDateInclusive = if (endDateOfTaxYear.isBefore(today)) endDateOfTaxYear else today
-
-    disposalDateForm(maximumDateInclusive, startDateOfTaxYear)
   }
 
   def disposalDateSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
@@ -354,6 +336,24 @@ class PropertyDetailsController @Inject() (
     }
   }
 
+  private def getDisposalDateFrom(taxYear: TaxYear): Form[LocalDate] = {
+    val today              = LocalDateUtils.today()
+    val startDateOfTaxYear = taxYear.startDateInclusive
+    val endDateOfTaxYear   = taxYear.endDateExclusive
+
+    val maximumDateInclusive = if (endDateOfTaxYear.isAfter(today)) endDateOfTaxYear else today
+
+    disposalDateForm(maximumDateInclusive, startDateOfTaxYear)
+  }
+
+  private def disposalDateBackLink(answers: Option[MultipleDisposalsExamplePropertyDetailsAnswers]): Call =
+    answers
+      .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
+      .fold(
+        _ => routes.PropertyDetailsController.enterUkAddress(),
+        _ => routes.PropertyDetailsController.checkYourAnswers()
+      )
+
   // the following aren't used for the returns journey - the returns journey only handles uk addresses
   protected lazy val isUkCall: Call                    = enterPostcodeCall
   protected lazy val isUkSubmitCall: Call              = enterPostcodeCall
@@ -365,20 +365,23 @@ class PropertyDetailsController @Inject() (
 
 object PropertyDetailsController {
 
-  def disposalDateForm(maximumDateInclusive: LocalDate, minimumDateInclusive: LocalDate): Form[LocalDate] =
+  def disposalDateForm(maximumDateInclusive: LocalDate, minimumDateInclusive: LocalDate): Form[LocalDate] = {
+    val key = "multipleDisposalsDisposalDate"
+
     Form(
       mapping(
         "" -> of(
           LocalDateUtils.dateFormatter(
-            Some(maximumDateInclusive), // earliest of [Today, End of the tax year]
-            Some(minimumDateInclusive), // start of the tax year
-            "disposalDate-day",
-            "disposalDate-month",
-            "disposalDate-year",
-            "disposalDate"
+            Some(maximumDateInclusive), //TODO: earliest of [Today, End of the tax year]
+            Some(minimumDateInclusive), //TODO: start of the tax year
+            s"$key-day",
+            s"$key-month",
+            s"$key-year",
+            key
           )
         )
       )(identity)(Some(_))
     )
+  }
 
 }

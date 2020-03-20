@@ -51,9 +51,9 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
   @dateInput(
    fieldId = key,
    label = pageHeading(title, Some(messages("triage.caption"))),
-   dayValue = form.data.get("disposalDate-day"),
-   monthValue = form.data.get("disposalDate-month"),
-   yearValue = form.data.get("disposalDate-year"),
+   dayValue = form.data.get(s"$key-day"),
+   monthValue = form.data.get(s"$key-month"),
+   yearValue = form.data.get(s"$key-year"),
    helpText = Some(Html(messages(s"$key.helpText"))),
    labelAsHeading = true,
    errorKey = errorKey.map(e => s"${e.key}.${e.message}"),
