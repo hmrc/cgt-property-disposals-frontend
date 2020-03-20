@@ -27,56 +27,117 @@ sealed trait YearToDateLiabilityAnswers extends Product with Serializable
 @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
 object YearToDateLiabilityAnswers {
 
-  @Lenses
-  final case class IncompleteYearToDateLiabilityAnswers(
-    estimatedIncome: Option[AmountInPence],
-    personalAllowance: Option[AmountInPence],
-    hasEstimatedDetails: Option[Boolean],
-    calculatedTaxDue: Option[CalculatedTaxDue],
-    taxDue: Option[AmountInPence],
-    mandatoryEvidence: Option[String]
-  ) extends YearToDateLiabilityAnswers
+  sealed trait CalculatedYearToDateLiabilityAnswers extends YearToDateLiabilityAnswers
 
-  object IncompleteYearToDateLiabilityAnswers {
-    val empty: IncompleteYearToDateLiabilityAnswers =
-      IncompleteYearToDateLiabilityAnswers(None, None, None, None, None, None)
+  sealed trait NonCalculatedYearToDateLiabilityAnswers extends YearToDateLiabilityAnswers
 
-    def fromCompleteAnswers(c: CompleteYearToDateLiabilityAnswers): IncompleteYearToDateLiabilityAnswers =
-      IncompleteYearToDateLiabilityAnswers(
-        Some(c.estimatedIncome),
-        c.personalAllowance,
-        Some(c.hasEstimatedDetails),
-        Some(c.calculatedTaxDue),
-        Some(c.taxDue),
-        c.mandatoryEvidence
-      )
-  }
+  object NonCalculatedYearToDateLiabilityAnswers {
 
-  final case class CompleteYearToDateLiabilityAnswers(
-    estimatedIncome: AmountInPence,
-    personalAllowance: Option[AmountInPence],
-    hasEstimatedDetails: Boolean,
-    calculatedTaxDue: CalculatedTaxDue,
-    taxDue: AmountInPence,
-    mandatoryEvidence: Option[String]
-  ) extends YearToDateLiabilityAnswers
+    @Lenses
+    final case class IncompleteNonCalculatedYearToDateLiabilityAnswers(
+      taxableGainOrLoss: Option[AmountInPence],
+      hasEstimatedDetails: Option[Boolean],
+      taxDue: Option[AmountInPence]
+    ) extends NonCalculatedYearToDateLiabilityAnswers
 
-  implicit class YTDLiabilityAnswersOps(private val a: YearToDateLiabilityAnswers) extends AnyVal {
+    object IncompleteNonCalculatedYearToDateLiabilityAnswers {
+      val empty: IncompleteNonCalculatedYearToDateLiabilityAnswers =
+        IncompleteNonCalculatedYearToDateLiabilityAnswers(None, None, None)
 
-    def fold[A](
-      ifIncomplete: IncompleteYearToDateLiabilityAnswers => A,
-      ifComplete: CompleteYearToDateLiabilityAnswers => A
-    ): A = a match {
-      case i: IncompleteYearToDateLiabilityAnswers => ifIncomplete(i)
-      case c: CompleteYearToDateLiabilityAnswers   => ifComplete(c)
+      def fromCompleteAnswers(
+        c: CompleteNonCalculatedYearToDateLiabilityAnswers
+      ): IncompleteNonCalculatedYearToDateLiabilityAnswers =
+        IncompleteNonCalculatedYearToDateLiabilityAnswers(
+          Some(c.taxableGainOrLoss),
+          Some(c.hasEstimatedDetails),
+          Some(c.taxDue)
+        )
     }
 
-    def unset[A](
-      fieldLens: Lens[IncompleteYearToDateLiabilityAnswers, Option[A]]
-    ): IncompleteYearToDateLiabilityAnswers =
-      fieldLens.set(None)(
-        fold(identity, IncompleteYearToDateLiabilityAnswers.fromCompleteAnswers)
-      )
+    final case class CompleteNonCalculatedYearToDateLiabilityAnswers(
+      taxableGainOrLoss: AmountInPence,
+      hasEstimatedDetails: Boolean,
+      taxDue: AmountInPence
+    ) extends NonCalculatedYearToDateLiabilityAnswers
+
+    implicit class NonCalculatedYTDLiabilityAnswersOps(private val a: NonCalculatedYearToDateLiabilityAnswers)
+        extends AnyVal {
+
+      def fold[A](
+        ifIncomplete: IncompleteNonCalculatedYearToDateLiabilityAnswers => A,
+        ifComplete: CompleteNonCalculatedYearToDateLiabilityAnswers => A
+      ): A = a match {
+        case i: IncompleteNonCalculatedYearToDateLiabilityAnswers => ifIncomplete(i)
+        case c: CompleteNonCalculatedYearToDateLiabilityAnswers   => ifComplete(c)
+      }
+
+      def unset[A](
+        fieldLens: Lens[IncompleteNonCalculatedYearToDateLiabilityAnswers, Option[A]]
+      ): IncompleteNonCalculatedYearToDateLiabilityAnswers =
+        fieldLens.set(None)(
+          fold(identity, IncompleteNonCalculatedYearToDateLiabilityAnswers.fromCompleteAnswers)
+        )
+    }
+
+  }
+
+  object CalculatedYearToDateLiabilityAnswers {
+
+    @Lenses
+    final case class IncompleteCalculatedYearToDateLiabilityAnswers(
+      estimatedIncome: Option[AmountInPence],
+      personalAllowance: Option[AmountInPence],
+      hasEstimatedDetails: Option[Boolean],
+      calculatedTaxDue: Option[CalculatedTaxDue],
+      taxDue: Option[AmountInPence],
+      mandatoryEvidence: Option[String]
+    ) extends CalculatedYearToDateLiabilityAnswers
+
+    object IncompleteCalculatedYearToDateLiabilityAnswers {
+      val empty: IncompleteCalculatedYearToDateLiabilityAnswers =
+        IncompleteCalculatedYearToDateLiabilityAnswers(None, None, None, None, None, None)
+
+      def fromCompleteAnswers(
+        c: CompleteCalculatedYearToDateLiabilityAnswers
+      ): IncompleteCalculatedYearToDateLiabilityAnswers =
+        IncompleteCalculatedYearToDateLiabilityAnswers(
+          Some(c.estimatedIncome),
+          c.personalAllowance,
+          Some(c.hasEstimatedDetails),
+          Some(c.calculatedTaxDue),
+          Some(c.taxDue),
+          c.mandatoryEvidence
+        )
+
+    }
+
+    final case class CompleteCalculatedYearToDateLiabilityAnswers(
+      estimatedIncome: AmountInPence,
+      personalAllowance: Option[AmountInPence],
+      hasEstimatedDetails: Boolean,
+      calculatedTaxDue: CalculatedTaxDue,
+      taxDue: AmountInPence,
+      mandatoryEvidence: Option[String]
+    ) extends CalculatedYearToDateLiabilityAnswers
+
+    implicit class CalculatedYTDLiabilityAnswersOps(private val a: CalculatedYearToDateLiabilityAnswers)
+        extends AnyVal {
+
+      def fold[A](
+        ifIncomplete: IncompleteCalculatedYearToDateLiabilityAnswers => A,
+        ifComplete: CompleteCalculatedYearToDateLiabilityAnswers => A
+      ): A = a match {
+        case i: IncompleteCalculatedYearToDateLiabilityAnswers => ifIncomplete(i)
+        case c: CompleteCalculatedYearToDateLiabilityAnswers   => ifComplete(c)
+      }
+
+      def unset[A](
+        fieldLens: Lens[IncompleteCalculatedYearToDateLiabilityAnswers, Option[A]]
+      ): IncompleteCalculatedYearToDateLiabilityAnswers =
+        fieldLens.set(None)(
+          fold(identity, IncompleteCalculatedYearToDateLiabilityAnswers.fromCompleteAnswers)
+        )
+    }
 
   }
 

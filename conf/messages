@@ -136,7 +136,7 @@ registration.cyaLabel.email=Contact email address
 registration.cyaChange.email=your email address
 
 enterPostcode.title=Find your UK contact address
-enterPostcode.label=Enter postcode
+
 
 email.title=Enter a contact email address
 email.amend.title=Enter a contact email address
@@ -179,8 +179,8 @@ address.manual.linkText=Enter the address another way
 address.lookup.linkText=Find address using UK postcode
 
 address.uk.title=Enter your UK contact address
-address.uk.line1.label=Building or street
-address.uk.line2.label=Building or street line 2 (optional)
+address.uk.line1.label=Building and street
+address.uk.line2.label=Building and street line 2 (optional)
 address.uk.line3.label=Town or city (optional)
 address.uk.line4.label=County (optional)
 address-line1.error.required=Enter the building or street
@@ -657,14 +657,34 @@ task-list.report-and-pay-the-tax.heading=Report and pay the tax
 task-list.enter-cgt-liability.link=Enter Capital Gains Tax liability so far this tax year
 task-list.ytd-liability.link=Enter Capital Gains Tax liability so far this tax year
 task-list.check-and-send-return.link=Check and send return, pay any tax due
-task-list.supporting-evidence.link=Upload Your Supporting Documents
+task-list.upload-supporting-docs.link=Upload Your Supporting Documents
 
-returns.property-address.caption=Property address
-enterPostcode.returns.title=Find the address of the UK property you disposed of
-address-select.returns.title=Select the address of the UK property you disposed of
-address.uk.returns.title=Enter the address of the UK property you disposed of
+
+task-list.enter-example-property-address.link=Enter details of one property
+
+returns.property-address.singleDisposal.caption=Property address
+returns.property-details.multipleDisposals.caption=Details of one property disposal
+
+property-details.multiple-disposals.guidance.title=You’ll need to enter details for one of the property disposals
+property-details.multiple-disposals.guidance.p1=You should enter the details of the property that gave you the largest gain or the smallest loss.
+property-details.multiple-disposals.guidance.p2=For that one property, you’ll need to enter:
+property-details.multiple-disposals.guidance.li1=property’s UK address
+property-details.multiple-disposals.guidance.li2=contract exchange date
+property-details.multiple-disposals.guidance.li3=disposal amount, less disposal costs
+property-details.multiple-disposals.guidance.li4=acquisition amount, plus improvement and acquisition costs
+property-details.multiple-disposals.guidance.p3=Contract exchange usually happens when you and the buyer or new owner swap contracts and the buyer pays a deposit.
+property-details.multiple-disposals.guidance.p4=You’ll also need to upload a document later providing details of the other properties you’re including in this return.
+
+enterPostcode.returns.singleDisposal.title=Find the address of the UK property you disposed of
+address-select.returns.singleDisposal.title=Select the address of the UK property you disposed of
+address.uk.returns.singleDisposal.title=Enter the address of the UK property you disposed of
+
+enterPostcode.returns.multipleDisposals.title=Find the address of one of the UK properties you disposed of
+address-select.returns.multipleDisposals.title=Select the address of one of the UK properties you disposed of
+address.uk.returns.multipleDisposals.title=Enter the address of one of the UK properties you disposed of
 
 returns.property-address.cya.title=Check your answers
+returns.property-details.multiple-disposals.cya.guidanceLink=Help completing this section
 returns.property-address.cyaLabel.property-address=Property address
 returns.property-address.cyaChange.property-address=the address of the property
 
@@ -916,9 +936,6 @@ exemptionsAndLosses.cyaChange.inYearLossesValue=the amount of in year losses
 exemptionsAndLosses.cyaChange.previousYearsLosses=your previous years losses
 exemptionsAndLosses.cyaChange.previousYearsLossesValue=the amount of previous years losses
 
-exemptionsAndLosses.cyaChange.annualExemptAmount=your annual exempt amount
-exemptionsAndLosses.cyaChange.taxableGainOrLoss=your taxable gain or net loss
-
 ytdLiability.caption=Tax amount owed
 
 estimatedIncome.title=What is your estimated income liable for UK tax in this tax year?
@@ -966,6 +983,10 @@ mandatoryEvidence.helpText=Upload one or more documents (maximum file size 5MB) 
 ytdLiability.cya.title=Check your answers
 ytdLiability.cyaLabel.mandatoryEvidence=Supporting file
 ytdLiability.cyaChange.mandatoryEvidence=your supporting file
+
+ytdLiability.cyaChange.annualExemptAmount=your annual exempt amount
+ytdLiability.cyaChange.taxableGainOrLoss=your taxable gain or net loss
+ytdLiability.cyaChange.nonCalculatedTaxDue=your tax due
 
 checkAllAnswers.title=Check your answers before sending the return
 checkAllAnswers.declaration=Declaration
@@ -1122,17 +1143,21 @@ initialGainOrLoss.details.li5=5. This will give you the amount of the initial ga
 initialGainOrLoss.details.example.title=Example
 initialGainOrLoss.details.example.details=You inherited a property. The market value of the property when you got it was £120,000. You paid £5,000 in legal fees when you got it. You spent £10,000 on making improvements to it. After 10 years, you sold the property for £150,000. You paid £5,000 for legal and estate agent's fees. This gave you an initial gain of £10,000.
 initialGainOrLoss.noLossOrGain.label=No initial gain, no initial loss
-initialGainOrLoss.summary.hint="Click on the link to change your answers"
+initialGainOrLoss.summary.hint=Click on the link to change your answers
 
 gain.error.required=Enter the initial gain amount
 gain.error.invalid=Initial gain amount must only include numbers, like 2,908 or 740.50
 gain.error.tooLarge=Initial gain amount must be a number greater than 0 and less than 50,000,000,000.00, or select no gain or loss
 gain.error.tooManyDecimals=Initial gain amount must have 2 decimal places or less, like 2,908 or 740.50
+gain.error.tooSmall=The initial gain must be a number more than 0 and less than 50,000,000,000
+gain.label=Initial gain amount
 
 loss.error.required=Enter the initial loss amount
 loss.error.invalid=Initial loss amount must only include numbers, like 2,908 or 740.50
 loss.error.tooLarge=Initial loss amount must be a number greater than 0 and less than 50,000,000,000.00, or select no gain or loss
 loss.error.tooManyDecimals=Initial loss amount must have 2 decimal places or less, like 2,908 or 740.50
+loss.error.tooSmall=The initial loss must be a number more than 0 and less than 50,000,000,000
+loss.label=Initial loss amount
 
 multipleDisposalsTaxYear.title=When were contracts exchanged on all the properties?
 multipleDisposalsTaxYear.link=What happens on the exchange date?
@@ -1179,3 +1204,10 @@ multipleDisposals.triage.cyaChange.assetTypes=the types of property included in 
 multipleDisposals.triage.cyaChange.wereAllPropertiesResidential=whether all the properties were residential properties
 multipleDisposals.triage.cyaChange.taxYear=when the contracts were exchanged on all the properties
 multipleDisposals.triage.cyaChange.completionDate=the completion date for all the properties
+
+nonCalculatedTaxDue.title=Enter the amount of Capital Gains Tax due for this return
+nonCalculatedTaxDue.helpText=You’ll need to work out and enter the amount.
+
+hasSupportingDocsToUpload.title=Do you want to upload any supporting docs?
+hasSupportingDocsToUpload.error.required=Select yes if you want to upload any supporting documents
+hasSupportingDocsToUpload.error.boolean=Select yes if you want to upload any supporting documents

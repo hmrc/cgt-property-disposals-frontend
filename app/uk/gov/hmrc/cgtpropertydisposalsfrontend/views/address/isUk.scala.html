@@ -29,7 +29,7 @@
  accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu
 )
 
-@(form: Form[Boolean], backLink: Call, submit: Call, addressJourneyType: AddressJourneyType)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[Boolean], backLink: Call, submit: Call, addressJourneyType: AddressJourneyType[_])(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"isUk"}
 @title = @{messages("subscription.isUk.title")}

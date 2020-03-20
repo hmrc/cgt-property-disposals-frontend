@@ -1,0 +1,14 @@
+GET  /details-needed                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.multipleDisposalsGuidance()
+POST /details-needed                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.multipleDisposalsGuidanceSubmit()
+
+GET  /enter-property-address             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.enterUkAddress()
+POST /enter-property-address             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.enterUkAddressSubmit()
+
+GET  /find-uk-property-address           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.enterPostcode()
+POST /find-uk-property-address           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.enterPostcodeSubmit()
+
+GET  /select-property-address            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.selectAddress()
+POST /select-property-address            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.selectAddressSubmit()
+
+GET  /confirm-property-address           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.checkYourAnswers()
+POST /confirm-property-address           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.checkYourAnswersSubmit()

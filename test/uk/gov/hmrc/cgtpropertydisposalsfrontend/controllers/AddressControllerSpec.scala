@@ -186,9 +186,13 @@ trait AddressControllerSpec[J <: JourneyStatus]
   def displayEnterUkAddressPage(performAction: () => Future[Result])(implicit messagesApi: MessagesApi): Unit =
     "display the enter UK address page" when {
       val expectedTitleMessageKey =
-        controller.addressJourneyType match {
-          case AddressJourneyType.Returns => "address.uk.returns.title"
-          case _                          => "address.uk.title"
+        controller.toAddressJourneyType(validJourneyStatus) match {
+          case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
+            f.journey.draftReturn.fold(
+              _ => "address.uk.returns.multipleDisposals.title",
+              _ => "address.uk.returns.singleDisposal.title"
+            )
+          case _ => "address.uk.title"
         }
 
       "the endpoint is requested" in {
@@ -504,9 +508,13 @@ trait AddressControllerSpec[J <: JourneyStatus]
   def enterPostcodePage(performAction: () => Future[Result])(implicit messagesApi: MessagesApi): Unit =
     "display the enter postcode page" when {
       val expectedTitleMessageKey =
-        controller.addressJourneyType match {
-          case AddressJourneyType.Returns => "enterPostcode.returns.title"
-          case _                          => "enterPostcode.title"
+        controller.toAddressJourneyType(validJourneyStatus) match {
+          case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
+            f.journey.draftReturn.fold(
+              _ => "enterPostcode.returns.multipleDisposals.title",
+              _ => "enterPostcode.returns.singleDisposal.title"
+            )
+          case _ => "enterPostcode.title"
         }
 
       "there is no address lookup result in session" in {
@@ -738,9 +746,13 @@ trait AddressControllerSpec[J <: JourneyStatus]
     }
 
     "display the select address page" when {
-      val expectedMessageTitleKey = controller.addressJourneyType match {
-        case AddressJourneyType.Returns => "address-select.returns.title"
-        case _                          => "address-select.title"
+      val expectedMessageTitleKey = controller.toAddressJourneyType(validJourneyStatus) match {
+        case f: AddressJourneyType.Returns.FillingOutReturnAddressJourney =>
+          f.journey.draftReturn.fold(
+            _ => "address-select.returns.multipleDisposals.title",
+            _ => "address-select.returns.singleDisposal.title"
+          )
+        case _ => "address-select.title"
       }
 
       "there is an address lookup result in session" in {

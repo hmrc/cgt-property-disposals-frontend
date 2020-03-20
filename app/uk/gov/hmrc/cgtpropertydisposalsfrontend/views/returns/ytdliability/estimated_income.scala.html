@@ -51,7 +51,7 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 
     @caption(messages("ytdLiability.caption"))
 
-    @formWrapper(routes.YearToDateLiabilityFirstReturnController.estimatedIncomeSubmit(), 'novalidate -> "novalidate") {
+    @formWrapper(routes.YearToDateLiabilityController.estimatedIncomeSubmit(), 'novalidate -> "novalidate") {
         @unitInput(
             fieldId = key,
             value = form.data.getOrElse(key, ""),

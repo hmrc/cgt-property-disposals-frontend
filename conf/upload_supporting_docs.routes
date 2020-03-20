@@ -1,0 +1,3 @@
+GET    /supporting-documents/do-you-want-to-upload-any-supporting-docs      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController.hasSupportingDocsToUpload()
+
+GET    /supporting-documents/check-your-answers                             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController.checkYourAnswers()

@@ -137,9 +137,11 @@ class InitialGainOrLossControllerSpec
             messageFromMessageKey(
               "initialGainOrLoss.title"
             ), { doc =>
-              doc.select(".govuk-caption-xl").html()  should include("Initial gain or loss")
-              doc.select("#initialGainOrLoss").html() should include("Did you make an initial gain or loss?")
-              doc.select("#back").attr("href")        shouldBe routes.InitialGainOrLossController.checkYourAnswers().url
+              doc.select(".govuk-caption-xl").html()                          should include("Initial gain or loss")
+              doc.select("#initialGainOrLoss").html()                         should include("Did you make an initial gain or loss?")
+              doc.select("#initialGainOrLoss-0-content > div > label").text() should be("Initial gain amount")
+              doc.select("#initialGainOrLoss-1-content > div > label").text() should be("Initial loss amount")
+              doc.select("#back").attr("href")                                shouldBe routes.InitialGainOrLossController.checkYourAnswers().url
               doc.select("#content > article > form").attr("action") shouldBe routes.InitialGainOrLossController
                 .submitInitialGainOrLoss()
                 .url
@@ -198,11 +200,19 @@ class InitialGainOrLossControllerSpec
 
       "show a form error" when {
 
+        def checkIfValueExistsForKey(expectedErrorMessageKey: String) = {
+          (messages(expectedErrorMessageKey) === expectedErrorMessageKey) shouldBe false
+          messages(expectedErrorMessageKey).trim().isEmpty                shouldBe false
+        }
+
         def testFormError(
           data: (String, String)*
         )(expectedErrorMessageKey: String, errorArgs: String*)(pageTitleKey: String, titleArgs: String*)(
           performAction: Seq[(String, String)] => Future[Result]
         ): Unit = {
+
+          checkIfValueExistsForKey(expectedErrorMessageKey)
+
           val session = sessionWithState(None)._1
 
           inSequence {

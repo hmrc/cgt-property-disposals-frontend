@@ -32,7 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, UKAddressLookupService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Onboarding.SubscriptionReadyAddressJourney
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
@@ -60,7 +60,8 @@ class SubscriptionAddressController @Inject() (
     with SessionUpdates
     with AddressController[SubscriptionReady] {
 
-  override val addressJourneyType: AddressJourneyType = AddressJourneyType.Onboarding
+  override val toAddressJourneyType: SubscriptionReady => SubscriptionReadyAddressJourney =
+    SubscriptionReadyAddressJourney.apply
 
   val subscriptionReadyAddressLens: Lens[SubscriptionReady, Address] =
     lens[SubscriptionReady].subscriptionDetails.address

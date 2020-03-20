@@ -29,7 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressControllerSpec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyAddressControllerSpec.validatePropertyAddressPage
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.SingleDisposalPropertyDetailsControllerSpec.validatePropertyAddressPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.{routes => returnsAddressRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
@@ -43,7 +43,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 
 import scala.concurrent.Future
 
-class PropertyAddressControllerSpec
+class SingleDisposalPropertyDetailsControllerSpec
     extends AddressControllerSpec[FillingOutReturn]
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour
@@ -57,7 +57,7 @@ class PropertyAddressControllerSpec
   override def overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](bind[ReturnsService].toInstance(mockReturnsService)) ::: super.overrideBindings
 
-  lazy val controller = instanceOf[PropertyAddressController]
+  lazy val controller = instanceOf[PropertyDetailsController]
 
   lazy implicit val messagesApi: MessagesApi = controller.messagesApi
 
@@ -108,7 +108,7 @@ class PropertyAddressControllerSpec
 
       behave like submitEnterUkAddress(
         performAction,
-        returnsAddressRoutes.PropertyAddressController.checkYourAnswers()
+        returnsAddressRoutes.PropertyDetailsController.checkYourAnswers()
       )
 
     }
@@ -130,7 +130,7 @@ class PropertyAddressControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
-      behave like submitEnterPostcode(performAction, returnsAddressRoutes.PropertyAddressController.selectAddress())
+      behave like submitEnterPostcode(performAction, returnsAddressRoutes.PropertyDetailsController.selectAddress())
 
     }
 
@@ -143,7 +143,7 @@ class PropertyAddressControllerSpec
 
       behave like displaySelectAddress(
         performAction,
-        controllers.returns.address.routes.PropertyAddressController.enterPostcode()
+        controllers.returns.address.routes.PropertyDetailsController.enterPostcode()
       )
 
     }
@@ -157,13 +157,13 @@ class PropertyAddressControllerSpec
 
       behave like submitSelectAddress(
         performAction,
-        controllers.returns.address.routes.PropertyAddressController.enterPostcode(),
-        returnsAddressRoutes.PropertyAddressController.checkYourAnswers()
+        controllers.returns.address.routes.PropertyDetailsController.enterPostcode(),
+        returnsAddressRoutes.PropertyDetailsController.checkYourAnswers()
       )
 
       "not update the session" when {
 
-        "the user selects an address which is already in their subscribed details" in {
+        "the user selects an address which is already in their session" in {
           val session = sessionWithValidJourneyStatus.copy(addressLookupResult = Some(addressLookupResult))
 
           inSequence {
@@ -172,7 +172,7 @@ class PropertyAddressControllerSpec
           }
 
           val result = performAction(Seq("address-select" -> "0"))
-          checkIsRedirect(result, returnsAddressRoutes.PropertyAddressController.checkYourAnswers())
+          checkIsRedirect(result, returnsAddressRoutes.PropertyDetailsController.checkYourAnswers())
         }
 
       }
@@ -198,7 +198,7 @@ class PropertyAddressControllerSpec
           }
         )
 
-      "redirect to the task list if there is no property address in session" in {
+      "redirect to the enter postcode page if there is no property address in session" in {
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(
@@ -211,7 +211,7 @@ class PropertyAddressControllerSpec
           )
         }
 
-        checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+        checkIsRedirect(performAction(), routes.PropertyDetailsController.enterPostcode())
       }
 
       "display the page if there is an address in session" in {
@@ -250,7 +250,7 @@ class PropertyAddressControllerSpec
   }
 }
 
-object PropertyAddressControllerSpec extends Matchers {
+object SingleDisposalPropertyDetailsControllerSpec extends Matchers {
   def validatePropertyAddressPage(
     ukAddress: UkAddress,
     doc: Document

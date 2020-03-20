@@ -31,18 +31,6 @@
 
 @(answers: CompleteExemptionAndLossesAnswers, disposalDate: DisposalDate)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
-@taxableGainOrLossLabelWithAmount = @{
-  answers.taxableGainOrLoss.map { amount =>
-    if(amount.value > 0)
-      "taxableGainOrLoss.gain.label" -> Some("taxableGain.label" -> MoneyUtils.formatAmountOfMoneyWithPoundSign(amount.inPounds()))
-    else if(amount.value < 0)
-      "taxableGainOrLoss.loss.label" -> Some("netLoss.label" -> MoneyUtils.formatAmountOfMoneyWithPoundSign(amount.inPounds() * -1))
-    else
-      "taxableGainOrLoss.noLossOrGain.label" -> None
-  }
-
-}
-
 @cyaSection() {
   @if(answers.inYearLosses.value === 0L) {
     @cyaRow(
@@ -102,25 +90,5 @@
     Some(cyaChange(messages("exemptionsAndLosses.cyaChange.annualExemptAmount"), routes.ExemptionAndLossesController.annualExemptAmount().url)),
     "annualExemptAmount"
   )
-
-  @taxableGainOrLossLabelWithAmount.map( l =>
-    cyaRow(
-      messages("taxableGainOrLoss.title"),
-      Html(messages(l._1)),
-      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.taxableGainOrLoss"), routes.ExemptionAndLossesController.taxableGainOrLoss().url)),
-      "taxableGainOrLoss"
-    )
-  )
-
-  @taxableGainOrLossLabelWithAmount.flatMap(_._2).map({ case (label, amount) =>
-    cyaRow(
-      messages(label),
-      Html(amount),
-      Some(cyaChange(messages("exemptionsAndLosses.cyaChange.taxableGainOrLoss"), routes.ExemptionAndLossesController.taxableGainOrLoss().url)),
-      "taxableGainOrLoss"
-    )
-  })
-
-
 
 }

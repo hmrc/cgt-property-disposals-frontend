@@ -58,7 +58,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate,
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CompleteYearToDateLiabilityAnswers, IncompleteYearToDateLiabilityAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYearToDateLiabilityAnswers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus
 
@@ -230,7 +230,7 @@ class TaskListControllerSpec
           )(
             "propertyAddress",
             messageFromMessageKey("task-list.enter-property-address.link"),
-            address.routes.PropertyAddressController.enterPostcode(),
+            address.routes.PropertyDetailsController.checkYourAnswers(),
             TaskListStatus.ToDo
           )
         }
@@ -244,7 +244,7 @@ class TaskListControllerSpec
           )(
             "propertyAddress",
             messageFromMessageKey("task-list.enter-property-address.link"),
-            address.routes.PropertyAddressController.checkYourAnswers(),
+            address.routes.PropertyDetailsController.checkYourAnswers(),
             TaskListStatus.Complete
           )
         }
@@ -527,7 +527,7 @@ class TaskListControllerSpec
           testStateOfSection(draftReturn)(
             "enterCgtLiability",
             messageFromMessageKey("task-list.enter-cgt-liability.link"),
-            yeartodatelliability.routes.YearToDateLiabilityFirstReturnController.checkYourAnswers(),
+            yeartodatelliability.routes.YearToDateLiabilityController.checkYourAnswers(),
             expectedStatus
           )
 
@@ -585,7 +585,7 @@ class TaskListControllerSpec
               acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
               reliefDetailsAnswers       = Some(sample[CompleteReliefDetailsAnswers]),
               exemptionAndLossesAnswers  = Some(sample[CompleteExemptionAndLossesAnswers]),
-              yearToDateLiabilityAnswers = Some(sample[IncompleteYearToDateLiabilityAnswers])
+              yearToDateLiabilityAnswers = Some(sample[IncompleteCalculatedYearToDateLiabilityAnswers])
             ),
             TaskListStatus.InProgress
           )
@@ -600,7 +600,7 @@ class TaskListControllerSpec
               acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
               reliefDetailsAnswers       = Some(sample[CompleteReliefDetailsAnswers]),
               exemptionAndLossesAnswers  = Some(sample[CompleteExemptionAndLossesAnswers]),
-              yearToDateLiabilityAnswers = Some(sample[CompleteYearToDateLiabilityAnswers])
+              yearToDateLiabilityAnswers = Some(sample[CompleteCalculatedYearToDateLiabilityAnswers])
             ),
             TaskListStatus.Complete
           )

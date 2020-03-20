@@ -77,6 +77,8 @@ class StartController @Inject() (
     with SessionUpdates
     with IvBehaviour {
 
+  val getDraftAndSentReturns: Boolean = config.underlying.getBoolean("get-draft-and-sent-returns")
+
   def start(): Action[AnyContent] = authenticatedActionWithRetrievedDataAndSessionData.async { implicit request =>
     (
       request.authenticatedRequest.journeyUserType,
@@ -233,8 +235,9 @@ class StartController @Inject() (
   ): Future[Result] = {
     val result = for {
       subscribedDetails <- subscriptionService.getSubscribedDetails(cgtReference)
-      draftReturns      <- returnsService.getDraftReturns(cgtReference)
-      sentReturns       <- returnsService.listReturns(cgtReference)
+      draftReturns <- if (getDraftAndSentReturns) returnsService.getDraftReturns(cgtReference)
+                     else EitherT.pure(List.empty)
+      sentReturns <- if (getDraftAndSentReturns) returnsService.listReturns(cgtReference) else EitherT.pure(List.empty)
       _ <- EitherT(
             updateSession(sessionStore, request)(
               _.copy(
