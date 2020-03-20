@@ -904,30 +904,28 @@ annualExemptAmount.error.tooManyDecimals=Annual Exempt Amount must have 2 decima
 annualExemptAmount.link=<a href="{0}" target="_blank">Find out about the Annual Exempt Amount (opens in a new window)</a>.
 
 
-taxableGainOrLoss.title=Did you make a taxable gain on the property disposal?
-taxableGainOrLoss.helpText=This is after you have subtracted any reliefs, improvements or losses you are using
-taxableGainOrLoss.error.required=Select yes if you made a taxable gain on the property disposal
-taxableGainOrLoss.error.invalid=Select yes if you made a taxable gain on the property disposal
+taxableGainOrLoss.title=Did you make an overall gain on loss on the property sale or disposal?
+taxableGainOrLoss.helpText=To work out if you made an overall gain or loss, you’ll need to take your initial gain or loss and subtract any reliefs, losses, or other allowances you are entitled to.
+taxableGainOrLoss.error.required=Select yes if you made an overall gain
+taxableGainOrLoss.error.invalid=Select yes if you made an overall gain
 
-taxableGainOrLoss.gain.label=Yes, I made a taxable gain
-taxableGain.label=Amount of taxable gain
-taxableGain.error.required=Enter the amount of the gain you made on the property disposal
-taxableGain.error.invalid=Amount of the gain or loss must be a number and must have 2 decimal places or less, for example 33.33
-taxableGain.error.tooSmall=The amount of the gain or loss must be a number more than 0, or select no taxable gain, no net loss
-taxableGain.error.tooLarge=Gain or loss must be a number that is 50,000,000,000.00 or less
-taxableGain.error.tooManyDecimals=Amount of the gain or loss must have 2 decimal places or less, for example 33.33 
+taxableGainOrLoss.gain.label=Yes, I made an overall gain
+taxableGain.label=Amount of overall gain
+taxableGain.error.required=Enter the amount of overall gain
+taxableGain.error.invalid=Overall gain must be a number and must have 2 decimal places or less, for example 4,820.54
+taxableGain.error.tooSmall=Overall gain must be a number more than 0. If you did not make on overall gain or loss select no overall gain or loss
+taxableGain.error.tooLarge=Overall gain must be a number that is 50,000,000,000.00 or less
+taxableGain.error.tooManyDecimals=Overall gain must have 2 decimal places or less, for example 4,820.54
 
-taxableGainOrLoss.loss.label=No, I made a net loss
-netLoss.label=Amount of net loss
-netLoss.error.required=Enter the amount of loss you made on the property disposal
-netLoss.error.invalid=Amount of the gain or loss must be a number and must have 2 decimal places or less, for example 33.33
-netLoss.error.tooSmall=	The amount of the gain or loss must be a number more than 0, or select no taxable gain, no net loss
-netLoss.error.tooLarge=Gain or loss must be a number that is 50,000,000,000.00 or less
-netLoss.error.tooManyDecimals=Amount of the gain or loss must have 2 decimal places or less, for example 33.33 
+taxableGainOrLoss.loss.label=No, I made an overall loss
+netLoss.label=Amount of overall loss
+netLoss.error.required=Enter the amount of overall loss
+netLoss.error.invalid=Overall loss must be a number and must have 2 decimal places or less, for example 33.33
+netLoss.error.tooSmall=Overall loss must be a number more than 0. If you did not make on overall gain or loss select no overall gain or loss
+netLoss.error.tooLarge=Overall loss must be a number that is 50,000,000,000.00 or less
+netLoss.error.tooManyDecimals=Overall loss must have 2 decimal places or less, for example 4,820.54
 
-taxableGainOrLoss.noLossOrGain.label=No taxable gain, no net loss
-taxableGainOrLoss.details.summary=How to work out if you made a taxable gain
-taxableGainOrLoss.details.p1=Subtract the amount you sold the property for as well as any reliefs, allowances, exemptions, or losses from the market value of the property when you inherited it. If the amount is more than £0 you made a taxable gain.
+taxableGainOrLoss.noLossOrGain.label=No overall gain or loss
 
 exemptionsAndLosses.cya.title=Check your answers
 
