@@ -46,7 +46,7 @@ class ViewReturnController @Inject() (
   paymentsService: PaymentsService,
   cc: MessagesControllerComponents,
   viewReturnPage: views.html.returns.view_return,
-  val rebasingEligabilityUtil: RebasingEligibilityUtil
+  rebasingEligibilityUtil: RebasingEligibilityUtil
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -60,9 +60,9 @@ class ViewReturnController @Inject() (
           viewReturnPage(
             sentReturn,
             returnSummary,
-            rebasingEligabilityUtil.getRebasingCutOffDate(sentReturn),
-            rebasingEligabilityUtil.isUk(sentReturn),
-            rebasingEligabilityUtil.isEligibleForRebase(sentReturn)
+            rebasingEligibilityUtil.getRebasingCutOffDate(sentReturn),
+            rebasingEligibilityUtil.isUk(sentReturn),
+            rebasingEligibilityUtil.isEligibleForRebase(sentReturn)
           )
         )
     }

@@ -123,16 +123,4 @@ class RebasingEligibilityUtil {
         getRebasingCutOffDate(assetType, isUkResident)
     }
 
-  def shouldRedirect(
-    wasUkResident: Boolean,
-    assetType: AssetType,
-    acquisitionDetailsAnswers: AcquisitionDetailsAnswers,
-    acquisitionDate: AcquisitionDate
-  ): Boolean =
-    if (wasUkResident && RebasingCutoffDates.ukResidents.isAfter(acquisitionDate.value)) {
-      acquisitionDetailsAnswers.fold(_.acquisitionMethod, c => Some(c.acquisitionMethod)).isDefined
-    } else if (!wasUkResident) {
-      acquisitionDetailsAnswers.fold(_.acquisitionPrice, c => Some(c.acquisitionPrice)).isDefined
-    } else true
-
 }

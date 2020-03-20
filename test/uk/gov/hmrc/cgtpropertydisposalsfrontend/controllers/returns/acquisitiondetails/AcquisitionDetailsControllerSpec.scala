@@ -2294,27 +2294,6 @@ class AcquisitionDetailsControllerSpec
 
         }
 
-        "the user is uk and residential asset type" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithState(
-                sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  improvementCosts = Some(sample[AmountInPence])
-                ),
-                AssetType.Residential,
-                true
-              )._1
-            )
-          }
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey("shouldUseRebase.title", LocalDateUtils.govDisplayFormat(ukResidents))
-          )
-
-        }
-
         "the user is non uk and residential asset type" in {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -2335,6 +2314,31 @@ class AcquisitionDetailsControllerSpec
               "shouldUseRebase.title",
               LocalDateUtils.govDisplayFormat(nonUkResidentsNonResidentialProperty)
             )
+          )
+
+        }
+
+      }
+
+      "redirect to check your answers" when {
+
+        "the user is uk" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  improvementCosts = Some(sample[AmountInPence])
+                ),
+                AssetType.Residential,
+                true
+              )._1
+            )
+          }
+
+          checkIsRedirect(
+            performAction(),
+            routes.AcquisitionDetailsController.checkYourAnswers()
           )
 
         }
@@ -2415,10 +2419,11 @@ class AcquisitionDetailsControllerSpec
 
       "redirect to the acquisition price page" when {
 
-        "the question has not been answered" in {
+        "the question has not been answered, and eligible for acquisition price" in {
           testRedirectOnMissingData(
             sessionWithState(
-              allQuestionsAnswered.copy(acquisitionPrice = None),
+              allQuestionsAnswered
+                .copy(acquisitionPrice = None, acquisitionDate = Some(AcquisitionDate(LocalDate.now()))),
               sample[AssetType],
               sample[Boolean]
             )._1,

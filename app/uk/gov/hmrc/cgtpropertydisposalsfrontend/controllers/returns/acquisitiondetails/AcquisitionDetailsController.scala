@@ -409,8 +409,7 @@ class AcquisitionDetailsController @Inject() (
                     )
                   )(
                     requiredPreviousAnswer = answers =>
-                      rebasingEligabilityUtil
-                        .shouldRedirect(wasUkResident, assetType, answers, acquisitionDate),
+                      shouldRedirectFromRebaseAcquisitionQuestions(wasUkResident, assetType, answers, acquisitionDate),
                     redirectToIfNoRequiredPreviousAnswer =
                       if (wasUkResident) routes.AcquisitionDetailsController.acquisitionDate()
                       else routes.AcquisitionDetailsController.acquisitionPrice()
@@ -557,13 +556,17 @@ class AcquisitionDetailsController @Inject() (
       case (_, _, draftReturn, answers) =>
         withAssetTypeAndResidentialStatus(draftReturn, answers) {
           case (assetType, wasAUkResident) =>
-            Ok(
-              shouldUseRebasePage(
-                shouldUseRebaseForm,
-                routes.AcquisitionDetailsController.rebasedAcquisitionPrice(),
-                rebasingEligabilityUtil.getRebasingCutOffDate(assetType, wasAUkResident)
+            if (wasAUkResident) {
+              Redirect(routes.AcquisitionDetailsController.checkYourAnswers())
+            } else {
+              Ok(
+                shouldUseRebasePage(
+                  shouldUseRebaseForm,
+                  routes.AcquisitionDetailsController.rebasedAcquisitionPrice(),
+                  rebasingEligabilityUtil.getRebasingCutOffDate(assetType, wasAUkResident)
+                )
               )
-            )
+            }
         }
     }
   }
@@ -740,6 +743,17 @@ class AcquisitionDetailsController @Inject() (
     Redirect(controllers.returns.routes.TaskListController.taskList())
   }
 
+  private def shouldRedirectFromRebaseAcquisitionQuestions(
+    wasUkResident: Boolean,
+    assetType: AssetType,
+    acquisitionDetailsAnswers: AcquisitionDetailsAnswers,
+    acquisitionDate: AcquisitionDate
+  ): Boolean =
+    if (wasUkResident && RebasingCutoffDates.ukResidents.isAfter(acquisitionDate.value)) {
+      acquisitionDetailsAnswers.fold(_.acquisitionMethod, c => Some(c.acquisitionMethod)).isDefined
+    } else if (!wasUkResident) {
+      acquisitionDetailsAnswers.fold(_.acquisitionPrice, c => Some(c.acquisitionPrice)).isDefined
+    } else true
 }
 
 object AcquisitionDetailsController {

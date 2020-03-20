@@ -798,7 +798,7 @@ acquisitionFeesValue.error.tooManyDecimals=Additional costs must be 2 decimal pl
 
 acquisitionDetails.cya.title=Check your answers
 acquisitionDetails.cyaLabel.rebased=Property value rebased
-acquisitionDetails.cyaLabel.rebasedValue=What was the market value of the property {0}
+acquisitionDetails.cyaLabel.rebasedValue=What was the market value of the property on {0}?
 acquisitionDetails.cyaLabel.improvementCostsValue=Amount of improvement costs
 acquisitionDetails.cyaLabel.acquisitionFeesValue=Amount of buying costs
 acquisitionDetails.cyaChange.acquisitionMethod=your acquisition method
@@ -821,7 +821,7 @@ rebaseAcquisitionPrice.dropdown.header=Why you need to enter this amount
 rebaseAcquisitionPrice.dropdown.p1=You owned the property on or before {0}.
 rebaseAcquisitionPrice.dropdown.p2=This means when you work out your gain or loss. You must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount
 rebaseAcquisitionPrice.dropdown.p3=This process is called rebasing.
-rebaseAcquisitionPrice.dropdown.p4=<a href="{0}" target="_blank">Find out how to ask HMRC to check a property’s market value (opens in a new window).</a>
+rebaseAcquisitionPrice.dropdown.p4=<a href="{0}" target="_blank">Find out how to ask HMRC to check a property’s market value (opens in a new window)</a>.
 rebaseAcquisitionPrice.dropdown.p5=It takes at least 3 months for HMRC to check a property’s market value. This means you should enter an estimate now and if you need to amend the amount do it later using this service. Or if you already complete a Self Assessment tax return you can provide the correct market value in your next Self Assessment.
 
 shouldUseRebase.title=Are you using the rebased value on {0} in your calculation?
