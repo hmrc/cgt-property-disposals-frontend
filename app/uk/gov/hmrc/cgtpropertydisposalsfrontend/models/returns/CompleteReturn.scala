@@ -35,7 +35,6 @@ final case class CompleteReturn(
   reliefDetails: CompleteReliefDetailsAnswers,
   exemptionsAndLossesDetails: CompleteExemptionAndLossesAnswers,
   yearToDateLiabilityAnswers: CompleteCalculatedYearToDateLiabilityAnswers,
-  uploadSupportingDocuments: CompleteUploadSupportingDocuments,
   initialGainOrLoss: Option[AmountInPence]
 )
 
@@ -52,10 +51,10 @@ object CompleteReturn {
         Some(e: CompleteExemptionAndLossesAnswers),
         Some(y: CompleteCalculatedYearToDateLiabilityAnswers),
         i,
-        Some(u: CompleteUploadSupportingDocuments),
+        _,
         _
         ) =>
-      Some(CompleteReturn(t, p, d, a, r, e, y, u, i))
+      Some(CompleteReturn(t, p, d, a, r, e, y, i))
 
     case _ =>
       None
