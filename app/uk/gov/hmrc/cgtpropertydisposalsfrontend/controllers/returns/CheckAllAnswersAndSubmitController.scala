@@ -69,7 +69,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
         Ok(
           checkAllAnswersPage(
             completeReturn,
-            rebasingEligibilityUtil.getRebasingCutOffDate(completeReturn),
+            rebasingEligibilityUtil.getDisplayRebasingCutOffDate(completeReturn),
             rebasingEligibilityUtil.isUk(completeReturn),
             rebasingEligibilityUtil.isEligibleForRebase(completeReturn)
           )

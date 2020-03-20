@@ -25,6 +25,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate,
 
 @Singleton
 class RebasingEligibilityUtil {
+
   def isUk(completeReturn: CompleteReturn): Boolean =
     completeReturn.triageAnswers.fold(
       i => i.assetType       -> i.wasAUKResident,
@@ -34,6 +35,15 @@ class RebasingEligibilityUtil {
     }
 
   def isEligibleForRebase(completeReturn: CompleteReturn): Boolean =
+    completeReturn.triageAnswers.fold(
+      i => i.assetType       -> i.wasAUKResident,
+      c => Some(c.assetType) -> Some(c.countryOfResidence.isUk())
+    ) match {
+      case (Some(assetType), Some(isUkResident)) =>
+        isEligibleForRebase(isUkResident, assetType, completeReturn.acquisitionDetails.acquisitionDate.value)
+    }
+
+  def isEligibleForAcquisitionPrice(completeReturn: CompleteReturn): Boolean =
     completeReturn.triageAnswers.fold(
       i => i.assetType       -> i.wasAUKResident,
       c => Some(c.assetType) -> Some(c.countryOfResidence.isUk())
@@ -50,7 +60,7 @@ class RebasingEligibilityUtil {
 
   def isEligibleForRebase(wasAUkResident: Boolean, assetType: AssetType, purchaseDate: LocalDate): Boolean =
     (wasAUkResident, assetType, purchaseDate) match {
-      case (true, AssetType.Residential, date) => date.isBefore(RebasingCutoffDates.ukResidents)
+      case (true, _, date) => date.isBefore(RebasingCutoffDates.ukResidents)
       case (false, AssetType.Residential, date) =>
         date.isBefore(RebasingCutoffDates.nonUkResidentsResidentialProperty)
       case (false, AssetType.NonResidential, date) =>
@@ -115,6 +125,25 @@ class RebasingEligibilityUtil {
     else RebasingCutoffDates.nonUkResidentsNonResidentialProperty
 
   def getRebasingCutOffDate(completeReturn: CompleteReturn): LocalDate =
+    completeReturn.triageAnswers.fold(
+      i => i.assetType       -> i.wasAUKResident,
+      c => Some(c.assetType) -> Some(c.countryOfResidence.isUk())
+    ) match {
+      case (Some(assetType), Some(isUkResident)) =>
+        getRebasingCutOffDate(assetType, isUkResident)
+    }
+
+  def getDisplayRebasingCutOffDate(
+    assetType: AssetType,
+    wasUkResident: Boolean
+  ): LocalDate =
+    if (wasUkResident)
+      RebasingCutoffDates.ukResidents
+    else if (assetType === AssetType.Residential)
+      RebasingCutoffDates.nonUkResidentsResidentialProperty.minusDays(1)
+    else RebasingCutoffDates.nonUkResidentsNonResidentialProperty.minusDays(1)
+
+  def getDisplayRebasingCutOffDate(completeReturn: CompleteReturn): LocalDate =
     completeReturn.triageAnswers.fold(
       i => i.assetType       -> i.wasAUKResident,
       c => Some(c.assetType) -> Some(c.countryOfResidence.isUk())

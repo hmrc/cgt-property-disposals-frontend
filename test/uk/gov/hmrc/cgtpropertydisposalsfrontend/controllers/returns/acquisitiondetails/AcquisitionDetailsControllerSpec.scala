@@ -1208,7 +1208,7 @@ class AcquisitionDetailsControllerSpec
             performAction(),
             messageFromMessageKey(
               "rebaseAcquisitionPrice.title",
-              LocalDateUtils.govDisplayFormat(nonUkResidentsResidentialProperty)
+              LocalDateUtils.govDisplayFormat(nonUkResidentsResidentialProperty.minusDays(1))
             ), { doc =>
               doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.acquisitionPrice().url
               doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
@@ -2288,7 +2288,7 @@ class AcquisitionDetailsControllerSpec
             performAction(),
             messageFromMessageKey(
               "shouldUseRebase.title",
-              LocalDateUtils.govDisplayFormat(nonUkResidentsResidentialProperty)
+              LocalDateUtils.govDisplayFormat(nonUkResidentsResidentialProperty.minusDays(1))
             )
           )
 
@@ -2312,7 +2312,7 @@ class AcquisitionDetailsControllerSpec
             performAction(),
             messageFromMessageKey(
               "shouldUseRebase.title",
-              LocalDateUtils.govDisplayFormat(nonUkResidentsNonResidentialProperty)
+              LocalDateUtils.govDisplayFormat(nonUkResidentsNonResidentialProperty.minusDays(1))
             )
           )
 
@@ -2345,6 +2345,53 @@ class AcquisitionDetailsControllerSpec
 
       }
 
+    }
+
+    "handling requests to submit to should use rebased" must {
+
+      val disposalDate = DisposalDate(LocalDate.of(1200, 1, 1), sample[TaxYear])
+      def performAction(data: (String, String)*): Future[Result] =
+        controller.shouldUseRebaseSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
+
+      "show a form error for non residential non uk" when {
+        val date: String = LocalDateUtils.govDisplayFormat(nonUkResidentsNonResidentialProperty.minusDays(1))
+
+        def test(data: (String, String)*)(expectedErrorKey: String) =
+          testFormError(data: _*)(expectedErrorKey)("shouldUseRebase.title", date)(
+            performAction,
+            sessionWithState(
+              sample[CompleteAcquisitionDetailsAnswers]
+                .copy(acquisitionDate = AcquisitionDate(nonUkResidentsNonResidentialProperty.minusDays(1))),
+              AssetType.NonResidential,
+              false,
+              disposalDate
+            )._1
+          )
+
+        "no option has been selected" in {
+          test()("shouldUseRebase.error.required")
+        }
+      }
+
+      "show a form error for residential non uk" when {
+        val date: String = LocalDateUtils.govDisplayFormat(nonUkResidentsResidentialProperty.minusDays(1))
+
+        def test(data: (String, String)*)(expectedErrorKey: String) =
+          testFormError(data: _*)(expectedErrorKey)("shouldUseRebase.title", date)(
+            performAction,
+            sessionWithState(
+              sample[CompleteAcquisitionDetailsAnswers]
+                .copy(acquisitionDate = AcquisitionDate(nonUkResidentsResidentialProperty.minusDays(1))),
+              AssetType.Residential,
+              false,
+              disposalDate
+            )._1
+          )
+
+        "no option has been selected" in {
+          test()("shouldUseRebase.error.required")
+        }
+      }
     }
 
     "handling requests to display the check your answers page" must {
@@ -2873,9 +2920,14 @@ object AcquisitionDetailsControllerSpec extends Matchers {
     }
 
     doc.select("#acquisitionMethod-answer").text() shouldBe expectedAcquisitionMethodDisplayName
-    doc.select("#acquisitionPrice-answer").text() shouldBe formatAmountOfMoneyWithPoundSign(
-      acquisitionDetailsAnswers.acquisitionPrice.inPounds()
-    )
+
+    if (!isRebasing || !isUk) {
+      doc.select("#acquisitionPrice-answer").text() shouldBe formatAmountOfMoneyWithPoundSign(
+        acquisitionDetailsAnswers.acquisitionPrice.inPounds()
+      )
+    } else {
+      doc.select("#acquisitionPrice-answer").text() shouldBe ""
+    }
 
     if (acquisitionDetailsAnswers.improvementCosts === AmountInPence.zero) {
       doc.select("#improvementCosts-answer").text shouldBe "No"

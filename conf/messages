@@ -826,6 +826,7 @@ rebaseAcquisitionPrice.dropdown.p5=It takes at least 3 months for HMRC to check 
 
 shouldUseRebase.title=Are you using the rebased value on {0} in your calculation?
 shouldUseRebase.helpText=You can use the rebased value or the actual cost of the property in your workings out. The amount you use could mean your gain or loss is lower.
+shouldUseRebase.error.required=Select whether you are using the rebased valued in your calculation
 
 reliefDetails.caption=Reliefs
 

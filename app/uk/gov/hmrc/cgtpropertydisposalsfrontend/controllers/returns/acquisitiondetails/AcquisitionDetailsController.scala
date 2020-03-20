@@ -405,7 +405,7 @@ class AcquisitionDetailsController @Inject() (
                     page = rebasedAcquisitionPricePage(
                       _,
                       _,
-                      rebasingEligabilityUtil.getRebasingCutOffDate(assetType, wasUkResident)
+                      rebasingEligabilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident)
                     )
                   )(
                     requiredPreviousAnswer = answers =>
@@ -563,7 +563,7 @@ class AcquisitionDetailsController @Inject() (
                 shouldUseRebasePage(
                   shouldUseRebaseForm,
                   routes.AcquisitionDetailsController.rebasedAcquisitionPrice(),
-                  rebasingEligabilityUtil.getRebasingCutOffDate(assetType, wasAUkResident)
+                  rebasingEligabilityUtil.getDisplayRebasingCutOffDate(assetType, wasAUkResident)
                 )
               )
             }
@@ -588,7 +588,12 @@ class AcquisitionDetailsController @Inject() (
                     answers
                   )(
                     shouldUseRebaseForm
-                  )(page = shouldUseRebasePage(_, _, rebaseDate))(
+                  )(page = shouldUseRebasePage(
+                    _,
+                    _,
+                    rebasingEligabilityUtil.getDisplayRebasingCutOffDate(assetType, wasUkResident)
+                  )
+                  )(
                     requiredPreviousAnswer               = _ => noAnswersRequired,
                     redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.shouldUseRebase()
                   )(
@@ -685,7 +690,7 @@ class AcquisitionDetailsController @Inject() (
 
               case IncompleteAcquisitionDetailsAnswers(_, Some(date), _, None, _, _, _)
                   if (rebasingEligabilityUtil
-                    .isEligibleForRebase(wasAUkResident, assetType, date.value)) => //logic here
+                    .isEligibleForRebase(wasAUkResident, assetType, date.value)) =>
                 Redirect(routes.AcquisitionDetailsController.rebasedAcquisitionPrice())
 
               case IncompleteAcquisitionDetailsAnswers(_, Some(date), _, _, _, _, None)
