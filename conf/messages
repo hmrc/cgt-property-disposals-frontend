@@ -1011,6 +1011,8 @@ calculator.total.taxableIncome=Taxable income
 
 calculator.incomeAboveThreshold=The amount of your taxable gain to be charged at basic rate is 0. This means all of your taxable gain will be charged at the higher rate. This is because your taxable income is higher than the UK threshold of {0}.
 
+calculator.trustRateInfo.p1=Most trusts pay all taxable gains at 28%.
+calculator.trustRateInfo.p2=Trusts for vulnerable beneficiaries get special tax treatment. If you’re a trustee of this type of trust you’ll need to work out the amount of tax due.
 calculator.ukThreshold=UK threshold
 calculator.total.ukThresholdLessTaxableIncome=UK threshold less taxable income
 calculator.basicRateRule=To work out the amount to be charged at the basic rate of Capital Gains Tax we took the lower of these amounts:
