@@ -54,21 +54,11 @@ object MoneyUtils {
         else Right(d)
       }
 
-  def validateLimit(key: String, exceedsLimit: BigDecimal => Boolean, limit: AmountInPence)(
+  def validateValueIsLessThan(key: String, limitInclusive: AmountInPence, errorMessageKey: => String)(
     value: BigDecimal
   ): Either[FormError, BigDecimal] =
-    if (exceedsLimit(value)) Left(FormError(key, "error.amountOverLimit", List(limit.inPounds().toString())))
-    else Right(value)
-
-  def validateLimitLessThanOther(key: String, comparedOtherKey: String, exceedsLimit: BigDecimal => Boolean)(
-    s: String
-  ): Either[FormError, BigDecimal] =
-    Try(BigDecimal(cleanupAmountOfMoneyString(s))).toEither
-      .leftMap(_ => FormError(key, "error.invalid"))
-      .flatMap { d =>
-        if (exceedsLimit(d)) Left(FormError(key, s"error.$comparedOtherKey"))
-        else Right(d)
-      }
+    if (value <= limitInclusive.inPounds()) Right(value)
+    else Left(FormError(key, errorMessageKey, List(limitInclusive.inPounds().toString())))
 
   def amountInPoundsFormatter(
     isTooSmall: BigDecimal => Boolean,

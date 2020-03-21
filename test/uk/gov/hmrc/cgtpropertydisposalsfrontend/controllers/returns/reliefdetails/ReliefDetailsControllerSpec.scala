@@ -375,7 +375,7 @@ class ReliefDetailsControllerSpec
               taxYear
             )._1
 
-            val updatedSession = sessionWithReliefDetailsAnswers(
+            val (updatedSession, updatedFillingOutReturn, updatedDraftReturn) = sessionWithReliefDetailsAnswers(
               fillingOutReturn,
               singleDisposalDraftReturn,
               Some(
@@ -389,16 +389,19 @@ class ReliefDetailsControllerSpec
               disposalDate,
               triageAnswers,
               taxYear
-            )._1
+            )
 
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(
                 session
               )
-              val Some(FillingOutReturn(subscribedDetails, _, agentReferenceNumber, updatedDraftReturn)) =
-                updatedSession.journeyStatus
-              mockStoreDraftReturn(updatedDraftReturn, subscribedDetails.cgtReference, agentReferenceNumber)(Right(()))
+
+              mockStoreDraftReturn(
+                updatedDraftReturn,
+                updatedFillingOutReturn.subscribedDetails.cgtReference,
+                updatedFillingOutReturn.agentReferenceNumber
+              )(Right(()))
               mockStoreSession(updatedSession)(Right())
             }
 
@@ -648,8 +651,9 @@ class ReliefDetailsControllerSpec
           "and the draft return and session data has been successfully updated" in {
           val currentAnswers    = sample[CompleteReliefDetailsAnswers].copy(lettingsRelief = AmountInPence.fromPounds(1d))
           val newLettingsRelief = 2d
-          val triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
-          val oldDraftReturn    = sample[SingleDisposalDraftReturn].copy(reliefDetailsAnswers = Some(currentAnswers), triageAnswers = triageAnswers)
+          val triageAnswers     = sample[CompleteSingleDisposalTriageAnswers]
+          val oldDraftReturn = sample[SingleDisposalDraftReturn]
+            .copy(reliefDetailsAnswers = Some(currentAnswers), triageAnswers = triageAnswers)
 
           val newDraftReturn =
             oldDraftReturn.copy(

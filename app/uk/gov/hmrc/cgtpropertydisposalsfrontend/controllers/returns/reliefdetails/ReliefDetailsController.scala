@@ -448,20 +448,18 @@ object ReliefDetailsController {
         )(_)
       )
       .flatMap(value =>
-        MoneyUtils.validateLimit(
+        MoneyUtils.validateValueIsLessThan(
           "lettingsRelief",
-          value => (lettingsReliefLimit -- AmountInPence.fromPounds(value)).isNegative,
-          lettingsReliefLimit
+          lettingsReliefLimit,
+          "error.amountOverLimit"
         )(value)
       )
       .flatMap { value =>
-        MoneyUtils.validateLimitLessThanOther(
+        MoneyUtils.validateValueIsLessThan(
           "lettingsRelief",
-          "amountOverPrivateResidenceRelief",
-          value => AmountInPence.fromPounds(value).value > privateResidencyRelief.value
-        )(
-          value.toString()
-        )
+          privateResidencyRelief,
+          "error.amountOverPrivateResidenceRelief"
+        )(value)
       }
       .leftMap(Seq(_))
   }
