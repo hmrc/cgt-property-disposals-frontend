@@ -904,30 +904,28 @@ annualExemptAmount.error.tooManyDecimals=Annual Exempt Amount must have 2 decima
 annualExemptAmount.link=<a href="{0}" target="_blank">Find out about the Annual Exempt Amount (opens in a new window)</a>.
 
 
-taxableGainOrLoss.title=Did you make a taxable gain on the property disposal?
-taxableGainOrLoss.helpText=This is after you have subtracted any reliefs, improvements or losses you are using
-taxableGainOrLoss.error.required=Select yes if you made a taxable gain on the property disposal
-taxableGainOrLoss.error.invalid=Select yes if you made a taxable gain on the property disposal
+taxableGainOrLoss.title=Did you make an overall gain on loss on the property sale or disposal?
+taxableGainOrLoss.helpText=To work out if you made an overall gain or loss, you’ll need to take your initial gain or loss and subtract any reliefs, losses, or other allowances you are entitled to.
+taxableGainOrLoss.error.required=Select yes if you made an overall gain
+taxableGainOrLoss.error.invalid=Select yes if you made an overall gain
 
-taxableGainOrLoss.gain.label=Yes, I made a taxable gain
-taxableGain.label=Amount of taxable gain
-taxableGain.error.required=Enter the amount of the gain you made on the property disposal
-taxableGain.error.invalid=Amount of the gain or loss must be a number and must have 2 decimal places or less, for example 33.33
-taxableGain.error.tooSmall=The amount of the gain or loss must be a number more than 0, or select no taxable gain, no net loss
-taxableGain.error.tooLarge=Gain or loss must be a number that is 50,000,000,000.00 or less
-taxableGain.error.tooManyDecimals=Amount of the gain or loss must have 2 decimal places or less, for example 33.33 
+taxableGainOrLoss.gain.label=Yes, I made an overall gain
+taxableGain.label=Amount of overall gain
+taxableGain.error.required=Enter the amount of overall gain
+taxableGain.error.invalid=Overall gain must be a number and must have 2 decimal places or less, for example 4,820.54
+taxableGain.error.tooSmall=Overall gain must be a number more than 0. If you did not make on overall gain or loss select no overall gain or loss
+taxableGain.error.tooLarge=Overall gain must be a number that is 50,000,000,000.00 or less
+taxableGain.error.tooManyDecimals=Overall gain must have 2 decimal places or less, for example 4,820.54
 
-taxableGainOrLoss.loss.label=No, I made a net loss
-netLoss.label=Amount of net loss
-netLoss.error.required=Enter the amount of loss you made on the property disposal
-netLoss.error.invalid=Amount of the gain or loss must be a number and must have 2 decimal places or less, for example 33.33
-netLoss.error.tooSmall=	The amount of the gain or loss must be a number more than 0, or select no taxable gain, no net loss
-netLoss.error.tooLarge=Gain or loss must be a number that is 50,000,000,000.00 or less
-netLoss.error.tooManyDecimals=Amount of the gain or loss must have 2 decimal places or less, for example 33.33 
+taxableGainOrLoss.loss.label=No, I made an overall loss
+netLoss.label=Amount of overall loss
+netLoss.error.required=Enter the amount of overall loss
+netLoss.error.invalid=Overall loss must be a number and must have 2 decimal places or less, for example 33.33
+netLoss.error.tooSmall=Overall loss must be a number more than 0. If you did not make on overall gain or loss select no overall gain or loss
+netLoss.error.tooLarge=Overall loss must be a number that is 50,000,000,000.00 or less
+netLoss.error.tooManyDecimals=Overall loss must have 2 decimal places or less, for example 4,820.54
 
-taxableGainOrLoss.noLossOrGain.label=No taxable gain, no net loss
-taxableGainOrLoss.details.summary=How to work out if you made a taxable gain
-taxableGainOrLoss.details.p1=Subtract the amount you sold the property for as well as any reliefs, allowances, exemptions, or losses from the market value of the property when you inherited it. If the amount is more than £0 you made a taxable gain.
+taxableGainOrLoss.noLossOrGain.label=No overall gain or loss
 
 exemptionsAndLosses.cya.title=Check your answers
 
@@ -976,6 +974,56 @@ taxDue.error.invalid=Amount of Capital Gains Tax due must be a number, for examp
 taxDue.error.tooSmall=Amount of Capital Gains Tax due must be a number between 0 and 50,000,000,000.00
 taxDue.error.tooLarge=Amount of Capital Gains Tax due must be a number between 0 and 50,000,000,000.00
 taxDue.error.tooManyDecimals=Amount of Capital Gains Tax due must have 2 decimal places or less, for example 493 or 2,040.59
+
+calculator.showWorkings=Show workings
+calculator.disposalPrice=Property disposal amount
+calculator.disposalFees=Disposal costs
+calculator.total.disposalAmount=Property disposal amount less costs
+
+calculator.acquisitionPrice=Property acquisition amount
+calculator.improvementCosts=Improvement costs
+calculator.acquisitionFees=Acquisition costs
+calculator.total.acquisitionAmount=Property acquisition amount plus costs
+
+calculator.userSuppliedInitialGain=You told us this was {0} {1}
+calculator.total.initialGainOrLoss=Initial gain or loss
+
+calculator.privateResidenceRelief=Private Residence Relief
+calculator.lettingRelief=Letting Relief
+calculator.total.reliefs=Total reliefs
+calculator.reliefsLossIntro=You made an initial loss, this means we will only apply Private Residence Relief to reduce your loss.
+
+calculator.total.gainOrLossAfterReliefs=Gain or loss after reliefs
+
+calculator.inYearLosses=Losses from this tax year
+calculator.total.gainAfterInYearLosses=Gain after losses from this tax year
+calculator.cannotUsePrevYearsLosses=You cannot use losses from previous tax years in this return. This is because you did not make a gain after applying losses from this tax year.
+calculator.prevYearLosses=Losses from previous tax years
+calculator.total.gainAfterLosses=Gain after all losses
+
+calculator.cannotApplyAEA=You cannot use any of your Annual Exempt Amount. This is because you did not make a gain.
+calculator.annualExemptAmount=Amount of Annual Exempt Amount used
+calculator.total.taxableGain=Taxable gain
+
+calculator.annualIncome=Gross annual income
+calculator.personalAllowance=Amount of Personal Allowance used
+calculator.total.taxableIncome=Taxable income
+
+calculator.incomeAboveThreshold=The amount of your taxable gain to be charged at basic rate is 0. This means all of your taxable gain will be charged at the higher rate. This is because your taxable income is higher than the UK threshold of {0}.
+
+calculator.ukThreshold=UK threshold
+calculator.total.ukThresholdLessTaxableIncome=UK threshold less taxable income
+calculator.basicRateRule=To work out the amount to be charged at the basic rate of Capital Gains Tax we took the lower of these amounts:
+calculator.basicAmount=Amount of the taxable gain to be charged at the basic rate
+calculator.basicRate=Basic rate
+calculator.total.amountDueAtBasicRate=Amount of tax due at the basic rate
+
+calculator.higherAmount=Amount of the taxable gain to be charged at the higher rate
+calculator.higherRate=Higher rate
+calculator.total.amountDueAtHigherRate=Amount of tax due at the higher rate
+
+calculator.total.taxOwed=Capital Gains Tax due for this return
+calculator.noTaxToPay=No tax is due for this return
 
 mandatoryEvidence.title=Add a document showing how you worked out the tax
 mandatoryEvidence.helpText=Upload one or more documents (maximum file size 5MB) showing how you worked out the Capital Gains Tax. For example, a spreadsheet or PDF.

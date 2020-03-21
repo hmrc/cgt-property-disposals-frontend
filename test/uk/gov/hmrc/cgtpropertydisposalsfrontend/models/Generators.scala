@@ -378,6 +378,8 @@ trait MoneyGen { this: GenUtils =>
 
   implicit val paymentsJourneyGen: Gen[PaymentsJourney] = gen[PaymentsJourney]
 
+  implicit val amountInPenceWithSourceGen: Gen[AmountInPenceWithSource] = gen[AmountInPenceWithSource]
+
 }
 
 trait TaxYearGen { this: GenUtils =>
