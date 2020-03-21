@@ -17,6 +17,8 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsExamplePropertyDetailsAnswers.CompleteMultipleDisposalsExamplePropertyDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat
 
@@ -35,4 +37,26 @@ addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.a
         Some(cyaChange(messages("returns.property-address.cyaChange.property-address"), returns.address.routes.PropertyDetailsController.enterPostcode().url)),
         "property-address"
     )
+
+    @cyaRow(
+        messages("returns.property-address.cyaLabel.disposal-date"),
+        Html(LocalDateUtils.govDisplayFormat(answers.disposalDate.value)),
+        Some(cyaChange(messages("returns.property-address.cyaChange.disposal-date"), returns.address.routes.PropertyDetailsController.disposalDate().url)),
+        "multipleDisposalsDisposalDate"
+    )
+
+    @cyaRow(
+        messages("returns.property-address.cyaLabel.disposal-price"),
+        Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.disposalPrice.inPounds())),
+        Some(cyaChange(messages("returns.property-address.cyaChange.disposal-price"), returns.address.routes.PropertyDetailsController.disposalPrice().url)),
+        "multipleDisposalsDisposalPrice"
+    )
+
+    @cyaRow(
+        messages("returns.property-address.cyaLabel.acquisition-price"),
+        Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.acquisitionPrice.inPounds())),
+        Some(cyaChange(messages("returns.property-address.cyaChange.acquisition-price"), returns.address.routes.PropertyDetailsController.acquisitionPrice().url)),
+        "multipleDisposalsAcquisitionPrice"
+    )
+
 }

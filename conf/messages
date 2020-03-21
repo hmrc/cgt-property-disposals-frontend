@@ -686,6 +686,9 @@ address.uk.returns.multipleDisposals.title=Enter the address of one of the UK pr
 returns.property-address.cya.title=Check your answers
 returns.property-details.multiple-disposals.cya.guidanceLink=Help completing this section
 returns.property-address.cyaLabel.property-address=Property address
+returns.property-address.cyaLabel.disposal-date=What date did you exchange contracts when disposing of the property?
+returns.property-address.cyaLabel.disposal-price=What was the disposal amount?
+returns.property-address.cyaLabel.acquisition-price=What was the acquisition amount?
 returns.property-address.cyaChange.property-address=the address of the property
 
 returns.disposal-details.caption=Sale or disposal details
