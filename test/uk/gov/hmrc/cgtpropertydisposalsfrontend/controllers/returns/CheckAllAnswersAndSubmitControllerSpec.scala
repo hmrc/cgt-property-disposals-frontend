@@ -39,7 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.Singl
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityControllerSpec._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, SubmitReturnFailed, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, PaymentsJourney}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.IncompleteAcquisitionDetailsAnswers
@@ -216,22 +216,31 @@ class CheckAllAnswersAndSubmitControllerSpec
 
       "show an error page" when {
 
-        "there is an error submitting the return" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(sessionWitJourney(completeFillingOutReturn))
-            mockSubmitReturn(submitReturnRequest)(Left(Error("")))
-          }
-
-          checkIsTechnicalErrorPage(performAction())
-        }
-
-        "there is an error updating the session" in {
+        "there is an error updating the session after a successful submission" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWitJourney(completeFillingOutReturn))
             mockSubmitReturn(submitReturnRequest)(Right(submitReturnResponse))
             mockStoreSession(sessionWitJourney(justSubmittedReturn))(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
+        "there is an error updating the session after a submission failure the return" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWitJourney(completeFillingOutReturn))
+            mockSubmitReturn(submitReturnRequest)(Left(Error("")))
+            mockStoreSession(
+              sessionWitJourney(
+                SubmitReturnFailed(
+                  completeFillingOutReturn.subscribedDetails,
+                  completeFillingOutReturn.ggCredId,
+                  completeFillingOutReturn.agentReferenceNumber
+                )
+              )
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -250,6 +259,110 @@ class CheckAllAnswersAndSubmitControllerSpec
           }
 
           checkIsRedirect(performAction(), routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission())
+        }
+
+      }
+
+      "redirect to the submission error page" when {
+        "there is an error submitting the return" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWitJourney(completeFillingOutReturn))
+            mockSubmitReturn(submitReturnRequest)(Left(Error("")))
+            mockStoreSession(
+              sessionWitJourney(
+                SubmitReturnFailed(
+                  completeFillingOutReturn.subscribedDetails,
+                  completeFillingOutReturn.ggCredId,
+                  completeFillingOutReturn.agentReferenceNumber
+                )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(performAction(), routes.CheckAllAnswersAndSubmitController.submissionError())
+        }
+      }
+
+    }
+
+    "handling requests to display the return submit failed page" must {
+
+      def performAction(): Future[Result] = controller.submissionError()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        performAction, {
+          case _: SubmitReturnFailed | _: Subscribed => true
+          case _                                     => false
+        }
+      )
+
+      "display the page" when {
+
+        def test(journey: JourneyStatus): Unit =
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(journey)
+              )
+            )
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("submitReturnError.title"), { doc =>
+                doc
+                  .select("#content > article > form")
+                  .attr("action") shouldBe routes.CheckAllAnswersAndSubmitController
+                  .submissionErrorSubmit()
+                  .url
+              }
+            )
+          }
+
+        "the user is in the SubmitReturnFailed state" in {
+          test(sample[SubmitReturnFailed])
+        }
+
+        "the user is in the subscribed state" in {
+          test(sample[Subscribed])
+        }
+
+      }
+
+    }
+
+    "handling submits on the return submit failed page" must {
+
+      def performAction(): Future[Result] = controller.submissionErrorSubmit()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        performAction, {
+          case _: SubmitReturnFailed | _: Subscribed => true
+          case _                                     => false
+        }
+      )
+
+      "redirect to the home page" when {
+
+        def test(journey: JourneyStatus): Unit =
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(journey)
+              )
+            )
+
+            checkIsRedirect(performAction(), homepage.routes.HomePageController.homepage())
+          }
+
+        "the user is in the SubmitReturnFailed state" in {
+          test(sample[SubmitReturnFailed])
+        }
+
+        "the user is in the subscribed state" in {
+          test(sample[Subscribed])
         }
 
       }

@@ -36,7 +36,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.pr
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, StartingNewDraftReturn, Subscribed, ViewingReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, StartingNewDraftReturn, SubmitReturnFailed, Subscribed, ViewingReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.govShortDisplayFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.ChargeType.{PenaltyInterest, UkResidentReturn}
@@ -78,10 +78,12 @@ trait HomePageControllerSpec
       bind[PaymentsService].toInstance(mockPaymentsService)
     )
 
-  def mockGetDraftReturns(cgtReference: CgtReference)(response: Either[Error, List[DraftReturn]]) =
+  def mockGetDraftReturns(cgtReference: CgtReference, sentReturns: List[ReturnSummary])(
+    response: Either[Error, List[DraftReturn]]
+  ) =
     (mockReturnsService
-      .getDraftReturns(_: CgtReference)(_: HeaderCarrier))
-      .expects(cgtReference, *)
+      .getDraftReturns(_: CgtReference, _: List[ReturnSummary])(_: HeaderCarrier))
+      .expects(cgtReference, sentReturns, *)
       .returning(EitherT.fromEither[Future](response))
 
   def mockGetReturnsList(cgtReference: CgtReference)(
@@ -664,35 +666,15 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
           sample[ReturnSummary]
         )
 
-        List(startingNewDraftReturn, fillingOurReturn, justSubmittedReturn, viewingReturn).foreach { journeyStatus =>
-          s"convert a ${journeyStatus.getClass.getSimpleName} to Subscribed journey status" in {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                SessionData.empty.copy(
-                  journeyStatus = Some(journeyStatus),
-                  userType      = Some(UserType.Individual)
-                )
-              )
-              mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Right(subscribed.draftReturns))
-              mockGetReturnsList(subscribed.subscribedDetails.cgtReference)(Right(subscribed.sentReturns))
-              mockStoreSession(
-                SessionData.empty.copy(
-                  journeyStatus = Some(subscribed),
-                  userType      = Some(UserType.Individual)
-                )
-              )(Right(()))
-            }
+        val submitReturnFailed = SubmitReturnFailed(
+          subscribed.subscribedDetails,
+          subscribed.ggCredId,
+          subscribed.agentReferenceNumber
+        )
 
-            val result = performAction()
-            status(result)          shouldBe OK
-            contentAsString(result) should include(messageFromMessageKey("account.home.title"))
-          }
-
-          "show an error page" when {
-
-            s"the conversion from ${journeyStatus.getClass.getSimpleName} is successful but " +
-              "there is an error updating the session" in {
+        List(startingNewDraftReturn, fillingOurReturn, justSubmittedReturn, viewingReturn, submitReturnFailed).foreach {
+          journeyStatus =>
+            s"convert a ${journeyStatus.getClass.getSimpleName} to Subscribed journey status" in {
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(
@@ -701,53 +683,86 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
                     userType      = Some(UserType.Individual)
                   )
                 )
-                mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Right(subscribed.draftReturns))
                 mockGetReturnsList(subscribed.subscribedDetails.cgtReference)(Right(subscribed.sentReturns))
+                mockGetDraftReturns(subscribed.subscribedDetails.cgtReference, subscribed.sentReturns)(
+                  Right(subscribed.draftReturns)
+                )
                 mockStoreSession(
                   SessionData.empty.copy(
                     journeyStatus = Some(subscribed),
                     userType      = Some(UserType.Individual)
                   )
-                )(Left(Error("")))
+                )(Right(()))
               }
 
-              checkIsTechnicalErrorPage(performAction())
+              val result = performAction()
+              status(result)          shouldBe OK
+              contentAsString(result) should include(messageFromMessageKey("account.home.title"))
             }
 
-            s"the conversion from ${journeyStatus.getClass.getSimpleName} is successful but " +
-              "there is an error getting the draft returns" in {
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(
-                  SessionData.empty.copy(
-                    journeyStatus = Some(journeyStatus),
-                    userType      = Some(UserType.Individual)
+            "show an error page" when {
+
+              s"the conversion from ${journeyStatus.getClass.getSimpleName} is successful but " +
+                "there is an error updating the session" in {
+                inSequence {
+                  mockAuthWithNoRetrievals()
+                  mockGetSession(
+                    SessionData.empty.copy(
+                      journeyStatus = Some(journeyStatus),
+                      userType      = Some(UserType.Individual)
+                    )
                   )
-                )
-                mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Left(Error("")))
-              }
-
-              checkIsTechnicalErrorPage(performAction())
-            }
-
-            s"the conversion from ${journeyStatus.getClass.getSimpleName} is successful but " +
-              "there is an error getting the list of returns" in {
-              inSequence {
-                mockAuthWithNoRetrievals()
-                mockGetSession(
-                  SessionData.empty.copy(
-                    journeyStatus = Some(journeyStatus),
-                    userType      = Some(UserType.Individual)
+                  mockGetReturnsList(subscribed.subscribedDetails.cgtReference)(Right(subscribed.sentReturns))
+                  mockGetDraftReturns(subscribed.subscribedDetails.cgtReference, subscribed.sentReturns)(
+                    Right(subscribed.draftReturns)
                   )
-                )
-                mockGetDraftReturns(subscribed.subscribedDetails.cgtReference)(Right(subscribed.draftReturns))
-                mockGetReturnsList(subscribed.subscribedDetails.cgtReference)(Left(Error("")))
+                  mockStoreSession(
+                    SessionData.empty.copy(
+                      journeyStatus = Some(subscribed),
+                      userType      = Some(UserType.Individual)
+                    )
+                  )(Left(Error("")))
+                }
+
+                checkIsTechnicalErrorPage(performAction())
               }
 
-              checkIsTechnicalErrorPage(performAction())
-            }
+              s"the conversion from ${journeyStatus.getClass.getSimpleName} is successful but " +
+                "there is an error getting the draft returns" in {
+                inSequence {
+                  mockAuthWithNoRetrievals()
+                  mockGetSession(
+                    SessionData.empty.copy(
+                      journeyStatus = Some(journeyStatus),
+                      userType      = Some(UserType.Individual)
+                    )
+                  )
+                  mockGetReturnsList(subscribed.subscribedDetails.cgtReference)(Right(subscribed.sentReturns))
+                  mockGetDraftReturns(subscribed.subscribedDetails.cgtReference, subscribed.sentReturns)(
+                    Left(Error(""))
+                  )
+                }
 
-          }
+                checkIsTechnicalErrorPage(performAction())
+              }
+
+              s"the conversion from ${journeyStatus.getClass.getSimpleName} is successful but " +
+                "there is an error getting the list of returns" in {
+                inSequence {
+                  mockAuthWithNoRetrievals()
+                  mockGetSession(
+                    SessionData.empty.copy(
+                      journeyStatus = Some(journeyStatus),
+                      userType      = Some(UserType.Individual)
+                    )
+                  )
+                  mockGetReturnsList(subscribed.subscribedDetails.cgtReference)(Left(Error("")))
+                }
+
+                checkIsTechnicalErrorPage(performAction())
+              }
+
+            }
         }
       }
 

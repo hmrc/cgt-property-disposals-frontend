@@ -1259,3 +1259,12 @@ nonCalculatedTaxDue.helpText=You’ll need to work out and enter the amount.
 hasSupportingDocsToUpload.title=Do you want to upload any supporting docs?
 hasSupportingDocsToUpload.error.required=Select yes if you want to upload any supporting documents
 hasSupportingDocsToUpload.error.boolean=Select yes if you want to upload any supporting documents
+
+submitReturnError.title=Sorry, there is a problem with the service
+submitReturnError.p1=Your return might not have been sent to HMRC.
+submitReturnError.p2=You’ll need to:
+submitReturnError.li1=Go to your Capital Gains Tax on UK property account home.
+submitReturnError.li2=If your return is in ‘Sent returns’ it has been received by HMRC. You do not need to send it again.
+submitReturnError.li3=If it is ‘Draft returns’ it has not been received by HMRC. You’ll need to try and send it again.
+submitReturnError.p3=You may get a penalty and have to pay interest if your return or payment is late.
+submitReturnError.button=Go to account home
