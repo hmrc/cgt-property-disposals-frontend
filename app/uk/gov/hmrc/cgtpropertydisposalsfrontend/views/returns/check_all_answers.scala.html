@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+@import java.time.LocalDate
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes
@@ -37,7 +38,7 @@
         initialGainOrLossSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.initialgainorloss.summary
 )
 
-@(draftReturn: CompleteReturn)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(draftReturn: CompleteReturn, rebasingCutoffDate: LocalDate, isUk: Boolean, isRebasing: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @title = @{ messages("checkAllAnswers.title") }
 @disposalMethod= @{draftReturn.triageAnswers.disposalMethod}
@@ -60,7 +61,7 @@
  @disposalDetailsSummary(draftReturn.disposalDetails, disposalMethod)
 
  <h2 class="heading-medium">@messages("task-list.acquisition-details.link")</h2>
- @acquisitionDetailsSummary(draftReturn.acquisitionDetails)
+ @acquisitionDetailsSummary(draftReturn.acquisitionDetails, rebasingCutoffDate, isUk, isRebasing)
 
  <h2 class="heading-medium">@messages("task-list.relief-details.link")</h2>
  @reliefDetailsSummary(draftReturn.reliefDetails)

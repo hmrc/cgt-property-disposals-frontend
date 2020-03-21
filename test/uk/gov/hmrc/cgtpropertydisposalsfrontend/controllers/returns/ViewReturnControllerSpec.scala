@@ -188,7 +188,7 @@ class ViewReturnControllerSpec
           )
 
           validatePaymentsSection(document, viewingReturn)
-          validateAllCheckYourAnswersSections(document, viewingReturn.completeReturn, userType)
+          validateAllCheckYourAnswersSections(document, viewingReturn.completeReturn, userType, false, true)
         }
       }
 

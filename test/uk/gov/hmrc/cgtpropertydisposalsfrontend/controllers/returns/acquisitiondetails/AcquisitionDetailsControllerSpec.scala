@@ -29,13 +29,13 @@ import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates.ukResidents
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.AcquisitionDetailsControllerSpec.validateAcquisitionDetailsCheckYourAnswersPage
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios.amountOfMoneyErrorScenarios
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DateErrorScenarios._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.AcquisitionDetailsControllerSpec.validateAcquisitionDetailsCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
@@ -57,12 +57,14 @@ class AcquisitionDetailsControllerSpec
     with ReturnsServiceSupport
     with ScalaCheckDrivenPropertyChecks
     with RedirectToStartBehaviour {
-  lazy val controller = instanceOf[AcquisitionDetailsController]
+  lazy val controller  = instanceOf[AcquisitionDetailsController]
+  val mockRebasingUtil = new RebasingEligibilityUtil()
   override val overrideBindings =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
       bind[SessionStore].toInstance(mockSessionStore),
-      bind[ReturnsService].toInstance(mockReturnsService)
+      bind[ReturnsService].toInstance(mockReturnsService),
+      bind[RebasingEligibilityUtil].toInstance(mockRebasingUtil)
     )
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
@@ -563,8 +565,9 @@ class AcquisitionDetailsControllerSpec
         val acquisitionDate = AcquisitionDate(disposalDate.value)
         val answers = sample[CompleteAcquisitionDetailsAnswers]
           .copy(acquisitionDate = AcquisitionDate(acquisitionDate.value.plusDays(1L)))
+        val wasUkResident = sample[Boolean]
         val (session, journey, draftReturn) =
-          sessionWithState(answers, sample[AssetType], sample[Boolean], disposalDate)
+          sessionWithState(answers, sample[AssetType], wasUkResident, disposalDate)
         val updatedDraftReturn = draftReturn.copy(acquisitionDetailsAnswers = Some(
           answers.copy(acquisitionDate = acquisitionDate)
         )
@@ -728,7 +731,8 @@ class AcquisitionDetailsControllerSpec
                 None,
                 None,
                 Some(oldAnswers.improvementCosts),
-                Some(oldAnswers.acquisitionFees)
+                Some(oldAnswers.acquisitionFees),
+                Some(oldAnswers.shouldUseRebase)
               )
             )
 
@@ -1068,17 +1072,18 @@ class AcquisitionDetailsControllerSpec
 
       "redirect to the acquisition price page" when {
 
-        "that question hasn't been answered" in {
+        "that question hasn't been answered for eligible rebase from non uk resident" in {
+
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate  = Some(acquisitionDate),
+                  acquisitionDate  = Some(AcquisitionDate(nonUkResidentsResidentialProperty.minusDays(2))),
                   acquisitionPrice = None
                 ),
-                sample[AssetType],
-                sample[Boolean]
+                AssetType.Residential,
+                false
               )._1
             )
           }
@@ -1091,6 +1096,27 @@ class AcquisitionDetailsControllerSpec
 
       }
 
+      "that question hasn't been answered for eligible rebase from uk resident" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionWithState(
+              sample[IncompleteAcquisitionDetailsAnswers].copy(
+                acquisitionDate   = Some(AcquisitionDate(RebasingCutoffDates.ukResidents.minusDays(2))),
+                acquisitionMethod = None
+              ),
+              sample[AssetType],
+              true
+            )._1
+          )
+        }
+
+        checkIsRedirect(
+          performAction(),
+          routes.AcquisitionDetailsController.acquisitionDate()
+        )
+      }
+
       "redirect to the check your answers page" when {
 
         "the user does not meet the rebasing criteria" in {
@@ -1099,7 +1125,7 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[CompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate = AcquisitionDate(ukResidents)
+                  acquisitionDate = AcquisitionDate(ukResidents.plusDays(1))
                 ),
                 AssetType.Residential,
                 true
@@ -1114,14 +1140,34 @@ class AcquisitionDetailsControllerSpec
 
       "display the page" when {
 
-        "the acquisition details section has not yet been completed" in {
+        "the acquisition details section has not yet been completed for non uk resident" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate  = Some(acquisitionDate),
-                  acquisitionPrice = Some(sample[AmountInPence])
+                  acquisitionDate =
+                    Some(AcquisitionDate(RebasingCutoffDates.nonUkResidentsResidentialProperty.minusDays(1))),
+                  acquisitionPrice = None
+                ),
+                AssetType.Residential,
+                false
+              )._1
+            )
+          }
+          checkIsRedirect(performAction(), routes.AcquisitionDetailsController.acquisitionPrice())
+
+        }
+
+        "the rebase acquisition details section has not yet been completed for uk resident" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate   = Some(AcquisitionDate(RebasingCutoffDates.ukResidents.minusDays(2))),
+                  acquisitionPrice  = Some(sample[AmountInPence]),
+                  acquisitionMethod = Some(AcquisitionMethod.Bought)
                 ),
                 AssetType.Residential,
                 true
@@ -1134,6 +1180,35 @@ class AcquisitionDetailsControllerSpec
             messageFromMessageKey(
               "rebaseAcquisitionPrice.title",
               LocalDateUtils.govDisplayFormat(ukResidents)
+            ), { doc =>
+              doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.acquisitionDate().url
+              doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                .rebasedAcquisitionPriceSubmit()
+                .url
+            }
+          )
+        }
+
+        "the acquisition details section has not yet been completed for non uk non resident" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  acquisitionDate  = Some(acquisitionDate),
+                  acquisitionPrice = Some(sample[AmountInPence])
+                ),
+                AssetType.Residential,
+                false
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(
+              "rebaseAcquisitionPrice.title",
+              LocalDateUtils.govDisplayFormat(nonUkResidentsResidentialProperty.minusDays(1))
             ), { doc =>
               doc.select("#back").attr("href") shouldBe routes.AcquisitionDetailsController.acquisitionPrice().url
               doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
@@ -1169,32 +1244,6 @@ class AcquisitionDetailsControllerSpec
           )
         }
 
-        "the amount in the session is zero" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithState(
-                sample[CompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate         = acquisitionDate,
-                  rebasedAcquisitionPrice = Some(AmountInPence.zero)
-                ),
-                AssetType.Residential,
-                true
-              )._1
-            )
-          }
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey(
-              "rebaseAcquisitionPrice.title",
-              LocalDateUtils.govDisplayFormat(ukResidents)
-            ), { doc =>
-              doc.select("#rebaseAcquisitionPrice-1").attr("checked") shouldBe "checked"
-            }
-          )
-        }
-
         "the amount in the session is non-zero" in {
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1216,8 +1265,7 @@ class AcquisitionDetailsControllerSpec
               "rebaseAcquisitionPrice.title",
               LocalDateUtils.govDisplayFormat(ukResidents)
             ), { doc =>
-              doc.select("#rebaseAcquisitionPrice-0").attr("checked")  shouldBe "checked"
-              doc.select("#rebaseAcquisitionPriceValue").attr("value") shouldBe "0.01"
+              doc.select("#rebaseAcquisitionPrice").attr("value") shouldBe "0.01"
             }
           )
         }
@@ -1231,7 +1279,7 @@ class AcquisitionDetailsControllerSpec
       def performAction(data: (String, String)*): Future[Result] =
         controller.rebasedAcquisitionPriceSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
 
-      val acquisitionDate = AcquisitionDate(LocalDate.ofEpochDay(0L))
+      val acquisitionDate = AcquisitionDate(ukResidents.minusDays(1))
 
       behave like redirectToStartBehaviour(() => performAction())
 
@@ -1247,11 +1295,12 @@ class AcquisitionDetailsControllerSpec
             mockGetSession(
               sessionWithState(
                 sample[IncompleteAcquisitionDetailsAnswers].copy(
-                  acquisitionDate  = Some(acquisitionDate),
+                  acquisitionDate =
+                    Some(AcquisitionDate(RebasingCutoffDates.nonUkResidentsNonResidentialProperty.minusDays(1))),
                   acquisitionPrice = None
                 ),
-                sample[AssetType],
-                sample[Boolean]
+                AssetType.NonResidential,
+                false
               )._1
             )
           }
@@ -1294,27 +1343,9 @@ class AcquisitionDetailsControllerSpec
           )
         }
 
-        "no option has been selected" in {
-          test()("rebaseAcquisitionPrice.error.required")
-        }
-
-        "the option selected is not valid" in {
-          test("rebaseAcquisitionPrice" -> "2")("rebaseAcquisitionPrice.error.invalid")
-        }
-
-        "the amount of money is invalid" in {
-          amountOfMoneyErrorScenarios("rebaseAcquisitionPriceValue").foreach { scenario =>
-            withClue(s"For $scenario: ") {
-              val data =
-                ("rebaseAcquisitionPrice" -> "0") :: scenario.formData
-              test(data: _*)(scenario.expectedErrorMessageKey)
-            }
-          }
-        }
-
         "the amount of money is zero" in {
-          test("rebaseAcquisitionPrice" -> "0", "rebaseAcquisitionPriceValue" -> "0")(
-            "rebaseAcquisitionPriceValue.error.tooSmall"
+          test("rebaseAcquisitionPrice" -> "0")(
+            "rebaseAcquisitionPrice.error.tooSmall"
           )
         }
 
@@ -1323,12 +1354,18 @@ class AcquisitionDetailsControllerSpec
       "show an error page" when {
         val price = 1.23d
         val answers = IncompleteAcquisitionDetailsAnswers.empty.copy(
-          acquisitionDate  = Some(acquisitionDate),
+          acquisitionDate  = Some(AcquisitionDate(ukResidents.minusDays(2))),
           acquisitionPrice = Some(sample[AmountInPence])
         )
         val (session, journey, draftReturn) = sessionWithState(answers, AssetType.Residential, true)
-        val updatedDraftReturn = draftReturn
-          .copy(acquisitionDetailsAnswers = Some(answers.copy(rebasedAcquisitionPrice = Some(AmountInPence(123L)))))
+        val updatedDraftReturn = draftReturn.copy(acquisitionDetailsAnswers = Some(
+          answers.copy(
+            rebasedAcquisitionPrice = Some(AmountInPence(123L)),
+            acquisitionPrice        = Some(AmountInPence(123L)),
+            shouldUseRebase         = Some(true)
+          )
+        )
+        )
         val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
         "there is an error updating the draft return" in {
@@ -1344,8 +1381,7 @@ class AcquisitionDetailsControllerSpec
 
           checkIsTechnicalErrorPage(
             performAction(
-              "rebaseAcquisitionPrice"      -> "0",
-              "rebaseAcquisitionPriceValue" -> price.toString
+              "rebaseAcquisitionPrice" -> price.toString
             )
           )
         }
@@ -1364,8 +1400,7 @@ class AcquisitionDetailsControllerSpec
 
           checkIsTechnicalErrorPage(
             performAction(
-              "rebaseAcquisitionPrice"      -> "0",
-              "rebaseAcquisitionPriceValue" -> price.toString
+              "rebaseAcquisitionPrice" -> price.toString
             )
           )
         }
@@ -1374,8 +1409,8 @@ class AcquisitionDetailsControllerSpec
 
       "redirect to the check you answers page" when {
         val scenarios = List(
-          List("rebaseAcquisitionPrice" -> "0", "rebaseAcquisitionPriceValue" -> "£1,234") -> AmountInPence(123400L),
-          List("rebaseAcquisitionPrice" -> "1") -> AmountInPence.zero
+          List("rebaseAcquisitionPrice" -> "£1,234") -> AmountInPence(123400L),
+          List("rebaseAcquisitionPrice" -> "1")      -> AmountInPence(100L)
         )
 
         "the price submitted is valid and the journey was incomplete" in {
@@ -1388,8 +1423,13 @@ class AcquisitionDetailsControllerSpec
                 )
                 val (session, journey, draftReturn) = sessionWithState(answers, AssetType.Residential, true)
                 val updatedDraftReturn = draftReturn
-                  .copy(acquisitionDetailsAnswers =
-                    Some(answers.copy(rebasedAcquisitionPrice = Some(expectedAmountInPence)))
+                  .copy(acquisitionDetailsAnswers = Some(
+                    answers.copy(
+                      rebasedAcquisitionPrice = Some(expectedAmountInPence),
+                      acquisitionPrice        = Some(expectedAmountInPence),
+                      shouldUseRebase         = Some(true)
+                    )
+                  )
                   )
                 val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
@@ -1422,8 +1462,13 @@ class AcquisitionDetailsControllerSpec
                 )
                 val (session, journey, draftReturn) = sessionWithState(answers, AssetType.Residential, true)
                 val updatedDraftReturn = draftReturn
-                  .copy(acquisitionDetailsAnswers =
-                    Some(answers.copy(rebasedAcquisitionPrice = Some(expectedAmountInPence)))
+                  .copy(acquisitionDetailsAnswers = Some(
+                    answers.copy(
+                      rebasedAcquisitionPrice = Some(expectedAmountInPence),
+                      acquisitionPrice        = expectedAmountInPence,
+                      shouldUseRebase         = true
+                    )
+                  )
                   )
                 val updatedSession = session.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
 
@@ -2217,6 +2262,138 @@ class AcquisitionDetailsControllerSpec
 
     }
 
+    "handling requests to display the should use rebase page" must {
+
+      def performAction(): Future[Result] = controller.shouldUseRebase()(FakeRequest())
+
+      behave like redirectToStartBehaviour(performAction)
+
+      "display the page" when {
+
+        "the user is non uk, residential and acquisition date before rebasing date" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  improvementCosts = Some(sample[AmountInPence])
+                ),
+                AssetType.Residential,
+                false
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(
+              "shouldUseRebase.title",
+              LocalDateUtils.govDisplayFormat(nonUkResidentsResidentialProperty.minusDays(1))
+            )
+          )
+
+        }
+
+        "the user is non uk and residential asset type" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  improvementCosts = Some(sample[AmountInPence])
+                ),
+                AssetType.NonResidential,
+                false
+              )._1
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(
+              "shouldUseRebase.title",
+              LocalDateUtils.govDisplayFormat(nonUkResidentsNonResidentialProperty.minusDays(1))
+            )
+          )
+
+        }
+
+      }
+
+      "redirect to check your answers" when {
+
+        "the user is uk" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                sample[IncompleteAcquisitionDetailsAnswers].copy(
+                  improvementCosts = Some(sample[AmountInPence])
+                ),
+                AssetType.Residential,
+                true
+              )._1
+            )
+          }
+
+          checkIsRedirect(
+            performAction(),
+            routes.AcquisitionDetailsController.checkYourAnswers()
+          )
+
+        }
+
+      }
+
+    }
+
+    "handling requests to submit to should use rebased" must {
+
+      val disposalDate = DisposalDate(LocalDate.of(1200, 1, 1), sample[TaxYear])
+      def performAction(data: (String, String)*): Future[Result] =
+        controller.shouldUseRebaseSubmit()(FakeRequest().withFormUrlEncodedBody(data: _*))
+
+      "show a form error for non residential non uk" when {
+        val date: String = LocalDateUtils.govDisplayFormat(nonUkResidentsNonResidentialProperty.minusDays(1))
+
+        def test(data: (String, String)*)(expectedErrorKey: String) =
+          testFormError(data: _*)(expectedErrorKey)("shouldUseRebase.title", date)(
+            performAction,
+            sessionWithState(
+              sample[CompleteAcquisitionDetailsAnswers]
+                .copy(acquisitionDate = AcquisitionDate(nonUkResidentsNonResidentialProperty.minusDays(1))),
+              AssetType.NonResidential,
+              false,
+              disposalDate
+            )._1
+          )
+
+        "no option has been selected" in {
+          test()("shouldUseRebase.error.required")
+        }
+      }
+
+      "show a form error for residential non uk" when {
+        val date: String = LocalDateUtils.govDisplayFormat(nonUkResidentsResidentialProperty.minusDays(1))
+
+        def test(data: (String, String)*)(expectedErrorKey: String) =
+          testFormError(data: _*)(expectedErrorKey)("shouldUseRebase.title", date)(
+            performAction,
+            sessionWithState(
+              sample[CompleteAcquisitionDetailsAnswers]
+                .copy(acquisitionDate = AcquisitionDate(nonUkResidentsResidentialProperty.minusDays(1))),
+              AssetType.Residential,
+              false,
+              disposalDate
+            )._1
+          )
+
+        "no option has been selected" in {
+          test()("shouldUseRebase.error.required")
+        }
+      }
+    }
+
     "handling requests to display the check your answers page" must {
 
       def performAction(): Future[Result] = controller.checkYourAnswers()(FakeRequest())
@@ -2227,7 +2404,8 @@ class AcquisitionDetailsControllerSpec
         sample[AmountInPence],
         Some(sample[AmountInPence]),
         sample[AmountInPence],
-        sample[AmountInPence]
+        sample[AmountInPence],
+        sample[Boolean]
       )
 
       val allQuestionsAnswered = IncompleteAcquisitionDetailsAnswers(
@@ -2236,7 +2414,8 @@ class AcquisitionDetailsControllerSpec
         Some(completeAnswers.acquisitionPrice),
         completeAnswers.rebasedAcquisitionPrice,
         Some(completeAnswers.improvementCosts),
-        Some(completeAnswers.acquisitionFees)
+        Some(completeAnswers.acquisitionFees),
+        Some(completeAnswers.shouldUseRebase)
       )
 
       behave like redirectToStartBehaviour(performAction)
@@ -2287,10 +2466,11 @@ class AcquisitionDetailsControllerSpec
 
       "redirect to the acquisition price page" when {
 
-        "the question has not been answered" in {
+        "the question has not been answered, and eligible for acquisition price" in {
           testRedirectOnMissingData(
             sessionWithState(
-              allQuestionsAnswered.copy(acquisitionPrice = None),
+              allQuestionsAnswered
+                .copy(acquisitionPrice = None, acquisitionDate = Some(AcquisitionDate(LocalDate.now()))),
               sample[AssetType],
               sample[Boolean]
             )._1,
@@ -2441,151 +2621,259 @@ class AcquisitionDetailsControllerSpec
           )
         }
 
-        "the user has already answered all the questions" in {
-          forAll { completeAnswers: CompleteAcquisitionDetailsAnswers =>
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(sessionWithState(completeAnswers, sample[AssetType], sample[Boolean])._1)
-            }
+        "the user has already answered all the questions and is non-uk and rebasing" in {
+          val nonUkRebasing = CompleteAcquisitionDetailsAnswers(
+            sample[AcquisitionMethod],
+            AcquisitionDate(nonUkResidentsNonResidentialProperty.minusDays(1)),
+            sample[AmountInPence],
+            Some(sample[AmountInPence]),
+            sample[AmountInPence],
+            sample[AmountInPence],
+            false
+          )
+          val assetType = AssetType.NonResidential
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithState(nonUkRebasing, assetType, false)._1)
+          }
 
-            checkPageIsDisplayed(
-              performAction(),
-              messageFromMessageKey("acquisitionDetails.cya.title"), { doc =>
-                validateAcquisitionDetailsCheckYourAnswersPage(completeAnswers, doc)
-                doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
-                  .checkYourAnswersSubmit()
-                  .url
-              }
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("acquisitionDetails.cya.title"), { doc =>
+              validateAcquisitionDetailsCheckYourAnswersPage(
+                nonUkRebasing,
+                doc,
+                false,
+                true
+              )
+              doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                .checkYourAnswersSubmit()
+                .url
+            }
+          )
+        }
+
+        "the user has already answered all the questions and is uk and rebasing" in {
+          val nonUkRebasing = CompleteAcquisitionDetailsAnswers(
+            sample[AcquisitionMethod],
+            AcquisitionDate(ukResidents.minusDays(2)),
+            sample[AmountInPence],
+            Some(sample[AmountInPence]),
+            sample[AmountInPence],
+            sample[AmountInPence],
+            true
+          )
+          val assetType = AssetType.NonResidential
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithState(nonUkRebasing, assetType, true)._1)
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("acquisitionDetails.cya.title"), { doc =>
+              validateAcquisitionDetailsCheckYourAnswersPage(
+                nonUkRebasing,
+                doc,
+                true,
+                true
+              )
+              doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                .checkYourAnswersSubmit()
+                .url
+            }
+          )
+        }
+
+        "the user has already answered all the questions and is uk and not rebasing" in {
+          val nonUkRebasing = CompleteAcquisitionDetailsAnswers(
+            sample[AcquisitionMethod],
+            AcquisitionDate(ukResidents.plusDays(1)),
+            sample[AmountInPence],
+            Some(sample[AmountInPence]),
+            sample[AmountInPence],
+            sample[AmountInPence],
+            true
+          )
+          val assetType = AssetType.NonResidential
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithState(nonUkRebasing, assetType, true)._1)
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("acquisitionDetails.cya.title"), { doc =>
+              validateAcquisitionDetailsCheckYourAnswersPage(
+                nonUkRebasing,
+                doc,
+                true,
+                false
+              )
+              doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                .checkYourAnswersSubmit()
+                .url
+            }
+          )
+        }
+
+        "the user has already answered all the questions and is not uk and not rebasing" in {
+          val nonUkRebasing = CompleteAcquisitionDetailsAnswers(
+            sample[AcquisitionMethod],
+            AcquisitionDate(nonUkResidentsNonResidentialProperty.plusDays(1)),
+            sample[AmountInPence],
+            Some(sample[AmountInPence]),
+            sample[AmountInPence],
+            sample[AmountInPence],
+            false
+          )
+          val assetType = AssetType.NonResidential
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithState(nonUkRebasing, assetType, false)._1)
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("acquisitionDetails.cya.title"), { doc =>
+              validateAcquisitionDetailsCheckYourAnswersPage(
+                nonUkRebasing,
+                doc,
+                false,
+                false
+              )
+              doc.select("#content > article > form").attr("action") shouldBe routes.AcquisitionDetailsController
+                .checkYourAnswersSubmit()
+                .url
+            }
+          )
+        }
+      }
+
+      "handling submits on the check you answers page" must {
+
+        def performAction(): Future[Result] = controller.checkYourAnswersSubmit()(FakeRequest())
+
+        "redirect to the task list" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                sample[CompleteAcquisitionDetailsAnswers],
+                sample[AssetType],
+                sample[Boolean]
+              )._1
             )
           }
+
+          checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
         }
       }
 
     }
 
-    "handling submits on the check you answers page" must {
+    def missingAssetTypeAndResidentialStatusBehaviour(performAction: () => Future[Result]) =
+      "redirect to the task list page" when {
 
-      def performAction(): Future[Result] = controller.checkYourAnswersSubmit()(FakeRequest())
+        "there is no asset type" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                Some(sample[CompleteAcquisitionDetailsAnswers]),
+                None,
+                Some(sample[Boolean]),
+                Some(sample[DisposalDate])
+              )._1
+            )
+          }
 
-      "redirect to the task list" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            sessionWithState(
-              sample[CompleteAcquisitionDetailsAnswers],
-              sample[AssetType],
-              sample[Boolean]
-            )._1
-          )
+          checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
         }
 
-        checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+        "there is no residential status" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                Some(sample[CompleteAcquisitionDetailsAnswers]),
+                Some(sample[AssetType]),
+                None,
+                Some(sample[DisposalDate])
+              )._1
+            )
+          }
+
+          checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+        }
+
       }
 
-    }
+    def missingAcquisitionDateBehaviour(performAction: () => Future[Result]) =
+      "redirect to the check you answers page" when {
 
+        "there is no acquisition date" in {
+          val completeAcquisitionDetailsAnswers = sample[CompleteAcquisitionDetailsAnswers]
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                Some(
+                  IncompleteAcquisitionDetailsAnswers(
+                    Some(completeAcquisitionDetailsAnswers.acquisitionMethod),
+                    None,
+                    Some(completeAcquisitionDetailsAnswers.acquisitionPrice),
+                    completeAcquisitionDetailsAnswers.rebasedAcquisitionPrice,
+                    Some(completeAcquisitionDetailsAnswers.improvementCosts),
+                    Some(completeAcquisitionDetailsAnswers.acquisitionFees),
+                    Some(completeAcquisitionDetailsAnswers.shouldUseRebase)
+                  )
+                ),
+                Some(sample[AssetType]),
+                Some(sample[Boolean]),
+                Some(sample[DisposalDate])
+              )._1
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.AcquisitionDetailsController.checkYourAnswers())
+        }
+
+      }
+
+    def missingAcquisitionMethodBehaviour(performAction: () => Future[Result]) =
+      "redirect to the check you answers page" when {
+
+        "there is no acquisition method" in {
+          val completeAcquisitionDetailsAnswers = sample[CompleteAcquisitionDetailsAnswers]
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithState(
+                Some(
+                  IncompleteAcquisitionDetailsAnswers(
+                    None,
+                    Some(completeAcquisitionDetailsAnswers.acquisitionDate),
+                    Some(completeAcquisitionDetailsAnswers.acquisitionPrice),
+                    completeAcquisitionDetailsAnswers.rebasedAcquisitionPrice,
+                    Some(completeAcquisitionDetailsAnswers.improvementCosts),
+                    Some(completeAcquisitionDetailsAnswers.acquisitionFees),
+                    Some(completeAcquisitionDetailsAnswers.shouldUseRebase)
+                  )
+                ),
+                Some(sample[AssetType]),
+                Some(sample[Boolean]),
+                Some(sample[DisposalDate])
+              )._1
+            )
+          }
+
+          checkIsRedirect(performAction(), routes.AcquisitionDetailsController.checkYourAnswers())
+        }
+      }
   }
-
-  def missingAssetTypeAndResidentialStatusBehaviour(performAction: () => Future[Result]) =
-    "redirect to the task list page" when {
-
-      "there is no asset type" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            sessionWithState(
-              Some(sample[CompleteAcquisitionDetailsAnswers]),
-              None,
-              Some(sample[Boolean]),
-              Some(sample[DisposalDate])
-            )._1
-          )
-        }
-
-        checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
-      }
-
-      "there is no residential status" in {
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            sessionWithState(
-              Some(sample[CompleteAcquisitionDetailsAnswers]),
-              Some(sample[AssetType]),
-              None,
-              Some(sample[DisposalDate])
-            )._1
-          )
-        }
-
-        checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
-      }
-
-    }
-
-  def missingAcquisitionDateBehaviour(performAction: () => Future[Result]) =
-    "redirect to the check you answers page" when {
-
-      "there is no acquisition date" in {
-        val completeAcquisitionDetailsAnswers = sample[CompleteAcquisitionDetailsAnswers]
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            sessionWithState(
-              Some(
-                IncompleteAcquisitionDetailsAnswers(
-                  Some(completeAcquisitionDetailsAnswers.acquisitionMethod),
-                  None,
-                  Some(completeAcquisitionDetailsAnswers.acquisitionPrice),
-                  completeAcquisitionDetailsAnswers.rebasedAcquisitionPrice,
-                  Some(completeAcquisitionDetailsAnswers.improvementCosts),
-                  Some(completeAcquisitionDetailsAnswers.acquisitionFees)
-                )
-              ),
-              Some(sample[AssetType]),
-              Some(sample[Boolean]),
-              Some(sample[DisposalDate])
-            )._1
-          )
-        }
-
-        checkIsRedirect(performAction(), routes.AcquisitionDetailsController.checkYourAnswers())
-      }
-
-    }
-
-  def missingAcquisitionMethodBehaviour(performAction: () => Future[Result]) =
-    "redirect to the check you answers page" when {
-
-      "there is no acquisition method" in {
-        val completeAcquisitionDetailsAnswers = sample[CompleteAcquisitionDetailsAnswers]
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            sessionWithState(
-              Some(
-                IncompleteAcquisitionDetailsAnswers(
-                  None,
-                  Some(completeAcquisitionDetailsAnswers.acquisitionDate),
-                  Some(completeAcquisitionDetailsAnswers.acquisitionPrice),
-                  completeAcquisitionDetailsAnswers.rebasedAcquisitionPrice,
-                  Some(completeAcquisitionDetailsAnswers.improvementCosts),
-                  Some(completeAcquisitionDetailsAnswers.acquisitionFees)
-                )
-              ),
-              Some(sample[AssetType]),
-              Some(sample[Boolean]),
-              Some(sample[DisposalDate])
-            )._1
-          )
-        }
-
-        checkIsRedirect(performAction(), routes.AcquisitionDetailsController.checkYourAnswers())
-      }
-
-    }
 
   def testFormError(
     data: (String, String)*
@@ -2620,7 +2908,9 @@ object AcquisitionDetailsControllerSpec extends Matchers {
 
   def validateAcquisitionDetailsCheckYourAnswersPage(
     acquisitionDetailsAnswers: CompleteAcquisitionDetailsAnswers,
-    doc: Document
+    doc: Document,
+    isUk: Boolean,
+    isRebasing: Boolean
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
     val expectedAcquisitionMethodDisplayName = acquisitionDetailsAnswers.acquisitionMethod match {
       case AcquisitionMethod.Bought       => messages("returns.acquisitionMethod.Bought")
@@ -2630,9 +2920,14 @@ object AcquisitionDetailsControllerSpec extends Matchers {
     }
 
     doc.select("#acquisitionMethod-answer").text() shouldBe expectedAcquisitionMethodDisplayName
-    doc.select("#acquisitionPrice-answer").text() shouldBe formatAmountOfMoneyWithPoundSign(
-      acquisitionDetailsAnswers.acquisitionPrice.inPounds()
-    )
+
+    if (!isRebasing || !isUk) {
+      doc.select("#acquisitionPrice-answer").text() shouldBe formatAmountOfMoneyWithPoundSign(
+        acquisitionDetailsAnswers.acquisitionPrice.inPounds()
+      )
+    } else {
+      doc.select("#acquisitionPrice-answer").text() shouldBe ""
+    }
 
     if (acquisitionDetailsAnswers.improvementCosts === AmountInPence.zero) {
       doc.select("#improvementCosts-answer").text shouldBe "No"
@@ -2653,13 +2948,15 @@ object AcquisitionDetailsControllerSpec extends Matchers {
     }
 
     acquisitionDetailsAnswers.rebasedAcquisitionPrice.foreach { rebasedAcquisitionPrice =>
-      if (rebasedAcquisitionPrice.isZero) {
-        doc.select("#rebasedAcquisitionPrice-answer").text shouldBe "No"
-      } else {
-        doc.select("#rebasedAcquisitionPrice-answer").text shouldBe "Yes"
-        doc.select("#rebasedAcquisitionPrice-value-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
-          rebasedAcquisitionPrice.inPounds()
-        )
+      if (!isUk && isRebasing) {
+        if (acquisitionDetailsAnswers.shouldUseRebase) {
+          doc.select("#shouldRebase-answer").text shouldBe "Yes"
+          doc.select("#rebasedAcquisitionPrice-value-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
+            rebasedAcquisitionPrice.inPounds()
+          )
+        } else {
+          doc.select("#shouldRebase-answer").text shouldBe "No"
+        }
       }
     }
   }

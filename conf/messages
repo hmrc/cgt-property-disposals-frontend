@@ -727,6 +727,8 @@ returns.disposal-details.cya.title=Check your answers
 
 acquisitionDetails.caption=Purchase or acquisition details
 
+
+
 acquisitionMethod.title=How did you get the property?
 returns.acquisitionMethod.Bought=Bought it
 returns.acquisitionMethod.Inherited=Inherited it
@@ -796,7 +798,7 @@ acquisitionFeesValue.error.tooManyDecimals=Additional costs must be 2 decimal pl
 
 acquisitionDetails.cya.title=Check your answers
 acquisitionDetails.cyaLabel.rebased=Property value rebased
-acquisitionDetails.cyaLabel.rebasedValue=Rebased value
+acquisitionDetails.cyaLabel.rebasedValue=What was the market value of the property on {0}?
 acquisitionDetails.cyaLabel.improvementCostsValue=Amount of improvement costs
 acquisitionDetails.cyaLabel.acquisitionFeesValue=Amount of buying costs
 acquisitionDetails.cyaChange.acquisitionMethod=your acquisition method
@@ -805,17 +807,26 @@ acquisitionDetails.cyaChange.acquisitionPrice=your acquisition price
 acquisitionDetails.cyaChange.rebasedAcquisitionPrice=your rebased acquisition price
 acquisitionDetails.cyaChange.improvementCosts=your improvements costs
 acquisitionDetails.cyaChange.acquisitionFees=your acquisition fees
+acquisitionDetails.cyaChange.shouldUseRebase=whether you are using the rebased value in your calculation
 
-rebaseAcquisitionPrice.title=Are you rebasing your share of the property to its market value on {0}?
+rebaseAcquisitionPrice.title=What was the market value of the property on {0}?
 rebaseAcquisitionPrice.helpText=You can work out your gain or loss by including the property’s market value on {0} in your calculation.
-rebaseAcquisitionPrice.error.required=Select yes if you rebasing the property to its market value on {0}
-rebaseAcquisitionPriceValue.label=Property’s market value on {0}
-rebaseAcquisitionPriceValue.error.required=Enter the property’s market value on {0}
-rebaseAcquisitionPriceValue.error.invalid=The amount of money must only include numbers, for example 160,000 or 23,040.50
-rebaseAcquisitionPriceValue.error.tooSmall=The amount of money must be a number between 1 and 50,000,000,000.00
-rebaseAcquisitionPriceValue.error.tooLarge=The amount of money must be a number between 1 and 50,000,000,000.00
-rebaseAcquisitionPriceValue.error.tooManyDecimals=The amount of money must be 2 decimal places or less, for example £160,000 or £23,040.50
+rebaseAcquisitionPrice.label=Property’s market value on {0}
+rebaseAcquisitionPrice.error.required=Enter the property’s market value on {0}
+rebaseAcquisitionPrice.error.invalid=The amount of money must only include numbers, for example 160,000 or 23,040.50
+rebaseAcquisitionPrice.error.tooSmall=The amount of money must be a number between 1 and 50,000,000,000.00
+rebaseAcquisitionPrice.error.tooLarge=The amount of money must be a number between 1 and 50,000,000,000.00
+rebaseAcquisitionPrice.error.tooManyDecimals=The amount of money must be 2 decimal places or less, for example £160,000 or £23,040.50
+rebaseAcquisitionPrice.dropdown.header=Why you need to enter this amount
+rebaseAcquisitionPrice.dropdown.p1=You owned the property on or before {0}.
+rebaseAcquisitionPrice.dropdown.p2=This means when you work out your gain or loss. You must use the market value of the property on that date. This is instead of using the actual purchase or acquisition amount
+rebaseAcquisitionPrice.dropdown.p3=This process is called rebasing.
+rebaseAcquisitionPrice.dropdown.p4=<a href="{0}" target="_blank">Find out how to ask HMRC to check a property’s market value (opens in a new window)</a>.
+rebaseAcquisitionPrice.dropdown.p5=It takes at least 3 months for HMRC to check a property’s market value. This means you should enter an estimate now and if you need to amend the amount do it later using this service. Or if you already complete a Self Assessment tax return you can provide the correct market value in your next Self Assessment.
 
+shouldUseRebase.title=Are you using the rebased value on {0} in your calculation?
+shouldUseRebase.helpText=You can use the rebased value or the actual cost of the property in your workings out. The amount you use could mean your gain or loss is lower.
+shouldUseRebase.error.required=Select whether you are using the rebased valued in your calculation
 
 reliefDetails.caption=Reliefs
 

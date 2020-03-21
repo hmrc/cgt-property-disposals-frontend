@@ -32,6 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitControllerSpec.validateAllCheckYourAnswersSections
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.AcquisitionDetailsControllerSpec.validateAcquisitionDetailsCheckYourAnswersPage
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails.DisposalDetailsControllerSpec._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesControllerSpec.validateExemptionAndLossesCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.ReliefDetailsControllerSpec.validateReliefDetailsCheckYourAnswersPage
@@ -149,7 +150,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey("checkAllAnswers.title"), { doc =>
-              validateAllCheckYourAnswersSections(doc, completeReturn, None)
+              validateAllCheckYourAnswersSections(doc, completeReturn, None, false, true)
               doc.select("#back").attr("href") shouldBe routes.TaskListController.taskList().url
               doc.select("#content > article > form").attr("action") shouldBe routes.CheckAllAnswersAndSubmitController
                 .checkAllAnswersSubmit()
@@ -171,7 +172,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey("checkAllAnswers.title"), { doc =>
-              validateAllCheckYourAnswersSections(doc, completeReturn, Some(UserType.Agent))
+              validateAllCheckYourAnswersSections(doc, completeReturn, Some(UserType.Agent), false, true)
               doc.select("#back").attr("href") shouldBe routes.TaskListController.taskList().url
               doc.select("#content > article > form").attr("action") shouldBe routes.CheckAllAnswersAndSubmitController
                 .checkAllAnswersSubmit()
@@ -527,17 +528,23 @@ object CheckAllAnswersAndSubmitControllerSpec {
   def validateAllCheckYourAnswersSections(
     doc: Document,
     completeReturn: CompleteReturn,
-    userType: Option[UserType]
+    userType: Option[UserType],
+    isUk: Boolean,
+    isRebasing: Boolean
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
     validateSingleDisposalTriageCheckYourAnswersPage(
       completeReturn.triageAnswers,
       userType,
       doc
     )
+
     validateAcquisitionDetailsCheckYourAnswersPage(
       completeReturn.acquisitionDetails,
-      doc
+      doc,
+      isUk,
+      isRebasing
     )
+
     validateDisposalDetailsCheckYourAnswersPage(
       completeReturn.disposalDetails,
       doc
