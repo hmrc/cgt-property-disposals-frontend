@@ -389,7 +389,7 @@ class PropertyDetailsController @Inject() (
               .fold(
                 formWithErrors =>
                   BadRequest(
-                    multipleDisposalsDisposalPricePage(formWithErrors, backLink)
+                    multipleDisposalsAcquisitionPricePage(formWithErrors, backLink)
                   ), { acquisitionPrice =>
                   if (answers
                         .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
@@ -511,7 +511,7 @@ class PropertyDetailsController @Inject() (
 
   private def disposalPriceBackLink(answers: Option[MultipleDisposalsExamplePropertyDetailsAnswers]): Call =
     answers
-      .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty) // TODO: required?
+      .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
       .fold(
         _ => routes.PropertyDetailsController.disposalDate(),
         _ => routes.PropertyDetailsController.checkYourAnswers()
@@ -519,7 +519,7 @@ class PropertyDetailsController @Inject() (
 
   private def acquisitionPriceBackLink(answers: Option[MultipleDisposalsExamplePropertyDetailsAnswers]): Call =
     answers
-      .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty) // TODO: required?
+      .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
       .fold(
         _ => routes.PropertyDetailsController.disposalPrice(),
         _ => routes.PropertyDetailsController.checkYourAnswers()
@@ -558,14 +558,18 @@ object PropertyDetailsController {
   val disposalPriceForm: Form[BigDecimal] =
     Form(
       mapping(
-        "multipleDisposalsDisposalPrice" -> of(MoneyUtils.amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds))
+        "multipleDisposalsDisposalPrice" -> of(
+          MoneyUtils.amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds)
+        )
       )(identity)(Some(_))
     )
 
   val acquisitionPriceForm: Form[BigDecimal] =
     Form(
       mapping(
-        "multipleDisposalsAcquisitionPrice" -> of(MoneyUtils.amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds))
+        "multipleDisposalsAcquisitionPrice" -> of(
+          MoneyUtils.amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds)
+        )
       )(identity)(Some(_))
     )
 
