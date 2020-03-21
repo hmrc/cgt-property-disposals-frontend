@@ -543,8 +543,8 @@ object PropertyDetailsController {
       mapping(
         "" -> of(
           LocalDateUtils.dateFormatter(
-            Some(maximumDateInclusive), //TODO: earliest of [Today, End of the tax year]
-            Some(minimumDateInclusive), //TODO: start of the tax year
+            Some(maximumDateInclusive),
+            Some(minimumDateInclusive),
             s"$key-day",
             s"$key-month",
             s"$key-year",
@@ -558,14 +558,14 @@ object PropertyDetailsController {
   val disposalPriceForm: Form[BigDecimal] =
     Form(
       mapping(
-        "disposalPrice" -> of(MoneyUtils.amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds))
+        "multipleDisposalsDisposalPrice" -> of(MoneyUtils.amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds))
       )(identity)(Some(_))
     )
 
   val acquisitionPriceForm: Form[BigDecimal] =
     Form(
       mapping(
-        "acquisitionPrice" -> of(MoneyUtils.amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds))
+        "multipleDisposalsAcquisitionPrice" -> of(MoneyUtils.amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds))
       )(identity)(Some(_))
     )
 
