@@ -58,7 +58,6 @@ class RebasingEligibilityUtilSpec extends WordSpec with Matchers {
 
   "RebasingEligibilityUtil" must {
 
-
     "when checking is UK" when {
 
       "is uk" in {
@@ -69,11 +68,12 @@ class RebasingEligibilityUtilSpec extends WordSpec with Matchers {
 
       "is not uk" in {
         val completedReturn =
-          sample[CompleteReturn].copy(triageAnswers = nonUkNonResidential.triage, acquisitionDetails = nonUkNonResidential.afterCutoff)
+          sample[CompleteReturn]
+            .copy(triageAnswers = nonUkNonResidential.triage, acquisitionDetails = nonUkNonResidential.afterCutoff)
         underTest.isUk(completedReturn) shouldBe false
       }
 
-     }
+    }
 
     "when checking for eligibility for rebasing" when {
 

@@ -141,7 +141,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
       behave like redirectToStartWhenInvalidJourney(
         performAction, {
           case _: Subscribed | _: StartingNewDraftReturn | _: FillingOutReturn | _: JustSubmittedReturn |
-              _: ViewingReturn =>
+              _: ViewingReturn | _: SubmitReturnFailed =>
             true
           case _ => false
         }
