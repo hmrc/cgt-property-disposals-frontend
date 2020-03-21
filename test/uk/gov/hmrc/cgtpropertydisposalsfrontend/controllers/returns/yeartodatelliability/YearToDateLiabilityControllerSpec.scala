@@ -39,6 +39,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutR
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue.GainCalculatedTaxDue
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
@@ -1170,6 +1172,7 @@ class YearToDateLiabilityControllerSpec
       val reliefDetailsAnswers      = sample[CompleteReliefDetailsAnswers]
       val exemptionAndLossesAnswers = sample[CompleteExemptionAndLossesAnswers]
       val initialGainOrLossAnswers  = sample[AmountInPence]
+      val isATrust                  = sample[Boolean]
 
       def draftReturnWithAnswers(yearToDateLiabilityAnswers: YearToDateLiabilityAnswers): SingleDisposalDraftReturn =
         sample[SingleDisposalDraftReturn].copy(
@@ -1191,7 +1194,8 @@ class YearToDateLiabilityControllerSpec
           exemptionAndLossesAnswers,
           estimatedIncome,
           personalAllowance,
-          Some(initialGainOrLossAnswers)
+          Some(initialGainOrLossAnswers),
+          isATrust
         )
 
       behave like redirectToStartBehaviour(performAction)
@@ -1228,6 +1232,7 @@ class YearToDateLiabilityControllerSpec
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
+                    subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
                     draftReturn = singleDispsaslDraftReturnWithCompleteJourneys(
                       Some(
                         IncompleteCalculatedYearToDateLiabilityAnswers.empty.copy(
