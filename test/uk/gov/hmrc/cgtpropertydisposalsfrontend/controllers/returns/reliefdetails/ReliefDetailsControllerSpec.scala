@@ -16,6 +16,8 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails
 
+import java.time.LocalDate
+
 import org.jsoup.nodes.Document
 import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -67,6 +69,8 @@ class ReliefDetailsControllerSpec
 
   implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
 
+  val maxLettingsReliefValue = AmountInPence.fromPounds(40000)
+
   def redirectToStartBehaviour(performAction: () => Future[Result]) =
     redirectToStartWhenInvalidJourney(
       performAction, {
@@ -81,7 +85,7 @@ class ReliefDetailsControllerSpec
     val draftReturn = sample[SingleDisposalDraftReturn].copy(
       reliefDetailsAnswers = reliefDetailsAnswers,
       triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(disposalDate = sample[DisposalDate]
-        .copy(taxYear = sample[TaxYear].copy(maxLettingsReliefAmount = AmountInPence.fromPounds(40000)))
+        .copy(taxYear = sample[TaxYear].copy(maxLettingsReliefAmount = maxLettingsReliefValue))
       )
     )
 
@@ -106,7 +110,7 @@ class ReliefDetailsControllerSpec
       reliefDetailsAnswers      = reliefDetailsAnswers,
       exemptionAndLossesAnswers = exemptionAndLossesAnswers,
       triageAnswers = completeSingleDisposalTriageAnswers.copy(disposalDate = disposalDate
-        .copy(taxYear = taxYear.copy(maxLettingsReliefAmount = AmountInPence.fromPounds(40000)))
+        .copy(taxYear = taxYear.copy(maxLettingsReliefAmount = maxLettingsReliefValue))
       )
     )
 
@@ -542,10 +546,12 @@ class ReliefDetailsControllerSpec
         }
 
         "the data is more than lettings relief limit" in {
+          val valueGreaterThanLettingsRelief =
+            (maxLettingsReliefValue ++ AmountInPence.fromPounds(10000)).inPounds().toString()
           test(
             "lettingsRelief"      -> "0",
-            "lettingsReliefValue" -> "50000"
-          )("lettingsRelief.error.amountOverLimit")
+            "lettingsReliefValue" -> valueGreaterThanLettingsRelief
+          )(Messages("lettingsRelief.error.amountOverLimit", maxLettingsReliefValue.inPounds().toString()))
 
         }
 
@@ -618,8 +624,10 @@ class ReliefDetailsControllerSpec
             .copy(privateResidentsRelief = Some(sample[AmountInPence]), lettingsRelief = None)
           val newLettingsRelief = 2d
 
-          val oldDraftReturn = sample[SingleDisposalDraftReturn].copy(reliefDetailsAnswers = Some(currentAnswers))
-
+          val triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+          val oldDraftReturn = sample[SingleDisposalDraftReturn]
+            .copy(triageAnswers = triageAnswers, reliefDetailsAnswers = Some(currentAnswers))
+          println(oldDraftReturn)
           val newDraftReturn =
             oldDraftReturn.copy(
               reliefDetailsAnswers = Some(
@@ -640,7 +648,8 @@ class ReliefDetailsControllerSpec
           "and the draft return and session data has been successfully updated" in {
           val currentAnswers    = sample[CompleteReliefDetailsAnswers].copy(lettingsRelief = AmountInPence.fromPounds(1d))
           val newLettingsRelief = 2d
-          val oldDraftReturn    = sample[SingleDisposalDraftReturn].copy(reliefDetailsAnswers = Some(currentAnswers))
+          val triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+          val oldDraftReturn    = sample[SingleDisposalDraftReturn].copy(reliefDetailsAnswers = Some(currentAnswers), triageAnswers = triageAnswers)
 
           val newDraftReturn =
             oldDraftReturn.copy(
