@@ -1302,3 +1302,11 @@ multipleDisposalsAcquisitionPrice.error.required=Enter the acquisition value of 
 multipleDisposalsAcquisitionPrice.error.tooLarge=Amount must be 50,000,000,000.00 or less
 multipleDisposalsAcquisitionPrice.error.tooSmall=Amount must a number more than 0 and less than 50,000,000,000
 
+submitReturnError.title=Sorry, there is a problem with the service
+submitReturnError.p1=Your return might not have been sent to HMRC.
+submitReturnError.p2=You’ll need to:
+submitReturnError.li1=Go to your Capital Gains Tax on UK property account home.
+submitReturnError.li2=If your return is in ‘Sent returns’ it has been received by HMRC. You do not need to send it again.
+submitReturnError.li3=If it is ‘Draft returns’ it has not been received by HMRC. You’ll need to try and send it again.
+submitReturnError.p3=You may get a penalty and have to pay interest if your return or payment is late.
+submitReturnError.button=Go to account home

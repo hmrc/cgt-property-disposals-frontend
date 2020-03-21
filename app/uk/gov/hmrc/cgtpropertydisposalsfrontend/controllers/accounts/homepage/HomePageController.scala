@@ -29,7 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, returns}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, StartingNewDraftReturn, Subscribed, ViewingReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, StartingNewDraftReturn, SubmitReturnFailed, Subscribed, ViewingReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
@@ -242,6 +242,18 @@ class HomePageController @Inject() (
             )
         }(f(s, _))
 
+      case Some((s: SessionData, r: SubmitReturnFailed)) if withUplift =>
+        upliftToSubscribedAndThen(r, r.subscribedDetails.cgtReference) {
+          case (r, draftReturns, sentReturns) =>
+            Subscribed(
+              r.subscribedDetails,
+              r.ggCredId,
+              r.agentReferenceNumber,
+              draftReturns,
+              sentReturns
+            )
+        }(f(s, _))
+
       case Some((s: SessionData, r: ViewingReturn)) if withUplift =>
         upliftToSubscribedAndThen(r, r.subscribedDetails.cgtReference) {
           case (r, draftReturns, sentReturns) =>
@@ -267,8 +279,8 @@ class HomePageController @Inject() (
     f: Subscribed => Future[Result]
   )()(implicit hc: HeaderCarrier, request: RequestWithSessionData[_]): Future[Result] = {
     val result = for {
-      draftReturns <- returnsService.getDraftReturns(cgtReference)
       sentReturns  <- returnsService.listReturns(cgtReference)
+      draftReturns <- returnsService.getDraftReturns(cgtReference, sentReturns)
       subscribed = uplift(journey, draftReturns, sentReturns)
       _ <- EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(subscribed))))
     } yield subscribed

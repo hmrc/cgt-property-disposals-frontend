@@ -103,6 +103,12 @@ object JourneyStatus {
     submissionResponse: SubmitReturnResponse
   ) extends JourneyStatus
 
+  final case class SubmitReturnFailed(
+    subscribedDetails: SubscribedDetails,
+    ggCredId: GGCredId,
+    agentReferenceNumber: Option[AgentReferenceNumber]
+  ) extends JourneyStatus
+
   final case class ViewingReturn(
     subscribedDetails: SubscribedDetails,
     ggCredId: GGCredId,

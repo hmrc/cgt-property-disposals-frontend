@@ -17,6 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns
 
 import java.time.LocalDate
+import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
@@ -28,8 +29,10 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear}
@@ -78,6 +81,12 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
       .expects(cgtReference, submissionId, *)
       .returning(EitherT.fromEither[Future](response))
 
+  def mockDeleteDraftReturns(draftReturnIds: List[UUID])(response: Either[Error, HttpResponse]) =
+    (mockConnector
+      .deleteDraftReturns(_: List[UUID])(_: HeaderCarrier))
+      .expects(draftReturnIds, *)
+      .returning(EitherT.fromEither[Future](response))
+
   val service = new ReturnsServiceImpl(mockConnector, stub[AuditService])
 
   implicit val hc: HeaderCarrier   = HeaderCarrier()
@@ -122,18 +131,20 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
       val cgtReference = sample[CgtReference]
 
+      val sentReturns = List(sample[ReturnSummary])
+
       "return an error" when {
 
         "the http response does not come back with status 200" in {
           mockGetDraftReturns(cgtReference)(Right(HttpResponse(INTERNAL_SERVER_ERROR)))
 
-          await(service.getDraftReturns(cgtReference).value).isLeft shouldBe true
+          await(service.getDraftReturns(cgtReference, sentReturns).value).isLeft shouldBe true
         }
 
         "the http response comes back with status 200 but the body cannot be parsed" in {
           mockGetDraftReturns(cgtReference)(Left(Error("")))
 
-          await(service.getDraftReturns(cgtReference).value).isLeft shouldBe true
+          await(service.getDraftReturns(cgtReference, sentReturns).value).isLeft shouldBe true
         }
 
       }
@@ -145,7 +156,53 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
         "the http call came back with a 200 and the body can be parsed" in {
           mockGetDraftReturns(cgtReference)(Right(HttpResponse(OK, Some(Json.toJson(draftReturnsResponse)))))
 
-          await(service.getDraftReturns(cgtReference).value) shouldBe Right(draftReturnsResponse.draftReturns)
+          await(service.getDraftReturns(cgtReference, sentReturns).value) shouldBe Right(
+            draftReturnsResponse.draftReturns
+          )
+        }
+
+        "there are draft returns which are found to have been already sent and" when {
+
+          val cgtReference = sample[CgtReference]
+
+          val triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
+          val address       = sample[UkAddress]
+
+          "the draft return is a single disposal draft return and" when {
+
+            val draftReturn = sample[SingleDisposalDraftReturn].copy(
+              triageAnswers   = triageAnswers,
+              propertyAddress = Some(address)
+            )
+            val draftReturnsResponse = GetDraftReturnResponse(List(draftReturn))
+
+            val sentReturn = sample[ReturnSummary].copy(
+              taxYear         = triageAnswers.disposalDate.taxYear.startDateInclusive.getYear.toString,
+              completionDate  = triageAnswers.completionDate.value,
+              propertyAddress = address
+            )
+            val sentReturns = List(sentReturn)
+
+            "the draft returns are successfully deleted" in {
+              inSequence {
+                mockGetDraftReturns(cgtReference)(Right(HttpResponse(OK, Some(Json.toJson(draftReturnsResponse)))))
+                mockDeleteDraftReturns(List(draftReturn.id))(Right(HttpResponse(OK)))
+              }
+
+              await(service.getDraftReturns(cgtReference, sentReturns).value) shouldBe Right(List.empty)
+            }
+
+            "the draft returns cannot be deleted" in {
+              inSequence {
+                mockGetDraftReturns(cgtReference)(Right(HttpResponse(OK, Some(Json.toJson(draftReturnsResponse)))))
+                mockDeleteDraftReturns(List(draftReturn.id))(Left(Error("")))
+              }
+
+              await(service.getDraftReturns(cgtReference, sentReturns).value) shouldBe Right(List.empty)
+            }
+
+          }
+
         }
 
       }
