@@ -25,6 +25,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, routes => baseRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.{routes => homeRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.ViewingReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{PaymentsService, ReturnsService}
@@ -44,7 +45,8 @@ class ViewReturnController @Inject() (
   returnsService: ReturnsService,
   paymentsService: PaymentsService,
   cc: MessagesControllerComponents,
-  viewReturnPage: views.html.returns.view_return
+  viewReturnPage: views.html.returns.view_return,
+  rebasingEligibilityUtil: RebasingEligibilityUtil
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -54,7 +56,15 @@ class ViewReturnController @Inject() (
   def displayReturn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withViewingReturn(request) {
       case ViewingReturn(_, _, _, sentReturn, returnSummary) =>
-        Ok(viewReturnPage(sentReturn, returnSummary))
+        Ok(
+          viewReturnPage(
+            sentReturn,
+            returnSummary,
+            rebasingEligibilityUtil.getDisplayRebasingCutOffDate(sentReturn),
+            rebasingEligibilityUtil.isUk(sentReturn),
+            rebasingEligibilityUtil.isEligibleForRebase(sentReturn)
+          )
+        )
     }
   }
 

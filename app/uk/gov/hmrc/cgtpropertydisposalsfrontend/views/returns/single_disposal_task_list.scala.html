@@ -63,7 +63,7 @@ val residentialBeforeDate = RebasingCutoffDates.nonUkResidentsResidentialPropert
 
 (countryOfResidence, assetType, acquisitionDetailsAnswers) match {
 case (_, _, _) if countryOfResidence.isUk() => false
-case (_, AssetType.Residential, Some(CompleteAcquisitionDetailsAnswers(_, AcquisitionDate(acquisitionDate), _, _, _, _)))
+case (_, AssetType.Residential, Some(CompleteAcquisitionDetailsAnswers(_, AcquisitionDate(acquisitionDate), _, _, _, _, _)))
 if acquisitionDate.isBefore(residentialBeforeDate) => true
 case (_, _, _) => false
 

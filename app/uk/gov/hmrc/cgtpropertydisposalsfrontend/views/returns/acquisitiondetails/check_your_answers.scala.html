@@ -14,6 +14,8 @@
  * limitations under the License.
  *@
 
+@import java.time.LocalDate
+
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.routes
@@ -30,7 +32,7 @@ formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
 returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(answers: CompleteAcquisitionDetailsAnswers)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(answers: CompleteAcquisitionDetailsAnswers, rebaseCutoffDate: LocalDate, isUk: Boolean, isRebasing: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 
 @title = @{messages("acquisitionDetails.cya.title")}
@@ -39,7 +41,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 
     @pageHeading(title, Some(messages("acquisitionDetails.caption")))
 
-    @summary(answers)
+    @summary(answers, rebaseCutoffDate, isUk, isRebasing)
 
     @formWrapper(routes.AcquisitionDetailsController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
         @submitButton(messages("button.confirmAndContinue"))

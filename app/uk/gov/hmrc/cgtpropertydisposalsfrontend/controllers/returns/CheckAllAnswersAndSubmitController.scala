@@ -26,6 +26,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.SubmitReturnResult
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.SubmitReturnResult.{SubmitReturnError, SubmitReturnSuccess}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, routes => baseRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, MultipleDisposalsDraftReturn, SingleDisposalDraftReturn, SubmitReturnRequest}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, SubmitReturnFailed, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
@@ -50,6 +55,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
   cc: MessagesControllerComponents,
   checkAllAnswersPage: pages.check_all_answers,
   confirmationOfSubmissionPage: pages.confirmation_of_submission,
+  rebasingEligibilityUtil: RebasingEligibilityUtil,
   submitReturnFailedPage: pages.submit_return_error
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
@@ -60,7 +66,14 @@ class CheckAllAnswersAndSubmitController @Inject() (
   def checkAllAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withCompleteDraftReturn(request) {
       case (_, _, completeReturn) =>
-        Ok(checkAllAnswersPage(completeReturn))
+        Ok(
+          checkAllAnswersPage(
+            completeReturn,
+            rebasingEligibilityUtil.getDisplayRebasingCutOffDate(completeReturn),
+            rebasingEligibilityUtil.isUk(completeReturn),
+            rebasingEligibilityUtil.isEligibleForRebase(completeReturn)
+          )
+        )
     }
   }
 

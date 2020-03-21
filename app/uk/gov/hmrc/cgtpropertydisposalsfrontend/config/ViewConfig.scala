@@ -66,6 +66,7 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
   val nrcgtReturn: String                      = getString("external-url.nrcgtReturn")
   val reliefsInfo: String                      = getString("external-url.reliefs-info")
   val lettingReliefInfo: String                = getString("external-url.letting-relief-info")
+  val marketValue: String                      = getString("external-url.market-value")
 
   val onboardingExitSurveyUrl: String = "/feedback/CGTPD-REG"
   val returnsExitSurveyUrl: String    = "/feedback/CGTPD-RET"
