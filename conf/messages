@@ -1279,3 +1279,18 @@ submitReturnError.li2=If your return is in ‘Sent returns’ it has been receiv
 submitReturnError.li3=If it is ‘Draft returns’ it has not been received by HMRC. You’ll need to try and send it again.
 submitReturnError.p3=You may get a penalty and have to pay interest if your return or payment is late.
 submitReturnError.button=Go to account home
+
+hasValidPostcode.title=Do any of the properties have a UK postcode?
+hasValidPostcode.error.boolean=Select whether any of the properties have a UK postcode
+hasValidPostcode.error.required=Select whether any of the properties have a UK postcode
+
+enterUPRN.title=Enter the Unique Property Reference Number (UPRN) for the UK property
+enterUPRN.line1.label=Unique Property Reference Number (UPRN)
+enterUPRN.line2.label=Area (optional)
+enterUPRN.line3.label=Town or city (optional)
+enterUPRN.line4.label=County (optional)
+enterUPRN.postcode.label=Postcode
+enterUPRN.postcode.helpText=If the property does not have a postcode enter the postcode of the nearest property. For example, AB2 9WQ.
+enterUPRN-line1.error.required=Enter a UPRN
+enterUPRN-line1.error.tooLong=UPRN must be 12 numbers or less
+enterUPRN-line1.error.invalid=UPRN must only include numbers
