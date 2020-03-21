@@ -21,17 +21,20 @@ import cats.instances.future._
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, routes => baseRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.SubmitReturnResult
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.SubmitReturnResult.{SubmitReturnError, SubmitReturnSuccess}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, routes => baseRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, SubmitReturnFailed, Subscribed}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, MultipleDisposalsDraftReturn, SingleDisposalDraftReturn, SubmitReturnRequest, SubmitReturnResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{PaymentsService, ReturnsService}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.{returns => pages}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -64,27 +67,17 @@ class CheckAllAnswersAndSubmitController @Inject() (
   def checkAllAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withCompleteDraftReturn(request) {
       case (_, fillingOutReturn, completeReturn) =>
-        val submittedReturnRequest =
-          SubmitReturnRequest(
-            completeReturn,
-            fillingOutReturn.draftReturn.id,
-            fillingOutReturn.subscribedDetails,
-            fillingOutReturn.agentReferenceNumber
-          )
         val result =
           for {
-            response <- returnsService
-                         .submitReturn(submittedReturnRequest)
-                         .map(Right(_))
-                         .leftFlatMap[Either[Error, SubmitReturnResponse], Error](e => EitherT.pure(Left(e)))
-            newJourneyStatus = response.fold(
-              _ =>
+            response <- EitherT.liftF(submitReturn(completeReturn, fillingOutReturn))
+            newJourneyStatus = response match {
+              case _: SubmitReturnError =>
                 SubmitReturnFailed(
                   fillingOutReturn.subscribedDetails,
                   fillingOutReturn.ggCredId,
                   fillingOutReturn.agentReferenceNumber
-                ),
-              submitReturnResponse =>
+                )
+              case SubmitReturnSuccess(submitReturnResponse) =>
                 JustSubmittedReturn(
                   fillingOutReturn.subscribedDetails,
                   fillingOutReturn.ggCredId,
@@ -92,7 +85,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
                   completeReturn,
                   submitReturnResponse
                 )
-            )
+            }
             _ <- EitherT(
                   updateSession(sessionStore, request)(
                     _.copy(journeyStatus = Some(newJourneyStatus))
@@ -104,19 +97,37 @@ class CheckAllAnswersAndSubmitController @Inject() (
           { e =>
             logger.warn("Error while trying to update session", e)
             errorHandler.errorResult()
-          },
-          _.fold(
-            { e =>
+          }, {
+            case SubmitReturnError(e) =>
               logger.warn(s"Could not submit return}", e)
               Redirect(routes.CheckAllAnswersAndSubmitController.submissionError())
-            }, { r =>
+
+            case SubmitReturnSuccess(r) =>
               logger.info(s"Successfully submitted return with submission id ${r.formBundleId}")
               Redirect(routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission())
-            }
-          )
+          }
         )
+
     }
   }
+
+  private def submitReturn(completeReturn: CompleteReturn, fillingOutReturn: FillingOutReturn)(
+    implicit hc: HeaderCarrier
+  ): Future[SubmitReturnResult] =
+    returnsService
+      .submitReturn(
+        SubmitReturnRequest(
+          completeReturn,
+          fillingOutReturn.draftReturn.id,
+          fillingOutReturn.subscribedDetails,
+          fillingOutReturn.agentReferenceNumber
+        )
+      )
+      .bimap(
+        SubmitReturnError,
+        SubmitReturnSuccess
+      )
+      .merge
 
   def submissionError(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withSubmitReturnFailesOrSubscribed(request) { _ =>
@@ -199,4 +210,18 @@ class CheckAllAnswersAndSubmitController @Inject() (
       case _ =>
         Redirect(baseRoutes.StartController.start())
     }
+}
+
+object CheckAllAnswersAndSubmitController {
+
+  sealed trait SubmitReturnResult
+
+  object SubmitReturnResult {
+
+    final case class SubmitReturnError(error: Error) extends SubmitReturnResult
+
+    final case class SubmitReturnSuccess(response: SubmitReturnResponse) extends SubmitReturnResult
+
+  }
+
 }
