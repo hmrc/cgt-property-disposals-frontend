@@ -564,6 +564,14 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
     }
 
+    "handling requests to display the disposal price page" must {}
+
+    "handling submitted answers to the disposal price page" must {}
+
+    "handling requests to display the acquisition price page" must {}
+
+    "handling submitted answers to the acquisition price page" must {}
+
     "handling requests to display the check your answers page" must {
 
       def performAction(): Future[Result] =

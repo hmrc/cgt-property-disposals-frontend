@@ -205,17 +205,18 @@ class PropertyDetailsController @Inject() (
         r.draftReturn match {
           case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
           case m: MultipleDisposalsDraftReturn =>
-            val answers  = m.examplePropertyDetailsAnswers
+            val answers = m.examplePropertyDetailsAnswers
+              .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
+
             val backLink = disposalDateBackLink(answers)
             val disposalDate = answers
-              .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
               .fold(_.disposalDate, c => Some(c.disposalDate))
 
             m.triageAnswers.fold(_.taxYear, c => Some(c.taxYear)) match {
               case Some(taxYear) =>
                 val form =
                   disposalDate.fold(getDisposalDateFrom(taxYear))(c => getDisposalDateFrom(taxYear).fill(c.value))
-                Ok(multipleDisposalsDisposalDatePage(form, backLink, false))
+                Ok(multipleDisposalsDisposalDatePage(form, backLink))
 
               case None => Redirect(controllers.returns.routes.TaskListController.taskList())
             }
@@ -229,7 +230,9 @@ class PropertyDetailsController @Inject() (
         r.draftReturn match {
           case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
           case m: MultipleDisposalsDraftReturn =>
-            val answers  = m.examplePropertyDetailsAnswers
+            val answers = m.examplePropertyDetailsAnswers
+              .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
+
             val backLink = disposalDateBackLink(answers)
             m.triageAnswers.fold(_.taxYear, c => Some(c.taxYear)) match {
               case Some(taxYear) =>
@@ -238,19 +241,17 @@ class PropertyDetailsController @Inject() (
                   .fold(
                     formWithErrors =>
                       BadRequest(
-                        multipleDisposalsDisposalDatePage(formWithErrors, backLink, false)
+                        multipleDisposalsDisposalDatePage(formWithErrors, backLink)
                       ), { date =>
                       val disposalDate = DisposalDate(date, taxYear)
 
                       if (answers
-                            .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
                             .fold(_.disposalDate, c => Some(c.disposalDate))
                             .contains(disposalDate)) {
                         Redirect(routes.PropertyDetailsController.checkYourAnswers())
                       } else {
                         val updatedAnswers =
                           answers
-                            .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
                             .fold(
                               _.copy(disposalDate = Some(disposalDate)),
                               _.copy(disposalDate = disposalDate)
@@ -289,11 +290,12 @@ class PropertyDetailsController @Inject() (
         r.draftReturn match {
           case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
           case m: MultipleDisposalsDraftReturn =>
-            val answers  = m.examplePropertyDetailsAnswers
+            val answers = m.examplePropertyDetailsAnswers
+              .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
+
             val backLink = disposalPriceBackLink(answers)
 
             val disposalPrice = answers
-              .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
               .fold(_.disposalPrice, c => Some(c.disposalPrice))
 
             val form = disposalPrice.fold(disposalPriceForm)(c => disposalPriceForm.fill(c.inPounds))
@@ -309,7 +311,8 @@ class PropertyDetailsController @Inject() (
         r.draftReturn match {
           case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
           case m: MultipleDisposalsDraftReturn =>
-            val answers  = m.examplePropertyDetailsAnswers
+            val answers = m.examplePropertyDetailsAnswers
+              .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
             val backLink = disposalPriceBackLink(answers)
 
             disposalPriceForm
@@ -320,14 +323,12 @@ class PropertyDetailsController @Inject() (
                     multipleDisposalsDisposalPricePage(formWithErrors, backLink)
                   ), { disposalPrice =>
                   if (answers
-                        .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
                         .fold(_.disposalPrice, c => Some(c.disposalPrice))
                         .contains(AmountInPence.fromPounds(disposalPrice))) {
                     Redirect(routes.PropertyDetailsController.checkYourAnswers())
                   } else {
                     val updatedAnswers =
                       answers
-                        .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
                         .fold(
                           _.copy(disposalPrice = Some(AmountInPence.fromPounds(disposalPrice))),
                           _.copy(disposalPrice = AmountInPence.fromPounds(disposalPrice))
@@ -361,11 +362,12 @@ class PropertyDetailsController @Inject() (
         r.draftReturn match {
           case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
           case m: MultipleDisposalsDraftReturn =>
-            val answers  = m.examplePropertyDetailsAnswers
+            val answers = m.examplePropertyDetailsAnswers
+              .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
+
             val backLink = acquisitionPriceBackLink(answers)
 
             val acquisitionPrice = answers
-              .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
               .fold(_.acquisitionPrice, c => Some(c.acquisitionPrice))
 
             val form = acquisitionPrice.fold(acquisitionPriceForm)(c => acquisitionPriceForm.fill(c.inPounds))
@@ -381,7 +383,8 @@ class PropertyDetailsController @Inject() (
         r.draftReturn match {
           case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
           case m: MultipleDisposalsDraftReturn =>
-            val answers  = m.examplePropertyDetailsAnswers
+            val answers = m.examplePropertyDetailsAnswers
+              .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
             val backLink = acquisitionPriceBackLink(answers)
 
             acquisitionPriceForm
@@ -392,14 +395,12 @@ class PropertyDetailsController @Inject() (
                     multipleDisposalsAcquisitionPricePage(formWithErrors, backLink)
                   ), { acquisitionPrice =>
                   if (answers
-                        .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
                         .fold(_.acquisitionPrice, c => Some(c.acquisitionPrice))
                         .contains(AmountInPence.fromPounds(acquisitionPrice))) {
                     Redirect(routes.PropertyDetailsController.checkYourAnswers())
                   } else {
                     val updatedAnswers =
                       answers
-                        .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
                         .fold(
                           _.copy(acquisitionPrice = Some(AmountInPence.fromPounds(acquisitionPrice))),
                           _.copy(acquisitionPrice = AmountInPence.fromPounds(acquisitionPrice))
@@ -501,25 +502,22 @@ class PropertyDetailsController @Inject() (
     disposalDateForm(maximumDateInclusive, startDateOfTaxYear)
   }
 
-  private def disposalDateBackLink(answers: Option[MultipleDisposalsExamplePropertyDetailsAnswers]): Call =
+  private def disposalDateBackLink(answers: MultipleDisposalsExamplePropertyDetailsAnswers): Call =
     answers
-      .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
       .fold(
         _ => routes.PropertyDetailsController.enterUkAddress(),
         _ => routes.PropertyDetailsController.checkYourAnswers()
       )
 
-  private def disposalPriceBackLink(answers: Option[MultipleDisposalsExamplePropertyDetailsAnswers]): Call =
+  private def disposalPriceBackLink(answers: MultipleDisposalsExamplePropertyDetailsAnswers): Call =
     answers
-      .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
       .fold(
         _ => routes.PropertyDetailsController.disposalDate(),
         _ => routes.PropertyDetailsController.checkYourAnswers()
       )
 
-  private def acquisitionPriceBackLink(answers: Option[MultipleDisposalsExamplePropertyDetailsAnswers]): Call =
+  private def acquisitionPriceBackLink(answers: MultipleDisposalsExamplePropertyDetailsAnswers): Call =
     answers
-      .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
       .fold(
         _ => routes.PropertyDetailsController.disposalPrice(),
         _ => routes.PropertyDetailsController.checkYourAnswers()

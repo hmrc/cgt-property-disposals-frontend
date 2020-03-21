@@ -33,7 +33,7 @@
  caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
 )
 
-@(form: Form[LocalDate], backLink: Call, displayReturnToSummaryLink: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(form: Form[LocalDate], backLink: Call)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"multipleDisposalsDisposalDate"}
 @hasErrors = @{form.hasErrors}
@@ -64,9 +64,9 @@
   )
 
   <p>@Html(messages(s"$key.link", viewConfig.tranferringOwnershipHelp))</p>
-  @submitButton(messages(if(displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
+  @submitButton(messages("button.saveAndContinue"))
  }
 
- @returnToSummaryLink(displayReturnToSummaryLink)
+ @returnToSummaryLink(displayReturnToSummaryLink = true)
 
 }
