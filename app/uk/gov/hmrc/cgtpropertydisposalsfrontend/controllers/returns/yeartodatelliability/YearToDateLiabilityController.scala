@@ -151,7 +151,8 @@ class YearToDateLiabilityController @Inject() (
                                          reliefDetailsAnswers,
                                          exemptionAndLossesAnswers,
                                          estimatedIncome,
-                                         personalAllowance
+                                         personalAllowance,
+                                         draftReturn.initialGainOrLoss
                                        )
                                      )
                 _ <- EitherT(

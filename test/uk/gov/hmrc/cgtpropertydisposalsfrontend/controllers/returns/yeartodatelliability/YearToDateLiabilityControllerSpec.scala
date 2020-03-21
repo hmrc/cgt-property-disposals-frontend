@@ -1169,6 +1169,7 @@ class YearToDateLiabilityControllerSpec
       val acquisitionDetailsAnswers = sample[CompleteAcquisitionDetailsAnswers]
       val reliefDetailsAnswers      = sample[CompleteReliefDetailsAnswers]
       val exemptionAndLossesAnswers = sample[CompleteExemptionAndLossesAnswers]
+      val initialGainOrLossAnswers  = sample[AmountInPence]
 
       def draftReturnWithAnswers(yearToDateLiabilityAnswers: YearToDateLiabilityAnswers): SingleDisposalDraftReturn =
         sample[SingleDisposalDraftReturn].copy(
@@ -1177,7 +1178,8 @@ class YearToDateLiabilityControllerSpec
           acquisitionDetailsAnswers  = Some(acquisitionDetailsAnswers),
           reliefDetailsAnswers       = Some(reliefDetailsAnswers),
           exemptionAndLossesAnswers  = Some(exemptionAndLossesAnswers),
-          yearToDateLiabilityAnswers = Some(yearToDateLiabilityAnswers)
+          yearToDateLiabilityAnswers = Some(yearToDateLiabilityAnswers),
+          initialGainOrLoss          = Some(initialGainOrLossAnswers)
         )
 
       def calculateRequest(estimatedIncome: AmountInPence, personalAllowance: AmountInPence) =
@@ -1188,7 +1190,8 @@ class YearToDateLiabilityControllerSpec
           reliefDetailsAnswers,
           exemptionAndLossesAnswers,
           estimatedIncome,
-          personalAllowance
+          personalAllowance,
+          Some(initialGainOrLossAnswers)
         )
 
       behave like redirectToStartBehaviour(performAction)

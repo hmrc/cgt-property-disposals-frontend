@@ -14,19 +14,15 @@
  * limitations under the License.
  *@
 
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.SumPartDisplay
 
-@this()
+@this(
+  sumPart: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_sum_part
+)
 
-@(total: AmountInPence, label: String, showGainType: Boolean)(implicit messages: Messages)
+@(parts: List[SumPartDisplay], total: SumPartDisplay)(implicit messages: Messages)
 
-<span class="calc-total">
-  @{MoneyUtils.formatAmountOfMoneyWithPoundSign(total.abs().inPounds())}
- @if(showGainType) {
-  @{if (total.isNegative) s"(${messages("generic.loss")})" else if (!total.isZero) s"(${messages("generic.gain")})"}
- }
-</span>
-<h2 class="heading-medium">
-   @label
-</h2>
+  <dl class="govuk-check-your-answers cya-questions-long">
+    @{ parts.map(sumPart(_)) }
+    @{ sumPart(total) }
+  </dl>

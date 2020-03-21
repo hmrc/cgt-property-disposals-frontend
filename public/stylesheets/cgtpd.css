@@ -606,7 +606,6 @@ input:focus + .hmcts-currency-input__symbol.right {
 
 .calc-rows > li {
     position: relative;
-    border-bottom: 1px solid #aaa;
 }
 
 .calc-total {
@@ -615,6 +614,22 @@ input:focus + .hmcts-currency-input__symbol.right {
     top: 8px;
     right: 0;
     font-weight: bold;
+}
+
+details dl.govuk-check-your-answers {
+    margin-bottom: 30px;
+}
+
+.sum-total > .cya-question,
+.sum-total > .cya-change {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.sum-part > .cya-question,
+.sum-part > .cya-change {
+    font-weight: normal;
+    font-size: 16px;
 }
 
 .column-three-quarters {
