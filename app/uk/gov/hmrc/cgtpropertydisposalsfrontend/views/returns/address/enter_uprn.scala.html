@@ -41,8 +41,9 @@
 @line3Key = @{"address-town"}
 @line4Key = @{"address-county"}
 @postcodeKey = @{"postcode"}
+@submit = @{ if(isSingleDisposal) routes.PropertyDetailsController.singleDisposalEnterLandUprnSubmit() else routes.PropertyDetailsController.multipleDisposalsEnterLandUprnSubmit() }
 
-@title = @{messages(s"$key.title")}
+@title = @{messages(if(isSingleDisposal) s"$key.singleDisposal.title" else s"$key.multipleDisposals.title")}
 
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
@@ -56,11 +57,14 @@
 
     @caption(messages(if(isSingleDisposal) "returns.property-address.singleDisposal.caption" else "returns.property-details.multipleDisposals.caption"))
 
-@formWrapper(routes.PropertyDetailsController.nonResidentialPropertyInputLandUPRNSubmit(), 'novalidate -> "novalidate") {
-    <fieldset id="@key">
+@formWrapper(submit, 'novalidate -> "novalidate") {
+    <fieldset id="@key" aria-describedby="address-hint">
       <legend>
         @pageHeading(title)
       </legend>
+
+      <p id="address-hint">@messages(s"$key.p1")</p>
+
       @textInput(
         fieldId = line1Key,
         label = Html(messages(s"$key.line1.label")),
@@ -68,7 +72,8 @@
         value = form.data.getOrElse(line1Key, ""),
         hasErrors = form.error(line1Key).nonEmpty,
         inputClass = Some("form-control-3-4"),
-        autoComplete = AutoCompleteType.AddressLine1
+        autoComplete = AutoCompleteType.AddressLine1,
+        helpText = Some(Html(messages(s"$key.line1.helpText")))
       )
       @textInput(
         fieldId = line2Key,
