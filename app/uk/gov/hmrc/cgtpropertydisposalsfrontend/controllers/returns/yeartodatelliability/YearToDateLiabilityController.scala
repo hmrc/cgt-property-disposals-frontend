@@ -88,22 +88,21 @@ class YearToDateLiabilityController @Inject() (
     f: (
       SessionData,
       FillingOutReturn,
-      YearToDateLiabilityAnswers,
-      Either[UserType.Organisation.type, UserType.Individual.type]
+      YearToDateLiabilityAnswers
     ) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((s, r @ FillingOutReturn(subscribedDetails: SubscribedDetails, _, _, d: SingleDisposalDraftReturn))) => {
+      case Some((s, r @ FillingOutReturn(_, _, _, d: SingleDisposalDraftReturn))) => {
         d.yearToDateLiabilityAnswers match {
-          case Some(y) => f(s, r, y, subscribedDetails.userType())
+          case Some(y) => f(s, r, y)
 
           case None =>
             d.reliefDetailsAnswers match {
               case Some(CompleteReliefDetailsAnswers(_, _, Some(_: OtherReliefsOption.OtherReliefs))) =>
-                f(s, r, IncompleteNonCalculatedYearToDateLiabilityAnswers.empty, subscribedDetails.userType())
+                f(s, r, IncompleteNonCalculatedYearToDateLiabilityAnswers.empty)
 
               case Some(_: CompleteReliefDetailsAnswers) =>
-                f(s, r, IncompleteCalculatedYearToDateLiabilityAnswers.empty, subscribedDetails.userType())
+                f(s, r, IncompleteCalculatedYearToDateLiabilityAnswers.empty)
 
               case _ =>
                 Redirect(controllers.returns.routes.TaskListController.taskList())
@@ -115,8 +114,8 @@ class YearToDateLiabilityController @Inject() (
           (s, r @ FillingOutReturn(subscribedDetails: SubscribedDetails, _, _, d: MultipleDisposalsDraftReturn))
           ) =>
         d.yearToDateLiabilityAnswers.fold[Future[Result]](
-          f(s, r, IncompleteNonCalculatedYearToDateLiabilityAnswers.empty, subscribedDetails.userType())
-        )(f(s, r, _, subscribedDetails.userType()))
+          f(s, r, IncompleteNonCalculatedYearToDateLiabilityAnswers.empty)
+        )(f(s, r, _))
 
       case _ => Redirect(controllers.routes.StartController.start())
     }
@@ -364,7 +363,7 @@ class YearToDateLiabilityController @Inject() (
 
   def estimatedIncome(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndYTDLiabilityAnswers(request) {
-      case (_, fillingOutReturn, answers, _) =>
+      case (_, fillingOutReturn, answers) =>
         (answers, fillingOutReturn.draftReturn) match {
           case (calculatedAnswers: CalculatedYearToDateLiabilityAnswers, draftReturn: SingleDisposalDraftReturn) =>
             withDisposalDate(draftReturn) { disposalDate =>
@@ -389,7 +388,7 @@ class YearToDateLiabilityController @Inject() (
 
   def estimatedIncomeSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndYTDLiabilityAnswers(request) {
-      case (_, fillingOutReturn, answers, _) =>
+      case (_, fillingOutReturn, answers) =>
         (answers, fillingOutReturn.draftReturn) match {
           case (calculatedAnswers: CalculatedYearToDateLiabilityAnswers, draftReturn: SingleDisposalDraftReturn) =>
             withDisposalDate(draftReturn) { disposalDate =>
@@ -443,7 +442,7 @@ class YearToDateLiabilityController @Inject() (
 
   def personalAllowance(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndYTDLiabilityAnswers(request) {
-      case (_, fillingOutReturn, answers, _) =>
+      case (_, fillingOutReturn, answers) =>
         (answers, fillingOutReturn.draftReturn) match {
           case (calculatedAnswers: CalculatedYearToDateLiabilityAnswers, draftReturn: SingleDisposalDraftReturn) =>
             withDisposalDate(draftReturn) { disposalDate =>
@@ -477,7 +476,7 @@ class YearToDateLiabilityController @Inject() (
 
   def personalAllowanceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndYTDLiabilityAnswers(request) {
-      case (_, fillingOutReturn, answers, _) =>
+      case (_, fillingOutReturn, answers) =>
         (answers, fillingOutReturn.draftReturn) match {
           case (calculatedAnswers: CalculatedYearToDateLiabilityAnswers, draftReturn: SingleDisposalDraftReturn) =>
             withDisposalDate(draftReturn) { disposalDate =>
@@ -538,7 +537,7 @@ class YearToDateLiabilityController @Inject() (
 
   def hasEstimatedDetails(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndYTDLiabilityAnswers(request) {
-      case (_, fillingOutReturn, answers, _) =>
+      case (_, fillingOutReturn, answers) =>
         (answers, fillingOutReturn.draftReturn) match {
           case (nonCalculatedAnswers: NonCalculatedYearToDateLiabilityAnswers, _: DraftReturn) =>
             commonDisplayBehaviour(nonCalculatedAnswers)(
@@ -586,7 +585,7 @@ class YearToDateLiabilityController @Inject() (
 
   def hasEstimatedDetailsSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndYTDLiabilityAnswers(request) {
-      case (_, fillingOutReturn, answers, _) =>
+      case (_, fillingOutReturn, answers) =>
         (answers, fillingOutReturn.draftReturn) match {
           case (nonCalculatedAnswers: NonCalculatedYearToDateLiabilityAnswers, draftReturn: DraftReturn) =>
             handleNonCalculatedEstimatedDetailsSubmit(nonCalculatedAnswers, draftReturn, fillingOutReturn)
@@ -688,7 +687,7 @@ class YearToDateLiabilityController @Inject() (
 
   def taxDue(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndYTDLiabilityAnswers(request) {
-      case (_, fillingOutReturn, answers, userType) =>
+      case (_, fillingOutReturn, answers) =>
         (answers, fillingOutReturn.draftReturn) match {
           case (calculatedAnswers: CalculatedYearToDateLiabilityAnswers, draftReturn: SingleDisposalDraftReturn) =>
             withEstimatedIncome(calculatedAnswers) { estimatedIncome =>
@@ -725,7 +724,7 @@ class YearToDateLiabilityController @Inject() (
                           estimatedIncome,
                           personalAllowance,
                           calculatedTaxDue,
-                          userType.isLeft
+                          fillingOutReturn.subscribedDetails.userType().isLeft
                         )
                         )(
                           _.fold(
@@ -749,7 +748,7 @@ class YearToDateLiabilityController @Inject() (
 
   def taxDueSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndYTDLiabilityAnswers(request) {
-      case (_, fillingOutReturn, answers, userType) =>
+      case (_, fillingOutReturn, answers) =>
         (answers, fillingOutReturn.draftReturn) match {
           case (calculatedAnswers: CalculatedYearToDateLiabilityAnswers, draftReturn: SingleDisposalDraftReturn) =>
             withEstimatedIncome(calculatedAnswers) { estimatedIncome =>
@@ -783,7 +782,7 @@ class YearToDateLiabilityController @Inject() (
                           estimatedIncome,
                           personalAllowance,
                           calculatedTaxDue,
-                          userType.isLeft
+                          fillingOutReturn.subscribedDetails.userType().isLeft
                         )
                         )(
                           _.fold(
@@ -828,7 +827,7 @@ class YearToDateLiabilityController @Inject() (
 
   def uploadMandatoryEvidence(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndYTDLiabilityAnswers(request) {
-      case (_, fillingOutReturn, answers, _) =>
+      case (_, fillingOutReturn, answers) =>
         (answers, fillingOutReturn.draftReturn) match {
           case (calculatedAnswers: CalculatedYearToDateLiabilityAnswers, _: SingleDisposalDraftReturn) =>
             withTaxDueAndCalculatedTaxDue(calculatedAnswers) { (taxDue, calculatedTaxDue) =>
@@ -857,7 +856,7 @@ class YearToDateLiabilityController @Inject() (
   def uploadMandatoryEvidenceSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
       withFillingOutReturnAndYTDLiabilityAnswers(request) {
-        case (_, fillingOutReturn, answers, _) =>
+        case (_, fillingOutReturn, answers) =>
           (answers, fillingOutReturn.draftReturn) match {
             case (calculatedAnswers: CalculatedYearToDateLiabilityAnswers, draftReturn: SingleDisposalDraftReturn) =>
               withTaxDueAndCalculatedTaxDue(calculatedAnswers) { (taxDue, calculatedTaxDue) =>
@@ -942,7 +941,7 @@ class YearToDateLiabilityController @Inject() (
 
   def taxableGainOrLossSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndYTDLiabilityAnswers(request) {
-      case (_, fillingOutReturn, answers, _) =>
+      case (_, fillingOutReturn, answers) =>
         answers match {
           case _: CalculatedYearToDateLiabilityAnswers =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
@@ -1000,7 +999,7 @@ class YearToDateLiabilityController @Inject() (
   def nonCalculatedEnterTaxDueSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
       withFillingOutReturnAndYTDLiabilityAnswers(request) {
-        case (_, fillingOutReturn, answers, _) =>
+        case (_, fillingOutReturn, answers) =>
           answers match {
             case _: CalculatedYearToDateLiabilityAnswers =>
               Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
@@ -1032,7 +1031,7 @@ class YearToDateLiabilityController @Inject() (
 
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndYTDLiabilityAnswers(request) {
-      case (_, fillingOutReturn, answers, _) =>
+      case (_, fillingOutReturn, answers) =>
         (answers, fillingOutReturn.draftReturn) match {
           case (c: CalculatedYearToDateLiabilityAnswers, s: SingleDisposalDraftReturn) =>
             checkYourAnswersHandleCalculated(c, fillingOutReturn, s)
