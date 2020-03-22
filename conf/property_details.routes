@@ -1,3 +1,9 @@
+GET  /does-propertu-have-uk-postcode      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.nonResidentialPropertyHasUkPostcode()
+POST /does-property-have-uk-postcode      uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.nonResidentialPropertyHasUkPostcodeSubmit()
+
+GET  /enter-unique-property-reference-number    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.nonResidentialPropertyInputLandUPRN()
+POST /enter-unique-property-reference-number    uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.nonResidentialPropertyInputLandUPRNSubmit()
+
 GET  /details-one-disposal/help          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.multipleDisposalsGuidance()
 POST /details-one-disposal/help          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.multipleDisposalsGuidanceSubmit()
 

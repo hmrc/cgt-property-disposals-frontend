@@ -37,7 +37,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalDraftReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, SingleDisposalDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 
@@ -197,6 +198,28 @@ class SingleDisposalPropertyDetailsControllerSpec
             validatePropertyAddressPage(ukAddressDetails, doc)
           }
         )
+
+      "redirect to the has uk postcode page if there is no address in session and the user " +
+        "hass a non-residential property type" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(journeyStatus = Some(
+              sample[FillingOutReturn].copy(
+                draftReturn =
+                  draftReturn.copy(
+                    triageAnswers =
+                      sample[CompleteSingleDisposalTriageAnswers].copy(assetType = AssetType.NonResidential),
+                    propertyAddress = None
+                  )
+              )
+            )
+            )
+          )
+        }
+
+        checkIsRedirect(performAction(), routes.PropertyDetailsController.nonResidentialPropertyHasUkPostcode())
+      }
 
       "redirect to the enter postcode page if there is no property address in session" in {
         inSequence {
