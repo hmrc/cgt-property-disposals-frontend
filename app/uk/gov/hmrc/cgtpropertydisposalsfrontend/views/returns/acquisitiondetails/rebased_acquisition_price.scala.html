@@ -51,7 +51,7 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
         @errorSummary(form)
     }
 
-    @caption(messages("acquisitionDetails.caption"))
+@caption(messages("acquisitionDetails.caption"))
 
     @formWrapper(routes.AcquisitionDetailsController.rebasedAcquisitionPriceSubmit(), 'novalidate -> "novalidate") {
         @unitInput(
@@ -63,18 +63,19 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
             labelAsHeading = true,
             autoComplete = AutoCompleteType.On,
             inputClass = Some("small"),
+            helpText = Some(Html(messages(s"$key.helpText"))),
             aspect = "left",
             unit = "£",
             assistiveText = messages("unit-input.assistive.pounds")
-        ),
+        )
 
-        @details(messages("rebaseAcquisitionPrice.dropdown.header"),
+        @details(messages(s"$key.dropdown.header"),
         Html(s"""|
-        |<p> ${messages("rebaseAcquisitionPrice.dropdown.p1", LocalDateUtils.govDisplayFormat(rebaseCutOffDate))} </p>
-        |<p> ${messages("rebaseAcquisitionPrice.dropdown.p2")} </p>
-        |<p> ${messages("rebaseAcquisitionPrice.dropdown.p3")} </p>
-        |<p> ${Html(messages("rebaseAcquisitionPrice.dropdown.p4", appConfig.marketValue))} </p>
-        |<p> ${messages("rebaseAcquisitionPrice.dropdown.p5")} </p>
+        |<p> ${messages(s"$key.dropdown.p1", LocalDateUtils.govDisplayFormat(rebaseCutOffDate))} </p>
+        |<p> ${messages(s"$key.dropdown.p2")} </p>
+        |<p> ${messages(s"$key.dropdown.p3")} </p>
+        |<p> ${Html(messages(s"$key.dropdown.p4", appConfig.marketValue))} </p>
+        |<p> ${messages(s"$key.dropdown.p5")} </p>
         |""".stripMargin ))
 
         @submitButton(messages("button.saveAndContinue"))
