@@ -33,7 +33,8 @@ final case class TaxYear(
   cgtRateLowerBandResidential: BigDecimal,
   cgtRateLowerBandNonResidential: BigDecimal,
   cgtRateHigherBandResidential: BigDecimal,
-  cgtRateHigherBandNonResidential: BigDecimal
+  cgtRateHigherBandNonResidential: BigDecimal,
+  maxLettingsReliefAmount: AmountInPence
 )
 
 object TaxYear {

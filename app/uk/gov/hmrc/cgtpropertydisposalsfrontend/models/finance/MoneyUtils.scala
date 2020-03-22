@@ -54,6 +54,12 @@ object MoneyUtils {
         else Right(d)
       }
 
+  def validateValueIsLessThan(key: String, limitInclusive: AmountInPence, errorMessageKey: => String)(
+    value: BigDecimal
+  ): Either[FormError, BigDecimal] =
+    if (value <= limitInclusive.inPounds()) Right(value)
+    else Left(FormError(key, errorMessageKey, List(limitInclusive.inPounds().toString())))
+
   def amountInPoundsFormatter(
     isTooSmall: BigDecimal => Boolean,
     isTooLarge: BigDecimal => Boolean
@@ -71,8 +77,12 @@ object MoneyUtils {
 
   // form for yes/no radio page with no mapping to £0 and yes expecting an amount of money
   // to be submitted
-  def amountInPoundsYesNoForm(optionId: String, valueId: String): Form[BigDecimal] = {
-    val innerOption = InnerOption { data =>
+  def amountInPoundsYesNoForm(
+    optionId: String,
+    valueId: String,
+    maybeInnerOption: Option[InnerOption[BigDecimal]] = None
+  ): Form[BigDecimal] = {
+    val innerOption = maybeInnerOption.getOrElse(InnerOption { data =>
       FormUtils
         .readValue(valueId, data, identity)
         .flatMap(
@@ -83,7 +93,7 @@ object MoneyUtils {
           )(_)
         )
         .leftMap(Seq(_))
-    }
+    })
 
     val formatter =
       ConditionalRadioUtils.formatter(optionId)(
