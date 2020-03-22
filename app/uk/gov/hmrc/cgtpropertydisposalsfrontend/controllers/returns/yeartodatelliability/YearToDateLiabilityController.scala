@@ -917,7 +917,7 @@ class YearToDateLiabilityController @Inject() (
 
   def taxableGainOrLoss(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndYTDLiabilityAnswers(request) {
-      case (_, _, answers, _) =>
+      case (_, _, answers) =>
         answers match {
           case _: CalculatedYearToDateLiabilityAnswers =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
@@ -973,7 +973,7 @@ class YearToDateLiabilityController @Inject() (
 
   def nonCalculatedEnterTaxDue(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndYTDLiabilityAnswers(request) {
-      case (_, _, answers, _) =>
+      case (_, _, answers) =>
         answers match {
           case _: CalculatedYearToDateLiabilityAnswers =>
             Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
