@@ -94,7 +94,6 @@ class YearToDateLiabilityController @Inject() (
       case Some((s, r @ FillingOutReturn(_, _, _, d: SingleDisposalDraftReturn))) =>
         d.yearToDateLiabilityAnswers match {
           case Some(y) => f(s, r, y)
-
           case None =>
             d.reliefDetailsAnswers match {
               case Some(CompleteReliefDetailsAnswers(_, _, Some(_: OtherReliefsOption.OtherReliefs))) =>
@@ -357,27 +356,26 @@ class YearToDateLiabilityController @Inject() (
     }
 
   def estimatedIncome(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
-    withFillingOutReturnAndYTDLiabilityAnswers(request) {
-      case (_, fillingOutReturn, answers) =>
-        (answers, fillingOutReturn.draftReturn) match {
-          case (calculatedAnswers: CalculatedYearToDateLiabilityAnswers, draftReturn: SingleDisposalDraftReturn) =>
-            withDisposalDate(draftReturn) { disposalDate =>
-              commonDisplayBehaviour(calculatedAnswers)(
-                form = _.fold(
-                  _.estimatedIncome.fold(estimatedIncomeForm)(a => estimatedIncomeForm.fill(a.inPounds())),
-                  c => estimatedIncomeForm.fill(c.estimatedIncome.inPounds())
-                )
-              )(
-                page = estimatedIncomePage(_, _, disposalDate)
-              )(
-                requiredPreviousAnswer = _ => Some(()),
-                controllers.returns.routes.TaskListController.taskList()
+    withFillingOutReturnAndYTDLiabilityAnswers(request) { (_, fillingOutReturn, answers) =>
+      (answers, fillingOutReturn.draftReturn) match {
+        case (calculatedAnswers: CalculatedYearToDateLiabilityAnswers, draftReturn: SingleDisposalDraftReturn) =>
+          withDisposalDate(draftReturn) { disposalDate =>
+            commonDisplayBehaviour(calculatedAnswers)(
+              form = _.fold(
+                _.estimatedIncome.fold(estimatedIncomeForm)(a => estimatedIncomeForm.fill(a.inPounds())),
+                c => estimatedIncomeForm.fill(c.estimatedIncome.inPounds())
               )
-            }
+            )(
+              page = estimatedIncomePage(_, _, disposalDate)
+            )(
+              requiredPreviousAnswer = _ => Some(()),
+              controllers.returns.routes.TaskListController.taskList()
+            )
+          }
 
-          case _ =>
-            Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
-        }
+        case _ =>
+          Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
+      }
     }
   }
 
@@ -407,7 +405,7 @@ class YearToDateLiabilityController @Inject() (
                           .contains(estimatedIncome)) {
                       draftReturn
                     } else {
-                      val newAnswers =
+                      val newAnswers: IncompleteCalculatedYearToDateLiabilityAnswers =
                         calculatedAnswers.fold(
                           { incomplete =>
                             val hadRequiredPersonalAllowance = incomplete.estimatedIncome.exists(_.value > 0L)
@@ -1037,7 +1035,6 @@ class YearToDateLiabilityController @Inject() (
             errorHandler.errorResult()
 
         }
-
     }
   }
 

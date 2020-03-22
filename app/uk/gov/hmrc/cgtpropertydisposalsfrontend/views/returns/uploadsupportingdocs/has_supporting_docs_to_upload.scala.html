@@ -44,7 +44,9 @@
 @errorSummary(form)
 }
 
-@formWrapper(routes.UploadSupportingDocumentsController.hasSupportingDocsToUpload(), 'novalidate -> "novalidate") {
+@caption(messages(s"$key.caption"))
+
+@formWrapper(routes.UploadSupportingDocumentsController.hasSupportingDocsToUploadSubmit(), 'novalidate -> "novalidate") {
 
     @yesNo(
         fieldId = key,
@@ -53,9 +55,9 @@
         errorKey = form.error(key).map(e => e.message),
         hasErrors = hasErrors,
         selected = form.value,
-        helpText = None,
+        helpText = Some(Html(messages(s"$key.help-text"))),
         yesContent = None
-        )
+    )
         @submitButton(messages("button.saveAndContinue"))
     }
 

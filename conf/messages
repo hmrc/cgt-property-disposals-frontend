@@ -1259,3 +1259,5 @@ nonCalculatedTaxDue.helpText=You’ll need to work out and enter the amount.
 hasSupportingDocsToUpload.title=Do you want to upload any supporting docs?
 hasSupportingDocsToUpload.error.required=Select yes if you want to upload any supporting documents
 hasSupportingDocsToUpload.error.boolean=Select yes if you want to upload any supporting documents
+hasSupportingDocsToUpload.caption=Supporting evidence
+hasSupportingDocsToUpload.help-text=For example, receipts or invoices or details of how you worked out the Capital Gains Tax due
