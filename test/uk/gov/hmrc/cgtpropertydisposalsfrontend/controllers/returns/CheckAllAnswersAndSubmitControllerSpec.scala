@@ -82,6 +82,8 @@ class CheckAllAnswersAndSubmitControllerSpec
 
   implicit val messagesApi: MessagesApi = controller.messagesApi
 
+  val rebasingEligibilityUtil = new RebasingEligibilityUtil()
+
   def sessionWitJourney(journeyStatus: JourneyStatus): SessionData =
     SessionData.empty.copy(journeyStatus = Some(journeyStatus))
 
@@ -150,7 +152,13 @@ class CheckAllAnswersAndSubmitControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey("checkAllAnswers.title"), { doc =>
-              validateAllCheckYourAnswersSections(doc, completeReturn, None, false, true)
+              validateAllCheckYourAnswersSections(
+                doc,
+                completeReturn,
+                None,
+                rebasingEligibilityUtil.isUk(completeReturn),
+                rebasingEligibilityUtil.isEligibleForRebase(completeReturn)
+              )
               doc.select("#back").attr("href") shouldBe routes.TaskListController.taskList().url
               doc.select("#content > article > form").attr("action") shouldBe routes.CheckAllAnswersAndSubmitController
                 .checkAllAnswersSubmit()
@@ -172,7 +180,13 @@ class CheckAllAnswersAndSubmitControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey("checkAllAnswers.title"), { doc =>
-              validateAllCheckYourAnswersSections(doc, completeReturn, Some(UserType.Agent), false, true)
+              validateAllCheckYourAnswersSections(
+                doc,
+                completeReturn,
+                Some(UserType.Agent),
+                rebasingEligibilityUtil.isUk(completeReturn),
+                rebasingEligibilityUtil.isEligibleForRebase(completeReturn)
+              )
               doc.select("#back").attr("href") shouldBe routes.TaskListController.taskList().url
               doc.select("#content > article > form").attr("action") shouldBe routes.CheckAllAnswersAndSubmitController
                 .checkAllAnswersSubmit()
