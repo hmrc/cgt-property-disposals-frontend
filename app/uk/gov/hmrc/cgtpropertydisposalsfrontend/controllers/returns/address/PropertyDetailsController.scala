@@ -103,11 +103,8 @@ class PropertyDetailsController @Inject() (
             else {
               val updatedDraftReturn = m.copy(
                 examplePropertyDetailsAnswers = Some(
-                  IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(
-                    Some(a),
-                    None,
-                    None,
-                    None
+                  IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty.copy(
+                    address = Some(a)
                   )
                 )
               )
@@ -258,6 +255,11 @@ class PropertyDetailsController @Inject() (
                             )
                         val updatedDraftReturn = m.copy(examplePropertyDetailsAnswers = Some(updatedAnswers))
                         val result = for {
+                          _ <- returnsService.storeDraftReturn(
+                                updatedDraftReturn,
+                                r.subscribedDetails.cgtReference,
+                                r.agentReferenceNumber
+                              )
                           _ <- EitherT(
                                 updateSession(sessionStore, request)(
                                   _.copy(journeyStatus = Some(r.copy(draftReturn = updatedDraftReturn)))
@@ -335,6 +337,11 @@ class PropertyDetailsController @Inject() (
                         )
                     val updatedDraftReturn = m.copy(examplePropertyDetailsAnswers = Some(updatedAnswers))
                     val result = for {
+                      _ <- returnsService.storeDraftReturn(
+                            updatedDraftReturn,
+                            r.subscribedDetails.cgtReference,
+                            r.agentReferenceNumber
+                          )
                       _ <- EitherT(
                             updateSession(sessionStore, request)(
                               _.copy(journeyStatus = Some(r.copy(draftReturn = updatedDraftReturn)))
@@ -407,6 +414,11 @@ class PropertyDetailsController @Inject() (
                         )
                     val updatedDraftReturn = m.copy(examplePropertyDetailsAnswers = Some(updatedAnswers))
                     val result = for {
+                      _ <- returnsService.storeDraftReturn(
+                            updatedDraftReturn,
+                            r.subscribedDetails.cgtReference,
+                            r.agentReferenceNumber
+                          )
                       _ <- EitherT(
                             updateSession(sessionStore, request)(
                               _.copy(journeyStatus = Some(r.copy(draftReturn = updatedDraftReturn)))
