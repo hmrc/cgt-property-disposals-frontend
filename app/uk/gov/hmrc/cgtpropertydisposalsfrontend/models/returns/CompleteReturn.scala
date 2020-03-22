@@ -27,7 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLosse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingDocuments.CompleteUploadSupportingDocuments
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYearToDateLiabilityAnswers.CompleteCalculatedYearToDateLiabilityAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.CompleteCalculatedYTDAnswers
 
 final case class CompleteReturn(
   triageAnswers: CompleteSingleDisposalTriageAnswers,
@@ -36,7 +36,7 @@ final case class CompleteReturn(
   acquisitionDetails: CompleteAcquisitionDetailsAnswers,
   reliefDetails: CompleteReliefDetailsAnswers,
   exemptionsAndLossesDetails: CompleteExemptionAndLossesAnswers,
-  yearToDateLiabilityAnswers: CompleteCalculatedYearToDateLiabilityAnswers,
+  yearToDateLiabilityAnswers: CompleteCalculatedYTDAnswers,
   initialGainOrLoss: Option[AmountInPence]
 )
 
@@ -51,7 +51,7 @@ object CompleteReturn {
         Some(a: CompleteAcquisitionDetailsAnswers),
         Some(r: CompleteReliefDetailsAnswers),
         Some(e: CompleteExemptionAndLossesAnswers),
-        Some(y: CompleteCalculatedYearToDateLiabilityAnswers),
+        Some(y: CompleteCalculatedYTDAnswers),
         i,
         _,
         _
@@ -69,14 +69,14 @@ object CompleteReturn {
   }
 
   implicit val format: OFormat[CompleteReturn] = {
-    implicit val triageFormat: OFormat[CompleteSingleDisposalTriageAnswers]                       = Json.format
-    implicit val ukAddressFormat: OFormat[UkAddress]                                              = Json.format
-    implicit val disposalDetailsFormat: OFormat[CompleteDisposalDetailsAnswers]                   = Json.format
-    implicit val acquisitionDetailsFormat: OFormat[CompleteAcquisitionDetailsAnswers]             = Json.format
-    implicit val reliefDetailsFormat: OFormat[CompleteReliefDetailsAnswers]                       = Json.format
-    implicit val exemptionAndLossesFormat: OFormat[CompleteExemptionAndLossesAnswers]             = Json.format
-    implicit val yearToDateLiabilityFormat: OFormat[CompleteCalculatedYearToDateLiabilityAnswers] = Json.format
-    implicit val uploadSupportingDocuments: OFormat[CompleteUploadSupportingDocuments]            = Json.format
+    implicit val triageFormat: OFormat[CompleteSingleDisposalTriageAnswers]            = Json.format
+    implicit val ukAddressFormat: OFormat[UkAddress]                                   = Json.format
+    implicit val disposalDetailsFormat: OFormat[CompleteDisposalDetailsAnswers]        = Json.format
+    implicit val acquisitionDetailsFormat: OFormat[CompleteAcquisitionDetailsAnswers]  = Json.format
+    implicit val reliefDetailsFormat: OFormat[CompleteReliefDetailsAnswers]            = Json.format
+    implicit val exemptionAndLossesFormat: OFormat[CompleteExemptionAndLossesAnswers]  = Json.format
+    implicit val yearToDateLiabilityFormat: OFormat[CompleteCalculatedYTDAnswers]      = Json.format
+    implicit val uploadSupportingDocuments: OFormat[CompleteUploadSupportingDocuments] = Json.format
     Json.format
   }
 

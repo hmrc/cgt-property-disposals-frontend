@@ -37,7 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcod
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsExamplePropertyDetailsAnswers.{CompleteMultipleDisposalsExamplePropertyDetailsAnswers, IncompleteMultipleDisposalsExamplePropertyDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.{CompleteExamplePropertyDetailsAnswers, IncompleteExamplePropertyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DraftReturn, MultipleDisposalsDraftReturn, SingleDisposalDraftReturn}
@@ -54,7 +54,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
     with ReturnsServiceSupport {
 
   val incompleteAnswers =
-    IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty.copy(address = Some(ukAddress(1)))
+    IncompleteExamplePropertyDetailsAnswers.empty.copy(address = Some(ukAddress(1)))
 
   val draftReturn: MultipleDisposalsDraftReturn =
     sample[MultipleDisposalsDraftReturn].copy(examplePropertyDetailsAnswers = Some(incompleteAnswers))
@@ -169,7 +169,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "the user has started but not completed this section" in {
           test(
             sample[MultipleDisposalsDraftReturn].copy(
-              examplePropertyDetailsAnswers = Some(sample[IncompleteMultipleDisposalsExamplePropertyDetailsAnswers])
+              examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
             ),
             controllers.returns.routes.TaskListController.taskList()
           )
@@ -178,7 +178,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "the user has completed this section" in {
           test(
             sample[MultipleDisposalsDraftReturn].copy(
-              examplePropertyDetailsAnswers = Some(sample[CompleteMultipleDisposalsExamplePropertyDetailsAnswers])
+              examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers])
             ),
             routes.PropertyDetailsController.checkYourAnswers()
           )
@@ -234,7 +234,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
                 assetTypes = List(AssetType.NonResidential)
               ),
-              examplePropertyDetailsAnswers = Some(sample[CompleteMultipleDisposalsExamplePropertyDetailsAnswers])
+              examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers])
             ),
             routes.PropertyDetailsController.checkYourAnswers()
           )
@@ -263,7 +263,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               sample[MultipleDisposalsDraftReturn].copy(
                 triageAnswers =
                   sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(AssetType.Residential)),
-                examplePropertyDetailsAnswers = Some(sample[IncompleteMultipleDisposalsExamplePropertyDetailsAnswers])
+                examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
               ),
               routes.PropertyDetailsController.enterPostcode()
             )
@@ -292,7 +292,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               sample[MultipleDisposalsDraftReturn].copy(
                 triageAnswers =
                   sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(AssetType.NonResidential)),
-                examplePropertyDetailsAnswers = Some(sample[IncompleteMultipleDisposalsExamplePropertyDetailsAnswers])
+                examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
               ),
               routes.PropertyDetailsController.nonResidentialPropertyHasUkPostcode()
             )
@@ -385,7 +385,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
                   assetTypes = List(AssetType.NonResidential)
                 ),
-                examplePropertyDetailsAnswers = Some(sample[CompleteMultipleDisposalsExamplePropertyDetailsAnswers])
+                examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers])
               ),
               routes.PropertyDetailsController.checkYourAnswers()
             )
@@ -614,7 +614,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
                   assetTypes = List(AssetType.NonResidential)
                 ),
-                examplePropertyDetailsAnswers = Some(sample[CompleteMultipleDisposalsExamplePropertyDetailsAnswers])
+                examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers])
               ),
               routes.PropertyDetailsController.nonResidentialPropertyHasUkPostcode()
             )
@@ -812,7 +812,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           val newAddress = UkAddress("1", Some("a"), Some("b"), Some("c"), Postcode("ZZ00ZZ"))
           val newDraftReturn = nonResidentialPropertyDraftReturn.copy(
             examplePropertyDetailsAnswers = Some(
-              IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty.copy(
+              IncompleteExamplePropertyDetailsAnswers.empty.copy(
                 address = Some(newAddress)
               )
             )
@@ -841,7 +841,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       "show an error page" when {
 
-        val answers = sample[CompleteMultipleDisposalsExamplePropertyDetailsAnswers]
+        val answers = sample[CompleteExamplePropertyDetailsAnswers]
         val draftReturn = nonResidentialPropertyDraftReturn.copy(
           examplePropertyDetailsAnswers = Some(answers)
         )
@@ -850,7 +850,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         val newDraftReturn = draftReturn.copy(
           examplePropertyDetailsAnswers = Some(
-            IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(Some(newAddress))
+            IncompleteExamplePropertyDetailsAnswers(Some(newAddress))
           )
         )
         val newJourney = journey.copy(draftReturn = newDraftReturn)
@@ -996,8 +996,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       val address = sample[UkAddress]
 
-      val completeAnswers      = CompleteMultipleDisposalsExamplePropertyDetailsAnswers(address)
-      val allQuestionsAnswered = IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(Some(completeAnswers.address))
+      val completeAnswers      = CompleteExamplePropertyDetailsAnswers(address)
+      val allQuestionsAnswered = IncompleteExamplePropertyDetailsAnswers(Some(completeAnswers.address))
       val currentDraftReturn =
         sample[MultipleDisposalsDraftReturn].copy(
           triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(AssetType.Residential)),
