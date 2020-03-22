@@ -32,7 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, 
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress, addressLineMapping}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsExamplePropertyDetailsAnswers.{CompleteMultipleDisposalsExamplePropertyDetailsAnswers, IncompleteMultipleDisposalsExamplePropertyDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.{CompleteExamplePropertyDetailsAnswers, IncompleteExamplePropertyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DraftReturn, MultipleDisposalsDraftReturn, SingleDisposalDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -117,7 +117,7 @@ class PropertyDetailsController @Inject() (
               EitherT.pure(journey)
             else {
               val updatedDraftReturn = m.copy(
-                examplePropertyDetailsAnswers = Some(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(Some(a)))
+                examplePropertyDetailsAnswers = Some(IncompleteExamplePropertyDetailsAnswers(Some(a)))
               )
               returnsService
                 .storeDraftReturn(
@@ -161,7 +161,7 @@ class PropertyDetailsController @Inject() (
     else
       fillingOutReturn.draftReturn.fold(
         _.examplePropertyDetailsAnswers
-          .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
+          .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
           .fold(
             _ => routes.PropertyDetailsController.multipleDisposalsGuidance(),
             _ => routes.PropertyDetailsController.checkYourAnswers()
@@ -296,7 +296,7 @@ class PropertyDetailsController @Inject() (
           case m: MultipleDisposalsDraftReturn =>
             val backLink =
               m.examplePropertyDetailsAnswers
-                .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
+                .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
                 .fold(
                   _ => controllers.returns.routes.TaskListController.taskList(),
                   _ => routes.PropertyDetailsController.checkYourAnswers()
@@ -316,7 +316,7 @@ class PropertyDetailsController @Inject() (
               case m: MultipleDisposalsDraftReturn =>
                 val redirectTo =
                   m.examplePropertyDetailsAnswers
-                    .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
+                    .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
                     .fold(
                       _ =>
                         if (hasNonResidentialProperty(assetTypes))
@@ -342,11 +342,11 @@ class PropertyDetailsController @Inject() (
               m.examplePropertyDetailsAnswers.fold[Future[Result]](
                 Redirect(routes.PropertyDetailsController.multipleDisposalsGuidance())
               ) {
-                case IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(None) =>
+                case IncompleteExamplePropertyDetailsAnswers(None) =>
                   Redirect(routes.PropertyDetailsController.multipleDisposalsGuidance())
 
-                case IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(Some(a)) =>
-                  val completeAnswers    = CompleteMultipleDisposalsExamplePropertyDetailsAnswers(a)
+                case IncompleteExamplePropertyDetailsAnswers(Some(a)) =>
+                  val completeAnswers    = CompleteExamplePropertyDetailsAnswers(a)
                   val updatedDraftReturn = m.copy(examplePropertyDetailsAnswers = Some(completeAnswers))
                   val result = for {
                     _ <- returnsService.storeDraftReturn(
@@ -369,7 +369,7 @@ class PropertyDetailsController @Inject() (
                     _ => Ok(multipleDisposalsCheckYourAnswersPage(completeAnswers, hasNonResidentialAssetType))
                   )
 
-                case c: CompleteMultipleDisposalsExamplePropertyDetailsAnswers =>
+                case c: CompleteExamplePropertyDetailsAnswers =>
                   Ok(multipleDisposalsCheckYourAnswersPage(c, hasNonResidentialAssetType))
 
               }
