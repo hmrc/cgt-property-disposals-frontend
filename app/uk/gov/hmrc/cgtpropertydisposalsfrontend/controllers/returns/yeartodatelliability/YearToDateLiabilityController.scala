@@ -89,22 +89,21 @@ class YearToDateLiabilityController @Inject() (
       SessionData,
       FillingOutReturn,
       YearToDateLiabilityAnswers,
-      Boolean
+      Either[UserType.Organisation.type, UserType.Individual.type]
     ) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((s, r @ FillingOutReturn(subscribedDetails: SubscribedDetails, _, _, d: SingleDisposalDraftReturn))) => {
-        val isATrust = subscribedDetails.userType().isLeft
         d.yearToDateLiabilityAnswers match {
-          case Some(y) => f(s, r, y, isATrust)
+          case Some(y) => f(s, r, y, subscribedDetails.userType())
 
           case None =>
             d.reliefDetailsAnswers match {
               case Some(CompleteReliefDetailsAnswers(_, _, Some(_: OtherReliefsOption.OtherReliefs))) =>
-                f(s, r, IncompleteNonCalculatedYearToDateLiabilityAnswers.empty, isATrust)
+                f(s, r, IncompleteNonCalculatedYearToDateLiabilityAnswers.empty, subscribedDetails.userType())
 
               case Some(_: CompleteReliefDetailsAnswers) =>
-                f(s, r, IncompleteCalculatedYearToDateLiabilityAnswers.empty, isATrust)
+                f(s, r, IncompleteCalculatedYearToDateLiabilityAnswers.empty, subscribedDetails.userType())
 
               case _ =>
                 Redirect(controllers.returns.routes.TaskListController.taskList())
@@ -114,12 +113,10 @@ class YearToDateLiabilityController @Inject() (
 
       case Some(
           (s, r @ FillingOutReturn(subscribedDetails: SubscribedDetails, _, _, d: MultipleDisposalsDraftReturn))
-          ) => {
-        val isATrust = subscribedDetails.userType().isLeft
+          ) =>
         d.yearToDateLiabilityAnswers.fold[Future[Result]](
-          f(s, r, IncompleteNonCalculatedYearToDateLiabilityAnswers.empty, isATrust)
-        )(f(s, r, _, isATrust))
-      }
+          f(s, r, IncompleteNonCalculatedYearToDateLiabilityAnswers.empty, subscribedDetails.userType())
+        )(f(s, r, _, subscribedDetails.userType()))
 
       case _ => Redirect(controllers.routes.StartController.start())
     }
@@ -691,7 +688,7 @@ class YearToDateLiabilityController @Inject() (
 
   def taxDue(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndYTDLiabilityAnswers(request) {
-      case (_, fillingOutReturn, answers, isATrust) =>
+      case (_, fillingOutReturn, answers, userType) =>
         (answers, fillingOutReturn.draftReturn) match {
           case (calculatedAnswers: CalculatedYearToDateLiabilityAnswers, draftReturn: SingleDisposalDraftReturn) =>
             withEstimatedIncome(calculatedAnswers) { estimatedIncome =>
@@ -728,7 +725,7 @@ class YearToDateLiabilityController @Inject() (
                           estimatedIncome,
                           personalAllowance,
                           calculatedTaxDue,
-                          isATrust
+                          userType.isLeft
                         )
                         )(
                           _.fold(
@@ -752,7 +749,7 @@ class YearToDateLiabilityController @Inject() (
 
   def taxDueSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndYTDLiabilityAnswers(request) {
-      case (_, fillingOutReturn, answers, isATrust) =>
+      case (_, fillingOutReturn, answers, userType) =>
         (answers, fillingOutReturn.draftReturn) match {
           case (calculatedAnswers: CalculatedYearToDateLiabilityAnswers, draftReturn: SingleDisposalDraftReturn) =>
             withEstimatedIncome(calculatedAnswers) { estimatedIncome =>
@@ -786,7 +783,7 @@ class YearToDateLiabilityController @Inject() (
                           estimatedIncome,
                           personalAllowance,
                           calculatedTaxDue,
-                          isATrust
+                          userType.isLeft
                         )
                         )(
                           _.fold(
