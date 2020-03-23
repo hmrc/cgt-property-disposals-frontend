@@ -16,33 +16,38 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
         pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-        summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_disposal_summary
+        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button
 )
 
-@(propertyAddress: UkAddress, hasNonResidentialAssetType: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@()(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
-
-@title = @{messages("returns.property-address.cya.title")}
+@key = @{"submitReturnError"}
+@title = @{messages(s"$key.title")}
 
 @mainTemplate(title = title, userType = request.userType) {
 
-    @pageHeading(title, Some(messages("returns.property-address.singleDisposal.caption")))
+  @pageHeading(title)
 
-    @summary(propertyAddress, hasNonResidentialAssetType)
+  <p>@messages(s"$key.p1")</p>
+  <p>@messages(s"$key.p2")</p>
 
-    @formWrapper(returns.address.routes.PropertyDetailsController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
-        @submitButton(messages("button.confirmAndContinue"))
+    <ol class="list list-number">
+        <li>@messages(s"$key.li1")</li>
+        <li>@messages(s"$key.li2")</li>
+        <li>@messages(s"$key.li3")</li>
+    </ol>
+
+  <p>@messages(s"$key.p3")</p>
+
+    @formWrapper(routes.CheckAllAnswersAndSubmitController.submissionErrorSubmit(), 'novalidate -> "novalidate") {
+        @submitButton(messages(s"$key.button"))
     }
-
-    @returnToSummaryLink(displayReturnToSummaryLink = true)
 
 }

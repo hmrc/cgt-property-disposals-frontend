@@ -63,7 +63,7 @@ val residentialBeforeDate = RebasingCutoffDates.nonUkResidentsResidentialPropert
 
 (countryOfResidence, assetType, acquisitionDetailsAnswers) match {
 case (_, _, _) if countryOfResidence.isUk() => false
-case (_, AssetType.Residential, Some(CompleteAcquisitionDetailsAnswers(_, AcquisitionDate(acquisitionDate), _, _, _, _)))
+case (_, AssetType.Residential, Some(CompleteAcquisitionDetailsAnswers(_, AcquisitionDate(acquisitionDate), _, _, _, _, _)))
 if acquisitionDate.isBefore(residentialBeforeDate) => true
 case (_, _, _) => false
 
@@ -107,8 +107,8 @@ TaskListStatus.CannotStart
   (propertyAddressState, disposalDetailsState, acquistionDetailsState, reliefDetailsState, exemptionsAndLossesState) match {
     case (TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete) =>
       draftReturn.yearToDateLiabilityAnswers.fold[TaskListStatus](TaskListStatus.ToDo) {
-          case c: CalculatedYearToDateLiabilityAnswers    => c.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete)
-          case n: NonCalculatedYearToDateLiabilityAnswers => n.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete)
+          case c: CalculatedYTDAnswers    => c.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete)
+          case n: NonCalculatedYTDAnswers => n.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete)
       }
 
       case _ => TaskListStatus.CannotStart

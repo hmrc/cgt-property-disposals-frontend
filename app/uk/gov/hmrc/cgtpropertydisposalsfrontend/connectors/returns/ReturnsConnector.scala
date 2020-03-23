@@ -18,9 +18,12 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.UUID
 
 import cats.data.EitherT
 import com.google.inject.{ImplementedBy, Inject, Singleton}
+import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector.DeleteDraftReturnsRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.http.HttpClient._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
@@ -40,6 +43,8 @@ trait ReturnsConnector {
   ): EitherT[Future, Error, HttpResponse]
 
   def getDraftReturns(cgtReference: CgtReference)(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
+
+  def deleteDraftReturns(draftReturnIds: List[UUID])(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse]
 
   def submitReturn(submitReturnRequest: SubmitReturnRequest)(
     implicit hc: HeaderCarrier
@@ -70,6 +75,8 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
 
   def getDraftReturnsUrl(cgtReference: CgtReference): String = s"$baseUrl/draft-returns/${cgtReference.value}"
 
+  val deleteDraftReturnsUrl: String = s"$baseUrl/draft-returns/delete"
+
   val submitReturnUrl: String = s"$baseUrl/return"
 
   val calculateCgtTaxDueUrl: String = s"$baseUrl/calculate-tax-due"
@@ -96,6 +103,16 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
     EitherT[Future, Error, HttpResponse](
       http
         .get(getDraftReturnsUrl(cgtReference))
+        .map(Right(_))
+        .recover {
+          case NonFatal(e) => Left(Error(e))
+        }
+    )
+
+  def deleteDraftReturns(draftReturnIds: List[UUID])(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] =
+    EitherT[Future, Error, HttpResponse](
+      http
+        .post(deleteDraftReturnsUrl, DeleteDraftReturnsRequest(draftReturnIds))
         .map(Right(_))
         .recover {
           case NonFatal(e) => Left(Error(e))
@@ -162,5 +179,17 @@ class ReturnsConnectorImpl @Inject() (http: HttpClient, servicesConfig: Services
     )
 
   private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ISO_DATE
+
+}
+
+object ReturnsConnector {
+
+  final case class DeleteDraftReturnsRequest(draftReturnIds: List[UUID])
+
+  object DeleteDraftReturnsRequest {
+
+    implicit val format: OFormat[DeleteDraftReturnsRequest] = Json.format
+
+  }
 
 }

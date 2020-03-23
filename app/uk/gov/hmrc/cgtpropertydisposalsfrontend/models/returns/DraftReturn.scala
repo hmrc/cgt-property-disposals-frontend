@@ -54,7 +54,7 @@ object SingleDisposalDraftReturn {
 final case class MultipleDisposalsDraftReturn(
   id: UUID,
   triageAnswers: MultipleDisposalsTriageAnswers,
-  examplePropertyDetailsAnswers: Option[MultipleDisposalsExamplePropertyDetailsAnswers],
+  examplePropertyDetailsAnswers: Option[ExamplePropertyDetailsAnswers],
   yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
   uploadSupportingDocuments: Option[UploadSupportingDocuments],
   lastUpdatedDate: LocalDate

@@ -258,7 +258,8 @@ class UploadSupportingDocumentsController @Inject() (
     answers match {
       case IncompleteUploadSupportingDocuments(hasSupportingDocuments) =>
         Redirect(routes.UploadSupportingDocumentsController.hasSupportingDocsToUpload())
-      // case CompleteUploadSupportingDocuments(hasSupportingDocuments) =>Ok(checkYourAnswersPage(c)) //TODO: needs to be enriched to show all the docs uploaded
+      case CompleteUploadSupportingDocuments(hasSupportingDocuments) =>
+        Ok("checkYourAnswersPage(c)") //TODO: needs to be enriched to show all the docs uploaded
     }
 
 }

@@ -323,7 +323,7 @@ trait AddressController[J <: JourneyStatus] {
       }
     }
 
-  private def storeAddress(
+  protected def storeAddress(
     continue: Call,
     currentJourneyStatus: J,
     isManuallyEnteredAddress: Boolean

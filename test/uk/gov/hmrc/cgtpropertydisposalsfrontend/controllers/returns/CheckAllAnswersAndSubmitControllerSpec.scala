@@ -32,6 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitControllerSpec.validateAllCheckYourAnswersSections
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.AcquisitionDetailsControllerSpec.validateAcquisitionDetailsCheckYourAnswersPage
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldetails.DisposalDetailsControllerSpec._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionandlosses.ExemptionAndLossesControllerSpec.validateExemptionAndLossesCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetails.ReliefDetailsControllerSpec.validateReliefDetailsCheckYourAnswersPage
@@ -39,7 +40,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.Singl
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityControllerSpec._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, SubmitReturnFailed, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, PaymentsJourney}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.IncompleteAcquisitionDetailsAnswers
@@ -48,7 +49,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLosse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.IncompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYearToDateLiabilityAnswers.IncompleteCalculatedYearToDateLiabilityAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.IncompleteCalculatedYTDAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, LocalDateUtils, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -80,6 +81,8 @@ class CheckAllAnswersAndSubmitControllerSpec
   lazy val controller = instanceOf[CheckAllAnswersAndSubmitController]
 
   implicit val messagesApi: MessagesApi = controller.messagesApi
+
+  val rebasingEligibilityUtil = new RebasingEligibilityUtil()
 
   def sessionWitJourney(journeyStatus: JourneyStatus): SessionData =
     SessionData.empty.copy(journeyStatus = Some(journeyStatus))
@@ -149,7 +152,13 @@ class CheckAllAnswersAndSubmitControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey("checkAllAnswers.title"), { doc =>
-              validateAllCheckYourAnswersSections(doc, completeReturn, None)
+              validateAllCheckYourAnswersSections(
+                doc,
+                completeReturn,
+                None,
+                rebasingEligibilityUtil.isUk(completeReturn),
+                rebasingEligibilityUtil.isEligibleForRebase(completeReturn)
+              )
               doc.select("#back").attr("href") shouldBe routes.TaskListController.taskList().url
               doc.select("#content > article > form").attr("action") shouldBe routes.CheckAllAnswersAndSubmitController
                 .checkAllAnswersSubmit()
@@ -171,7 +180,13 @@ class CheckAllAnswersAndSubmitControllerSpec
           checkPageIsDisplayed(
             performAction(),
             messageFromMessageKey("checkAllAnswers.title"), { doc =>
-              validateAllCheckYourAnswersSections(doc, completeReturn, Some(UserType.Agent))
+              validateAllCheckYourAnswersSections(
+                doc,
+                completeReturn,
+                Some(UserType.Agent),
+                rebasingEligibilityUtil.isUk(completeReturn),
+                rebasingEligibilityUtil.isEligibleForRebase(completeReturn)
+              )
               doc.select("#back").attr("href") shouldBe routes.TaskListController.taskList().url
               doc.select("#content > article > form").attr("action") shouldBe routes.CheckAllAnswersAndSubmitController
                 .checkAllAnswersSubmit()
@@ -216,22 +231,31 @@ class CheckAllAnswersAndSubmitControllerSpec
 
       "show an error page" when {
 
-        "there is an error submitting the return" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(sessionWitJourney(completeFillingOutReturn))
-            mockSubmitReturn(submitReturnRequest)(Left(Error("")))
-          }
-
-          checkIsTechnicalErrorPage(performAction())
-        }
-
-        "there is an error updating the session" in {
+        "there is an error updating the session after a successful submission" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(sessionWitJourney(completeFillingOutReturn))
             mockSubmitReturn(submitReturnRequest)(Right(submitReturnResponse))
             mockStoreSession(sessionWitJourney(justSubmittedReturn))(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction())
+        }
+
+        "there is an error updating the session after a submission failure the return" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWitJourney(completeFillingOutReturn))
+            mockSubmitReturn(submitReturnRequest)(Left(Error("")))
+            mockStoreSession(
+              sessionWitJourney(
+                SubmitReturnFailed(
+                  completeFillingOutReturn.subscribedDetails,
+                  completeFillingOutReturn.ggCredId,
+                  completeFillingOutReturn.agentReferenceNumber
+                )
+              )
+            )(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -250,6 +274,110 @@ class CheckAllAnswersAndSubmitControllerSpec
           }
 
           checkIsRedirect(performAction(), routes.CheckAllAnswersAndSubmitController.confirmationOfSubmission())
+        }
+
+      }
+
+      "redirect to the submission error page" when {
+        "there is an error submitting the return" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWitJourney(completeFillingOutReturn))
+            mockSubmitReturn(submitReturnRequest)(Left(Error("")))
+            mockStoreSession(
+              sessionWitJourney(
+                SubmitReturnFailed(
+                  completeFillingOutReturn.subscribedDetails,
+                  completeFillingOutReturn.ggCredId,
+                  completeFillingOutReturn.agentReferenceNumber
+                )
+              )
+            )(Right(()))
+          }
+
+          checkIsRedirect(performAction(), routes.CheckAllAnswersAndSubmitController.submissionError())
+        }
+      }
+
+    }
+
+    "handling requests to display the return submit failed page" must {
+
+      def performAction(): Future[Result] = controller.submissionError()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        performAction, {
+          case _: SubmitReturnFailed | _: Subscribed => true
+          case _                                     => false
+        }
+      )
+
+      "display the page" when {
+
+        def test(journey: JourneyStatus): Unit =
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(journey)
+              )
+            )
+
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("submitReturnError.title"), { doc =>
+                doc
+                  .select("#content > article > form")
+                  .attr("action") shouldBe routes.CheckAllAnswersAndSubmitController
+                  .submissionErrorSubmit()
+                  .url
+              }
+            )
+          }
+
+        "the user is in the SubmitReturnFailed state" in {
+          test(sample[SubmitReturnFailed])
+        }
+
+        "the user is in the subscribed state" in {
+          test(sample[Subscribed])
+        }
+
+      }
+
+    }
+
+    "handling submits on the return submit failed page" must {
+
+      def performAction(): Future[Result] = controller.submissionErrorSubmit()(FakeRequest())
+
+      behave like redirectToStartWhenInvalidJourney(
+        performAction, {
+          case _: SubmitReturnFailed | _: Subscribed => true
+          case _                                     => false
+        }
+      )
+
+      "redirect to the home page" when {
+
+        def test(journey: JourneyStatus): Unit =
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(journey)
+              )
+            )
+
+            checkIsRedirect(performAction(), homepage.routes.HomePageController.homepage())
+          }
+
+        "the user is in the SubmitReturnFailed state" in {
+          test(sample[SubmitReturnFailed])
+        }
+
+        "the user is in the subscribed state" in {
+          test(sample[Subscribed])
         }
 
       }
@@ -380,7 +508,7 @@ class CheckAllAnswersAndSubmitControllerSpec
       _.copy(reliefDetailsAnswers       = None),
       _.copy(exemptionAndLossesAnswers  = Some(sample[IncompleteExemptionAndLossesAnswers])),
       _.copy(exemptionAndLossesAnswers  = None),
-      _.copy(yearToDateLiabilityAnswers = Some(sample[IncompleteCalculatedYearToDateLiabilityAnswers])),
+      _.copy(yearToDateLiabilityAnswers = Some(sample[IncompleteCalculatedYTDAnswers])),
       _.copy(yearToDateLiabilityAnswers = None)
     )
 
@@ -414,17 +542,23 @@ object CheckAllAnswersAndSubmitControllerSpec {
   def validateAllCheckYourAnswersSections(
     doc: Document,
     completeReturn: CompleteReturn,
-    userType: Option[UserType]
+    userType: Option[UserType],
+    isUk: Boolean,
+    isRebasing: Boolean
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
     validateSingleDisposalTriageCheckYourAnswersPage(
       completeReturn.triageAnswers,
       userType,
       doc
     )
+
     validateAcquisitionDetailsCheckYourAnswersPage(
       completeReturn.acquisitionDetails,
-      doc
+      doc,
+      isUk,
+      isRebasing
     )
+
     validateDisposalDetailsCheckYourAnswersPage(
       completeReturn.disposalDetails,
       doc

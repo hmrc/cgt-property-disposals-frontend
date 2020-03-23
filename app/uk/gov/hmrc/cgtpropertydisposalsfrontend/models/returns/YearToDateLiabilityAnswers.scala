@@ -24,76 +24,74 @@ sealed trait YearToDateLiabilityAnswers extends Product with Serializable
 
 object YearToDateLiabilityAnswers {
 
-  sealed trait CalculatedYearToDateLiabilityAnswers extends YearToDateLiabilityAnswers
+  sealed trait CalculatedYTDAnswers extends YearToDateLiabilityAnswers
 
-  sealed trait NonCalculatedYearToDateLiabilityAnswers extends YearToDateLiabilityAnswers
+  sealed trait NonCalculatedYTDAnswers extends YearToDateLiabilityAnswers
 
-  object NonCalculatedYearToDateLiabilityAnswers {
+  object NonCalculatedYTDAnswers {
 
-    final case class IncompleteNonCalculatedYearToDateLiabilityAnswers(
+    final case class IncompleteNonCalculatedYTDAnswers(
       taxableGainOrLoss: Option[AmountInPence],
       hasEstimatedDetails: Option[Boolean],
       taxDue: Option[AmountInPence]
-    ) extends NonCalculatedYearToDateLiabilityAnswers
+    ) extends NonCalculatedYTDAnswers
 
-    object IncompleteNonCalculatedYearToDateLiabilityAnswers {
-      val empty: IncompleteNonCalculatedYearToDateLiabilityAnswers =
-        IncompleteNonCalculatedYearToDateLiabilityAnswers(None, None, None)
+    object IncompleteNonCalculatedYTDAnswers {
+      val empty: IncompleteNonCalculatedYTDAnswers =
+        IncompleteNonCalculatedYTDAnswers(None, None, None)
     }
 
-    final case class CompleteNonCalculatedYearToDateLiabilityAnswers(
+    final case class CompleteNonCalculatedYTDAnswers(
       taxableGainOrLoss: AmountInPence,
       hasEstimatedDetails: Boolean,
       taxDue: AmountInPence
-    ) extends NonCalculatedYearToDateLiabilityAnswers
+    ) extends NonCalculatedYTDAnswers
 
-    implicit class NonCalculatedYTDLiabilityAnswersOps(private val a: NonCalculatedYearToDateLiabilityAnswers)
-        extends AnyVal {
+    implicit class NonCalculatedYTDLiabilityAnswersOps(private val a: NonCalculatedYTDAnswers) extends AnyVal {
 
       def fold[A](
-        ifIncomplete: IncompleteNonCalculatedYearToDateLiabilityAnswers => A,
-        ifComplete: CompleteNonCalculatedYearToDateLiabilityAnswers => A
+        ifIncomplete: IncompleteNonCalculatedYTDAnswers => A,
+        ifComplete: CompleteNonCalculatedYTDAnswers => A
       ): A = a match {
-        case i: IncompleteNonCalculatedYearToDateLiabilityAnswers => ifIncomplete(i)
-        case c: CompleteNonCalculatedYearToDateLiabilityAnswers   => ifComplete(c)
+        case i: IncompleteNonCalculatedYTDAnswers => ifIncomplete(i)
+        case c: CompleteNonCalculatedYTDAnswers   => ifComplete(c)
       }
     }
 
   }
 
-  object CalculatedYearToDateLiabilityAnswers {
-    final case class IncompleteCalculatedYearToDateLiabilityAnswers(
+  object CalculatedYTDAnswers {
+    final case class IncompleteCalculatedYTDAnswers(
       estimatedIncome: Option[AmountInPence],
       personalAllowance: Option[AmountInPence],
       hasEstimatedDetails: Option[Boolean],
       calculatedTaxDue: Option[CalculatedTaxDue],
       taxDue: Option[AmountInPence],
       mandatoryEvidence: Option[String]
-    ) extends CalculatedYearToDateLiabilityAnswers
+    ) extends CalculatedYTDAnswers
 
-    object IncompleteCalculatedYearToDateLiabilityAnswers {
-      val empty: IncompleteCalculatedYearToDateLiabilityAnswers =
-        IncompleteCalculatedYearToDateLiabilityAnswers(None, None, None, None, None, None)
+    object IncompleteCalculatedYTDAnswers {
+      val empty: IncompleteCalculatedYTDAnswers =
+        IncompleteCalculatedYTDAnswers(None, None, None, None, None, None)
     }
 
-    final case class CompleteCalculatedYearToDateLiabilityAnswers(
+    final case class CompleteCalculatedYTDAnswers(
       estimatedIncome: AmountInPence,
       personalAllowance: Option[AmountInPence],
       hasEstimatedDetails: Boolean,
       calculatedTaxDue: CalculatedTaxDue,
       taxDue: AmountInPence,
       mandatoryEvidence: Option[String]
-    ) extends CalculatedYearToDateLiabilityAnswers
+    ) extends CalculatedYTDAnswers
 
-    implicit class CalculatedYTDLiabilityAnswersOps(private val a: CalculatedYearToDateLiabilityAnswers)
-        extends AnyVal {
+    implicit class CalculatedYTDLiabilityAnswersOps(private val a: CalculatedYTDAnswers) extends AnyVal {
 
       def fold[A](
-        ifIncomplete: IncompleteCalculatedYearToDateLiabilityAnswers => A,
-        ifComplete: CompleteCalculatedYearToDateLiabilityAnswers => A
+        ifIncomplete: IncompleteCalculatedYTDAnswers => A,
+        ifComplete: CompleteCalculatedYTDAnswers => A
       ): A = a match {
-        case i: IncompleteCalculatedYearToDateLiabilityAnswers => ifIncomplete(i)
-        case c: CompleteCalculatedYearToDateLiabilityAnswers   => ifComplete(c)
+        case i: IncompleteCalculatedYTDAnswers => ifIncomplete(i)
+        case c: CompleteCalculatedYTDAnswers   => ifComplete(c)
       }
     }
 

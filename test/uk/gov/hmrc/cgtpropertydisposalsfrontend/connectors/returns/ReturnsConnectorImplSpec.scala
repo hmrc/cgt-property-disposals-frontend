@@ -17,11 +17,13 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns
 
 import java.time.LocalDate
+import java.util.UUID
 
 import com.typesafe.config.ConfigFactory
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{Matchers, WordSpec}
 import play.api.{Configuration, Mode}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector.DeleteDraftReturnsRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.{ConnectorSpec, HttpSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
@@ -64,6 +66,17 @@ class ReturnsConnectorImplSpec extends WordSpec with Matchers with MockFactory w
       behave like connectorBehaviour(
         mockPost(expectedUrl, Map.empty, draftReturn),
         () => connector.storeDraftReturn(draftReturn, cgtReference)
+      )
+    }
+
+    "handling requests to delete a draft returns" must {
+
+      val ids         = List.fill(3)(UUID.randomUUID())
+      val expectedUrl = s"http://host:123/draft-returns/delete"
+
+      behave like connectorBehaviour(
+        mockPost(expectedUrl, Map.empty, DeleteDraftReturnsRequest(ids)),
+        () => connector.deleteDraftReturns(ids)
       )
     }
 

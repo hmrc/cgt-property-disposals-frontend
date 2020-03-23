@@ -16,6 +16,7 @@
 
 @import cats.instances.long._
 @import cats.syntax.eq._
+@import java.time.LocalDate
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.routes
@@ -23,6 +24,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionMethod
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils
 
 @this(
         cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
@@ -31,7 +33,7 @@
         addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
 )
 
-@(answers: CompleteAcquisitionDetailsAnswers)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(answers: CompleteAcquisitionDetailsAnswers, cutoffDate: LocalDate, isUk: Boolean, isRebasing: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 @acquisitionMethodAndPriceTitle = @{
   answers.acquisitionMethod match {
     case AcquisitionMethod.Bought => (messages("returns.acquisitionMethod.Bought"), messages("acquisitionPriceBought.title"))
@@ -54,12 +56,17 @@
     Some(cyaChange(messages("acquisitionDetails.cyaChange.acquisitionDate"), routes.AcquisitionDetailsController.acquisitionDate().url)),
     "acquisitionDate"
   )
-  @cyaRow(
-    acquisitionMethodAndPriceTitle._2,
-    Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.acquisitionPrice.inPounds())),
-    Some(cyaChange(messages("acquisitionDetails.cyaChange.acquisitionPrice"), routes.AcquisitionDetailsController.acquisitionPrice().url)),
-    "acquisitionPrice"
-  )
+
+@if((isUk && !isRebasing) || !isUk) {
+@cyaRow(
+      messages("acquisitionPriceBought.title"),
+      Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.acquisitionPrice.inPounds())),
+      Some(cyaChange(messages("acquisitionDetails.cyaChange.acquisitionPrice"), routes.AcquisitionDetailsController.acquisitionPrice().url)),
+      "acquisitionPrice"
+)
+}
+
+@if(isRebasing) {
   @answers.rebasedAcquisitionPrice.map{ rebasedValue =>
     @if(rebasedValue.value === 0L){
       @cyaRow(
@@ -70,23 +77,36 @@
       )
     } else {
       @cyaRow(
-        messages("acquisitionDetails.cyaLabel.rebased"),
-        Html(messages("generic.yes")),
-        Some(cyaChange(messages("acquisitionDetails.cyaChange.rebasedAcquisitionPrice"), routes.AcquisitionDetailsController.rebasedAcquisitionPrice().url)),
-        "rebasedAcquisitionPrice"
-      )
-      @cyaRow(
-        messages("acquisitionDetails.cyaLabel.rebasedValue"),
+        messages("acquisitionDetails.cyaLabel.rebasedValue", LocalDateUtils.govShortDisplayFormat(cutoffDate)),
         Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(rebasedValue.inPounds())),
         Some(cyaChange(messages("acquisitionDetails.cyaChange.rebasedAcquisitionPrice"), routes.AcquisitionDetailsController.rebasedAcquisitionPrice().url)),
         "rebasedAcquisitionPrice-value"
       )
     }
   }
-  @if(answers.improvementCosts.value === 0L){
-    @cyaRow(
-      messages("improvementCosts.title"),
-      Html(messages("generic.no")),
+}
+@if(!isUk && isRebasing) {
+@if(answers.shouldUseRebase){
+  @cyaRow(
+    messages("shouldUseRebase.title", LocalDateUtils.govShortDisplayFormat(cutoffDate)),
+    Html(messages("generic.yes")),
+    Some(cyaChange(messages("acquisitionDetails.cyaChange.shouldUseRebase"), routes.AcquisitionDetailsController.shouldUseRebase().url)),
+    "shouldRebase"
+  )
+} else {
+  @cyaRow(
+    messages("shouldUseRebase.title", LocalDateUtils.govShortDisplayFormat(cutoffDate)),
+    Html(messages("generic.no")),
+    Some(cyaChange(messages("acquisitionDetails.cyaChange.shouldUseRebase"), routes.AcquisitionDetailsController.shouldUseRebase().url)),
+    "shouldRebase"
+  )
+}
+}
+
+@if(answers.improvementCosts.value === 0L){
+@cyaRow(
+messages("improvementCosts.title"),
+Html(messages("generic.no")),
       Some(cyaChange(messages("acquisitionDetails.cyaChange.improvementCosts"), routes.AcquisitionDetailsController.improvementCosts().url)),
       "improvementCosts"
     )
