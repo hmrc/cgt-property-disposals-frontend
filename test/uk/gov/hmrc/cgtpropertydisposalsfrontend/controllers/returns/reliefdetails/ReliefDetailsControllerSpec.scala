@@ -182,7 +182,13 @@ class ReliefDetailsControllerSpec
       }
 
     }
+    "handling check your answers" must {
+      def performAction(data: Seq[(String, String)]): Future[Result] =
+        controller.checkYourAnswers()(FakeRequest().withFormUrlEncodedBody(data: _*))
 
+      behave like residentsReliefSubmittedYesBehaviour(performAction, AmountInPence(500))
+      behave like residentsReliefSubmittedNoBehaviour(performAction)
+    }
     "handling submitted answers to the private residents relief page" must {
 
       def performAction(data: Seq[(String, String)]): Future[Result] =
@@ -732,7 +738,7 @@ class ReliefDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like noLettingsReliefBehaviour(performAction)
+      behave like noPrivateResidentsReliefBehaviour(performAction)
 
       val otherReliefs = OtherReliefs("ReliefName", AmountInPence.fromPounds(13.34))
 
@@ -807,7 +813,7 @@ class ReliefDetailsControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
-      behave like noLettingsReliefBehaviour(() => performAction(Seq.empty))
+      behave like noPrivateResidentsReliefBehaviour(() => performAction(Seq.empty))
 
       val otherReliefs = OtherReliefs("ReliefName", AmountInPence.fromPounds(13.34))
 
@@ -1167,7 +1173,8 @@ class ReliefDetailsControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithReliefDetailsAnswers(
-                allQuestionsAnswered.copy(lettingsRelief = None)
+                allQuestionsAnswered
+                  .copy(privateResidentsRelief = Some(AmountInPence(20)), lettingsRelief = None, otherReliefs = None)
               )._1
             )
           }
@@ -1337,15 +1344,15 @@ class ReliefDetailsControllerSpec
       }
     }
 
-  def noLettingsReliefBehaviour(performAction: () => Future[Result]): Unit =
-    "redirect to the what was your lettings relief page" when {
+  def residentsReliefSubmittedNoBehaviour(performAction: Seq[(String, String)] => Future[Result]): Unit =
+    "redirect to the other reliefs page" when {
 
-      "there is no lettings relief " in {
+      "residents relief is selected as No" in {
         val sessionData = sessionWithReliefDetailsAnswers(
           IncompleteReliefDetailsAnswers(
-            Some(sample[AmountInPence]),
+            Some(AmountInPence(0)),
             None,
-            Some(sample[OtherReliefsOption])
+            None
           )
         )._1
 
@@ -1355,7 +1362,50 @@ class ReliefDetailsControllerSpec
         }
 
         checkIsRedirect(
-          performAction(),
+          performAction(Seq("privateResidentsRelief" -> "1")),
+          routes.ReliefDetailsController.otherReliefsSubmit()
+        )
+      }
+    }
+
+  def residentsReliefSubmittedYesBehaviour(
+    performAction: Seq[(String, String)] => Future[Result],
+    residentsReliefAmount: AmountInPence
+  ): Unit =
+    "redirect to the other reliefs page" when {
+
+      "residents relief is selected as Yes" in {
+        val incompleteAnswers =
+          sample[IncompleteReliefDetailsAnswers].copy(privateResidentsRelief = Some(residentsReliefAmount), None, None)
+        val fillingOutReturn          = sample[FillingOutReturn]
+        val singleDisposalDraftReturn = sample[SingleDisposalDraftReturn]
+        val disposalDate              = sample[DisposalDate]
+        val triageAnswers             = sample[CompleteSingleDisposalTriageAnswers]
+        val taxYear                   = sample[TaxYear]
+
+        val session = sessionWithReliefDetailsAnswers(
+          fillingOutReturn,
+          singleDisposalDraftReturn,
+          Some(incompleteAnswers),
+          None,
+          disposalDate,
+          triageAnswers,
+          taxYear
+        )._1
+        val data = Seq(
+          "privateResidentsRelief"      -> "0",
+          "privateResidentsReliefValue" -> s"${residentsReliefAmount.inPounds().toString()}"
+        )
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            session
+          )
+        }
+
+        checkIsRedirect(
+          performAction(data),
           routes.ReliefDetailsController.lettingsRelief()
         )
       }
