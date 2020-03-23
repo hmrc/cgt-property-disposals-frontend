@@ -42,8 +42,6 @@
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
 
- @backLinkComponent(backLink)
-
  @if(hasErrors) {
   @errorSummary(form)
  }
