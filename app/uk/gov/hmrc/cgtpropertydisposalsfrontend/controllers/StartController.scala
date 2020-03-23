@@ -235,9 +235,9 @@ class StartController @Inject() (
   ): Future[Result] = {
     val result = for {
       subscribedDetails <- subscriptionService.getSubscribedDetails(cgtReference)
-      draftReturns <- if (getDraftAndSentReturns) returnsService.getDraftReturns(cgtReference)
+      sentReturns       <- if (getDraftAndSentReturns) returnsService.listReturns(cgtReference) else EitherT.pure(List.empty)
+      draftReturns <- if (getDraftAndSentReturns) returnsService.getDraftReturns(cgtReference, sentReturns)
                      else EitherT.pure(List.empty)
-      sentReturns <- if (getDraftAndSentReturns) returnsService.listReturns(cgtReference) else EitherT.pure(List.empty)
       _ <- EitherT(
             updateSession(sessionStore, request)(
               _.copy(

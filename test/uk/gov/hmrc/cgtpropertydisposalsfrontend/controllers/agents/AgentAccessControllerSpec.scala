@@ -149,10 +149,12 @@ class AgentAccessControllerSpec
       .expects(agentGGCredId, clientCgtReference, unsuccessfulVerifierAttempts)
       .returning(Future.successful(result))
 
-  def mockGetDraftReturns(cgtReference: CgtReference)(response: Either[Error, List[SingleDisposalDraftReturn]]) =
+  def mockGetDraftReturns(cgtReference: CgtReference, sentReturns: List[ReturnSummary])(
+    response: Either[Error, List[SingleDisposalDraftReturn]]
+  ) =
     (mockReturnsService
-      .getDraftReturns(_: CgtReference)(_: HeaderCarrier))
-      .expects(cgtReference, *)
+      .getDraftReturns(_: CgtReference, _: List[ReturnSummary])(_: HeaderCarrier))
+      .expects(cgtReference, sentReturns, *)
       .returning(EitherT.fromEither[Future](response))
 
   def mockGetReturnsList(cgtReference: CgtReference)(
@@ -1035,7 +1037,8 @@ class AgentAccessControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData(ukClientDetails, correctVerifierSupplied = true))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(Right(None))
-            mockGetDraftReturns(ukClientDetails.cgtReference)(Left(Error("")))
+            mockGetReturnsList(ukClientDetails.cgtReference)(Right(returnsList))
+            mockGetDraftReturns(ukClientDetails.cgtReference, returnsList)(Left(Error("")))
           }
 
           checkIsTechnicalErrorPage(performAction())
@@ -1046,7 +1049,6 @@ class AgentAccessControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData(ukClientDetails, correctVerifierSupplied = true))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(Right(None))
-            mockGetDraftReturns(ukClientDetails.cgtReference)(Right(draftReturns))
             mockGetReturnsList(ukClientDetails.cgtReference)(Left(Error("")))
           }
 
@@ -1058,8 +1060,8 @@ class AgentAccessControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData(ukClientDetails, correctVerifierSupplied = true))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, ukClientDetails.cgtReference)(Right(None))
-            mockGetDraftReturns(ukClientDetails.cgtReference)(Right(draftReturns))
             mockGetReturnsList(ukClientDetails.cgtReference)(Right(returnsList))
+            mockGetDraftReturns(ukClientDetails.cgtReference, returnsList)(Right(draftReturns))
             mockStoreSession(
               SessionData.empty
                 .copy(journeyStatus = Some(
@@ -1086,8 +1088,8 @@ class AgentAccessControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(sessionData(clientDetails, correctVerifierSupplied = true))
             mockGetUnsuccessfulVerifierAttempts(agentGGCredId, clientDetails.cgtReference)(Right(None))
-            mockGetDraftReturns(ukClientDetails.cgtReference)(Right(draftReturns))
             mockGetReturnsList(ukClientDetails.cgtReference)(Right(returnsList))
+            mockGetDraftReturns(ukClientDetails.cgtReference, returnsList)(Right(draftReturns))
             mockStoreSession(
               SessionData.empty.copy(
                 journeyStatus = Some(

@@ -48,8 +48,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLosse
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingDocuments.CompleteUploadSupportingDocuments
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYearToDateLiabilityAnswers._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYearToDateLiabilityAnswers.{CompleteNonCalculatedYearToDateLiabilityAnswers, IncompleteNonCalculatedYearToDateLiabilityAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.{CompleteNonCalculatedYTDAnswers, IncompleteNonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, LocalDateUtils, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -218,7 +218,7 @@ class YearToDateLiabilityControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithSingleDisposalState(
-                IncompleteCalculatedYearToDateLiabilityAnswers.empty.copy(
+                IncompleteCalculatedYTDAnswers.empty.copy(
                   estimatedIncome = Some(AmountInPence.fromPounds(12.34))
                 ),
                 sample[DisposalDate]
@@ -237,7 +237,7 @@ class YearToDateLiabilityControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithSingleDisposalState(
-                sample[CompleteCalculatedYearToDateLiabilityAnswers]
+                sample[CompleteCalculatedYTDAnswers]
                   .copy(estimatedIncome = AmountInPence.fromPounds(12.34)),
                 sample[DisposalDate]
               )._1
@@ -275,8 +275,8 @@ class YearToDateLiabilityControllerSpec
       behave like redirectWhenNotSingleDisposalCalculatedJourneyBehaviour(() => performAction())
 
       behave like unsuccessfulUpdateBehaviourForSingleDisposal(
-        IncompleteCalculatedYearToDateLiabilityAnswers.empty,
-        IncompleteCalculatedYearToDateLiabilityAnswers.empty.copy(
+        IncompleteCalculatedYTDAnswers.empty,
+        IncompleteCalculatedYTDAnswers.empty.copy(
           estimatedIncome = Some(AmountInPence.zero)
         ),
         () => performAction("estimatedIncome" -> "0")
@@ -299,14 +299,14 @@ class YearToDateLiabilityControllerSpec
           testSuccessfulUpdatesAfterSubmitWithSingleDisposal(
             performAction("estimatedIncome" -> "1"),
             None,
-            IncompleteCalculatedYearToDateLiabilityAnswers.empty.copy(estimatedIncome = Some(AmountInPence(100L))),
+            IncompleteCalculatedYTDAnswers.empty.copy(estimatedIncome = Some(AmountInPence(100L))),
             completeReliefDetailsAnswersWithNoOtherReliefs,
             sample[DisposalDate]
           )
         }
 
         "the user had started answering questions in this section but had not completed it" in {
-          val answers = sample[IncompleteCalculatedYearToDateLiabilityAnswers]
+          val answers = sample[IncompleteCalculatedYTDAnswers]
           testSuccessfulUpdatesAfterSubmitWithSingleDisposal(
             performAction("estimatedIncome" -> "1"),
             answers.copy(estimatedIncome = Some(AmountInPence(1L))),
@@ -316,9 +316,9 @@ class YearToDateLiabilityControllerSpec
 
         "the user had already completed the section" in {
           val oldAnswers =
-            sample[CompleteCalculatedYearToDateLiabilityAnswers].copy(estimatedIncome = AmountInPence(1L))
+            sample[CompleteCalculatedYTDAnswers].copy(estimatedIncome = AmountInPence(1L))
           val newAnswers =
-            IncompleteCalculatedYearToDateLiabilityAnswers.empty.copy(estimatedIncome = Some(AmountInPence(100L)))
+            IncompleteCalculatedYTDAnswers.empty.copy(estimatedIncome = Some(AmountInPence(100L)))
           testSuccessfulUpdatesAfterSubmitWithSingleDisposal(
             performAction("estimatedIncome" -> "1"),
             oldAnswers,
@@ -333,7 +333,7 @@ class YearToDateLiabilityControllerSpec
         "the user had entered a non-zero income and has now just submitted a zero income and " +
           "the journey was incomplete" in {
           val oldAnswers =
-            sample[IncompleteCalculatedYearToDateLiabilityAnswers].copy(
+            sample[IncompleteCalculatedYTDAnswers].copy(
               estimatedIncome   = Some(AmountInPence(1L)),
               personalAllowance = Some(AmountInPence(1L))
             )
@@ -348,7 +348,7 @@ class YearToDateLiabilityControllerSpec
         "the user had entered a zero income and has now just submitted a non-zero income and " +
           "the journey was incomplete" in {
           val oldAnswers =
-            sample[IncompleteCalculatedYearToDateLiabilityAnswers].copy(
+            sample[IncompleteCalculatedYTDAnswers].copy(
               estimatedIncome   = Some(AmountInPence.zero),
               personalAllowance = Some(AmountInPence(1L))
             )
@@ -364,7 +364,7 @@ class YearToDateLiabilityControllerSpec
       "not do any updates if the submitted answer is the same as one already stored in session and" when {
 
         "the section is incomplete" in {
-          val answers = sample[IncompleteCalculatedYearToDateLiabilityAnswers].copy(
+          val answers = sample[IncompleteCalculatedYTDAnswers].copy(
             estimatedIncome   = Some(AmountInPence(1L)),
             personalAllowance = Some(AmountInPence(2L))
           )
@@ -381,7 +381,7 @@ class YearToDateLiabilityControllerSpec
         }
 
         "the section is complete" in {
-          val answers = sample[CompleteCalculatedYearToDateLiabilityAnswers].copy(
+          val answers = sample[CompleteCalculatedYTDAnswers].copy(
             estimatedIncome   = AmountInPence(1L),
             personalAllowance = Some(AmountInPence(2L))
           )
@@ -420,7 +420,7 @@ class YearToDateLiabilityControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithSingleDisposalState(
-                sample[CompleteCalculatedYearToDateLiabilityAnswers].copy(
+                sample[CompleteCalculatedYTDAnswers].copy(
                   estimatedIncome = AmountInPence.zero
                 ),
                 sample[DisposalDate]
@@ -442,7 +442,7 @@ class YearToDateLiabilityControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(
                 sessionWithSingleDisposalState(
-                  sample[IncompleteCalculatedYearToDateLiabilityAnswers].copy(
+                  sample[IncompleteCalculatedYTDAnswers].copy(
                     estimatedIncome   = Some(AmountInPence.fromPounds(12.34)),
                     personalAllowance = None
                   ),
@@ -471,7 +471,7 @@ class YearToDateLiabilityControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(
                 sessionWithSingleDisposalState(
-                  sample[CompleteCalculatedYearToDateLiabilityAnswers].copy(
+                  sample[CompleteCalculatedYTDAnswers].copy(
                     estimatedIncome   = AmountInPence(1L),
                     personalAllowance = Some(AmountInPence(1234L))
                   ),
@@ -516,11 +516,11 @@ class YearToDateLiabilityControllerSpec
       behave like redirectWhenNotSingleDisposalCalculatedJourneyBehaviour(() => performAction())
 
       {
-        val completeAnswers = sample[CompleteCalculatedYearToDateLiabilityAnswers].copy(
+        val completeAnswers = sample[CompleteCalculatedYTDAnswers].copy(
           estimatedIncome   = AmountInPence(1L),
           personalAllowance = Some(AmountInPence(2L))
         )
-        val newAnswers = IncompleteCalculatedYearToDateLiabilityAnswers.empty.copy(
+        val newAnswers = IncompleteCalculatedYTDAnswers.empty.copy(
           estimatedIncome   = Some(completeAnswers.estimatedIncome),
           personalAllowance = Some(AmountInPence.zero)
         )
@@ -538,7 +538,7 @@ class YearToDateLiabilityControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithSingleDisposalState(
-                sample[CompleteCalculatedYearToDateLiabilityAnswers].copy(
+                sample[CompleteCalculatedYTDAnswers].copy(
                   estimatedIncome = AmountInPence.zero
                 ),
                 sample[DisposalDate]
@@ -558,7 +558,7 @@ class YearToDateLiabilityControllerSpec
           val taxYear           = sample[TaxYear].copy(personalAllowance = personalAllowance)
           val disposalDate      = sample[DisposalDate].copy(taxYear = taxYear)
           val session = sessionWithSingleDisposalState(
-            IncompleteCalculatedYearToDateLiabilityAnswers.empty.copy(
+            IncompleteCalculatedYTDAnswers.empty.copy(
               estimatedIncome = Some(AmountInPence(1L))
             ),
             disposalDate
@@ -588,7 +588,7 @@ class YearToDateLiabilityControllerSpec
 
         "the user had started answering questions in this section but had not completed it" in {
           val oldAnswers =
-            IncompleteCalculatedYearToDateLiabilityAnswers.empty.copy(
+            IncompleteCalculatedYTDAnswers.empty.copy(
               estimatedIncome     = Some(AmountInPence(1L)),
               personalAllowance   = None,
               hasEstimatedDetails = Some(sample[Boolean])
@@ -607,12 +607,12 @@ class YearToDateLiabilityControllerSpec
 
         "the user had already completed the section" in {
           val oldAnswers =
-            sample[CompleteCalculatedYearToDateLiabilityAnswers].copy(
+            sample[CompleteCalculatedYTDAnswers].copy(
               estimatedIncome   = AmountInPence(1L),
               personalAllowance = Some(AmountInPence(2L))
             )
 
-          val newAnswers = IncompleteCalculatedYearToDateLiabilityAnswers.empty.copy(
+          val newAnswers = IncompleteCalculatedYTDAnswers.empty.copy(
             estimatedIncome   = Some(oldAnswers.estimatedIncome),
             personalAllowance = Some(AmountInPence(100L))
           )
@@ -635,7 +635,7 @@ class YearToDateLiabilityControllerSpec
         )
 
         "the section is incomplete" in {
-          val answers = sample[IncompleteCalculatedYearToDateLiabilityAnswers].copy(
+          val answers = sample[IncompleteCalculatedYTDAnswers].copy(
             estimatedIncome   = Some(AmountInPence(1L)),
             personalAllowance = Some(AmountInPence(2L))
           )
@@ -652,7 +652,7 @@ class YearToDateLiabilityControllerSpec
         }
 
         "the section is complete" in {
-          val answers = sample[CompleteCalculatedYearToDateLiabilityAnswers].copy(
+          val answers = sample[CompleteCalculatedYTDAnswers].copy(
             estimatedIncome   = AmountInPence(1L),
             personalAllowance = Some(AmountInPence(2L))
           )
@@ -690,7 +690,7 @@ class YearToDateLiabilityControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(
                 sessionWithSingleDisposalState(
-                  IncompleteCalculatedYearToDateLiabilityAnswers.empty.copy(
+                  IncompleteCalculatedYTDAnswers.empty.copy(
                     estimatedIncome = Some(AmountInPence(1L))
                   ),
                   sample[DisposalDate]
@@ -736,7 +736,7 @@ class YearToDateLiabilityControllerSpec
 
             "the section is incomplete and the estimated income is zero" in {
               test(
-                sample[IncompleteCalculatedYearToDateLiabilityAnswers].copy(
+                sample[IncompleteCalculatedYTDAnswers].copy(
                   estimatedIncome = Some(AmountInPence.zero)
                 ),
                 routes.YearToDateLiabilityController.estimatedIncome()
@@ -745,7 +745,7 @@ class YearToDateLiabilityControllerSpec
 
             "the section is incomplete and the estimated income is non-zero" in {
               test(
-                sample[IncompleteCalculatedYearToDateLiabilityAnswers].copy(
+                sample[IncompleteCalculatedYTDAnswers].copy(
                   estimatedIncome   = Some(AmountInPence(100L)),
                   personalAllowance = Some(AmountInPence(1L))
                 ),
@@ -755,7 +755,7 @@ class YearToDateLiabilityControllerSpec
 
             "the section is complete and the estimated income is zero" in {
               test(
-                sample[CompleteCalculatedYearToDateLiabilityAnswers].copy(
+                sample[CompleteCalculatedYTDAnswers].copy(
                   estimatedIncome   = AmountInPence.zero,
                   personalAllowance = None
                 ),
@@ -765,7 +765,7 @@ class YearToDateLiabilityControllerSpec
 
             "the section is complete and the estimated income is non-zero" in {
               test(
-                sample[CompleteCalculatedYearToDateLiabilityAnswers].copy(
+                sample[CompleteCalculatedYTDAnswers].copy(
                   estimatedIncome   = AmountInPence(100L),
                   personalAllowance = Some(AmountInPence(1L))
                 ),
@@ -788,7 +788,7 @@ class YearToDateLiabilityControllerSpec
               mockGetSession(
                 sessionWithMultipleDisposalsState(
                   (
-                    IncompleteNonCalculatedYearToDateLiabilityAnswers.empty
+                    IncompleteNonCalculatedYTDAnswers.empty
                   )
                 )._1
               )
@@ -828,7 +828,7 @@ class YearToDateLiabilityControllerSpec
           "the user has not answered the question yet" in {
             test(
               sessionWithMultipleDisposalsState(
-                IncompleteNonCalculatedYearToDateLiabilityAnswers.empty.copy(
+                IncompleteNonCalculatedYTDAnswers.empty.copy(
                   taxableGainOrLoss = Some(AmountInPence.zero)
                 )
               )._1,
@@ -837,7 +837,7 @@ class YearToDateLiabilityControllerSpec
           }
 
           "the user has answered the question before" in {
-            val answers = sample[CompleteNonCalculatedYearToDateLiabilityAnswers].copy(
+            val answers = sample[CompleteNonCalculatedYTDAnswers].copy(
               hasEstimatedDetails = true
             )
             test(
@@ -865,7 +865,7 @@ class YearToDateLiabilityControllerSpec
         behave like noEstimatedIncomeBehaviour(() => performAction())
 
         {
-          val answers = IncompleteCalculatedYearToDateLiabilityAnswers.empty.copy(
+          val answers = IncompleteCalculatedYTDAnswers.empty.copy(
             estimatedIncome   = Some(AmountInPence(1L)),
             personalAllowance = Some(AmountInPence(2L))
           )
@@ -885,7 +885,7 @@ class YearToDateLiabilityControllerSpec
               mockAuthWithNoRetrievals()
               mockGetSession(
                 sessionWithSingleDisposalState(
-                  IncompleteCalculatedYearToDateLiabilityAnswers.empty.copy(
+                  IncompleteCalculatedYTDAnswers.empty.copy(
                     estimatedIncome = Some(AmountInPence(1L))
                   ),
                   sample[DisposalDate]
@@ -899,7 +899,7 @@ class YearToDateLiabilityControllerSpec
         }
 
         "show a form error" when {
-          val answers = IncompleteCalculatedYearToDateLiabilityAnswers.empty.copy(
+          val answers = IncompleteCalculatedYTDAnswers.empty.copy(
             estimatedIncome   = Some(AmountInPence(1L)),
             personalAllowance = Some(AmountInPence(2L))
           )
@@ -924,7 +924,7 @@ class YearToDateLiabilityControllerSpec
           "all updates are successful and" when {
 
             "the journey was incomplete" in {
-              val answers = IncompleteCalculatedYearToDateLiabilityAnswers.empty.copy(
+              val answers = IncompleteCalculatedYTDAnswers.empty.copy(
                 estimatedIncome   = Some(AmountInPence(1L)),
                 personalAllowance = Some(AmountInPence(2L))
               )
@@ -939,7 +939,7 @@ class YearToDateLiabilityControllerSpec
             }
 
             "the journey was complete" in {
-              val answers = CompleteCalculatedYearToDateLiabilityAnswers(
+              val answers = CompleteCalculatedYTDAnswers(
                 estimatedIncome     = AmountInPence.zero,
                 personalAllowance   = None,
                 hasEstimatedDetails = false,
@@ -949,7 +949,7 @@ class YearToDateLiabilityControllerSpec
               )
 
               val updatedAnswers =
-                IncompleteCalculatedYearToDateLiabilityAnswers(
+                IncompleteCalculatedYTDAnswers(
                   estimatedIncome     = Some(AmountInPence.zero),
                   personalAllowance   = None,
                   hasEstimatedDetails = Some(true),
@@ -975,7 +975,7 @@ class YearToDateLiabilityControllerSpec
           "the section is incomplete" in {
 
             val session = sessionWithSingleDisposalState(
-              IncompleteCalculatedYearToDateLiabilityAnswers.empty.copy(
+              IncompleteCalculatedYTDAnswers.empty.copy(
                 estimatedIncome     = Some(AmountInPence(1L)),
                 personalAllowance   = Some(AmountInPence(2L)),
                 hasEstimatedDetails = Some(true)
@@ -996,7 +996,7 @@ class YearToDateLiabilityControllerSpec
 
           "the section is complete" in {
             val session = sessionWithSingleDisposalState(
-              CompleteCalculatedYearToDateLiabilityAnswers(
+              CompleteCalculatedYTDAnswers(
                 AmountInPence(1L),
                 Some(AmountInPence(2L)),
                 hasEstimatedDetails = false,
@@ -1024,7 +1024,7 @@ class YearToDateLiabilityControllerSpec
       "handling users on a non-calculated journey" must {
 
         {
-          val answers = IncompleteNonCalculatedYearToDateLiabilityAnswers.empty.copy(
+          val answers = IncompleteNonCalculatedYTDAnswers.empty.copy(
             taxableGainOrLoss = Some(AmountInPence.zero)
           )
 
@@ -1040,7 +1040,7 @@ class YearToDateLiabilityControllerSpec
         }
 
         "show a form error" when {
-          val answers = sample[CompleteNonCalculatedYearToDateLiabilityAnswers].copy(
+          val answers = sample[CompleteNonCalculatedYTDAnswers].copy(
             hasEstimatedDetails = false
           )
           val currentSession = sessionWithMultipleDisposalsState(answers)._1
@@ -1064,7 +1064,7 @@ class YearToDateLiabilityControllerSpec
 
             "the user is on a multiple disposal journey" in {
               val answers =
-                IncompleteNonCalculatedYearToDateLiabilityAnswers.empty.copy(
+                IncompleteNonCalculatedYTDAnswers.empty.copy(
                   taxableGainOrLoss = Some(AmountInPence(1L))
                 )
 
@@ -1094,7 +1094,7 @@ class YearToDateLiabilityControllerSpec
 
             "the user is on a non-calculated single disposal journey" in {
               val answers =
-                sample[CompleteNonCalculatedYearToDateLiabilityAnswers].copy(
+                sample[CompleteNonCalculatedYTDAnswers].copy(
                   hasEstimatedDetails = true
                 )
 
@@ -1137,7 +1137,7 @@ class YearToDateLiabilityControllerSpec
 
           "the answer in the session is the same as the one already stored" in {
             val answers =
-              IncompleteNonCalculatedYearToDateLiabilityAnswers.empty.copy(
+              IncompleteNonCalculatedYTDAnswers.empty.copy(
                 taxableGainOrLoss   = Some(AmountInPence(1L)),
                 hasEstimatedDetails = Some(false)
               )
@@ -1214,7 +1214,7 @@ class YearToDateLiabilityControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithSingleDisposalState(
-                IncompleteCalculatedYearToDateLiabilityAnswers.empty.copy(
+                IncompleteCalculatedYTDAnswers.empty.copy(
                   estimatedIncome = Some(AmountInPence(1L))
                 ),
                 sample[DisposalDate]
@@ -1235,7 +1235,7 @@ class YearToDateLiabilityControllerSpec
                     subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
                     draftReturn = singleDispsaslDraftReturnWithCompleteJourneys(
                       Some(
-                        IncompleteCalculatedYearToDateLiabilityAnswers.empty.copy(
+                        IncompleteCalculatedYTDAnswers.empty.copy(
                           estimatedIncome   = Some(AmountInPence(1L)),
                           personalAllowance = Some(AmountInPence(2L))
                         )
@@ -1257,7 +1257,7 @@ class YearToDateLiabilityControllerSpec
       "show an error page" when {
 
         "there is an error getting the calculated tax due" in {
-          val answers = IncompleteCalculatedYearToDateLiabilityAnswers.empty.copy(
+          val answers = IncompleteCalculatedYTDAnswers.empty.copy(
             estimatedIncome     = Some(AmountInPence(1L)),
             personalAllowance   = Some(AmountInPence(2L)),
             hasEstimatedDetails = Some(false)
@@ -1281,7 +1281,7 @@ class YearToDateLiabilityControllerSpec
         }
 
         "there is an error storing the calculated tax due" in {
-          val answers = IncompleteCalculatedYearToDateLiabilityAnswers.empty.copy(
+          val answers = IncompleteCalculatedYTDAnswers.empty.copy(
             estimatedIncome     = Some(AmountInPence(1L)),
             personalAllowance   = Some(AmountInPence(2L)),
             hasEstimatedDetails = Some(false)
@@ -1341,7 +1341,7 @@ class YearToDateLiabilityControllerSpec
         }
 
         "the section is incomplete and a calculation hasn't already been done" in {
-          val answers = IncompleteCalculatedYearToDateLiabilityAnswers(
+          val answers = IncompleteCalculatedYTDAnswers(
             Some(AmountInPence.zero),
             None,
             Some(true),
@@ -1376,7 +1376,7 @@ class YearToDateLiabilityControllerSpec
         }
 
         "the section is incomplete and a calculation has already been done" in {
-          val answers = IncompleteCalculatedYearToDateLiabilityAnswers(
+          val answers = IncompleteCalculatedYTDAnswers(
             Some(AmountInPence.zero),
             None,
             Some(true),
@@ -1393,7 +1393,7 @@ class YearToDateLiabilityControllerSpec
         }
 
         "the section is complete" in {
-          val answers = sample[CompleteCalculatedYearToDateLiabilityAnswers]
+          val answers = sample[CompleteCalculatedYTDAnswers]
           test(
             answers,
             { case (_, _) => () },
@@ -1419,11 +1419,12 @@ class YearToDateLiabilityControllerSpec
       behave like redirectWhenNotSingleDisposalCalculatedJourneyBehaviour(() => performAction())
 
       {
-        val oldAnswers = sample[IncompleteCalculatedYearToDateLiabilityAnswers].copy(
-          estimatedIncome   = Some(AmountInPence(0L)),
-          calculatedTaxDue  = Some(sample[CalculatedTaxDue]),
-          personalAllowance = None,
-          mandatoryEvidence = None
+        val oldAnswers = sample[IncompleteCalculatedYTDAnswers].copy(
+          estimatedIncome     = Some(AmountInPence(0L)),
+          calculatedTaxDue    = Some(sample[CalculatedTaxDue]),
+          personalAllowance   = None,
+          hasEstimatedDetails = Some(true),
+          mandatoryEvidence   = None
         )
         val draftReturn = singleDispsaslDraftReturnWithCompleteJourneys(
           Some(oldAnswers),
@@ -1449,7 +1450,7 @@ class YearToDateLiabilityControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithSingleDisposalState(
-                IncompleteCalculatedYearToDateLiabilityAnswers.empty.copy(
+                IncompleteCalculatedYTDAnswers.empty.copy(
                   estimatedIncome = Some(AmountInPence(1L))
                 ),
                 sample[DisposalDate]
@@ -1465,7 +1466,7 @@ class YearToDateLiabilityControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithSingleDisposalState(
-                IncompleteCalculatedYearToDateLiabilityAnswers.empty.copy(
+                IncompleteCalculatedYTDAnswers.empty.copy(
                   estimatedIncome   = Some(AmountInPence(1L)),
                   personalAllowance = Some(AmountInPence.zero)
                 ),
@@ -1478,7 +1479,7 @@ class YearToDateLiabilityControllerSpec
         }
 
         "there is no calculated tax due in session" in {
-          val answers = sample[IncompleteCalculatedYearToDateLiabilityAnswers].copy(
+          val answers = sample[IncompleteCalculatedYTDAnswers].copy(
             estimatedIncome     = Some(AmountInPence(0L)),
             hasEstimatedDetails = Some(true),
             calculatedTaxDue    = None,
@@ -1508,7 +1509,7 @@ class YearToDateLiabilityControllerSpec
       "show a form error" when {
         val draftReturn =
           singleDispsaslDraftReturnWithCompleteJourneys(
-            Some(sample[CompleteCalculatedYearToDateLiabilityAnswers]),
+            Some(sample[CompleteCalculatedYTDAnswers]),
             sample[DisposalDate],
             completeReliefDetailsAnswersWithNoOtherReliefs
           )
@@ -1542,7 +1543,7 @@ class YearToDateLiabilityControllerSpec
           "the journey was incomplete" in {
             val disposalDate = sample[DisposalDate]
 
-            val answers = IncompleteCalculatedYearToDateLiabilityAnswers(
+            val answers = IncompleteCalculatedYTDAnswers(
               Some(AmountInPence(1L)),
               Some(AmountInPence(2L)),
               Some(true),
@@ -1572,7 +1573,7 @@ class YearToDateLiabilityControllerSpec
           "the journey was complete" in {
             val disposalDate = sample[DisposalDate]
 
-            val answers = CompleteCalculatedYearToDateLiabilityAnswers(
+            val answers = CompleteCalculatedYTDAnswers(
               AmountInPence(1L),
               Some(AmountInPence(2L)),
               false,
@@ -1588,7 +1589,7 @@ class YearToDateLiabilityControllerSpec
 
             val updatedDraftReturn = draftReturn.copy(
               yearToDateLiabilityAnswers = Some(
-                IncompleteCalculatedYearToDateLiabilityAnswers(
+                IncompleteCalculatedYTDAnswers(
                   Some(answers.estimatedIncome),
                   answers.personalAllowance,
                   Some(answers.hasEstimatedDetails),
@@ -1616,7 +1617,7 @@ class YearToDateLiabilityControllerSpec
 
       "the user is on a calculated journey" must {
 
-        val completeAnswers = CompleteCalculatedYearToDateLiabilityAnswers(
+        val completeAnswers = CompleteCalculatedYTDAnswers(
           AmountInPence(1L),
           Some(AmountInPence(2L)),
           sample[Boolean],
@@ -1625,7 +1626,7 @@ class YearToDateLiabilityControllerSpec
           Some(sample[String])
         )
 
-        val allQuestionAnswered = IncompleteCalculatedYearToDateLiabilityAnswers(
+        val allQuestionAnswered = IncompleteCalculatedYTDAnswers(
           Some(completeAnswers.estimatedIncome),
           completeAnswers.personalAllowance,
           Some(completeAnswers.hasEstimatedDetails),
@@ -1635,7 +1636,7 @@ class YearToDateLiabilityControllerSpec
         )
 
         def testRedirectWhenIncompleteAnswers(
-          answers: IncompleteCalculatedYearToDateLiabilityAnswers,
+          answers: IncompleteCalculatedYTDAnswers,
           expectedRedirect: Call
         ): Unit = {
           inSequence {
@@ -1733,7 +1734,7 @@ class YearToDateLiabilityControllerSpec
         "show the page" when {
 
           "the section is complete" in {
-            forAll { completeAnswers: CompleteCalculatedYearToDateLiabilityAnswers =>
+            forAll { completeAnswers: CompleteCalculatedYTDAnswers =>
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(sessionWithSingleDisposalState(completeAnswers, sample[DisposalDate])._1)
@@ -1780,13 +1781,13 @@ class YearToDateLiabilityControllerSpec
 
       "the user is on a non-calculated journey" must {
 
-        val completeAnswers = CompleteNonCalculatedYearToDateLiabilityAnswers(
+        val completeAnswers = CompleteNonCalculatedYTDAnswers(
           AmountInPence(1L),
           true,
           AmountInPence(2L)
         )
 
-        val allQuestionAnswered = IncompleteNonCalculatedYearToDateLiabilityAnswers(
+        val allQuestionAnswered = IncompleteNonCalculatedYTDAnswers(
           Some(completeAnswers.taxableGainOrLoss),
           Some(completeAnswers.hasEstimatedDetails),
           Some(completeAnswers.taxDue)
@@ -1798,7 +1799,7 @@ class YearToDateLiabilityControllerSpec
         val updatedSession                  = session.copy(journeyStatus = Some(updatedJourney))
 
         def testRedirectWhenIncompleteAnswers(
-          answers: IncompleteNonCalculatedYearToDateLiabilityAnswers,
+          answers: IncompleteNonCalculatedYTDAnswers,
           expectedRedirect: Call
         ): Unit = {
           inSequence {
@@ -1941,7 +1942,7 @@ class YearToDateLiabilityControllerSpec
 
         "the section is incomplete" in {
           test(
-            IncompleteCalculatedYearToDateLiabilityAnswers(
+            IncompleteCalculatedYTDAnswers(
               Some(AmountInPence.zero),
               None,
               Some(true),
@@ -1955,7 +1956,7 @@ class YearToDateLiabilityControllerSpec
 
         "the section is complete" in {
           test(
-            sample[CompleteCalculatedYearToDateLiabilityAnswers].copy(
+            sample[CompleteCalculatedYTDAnswers].copy(
               calculatedTaxDue = calculatedTaxDue,
               taxDue           = AmountInPence(200L)
             ),
@@ -1989,7 +1990,7 @@ class YearToDateLiabilityControllerSpec
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(
-            sessionWithSingleDisposalState(sample[CompleteCalculatedYearToDateLiabilityAnswers], sample[DisposalDate])._1
+            sessionWithSingleDisposalState(sample[CompleteCalculatedYTDAnswers], sample[DisposalDate])._1
           )
         }
 
@@ -2060,7 +2061,7 @@ class YearToDateLiabilityControllerSpec
         "the user has already started this uncalculated section but have not completed it yet" in {
           test(
             sessionWithMultipleDisposalsState(
-              IncompleteNonCalculatedYearToDateLiabilityAnswers.empty.copy(taxableGainOrLoss = Some(
+              IncompleteNonCalculatedYTDAnswers.empty.copy(taxableGainOrLoss = Some(
                 AmountInPence(-100L)
               )
               )
@@ -2075,7 +2076,7 @@ class YearToDateLiabilityControllerSpec
         "the user has completed this uncalculated section" in {
           test(
             sessionWithMultipleDisposalsState(
-              sample[CompleteNonCalculatedYearToDateLiabilityAnswers].copy(taxableGainOrLoss = AmountInPence(0L))
+              sample[CompleteNonCalculatedYTDAnswers].copy(taxableGainOrLoss = AmountInPence(0L))
             )._1,
             routes.YearToDateLiabilityController.checkYourAnswers(), { doc =>
               doc.select("#taxableGainOrLoss-2").attr("checked") shouldBe "checked"
@@ -2103,7 +2104,7 @@ class YearToDateLiabilityControllerSpec
         behave like unsuccessfulUpdateBehaviour(
           draftReturn,
           draftReturn.copy(yearToDateLiabilityAnswers = Some(
-            IncompleteNonCalculatedYearToDateLiabilityAnswers.empty.copy(
+            IncompleteNonCalculatedYTDAnswers.empty.copy(
               taxableGainOrLoss = Some(AmountInPence(101L))
             )
           )
@@ -2176,7 +2177,7 @@ class YearToDateLiabilityControllerSpec
                 "taxableGain"       -> "30"
               ),
               None,
-              IncompleteNonCalculatedYearToDateLiabilityAnswers.empty.copy(taxableGainOrLoss = Some(newAmount))
+              IncompleteNonCalculatedYTDAnswers.empty.copy(taxableGainOrLoss = Some(newAmount))
             )
           }
 
@@ -2188,16 +2189,16 @@ class YearToDateLiabilityControllerSpec
                 "taxableGainOrLoss" -> "1",
                 "netLoss"           -> "30"
               ),
-              IncompleteNonCalculatedYearToDateLiabilityAnswers.empty.copy(taxableGainOrLoss = Some(AmountInPence(2L))),
-              IncompleteNonCalculatedYearToDateLiabilityAnswers.empty.copy(taxableGainOrLoss = Some(newAmount)),
-              sample[CompleteReliefDetailsAnswers].copy(otherReliefs                         = Some(sample[OtherReliefsOption.OtherReliefs]))
+              IncompleteNonCalculatedYTDAnswers.empty.copy(taxableGainOrLoss = Some(AmountInPence(2L))),
+              IncompleteNonCalculatedYTDAnswers.empty.copy(taxableGainOrLoss = Some(newAmount)),
+              sample[CompleteReliefDetailsAnswers].copy(otherReliefs         = Some(sample[OtherReliefsOption.OtherReliefs]))
             )
           }
 
           "the section was complete" in {
             val newAmount = AmountInPence(0L)
             val answers =
-              sample[CompleteNonCalculatedYearToDateLiabilityAnswers].copy(taxableGainOrLoss = AmountInPence(1L))
+              sample[CompleteNonCalculatedYTDAnswers].copy(taxableGainOrLoss = AmountInPence(1L))
 
             testSuccessfulUpdatesAfterSubmitWithMultipleDisposals(
               performAction(
@@ -2219,7 +2220,7 @@ class YearToDateLiabilityControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithMultipleDisposalsState(
-                sample[CompleteNonCalculatedYearToDateLiabilityAnswers].copy(taxableGainOrLoss = AmountInPence.zero)
+                sample[CompleteNonCalculatedYTDAnswers].copy(taxableGainOrLoss = AmountInPence.zero)
               )._1
             )
           }
@@ -2248,7 +2249,7 @@ class YearToDateLiabilityControllerSpec
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
-              sessionWithMultipleDisposalsState(IncompleteNonCalculatedYearToDateLiabilityAnswers.empty)._1
+              sessionWithMultipleDisposalsState(IncompleteNonCalculatedYTDAnswers.empty)._1
             )
           }
 
@@ -2288,7 +2289,7 @@ class YearToDateLiabilityControllerSpec
         "the user has not answered this question before" in {
           test(
             sessionWithMultipleDisposalsState(
-              IncompleteNonCalculatedYearToDateLiabilityAnswers.empty.copy(hasEstimatedDetails = Some(true))
+              IncompleteNonCalculatedYTDAnswers.empty.copy(hasEstimatedDetails = Some(true))
             )._1,
             routes.YearToDateLiabilityController.hasEstimatedDetails()
           )
@@ -2297,7 +2298,7 @@ class YearToDateLiabilityControllerSpec
         "the user has answered this question before" in {
           test(
             sessionWithSingleDisposalState(
-              Some(sample[CompleteNonCalculatedYearToDateLiabilityAnswers]),
+              Some(sample[CompleteNonCalculatedYTDAnswers]),
               Some(sample[DisposalDate]),
               Some(
                 sample[CompleteReliefDetailsAnswers].copy(otherReliefs = Some(sample[OtherReliefsOption.OtherReliefs]))
@@ -2320,7 +2321,7 @@ class YearToDateLiabilityControllerSpec
 
       {
         val answers =
-          IncompleteNonCalculatedYearToDateLiabilityAnswers.empty.copy(
+          IncompleteNonCalculatedYTDAnswers.empty.copy(
             taxableGainOrLoss   = Some(AmountInPence.zero),
             hasEstimatedDetails = Some(true)
           )
@@ -2343,7 +2344,7 @@ class YearToDateLiabilityControllerSpec
       "show a form error" when {
 
         val currentSession = sessionWithMultipleDisposalsState(
-          sample[CompleteNonCalculatedYearToDateLiabilityAnswers]
+          sample[CompleteNonCalculatedYTDAnswers]
         )._1
 
         def test(data: (String, String)*)(expectedErrorKey: String): Unit =
@@ -2367,7 +2368,7 @@ class YearToDateLiabilityControllerSpec
 
           "the section had been started but not completed" in {
             val newAmount = AmountInPence(101L)
-            val answers = IncompleteNonCalculatedYearToDateLiabilityAnswers.empty.copy(
+            val answers = IncompleteNonCalculatedYTDAnswers.empty.copy(
               taxableGainOrLoss   = Some(AmountInPence(2L)),
               hasEstimatedDetails = Some(true)
             )
@@ -2384,7 +2385,7 @@ class YearToDateLiabilityControllerSpec
           "the section was complete" in {
             val newAmount = AmountInPence(0L)
             val answers =
-              sample[CompleteNonCalculatedYearToDateLiabilityAnswers].copy(taxDue = AmountInPence(1L))
+              sample[CompleteNonCalculatedYTDAnswers].copy(taxDue = AmountInPence(1L))
 
             testSuccessfulUpdatesAfterSubmitWithMultipleDisposals(
               performAction(
@@ -2406,7 +2407,7 @@ class YearToDateLiabilityControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithMultipleDisposalsState(
-                sample[CompleteNonCalculatedYearToDateLiabilityAnswers].copy(taxDue = AmountInPence.zero)
+                sample[CompleteNonCalculatedYTDAnswers].copy(taxDue = AmountInPence.zero)
               )._1
             )
           }
@@ -2430,7 +2431,7 @@ class YearToDateLiabilityControllerSpec
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(
-            sessionWithSingleDisposalState(Some(sample[CompleteCalculatedYearToDateLiabilityAnswers]), None)._1
+            sessionWithSingleDisposalState(Some(sample[CompleteCalculatedYTDAnswers]), None)._1
           )
         }
 
@@ -2445,7 +2446,7 @@ class YearToDateLiabilityControllerSpec
           mockAuthWithNoRetrievals()
           mockGetSession(
             sessionWithSingleDisposalState(
-              sample[IncompleteCalculatedYearToDateLiabilityAnswers].copy(
+              sample[IncompleteCalculatedYTDAnswers].copy(
                 estimatedIncome     = None,
                 personalAllowance   = Some(sample[AmountInPence]),
                 hasEstimatedDetails = Some(sample[Boolean])
@@ -2463,7 +2464,7 @@ class YearToDateLiabilityControllerSpec
   def incompleteOtherJourneysBehaviour(performAction: () => Future[Result]): Unit = {
     val draftReturn = singleDispsaslDraftReturnWithCompleteJourneys(
       Some(
-        sample[CompleteCalculatedYearToDateLiabilityAnswers]
+        sample[CompleteCalculatedYTDAnswers]
           .copy(estimatedIncome = AmountInPence.zero, personalAllowance = None)
       ),
       sample[DisposalDate],
@@ -2544,7 +2545,7 @@ class YearToDateLiabilityControllerSpec
           mockAuthWithNoRetrievals()
           mockGetSession(
             sessionWithSingleDisposalState(
-              sample[CompleteCalculatedYearToDateLiabilityAnswers],
+              sample[CompleteCalculatedYTDAnswers],
               sample[DisposalDate]
             )._1
           )
@@ -2581,7 +2582,7 @@ class YearToDateLiabilityControllerSpec
           mockAuthWithNoRetrievals()
           mockGetSession(
             sessionWithSingleDisposalState(
-              sample[CompleteNonCalculatedYearToDateLiabilityAnswers],
+              sample[CompleteNonCalculatedYTDAnswers],
               sample[DisposalDate]
             )._1
           )
@@ -2596,7 +2597,7 @@ class YearToDateLiabilityControllerSpec
           mockAuthWithNoRetrievals()
           mockGetSession(
             sessionWithSingleDisposalState(
-              Some(sample[CompleteNonCalculatedYearToDateLiabilityAnswers]),
+              Some(sample[CompleteNonCalculatedYTDAnswers]),
               Some(sample[DisposalDate]),
               Some(
                 sample[CompleteReliefDetailsAnswers].copy(otherReliefs = Some(sample[OtherReliefsOption.OtherReliefs]))
@@ -2692,7 +2693,7 @@ class YearToDateLiabilityControllerSpec
   )(expectedErrorMessageKey: String, errorArgs: String*)(pageTitleKey: String, titleArgs: String*)(
     performAction: Seq[(String, String)] => Future[Result],
     currentSession: SessionData = sessionWithSingleDisposalState(
-      sample[CompleteCalculatedYearToDateLiabilityAnswers],
+      sample[CompleteCalculatedYTDAnswers],
       sample[DisposalDate]
     )._1
   ): Unit = {
@@ -2792,7 +2793,7 @@ class YearToDateLiabilityControllerSpec
 
       val calculatedTaxDue = sample[GainCalculatedTaxDue].copy(amountOfTaxDue = AmountInPence(100L))
 
-      val answers = IncompleteCalculatedYearToDateLiabilityAnswers.empty.copy(
+      val answers = IncompleteCalculatedYTDAnswers.empty.copy(
         estimatedIncome     = Some(AmountInPence(1L)),
         personalAllowance   = Some(AmountInPence.zero),
         hasEstimatedDetails = Some(false)
@@ -2840,7 +2841,7 @@ class YearToDateLiabilityControllerSpec
 
 object YearToDateLiabilityControllerSpec extends Matchers {
   def validateCalculatedYearToDateLiabilityPage(
-    completeYearToDateLiabilityAnswers: CompleteCalculatedYearToDateLiabilityAnswers,
+    completeYearToDateLiabilityAnswers: CompleteCalculatedYTDAnswers,
     doc: Document
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
     doc.select("#estimatedIncome-value-answer").text() shouldBe formatAmountOfMoneyWithPoundSign(
@@ -2862,7 +2863,7 @@ object YearToDateLiabilityControllerSpec extends Matchers {
   }
 
   def validateNonCalculatedYearToDateLiabilityPage(
-    answers: CompleteNonCalculatedYearToDateLiabilityAnswers,
+    answers: CompleteNonCalculatedYTDAnswers,
     doc: Document
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
     if (answers.taxableGainOrLoss < AmountInPence.zero) {

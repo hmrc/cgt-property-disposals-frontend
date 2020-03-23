@@ -16,7 +16,7 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.DisplayFormat
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 
@@ -27,13 +27,15 @@
         addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display,
 )
 
-@(propertyAddress: UkAddress)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(propertyAddress: UkAddress, hasNonResidentialAssetType: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @cyaSection() {
   @cyaRow(
     messages("returns.property-address.cyaLabel.property-address"),
     addressDisplay(propertyAddress, DisplayFormat.Block),
-    Some(cyaChange(messages("returns.property-address.cyaChange.property-address"), returns.address.routes.PropertyDetailsController.enterPostcode().url)),
+    Some(cyaChange(messages("returns.property-address.cyaChange.property-address"),
+        if(hasNonResidentialAssetType) routes.PropertyDetailsController.singleDisposalHasUkPostcode().url
+        else routes.PropertyDetailsController.enterPostcode().url)),
       "property-address"
   )
 }

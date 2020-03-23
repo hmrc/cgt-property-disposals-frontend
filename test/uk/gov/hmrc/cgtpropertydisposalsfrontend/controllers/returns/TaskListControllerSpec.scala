@@ -58,7 +58,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate,
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYearToDateLiabilityAnswers._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus
 
@@ -585,7 +585,7 @@ class TaskListControllerSpec
               acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
               reliefDetailsAnswers       = Some(sample[CompleteReliefDetailsAnswers]),
               exemptionAndLossesAnswers  = Some(sample[CompleteExemptionAndLossesAnswers]),
-              yearToDateLiabilityAnswers = Some(sample[IncompleteCalculatedYearToDateLiabilityAnswers])
+              yearToDateLiabilityAnswers = Some(sample[IncompleteCalculatedYTDAnswers])
             ),
             TaskListStatus.InProgress
           )
@@ -600,7 +600,7 @@ class TaskListControllerSpec
               acquisitionDetailsAnswers  = Some(sample[CompleteAcquisitionDetailsAnswers]),
               reliefDetailsAnswers       = Some(sample[CompleteReliefDetailsAnswers]),
               exemptionAndLossesAnswers  = Some(sample[CompleteExemptionAndLossesAnswers]),
-              yearToDateLiabilityAnswers = Some(sample[CompleteCalculatedYearToDateLiabilityAnswers])
+              yearToDateLiabilityAnswers = Some(sample[CompleteCalculatedYTDAnswers])
             ),
             TaskListStatus.Complete
           )
