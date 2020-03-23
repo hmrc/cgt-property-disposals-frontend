@@ -1172,7 +1172,6 @@ class YearToDateLiabilityControllerSpec
       val reliefDetailsAnswers      = sample[CompleteReliefDetailsAnswers]
       val exemptionAndLossesAnswers = sample[CompleteExemptionAndLossesAnswers]
       val initialGainOrLossAnswers  = sample[AmountInPence]
-      val isATrust                  = sample[Boolean]
 
       def draftReturnWithAnswers(yearToDateLiabilityAnswers: YearToDateLiabilityAnswers): SingleDisposalDraftReturn =
         sample[SingleDisposalDraftReturn].copy(
@@ -1185,7 +1184,7 @@ class YearToDateLiabilityControllerSpec
           initialGainOrLoss          = Some(initialGainOrLossAnswers)
         )
 
-      def calculateRequest(estimatedIncome: AmountInPence, personalAllowance: AmountInPence) =
+      def calculateRequest(estimatedIncome: AmountInPence, personalAllowance: AmountInPence, isATrust: Boolean) =
         CalculateCgtTaxDueRequest(
           triageAnswers,
           disposalDetailsAnswers,
@@ -1257,20 +1256,23 @@ class YearToDateLiabilityControllerSpec
       "show an error page" when {
 
         "there is an error getting the calculated tax due" in {
+          val subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName]))
+
           val answers = IncompleteCalculatedYTDAnswers.empty.copy(
             estimatedIncome     = Some(AmountInPence(1L)),
             personalAllowance   = Some(AmountInPence(2L)),
             hasEstimatedDetails = Some(false)
           )
 
-          val calculateCgtTaxDueRequest = calculateRequest(AmountInPence(1L), AmountInPence(2L))
+          val calculateCgtTaxDueRequest = calculateRequest(AmountInPence(1L), AmountInPence(2L), isATrust = false)
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               SessionData.empty.copy(
                 journeyStatus = Some(
-                  sample[FillingOutReturn].copy(draftReturn = draftReturnWithAnswers(answers))
+                  sample[FillingOutReturn]
+                    .copy(subscribedDetails = subscribedDetails, draftReturn = draftReturnWithAnswers(answers))
                 )
               )
             )
@@ -1281,16 +1283,19 @@ class YearToDateLiabilityControllerSpec
         }
 
         "there is an error storing the calculated tax due" in {
+          val subscribedDetails = sample[SubscribedDetails].copy(name = Left(sample[TrustName]))
+
           val answers = IncompleteCalculatedYTDAnswers.empty.copy(
             estimatedIncome     = Some(AmountInPence(1L)),
             personalAllowance   = Some(AmountInPence(2L)),
             hasEstimatedDetails = Some(false)
           )
 
-          val calculateCgtTaxDueRequest = calculateRequest(AmountInPence(1L), AmountInPence(2L))
+          val calculateCgtTaxDueRequest = calculateRequest(AmountInPence(1L), AmountInPence(2L), isATrust = true)
           val calculatedTaxDue          = sample[CalculatedTaxDue]
           val draftReturn               = draftReturnWithAnswers(answers)
-          val fillingOutReturn          = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+          val fillingOutReturn =
+            sample[FillingOutReturn].copy(draftReturn = draftReturn, subscribedDetails = subscribedDetails)
           val updatedFillingOutReturn = fillingOutReturn.copy(draftReturn = draftReturn.copy(
             yearToDateLiabilityAnswers = Some(answers.copy(calculatedTaxDue = Some(calculatedTaxDue)))
           )
@@ -1312,12 +1317,14 @@ class YearToDateLiabilityControllerSpec
 
         def test(
           answers: YearToDateLiabilityAnswers,
+          subscribedDetails: SubscribedDetails,
           mockCalculateTaxDue: (FillingOutReturn, SingleDisposalDraftReturn) => Unit,
           backLink: Call
         ): Unit = {
           val draftReturn = draftReturnWithAnswers(answers)
           val fillingOutReturn = sample[FillingOutReturn].copy(
-            draftReturn = draftReturn
+            subscribedDetails = subscribedDetails,
+            draftReturn       = draftReturn
           )
 
           val session = SessionData.empty.copy(journeyStatus = Some(fillingOutReturn))
@@ -1353,9 +1360,10 @@ class YearToDateLiabilityControllerSpec
           val calculatedTaxDue = sample[CalculatedTaxDue]
 
           test(
-            answers, {
+            answers,
+            sample[SubscribedDetails].copy(name = Right(sample[IndividualName])), {
               case (fillingOutReturn, draftReturn) =>
-                mockCalculationService(calculateRequest(AmountInPence.zero, AmountInPence.zero))(
+                mockCalculationService(calculateRequest(AmountInPence.zero, AmountInPence.zero, isATrust = false))(
                   Right(calculatedTaxDue)
                 )
                 mockStoreSession(
@@ -1387,6 +1395,7 @@ class YearToDateLiabilityControllerSpec
 
           test(
             answers,
+            sample[SubscribedDetails].copy(name = Left(sample[TrustName])),
             { case (_, _) => () },
             routes.YearToDateLiabilityController.hasEstimatedDetails()
           )
@@ -1396,6 +1405,7 @@ class YearToDateLiabilityControllerSpec
           val answers = sample[CompleteCalculatedYTDAnswers]
           test(
             answers,
+            sample[SubscribedDetails],
             { case (_, _) => () },
             routes.YearToDateLiabilityController.checkYourAnswers()
           )
