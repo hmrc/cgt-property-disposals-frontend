@@ -554,13 +554,13 @@ class ReliefDetailsControllerSpec
           test(
             "lettingsRelief"      -> "0",
             "lettingsReliefValue" -> valueGreaterThanLettingsRelief
-          )(Messages("lettingsRelief.error.amountOverLimit", maxLettingsReliefValue.inPounds().toString()))
+          )(Messages("lettingsReliefValue.error.amountOverLimit", maxLettingsReliefValue.inPounds().toString()))
 
         }
 
         "the data is more than private residence relief limit" in {
           testWithResidentsRelief(AmountInPence.fromPounds(5), "lettingsRelief" -> "0", "lettingsReliefValue" -> "10")(
-            "lettingsRelief.error.amountOverPrivateResidenceRelief"
+            "lettingsReliefValue.error.amountOverPrivateResidenceRelief"
           )
 
         }

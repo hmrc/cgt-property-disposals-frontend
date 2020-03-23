@@ -190,40 +190,41 @@ class ReliefDetailsController @Inject() (
           )(
             updateDraftReturn = {
               case (p, draftReturn) =>
-                val currentPrivateResidentsRelief: AmountInPence =
-                  fromMaybeReliefsToPrivateResidentsReliefAmount(draftReturn)
-                if (currentPrivateResidentsRelief === AmountInPence.fromPounds(p))
-                  draftReturn
-                else {
-                  draftReturn.copy(
-                    reliefDetailsAnswers = Some(
-                      answers.fold(
-                        _.copy(privateResidentsRelief = Some(AmountInPence.fromPounds(p)), lettingsRelief = None),
-                        c =>
-                          IncompleteReliefDetailsAnswers(
-                            Some(AmountInPence.fromPounds(p)),
-                            None,
-                            c.otherReliefs
-                          )
+                fromMaybeReliefsToPrivateResidentsReliefAmount(draftReturn) match {
+                  case Some(value) if (value === AmountInPence.fromPounds(p)) => {
+                    draftReturn
+                  }
+                  case _ => {
+                    draftReturn.copy(
+                      reliefDetailsAnswers = Some(
+                        answers.fold(
+                          _.copy(privateResidentsRelief = Some(AmountInPence.fromPounds(p)), lettingsRelief = None),
+                          c =>
+                            IncompleteReliefDetailsAnswers(
+                              Some(AmountInPence.fromPounds(p)),
+                              None,
+                              c.otherReliefs
+                            )
+                        )
                       )
                     )
-                  )
+                  }
                 }
-
             }
           )
       }
   }
 
-  private def fromMaybeReliefsToPrivateResidentsReliefAmount(draftReturn: SingleDisposalDraftReturn): AmountInPence = {
+  private def fromMaybeReliefsToPrivateResidentsReliefAmount(
+    draftReturn: SingleDisposalDraftReturn
+  ): Option[AmountInPence] = {
     val privateResidentsRelief = draftReturn.reliefDetailsAnswers
-      .map(answers =>
-        answers.fold[AmountInPence](
-          incomplete => incomplete.privateResidentsRelief.getOrElse(AmountInPence(0)),
-          p => p.privateResidentsRelief
+      .flatMap(answers =>
+        answers.fold[Option[AmountInPence]](
+          incomplete => incomplete.privateResidentsRelief,
+          p => Some(p.privateResidentsRelief)
         )
       )
-      .getOrElse(AmountInPence(0))
     privateResidentsRelief
   }
 
@@ -437,32 +438,33 @@ object ReliefDetailsController {
   val privateResidentsReliefForm: Form[BigDecimal] =
     MoneyUtils.amountInPoundsYesNoForm("privateResidentsRelief", "privateResidentsReliefValue")
 
-  def innerOption(privateResidencyRelief: AmountInPence, lettingsReliefLimit: AmountInPence) = InnerOption { data =>
-    FormUtils
-      .readValue("lettingsReliefValue", data, identity)
-      .flatMap(
-        MoneyUtils.validateAmountOfMoney(
-          "lettingsReliefValue",
-          _ <= 0,
-          _ > MoneyUtils.maxAmountOfPounds
-        )(_)
-      )
-      .flatMap(value =>
-        MoneyUtils.validateValueIsLessThan(
-          "lettingsRelief",
-          lettingsReliefLimit,
-          "error.amountOverLimit"
-        )(value)
-      )
-      .flatMap { value =>
-        MoneyUtils.validateValueIsLessThan(
-          "lettingsRelief",
-          privateResidencyRelief,
-          "error.amountOverPrivateResidenceRelief"
-        )(value)
-      }
-      .leftMap(Seq(_))
-  }
+  def innerOption(privateResidencyRelief: AmountInPence, lettingsReliefLimit: AmountInPence): InnerOption[BigDecimal] =
+    InnerOption { data =>
+      FormUtils
+        .readValue("lettingsReliefValue", data, identity)
+        .flatMap(
+          MoneyUtils.validateAmountOfMoney(
+            "lettingsReliefValue",
+            _ <= 0,
+            _ > MoneyUtils.maxAmountOfPounds
+          )(_)
+        )
+        .flatMap(value =>
+          MoneyUtils.validateValueIsLessThan(
+            "lettingsReliefValue",
+            lettingsReliefLimit,
+            "error.amountOverLimit"
+          )(value)
+        )
+        .flatMap { value =>
+          MoneyUtils.validateValueIsLessThan(
+            "lettingsReliefValue",
+            privateResidencyRelief,
+            "error.amountOverPrivateResidenceRelief"
+          )(value)
+        }
+        .leftMap(Seq(_))
+    }
 
   def lettingsReliefForm(answers: ReliefDetailsAnswers, lettingsReliefLimit: AmountInPence): Form[BigDecimal] = {
     val reliefAmount =
