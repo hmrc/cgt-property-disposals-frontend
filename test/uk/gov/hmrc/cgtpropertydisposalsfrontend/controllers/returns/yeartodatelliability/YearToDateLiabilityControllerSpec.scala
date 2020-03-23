@@ -1415,10 +1415,11 @@ class YearToDateLiabilityControllerSpec
 
       {
         val oldAnswers = sample[IncompleteCalculatedYTDAnswers].copy(
-          estimatedIncome   = Some(AmountInPence(0L)),
-          calculatedTaxDue  = Some(sample[CalculatedTaxDue]),
-          personalAllowance = None,
-          mandatoryEvidence = None
+          estimatedIncome     = Some(AmountInPence(0L)),
+          calculatedTaxDue    = Some(sample[CalculatedTaxDue]),
+          personalAllowance   = None,
+          hasEstimatedDetails = Some(true),
+          mandatoryEvidence   = None
         )
         val draftReturn = singleDispsaslDraftReturnWithCompleteJourneys(
           Some(oldAnswers),

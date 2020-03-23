@@ -33,7 +33,7 @@ addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.a
         messages("returns.property-address.cyaLabel.property-address"),
         addressDisplay(answers.address, DisplayFormat.Block),
         Some(cyaChange(messages("returns.property-address.cyaChange.property-address"),
-            if(hasNonResidentialAssetType) routes.PropertyDetailsController.nonResidentialPropertyHasUkPostcode().url
+            if(hasNonResidentialAssetType) routes.PropertyDetailsController.singleDisposalHasUkPostcode().url
             else routes.PropertyDetailsController.enterPostcode().url
         )),
         "property-address"

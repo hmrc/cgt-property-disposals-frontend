@@ -283,7 +283,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                   sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(AssetType.NonResidential)),
                 examplePropertyDetailsAnswers = None
               ),
-              routes.PropertyDetailsController.nonResidentialPropertyHasUkPostcode()
+              routes.PropertyDetailsController.singleDisposalHasUkPostcode()
             )
           }
 
@@ -294,7 +294,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                   sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(AssetType.NonResidential)),
                 examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
               ),
-              routes.PropertyDetailsController.nonResidentialPropertyHasUkPostcode()
+              routes.PropertyDetailsController.singleDisposalHasUkPostcode()
             )
           }
 
@@ -304,39 +304,16 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
     "handling requests to display the has a uk postcode page" must {
 
-      def performAction(): Future[Result] = controller.nonResidentialPropertyHasUkPostcode()(FakeRequest())
+      def performAction(): Future[Result] = controller.multipleDisposalsHasUkPostcode()(FakeRequest())
 
       behave like redirectToTaskListWhenNoAssetTypeBehaviour(performAction)
 
-      "redirect to the check your answers page" when {
-
-        "the user did not dispose of a non-residential property" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              SessionData.empty.copy(
-                journeyStatus = Some(
-                  sample[FillingOutReturn].copy(
-                    draftReturn = sample[MultipleDisposalsDraftReturn].copy(
-                      triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
-                        assetTypes = List(AssetType.Residential)
-                      )
-                    )
-                  )
-                )
-              )
-            )
-          }
-
-          checkIsRedirect(performAction(), routes.PropertyDetailsController.checkYourAnswers())
-        }
-
-      }
+      behave like redirectWhenNotNonResidentialAssetTypeBehaviour(performAction)
 
       "display the page" when {
 
         def test(
-          draftReturn: DraftReturn,
+          draftReturn: MultipleDisposalsDraftReturn,
           expectedBackLink: Call
         ): Unit = {
           inSequence {
@@ -354,69 +331,39 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey("hasValidPostcode.title"), { doc =>
+            messageFromMessageKey("hasValidPostcode.multipleDisposals.title"), { doc =>
               doc.select("#back").attr("href") shouldBe expectedBackLink.url
               doc
                 .select("#content > article > form")
                 .attr("action") shouldBe routes.PropertyDetailsController
-                .nonResidentialPropertyHasUkPostcodeSubmit()
+                .multipleDisposalsHasUkPostcodeSubmit()
                 .url
             }
           )
         }
 
-        "the user is on a multiple disposal journey and" when {
-
-          "the user disposed of a non-residential property and the section is not complete" in {
-            test(
-              sample[MultipleDisposalsDraftReturn].copy(
-                triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
-                  assetTypes = List(AssetType.NonResidential)
-                ),
-                examplePropertyDetailsAnswers = None
+        "the user disposed of a non-residential property and the section is not complete" in {
+          test(
+            sample[MultipleDisposalsDraftReturn].copy(
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                assetTypes = List(AssetType.NonResidential)
               ),
-              routes.PropertyDetailsController.multipleDisposalsGuidance()
-            )
-          }
-
-          "the user disposed of a non-residential property and the section is complete" in {
-            test(
-              sample[MultipleDisposalsDraftReturn].copy(
-                triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
-                  assetTypes = List(AssetType.NonResidential)
-                ),
-                examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers])
-              ),
-              routes.PropertyDetailsController.checkYourAnswers()
-            )
-          }
+              examplePropertyDetailsAnswers = None
+            ),
+            routes.PropertyDetailsController.multipleDisposalsGuidance()
+          )
         }
 
-        "the user is on a single disposal journey and" when {
-
-          "the user disposed of a non-residential property and the section is not complete" in {
-            test(
-              sample[SingleDisposalDraftReturn].copy(
-                triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
-                  assetType = AssetType.NonResidential
-                ),
-                propertyAddress = None
+        "the user disposed of a non-residential property and the section is complete" in {
+          test(
+            sample[MultipleDisposalsDraftReturn].copy(
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                assetTypes = List(AssetType.NonResidential)
               ),
-              controllers.returns.routes.TaskListController.taskList()
-            )
-          }
-
-          "the user disposed of a non-residential property and the section is complete" in {
-            test(
-              sample[SingleDisposalDraftReturn].copy(
-                triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
-                  assetType = AssetType.NonResidential
-                ),
-                propertyAddress = Some(sample[UkAddress])
-              ),
-              routes.PropertyDetailsController.checkYourAnswers()
-            )
-          }
+              examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers])
+            ),
+            routes.PropertyDetailsController.checkYourAnswers()
+          )
         }
 
       }
@@ -426,9 +373,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
     "handling submits on the has a uk postcode page" must {
 
       def performAction(formData: (String, String)*): Future[Result] =
-        controller.nonResidentialPropertyHasUkPostcodeSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
+        controller.singleDisposalHasUkPostcodeSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
 
       behave like redirectToTaskListWhenNoAssetTypeBehaviour(() => performAction())
+
+      behave like redirectWhenNotNonResidentialAssetTypeBehaviour(() => performAction())
 
       val nonResidentialPropertyDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
         triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
@@ -439,31 +388,6 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       val nonResidentialFillingOutReturn = sample[FillingOutReturn].copy(
         draftReturn = nonResidentialPropertyDraftReturn
       )
-
-      "redirect to the check your answers page" when {
-
-        "the user did not dispose of a non-residential property" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              SessionData.empty.copy(
-                journeyStatus = Some(
-                  sample[FillingOutReturn].copy(
-                    draftReturn = sample[MultipleDisposalsDraftReturn].copy(
-                      triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
-                        assetTypes = List(AssetType.Residential)
-                      )
-                    )
-                  )
-                )
-              )
-            )
-          }
-
-          checkIsRedirect(performAction(), routes.PropertyDetailsController.checkYourAnswers())
-        }
-
-      }
 
       "show a form error" when {
 
@@ -479,9 +403,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey("hasValidPostcode.title"), { doc =>
+            messageFromMessageKey("hasValidPostcode.multipleDisposals.title"), { doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
-                "hasValidPostcode.error.required"
+                "hasValidPostcode.multipleDisposals.error.required"
               )
             },
             BAD_REQUEST
@@ -523,7 +447,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           checkIsRedirect(
             performAction("hasValidPostcode" -> "false"),
-            routes.PropertyDetailsController.nonResidentialPropertyInputLandUPRN()
+            routes.PropertyDetailsController.multipleDisposalsEnterLandUprn()
           )
         }
 
@@ -533,39 +457,16 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
     "handling requests to display the enter UPRN page" must {
 
-      def performAction(): Future[Result] = controller.nonResidentialPropertyInputLandUPRN()(FakeRequest())
+      def performAction(): Future[Result] = controller.multipleDisposalsEnterLandUprn()(FakeRequest())
 
       behave like redirectToTaskListWhenNoAssetTypeBehaviour(performAction)
 
-      "redirect to the check your answers page" when {
-
-        "the user did not dispose of a non-residential property" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              SessionData.empty.copy(
-                journeyStatus = Some(
-                  sample[FillingOutReturn].copy(
-                    draftReturn = sample[MultipleDisposalsDraftReturn].copy(
-                      triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
-                        assetTypes = List(AssetType.Residential)
-                      )
-                    )
-                  )
-                )
-              )
-            )
-          }
-
-          checkIsRedirect(performAction(), routes.PropertyDetailsController.checkYourAnswers())
-        }
-
-      }
+      behave like redirectWhenNotNonResidentialAssetTypeBehaviour(performAction)
 
       "display the page" when {
 
         def test(
-          draftReturn: DraftReturn,
+          draftReturn: MultipleDisposalsDraftReturn,
           expectedBackLink: Call
         ): Unit = {
           inSequence {
@@ -583,70 +484,41 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey("enterUPRN.title"), { doc =>
+            messageFromMessageKey("enterUPRN.multipleDisposals.title"), { doc =>
               doc.select("#back").attr("href") shouldBe expectedBackLink.url
               doc
                 .select("#content > article > form")
                 .attr("action") shouldBe routes.PropertyDetailsController
-                .nonResidentialPropertyInputLandUPRNSubmit()
+                .multipleDisposalsEnterLandUprnSubmit()
                 .url
             }
           )
         }
 
-        "the user is on a multiple disposal journey and" when {
-
-          "the user disposed of a non-residential property and the section is not complete" in {
-            test(
-              sample[MultipleDisposalsDraftReturn].copy(
-                triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
-                  assetTypes = List(AssetType.NonResidential)
-                ),
-                examplePropertyDetailsAnswers = None
+        "the user disposed of a non-residential property and the section is not complete" in {
+          test(
+            sample[MultipleDisposalsDraftReturn].copy(
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                assetTypes = List(AssetType.NonResidential)
               ),
-              routes.PropertyDetailsController.nonResidentialPropertyHasUkPostcode()
-            )
-          }
-
-          "the user disposed of a non-residential property and the section is complete" in {
-            test(
-              sample[MultipleDisposalsDraftReturn].copy(
-                triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
-                  assetTypes = List(AssetType.NonResidential)
-                ),
-                examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers])
-              ),
-              routes.PropertyDetailsController.nonResidentialPropertyHasUkPostcode()
-            )
-          }
+              examplePropertyDetailsAnswers = None
+            ),
+            routes.PropertyDetailsController.singleDisposalHasUkPostcode()
+          )
         }
 
-        "the user is on a single disposal journey and" when {
-
-          "the user disposed of a non-residential property and the section is not complete" in {
-            test(
-              sample[SingleDisposalDraftReturn].copy(
-                triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
-                  assetType = AssetType.NonResidential
-                ),
-                propertyAddress = None
+        "the user disposed of a non-residential property and the section is complete" in {
+          test(
+            sample[MultipleDisposalsDraftReturn].copy(
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                assetTypes = List(AssetType.NonResidential)
               ),
-              routes.PropertyDetailsController.nonResidentialPropertyHasUkPostcode()
-            )
-          }
-
-          "the user disposed of a non-residential property and the section is complete" in {
-            test(
-              sample[SingleDisposalDraftReturn].copy(
-                triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
-                  assetType = AssetType.NonResidential
-                ),
-                propertyAddress = Some(sample[UkAddress])
-              ),
-              routes.PropertyDetailsController.nonResidentialPropertyHasUkPostcode()
-            )
-          }
+              examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers])
+            ),
+            routes.PropertyDetailsController.singleDisposalHasUkPostcode()
+          )
         }
+
       }
 
     }
@@ -654,7 +526,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
     "handling submits on the has a enter UPRN page" must {
 
       def performAction(formData: (String, String)*): Future[Result] =
-        controller.nonResidentialPropertyInputLandUPRNSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
+        controller.multipleDisposalsEnterLandUprnSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
 
       def formData(ukAddress: UkAddress): List[(String, String)] =
         List(
@@ -667,6 +539,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       behave like redirectToTaskListWhenNoAssetTypeBehaviour(() => performAction())
 
+      behave like redirectWhenNotNonResidentialAssetTypeBehaviour(() => performAction())
+
       val nonResidentialPropertyDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
         triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
           assetTypes = List(AssetType.NonResidential)
@@ -676,31 +550,6 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       val nonResidentialFillingOutReturn = sample[FillingOutReturn].copy(
         draftReturn = nonResidentialPropertyDraftReturn
       )
-
-      "redirect to the check your answers page" when {
-
-        "the user did not dispose of a non-residential property" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              SessionData.empty.copy(
-                journeyStatus = Some(
-                  sample[FillingOutReturn].copy(
-                    draftReturn = sample[MultipleDisposalsDraftReturn].copy(
-                      triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
-                        assetTypes = List(AssetType.Residential)
-                      )
-                    )
-                  )
-                )
-              )
-            )
-          }
-
-          checkIsRedirect(performAction(), routes.PropertyDetailsController.checkYourAnswers())
-        }
-
-      }
 
       "show a form error" when {
 
@@ -716,7 +565,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(formData: _*),
-            messageFromMessageKey("enterUPRN.title"), { doc =>
+            messageFromMessageKey("enterUPRN.multipleDisposals.title"), { doc =>
               val errors = doc.select("#error-summary-display > ul").first()
               errors.children.eachText().asScala.toList shouldBe expectedErrorMessageKeys.toList
                 .map(messageFromMessageKey(_))
@@ -1178,6 +1027,32 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
       }
+    }
+
+  def redirectWhenNotNonResidentialAssetTypeBehaviour(performAction: () => Future[Result]): Unit =
+    "redirect to the check your answers page" when {
+
+      "the user did not dispose of a non-residential property" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              journeyStatus = Some(
+                sample[FillingOutReturn].copy(
+                  draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+                    triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                      assetTypes = List(AssetType.Residential)
+                    )
+                  )
+                )
+              )
+            )
+          )
+        }
+
+        checkIsRedirect(performAction(), routes.PropertyDetailsController.checkYourAnswers())
+      }
+
     }
 
 }

@@ -1283,12 +1283,19 @@ submitReturnError.li3=If it is ‘Draft returns’ it has not been received by H
 submitReturnError.p3=You may get a penalty and have to pay interest if your return or payment is late.
 submitReturnError.button=Go to account home
 
-hasValidPostcode.title=Do any of the properties have a UK postcode?
-hasValidPostcode.error.boolean=Select whether any of the properties have a UK postcode
-hasValidPostcode.error.required=Select whether any of the properties have a UK postcode
+hasValidPostcode.singleDisposal.title=Does the property have a UK postcode?
+hasValidPostcode.singleDisposal.error.boolean=Select whether the property has a UK postcode
+hasValidPostcode.singleDisposal.error.required=Select whether the property has a UK postcode
 
-enterUPRN.title=Enter the Unique Property Reference Number (UPRN) for the UK property
-enterUPRN.line1.label=Unique Property Reference Number (UPRN)
+hasValidPostcode.multipleDisposals.title=Do any of the properties have a UK postcode?
+hasValidPostcode.multipleDisposals.error.boolean=Select whether any of the properties have a UK postcode
+hasValidPostcode.multipleDisposals.error.required=Select whether any of the properties have a UK postcode
+
+enterUPRN.singleDisposal.title=Enter the Unique Property Reference Number (UPRN) for the UK property
+enterUPRN.multipleDisposals.title=Enter the Unique Property Reference Number (UPRN) for one of the UK property disposals
+enterUPRN.p1=A UPRN is a reference number used to identify every piece of land and property in Great Britain.
+enterUPRN.line1.label=UPRN or first line of address
+enterUPRN.line1.helpText=UPRN is 12 numbers or less.
 enterUPRN.line2.label=Area (optional)
 enterUPRN.line3.label=Town or city (optional)
 enterUPRN.line4.label=County (optional)

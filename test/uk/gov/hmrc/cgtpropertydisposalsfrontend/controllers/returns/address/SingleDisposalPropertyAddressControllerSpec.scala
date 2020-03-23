@@ -22,9 +22,10 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.{Lang, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
-import play.api.mvc.Result
+import play.api.mvc.{Call, Result}
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
+import play.api.test.Helpers.BAD_REQUEST
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AddressControllerSpec
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
@@ -33,15 +34,16 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.Sing
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.{routes => returnsAddressRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, SingleDisposalDraftReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 
+import scala.collection.JavaConverters._
 import scala.concurrent.Future
 
 class SingleDisposalPropertyDetailsControllerSpec
@@ -51,7 +53,10 @@ class SingleDisposalPropertyDetailsControllerSpec
     with ReturnsServiceSupport {
 
   val draftReturn: SingleDisposalDraftReturn =
-    sample[SingleDisposalDraftReturn].copy(propertyAddress = Some(ukAddress(1)))
+    sample[SingleDisposalDraftReturn].copy(
+      triageAnswers   = sample[CompleteSingleDisposalTriageAnswers].copy(assetType = AssetType.Residential),
+      propertyAddress = Some(ukAddress(1))
+    )
 
   val validJourneyStatus = FillingOutReturn(sample[SubscribedDetails], sample[GGCredId], None, draftReturn)
 
@@ -187,6 +192,8 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
+      behave like redirectToTaskListWhenNoAssetTypeBehaviour(performAction)
+
       def testIsCheckYourAnswers(
         result: Future[Result],
         ukAddressDetails: UkAddress,
@@ -218,7 +225,7 @@ class SingleDisposalPropertyDetailsControllerSpec
           )
         }
 
-        checkIsRedirect(performAction(), routes.PropertyDetailsController.nonResidentialPropertyHasUkPostcode())
+        checkIsRedirect(performAction(), routes.PropertyDetailsController.singleDisposalHasUkPostcode())
       }
 
       "redirect to the enter postcode page if there is no property address in session" in {
@@ -227,7 +234,10 @@ class SingleDisposalPropertyDetailsControllerSpec
           mockGetSession(
             SessionData.empty.copy(journeyStatus = Some(
               sample[FillingOutReturn].copy(
-                draftReturn = draftReturn.copy(propertyAddress = None)
+                draftReturn = draftReturn.copy(
+                  triageAnswers   = sample[CompleteSingleDisposalTriageAnswers].copy(assetType = AssetType.Residential),
+                  propertyAddress = None
+                )
               )
             )
             )
@@ -270,7 +280,492 @@ class SingleDisposalPropertyDetailsControllerSpec
 
     }
 
+    "handling requests to display the has a uk postcode page" must {
+
+      def performAction(): Future[Result] = controller.singleDisposalHasUkPostcode()(FakeRequest())
+
+      behave like redirectToTaskListWhenNoAssetTypeBehaviour(performAction)
+
+      behave like redirectWhenNotNonResidentialAssetTypeBehaviour(performAction)
+
+      "display the page" when {
+
+        def test(
+          draftReturn: SingleDisposalDraftReturn,
+          expectedBackLink: Call
+        ): Unit = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = draftReturn
+                  )
+                )
+              )
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("hasValidPostcode.singleDisposal.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe expectedBackLink.url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.PropertyDetailsController
+                .singleDisposalHasUkPostcodeSubmit()
+                .url
+            }
+          )
+        }
+
+        "the user disposed of a non-residential property and the section is not complete" in {
+          test(
+            sample[SingleDisposalDraftReturn].copy(
+              triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+                assetType = AssetType.NonResidential
+              ),
+              propertyAddress = None
+            ),
+            controllers.returns.routes.TaskListController.taskList()
+          )
+        }
+
+        "the user disposed of a non-residential property and the section is complete" in {
+          test(
+            sample[SingleDisposalDraftReturn].copy(
+              triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+                assetType = AssetType.NonResidential
+              ),
+              propertyAddress = Some(sample[UkAddress])
+            ),
+            routes.PropertyDetailsController.checkYourAnswers()
+          )
+        }
+
+      }
+
+    }
+
+    "handling submits on the has a uk postcode page" must {
+
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.singleDisposalHasUkPostcodeSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
+
+      behave like redirectToTaskListWhenNoAssetTypeBehaviour(() => performAction())
+
+      behave like redirectWhenNotNonResidentialAssetTypeBehaviour(() => performAction())
+
+      val nonResidentialPropertyDraftReturn = sample[SingleDisposalDraftReturn].copy(
+        triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+          assetType = AssetType.NonResidential
+        )
+      )
+
+      val nonResidentialFillingOutReturn = sample[FillingOutReturn].copy(
+        draftReturn = nonResidentialPropertyDraftReturn
+      )
+
+      "show a form error" when {
+
+        "the user did not submit anything" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(nonResidentialFillingOutReturn)
+              )
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("hasValidPostcode.singleDisposal.title"), { doc =>
+              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+                "hasValidPostcode.singleDisposal.error.required"
+              )
+            },
+            BAD_REQUEST
+          )
+
+        }
+      }
+
+      "redirect to the enter postcode page" when {
+
+        "the user selects yes" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(nonResidentialFillingOutReturn)
+              )
+            )
+          }
+
+          checkIsRedirect(
+            performAction("hasValidPostcode" -> "true"),
+            routes.PropertyDetailsController.enterPostcode()
+          )
+        }
+      }
+
+      "redirect to the enter UPRN page" when {
+
+        "the user selects no" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(nonResidentialFillingOutReturn)
+              )
+            )
+          }
+
+          checkIsRedirect(
+            performAction("hasValidPostcode" -> "false"),
+            routes.PropertyDetailsController.singleDisposalEnterLandUprn()
+          )
+        }
+
+      }
+
+    }
+
+    "handling requests to display the enter UPRN page" must {
+
+      def performAction(): Future[Result] = controller.singleDisposalEnterLandUprn()(FakeRequest())
+
+      behave like redirectToTaskListWhenNoAssetTypeBehaviour(performAction)
+
+      behave like redirectWhenNotNonResidentialAssetTypeBehaviour(performAction)
+
+      "display the page" when {
+
+        def test(
+          draftReturn: SingleDisposalDraftReturn,
+          expectedBackLink: Call
+        ): Unit = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = draftReturn
+                  )
+                )
+              )
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("enterUPRN.singleDisposal.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe expectedBackLink.url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.PropertyDetailsController
+                .singleDisposalEnterLandUprnSubmit()
+                .url
+            }
+          )
+        }
+
+        "the user disposed of a non-residential property and the section is not complete" in {
+          test(
+            sample[SingleDisposalDraftReturn].copy(
+              triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+                assetType = AssetType.NonResidential
+              ),
+              propertyAddress = None
+            ),
+            routes.PropertyDetailsController.singleDisposalHasUkPostcode()
+          )
+        }
+
+        "the user disposed of a non-residential property and the section is complete" in {
+          test(
+            sample[SingleDisposalDraftReturn].copy(
+              triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+                assetType = AssetType.NonResidential
+              ),
+              propertyAddress = Some(sample[UkAddress])
+            ),
+            routes.PropertyDetailsController.singleDisposalHasUkPostcode()
+          )
+        }
+      }
+
+    }
+
+    "handling submits on the has a enter UPRN page" must {
+
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.singleDisposalEnterLandUprnSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
+
+      def formData(ukAddress: UkAddress): List[(String, String)] =
+        List(
+          "enterUPRN-line1" -> Some(ukAddress.line1),
+          "address-line2"   -> ukAddress.line2,
+          "address-town"    -> ukAddress.town,
+          "address-county"  -> ukAddress.county,
+          "postcode"        -> Some(ukAddress.postcode.value)
+        ).collect { case (key, Some(value)) => key -> value }
+
+      behave like redirectToTaskListWhenNoAssetTypeBehaviour(() => performAction())
+
+      behave like redirectWhenNotNonResidentialAssetTypeBehaviour(() => performAction())
+
+      val nonResidentialPropertyDraftReturn = sample[SingleDisposalDraftReturn].copy(
+        triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+          assetType = AssetType.NonResidential
+        ),
+        propertyAddress = None
+      )
+
+      val nonResidentialFillingOutReturn = sample[FillingOutReturn].copy(
+        draftReturn = nonResidentialPropertyDraftReturn
+      )
+
+      "show a form error" when {
+
+        def test(formData: (String, String)*)(expectedErrorMessageKeys: String*): Unit = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(nonResidentialFillingOutReturn)
+              )
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(formData: _*),
+            messageFromMessageKey("enterUPRN.singleDisposal.title"), { doc =>
+              val errors = doc.select("#error-summary-display > ul").first()
+              errors.children.eachText().asScala.toList shouldBe expectedErrorMessageKeys.toList
+                .map(messageFromMessageKey(_))
+            },
+            BAD_REQUEST
+          )
+        }
+
+        "the user did not submit anything" in {
+          test()("enterUPRN-line1.error.required", "postcode.error.required")
+        }
+
+        "the UPRN contains characters which are not digits" in {
+          test(
+            "enterUPRN-line1" -> "abc123",
+            "postcode"        -> "ZZ00ZZ"
+          )(
+            "enterUPRN-line1.error.invalid"
+          )
+        }
+
+        "the UPRN contains more than 13 digits" in {
+          test(
+            "enterUPRN-line1" -> ("1" * 13),
+            "postcode"        -> "ZZ00ZZ"
+          )(
+            "enterUPRN-line1.error.tooLong"
+          )
+        }
+
+        "the postcode does not have the correct format" in {
+          test(
+            "enterUPRN-line1" -> "1",
+            "postcode"        -> "12VS34"
+          )(
+            "postcode.error.pattern"
+          )
+        }
+
+        "the postcode has invalid characters" in {
+          test(
+            "enterUPRN-line1" -> "1",
+            "postcode"        -> "12$3"
+          )(
+            "postcode.error.invalidCharacters"
+          )
+        }
+
+        "the postcode is too long" in {
+          test(
+            "enterUPRN-line1" -> "1",
+            "postcode"        -> ("a" * 20)
+          )(
+            "postcode.error.tooLong"
+          )
+        }
+
+        "the address lines are too long" in {
+          val tooLong = "a" * 36
+          test(
+            "enterUPRN-line1" -> "1",
+            "postcode"        -> ("ZZ00ZZ"),
+            "address-line2"   -> tooLong,
+            "address-town"    -> tooLong,
+            "address-county"  -> tooLong
+          )(
+            "address-line2.error.tooLong",
+            "address-town.error.tooLong",
+            "address-county.error.tooLong"
+          )
+        }
+
+        "the address lines contain invalid characters" in {
+          val invalidCharacters = "^%***"
+          test(
+            "enterUPRN-line1" -> "1",
+            "postcode"        -> ("ZZ00ZZ"),
+            "address-line2"   -> invalidCharacters,
+            "address-town"    -> invalidCharacters,
+            "address-county"  -> invalidCharacters
+          )(
+            "address-line2.error.pattern",
+            "address-town.error.pattern",
+            "address-county.error.pattern"
+          )
+        }
+
+      }
+
+      "redirect to the check your answers page" when {
+
+        "the address submitted is valid and all updates are successful" in {
+          val newAddress = UkAddress("1", Some("a"), Some("b"), Some("c"), Postcode("ZZ00ZZ"))
+          val newDraftReturn = nonResidentialPropertyDraftReturn.copy(
+            propertyAddress = Some(newAddress)
+          )
+          val newJourney = nonResidentialFillingOutReturn.copy(draftReturn = newDraftReturn)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(nonResidentialFillingOutReturn)
+              )
+            )
+            mockStoreDraftReturn(
+              newDraftReturn,
+              newJourney.subscribedDetails.cgtReference,
+              newJourney.agentReferenceNumber
+            )(Right(()))
+            mockStoreSession(SessionData.empty.copy(journeyStatus = Some(newJourney)))(Right(()))
+          }
+
+          checkIsRedirect(performAction(formData(newAddress): _*), routes.PropertyDetailsController.checkYourAnswers())
+        }
+
+      }
+
+      "show an error page" when {
+
+        val draftReturn = nonResidentialPropertyDraftReturn.copy(propertyAddress = Some(sample[UkAddress]))
+        val journey     = nonResidentialFillingOutReturn.copy(draftReturn = draftReturn)
+        val newAddress  = UkAddress("1", None, None, None, Postcode("ZZ00ZZ"))
+
+        val newDraftReturn = draftReturn.copy(
+          propertyAddress = Some(newAddress)
+        )
+        val newJourney = journey.copy(draftReturn = newDraftReturn)
+
+        "there is an error updating the draft return" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(journey)
+              )
+            )
+            mockStoreDraftReturn(
+              newDraftReturn,
+              newJourney.subscribedDetails.cgtReference,
+              newJourney.agentReferenceNumber
+            )(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction(formData(newAddress): _*))
+        }
+
+        "there is an error updating the session" in {
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(journey)
+              )
+            )
+            mockStoreDraftReturn(
+              newDraftReturn,
+              newJourney.subscribedDetails.cgtReference,
+              newJourney.agentReferenceNumber
+            )(Right(()))
+            mockStoreSession(SessionData.empty.copy(journeyStatus = Some(newJourney)))(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction(formData(newAddress): _*))
+        }
+
+      }
+
+    }
+
   }
+
+  def redirectToTaskListWhenNoAssetTypeBehaviour(performAction: () => Future[Result]): Unit =
+    "redirect to the task list" when {
+
+      "no asset type can be found" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              journeyStatus = Some(
+                sample[FillingOutReturn].copy(
+                  draftReturn = sample[SingleDisposalDraftReturn].copy(
+                    triageAnswers = sample[IncompleteSingleDisposalTriageAnswers].copy(assetType = None)
+                  )
+                )
+              )
+            )
+          )
+        }
+
+        checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+      }
+    }
+
+  def redirectWhenNotNonResidentialAssetTypeBehaviour(performAction: () => Future[Result]): Unit =
+    "redirect to the check your answers page" when {
+
+      "the user did not dispose of a non-residential property" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              journeyStatus = Some(
+                sample[FillingOutReturn].copy(
+                  draftReturn = sample[SingleDisposalDraftReturn].copy(
+                    triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+                      assetType = AssetType.Residential
+                    )
+                  )
+                )
+              )
+            )
+          )
+        }
+
+        checkIsRedirect(performAction(), routes.PropertyDetailsController.checkYourAnswers())
+      }
+
+    }
+
 }
 
 object SingleDisposalPropertyDetailsControllerSpec extends Matchers {
