@@ -877,7 +877,32 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       }
 
+      "redirect to the task list page" when {
+
+        "no tax year can be found" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+                      triageAnswers = sample[IncompleteMultipleDisposalsTriageAnswers].copy(taxYear = None)
+                    )
+                  )
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+        }
+
+      }
+
       "display the page" when {
+
+        val triageAnswersWithTaxYear = sample[CompleteMultipleDisposalsTriageAnswers].copy(taxYear = taxYear)
 
         def test(draftReturn: MultipleDisposalsDraftReturn, expectedBackLink: Call): Unit = {
           inSequence {
@@ -909,6 +934,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "the user has not started this section before" in {
           test(
             sample[MultipleDisposalsDraftReturn].copy(
+              triageAnswers                 = triageAnswersWithTaxYear,
               examplePropertyDetailsAnswers = None
             ),
             routes.PropertyDetailsController.enterUkAddress()
@@ -918,6 +944,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "the user has started but not completed this section" in {
           test(
             sample[MultipleDisposalsDraftReturn].copy(
+              triageAnswers = triageAnswersWithTaxYear,
               examplePropertyDetailsAnswers = Some(
                 sample[IncompleteExamplePropertyDetailsAnswers].copy(
                   disposalDate = None
@@ -931,6 +958,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "the user has completed this section" in {
           test(
             sample[MultipleDisposalsDraftReturn].copy(
+              triageAnswers = triageAnswersWithTaxYear,
               examplePropertyDetailsAnswers = Some(
                 sample[CompleteExamplePropertyDetailsAnswers].copy(
                   disposalDate = disposalDate
@@ -961,6 +989,29 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction())
 
+      "redirect to the task list page" when {
+
+        "no tax year can be found" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+                      triageAnswers = sample[IncompleteMultipleDisposalsTriageAnswers].copy(taxYear = None)
+                    )
+                  )
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+        }
+
+      }
+
       "not update the session" when {
         "the date submitted is the same as one that already exists in session" in {
 
@@ -970,6 +1021,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           )
 
           val draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+            triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(taxYear = taxYear),
             examplePropertyDetailsAnswers = Some(answers)
           )
 
@@ -1001,7 +1053,14 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithValidJourneyStatus.copy(
-                journeyStatus = Some(sample[FillingOutReturn])
+                journeyStatus = Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+                      triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(taxYear = taxYear),
+                      examplePropertyDetailsAnswers = None
+                    )
+                  )
+                )
               )
             )
           }
@@ -1040,7 +1099,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         }
 
         "the date entered is too far in past" in {
-          testFormError(formData(LocalDateUtils.today().minusDays(365L)))(
+          testFormError(formData(LocalDateUtils.today().minusYears(1L)))(
             s"$key.error.tooFarInPast"
           )
         }
@@ -1085,6 +1144,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             )
 
             val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
+              triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(taxYear = taxYear),
               examplePropertyDetailsAnswers = Some(answers)
             )
 
@@ -1114,6 +1174,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             )
 
             val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
+              triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(taxYear = taxYear),
               examplePropertyDetailsAnswers = Some(answers)
             )
 
@@ -1764,11 +1825,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             mockGetSession(
               SessionData.empty.copy(journeyStatus = Some(
                 sample[FillingOutReturn].copy(
-                  draftReturn = draftReturn.copy(
+                  draftReturn = currentDraftReturn.copy(
                     examplePropertyDetailsAnswers = Some(
-                      sample[IncompleteExamplePropertyDetailsAnswers].copy(
-                        disposalDate = None
-                      )
+                      allQuestionsAnswered.copy(disposalDate = None)
                     )
                   )
                 )
@@ -1793,11 +1852,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             mockGetSession(
               SessionData.empty.copy(journeyStatus = Some(
                 sample[FillingOutReturn].copy(
-                  draftReturn = draftReturn.copy(
+                  draftReturn = currentDraftReturn.copy(
                     examplePropertyDetailsAnswers = Some(
-                      sample[IncompleteExamplePropertyDetailsAnswers].copy(
-                        disposalPrice = None
-                      )
+                      allQuestionsAnswered.copy(disposalPrice = None)
                     )
                   )
                 )
@@ -1822,11 +1879,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             mockGetSession(
               SessionData.empty.copy(journeyStatus = Some(
                 sample[FillingOutReturn].copy(
-                  draftReturn = draftReturn.copy(
+                  draftReturn = currentDraftReturn.copy(
                     examplePropertyDetailsAnswers = Some(
-                      sample[IncompleteExamplePropertyDetailsAnswers].copy(
-                        acquisitionPrice = None
-                      )
+                      allQuestionsAnswered.copy(acquisitionPrice = None)
                     )
                   )
                 )

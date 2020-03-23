@@ -384,15 +384,15 @@ class PropertyDetailsController @Inject() (
         r.draftReturn match {
           case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
           case m: MultipleDisposalsDraftReturn =>
-            val answers = m.examplePropertyDetailsAnswers
-              .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
-
-            val backLink = disposalDateBackLink(answers)
-            val disposalDate = answers
-              .fold(_.disposalDate, c => Some(c.disposalDate))
-
             m.triageAnswers.fold(_.taxYear, c => Some(c.taxYear)) match {
               case Some(taxYear) =>
+                val answers = m.examplePropertyDetailsAnswers
+                  .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
+
+                val backLink = disposalDateBackLink(answers)
+                val disposalDate = answers
+                  .fold(_.disposalDate, c => Some(c.disposalDate))
+
                 val form =
                   disposalDate.fold(getDisposalDateFrom(taxYear))(c => getDisposalDateFrom(taxYear).fill(c.value))
                 Ok(multipleDisposalsDisposalDatePage(form, backLink))
@@ -409,12 +409,12 @@ class PropertyDetailsController @Inject() (
         r.draftReturn match {
           case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
           case m: MultipleDisposalsDraftReturn =>
-            val answers = m.examplePropertyDetailsAnswers
-              .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
-
-            val backLink = disposalDateBackLink(answers)
             m.triageAnswers.fold(_.taxYear, c => Some(c.taxYear)) match {
               case Some(taxYear) =>
+                val answers = m.examplePropertyDetailsAnswers
+                  .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
+
+                val backLink = disposalDateBackLink(answers)
                 getDisposalDateFrom(taxYear)
                   .bindFromRequest()
                   .fold(
