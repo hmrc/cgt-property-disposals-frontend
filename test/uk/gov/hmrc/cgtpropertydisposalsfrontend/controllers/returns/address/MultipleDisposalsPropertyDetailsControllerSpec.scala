@@ -920,14 +920,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey("multipleDisposalsDisposalDate.title"), { doc =>
-              doc.select("#back").attr("href") shouldBe expectedBackLink.url
-              doc
-                .select("#content > article > form")
-                .attr("action") shouldBe routes.PropertyDetailsController
-                .disposalDateSubmit()
-                .url
-            }
+            messageFromMessageKey("multipleDisposalsDisposalDate.title")
           )
         }
 

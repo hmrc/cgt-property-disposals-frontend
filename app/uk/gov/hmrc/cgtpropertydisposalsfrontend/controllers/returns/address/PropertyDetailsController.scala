@@ -389,13 +389,12 @@ class PropertyDetailsController @Inject() (
                 val answers = m.examplePropertyDetailsAnswers
                   .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
 
-                val backLink = disposalDateBackLink(answers)
                 val disposalDate = answers
                   .fold(_.disposalDate, c => Some(c.disposalDate))
 
                 val form =
                   disposalDate.fold(getDisposalDateFrom(taxYear))(c => getDisposalDateFrom(taxYear).fill(c.value))
-                Ok(multipleDisposalsDisposalDatePage(form, backLink))
+                Ok(multipleDisposalsDisposalDatePage(form))
 
               case None => Redirect(controllers.returns.routes.TaskListController.taskList())
             }
@@ -414,13 +413,12 @@ class PropertyDetailsController @Inject() (
                 val answers = m.examplePropertyDetailsAnswers
                   .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
 
-                val backLink = disposalDateBackLink(answers)
                 getDisposalDateFrom(taxYear)
                   .bindFromRequest()
                   .fold(
                     formWithErrors =>
                       BadRequest(
-                        multipleDisposalsDisposalDatePage(formWithErrors, backLink)
+                        multipleDisposalsDisposalDatePage(formWithErrors)
                       ), { date =>
                       val disposalDate = DisposalDate(date, taxYear)
 
@@ -704,13 +702,6 @@ class PropertyDetailsController @Inject() (
 
     disposalDateForm(maximumDateInclusive, startDateOfTaxYear)
   }
-
-  private def disposalDateBackLink(answers: ExamplePropertyDetailsAnswers): Call =
-    answers
-      .fold(
-        _ => routes.PropertyDetailsController.enterUkAddress(),
-        _ => routes.PropertyDetailsController.checkYourAnswers()
-      )
 
   private def disposalPriceBackLink(answers: ExamplePropertyDetailsAnswers): Call =
     answers
