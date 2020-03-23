@@ -813,7 +813,7 @@ acquisitionDetails.cyaChange.acquisitionFees=your acquisition fees
 acquisitionDetails.cyaChange.shouldUseRebase=whether you are using the rebased value in your calculation
 
 rebaseAcquisitionPrice.title=What was the market value of the property on {0}?
-rebaseAcquisitionPrice.helpText=You can work out your gain or loss by including the property’s market value on {0} in your calculation.
+rebaseAcquisitionPrice.helpText=You can provide a valuation from a surveyor or a realistic estimate. If the ownership of the property was shared, only enter the market value of your share.
 rebaseAcquisitionPrice.label=Property’s market value on {0}
 rebaseAcquisitionPrice.error.required=Enter the property’s market value on {0}
 rebaseAcquisitionPrice.error.invalid=The amount of money must only include numbers, for example 160,000 or 23,040.50
@@ -1322,3 +1322,25 @@ submitReturnError.li2=If your return is in ‘Sent returns’ it has been receiv
 submitReturnError.li3=If it is ‘Draft returns’ it has not been received by HMRC. You’ll need to try and send it again.
 submitReturnError.p3=You may get a penalty and have to pay interest if your return or payment is late.
 submitReturnError.button=Go to account home
+
+hasValidPostcode.singleDisposal.title=Does the property have a UK postcode?
+hasValidPostcode.singleDisposal.error.boolean=Select whether the property has a UK postcode
+hasValidPostcode.singleDisposal.error.required=Select whether the property has a UK postcode
+
+hasValidPostcode.multipleDisposals.title=Do any of the properties have a UK postcode?
+hasValidPostcode.multipleDisposals.error.boolean=Select whether any of the properties have a UK postcode
+hasValidPostcode.multipleDisposals.error.required=Select whether any of the properties have a UK postcode
+
+enterUPRN.singleDisposal.title=Enter the Unique Property Reference Number (UPRN) for the UK property
+enterUPRN.multipleDisposals.title=Enter the Unique Property Reference Number (UPRN) for one of the UK property disposals
+enterUPRN.p1=A UPRN is a reference number used to identify every piece of land and property in Great Britain.
+enterUPRN.line1.label=UPRN or first line of address
+enterUPRN.line1.helpText=UPRN is 12 numbers or less.
+enterUPRN.line2.label=Area (optional)
+enterUPRN.line3.label=Town or city (optional)
+enterUPRN.line4.label=County (optional)
+enterUPRN.postcode.label=Postcode
+enterUPRN.postcode.helpText=If the property does not have a postcode enter the postcode of the nearest property. For example, AB2 9WQ.
+enterUPRN-line1.error.required=Enter a UPRN
+enterUPRN-line1.error.tooLong=UPRN must be 12 numbers or less
+enterUPRN-line1.error.invalid=UPRN must only include numbers

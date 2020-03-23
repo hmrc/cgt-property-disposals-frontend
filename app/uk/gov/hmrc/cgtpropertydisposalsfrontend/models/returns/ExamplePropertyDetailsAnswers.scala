@@ -21,45 +21,45 @@ import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
-sealed trait MultipleDisposalsExamplePropertyDetailsAnswers extends Product with Serializable
+sealed trait ExamplePropertyDetailsAnswers extends Product with Serializable
 
-object MultipleDisposalsExamplePropertyDetailsAnswers {
+object ExamplePropertyDetailsAnswers {
 
-  final case class IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(
+  final case class IncompleteExamplePropertyDetailsAnswers(
     address: Option[UkAddress],
     disposalDate: Option[DisposalDate],
     disposalPrice: Option[AmountInPence],
     acquisitionPrice: Option[AmountInPence]
-  ) extends MultipleDisposalsExamplePropertyDetailsAnswers
+  ) extends ExamplePropertyDetailsAnswers
 
-  object IncompleteMultipleDisposalsExamplePropertyDetailsAnswers {
-    val empty: IncompleteMultipleDisposalsExamplePropertyDetailsAnswers =
-      IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(None, None, None, None)
+  object IncompleteExamplePropertyDetailsAnswers {
+    val empty: IncompleteExamplePropertyDetailsAnswers =
+      IncompleteExamplePropertyDetailsAnswers(None, None, None, None)
   }
 
-  final case class CompleteMultipleDisposalsExamplePropertyDetailsAnswers(
+  final case class CompleteExamplePropertyDetailsAnswers(
     address: UkAddress,
     disposalDate: DisposalDate,
     disposalPrice: AmountInPence,
     acquisitionPrice: AmountInPence
-  ) extends MultipleDisposalsExamplePropertyDetailsAnswers
+  ) extends ExamplePropertyDetailsAnswers
 
-  implicit class MultipleDisposalsExamplePropertyDetailsAnswersOps(
-    private val m: MultipleDisposalsExamplePropertyDetailsAnswers
+  implicit class ExamplePropertyDetailsAnswersOps(
+    private val m: ExamplePropertyDetailsAnswers
   ) extends AnyVal {
 
     def fold[A](
-      whenIncomplete: IncompleteMultipleDisposalsExamplePropertyDetailsAnswers => A,
-      whenComplete: CompleteMultipleDisposalsExamplePropertyDetailsAnswers => A
+      whenIncomplete: IncompleteExamplePropertyDetailsAnswers => A,
+      whenComplete: CompleteExamplePropertyDetailsAnswers => A
     ): A = m match {
-      case i: IncompleteMultipleDisposalsExamplePropertyDetailsAnswers => whenIncomplete(i)
-      case c: CompleteMultipleDisposalsExamplePropertyDetailsAnswers   => whenComplete(c)
+      case i: IncompleteExamplePropertyDetailsAnswers => whenIncomplete(i)
+      case c: CompleteExamplePropertyDetailsAnswers   => whenComplete(c)
     }
 
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[MultipleDisposalsExamplePropertyDetailsAnswers] = {
+  implicit val format: OFormat[ExamplePropertyDetailsAnswers] = {
     implicit val ukAddressFormat: OFormat[UkAddress] = Json.format
     derived.oformat()
   }

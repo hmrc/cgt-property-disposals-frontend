@@ -68,7 +68,7 @@
     @triageSummary(completeReturn.triageAnswers)
 
     <h2 class="heading-medium">@messages("task-list.enter-property-address.link")</h2>
-    @addressSummary(completeReturn.propertyAddress)
+    @addressSummary(completeReturn.propertyAddress, completeReturn.hasNonResidentialAssetType())
 
     <h2 class="heading-medium">@messages("task-list.disposals-details.link")</h2>
     @disposalDetailsSummary(completeReturn.disposalDetails, disposalMethod)

@@ -46,8 +46,8 @@ messages("service.title")
 
 @ytdLiabilityState = @{
     draftReturn.yearToDateLiabilityAnswers.fold[TaskListStatus](TaskListStatus.ToDo) {
-        case c: CalculatedYearToDateLiabilityAnswers    => c.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete)
-        case n: NonCalculatedYearToDateLiabilityAnswers => n.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete)
+        case c: CalculatedYTDAnswers    => c.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete)
+        case n: NonCalculatedYTDAnswers => n.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete)
     }
 }
 
