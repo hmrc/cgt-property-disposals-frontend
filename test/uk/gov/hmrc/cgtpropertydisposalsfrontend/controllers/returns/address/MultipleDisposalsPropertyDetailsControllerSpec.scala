@@ -1203,7 +1203,34 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "the user has started a draft return and" when {
 
           "have completed the section and they enter a figure which is " +
-            "different than one they have already entered" in {}
+            "different than one they have already entered" in {
+
+            val answers = sample[CompleteExamplePropertyDetailsAnswers].copy(
+              disposalDate = disposalDate.copy(
+                value = LocalDateUtils.today().minusDays(10L)
+              )
+            )
+
+            val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
+              triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(taxYear = taxYear),
+              examplePropertyDetailsAnswers = Some(answers)
+            )
+
+            val updatedDraftReturn = oldDraftReturn.copy(
+              examplePropertyDetailsAnswers = Some(
+                answers.copy(
+                  disposalDate = disposalDate
+                )
+              )
+            )
+
+            test(
+              performAction(formData(disposalDate.value): _*),
+              oldDraftReturn,
+              updatedDraftReturn
+            )
+
+          }
         }
       }
 
