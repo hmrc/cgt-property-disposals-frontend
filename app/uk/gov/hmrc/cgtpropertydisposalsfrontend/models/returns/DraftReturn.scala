@@ -55,6 +55,7 @@ final case class MultipleDisposalsDraftReturn(
   id: UUID,
   triageAnswers: MultipleDisposalsTriageAnswers,
   examplePropertyDetailsAnswers: Option[ExamplePropertyDetailsAnswers],
+  exemptionAndLossesAnswers: Option[ExemptionAndLossesAnswers],
   yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
   uploadSupportingDocuments: Option[UploadSupportingDocuments],
   lastUpdatedDate: LocalDate
@@ -63,7 +64,7 @@ final case class MultipleDisposalsDraftReturn(
 object MultipleDisposalsDraftReturn {
 
   def newDraftReturn(id: UUID, triageAnswers: MultipleDisposalsTriageAnswers) =
-    MultipleDisposalsDraftReturn(id, triageAnswers, None, None, None, LocalDateUtils.today())
+    MultipleDisposalsDraftReturn(id, triageAnswers, None, None, None, None, LocalDateUtils.today())
 
 }
 

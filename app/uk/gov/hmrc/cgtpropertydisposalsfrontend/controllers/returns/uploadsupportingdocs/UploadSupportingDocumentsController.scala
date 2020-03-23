@@ -70,7 +70,7 @@ class UploadSupportingDocumentsController @Inject() (
             uploadSupportingDocuments.fold[Future[Result]](
               f(s, r, d, IncompleteUploadSupportingDocuments.empty)
             )(f(s, r, d, _))
-          case MultipleDisposalsDraftReturn(_, _, _, _, uploadSupportingDocuments, _) =>
+          case MultipleDisposalsDraftReturn(_, _, _, _, _, uploadSupportingDocuments, _) =>
             uploadSupportingDocuments.fold[Future[Result]](
               f(s, r, d, IncompleteUploadSupportingDocuments.empty)
             )(f(s, r, d, _))
