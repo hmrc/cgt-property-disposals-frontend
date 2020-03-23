@@ -34,8 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressControllerSp
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.{routes => returnsAddressRoutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.routes
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, LocalDateUtils, SessionData, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, LocalDateUtils, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
@@ -966,6 +965,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "the date submitted is the same as one that already exists in session" in {
 
           val answers = sample[IncompleteExamplePropertyDetailsAnswers].copy(
+            address      = Some(sample[UkAddress]),
             disposalDate = Some(disposalDate)
           )
 
@@ -1001,7 +1001,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithValidJourneyStatus.copy(
-                journeyStatus = Some(sample[JourneyStatus])
+                journeyStatus = Some(sample[FillingOutReturn])
               )
             )
           }
@@ -1110,7 +1110,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           "the user has already answered the question" in {
             val answers = sample[CompleteExamplePropertyDetailsAnswers].copy(
-              disposalDate  = disposalDate
+              disposalDate = disposalDate
             )
 
             val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
@@ -1598,59 +1598,82 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       "redirect to the cya page" when {
 
         def test(
-          draftReturn: DraftReturn,
-          expectedRedirect: Call
+          result: => Future[Result],
+          oldDraftReturn: DraftReturn,
+          updatedDraftReturn: DraftReturn
         ): Unit = {
+
+          val journey = sample[FillingOutReturn].copy(draftReturn = oldDraftReturn)
+          val session = SessionData.empty.copy(journeyStatus      = Some(journey))
+
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              SessionData.empty.copy(
-                journeyStatus = Some(
-                  sample[FillingOutReturn].copy(
-                    draftReturn = draftReturn
-                  )
-                )
-              )
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(
+              Right(())
             )
+            mockStoreSession(
+              session
+                .copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+            )(Right(()))
           }
 
-          checkIsRedirect(performAction(), expectedRedirect)
-        }
-
-        "the user is on a single disposal journey" in {
-          test(
-            sample[SingleDisposalDraftReturn],
-            routes.PropertyDetailsController.checkYourAnswers()
-          )
+          checkIsRedirect(result, routes.PropertyDetailsController.checkYourAnswers())
         }
 
         "the user is on a multiple disposals journey and has completed this section" in {
+          val answers = sample[CompleteExamplePropertyDetailsAnswers].copy(
+            disposalDate     = disposalDate,
+            acquisitionPrice = AmountInPence.fromPounds(10)
+          )
+
+          val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
+            examplePropertyDetailsAnswers = Some(answers)
+          )
+
+          val newDraftReturn = oldDraftReturn.copy(
+            examplePropertyDetailsAnswers = Some(
+              answers.copy(
+                acquisitionPrice = AmountInPence.fromPounds(100)
+              )
+            )
+          )
+
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
-              examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers])
-            ),
-            routes.PropertyDetailsController.checkYourAnswers()
+            performAction(key -> "100"),
+            oldDraftReturn,
+            newDraftReturn
           )
         }
 
         "the user hasn't ever answered the acquisition price question " +
           "and the draft return and session data has been successfully updated" in {
-          val taxYear = sample[TaxYear].copy(
-            startDateInclusive = LocalDate.of(2019, 4, 6),
-            endDateExclusive   = LocalDate.of(2020, 4, 6)
+
+          val answers = sample[IncompleteExamplePropertyDetailsAnswers].copy(
+            disposalDate     = Some(disposalDate),
+            acquisitionPrice = Some(AmountInPence.fromPounds(10))
           )
-          val disposalDate = DisposalDate(value = LocalDateUtils.today(), taxYear = taxYear)
-          test(
-            sample[MultipleDisposalsDraftReturn].copy(
-              examplePropertyDetailsAnswers = Some(
-                sample[IncompleteExamplePropertyDetailsAnswers].copy(
-                  disposalDate     = Some(disposalDate),
-                  disposalPrice    = Some(AmountInPence.fromPounds(10)),
-                  acquisitionPrice = Some(AmountInPence.fromPounds(10))
-                )
+
+          val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
+            examplePropertyDetailsAnswers = Some(answers)
+          )
+
+          val newDraftReturn = oldDraftReturn.copy(
+            examplePropertyDetailsAnswers = Some(
+              answers.copy(
+                acquisitionPrice = Some(AmountInPence.fromPounds(100))
               )
-            ),
-            routes.PropertyDetailsController.checkYourAnswers()
+            )
+          )
+
+          test(
+            performAction(key -> "100"),
+            oldDraftReturn,
+            newDraftReturn
           )
         }
 
