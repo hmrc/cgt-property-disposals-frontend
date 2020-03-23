@@ -16,6 +16,9 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
+import cats.syntax.eq._
+import cats.instances.list._
+
 import julienrf.json.derived
 import play.api.libs.json.OFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TaxYear
@@ -40,6 +43,19 @@ object MultipleDisposalsTriageAnswers {
   object IncompleteMultipleDisposalsTriageAnswers {
     val empty: IncompleteMultipleDisposalsTriageAnswers =
       IncompleteMultipleDisposalsTriageAnswers(None, None, None, None, None, None, None, None, None)
+
+    def fromCompleteAnswers(c: CompleteMultipleDisposalsTriageAnswers): IncompleteMultipleDisposalsTriageAnswers =
+      IncompleteMultipleDisposalsTriageAnswers(
+        c.individualUserType,
+        Some(c.numberOfProperties),
+        Some(c.countryOfResidence.isUk()),
+        if (c.countryOfResidence.isUk()) None else Some(c.countryOfResidence),
+        if (c.countryOfResidence.isUk()) Some(c.assetTypes === List(AssetType.Residential)) else None,
+        Some(c.assetTypes),
+        Some(true),
+        Some(c.taxYear),
+        Some(c.completionDate)
+      )
   }
 
   final case class CompleteMultipleDisposalsTriageAnswers(

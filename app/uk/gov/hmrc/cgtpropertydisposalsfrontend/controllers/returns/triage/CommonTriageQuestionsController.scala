@@ -17,8 +17,8 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 import cats.data.EitherT
-import cats.instances.list._
 import cats.instances.future._
+import cats.instances.list._
 import cats.syntax.either._
 import cats.syntax.order._
 import com.google.inject.Inject
@@ -29,13 +29,13 @@ import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, FormUtils, LocalDateUtils, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.IncompleteMultipleDisposalsTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DraftReturn, IndividualUserType, MultipleDisposalsDraftReturn, MultipleDisposalsTriageAnswers, NumberOfProperties, SingleDisposalDraftReturn, SingleDisposalTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, FormUtils, LocalDateUtils, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
@@ -384,18 +384,29 @@ class CommonTriageQuestionsController @Inject() (
     state: Either[StartingNewDraftReturn, FillingOutReturn],
     individualUserType: IndividualUserType
   ): Either[StartingNewDraftReturn, FillingOutReturn] = {
+    def updateMultipleDisposalsAnswers(m: MultipleDisposalsTriageAnswers): MultipleDisposalsTriageAnswers =
+      m.fold[MultipleDisposalsTriageAnswers](
+        _.copy(individualUserType = Some(individualUserType)),
+        IncompleteMultipleDisposalsTriageAnswers
+          .fromCompleteAnswers(_)
+          .copy(individualUserType = Some(individualUserType))
+      )
+
+    def updateSingleDisposalAnswers(s: SingleDisposalTriageAnswers): SingleDisposalTriageAnswers =
+      s.fold(
+        _.copy(individualUserType = Some(individualUserType)),
+        IncompleteSingleDisposalTriageAnswers
+          .fromCompleteAnswers(_)
+          .copy(individualUserType = Some(individualUserType))
+      )
+
     val answers = triageAnswersFomState(state)
+
     state.bimap(
       _.copy(
         newReturnTriageAnswers = answers.bimap[MultipleDisposalsTriageAnswers, SingleDisposalTriageAnswers](
-          _.fold[MultipleDisposalsTriageAnswers](
-            _.copy(individualUserType = Some(individualUserType)),
-            _.copy(individualUserType = Some(individualUserType))
-          ),
-          _.fold(
-            _.copy(individualUserType = Some(individualUserType)),
-            _.copy(individualUserType = Some(individualUserType))
-          )
+          updateMultipleDisposalsAnswers,
+          updateSingleDisposalAnswers
         )
       ),
       r =>
@@ -403,17 +414,11 @@ class CommonTriageQuestionsController @Inject() (
           draftReturn = r.draftReturn.fold[DraftReturn](
             m =>
               m.copy(
-                triageAnswers = m.triageAnswers.fold[MultipleDisposalsTriageAnswers](
-                  _.copy(individualUserType = Some(individualUserType)),
-                  _.copy(individualUserType = Some(individualUserType))
-                )
+                triageAnswers = updateMultipleDisposalsAnswers(m.triageAnswers)
               ),
             s =>
               s.copy(
-                triageAnswers = s.triageAnswers.fold[SingleDisposalTriageAnswers](
-                  _.copy(individualUserType = Some(individualUserType)),
-                  _.copy(individualUserType = Some(individualUserType))
-                )
+                triageAnswers = updateSingleDisposalAnswers(s.triageAnswers)
               )
           )
         )

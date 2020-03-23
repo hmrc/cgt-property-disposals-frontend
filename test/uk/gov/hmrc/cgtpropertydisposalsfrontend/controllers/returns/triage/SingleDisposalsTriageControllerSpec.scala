@@ -646,7 +646,9 @@ class SingleDisposalsTriageControllerSpec
               performAction,
               completeAnswers.copy(assetType = Residential),
               List("didYouDisposeOfResidentialProperty" -> "false"),
-              completeAnswers.copy(assetType = NonResidential),
+              IncompleteSingleDisposalTriageAnswers
+                .fromCompleteAnswers(completeAnswers)
+                .copy(assetType = Some(NonResidential)),
               checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
             )
           }
@@ -657,7 +659,9 @@ class SingleDisposalsTriageControllerSpec
               performAction,
               completeAnswers.copy(assetType = NonResidential),
               List("didYouDisposeOfResidentialProperty" -> "true"),
-              completeAnswers.copy(assetType = Residential),
+              IncompleteSingleDisposalTriageAnswers
+                .fromCompleteAnswers(completeAnswers)
+                .copy(assetType = Some(Residential)),
               checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
             )
           }
@@ -681,7 +685,9 @@ class SingleDisposalsTriageControllerSpec
               performAction,
               completeAnswers.copy(assetType = Residential),
               List("didYouDisposeOfResidentialProperty" -> "false"),
-              completeAnswers.copy(assetType = NonResidential),
+              IncompleteSingleDisposalTriageAnswers
+                .fromCompleteAnswers(completeAnswers)
+                .copy(assetType = Some(NonResidential)),
               checkIsRedirect(_, routes.SingleDisposalsTriageController.checkYourAnswers())
             )
           }
