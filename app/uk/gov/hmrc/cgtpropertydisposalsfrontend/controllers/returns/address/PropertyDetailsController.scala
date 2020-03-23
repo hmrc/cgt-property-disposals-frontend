@@ -20,28 +20,29 @@ import java.time.LocalDate
 
 import cats.data.EitherT
 import cats.instances.future._
+import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.data.Form
-import play.api.data.Forms.{mapping, of}
+import play.api.data.Forms.{mapping, of, optional, text}
+import play.api.data.validation.{Constraint, Invalid, Valid}
 import play.api.mvc._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.{routes => addressRoutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.{disposalDateForm, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{routes => returnsRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressController, SessionUpdates}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress, addressLineMapping}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsExamplePropertyDetailsAnswers.{CompleteMultipleDisposalsExamplePropertyDetailsAnswers, IncompleteMultipleDisposalsExamplePropertyDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, MultipleDisposalsDraftReturn, MultipleDisposalsExamplePropertyDetailsAnswers, SingleDisposalDraftReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, LocalDateUtils, SessionData, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.{CompleteExamplePropertyDetailsAnswers, IncompleteExamplePropertyDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, LocalDateUtils, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.FillingOutReturnAddressJourney
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -69,13 +70,17 @@ class PropertyDetailsController @Inject() (
   multipleDisposalsDisposalPricePage: views.html.returns.address.disposal_price,
   multipleDisposalsAcquisitionPricePage: views.html.returns.address.acquisition_price,
   singleDisposalCheckYourAnswersPage: views.html.returns.address.single_disposal_check_your_answers,
-  multipleDisposalsCheckYourAnswersPage: views.html.returns.address.multiple_disposals_check_your_answers
+  multipleDisposalsCheckYourAnswersPage: views.html.returns.address.multiple_disposals_check_your_answers,
+  hasValidPostcodePage: views.html.returns.address.has_valid_postcode,
+  enterUPRNPage: views.html.returns.address.enter_uprn
 )(implicit val viewConfig: ViewConfig, val ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
     with Logging
     with SessionUpdates
     with AddressController[FillingOutReturn] {
+
+  import PropertyDetailsController._
 
   override val toAddressJourneyType: FillingOutReturn => FillingOutReturnAddressJourney =
     FillingOutReturnAddressJourney.apply
@@ -88,6 +93,22 @@ class PropertyDetailsController @Inject() (
       case _                                        => Left(Redirect(controllers.routes.StartController.start()))
     }
 
+  private def withAssetTypes(
+    draftReturn: DraftReturn
+  )(f: Either[List[AssetType], AssetType] => Future[Result]): Future[Result] =
+    assetTypes(draftReturn).fold[Future[Result]](
+      Redirect(controllers.returns.routes.TaskListController.taskList())
+    )(f)
+
+  private def assetTypes(draftReturn: DraftReturn): Option[Either[List[AssetType], AssetType]] =
+    draftReturn.fold(
+      _.triageAnswers.fold(_.assetTypes, c => Some(c.assetTypes)).map(Left(_)),
+      _.triageAnswers.fold(_.assetType, c => Some(c.assetType)).map(Right(_))
+    )
+
+  private def hasNonResidentialProperty(assetTypes: Either[List[AssetType], AssetType]): Boolean =
+    assetTypes.fold(_.contains(AssetType.NonResidential), _ === AssetType.NonResidential)
+
   def updateAddress(journey: FillingOutReturn, address: Address, isManuallyEnteredAddress: Boolean)(
     implicit hc: HeaderCarrier,
     request: Request[_]
@@ -98,13 +119,15 @@ class PropertyDetailsController @Inject() (
       case a: UkAddress =>
         journey.draftReturn match {
           case m: MultipleDisposalsDraftReturn =>
-            if (m.examplePropertyDetailsAnswers.flatMap(_.fold(_.address, c => Some(c.address))).contains(a))
+            val answers = m.examplePropertyDetailsAnswers.getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
+            if (answers.fold(_.address, c => Some(c.address)).contains(a))
               EitherT.pure(journey)
             else {
               val updatedDraftReturn = m.copy(
                 examplePropertyDetailsAnswers = Some(
-                  IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty.copy(
-                    address = Some(a)
+                  answers.fold(
+                    _.copy(address = Some(a)),
+                    _.copy(address = a)
                   )
                 )
               )
@@ -143,20 +166,174 @@ class PropertyDetailsController @Inject() (
   protected lazy val selectAddressSubmitCall: Call = addressRoutes.PropertyDetailsController.selectAddressSubmit()
   protected lazy val continueCall: Call            = addressRoutes.PropertyDetailsController.checkYourAnswers()
 
-  override protected val enterPostcodePageBackLink: FillingOutReturn => Call =
-    _.draftReturn.fold(
-      _.examplePropertyDetailsAnswers.fold(
-        routes.PropertyDetailsController.multipleDisposalsGuidance()
-      )(
-        _.fold(
-          _ => routes.PropertyDetailsController.multipleDisposalsGuidance(),
-          _ => routes.PropertyDetailsController.checkYourAnswers()
-        )
-      ),
-      _.propertyAddress.fold(
-        returnsRoutes.TaskListController.taskList()
-      )(_ => addressRoutes.PropertyDetailsController.checkYourAnswers())
-    )
+  override protected val enterPostcodePageBackLink: FillingOutReturn => Call = { fillingOutReturn =>
+    val hasNonResidentialAssetTypes = assetTypes(fillingOutReturn.draftReturn).exists(hasNonResidentialProperty)
+    if (hasNonResidentialAssetTypes)
+      routes.PropertyDetailsController.singleDisposalHasUkPostcode()
+    else
+      fillingOutReturn.draftReturn.fold(
+        _.examplePropertyDetailsAnswers
+          .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
+          .fold(
+            _ => routes.PropertyDetailsController.multipleDisposalsGuidance(),
+            _ => routes.PropertyDetailsController.checkYourAnswers()
+          ),
+        _.propertyAddress.fold(
+          returnsRoutes.TaskListController.taskList()
+        )(_ => addressRoutes.PropertyDetailsController.checkYourAnswers())
+      )
+  }
+
+  private def hasUkPostcodeBackLink(
+    fillingOutReturn: FillingOutReturn,
+    isSingleDisposal: Boolean
+  ): Call = {
+    val isComplete = fillingOutReturn.draftReturn
+      .fold(_.examplePropertyDetailsAnswers.exists(_.fold(_ => false, _ => true)), _.propertyAddress.isDefined)
+    if (isComplete) routes.PropertyDetailsController.checkYourAnswers()
+    else if (isSingleDisposal) controllers.returns.routes.TaskListController.taskList()
+    else routes.PropertyDetailsController.multipleDisposalsGuidance()
+  }
+
+  def singleDisposalHasUkPostcode(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    commonHasUkPostcodeBehaviour()
+  }
+
+  def multipleDisposalsHasUkPostcode(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request =>
+      commonHasUkPostcodeBehaviour()
+  }
+
+  private def commonHasUkPostcodeBehaviour()(implicit request: RequestWithSessionData[_]): Future[Result] =
+    withValidJourney(request) {
+      case (_, fillingOutReturn) =>
+        withAssetTypes(fillingOutReturn.draftReturn) { assetTypes =>
+          if (hasNonResidentialProperty(assetTypes)) {
+            val isSingleDisposal = fillingOutReturn.draftReturn.fold(_ => false, _ => true)
+            Ok(
+              hasValidPostcodePage(
+                hasValidPostcodeForm,
+                hasUkPostcodeBackLink(fillingOutReturn, isSingleDisposal),
+                isSingleDisposal
+              )
+            )
+          } else {
+            Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          }
+        }
+    }
+
+  def singleDisposalHasUkPostcodeSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request =>
+      commonHasUkPostcodeSubmitBehaviour()
+  }
+
+  def multipleDisposalsHasUkPostcodeSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request =>
+      commonHasUkPostcodeSubmitBehaviour()
+  }
+
+  private def commonHasUkPostcodeSubmitBehaviour()(implicit request: RequestWithSessionData[_]): Future[Result] =
+    withValidJourney(request) {
+      case (_, fillingOutReturn) =>
+        withAssetTypes(fillingOutReturn.draftReturn) { assetTypes =>
+          if (hasNonResidentialProperty(assetTypes)) {
+            val isSingleDisposal = fillingOutReturn.draftReturn.fold(_ => false, _ => true)
+
+            hasValidPostcodeForm
+              .bindFromRequest()
+              .fold(
+                formWithErrors =>
+                  BadRequest(
+                    hasValidPostcodePage(
+                      formWithErrors,
+                      hasUkPostcodeBackLink(fillingOutReturn, isSingleDisposal),
+                      isSingleDisposal
+                    )
+                  ), { hasValidPostcode =>
+                  Redirect(
+                    if (hasValidPostcode)
+                      routes.PropertyDetailsController.enterPostcode()
+                    else if (isSingleDisposal)
+                      routes.PropertyDetailsController.singleDisposalEnterLandUprn()
+                    else
+                      routes.PropertyDetailsController.multipleDisposalsEnterLandUprn()
+                  )
+                }
+              )
+          } else {
+            Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          }
+        }
+    }
+
+  def singleDisposalEnterLandUprn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    commonEnterLandUprnBehaviour()
+  }
+
+  def multipleDisposalsEnterLandUprn(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request =>
+      commonEnterLandUprnBehaviour()
+  }
+
+  private def commonEnterLandUprnBehaviour()(implicit request: RequestWithSessionData[_]): Future[Result] =
+    withValidJourney(request) {
+      case (_, fillingOutReturn) =>
+        withAssetTypes(fillingOutReturn.draftReturn) { assetTypes =>
+          if (hasNonResidentialProperty(assetTypes)) {
+            val isSingleDisposal = fillingOutReturn.draftReturn.fold(_ => false, _ => true)
+            Ok(
+              enterUPRNPage(
+                enterUPRNForm,
+                routes.PropertyDetailsController.singleDisposalHasUkPostcode(),
+                isSingleDisposal
+              )
+            )
+          } else {
+            Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          }
+        }
+    }
+
+  def singleDisposalEnterLandUprnSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request =>
+      commonEnterLandUprnSubmitBehaviour()
+  }
+
+  def multipleDisposalsEnterLandUprnSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request =>
+      commonEnterLandUprnSubmitBehaviour()
+  }
+
+  private def commonEnterLandUprnSubmitBehaviour()(implicit request: RequestWithSessionData[_]): Future[Result] =
+    withValidJourney(request) {
+      case (_, fillingOutReturn) =>
+        withAssetTypes(fillingOutReturn.draftReturn) { assetTypes =>
+          if (hasNonResidentialProperty(assetTypes)) {
+            val isSingleDisposal = fillingOutReturn.draftReturn.fold(_ => false, _ => true)
+
+            enterUPRNForm
+              .bindFromRequest()
+              .fold(
+                formWithErrors =>
+                  BadRequest(
+                    enterUPRNPage(
+                      formWithErrors,
+                      routes.PropertyDetailsController.singleDisposalHasUkPostcode(),
+                      isSingleDisposal
+                    )
+                  ),
+                storeAddress(
+                  routes.PropertyDetailsController.checkYourAnswers(),
+                  fillingOutReturn,
+                  isManuallyEnteredAddress = true
+                )
+              )
+          } else {
+            Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          }
+        }
+    }
 
   def multipleDisposalsGuidance(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) {
@@ -166,7 +343,7 @@ class PropertyDetailsController @Inject() (
           case m: MultipleDisposalsDraftReturn =>
             val backLink =
               m.examplePropertyDetailsAnswers
-                .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
+                .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
                 .fold(
                   _ => controllers.returns.routes.TaskListController.taskList(),
                   _ => routes.PropertyDetailsController.checkYourAnswers()
@@ -180,18 +357,23 @@ class PropertyDetailsController @Inject() (
     implicit request =>
       withValidJourney(request) {
         case (_, r) =>
-          r.draftReturn match {
-            case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
-            case m: MultipleDisposalsDraftReturn =>
-              val redirectTo =
-                m.examplePropertyDetailsAnswers
-                  .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
-                  .fold(
-                    _ => routes.PropertyDetailsController.enterPostcode(),
-                    _ => routes.PropertyDetailsController.checkYourAnswers()
-                  )
+          withAssetTypes(r.draftReturn) { assetTypes =>
+            r.draftReturn match {
+              case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
+              case m: MultipleDisposalsDraftReturn =>
+                val redirectTo =
+                  m.examplePropertyDetailsAnswers
+                    .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
+                    .fold(
+                      _ =>
+                        if (hasNonResidentialProperty(assetTypes))
+                          routes.PropertyDetailsController.singleDisposalHasUkPostcode()
+                        else routes.PropertyDetailsController.enterPostcode(),
+                      _ => routes.PropertyDetailsController.checkYourAnswers()
+                    )
 
-              Redirect(redirectTo)
+                Redirect(redirectTo)
+            }
           }
       }
   }
@@ -203,7 +385,7 @@ class PropertyDetailsController @Inject() (
           case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
           case m: MultipleDisposalsDraftReturn =>
             val answers = m.examplePropertyDetailsAnswers
-              .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
+              .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
 
             val backLink = disposalDateBackLink(answers)
             val disposalDate = answers
@@ -228,7 +410,7 @@ class PropertyDetailsController @Inject() (
           case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
           case m: MultipleDisposalsDraftReturn =>
             val answers = m.examplePropertyDetailsAnswers
-              .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
+              .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
 
             val backLink = disposalDateBackLink(answers)
             m.triageAnswers.fold(_.taxYear, c => Some(c.taxYear)) match {
@@ -293,7 +475,7 @@ class PropertyDetailsController @Inject() (
           case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
           case m: MultipleDisposalsDraftReturn =>
             val answers = m.examplePropertyDetailsAnswers
-              .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
+              .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
 
             val backLink = disposalPriceBackLink(answers)
 
@@ -314,7 +496,7 @@ class PropertyDetailsController @Inject() (
           case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
           case m: MultipleDisposalsDraftReturn =>
             val answers = m.examplePropertyDetailsAnswers
-              .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
+              .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
             val backLink = disposalPriceBackLink(answers)
 
             disposalPriceForm
@@ -370,7 +552,7 @@ class PropertyDetailsController @Inject() (
           case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
           case m: MultipleDisposalsDraftReturn =>
             val answers = m.examplePropertyDetailsAnswers
-              .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
+              .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
 
             val backLink = acquisitionPriceBackLink(answers)
 
@@ -391,7 +573,7 @@ class PropertyDetailsController @Inject() (
           case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
           case m: MultipleDisposalsDraftReturn =>
             val answers = m.examplePropertyDetailsAnswers
-              .getOrElse(IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty)
+              .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
             val backLink = acquisitionPriceBackLink(answers)
 
             acquisitionPriceForm
@@ -443,56 +625,65 @@ class PropertyDetailsController @Inject() (
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) {
       case (_, r) =>
-        r.draftReturn match {
-          case m: MultipleDisposalsDraftReturn =>
-            m.examplePropertyDetailsAnswers.fold[Future[Result]](
-              Redirect(routes.PropertyDetailsController.multipleDisposalsGuidance())
-            ) {
-              case IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(None, _, _, _) =>
+        withAssetTypes(r.draftReturn) { assetTypes =>
+          val hasNonResidentialAssetType = hasNonResidentialProperty(assetTypes)
+
+          r.draftReturn match {
+            case m: MultipleDisposalsDraftReturn =>
+              m.examplePropertyDetailsAnswers.fold[Future[Result]](
                 Redirect(routes.PropertyDetailsController.multipleDisposalsGuidance())
+              ) {
+                case IncompleteExamplePropertyDetailsAnswers(None, _, _, _) =>
+                  Redirect(routes.PropertyDetailsController.multipleDisposalsGuidance())
 
-              case IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(_, None, _, _) =>
-                Redirect(routes.PropertyDetailsController.disposalDate())
+                case IncompleteExamplePropertyDetailsAnswers(_, None, _, _) =>
+                  Redirect(routes.PropertyDetailsController.disposalDate())
 
-              case IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(_, _, None, _) =>
-                Redirect(routes.PropertyDetailsController.disposalPrice())
+                case IncompleteExamplePropertyDetailsAnswers(_, _, None, _) =>
+                  Redirect(routes.PropertyDetailsController.disposalPrice())
 
-              case IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(_, _, _, None) =>
-                Redirect(routes.PropertyDetailsController.acquisitionPrice())
+                case IncompleteExamplePropertyDetailsAnswers(_, _, _, None) =>
+                  Redirect(routes.PropertyDetailsController.acquisitionPrice())
 
-              case IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(Some(a), Some(dd), Some(dp), Some(ap)) =>
-                val completeAnswers    = CompleteMultipleDisposalsExamplePropertyDetailsAnswers(a, dd, dp, ap)
-                val updatedDraftReturn = m.copy(examplePropertyDetailsAnswers = Some(completeAnswers))
-                val result = for {
-                  _ <- returnsService.storeDraftReturn(
-                        updatedDraftReturn,
-                        r.subscribedDetails.cgtReference,
-                        r.agentReferenceNumber
-                      )
-                  _ <- EitherT(
-                        updateSession(sessionStore, request)(
-                          _.copy(journeyStatus = Some(r.copy(draftReturn = updatedDraftReturn)))
+                case IncompleteExamplePropertyDetailsAnswers(Some(a), Some(dd), Some(dp), Some(ap)) =>
+                  val completeAnswers    = CompleteExamplePropertyDetailsAnswers(a, dd, dp, ap)
+                  val updatedDraftReturn = m.copy(examplePropertyDetailsAnswers = Some(completeAnswers))
+                  val result = for {
+                    _ <- returnsService.storeDraftReturn(
+                          updatedDraftReturn,
+                          r.subscribedDetails.cgtReference,
+                          r.agentReferenceNumber
                         )
-                      )
-                } yield ()
+                    _ <- EitherT(
+                          updateSession(sessionStore, request)(
+                            _.copy(journeyStatus = Some(r.copy(draftReturn = updatedDraftReturn)))
+                          )
+                        )
+                  } yield ()
 
-                result.fold(
-                  { e =>
-                    logger.warn("Could not update draft return", e)
-                    errorHandler.errorResult()
-                  },
-                  _ => Ok(multipleDisposalsCheckYourAnswersPage(completeAnswers))
+                  result.fold(
+                    { e =>
+                      logger.warn("Could not update draft return", e)
+                      errorHandler.errorResult()
+                    },
+                    _ => Ok(multipleDisposalsCheckYourAnswersPage(completeAnswers, hasNonResidentialAssetType))
+                  )
+
+                case c: CompleteExamplePropertyDetailsAnswers =>
+                  Ok(multipleDisposalsCheckYourAnswersPage(c, hasNonResidentialAssetType))
+
+              }
+
+            case s: SingleDisposalDraftReturn =>
+              s.propertyAddress.fold(
+                Redirect(
+                  if (hasNonResidentialProperty(assetTypes))
+                    routes.PropertyDetailsController.singleDisposalHasUkPostcode()
+                  else
+                    routes.PropertyDetailsController.enterPostcode()
                 )
-
-              case c: CompleteMultipleDisposalsExamplePropertyDetailsAnswers =>
-                Ok(multipleDisposalsCheckYourAnswersPage(c))
-
-            }
-
-          case s: SingleDisposalDraftReturn =>
-            s.propertyAddress.fold(
-              Redirect(routes.PropertyDetailsController.enterPostcode())
-            )(address => Ok(singleDisposalCheckYourAnswersPage(address)))
+              )(address => Ok(singleDisposalCheckYourAnswersPage(address, hasNonResidentialAssetType)))
+          }
         }
     }
   }
@@ -514,21 +705,21 @@ class PropertyDetailsController @Inject() (
     disposalDateForm(maximumDateInclusive, startDateOfTaxYear)
   }
 
-  private def disposalDateBackLink(answers: MultipleDisposalsExamplePropertyDetailsAnswers): Call =
+  private def disposalDateBackLink(answers: ExamplePropertyDetailsAnswers): Call =
     answers
       .fold(
         _ => routes.PropertyDetailsController.enterUkAddress(),
         _ => routes.PropertyDetailsController.checkYourAnswers()
       )
 
-  private def disposalPriceBackLink(answers: MultipleDisposalsExamplePropertyDetailsAnswers): Call =
+  private def disposalPriceBackLink(answers: ExamplePropertyDetailsAnswers): Call =
     answers
       .fold(
         _ => routes.PropertyDetailsController.disposalDate(),
         _ => routes.PropertyDetailsController.checkYourAnswers()
       )
 
-  private def acquisitionPriceBackLink(answers: MultipleDisposalsExamplePropertyDetailsAnswers): Call =
+  private def acquisitionPriceBackLink(answers: ExamplePropertyDetailsAnswers): Call =
     answers
       .fold(
         _ => routes.PropertyDetailsController.disposalPrice(),
@@ -545,6 +736,32 @@ class PropertyDetailsController @Inject() (
 }
 
 object PropertyDetailsController {
+
+  val hasValidPostcodeForm: Form[Boolean] =
+    Form(
+      mapping(
+        "hasValidPostcode" -> of(BooleanFormatter.formatter)
+      )(identity)(Some(_))
+    )
+
+  val enterUPRNForm: Form[UkAddress] = {
+    val uprnConstraint: Constraint[String] = Constraint(s =>
+      if (s.isEmpty) Invalid("error.required")
+      else if (s.exists(!_.isDigit)) Invalid("error.invalid")
+      else if (s.length > 12) Invalid("error.tooLong")
+      else Valid
+    )
+
+    Form(
+      mapping(
+        "enterUPRN-line1" -> text.transform[String](_.trim, _.trim).verifying(uprnConstraint),
+        "address-line2"   -> optional(addressLineMapping),
+        "address-town"    -> optional(addressLineMapping),
+        "address-county"  -> optional(addressLineMapping),
+        "postcode"        -> Postcode.mapping
+      )(UkAddress.apply)(UkAddress.unapply)
+    )
+  }
 
   def disposalDateForm(maximumDateInclusive: LocalDate, minimumDateInclusive: LocalDate): Form[LocalDate] = {
     val key = "multipleDisposalsDisposalDate"

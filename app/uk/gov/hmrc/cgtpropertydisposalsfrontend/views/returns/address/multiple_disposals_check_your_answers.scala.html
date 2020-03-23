@@ -17,7 +17,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsExamplePropertyDetailsAnswers.CompleteMultipleDisposalsExamplePropertyDetailsAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.CompleteExamplePropertyDetailsAnswers
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -28,7 +28,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.multiple_disposals_summary
 )
 
-@(answers: CompleteMultipleDisposalsExamplePropertyDetailsAnswers)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(answers: CompleteExamplePropertyDetailsAnswers, hasNonResidentialAssetType: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 
 @title = @{messages("returns.property-address.cya.title")}
@@ -41,7 +41,7 @@ summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.mul
         <a href="@routes.PropertyDetailsController.multipleDisposalsGuidance()" id="guidanceLink">@messages("returns.property-details.multiple-disposals.cya.guidanceLink")</a>
     </p>
 
-    @summary(answers)
+    @summary(answers, hasNonResidentialAssetType)
 
     @formWrapper(routes.PropertyDetailsController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
         @submitButton(messages("button.confirmAndContinue"))

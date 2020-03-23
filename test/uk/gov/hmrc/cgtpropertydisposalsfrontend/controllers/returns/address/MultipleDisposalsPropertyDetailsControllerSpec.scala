@@ -27,7 +27,7 @@ import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, Result}
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
-import play.api.test.Helpers.BAD_REQUEST
+import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios.amountOfMoneyErrorScenarios
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressControllerSpec, DateErrorScenarios}
@@ -35,18 +35,22 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectT
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.{routes => returnsAddressRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.routes
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, LocalDateUtils, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, DraftReturn, MultipleDisposalsDraftReturn, SingleDisposalDraftReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsExamplePropertyDetailsAnswers.{CompleteMultipleDisposalsExamplePropertyDetailsAnswers, IncompleteMultipleDisposalsExamplePropertyDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, LocalDateUtils, SessionData, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.{CompleteExamplePropertyDetailsAnswers, IncompleteExamplePropertyDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DraftReturn, MultipleDisposalsDraftReturn, SingleDisposalDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 
+import scala.collection.JavaConverters._
 import scala.concurrent.Future
 
 class MultipleDisposalsPropertyDetailsControllerSpec
@@ -56,7 +60,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
     with ReturnsServiceSupport {
 
   val incompleteAnswers =
-    IncompleteMultipleDisposalsExamplePropertyDetailsAnswers.empty.copy(address = Some(ukAddress(1)))
+    IncompleteExamplePropertyDetailsAnswers.empty.copy(address = Some(ukAddress(1)))
 
   val draftReturn: MultipleDisposalsDraftReturn =
     sample[MultipleDisposalsDraftReturn].copy(examplePropertyDetailsAnswers = Some(incompleteAnswers))
@@ -178,7 +182,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "the user has started but not completed this section" in {
           test(
             sample[MultipleDisposalsDraftReturn].copy(
-              examplePropertyDetailsAnswers = Some(sample[IncompleteMultipleDisposalsExamplePropertyDetailsAnswers])
+              examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
             ),
             controllers.returns.routes.TaskListController.taskList()
           )
@@ -187,7 +191,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "the user has completed this section" in {
           test(
             sample[MultipleDisposalsDraftReturn].copy(
-              examplePropertyDetailsAnswers = Some(sample[CompleteMultipleDisposalsExamplePropertyDetailsAnswers])
+              examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers])
             ),
             routes.PropertyDetailsController.checkYourAnswers()
           )
@@ -222,11 +226,17 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         checkIsRedirect(performAction(), expectedRedirect)
       }
 
+      behave like redirectToTaskListWhenNoAssetTypeBehaviour(performAction)
+
       "redirect to the check your answers page" when {
 
         "the user is on a single disposal journey" in {
           test(
-            sample[SingleDisposalDraftReturn],
+            sample[SingleDisposalDraftReturn].copy(
+              triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
+                assetType = AssetType.Residential
+              )
+            ),
             routes.PropertyDetailsController.checkYourAnswers()
           )
         }
@@ -234,7 +244,10 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "the user ins on a multiple disposals journey and has completed this section" in {
           test(
             sample[MultipleDisposalsDraftReturn].copy(
-              examplePropertyDetailsAnswers = Some(sample[CompleteMultipleDisposalsExamplePropertyDetailsAnswers])
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                assetTypes = List(AssetType.NonResidential)
+              ),
+              examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers])
             ),
             routes.PropertyDetailsController.checkYourAnswers()
           )
@@ -244,25 +257,507 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       "redirect to the enter postcode page" when {
 
-        "the user has not started this section before" in {
-          test(
-            sample[MultipleDisposalsDraftReturn].copy(
-              examplePropertyDetailsAnswers = None
-            ),
-            routes.PropertyDetailsController.enterPostcode()
+        "the user did not dispose of a non-residential property and" when {
+
+          "the user has not started this section before and the user did not dispose of a " +
+            "non-residential property" in {
+            test(
+              sample[MultipleDisposalsDraftReturn].copy(
+                triageAnswers =
+                  sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(AssetType.Residential)),
+                examplePropertyDetailsAnswers = None
+              ),
+              routes.PropertyDetailsController.enterPostcode()
+            )
+          }
+
+          "the user has started but not completed this section" in {
+            test(
+              sample[MultipleDisposalsDraftReturn].copy(
+                triageAnswers =
+                  sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(AssetType.Residential)),
+                examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
+              ),
+              routes.PropertyDetailsController.enterPostcode()
+            )
+          }
+
+        }
+      }
+
+      "redirect to the enter has a valid postcode page" when {
+
+        "the user disposed of a non-residential property and" when {
+
+          "the user has not started this section before" in {
+            test(
+              sample[MultipleDisposalsDraftReturn].copy(
+                triageAnswers =
+                  sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(AssetType.NonResidential)),
+                examplePropertyDetailsAnswers = None
+              ),
+              routes.PropertyDetailsController.singleDisposalHasUkPostcode()
+            )
+          }
+
+          "the user has started but not completed this section" in {
+            test(
+              sample[MultipleDisposalsDraftReturn].copy(
+                triageAnswers =
+                  sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(AssetType.NonResidential)),
+                examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
+              ),
+              routes.PropertyDetailsController.singleDisposalHasUkPostcode()
+            )
+          }
+
+        }
+      }
+    }
+
+    "handling requests to display the has a uk postcode page" must {
+
+      def performAction(): Future[Result] = controller.multipleDisposalsHasUkPostcode()(FakeRequest())
+
+      behave like redirectToTaskListWhenNoAssetTypeBehaviour(performAction)
+
+      behave like redirectWhenNotNonResidentialAssetTypeBehaviour(performAction)
+
+      "display the page" when {
+
+        def test(
+          draftReturn: MultipleDisposalsDraftReturn,
+          expectedBackLink: Call
+        ): Unit = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = draftReturn
+                  )
+                )
+              )
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("hasValidPostcode.multipleDisposals.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe expectedBackLink.url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.PropertyDetailsController
+                .multipleDisposalsHasUkPostcodeSubmit()
+                .url
+            }
           )
         }
 
-        "the user has started but not completed this section" in {
+        "the user disposed of a non-residential property and the section is not complete" in {
           test(
             sample[MultipleDisposalsDraftReturn].copy(
-              examplePropertyDetailsAnswers = Some(sample[IncompleteMultipleDisposalsExamplePropertyDetailsAnswers])
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                assetTypes = List(AssetType.NonResidential)
+              ),
+              examplePropertyDetailsAnswers = None
             ),
-            routes.PropertyDetailsController.enterPostcode()
+            routes.PropertyDetailsController.multipleDisposalsGuidance()
+          )
+        }
+
+        "the user disposed of a non-residential property and the section is complete" in {
+          test(
+            sample[MultipleDisposalsDraftReturn].copy(
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                assetTypes = List(AssetType.NonResidential)
+              ),
+              examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers])
+            ),
+            routes.PropertyDetailsController.checkYourAnswers()
           )
         }
 
       }
+
+    }
+
+    "handling submits on the has a uk postcode page" must {
+
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.singleDisposalHasUkPostcodeSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
+
+      behave like redirectToTaskListWhenNoAssetTypeBehaviour(() => performAction())
+
+      behave like redirectWhenNotNonResidentialAssetTypeBehaviour(() => performAction())
+
+      val nonResidentialPropertyDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
+        triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+          assetTypes = List(AssetType.NonResidential)
+        )
+      )
+
+      val nonResidentialFillingOutReturn = sample[FillingOutReturn].copy(
+        draftReturn = nonResidentialPropertyDraftReturn
+      )
+
+      "show a form error" when {
+
+        "the user did not submit anything" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(nonResidentialFillingOutReturn)
+              )
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("hasValidPostcode.multipleDisposals.title"), { doc =>
+              doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
+                "hasValidPostcode.multipleDisposals.error.required"
+              )
+            },
+            BAD_REQUEST
+          )
+
+        }
+      }
+
+      "redirect to the enter postcode page" when {
+
+        "the user selects yes" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(nonResidentialFillingOutReturn)
+              )
+            )
+          }
+
+          checkIsRedirect(
+            performAction("hasValidPostcode" -> "true"),
+            routes.PropertyDetailsController.enterPostcode()
+          )
+        }
+      }
+
+      "redirect to the enter UPRN page" when {
+
+        "the user selects no" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(nonResidentialFillingOutReturn)
+              )
+            )
+          }
+
+          checkIsRedirect(
+            performAction("hasValidPostcode" -> "false"),
+            routes.PropertyDetailsController.multipleDisposalsEnterLandUprn()
+          )
+        }
+
+      }
+
+    }
+
+    "handling requests to display the enter UPRN page" must {
+
+      def performAction(): Future[Result] = controller.multipleDisposalsEnterLandUprn()(FakeRequest())
+
+      behave like redirectToTaskListWhenNoAssetTypeBehaviour(performAction)
+
+      behave like redirectWhenNotNonResidentialAssetTypeBehaviour(performAction)
+
+      "display the page" when {
+
+        def test(
+          draftReturn: MultipleDisposalsDraftReturn,
+          expectedBackLink: Call
+        ): Unit = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = draftReturn
+                  )
+                )
+              )
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("enterUPRN.multipleDisposals.title"), { doc =>
+              doc.select("#back").attr("href") shouldBe expectedBackLink.url
+              doc
+                .select("#content > article > form")
+                .attr("action") shouldBe routes.PropertyDetailsController
+                .multipleDisposalsEnterLandUprnSubmit()
+                .url
+            }
+          )
+        }
+
+        "the user disposed of a non-residential property and the section is not complete" in {
+          test(
+            sample[MultipleDisposalsDraftReturn].copy(
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                assetTypes = List(AssetType.NonResidential)
+              ),
+              examplePropertyDetailsAnswers = None
+            ),
+            routes.PropertyDetailsController.singleDisposalHasUkPostcode()
+          )
+        }
+
+        "the user disposed of a non-residential property and the section is complete" in {
+          test(
+            sample[MultipleDisposalsDraftReturn].copy(
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                assetTypes = List(AssetType.NonResidential)
+              ),
+              examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers])
+            ),
+            routes.PropertyDetailsController.singleDisposalHasUkPostcode()
+          )
+        }
+
+      }
+
+    }
+
+    "handling submits on the enter UPRN page" must {
+
+      def performAction(formData: (String, String)*): Future[Result] =
+        controller.multipleDisposalsEnterLandUprnSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*))
+
+      def formData(ukAddress: UkAddress): List[(String, String)] =
+        List(
+          "enterUPRN-line1" -> Some(ukAddress.line1),
+          "address-line2"   -> ukAddress.line2,
+          "address-town"    -> ukAddress.town,
+          "address-county"  -> ukAddress.county,
+          "postcode"        -> Some(ukAddress.postcode.value)
+        ).collect { case (key, Some(value)) => key -> value }
+
+      behave like redirectToTaskListWhenNoAssetTypeBehaviour(() => performAction())
+
+      behave like redirectWhenNotNonResidentialAssetTypeBehaviour(() => performAction())
+
+      val answers = IncompleteExamplePropertyDetailsAnswers.empty
+
+      val nonResidentialPropertyDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
+        triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+          assetTypes = List(AssetType.NonResidential)
+        ),
+        examplePropertyDetailsAnswers = Some(answers)
+      )
+
+      val nonResidentialFillingOutReturn = sample[FillingOutReturn].copy(
+        draftReturn = nonResidentialPropertyDraftReturn
+      )
+
+      "show a form error" when {
+
+        def test(formData: (String, String)*)(expectedErrorMessageKeys: String*): Unit = {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(nonResidentialFillingOutReturn)
+              )
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(formData: _*),
+            messageFromMessageKey("enterUPRN.multipleDisposals.title"), { doc =>
+              val errors = doc.select("#error-summary-display > ul").first()
+              errors.children.eachText().asScala.toList shouldBe expectedErrorMessageKeys.toList
+                .map(messageFromMessageKey(_))
+            },
+            BAD_REQUEST
+          )
+        }
+
+        "the user did not submit anything" in {
+          test()("enterUPRN-line1.error.required", "postcode.error.required")
+        }
+
+        "the UPRN contains characters which are not digits" in {
+          test(
+            "enterUPRN-line1" -> "abc123",
+            "postcode"        -> "ZZ00ZZ"
+          )(
+            "enterUPRN-line1.error.invalid"
+          )
+        }
+
+        "the UPRN contains more than 13 digits" in {
+          test(
+            "enterUPRN-line1" -> ("1" * 13),
+            "postcode"        -> "ZZ00ZZ"
+          )(
+            "enterUPRN-line1.error.tooLong"
+          )
+        }
+
+        "the postcode does not have the correct format" in {
+          test(
+            "enterUPRN-line1" -> "1",
+            "postcode"        -> "12VS34"
+          )(
+            "postcode.error.pattern"
+          )
+        }
+
+        "the postcode has invalid characters" in {
+          test(
+            "enterUPRN-line1" -> "1",
+            "postcode"        -> "12$3"
+          )(
+            "postcode.error.invalidCharacters"
+          )
+        }
+
+        "the postcode is too long" in {
+          test(
+            "enterUPRN-line1" -> "1",
+            "postcode"        -> ("a" * 20)
+          )(
+            "postcode.error.tooLong"
+          )
+        }
+
+        "the address lines are too long" in {
+          val tooLong = "a" * 36
+          test(
+            "enterUPRN-line1" -> "1",
+            "postcode"        -> ("ZZ00ZZ"),
+            "address-line2"   -> tooLong,
+            "address-town"    -> tooLong,
+            "address-county"  -> tooLong
+          )(
+            "address-line2.error.tooLong",
+            "address-town.error.tooLong",
+            "address-county.error.tooLong"
+          )
+        }
+
+        "the address lines contain invalid characters" in {
+          val invalidCharacters = "^%***"
+          test(
+            "enterUPRN-line1" -> "1",
+            "postcode"        -> ("ZZ00ZZ"),
+            "address-line2"   -> invalidCharacters,
+            "address-town"    -> invalidCharacters,
+            "address-county"  -> invalidCharacters
+          )(
+            "address-line2.error.pattern",
+            "address-town.error.pattern",
+            "address-county.error.pattern"
+          )
+        }
+
+      }
+
+      "redirect to the check your answers page" when {
+
+        "the address submitted is valid and all updates are successful" in {
+          val newAddress = UkAddress("1", Some("a"), Some("b"), Some("c"), Postcode("ZZ00ZZ"))
+          val newDraftReturn = nonResidentialPropertyDraftReturn.copy(
+            examplePropertyDetailsAnswers = Some(
+              answers.copy(
+                address = Some(newAddress)
+              )
+            )
+          )
+          val newJourney = nonResidentialFillingOutReturn.copy(draftReturn = newDraftReturn)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(nonResidentialFillingOutReturn)
+              )
+            )
+            mockStoreDraftReturn(
+              newDraftReturn,
+              newJourney.subscribedDetails.cgtReference,
+              newJourney.agentReferenceNumber
+            )(Right(()))
+            mockStoreSession(SessionData.empty.copy(journeyStatus = Some(newJourney)))(Right(()))
+          }
+
+          checkIsRedirect(performAction(formData(newAddress): _*), routes.PropertyDetailsController.checkYourAnswers())
+        }
+
+      }
+
+      "show an error page" when {
+
+        val answers = sample[CompleteExamplePropertyDetailsAnswers]
+        val draftReturn = nonResidentialPropertyDraftReturn.copy(
+          examplePropertyDetailsAnswers = Some(answers)
+        )
+        val journey    = nonResidentialFillingOutReturn.copy(draftReturn = draftReturn)
+        val newAddress = UkAddress("1", None, None, None, Postcode("ZZ00ZZ"))
+
+        val newDraftReturn = draftReturn.copy(
+          examplePropertyDetailsAnswers = Some(answers.copy(address = newAddress))
+        )
+        val newJourney = journey.copy(draftReturn = newDraftReturn)
+
+        "there is an error updating the draft return" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(journey)
+              )
+            )
+            mockStoreDraftReturn(
+              newDraftReturn,
+              newJourney.subscribedDetails.cgtReference,
+              newJourney.agentReferenceNumber
+            )(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction(formData(newAddress): _*))
+        }
+
+        "there is an error updating the session" in {
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(journey)
+              )
+            )
+            mockStoreDraftReturn(
+              newDraftReturn,
+              newJourney.subscribedDetails.cgtReference,
+              newJourney.agentReferenceNumber
+            )(Right(()))
+            mockStoreSession(SessionData.empty.copy(journeyStatus = Some(newJourney)))(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(performAction(formData(newAddress): _*))
+        }
+
+      }
+
     }
 
     "handling requests to display the enter UK address page" must {
@@ -425,7 +920,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           test(
             sample[MultipleDisposalsDraftReturn].copy(
               examplePropertyDetailsAnswers = Some(
-                sample[IncompleteMultipleDisposalsExamplePropertyDetailsAnswers].copy(
+                sample[IncompleteExamplePropertyDetailsAnswers].copy(
                   disposalDate = None
                 )
               )
@@ -438,7 +933,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           test(
             sample[MultipleDisposalsDraftReturn].copy(
               examplePropertyDetailsAnswers = Some(
-                sample[CompleteMultipleDisposalsExamplePropertyDetailsAnswers].copy(
+                sample[CompleteExamplePropertyDetailsAnswers].copy(
                   address      = sample[UkAddress],
                   disposalDate = sample[DisposalDate].copy(value = LocalDateUtils.today())
                 )
@@ -471,7 +966,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       "not update the session" when {
         "the date submitted is the same as one that already exists in session" in {
 
-          val answers = sample[IncompleteMultipleDisposalsExamplePropertyDetailsAnswers].copy(
+          val answers = sample[IncompleteExamplePropertyDetailsAnswers].copy(
             disposalDate = Some(disposalDate)
           )
 
@@ -586,7 +1081,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "the user has not started a draft return and" when {
 
           "the user has not answered the question before" in {
-            val answers = sample[IncompleteMultipleDisposalsExamplePropertyDetailsAnswers].copy(
+            val answers = sample[IncompleteExamplePropertyDetailsAnswers].copy(
               disposalDate = Some(disposalDate)
             )
 
@@ -615,7 +1110,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           }
 
           "the user has already answered the question" in {
-            val answers = sample[CompleteMultipleDisposalsExamplePropertyDetailsAnswers].copy(
+            val answers = sample[CompleteExamplePropertyDetailsAnswers].copy(
               disposalPrice = AmountInPence.fromPounds(1),
               disposalDate  = disposalDate
             )
@@ -721,7 +1216,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           test(
             sample[MultipleDisposalsDraftReturn].copy(
               examplePropertyDetailsAnswers = Some(
-                sample[IncompleteMultipleDisposalsExamplePropertyDetailsAnswers].copy(
+                sample[IncompleteExamplePropertyDetailsAnswers].copy(
                   disposalPrice = None
                 )
               )
@@ -734,7 +1229,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           test(
             sample[MultipleDisposalsDraftReturn].copy(
               examplePropertyDetailsAnswers = Some(
-                sample[CompleteMultipleDisposalsExamplePropertyDetailsAnswers].copy(
+                sample[CompleteExamplePropertyDetailsAnswers].copy(
                   disposalPrice = sample[AmountInPence]
                 )
               )
@@ -770,7 +1265,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                   sample[FillingOutReturn].copy(
                     draftReturn = sample[MultipleDisposalsDraftReturn].copy(
                       examplePropertyDetailsAnswers = Some(
-                        sample[IncompleteMultipleDisposalsExamplePropertyDetailsAnswers].copy(
+                        sample[IncompleteExamplePropertyDetailsAnswers].copy(
                           disposalPrice = Some(disposalPrice)
                         )
                       )
@@ -800,7 +1295,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                   sample[FillingOutReturn].copy(
                     draftReturn = sample[MultipleDisposalsDraftReturn].copy(
                       examplePropertyDetailsAnswers = Some(
-                        sample[CompleteMultipleDisposalsExamplePropertyDetailsAnswers]
+                        sample[CompleteExamplePropertyDetailsAnswers]
                       )
                     )
                   )
@@ -863,7 +1358,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user is on a multiple disposals journey and has completed this section" in {
 
-          val answers = sample[CompleteMultipleDisposalsExamplePropertyDetailsAnswers].copy(
+          val answers = sample[CompleteExamplePropertyDetailsAnswers].copy(
             disposalPrice = AmountInPence.fromPounds(1),
             disposalDate  = disposalDate
           )
@@ -890,7 +1385,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "the user hasn't ever answered the disposal price question " +
           "and the draft return and session data has been successfully updated" in {
 
-          val answers = sample[IncompleteMultipleDisposalsExamplePropertyDetailsAnswers].copy(
+          val answers = sample[IncompleteExamplePropertyDetailsAnswers].copy(
             address       = Some(sample[UkAddress]),
             disposalDate  = Some(disposalDate),
             disposalPrice = Some(AmountInPence.fromPounds(1))
@@ -989,7 +1484,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           test(
             sample[MultipleDisposalsDraftReturn].copy(
               examplePropertyDetailsAnswers = Some(
-                sample[IncompleteMultipleDisposalsExamplePropertyDetailsAnswers].copy(
+                sample[IncompleteExamplePropertyDetailsAnswers].copy(
                   acquisitionPrice = None
                 )
               )
@@ -1002,7 +1497,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           test(
             sample[MultipleDisposalsDraftReturn].copy(
               examplePropertyDetailsAnswers = Some(
-                sample[CompleteMultipleDisposalsExamplePropertyDetailsAnswers].copy(
+                sample[CompleteExamplePropertyDetailsAnswers].copy(
                   acquisitionPrice = sample[AmountInPence]
                 )
               )
@@ -1037,7 +1532,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                   sample[FillingOutReturn].copy(
                     draftReturn = sample[MultipleDisposalsDraftReturn].copy(
                       examplePropertyDetailsAnswers = Some(
-                        sample[IncompleteMultipleDisposalsExamplePropertyDetailsAnswers].copy(
+                        sample[IncompleteExamplePropertyDetailsAnswers].copy(
                           acquisitionPrice = Some(acquisitionPrice)
                         )
                       )
@@ -1067,7 +1562,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                   sample[FillingOutReturn].copy(
                     draftReturn = sample[MultipleDisposalsDraftReturn].copy(
                       examplePropertyDetailsAnswers = Some(
-                        sample[CompleteMultipleDisposalsExamplePropertyDetailsAnswers]
+                        sample[CompleteExamplePropertyDetailsAnswers]
                       )
                     )
                   )
@@ -1130,7 +1625,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "the user is on a multiple disposals journey and has completed this section" in {
           test(
             sample[MultipleDisposalsDraftReturn].copy(
-              examplePropertyDetailsAnswers = Some(sample[CompleteMultipleDisposalsExamplePropertyDetailsAnswers])
+              examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers])
             ),
             routes.PropertyDetailsController.checkYourAnswers()
           )
@@ -1146,7 +1641,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           test(
             sample[MultipleDisposalsDraftReturn].copy(
               examplePropertyDetailsAnswers = Some(
-                sample[IncompleteMultipleDisposalsExamplePropertyDetailsAnswers].copy(
+                sample[IncompleteExamplePropertyDetailsAnswers].copy(
                   disposalDate     = Some(disposalDate),
                   disposalPrice    = Some(AmountInPence.fromPounds(10)),
                   acquisitionPrice = Some(AmountInPence.fromPounds(10))
@@ -1174,9 +1669,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       val acquisitionPrice = sample[AmountInPence]
 
       val completeAnswers =
-        CompleteMultipleDisposalsExamplePropertyDetailsAnswers(address, disposalDate, disposalPrice, acquisitionPrice)
+        CompleteExamplePropertyDetailsAnswers(address, disposalDate, disposalPrice, acquisitionPrice)
 
-      val allQuestionsAnswered = IncompleteMultipleDisposalsExamplePropertyDetailsAnswers(
+      val allQuestionsAnswered = IncompleteExamplePropertyDetailsAnswers(
         Some(completeAnswers.address),
         Some(completeAnswers.disposalDate),
         Some(completeAnswers.disposalPrice),
@@ -1184,10 +1679,15 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       )
 
       val currentDraftReturn =
-        sample[MultipleDisposalsDraftReturn].copy(examplePropertyDetailsAnswers = Some(allQuestionsAnswered))
+        sample[MultipleDisposalsDraftReturn].copy(
+          triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(AssetType.Residential)),
+          examplePropertyDetailsAnswers = Some(allQuestionsAnswered)
+        )
       val currentJourney     = sample[FillingOutReturn].copy(draftReturn             = currentDraftReturn)
       val updatedDraftReturn = currentDraftReturn.copy(examplePropertyDetailsAnswers = Some(completeAnswers))
       val updatedJourney     = currentJourney.copy(draftReturn                       = updatedDraftReturn)
+
+      behave like redirectToTaskListWhenNoAssetTypeBehaviour(performAction)
 
       "redirect to the guidance page" when {
 
@@ -1197,7 +1697,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             mockGetSession(
               SessionData.empty.copy(journeyStatus = Some(
                 sample[FillingOutReturn].copy(
-                  draftReturn = draftReturn.copy(
+                  draftReturn = currentDraftReturn.copy(
                     examplePropertyDetailsAnswers = None
                   )
                 )
@@ -1218,7 +1718,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             mockGetSession(
               SessionData.empty.copy(journeyStatus = Some(
                 sample[FillingOutReturn].copy(
-                  draftReturn = draftReturn.copy(
+                  draftReturn = currentDraftReturn.copy(
                     examplePropertyDetailsAnswers = Some(allQuestionsAnswered.copy(address = None))
                   )
                 )
@@ -1231,35 +1731,6 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         }
       }
 
-      "redirect to the address page" when {
-
-        "the user has started the section but there is no property address" in {
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              SessionData.empty.copy(journeyStatus = Some(
-                sample[FillingOutReturn].copy(
-                  draftReturn = draftReturn.copy(
-                    examplePropertyDetailsAnswers = Some(
-                      sample[IncompleteMultipleDisposalsExamplePropertyDetailsAnswers].copy(
-                        address = None
-                      )
-                    )
-                  )
-                )
-              )
-              )
-            )
-          }
-
-          checkIsRedirect(
-            performAction(),
-            routes.PropertyDetailsController.enterUkAddress()
-          )
-        }
-
-      }
-
       "redirect to the disposal date page" when {
 
         "the user has started the section but there is no disposal date" in {
@@ -1270,7 +1741,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 sample[FillingOutReturn].copy(
                   draftReturn = draftReturn.copy(
                     examplePropertyDetailsAnswers = Some(
-                      sample[IncompleteMultipleDisposalsExamplePropertyDetailsAnswers].copy(
+                      sample[IncompleteExamplePropertyDetailsAnswers].copy(
                         disposalDate = None
                       )
                     )
@@ -1299,7 +1770,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 sample[FillingOutReturn].copy(
                   draftReturn = draftReturn.copy(
                     examplePropertyDetailsAnswers = Some(
-                      sample[IncompleteMultipleDisposalsExamplePropertyDetailsAnswers].copy(
+                      sample[IncompleteExamplePropertyDetailsAnswers].copy(
                         disposalPrice = None
                       )
                     )
@@ -1328,7 +1799,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 sample[FillingOutReturn].copy(
                   draftReturn = draftReturn.copy(
                     examplePropertyDetailsAnswers = Some(
-                      sample[IncompleteMultipleDisposalsExamplePropertyDetailsAnswers].copy(
+                      sample[IncompleteExamplePropertyDetailsAnswers].copy(
                         acquisitionPrice = None
                       )
                     )
@@ -1455,6 +1926,56 @@ class MultipleDisposalsPropertyDetailsControllerSpec
     }
 
   }
+
+  def redirectToTaskListWhenNoAssetTypeBehaviour(performAction: () => Future[Result]): Unit =
+    "redirect to the task list" when {
+
+      "no asset type can be found" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              journeyStatus = Some(
+                sample[FillingOutReturn].copy(
+                  draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+                    triageAnswers = sample[IncompleteMultipleDisposalsTriageAnswers].copy(assetTypes = None)
+                  )
+                )
+              )
+            )
+          )
+        }
+
+        checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+      }
+    }
+
+  def redirectWhenNotNonResidentialAssetTypeBehaviour(performAction: () => Future[Result]): Unit =
+    "redirect to the check your answers page" when {
+
+      "the user did not dispose of a non-residential property" in {
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              journeyStatus = Some(
+                sample[FillingOutReturn].copy(
+                  draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+                    triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                      assetTypes = List(AssetType.Residential)
+                    )
+                  )
+                )
+              )
+            )
+          )
+        }
+
+        checkIsRedirect(performAction(), routes.PropertyDetailsController.checkYourAnswers())
+      }
+
+    }
+
 }
 
 object MultipleDisposalsPropertyDetailsControllerSpec extends Matchers {
