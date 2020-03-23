@@ -13,14 +13,23 @@ POST /details-one-disposal/enter-unique-property-reference-number    uk.gov.hmrc
 GET  /details-one-disposal/help          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.multipleDisposalsGuidance()
 POST /details-one-disposal/help          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.multipleDisposalsGuidanceSubmit()
 
-GET  /enter-property-address             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.enterUkAddress()
-POST /enter-property-address             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.enterUkAddressSubmit()
+GET  /enter-property-address                                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.enterUkAddress()
+POST /enter-property-address                                uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.enterUkAddressSubmit()
 
-GET  /find-uk-property-address           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.enterPostcode()
-POST /find-uk-property-address           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.enterPostcodeSubmit()
+GET  /find-uk-property-address                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.enterPostcode()
+POST /find-uk-property-address                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.enterPostcodeSubmit()
 
-GET  /select-property-address            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.selectAddress()
-POST /select-property-address            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.selectAddressSubmit()
+GET  /select-property-address                               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.selectAddress()
+POST /select-property-address                               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.selectAddressSubmit()
 
-GET  /confirm-property-address           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.checkYourAnswers()
-POST /confirm-property-address           uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.checkYourAnswersSubmit()
+GET  /details-one-disposal/enter-contract-exchange-date     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.disposalDate()
+POST /details-one-disposal/enter-contract-exchange-date     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.disposalDateSubmit()
+
+GET  /details-one-disposal/enter-disposal-value             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.disposalPrice()
+POST /details-one-disposal/enter-disposal-value             uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.disposalPriceSubmit()
+
+GET  /details-one-disposal/enter-acquisition-value          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.acquisitionPrice()
+POST /details-one-disposal/enter-acquisition-value          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.acquisitionPriceSubmit()
+
+GET  /confirm-property-address                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.checkYourAnswers()
+POST /confirm-property-address                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.PropertyDetailsController.checkYourAnswersSubmit()
