@@ -99,6 +99,13 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       }
     )
 
+  val taxYear = sample[TaxYear].copy(
+    startDateInclusive = LocalDate.of(2019, 4, 6),
+    endDateExclusive   = LocalDate.of(2020, 4, 6)
+  )
+
+  val disposalDate = DisposalDate(value = LocalDate.of(2020, 3, 20), taxYear = taxYear)
+
   "AddressController" when {
 
     "handling requests to display the guidance page" must {
@@ -454,9 +461,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       def formData(d: LocalDate): List[(String, String)] =
         List(
-          s"$key-day"   -> d.getDayOfMonth.toString,
-          s"$key-month" -> d.getMonthValue.toString,
-          s"$key-year"  -> d.getYear.toString
+          "multipleDisposalsDisposalDate-day"   -> d.getDayOfMonth.toString,
+          "multipleDisposalsDisposalDate-month" -> d.getMonthValue.toString,
+          "multipleDisposalsDisposalDate-year"  -> d.getYear.toString
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -464,7 +471,13 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       "not update the session" when {
         "the date submitted is the same as one that already exists in session" in {
 
-          val disposalDate = sample[DisposalDate].copy(value = LocalDateUtils.today())
+          val answers = sample[IncompleteMultipleDisposalsExamplePropertyDetailsAnswers].copy(
+            disposalDate = Some(disposalDate)
+          )
+
+          val draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+            examplePropertyDetailsAnswers = Some(answers)
+          )
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -472,13 +485,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = sample[MultipleDisposalsDraftReturn].copy(
-                      examplePropertyDetailsAnswers = Some(
-                        sample[IncompleteMultipleDisposalsExamplePropertyDetailsAnswers].copy(
-                          disposalDate = Some(disposalDate)
-                        )
-                      )
-                    )
+                    draftReturn = draftReturn
                   )
                 )
               )
@@ -548,11 +555,90 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       "redirect to the check your answers page" when {
 
+        def test(
+          result: => Future[Result],
+          oldDraftReturn: DraftReturn,
+          updatedDraftReturn: DraftReturn
+        ): Unit = {
+
+          val journey = sample[FillingOutReturn].copy(draftReturn = oldDraftReturn)
+          val session = SessionData.empty.copy(journeyStatus      = Some(journey))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(
+              Right(())
+            )
+            mockStoreSession(
+              session
+                .copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+            )(Right(()))
+          }
+
+          checkIsRedirect(result, routes.PropertyDetailsController.checkYourAnswers())
+        }
+
         "the user has not started a draft return and" when {
 
-          "the user has not answered the question before" in {}
+          "the user has not answered the question before" in {
+            val answers = sample[IncompleteMultipleDisposalsExamplePropertyDetailsAnswers].copy(
+              disposalDate = Some(disposalDate)
+            )
 
-          "the user has already answered the question" in {}
+            val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
+              examplePropertyDetailsAnswers = Some(answers)
+            )
+
+            val updatedDisposalDate = disposalDate.copy(
+              value = disposalDate.value.plusDays(10)
+            )
+
+            val updatedDraftReturn = oldDraftReturn.copy(
+              examplePropertyDetailsAnswers = Some(
+                answers.copy(
+                  disposalDate = Some(updatedDisposalDate)
+                )
+              )
+            )
+
+            test(
+              performAction(key -> "10"),
+              oldDraftReturn,
+              updatedDraftReturn
+            )
+
+          }
+
+          "the user has already answered the question" in {
+            val answers = sample[CompleteMultipleDisposalsExamplePropertyDetailsAnswers].copy(
+              disposalPrice = AmountInPence.fromPounds(1),
+              disposalDate  = disposalDate
+            )
+
+            val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
+              examplePropertyDetailsAnswers = Some(answers)
+            )
+
+            val updatedDraftReturn = oldDraftReturn.copy(
+              examplePropertyDetailsAnswers = Some(
+                answers.copy(
+                  disposalPrice = AmountInPence.fromPounds(10)
+                )
+              )
+            )
+
+            test(
+              performAction(key -> "10"),
+              oldDraftReturn,
+              updatedDraftReturn
+            )
+
+          }
 
         }
 
@@ -748,58 +834,84 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       "redirect to the cya page" when {
 
         def test(
-          draftReturn: DraftReturn,
-          expectedRedirect: Call
+          result: => Future[Result],
+          oldDraftReturn: DraftReturn,
+          updatedDraftReturn: DraftReturn
         ): Unit = {
+
+          val journey = sample[FillingOutReturn].copy(draftReturn = oldDraftReturn)
+          val session = SessionData.empty.copy(journeyStatus      = Some(journey))
+
           inSequence {
             mockAuthWithNoRetrievals()
-            mockGetSession(
-              SessionData.empty.copy(
-                journeyStatus = Some(
-                  sample[FillingOutReturn].copy(
-                    draftReturn = draftReturn
-                  )
-                )
-              )
+            mockGetSession(session)
+            mockStoreDraftReturn(
+              updatedDraftReturn,
+              journey.subscribedDetails.cgtReference,
+              journey.agentReferenceNumber
+            )(
+              Right(())
             )
+            mockStoreSession(
+              session
+                .copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+            )(Right(()))
           }
 
-          checkIsRedirect(performAction(), expectedRedirect)
-        }
-
-        "the user is on a single disposal journey" in {
-          test(
-            sample[SingleDisposalDraftReturn],
-            routes.PropertyDetailsController.checkYourAnswers()
-          )
+          checkIsRedirect(result, routes.PropertyDetailsController.checkYourAnswers())
         }
 
         "the user is on a multiple disposals journey and has completed this section" in {
+
+          val answers = sample[CompleteMultipleDisposalsExamplePropertyDetailsAnswers].copy(
+            disposalPrice = AmountInPence.fromPounds(1),
+            disposalDate  = disposalDate
+          )
+
+          val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
+            examplePropertyDetailsAnswers = Some(answers)
+          )
+
+          val updatedDraftReturn = oldDraftReturn.copy(
+            examplePropertyDetailsAnswers = Some(
+              answers.copy(
+                disposalPrice = AmountInPence.fromPounds(10)
+              )
+            )
+          )
+
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
-              examplePropertyDetailsAnswers = Some(sample[CompleteMultipleDisposalsExamplePropertyDetailsAnswers])
-            ),
-            routes.PropertyDetailsController.checkYourAnswers()
+            performAction(key -> "10"),
+            oldDraftReturn,
+            updatedDraftReturn
           )
         }
 
-        "the user hasn't ever answered the acquisition price question " +
+        "the user hasn't ever answered the disposal price question " +
           "and the draft return and session data has been successfully updated" in {
-          val taxYear = sample[TaxYear].copy(
-            startDateInclusive = LocalDate.of(2019, 4, 6),
-            endDateExclusive   = LocalDate.of(2020, 4, 6)
+
+          val answers = sample[IncompleteMultipleDisposalsExamplePropertyDetailsAnswers].copy(
+            address       = Some(sample[UkAddress]),
+            disposalDate  = Some(disposalDate),
+            disposalPrice = Some(AmountInPence.fromPounds(1))
           )
-          val disposalDate = DisposalDate(value = LocalDate.of(2020, 3, 20), taxYear = taxYear)
-          test(
-            sample[MultipleDisposalsDraftReturn].copy(
-              examplePropertyDetailsAnswers = Some(
-                sample[IncompleteMultipleDisposalsExamplePropertyDetailsAnswers].copy(
-                  disposalDate  = Some(disposalDate),
-                  disposalPrice = Some(AmountInPence.fromPounds(10))
-                )
+
+          val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
+            examplePropertyDetailsAnswers = Some(answers)
+          )
+
+          val updatedDraftReturn = oldDraftReturn.copy(
+            examplePropertyDetailsAnswers = Some(
+              answers.copy(
+                disposalPrice = Some(AmountInPence.fromPounds(10))
               )
-            ),
-            routes.PropertyDetailsController.checkYourAnswers()
+            )
+          )
+
+          test(
+            performAction(key -> "10"),
+            oldDraftReturn,
+            updatedDraftReturn
           )
         }
 
@@ -853,7 +965,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           checkPageIsDisplayed(
             performAction(),
-            messageFromMessageKey("multipleDisposalsAcquisitionDate.title"), { doc =>
+            messageFromMessageKey("multipleDisposalsAcquisitionPrice.title"), { doc =>
               doc.select("#back").attr("href") shouldBe expectedBackLink.url
               doc
                 .select("#content > article > form")
