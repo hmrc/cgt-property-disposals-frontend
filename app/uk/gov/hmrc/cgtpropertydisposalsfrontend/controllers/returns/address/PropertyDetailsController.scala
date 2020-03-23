@@ -157,7 +157,7 @@ class PropertyDetailsController @Inject() (
   override protected val enterPostcodePageBackLink: FillingOutReturn => Call = { fillingOutReturn =>
     val hasNonResidentialAssetTypes = assetTypes(fillingOutReturn.draftReturn).exists(hasNonResidentialProperty)
     if (hasNonResidentialAssetTypes)
-      routes.PropertyDetailsController.nonResidentialPropertyHasUkPostcode()
+      routes.PropertyDetailsController.singleDisposalHasUkPostcode()
     else
       fillingOutReturn.draftReturn.fold(
         _.examplePropertyDetailsAnswers
@@ -172,7 +172,7 @@ class PropertyDetailsController @Inject() (
       )
   }
 
-  private def nonResidentialPropertyHasUKPostcodeBackLink(
+  private def hasUkPostcodeBackLink(
     fillingOutReturn: FillingOutReturn,
     isSingleDisposal: Boolean
   ): Call = {
@@ -182,111 +182,146 @@ class PropertyDetailsController @Inject() (
     else if (isSingleDisposal) controllers.returns.routes.TaskListController.taskList()
     else routes.PropertyDetailsController.multipleDisposalsGuidance()
   }
-  def nonResidentialPropertyHasUkPostcode(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request =>
-      withValidJourney(request) {
-        case (_, fillingOutReturn) =>
-          withAssetTypes(fillingOutReturn.draftReturn) { assetTypes =>
-            if (hasNonResidentialProperty(assetTypes)) {
-              val isSingleDisposal = fillingOutReturn.draftReturn.fold(_ => false, _ => true)
-              Ok(
-                hasValidPostcodePage(
-                  hasValidPostcodeForm,
-                  nonResidentialPropertyHasUKPostcodeBackLink(fillingOutReturn, isSingleDisposal),
-                  isSingleDisposal
-                )
-              )
-            } else {
-              Redirect(routes.PropertyDetailsController.checkYourAnswers())
-            }
-          }
-      }
+
+  def singleDisposalHasUkPostcode(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    commonHasUkPostcodeBehaviour()
   }
 
-  def nonResidentialPropertyHasUkPostcodeSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+  def multipleDisposalsHasUkPostcode(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
-      withValidJourney(request) {
-        case (_, fillingOutReturn) =>
-          withAssetTypes(fillingOutReturn.draftReturn) { assetTypes =>
-            if (hasNonResidentialProperty(assetTypes)) {
-              val isSingleDisposal = fillingOutReturn.draftReturn.fold(_ => false, _ => true)
+      commonHasUkPostcodeBehaviour()
+  }
 
-              hasValidPostcodeForm
-                .bindFromRequest()
-                .fold(
-                  formWithErrors =>
-                    BadRequest(
-                      hasValidPostcodePage(
-                        formWithErrors,
-                        nonResidentialPropertyHasUKPostcodeBackLink(fillingOutReturn, isSingleDisposal),
-                        isSingleDisposal
-                      )
-                    ), { hasValidPostcode =>
+  private def commonHasUkPostcodeBehaviour()(implicit request: RequestWithSessionData[_]): Future[Result] =
+    withValidJourney(request) {
+      case (_, fillingOutReturn) =>
+        withAssetTypes(fillingOutReturn.draftReturn) { assetTypes =>
+          if (hasNonResidentialProperty(assetTypes)) {
+            val isSingleDisposal = fillingOutReturn.draftReturn.fold(_ => false, _ => true)
+            Ok(
+              hasValidPostcodePage(
+                hasValidPostcodeForm,
+                hasUkPostcodeBackLink(fillingOutReturn, isSingleDisposal),
+                isSingleDisposal
+              )
+            )
+          } else {
+            Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          }
+        }
+    }
+
+  def singleDisposalHasUkPostcodeSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request =>
+      commonHasUkPostcodeSubmitBehaviour()
+  }
+
+  def multipleDisposalsHasUkPostcodeSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request =>
+      commonHasUkPostcodeSubmitBehaviour()
+  }
+
+  private def commonHasUkPostcodeSubmitBehaviour()(implicit request: RequestWithSessionData[_]): Future[Result] =
+    withValidJourney(request) {
+      case (_, fillingOutReturn) =>
+        withAssetTypes(fillingOutReturn.draftReturn) { assetTypes =>
+          if (hasNonResidentialProperty(assetTypes)) {
+            val isSingleDisposal = fillingOutReturn.draftReturn.fold(_ => false, _ => true)
+
+            hasValidPostcodeForm
+              .bindFromRequest()
+              .fold(
+                formWithErrors =>
+                  BadRequest(
+                    hasValidPostcodePage(
+                      formWithErrors,
+                      hasUkPostcodeBackLink(fillingOutReturn, isSingleDisposal),
+                      isSingleDisposal
+                    )
+                  ), { hasValidPostcode =>
+                  Redirect(
                     if (hasValidPostcode)
-                      Redirect(routes.PropertyDetailsController.enterPostcode())
+                      routes.PropertyDetailsController.enterPostcode()
+                    else if (isSingleDisposal)
+                      routes.PropertyDetailsController.singleDisposalEnterLandUprn()
                     else
-                      Redirect(routes.PropertyDetailsController.nonResidentialPropertyInputLandUPRN())
-                  }
-                )
-            } else {
-              Redirect(routes.PropertyDetailsController.checkYourAnswers())
-            }
+                      routes.PropertyDetailsController.multipleDisposalsEnterLandUprn()
+                  )
+                }
+              )
+          } else {
+            Redirect(routes.PropertyDetailsController.checkYourAnswers())
           }
-      }
+        }
+    }
+
+  def singleDisposalEnterLandUprn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    commonEnterLandUprnBehaviour()
   }
 
-  def nonResidentialPropertyInputLandUPRN(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+  def multipleDisposalsEnterLandUprn(): Action[AnyContent] = authenticatedActionWithSessionData.async {
     implicit request =>
-      withValidJourney(request) {
-        case (_, fillingOutReturn) =>
-          withAssetTypes(fillingOutReturn.draftReturn) { assetTypes =>
-            if (hasNonResidentialProperty(assetTypes)) {
-              val isSingleDisposal = fillingOutReturn.draftReturn.fold(_ => false, _ => true)
-              Ok(
-                enterUPRNPage(
-                  enterUPRNForm,
-                  routes.PropertyDetailsController.nonResidentialPropertyHasUkPostcode(),
-                  isSingleDisposal
+      commonEnterLandUprnBehaviour()
+  }
+
+  private def commonEnterLandUprnBehaviour()(implicit request: RequestWithSessionData[_]): Future[Result] =
+    withValidJourney(request) {
+      case (_, fillingOutReturn) =>
+        withAssetTypes(fillingOutReturn.draftReturn) { assetTypes =>
+          if (hasNonResidentialProperty(assetTypes)) {
+            val isSingleDisposal = fillingOutReturn.draftReturn.fold(_ => false, _ => true)
+            Ok(
+              enterUPRNPage(
+                enterUPRNForm,
+                routes.PropertyDetailsController.singleDisposalHasUkPostcode(),
+                isSingleDisposal
+              )
+            )
+          } else {
+            Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          }
+        }
+    }
+
+  def singleDisposalEnterLandUprnSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request =>
+      commonEnterLandUprnSubmitBehaviour()
+  }
+
+  def multipleDisposalsEnterLandUprnSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request =>
+      commonEnterLandUprnSubmitBehaviour()
+  }
+
+  private def commonEnterLandUprnSubmitBehaviour()(implicit request: RequestWithSessionData[_]): Future[Result] =
+    withValidJourney(request) {
+      case (_, fillingOutReturn) =>
+        withAssetTypes(fillingOutReturn.draftReturn) { assetTypes =>
+          if (hasNonResidentialProperty(assetTypes)) {
+            val isSingleDisposal = fillingOutReturn.draftReturn.fold(_ => false, _ => true)
+
+            enterUPRNForm
+              .bindFromRequest()
+              .fold(
+                formWithErrors =>
+                  BadRequest(
+                    enterUPRNPage(
+                      formWithErrors,
+                      routes.PropertyDetailsController.singleDisposalHasUkPostcode(),
+                      isSingleDisposal
+                    )
+                  ),
+                storeAddress(
+                  routes.PropertyDetailsController.checkYourAnswers(),
+                  fillingOutReturn,
+                  isManuallyEnteredAddress = true
                 )
               )
-            } else {
-              Redirect(routes.PropertyDetailsController.checkYourAnswers())
-            }
+          } else {
+            Redirect(routes.PropertyDetailsController.checkYourAnswers())
           }
-      }
-  }
-
-  def nonResidentialPropertyInputLandUPRNSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async {
-    implicit request =>
-      withValidJourney(request) {
-        case (_, fillingOutReturn) =>
-          withAssetTypes(fillingOutReturn.draftReturn) { assetTypes =>
-            if (hasNonResidentialProperty(assetTypes)) {
-              val isSingleDisposal = fillingOutReturn.draftReturn.fold(_ => false, _ => true)
-
-              enterUPRNForm
-                .bindFromRequest()
-                .fold(
-                  formWithErrors =>
-                    BadRequest(
-                      enterUPRNPage(
-                        formWithErrors,
-                        routes.PropertyDetailsController.nonResidentialPropertyHasUkPostcode(),
-                        isSingleDisposal
-                      )
-                    ),
-                  storeAddress(
-                    routes.PropertyDetailsController.checkYourAnswers(),
-                    fillingOutReturn,
-                    isManuallyEnteredAddress = true
-                  )
-                )
-            } else {
-              Redirect(routes.PropertyDetailsController.checkYourAnswers())
-            }
-          }
-      }
-  }
+        }
+    }
 
   def multipleDisposalsGuidance(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withValidJourney(request) {
@@ -320,7 +355,7 @@ class PropertyDetailsController @Inject() (
                     .fold(
                       _ =>
                         if (hasNonResidentialProperty(assetTypes))
-                          routes.PropertyDetailsController.nonResidentialPropertyHasUkPostcode()
+                          routes.PropertyDetailsController.singleDisposalHasUkPostcode()
                         else routes.PropertyDetailsController.enterPostcode(),
                       _ => routes.PropertyDetailsController.checkYourAnswers()
                     )
@@ -378,7 +413,7 @@ class PropertyDetailsController @Inject() (
               s.propertyAddress.fold(
                 Redirect(
                   if (hasNonResidentialProperty(assetTypes))
-                    routes.PropertyDetailsController.nonResidentialPropertyHasUkPostcode()
+                    routes.PropertyDetailsController.singleDisposalHasUkPostcode()
                   else
                     routes.PropertyDetailsController.enterPostcode()
                 )
