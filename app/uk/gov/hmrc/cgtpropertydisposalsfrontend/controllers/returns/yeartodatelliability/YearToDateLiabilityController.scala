@@ -92,7 +92,7 @@ class YearToDateLiabilityController @Inject() (
     ) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((s, r @ FillingOutReturn(_, _, _, d: SingleDisposalDraftReturn))) => {
+      case Some((s, r @ FillingOutReturn(_, _, _, d: SingleDisposalDraftReturn))) =>
         d.yearToDateLiabilityAnswers match {
           case Some(y) => f(s, r, y)
 
@@ -108,11 +108,8 @@ class YearToDateLiabilityController @Inject() (
                 Redirect(controllers.returns.routes.TaskListController.taskList())
             }
         }
-      }
 
-      case Some(
-          (s, r @ FillingOutReturn(subscribedDetails: SubscribedDetails, _, _, d: MultipleDisposalsDraftReturn))
-          ) =>
+      case Some((s, r @ FillingOutReturn(_, _, _, d: MultipleDisposalsDraftReturn))) =>
         d.yearToDateLiabilityAnswers.fold[Future[Result]](
           f(s, r, IncompleteNonCalculatedYearToDateLiabilityAnswers.empty)
         )(f(s, r, _))
