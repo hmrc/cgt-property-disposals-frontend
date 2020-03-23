@@ -22,7 +22,6 @@ import cats.instances.bigDecimal._
 import cats.instances.char._
 import cats.syntax.either._
 import cats.syntax.eq._
-
 import play.api.data.format.Formatter
 import play.api.data.{Form, FormError}
 import play.api.data.Forms.{mapping, of}
@@ -58,7 +57,11 @@ object MoneyUtils {
     value: BigDecimal
   ): Either[FormError, BigDecimal] =
     if (value <= limitInclusive.inPounds()) Right(value)
-    else Left(FormError(key, errorMessageKey, List(limitInclusive.inPounds().toString())))
+    else {
+      Left(
+        FormError(key, errorMessageKey, List(limitInclusive.inPounds().toString()))
+      )
+    }
 
   def amountInPoundsFormatter(
     isTooSmall: BigDecimal => Boolean,
