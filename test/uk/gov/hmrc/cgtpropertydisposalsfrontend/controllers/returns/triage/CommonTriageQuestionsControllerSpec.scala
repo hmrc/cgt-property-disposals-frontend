@@ -409,12 +409,17 @@ class CommonTriageQuestionsControllerSpec
             val answers =
               sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(IndividualUserType.Self))
 
+            val newAnswers =
+              IncompleteSingleDisposalTriageAnswers
+                .fromCompleteAnswers(answers)
+                .copy(individualUserType = Some(IndividualUserType.PersonalRepresentative))
+
             testSuccessfulUpdateStartingNewDraftReturn(
               performAction("individualUserType" -> "2"),
               Right(answers),
               Right(sample[IndividualName])
             )(
-              Right(answers.copy(individualUserType = Some(IndividualUserType.PersonalRepresentative))),
+              Right(newAnswers),
               routes.SingleDisposalsTriageController.checkYourAnswers()
             )
           }
@@ -439,12 +444,17 @@ class CommonTriageQuestionsControllerSpec
             val answers =
               sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = Some(IndividualUserType.Self))
 
+            val newAnswers =
+              IncompleteMultipleDisposalsTriageAnswers
+                .fromCompleteAnswers(answers)
+                .copy(individualUserType = Some(IndividualUserType.PersonalRepresentative))
+
             testSuccessfulUpdateStartingNewDraftReturn(
               performAction("individualUserType" -> "2"),
               Left(answers),
               Right(sample[IndividualName])
             )(
-              Left(answers.copy(individualUserType = Some(IndividualUserType.PersonalRepresentative))),
+              Left(newAnswers),
               routes.MultipleDisposalsTriageController.checkYourAnswers()
             )
 
@@ -467,11 +477,16 @@ class CommonTriageQuestionsControllerSpec
             val answers =
               sample[CompleteSingleDisposalTriageAnswers].copy(individualUserType = Some(IndividualUserType.Self))
 
+            val newAnswers =
+              IncompleteSingleDisposalTriageAnswers
+                .fromCompleteAnswers(answers)
+                .copy(individualUserType = Some(IndividualUserType.PersonalRepresentative))
+
             testSuccessfulUpdateFillingOutReturn(
               performAction("individualUserType" -> "2"),
               answers
             )(
-              answers.copy(individualUserType = Some(IndividualUserType.PersonalRepresentative)),
+              newAnswers,
               routes.SingleDisposalsTriageController.checkYourAnswers()
             )
           }
