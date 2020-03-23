@@ -439,8 +439,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             sample[MultipleDisposalsDraftReturn].copy(
               examplePropertyDetailsAnswers = Some(
                 sample[CompleteMultipleDisposalsExamplePropertyDetailsAnswers].copy(
-                  address      = sample[UkAddress],
-                  disposalDate = sample[DisposalDate].copy(value = LocalDateUtils.today())
+                  disposalDate = disposalDate
                 )
               )
             ),
@@ -607,7 +606,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             )
 
             test(
-              performAction(key -> "10"),
+              performAction(formData(updatedDisposalDate.value): _*),
               oldDraftReturn,
               updatedDraftReturn
             )
@@ -616,24 +615,27 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           "the user has already answered the question" in {
             val answers = sample[CompleteMultipleDisposalsExamplePropertyDetailsAnswers].copy(
-              disposalPrice = AmountInPence.fromPounds(1),
-              disposalDate  = disposalDate
+              disposalDate = disposalDate
             )
 
             val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
               examplePropertyDetailsAnswers = Some(answers)
             )
 
+            val updatedDisposalDate = disposalDate.copy(
+              value = disposalDate.value.plusDays(10)
+            )
+
             val updatedDraftReturn = oldDraftReturn.copy(
               examplePropertyDetailsAnswers = Some(
                 answers.copy(
-                  disposalPrice = AmountInPence.fromPounds(10)
+                  disposalDate = updatedDisposalDate
                 )
               )
             )
 
             test(
-              performAction(key -> "10"),
+              performAction(formData(updatedDisposalDate.value): _*),
               oldDraftReturn,
               updatedDraftReturn
             )
