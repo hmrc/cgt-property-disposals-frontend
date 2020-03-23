@@ -33,49 +33,17 @@ backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.component
 returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
 radioGroupConditional: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.radio_group_conditional,
 unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
-caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
+caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
 @(form: Form[BigDecimal], backLink: Call, rebaseCutOffDate: LocalDate)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 @key = @{ "rebaseAcquisitionPrice" }
-@valueKey = @{"rebaseAcquisitionPriceValue"}
 @rebaseCutOffDateDisplayString = @{LocalDateUtils.govDisplayFormat(rebaseCutOffDate)}
 @title = @{messages(s"$key.title", rebaseCutOffDateDisplayString)}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
-@options = @{List(
-    RadioOption(
-        label = messages(s"generic.yes"),
-        content = Some(unitInput(
-            fieldId = valueKey,
-            value = form.data.getOrElse(valueKey, ""),
-            label = Html(messages(s"$valueKey.label", rebaseCutOffDateDisplayString)),
-            formError = form.error(valueKey),
-            hasErrors = form.error(valueKey).nonEmpty,
-            autoComplete = AutoCompleteType.On,
-            inputClass = Some("small"),
-            aspect = "left",
-            unit = "£",
-            assistiveText = messages("unit-input.assistive.pounds")
-        )),
-        optionHelpText = None
-    ),
-    RadioOption(
-        label = messages(s"generic.no"),
-        content = None,
-        optionHelpText = None
-    )
-
-)}
-@selectedIndex = @{
-    form.data.get(key).map({
-        case "0" => 0
-        case _   => 1
-    })
-}
-
-
-@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = false) {
+@mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors, withSignOutLink = true) {
 
     @backLinkComponent(backLink)
 
@@ -83,18 +51,33 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption
         @errorSummary(form)
     }
 
-    @caption(messages("acquisitionDetails.caption"))
+@caption(messages("acquisitionDetails.caption"))
 
     @formWrapper(routes.AcquisitionDetailsController.rebasedAcquisitionPriceSubmit(), 'novalidate -> "novalidate") {
-        @radioGroupConditional(
+        @unitInput(
             fieldId = key,
-            label = pageHeading(title),
-            selected = selectedIndex,
-            error = form.error(key),
-            hasErrors = hasErrors,
-            options = options,
-            helpText = Some(Html(messages(s"$key.helpText", rebaseCutOffDateDisplayString)))
+            value = form.data.getOrElse(key, ""),
+            formError = form.error(key),
+            hasErrors = form.error(key).nonEmpty,
+            label = Html(title),
+            labelAsHeading = true,
+            autoComplete = AutoCompleteType.On,
+            inputClass = Some("small"),
+            helpText = Some(Html(messages(s"$key.helpText"))),
+            aspect = "left",
+            unit = "£",
+            assistiveText = messages("unit-input.assistive.pounds")
         )
+
+        @details(messages(s"$key.dropdown.header"),
+        Html(s"""|
+        |<p> ${messages(s"$key.dropdown.p1", LocalDateUtils.govDisplayFormat(rebaseCutOffDate))} </p>
+        |<p> ${messages(s"$key.dropdown.p2")} </p>
+        |<p> ${messages(s"$key.dropdown.p3")} </p>
+        |<p> ${Html(messages(s"$key.dropdown.p4", appConfig.marketValue))} </p>
+        |<p> ${messages(s"$key.dropdown.p5")} </p>
+        |""".stripMargin ))
+
         @submitButton(messages("button.saveAndContinue"))
     }
 

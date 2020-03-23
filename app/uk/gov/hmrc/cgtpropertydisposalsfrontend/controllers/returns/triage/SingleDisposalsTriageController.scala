@@ -45,8 +45,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserTyp
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.NumberOfProperties.{MoreThanOne, One}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.IncompleteReliefDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYearToDateLiabilityAnswers, NonCalculatedYearToDateLiabilityAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYearToDateLiabilityAnswers.IncompleteCalculatedYearToDateLiabilityAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit.DraftReturnStarted
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -474,8 +473,8 @@ class SingleDisposalsTriageController @Inject() (
                     draftReturn = d.copy(
                       triageAnswers = newAnswers,
                       yearToDateLiabilityAnswers = d.yearToDateLiabilityAnswers.flatMap {
-                        case _: CalculatedYearToDateLiabilityAnswers    => None
-                        case n: NonCalculatedYearToDateLiabilityAnswers => Some(n)
+                        case _: CalculatedYTDAnswers    => None
+                        case n: NonCalculatedYTDAnswers => Some(n)
                       }
                     )
                   )

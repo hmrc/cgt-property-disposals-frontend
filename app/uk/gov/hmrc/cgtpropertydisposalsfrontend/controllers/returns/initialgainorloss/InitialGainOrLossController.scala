@@ -32,7 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.Inn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.validateAmountOfMoney
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalDraftReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AmountInPenceWithSource, SingleDisposalDraftReturn, Source}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, FormUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -137,7 +137,8 @@ class InitialGainOrLossController @Inject() (
       .fold(
         formWithErrors => BadRequest(page(formWithErrors)), { value =>
           val newAnswer: AmountInPence = convertValueToAnswer(value)
-          val updatedDraftReturn       = draftReturn.copy(initialGainOrLoss = Some(newAnswer))
+          val updatedDraftReturn =
+            draftReturn.copy(initialGainOrLoss = Some(newAnswer))
 
           val result = for {
             _ <- if (updatedDraftReturn === draftReturn) EitherT.pure(())

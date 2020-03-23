@@ -33,6 +33,7 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitControllerSpec.validateAllCheckYourAnswersSections
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.ViewingReturn
@@ -73,6 +74,8 @@ class ViewReturnControllerSpec
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
   implicit val messages: Messages = MessagesImpl(lang, messagesApi)
+
+  val rebasingUtil: RebasingEligibilityUtil = new RebasingEligibilityUtil()
 
   def mockStartPaymentJourney(
     cgtReference: CgtReference,
@@ -188,7 +191,13 @@ class ViewReturnControllerSpec
           )
 
           validatePaymentsSection(document, viewingReturn)
-          validateAllCheckYourAnswersSections(document, viewingReturn.completeReturn, userType)
+          validateAllCheckYourAnswersSections(
+            document,
+            viewingReturn.completeReturn,
+            userType,
+            rebasingUtil.isUk(viewingReturn.completeReturn),
+            rebasingUtil.isEligibleForRebase(viewingReturn.completeReturn)
+          )
         }
       }
 

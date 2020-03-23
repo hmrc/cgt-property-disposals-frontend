@@ -22,6 +22,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.initialgainorloss.routes
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AmountInPenceWithSource
 
 @this(
         cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
@@ -32,11 +33,11 @@
 @(answers: AmountInPence)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @initialGainOrLossLabelWithAmount = @{
-  Some(answers).map { amount =>
-    if(amount > AmountInPence.zero)
-      "initialGainOrLoss.gain.label" -> Some("taxableGain.label" -> MoneyUtils.formatAmountOfMoneyWithPoundSign(amount.inPounds()))
-    else if(amount < AmountInPence.zero)
-      "initialGainOrLoss.loss.label" -> Some("netLoss.label" -> MoneyUtils.formatAmountOfMoneyWithPoundSign(amount.inPounds() * -1))
+  Some(answers).map { answer =>
+    if(answer > AmountInPence.zero)
+      "initialGainOrLoss.gain.label" -> Some("gain.label" -> MoneyUtils.formatAmountOfMoneyWithPoundSign(answer.inPounds()))
+    else if(answer < AmountInPence.zero)
+      "initialGainOrLoss.loss.label" -> Some("loss.label" -> MoneyUtils.formatAmountOfMoneyWithPoundSign(answer.inPounds() * -1))
     else
       "initialGainOrLoss.noLossOrGain.label" -> None
   }
@@ -45,12 +46,23 @@
 
 @cyaSection() {
 
-  @initialGainOrLossLabelWithAmount.map( l =>
-    cyaRow(
+  @initialGainOrLossLabelWithAmount.map{ labelsAndAmount =>
+
+    @cyaRow(
       messages("initialGainOrLoss.title"),
-      Html(messages(l._1)),
+      Html(messages(labelsAndAmount._1)),
       Some(cyaChange(messages("initialGainOrLoss.cya.hint"), routes.InitialGainOrLossController.enterInitialGainOrLoss().url)),
       "initialGainOrLoss"
     )
-  )
+
+    @labelsAndAmount._2.map( labelAndAmount =>
+      cyaRow(
+        messages(labelAndAmount._1),
+        Html(labelAndAmount._2),
+        Some(cyaChange(messages("initialGainOrLoss.cya.hint"), routes.InitialGainOrLossController.enterInitialGainOrLoss().url)),
+        "initialGainOrLoss"
+      )
+    )
+
+  }
 }

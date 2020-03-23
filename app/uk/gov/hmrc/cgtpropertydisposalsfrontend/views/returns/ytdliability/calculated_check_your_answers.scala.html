@@ -17,7 +17,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.routes
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYearToDateLiabilityAnswers.CompleteCalculatedYearToDateLiabilityAnswers
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.CompleteCalculatedYTDAnswers
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -28,7 +28,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.calculated_summary
 )
 
-@(answers: CompleteCalculatedYearToDateLiabilityAnswers)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(answers: CompleteCalculatedYTDAnswers)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 
 @title = @{messages("ytdLiability.cya.title")}

@@ -14,6 +14,7 @@
  * limitations under the License.
  *@
 
+@import java.time.LocalDate
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.routes
@@ -37,11 +38,11 @@
         initialGainOrLossSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.initialgainorloss.summary
 )
 
-@(draftReturn: CompleteReturn)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(completeReturn: CompleteReturn, rebasingCutoffDate: LocalDate, isUk: Boolean, isRebasing: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @title = @{ messages("checkAllAnswers.title") }
-@disposalMethod= @{draftReturn.triageAnswers.disposalMethod}
-@disposalDate = @{draftReturn.triageAnswers.disposalDate}
+@disposalMethod= @{completeReturn.triageAnswers.disposalMethod}
+@disposalDate = @{completeReturn.triageAnswers.disposalDate}
 
 
 @mainTemplate(title = title, userType = request.userType) {
@@ -51,30 +52,30 @@
  @pageHeading(title)
 
  <h2>@messages("task-list.triage.link")</h2>
- @triageSummary(draftReturn.triageAnswers)
+ @triageSummary(completeReturn.triageAnswers)
 
  <h2 class="heading-medium">@messages("task-list.enter-property-address.link")</h2>
- @addressSummary(draftReturn.propertyAddress)
+ @addressSummary(completeReturn.propertyAddress, completeReturn.hasNonResidentialAssetType())
 
  <h2 class="heading-medium">@messages("task-list.disposals-details.link")</h2>
- @disposalDetailsSummary(draftReturn.disposalDetails, disposalMethod)
+ @disposalDetailsSummary(completeReturn.disposalDetails, disposalMethod)
 
  <h2 class="heading-medium">@messages("task-list.acquisition-details.link")</h2>
- @acquisitionDetailsSummary(draftReturn.acquisitionDetails)
+ @acquisitionDetailsSummary(completeReturn.acquisitionDetails, rebasingCutoffDate, isUk, isRebasing)
 
  <h2 class="heading-medium">@messages("task-list.relief-details.link")</h2>
- @reliefDetailsSummary(draftReturn.reliefDetails)
+ @reliefDetailsSummary(completeReturn.reliefDetails)
 
-  @draftReturn.initialGainOrLoss.map{ initialGainOrLoss =>
+  @completeReturn.initialGainOrLoss.map{ initialGainOrLoss =>
    <h2 class="heading-medium">@messages("task-list.enter-initial-gain-or-loss.link")</h2>
    @initialGainOrLossSummary(initialGainOrLoss)
 }
 
  <h2 class="heading-medium">@messages("task-list.exemptions-and-losses.link")</h2>
- @lossesSummary(draftReturn.exemptionsAndLossesDetails, disposalDate)
+ @lossesSummary(completeReturn.exemptionsAndLossesDetails, disposalDate)
 
  <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
- @yearToDateLiabilitySummary(draftReturn.yearToDateLiabilityAnswers)
+ @yearToDateLiabilitySummary(completeReturn.yearToDateLiabilityAnswers)
 
  @formWrapper(routes.CheckAllAnswersAndSubmitController.checkAllAnswersSubmit(), 'novalidate -> "novalidate") {
   <h2 class="heading-medium">@messages("checkAllAnswers.declaration")</h2>

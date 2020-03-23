@@ -110,10 +110,12 @@ class StartControllerSpec
       .expects(cgtReference, *)
       .returning(EitherT(Future.successful(response)))
 
-  def mockGetDraftReturns(cgtReference: CgtReference)(response: Either[Error, List[SingleDisposalDraftReturn]]) =
+  def mockGetDraftReturns(cgtReference: CgtReference, sentReturns: List[ReturnSummary])(
+    response: Either[Error, List[SingleDisposalDraftReturn]]
+  ) =
     (mockReturnsService
-      .getDraftReturns(_: CgtReference)(_: HeaderCarrier))
-      .expects(cgtReference, *)
+      .getDraftReturns(_: CgtReference, _: List[ReturnSummary])(_: HeaderCarrier))
+      .expects(cgtReference, sentReturns, *)
       .returning(EitherT.fromEither[Future](response))
 
   def mockSendAuditEvent[A: Writes](event: A, auditType: String, transactionName: String) =
@@ -1528,7 +1530,8 @@ class StartControllerSpec
                 )
                 mockGetSession(SessionData.empty)
                 mockGetSubscribedDetails(cgtReference)(Right(subscribedDetails))
-                mockGetDraftReturns(cgtReference)(Left(Error("")))
+                mockGetReturnsList(subscribedDetails.cgtReference)(Right(sentReturns))
+                mockGetDraftReturns(cgtReference, sentReturns)(Left(Error("")))
               }
 
               checkIsTechnicalErrorPage(performAction())
@@ -1547,7 +1550,6 @@ class StartControllerSpec
                 )
                 mockGetSession(SessionData.empty)
                 mockGetSubscribedDetails(cgtReference)(Right(subscribedDetails))
-                mockGetDraftReturns(cgtReference)(Right(draftReturns))
                 mockGetReturnsList(subscribedDetails.cgtReference)(Left(Error("")))
               }
 
@@ -1567,8 +1569,8 @@ class StartControllerSpec
                 )
                 mockGetSession(SessionData.empty)
                 mockGetSubscribedDetails(cgtReference)(Right(subscribedDetails))
-                mockGetDraftReturns(cgtReference)(Right(draftReturns))
                 mockGetReturnsList(subscribedDetails.cgtReference)(Right(sentReturns))
+                mockGetDraftReturns(cgtReference, sentReturns)(Right(draftReturns))
                 mockStoreSession(sessionWithSubscribed.copy(userType = Some(UserType.Individual)))(Left(Error("")))
               }
 
@@ -1591,8 +1593,8 @@ class StartControllerSpec
               )
               mockGetSession(SessionData.empty)
               mockGetSubscribedDetails(cgtReference)(Right(subscribedDetails))
-              mockGetDraftReturns(cgtReference)(Right(draftReturns))
               mockGetReturnsList(subscribedDetails.cgtReference)(Right(sentReturns))
+              mockGetDraftReturns(cgtReference, sentReturns)(Right(draftReturns))
               mockStoreSession(sessionWithSubscribed.copy(userType = Some(UserType.Individual)))(Right(()))
             }
 

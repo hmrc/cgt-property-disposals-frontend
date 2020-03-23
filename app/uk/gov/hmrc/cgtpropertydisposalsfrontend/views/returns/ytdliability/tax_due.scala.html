@@ -26,6 +26,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.AutoCompleteType
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.SumPartDisplay
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -37,7 +38,13 @@
         errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
         caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
         unitInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.unit_input,
-        calcRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_row
+        calcRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.calculation_row,
+        initialGainOrLossWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.initial_gain_or_loss_workings,
+        gainOrLossAfterReliefsWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.gain_or_loss_after_reliefs_workings,
+        gainAfterLossesWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.gain_after_losses_workings,
+        taxableGainWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.taxable_gain_workings,
+        taxOwedWorkings: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.partials.tax_owed_workings,
+        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
 @(form: Form[BigDecimal],
@@ -55,6 +62,8 @@
 @key = @{ "taxDue" }
 @title = @{messages(s"$key.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
+@taxYear = @{ triageAnswers.disposalDate.taxYear }
+@assetType = @{ triageAnswers.assetType }
 
 @mainTemplate(title = title, hasErrors = hasErrors, userType = request.userType) {
 
@@ -70,19 +79,26 @@
 
     <ul class="calc-rows with-bottom-margin">
       <li>
-        @calcRow(calculatedTax.initialGainOrLoss, messages("taxDue.initialGainOrLoss"), true)
+        @calcRow(calculatedTax.initialGainOrLoss.amount, messages(s"$key.initialGainOrLoss"), showGainType = true)
+        @details(messages("calculator.showWorkings"), initialGainOrLossWorkings(disposalDetails, acquisitionDetails, calculatedTax))
       </li>
       <li>
-        @calcRow(calculatedTax.gainOrLossAfterReliefs, messages("taxDue.gainOrLossAfterReliefs"), true)
+        @calcRow(calculatedTax.gainOrLossAfterReliefs, messages(s"$key.gainOrLossAfterReliefs"), showGainType = true)
+        @details(messages("calculator.showWorkings"), gainOrLossAfterReliefsWorkings(reliefDetails, calculatedTax))
       </li>
+      @if(!calculatedTax.initialGainOrLoss.amount.isNegative) {
+        <li>
+          @calcRow(calculatedTax.gainOrLossAfterLosses, messages(s"$key.gainAfterLosses"), showGainType = true)
+          @details(messages("calculator.showWorkings"), gainAfterLossesWorkings(exemptionsAndLossesDetails, calculatedTax))
+        </li>
+        <li>
+          @calcRow(calculatedTax.taxableGainOrNetLoss, messages(s"$key.taxableGain"), showGainType = true)
+          @details(messages("calculator.showWorkings"), taxableGainWorkings(exemptionsAndLossesDetails, calculatedTax))
+        </li>
+      }
       <li>
-      @calcRow(calculatedTax.gainOrLossAfterLosses, messages("taxDue.gainAfterLosses"), true)
-      </li>
-      <li>
-      @calcRow(calculatedTax.taxableGainOrNetLoss, messages("taxDue.taxableGain"), true)
-      </li>
-      <li>
-      @calcRow(calculatedTax.amountOfTaxDue, messages("taxDue.amountOfTaxDue"), false)
+        @calcRow(calculatedTax.amountOfTaxDue, messages(s"$key.amountOfTaxDue"), showGainType = false)
+        @details(messages("calculator.showWorkings"), taxOwedWorkings(estimatedIncome, personalAllowance, calculatedTax, taxYear, assetType))
       </li>
     </ul>
 
