@@ -39,7 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{IndirectDisposal, MixedUse, NonResidential, Residential}
@@ -187,6 +187,31 @@ class SingleDisposalsTriageControllerSpec
           .attr("action") shouldBe routes.SingleDisposalsTriageController
           .howDidYouDisposeOfPropertySubmit()
           .url
+      }
+
+      "use a different page title" when {
+
+        "an agent requests the page" in {
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers)._1.copy(
+                userType = Some(UserType.Agent),
+                journeyStatus = Some(
+                  sample[FillingOutReturn].copy(
+                    agentReferenceNumber = Some(sample[AgentReferenceNumber])
+                  )
+                )
+              )
+            )
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("disposalMethod.agent.title")
+          )
+        }
       }
 
     }
