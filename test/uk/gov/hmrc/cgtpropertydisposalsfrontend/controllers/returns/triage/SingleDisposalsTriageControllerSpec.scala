@@ -21,6 +21,7 @@ import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
+import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -180,6 +181,14 @@ class SingleDisposalsTriageControllerSpec
         }
       )
 
+      behave like displayCustomContentForAgent(
+        performAction
+      )(requiredPreviousAnswers)(
+        "disposalMethod.agent.title", { doc =>
+          checkContent(doc, routes.CommonTriageQuestionsController.howManyProperties())
+        }
+      )
+
       def checkContent(doc: Document, backLink: Call): Unit = {
         doc.select("#back").attr("href") shouldBe backLink.url
         doc
@@ -187,31 +196,6 @@ class SingleDisposalsTriageControllerSpec
           .attr("action") shouldBe routes.SingleDisposalsTriageController
           .howDidYouDisposeOfPropertySubmit()
           .url
-      }
-
-      "use a different page title" when {
-
-        "an agent requests the page" in {
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionDataWithStartingNewDraftReturn(requiredPreviousAnswers)._1.copy(
-                userType = Some(UserType.Agent),
-                journeyStatus = Some(
-                  sample[FillingOutReturn].copy(
-                    agentReferenceNumber = Some(sample[AgentReferenceNumber])
-                  )
-                )
-              )
-            )
-          }
-
-          checkPageIsDisplayed(
-            performAction(),
-            messageFromMessageKey("disposalMethod.agent.title")
-          )
-        }
       }
 
     }
@@ -367,6 +351,14 @@ class SingleDisposalsTriageControllerSpec
         "wereYouAUKResident.title", { doc =>
           checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
           doc.select("#wereYouAUKResident-true").attr("checked") shouldBe "checked"
+        }
+      )
+
+      behave like displayCustomContentForAgent(
+        performAction
+      )(requiredPreviousAnswers)(
+        "wereYouAUKResident.agent.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty())
         }
       )
 
@@ -597,6 +589,14 @@ class SingleDisposalsTriageControllerSpec
         )
       }
 
+      behave like displayCustomContentForAgent(
+        performAction
+      )(requiredPreviousAnswers)(
+        "didYouDisposeOfResidentialProperty.agent.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.wereYouAUKResident())
+        }
+      )
+
       def checkContent(doc: Document, backLink: Call): Unit = {
         doc.select("#back").attr("href") shouldBe backLink.url
         doc
@@ -818,6 +818,14 @@ class SingleDisposalsTriageControllerSpec
         "disposalDate.title", { doc =>
           checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
           checkPrepopulatedContent(doc, disposalDate)
+        }
+      )
+
+      behave like displayCustomContentForAgent(
+        performAction
+      )(requiredPreviousAnswersUkResident)(
+        "disposalDate.agent.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty())
         }
       )
 
@@ -1092,6 +1100,14 @@ class SingleDisposalsTriageControllerSpec
         }
       )
 
+      behave like displayCustomContentForAgent(
+        performAction
+      )(requiredPreviousAnswers)(
+        "completionDate.agent.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.whenWasDisposalDate())
+        }
+      )
+
       def checkContent(doc: Document, backLink: Call): Unit = {
         doc.select("#back").attr("href") shouldBe backLink.url
         doc
@@ -1340,6 +1356,14 @@ class SingleDisposalsTriageControllerSpec
         }
       )
 
+      behave like displayCustomContentForAgent(
+        performAction
+      )(requiredPreviousAnswers)(
+        "triage.enterCountry.agent.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.wereYouAUKResident())
+        }
+      )
+
       def checkContent(doc: Document, backLink: Call): Unit = {
         doc.select("#back").attr("href") shouldBe backLink.url
         doc
@@ -1548,6 +1572,14 @@ class SingleDisposalsTriageControllerSpec
         "assetTypeForNonUkResidents.title", { doc =>
           checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
           doc.select("#assetTypeForNonUkResidents-0").attr("checked") shouldBe "checked"
+        }
+      )
+
+      behave like displayCustomContentForAgent(
+        performAction
+      )(requiredPreviousAnswers)(
+        "assetTypeForNonUkResidents.agent.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.countryOfResidence())
         }
       )
 
@@ -2244,6 +2276,38 @@ class SingleDisposalsTriageControllerSpec
             checkContent
           )
         }
+      }
+    }
+
+  def displayCustomContentForAgent(
+    performAction: () => Future[Result]
+  )(answers: IncompleteSingleDisposalTriageAnswers)(
+    pageTitleKey: String,
+    checkContent: Document => Unit
+  ): Unit =
+    "use a different page title" when {
+
+      "an agent requests the page" in {
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionDataWithStartingNewDraftReturn(answers)._1.copy(
+              userType = Some(UserType.Agent),
+              journeyStatus = Some(
+                sample[FillingOutReturn].copy(
+                  agentReferenceNumber = Some(sample[AgentReferenceNumber])
+                )
+              )
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey(pageTitleKey),
+          checkContent
+        )
       }
     }
 
