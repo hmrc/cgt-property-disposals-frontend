@@ -1041,7 +1041,9 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       "show a form error" when {
 
-        def testFormError(formData: List[(String, String)])(expectedErrorMessageKey: String) = {
+        def testFormError(
+          formData: List[(String, String)]
+        )(expectedErrorMessageKey: String, args: Seq[String] = Seq()) = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -1062,7 +1064,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             performAction(formData: _*),
             messageFromMessageKey(s"$key.title"), { doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
-                expectedErrorMessageKey
+                expectedErrorMessageKey,
+                args: _*
               )
             },
             BAD_REQUEST
@@ -1092,8 +1095,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         }
 
         "the date entered is too far in past" in {
+          val param1 = taxYear.startDateInclusive.getYear.toString
+          val param2 = taxYear.endDateExclusive.getYear.toString
           testFormError(formData(LocalDateUtils.today().minusYears(1L)))(
-            s"$key.error.tooFarInPast"
+            s"$key.error.tooFarInPast",
+            Seq(param1, param2)
           )
         }
 
