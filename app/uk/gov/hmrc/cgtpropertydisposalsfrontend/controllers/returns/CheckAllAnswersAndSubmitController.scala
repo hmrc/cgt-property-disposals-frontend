@@ -25,14 +25,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.SubmitReturnResult
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.SubmitReturnResult.{SubmitReturnError, SubmitReturnSuccess}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, routes => baseRoutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteSingleDisposalReturn, MultipleDisposalsDraftReturn, SingleDisposalDraftReturn, SubmitReturnRequest}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, routes => baseRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, SubmitReturnFailed, Subscribed}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{MultipleDisposalsDraftReturn, SingleDisposalDraftReturn, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{PaymentsService, ReturnsService}
@@ -66,14 +63,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
   def checkAllAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withCompleteDraftReturn(request) {
       case (_, _, completeReturn) =>
-        Ok(
-          checkAllAnswersPage(
-            completeReturn,
-            rebasingEligibilityUtil.getDisplayRebasingCutOffDate(completeReturn),
-            rebasingEligibilityUtil.isUk(completeReturn),
-            rebasingEligibilityUtil.isEligibleForRebase(completeReturn)
-          )
-        )
+        Ok(checkAllAnswersPage(completeReturn, rebasingEligibilityUtil))
     }
   }
 
@@ -124,7 +114,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
     }
   }
 
-  private def submitReturn(completeReturn: CompleteSingleDisposalReturn, fillingOutReturn: FillingOutReturn)(
+  private def submitReturn(completeReturn: CompleteReturn, fillingOutReturn: FillingOutReturn)(
     implicit hc: HeaderCarrier
   ): Future[SubmitReturnResult] =
     returnsService
@@ -207,7 +197,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
 
   private def withCompleteDraftReturn(
     request: RequestWithSessionData[_]
-  )(f: (SessionData, FillingOutReturn, CompleteSingleDisposalReturn) => Future[Result]): Future[Result] =
+  )(f: (SessionData, FillingOutReturn, CompleteReturn) => Future[Result]): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((s, r @ FillingOutReturn(_, _, _, draftReturn: SingleDisposalDraftReturn))) =>
         CompleteSingleDisposalReturn
@@ -216,9 +206,12 @@ class CheckAllAnswersAndSubmitController @Inject() (
             Redirect(routes.TaskListController.taskList())
           )(f(s, r, _))
 
-      case Some((_, _ @FillingOutReturn(_, _, _, _: MultipleDisposalsDraftReturn))) =>
-        // TODO: implement when ready
-        sys.error("multiple disposals not handled yet")
+      case Some((s, r @ FillingOutReturn(_, _, _, draftReturn: MultipleDisposalsDraftReturn))) =>
+        CompleteMultipleDisposalsReturn
+          .fromDraftReturn(draftReturn)
+          .fold[Future[Result]](
+            Redirect(routes.TaskListController.taskList())
+          )(f(s, r, _))
 
       case _ =>
         Redirect(baseRoutes.StartController.start())

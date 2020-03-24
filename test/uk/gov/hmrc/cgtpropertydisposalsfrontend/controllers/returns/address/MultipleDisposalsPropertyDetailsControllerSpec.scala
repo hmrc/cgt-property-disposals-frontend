@@ -1928,7 +1928,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         def testIsCheckYourAnswers(
           result: Future[Result],
-          ukAddressDetails: UkAddress,
+          answers: CompleteExamplePropertyDetailsAnswers,
           expectedTitleKey: String
         ): Unit =
           checkPageIsDisplayed(
@@ -1940,7 +1940,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 "returns.property-details.multiple-disposals.cya.guidanceLink"
               )
 
-              MultipleDisposalsPropertyDetailsControllerSpec.validatePropertyAddressPage(ukAddressDetails, doc)
+              MultipleDisposalsPropertyDetailsControllerSpec.validateExamplePropertyDetailsSummary(answers, doc)
             }
           )
 
@@ -1958,7 +1958,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           testIsCheckYourAnswers(
             performAction(),
-            address,
+            completeAnswers,
             "returns.property-address.cya.title"
           )
         }
@@ -1971,7 +1971,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           testIsCheckYourAnswers(
             performAction(),
-            address,
+            completeAnswers,
             "returns.property-address.cya.title"
           )
         }
@@ -2085,12 +2085,15 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 }
 
 object MultipleDisposalsPropertyDetailsControllerSpec extends Matchers {
-  def validatePropertyAddressPage(
-    ukAddress: UkAddress,
+  def validateExamplePropertyDetailsSummary(
+    examplePropertyDetailsAnswers: CompleteExamplePropertyDetailsAnswers,
     doc: Document
-  )(implicit messages: MessagesApi, lang: Lang): Unit =
+  )(implicit messages: MessagesApi, lang: Lang): Unit = {
+    val ukAddress = examplePropertyDetailsAnswers.address
+
     doc.select("#property-address-answer").text() shouldBe
       List(Some(ukAddress.line1), ukAddress.line2, ukAddress.town, ukAddress.county, Some(ukAddress.postcode.value))
         .collect { case Some(s) => s.trim }
         .mkString(" ")
+  }
 }

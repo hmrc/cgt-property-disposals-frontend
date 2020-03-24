@@ -28,81 +28,72 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers._
 
 @this(
-mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning,
-taskLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.taskLink
+        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+        warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning,
+        taskLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.taskLink
 )
 
 @(draftReturn: SingleDisposalDraftReturn)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers
-@title = @{
-messages("service.title")
-}
-@triageState = @{
-draftReturn.triageAnswers.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete)
-}
-@propertyAddressState = @{
-draftReturn.propertyAddress.fold[TaskListStatus](TaskListStatus.ToDo)(_ => TaskListStatus.Complete)
-}
-@disposalDetailsState = @{
-draftReturn.disposalDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))
-}
-@acquistionDetailsState = @{
-draftReturn.acquisitionDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))
-}
-@uploadSupportingDocsState = @{
-    draftReturn.uploadSupportingDocuments.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))
-}
+@title = @{messages("service.title")}
+@triageState = @{draftReturn.triageAnswers.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete)}
+@propertyAddressState = @{draftReturn.propertyAddress.fold[TaskListStatus](TaskListStatus.ToDo)(_ => TaskListStatus.Complete)}
+@disposalDetailsState = @{draftReturn.disposalDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))}
+@acquistionDetailsState = @{draftReturn.acquisitionDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))}
+@uploadSupportingDocsState = @{draftReturn.uploadSupportingDocuments.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))}
 
 @initialGainOrLossState = @{
-def shouldSeeSection(countryOfResidence: Country, assetType: AssetType, acquisitionDetailsAnswers: Option[AcquisitionDetailsAnswers]) = {
-val residentialBeforeDate = RebasingCutoffDates.nonUkResidentsResidentialProperty
+    def shouldSeeSection(countryOfResidence: Country, assetType: AssetType, acquisitionDetailsAnswers: Option[AcquisitionDetailsAnswers]) = {
+    val residentialBeforeDate = RebasingCutoffDates.nonUkResidentsResidentialProperty
+    (countryOfResidence, assetType, acquisitionDetailsAnswers) match {
+        case (_, _, _) if countryOfResidence.isUk() => false
+        case (_, AssetType.Residential, Some(CompleteAcquisitionDetailsAnswers(_, AcquisitionDate(acquisitionDate), _, _, _, _, _)))
+          if acquisitionDate.isBefore(residentialBeforeDate) => true
+        case (_, _, _) => false
+    }
+    }
 
-(countryOfResidence, assetType, acquisitionDetailsAnswers) match {
-case (_, _, _) if countryOfResidence.isUk() => false
-case (_, AssetType.Residential, Some(CompleteAcquisitionDetailsAnswers(_, AcquisitionDate(acquisitionDate), _, _, _, _, _)))
-if acquisitionDate.isBefore(residentialBeforeDate) => true
-case (_, _, _) => false
+    def canSeeInitialGainOrLoss = {
+        (draftReturn.triageAnswers) match {
+            case IncompleteSingleDisposalTriageAnswers(_, _, _, _, Some(countryOfResidence), Some(assetType), _, _, _) =>
+                shouldSeeSection(countryOfResidence, assetType, draftReturn.acquisitionDetailsAnswers)
+            case CompleteSingleDisposalTriageAnswers(_, _, countryOfResidence, assetType, _, _) =>
+                shouldSeeSection(countryOfResidence, assetType, draftReturn.acquisitionDetailsAnswers)
+            case _ =>
+                false
+        }
+    }
 
-}
-}
-
-def canUseService = {
-(draftReturn.triageAnswers) match {
-case IncompleteSingleDisposalTriageAnswers(_, _, _, _, Some(countryOfResidence), Some(assetType), _, _, _) => shouldSeeSection(countryOfResidence, assetType, draftReturn.acquisitionDetailsAnswers)
-case CompleteSingleDisposalTriageAnswers(_, _, countryOfResidence, assetType, _, _) => shouldSeeSection(countryOfResidence, assetType, draftReturn.acquisitionDetailsAnswers)
-case _ => false
-}
-}
-
-if(canUseService)
-draftReturn.initialGainOrLoss match {
-case (Some(_)) => TaskListStatus.Complete
-case _ => TaskListStatus.ToDo
-}
-else
-TaskListStatus.CannotStart
+    if(canSeeInitialGainOrLoss)
+        draftReturn.initialGainOrLoss match {
+            case (Some(_)) => TaskListStatus.Complete
+            case _ => TaskListStatus.ToDo
+        }
+    else
+        TaskListStatus.CannotStart
 
 }
 
 @reliefDetailsState = @{
-(propertyAddressState, disposalDetailsState, acquistionDetailsState) match {
-case (TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete) =>
-draftReturn.reliefDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))
-case _ => TaskListStatus.CannotStart
+    (propertyAddressState, disposalDetailsState, acquistionDetailsState) match {
+        case (TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete) =>
+            draftReturn.reliefDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))
+        case _ => TaskListStatus.CannotStart
+    }
 }
-}
+
 @exemptionsAndLossesState = @{
-reliefDetailsState match {
-case TaskListStatus.Complete =>
-draftReturn.exemptionAndLossesAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))
-case _ =>
-TaskListStatus.CannotStart
+    reliefDetailsState match {
+        case TaskListStatus.Complete =>
+            draftReturn.exemptionAndLossesAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))
+        case _ =>
+            TaskListStatus.CannotStart
+    }
 }
-}
+
 @ytdLiabilityState = @{
   (propertyAddressState, disposalDetailsState, acquistionDetailsState, reliefDetailsState, exemptionsAndLossesState) match {
     case (TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete) =>
@@ -116,13 +107,13 @@ TaskListStatus.CannotStart
 }
 
 @checkAndSendReturnState = @{
-(propertyAddressState, disposalDetailsState, acquistionDetailsState, reliefDetailsState, exemptionsAndLossesState, ytdLiabilityState) match {
-case (TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete) =>
-TaskListStatus.ToDo
+    (propertyAddressState, disposalDetailsState, acquistionDetailsState, reliefDetailsState, exemptionsAndLossesState, ytdLiabilityState) match {
+        case (TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete) =>
+            TaskListStatus.ToDo
 
-case _ =>
-TaskListStatus.CannotStart
-}
+        case _ =>
+            TaskListStatus.CannotStart
+    }
 }
 
 @mainTemplate(title = title, userType = request.userType) {
@@ -215,13 +206,10 @@ TaskListStatus.CannotStart
 
         </ul>
     </li>
-</ol>
 } else {
-</ol>
-
-@warning(messages("task-list.incompleteTriage"))
-
+    @warning(messages("task-list.incompleteTriage"))
 }
+</ol>
 
 <p><a id="saveAndComeBackLater" href="@{
         returns.routes.ConfirmDraftReturnController.confirmDraftReturn()
