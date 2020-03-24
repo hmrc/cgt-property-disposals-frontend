@@ -547,8 +547,8 @@ assetTypeForNonUkResidents.agent.IndirectDisposal=Company shares in UK land - yo
 assetTypeForNonUkResidents.IndirectDisposal.helpText=An indirect disposal is where the disposal involves rights to assets that derive at least 75% of their value from UK land.
 assetTypeForNonUkResidents.error.required=Select the type of property or asset you sold or disposed of
 assetTypeForNonUkResidents.error.invalid=Select the type of property or asset you sold or disposed of
-assetTypeForNonUkResidents.agent.error.required=Select the type of property or asset you sold or disposed of
-assetTypeForNonUkResidents.agent.error.invalid=Select the type of property or asset you sold or disposed of
+assetTypeForNonUkResidents.agent.error.required=Select the type of property or asset your client sold or disposed of
+assetTypeForNonUkResidents.agent.error.invalid=Select the type of property or asset your client sold or disposed of
 
 didYouDisposeOfResidentialProperty.title=Did you sell or dispose of a UK residential property?
 didYouDisposeOfResidentialProperty.agent.title=Did your client sell or dispose of a UK residential property?
