@@ -183,7 +183,7 @@ class SingleDisposalsTriageControllerSpec
 
       behave like displayCustomContentForAgent(
         performAction
-      )(requiredPreviousAnswers)(
+      )(requiredPreviousAnswers.copy(disposalMethod = Some(DisposalMethod.Gifted)))(
         "disposalMethod.agent.title", { doc =>
           checkContent(doc, routes.CommonTriageQuestionsController.howManyProperties())
         }
@@ -356,9 +356,9 @@ class SingleDisposalsTriageControllerSpec
 
       behave like displayCustomContentForAgent(
         performAction
-      )(requiredPreviousAnswers)(
+      )(requiredPreviousAnswers.copy(wasAUKResident = Some(true), countryOfResidence = Some(Country.uk)))(
         "wereYouAUKResident.agent.title", { doc =>
-          checkContent(doc, routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty())
+          checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
         }
       )
 
@@ -591,7 +591,7 @@ class SingleDisposalsTriageControllerSpec
 
       behave like displayCustomContentForAgent(
         performAction
-      )(requiredPreviousAnswers)(
+      )(requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential)))(
         "didYouDisposeOfResidentialProperty.agent.title", { doc =>
           checkContent(doc, routes.SingleDisposalsTriageController.wereYouAUKResident())
         }
@@ -823,7 +823,7 @@ class SingleDisposalsTriageControllerSpec
 
       behave like displayCustomContentForAgent(
         performAction
-      )(requiredPreviousAnswersUkResident)(
+      )(requiredPreviousAnswersUkResident.copy(disposalDate = Some(disposalDate)))(
         "disposalDate.agent.title", { doc =>
           checkContent(doc, routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty())
         }
@@ -1102,7 +1102,7 @@ class SingleDisposalsTriageControllerSpec
 
       behave like displayCustomContentForAgent(
         performAction
-      )(requiredPreviousAnswers)(
+      )(requiredPreviousAnswers.copy(completionDate = Some(CompletionDate(disposalDate.value))))(
         "completionDate.agent.title", { doc =>
           checkContent(doc, routes.SingleDisposalsTriageController.whenWasDisposalDate())
         }
@@ -1358,7 +1358,7 @@ class SingleDisposalsTriageControllerSpec
 
       behave like displayCustomContentForAgent(
         performAction
-      )(requiredPreviousAnswers)(
+      )(requiredPreviousAnswers.copy(countryOfResidence = Some(country)))(
         "triage.enterCountry.agent.title", { doc =>
           checkContent(doc, routes.SingleDisposalsTriageController.wereYouAUKResident())
         }
@@ -1577,7 +1577,7 @@ class SingleDisposalsTriageControllerSpec
 
       behave like displayCustomContentForAgent(
         performAction
-      )(requiredPreviousAnswers)(
+      )(requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential)))(
         "assetTypeForNonUkResidents.agent.title", { doc =>
           checkContent(doc, routes.SingleDisposalsTriageController.countryOfResidence())
         }
@@ -2292,11 +2292,14 @@ class SingleDisposalsTriageControllerSpec
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(
-            sessionDataWithStartingNewDraftReturn(answers)._1.copy(
+            SessionData.empty.copy(
               userType = Some(UserType.Agent),
               journeyStatus = Some(
                 sample[FillingOutReturn].copy(
-                  agentReferenceNumber = Some(sample[AgentReferenceNumber])
+                  agentReferenceNumber = Some(sample[AgentReferenceNumber]),
+                  draftReturn = sample[SingleDisposalDraftReturn].copy(
+                    triageAnswers = answers
+                  )
                 )
               )
             )
