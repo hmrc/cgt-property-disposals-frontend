@@ -537,7 +537,7 @@ assetTypeForNonUkResidents.IndirectDisposal.helpText=An indirect disposal is whe
 assetTypeForNonUkResidents.error.required=Select the type of property or asset you sold or disposed of
 assetTypeForNonUkResidents.error.invalid=Select the type of property or asset you sold or disposed of
 
-didYouDisposeOfResidentialProperty.title=Are you reporting the disposal of a UK  residential property?
+didYouDisposeOfResidentialProperty.title=Are you reporting the disposal of a UK residential property?
 didYouDisposeOfResidentialProperty.helpText=Residential property includes houses, flats, or other dwellings, including their gardens or grounds.
 didYouDisposeOfResidentialProperty.Residential=Yes
 didYouDisposeOfResidentialProperty.NonResidential=No
