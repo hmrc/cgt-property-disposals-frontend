@@ -554,7 +554,8 @@ ukResidentCanOnlyReportResidential.title=You cannot use this service
 ukResidentCanOnlyReportResidential.p1=You told us you were a UK resident on the day you sold or disposed of the UK property. You can only use this service to report UK residential property.
 ukResidentCanOnlyReportResidential.p2=Find out how to report and pay Capital Gains Tax on <a href="{0}">non-residential UK property sales or disposals</a>.
 
-disposalDate.title=When the property was disposed of, what date were contracts exchanged?
+disposalDate.title=What date did you exchange contracts when disposing of the property?
+disposalDate.trust.title=When the property was disposed of, what date were contracts exchanged?
 disposalDate.indirectDisposal.title=What date did you sell the shares?
 disposalDate.helpText=It’s usually when you and the buyer or new owner swapped contracts and the buyer paid a deposit.
 disposalDate.link=<a href="{0}" target="_blank">Find out what happens on the exchange date (opens in a new window)</a>.
@@ -571,7 +572,8 @@ disposalDate-month.error.monthAndYearRequired=Contract exchange date must includ
 disposalDate-day.error.dayAndYearRequired=Contract exchange date must include a day and a year
 disposalDate-day.error.dayAndMonthRequired=Contract exchange date must include a day and a month
 
-completionDate.title=When the property was disposed of what was the completion date?
+completionDate.title=What was the completion date when you sold or disposed of the property?
+completionDate.trust.title=When the property was disposed of what was the completion date?
 completionDate.helpText=It’s usually when you got the money from the sale or property transfer and the new owner got the keys. For example, 25 4 2020.
 completionDate.link=<a href="{0}" target="_blank">Find out what happens on the completion date (opens in a new window)</a>.
 completionDate.error.required=Enter a completion date

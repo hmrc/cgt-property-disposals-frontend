@@ -65,13 +65,15 @@ class CheckAllAnswersAndSubmitController @Inject() (
 
   def checkAllAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withCompleteDraftReturn(request) {
-      case (_, _, completeReturn) =>
+      case (_, fillingOutReturn, completeReturn) =>
+        val isATrust = fillingOutReturn.subscribedDetails.userType().isLeft
         Ok(
           checkAllAnswersPage(
             completeReturn,
             rebasingEligibilityUtil.getDisplayRebasingCutOffDate(completeReturn),
             rebasingEligibilityUtil.isUk(completeReturn),
-            rebasingEligibilityUtil.isEligibleForRebase(completeReturn)
+            rebasingEligibilityUtil.isEligibleForRebase(completeReturn),
+            isATrust
           )
         )
     }
