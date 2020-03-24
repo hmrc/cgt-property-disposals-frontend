@@ -416,10 +416,19 @@ class PropertyDetailsController @Inject() (
                 getDisposalDateFrom(taxYear)
                   .bindFromRequest()
                   .fold(
-                    formWithErrors =>
+                    formWithErrors => {
+                      val param1 = taxYear.startDateInclusive.getYear.toString
+                      val param2 = taxYear.endDateExclusive.getYear.toString
+                      val updatedFormWithErrors = formWithErrors.errors.map {
+                        _.copy(args = Seq(param1, param2))
+                      }
+
                       BadRequest(
-                        multipleDisposalsDisposalDatePage(formWithErrors)
-                      ), { date =>
+                        multipleDisposalsDisposalDatePage(
+                          formWithErrors.copy(errors = updatedFormWithErrors)
+                        )
+                      )
+                    }, { date =>
                       val disposalDate = DisposalDate(date, taxYear)
 
                       if (answers
