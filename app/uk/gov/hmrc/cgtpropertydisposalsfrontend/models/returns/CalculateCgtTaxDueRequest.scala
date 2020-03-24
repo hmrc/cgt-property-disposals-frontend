@@ -17,6 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import play.api.libs.json.{Json, OFormat}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
@@ -32,7 +33,8 @@ final case class CalculateCgtTaxDueRequest(
   exemptionAndLosses: CompleteExemptionAndLossesAnswers,
   estimatedIncome: AmountInPence,
   personalAllowance: AmountInPence,
-  initialGainOrLoss: Option[AmountInPence]
+  initialGainOrLoss: Option[AmountInPence],
+  isATrust: Boolean
 )
 
 object CalculateCgtTaxDueRequest {

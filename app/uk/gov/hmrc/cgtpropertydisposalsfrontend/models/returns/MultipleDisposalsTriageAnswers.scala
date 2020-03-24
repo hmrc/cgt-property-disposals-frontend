@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import cats.instances.list._
 import cats.syntax.eq._
+import cats.instances.list._
+
 import julienrf.json.derived
 import monocle.Lens
 import monocle.macros.Lenses
@@ -59,7 +60,6 @@ object MultipleDisposalsTriageAnswers {
         Some(c.taxYear),
         Some(c.completionDate)
       )
-
   }
 
   final case class CompleteMultipleDisposalsTriageAnswers(

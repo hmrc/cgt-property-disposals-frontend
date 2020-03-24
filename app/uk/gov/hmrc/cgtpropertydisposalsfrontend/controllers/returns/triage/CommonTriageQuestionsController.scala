@@ -410,7 +410,10 @@ class CommonTriageQuestionsController @Inject() (
               m.copy(
                 triageAnswers = updateMultipleDisposalAnswers(m.triageAnswers)
               ),
-            s => s.copy(triageAnswers = updateSingleDisposalAnswers(s.triageAnswers), yearToDateLiabilityAnswers = None)
+            s =>
+              s.copy(
+                triageAnswers = updateSingleDisposalAnswers(s.triageAnswers)
+              )
           )
         )
     )

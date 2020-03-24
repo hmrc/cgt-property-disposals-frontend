@@ -256,7 +256,7 @@ class MultipleDisposalsTriageController @Inject() (
       withMultipleDisposalTriageAnswers(request) {
         case (_, state, answers) =>
           val werePropertiesResidential =
-            answers.fold(_.wereAllPropertiesResidential, c => Some(c.assetTypes == AssetType.Residential))
+            answers.fold(_.wereAllPropertiesResidential, c => Some(c.assetTypes === List(AssetType.Residential)))
           val form =
             werePropertiesResidential.fold(wereAllPropertiesResidentialForm)(wereAllPropertiesResidentialForm.fill)
           val backLink = answers.fold(

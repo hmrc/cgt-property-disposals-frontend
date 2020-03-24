@@ -62,6 +62,7 @@ object SingleDisposalTriageAnswers {
 
     implicit val format: OFormat[IncompleteSingleDisposalTriageAnswers] = Json.format
   }
+
   final case class CompleteSingleDisposalTriageAnswers(
     individualUserType: Option[IndividualUserType],
     disposalMethod: DisposalMethod,
@@ -70,11 +71,6 @@ object SingleDisposalTriageAnswers {
     disposalDate: DisposalDate,
     completionDate: CompletionDate
   ) extends SingleDisposalTriageAnswers
-
-  object CompleteSingleDisposalTriageAnswers {
-
-    implicit val format: OFormat[CompleteSingleDisposalTriageAnswers] = Json.format
-  }
 
   implicit class IndividualTriageQuestionOps(private val i: SingleDisposalTriageAnswers) extends AnyVal {
 

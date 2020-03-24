@@ -56,7 +56,8 @@
   exemptionsAndLossesDetails: CompleteExemptionAndLossesAnswers,
   estimatedIncome: AmountInPence,
   personalAllowance: AmountInPence,
-  calculatedTax: CalculatedTaxDue
+  calculatedTax: CalculatedTaxDue,
+  isATrust: Boolean
 )(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @key = @{ "taxDue" }
@@ -98,7 +99,7 @@
       }
       <li>
         @calcRow(calculatedTax.amountOfTaxDue, messages(s"$key.amountOfTaxDue"), showGainType = false)
-        @details(messages("calculator.showWorkings"), taxOwedWorkings(estimatedIncome, personalAllowance, calculatedTax, taxYear, assetType))
+        @details(messages("calculator.showWorkings"), taxOwedWorkings(estimatedIncome, personalAllowance, calculatedTax, taxYear, assetType, isATrust))
       </li>
     </ul>
 

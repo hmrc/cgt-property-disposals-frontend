@@ -59,7 +59,7 @@
       cyaRow(
         messages(labelAndAmount._1),
         Html(labelAndAmount._2),
-        Some(cyaChange(messages("initialGainOrLoss.cya.hint"), routes.InitialGainOrLossController.enterInitialGainOrLoss().url)),
+        Some(cyaChange(messages(labelAndAmount._1), routes.InitialGainOrLossController.enterInitialGainOrLoss().url)),
         "initialGainOrLoss"
       )
     )

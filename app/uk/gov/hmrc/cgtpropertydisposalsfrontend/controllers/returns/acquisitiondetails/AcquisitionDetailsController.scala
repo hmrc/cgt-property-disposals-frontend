@@ -685,7 +685,7 @@ class AcquisitionDetailsController @Inject() (
                 Redirect(routes.AcquisitionDetailsController.acquisitionDate())
 
               case IncompleteAcquisitionDetailsAnswers(_, Some(date), None, _, _, _, _)
-                  if (rebasingEligabilityUtil.isEligibleForAcquisitionPrice(wasAUkResident, assetType, date.value)) =>
+                  if (rebasingEligabilityUtil.isEligibleForAcquisitionPrice(wasAUkResident, date.value)) =>
                 Redirect(routes.AcquisitionDetailsController.acquisitionPrice())
 
               case IncompleteAcquisitionDetailsAnswers(_, Some(date), _, None, _, _, _)

@@ -19,20 +19,30 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 import julienrf.json.derived
 import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
 sealed trait ExamplePropertyDetailsAnswers extends Product with Serializable
 
 object ExamplePropertyDetailsAnswers {
 
-  final case class IncompleteExamplePropertyDetailsAnswers(address: Option[UkAddress])
-      extends ExamplePropertyDetailsAnswers
+  final case class IncompleteExamplePropertyDetailsAnswers(
+    address: Option[UkAddress],
+    disposalDate: Option[DisposalDate],
+    disposalPrice: Option[AmountInPence],
+    acquisitionPrice: Option[AmountInPence]
+  ) extends ExamplePropertyDetailsAnswers
 
   object IncompleteExamplePropertyDetailsAnswers {
     val empty: IncompleteExamplePropertyDetailsAnswers =
-      IncompleteExamplePropertyDetailsAnswers(None)
+      IncompleteExamplePropertyDetailsAnswers(None, None, None, None)
   }
 
-  final case class CompleteExamplePropertyDetailsAnswers(address: UkAddress) extends ExamplePropertyDetailsAnswers
+  final case class CompleteExamplePropertyDetailsAnswers(
+    address: UkAddress,
+    disposalDate: DisposalDate,
+    disposalPrice: AmountInPence,
+    acquisitionPrice: AmountInPence
+  ) extends ExamplePropertyDetailsAnswers
 
   implicit class ExamplePropertyDetailsAnswersOps(
     private val m: ExamplePropertyDetailsAnswers

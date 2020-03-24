@@ -352,14 +352,22 @@ class SingleDisposalsTriageController @Inject() (
     }
   }
 
-  private def updateDisposalDate(d: LocalDate, taxYear: Option[TaxYear], answers: SingleDisposalTriageAnswers) = {
+  private def updateDisposalDate(
+    d: LocalDate,
+    taxYear: Option[TaxYear],
+    answers: SingleDisposalTriageAnswers
+  ): IncompleteSingleDisposalTriageAnswers = {
     def updateCompleteAnswers(
       c: CompleteSingleDisposalTriageAnswers,
       date: Either[LocalDate, DisposalDate]
     ): IncompleteSingleDisposalTriageAnswers =
       IncompleteSingleDisposalTriageAnswers
         .fromCompleteAnswers(c)
-        .copy(disposalDate = date.toOption, tooEarlyDisposalDate = date.swap.toOption)
+        .copy(
+          disposalDate         = date.toOption,
+          tooEarlyDisposalDate = date.swap.toOption,
+          completionDate       = None
+        )
 
     taxYear.fold {
       answers.fold(
