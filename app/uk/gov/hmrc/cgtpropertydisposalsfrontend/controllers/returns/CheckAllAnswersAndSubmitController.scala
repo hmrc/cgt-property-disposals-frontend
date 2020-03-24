@@ -30,7 +30,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, MultipleDisposalsDraftReturn, SingleDisposalDraftReturn, SubmitReturnRequest}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteSingleDisposalReturn, MultipleDisposalsDraftReturn, SingleDisposalDraftReturn, SubmitReturnRequest}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, SubmitReturnFailed, Subscribed}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
@@ -124,7 +124,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
     }
   }
 
-  private def submitReturn(completeReturn: CompleteReturn, fillingOutReturn: FillingOutReturn)(
+  private def submitReturn(completeReturn: CompleteSingleDisposalReturn, fillingOutReturn: FillingOutReturn)(
     implicit hc: HeaderCarrier
   ): Future[SubmitReturnResult] =
     returnsService
@@ -207,10 +207,10 @@ class CheckAllAnswersAndSubmitController @Inject() (
 
   private def withCompleteDraftReturn(
     request: RequestWithSessionData[_]
-  )(f: (SessionData, FillingOutReturn, CompleteReturn) => Future[Result]): Future[Result] =
+  )(f: (SessionData, FillingOutReturn, CompleteSingleDisposalReturn) => Future[Result]): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((s, r @ FillingOutReturn(_, _, _, draftReturn: SingleDisposalDraftReturn))) =>
-        CompleteReturn
+        CompleteSingleDisposalReturn
           .fromDraftReturn(draftReturn)
           .fold[Future[Result]](
             Redirect(routes.TaskListController.taskList())

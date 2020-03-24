@@ -99,7 +99,7 @@ object JourneyStatus {
     subscribedDetails: SubscribedDetails,
     ggCredId: GGCredId,
     agentReferenceNumber: Option[AgentReferenceNumber],
-    completeReturn: CompleteReturn,
+    completeReturn: CompleteSingleDisposalReturn,
     submissionResponse: SubmitReturnResponse
   ) extends JourneyStatus
 
@@ -113,7 +113,7 @@ object JourneyStatus {
     subscribedDetails: SubscribedDetails,
     ggCredId: GGCredId,
     agentReferenceNumber: Option[AgentReferenceNumber],
-    completeReturn: CompleteReturn,
+    completeReturn: CompleteSingleDisposalReturn,
     returnSummary: ReturnSummary
   ) extends JourneyStatus
 
