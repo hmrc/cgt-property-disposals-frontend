@@ -16,7 +16,7 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -26,6 +26,7 @@
 
 @(backLink: Call)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
+@isAgent = @{ request.userType.contains(UserType.Agent) }
 @title = @{messages("disposalDateTooEarly.uk.title")}
 
 @mainTemplate(title = title, userType = request.userType) {
@@ -34,7 +35,7 @@
 
     @pageHeading(title)
     <p>
-    @messages("disposalDateTooEarly.uk.p1")
+    @messages(if (isAgent) "disposalDateTooEarly.agent.uk.p1" else "disposalDateTooEarly.uk.p1")
     </p>
     <p>
     @Html(messages("disposalDateTooEarly.uk.p2", appConfig.reportingCgtBefore6April2020))
