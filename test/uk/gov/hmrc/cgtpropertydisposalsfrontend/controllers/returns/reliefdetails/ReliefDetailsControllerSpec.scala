@@ -182,13 +182,7 @@ class ReliefDetailsControllerSpec
       }
 
     }
-    "handling check your answers" must {
-      def performAction(data: Seq[(String, String)]): Future[Result] =
-        controller.checkYourAnswers()(FakeRequest().withFormUrlEncodedBody(data: _*))
 
-      behave like residentsReliefSubmittedYesBehaviour(performAction, AmountInPence(500))
-      behave like residentsReliefSubmittedNoBehaviour(performAction)
-    }
     "handling submitted answers to the private residents relief page" must {
 
       def performAction(data: Seq[(String, String)]): Future[Result] =
@@ -485,7 +479,50 @@ class ReliefDetailsControllerSpec
         }
 
       }
+      "redirect to the residents page" when {
+        "the user has not answered residents relief and not answered lettings relief" in {
 
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithReliefDetailsAnswers(
+                IncompleteReliefDetailsAnswers.empty.copy(
+                  privateResidentsRelief = None,
+                  lettingsRelief         = None,
+                  otherReliefs           = None
+                )
+              )._1
+            )
+          }
+          checkIsRedirect(
+            performAction(),
+            controllers.returns.reliefdetails.routes.ReliefDetailsController.privateResidentsRelief()
+          )
+
+        }
+      }
+      "redirect to the other reliefs page" when {
+        "the user has no residents relief (amount zero) and no lettings relief" in {
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithReliefDetailsAnswers(
+                IncompleteReliefDetailsAnswers.empty.copy(
+                  privateResidentsRelief = Some(AmountInPence(0)),
+                  lettingsRelief         = None,
+                  otherReliefs           = None
+                )
+              )._1
+            )
+          }
+          checkIsRedirect(
+            performAction(),
+            controllers.returns.reliefdetails.routes.ReliefDetailsController.otherReliefs()
+          )
+
+        }
+      }
     }
 
     "handling submitted answers to the lettings relief page" must {
@@ -741,7 +778,30 @@ class ReliefDetailsControllerSpec
       behave like noPrivateResidentsReliefBehaviour(performAction)
 
       val otherReliefs = OtherReliefs("ReliefName", AmountInPence.fromPounds(13.34))
+      "redirect to lettings relief page" when {
 
+        "the user has residents relief greater than zero but lettings relief not answered yet" in {
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithReliefDetailsAnswers(
+                IncompleteReliefDetailsAnswers.empty.copy(
+                  privateResidentsRelief = Some(AmountInPence.fromPounds(11.34)),
+                  lettingsRelief         = None,
+                  otherReliefs           = None
+                )
+              )._1
+            )
+          }
+
+          checkIsRedirect(
+            performAction(),
+            controllers.returns.reliefdetails.routes.ReliefDetailsController.lettingsRelief()
+          )
+
+        }
+      }
       "display the page" when {
 
         "the user has not answered the question before" in {
@@ -977,7 +1037,35 @@ class ReliefDetailsControllerSpec
         }
 
       }
+      "redirect to lettings page" when {
+        "the user has residents relief greater than zero but lettings relief not answered yet" in {
 
+          val otherReliefs = OtherReliefs("ReliefName", AmountInPence.fromPounds(2d))
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              sessionWithReliefDetailsAnswers(
+                IncompleteReliefDetailsAnswers.empty.copy(
+                  privateResidentsRelief = Some(AmountInPence.fromPounds(11.34)),
+                  lettingsRelief         = None,
+                  otherReliefs           = Some(otherReliefs)
+                )
+              )._1
+            )
+          }
+          checkIsRedirect(
+            performAction(
+              Seq(
+                "otherReliefs"       -> "0",
+                "otherReliefsName"   -> otherReliefs.name,
+                "otherReliefsAmount" -> otherReliefs.amount.inPounds().toString
+              )
+            ),
+            controllers.returns.reliefdetails.routes.ReliefDetailsController.lettingsRelief()
+          )
+
+        }
+      }
       "redirect to the cya page" when {
 
         "the user has not answered all of the relief details questions " +
@@ -1163,12 +1251,10 @@ class ReliefDetailsControllerSpec
           checkIsRedirect(performAction(), routes.ReliefDetailsController.privateResidentsRelief())
 
         }
-
       }
 
       "redirect to the lettings relief page" when {
-
-        "the user has not answered that question" in {
+        "the user has not answered that question and the amount of private residents relief is greater them zero" in {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -1199,6 +1285,25 @@ class ReliefDetailsControllerSpec
 
           checkIsRedirect(performAction(), routes.ReliefDetailsController.otherReliefs())
 
+        }
+        "the user has not answered lettings relief question as the user selected No for residents relief " in {
+          val sessionData = sessionWithReliefDetailsAnswers(
+            IncompleteReliefDetailsAnswers(
+              Some(AmountInPence(0)),
+              None,
+              None
+            )
+          )._1
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionData)
+          }
+
+          checkIsRedirect(
+            performAction(),
+            routes.ReliefDetailsController.otherReliefs()
+          )
         }
       }
 
@@ -1344,7 +1449,7 @@ class ReliefDetailsControllerSpec
       }
     }
 
-  def residentsReliefSubmittedNoBehaviour(performAction: Seq[(String, String)] => Future[Result]): Unit =
+  def residentsReliefSubmittedNoBehaviour(performAction: () => Future[Result]): Unit =
     "redirect to the other reliefs page" when {
 
       "residents relief is selected as No" in {
@@ -1362,14 +1467,14 @@ class ReliefDetailsControllerSpec
         }
 
         checkIsRedirect(
-          performAction(Seq("privateResidentsRelief" -> "1")),
-          routes.ReliefDetailsController.otherReliefsSubmit()
+          performAction(),
+          routes.ReliefDetailsController.otherReliefs()
         )
       }
     }
 
   def residentsReliefSubmittedYesBehaviour(
-    performAction: Seq[(String, String)] => Future[Result],
+    performAction: () => Future[Result],
     residentsReliefAmount: AmountInPence
   ): Unit =
     "redirect to the other reliefs page" when {
@@ -1405,7 +1510,7 @@ class ReliefDetailsControllerSpec
         }
 
         checkIsRedirect(
-          performAction(data),
+          performAction(),
           routes.ReliefDetailsController.lettingsRelief()
         )
       }
