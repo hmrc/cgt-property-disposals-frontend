@@ -29,6 +29,7 @@ final case class TaxYear(
   annualExemptAmountGeneral: AmountInPence,
   annualExemptAmountNonVulnerableTrust: AmountInPence,
   personalAllowance: AmountInPence,
+  maxPersonalAllowance: AmountInPence,
   incomeTaxHigherRateThreshold: AmountInPence,
   cgtRateLowerBandResidential: BigDecimal,
   cgtRateLowerBandNonResidential: BigDecimal,
