@@ -384,20 +384,21 @@ class PropertyDetailsController @Inject() (
         r.draftReturn match {
           case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
           case m: MultipleDisposalsDraftReturn =>
-            m.triageAnswers.fold(_.taxYear, c => Some(c.taxYear)) match {
-              case Some(taxYear) =>
+            m.triageAnswers.fold(
+              i => i.taxYear       -> i.completionDate,
+              c => Some(c.taxYear) -> Some(c.completionDate)
+            ) match {
+              case (Some(taxYear), Some(completionDate)) =>
                 val answers = m.examplePropertyDetailsAnswers
                   .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
 
                 val disposalDate = answers.fold(_.disposalDate, c => Some(c.disposalDate))
 
-                val completionDate = getCompletionDate(m.triageAnswers)
-
                 val f    = getDisposalDateFrom(taxYear, completionDate)
                 val form = disposalDate.fold(f)(c => f.fill(c.value))
                 Ok(multipleDisposalsDisposalDatePage(form))
 
-              case None => Redirect(controllers.returns.routes.TaskListController.taskList())
+              case _ => Redirect(controllers.returns.routes.TaskListController.taskList())
             }
         }
     }
@@ -409,12 +410,13 @@ class PropertyDetailsController @Inject() (
         r.draftReturn match {
           case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
           case m: MultipleDisposalsDraftReturn =>
-            m.triageAnswers.fold(_.taxYear, c => Some(c.taxYear)) match {
-              case Some(taxYear) =>
+            m.triageAnswers.fold(
+              i => i.taxYear       -> i.completionDate,
+              c => Some(c.taxYear) -> Some(c.completionDate)
+            ) match {
+              case (Some(taxYear), Some(completionDate)) =>
                 val answers = m.examplePropertyDetailsAnswers
                   .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
-
-                val completionDate = getCompletionDate(m.triageAnswers)
 
                 getDisposalDateFrom(taxYear, completionDate)
                   .bindFromRequest()
@@ -472,7 +474,7 @@ class PropertyDetailsController @Inject() (
                     }
                   )
 
-              case None => Redirect(controllers.returns.routes.TaskListController.taskList())
+              case _ => Redirect(controllers.returns.routes.TaskListController.taskList())
             }
         }
     }
@@ -729,11 +731,6 @@ class PropertyDetailsController @Inject() (
         _ => routes.PropertyDetailsController.disposalPrice(),
         _ => routes.PropertyDetailsController.checkYourAnswers()
       )
-
-  private def getCompletionDate(answers: MultipleDisposalsTriageAnswers): CompletionDate =
-    answers
-      .fold(_.completionDate, c => Some(c.completionDate))
-      .getOrElse(CompletionDate(LocalDateUtils.today()))
 
   // the following aren't used for the returns journey - the returns journey only handles uk addresses
   protected lazy val isUkCall: Call                    = enterPostcodeCall
