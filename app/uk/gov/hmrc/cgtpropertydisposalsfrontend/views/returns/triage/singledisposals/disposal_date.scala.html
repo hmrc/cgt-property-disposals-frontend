@@ -20,6 +20,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DisposalDate}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
 mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -34,9 +35,11 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 
 @(form: Form[LocalDate], backLink: Call, displayReturnToSummaryLink: Boolean, assetType: AssetType)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@customErrorKey = @{if (isAgent) "agent" else ""}
 @key = @{"disposalDate"}
 @hasErrors = @{form.hasErrors}
-@title = @{messages( "disposalDate.title")}
+@title = @{messages(if (isAgent) "disposalDate.agent.title" else "disposalDate.title")}
 @errorKey = @{List("disposalDate-day", "disposalDate-month", "disposalDate-year", "disposalDate").map(form.error).find(_.isDefined).flatten}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
@@ -54,9 +57,9 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
    dayValue = form.data.get("disposalDate-day"),
    monthValue = form.data.get("disposalDate-month"),
    yearValue = form.data.get("disposalDate-year"),
-   helpText = Some(Html(messages("disposalDate.helpText"))),
+   helpText = Some(Html(messages(if (isAgent) "disposalDate.agent.helpText" else "disposalDate.helpText"))),
    labelAsHeading = true,
-   errorKey = errorKey.map(e => s"${e.key}.${e.message}"),
+   errorKey = form.error(key).map(e => s"${e.key}.${e.message}"),
    hasErrors = hasErrors
   )
 

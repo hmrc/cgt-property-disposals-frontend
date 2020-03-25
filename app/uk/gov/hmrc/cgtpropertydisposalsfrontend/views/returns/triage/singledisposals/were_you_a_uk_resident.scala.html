@@ -17,6 +17,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -31,8 +32,11 @@
 
 @(form: Form[Boolean], backLink: Call, displayReturnToSummaryLink: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
+@isAgent = @{ request.userType.contains(UserType.Agent) }
 @key = @{"wereYouAUKResident"}
-@title = @{messages("wereYouAUKResident.title")}
+@customErrorKey = @{if (isAgent) "wereYouAUKResident.agent" else "wereYouAUKResident"}
+@yesNoErrorKey = @{if (isAgent) "agent." else ""}
+@title = @{messages(if (isAgent) "wereYouAUKResident.agent.title" else "wereYouAUKResident.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 
@@ -41,7 +45,7 @@
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
-        @errorSummary(form)
+        @errorSummary(form, Some(s"$customErrorKey"))
     }
 
     @formWrapper(controllers.returns.triage.routes.SingleDisposalsTriageController.wereYouAUKResidentSubmit(), 'novalidate -> "novalidate") {
@@ -49,12 +53,18 @@
             fieldId = key,
             label = pageHeading(title, Some(messages("triage.caption"))),
             labelAsHeading = true,
-            errorKey = form.error(key).map(e => e.message),
+            errorKey = form.error(key).map(e => s"$yesNoErrorKey${e.message}"),
             hasErrors = hasErrors,
             selected = form.value,
             helpText = Some(Html(messages("wereYouAUKResident.helpText")))
         )
-        <p>@Html(messages("wereYouAUKResident.link", viewConfig.workOurYouResidenceStatusUrl))</p>
+
+        @if(isAgent) {
+          <p>@Html(messages("wereYouAUKResident.agent.link", viewConfig.workOutClientsResidenceStatusUrl))</p>
+        } else {
+          <p>@Html(messages("wereYouAUKResident.link", viewConfig.workOurYouResidenceStatusUrl))</p>
+        }
+
 
         @submitButton(messages(if(displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
     }
