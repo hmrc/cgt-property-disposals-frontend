@@ -38,7 +38,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDetailsAnswers, DisposalMethod, ShareOfProperty, SingleDisposalDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDetailsAnswers, DisposalMethod, DraftSingleDisposalReturn, ShareOfProperty}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -72,8 +72,8 @@ class DisposalDetailsControllerSpec
       }
     )
 
-  def fillingOutReturn(disposalMethod: DisposalMethod): (FillingOutReturn, SingleDisposalDraftReturn) = {
-    val draftReturn = sample[SingleDisposalDraftReturn].copy(triageAnswers =
+  def fillingOutReturn(disposalMethod: DisposalMethod): (FillingOutReturn, DraftSingleDisposalReturn) = {
+    val draftReturn = sample[DraftSingleDisposalReturn].copy(triageAnswers =
       sample[CompleteSingleDisposalTriageAnswers].copy(
         disposalMethod = disposalMethod
       )
@@ -84,7 +84,7 @@ class DisposalDetailsControllerSpec
   def sessionWithDisposalDetailsAnswers(
     answers: Option[DisposalDetailsAnswers],
     disposalMethod: DisposalMethod
-  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) = {
+  ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
     val (journey, draftReturn) = fillingOutReturn(disposalMethod)
     val updatedDraftReturn     = draftReturn.copy(disposalDetailsAnswers = answers)
     val updatedJourney         = journey.copy(draftReturn = updatedDraftReturn)
@@ -99,7 +99,7 @@ class DisposalDetailsControllerSpec
   def sessionWithDisposalDetailsAnswers(
     answers: DisposalDetailsAnswers,
     disposalMethod: DisposalMethod
-  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) =
+  ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) =
     sessionWithDisposalDetailsAnswers(Some(answers), disposalMethod)
 
   "DisposalDetailsController" when {
@@ -1439,7 +1439,7 @@ class DisposalDetailsControllerSpec
     "redirect to start endpoint" when {
 
       "there is no disposal method" in {
-        val draftReturn = sample[SingleDisposalDraftReturn].copy(
+        val draftReturn = sample[DraftSingleDisposalReturn].copy(
           triageAnswers = sample[IncompleteSingleDisposalTriageAnswers].copy(disposalMethod = None)
         )
 
@@ -1459,7 +1459,7 @@ class DisposalDetailsControllerSpec
     "redirect to the what was your share page" when {
 
       "there is no property share" in {
-        val draftReturn = sample[SingleDisposalDraftReturn].copy(
+        val draftReturn = sample[DraftSingleDisposalReturn].copy(
           triageAnswers = sample[CompleteSingleDisposalTriageAnswers],
           disposalDetailsAnswers = Some(
             IncompleteDisposalDetailsAnswers(

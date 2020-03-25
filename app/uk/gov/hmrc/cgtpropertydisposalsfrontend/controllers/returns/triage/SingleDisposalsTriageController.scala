@@ -598,7 +598,7 @@ class SingleDisposalsTriageController @Inject() (
   }
 
   private def updateAnswersAndShowCheckYourAnswersPage(
-    state: Either[StartingNewDraftReturn, (SingleDisposalDraftReturn, FillingOutReturn)],
+    state: Either[StartingNewDraftReturn, (DraftSingleDisposalReturn, FillingOutReturn)],
     newCompleteTriageAnswers: CompleteSingleDisposalTriageAnswers,
     displayReturnToSummaryLink: Boolean
   )(implicit request: RequestWithSessionData[_], hc: HeaderCarrier): Future[Result] = {
@@ -630,7 +630,7 @@ class SingleDisposalsTriageController @Inject() (
 
             def toFillingOurNewReturn(startingNewDraftReturn: StartingNewDraftReturn): Future[Result] = {
               val newDraftReturn =
-                SingleDisposalDraftReturn(
+                DraftSingleDisposalReturn(
                   uuidGenerator.nextId(),
                   complete,
                   None,
@@ -772,7 +772,7 @@ class SingleDisposalsTriageController @Inject() (
   private def withSingleDisposalTriageAnswers(request: RequestWithSessionData[_])(
     f: (
       SessionData,
-      Either[StartingNewDraftReturn, (SingleDisposalDraftReturn, FillingOutReturn)],
+      Either[StartingNewDraftReturn, (DraftSingleDisposalReturn, FillingOutReturn)],
       SingleDisposalTriageAnswers
     ) => Future[Result]
   ): Future[Result] =
@@ -780,7 +780,7 @@ class SingleDisposalsTriageController @Inject() (
       case Some((session, s @ StartingNewDraftReturn(_, _, _, Right(t)))) =>
         f(session, Left(s), t)
 
-      case Some((session, r @ FillingOutReturn(_, _, _, d: SingleDisposalDraftReturn))) =>
+      case Some((session, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn))) =>
         f(session, Right(d -> r), d.triageAnswers)
 
       case _ =>

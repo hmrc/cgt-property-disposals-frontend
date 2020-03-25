@@ -46,9 +46,9 @@ object CompleteReturn {
 
   object CompleteMultipleDisposalsReturn {
 
-    def fromDraftReturn(draftReturn: MultipleDisposalsDraftReturn): Option[CompleteMultipleDisposalsReturn] =
+    def fromDraftReturn(draftReturn: DraftMultipleDisposalsReturn): Option[CompleteMultipleDisposalsReturn] =
       draftReturn match {
-        case MultipleDisposalsDraftReturn(
+        case DraftMultipleDisposalsReturn(
             _,
             t: CompleteMultipleDisposalsTriageAnswers,
             Some(p: CompleteExamplePropertyDetailsAnswers),
@@ -79,9 +79,9 @@ object CompleteReturn {
 
   object CompleteSingleDisposalReturn {
 
-    def fromDraftReturn(draftReturn: SingleDisposalDraftReturn): Option[CompleteSingleDisposalReturn] =
+    def fromDraftReturn(draftReturn: DraftSingleDisposalReturn): Option[CompleteSingleDisposalReturn] =
       draftReturn match {
-        case SingleDisposalDraftReturn(
+        case DraftSingleDisposalReturn(
             _,
             t: CompleteSingleDisposalTriageAnswers,
             Some(p: UkAddress),
@@ -96,7 +96,7 @@ object CompleteReturn {
             ) =>
           Some(CompleteSingleDisposalReturn(t, p, d, a, r, e, Right(y), i))
 
-        case SingleDisposalDraftReturn(
+        case DraftSingleDisposalReturn(
             _,
             t: CompleteSingleDisposalTriageAnswers,
             Some(p: UkAddress),

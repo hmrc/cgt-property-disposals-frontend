@@ -123,7 +123,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 
         val completeReturn = sample[CompleteSingleDisposalReturn]
 
-        val completeDraftReturn = SingleDisposalDraftReturn(
+        val completeDraftReturn = DraftSingleDisposalReturn(
           UUID.randomUUID(),
           completeReturn.triageAnswers,
           Some(completeReturn.propertyAddress),
@@ -200,7 +200,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 
         val completeReturn = sample[CompleteMultipleDisposalsReturn]
 
-        val completeDraftReturn = MultipleDisposalsDraftReturn(
+        val completeDraftReturn = DraftMultipleDisposalsReturn(
           UUID.randomUUID(),
           completeReturn.triageAnswers,
           Some(completeReturn.examplePropertyDetailsAnswers),
@@ -275,7 +275,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 
       val completeReturn = sample[CompleteSingleDisposalReturn]
 
-      val completeDraftReturn = SingleDisposalDraftReturn(
+      val completeDraftReturn = DraftSingleDisposalReturn(
         UUID.randomUUID(),
         completeReturn.triageAnswers,
         Some(completeReturn.propertyAddress),
@@ -583,9 +583,9 @@ class CheckAllAnswersAndSubmitControllerSpec
 
   def incompleteSingleDisposalJourneyBehaviour(
     performAction: () => Future[Result],
-    completeDraftReturn: SingleDisposalDraftReturn
+    completeDraftReturn: DraftSingleDisposalReturn
   ) = {
-    val makeIncompleteFunctions = List[SingleDisposalDraftReturn => SingleDisposalDraftReturn](
+    val makeIncompleteFunctions = List[DraftSingleDisposalReturn => DraftSingleDisposalReturn](
       _.copy(triageAnswers              = sample[IncompleteSingleDisposalTriageAnswers]),
       _.copy(propertyAddress            = None),
       _.copy(disposalDetailsAnswers     = Some(sample[IncompleteDisposalDetailsAnswers])),
@@ -626,9 +626,9 @@ class CheckAllAnswersAndSubmitControllerSpec
 
   def incompleteMultipleDisposalsJourneyBehaviour(
     performAction: () => Future[Result],
-    completeDraftReturn: MultipleDisposalsDraftReturn
+    completeDraftReturn: DraftMultipleDisposalsReturn
   ): Unit = {
-    val makeIncompleteFunctions = List[MultipleDisposalsDraftReturn => MultipleDisposalsDraftReturn](
+    val makeIncompleteFunctions = List[DraftMultipleDisposalsReturn => DraftMultipleDisposalsReturn](
       _.copy(triageAnswers                 = sample[IncompleteMultipleDisposalsTriageAnswers]),
       _.copy(examplePropertyDetailsAnswers = None),
       _.copy(examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])),

@@ -285,7 +285,7 @@ trait ReturnGen extends LowerPriorityReturnGen { this: GenUtils =>
 
   implicit val draftReturnGen: Gen[DraftReturn] = gen[DraftReturn]
 
-  implicit val singleDisposalDraftReturnGen: Gen[SingleDisposalDraftReturn] = gen[SingleDisposalDraftReturn]
+  implicit val singleDisposalDraftReturnGen: Gen[DraftSingleDisposalReturn] = gen[DraftSingleDisposalReturn]
 
   implicit val completeSingleDisposalReturnGen: Gen[CompleteSingleDisposalReturn] = gen[CompleteSingleDisposalReturn]
 
@@ -303,7 +303,7 @@ trait ReturnGen extends LowerPriorityReturnGen { this: GenUtils =>
 
 trait LowerPriorityReturnGen { this: GenUtils =>
 
-  implicit val multipleDisposalDraftReturnGen: Gen[MultipleDisposalsDraftReturn] = gen[MultipleDisposalsDraftReturn]
+  implicit val multipleDisposalDraftReturnGen: Gen[DraftMultipleDisposalsReturn] = gen[DraftMultipleDisposalsReturn]
 
   implicit val completeMultipleDisposalReturnGen: Gen[CompleteMultipleDisposalsReturn] =
     gen[CompleteMultipleDisposalsReturn]

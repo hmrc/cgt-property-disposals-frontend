@@ -42,11 +42,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAdd
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, DraftReturn, MultipleDisposalsDraftReturn, SingleDisposalDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, DraftMultipleDisposalsReturn, DraftReturn, DraftSingleDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.{CompleteExamplePropertyDetailsAnswers, IncompleteExamplePropertyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DraftReturn, MultipleDisposalsDraftReturn, SingleDisposalDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DraftMultipleDisposalsReturn, DraftReturn, DraftSingleDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 
 import scala.collection.JavaConverters._
@@ -61,8 +61,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
   val incompleteAnswers =
     IncompleteExamplePropertyDetailsAnswers.empty.copy(address = Some(ukAddress(1)))
 
-  val draftReturn: MultipleDisposalsDraftReturn =
-    sample[MultipleDisposalsDraftReturn].copy(examplePropertyDetailsAnswers = Some(incompleteAnswers))
+  val draftReturn: DraftMultipleDisposalsReturn =
+    sample[DraftMultipleDisposalsReturn].copy(examplePropertyDetailsAnswers = Some(incompleteAnswers))
 
   val validJourneyStatus = FillingOutReturn(sample[SubscribedDetails], sample[GGCredId], None, draftReturn)
 
@@ -125,7 +125,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = sample[SingleDisposalDraftReturn]
+                    draftReturn = sample[DraftSingleDisposalReturn]
                   )
                 )
               )
@@ -140,7 +140,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       "display the page" when {
 
         def test(
-          draftReturn: MultipleDisposalsDraftReturn,
+          draftReturn: DraftMultipleDisposalsReturn,
           expectedBackLink: Call
         ): Unit = {
           inSequence {
@@ -171,7 +171,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user has not started this section before" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               examplePropertyDetailsAnswers = None
             ),
             controllers.returns.routes.TaskListController.taskList()
@@ -180,7 +180,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user has started but not completed this section" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
             ),
             controllers.returns.routes.TaskListController.taskList()
@@ -189,7 +189,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user has completed this section" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers])
             ),
             routes.PropertyDetailsController.checkYourAnswers()
@@ -231,7 +231,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user is on a single disposal journey" in {
           test(
-            sample[SingleDisposalDraftReturn].copy(
+            sample[DraftSingleDisposalReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
                 assetType = AssetType.Residential
               )
@@ -242,7 +242,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user ins on a multiple disposals journey and has completed this section" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
                 assetTypes = List(AssetType.NonResidential)
               ),
@@ -261,7 +261,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           "the user has not started this section before and the user did not dispose of a " +
             "non-residential property" in {
             test(
-              sample[MultipleDisposalsDraftReturn].copy(
+              sample[DraftMultipleDisposalsReturn].copy(
                 triageAnswers =
                   sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(AssetType.Residential)),
                 examplePropertyDetailsAnswers = None
@@ -272,7 +272,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           "the user has started but not completed this section" in {
             test(
-              sample[MultipleDisposalsDraftReturn].copy(
+              sample[DraftMultipleDisposalsReturn].copy(
                 triageAnswers =
                   sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(AssetType.Residential)),
                 examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
@@ -290,7 +290,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           "the user has not started this section before" in {
             test(
-              sample[MultipleDisposalsDraftReturn].copy(
+              sample[DraftMultipleDisposalsReturn].copy(
                 triageAnswers =
                   sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(AssetType.NonResidential)),
                 examplePropertyDetailsAnswers = None
@@ -301,7 +301,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           "the user has started but not completed this section" in {
             test(
-              sample[MultipleDisposalsDraftReturn].copy(
+              sample[DraftMultipleDisposalsReturn].copy(
                 triageAnswers =
                   sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(AssetType.NonResidential)),
                 examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
@@ -325,7 +325,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       "display the page" when {
 
         def test(
-          draftReturn: MultipleDisposalsDraftReturn,
+          draftReturn: DraftMultipleDisposalsReturn,
           expectedBackLink: Call
         ): Unit = {
           inSequence {
@@ -356,7 +356,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user disposed of a non-residential property and the section is not complete" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
                 assetTypes = List(AssetType.NonResidential)
               ),
@@ -368,7 +368,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user disposed of a non-residential property and the section is complete" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
                 assetTypes = List(AssetType.NonResidential)
               ),
@@ -391,7 +391,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       behave like redirectWhenNotNonResidentialAssetTypeBehaviour(() => performAction())
 
-      val nonResidentialPropertyDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
+      val nonResidentialPropertyDraftReturn = sample[DraftMultipleDisposalsReturn].copy(
         triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
           assetTypes = List(AssetType.NonResidential)
         )
@@ -478,7 +478,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       "display the page" when {
 
         def test(
-          draftReturn: MultipleDisposalsDraftReturn,
+          draftReturn: DraftMultipleDisposalsReturn,
           expectedBackLink: Call
         ): Unit = {
           inSequence {
@@ -509,7 +509,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user disposed of a non-residential property and the section is not complete" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
                 assetTypes = List(AssetType.NonResidential)
               ),
@@ -521,7 +521,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user disposed of a non-residential property and the section is complete" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
                 assetTypes = List(AssetType.NonResidential)
               ),
@@ -555,7 +555,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       val answers = IncompleteExamplePropertyDetailsAnswers.empty
 
-      val nonResidentialPropertyDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
+      val nonResidentialPropertyDraftReturn = sample[DraftMultipleDisposalsReturn].copy(
         triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
           assetTypes = List(AssetType.NonResidential)
         ),
@@ -865,7 +865,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = sample[SingleDisposalDraftReturn]
+                    draftReturn = sample[DraftSingleDisposalReturn]
                   )
                 )
               )
@@ -886,7 +886,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+                    draftReturn = sample[DraftMultipleDisposalsReturn].copy(
                       triageAnswers = sample[IncompleteMultipleDisposalsTriageAnswers].copy(taxYear = None)
                     )
                   )
@@ -904,7 +904,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         val triageAnswersWithTaxYear = sample[CompleteMultipleDisposalsTriageAnswers].copy(taxYear = taxYear)
 
-        def test(draftReturn: MultipleDisposalsDraftReturn, expectedBackLink: Call): Unit = {
+        def test(draftReturn: DraftMultipleDisposalsReturn, expectedBackLink: Call): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -926,7 +926,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user has not started this section before" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               triageAnswers                 = triageAnswersWithTaxYear,
               examplePropertyDetailsAnswers = None
             ),
@@ -936,7 +936,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user has started but not completed this section" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               triageAnswers = triageAnswersWithTaxYear,
               examplePropertyDetailsAnswers = Some(
                 sample[IncompleteExamplePropertyDetailsAnswers].copy(
@@ -950,7 +950,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user has completed this section" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               triageAnswers = triageAnswersWithTaxYear,
               examplePropertyDetailsAnswers = Some(
                 sample[CompleteExamplePropertyDetailsAnswers].copy(
@@ -991,7 +991,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+                    draftReturn = sample[DraftMultipleDisposalsReturn].copy(
                       triageAnswers = sample[IncompleteMultipleDisposalsTriageAnswers].copy(taxYear = None)
                     )
                   )
@@ -1013,7 +1013,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             disposalDate = Some(disposalDate)
           )
 
-          val draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+          val draftReturn = sample[DraftMultipleDisposalsReturn].copy(
             triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(taxYear = taxYear),
             examplePropertyDetailsAnswers = Some(answers)
           )
@@ -1050,7 +1050,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               sessionWithValidJourneyStatus.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+                    draftReturn = sample[DraftMultipleDisposalsReturn].copy(
                       triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(taxYear = taxYear),
                       examplePropertyDetailsAnswers = None
                     )
@@ -1142,7 +1142,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               disposalDate = Some(disposalDate)
             )
 
-            val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
+            val oldDraftReturn = sample[DraftMultipleDisposalsReturn].copy(
               triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(taxYear = taxYear),
               examplePropertyDetailsAnswers = Some(answers)
             )
@@ -1172,7 +1172,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               disposalDate = disposalDate
             )
 
-            val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
+            val oldDraftReturn = sample[DraftMultipleDisposalsReturn].copy(
               triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(taxYear = taxYear),
               examplePropertyDetailsAnswers = Some(answers)
             )
@@ -1210,7 +1210,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               )
             )
 
-            val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
+            val oldDraftReturn = sample[DraftMultipleDisposalsReturn].copy(
               triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(taxYear = taxYear),
               examplePropertyDetailsAnswers = Some(answers)
             )
@@ -1251,7 +1251,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = sample[SingleDisposalDraftReturn]
+                    draftReturn = sample[DraftSingleDisposalReturn]
                   )
                 )
               )
@@ -1265,7 +1265,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       "display the page" when {
 
-        def test(draftReturn: MultipleDisposalsDraftReturn, expectedBackLink: Call): Unit = {
+        def test(draftReturn: DraftMultipleDisposalsReturn, expectedBackLink: Call): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -1294,7 +1294,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user has not started this section before" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               examplePropertyDetailsAnswers = None
             ),
             routes.PropertyDetailsController.disposalDate()
@@ -1303,7 +1303,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user has started but not completed this section" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               examplePropertyDetailsAnswers = Some(
                 sample[IncompleteExamplePropertyDetailsAnswers].copy(
                   disposalPrice = None
@@ -1316,7 +1316,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user has completed this section" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               examplePropertyDetailsAnswers = Some(
                 sample[CompleteExamplePropertyDetailsAnswers].copy(
                   disposalPrice = sample[AmountInPence]
@@ -1352,7 +1352,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+                    draftReturn = sample[DraftMultipleDisposalsReturn].copy(
                       examplePropertyDetailsAnswers = Some(
                         sample[IncompleteExamplePropertyDetailsAnswers].copy(
                           disposalPrice = Some(disposalPrice)
@@ -1382,7 +1382,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+                    draftReturn = sample[DraftMultipleDisposalsReturn].copy(
                       examplePropertyDetailsAnswers = Some(
                         sample[CompleteExamplePropertyDetailsAnswers]
                       )
@@ -1452,7 +1452,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             disposalDate  = disposalDate
           )
 
-          val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
+          val oldDraftReturn = sample[DraftMultipleDisposalsReturn].copy(
             examplePropertyDetailsAnswers = Some(answers)
           )
 
@@ -1480,7 +1480,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             disposalPrice = Some(AmountInPence.fromPounds(1))
           )
 
-          val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
+          val oldDraftReturn = sample[DraftMultipleDisposalsReturn].copy(
             examplePropertyDetailsAnswers = Some(answers)
           )
 
@@ -1519,7 +1519,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = sample[SingleDisposalDraftReturn]
+                    draftReturn = sample[DraftSingleDisposalReturn]
                   )
                 )
               )
@@ -1533,7 +1533,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       "display the page" when {
 
-        def test(draftReturn: MultipleDisposalsDraftReturn, expectedBackLink: Call): Unit = {
+        def test(draftReturn: DraftMultipleDisposalsReturn, expectedBackLink: Call): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -1562,7 +1562,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user has not started this section before" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               examplePropertyDetailsAnswers = None
             ),
             routes.PropertyDetailsController.disposalPrice()
@@ -1571,7 +1571,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user has started but not completed this section" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               examplePropertyDetailsAnswers = Some(
                 sample[IncompleteExamplePropertyDetailsAnswers].copy(
                   acquisitionPrice = None
@@ -1584,7 +1584,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user has completed this section" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               examplePropertyDetailsAnswers = Some(
                 sample[CompleteExamplePropertyDetailsAnswers].copy(
                   acquisitionPrice = sample[AmountInPence]
@@ -1619,7 +1619,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+                    draftReturn = sample[DraftMultipleDisposalsReturn].copy(
                       examplePropertyDetailsAnswers = Some(
                         sample[IncompleteExamplePropertyDetailsAnswers].copy(
                           acquisitionPrice = Some(acquisitionPrice)
@@ -1649,7 +1649,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+                    draftReturn = sample[DraftMultipleDisposalsReturn].copy(
                       examplePropertyDetailsAnswers = Some(
                         sample[CompleteExamplePropertyDetailsAnswers]
                       )
@@ -1718,7 +1718,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             acquisitionPrice = AmountInPence.fromPounds(10)
           )
 
-          val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
+          val oldDraftReturn = sample[DraftMultipleDisposalsReturn].copy(
             examplePropertyDetailsAnswers = Some(answers)
           )
 
@@ -1745,7 +1745,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             acquisitionPrice = Some(AmountInPence.fromPounds(10))
           )
 
-          val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
+          val oldDraftReturn = sample[DraftMultipleDisposalsReturn].copy(
             examplePropertyDetailsAnswers = Some(answers)
           )
 
@@ -1791,7 +1791,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       )
 
       val currentDraftReturn =
-        sample[MultipleDisposalsDraftReturn].copy(
+        sample[DraftMultipleDisposalsReturn].copy(
           triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(AssetType.Residential)),
           examplePropertyDetailsAnswers = Some(allQuestionsAnswered)
         )
@@ -2043,7 +2043,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             SessionData.empty.copy(
               journeyStatus = Some(
                 sample[FillingOutReturn].copy(
-                  draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+                  draftReturn = sample[DraftMultipleDisposalsReturn].copy(
                     triageAnswers = sample[IncompleteMultipleDisposalsTriageAnswers].copy(assetTypes = None)
                   )
                 )
@@ -2066,7 +2066,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             SessionData.empty.copy(
               journeyStatus = Some(
                 sample[FillingOutReturn].copy(
-                  draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+                  draftReturn = sample[DraftMultipleDisposalsReturn].copy(
                     triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
                       assetTypes = List(AssetType.Residential)
                     )

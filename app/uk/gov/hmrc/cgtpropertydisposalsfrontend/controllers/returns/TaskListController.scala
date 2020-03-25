@@ -22,7 +22,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{routes => baseRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{MultipleDisposalsDraftReturn, SingleDisposalDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftSingleDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
@@ -44,10 +44,10 @@ class TaskListController @Inject() (
 
   def taskList(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
     request.sessionData.flatMap(_.journeyStatus) match {
-      case Some(FillingOutReturn(_, _, _, s: SingleDisposalDraftReturn)) =>
+      case Some(FillingOutReturn(_, _, _, s: DraftSingleDisposalReturn)) =>
         Ok(singleDisposalTaskListPage(s))
 
-      case Some(FillingOutReturn(_, _, _, m: MultipleDisposalsDraftReturn)) =>
+      case Some(FillingOutReturn(_, _, _, m: DraftMultipleDisposalsReturn)) =>
         Ok(multipleDisposalsTaskListPage(m))
 
       case _ =>

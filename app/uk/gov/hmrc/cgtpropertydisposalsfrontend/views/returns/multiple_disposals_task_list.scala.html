@@ -17,7 +17,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsDraftReturn
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftMultipleDisposalsReturn
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers._
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus
 
@@ -28,7 +28,7 @@
         warning: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.warning
 )
 
-@(draftReturn: MultipleDisposalsDraftReturn)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+@(draftReturn: DraftMultipleDisposalsReturn)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
 @title = @{
 messages("service.title")

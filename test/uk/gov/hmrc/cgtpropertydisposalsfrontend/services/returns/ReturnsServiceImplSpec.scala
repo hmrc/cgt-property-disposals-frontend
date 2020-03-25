@@ -97,7 +97,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
     "handling requests to store draft returns" must {
 
-      val draftReturn  = sample[SingleDisposalDraftReturn]
+      val draftReturn  = sample[DraftSingleDisposalReturn]
       val cgtReference = sample[CgtReference]
 
       "return an error" when {
@@ -152,7 +152,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
       "return an ok response" when {
 
-        val draftReturnsResponse = GetDraftReturnResponse(List(sample[SingleDisposalDraftReturn]))
+        val draftReturnsResponse = GetDraftReturnResponse(List(sample[DraftSingleDisposalReturn]))
 
         "the http call came back with a 200 and the body can be parsed" in {
           mockGetDraftReturns(cgtReference)(Right(HttpResponse(OK, Some(Json.toJson(draftReturnsResponse)))))
@@ -171,7 +171,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
           "the draft return is a single disposal draft return and" when {
 
-            val draftReturn = sample[SingleDisposalDraftReturn].copy(
+            val draftReturn = sample[DraftSingleDisposalReturn].copy(
               triageAnswers   = triageAnswers,
               propertyAddress = Some(address)
             )

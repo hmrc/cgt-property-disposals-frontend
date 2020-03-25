@@ -74,12 +74,12 @@ class ReliefDetailsController @Inject() (
     f: (
       SessionData,
       FillingOutReturn,
-      SingleDisposalDraftReturn,
+      DraftSingleDisposalReturn,
       ReliefDetailsAnswers
     ) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((s, r @ FillingOutReturn(_, _, _, d: SingleDisposalDraftReturn))) =>
+      case Some((s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn))) =>
         d.reliefDetailsAnswers.fold[Future[Result]](
           f(s, r, d, IncompleteReliefDetailsAnswers.empty)
         )(f(s, r, d, _))
@@ -106,7 +106,7 @@ class ReliefDetailsController @Inject() (
 
   private def commonSubmitBehaviour[A, P: Writeable, R](
     currentFillingOutReturn: FillingOutReturn,
-    currentDraftReturn: SingleDisposalDraftReturn,
+    currentDraftReturn: DraftSingleDisposalReturn,
     currentAnswers: ReliefDetailsAnswers
   )(form: Form[A])(
     page: (Form[A], Call) => P
@@ -114,7 +114,7 @@ class ReliefDetailsController @Inject() (
     requiredPreviousAnswer: ReliefDetailsAnswers => Option[R],
     redirectToIfNoRequiredPreviousAnswer: Call
   )(
-    updateDraftReturn: (A, SingleDisposalDraftReturn) => SingleDisposalDraftReturn
+    updateDraftReturn: (A, DraftSingleDisposalReturn) => DraftSingleDisposalReturn
   )(
     implicit request: RequestWithSessionData[_]
   ): Future[Result] =
@@ -215,7 +215,7 @@ class ReliefDetailsController @Inject() (
   }
 
   private def fromMaybeReliefsToPrivateResidentsReliefAmount(
-    draftReturn: SingleDisposalDraftReturn
+    draftReturn: DraftSingleDisposalReturn
   ): Option[AmountInPence] = {
     val privateResidentsRelief = draftReturn.reliefDetailsAnswers
       .flatMap(answers =>
@@ -245,7 +245,7 @@ class ReliefDetailsController @Inject() (
 
   def lettingsDisplayBehaviour(
     fillingOutReturn: FillingOutReturn,
-    draftReturn: SingleDisposalDraftReturn,
+    draftReturn: DraftSingleDisposalReturn,
     answers: ReliefDetailsAnswers,
     taxYear: TaxYear
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
@@ -268,10 +268,10 @@ class ReliefDetailsController @Inject() (
 
   def withTaxYear(
     fillingOutReturn: FillingOutReturn,
-    draftReturn: SingleDisposalDraftReturn,
+    draftReturn: DraftSingleDisposalReturn,
     reliefDetailsAnswers: ReliefDetailsAnswers
   )(
-    f: (FillingOutReturn, SingleDisposalDraftReturn, ReliefDetailsAnswers, TaxYear) => Future[Result]
+    f: (FillingOutReturn, DraftSingleDisposalReturn, ReliefDetailsAnswers, TaxYear) => Future[Result]
   ): Future[Result] = {
     val fallBackRoute: Future[Result] = Redirect(controllers.returns.routes.TaskListController.taskList())
     draftReturn.triageAnswers.fold[Future[Result]](
@@ -285,7 +285,7 @@ class ReliefDetailsController @Inject() (
 
   private def lettingsSubmitBehaviour(
     fillingOutReturn: FillingOutReturn,
-    draftReturn: SingleDisposalDraftReturn,
+    draftReturn: DraftSingleDisposalReturn,
     answers: ReliefDetailsAnswers,
     taxYear: TaxYear
   )(implicit request: RequestWithSessionData[_]) =

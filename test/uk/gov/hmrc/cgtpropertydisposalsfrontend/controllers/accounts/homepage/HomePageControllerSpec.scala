@@ -211,7 +211,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
       "display draft returns on the home page when there is no property address" in {
         val triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
           .copy(completionDate = CompletionDate(LocalDate.now().minusMonths(1)))
-        val sampleDraftReturn = sample[SingleDisposalDraftReturn]
+        val sampleDraftReturn = sample[DraftSingleDisposalReturn]
           .copy(triageAnswers = triageAnswers, lastUpdatedDate = LocalDate.now(), propertyAddress = None)
         val subscribed = sample[Subscribed].copy(draftReturns = List(sampleDraftReturn))
 
@@ -250,7 +250,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
         val propertyAddress = sample[UkAddress]
         val triageAnswers = sample[CompleteSingleDisposalTriageAnswers]
           .copy(completionDate = CompletionDate(LocalDate.now().minusMonths(1)))
-        val sampleDraftReturn = sample[SingleDisposalDraftReturn].copy(
+        val sampleDraftReturn = sample[DraftSingleDisposalReturn].copy(
           triageAnswers   = triageAnswers,
           lastUpdatedDate = LocalDate.now(),
           propertyAddress = Some(propertyAddress)
@@ -291,7 +291,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
       "display draft returns on the home page when there is no completion date" in {
         val propertyAddress = sample[UkAddress]
         val triageAnswers   = sample[IncompleteSingleDisposalTriageAnswers].copy(completionDate = None)
-        val sampleDraftReturn = sample[SingleDisposalDraftReturn].copy(
+        val sampleDraftReturn = sample[DraftSingleDisposalReturn].copy(
           triageAnswers   = triageAnswers,
           lastUpdatedDate = LocalDate.now(),
           propertyAddress = Some(propertyAddress)
@@ -651,7 +651,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
           subscribed.subscribedDetails,
           subscribed.ggCredId,
           subscribed.agentReferenceNumber,
-          sample[SingleDisposalDraftReturn]
+          sample[DraftSingleDisposalReturn]
         )
         val justSubmittedReturn = JustSubmittedReturn(
           subscribed.subscribedDetails,
@@ -881,7 +881,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
         case _             => false
       })
 
-      val draftReturn = sample[SingleDisposalDraftReturn]
+      val draftReturn = sample[DraftSingleDisposalReturn]
 
       val subscribed = sample[Subscribed].copy(draftReturns = List(draftReturn))
 

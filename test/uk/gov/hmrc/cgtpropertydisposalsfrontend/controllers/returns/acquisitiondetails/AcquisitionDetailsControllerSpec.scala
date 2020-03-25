@@ -84,7 +84,7 @@ class AcquisitionDetailsControllerSpec
     assetType: AssetType,
     wasUkResident: Boolean,
     disposalDate: DisposalDate = sample[DisposalDate]
-  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) =
+  ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) =
     sessionWithState(Some(answers), Some(assetType), Some(wasUkResident), Some(disposalDate))
 
   def sessionWithState(
@@ -92,9 +92,9 @@ class AcquisitionDetailsControllerSpec
     assetType: Option[AssetType],
     wasUkResident: Option[Boolean],
     disposalDate: Option[DisposalDate]
-  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) = {
+  ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
     val draftReturn =
-      sample[SingleDisposalDraftReturn].copy(
+      sample[DraftSingleDisposalReturn].copy(
         triageAnswers = sample[IncompleteSingleDisposalTriageAnswers].copy(
           assetType      = assetType,
           wasAUKResident = wasUkResident,

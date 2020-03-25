@@ -106,7 +106,7 @@ class SingleDisposalsTriageControllerSpec
   }
 
   def sessionDataWithFillingOurReturn(
-    draftReturn: SingleDisposalDraftReturn,
+    draftReturn: DraftSingleDisposalReturn,
     name: Either[TrustName, IndividualName]
   ): (SessionData, FillingOutReturn) = {
     val fillingOutReturn = sample[FillingOutReturn].copy(
@@ -120,9 +120,9 @@ class SingleDisposalsTriageControllerSpec
   def sessionDataWithFillingOutReturn(
     singleDisposalTriageAnswers: SingleDisposalTriageAnswers,
     name: Either[TrustName, IndividualName] = Right(sample[IndividualName])
-  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) = {
+  ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
     val draftReturn =
-      sample[SingleDisposalDraftReturn].copy(triageAnswers = singleDisposalTriageAnswers)
+      sample[DraftSingleDisposalReturn].copy(triageAnswers = singleDisposalTriageAnswers)
 
     val (session, journey) = sessionDataWithFillingOurReturn(
       draftReturn,
@@ -2003,7 +2003,7 @@ class SingleDisposalsTriageControllerSpec
         startingNewDraftReturn.subscribedDetails,
         startingNewDraftReturn.ggCredId,
         startingNewDraftReturn.agentReferenceNumber,
-        SingleDisposalDraftReturn(
+        DraftSingleDisposalReturn(
           uuid,
           completeAnswers,
           None,
@@ -2251,7 +2251,7 @@ class SingleDisposalsTriageControllerSpec
       }
 
       "the user is filling in a draft return and" when {
-        val draftReturn        = sample[SingleDisposalDraftReturn].copy(triageAnswers = currentAnswers)
+        val draftReturn        = sample[DraftSingleDisposalReturn].copy(triageAnswers = currentAnswers)
         val updatedDraftReturn = draftReturn.copy(triageAnswers                       = updatedAnswers)
 
         val fillingOutReturn        = sample[FillingOutReturn].copy(draftReturn = draftReturn)
@@ -2322,7 +2322,7 @@ class SingleDisposalsTriageControllerSpec
     checkNextResult: Future[Result] => Unit,
     extraMockActions: () => Unit = () => ()
   ): Unit = {
-    val draftReturn        = sample[SingleDisposalDraftReturn].copy(triageAnswers = currentAnswers)
+    val draftReturn        = sample[DraftSingleDisposalReturn].copy(triageAnswers = currentAnswers)
     val updatedDraftReturn = draftReturn.copy(triageAnswers                       = updatedAnswers)
 
     val fillingOutReturn        = sample[FillingOutReturn].copy(draftReturn = draftReturn)
