@@ -46,6 +46,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingD
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, MultipleDisposalsDraftReturn, SingleDisposalDraftReturn, UploadSupportingDocuments}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UpscanService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
@@ -61,6 +62,7 @@ class UploadSupportingDocumentsController @Inject() (
   val sessionStore: SessionStore,
   val errorHandler: ErrorHandler,
   returnsService: ReturnsService,
+  upscanService: UpscanService,
   cc: MessagesControllerComponents,
   val config: Configuration,
   hasSupportingDocsToUploadPage: pages.has_supporting_docs_to_upload
@@ -180,9 +182,25 @@ class UploadSupportingDocumentsController @Inject() (
                     ) =>
                   m.copy(uploadSupportingDocuments = Some(CompleteUploadSupportingDocuments(b)))
               }
-
             }
           )
+      }
+  }
+
+  def uploadDocumentWithSupportingEvidence(): Action[AnyContent] = authenticatedActionWithSessionData.async {
+    implicit request =>
+      withSupportingDocumentChoices(request) { (_, _, answers) =>
+        commonDisplayBehaviour(answers)(
+          form = _.fold(
+            _.hasSupportingDocuments.fold(hasSupportingDocsToUploadForm)(hasSupportingDocsToUploadForm.fill),
+            c => hasSupportingDocsToUploadForm.fill(c.hasSupportingDocuments)
+          )
+        )(
+          page = hasSupportingDocsToUploadPage(_, _)
+        )(
+          requiredPreviousAnswer               = _.fold(_.hasSupportingDocuments, c => Some(c.hasSupportingDocuments)),
+          redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList() //TODO: do I really want to go here??
+        )
       }
   }
 
@@ -199,7 +217,6 @@ class UploadSupportingDocumentsController @Inject() (
           case _ =>
             logger.warn("error processing cya") //TODO: fix error message
             errorHandler.errorResult()
-
         }
     }
   }
@@ -224,8 +241,6 @@ class UploadSupportingDocumentsController @Inject() (
         formWithErrors => BadRequest(page(formWithErrors, controllers.returns.routes.TaskListController.taskList())), {
           value =>
             val newDraftReturn = updateAnswers(value, currentDraftReturn)
-            //.fold(_ => CompleteUploadSupportingDocuments(true), _ => CompleteUploadSupportingDocuments(true))
-
             val result = for {
               _ <- if (newDraftReturn === currentDraftReturn) EitherT.pure(())
                   else

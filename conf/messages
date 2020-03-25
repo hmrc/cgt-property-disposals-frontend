@@ -1268,12 +1268,6 @@ multipleDisposals.triage.cyaChange.completionDate=the completion date for all th
 nonCalculatedTaxDue.title=Enter the amount of Capital Gains Tax due for this return
 nonCalculatedTaxDue.helpText=You’ll need to work out and enter the amount.
 
-hasSupportingDocsToUpload.title=Do you want to upload any supporting docs?
-hasSupportingDocsToUpload.error.required=Select yes if you want to upload any supporting documents
-hasSupportingDocsToUpload.error.boolean=Select yes if you want to upload any supporting documents
-hasSupportingDocsToUpload.caption=Supporting evidence
-hasSupportingDocsToUpload.help-text=For example, receipts or invoices or details of how you worked out the Capital Gains Tax due
-
 submitReturnError.title=Sorry, there is a problem with the service
 submitReturnError.p1=Your return might not have been sent to HMRC.
 submitReturnError.p2=You’ll need to:
@@ -1304,3 +1298,14 @@ enterUPRN.postcode.helpText=If the property does not have a postcode enter the p
 enterUPRN-line1.error.required=Enter a UPRN
 enterUPRN-line1.error.tooLong=UPRN must be 12 numbers or less
 enterUPRN-line1.error.invalid=UPRN must only include numbers
+
+hasSupportingDocsToUpload.title=Do you want to upload any supporting docs?
+hasSupportingDocsToUpload.error.required=Select yes if you want to upload any supporting documents
+hasSupportingDocsToUpload.error.boolean=Select yes if you want to upload any supporting documents
+hasSupportingDocsToUpload.caption=Supporting evidence
+hasSupportingDocsToUpload.help-text=Up to 4 documents can be uploaded to support your return. For example, spreadsheets with calculations, invoices, receipts or valuations.
+
+uploadDocumentWithSupportingEvidence.title=Upload a document with your supporting evidence
+uploadDocumentWithSupportingEvidence.error.required=Upload a file to support your return
+uploadDocumentWithSupportingEvidence.caption=Supporting evidence
+uploadDocumentWithSupportingEvidence.help-text=The file can be up to 5MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, PNG, and JPG.
