@@ -21,6 +21,7 @@ import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
+import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -39,7 +40,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{IndirectDisposal, MixedUse, NonResidential, Residential}
@@ -177,6 +178,14 @@ class SingleDisposalsTriageControllerSpec
         "disposalMethod.title", { doc =>
           checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
           doc.select("#disposalMethod-1").attr("checked") shouldBe "checked"
+        }
+      )
+
+      behave like displayCustomContentForAgent(
+        performAction
+      )(requiredPreviousAnswers.copy(disposalMethod = Some(DisposalMethod.Sold)))(
+        "disposalMethod.agent.title", { doc =>
+          checkContent(doc, routes.CommonTriageQuestionsController.howManyProperties())
         }
       )
 
@@ -342,6 +351,14 @@ class SingleDisposalsTriageControllerSpec
         "wereYouAUKResident.title", { doc =>
           checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
           doc.select("#wereYouAUKResident-true").attr("checked") shouldBe "checked"
+        }
+      )
+
+      behave like displayCustomContentForAgent(
+        performAction
+      )(requiredPreviousAnswers.copy(wasAUKResident = Some(true), countryOfResidence = Some(Country.uk)))(
+        "wereYouAUKResident.agent.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty())
         }
       )
 
@@ -572,6 +589,14 @@ class SingleDisposalsTriageControllerSpec
         )
       }
 
+      behave like displayCustomContentForAgent(
+        performAction
+      )(requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential)))(
+        "didYouDisposeOfResidentialProperty.agent.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.wereYouAUKResident())
+        }
+      )
+
       def checkContent(doc: Document, backLink: Call): Unit = {
         doc.select("#back").attr("href") shouldBe backLink.url
         doc
@@ -793,6 +818,14 @@ class SingleDisposalsTriageControllerSpec
         "disposalDate.title", { doc =>
           checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
           checkPrepopulatedContent(doc, disposalDate)
+        }
+      )
+
+      behave like displayCustomContentForAgent(
+        performAction
+      )(requiredPreviousAnswersUkResident.copy(disposalDate = Some(disposalDate)))(
+        "disposalDate.agent.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty())
         }
       )
 
@@ -1067,6 +1100,14 @@ class SingleDisposalsTriageControllerSpec
         }
       )
 
+      behave like displayCustomContentForAgent(
+        performAction
+      )(requiredPreviousAnswers.copy(completionDate = Some(CompletionDate(disposalDate.value))))(
+        "completionDate.agent.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.whenWasDisposalDate())
+        }
+      )
+
       def checkContent(doc: Document, backLink: Call): Unit = {
         doc.select("#back").attr("href") shouldBe backLink.url
         doc
@@ -1315,6 +1356,14 @@ class SingleDisposalsTriageControllerSpec
         }
       )
 
+      behave like displayCustomContentForAgent(
+        performAction
+      )(requiredPreviousAnswers.copy(countryOfResidence = Some(country)))(
+        "triage.enterCountry.agent.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.wereYouAUKResident())
+        }
+      )
+
       def checkContent(doc: Document, backLink: Call): Unit = {
         doc.select("#back").attr("href") shouldBe backLink.url
         doc
@@ -1523,6 +1572,14 @@ class SingleDisposalsTriageControllerSpec
         "assetTypeForNonUkResidents.title", { doc =>
           checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
           doc.select("#assetTypeForNonUkResidents-0").attr("checked") shouldBe "checked"
+        }
+      )
+
+      behave like displayCustomContentForAgent(
+        performAction
+      )(requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential)))(
+        "assetTypeForNonUkResidents.agent.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.countryOfResidence())
         }
       )
 
@@ -2219,6 +2276,41 @@ class SingleDisposalsTriageControllerSpec
             checkContent
           )
         }
+      }
+    }
+
+  def displayCustomContentForAgent(
+    performAction: () => Future[Result]
+  )(answers: IncompleteSingleDisposalTriageAnswers)(
+    pageTitleKey: String,
+    checkContent: Document => Unit
+  ): Unit =
+    "use a different page title" when {
+
+      "an agent requests the page" in {
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              userType = Some(UserType.Agent),
+              journeyStatus = Some(
+                sample[FillingOutReturn].copy(
+                  agentReferenceNumber = Some(sample[AgentReferenceNumber]),
+                  draftReturn = sample[DraftSingleDisposalReturn].copy(
+                    triageAnswers = answers
+                  )
+                )
+              )
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey(pageTitleKey),
+          checkContent
+        )
       }
     }
 

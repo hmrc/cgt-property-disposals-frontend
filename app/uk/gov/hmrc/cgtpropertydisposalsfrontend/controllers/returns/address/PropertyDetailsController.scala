@@ -384,19 +384,21 @@ class PropertyDetailsController @Inject() (
         r.draftReturn match {
           case _: DraftSingleDisposalReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
           case m: DraftMultipleDisposalsReturn =>
-            m.triageAnswers.fold(_.taxYear, c => Some(c.taxYear)) match {
-              case Some(taxYear) =>
+            m.triageAnswers.fold(
+              i => i.taxYear       -> i.completionDate,
+              c => Some(c.taxYear) -> Some(c.completionDate)
+            ) match {
+              case (Some(taxYear), Some(completionDate)) =>
                 val answers = m.examplePropertyDetailsAnswers
                   .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
 
-                val disposalDate = answers
-                  .fold(_.disposalDate, c => Some(c.disposalDate))
+                val disposalDate = answers.fold(_.disposalDate, c => Some(c.disposalDate))
 
-                val form =
-                  disposalDate.fold(getDisposalDateFrom(taxYear))(c => getDisposalDateFrom(taxYear).fill(c.value))
+                val f    = getDisposalDateFrom(taxYear, completionDate)
+                val form = disposalDate.fold(f)(c => f.fill(c.value))
                 Ok(multipleDisposalsDisposalDatePage(form))
 
-              case None => Redirect(controllers.returns.routes.TaskListController.taskList())
+              case _ => Redirect(controllers.returns.routes.TaskListController.taskList())
             }
         }
     }
@@ -408,12 +410,15 @@ class PropertyDetailsController @Inject() (
         r.draftReturn match {
           case _: DraftSingleDisposalReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
           case m: DraftMultipleDisposalsReturn =>
-            m.triageAnswers.fold(_.taxYear, c => Some(c.taxYear)) match {
-              case Some(taxYear) =>
+            m.triageAnswers.fold(
+              i => i.taxYear       -> i.completionDate,
+              c => Some(c.taxYear) -> Some(c.completionDate)
+            ) match {
+              case (Some(taxYear), Some(completionDate)) =>
                 val answers = m.examplePropertyDetailsAnswers
                   .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
 
-                getDisposalDateFrom(taxYear)
+                getDisposalDateFrom(taxYear, completionDate)
                   .bindFromRequest()
                   .fold(
                     formWithErrors => {
@@ -469,7 +474,7 @@ class PropertyDetailsController @Inject() (
                     }
                   )
 
-              case None => Redirect(controllers.returns.routes.TaskListController.taskList())
+              case _ => Redirect(controllers.returns.routes.TaskListController.taskList())
             }
         }
     }
@@ -702,12 +707,13 @@ class PropertyDetailsController @Inject() (
     }
   }
 
-  private def getDisposalDateFrom(taxYear: TaxYear): Form[LocalDate] = {
-    val today              = LocalDateUtils.today()
+  private def getDisposalDateFrom(taxYear: TaxYear, completionDate: CompletionDate): Form[LocalDate] = {
     val startDateOfTaxYear = taxYear.startDateInclusive
     val endDateOfTaxYear   = taxYear.endDateExclusive
 
-    val maximumDateInclusive = if (endDateOfTaxYear.isAfter(today)) endDateOfTaxYear else today
+    val maximumDateInclusive =
+      if (endDateOfTaxYear.isBefore(completionDate.value)) endDateOfTaxYear
+      else completionDate.value
 
     disposalDateForm(maximumDateInclusive, startDateOfTaxYear)
   }

@@ -91,17 +91,17 @@ class ReliefDetailsController @Inject() (
   )(form: ReliefDetailsAnswers => Form[A])(
     page: (Form[A], Call) => P
   )(
-    requiredPreviousAnswer: ReliefDetailsAnswers => Option[R],
-    redirectToIfNoRequiredPreviousAnswer: Call
+    hasRequiredPreviousAnswer: ReliefDetailsAnswers => Boolean,
+    redirectToIfNoRequiredPreviousAnswer: ReliefDetailsAnswers => Call
   ): Future[Result] =
-    if (requiredPreviousAnswer(currentAnswers).isDefined) {
+    if (hasRequiredPreviousAnswer(currentAnswers)) {
       val backLink = currentAnswers.fold(
-        _ => redirectToIfNoRequiredPreviousAnswer,
+        _ => redirectToIfNoRequiredPreviousAnswer(currentAnswers),
         _ => routes.ReliefDetailsController.checkYourAnswers()
       )
       Ok(page(form(currentAnswers), backLink))
     } else {
-      Redirect(redirectToIfNoRequiredPreviousAnswer)
+      Redirect(redirectToIfNoRequiredPreviousAnswer(currentAnswers))
     }
 
   private def commonSubmitBehaviour[A, P: Writeable, R](
@@ -111,16 +111,16 @@ class ReliefDetailsController @Inject() (
   )(form: Form[A])(
     page: (Form[A], Call) => P
   )(
-    requiredPreviousAnswer: ReliefDetailsAnswers => Option[R],
-    redirectToIfNoRequiredPreviousAnswer: Call
+    hasRequiredPreviousAnswer: ReliefDetailsAnswers => Boolean,
+    redirectToIfNoRequiredPreviousAnswer: ReliefDetailsAnswers => Call
   )(
     updateDraftReturn: (A, DraftSingleDisposalReturn) => DraftSingleDisposalReturn
   )(
     implicit request: RequestWithSessionData[_]
   ): Future[Result] =
-    if (requiredPreviousAnswer(currentAnswers).isDefined) {
+    if (hasRequiredPreviousAnswer(currentAnswers)) {
       lazy val backLink = currentAnswers.fold(
-        _ => redirectToIfNoRequiredPreviousAnswer,
+        _ => redirectToIfNoRequiredPreviousAnswer(currentAnswers),
         _ => controllers.returns.reliefdetails.routes.ReliefDetailsController.checkYourAnswers()
       )
       form
@@ -151,7 +151,7 @@ class ReliefDetailsController @Inject() (
           }
         )
     } else {
-      Redirect(redirectToIfNoRequiredPreviousAnswer)
+      Redirect(redirectToIfNoRequiredPreviousAnswer(currentAnswers))
     }
 
   def privateResidentsRelief(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
@@ -166,8 +166,8 @@ class ReliefDetailsController @Inject() (
         )(
           page = privateResidentsReliefPage(_, _)
         )(
-          requiredPreviousAnswer = _ => Some(()),
-          controllers.returns.routes.TaskListController.taskList()
+          hasRequiredPreviousAnswer = _ => true,
+          _ => controllers.returns.routes.TaskListController.taskList()
         )
     }
   }
@@ -184,8 +184,8 @@ class ReliefDetailsController @Inject() (
                 privateResidentsReliefPage(form, backLink)
             }
           )(
-            requiredPreviousAnswer               = _ => Some(()),
-            redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
+            hasRequiredPreviousAnswer            = _ => true,
+            redirectToIfNoRequiredPreviousAnswer = _ => controllers.returns.routes.TaskListController.taskList()
           )(
             updateDraftReturn = {
               case (p, draftReturn) =>
@@ -259,11 +259,8 @@ class ReliefDetailsController @Inject() (
     )(
       page = lettingsReliefPage(_, _)
     )(
-      requiredPreviousAnswer = _.fold(
-        _.privateResidentsRelief,
-        c => Some(c.privateResidentsRelief)
-      ),
-      routes.ReliefDetailsController.privateResidentsRelief()
+      hasRequiredPreviousAnswer            = hasRequiredPreviousAnswerForLettingsReliefs,
+      redirectToIfNoRequiredPreviousAnswer = _ => routes.ReliefDetailsController.privateResidentsRelief()
     )
 
   def withTaxYear(
@@ -292,11 +289,8 @@ class ReliefDetailsController @Inject() (
     commonSubmitBehaviour(fillingOutReturn, draftReturn, answers)(
       form = lettingsReliefForm(answers, taxYear.maxLettingsReliefAmount)
     )(page = lettingsReliefPage(_, _))(
-      requiredPreviousAnswer = _.fold(
-        _.privateResidentsRelief,
-        c => Some(c.privateResidentsRelief)
-      ),
-      redirectToIfNoRequiredPreviousAnswer = routes.ReliefDetailsController.privateResidentsRelief()
+      hasRequiredPreviousAnswer            = hasRequiredPreviousAnswerForLettingsReliefs,
+      redirectToIfNoRequiredPreviousAnswer = _ => routes.ReliefDetailsController.privateResidentsRelief()
     )(
       updateDraftReturn = {
         case (p, draftReturn) =>
@@ -332,11 +326,8 @@ class ReliefDetailsController @Inject() (
         )(
           page = otherReliefsPage(_, _)
         )(
-          requiredPreviousAnswer = _.fold(
-            _.lettingsRelief,
-            c => Some(c.lettingsRelief)
-          ),
-          routes.ReliefDetailsController.lettingsRelief()
+          hasRequiredPreviousAnswer            = hasRequiredPreviousAnswerForOtherReliefs,
+          redirectToIfNoRequiredPreviousAnswer = _ => routes.ReliefDetailsController.lettingsRelief()
         )
     }
   }
@@ -347,11 +338,8 @@ class ReliefDetailsController @Inject() (
         commonSubmitBehaviour(fillingOutReturn, draftReturn, answers)(
           form = otherReliefsForm
         )(page = otherReliefsPage(_, _))(
-          requiredPreviousAnswer = _.fold(
-            _.lettingsRelief,
-            c => Some(c.lettingsRelief)
-          ),
-          redirectToIfNoRequiredPreviousAnswer = routes.ReliefDetailsController.lettingsRelief()
+          hasRequiredPreviousAnswer            = hasRequiredPreviousAnswerForOtherReliefs,
+          redirectToIfNoRequiredPreviousAnswer = _ => routes.ReliefDetailsController.lettingsRelief()
         )(
           updateDraftReturn = {
             case (maybeOtherReliefs, draftReturn) =>
@@ -381,6 +369,18 @@ class ReliefDetailsController @Inject() (
     }
   }
 
+  private def hasRequiredPreviousAnswerForOtherReliefs(answers: ReliefDetailsAnswers): Boolean = {
+    val privateResidentsRelief = answers.fold(_.privateResidentsRelief, c => Some(c.privateResidentsRelief))
+    val lettingRelief          = answers.fold(_.lettingsRelief, c => Some(c.lettingsRelief))
+
+    privateResidentsRelief.exists(_.isZero) || (privateResidentsRelief.exists(_.isPositive) && lettingRelief.isDefined)
+  }
+
+  private def hasRequiredPreviousAnswerForLettingsReliefs(answers: ReliefDetailsAnswers): Boolean = {
+    val privateResidentsRelief = answers.fold(_.privateResidentsRelief, c => Some(c.privateResidentsRelief))
+    privateResidentsRelief.exists(_.isPositive)
+  }
+
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndReliefDetailsAnswers(request) {
       case (_, fillingOutReturn, draftReturn, answers) =>
@@ -391,36 +391,53 @@ class ReliefDetailsController @Inject() (
           case IncompleteReliefDetailsAnswers(None, _, _) =>
             Redirect(routes.ReliefDetailsController.privateResidentsRelief())
 
-          case IncompleteReliefDetailsAnswers(_, None, _) =>
+          case IncompleteReliefDetailsAnswers(Some(AmountInPence(0)), None, None) =>
+            Redirect(routes.ReliefDetailsController.otherReliefs())
+
+          case IncompleteReliefDetailsAnswers(_, None, None) =>
             Redirect(routes.ReliefDetailsController.lettingsRelief())
 
           case IncompleteReliefDetailsAnswers(_, _, None) =>
             Redirect(routes.ReliefDetailsController.otherReliefs())
 
+          case IncompleteReliefDetailsAnswers(Some(prr), None, or) =>
+            completeRelief(fillingOutReturn, draftReturn, prr, AmountInPence(0), or)
+
           case IncompleteReliefDetailsAnswers(Some(prr), Some(lr), or) =>
-            val completeAnswers = CompleteReliefDetailsAnswers(prr, lr, or)
-            val newDraftReturn =
-              draftReturn.copy(reliefDetailsAnswers = Some(completeAnswers))
-
-            val result = for {
-              _ <- returnsService.storeDraftReturn(
-                    newDraftReturn,
-                    fillingOutReturn.subscribedDetails.cgtReference,
-                    fillingOutReturn.agentReferenceNumber
-                  )
-              _ <- EitherT(
-                    updateSession(sessionStore, request)(
-                      _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
-                    )
-                  )
-            } yield ()
-
-            result.fold({ e =>
-              logger.warn("Could not update session", e)
-              errorHandler.errorResult()
-            }, _ => Ok(checkYouAnswersPage(completeAnswers)))
+            completeRelief(fillingOutReturn, draftReturn, prr, lr, or)
         }
     }
+
+  }
+
+  private def completeRelief(
+    fillingOutReturn: FillingOutReturn,
+    draftReturn: DraftSingleDisposalReturn,
+    prr: AmountInPence,
+    lr: AmountInPence,
+    or: Option[OtherReliefsOption]
+  )(implicit request: RequestWithSessionData[_]): Future[Result] = {
+    val completeAnswers = CompleteReliefDetailsAnswers(prr, lr, or)
+    val newDraftReturn =
+      draftReturn.copy(reliefDetailsAnswers = Some(completeAnswers))
+
+    val result = for {
+      _ <- returnsService.storeDraftReturn(
+            newDraftReturn,
+            fillingOutReturn.subscribedDetails.cgtReference,
+            fillingOutReturn.agentReferenceNumber
+          )
+      _ <- EitherT(
+            updateSession(sessionStore, request)(
+              _.copy(journeyStatus = Some(fillingOutReturn.copy(draftReturn = newDraftReturn)))
+            )
+          )
+    } yield ()
+
+    result.fold({ e =>
+      logger.warn("Could not update session", e)
+      errorHandler.errorResult()
+    }, _ => Ok(checkYouAnswersPage(completeAnswers)))
   }
 
   def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
