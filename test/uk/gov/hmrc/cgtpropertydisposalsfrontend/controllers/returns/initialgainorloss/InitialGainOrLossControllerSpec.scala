@@ -33,7 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalDraftReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftSingleDisposalReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -69,8 +69,8 @@ class InitialGainOrLossControllerSpec
 
   def sessionWithState(
     initialGainOrLoss: Option[AmountInPence]
-  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) = {
-    val draftReturn = sample[SingleDisposalDraftReturn].copy(initialGainOrLoss = initialGainOrLoss)
+  ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
+    val draftReturn = sample[DraftSingleDisposalReturn].copy(initialGainOrLoss = initialGainOrLoss)
     val journey     = sample[FillingOutReturn].copy(draftReturn                = draftReturn)
 
     (
@@ -90,7 +90,7 @@ class InitialGainOrLossControllerSpec
       "display the page with backlink to tasklist" when {
 
         "initialGainOrLoss is not present in draftReturn" in {
-          val draftReturn      = sample[SingleDisposalDraftReturn].copy(initialGainOrLoss = None)
+          val draftReturn      = sample[DraftSingleDisposalReturn].copy(initialGainOrLoss = None)
           val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn                = draftReturn)
 
           inSequence {
@@ -121,7 +121,7 @@ class InitialGainOrLossControllerSpec
       "display the page with backlink to check your answers" when {
 
         "initialGainOrLoss is present in returnDraft" in {
-          val draftReturn = sample[SingleDisposalDraftReturn]
+          val draftReturn = sample[DraftSingleDisposalReturn]
             .copy(initialGainOrLoss = Some(AmountInPence(300L)))
           val fillingOutReturn = sample[FillingOutReturn].copy(draftReturn = draftReturn)
 

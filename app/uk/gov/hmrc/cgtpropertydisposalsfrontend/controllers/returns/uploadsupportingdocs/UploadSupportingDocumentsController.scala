@@ -29,7 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController.hasSupportingDocsToUploadForm
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingDocuments.IncompleteUploadSupportingDocuments
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, MultipleDisposalsDraftReturn, SingleDisposalDraftReturn, UploadSupportingDocuments}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftReturn, DraftSingleDisposalReturn, UploadSupportingDocuments}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, _}
@@ -66,11 +66,11 @@ class UploadSupportingDocumentsController @Inject() (
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((s, r @ FillingOutReturn(_, _, _, d: DraftReturn))) =>
         d match {
-          case SingleDisposalDraftReturn(_, _, _, _, _, _, _, _, _, uploadSupportingDocuments, _) =>
+          case DraftSingleDisposalReturn(_, _, _, _, _, _, _, _, _, uploadSupportingDocuments, _) =>
             uploadSupportingDocuments.fold[Future[Result]](
               f(s, r, d, IncompleteUploadSupportingDocuments.empty)
             )(f(s, r, d, _))
-          case MultipleDisposalsDraftReturn(_, _, _, _, _, uploadSupportingDocuments, _) =>
+          case DraftMultipleDisposalsReturn(_, _, _, _, _, uploadSupportingDocuments, _) =>
             uploadSupportingDocuments.fold[Future[Result]](
               f(s, r, d, IncompleteUploadSupportingDocuments.empty)
             )(f(s, r, d, _))

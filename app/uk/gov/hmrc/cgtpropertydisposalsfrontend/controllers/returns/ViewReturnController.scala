@@ -60,9 +60,7 @@ class ViewReturnController @Inject() (
           viewReturnPage(
             sentReturn,
             returnSummary,
-            rebasingEligibilityUtil.getDisplayRebasingCutOffDate(sentReturn),
-            rebasingEligibilityUtil.isUk(sentReturn),
-            rebasingEligibilityUtil.isEligibleForRebase(sentReturn)
+            rebasingEligibilityUtil
           )
         )
     }

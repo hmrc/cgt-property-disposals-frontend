@@ -81,8 +81,8 @@ class CommonTriageQuestionsControllerSpec
   def sessionDataWithFillingOutReturn(
     singleDisposalTriageAnswers: SingleDisposalTriageAnswers,
     name: Either[TrustName, IndividualName] = Right(sample[IndividualName])
-  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) = {
-    val draftReturn = sample[SingleDisposalDraftReturn].copy(
+  ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
+    val draftReturn = sample[DraftSingleDisposalReturn].copy(
       triageAnswers = singleDisposalTriageAnswers
     )
     val fillingOutReturn = sample[FillingOutReturn].copy(

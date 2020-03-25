@@ -37,7 +37,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDetailsAnswers, DisposalMethod, ShareOfProperty, SingleDisposalDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDetailsAnswers, DisposalMethod, DraftSingleDisposalReturn, ShareOfProperty}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, FormUtils, NumberUtils, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -74,19 +74,19 @@ class DisposalDetailsController @Inject() (
     f: (
       SessionData,
       FillingOutReturn,
-      SingleDisposalDraftReturn,
+      DraftSingleDisposalReturn,
       DisposalDetailsAnswers
     ) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((s, r @ FillingOutReturn(_, _, _, d: SingleDisposalDraftReturn))) =>
+      case Some((s, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn))) =>
         d.disposalDetailsAnswers
           .fold[Future[Result]](f(s, r, d, IncompleteDisposalDetailsAnswers.empty))(f(s, r, d, _))
 
       case _ => Redirect(controllers.routes.StartController.start())
     }
 
-  private def withDisposalMethod(draftReturn: SingleDisposalDraftReturn)(
+  private def withDisposalMethod(draftReturn: DraftSingleDisposalReturn)(
     f: DisposalMethod => Future[Result]
   ): Future[Result] =
     draftReturn.triageAnswers.fold(_.disposalMethod, c => Some(c.disposalMethod)) match {
@@ -95,7 +95,7 @@ class DisposalDetailsController @Inject() (
     }
 
   private def withDisposalMethodAndShareOfProperty(
-    draftReturn: SingleDisposalDraftReturn,
+    draftReturn: DraftSingleDisposalReturn,
     answers: DisposalDetailsAnswers
   )(
     f: (DisposalMethod, ShareOfProperty) => Future[Result]
@@ -126,7 +126,7 @@ class DisposalDetailsController @Inject() (
 
   private def submitBehaviour[A, P: Writeable, R](
     fillingOutReturn: FillingOutReturn,
-    draftReturn: SingleDisposalDraftReturn,
+    draftReturn: DraftSingleDisposalReturn,
     answers: DisposalDetailsAnswers
   )(
     form: Form[A]

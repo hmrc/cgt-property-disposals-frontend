@@ -41,7 +41,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifierAttempts
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{ReturnSummary, SingleDisposalDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftSingleDisposalReturn, ReturnSummary}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.agents.AgentVerifierMatchRetryStore
@@ -150,7 +150,7 @@ class AgentAccessControllerSpec
       .returning(Future.successful(result))
 
   def mockGetDraftReturns(cgtReference: CgtReference, sentReturns: List[ReturnSummary])(
-    response: Either[Error, List[SingleDisposalDraftReturn]]
+    response: Either[Error, List[DraftSingleDisposalReturn]]
   ) =
     (mockReturnsService
       .getDraftReturns(_: CgtReference, _: List[ReturnSummary])(_: HeaderCarrier))
@@ -991,7 +991,7 @@ class AgentAccessControllerSpec
 
       def performAction(): Future[Result] = controller.confirmClientSubmit()(FakeRequest())
 
-      val draftReturns = List(sample[SingleDisposalDraftReturn])
+      val draftReturns = List(sample[DraftSingleDisposalReturn])
 
       val returnsList = List(sample[ReturnSummary])
 
