@@ -1146,7 +1146,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             )
 
             val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
-              triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(taxYear = taxYear),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(
+                  completionDate = CompletionDate(taxYear.endDateExclusive),
+                  taxYear        = taxYear
+                ),
               examplePropertyDetailsAnswers = Some(answers)
             )
 
@@ -1176,7 +1180,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             )
 
             val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
-              triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(taxYear = taxYear),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(
+                  completionDate = CompletionDate(taxYear.endDateExclusive),
+                  taxYear        = taxYear
+                ),
               examplePropertyDetailsAnswers = Some(answers)
             )
 
@@ -1214,7 +1222,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             )
 
             val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
-              triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(taxYear = taxYear),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(
+                  completionDate = CompletionDate(taxYear.endDateExclusive),
+                  taxYear        = taxYear
+                ),
               examplePropertyDetailsAnswers = Some(answers)
             )
 
