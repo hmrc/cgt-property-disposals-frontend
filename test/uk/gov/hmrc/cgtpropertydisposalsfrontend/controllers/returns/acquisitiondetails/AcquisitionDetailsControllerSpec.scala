@@ -2788,7 +2788,7 @@ class AcquisitionDetailsControllerSpec
                   checkPageIsDisplayed(
                     performAction(),
                     messageFromMessageKey("acquisitionDetails.cya.title"), { doc =>
-                      doc.select("#acquisitionDate-question").text() shouldBe expectedTitle
+                      doc.select("#acquisitionPrice-question").text() shouldBe expectedTitle
                     }
                   )
                 }
