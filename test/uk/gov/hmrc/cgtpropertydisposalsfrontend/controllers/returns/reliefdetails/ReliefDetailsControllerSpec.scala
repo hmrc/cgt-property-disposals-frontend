@@ -1497,10 +1497,6 @@ class ReliefDetailsControllerSpec
           triageAnswers,
           taxYear
         )._1
-        val data = Seq(
-          "privateResidentsRelief"      -> "0",
-          "privateResidentsReliefValue" -> s"${residentsReliefAmount.inPounds().toString()}"
-        )
 
         inSequence {
           mockAuthWithNoRetrievals()
