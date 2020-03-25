@@ -551,7 +551,7 @@ assetTypeForNonUkResidents.agent.error.required=Select the type of property or a
 assetTypeForNonUkResidents.agent.error.invalid=Select the type of property or asset your client sold or disposed of
 
 didYouDisposeOfResidentialProperty.title=Did you sell or dispose of a UK residential property?
-didYouDisposeOfResidentialProperty.agent.title=Did your client sell or dispose of a UK residential property?
+didYouDisposeOfResidentialProperty.agent.title=Did your client dispose of a UK residential property?
 didYouDisposeOfResidentialProperty.helpText=Residential property includes houses, flats, or other dwellings, including their gardens or grounds.
 didYouDisposeOfResidentialProperty.Residential=Yes
 didYouDisposeOfResidentialProperty.NonResidential=No
@@ -610,11 +610,13 @@ completionDate-day.error.dayAndMonthRequired=Completion date must include a day 
 
 disposalDateTooEarly.non-uk.title=You cannot use this service
 disposalDateTooEarly.non-uk.p1=This is because when you sold or disposed of the property, you exchanged contracts before 6 April 2020.
+disposalDateTooEarly.agent.non-uk.p1=This is because when your client sold or disposed of the property, they exchanged contracts before 6 April 2020.
 disposalDateTooEarly.non-uk.p2=If you made an indirect disposal and sold shares not property it’s because you sold the shares before 6 April 2020.
 disposalDateTooEarly.non-uk.p3=Find out how to report and pay Capital Gains Tax on <a href="{0}">UK property sales or disposals before 6 April 2020</a>.
 
 disposalDateTooEarly.uk.title=You cannot use this service
 disposalDateTooEarly.uk.p1=This is because when you sold or disposed of the property, you exchanged contracts before 6 April 2020.
+disposalDateTooEarly.agent.uk.p1=This is because when your client sold or disposed of the property, they exchanged contracts before 6 April 2020.
 disposalDateTooEarly.uk.p2=Find out how to report and pay Capital Gains Tax on <a href="{0}">UK property sales or disposals before 6 April 2020</a>.
 
 triage.check-your-answers.title=Check your answers
