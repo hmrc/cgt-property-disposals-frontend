@@ -389,11 +389,12 @@ class PropertyDetailsController @Inject() (
                 val answers = m.examplePropertyDetailsAnswers
                   .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
 
-                val disposalDate = answers
-                  .fold(_.disposalDate, c => Some(c.disposalDate))
+                val disposalDate = answers.fold(_.disposalDate, c => Some(c.disposalDate))
 
-                val form =
-                  disposalDate.fold(getDisposalDateFrom(taxYear))(c => getDisposalDateFrom(taxYear).fill(c.value))
+                val completionDate = getCompletionDate(m.triageAnswers)
+
+                val f    = getDisposalDateFrom(taxYear, completionDate)
+                val form = disposalDate.fold(f)(c => f.fill(c.value))
                 Ok(multipleDisposalsDisposalDatePage(form))
 
               case None => Redirect(controllers.returns.routes.TaskListController.taskList())
@@ -413,7 +414,9 @@ class PropertyDetailsController @Inject() (
                 val answers = m.examplePropertyDetailsAnswers
                   .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
 
-                getDisposalDateFrom(taxYear)
+                val completionDate = getCompletionDate(m.triageAnswers)
+
+                getDisposalDateFrom(taxYear, completionDate)
                   .bindFromRequest()
                   .fold(
                     formWithErrors => {
@@ -702,12 +705,13 @@ class PropertyDetailsController @Inject() (
     }
   }
 
-  private def getDisposalDateFrom(taxYear: TaxYear): Form[LocalDate] = {
-    val today              = LocalDateUtils.today()
+  private def getDisposalDateFrom(taxYear: TaxYear, completionDate: CompletionDate): Form[LocalDate] = {
     val startDateOfTaxYear = taxYear.startDateInclusive
     val endDateOfTaxYear   = taxYear.endDateExclusive
 
-    val maximumDateInclusive = if (endDateOfTaxYear.isAfter(today)) endDateOfTaxYear else today
+    val maximumDateInclusive =
+      if (endDateOfTaxYear.isBefore(completionDate.value)) endDateOfTaxYear
+      else completionDate.value
 
     disposalDateForm(maximumDateInclusive, startDateOfTaxYear)
   }
@@ -725,6 +729,11 @@ class PropertyDetailsController @Inject() (
         _ => routes.PropertyDetailsController.disposalPrice(),
         _ => routes.PropertyDetailsController.checkYourAnswers()
       )
+
+  private def getCompletionDate(answers: MultipleDisposalsTriageAnswers): CompletionDate =
+    answers
+      .fold(_.completionDate, c => Some(c.completionDate))
+      .getOrElse(CompletionDate(LocalDateUtils.today()))
 
   // the following aren't used for the returns journey - the returns journey only handles uk addresses
   protected lazy val isUkCall: Call                    = enterPostcodeCall

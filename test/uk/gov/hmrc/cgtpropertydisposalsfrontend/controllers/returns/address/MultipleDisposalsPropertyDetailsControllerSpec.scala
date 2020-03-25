@@ -1089,7 +1089,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         }
 
         "the date entered is too far in future" in {
-          testFormError(formData(LocalDateUtils.today().plusDays(365L)))(
+          testFormError(formData(LocalDateUtils.today().plusYears(1L)))(
             s"$key.error.tooFarInFuture"
           )
         }
