@@ -42,11 +42,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAdd
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, DraftReturn, MultipleDisposalsDraftReturn, SingleDisposalDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, CompletionDate, DisposalDate, DraftReturn, MultipleDisposalsDraftReturn, SingleDisposalDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.{CompleteExamplePropertyDetailsAnswers, IncompleteExamplePropertyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DraftReturn, MultipleDisposalsDraftReturn, SingleDisposalDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 
 import scala.collection.JavaConverters._
@@ -898,6 +897,25 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
         }
 
+        "no completion date can be found" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+                      triageAnswers = sample[IncompleteMultipleDisposalsTriageAnswers].copy(completionDate = None)
+                    )
+                  )
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+        }
+
       }
 
       "display the page" when {
@@ -1003,6 +1021,25 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
         }
 
+        "no completion date can be found" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+                      triageAnswers = sample[IncompleteMultipleDisposalsTriageAnswers].copy(completionDate = None)
+                    )
+                  )
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+        }
+
       }
 
       "not update the session" when {
@@ -1014,7 +1051,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           )
 
           val draftReturn = sample[MultipleDisposalsDraftReturn].copy(
-            triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(taxYear = taxYear),
+            triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+              .copy(
+                taxYear        = taxYear,
+                completionDate = CompletionDate(taxYear.endDateExclusive)
+              ),
             examplePropertyDetailsAnswers = Some(answers)
           )
 
@@ -1089,7 +1130,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         }
 
         "the date entered is too far in future" in {
-          testFormError(formData(LocalDateUtils.today().plusDays(365L)))(
+          testFormError(formData(LocalDateUtils.today().plusYears(2L)))(
             s"$key.error.tooFarInFuture"
           )
         }
@@ -1097,7 +1138,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         "the date entered is too far in past" in {
           val param1 = taxYear.startDateInclusive.getYear.toString
           val param2 = taxYear.endDateExclusive.getYear.toString
-          testFormError(formData(LocalDateUtils.today().minusYears(1L)))(
+          testFormError(formData(LocalDateUtils.today().minusYears(2L)))(
             s"$key.error.tooFarInPast",
             Seq(param1, param2)
           )
@@ -1143,7 +1184,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             )
 
             val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
-              triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(taxYear = taxYear),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(
+                  completionDate = CompletionDate(taxYear.endDateExclusive),
+                  taxYear        = taxYear
+                ),
               examplePropertyDetailsAnswers = Some(answers)
             )
 
@@ -1173,7 +1218,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             )
 
             val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
-              triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(taxYear = taxYear),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(
+                  completionDate = CompletionDate(taxYear.endDateExclusive),
+                  taxYear        = taxYear
+                ),
               examplePropertyDetailsAnswers = Some(answers)
             )
 
@@ -1211,7 +1260,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             )
 
             val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
-              triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(taxYear = taxYear),
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(
+                  completionDate = CompletionDate(taxYear.endDateExclusive),
+                  taxYear        = taxYear
+                ),
               examplePropertyDetailsAnswers = Some(answers)
             )
 

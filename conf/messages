@@ -1304,7 +1304,7 @@ multipleDisposalsDisposalDate.link=<a href="{0}" target="_blank">Find out what h
 
 multipleDisposalsDisposalDate.error.required=Enter a contract exchange date
 multipleDisposalsDisposalDate.error.invalid=Enter a real contract exchange date
-multipleDisposalsDisposalDate.error.tooFarInFuture=The contract exchange date must be today or in the past
+multipleDisposalsDisposalDate.error.tooFarInFuture=Contract exchange date must be the same or before the completion date
 multipleDisposalsDisposalDate.error.tooFarInPast=The date must be in the tax year {0} to {1}
 multipleDisposalsDisposalDate-day.error.required=Contract exchange date must include a day
 multipleDisposalsDisposalDate-month.error.required=Contract exchange date must include a month
