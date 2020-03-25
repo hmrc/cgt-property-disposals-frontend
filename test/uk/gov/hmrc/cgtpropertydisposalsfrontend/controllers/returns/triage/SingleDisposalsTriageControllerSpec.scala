@@ -183,7 +183,7 @@ class SingleDisposalsTriageControllerSpec
 
       behave like displayCustomContentForAgent(
         performAction
-      )(requiredPreviousAnswers.copy(disposalMethod = Some(DisposalMethod.Gifted)))(
+      )(requiredPreviousAnswers.copy(disposalMethod = Some(DisposalMethod.Sold)))(
         "disposalMethod.agent.title", { doc =>
           checkContent(doc, routes.CommonTriageQuestionsController.howManyProperties())
         }
@@ -358,7 +358,7 @@ class SingleDisposalsTriageControllerSpec
         performAction
       )(requiredPreviousAnswers.copy(wasAUKResident = Some(true), countryOfResidence = Some(Country.uk)))(
         "wereYouAUKResident.agent.title", { doc =>
-          checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
+          checkContent(doc, routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty())
         }
       )
 
