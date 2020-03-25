@@ -18,7 +18,7 @@
 
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteReturn, ReturnSummary}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{CompleteSingleDisposalReturn, ReturnSummary}
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -31,14 +31,15 @@
         returnCharges: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_charges,
         triageSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.singledisposals.summary,
         addressSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_disposal_summary,
-        yearToDateLiabilitySummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.calculated_summary,
+        calculatedYearToDateLiabilitySummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.calculated_summary,
+        nonCalculatedYearToDateLiabilitySummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability.non_calculated_summary,
         acquisitionDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.acquisitiondetails.summary,
         disposalDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.disposaldetails.summary,
         reliefDetailsSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.reliefdetails.summary,
         lossesSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.exemptionandlosses.summary
 )
 
-@(completeReturn: CompleteReturn, returnSummary: ReturnSummary, rebasingCutOff: LocalDate, isUk: Boolean, isRebasing: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(completeReturn: CompleteSingleDisposalReturn, returnSummary: ReturnSummary, rebasingCutOff: LocalDate, isUk: Boolean, isRebasing: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @title = @{messages("viewReturn.title")}
 @disposalMethod= @{completeReturn.triageAnswers.disposalMethod}
@@ -83,7 +84,10 @@
     @lossesSummary(completeReturn.exemptionsAndLossesDetails, disposalDate)
 
     <h2 class="heading-medium">@messages("task-list.enter-cgt-liability.link")</h2>
-    @yearToDateLiabilitySummary(completeReturn.yearToDateLiabilityAnswers)
+      @completeReturn.yearToDateLiabilityAnswers.fold(
+          nonCalculatedYearToDateLiabilitySummary(_),
+          calculatedYearToDateLiabilitySummary(_)
+      )
   </div>
 
 }

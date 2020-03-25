@@ -110,7 +110,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 
   "CheckAllAnswersAndSubmitController" when {
 
-    val completeReturn = sample[CompleteReturn]
+    val completeReturn = sample[CompleteSingleDisposalReturn]
 
     val completeDraftReturn = SingleDisposalDraftReturn(
       UUID.randomUUID(),
@@ -120,7 +120,7 @@ class CheckAllAnswersAndSubmitControllerSpec
       Some(completeReturn.acquisitionDetails),
       Some(completeReturn.reliefDetails),
       Some(completeReturn.exemptionsAndLossesDetails),
-      Some(completeReturn.yearToDateLiabilityAnswers),
+      Some(completeReturn.yearToDateLiabilityAnswers.merge),
       completeReturn.initialGainOrLoss,
       None,
       LocalDateUtils.today()
@@ -541,7 +541,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 object CheckAllAnswersAndSubmitControllerSpec {
   def validateAllCheckYourAnswersSections(
     doc: Document,
-    completeReturn: CompleteReturn,
+    completeReturn: CompleteSingleDisposalReturn,
     userType: Option[UserType],
     isUk: Boolean,
     isRebasing: Boolean
@@ -571,9 +571,10 @@ object CheckAllAnswersAndSubmitControllerSpec {
       completeReturn.exemptionsAndLossesDetails,
       doc
     )
-    validateCalculatedYearToDateLiabilityPage(
-      completeReturn.yearToDateLiabilityAnswers,
-      doc
+
+    completeReturn.yearToDateLiabilityAnswers.fold(
+      validateNonCalculatedYearToDateLiabilityPage(_, doc),
+      validateCalculatedYearToDateLiabilityPage(_, doc)
     )
   }
 }
