@@ -260,7 +260,7 @@ class ReliefDetailsController @Inject() (
       page = lettingsReliefPage(_, _)
     )(
       hasRequiredPreviousAnswer            = hasRequiredPreviousAnswerForLettingsReliefs,
-      redirectToIfNoRequiredPreviousAnswer = getRedirectForLettingsReliefs
+      redirectToIfNoRequiredPreviousAnswer = _ => routes.ReliefDetailsController.privateResidentsRelief()
     )
 
   def withTaxYear(
@@ -290,7 +290,7 @@ class ReliefDetailsController @Inject() (
       form = lettingsReliefForm(answers, taxYear.maxLettingsReliefAmount)
     )(page = lettingsReliefPage(_, _))(
       hasRequiredPreviousAnswer            = hasRequiredPreviousAnswerForLettingsReliefs,
-      redirectToIfNoRequiredPreviousAnswer = getRedirectForLettingsReliefs
+      redirectToIfNoRequiredPreviousAnswer = _ => routes.ReliefDetailsController.privateResidentsRelief()
     )(
       updateDraftReturn = {
         case (p, draftReturn) =>
@@ -327,7 +327,7 @@ class ReliefDetailsController @Inject() (
           page = otherReliefsPage(_, _)
         )(
           hasRequiredPreviousAnswer            = hasRequiredPreviousAnswerForOtherReliefs,
-          redirectToIfNoRequiredPreviousAnswer = getRedirectForOtherReliefs
+          redirectToIfNoRequiredPreviousAnswer = _ => routes.ReliefDetailsController.lettingsRelief()
         )
     }
   }
@@ -339,7 +339,7 @@ class ReliefDetailsController @Inject() (
           form = otherReliefsForm
         )(page = otherReliefsPage(_, _))(
           hasRequiredPreviousAnswer            = hasRequiredPreviousAnswerForOtherReliefs,
-          redirectToIfNoRequiredPreviousAnswer = getRedirectForOtherReliefs
+          redirectToIfNoRequiredPreviousAnswer = _ => routes.ReliefDetailsController.lettingsRelief()
         )(
           updateDraftReturn = {
             case (maybeOtherReliefs, draftReturn) =>
@@ -369,53 +369,17 @@ class ReliefDetailsController @Inject() (
     }
   }
 
-  private def hasRequiredPreviousAnswerForOtherReliefs(answers: ReliefDetailsAnswers): Boolean =
-    answers match {
-      case IncompleteReliefDetailsAnswers(None, _, _)                                                  => false
-      case IncompleteReliefDetailsAnswers(Some(AmountInPence(0)), _, _)                                => true
-      case IncompleteReliefDetailsAnswers(Some(AmountInPence(_)), lettingsRelief, _)                   => lettingsRelief.isDefined
-      case CompleteReliefDetailsAnswers(AmountInPence(0), lettingsRelief, _) if !lettingsRelief.isZero => false
-      case CompleteReliefDetailsAnswers(AmountInPence(_), _, _)                                        => true
-    }
+  private def hasRequiredPreviousAnswerForOtherReliefs(answers: ReliefDetailsAnswers): Boolean = {
+    val privateResidentsRelief = answers.fold(_.privateResidentsRelief, c => Some(c.privateResidentsRelief))
+    val lettingRelief          = answers.fold(_.lettingsRelief, c => Some(c.lettingsRelief))
 
-  private def getRedirectForOtherReliefs(answers: ReliefDetailsAnswers): Call =
-    answers match {
-      case IncompleteReliefDetailsAnswers(None, _, _) => routes.ReliefDetailsController.privateResidentsRelief()
-      case IncompleteReliefDetailsAnswers(Some(AmountInPence(0)), _, _) =>
-        routes.ReliefDetailsController.privateResidentsRelief()
-      case IncompleteReliefDetailsAnswers(Some(AmountInPence(_)), lettingsRelief, _) =>
-        routes.ReliefDetailsController.lettingsRelief()
-      case CompleteReliefDetailsAnswers(AmountInPence(0), lettingsRelief, _) if !lettingsRelief.isZero =>
-        routes.ReliefDetailsController.privateResidentsRelief()
-      case CompleteReliefDetailsAnswers(AmountInPence(_), _, _) => routes.ReliefDetailsController.lettingsRelief()
-    }
+    privateResidentsRelief.exists(_.isZero) || (privateResidentsRelief.exists(_.isPositive) && lettingRelief.isDefined)
+  }
 
-  private def hasRequiredPreviousAnswerForLettingsReliefs(answers: ReliefDetailsAnswers): Boolean =
-    answers match {
-      case IncompleteReliefDetailsAnswers(None, _, _)                                        => false
-      case IncompleteReliefDetailsAnswers(Some(AmountInPence(0)), None, _)                   => false
-      case IncompleteReliefDetailsAnswers(Some(AmountInPence(0)), Some(AmountInPence(0)), _) => false
-      case IncompleteReliefDetailsAnswers(Some(AmountInPence(0)), Some(_), _)                => false
-      case IncompleteReliefDetailsAnswers(Some(AmountInPence(_)), _, _)                      => true
-      case CompleteReliefDetailsAnswers(AmountInPence(0), AmountInPence(0), _)               => false
-      case CompleteReliefDetailsAnswers(_, _, _)                                             => true
-    }
-
-  private def getRedirectForLettingsReliefs(answers: ReliefDetailsAnswers): Call =
-    answers match {
-      case IncompleteReliefDetailsAnswers(None, _, _) => routes.ReliefDetailsController.privateResidentsRelief()
-      case IncompleteReliefDetailsAnswers(Some(AmountInPence(0)), None, _) =>
-        routes.ReliefDetailsController.otherReliefs()
-      case IncompleteReliefDetailsAnswers(Some(AmountInPence(0)), Some(AmountInPence(0)), _) =>
-        routes.ReliefDetailsController.otherReliefs()
-      case IncompleteReliefDetailsAnswers(Some(AmountInPence(0)), Some(_), _) =>
-        routes.ReliefDetailsController.privateResidentsRelief()
-      case IncompleteReliefDetailsAnswers(Some(AmountInPence(value)), _, _) =>
-        routes.ReliefDetailsController.privateResidentsRelief()
-      case CompleteReliefDetailsAnswers(AmountInPence(0), AmountInPence(0), _) =>
-        routes.ReliefDetailsController.otherReliefs()
-      case CompleteReliefDetailsAnswers(_, _, _) => routes.ReliefDetailsController.privateResidentsRelief()
-    }
+  private def hasRequiredPreviousAnswerForLettingsReliefs(answers: ReliefDetailsAnswers): Boolean = {
+    val privateResidentsRelief = answers.fold(_.privateResidentsRelief, c => Some(c.privateResidentsRelief))
+    privateResidentsRelief.exists(_.isPositive)
+  }
 
   def checkYourAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withFillingOutReturnAndReliefDetailsAnswers(request) {

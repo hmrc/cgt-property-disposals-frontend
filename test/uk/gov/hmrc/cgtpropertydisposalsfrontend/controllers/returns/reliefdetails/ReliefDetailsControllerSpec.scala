@@ -501,28 +501,6 @@ class ReliefDetailsControllerSpec
 
         }
       }
-      "redirect to the other reliefs page" when {
-        "the user has no residents relief (amount zero) and no lettings relief" in {
-
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(
-              sessionWithReliefDetailsAnswers(
-                IncompleteReliefDetailsAnswers.empty.copy(
-                  privateResidentsRelief = Some(AmountInPence(0)),
-                  lettingsRelief         = None,
-                  otherReliefs           = None
-                )
-              )._1
-            )
-          }
-          checkIsRedirect(
-            performAction(),
-            controllers.returns.reliefdetails.routes.ReliefDetailsController.otherReliefs()
-          )
-
-        }
-      }
     }
 
     "handling submitted answers to the lettings relief page" must {
@@ -775,7 +753,7 @@ class ReliefDetailsControllerSpec
 
       behave like redirectToStartBehaviour(performAction)
 
-      behave like noPrivateResidentsReliefBehaviour(performAction)
+      behave like noLettingsReliefBehaviour(performAction)
 
       val otherReliefs = OtherReliefs("ReliefName", AmountInPence.fromPounds(13.34))
       "redirect to lettings relief page" when {
@@ -873,7 +851,7 @@ class ReliefDetailsControllerSpec
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
 
-      behave like noPrivateResidentsReliefBehaviour(() => performAction(Seq.empty))
+      behave like noLettingsReliefBehaviour(() => performAction(Seq.empty))
 
       val otherReliefs = OtherReliefs("ReliefName", AmountInPence.fromPounds(13.34))
 
@@ -1449,60 +1427,21 @@ class ReliefDetailsControllerSpec
       }
     }
 
-  def residentsReliefSubmittedNoBehaviour(performAction: () => Future[Result]): Unit =
-    "redirect to the other reliefs page" when {
+  def noLettingsReliefBehaviour(performAction: () => Future[Result]): Unit =
+    "redirect to the what was your lettings relief page" when {
 
-      "residents relief is selected as No" in {
+      "there is no lettings relief " in {
         val sessionData = sessionWithReliefDetailsAnswers(
           IncompleteReliefDetailsAnswers(
-            Some(AmountInPence(0)),
+            Some(sample[AmountInPence]),
             None,
-            None
+            Some(sample[OtherReliefsOption])
           )
         )._1
 
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(sessionData)
-        }
-
-        checkIsRedirect(
-          performAction(),
-          routes.ReliefDetailsController.otherReliefs()
-        )
-      }
-    }
-
-  def residentsReliefSubmittedYesBehaviour(
-    performAction: () => Future[Result],
-    residentsReliefAmount: AmountInPence
-  ): Unit =
-    "redirect to the other reliefs page" when {
-
-      "residents relief is selected as Yes" in {
-        val incompleteAnswers =
-          sample[IncompleteReliefDetailsAnswers].copy(privateResidentsRelief = Some(residentsReliefAmount), None, None)
-        val fillingOutReturn          = sample[FillingOutReturn]
-        val singleDisposalDraftReturn = sample[SingleDisposalDraftReturn]
-        val disposalDate              = sample[DisposalDate]
-        val triageAnswers             = sample[CompleteSingleDisposalTriageAnswers]
-        val taxYear                   = sample[TaxYear]
-
-        val session = sessionWithReliefDetailsAnswers(
-          fillingOutReturn,
-          singleDisposalDraftReturn,
-          Some(incompleteAnswers),
-          None,
-          disposalDate,
-          triageAnswers,
-          taxYear
-        )._1
-
-        inSequence {
-          mockAuthWithNoRetrievals()
-          mockGetSession(
-            session
-          )
         }
 
         checkIsRedirect(
