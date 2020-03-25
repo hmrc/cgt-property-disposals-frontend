@@ -356,7 +356,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
       "return a list of returns" when {
 
         "the response body can be parsed and converted" in {
-          val completeReturn = sample[CompleteReturn]
+          val completeReturn = sample[CompleteSingleDisposalReturn]
           mockDisplayReturn(cgtReference, submissionId)(Right(HttpResponse(200, Some(Json.toJson(completeReturn)))))
 
           await(service.displayReturn(cgtReference, submissionId).value) shouldBe Right(completeReturn)

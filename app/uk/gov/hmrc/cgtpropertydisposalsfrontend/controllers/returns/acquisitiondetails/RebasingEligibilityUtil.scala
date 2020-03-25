@@ -21,21 +21,21 @@ import java.time.LocalDate
 import cats.syntax.eq._
 import com.google.inject.Singleton
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AssetType, CompleteReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AssetType, CompleteSingleDisposalReturn}
 
 @Singleton
 class RebasingEligibilityUtil {
 
-  def isUk(completeReturn: CompleteReturn): Boolean = extractIsUk(completeReturn)
+  def isUk(completeReturn: CompleteSingleDisposalReturn): Boolean = extractIsUk(completeReturn)
 
-  def isEligibleForRebase(completeReturn: CompleteReturn): Boolean =
+  def isEligibleForRebase(completeReturn: CompleteSingleDisposalReturn): Boolean =
     isEligibleForRebase(
       isUk(completeReturn),
       extractAssetType(completeReturn),
       completeReturn.acquisitionDetails.acquisitionDate.value
     )
 
-  def isEligibleForAcquisitionPrice(completeReturn: CompleteReturn): Boolean =
+  def isEligibleForAcquisitionPrice(completeReturn: CompleteSingleDisposalReturn): Boolean =
     isEligibleForAcquisitionPrice(isUk(completeReturn), completeReturn.acquisitionDetails.acquisitionDate.value)
 
   def isEligibleForAcquisitionPrice(wasAUkResident: Boolean, purchaseDate: LocalDate): Boolean =
@@ -81,7 +81,7 @@ class RebasingEligibilityUtil {
     Some(cutoffDate).filter(acquisitionDate.value.isBefore)
   }
 
-  def getRebasingCutOffDate(completeReturn: CompleteReturn): LocalDate =
+  def getRebasingCutOffDate(completeReturn: CompleteSingleDisposalReturn): LocalDate =
     getRebasingCutOffDate(extractAssetType(completeReturn), isUk(completeReturn))
 
   def getRebasingCutOffDate(
@@ -94,7 +94,7 @@ class RebasingEligibilityUtil {
       RebasingCutoffDates.nonUkResidentsResidentialProperty
     else RebasingCutoffDates.nonUkResidentsNonResidentialProperty
 
-  def getDisplayRebasingCutOffDate(completeReturn: CompleteReturn): LocalDate =
+  def getDisplayRebasingCutOffDate(completeReturn: CompleteSingleDisposalReturn): LocalDate =
     getDisplayRebasingCutOffDate(extractAssetType(completeReturn), isUk(completeReturn))
 
   def getDisplayRebasingCutOffDate(
@@ -107,9 +107,10 @@ class RebasingEligibilityUtil {
       RebasingCutoffDates.nonUkResidentsResidentialProperty.minusDays(1)
     else RebasingCutoffDates.nonUkResidentsNonResidentialProperty.minusDays(1)
 
-  private def extractIsUk(completeReturn: CompleteReturn): Boolean =
+  private def extractIsUk(completeReturn: CompleteSingleDisposalReturn): Boolean =
     completeReturn.triageAnswers.countryOfResidence.isUk()
 
-  private def extractAssetType(completeReturn: CompleteReturn): AssetType = completeReturn.triageAnswers.assetType
+  private def extractAssetType(completeReturn: CompleteSingleDisposalReturn): AssetType =
+    completeReturn.triageAnswers.assetType
 
 }
