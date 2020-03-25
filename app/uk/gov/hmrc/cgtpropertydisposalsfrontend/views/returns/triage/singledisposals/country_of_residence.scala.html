@@ -35,7 +35,6 @@
 @(form: Form[Country], backLink: Call, displayReturnToSummaryLink: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
-@customErrorKey = @{if (isAgent) "agent" else ""}
 @key = @{"countryCode"}
 @title = @{messages(if (isAgent) "triage.enterCountry.agent.title" else "triage.enterCountry.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
