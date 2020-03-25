@@ -51,7 +51,7 @@
     "acquisitionMethod"
   )
   @cyaRow(
-    messages("acquisitionDate.title"),
+    acquisitionMethodAndPriceTitle._2,
     Html(LocalDateUtils.govDisplayFormat(answers.acquisitionDate.value)),
     Some(cyaChange(messages("acquisitionDetails.cyaChange.acquisitionDate"), routes.AcquisitionDetailsController.acquisitionDate().url)),
     "acquisitionDate"
