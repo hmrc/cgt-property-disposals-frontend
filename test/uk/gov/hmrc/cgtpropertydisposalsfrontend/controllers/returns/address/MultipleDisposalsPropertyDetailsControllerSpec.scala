@@ -897,6 +897,25 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
         }
 
+        "no completion date can be found" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+                      triageAnswers = sample[IncompleteMultipleDisposalsTriageAnswers].copy(completionDate = None)
+                    )
+                  )
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+        }
+
       }
 
       "display the page" when {
@@ -992,6 +1011,25 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                   sample[FillingOutReturn].copy(
                     draftReturn = sample[MultipleDisposalsDraftReturn].copy(
                       triageAnswers = sample[IncompleteMultipleDisposalsTriageAnswers].copy(taxYear = None)
+                    )
+                  )
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+        }
+
+        "no completion date can be found" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+                      triageAnswers = sample[IncompleteMultipleDisposalsTriageAnswers].copy(completionDate = None)
                     )
                   )
                 )
