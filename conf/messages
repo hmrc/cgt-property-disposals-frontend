@@ -510,34 +510,48 @@ numberOfProperties.error.invalid=Select how many UK properties you are including
 numberOfProperties.error.required=Select how many UK properties you are including in this return
 
 disposalMethod.title=How did you sell or dispose of the UK property?
+disposalMethod.agent.title=How did your client sell or dispose of the UK property?
 disposalMethod.Sold=Sold it
 disposalMethod.Gifted=Gave it away
 disposalMethod.Other=Other
-disposalMethod.error.required=Select if you sold it, gave it away or other
-disposalMethod.error.invalid=Select if you sold it, gave it away or other
+disposalMethod.error.required=Select sold it, gave it away or other
+disposalMethod.error.invalid=Select sold it, gave it away or other
 
 wereYouAUKResident.title=Were you a UK resident when you exchanged contracts when disposing of the property?
-wereYouAUKResident.helpText=Contract exchange usually happens when you and the buyer or new owner swap contracts and the buyer pays a deposit.
-wereYouAUKResident.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>.
+wereYouAUKResident.agent.title=Was your client a UK resident on the day contracts were exchanged?
+wereYouAUKResident.helpText=Contract exchange usually happens when a buyer and seller swap contracts and the buyer pays a deposit.
+wereYouAUKResident.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>
+wereYouAUKResident.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status for a tax year (opens in a new window)</a>
 wereYouAUKResident.error.required=Select yes if you were a UK resident when you exchanged contracts
 wereYouAUKResident.error.boolean=Select yes if you were a UK resident when you exchanged contracts
+wereYouAUKResident.agent.error.required=Select yes if your client was a UK resident when they exchanged contracts
+wereYouAUKResident.agent.error.boolean=Select yes if your client was a UK resident when they exchanged contracts
 
 triage.enterCountry.title=What was your country of residence on the day you ‘exchanged’ contracts?
+triage.enterCountry.agent.title=What country was your client a resident of when they exchanged contracts?
 triage.enterCountry.helpText=It’s usually the day you and the new owner swapped contracts and they paid a deposit. If you made an indirect disposal, it’s the day you sold the shares.
+triage.enterCountry.agent.helpText=It’s usually the day your client and the new owner swapped contracts and they paid a deposit.
 triage.enterCountry.link=<a href="{0}" target="_blank">Work out your residence status for a tax year (opens in a new window)</a>.
+triage.enterCountry.agent.link=<a href="{0}" target="_blank">Work out your client’s residence status for a tax year (opens in a new window)</a>.
 
 assetTypeForNonUkResidents.title=What type of property or asset did you sell?
+assetTypeForNonUkResidents.agent.title=What type of property, land or asset did your client sell or dispose of?
 assetTypeForNonUkResidents.Residential=Residential
 assetTypeForNonUkResidents.Residential.helpText=Residential property includes houses, flats, or other dwellings, including their gardens or grounds.
 assetTypeForNonUkResidents.NonResidential=Non-residential
 assetTypeForNonUkResidents.MixedUse=Mixed use
 assetTypeForNonUkResidents.MixedUse.helpText=Part of the property was residential while you owned it.
+assetTypeForNonUkResidents.agent.MixedUse.helpText=Part of the property was residential while your client owned it.
 assetTypeForNonUkResidents.IndirectDisposal=Company shares - you made an indirect disposal
+assetTypeForNonUkResidents.agent.IndirectDisposal=Company shares in UK land - your client made an indirect disposal
 assetTypeForNonUkResidents.IndirectDisposal.helpText=An indirect disposal is where the disposal involves rights to assets that derive at least 75% of their value from UK land.
 assetTypeForNonUkResidents.error.required=Select the type of property or asset you sold or disposed of
 assetTypeForNonUkResidents.error.invalid=Select the type of property or asset you sold or disposed of
+assetTypeForNonUkResidents.agent.error.required=Select the type of property or asset your client sold or disposed of
+assetTypeForNonUkResidents.agent.error.invalid=Select the type of property or asset your client sold or disposed of
 
 didYouDisposeOfResidentialProperty.title=Did you sell or dispose of a UK residential property?
+didYouDisposeOfResidentialProperty.agent.title=Did your client sell or dispose of a UK residential property?
 didYouDisposeOfResidentialProperty.helpText=Residential property includes houses, flats, or other dwellings, including their gardens or grounds.
 didYouDisposeOfResidentialProperty.Residential=Yes
 didYouDisposeOfResidentialProperty.NonResidential=No
@@ -547,16 +561,20 @@ didYouDisposeOfResidentialProperty.details.l1=a building where someone lives or 
 didYouDisposeOfResidentialProperty.details.l2=a building that is being built or changed so it can be used as a place where someone could live
 didYouDisposeOfResidentialProperty.details.l3=land that’s part of a garden or grounds of a building that’s used as a place where someone lives, or could live
 didYouDisposeOfResidentialProperty.details.link=<a href="{0}" tabindex="-1" target="_blank">Read a definition of residential property (opens in a new window)</a>.
-didYouDisposeOfResidentialProperty.error.required=Select yes if you sold or disposed of a residential property
-didYouDisposeOfResidentialProperty.error.boolean=Select yes if you sold or disposed of a residential property
+didYouDisposeOfResidentialProperty.error.required=Select yes if you sold or disposed of a UK residential property
+didYouDisposeOfResidentialProperty.agent.error.required=Select yes if your client sold or disposed of a UK residential property
+didYouDisposeOfResidentialProperty.error.boolean=Select yes if you sold or disposed of a UK residential property
+didYouDisposeOfResidentialProperty.agent.error.boolean=Select yes if your client sold or disposed of a UK residential property
 
 ukResidentCanOnlyReportResidential.title=You cannot use this service
 ukResidentCanOnlyReportResidential.p1=You told us you were a UK resident on the day you sold or disposed of the UK property. You can only use this service to report UK residential property.
 ukResidentCanOnlyReportResidential.p2=Find out how to report and pay Capital Gains Tax on <a href="{0}">non-residential UK property sales or disposals</a>.
 
 disposalDate.title=What date did you exchange contracts when disposing of the property?
+disposalDate.agent.title=When the property was disposed of what date were contracts exchanged?
 disposalDate.indirectDisposal.title=What date did you sell the shares?
 disposalDate.helpText=It’s usually when you and the buyer or new owner swapped contracts and the buyer paid a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020
+disposalDate.agent.helpText=It’s usually when a buyer and seller swap contracts and the buyer pays a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020.
 disposalDate.link=<a href="{0}" target="_blank">Find out what happens on the exchange date (opens in a new window)</a>.
 disposalDate.error.required=Enter a contract exchange date
 disposalDate.error.invalid=Enter a real contract exchange date
@@ -572,7 +590,9 @@ disposalDate-day.error.dayAndYearRequired=Contract exchange date must include a 
 disposalDate-day.error.dayAndMonthRequired=Contract exchange date must include a day and a month
 
 completionDate.title=What was the completion date when you sold or disposed of the property?
+completionDate.agent.title=When the property was disposed of what was the completion date?
 completionDate.helpText=It’s usually when you got the money from the sale or property transfer and the new owner got the keys. For example, 25 4 2020.
+completionDate.agent.helpText=It’s usually when the money from the sale or property was transferred and the new owner got the keys. For example, 25 4 2020.
 completionDate.link=<a href="{0}" target="_blank">Find out what happens on the completion date (opens in a new window)</a>.
 completionDate.error.required=Enter a completion date
 completionDate.error.invalid=Enter a real completion date
@@ -686,6 +706,9 @@ address.uk.returns.multipleDisposals.title=Enter the address of one of the UK pr
 returns.property-address.cya.title=Check your answers
 returns.property-details.multiple-disposals.cya.guidanceLink=Help completing this section
 returns.property-address.cyaLabel.property-address=Property address
+returns.property-address.cyaLabel.disposal-date=What date did you exchange contracts when disposing of the property?
+returns.property-address.cyaLabel.disposal-price=What was the disposal amount?
+returns.property-address.cyaLabel.acquisition-price=What was the acquisition amount?
 returns.property-address.cyaChange.property-address=the address of the property
 
 returns.disposal-details.caption=Sale or disposal details
@@ -851,8 +874,8 @@ lettingsReliefValue.error.tooSmall=Amount of Letting Relief must be more than th
 lettingsReliefValue.error.tooLarge=Amount of Letting Relief must be 50,000,000,000.00 or less
 lettingsReliefValue.error.invalid=Amount of Letting Relief must be a number, like 108 or 2,940.54
 lettingsRelief.furtherInfoLink=Find out about Letting Relief and how to calculate it (opens in a new window)
-lettingsRelief.error.amountOverLimit=Amount of Letting Relief must be {0} or less
-lettingsRelief.error.amountOverPrivateResidenceRelief=Amount of Letting Relief cannot be higher than private residence relief
+lettingsReliefValue.error.amountOverLimit=Amount of Letting Relief must be {0} or less
+lettingsReliefValue.error.amountOverPrivateResidenceRelief=Amount of Letting Relief cannot be higher than private residence relief
 otherReliefs.title=Do you want to claim any other reliefs?
 otherReliefs.helpText=You will need to tell us what other reliefs you are claiming and what the total amount of these is.
 otherReliefsName.label=Names of the other reliefs you are claiming
@@ -1023,6 +1046,8 @@ calculator.total.taxableIncome=Taxable income
 
 calculator.incomeAboveThreshold=The amount of your taxable gain to be charged at basic rate is 0. This means all of your taxable gain will be charged at the higher rate. This is because your taxable income is higher than the UK threshold of {0}.
 
+calculator.trustRateInfo.p1=Most trusts pay all taxable gains at 28%.
+calculator.trustRateInfo.p2=Trusts for vulnerable beneficiaries get special tax treatment. If you’re a trustee of this type of trust you’ll need to work out the amount of tax due.
 calculator.ukThreshold=UK threshold
 calculator.total.ukThresholdLessTaxableIncome=UK threshold less taxable income
 calculator.basicRateRule=To work out the amount to be charged at the basic rate of Capital Gains Tax we took the lower of these amounts:
@@ -1204,6 +1229,7 @@ initialGainOrLoss.details.example.title=Example
 initialGainOrLoss.details.example.details=You inherited a property. The market value of the property when you got it was £120,000. You paid £5,000 in legal fees when you got it. You spent £10,000 on making improvements to it. After 10 years, you sold the property for £150,000. You paid £5,000 for legal and estate agent's fees. This gave you an initial gain of £10,000.
 initialGainOrLoss.noLossOrGain.label=No initial gain, no initial loss
 initialGainOrLoss.summary.hint=Click on the link to change your answers
+initialGainOrLoss.cya.hint=whether you made an initial gain, a loss, or no gain or loss
 
 gain.error.required=Enter the initial gain amount
 gain.error.invalid=Initial gain amount must only include numbers, like 2,908 or 740.50
@@ -1268,6 +1294,46 @@ multipleDisposals.triage.cyaChange.completionDate=the completion date for all th
 nonCalculatedTaxDue.title=Enter the amount of Capital Gains Tax due for this return
 nonCalculatedTaxDue.helpText=You’ll need to work out and enter the amount.
 
+multipleDisposalsDisposalDate.title=What date did you exchange contracts when disposing of the property?
+multipleDisposalsDisposalDate.helpText=It’s usually when you and the buyer or new owner swapped contracts and the buyer paid a deposit. This is also called the ‘disposal’ date. For example, 25 4 2020
+multipleDisposalsDisposalDate.link=<a href="{0}" target="_blank">Find out what happens on the exchange date (opens in a new window)</a>.
+
+multipleDisposalsDisposalDate.error.required=Enter a contract exchange date
+multipleDisposalsDisposalDate.error.invalid=Enter a real contract exchange date
+multipleDisposalsDisposalDate.error.tooFarInFuture=Contract exchange date must be the same or before the completion date
+multipleDisposalsDisposalDate.error.tooFarInPast=The date must be in the tax year {0} to {1}
+multipleDisposalsDisposalDate-day.error.required=Contract exchange date must include a day
+multipleDisposalsDisposalDate-month.error.required=Contract exchange date must include a month
+multipleDisposalsDisposalDate-year.error.required=Contract exchange date must include a year
+multipleDisposalsDisposalDate-day.error.invalid=Enter a real contract exchange date
+multipleDisposalsDisposalDate-month.error.invalid=Enter a real contract exchange date
+multipleDisposalsDisposalDate-year.error.invalid=Enter a real contract exchange date
+multipleDisposalsDisposalDate-month.error.monthAndYearRequired=Contract exchange date must include a month and a year
+multipleDisposalsDisposalDate-day.error.dayAndYearRequired=Contract exchange date must include a day and a year
+multipleDisposalsDisposalDate-day.error.dayAndMonthRequired=Contract exchange date must include a day and a month
+
+multipleDisposalsDisposalPrice.title=What was the disposal value of the property?
+multipleDisposalsDisposalPrice.helpText=This is the amount you got when you sold the property or its market value if you disposed of it another key. You should subtract any selling or disposal costs.
+multipleDisposalsDisposalPrice.link=What are disposal costs?
+multipleDisposalsDisposalPrice.details.p1=Disposal or selling costs include fees for estate agents or solicitors.
+
+multipleDisposalsDisposalPrice.error.required=Enter the disposal value of the property, for example, 20,520.86
+multipleDisposalsDisposalPrice.error.invalid=Amount must be a number
+multipleDisposalsDisposalPrice.error.tooLarge=Amount must be 50,000,000,000.00 or less
+multipleDisposalsDisposalPrice.error.tooSmall=Amount must a number more than 0 and less than 50,000,000,000
+
+multipleDisposalsAcquisitionPrice.title=What was the acquisition value of the property?
+multipleDisposalsAcquisitionPrice.helpText=This is the amount you paid when you bought the property or its market value if you inherited it or got it as a gift. You should add on any improvements or acquisition costs.
+multipleDisposalsAcquisitionPrice.link=What are improvement and acquisition costs?
+multipleDisposalsAcquisitionPrice.details.p1=You can include the cost of improvements that added value to the property. For example, if you built an extension or replaced a basic kitchen with a luxary one. You cannot claim for mortgage interest, decorating or maintenance.
+multipleDisposalsAcquisitionPrice.details.p2=Acquisition or buying costs include fees for surveyors or solicitors.
+multipleDisposalsAcquisitionPrice.details.p3=If you shared any of the costs, you can only claim your share.
+
+multipleDisposalsAcquisitionPrice.error.invalid=Amount must be a number
+multipleDisposalsAcquisitionPrice.error.required=Enter the acquisition value of the property, for example 20,520.86
+multipleDisposalsAcquisitionPrice.error.tooLarge=Amount must be 50,000,000,000.00 or less
+multipleDisposalsAcquisitionPrice.error.tooSmall=Amount must a number more than 0 and less than 50,000,000,000
+
 submitReturnError.title=Sorry, there is a problem with the service
 submitReturnError.p1=Your return might not have been sent to HMRC.
 submitReturnError.p2=You’ll need to:
@@ -1309,3 +1375,12 @@ uploadDocumentWithSupportingEvidence.title=Upload a document with your supportin
 uploadDocumentWithSupportingEvidence.error.required=Upload a file to support your return
 uploadDocumentWithSupportingEvidence.caption=Supporting evidence
 uploadDocumentWithSupportingEvidence.help-text=The file can be up to 5MB. We accept these file types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT, PNG, and JPG.
+
+uploadDocumentsWithSupportingDocuments.check-your-answers.title=Check your answers
+uploadDocumentsWithSupportingDocuments.check-your-answers.caption=Supporting evidence
+uploadDocumentsWithSupportingDocuments.check-your-answers.do-you-want-to-upload-documents
+uploadDocumentsWithSupportingDocuments.check-your-answers.document-one
+uploadDocumentsWithSupportingDocuments.check-your-answers.document-two
+uploadDocumentsWithSupportingDocuments.check-your-answers.document-three
+uploadDocumentsWithSupportingDocuments.check-your-answers.document-four
+uploadDocumentsWithSupportingDocuments.check-your-answers.cya-change=Change

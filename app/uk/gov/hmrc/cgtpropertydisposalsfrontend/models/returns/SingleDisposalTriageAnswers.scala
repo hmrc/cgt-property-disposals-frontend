@@ -43,8 +43,20 @@ object SingleDisposalTriageAnswers {
     val empty: IncompleteSingleDisposalTriageAnswers =
       IncompleteSingleDisposalTriageAnswers(None, false, None, None, None, None, None, None, None)
 
-    implicit val format: OFormat[IncompleteSingleDisposalTriageAnswers] = Json.format
+    def fromCompleteAnswers(c: CompleteSingleDisposalTriageAnswers): IncompleteSingleDisposalTriageAnswers =
+      IncompleteSingleDisposalTriageAnswers(
+        c.individualUserType,
+        true,
+        Some(c.disposalMethod),
+        Some(c.countryOfResidence.isUk()),
+        if (c.countryOfResidence.isUk()) None else Some(c.countryOfResidence),
+        Some(c.assetType),
+        Some(c.disposalDate),
+        Some(c.completionDate),
+        None
+      )
   }
+
   final case class CompleteSingleDisposalTriageAnswers(
     individualUserType: Option[IndividualUserType],
     disposalMethod: DisposalMethod,
@@ -53,11 +65,6 @@ object SingleDisposalTriageAnswers {
     disposalDate: DisposalDate,
     completionDate: CompletionDate
   ) extends SingleDisposalTriageAnswers
-
-  object CompleteSingleDisposalTriageAnswers {
-
-    implicit val format: OFormat[CompleteSingleDisposalTriageAnswers] = Json.format
-  }
 
   implicit class IndividualTriageQuestionOps(private val i: SingleDisposalTriageAnswers) extends AnyVal {
 

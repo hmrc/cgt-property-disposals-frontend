@@ -221,8 +221,8 @@ class SingleDisposalsTriageController @Inject() (
           case (wasResidentialProperty, i) =>
             val assetType = if (wasResidentialProperty) AssetType.Residential else AssetType.NonResidential
             i.fold(
-              _.copy(assetType = Some(assetType)),
-              _.copy(assetType = assetType)
+              _.copy(assetType                                                            = Some(assetType)),
+              IncompleteSingleDisposalTriageAnswers.fromCompleteAnswers(_).copy(assetType = Some(assetType))
             )
         },
         nextResult = {
@@ -333,22 +333,23 @@ class SingleDisposalsTriageController @Inject() (
     }
   }
 
-  private def updateDisposalDate(d: LocalDate, taxYear: Option[TaxYear], answers: SingleDisposalTriageAnswers) = {
+  private def updateDisposalDate(
+    d: LocalDate,
+    taxYear: Option[TaxYear],
+    answers: SingleDisposalTriageAnswers
+  ): IncompleteSingleDisposalTriageAnswers = {
     def updateCompleteAnswers(
       c: CompleteSingleDisposalTriageAnswers,
       date: Either[LocalDate, DisposalDate]
     ): IncompleteSingleDisposalTriageAnswers =
-      IncompleteSingleDisposalTriageAnswers(
-        c.individualUserType,
-        true,
-        Some(c.disposalMethod),
-        Some(c.countryOfResidence.isUk()),
-        if (c.countryOfResidence.isUk()) None else Some(c.countryOfResidence),
-        Some(c.assetType),
-        date.toOption,
-        None,
-        date.swap.toOption
-      )
+      IncompleteSingleDisposalTriageAnswers
+        .fromCompleteAnswers(c)
+        .copy(
+          disposalDate         = date.toOption,
+          tooEarlyDisposalDate = date.swap.toOption,
+          completionDate       = None
+        )
+
     taxYear.fold {
       answers.fold(
         _.copy(disposalDate = None, tooEarlyDisposalDate = Some(d)),

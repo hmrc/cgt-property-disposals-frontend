@@ -23,7 +23,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 
 final case class SubmitReturnRequest(
-  completeReturn: CompleteReturn,
+  completeReturn: CompleteSingleDisposalReturn,
   id: UUID,
   subscribedDetails: SubscribedDetails,
   agentReferenceNumber: Option[AgentReferenceNumber]

@@ -21,42 +21,25 @@ import java.time.LocalDate
 import cats.syntax.eq._
 import com.google.inject.Singleton
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AcquisitionDetailsAnswers, AssetType, CompleteReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AssetType, CompleteSingleDisposalReturn}
 
 @Singleton
 class RebasingEligibilityUtil {
 
-  def isUk(completeReturn: CompleteReturn): Boolean =
-    completeReturn.triageAnswers.fold(
-      i => i.assetType       -> i.wasAUKResident,
-      c => Some(c.assetType) -> Some(c.countryOfResidence.isUk())
-    ) match {
-      case (_, Some(isUkResident)) => isUkResident
-    }
+  def isUk(completeReturn: CompleteSingleDisposalReturn): Boolean = extractIsUk(completeReturn)
 
-  def isEligibleForRebase(completeReturn: CompleteReturn): Boolean =
-    completeReturn.triageAnswers.fold(
-      i => i.assetType       -> i.wasAUKResident,
-      c => Some(c.assetType) -> Some(c.countryOfResidence.isUk())
-    ) match {
-      case (Some(assetType), Some(isUkResident)) =>
-        isEligibleForRebase(isUkResident, assetType, completeReturn.acquisitionDetails.acquisitionDate.value)
-    }
+  def isEligibleForRebase(completeReturn: CompleteSingleDisposalReturn): Boolean =
+    isEligibleForRebase(
+      isUk(completeReturn),
+      extractAssetType(completeReturn),
+      completeReturn.acquisitionDetails.acquisitionDate.value
+    )
 
-  def isEligibleForAcquisitionPrice(completeReturn: CompleteReturn): Boolean =
-    completeReturn.triageAnswers.fold(
-      i => i.assetType       -> i.wasAUKResident,
-      c => Some(c.assetType) -> Some(c.countryOfResidence.isUk())
-    ) match {
-      case (Some(assetType), Some(isUkResident)) =>
-        isEligibleForAcquisitionPrice(isUkResident, assetType, completeReturn.acquisitionDetails.acquisitionDate.value)
-    }
+  def isEligibleForAcquisitionPrice(completeReturn: CompleteSingleDisposalReturn): Boolean =
+    isEligibleForAcquisitionPrice(isUk(completeReturn), completeReturn.acquisitionDetails.acquisitionDate.value)
 
-  def isEligibleForAcquisitionPrice(wasAUkResident: Boolean, assetType: AssetType, purchaseDate: LocalDate): Boolean =
-    (wasAUkResident, assetType, purchaseDate) match {
-      case (true, _, date) => date.isAfter(RebasingCutoffDates.ukResidents)
-      case _               => true
-    }
+  def isEligibleForAcquisitionPrice(wasAUkResident: Boolean, purchaseDate: LocalDate): Boolean =
+    !wasAUkResident || purchaseDate.isAfter(RebasingCutoffDates.ukResidents)
 
   def isEligibleForRebase(wasAUkResident: Boolean, assetType: AssetType, purchaseDate: LocalDate): Boolean =
     (wasAUkResident, assetType, purchaseDate) match {
@@ -67,22 +50,6 @@ class RebasingEligibilityUtil {
         date.isBefore(RebasingCutoffDates.nonUkResidentsNonResidentialProperty)
       case _ => false
     }
-
-  def isUkAndEligibleForRebase(completeReturn: CompleteReturn): Boolean =
-    completeReturn.triageAnswers.fold(
-      i => i.assetType       -> i.wasAUKResident,
-      c => Some(c.assetType) -> Some(c.countryOfResidence.isUk())
-    ) match {
-      case (Some(assetType), Some(isUkResident)) =>
-        isUkAndEligibleForRebase(isUkResident, completeReturn.acquisitionDetails.acquisitionDate, assetType)
-    }
-
-  def isUkAndEligibleForRebase(
-    wasUkResident: Boolean,
-    acquisitionDate: AcquisitionDate,
-    assetType: AssetType
-  ): Boolean =
-    wasUkResident && rebasingCutOffDate(acquisitionDate, assetType, wasUkResident).isDefined
 
   def rebasingCutOffDate(
     acquisitionDate: AcquisitionDate,
@@ -114,6 +81,9 @@ class RebasingEligibilityUtil {
     Some(cutoffDate).filter(acquisitionDate.value.isBefore)
   }
 
+  def getRebasingCutOffDate(completeReturn: CompleteSingleDisposalReturn): LocalDate =
+    getRebasingCutOffDate(extractAssetType(completeReturn), isUk(completeReturn))
+
   def getRebasingCutOffDate(
     assetType: AssetType,
     wasUkResident: Boolean
@@ -124,14 +94,8 @@ class RebasingEligibilityUtil {
       RebasingCutoffDates.nonUkResidentsResidentialProperty
     else RebasingCutoffDates.nonUkResidentsNonResidentialProperty
 
-  def getRebasingCutOffDate(completeReturn: CompleteReturn): LocalDate =
-    completeReturn.triageAnswers.fold(
-      i => i.assetType       -> i.wasAUKResident,
-      c => Some(c.assetType) -> Some(c.countryOfResidence.isUk())
-    ) match {
-      case (Some(assetType), Some(isUkResident)) =>
-        getRebasingCutOffDate(assetType, isUkResident)
-    }
+  def getDisplayRebasingCutOffDate(completeReturn: CompleteSingleDisposalReturn): LocalDate =
+    getDisplayRebasingCutOffDate(extractAssetType(completeReturn), isUk(completeReturn))
 
   def getDisplayRebasingCutOffDate(
     assetType: AssetType,
@@ -143,13 +107,10 @@ class RebasingEligibilityUtil {
       RebasingCutoffDates.nonUkResidentsResidentialProperty.minusDays(1)
     else RebasingCutoffDates.nonUkResidentsNonResidentialProperty.minusDays(1)
 
-  def getDisplayRebasingCutOffDate(completeReturn: CompleteReturn): LocalDate =
-    completeReturn.triageAnswers.fold(
-      i => i.assetType       -> i.wasAUKResident,
-      c => Some(c.assetType) -> Some(c.countryOfResidence.isUk())
-    ) match {
-      case (Some(assetType), Some(isUkResident)) =>
-        getRebasingCutOffDate(assetType, isUkResident)
-    }
+  private def extractIsUk(completeReturn: CompleteSingleDisposalReturn): Boolean =
+    completeReturn.triageAnswers.countryOfResidence.isUk()
+
+  private def extractAssetType(completeReturn: CompleteSingleDisposalReturn): AssetType =
+    completeReturn.triageAnswers.assetType
 
 }

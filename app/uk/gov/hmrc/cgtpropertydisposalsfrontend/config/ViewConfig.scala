@@ -56,6 +56,7 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) {
   val trustHelpUrl: String                     = getString("external-url.trust-help")
   val tellHmrcChangeDetails: String            = getString("external-url.tell-hmrc-change-details")
   val workOurYouResidenceStatusUrl: String     = getString("external-url.work-out-your-residence-status")
+  val workOutClientsResidenceStatusUrl: String = getString("external-url.work-out-your-clients-residence-status")
   val residentialPropertyDefinitionUrl: String = getString("external-url.residential-property-definition")
   val tranferringOwnershipHelp: String         = getString("external-url.transferring-ownership-help")
   val cgtLossesUrl: String                     = getString("external-url.cgt-losses")

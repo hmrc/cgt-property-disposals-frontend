@@ -28,7 +28,8 @@
         labelAsHeading: Boolean = false,
         error: Option[FormError] = None,
         hasErrors: Boolean = false,
-        selected: Option[Int] = None
+        selected: Option[Int] = None,
+        customErrorKey: Option[String] = None
 )(implicit messages: Messages)
 
 @classes = @{if(error.nonEmpty) "form-group form-group-error" else "form-group" }
@@ -50,7 +51,7 @@
     </span>
     }
     @errorIdWithError.map { case (id, e) =>
-      @errorInline(id, messages(s"$fieldId.${e.message}", e.args))
+      @errorInline(id, messages(s"${customErrorKey.getOrElse(fieldId)}.${e.message}", e.args))
     }
 
     @options.zipWithIndex.map{ case (option, index) =>

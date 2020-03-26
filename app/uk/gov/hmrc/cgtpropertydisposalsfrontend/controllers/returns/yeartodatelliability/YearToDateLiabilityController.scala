@@ -152,7 +152,8 @@ class YearToDateLiabilityController @Inject() (
                                          exemptionAndLossesAnswers,
                                          estimatedIncome,
                                          personalAllowance,
-                                         draftReturn.initialGainOrLoss
+                                         draftReturn.initialGainOrLoss,
+                                         fillingOutReturn.subscribedDetails.userType().isLeft
                                        )
                                      )
                 _ <- EitherT(
@@ -718,7 +719,8 @@ class YearToDateLiabilityController @Inject() (
                           exemptionsAndLossesDetails,
                           estimatedIncome,
                           personalAllowance,
-                          calculatedTaxDue
+                          calculatedTaxDue,
+                          fillingOutReturn.subscribedDetails.userType().isLeft
                         )
                         )(
                           _.fold(
@@ -775,7 +777,8 @@ class YearToDateLiabilityController @Inject() (
                           exemptionsAndLossesDetails,
                           estimatedIncome,
                           personalAllowance,
-                          calculatedTaxDue
+                          calculatedTaxDue,
+                          fillingOutReturn.subscribedDetails.userType().isLeft
                         )
                         )(
                           _.fold(

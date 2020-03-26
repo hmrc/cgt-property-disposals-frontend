@@ -67,7 +67,7 @@ trait ReturnsService {
 
   def displayReturn(cgtReference: CgtReference, submissionId: String)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, CompleteReturn]
+  ): EitherT[Future, Error, CompleteSingleDisposalReturn]
 
 }
 
@@ -196,10 +196,10 @@ class ReturnsServiceImpl @Inject() (connector: ReturnsConnector, auditService: A
 
   def displayReturn(cgtReference: CgtReference, submissionId: String)(
     implicit hc: HeaderCarrier
-  ): EitherT[Future, Error, CompleteReturn] =
+  ): EitherT[Future, Error, CompleteSingleDisposalReturn] =
     connector.displayReturn(cgtReference, submissionId).subflatMap { response =>
       if (response.status === OK) {
-        response.parseJSON[CompleteReturn]().leftMap(Error(_))
+        response.parseJSON[CompleteSingleDisposalReturn]().leftMap(Error(_))
       } else {
         Left(Error(s"call to list returns came back with status ${response.status}"))
       }

@@ -34,7 +34,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutR
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.{CompleteExemptionAndLossesAnswers, IncompleteExemptionAndLossesAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, ExemptionAndLossesAnswers, SingleDisposalDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, DraftReturn, ExemptionAndLossesAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
@@ -64,26 +64,39 @@ class ExemptionAndLossesController @Inject() (
     with SessionUpdates {
 
   private def withFillingOutReturnAndAnswers(request: RequestWithSessionData[_])(
-    f: (SessionData, FillingOutReturn, SingleDisposalDraftReturn, ExemptionAndLossesAnswers) => Future[Result]
+    f: (SessionData, FillingOutReturn, DraftReturn, ExemptionAndLossesAnswers) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((s, r @ FillingOutReturn(_, _, _, d: SingleDisposalDraftReturn))) =>
-        f(s, r, d, d.exemptionAndLossesAnswers.getOrElse(IncompleteExemptionAndLossesAnswers.empty))
-
+      case Some((s, r @ FillingOutReturn(_, _, _, d))) =>
+        val answers = d
+          .fold(_.exemptionAndLossesAnswers, _.exemptionAndLossesAnswers)
+          .getOrElse(IncompleteExemptionAndLossesAnswers.empty)
+        f(s, r, d, answers)
       case _ =>
         Redirect(controllers.routes.StartController.start())
     }
 
   private def withDisposalDate(
-    draftReturn: SingleDisposalDraftReturn
-  )(f: DisposalDate => Future[Result]): Future[Result] =
-    draftReturn.triageAnswers.fold(
-      _.disposalDate,
-      c => Some(c.disposalDate)
-    ) match {
+    draftReturn: DraftReturn
+  )(f: DisposalDate => Future[Result]): Future[Result] = {
+    val disposalDate = draftReturn.fold(
+      _.examplePropertyDetailsAnswers.flatMap(
+        _.fold(
+          _.disposalDate,
+          c => Some(c.disposalDate)
+        )
+      ),
+      _.triageAnswers.fold(
+        _.disposalDate,
+        c => Some(c.disposalDate)
+      )
+    )
+
+    disposalDate match {
       case Some(d) => f(d)
       case None    => Redirect(controllers.returns.routes.TaskListController.taskList())
     }
+  }
 
   private def commonDisplayBehaviour[A, P: Writeable, R](
     currentAnswers: ExemptionAndLossesAnswers
@@ -106,7 +119,7 @@ class ExemptionAndLossesController @Inject() (
 
   private def commonSubmitBehaviour[A, P: Writeable, R](
     currentFillingOutReturn: FillingOutReturn,
-    currentDraftReturn: SingleDisposalDraftReturn,
+    currentDraftReturn: DraftReturn,
     currentAnswers: ExemptionAndLossesAnswers
   )(form: Form[A])(
     page: (Form[A], Call) => P
@@ -127,8 +140,11 @@ class ExemptionAndLossesController @Inject() (
         .bindFromRequest()
         .fold(
           formWithErrors => BadRequest(page(formWithErrors, backLink)), { value =>
-            val newAnswers     = updateAnswers(value, currentAnswers)
-            val newDraftReturn = currentDraftReturn.copy(exemptionAndLossesAnswers = Some(newAnswers))
+            val newAnswers = updateAnswers(value, currentAnswers)
+            val newDraftReturn = currentDraftReturn.fold(
+              _.copy(exemptionAndLossesAnswers = Some(newAnswers)),
+              _.copy(exemptionAndLossesAnswers = Some(newAnswers))
+            )
 
             val result = for {
               _ <- if (newDraftReturn === currentDraftReturn) EitherT.pure(())
@@ -330,7 +346,10 @@ class ExemptionAndLossesController @Inject() (
             case IncompleteExemptionAndLossesAnswers(Some(i), Some(p), Some(a)) =>
               val completeAnswers = CompleteExemptionAndLossesAnswers(i, p, a)
               val newDraftReturn =
-                draftReturn.copy(exemptionAndLossesAnswers = Some(completeAnswers))
+                draftReturn.fold(
+                  _.copy(exemptionAndLossesAnswers = Some(completeAnswers)),
+                  _.copy(exemptionAndLossesAnswers = Some(completeAnswers))
+                )
 
               val result = for {
                 _ <- returnsService.storeDraftReturn(

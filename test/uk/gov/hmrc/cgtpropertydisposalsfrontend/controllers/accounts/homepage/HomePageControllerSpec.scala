@@ -94,7 +94,9 @@ trait HomePageControllerSpec
       .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
-  def mockDisplayReturn(cgtReference: CgtReference, submissionId: String)(response: Either[Error, CompleteReturn]) =
+  def mockDisplayReturn(cgtReference: CgtReference, submissionId: String)(
+    response: Either[Error, CompleteSingleDisposalReturn]
+  ) =
     (mockReturnsService
       .displayReturn(_: CgtReference, _: String)(_: HeaderCarrier))
       .expects(cgtReference, submissionId, *)
@@ -654,7 +656,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
           subscribed.subscribedDetails,
           subscribed.ggCredId,
           subscribed.agentReferenceNumber,
-          sample[CompleteReturn],
+          sample[CompleteSingleDisposalReturn],
           sample[SubmitReturnResponse]
         )
 
@@ -662,7 +664,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
           subscribed.subscribedDetails,
           subscribed.ggCredId,
           subscribed.agentReferenceNumber,
-          sample[CompleteReturn],
+          sample[CompleteSingleDisposalReturn],
           sample[ReturnSummary]
         )
 
@@ -971,7 +973,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
         }
 
         "there is an error updating the session" in {
-          val completeReturn = sample[CompleteReturn]
+          val completeReturn = sample[CompleteSingleDisposalReturn]
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1002,7 +1004,7 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
       "redirect to the view return screen" when {
 
         "the return is successfully retrieved and the session is updated" in {
-          val completeReturn = sample[CompleteReturn]
+          val completeReturn = sample[CompleteSingleDisposalReturn]
 
           inSequence {
             mockAuthWithNoRetrievals()

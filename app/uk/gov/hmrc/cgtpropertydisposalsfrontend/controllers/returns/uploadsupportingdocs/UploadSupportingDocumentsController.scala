@@ -65,7 +65,8 @@ class UploadSupportingDocumentsController @Inject() (
   upscanService: UpscanService,
   cc: MessagesControllerComponents,
   val config: Configuration,
-  hasSupportingDocsToUploadPage: pages.has_supporting_docs_to_upload
+  hasSupportingDocsToUploadPage: pages.has_supporting_docs_to_upload,
+  checkYourAnswersPage : pages.check_your_answers,
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -82,15 +83,16 @@ class UploadSupportingDocumentsController @Inject() (
     ) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
-      case Some((s, r @ FillingOutReturn(_, _, _, d: SingleDisposalDraftReturn))) =>
-        d.uploadSupportingDocuments match {
-          case Some(value) => f(s, r, value)
-          case None        => f(s, r, IncompleteUploadSupportingDocuments.empty)
-        }
-      case Some((s, r @ FillingOutReturn(_, _, _, d: MultipleDisposalsDraftReturn))) =>
-        d.uploadSupportingDocuments match {
-          case Some(value) => f(s, r, value)
-          case None        => f(s, r, IncompleteUploadSupportingDocuments.empty)
+      case Some((s, r @ FillingOutReturn(_, _, _, d: DraftReturn))) =>
+        d match {
+          case SingleDisposalDraftReturn(_, _, _, _, _, _, _, _, _, uploadSupportingDocuments, _) =>
+            uploadSupportingDocuments.fold[Future[Result]](
+              f(s, r, IncompleteUploadSupportingDocuments.empty)
+            )(f(s, r, _))
+          case MultipleDisposalsDraftReturn(_, _, _, _, _, uploadSupportingDocuments, _) =>
+            uploadSupportingDocuments.fold[Future[Result]](
+              f(s, r, IncompleteUploadSupportingDocuments.empty)
+            )(f(s, r, _))
         }
       case _ => Redirect(controllers.routes.StartController.start())
     }
@@ -177,6 +179,7 @@ class UploadSupportingDocumentsController @Inject() (
                       _,
                       _,
                       _,
+                      _,
                       uploadSupportingDocuments,
                       _
                     ) =>
@@ -220,6 +223,11 @@ class UploadSupportingDocumentsController @Inject() (
         }
     }
   }
+
+  def checkYourAnswersSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
+    Ok()
+  }
+
 
   private def commonSubmitBehaviour[Y <: UploadSupportingDocuments, D <: DraftReturn: Eq, A, P: Writeable, R](
     currentFillingOutReturn: FillingOutReturn,
