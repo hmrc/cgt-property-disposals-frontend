@@ -165,7 +165,7 @@ class CommonTriageQuestionsController @Inject() (
             form,
             howManyPropertiesBackLink(state),
             state.isRight,
-            state.fold(_.subscribedDetails.userType().isLeft, _.subscribedDetails.userType().isLeft)
+            state.fold(_.subscribedDetails.isATrust, _.subscribedDetails.isATrust)
           )
         )
     }
@@ -183,7 +183,7 @@ class CommonTriageQuestionsController @Inject() (
                   formWithErrors,
                   howManyPropertiesBackLink(state),
                   state.isRight,
-                  state.fold(_.subscribedDetails.userType().isLeft, _.subscribedDetails.userType().isLeft)
+                  state.fold(_.subscribedDetails.isATrust, _.subscribedDetails.isATrust)
                 )
               ), { numberOfProperties =>
               if (getNumberOfProperties(state).contains(numberOfProperties)) {
@@ -249,7 +249,7 @@ class CommonTriageQuestionsController @Inject() (
     withState(request) {
       case (_, state) =>
         val triageAnswers = triageAnswersFomState(state)
-        val isATrust      = state.fold(_.subscribedDetails.userType().isLeft, _.subscribedDetails.userType().isLeft)
+        val isATrust      = state.fold(_.subscribedDetails.isATrust, _.subscribedDetails.isATrust)
         lazy val backLink = triageAnswers.fold(
           _ => routes.MultipleDisposalsTriageController.whenWereContractsExchanged(),
           _ => routes.SingleDisposalsTriageController.whenWasDisposalDate()

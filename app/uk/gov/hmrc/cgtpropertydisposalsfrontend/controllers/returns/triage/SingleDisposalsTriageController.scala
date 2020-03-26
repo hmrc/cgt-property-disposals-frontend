@@ -94,7 +94,7 @@ class SingleDisposalsTriageController @Inject() (
       page = {
         case (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
           val isATrust = journeyStatus
-            .fold(_.subscribedDetails.userType().isLeft, _._2.subscribedDetails.userType().isLeft)
+            .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
           disposalMethodPage(
             form,
             backLink(currentAnswers, routes.CommonTriageQuestionsController.howManyProperties()),
@@ -114,7 +114,7 @@ class SingleDisposalsTriageController @Inject() (
         page = {
           case (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
             val isATrust = journeyStatus
-              .fold(_.subscribedDetails.userType().isLeft, _._2.subscribedDetails.userType().isLeft)
+              .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
             disposalMethodPage(
               form,
               backLink(currentAnswers, routes.CommonTriageQuestionsController.howManyProperties()),
@@ -142,7 +142,7 @@ class SingleDisposalsTriageController @Inject() (
       page = {
         case (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
           val isATrust = journeyStatus
-            .fold(_.subscribedDetails.userType().isLeft, _._2.subscribedDetails.userType().isLeft)
+            .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
           wereYouAUKResidentPage(
             form,
             backLink(currentAnswers, routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()),
@@ -161,7 +161,7 @@ class SingleDisposalsTriageController @Inject() (
       page = {
         case (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
           val isATrust = journeyStatus
-            .fold(_.subscribedDetails.userType().isLeft, _._2.subscribedDetails.userType().isLeft)
+            .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
           wereYouAUKResidentPage(
             form,
             backLink(currentAnswers, routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()),
@@ -209,7 +209,7 @@ class SingleDisposalsTriageController @Inject() (
         page = {
           case (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
             val isATrust = journeyStatus
-              .fold(_.subscribedDetails.userType().isLeft, _._2.subscribedDetails.userType().isLeft)
+              .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
             didYouDisposeOfResidentialPropertyPage(
               form,
               backLink(currentAnswers, routes.SingleDisposalsTriageController.wereYouAUKResident()),
@@ -229,7 +229,7 @@ class SingleDisposalsTriageController @Inject() (
         page = {
           case (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
             val isATrust = journeyStatus
-              .fold(_.subscribedDetails.userType().isLeft, _._2.subscribedDetails.userType().isLeft)
+              .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
             didYouDisposeOfResidentialPropertyPage(
               form,
               backLink(currentAnswers, routes.SingleDisposalsTriageController.wereYouAUKResident()),
@@ -273,7 +273,7 @@ class SingleDisposalsTriageController @Inject() (
       page = {
         case (journeyStatus, currentAnswers, form, isDraftReturn, assetType) =>
           val isATrust = journeyStatus
-            .fold(_.subscribedDetails.userType().isLeft, _._2.subscribedDetails.userType().isLeft)
+            .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
           disposalDatePage(
             form,
             disposalDateBackLink(currentAnswers),
@@ -289,7 +289,7 @@ class SingleDisposalsTriageController @Inject() (
     withSingleDisposalTriageAnswers(request) {
       case (_, state, triageAnswers) =>
         val isATrust =
-          state.fold(s => s.subscribedDetails.userType().isLeft, f => f._2.subscribedDetails.userType().isLeft)
+          state.fold(s => s.subscribedDetails.isATrust, f => f._2.subscribedDetails.isATrust)
         triageAnswers.fold(_.assetType, c => Some(c.assetType)) match {
           case None => Redirect(disposalDateBackLink(triageAnswers))
           case Some(assetType) =>
@@ -398,7 +398,7 @@ class SingleDisposalsTriageController @Inject() (
       page = {
         case (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
           val isATrust = journeyStatus
-            .fold(_.subscribedDetails.userType().isLeft, _._2.subscribedDetails.userType().isLeft)
+            .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
 
           completionDatePage(
             form,
@@ -418,7 +418,7 @@ class SingleDisposalsTriageController @Inject() (
       page = {
         case (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
           val isATrust = journeyStatus
-            .fold(_.subscribedDetails.userType().isLeft, _._2.subscribedDetails.userType().isLeft)
+            .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
           completionDatePage(
             form,
             backLink(currentAnswers, routes.SingleDisposalsTriageController.whenWasDisposalDate()),
@@ -443,7 +443,7 @@ class SingleDisposalsTriageController @Inject() (
       page = {
         case (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
           val isATrust = journeyStatus
-            .fold(_.subscribedDetails.userType().isLeft, _._2.subscribedDetails.userType().isLeft)
+            .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
           countryOfResidencePage(
             form,
             backLink(currentAnswers, routes.SingleDisposalsTriageController.wereYouAUKResident()),
@@ -462,7 +462,7 @@ class SingleDisposalsTriageController @Inject() (
       page = {
         case (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
           val isATrust = journeyStatus
-            .fold(_.subscribedDetails.userType().isLeft, _._2.subscribedDetails.userType().isLeft)
+            .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
           countryOfResidencePage(
             form,
             backLink(currentAnswers, routes.SingleDisposalsTriageController.wereYouAUKResident()),
@@ -486,7 +486,7 @@ class SingleDisposalsTriageController @Inject() (
       _.fold(_.assetType, c => Some(c.assetType)), {
         case (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
           val isATrust = journeyStatus
-            .fold(_.subscribedDetails.userType().isLeft, _._2.subscribedDetails.userType().isLeft)
+            .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
           assetTypeForNonUkResidentsPage(
             form,
             backLink(currentAnswers, routes.SingleDisposalsTriageController.countryOfResidence()),
@@ -506,7 +506,7 @@ class SingleDisposalsTriageController @Inject() (
         {
           case (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
             val isATrust = journeyStatus
-              .fold(_.subscribedDetails.userType().isLeft, _._2.subscribedDetails.userType().isLeft)
+              .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
             assetTypeForNonUkResidentsPage(
               form,
               backLink(currentAnswers, routes.SingleDisposalsTriageController.countryOfResidence()),
@@ -553,8 +553,8 @@ class SingleDisposalsTriageController @Inject() (
           case c: CompleteSingleDisposalTriageAnswers =>
             val isATrust = state
               .bimap(
-                _.subscribedDetails.userType().isLeft,
-                _._2.subscribedDetails.userType().isLeft
+                _.subscribedDetails.isATrust,
+                _._2.subscribedDetails.isATrust
               )
               .contains(true)
             Ok(checkYourAnswersPage(c, displayReturnToSummaryLink, isATrust))
@@ -667,8 +667,8 @@ class SingleDisposalsTriageController @Inject() (
       case Right(_) =>
         val isATrust = state
           .bimap(
-            _.subscribedDetails.userType().isLeft,
-            _._2.subscribedDetails.userType().isLeft
+            _.subscribedDetails.isATrust,
+            _._2.subscribedDetails.isATrust
           )
           .contains(true)
 

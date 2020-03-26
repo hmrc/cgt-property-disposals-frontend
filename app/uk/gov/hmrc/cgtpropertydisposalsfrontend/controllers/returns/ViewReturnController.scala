@@ -61,7 +61,7 @@ class ViewReturnController @Inject() (
             sentReturn,
             returnSummary,
             rebasingEligibilityUtil,
-            subscribedDetails.userType().isLeft
+            subscribedDetails.isATrust
           )
         )
     }

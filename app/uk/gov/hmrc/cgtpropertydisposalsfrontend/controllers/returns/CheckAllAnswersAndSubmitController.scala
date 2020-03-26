@@ -67,7 +67,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
           checkAllAnswersPage(
             completeReturn,
             rebasingEligibilityUtil,
-            fillingOutReturn.subscribedDetails.userType().isLeft
+            fillingOutReturn.subscribedDetails.isATrust
           )
         )
     }

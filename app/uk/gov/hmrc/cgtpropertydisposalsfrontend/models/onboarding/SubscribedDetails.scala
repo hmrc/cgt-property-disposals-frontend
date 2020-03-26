@@ -44,6 +44,6 @@ object SubscribedDetails {
     def makeAccountName(): String = details.name.fold(n => n.value, n => n.makeSingleName())
     def userType(): Either[UserType.Organisation.type, UserType.Individual.type] =
       details.name.bimap(_ => UserType.Organisation, _ => UserType.Individual)
-
+    def isATrust: Boolean = userType().isLeft
   }
 }
