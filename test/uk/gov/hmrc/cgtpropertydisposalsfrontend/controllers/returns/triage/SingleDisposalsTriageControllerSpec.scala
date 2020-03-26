@@ -2341,9 +2341,9 @@ class SingleDisposalsTriageControllerSpec
     pageTitleKey: String,
     checkContent: Document => Unit
   ): Unit =
-    "use a different page title" when {
+    "use the agent page title" when {
 
-      "an agent requests the page" in {
+      "an agent requests the page for an individual client" in {
 
         inSequence {
           mockAuthWithNoRetrievals()
@@ -2353,6 +2353,38 @@ class SingleDisposalsTriageControllerSpec
               journeyStatus = Some(
                 sample[FillingOutReturn].copy(
                   agentReferenceNumber = Some(sample[AgentReferenceNumber]),
+                  subscribedDetails = sample[SubscribedDetails].copy(
+                    name = Right(sample[IndividualName])
+                  ),
+                  draftReturn = sample[DraftSingleDisposalReturn].copy(
+                    triageAnswers = answers
+                  )
+                )
+              )
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey(pageTitleKey),
+          checkContent
+        )
+      }
+
+      "an agent requests the page for a trust client" in {
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              userType = Some(UserType.Agent),
+              journeyStatus = Some(
+                sample[FillingOutReturn].copy(
+                  agentReferenceNumber = Some(sample[AgentReferenceNumber]),
+                  subscribedDetails = sample[SubscribedDetails].copy(
+                    name = Left(sample[TrustName])
+                  ),
                   draftReturn = sample[DraftSingleDisposalReturn].copy(
                     triageAnswers = answers
                   )
@@ -2376,7 +2408,7 @@ class SingleDisposalsTriageControllerSpec
     pageTitleKey: String,
     checkContent: Document => Unit
   ): Unit =
-    "use a different page title" when {
+    "use the trust page title" when {
 
       "a trust requests the page" in {
 
