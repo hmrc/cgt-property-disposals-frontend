@@ -35,7 +35,7 @@ backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.component
 
 @(form: Form[Boolean], backLink: Call, reference : String)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
-@key = @{"uploadDocumentWithSupportingEvidence"}
+@key = @{"upload-supporting-documents"}
 @title = @{messages(s"$key.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 

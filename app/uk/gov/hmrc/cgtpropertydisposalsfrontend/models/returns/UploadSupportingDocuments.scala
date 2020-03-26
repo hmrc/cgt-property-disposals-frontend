@@ -24,6 +24,7 @@ sealed trait UploadSupportingDocuments extends Product with Serializable
 object UploadSupportingDocuments {
 
   final case class SupportingDocuments(
+    reference: String,
     fileName: String
   )
 

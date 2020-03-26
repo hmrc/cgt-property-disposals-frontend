@@ -55,7 +55,8 @@ class UploadSupportingDocumentsController @Inject() (
   cc: MessagesControllerComponents,
   val config: Configuration,
   hasSupportingDocsToUploadPage: pages.has_supporting_docs_to_upload,
-  checkYourAnswersPage: pages.check_your_answers
+  checkYourAnswersPage: pages.check_your_answers,
+  changeOrDeletePage: pages.change_or_delete_supporting_document
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -197,7 +198,12 @@ class UploadSupportingDocumentsController @Inject() (
   }
 
   def changeOrDeleteFile() = authenticatedActionWithSessionData.async { implicit request =>
-    Ok("changing file")
+    Ok(
+      changeOrDeletePage(
+        Some(SupportingDocuments("1", "filename")),
+        routes.UploadSupportingDocumentsController.checkYourAnswers()
+      )
+    )
   }
 
   def changeOrDeleteFileSubmit() = authenticatedActionWithSessionData.async { implicit request =>
@@ -278,9 +284,9 @@ class UploadSupportingDocumentsController @Inject() (
       case IncompleteUploadSupportingDocuments(hasSupportingDocuments) =>
         //Redirect(routes.UploadSupportingDocumentsController.hasSupportingDocsToUpload())
         //Redirect(routes.UploadSupportingDocumentsController.checkYourAnswers())
-        Ok(checkYourAnswersPage(CompleteUploadSupportingDocuments(true, List(SupportingDocuments("f1")))))
+        Ok(checkYourAnswersPage(CompleteUploadSupportingDocuments(true, List(SupportingDocuments("1", "f1")))))
       case CompleteUploadSupportingDocuments(hasSupportingDocuments, uploadeddocs) => //FIXME: list value
-        Ok(checkYourAnswersPage(CompleteUploadSupportingDocuments(true, List(SupportingDocuments("f1")))))
+        Ok(checkYourAnswersPage(CompleteUploadSupportingDocuments(true, List(SupportingDocuments("2", "f1")))))
     }
 
 }

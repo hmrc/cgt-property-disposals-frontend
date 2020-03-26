@@ -58,8 +58,10 @@
             helpText = Some(Html(messages(s"$key.help-text"))),
             yesContent = None
         )
-            @submitButton(messages("button.saveAndContinue"))
-        }
+
+        @submitButton(messages("button.saveAndContinue"))
+
+    }
 
         @returnToSummaryLink(displayReturnToSummaryLink = true)
 
