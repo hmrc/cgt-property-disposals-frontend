@@ -717,12 +717,16 @@ returns.property-details.multipleDisposals.caption=Details of one property dispo
 
 property-details.multiple-disposals.guidance.title=You’ll need to enter details for one of the property disposals
 property-details.multiple-disposals.guidance.p1=You should enter the details of the property that gave you the largest gain or the smallest loss.
+property-details.multiple-disposals.guidance.agent.p1=You should enter the details of the property that gave your client the largest gain or the smallest loss.
+property-details.multiple-disposals.guidance.trust.p1=You should enter the details of the property that gave the trust the largest gain or the smallest loss.
 property-details.multiple-disposals.guidance.p2=For that one property, you’ll need to enter:
 property-details.multiple-disposals.guidance.li1=property’s UK address
 property-details.multiple-disposals.guidance.li2=contract exchange date
 property-details.multiple-disposals.guidance.li3=disposal amount, less disposal costs
 property-details.multiple-disposals.guidance.li4=acquisition amount, plus improvement and acquisition costs
 property-details.multiple-disposals.guidance.p3=Contract exchange usually happens when you and the buyer or new owner swap contracts and the buyer pays a deposit.
+property-details.multiple-disposals.guidance.agent.p3=Contract exchange usually happens when your client and the buyer or new owner swap contracts and the buyer pays a deposit.
+property-details.multiple-disposals.guidance.trust.p3=Contract exchange usually happens when the trust and the buyer or new owner swap contracts and the buyer pays a deposit.
 property-details.multiple-disposals.guidance.p4=You’ll also need to upload a document later providing details of the other properties you’re including in this return.
 
 enterPostcode.returns.singleDisposal.title=Find the address of the UK property you disposed of
@@ -1359,7 +1363,7 @@ multipleDisposalsDisposalPrice.error.tooSmall=Amount must a number more than 0 a
 multipleDisposalsAcquisitionPrice.title=What was the acquisition value of the property?
 multipleDisposalsAcquisitionPrice.helpText=This is the amount you paid when you bought the property or its market value if you inherited it or got it as a gift. You should add on any improvements or acquisition costs.
 multipleDisposalsAcquisitionPrice.link=What are improvement and acquisition costs?
-multipleDisposalsAcquisitionPrice.details.p1=You can include the cost of improvements that added value to the property. For example, if you built an extension or replaced a basic kitchen with a luxary one. You cannot claim for mortgage interest, decorating or maintenance.
+multipleDisposalsAcquisitionPrice.details.p1=You can include the cost of improvements that added value to the property. For example, if you built an extension or replaced a basic kitchen with a luxury one. You cannot claim for mortgage interest, decorating or maintenance.
 multipleDisposalsAcquisitionPrice.details.p2=Acquisition or buying costs include fees for surveyors or solicitors.
 multipleDisposalsAcquisitionPrice.details.p3=If you shared any of the costs, you can only claim your share.
 

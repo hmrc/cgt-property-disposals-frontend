@@ -348,7 +348,7 @@ class PropertyDetailsController @Inject() (
                   _ => controllers.returns.routes.TaskListController.taskList(),
                   _ => routes.PropertyDetailsController.checkYourAnswers()
                 )
-            Ok(multipleDisposalsGuidancePage(backLink))
+            Ok(multipleDisposalsGuidancePage(backLink, r.subscribedDetails.isATrust))
         }
     }
   }
