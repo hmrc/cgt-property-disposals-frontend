@@ -40,17 +40,17 @@
     <p>
         @messages(s"$key.telephone.title")
         <br />
-        <span class="bold">@messages(s"$key.telephone.number")</span>
+        <span class="bold">@viewConfig.hmrcTelephone</span>
     </p>
     <p>
         @messages(s"$key.outside-uk-telephone.title")
         <br />
-        <span class="bold">@messages(s"$key.outside-uk-telephone.number")</span>
+        <span class="bold">@viewConfig.outsideUkPhone</span>
     </p>
     <p>
         @messages(s"$key.phoneAgent.title")
         <br />
-        <span class="bold">@messages(s"$key.phoneAgent.number")</span>
+        <span class="bold">@viewConfig.agentDedicatedLine</span>
     </p>
 
     <br />
