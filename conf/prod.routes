@@ -9,6 +9,8 @@ GET /capital-gains-tax-uk-property/pay-total-outstanding                   uk.go
 GET  /capital-gains-tax-uk-property/upscan-initiate                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.upscan.UpscanController.upscan()
 POST /capital-gains-tax-uk-property/upload                                  uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.upscan.UpscanController.upload()
 
+GET   /exit/report-another-way                                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts.homepage.HomePageController.exitForSubsequentReturn()
+
 ->   /capital-gains-tax-uk-property                                         app.Routes
 ->   /capital-gains-tax-uk-property                                         accounts.Routes
 ->   /capital-gains-tax-uk-property                                         onboarding.Routes
