@@ -31,12 +31,13 @@ backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.component
 returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(form: Form[CompletionDate], backLink: Call, displayReturnToSummaryLink: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(form: Form[CompletionDate], backLink: Call, displayReturnToSummaryLink: Boolean, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
-@isAgent = @{ request.userType.contains(UserType.Agent) }
 @key = @{"completionDate"}
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
+@title = @{messages(s"$key$userKey.title")}
 @hasErrors = @{form.hasErrors}
-@title = @{messages(if (isAgent) "completionDate.agent.title" else "completionDate.title")}
 @errorKey = @{List("completionDate-day", "completionDate-month", "completionDate-year", "completionDate").map(form.error).find(_.isDefined).flatten}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
@@ -54,7 +55,7 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
    dayValue = form.data.get("completionDate-day"),
    monthValue = form.data.get("completionDate-month"),
    yearValue = form.data.get("completionDate-year"),
-   helpText = Some(Html(messages(if (isAgent) "completionDate.agent.helpText" else "completionDate.helpText"))),
+   helpText = Some(Html(messages(s"$key$userKey.helpText"))),
    labelAsHeading = true,
    errorKey = errorKey.map(e => s"${e.key}.${e.message}"),
    hasErrors = hasErrors

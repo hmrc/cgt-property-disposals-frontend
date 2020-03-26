@@ -62,8 +62,14 @@ class CheckAllAnswersAndSubmitController @Inject() (
 
   def checkAllAnswers(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withCompleteDraftReturn(request) {
-      case (_, _, completeReturn) =>
-        Ok(checkAllAnswersPage(completeReturn, rebasingEligibilityUtil))
+      case (_, fillingOutReturn, completeReturn) =>
+        Ok(
+          checkAllAnswersPage(
+            completeReturn,
+            rebasingEligibilityUtil,
+            fillingOutReturn.subscribedDetails.isATrust
+          )
+        )
     }
   }
 
