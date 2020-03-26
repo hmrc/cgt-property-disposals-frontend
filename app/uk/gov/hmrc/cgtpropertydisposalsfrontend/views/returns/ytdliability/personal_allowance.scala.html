@@ -38,6 +38,7 @@
 @taxYearStartYear = @{disposalDate.taxYear.startDateInclusive.getYear.toString}
 @taxYearEndYear = @{disposalDate.taxYear.endDateExclusive.getYear.toString}
 @personalAllowance = @{ MoneyUtils.formatAmountOfMoneyWithPoundSign(disposalDate.taxYear.personalAllowance.inPounds())}
+@higherIncomePersonalAllowanceThreshold = @{ MoneyUtils.formatAmountOfMoneyWithPoundSign(disposalDate.taxYear.higherIncomePersonalAllowanceThreshold.inPounds())}
 
 @title = @{messages(s"$key.title", taxYearStartYear, taxYearEndYear)}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
@@ -60,7 +61,7 @@
             hasErrors = form.error(key).nonEmpty,
             label = Html(title),
             labelAsHeading = true,
-            helpText = Some(Html(messages(s"$key.helpText", taxYearStartYear, taxYearEndYear, personalAllowance))),
+            helpText = Some(Html(messages(s"$key.helpText", taxYearStartYear, taxYearEndYear, personalAllowance, higherIncomePersonalAllowanceThreshold))),
             autoComplete = AutoCompleteType.On,
             inputClass = Some("small"),
             aspect = "left",

@@ -34,6 +34,7 @@
 
 @key = @{"hasEstimatedDetails"}
 @title = @{messages(s"$key.title")}
+@helpText = @{messages(s"$key.helpText")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
@@ -54,7 +55,7 @@
             errorKey = form.error(key).map(e => e.message),
             hasErrors = hasErrors,
             selected = form.value,
-            helpText = None,
+            helpText = Some(Html(helpText)),
             yesContent = Some(Html(messages(s"$key.yes.content")))
         )
         @submitButton(messages("button.saveAndContinue"))
