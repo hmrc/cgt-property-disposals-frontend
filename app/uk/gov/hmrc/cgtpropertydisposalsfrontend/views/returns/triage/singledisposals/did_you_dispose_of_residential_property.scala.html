@@ -33,13 +33,13 @@
 )
 
 
-@(form: Form[Boolean], backLink: Call, displayReturnToSummaryLink: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(form: Form[Boolean], backLink: Call, displayReturnToSummaryLink: Boolean, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
-@isAgent = @{ request.userType.contains(UserType.Agent) }
 @key = @{"didYouDisposeOfResidentialProperty"}
-@customErrorKey = @{if (isAgent) s"$key.agent" else s"$key"}
-@yesNoErrorKey = @{if (isAgent) "agent." else ""}
-@title = @{messages(if (isAgent) s"$key.agent.title" else s"$key.title")}
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
+@userErrorPrefix =  @{if (isAgent) "agent." else if (isATrust) "trust." else ""}
+@title = @{messages(s"$key$userKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 
@@ -48,7 +48,7 @@
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
-      @errorSummary(form, Some(s"$customErrorKey"))
+      @errorSummary(form, Some(s"$key$userKey"))
     }
 
     @formWrapper(controllers.returns.triage.routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialPropertySubmit(), 'novalidate -> "novalidate") {
@@ -56,10 +56,10 @@
             fieldId = key,
             label = pageHeading(title, Some(messages("triage.caption"))),
             labelAsHeading = true,
-            errorKey = form.error(key).map(e => s"$yesNoErrorKey${e.message}"),
+            errorKey = form.error(key).map(e => s"$userErrorPrefix${e.message}"),
             hasErrors = hasErrors,
             selected = form.value,
-            helpText = Some(Html(messages("didYouDisposeOfResidentialProperty.helpText")))
+            helpText = Some(Html(messages(s"$key.helpText")))
         )
 
         @details(messages("didYouDisposeOfResidentialProperty.details.summary"),

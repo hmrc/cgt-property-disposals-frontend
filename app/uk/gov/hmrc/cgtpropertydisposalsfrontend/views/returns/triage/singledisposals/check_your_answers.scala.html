@@ -28,7 +28,7 @@
         summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.singledisposals.summary
 )
 
-@(answers: CompleteSingleDisposalTriageAnswers, displayReturnToSummaryLink: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(answers: CompleteSingleDisposalTriageAnswers, displayReturnToSummaryLink: Boolean, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @title = @{messages("triage.check-your-answers.title")}
 
@@ -36,7 +36,7 @@
 
  @pageHeading(title, Some(messages("triage.caption")))
 
- @summary(answers)
+ @summary(answers, isATrust)
 
  @formWrapper(routes.SingleDisposalsTriageController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
   @submitButton(messages("button.confirmAndContinue"))

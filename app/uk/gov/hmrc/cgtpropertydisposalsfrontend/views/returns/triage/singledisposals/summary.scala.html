@@ -32,9 +32,10 @@ formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
 returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(answers: CompleteSingleDisposalTriageAnswers)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(answers: CompleteSingleDisposalTriageAnswers, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
 
 @cyaSection() {
   @answers.individualUserType.map{ individualUserType =>
@@ -53,13 +54,13 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
       "numberOfProperties"
   )
   @cyaRow(
-    messages(if (isAgent) "disposalMethod.agent.title" else "disposalMethod.title"),
+    messages(s"disposalMethod$userKey.title"),
     Html(messages(s"disposalMethod.${answers.disposalMethod.toString}")),
     Some(cyaChange(messages("triage.cyaChange.disposalMethod"), routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty().url)),
       "disposalMethod"
   )
   @cyaRow(
-    messages(if (isAgent) "wereYouAUKResident.agent.title" else "wereYouAUKResident.title"),
+    messages(s"wereYouAUKResident$userKey.title"),
     Html(messages(s"yesNo.${answers.countryOfResidence.isUk().toString}")),
     Some(cyaChange(messages("triage.cyaChange.wereYouAUKResident"), routes.SingleDisposalsTriageController.wereYouAUKResident().url)),
       "wereYouAUKResident"
