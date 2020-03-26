@@ -28,7 +28,6 @@
         submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
         formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
         backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
-        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
         singleDisposalTriageSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.singledisposals.summary,
         multipleDisposalsTriageSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.multipledisposals.summary,
         addressSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_disposal_summary,
@@ -114,7 +113,15 @@
   @submitButton(messages("button.acceptAndSend"))
  }
 
- @returnToSummaryLink(displayReturnToSummaryLink = true)
+ <p class="js-enabled">
+  <a href="JavaScript: window.print()">
+  @messages("viewReturn.printLink")
+  </a>
+ </p>
+
+  <a href="@{routes.ConfirmDraftReturnController.confirmDraftReturn().url}">@messages("task-list.save-and-come-back.link")</a>
+
+
 
 }
 
