@@ -42,29 +42,29 @@
     <p>@messages(s"$key.p3")</p>
 
     <p>
-        @messages("iv.insufficientEvidence.telephone.title")
+        @messages(s"$key.telephone.title")
         <br />
-        <span class="bold">@messages("iv.insufficientEvidence.telephone.number")</span>
+        <span class="bold">@messages(s"$key.telephone.number")</span>
     </p>
     <p>
-        @messages("iv.insufficientEvidence.outside-uk-telephone.title")
+        @messages(s"$key.outside-uk-telephone.title")
         <br />
-        <span class="bold">@messages("iv.insufficientEvidence.outside-uk-telephone.number")</span>
+        <span class="bold">@messages(s"$key.outside-uk-telephone.number")</span>
     </p>
     <p>
-        @messages("subsequentReturnExit.phoneAgent.title")
+        @messages(s"$key.phoneAgent.title")
         <br />
-        <span class="bold">@messages("subsequentReturnExit.phoneAgent.number")</span>
+        <span class="bold">@messages(s"$key.phoneAgent.number")</span>
     </p>
 
-    <p>@messages("iv.insufficientEvidence.openingTimes")</p>
-    <p>@messages("subsequentReturnExit.openingTimes.monToFri")
-    <p>@messages("subsequentReturnExit.closingTimes")</p>
+    <p>@messages(s"$key.openingTimes")</p>
+    <p>@messages(s"$key.openingTimes.monToFri")
+    <p>@messages(s"$key.closingTimes")</p>
 
     <p>
-        @messages("iv.insufficientEvidence.getHelp") <a href="@viewConfig.additionalNeedsUrl">@messages("iv.insufficientEvidence.additionalNeedsLink")</a>.
+        @messages(s"$key.getHelp") <a href="@viewConfig.additionalNeedsUrl">@messages(s"$key.additionalNeedsLink")</a>.
     </p>
 
-    <p><a href="@viewConfig.callChargesUrl">@messages("iv.insufficientEvidence.helpWithCallCharges")</a></p>
+    <p><a href="@viewConfig.callChargesUrl">@messages(s"$key.helpWithCallCharges")</a></p>
 
 }

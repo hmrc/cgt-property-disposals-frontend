@@ -56,7 +56,8 @@ class HomePageController @Inject() (
   homePage: views.html.account.home,
   privateBetaHomePage: views.html.account.home_private_beta,
   detailUpdatedPage: views.html.account.details_updated,
-  signedOutPage: views.html.account.signed_out
+  signedOutPage: views.html.account.signed_out,
+  subsequentReturnExitPage: views.html.returns.subsequent_return_exit
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -73,9 +74,11 @@ class HomePageController @Inject() (
 
   def startNewReturn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withSubscribedUser { (_, subscribed) =>
-      subscribed.sentReturns.nonEmpty match {
+      val exitFlag = (subscribed.sentReturns.nonEmpty || subscribed.draftReturns.nonEmpty)
+
+      exitFlag match {
         case true =>
-          Redirect(returns.routes.SubsequentReturnExitController.exitForSubsequentReturn())
+          Redirect(routes.HomePageController.exitForSubsequentReturn())
 
         case _ =>
           val redirectTo = subscribed.subscribedDetails
@@ -206,6 +209,10 @@ class HomePageController @Inject() (
           )
     }(withUplift = false)
 
+  }
+
+  def exitForSubsequentReturn(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
+    Ok(subsequentReturnExitPage())
   }
 
   private def withSubscribedUser(

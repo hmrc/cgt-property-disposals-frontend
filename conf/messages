@@ -1376,7 +1376,17 @@ subsequentReturnExit.p1=At the moment, only the first return for UK property sal
 subsequentReturnExit.p2=You’ll need to contact HMRC and ask for a paper return to be posted to you.
 subsequentReturnExit.p3=Have your National Insurance number or your Self Assessment Unique Taxpayer Reference to hand if you have one.
 
+subsequentReturnExit.openingTimes=Opening times:
 subsequentReturnExit.openingTimes.monToFri=8am to 4pm, Monday to Friday
 subsequentReturnExit.closingTimes=Closed Sundays and bank holidays.
 subsequentReturnExit.phoneAgent.title=Agent Dedicated Line:
 subsequentReturnExit.phoneAgent.number=0300 200 3311
+
+subsequentReturnExit.telephone.title=Telephone:
+subsequentReturnExit.telephone.number=0300 200 3300
+subsequentReturnExit.outside-uk-telephone.title=Outside UK:
+subsequentReturnExit.outside-uk-telephone.number=+44 135 535 9022
+
+subsequentReturnExit.getHelp=Get help
+subsequentReturnExit.additionalNeedsLink=dealing with HMRC if you have additional needs
+subsequentReturnExit.helpWithCallCharges=Find out about call charges
