@@ -78,7 +78,7 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
         )
 
         @if(isTrust) {
-          @details(messages(s"$key.details.1.header"), Html(messages(s"$key.details.1.body", appConfig.taxFreeAllowance)))
+          @details(messages(s"$key.details.1.header"), Html(messages(s"$key.details.1.body", appConfig.trustsTaxFreeAllowance)))
           @details(messages(s"$key.details.2.header"),  Html(messages(s"$key.details.2.body", appConfig.trustsForVulnerable)))
         } else {
           <p>@Html(messages(s"$key.link", appConfig.annualExemptAmountUrl))</p>

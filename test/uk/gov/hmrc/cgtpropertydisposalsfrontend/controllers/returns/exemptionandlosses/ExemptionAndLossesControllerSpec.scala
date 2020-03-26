@@ -975,9 +975,6 @@ class ExemptionAndLossesControllerSpec
             messageFromMessageKey(
               "annualExemptAmount.trust.title"
             ), { doc =>
-              doc.select("#annualExemptAmount-form-hint").text() contains messageFromMessageKey(
-                "annualExemptAmount.trust.helpText"
-              )
               doc.select("#content > article > form > p > a").text() contains messageFromMessageKey(
                 "annualExemptAmount.trust.link"
               )
