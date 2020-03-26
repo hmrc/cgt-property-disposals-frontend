@@ -1385,7 +1385,6 @@ class ReliefDetailsControllerSpec
             AmountInPence(0),
             Some(sample[OtherReliefs])
           )
-          forAll { completeAnswers: CompleteReliefDetailsAnswers =>
             inSequence {
               mockAuthWithNoRetrievals()
               mockGetSession(sessionWithReliefDetailsAnswers(completeAnswersWithoutResidentialRelief)._1)
@@ -1400,7 +1399,6 @@ class ReliefDetailsControllerSpec
                   .url
               }
             )
-          }
         }
       }
 
@@ -1523,6 +1521,9 @@ object ReliefDetailsControllerSpec extends Matchers {
           reliefDetailsAnswers.lettingsRelief.inPounds()
         )
       }
+    } else {
+      doc.select("#lettingsReliefValue-answer").hasText shouldBe false
+      doc.select("#lettingsRelief-answer").hasText shouldBe false
     }
 
     reliefDetailsAnswers.otherReliefs.foreach {
