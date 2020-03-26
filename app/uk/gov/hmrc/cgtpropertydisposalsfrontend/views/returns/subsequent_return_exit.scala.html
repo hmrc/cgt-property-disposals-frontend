@@ -1,0 +1,70 @@
+@*
+ * Copyright 2020 HM Revenue & Customs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *@
+
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
+
+@this(
+        mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+        pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+        backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link,
+        details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details,
+        formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+        caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+        returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
+)
+
+@()(implicit request:RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+
+@key=@{"subsequentReturnExit"}
+@title = @{messages(s"$key.title")}
+
+@mainTemplate(title = title, userType = request.userType, withSignOutLink = true) {
+
+    @pageHeading(title)
+    <p>@messages(s"$key.p1")</p>
+    <p>@messages(s"$key.p2")</p>
+    <p>@messages(s"$key.p3")</p>
+
+    <p>
+        @messages("iv.insufficientEvidence.telephone.title")
+        <br />
+        <span class="bold">@messages("iv.insufficientEvidence.telephone.number")</span>
+    </p>
+    <p>
+        @messages("iv.insufficientEvidence.outside-uk-telephone.title")
+        <br />
+        <span class="bold">@messages("iv.insufficientEvidence.outside-uk-telephone.number")</span>
+    </p>
+    <p>
+        @messages("subsequentReturnExit.phoneAgent.title")
+        <br />
+        <span class="bold">@messages("subsequentReturnExit.phoneAgent.number")</span>
+    </p>
+
+    <p>@messages("iv.insufficientEvidence.openingTimes")</p>
+    <p>@messages("subsequentReturnExit.openingTimes.monToFri")
+    <p>@messages("subsequentReturnExit.closingTimes")</p>
+
+    <p>
+        @messages("iv.insufficientEvidence.getHelp") <a href="@viewConfig.additionalNeedsUrl">@messages("iv.insufficientEvidence.additionalNeedsLink")</a>.
+    </p>
+
+    <p><a href="@viewConfig.callChargesUrl">@messages("iv.insufficientEvidence.helpWithCallCharges")</a></p>
+
+}

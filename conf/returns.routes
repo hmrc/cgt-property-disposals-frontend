@@ -22,3 +22,5 @@ GET   /pay-charge-in-return              uk.gov.hmrc.cgtpropertydisposalsfronten
 GET   /check-if-return-was-sent          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.submissionError()
 POST  /check-if-return-was-sent          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.submissionErrorSubmit()
 GET   /return-draft-confirmation         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ConfirmDraftReturnController.confirmDraftReturn()
+
+GET   /exit                              uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.SubsequentReturnExitController.exitForSubsequentReturn()

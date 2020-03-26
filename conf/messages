@@ -1368,3 +1368,13 @@ enterUPRN.postcode.helpText=If the property does not have a postcode enter the p
 enterUPRN-line1.error.required=Enter a UPRN
 enterUPRN-line1.error.tooLong=UPRN must be 12 numbers or less
 enterUPRN-line1.error.invalid=UPRN must only include numbers
+
+subsequentReturnExit.title=You’ll need to contact HMRC
+subsequentReturnExit.p1=At the moment, only the first return for UK property sale or disposal in the tax year can be submitted online.
+subsequentReturnExit.p2=You’ll need to contact HMRC and ask for a paper return to be posted to you.
+subsequentReturnExit.p3=Have your National Insurance number or your Self Assessment Unique Taxpayer Reference to hand if you have one.
+
+subsequentReturnExit.openingTimes.monToFri=8am to 4pm, Monday to Friday
+subsequentReturnExit.closingTimes=Closed Sundays and bank holidays.
+subsequentReturnExit.phoneAgent.title=Agent Dedicated Line:
+subsequentReturnExit.phoneAgent.number=0300 200 3311

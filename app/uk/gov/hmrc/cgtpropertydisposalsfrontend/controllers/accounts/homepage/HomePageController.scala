@@ -73,31 +73,37 @@ class HomePageController @Inject() (
 
   def startNewReturn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withSubscribedUser { (_, subscribed) =>
-      val redirectTo = subscribed.subscribedDetails
-        .userType()
-        .fold(
-          _ => triage.routes.CommonTriageQuestionsController.howManyProperties(),
-          _ => triage.routes.CommonTriageQuestionsController.whoIsIndividualRepresenting()
-        )
+      subscribed.sentReturns.nonEmpty match {
+        case true =>
+          Redirect(returns.routes.SubsequentReturnExitController.exitForSubsequentReturn())
 
-      updateSession(sessionStore, request)(
-        _.copy(
-          journeyStatus = Some(
-            StartingNewDraftReturn(
-              subscribed.subscribedDetails,
-              subscribed.ggCredId,
-              subscribed.agentReferenceNumber,
-              Right(IncompleteSingleDisposalTriageAnswers.empty)
+        case _ =>
+          val redirectTo = subscribed.subscribedDetails
+            .userType()
+            .fold(
+              _ => triage.routes.CommonTriageQuestionsController.howManyProperties(),
+              _ => triage.routes.CommonTriageQuestionsController.whoIsIndividualRepresenting()
             )
-          )
-        )
-      ).map {
-        case Left(e) =>
-          logger.warn("Could not update session", e)
-          errorHandler.errorResult()
 
-        case Right(_) =>
-          Redirect(redirectTo)
+          updateSession(sessionStore, request)(
+            _.copy(
+              journeyStatus = Some(
+                StartingNewDraftReturn(
+                  subscribed.subscribedDetails,
+                  subscribed.ggCredId,
+                  subscribed.agentReferenceNumber,
+                  Right(IncompleteSingleDisposalTriageAnswers.empty)
+                )
+              )
+            )
+          ).map {
+            case Left(e) =>
+              logger.warn("Could not update session", e)
+              errorHandler.errorResult()
+
+            case Right(_) =>
+              Redirect(redirectTo)
+          }
       }
     }(withUplift = false)
   }
