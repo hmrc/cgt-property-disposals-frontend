@@ -38,7 +38,10 @@
     <p>@messages(s"$key.p3")</p>
 
     <p>
-        @messages(s"$key.telephone.title")
+        <h2 class="heading-medium">@messages(s"$key.telephone.title")</h2>
+    </p>
+    <p>
+        @messages(s"$key.inside-uk-telephone.title")
         <br />
         <span class="bold">@viewConfig.hmrcTelephone</span>
     </p>
@@ -53,11 +56,11 @@
         <span class="bold">@viewConfig.agentDedicatedLine</span>
     </p>
 
-    <br />
-    <p>@messages(s"$key.openingTimes")</p>
+    <p>
+        <h2 class="heading-medium">@messages(s"$key.openingTimes.title")</h2>
+    </p>
     <p>@messages(s"$key.openingTimes.monToFri")
     <p>@messages(s"$key.closingTimes")</p>
-    <br />
 
     <p>
         @messages(s"$key.getHelp") <a href="@viewConfig.additionalNeedsUrl">@messages(s"$key.additionalNeedsLink")</a>.
