@@ -19,7 +19,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
-@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DisposalDate}
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
@@ -40,7 +40,6 @@ returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.compone
 @userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
 @title = @{messages(s"$key$userKey.title")}
 @hasErrors = @{form.hasErrors}
-@errorKey = @{List("disposalDate-day", "disposalDate-month", "disposalDate-year", "disposalDate").map(form.error).find(_.isDefined).flatten}
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
 
