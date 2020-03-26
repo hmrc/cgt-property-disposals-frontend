@@ -1406,7 +1406,7 @@ subsequentReturnExit.p3=Have your National Insurance number or your Self Assessm
 
 subsequentReturnExit.openingTimes=Opening times:
 subsequentReturnExit.openingTimes.monToFri=8am to 4pm, Monday to Friday
-subsequentReturnExit.closingTimes=Closed Sundays and bank holidays.
+subsequentReturnExit.closingTimes=Closed weekends and bank holidays
 subsequentReturnExit.phoneAgent.title=Agent Dedicated Line:
 subsequentReturnExit.phoneAgent.number=0300 200 3311
 
