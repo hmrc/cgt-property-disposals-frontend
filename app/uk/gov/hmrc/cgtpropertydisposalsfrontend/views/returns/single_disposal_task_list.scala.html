@@ -78,8 +78,8 @@
 }
 
 @reliefDetailsState = @{
-    (propertyAddressState, disposalDetailsState, acquistionDetailsState) match {
-        case (TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete) =>
+    (disposalDetailsState, acquistionDetailsState) match {
+        case (TaskListStatus.Complete, TaskListStatus.Complete) =>
             draftReturn.reliefDetailsAnswers.fold[TaskListStatus](TaskListStatus.ToDo)(_.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete))
         case _ => TaskListStatus.CannotStart
     }
@@ -95,8 +95,8 @@
 }
 
 @ytdLiabilityState = @{
-  (propertyAddressState, disposalDetailsState, acquistionDetailsState, reliefDetailsState, exemptionsAndLossesState) match {
-    case (TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete) =>
+  (disposalDetailsState, acquistionDetailsState, reliefDetailsState, exemptionsAndLossesState) match {
+    case (TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete, TaskListStatus.Complete) =>
       draftReturn.yearToDateLiabilityAnswers.fold[TaskListStatus](TaskListStatus.ToDo) {
           case c: CalculatedYTDAnswers    => c.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete)
           case n: NonCalculatedYTDAnswers => n.fold(_ => TaskListStatus.InProgress, _ => TaskListStatus.Complete)
