@@ -97,8 +97,8 @@ class YearToDateLiabilityControllerSpec
     ytdLiabilityAnswers: Option[YearToDateLiabilityAnswers],
     disposalDate: Option[DisposalDate],
     reliefDetailsAnswers: Option[ReliefDetailsAnswers] = Some(sample[CompleteReliefDetailsAnswers])
-  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) = {
-    val draftReturn = sample[SingleDisposalDraftReturn].copy(
+  ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
+    val draftReturn = sample[DraftSingleDisposalReturn].copy(
       triageAnswers              = sample[IncompleteSingleDisposalTriageAnswers].copy(disposalDate = disposalDate),
       reliefDetailsAnswers       = reliefDetailsAnswers,
       yearToDateLiabilityAnswers = ytdLiabilityAnswers
@@ -114,13 +114,13 @@ class YearToDateLiabilityControllerSpec
   def sessionWithSingleDisposalState(
     ytdLiabilityAnswers: YearToDateLiabilityAnswers,
     disposalDate: DisposalDate
-  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) =
+  ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) =
     sessionWithSingleDisposalState(Some(ytdLiabilityAnswers), Some(disposalDate))
 
   def sessionWithMultipleDisposalsState(
     ytdLiabilityAnswers: Option[YearToDateLiabilityAnswers]
-  ): (SessionData, FillingOutReturn, MultipleDisposalsDraftReturn) = {
-    val draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+  ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) = {
+    val draftReturn = sample[DraftMultipleDisposalsReturn].copy(
       yearToDateLiabilityAnswers = ytdLiabilityAnswers
     )
     val journey = sample[FillingOutReturn].copy(draftReturn = draftReturn)
@@ -133,15 +133,15 @@ class YearToDateLiabilityControllerSpec
 
   def sessionWithMultipleDisposalsState(
     ytdLiabilityAnswers: YearToDateLiabilityAnswers
-  ): (SessionData, FillingOutReturn, MultipleDisposalsDraftReturn) =
+  ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) =
     sessionWithMultipleDisposalsState(Some(ytdLiabilityAnswers))
 
   def singleDispsaslDraftReturnWithCompleteJourneys(
     yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
     disposalDate: DisposalDate,
     reliefDetailsAnswers: ReliefDetailsAnswers
-  ): SingleDisposalDraftReturn =
-    SingleDisposalDraftReturn(
+  ): DraftSingleDisposalReturn =
+    DraftSingleDisposalReturn(
       UUID.randomUUID(),
       sample[CompleteSingleDisposalTriageAnswers].copy(disposalDate = disposalDate),
       Some(sample[UkAddress]),
@@ -958,7 +958,7 @@ class YearToDateLiabilityControllerSpec
                   None
                 )
 
-              val draftReturn        = sample[SingleDisposalDraftReturn].copy(yearToDateLiabilityAnswers = Some(answers))
+              val draftReturn        = sample[DraftSingleDisposalReturn].copy(yearToDateLiabilityAnswers = Some(answers))
               val updatedDraftReturn = draftReturn.copy(yearToDateLiabilityAnswers                       = Some(updatedAnswers))
 
               testSuccessfulUpdatesAfterSubmit(
@@ -1173,8 +1173,8 @@ class YearToDateLiabilityControllerSpec
       val exemptionAndLossesAnswers = sample[CompleteExemptionAndLossesAnswers]
       val initialGainOrLossAnswers  = sample[AmountInPence]
 
-      def draftReturnWithAnswers(yearToDateLiabilityAnswers: YearToDateLiabilityAnswers): SingleDisposalDraftReturn =
-        sample[SingleDisposalDraftReturn].copy(
+      def draftReturnWithAnswers(yearToDateLiabilityAnswers: YearToDateLiabilityAnswers): DraftSingleDisposalReturn =
+        sample[DraftSingleDisposalReturn].copy(
           triageAnswers              = triageAnswers,
           disposalDetailsAnswers     = Some(disposalDetailsAnswers),
           acquisitionDetailsAnswers  = Some(acquisitionDetailsAnswers),
@@ -1318,7 +1318,7 @@ class YearToDateLiabilityControllerSpec
         def test(
           answers: YearToDateLiabilityAnswers,
           subscribedDetails: SubscribedDetails,
-          mockCalculateTaxDue: (FillingOutReturn, SingleDisposalDraftReturn) => Unit,
+          mockCalculateTaxDue: (FillingOutReturn, DraftSingleDisposalReturn) => Unit,
           backLink: Call
         ): Unit = {
           val draftReturn = draftReturnWithAnswers(answers)
@@ -2483,7 +2483,7 @@ class YearToDateLiabilityControllerSpec
 
     "redirect to the task list page" when {
 
-      def test(draftReturn: SingleDisposalDraftReturn): Unit = {
+      def test(draftReturn: DraftSingleDisposalReturn): Unit = {
         val session = SessionData.empty.copy(
           journeyStatus = Some(
             sample[FillingOutReturn].copy(draftReturn = draftReturn)

@@ -59,7 +59,7 @@
 
 @if((isUk && !isRebasing) || !isUk) {
 @cyaRow(
-      messages("acquisitionPriceBought.title"),
+    acquisitionMethodAndPriceTitle._2,
       Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.acquisitionPrice.inPounds())),
       Some(cyaChange(messages("acquisitionDetails.cyaChange.acquisitionPrice"), routes.AcquisitionDetailsController.acquisitionPrice().url)),
       "acquisitionPrice"

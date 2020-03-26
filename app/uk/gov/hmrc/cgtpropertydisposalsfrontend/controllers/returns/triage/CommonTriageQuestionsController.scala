@@ -347,7 +347,7 @@ class CommonTriageQuestionsController @Inject() (
           _.copy(newReturnTriageAnswers = Right(newTriageAnswers)),
           fillingOutReturn =>
             fillingOutReturn.copy(
-              draftReturn = SingleDisposalDraftReturn(
+              draftReturn = DraftSingleDisposalReturn(
                 fillingOutReturn.draftReturn.id,
                 newTriageAnswers,
                 None,
@@ -374,7 +374,7 @@ class CommonTriageQuestionsController @Inject() (
           fillingOutReturn =>
             fillingOutReturn.copy(
               draftReturn =
-                MultipleDisposalsDraftReturn.newDraftReturn(fillingOutReturn.draftReturn.id, newTriageAnswers)
+                DraftMultipleDisposalsReturn.newDraftReturn(fillingOutReturn.draftReturn.id, newTriageAnswers)
             )
         )
     }

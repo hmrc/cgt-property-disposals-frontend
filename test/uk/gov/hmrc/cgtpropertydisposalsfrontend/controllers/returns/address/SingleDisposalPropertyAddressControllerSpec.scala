@@ -39,7 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcod
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, SingleDisposalDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DraftSingleDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 
@@ -52,8 +52,8 @@ class SingleDisposalPropertyDetailsControllerSpec
     with RedirectToStartBehaviour
     with ReturnsServiceSupport {
 
-  val draftReturn: SingleDisposalDraftReturn =
-    sample[SingleDisposalDraftReturn].copy(
+  val draftReturn: DraftSingleDisposalReturn =
+    sample[DraftSingleDisposalReturn].copy(
       triageAnswers   = sample[CompleteSingleDisposalTriageAnswers].copy(assetType = AssetType.Residential),
       propertyAddress = Some(ukAddress(1))
     )
@@ -291,7 +291,7 @@ class SingleDisposalPropertyDetailsControllerSpec
       "display the page" when {
 
         def test(
-          draftReturn: SingleDisposalDraftReturn,
+          draftReturn: DraftSingleDisposalReturn,
           expectedBackLink: Call
         ): Unit = {
           inSequence {
@@ -322,7 +322,7 @@ class SingleDisposalPropertyDetailsControllerSpec
 
         "the user disposed of a non-residential property and the section is not complete" in {
           test(
-            sample[SingleDisposalDraftReturn].copy(
+            sample[DraftSingleDisposalReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
                 assetType = AssetType.NonResidential
               ),
@@ -334,7 +334,7 @@ class SingleDisposalPropertyDetailsControllerSpec
 
         "the user disposed of a non-residential property and the section is complete" in {
           test(
-            sample[SingleDisposalDraftReturn].copy(
+            sample[DraftSingleDisposalReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
                 assetType = AssetType.NonResidential
               ),
@@ -357,7 +357,7 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       behave like redirectWhenNotNonResidentialAssetTypeBehaviour(() => performAction())
 
-      val nonResidentialPropertyDraftReturn = sample[SingleDisposalDraftReturn].copy(
+      val nonResidentialPropertyDraftReturn = sample[DraftSingleDisposalReturn].copy(
         triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
           assetType = AssetType.NonResidential
         )
@@ -444,7 +444,7 @@ class SingleDisposalPropertyDetailsControllerSpec
       "display the page" when {
 
         def test(
-          draftReturn: SingleDisposalDraftReturn,
+          draftReturn: DraftSingleDisposalReturn,
           expectedBackLink: Call
         ): Unit = {
           inSequence {
@@ -475,7 +475,7 @@ class SingleDisposalPropertyDetailsControllerSpec
 
         "the user disposed of a non-residential property and the section is not complete" in {
           test(
-            sample[SingleDisposalDraftReturn].copy(
+            sample[DraftSingleDisposalReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
                 assetType = AssetType.NonResidential
               ),
@@ -487,7 +487,7 @@ class SingleDisposalPropertyDetailsControllerSpec
 
         "the user disposed of a non-residential property and the section is complete" in {
           test(
-            sample[SingleDisposalDraftReturn].copy(
+            sample[DraftSingleDisposalReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
                 assetType = AssetType.NonResidential
               ),
@@ -518,7 +518,7 @@ class SingleDisposalPropertyDetailsControllerSpec
 
       behave like redirectWhenNotNonResidentialAssetTypeBehaviour(() => performAction())
 
-      val nonResidentialPropertyDraftReturn = sample[SingleDisposalDraftReturn].copy(
+      val nonResidentialPropertyDraftReturn = sample[DraftSingleDisposalReturn].copy(
         triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
           assetType = AssetType.NonResidential
         ),
@@ -727,7 +727,7 @@ class SingleDisposalPropertyDetailsControllerSpec
             SessionData.empty.copy(
               journeyStatus = Some(
                 sample[FillingOutReturn].copy(
-                  draftReturn = sample[SingleDisposalDraftReturn].copy(
+                  draftReturn = sample[DraftSingleDisposalReturn].copy(
                     triageAnswers = sample[IncompleteSingleDisposalTriageAnswers].copy(assetType = None)
                   )
                 )
@@ -750,7 +750,7 @@ class SingleDisposalPropertyDetailsControllerSpec
             SessionData.empty.copy(
               journeyStatus = Some(
                 sample[FillingOutReturn].copy(
-                  draftReturn = sample[SingleDisposalDraftReturn].copy(
+                  draftReturn = sample[DraftSingleDisposalReturn].copy(
                     triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
                       assetType = AssetType.Residential
                     )

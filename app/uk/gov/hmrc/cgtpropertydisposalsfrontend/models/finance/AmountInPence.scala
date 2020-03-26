@@ -43,6 +43,8 @@ object AmountInPence {
 
     def isNegative: Boolean = a < AmountInPence.zero
 
+    def isPositive: Boolean = a > AmountInPence.zero
+
     def isZero: Boolean = a.value === 0L
 
     def abs(): AmountInPence = if (a.isNegative) AmountInPence(-a.value) else a

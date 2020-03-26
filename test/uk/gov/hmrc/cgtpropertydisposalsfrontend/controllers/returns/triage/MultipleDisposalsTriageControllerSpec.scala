@@ -83,7 +83,7 @@ class MultipleDisposalsTriageControllerSpec
 
   def isValidJourney(journeyStatus: JourneyStatus): Boolean = journeyStatus match {
     case r: StartingNewDraftReturn if (r.newReturnTriageAnswers.isLeft) => true
-    case FillingOutReturn(_, _, _, _: MultipleDisposalsDraftReturn)     => true
+    case FillingOutReturn(_, _, _, _: DraftMultipleDisposalsReturn)     => true
     case _                                                              => false
   }
 
@@ -105,8 +105,8 @@ class MultipleDisposalsTriageControllerSpec
 
   def sessionDataWithFillingOutReturn(
     multipleDisposalsAnswers: MultipleDisposalsTriageAnswers
-  ): (SessionData, FillingOutReturn, MultipleDisposalsDraftReturn) = {
-    val draftReturn = sample[MultipleDisposalsDraftReturn].copy(triageAnswers = multipleDisposalsAnswers)
+  ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) = {
+    val draftReturn = sample[DraftMultipleDisposalsReturn].copy(triageAnswers = multipleDisposalsAnswers)
     val journey     = sample[FillingOutReturn].copy(draftReturn               = draftReturn)
     val session = SessionData.empty.copy(
       journeyStatus = Some(journey)
@@ -3027,7 +3027,7 @@ class MultipleDisposalsTriageControllerSpec
         val completeAnswers    = sample[CompleteMultipleDisposalsTriageAnswers]
         val (session, journey) = sessionDataWithStartingNewDraftReturn(completeAnswers)
         val draftId            = UUID.randomUUID()
-        val newDraftReturn     = MultipleDisposalsDraftReturn.newDraftReturn(draftId, completeAnswers)
+        val newDraftReturn     = DraftMultipleDisposalsReturn.newDraftReturn(draftId, completeAnswers)
         val newJourney = FillingOutReturn(
           journey.subscribedDetails,
           journey.ggCredId,

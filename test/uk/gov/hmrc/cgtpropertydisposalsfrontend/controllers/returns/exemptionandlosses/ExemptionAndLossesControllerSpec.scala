@@ -75,9 +75,9 @@ class ExemptionAndLossesControllerSpec
   def sessionWithSingleDisposalsState(
     answers: Option[ExemptionAndLossesAnswers],
     disposalDate: Option[DisposalDate]
-  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) = {
+  ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
     val draftReturn =
-      sample[SingleDisposalDraftReturn].copy(
+      sample[DraftSingleDisposalReturn].copy(
         triageAnswers = sample[IncompleteSingleDisposalTriageAnswers].copy(
           disposalDate = disposalDate
         ),
@@ -96,15 +96,15 @@ class ExemptionAndLossesControllerSpec
   def sessionWithSingleDisposalState(
     answers: ExemptionAndLossesAnswers,
     disposalDate: DisposalDate
-  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) =
+  ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) =
     sessionWithSingleDisposalsState(Some(answers), Some(disposalDate))
 
   def sessionWithMultipleDisposalsState(
     answers: Option[ExemptionAndLossesAnswers],
     disposalDate: Option[DisposalDate]
-  ): (SessionData, FillingOutReturn, MultipleDisposalsDraftReturn) = {
+  ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) = {
     val draftReturn =
-      sample[MultipleDisposalsDraftReturn].copy(
+      sample[DraftMultipleDisposalsReturn].copy(
         examplePropertyDetailsAnswers =
           Some(sample[IncompleteExamplePropertyDetailsAnswers].copy(disposalDate = disposalDate)),
         exemptionAndLossesAnswers = answers
@@ -122,7 +122,7 @@ class ExemptionAndLossesControllerSpec
   def sessionWithMultipleDisposalsState(
     answers: ExemptionAndLossesAnswers,
     disposalDate: DisposalDate
-  ): (SessionData, FillingOutReturn, MultipleDisposalsDraftReturn) =
+  ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) =
     sessionWithMultipleDisposalsState(Some(answers), Some(disposalDate))
 
   "AcquisitionDetailsController" when {

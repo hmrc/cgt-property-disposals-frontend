@@ -44,7 +44,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionMethod, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 
@@ -84,7 +84,7 @@ class AcquisitionDetailsControllerSpec
     assetType: AssetType,
     wasUkResident: Boolean,
     disposalDate: DisposalDate = sample[DisposalDate]
-  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) =
+  ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) =
     sessionWithState(Some(answers), Some(assetType), Some(wasUkResident), Some(disposalDate))
 
   def sessionWithState(
@@ -92,9 +92,9 @@ class AcquisitionDetailsControllerSpec
     assetType: Option[AssetType],
     wasUkResident: Option[Boolean],
     disposalDate: Option[DisposalDate]
-  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) = {
+  ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
     val draftReturn =
-      sample[SingleDisposalDraftReturn].copy(
+      sample[DraftSingleDisposalReturn].copy(
         triageAnswers = sample[IncompleteSingleDisposalTriageAnswers].copy(
           assetType      = assetType,
           wasAUKResident = wasUkResident,
@@ -2482,7 +2482,7 @@ class AcquisitionDetailsControllerSpec
 
       "redirect to the rebased acquisition price page" when {
 
-        "the question has not been answered and the user meets the rebasing crieria" when {
+        "the question has not been answered and the user meets the rebasing criteria" when {
 
           "the user was a uk resident and is disposing a residential property" in {
             testRedirectOnMissingData(
@@ -2747,6 +2747,53 @@ class AcquisitionDetailsControllerSpec
                 .url
             }
           )
+        }
+
+        "display correct questions on check your answers" when {
+
+          "The question for the acquisition on the cya is correct for all acquisition methods" in {
+            val date = LocalDate.now()
+            List(
+              (AcquisitionMethod.Bought, messages("acquisitionPriceBought.title")),
+              (
+                AcquisitionMethod.Inherited,
+                messages("acquisitionPriceNotBought.title", LocalDateUtils.govDisplayFormat(date))
+              ),
+              (
+                AcquisitionMethod.Gifted,
+                messages("acquisitionPriceNotBought.title", LocalDateUtils.govDisplayFormat(date))
+              ),
+              (
+                AcquisitionMethod.Other("test"),
+                messages("acquisitionPriceNotBought.title", LocalDateUtils.govDisplayFormat(date))
+              )
+            ).foreach {
+              case (method, expectedTitle) =>
+                withClue(s"For $method and $expectedTitle") {
+                  val nonUkRebasing = CompleteAcquisitionDetailsAnswers(
+                    method,
+                    AcquisitionDate(date),
+                    sample[AmountInPence],
+                    Some(sample[AmountInPence]),
+                    sample[AmountInPence],
+                    sample[AmountInPence],
+                    false
+                  )
+                  val assetType = AssetType.NonResidential
+                  inSequence {
+                    mockAuthWithNoRetrievals()
+                    mockGetSession(sessionWithState(nonUkRebasing, assetType, false)._1)
+                  }
+
+                  checkPageIsDisplayed(
+                    performAction(),
+                    messageFromMessageKey("acquisitionDetails.cya.title"), { doc =>
+                      doc.select("#acquisitionPrice-question").text() shouldBe expectedTitle
+                    }
+                  )
+                }
+            }
+          }
         }
       }
 

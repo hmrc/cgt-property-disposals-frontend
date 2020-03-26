@@ -32,17 +32,19 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitControllerSpec.validateAllCheckYourAnswersSections
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitControllerSpec._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.ViewingReturn
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{Subscribed, ViewingReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.LocalDateUtils.govShortDisplayFormat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.ChargeType.{PenaltyInterest, UkResidentReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.PaymentMethod.DirectDebit
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReturnSummary
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, UserType}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -168,36 +170,79 @@ class ViewReturnControllerSpec
         }
       )
 
-      "display the page" in {
-        forAll { sampleViewingReturn: ViewingReturn =>
-          val viewingReturn = sampleViewingReturn.copy(returnSummary = sentReturn)
-          val userType      = if (sampleViewingReturn.agentReferenceNumber.isDefined) Some(UserType.Agent) else None
-          inSequence {
-            mockAuthWithNoRetrievals()
-            mockGetSession(SessionData.empty.copy(journeyStatus = Some(viewingReturn), userType = userType))
-          }
+      "display the page for a single disposal journey" in {
+        forAll {
+          (
+            completeSingleDisposalReturn: CompleteSingleDisposalReturn,
+            agentReferenceNumber: Option[AgentReferenceNumber]
+          ) =>
+            val sampleViewingReturn = sample[ViewingReturn]
+              .copy(completeReturn = completeSingleDisposalReturn, agentReferenceNumber = agentReferenceNumber)
+            val viewingReturn = sampleViewingReturn.copy(returnSummary = sentReturn)
+            val userType      = if (agentReferenceNumber.isDefined) Some(UserType.Agent) else None
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(SessionData.empty.copy(journeyStatus = Some(viewingReturn), userType = userType))
+            }
 
-          val result   = performAction()
-          val document = Jsoup.parse(contentAsString(result))
+            val result   = performAction()
+            val document = Jsoup.parse(contentAsString(result))
 
-          document
-            .select("#content > article > div.govuk-box-highlight.govuk-box-highlight--status > h1")
-            .text() shouldBe messageFromMessageKey(
-            "viewReturn.title"
-          )
-          document.select("#heading-reference").text() shouldBe viewingReturn.returnSummary.submissionId
-          document.select("#heading-tax-owed").text() shouldBe MoneyUtils.formatAmountOfMoneyWithPoundSign(
-            viewingReturn.returnSummary.mainReturnChargeAmount.withFloorZero.inPounds()
-          )
+            document
+              .select("#content > article > div.govuk-box-highlight.govuk-box-highlight--status > h1")
+              .text() shouldBe messageFromMessageKey(
+              "viewReturn.title"
+            )
+            document.select("#heading-reference").text() shouldBe viewingReturn.returnSummary.submissionId
+            document.select("#heading-tax-owed").text() shouldBe MoneyUtils.formatAmountOfMoneyWithPoundSign(
+              viewingReturn.returnSummary.mainReturnChargeAmount.withFloorZero.inPounds()
+            )
 
-          validatePaymentsSection(document, viewingReturn)
-          validateAllCheckYourAnswersSections(
-            document,
-            viewingReturn.completeReturn,
-            userType,
-            rebasingUtil.isUk(viewingReturn.completeReturn),
-            rebasingUtil.isEligibleForRebase(viewingReturn.completeReturn)
-          )
+            validatePaymentsSection(document, viewingReturn)
+            validateSingleDisposalCheckAllYourAnswersSections(
+              document,
+              completeSingleDisposalReturn,
+              userType,
+              rebasingUtil.isUk(completeSingleDisposalReturn),
+              rebasingUtil.isEligibleForRebase(completeSingleDisposalReturn)
+            )
+        }
+      }
+
+      "display the page for a multiple disposals journey" in {
+        forAll {
+          (
+            completeMultipleDisposalsReturn: CompleteMultipleDisposalsReturn,
+            agentReferenceNumber: Option[AgentReferenceNumber]
+          ) =>
+            val sampleViewingReturn = sample[ViewingReturn]
+              .copy(completeReturn = completeMultipleDisposalsReturn, agentReferenceNumber = agentReferenceNumber)
+            val viewingReturn = sampleViewingReturn.copy(returnSummary = sentReturn)
+            val userType      = if (agentReferenceNumber.isDefined) Some(UserType.Agent) else None
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(SessionData.empty.copy(journeyStatus = Some(viewingReturn), userType = userType))
+            }
+
+            val result   = performAction()
+            val document = Jsoup.parse(contentAsString(result))
+
+            document
+              .select("#content > article > div.govuk-box-highlight.govuk-box-highlight--status > h1")
+              .text() shouldBe messageFromMessageKey(
+              "viewReturn.title"
+            )
+            document.select("#heading-reference").text() shouldBe viewingReturn.returnSummary.submissionId
+            document.select("#heading-tax-owed").text() shouldBe MoneyUtils.formatAmountOfMoneyWithPoundSign(
+              viewingReturn.returnSummary.mainReturnChargeAmount.withFloorZero.inPounds()
+            )
+
+            validatePaymentsSection(document, viewingReturn)
+            validateMultipleDisposalsCheckAllYourAnswersSections(
+              document,
+              completeMultipleDisposalsReturn,
+              userType
+            )
         }
       }
 

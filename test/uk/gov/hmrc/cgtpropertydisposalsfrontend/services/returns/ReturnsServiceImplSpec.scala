@@ -32,6 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.CompleteSingleDisposalReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.ReturnCharge
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
@@ -96,7 +97,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
     "handling requests to store draft returns" must {
 
-      val draftReturn  = sample[SingleDisposalDraftReturn]
+      val draftReturn  = sample[DraftSingleDisposalReturn]
       val cgtReference = sample[CgtReference]
 
       "return an error" when {
@@ -151,7 +152,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
       "return an ok response" when {
 
-        val draftReturnsResponse = GetDraftReturnResponse(List(sample[SingleDisposalDraftReturn]))
+        val draftReturnsResponse = GetDraftReturnResponse(List(sample[DraftSingleDisposalReturn]))
 
         "the http call came back with a 200 and the body can be parsed" in {
           mockGetDraftReturns(cgtReference)(Right(HttpResponse(OK, Some(Json.toJson(draftReturnsResponse)))))
@@ -170,7 +171,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
 
           "the draft return is a single disposal draft return and" when {
 
-            val draftReturn = sample[SingleDisposalDraftReturn].copy(
+            val draftReturn = sample[DraftSingleDisposalReturn].copy(
               triageAnswers   = triageAnswers,
               propertyAddress = Some(address)
             )
@@ -356,7 +357,7 @@ class ReturnsServiceImplSpec extends WordSpec with Matchers with MockFactory {
       "return a list of returns" when {
 
         "the response body can be parsed and converted" in {
-          val completeReturn = sample[CompleteSingleDisposalReturn]
+          val completeReturn: CompleteReturn = sample[CompleteSingleDisposalReturn]
           mockDisplayReturn(cgtReference, submissionId)(Right(HttpResponse(200, Some(Json.toJson(completeReturn)))))
 
           await(service.displayReturn(cgtReference, submissionId).value) shouldBe Right(completeReturn)
