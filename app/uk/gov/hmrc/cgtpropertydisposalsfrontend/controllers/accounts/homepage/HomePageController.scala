@@ -56,7 +56,8 @@ class HomePageController @Inject() (
   homePage: views.html.account.home,
   privateBetaHomePage: views.html.account.home_private_beta,
   detailUpdatedPage: views.html.account.details_updated,
-  signedOutPage: views.html.account.signed_out
+  signedOutPage: views.html.account.signed_out,
+  subsequentReturnExitPage: views.html.returns.subsequent_return_exit
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
     with WithAuthAndSessionDataAction
@@ -73,31 +74,39 @@ class HomePageController @Inject() (
 
   def startNewReturn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withSubscribedUser { (_, subscribed) =>
-      val redirectTo = subscribed.subscribedDetails
-        .userType()
-        .fold(
-          _ => triage.routes.CommonTriageQuestionsController.howManyProperties(),
-          _ => triage.routes.CommonTriageQuestionsController.whoIsIndividualRepresenting()
-        )
+      val exitFlag = (subscribed.sentReturns.nonEmpty || subscribed.draftReturns.nonEmpty)
 
-      updateSession(sessionStore, request)(
-        _.copy(
-          journeyStatus = Some(
-            StartingNewDraftReturn(
-              subscribed.subscribedDetails,
-              subscribed.ggCredId,
-              subscribed.agentReferenceNumber,
-              Right(IncompleteSingleDisposalTriageAnswers.empty)
+      exitFlag match {
+        case true =>
+          Redirect(routes.HomePageController.exitForSubsequentReturn())
+
+        case _ =>
+          val redirectTo = subscribed.subscribedDetails
+            .userType()
+            .fold(
+              _ => triage.routes.CommonTriageQuestionsController.howManyProperties(),
+              _ => triage.routes.CommonTriageQuestionsController.whoIsIndividualRepresenting()
             )
-          )
-        )
-      ).map {
-        case Left(e) =>
-          logger.warn("Could not update session", e)
-          errorHandler.errorResult()
 
-        case Right(_) =>
-          Redirect(redirectTo)
+          updateSession(sessionStore, request)(
+            _.copy(
+              journeyStatus = Some(
+                StartingNewDraftReturn(
+                  subscribed.subscribedDetails,
+                  subscribed.ggCredId,
+                  subscribed.agentReferenceNumber,
+                  Right(IncompleteSingleDisposalTriageAnswers.empty)
+                )
+              )
+            )
+          ).map {
+            case Left(e) =>
+              logger.warn("Could not update session", e)
+              errorHandler.errorResult()
+
+            case Right(_) =>
+              Redirect(redirectTo)
+          }
       }
     }(withUplift = false)
   }
@@ -200,6 +209,10 @@ class HomePageController @Inject() (
           )
     }(withUplift = false)
 
+  }
+
+  def exitForSubsequentReturn(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
+    Ok(subsequentReturnExitPage(routes.HomePageController.homepage()))
   }
 
   private def withSubscribedUser(

@@ -39,10 +39,12 @@
 
         @summary(answers)
 
-        Html("<a href="url">Add another file</span></a>")
+        <a href="url">Add another file</span></a>
 
         @formWrapper(routes.UploadSupportingDocumentsController.checkYourAnswersSubmit(), 'novalidate -> "novalidate") {
+
             @submitButton(messages("button.confirmAndContinue"))
-        }
 
     }
+
+}

@@ -31,7 +31,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.uploadsupportingdocs.UploadSupportingDocumentsController.hasSupportingDocsToUploadForm
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingDocuments.{CompleteUploadSupportingDocuments, IncompleteUploadSupportingDocuments}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingDocuments.{CompleteUploadSupportingDocuments, IncompleteUploadSupportingDocuments, SupportingDocuments}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftReturn, DraftSingleDisposalReturn, UploadSupportingDocuments}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
@@ -276,9 +276,11 @@ class UploadSupportingDocumentsController @Inject() (
   )(implicit request: RequestWithSessionData[_]): Future[Result] =
     answers match {
       case IncompleteUploadSupportingDocuments(hasSupportingDocuments) =>
-        Redirect(routes.UploadSupportingDocumentsController.hasSupportingDocsToUpload())
+        //Redirect(routes.UploadSupportingDocumentsController.hasSupportingDocsToUpload())
+        //Redirect(routes.UploadSupportingDocumentsController.checkYourAnswers())
+        Ok(checkYourAnswersPage(CompleteUploadSupportingDocuments(true, List(SupportingDocuments("f1")))))
       case CompleteUploadSupportingDocuments(hasSupportingDocuments, uploadeddocs) => //FIXME: list value
-        Ok("checkYourAnswersPage(c)") //TODO: needs to be enriched to show all the docs uploaded
+        Ok(checkYourAnswersPage(CompleteUploadSupportingDocuments(true, List(SupportingDocuments("f1")))))
     }
 
 }

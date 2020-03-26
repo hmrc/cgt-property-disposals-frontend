@@ -20,32 +20,40 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.UploadSupportingDocuments.CompleteUploadSupportingDocuments
 
 @this(
-    cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
-    cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
-    cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
+cyaSection: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_section,
+cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row,
+cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change
 )
 
 @(answers: CompleteUploadSupportingDocuments)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
 
- @key = @{"uploadDocumentsWithSupportingDocuments.check-your-answers"}
+@key = @{"uploadDocumentsWithSupportingDocuments.check-your-answers"}
 
-     @title = @{messages(s"$key.title")}
+@title = @{messages(s"$key.title")}
 
-      @cyaSection() {
+@hasSupportingDocs = @{
+ answers.hasSupportingDocuments match {
+   case true => "Yes"
+   case false => "No"
+}
+}
 
-        @cyaRow(
-            messages("uploadDocumentsWithSupportingDocuments.check-your-answers.do-you-want-to-upload-documents"),
-            Html(answers.hasSupportingDocuments.toString),
-            Some(cyaChange(messages("uploadDocumentsWithSupportingDocuments.check-your-answers.cya-change"), routes.UploadSupportingDocumentsController.hasSupportingDocsToUpload().url)),
-            "do-you-want-to-upload-supporting-evidence-value"
-        )
+@cyaSection() {
 
-        @for((doc, fileIndex) <- answers.documents.zipWithIndex) {
-            @cyaRow(
-               "Supporting Evidence File " + fileIndex.toString,
-               Html(doc.fileName),
-               Some(cyaChange(messages(s"$key.cya-change"), routes.UploadSupportingDocumentsController.changeOrDeleteFile().url)),
-               s"supporting-document-$fileIndex-value"
-            )
-        }
+@cyaRow(
+messages("uploadDocumentsWithSupportingDocuments.check-your-answers.do-you-want-to-upload-documents"),
+Html(hasSupportingDocs),
+Some(cyaChange(messages("uploadDocumentsWithSupportingDocuments.check-your-answers.cya-change"), routes.UploadSupportingDocumentsController.hasSupportingDocsToUpload().url)),
+"do-you-want-to-upload-supporting-evidence-value"
+)
+
+@for((doc, fileIndex) <- answers.documents.zipWithIndex) {
+@cyaRow(
+"Supporting evidence file " + (fileIndex + 1).toString,
+Html(doc.fileName),
+Some(cyaChange(messages(s"$key.cya-change"), routes.UploadSupportingDocumentsController.changeOrDeleteFile().url)),
+s"supporting-document-$fileIndex-value"
+)
+}
+
 }

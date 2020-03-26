@@ -785,7 +785,10 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
       "show an error page" when {
 
         "there is an error updating the session" in {
-          val subscribed = sample[Subscribed]
+          val subscribed = sample[Subscribed].copy(
+            draftReturns = List.empty,
+            sentReturns  = List.empty
+          )
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -812,7 +815,11 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
 
         "the subscribed user type is individual" in {
           val subscribed = sample[Subscribed]
-            .copy(subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])))
+            .copy(
+              subscribedDetails = sample[SubscribedDetails].copy(name = Right(sample[IndividualName])),
+              draftReturns      = List.empty,
+              sentReturns       = List.empty
+            )
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -842,8 +849,11 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
       "redirect to the number of disposals page" when {
 
         "the subscribed user type is trust" in {
-          val subscribed =
-            sample[Subscribed].copy(subscribedDetails = sample[SubscribedDetails].copy(name = Left(sample[TrustName])))
+          val subscribed = sample[Subscribed].copy(
+            subscribedDetails = sample[SubscribedDetails].copy(name = Left(sample[TrustName])),
+            draftReturns      = List.empty,
+            sentReturns       = List.empty
+          )
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -865,6 +875,90 @@ class PublicBetaHomePageControllerSpec extends HomePageControllerSpec with I18nS
           checkIsRedirect(
             performAction(),
             controllers.returns.triage.routes.CommonTriageQuestionsController.howManyProperties()
+          )
+        }
+
+      }
+
+      "redirect to the subsequent return exit page" when {
+
+        "the session has a draft return" in {
+          val subscribed = sample[Subscribed].copy(
+            subscribedDetails = sample[SubscribedDetails].copy(name = Left(sample[TrustName])),
+            sentReturns       = List.empty
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionDataWithSubscribed(subscribed))
+          }
+
+          checkIsRedirect(
+            performAction(),
+            routes.HomePageController.exitForSubsequentReturn()
+          )
+        }
+
+        "there is a submitted return" in {
+          val subscribed = sample[Subscribed].copy(
+            subscribedDetails = sample[SubscribedDetails].copy(name = Left(sample[TrustName])),
+            draftReturns      = List.empty
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionDataWithSubscribed(subscribed))
+          }
+
+          checkIsRedirect(
+            performAction(),
+            routes.HomePageController.exitForSubsequentReturn()
+          )
+        }
+
+        "there is submitted and draft returns" in {
+          val subscribed =
+            sample[Subscribed].copy(subscribedDetails = sample[SubscribedDetails].copy(name = Left(sample[TrustName])))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionDataWithSubscribed(subscribed))
+          }
+
+          checkIsRedirect(
+            performAction(),
+            routes.HomePageController.exitForSubsequentReturn()
+          )
+        }
+
+      }
+
+    }
+
+    "handling requests to subsequent return exit page" must {
+
+      def performAction(): Future[Result] = controller.exitForSubsequentReturn()(FakeRequest())
+
+      val expectedPageTitleMessageKey = "subsequentReturnExit.title"
+      val expectedBackLink            = routes.HomePageController.homepage()
+
+      "display the page" when {
+
+        "there is a draft or subsequent return" in {
+          val sessionData = SessionData.empty.copy(
+            journeyStatus = Some(sample[Subscribed])
+          )
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionData)
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(expectedPageTitleMessageKey), { doc =>
+              doc.select("#back").attr("href") shouldBe expectedBackLink.url
+            }
           )
         }
 

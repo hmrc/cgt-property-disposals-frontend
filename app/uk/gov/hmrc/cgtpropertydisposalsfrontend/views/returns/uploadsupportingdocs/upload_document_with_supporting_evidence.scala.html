@@ -22,15 +22,15 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 
 @this(
-    mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
-    pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
-    submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
-    errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
-    formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
-    yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no,
-    caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
-    returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
-    backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
+mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
+pageHeading: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.page_heading,
+submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button,
+errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary,
+formWrapper: uk.gov.hmrc.play.views.html.helpers.FormWithCSRF,
+yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no,
+caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
+returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link,
+backLinkComponent: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.back_link
 )
 
 @(form: Form[Boolean], backLink: Call, reference : String)(implicit request:RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
@@ -41,23 +41,23 @@
 
 @mainTemplate(title = title, userType = request.userType, hasErrors = hasErrors) {
 
-    @backLinkComponent(backLink)
+@backLinkComponent(backLink)
 
-    @if(hasErrors) {
-        @errorSummary(form)
-    }
+@if(hasErrors) {
+@errorSummary(form)
+}
 
-    @caption(messages(s"$key.caption"))
+@caption(messages(s"$key.caption"))
 
-    @formWrapper(action = upscanRoutes.UpscanController.upload(), 'enctype -> "multipart/form-data") {
+@formWrapper(action = upscanRoutes.UpscanController.upload(), 'enctype -> "multipart/form-data") {
 
-        @CSRF.formField
-        <input type="hidden" name="reference" value="@reference" />
-        <input type="file" name="file" />
-        <input type="submit" value="Submit"/>
+@CSRF.formField
+<input type="hidden" name="reference" value="@reference" />
+<input type="file" name="file" />
+<input type="submit" value="Submit"/>
 
-    }
+}
 
-    @returnToSummaryLink(displayReturnToSummaryLink = true)
+@returnToSummaryLink(displayReturnToSummaryLink = true)
 
 }
