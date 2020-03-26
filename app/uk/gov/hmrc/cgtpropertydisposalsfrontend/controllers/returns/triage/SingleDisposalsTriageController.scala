@@ -87,6 +87,8 @@ class SingleDisposalsTriageController @Inject() (
 
   import SingleDisposalsTriageController._
 
+  type JourneyState = Either[StartingNewDraftReturn, (DraftSingleDisposalReturn, FillingOutReturn)]
+
   def howDidYouDisposeOfProperty(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     displayTriagePage(
       _.fold(incomplete => if (incomplete.hasConfirmedSingleDisposal) Some(()) else None, _ => Some(())),
@@ -94,11 +96,14 @@ class SingleDisposalsTriageController @Inject() (
     )(_ => disposalMethodForm)(
       extractField = _.fold(_.disposalMethod, c => Some(c.disposalMethod)),
       page = {
-        case (currentState, form, isDraftReturn, _) =>
+        case (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
+          val isATrust = journeyStatus
+            .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
           disposalMethodPage(
             form,
-            backLink(currentState, routes.CommonTriageQuestionsController.howManyProperties()),
-            isDraftReturn
+            backLink(currentAnswers, routes.CommonTriageQuestionsController.howManyProperties()),
+            isDraftReturn,
+            isATrust
           )
       }
     )
@@ -111,11 +116,14 @@ class SingleDisposalsTriageController @Inject() (
         _ => routes.CommonTriageQuestionsController.howManyProperties()
       )(_ => disposalMethodForm)(
         page = {
-          case (currentState, form, isDraftReturn, _) =>
+          case (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
+            val isATrust = journeyStatus
+              .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
             disposalMethodPage(
               form,
-              backLink(currentState, routes.CommonTriageQuestionsController.howManyProperties()),
-              isDraftReturn
+              backLink(currentAnswers, routes.CommonTriageQuestionsController.howManyProperties()),
+              isDraftReturn,
+              isATrust
             )
         },
         updateState = {
@@ -155,11 +163,14 @@ class SingleDisposalsTriageController @Inject() (
     )(_ => wasAUkResidentForm)(
       extractField = _.fold(_.wasAUKResident, c => Some(c.countryOfResidence.isUk())),
       page = {
-        case (currentState, form, isDraftReturn, _) =>
+        case (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
+          val isATrust = journeyStatus
+            .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
           wereYouAUKResidentPage(
             form,
-            backLink(currentState, routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()),
-            isDraftReturn
+            backLink(currentAnswers, routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()),
+            isDraftReturn,
+            isATrust
           )
       }
     )
@@ -171,11 +182,14 @@ class SingleDisposalsTriageController @Inject() (
       _ => routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()
     )(_ => wasAUkResidentForm)(
       page = {
-        case (currentState, form, isDraftReturn, _) =>
+        case (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
+          val isATrust = journeyStatus
+            .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
           wereYouAUKResidentPage(
             form,
-            backLink(currentState, routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()),
-            isDraftReturn
+            backLink(currentAnswers, routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty()),
+            isDraftReturn,
+            isATrust
           )
       },
       updateState = {
@@ -207,11 +221,14 @@ class SingleDisposalsTriageController @Inject() (
         extractField =
           _.fold(_.assetType.map(_ === AssetType.Residential), c => Some(c.assetType === AssetType.Residential)),
         page = {
-          case (currentState, form, isDraftReturn, _) =>
+          case (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
+            val isATrust = journeyStatus
+              .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
             didYouDisposeOfResidentialPropertyPage(
               form,
-              backLink(currentState, routes.SingleDisposalsTriageController.wereYouAUKResident()),
-              isDraftReturn
+              backLink(currentAnswers, routes.SingleDisposalsTriageController.wereYouAUKResident()),
+              isDraftReturn,
+              isATrust
             )
         }
       )
@@ -224,11 +241,14 @@ class SingleDisposalsTriageController @Inject() (
         _ => routes.SingleDisposalsTriageController.wereYouAUKResident()
       )(_ => wasResidentialPropertyForm)(
         page = {
-          case (currentState, form, isDraftReturn, _) =>
+          case (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
+            val isATrust = journeyStatus
+              .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
             didYouDisposeOfResidentialPropertyPage(
               form,
-              backLink(currentState, routes.SingleDisposalsTriageController.wereYouAUKResident()),
-              isDraftReturn
+              backLink(currentAnswers, routes.SingleDisposalsTriageController.wereYouAUKResident()),
+              isDraftReturn,
+              isATrust
             )
         },
         updateState = {
@@ -272,12 +292,15 @@ class SingleDisposalsTriageController @Inject() (
       extractField =
         _.fold(i => i.disposalDate.map(_.value).orElse(i.tooEarlyDisposalDate), c => Some(c.disposalDate.value)),
       page = {
-        case (currentState, form, isDraftReturn, assetType) =>
+        case (journeyStatus, currentAnswers, form, isDraftReturn, assetType) =>
+          val isATrust = journeyStatus
+            .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
           disposalDatePage(
             form,
-            disposalDateBackLink(currentState),
+            disposalDateBackLink(currentAnswers),
             isDraftReturn,
-            assetType
+            assetType,
+            isATrust
           )
       }
     )
@@ -286,6 +309,8 @@ class SingleDisposalsTriageController @Inject() (
   def whenWasDisposalDateSubmit(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withSingleDisposalTriageAnswers(request) {
       case (_, state, triageAnswers) =>
+        val isATrust =
+          state.fold(s => s.subscribedDetails.isATrust, f => f._2.subscribedDetails.isATrust)
         triageAnswers.fold(_.assetType, c => Some(c.assetType)) match {
           case None => Redirect(disposalDateBackLink(triageAnswers))
           case Some(assetType) =>
@@ -298,7 +323,8 @@ class SingleDisposalsTriageController @Inject() (
                       formWithErrors,
                       disposalDateBackLink(triageAnswers),
                       state.isRight,
-                      assetType
+                      assetType,
+                      isATrust
                     )
                   ), { date =>
                   val result = triageAnswers.fold(_.disposalDate, c => Some(c.disposalDate)) match {
@@ -389,11 +415,15 @@ class SingleDisposalsTriageController @Inject() (
     )(disposalDate => completionDateForm(disposalDate, LocalDateUtils.today()))(
       extractField = _.fold(_.completionDate, c => Some(c.completionDate)),
       page = {
-        case (currentState, form, isDraftReturn, _) =>
+        case (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
+          val isATrust = journeyStatus
+            .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
+
           completionDatePage(
             form,
-            backLink(currentState, routes.SingleDisposalsTriageController.whenWasDisposalDate()),
-            isDraftReturn
+            backLink(currentAnswers, routes.SingleDisposalsTriageController.whenWasDisposalDate()),
+            isDraftReturn,
+            isATrust
           )
       }
     )
@@ -405,11 +435,14 @@ class SingleDisposalsTriageController @Inject() (
       _ => routes.SingleDisposalsTriageController.whenWasDisposalDate()
     )(disposalDate => completionDateForm(disposalDate, LocalDateUtils.today()))(
       page = {
-        case (currentState, form, isDraftReturn, _) =>
+        case (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
+          val isATrust = journeyStatus
+            .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
           completionDatePage(
             form,
-            backLink(currentState, routes.SingleDisposalsTriageController.whenWasDisposalDate()),
-            isDraftReturn
+            backLink(currentAnswers, routes.SingleDisposalsTriageController.whenWasDisposalDate()),
+            isDraftReturn,
+            isATrust
           )
       },
       updateState = {
@@ -444,11 +477,14 @@ class SingleDisposalsTriageController @Inject() (
     )(_ => countryOfResidenceForm)(
       extractField = _.fold(_.countryOfResidence, c => Some(c.countryOfResidence)),
       page = {
-        case (currentState, form, isDraftReturn, _) =>
+        case (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
+          val isATrust = journeyStatus
+            .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
           countryOfResidencePage(
             form,
-            backLink(currentState, routes.SingleDisposalsTriageController.wereYouAUKResident()),
-            isDraftReturn
+            backLink(currentAnswers, routes.SingleDisposalsTriageController.wereYouAUKResident()),
+            isDraftReturn,
+            isATrust
           )
       }
     )
@@ -460,11 +496,14 @@ class SingleDisposalsTriageController @Inject() (
       _ => routes.SingleDisposalsTriageController.wereYouAUKResident()
     )(_ => countryOfResidenceForm)(
       page = {
-        case (currentState, form, isDraftReturn, _) =>
+        case (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
+          val isATrust = journeyStatus
+            .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
           countryOfResidencePage(
             form,
-            backLink(currentState, routes.SingleDisposalsTriageController.wereYouAUKResident()),
-            isDraftReturn
+            backLink(currentAnswers, routes.SingleDisposalsTriageController.wereYouAUKResident()),
+            isDraftReturn,
+            isATrust
           )
       },
       updateState = {
@@ -500,11 +539,14 @@ class SingleDisposalsTriageController @Inject() (
       _ => routes.SingleDisposalsTriageController.countryOfResidence()
     )(_ => assetTypeForNonUkResidentsForm)(
       _.fold(_.assetType, c => Some(c.assetType)), {
-        case (currentState, form, isDraftReturn, _) =>
+        case (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
+          val isATrust = journeyStatus
+            .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
           assetTypeForNonUkResidentsPage(
             form,
-            backLink(currentState, routes.SingleDisposalsTriageController.countryOfResidence()),
-            isDraftReturn
+            backLink(currentAnswers, routes.SingleDisposalsTriageController.countryOfResidence()),
+            isDraftReturn,
+            isATrust
           )
       }
     )
@@ -517,11 +559,14 @@ class SingleDisposalsTriageController @Inject() (
         _ => routes.SingleDisposalsTriageController.countryOfResidence()
       )(_ => assetTypeForNonUkResidentsForm)(
         {
-          case (currentState, form, isDraftReturn, _) =>
+          case (journeyStatus, currentAnswers, form, isDraftReturn, _) =>
+            val isATrust = journeyStatus
+              .fold(_.subscribedDetails.isATrust, _._2.subscribedDetails.isATrust)
             assetTypeForNonUkResidentsPage(
               form,
-              backLink(currentState, routes.SingleDisposalsTriageController.countryOfResidence()),
-              isDraftReturn
+              backLink(currentAnswers, routes.SingleDisposalsTriageController.countryOfResidence()),
+              isDraftReturn,
+              isATrust
             )
         },
         updateState = {
@@ -562,7 +607,13 @@ class SingleDisposalsTriageController @Inject() (
 
         triageAnswers match {
           case c: CompleteSingleDisposalTriageAnswers =>
-            Ok(checkYourAnswersPage(c, displayReturnToSummaryLink))
+            val isATrust = state
+              .bimap(
+                _.subscribedDetails.isATrust,
+                _._2.subscribedDetails.isATrust
+              )
+              .contains(true)
+            Ok(checkYourAnswersPage(c, displayReturnToSummaryLink, isATrust))
 
           case IncompleteSingleDisposalTriageAnswers(None, _, _, _, _, _, _, _, _) if isIndividual =>
             Redirect(routes.CommonTriageQuestionsController.whoIsIndividualRepresenting())
@@ -654,7 +705,7 @@ class SingleDisposalsTriageController @Inject() (
   }
 
   private def updateAnswersAndShowCheckYourAnswersPage(
-    state: Either[StartingNewDraftReturn, (SingleDisposalDraftReturn, FillingOutReturn)],
+    state: Either[StartingNewDraftReturn, (DraftSingleDisposalReturn, FillingOutReturn)],
     newCompleteTriageAnswers: CompleteSingleDisposalTriageAnswers,
     displayReturnToSummaryLink: Boolean
   )(implicit request: RequestWithSessionData[_], hc: HeaderCarrier): Future[Result] = {
@@ -670,7 +721,14 @@ class SingleDisposalsTriageController @Inject() (
         errorHandler.errorResult()
 
       case Right(_) =>
-        Ok(checkYourAnswersPage(newCompleteTriageAnswers, displayReturnToSummaryLink))
+        val isATrust = state
+          .bimap(
+            _.subscribedDetails.isATrust,
+            _._2.subscribedDetails.isATrust
+          )
+          .contains(true)
+
+        Ok(checkYourAnswersPage(newCompleteTriageAnswers, displayReturnToSummaryLink, isATrust))
     }
   }
 
@@ -686,7 +744,7 @@ class SingleDisposalsTriageController @Inject() (
 
             def toFillingOurNewReturn(startingNewDraftReturn: StartingNewDraftReturn): Future[Result] = {
               val newDraftReturn =
-                SingleDisposalDraftReturn(
+                DraftSingleDisposalReturn(
                   uuidGenerator.nextId(),
                   complete,
                   None,
@@ -747,10 +805,10 @@ class SingleDisposalsTriageController @Inject() (
   )(
     form: R => Form[A]
   )(
-    page: (SingleDisposalTriageAnswers, Form[A], Boolean, R) => Page,
+    page: (JourneyState, SingleDisposalTriageAnswers, Form[A], Boolean, R) => Page,
     updateState: (
       A,
-      Either[StartingNewDraftReturn, (SingleDisposalDraftReturn, FillingOutReturn)],
+      Either[StartingNewDraftReturn, (DraftSingleDisposalReturn, FillingOutReturn)],
       SingleDisposalTriageAnswers
     ) => Either[StartingNewDraftReturn, FillingOutReturn]
   )(
@@ -764,7 +822,7 @@ class SingleDisposalsTriageController @Inject() (
             form(r)
               .bindFromRequest()
               .fold(
-                formWithErrors => BadRequest(page(triageAnswers, formWithErrors, state.isRight, r)), { value =>
+                formWithErrors => BadRequest(page(state, triageAnswers, formWithErrors, state.isRight, r)), { value =>
                   val updatedState = updateState(value, state, triageAnswers)
 
                   val result = for {
@@ -805,7 +863,7 @@ class SingleDisposalsTriageController @Inject() (
     form: R => Form[A]
   )(
     extractField: SingleDisposalTriageAnswers => Option[A],
-    page: (SingleDisposalTriageAnswers, Form[A], Boolean, R) => Page
+    page: (JourneyState, SingleDisposalTriageAnswers, Form[A], Boolean, R) => Page
   )(
     implicit request: RequestWithSessionData[_]
   ): Future[Result] =
@@ -817,14 +875,14 @@ class SingleDisposalsTriageController @Inject() (
             val f = extractField(triageAnswers)
               .fold(form(r))(form(r).fill)
 
-            Ok(page(triageAnswers, f, state.isRight, r))
+            Ok(page(state, triageAnswers, f, state.isRight, r))
         }
     }
 
   private def withSingleDisposalTriageAnswers(request: RequestWithSessionData[_])(
     f: (
       SessionData,
-      Either[StartingNewDraftReturn, (SingleDisposalDraftReturn, FillingOutReturn)],
+      Either[StartingNewDraftReturn, (DraftSingleDisposalReturn, FillingOutReturn)],
       SingleDisposalTriageAnswers
     ) => Future[Result]
   ): Future[Result] =
@@ -832,7 +890,7 @@ class SingleDisposalsTriageController @Inject() (
       case Some((session, s @ StartingNewDraftReturn(_, _, _, Right(t)))) =>
         f(session, Left(s), t)
 
-      case Some((session, r @ FillingOutReturn(_, _, _, d: SingleDisposalDraftReturn))) =>
+      case Some((session, r @ FillingOutReturn(_, _, _, d: DraftSingleDisposalReturn))) =>
         f(session, Right(d -> r), d.triageAnswers)
 
       case _ =>

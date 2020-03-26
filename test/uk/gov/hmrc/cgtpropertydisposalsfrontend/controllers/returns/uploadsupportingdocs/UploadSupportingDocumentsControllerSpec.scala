@@ -63,9 +63,9 @@ class UploadSupportingDocumentsControllerSpec
   def sessionWithState(
     uploadSupportingDocAnswer: Option[UploadSupportingDocuments],
     disposalDate: Option[DisposalDate]
-  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) = {
+  ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
 
-    val draftReturn = sample[SingleDisposalDraftReturn].copy(uploadSupportingDocuments = uploadSupportingDocAnswer)
+    val draftReturn = sample[DraftSingleDisposalReturn].copy(uploadSupportingDocuments = uploadSupportingDocAnswer)
 
     val journey = sample[FillingOutReturn].copy(draftReturn = draftReturn)
     (
@@ -78,14 +78,14 @@ class UploadSupportingDocumentsControllerSpec
   def sessionWithState(
     uploadSupportingDocAnswer1: UploadSupportingDocuments,
     disposalDate: DisposalDate
-  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) =
+  ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) =
     sessionWithState(Some(uploadSupportingDocAnswer1), Some(disposalDate))
 
   def draftReturnWithCompleteJourneys(
     uploadSupportingDocAnswer: Option[UploadSupportingDocuments],
     disposalDate: DisposalDate
   ) =
-    SingleDisposalDraftReturn(
+    DraftSingleDisposalReturn(
       UUID.randomUUID(),
       sample[CompleteSingleDisposalTriageAnswers].copy(disposalDate = disposalDate),
       None,

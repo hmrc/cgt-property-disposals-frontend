@@ -30,23 +30,22 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios.amountOfMoneyErrorScenarios
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressControllerSpec, DateErrorScenarios}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServiceSupport
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address.{routes => returnsAddressRoutes}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, LocalDateUtils, SessionData, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AddressControllerSpec, DateErrorScenarios}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.FillingOutReturn
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DisposalDate, DraftReturn, MultipleDisposalsDraftReturn, SingleDisposalDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.{CompleteExamplePropertyDetailsAnswers, IncompleteExamplePropertyDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposalsTriageAnswers.{CompleteMultipleDisposalsTriageAnswers, IncompleteMultipleDisposalsTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AssetType, DraftReturn, MultipleDisposalsDraftReturn, SingleDisposalDraftReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, LocalDateUtils, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 
 import scala.collection.JavaConverters._
@@ -61,8 +60,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
   val incompleteAnswers =
     IncompleteExamplePropertyDetailsAnswers.empty.copy(address = Some(ukAddress(1)))
 
-  val draftReturn: MultipleDisposalsDraftReturn =
-    sample[MultipleDisposalsDraftReturn].copy(examplePropertyDetailsAnswers = Some(incompleteAnswers))
+  val draftReturn: DraftMultipleDisposalsReturn =
+    sample[DraftMultipleDisposalsReturn].copy(examplePropertyDetailsAnswers = Some(incompleteAnswers))
 
   val validJourneyStatus = FillingOutReturn(sample[SubscribedDetails], sample[GGCredId], None, draftReturn)
 
@@ -125,7 +124,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = sample[SingleDisposalDraftReturn]
+                    draftReturn = sample[DraftSingleDisposalReturn]
                   )
                 )
               )
@@ -140,7 +139,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       "display the page" when {
 
         def test(
-          draftReturn: MultipleDisposalsDraftReturn,
+          draftReturn: DraftMultipleDisposalsReturn,
           expectedBackLink: Call
         ): Unit = {
           inSequence {
@@ -171,7 +170,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user has not started this section before" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               examplePropertyDetailsAnswers = None
             ),
             controllers.returns.routes.TaskListController.taskList()
@@ -180,7 +179,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user has started but not completed this section" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
             ),
             controllers.returns.routes.TaskListController.taskList()
@@ -189,7 +188,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user has completed this section" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               examplePropertyDetailsAnswers = Some(sample[CompleteExamplePropertyDetailsAnswers])
             ),
             routes.PropertyDetailsController.checkYourAnswers()
@@ -231,7 +230,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user is on a single disposal journey" in {
           test(
-            sample[SingleDisposalDraftReturn].copy(
+            sample[DraftSingleDisposalReturn].copy(
               triageAnswers = sample[CompleteSingleDisposalTriageAnswers].copy(
                 assetType = AssetType.Residential
               )
@@ -242,7 +241,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user ins on a multiple disposals journey and has completed this section" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
                 assetTypes = List(AssetType.NonResidential)
               ),
@@ -251,7 +250,6 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             routes.PropertyDetailsController.checkYourAnswers()
           )
         }
-
       }
 
       "redirect to the enter postcode page" when {
@@ -261,7 +259,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           "the user has not started this section before and the user did not dispose of a " +
             "non-residential property" in {
             test(
-              sample[MultipleDisposalsDraftReturn].copy(
+              sample[DraftMultipleDisposalsReturn].copy(
                 triageAnswers =
                   sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(AssetType.Residential)),
                 examplePropertyDetailsAnswers = None
@@ -272,7 +270,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           "the user has started but not completed this section" in {
             test(
-              sample[MultipleDisposalsDraftReturn].copy(
+              sample[DraftMultipleDisposalsReturn].copy(
                 triageAnswers =
                   sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(AssetType.Residential)),
                 examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
@@ -290,7 +288,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           "the user has not started this section before" in {
             test(
-              sample[MultipleDisposalsDraftReturn].copy(
+              sample[DraftMultipleDisposalsReturn].copy(
                 triageAnswers =
                   sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(AssetType.NonResidential)),
                 examplePropertyDetailsAnswers = None
@@ -301,7 +299,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           "the user has started but not completed this section" in {
             test(
-              sample[MultipleDisposalsDraftReturn].copy(
+              sample[DraftMultipleDisposalsReturn].copy(
                 triageAnswers =
                   sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(AssetType.NonResidential)),
                 examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
@@ -325,7 +323,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       "display the page" when {
 
         def test(
-          draftReturn: MultipleDisposalsDraftReturn,
+          draftReturn: DraftMultipleDisposalsReturn,
           expectedBackLink: Call
         ): Unit = {
           inSequence {
@@ -356,7 +354,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user disposed of a non-residential property and the section is not complete" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
                 assetTypes = List(AssetType.NonResidential)
               ),
@@ -368,7 +366,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user disposed of a non-residential property and the section is complete" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
                 assetTypes = List(AssetType.NonResidential)
               ),
@@ -391,7 +389,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       behave like redirectWhenNotNonResidentialAssetTypeBehaviour(() => performAction())
 
-      val nonResidentialPropertyDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
+      val nonResidentialPropertyDraftReturn = sample[DraftMultipleDisposalsReturn].copy(
         triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
           assetTypes = List(AssetType.NonResidential)
         )
@@ -478,7 +476,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       "display the page" when {
 
         def test(
-          draftReturn: MultipleDisposalsDraftReturn,
+          draftReturn: DraftMultipleDisposalsReturn,
           expectedBackLink: Call
         ): Unit = {
           inSequence {
@@ -509,7 +507,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user disposed of a non-residential property and the section is not complete" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
                 assetTypes = List(AssetType.NonResidential)
               ),
@@ -521,7 +519,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user disposed of a non-residential property and the section is complete" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
                 assetTypes = List(AssetType.NonResidential)
               ),
@@ -555,7 +553,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       val answers = IncompleteExamplePropertyDetailsAnswers.empty
 
-      val nonResidentialPropertyDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
+      val nonResidentialPropertyDraftReturn = sample[DraftMultipleDisposalsReturn].copy(
         triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
           assetTypes = List(AssetType.NonResidential)
         ),
@@ -865,7 +863,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = sample[SingleDisposalDraftReturn]
+                    draftReturn = sample[DraftSingleDisposalReturn]
                   )
                 )
               )
@@ -886,8 +884,27 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+                    draftReturn = sample[DraftMultipleDisposalsReturn].copy(
                       triageAnswers = sample[IncompleteMultipleDisposalsTriageAnswers].copy(taxYear = None)
+                    )
+                  )
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+        }
+
+        "no completion date can be found" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = sample[DraftMultipleDisposalsReturn].copy(
+                      triageAnswers = sample[IncompleteMultipleDisposalsTriageAnswers].copy(completionDate = None)
                     )
                   )
                 )
@@ -904,7 +921,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         val triageAnswersWithTaxYear = sample[CompleteMultipleDisposalsTriageAnswers].copy(taxYear = taxYear)
 
-        def test(draftReturn: MultipleDisposalsDraftReturn, expectedBackLink: Call): Unit = {
+        def test(draftReturn: DraftMultipleDisposalsReturn, expectedBackLink: Call): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -926,7 +943,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user has not started this section before" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               triageAnswers                 = triageAnswersWithTaxYear,
               examplePropertyDetailsAnswers = None
             ),
@@ -936,7 +953,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user has started but not completed this section" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               triageAnswers = triageAnswersWithTaxYear,
               examplePropertyDetailsAnswers = Some(
                 sample[IncompleteExamplePropertyDetailsAnswers].copy(
@@ -950,7 +967,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user has completed this section" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               triageAnswers = triageAnswersWithTaxYear,
               examplePropertyDetailsAnswers = Some(
                 sample[CompleteExamplePropertyDetailsAnswers].copy(
@@ -991,8 +1008,27 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+                    draftReturn = sample[DraftMultipleDisposalsReturn].copy(
                       triageAnswers = sample[IncompleteMultipleDisposalsTriageAnswers].copy(taxYear = None)
+                    )
+                  )
+                )
+              )
+            )
+          }
+
+          checkIsRedirect(performAction(), controllers.returns.routes.TaskListController.taskList())
+        }
+
+        "no completion date can be found" in {
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = sample[DraftMultipleDisposalsReturn].copy(
+                      triageAnswers = sample[IncompleteMultipleDisposalsTriageAnswers].copy(completionDate = None)
                     )
                   )
                 )
@@ -1013,8 +1049,12 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             disposalDate = Some(disposalDate)
           )
 
-          val draftReturn = sample[MultipleDisposalsDraftReturn].copy(
-            triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(taxYear = taxYear),
+          val draftReturn = sample[DraftMultipleDisposalsReturn].copy(
+            triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+              .copy(
+                taxYear        = taxYear,
+                completionDate = CompletionDate(taxYear.endDateExclusive)
+              ),
             examplePropertyDetailsAnswers = Some(answers)
           )
 
@@ -1041,15 +1081,20 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       "show a form error" when {
 
-        def testFormError(formData: List[(String, String)])(expectedErrorMessageKey: String) = {
+        def testFormError(
+          formData: List[(String, String)]
+        )(expectedErrorMessageKey: String, args: Seq[String] = Seq()) = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
               sessionWithValidJourneyStatus.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = sample[MultipleDisposalsDraftReturn].copy(
-                      triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(taxYear = taxYear),
+                    draftReturn = sample[DraftMultipleDisposalsReturn].copy(
+                      triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                        taxYear        = taxYear,
+                        completionDate = CompletionDate(taxYear.endDateExclusive.minusDays(10L))
+                      ),
                       examplePropertyDetailsAnswers = None
                     )
                   )
@@ -1062,7 +1107,8 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             performAction(formData: _*),
             messageFromMessageKey(s"$key.title"), { doc =>
               doc.select("#error-summary-display > ul > li > a").text() shouldBe messageFromMessageKey(
-                expectedErrorMessageKey
+                expectedErrorMessageKey,
+                args: _*
               )
             },
             BAD_REQUEST
@@ -1086,14 +1132,17 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         }
 
         "the date entered is too far in future" in {
-          testFormError(formData(LocalDateUtils.today().plusDays(365L)))(
+          testFormError(formData(LocalDateUtils.today().plusYears(2L)))(
             s"$key.error.tooFarInFuture"
           )
         }
 
         "the date entered is too far in past" in {
-          testFormError(formData(LocalDateUtils.today().minusYears(1L)))(
-            s"$key.error.tooFarInPast"
+          val param1 = taxYear.startDateInclusive.getYear.toString
+          val param2 = taxYear.endDateExclusive.getYear.toString
+          testFormError(formData(taxYear.startDateInclusive.minusYears(2L)))(
+            s"$key.error.tooFarInPast",
+            Seq(param1, param2)
           )
         }
 
@@ -1136,8 +1185,12 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               disposalDate = Some(disposalDate)
             )
 
-            val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
-              triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(taxYear = taxYear),
+            val oldDraftReturn = sample[DraftMultipleDisposalsReturn].copy(
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(
+                  taxYear        = taxYear,
+                  completionDate = CompletionDate(taxYear.endDateExclusive)
+                ),
               examplePropertyDetailsAnswers = Some(answers)
             )
 
@@ -1166,8 +1219,12 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               disposalDate = disposalDate
             )
 
-            val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
-              triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(taxYear = taxYear),
+            val oldDraftReturn = sample[DraftMultipleDisposalsReturn].copy(
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(
+                  taxYear        = taxYear,
+                  completionDate = CompletionDate(taxYear.endDateExclusive)
+                ),
               examplePropertyDetailsAnswers = Some(answers)
             )
 
@@ -1204,11 +1261,14 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               )
             )
 
-            val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
-              triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(taxYear = taxYear),
+            val oldDraftReturn = sample[DraftMultipleDisposalsReturn].copy(
+              triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                .copy(
+                  taxYear        = taxYear,
+                  completionDate = CompletionDate(taxYear.endDateExclusive)
+                ),
               examplePropertyDetailsAnswers = Some(answers)
             )
-
             val updatedDraftReturn = oldDraftReturn.copy(
               examplePropertyDetailsAnswers = Some(
                 answers.copy(
@@ -1245,7 +1305,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = sample[SingleDisposalDraftReturn]
+                    draftReturn = sample[DraftSingleDisposalReturn]
                   )
                 )
               )
@@ -1259,7 +1319,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       "display the page" when {
 
-        def test(draftReturn: MultipleDisposalsDraftReturn, expectedBackLink: Call): Unit = {
+        def test(draftReturn: DraftMultipleDisposalsReturn, expectedBackLink: Call): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -1288,7 +1348,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user has not started this section before" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               examplePropertyDetailsAnswers = None
             ),
             routes.PropertyDetailsController.disposalDate()
@@ -1297,7 +1357,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user has started but not completed this section" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               examplePropertyDetailsAnswers = Some(
                 sample[IncompleteExamplePropertyDetailsAnswers].copy(
                   disposalPrice = None
@@ -1310,7 +1370,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user has completed this section" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               examplePropertyDetailsAnswers = Some(
                 sample[CompleteExamplePropertyDetailsAnswers].copy(
                   disposalPrice = sample[AmountInPence]
@@ -1346,7 +1406,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+                    draftReturn = sample[DraftMultipleDisposalsReturn].copy(
                       examplePropertyDetailsAnswers = Some(
                         sample[IncompleteExamplePropertyDetailsAnswers].copy(
                           disposalPrice = Some(disposalPrice)
@@ -1376,7 +1436,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+                    draftReturn = sample[DraftMultipleDisposalsReturn].copy(
                       examplePropertyDetailsAnswers = Some(
                         sample[CompleteExamplePropertyDetailsAnswers]
                       )
@@ -1446,7 +1506,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             disposalDate  = disposalDate
           )
 
-          val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
+          val oldDraftReturn = sample[DraftMultipleDisposalsReturn].copy(
             examplePropertyDetailsAnswers = Some(answers)
           )
 
@@ -1474,7 +1534,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             disposalPrice = Some(AmountInPence.fromPounds(1))
           )
 
-          val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
+          val oldDraftReturn = sample[DraftMultipleDisposalsReturn].copy(
             examplePropertyDetailsAnswers = Some(answers)
           )
 
@@ -1513,7 +1573,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = sample[SingleDisposalDraftReturn]
+                    draftReturn = sample[DraftSingleDisposalReturn]
                   )
                 )
               )
@@ -1527,7 +1587,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       "display the page" when {
 
-        def test(draftReturn: MultipleDisposalsDraftReturn, expectedBackLink: Call): Unit = {
+        def test(draftReturn: DraftMultipleDisposalsReturn, expectedBackLink: Call): Unit = {
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(
@@ -1556,7 +1616,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user has not started this section before" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               examplePropertyDetailsAnswers = None
             ),
             routes.PropertyDetailsController.disposalPrice()
@@ -1565,7 +1625,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user has started but not completed this section" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               examplePropertyDetailsAnswers = Some(
                 sample[IncompleteExamplePropertyDetailsAnswers].copy(
                   acquisitionPrice = None
@@ -1578,7 +1638,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         "the user has completed this section" in {
           test(
-            sample[MultipleDisposalsDraftReturn].copy(
+            sample[DraftMultipleDisposalsReturn].copy(
               examplePropertyDetailsAnswers = Some(
                 sample[CompleteExamplePropertyDetailsAnswers].copy(
                   acquisitionPrice = sample[AmountInPence]
@@ -1613,7 +1673,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+                    draftReturn = sample[DraftMultipleDisposalsReturn].copy(
                       examplePropertyDetailsAnswers = Some(
                         sample[IncompleteExamplePropertyDetailsAnswers].copy(
                           acquisitionPrice = Some(acquisitionPrice)
@@ -1643,7 +1703,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               SessionData.empty.copy(
                 journeyStatus = Some(
                   sample[FillingOutReturn].copy(
-                    draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+                    draftReturn = sample[DraftMultipleDisposalsReturn].copy(
                       examplePropertyDetailsAnswers = Some(
                         sample[CompleteExamplePropertyDetailsAnswers]
                       )
@@ -1712,7 +1772,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             acquisitionPrice = AmountInPence.fromPounds(10)
           )
 
-          val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
+          val oldDraftReturn = sample[DraftMultipleDisposalsReturn].copy(
             examplePropertyDetailsAnswers = Some(answers)
           )
 
@@ -1739,7 +1799,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             acquisitionPrice = Some(AmountInPence.fromPounds(10))
           )
 
-          val oldDraftReturn = sample[MultipleDisposalsDraftReturn].copy(
+          val oldDraftReturn = sample[DraftMultipleDisposalsReturn].copy(
             examplePropertyDetailsAnswers = Some(answers)
           )
 
@@ -1785,7 +1845,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       )
 
       val currentDraftReturn =
-        sample[MultipleDisposalsDraftReturn].copy(
+        sample[DraftMultipleDisposalsReturn].copy(
           triageAnswers                 = sample[CompleteMultipleDisposalsTriageAnswers].copy(assetTypes = List(AssetType.Residential)),
           examplePropertyDetailsAnswers = Some(allQuestionsAnswered)
         )
@@ -1922,7 +1982,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
         def testIsCheckYourAnswers(
           result: Future[Result],
-          ukAddressDetails: UkAddress,
+          answers: CompleteExamplePropertyDetailsAnswers,
           expectedTitleKey: String
         ): Unit =
           checkPageIsDisplayed(
@@ -1934,7 +1994,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
                 "returns.property-details.multiple-disposals.cya.guidanceLink"
               )
 
-              MultipleDisposalsPropertyDetailsControllerSpec.validatePropertyAddressPage(ukAddressDetails, doc)
+              MultipleDisposalsPropertyDetailsControllerSpec.validateExamplePropertyDetailsSummary(answers, doc)
             }
           )
 
@@ -1952,7 +2012,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           testIsCheckYourAnswers(
             performAction(),
-            address,
+            completeAnswers,
             "returns.property-address.cya.title"
           )
         }
@@ -1965,7 +2025,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
           testIsCheckYourAnswers(
             performAction(),
-            address,
+            completeAnswers,
             "returns.property-address.cya.title"
           )
         }
@@ -2037,7 +2097,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             SessionData.empty.copy(
               journeyStatus = Some(
                 sample[FillingOutReturn].copy(
-                  draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+                  draftReturn = sample[DraftMultipleDisposalsReturn].copy(
                     triageAnswers = sample[IncompleteMultipleDisposalsTriageAnswers].copy(assetTypes = None)
                   )
                 )
@@ -2060,7 +2120,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             SessionData.empty.copy(
               journeyStatus = Some(
                 sample[FillingOutReturn].copy(
-                  draftReturn = sample[MultipleDisposalsDraftReturn].copy(
+                  draftReturn = sample[DraftMultipleDisposalsReturn].copy(
                     triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
                       assetTypes = List(AssetType.Residential)
                     )
@@ -2079,12 +2139,15 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 }
 
 object MultipleDisposalsPropertyDetailsControllerSpec extends Matchers {
-  def validatePropertyAddressPage(
-    ukAddress: UkAddress,
+  def validateExamplePropertyDetailsSummary(
+    examplePropertyDetailsAnswers: CompleteExamplePropertyDetailsAnswers,
     doc: Document
-  )(implicit messages: MessagesApi, lang: Lang): Unit =
+  )(implicit messages: MessagesApi, lang: Lang): Unit = {
+    val ukAddress = examplePropertyDetailsAnswers.address
+
     doc.select("#property-address-answer").text() shouldBe
       List(Some(ukAddress.line1), ukAddress.line2, ukAddress.town, ukAddress.county, Some(ukAddress.postcode.value))
         .collect { case Some(s) => s.trim }
         .mkString(" ")
+  }
 }

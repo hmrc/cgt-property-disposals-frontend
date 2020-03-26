@@ -55,14 +55,13 @@ class ViewReturnController @Inject() (
 
   def displayReturn(): Action[AnyContent] = authenticatedActionWithSessionData.async { implicit request =>
     withViewingReturn(request) {
-      case ViewingReturn(_, _, _, sentReturn, returnSummary) =>
+      case ViewingReturn(subscribedDetails, _, _, sentReturn, returnSummary) =>
         Ok(
           viewReturnPage(
             sentReturn,
             returnSummary,
-            rebasingEligibilityUtil.getDisplayRebasingCutOffDate(sentReturn),
-            rebasingEligibilityUtil.isUk(sentReturn),
-            rebasingEligibilityUtil.isEligibleForRebase(sentReturn)
+            rebasingEligibilityUtil,
+            subscribedDetails.isATrust
           )
         )
     }

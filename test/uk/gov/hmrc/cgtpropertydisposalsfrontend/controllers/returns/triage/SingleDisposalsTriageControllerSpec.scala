@@ -21,6 +21,7 @@ import java.util.UUID
 
 import cats.data.EitherT
 import cats.instances.future._
+import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.scalatest.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -39,7 +40,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, Contro
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Generators.{sample, _}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{IndirectDisposal, MixedUse, NonResidential, Residential}
@@ -106,7 +107,7 @@ class SingleDisposalsTriageControllerSpec
   }
 
   def sessionDataWithFillingOurReturn(
-    draftReturn: SingleDisposalDraftReturn,
+    draftReturn: DraftSingleDisposalReturn,
     name: Either[TrustName, IndividualName]
   ): (SessionData, FillingOutReturn) = {
     val fillingOutReturn = sample[FillingOutReturn].copy(
@@ -120,9 +121,9 @@ class SingleDisposalsTriageControllerSpec
   def sessionDataWithFillingOutReturn(
     singleDisposalTriageAnswers: SingleDisposalTriageAnswers,
     name: Either[TrustName, IndividualName] = Right(sample[IndividualName])
-  ): (SessionData, FillingOutReturn, SingleDisposalDraftReturn) = {
+  ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn) = {
     val draftReturn =
-      sample[SingleDisposalDraftReturn].copy(triageAnswers = singleDisposalTriageAnswers)
+      sample[DraftSingleDisposalReturn].copy(triageAnswers = singleDisposalTriageAnswers)
 
     val (session, journey) = sessionDataWithFillingOurReturn(
       draftReturn,
@@ -177,6 +178,22 @@ class SingleDisposalsTriageControllerSpec
         "disposalMethod.title", { doc =>
           checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
           doc.select("#disposalMethod-1").attr("checked") shouldBe "checked"
+        }
+      )
+
+      behave like displayCustomContentForAgent(
+        performAction
+      )(requiredPreviousAnswers.copy(disposalMethod = Some(DisposalMethod.Sold)))(
+        "disposalMethod.agent.title", { doc =>
+          checkContent(doc, routes.CommonTriageQuestionsController.howManyProperties())
+        }
+      )
+
+      behave like displayCustomContentForTrusts(
+        performAction
+      )(requiredPreviousAnswers.copy(disposalMethod = Some(DisposalMethod.Sold)))(
+        "disposalMethod.trust.title", { doc =>
+          checkContent(doc, routes.CommonTriageQuestionsController.howManyProperties())
         }
       )
 
@@ -342,6 +359,22 @@ class SingleDisposalsTriageControllerSpec
         "wereYouAUKResident.title", { doc =>
           checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
           doc.select("#wereYouAUKResident-true").attr("checked") shouldBe "checked"
+        }
+      )
+
+      behave like displayCustomContentForAgent(
+        performAction
+      )(requiredPreviousAnswers.copy(wasAUKResident = Some(true), countryOfResidence = Some(Country.uk)))(
+        "wereYouAUKResident.agent.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty())
+        }
+      )
+
+      behave like displayCustomContentForTrusts(
+        performAction
+      )(requiredPreviousAnswers.copy(wasAUKResident = Some(true), countryOfResidence = Some(Country.uk)))(
+        "wereYouAUKResident.trust.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.howDidYouDisposeOfProperty())
         }
       )
 
@@ -572,6 +605,22 @@ class SingleDisposalsTriageControllerSpec
         )
       }
 
+      behave like displayCustomContentForAgent(
+        performAction
+      )(requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential)))(
+        "didYouDisposeOfResidentialProperty.agent.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.wereYouAUKResident())
+        }
+      )
+
+      behave like displayCustomContentForTrusts(
+        performAction
+      )(requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential)))(
+        "didYouDisposeOfResidentialProperty.trust.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.wereYouAUKResident())
+        }
+      )
+
       def checkContent(doc: Document, backLink: Call): Unit = {
         doc.select("#back").attr("href") shouldBe backLink.url
         doc
@@ -793,6 +842,22 @@ class SingleDisposalsTriageControllerSpec
         "disposalDate.title", { doc =>
           checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
           checkPrepopulatedContent(doc, disposalDate)
+        }
+      )
+
+      behave like displayCustomContentForAgent(
+        performAction
+      )(requiredPreviousAnswersUkResident.copy(disposalDate = Some(disposalDate)))(
+        "disposalDate.agent.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty())
+        }
+      )
+
+      behave like displayCustomContentForTrusts(
+        performAction
+      )(requiredPreviousAnswersUkResident.copy(disposalDate = Some(disposalDate)))(
+        "disposalDate.trust.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialProperty())
         }
       )
 
@@ -1067,6 +1132,22 @@ class SingleDisposalsTriageControllerSpec
         }
       )
 
+      behave like displayCustomContentForAgent(
+        performAction
+      )(requiredPreviousAnswers.copy(completionDate = Some(CompletionDate(disposalDate.value))))(
+        "completionDate.agent.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.whenWasDisposalDate())
+        }
+      )
+
+      behave like displayCustomContentForTrusts(
+        performAction
+      )(requiredPreviousAnswers.copy(completionDate = Some(CompletionDate(disposalDate.value))))(
+        "completionDate.trust.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.whenWasDisposalDate())
+        }
+      )
+
       def checkContent(doc: Document, backLink: Call): Unit = {
         doc.select("#back").attr("href") shouldBe backLink.url
         doc
@@ -1315,6 +1396,22 @@ class SingleDisposalsTriageControllerSpec
         }
       )
 
+      behave like displayCustomContentForAgent(
+        performAction
+      )(requiredPreviousAnswers.copy(countryOfResidence = Some(country)))(
+        "triage.enterCountry.agent.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.wereYouAUKResident())
+        }
+      )
+
+      behave like displayCustomContentForTrusts(
+        performAction
+      )(requiredPreviousAnswers.copy(countryOfResidence = Some(country)))(
+        "triage.enterCountry.trust.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.wereYouAUKResident())
+        }
+      )
+
       def checkContent(doc: Document, backLink: Call): Unit = {
         doc.select("#back").attr("href") shouldBe backLink.url
         doc
@@ -1523,6 +1620,22 @@ class SingleDisposalsTriageControllerSpec
         "assetTypeForNonUkResidents.title", { doc =>
           checkContent(doc, routes.SingleDisposalsTriageController.checkYourAnswers())
           doc.select("#assetTypeForNonUkResidents-0").attr("checked") shouldBe "checked"
+        }
+      )
+
+      behave like displayCustomContentForAgent(
+        performAction
+      )(requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential)))(
+        "assetTypeForNonUkResidents.agent.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.countryOfResidence())
+        }
+      )
+
+      behave like displayCustomContentForTrusts(
+        performAction
+      )(requiredPreviousAnswers.copy(assetType = Some(AssetType.Residential)))(
+        "assetTypeForNonUkResidents.trust.title", { doc =>
+          checkContent(doc, routes.SingleDisposalsTriageController.countryOfResidence())
         }
       )
 
@@ -2003,7 +2116,7 @@ class SingleDisposalsTriageControllerSpec
         startingNewDraftReturn.subscribedDetails,
         startingNewDraftReturn.ggCredId,
         startingNewDraftReturn.agentReferenceNumber,
-        SingleDisposalDraftReturn(
+        DraftSingleDisposalReturn(
           uuid,
           completeAnswers,
           None,
@@ -2222,6 +2335,111 @@ class SingleDisposalsTriageControllerSpec
       }
     }
 
+  def displayCustomContentForAgent(
+    performAction: () => Future[Result]
+  )(answers: IncompleteSingleDisposalTriageAnswers)(
+    pageTitleKey: String,
+    checkContent: Document => Unit
+  ): Unit =
+    "use the agent page title" when {
+
+      "an agent requests the page for an individual client" in {
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              userType = Some(UserType.Agent),
+              journeyStatus = Some(
+                sample[FillingOutReturn].copy(
+                  agentReferenceNumber = Some(sample[AgentReferenceNumber]),
+                  subscribedDetails = sample[SubscribedDetails].copy(
+                    name = Right(sample[IndividualName])
+                  ),
+                  draftReturn = sample[DraftSingleDisposalReturn].copy(
+                    triageAnswers = answers
+                  )
+                )
+              )
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey(pageTitleKey),
+          checkContent
+        )
+      }
+
+      "an agent requests the page for a trust client" in {
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              userType = Some(UserType.Agent),
+              journeyStatus = Some(
+                sample[FillingOutReturn].copy(
+                  agentReferenceNumber = Some(sample[AgentReferenceNumber]),
+                  subscribedDetails = sample[SubscribedDetails].copy(
+                    name = Left(sample[TrustName])
+                  ),
+                  draftReturn = sample[DraftSingleDisposalReturn].copy(
+                    triageAnswers = answers
+                  )
+                )
+              )
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey(pageTitleKey),
+          checkContent
+        )
+      }
+    }
+
+  def displayCustomContentForTrusts(
+    performAction: () => Future[Result]
+  )(answers: IncompleteSingleDisposalTriageAnswers)(
+    pageTitleKey: String,
+    checkContent: Document => Unit
+  ): Unit =
+    "use the trust page title" when {
+
+      "a trust requests the page" in {
+
+        inSequence {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            SessionData.empty.copy(
+              userType = Some(UserType.Organisation),
+              journeyStatus = Some(
+                sample[FillingOutReturn].copy(
+                  agentReferenceNumber = None,
+                  subscribedDetails = sample[SubscribedDetails].copy(
+                    name = Left(sample[TrustName])
+                  ),
+                  draftReturn = sample[DraftSingleDisposalReturn].copy(
+                    triageAnswers = answers
+                  )
+                )
+              )
+            )
+          )
+        }
+
+        checkPageIsDisplayed(
+          performAction(),
+          messageFromMessageKey(pageTitleKey),
+          checkContent
+        )
+      }
+    }
+
   def unsuccessfulUpdatesStartingNewDraftBehaviour(
     performAction: Seq[(String, String)] => Future[Result],
     currentAnswers: SingleDisposalTriageAnswers,
@@ -2251,7 +2469,7 @@ class SingleDisposalsTriageControllerSpec
       }
 
       "the user is filling in a draft return and" when {
-        val draftReturn        = sample[SingleDisposalDraftReturn].copy(triageAnswers = currentAnswers)
+        val draftReturn        = sample[DraftSingleDisposalReturn].copy(triageAnswers = currentAnswers)
         val updatedDraftReturn = draftReturn.copy(triageAnswers                       = updatedAnswers)
 
         val fillingOutReturn        = sample[FillingOutReturn].copy(draftReturn = draftReturn)
@@ -2322,7 +2540,7 @@ class SingleDisposalsTriageControllerSpec
     checkNextResult: Future[Result] => Unit,
     extraMockActions: () => Unit = () => ()
   ): Unit = {
-    val draftReturn        = sample[SingleDisposalDraftReturn].copy(triageAnswers = currentAnswers)
+    val draftReturn        = sample[DraftSingleDisposalReturn].copy(triageAnswers = currentAnswers)
     val updatedDraftReturn = draftReturn.copy(triageAnswers                       = updatedAnswers)
 
     val fillingOutReturn        = sample[FillingOutReturn].copy(draftReturn = draftReturn)

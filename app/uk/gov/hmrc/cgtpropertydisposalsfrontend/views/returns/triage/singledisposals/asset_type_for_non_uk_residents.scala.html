@@ -19,6 +19,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.components.RadioOption
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -31,10 +32,12 @@
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(form: Form[AssetType], backLink: Call, displayReturnToSummaryLink: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@(form: Form[AssetType], backLink: Call, displayReturnToSummaryLink: Boolean, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
 
 @key = @{"assetTypeForNonUkResidents"}
-@title = @{messages(s"$key.title")}
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
+@title = @{messages(s"$key$userKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 @selectedIndex = @{
@@ -61,10 +64,10 @@
       RadioOption(
         label = messages(s"$key.MixedUse"),
         content = None,
-        optionHelpText = Some(Html(messages(s"$key.MixedUse.helpText")))
+        optionHelpText = Some(Html(messages(s"$key$userKey.MixedUse.helpText")))
       ),
       RadioOption(
-        label = messages(s"$key.IndirectDisposal"),
+        label = messages(s"$key$userKey.IndirectDisposal"),
         content = None,
         optionHelpText = Some(Html(messages(s"$key.IndirectDisposal.helpText")))
       )
@@ -76,7 +79,7 @@
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
-        @errorSummary(form)
+        @errorSummary(form, Some(s"$key$userKey"))
     }
 
     @formWrapper(controllers.returns.triage.routes.SingleDisposalsTriageController.assetTypeForNonUkResidentsSubmit(), 'novalidate -> "novalidate") {
@@ -87,7 +90,8 @@
             label = pageHeading(title, Some(messages("triage.caption"))),
             labelAsHeading = true,
             error = form.error(key),
-            hasErrors = hasErrors
+            hasErrors = hasErrors,
+            customErrorKey = Some(s"$key$userKey")
         )
 
         @submitButton(messages(if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))

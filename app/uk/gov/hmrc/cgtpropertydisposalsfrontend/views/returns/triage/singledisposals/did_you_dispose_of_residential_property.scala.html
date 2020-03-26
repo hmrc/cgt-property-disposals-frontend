@@ -17,6 +17,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -32,10 +33,13 @@
 )
 
 
-@(form: Form[Boolean], backLink: Call, displayReturnToSummaryLink: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(form: Form[Boolean], backLink: Call, displayReturnToSummaryLink: Boolean, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"didYouDisposeOfResidentialProperty"}
-@title = @{messages("didYouDisposeOfResidentialProperty.title")}
+@isAgent = @{ request.userType.contains(UserType.Agent) }
+@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
+@userErrorPrefix =  @{if (isAgent) "agent." else if (isATrust) "trust." else ""}
+@title = @{messages(s"$key$userKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 
@@ -44,7 +48,7 @@
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
-        @errorSummary(form)
+      @errorSummary(form, Some(s"$key$userKey"))
     }
 
     @formWrapper(controllers.returns.triage.routes.SingleDisposalsTriageController.didYouDisposeOfAResidentialPropertySubmit(), 'novalidate -> "novalidate") {
@@ -52,10 +56,10 @@
             fieldId = key,
             label = pageHeading(title, Some(messages("triage.caption"))),
             labelAsHeading = true,
-            errorKey = form.error(key).map(e => e.message),
+            errorKey = form.error(key).map(e => s"$userErrorPrefix${e.message}"),
             hasErrors = hasErrors,
             selected = form.value,
-            helpText = Some(Html(messages("didYouDisposeOfResidentialProperty.helpText")))
+            helpText = Some(Html(messages(s"$key.helpText")))
         )
 
         @details(messages("didYouDisposeOfResidentialProperty.details.summary"),

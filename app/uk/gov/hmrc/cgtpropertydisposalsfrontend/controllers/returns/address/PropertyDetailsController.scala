@@ -118,7 +118,7 @@ class PropertyDetailsController @Inject() (
         EitherT.leftT[Future, FillingOutReturn](Error("Got non uk address in returns journey but expected uk address"))
       case a: UkAddress =>
         journey.draftReturn match {
-          case m: MultipleDisposalsDraftReturn =>
+          case m: DraftMultipleDisposalsReturn =>
             val answers = m.examplePropertyDetailsAnswers.getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
             if (answers.fold(_.address, c => Some(c.address)).contains(a))
               EitherT.pure(journey)
@@ -140,7 +140,7 @@ class PropertyDetailsController @Inject() (
                 .map(_ => journey.copy(draftReturn = updatedDraftReturn))
             }
 
-          case d: SingleDisposalDraftReturn =>
+          case d: DraftSingleDisposalReturn =>
             if (d.propertyAddress.contains(a))
               EitherT.pure(journey)
             else {
@@ -339,8 +339,8 @@ class PropertyDetailsController @Inject() (
     withValidJourney(request) {
       case (_, r) =>
         r.draftReturn match {
-          case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
-          case m: MultipleDisposalsDraftReturn =>
+          case _: DraftSingleDisposalReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          case m: DraftMultipleDisposalsReturn =>
             val backLink =
               m.examplePropertyDetailsAnswers
                 .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
@@ -359,8 +359,8 @@ class PropertyDetailsController @Inject() (
         case (_, r) =>
           withAssetTypes(r.draftReturn) { assetTypes =>
             r.draftReturn match {
-              case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
-              case m: MultipleDisposalsDraftReturn =>
+              case _: DraftSingleDisposalReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
+              case m: DraftMultipleDisposalsReturn =>
                 val redirectTo =
                   m.examplePropertyDetailsAnswers
                     .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
@@ -382,21 +382,23 @@ class PropertyDetailsController @Inject() (
     withValidJourney(request) {
       case (_, r) =>
         r.draftReturn match {
-          case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
-          case m: MultipleDisposalsDraftReturn =>
-            m.triageAnswers.fold(_.taxYear, c => Some(c.taxYear)) match {
-              case Some(taxYear) =>
+          case _: DraftSingleDisposalReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          case m: DraftMultipleDisposalsReturn =>
+            m.triageAnswers.fold(
+              i => i.taxYear       -> i.completionDate,
+              c => Some(c.taxYear) -> Some(c.completionDate)
+            ) match {
+              case (Some(taxYear), Some(completionDate)) =>
                 val answers = m.examplePropertyDetailsAnswers
                   .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
 
-                val disposalDate = answers
-                  .fold(_.disposalDate, c => Some(c.disposalDate))
+                val disposalDate = answers.fold(_.disposalDate, c => Some(c.disposalDate))
 
-                val form =
-                  disposalDate.fold(getDisposalDateFrom(taxYear))(c => getDisposalDateFrom(taxYear).fill(c.value))
+                val f    = getDisposalDateFrom(taxYear, completionDate)
+                val form = disposalDate.fold(f)(c => f.fill(c.value))
                 Ok(multipleDisposalsDisposalDatePage(form))
 
-              case None => Redirect(controllers.returns.routes.TaskListController.taskList())
+              case _ => Redirect(controllers.returns.routes.TaskListController.taskList())
             }
         }
     }
@@ -406,20 +408,32 @@ class PropertyDetailsController @Inject() (
     withValidJourney(request) {
       case (_, r) =>
         r.draftReturn match {
-          case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
-          case m: MultipleDisposalsDraftReturn =>
-            m.triageAnswers.fold(_.taxYear, c => Some(c.taxYear)) match {
-              case Some(taxYear) =>
+          case _: DraftSingleDisposalReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          case m: DraftMultipleDisposalsReturn =>
+            m.triageAnswers.fold(
+              i => i.taxYear       -> i.completionDate,
+              c => Some(c.taxYear) -> Some(c.completionDate)
+            ) match {
+              case (Some(taxYear), Some(completionDate)) =>
                 val answers = m.examplePropertyDetailsAnswers
                   .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
 
-                getDisposalDateFrom(taxYear)
+                getDisposalDateFrom(taxYear, completionDate)
                   .bindFromRequest()
                   .fold(
-                    formWithErrors =>
+                    formWithErrors => {
+                      val param1 = taxYear.startDateInclusive.getYear.toString
+                      val param2 = taxYear.endDateExclusive.getYear.toString
+                      val updatedFormWithErrors = formWithErrors.errors.map {
+                        _.copy(args = Seq(param1, param2))
+                      }
+
                       BadRequest(
-                        multipleDisposalsDisposalDatePage(formWithErrors)
-                      ), { date =>
+                        multipleDisposalsDisposalDatePage(
+                          formWithErrors.copy(errors = updatedFormWithErrors)
+                        )
+                      )
+                    }, { date =>
                       val disposalDate = DisposalDate(date, taxYear)
 
                       if (answers
@@ -460,7 +474,7 @@ class PropertyDetailsController @Inject() (
                     }
                   )
 
-              case None => Redirect(controllers.returns.routes.TaskListController.taskList())
+              case _ => Redirect(controllers.returns.routes.TaskListController.taskList())
             }
         }
     }
@@ -470,8 +484,8 @@ class PropertyDetailsController @Inject() (
     withValidJourney(request) {
       case (_, r) =>
         r.draftReturn match {
-          case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
-          case m: MultipleDisposalsDraftReturn =>
+          case _: DraftSingleDisposalReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          case m: DraftMultipleDisposalsReturn =>
             val answers = m.examplePropertyDetailsAnswers
               .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
 
@@ -491,8 +505,8 @@ class PropertyDetailsController @Inject() (
     withValidJourney(request) {
       case (_, r) =>
         r.draftReturn match {
-          case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
-          case m: MultipleDisposalsDraftReturn =>
+          case _: DraftSingleDisposalReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          case m: DraftMultipleDisposalsReturn =>
             val answers = m.examplePropertyDetailsAnswers
               .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
             val backLink = disposalPriceBackLink(answers)
@@ -547,8 +561,8 @@ class PropertyDetailsController @Inject() (
     withValidJourney(request) {
       case (_, r) =>
         r.draftReturn match {
-          case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
-          case m: MultipleDisposalsDraftReturn =>
+          case _: DraftSingleDisposalReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          case m: DraftMultipleDisposalsReturn =>
             val answers = m.examplePropertyDetailsAnswers
               .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
 
@@ -568,8 +582,8 @@ class PropertyDetailsController @Inject() (
     withValidJourney(request) {
       case (_, r) =>
         r.draftReturn match {
-          case _: SingleDisposalDraftReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
-          case m: MultipleDisposalsDraftReturn =>
+          case _: DraftSingleDisposalReturn => Redirect(routes.PropertyDetailsController.checkYourAnswers())
+          case m: DraftMultipleDisposalsReturn =>
             val answers = m.examplePropertyDetailsAnswers
               .getOrElse(IncompleteExamplePropertyDetailsAnswers.empty)
             val backLink = acquisitionPriceBackLink(answers)
@@ -627,7 +641,7 @@ class PropertyDetailsController @Inject() (
           val hasNonResidentialAssetType = hasNonResidentialProperty(assetTypes)
 
           r.draftReturn match {
-            case m: MultipleDisposalsDraftReturn =>
+            case m: DraftMultipleDisposalsReturn =>
               m.examplePropertyDetailsAnswers.fold[Future[Result]](
                 Redirect(routes.PropertyDetailsController.multipleDisposalsGuidance())
               ) {
@@ -672,7 +686,7 @@ class PropertyDetailsController @Inject() (
 
               }
 
-            case s: SingleDisposalDraftReturn =>
+            case s: DraftSingleDisposalReturn =>
               s.propertyAddress.fold(
                 Redirect(
                   if (hasNonResidentialProperty(assetTypes))
@@ -693,12 +707,13 @@ class PropertyDetailsController @Inject() (
     }
   }
 
-  private def getDisposalDateFrom(taxYear: TaxYear): Form[LocalDate] = {
-    val today              = LocalDateUtils.today()
+  private def getDisposalDateFrom(taxYear: TaxYear, completionDate: CompletionDate): Form[LocalDate] = {
     val startDateOfTaxYear = taxYear.startDateInclusive
     val endDateOfTaxYear   = taxYear.endDateExclusive
 
-    val maximumDateInclusive = if (endDateOfTaxYear.isAfter(today)) endDateOfTaxYear else today
+    val maximumDateInclusive =
+      if (endDateOfTaxYear.isBefore(completionDate.value)) endDateOfTaxYear
+      else completionDate.value
 
     disposalDateForm(maximumDateInclusive, startDateOfTaxYear)
   }

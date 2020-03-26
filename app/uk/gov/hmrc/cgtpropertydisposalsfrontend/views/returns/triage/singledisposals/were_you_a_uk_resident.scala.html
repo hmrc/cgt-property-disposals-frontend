@@ -17,6 +17,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType
 
 @this(
         mainTemplate: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.main_template,
@@ -29,10 +30,13 @@
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link
 )
 
-@(form: Form[Boolean], backLink: Call, displayReturnToSummaryLink: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+@(form: Form[Boolean], backLink: Call, displayReturnToSummaryLink: Boolean, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
 
+@isAgent = @{ request.userType.contains(UserType.Agent) }
 @key = @{"wereYouAUKResident"}
-@title = @{messages("wereYouAUKResident.title")}
+@userKey = @{if (isAgent) ".agent" else if (isATrust) ".trust" else ""}
+@userTypeErrorPrefix =  @{if (isAgent) "agent." else if (isATrust) "trust." else ""}
+@title = @{messages(s"$key$userKey.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 
 
@@ -41,7 +45,7 @@
     @backLinkComponent(backLink)
 
     @if(hasErrors) {
-        @errorSummary(form)
+        @errorSummary(form, Some(s"$key$userKey"))
     }
 
     @formWrapper(controllers.returns.triage.routes.SingleDisposalsTriageController.wereYouAUKResidentSubmit(), 'novalidate -> "novalidate") {
@@ -49,14 +53,15 @@
             fieldId = key,
             label = pageHeading(title, Some(messages("triage.caption"))),
             labelAsHeading = true,
-            errorKey = form.error(key).map(e => e.message),
+            errorKey = form.error(key).map(e => s"$userTypeErrorPrefix${e.message}"),
             hasErrors = hasErrors,
             selected = form.value,
             helpText = Some(Html(messages("wereYouAUKResident.helpText")))
         )
-        <p>@Html(messages("wereYouAUKResident.link", viewConfig.workOurYouResidenceStatusUrl))</p>
 
-        @submitButton(messages(if(displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
+      <p>@Html(messages(s"$key$userKey.link", viewConfig.workOurYouResidenceStatusUrl))</p>
+
+      @submitButton(messages(if(displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink)
