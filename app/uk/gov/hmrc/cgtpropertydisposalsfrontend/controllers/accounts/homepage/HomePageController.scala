@@ -212,7 +212,7 @@ class HomePageController @Inject() (
   }
 
   def exitForSubsequentReturn(): Action[AnyContent] = authenticatedActionWithSessionData { implicit request =>
-    Ok(subsequentReturnExitPage())
+    Ok(subsequentReturnExitPage(routes.HomePageController.homepage()))
   }
 
   private def withSubscribedUser(
