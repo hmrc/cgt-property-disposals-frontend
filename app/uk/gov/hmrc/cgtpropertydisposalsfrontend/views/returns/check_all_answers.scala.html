@@ -113,6 +113,16 @@
   @submitButton(messages("button.acceptAndSend"))
  }
 
+ <p class="js-enabled">
+  <a href="JavaScript: window.print()">
+  @messages("viewReturn.printLink")
+  </a>
+ </p>
+
+  <a href="@{routes.ConfirmDraftReturnController.confirmDraftReturn().url}">@messages("task-list.save-and-come-back.link")</a>
+
+
+
 }
 
 
