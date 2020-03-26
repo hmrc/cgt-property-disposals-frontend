@@ -55,26 +55,28 @@
     )
   }
 
-  @if(answers.lettingsRelief.value === 0L) {
-    @cyaRow(
-      messages("lettingsRelief.title"),
-      Html(messages("generic.no")),
-      Some(cyaChange(messages("reliefDetails.cyaChange.lettingsReliefValue"), routes.ReliefDetailsController.lettingsRelief().url)),
-      "lettingsReliefValue"
-    )
-  } else {
-    @cyaRow(
-      messages("lettingsRelief.title"),
-      Html(messages("generic.yes")),
-      Some(cyaChange(messages("reliefDetails.cyaChange.lettingsRelief"), routes.ReliefDetailsController.lettingsRelief().url)),
-      "lettingsRelief"
-    )
-    @cyaRow(
-      messages("lettingsReliefValue.label"),
-      Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.lettingsRelief.inPounds())),
-      Some(cyaChange(messages("reliefDetails.cyaChange.lettingsReliefValue"), routes.ReliefDetailsController.lettingsRelief().url)),
-      "lettingsReliefValue"
-    )
+  @if(answers.privateResidentsRelief.isPositive) {
+    @if(answers.lettingsRelief.value === 0L) {
+      @cyaRow(
+        messages("lettingsRelief.title"),
+        Html(messages("generic.no")),
+        Some(cyaChange(messages("reliefDetails.cyaChange.lettingsReliefValue"), routes.ReliefDetailsController.lettingsRelief().url)),
+        "lettingsReliefValue"
+      )
+    } else {
+      @cyaRow(
+        messages("lettingsRelief.title"),
+        Html(messages("generic.yes")),
+        Some(cyaChange(messages("reliefDetails.cyaChange.lettingsRelief"), routes.ReliefDetailsController.lettingsRelief().url)),
+        "lettingsRelief"
+      )
+      @cyaRow(
+        messages("lettingsReliefValue.label"),
+        Html(MoneyUtils.formatAmountOfMoneyWithPoundSign(answers.lettingsRelief.inPounds())),
+        Some(cyaChange(messages("reliefDetails.cyaChange.lettingsReliefValue"), routes.ReliefDetailsController.lettingsRelief().url)),
+        "lettingsReliefValue"
+      )
+    }
   }
 
   @answers.otherReliefs.map {

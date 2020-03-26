@@ -1379,7 +1379,29 @@ class ReliefDetailsControllerSpec
             )
           }
         }
+        "the user has set residential relief to no" in {
+          val completeAnswersWithoutResidentialRelief = CompleteReliefDetailsAnswers(
+            AmountInPence(0),
+            AmountInPence(0),
+            Some(sample[OtherReliefs])
+          )
+          forAll { completeAnswers: CompleteReliefDetailsAnswers =>
+            inSequence {
+              mockAuthWithNoRetrievals()
+              mockGetSession(sessionWithReliefDetailsAnswers(completeAnswersWithoutResidentialRelief)._1)
+            }
 
+            checkPageIsDisplayed(
+              performAction(),
+              messageFromMessageKey("reliefDetails.cya.title"), { doc =>
+                validateReliefDetailsCheckYourAnswersPage(completeAnswersWithoutResidentialRelief, doc)
+                doc.select("#content > article > form").attr("action") shouldBe routes.ReliefDetailsController
+                  .checkYourAnswersSubmit()
+                  .url
+              }
+            )
+          }
+        }
       }
 
     }
@@ -1484,7 +1506,7 @@ object ReliefDetailsControllerSpec extends Matchers {
   )(implicit messages: MessagesApi, lang: Lang): Unit = {
 
     if (reliefDetailsAnswers.privateResidentsRelief.isZero) {
-      doc.select("#privateResidentsRelief-answer").text shouldBe "No"
+      doc.select("#privateResidentsReliefValue-answer").text shouldBe "No"
     } else {
       doc.select("#privateResidentsRelief-answer").text shouldBe "Yes"
       doc.select("#privateResidentsReliefValue-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
@@ -1492,13 +1514,15 @@ object ReliefDetailsControllerSpec extends Matchers {
       )
     }
 
-    if (reliefDetailsAnswers.lettingsRelief.isZero) {
-      doc.select("#lettingsRelief-answer").text shouldBe "No"
-    } else {
-      doc.select("#lettingsRelief-answer").text shouldBe "Yes"
-      doc.select("#lettingsReliefValue-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
-        reliefDetailsAnswers.lettingsRelief.inPounds()
-      )
+    if (reliefDetailsAnswers.privateResidentsRelief.isPositive) {
+      if (reliefDetailsAnswers.lettingsRelief.isZero) {
+        doc.select("#lettingsReliefValue-answer").text shouldBe "No"
+      } else {
+        doc.select("#lettingsRelief-answer").text shouldBe "Yes"
+        doc.select("#lettingsReliefValue-answer").text shouldBe formatAmountOfMoneyWithPoundSign(
+          reliefDetailsAnswers.lettingsRelief.inPounds()
+        )
+      }
     }
 
     reliefDetailsAnswers.otherReliefs.foreach {
