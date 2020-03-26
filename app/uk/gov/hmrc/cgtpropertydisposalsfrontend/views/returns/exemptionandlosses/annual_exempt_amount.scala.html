@@ -35,9 +35,10 @@ caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption,
 details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 )
 
-@(form: Form[BigDecimal], backLink: Call, disposalDate: DisposalDate)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
-@key = @{ "annualExemptAmount" }
-@title = @{messages("annualExemptAmount.title")}
+@(form: Form[BigDecimal], backLink: Call, disposalDate: DisposalDate, isTrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages, appConfig: ViewConfig)
+@key = @{ if(isTrust) "annualExemptAmount.trust" else "annualExemptAmount.individual" }
+@baseKey = @{ "annualExemptAmount" }
+@title = @{messages(s"$key.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
 @taxYear = @{disposalDate.taxYear}
 @annualExemptAmountString = @{ MoneyUtils.formatAmountOfMoneyWithPoundSign(taxYear.annualExemptAmountGeneral.inPounds()) }
@@ -55,10 +56,10 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
 
     @formWrapper(routes.ExemptionAndLossesController.annualExemptAmountSubmit(), 'novalidate -> "novalidate") {
         @unitInput(
-            fieldId = key,
-            value = form.data.getOrElse(key, ""),
-            formError = form.error(key),
-            hasErrors =  form.error(key).nonEmpty,
+            fieldId = baseKey,
+            value = form.data.getOrElse(baseKey, ""),
+            formError = form.error(baseKey),
+            hasErrors =  form.error(baseKey).nonEmpty,
             label = Html(title),
             labelAsHeading = true,
             helpText = Some(Html(
@@ -76,10 +77,16 @@ details: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.details
             assistiveText = messages("unit-input.assistive.pounds")
         )
 
-        <p>@Html(messages(s"$key.link", appConfig.annualExemptAmountUrl))</p>
+        @if(isTrust) {
+          @details(messages(s"$key.details.1.header"), Html(messages(s"$key.details.1.body", appConfig.taxFreeAllowance)))
+          @details(messages(s"$key.details.2.header"),  Html(messages(s"$key.details.2.body", appConfig.trustsForVulnerable)))
+        } else {
+          <p>@Html(messages(s"$key.link", appConfig.annualExemptAmountUrl))</p>
+        }
 
         @submitButton(messages("button.saveAndContinue"))
     }
 
     @returnToSummaryLink(displayReturnToSummaryLink = true)
 }
+
